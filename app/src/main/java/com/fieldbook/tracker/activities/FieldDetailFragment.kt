@@ -360,7 +360,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
 
         studyGroupNameChip.visibility = View.GONE
         val groupName = database.getStudyGroupNameById(field.groupId)
-        if (!groupName.isNullOrEmpty() && groupName != field.trial_name) {
+        if (!groupName.isNullOrEmpty() && groupName != field.trialName) {
             studyGroupNameChip.visibility = View.VISIBLE
             studyGroupNameChip.text = groupName
         }

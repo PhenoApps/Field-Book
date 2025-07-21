@@ -221,7 +221,7 @@ class StudyDao {
             it.trialName = this["trial_name"]?.toString()
             it.searchAttribute = this["observation_unit_search_attribute"]?.toString()
             it.groupId = this["group_id"]?.toString()?.toIntOrNull()
-            it.is_archived = this["is_archived"].toString() == "true"
+            it.archived = this["is_archived"].toString() == "true"
         }
 
         fun getAllFieldObjects(sortOrder: String): ArrayList<FieldObject> = withDatabase { db ->

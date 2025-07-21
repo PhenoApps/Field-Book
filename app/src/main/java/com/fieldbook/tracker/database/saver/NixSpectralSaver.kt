@@ -167,7 +167,6 @@ class NixSpectralSaver @Inject constructor(private val database: DataHelper) : D
         val obsId = database.insertObservation(
             entryId,
             traitId.toString(),
-            Formats.NIX.getDatabaseName(),
             uriId.toString(),
             person,
             location,

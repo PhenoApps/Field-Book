@@ -202,8 +202,8 @@ abstract class BaseFieldActivity : ThemedActivity(), FieldAdapterController, Fie
 
     protected fun getFieldNames(fieldIds: List<Int>): String {
         val fieldNames = fieldIds.flatMap { id ->
-            fieldList.filter { it.exp_id == id }
-                .map { "<b>${it.exp_alias}</b>" }
+            fieldList.filter { it.studyId == id }
+                .map { "<b>${it.alias}</b>" }
         }
 
         return android.text.TextUtils.join(", ", fieldNames)

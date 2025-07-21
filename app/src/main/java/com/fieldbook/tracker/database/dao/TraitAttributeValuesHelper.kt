@@ -7,6 +7,7 @@ import com.fieldbook.tracker.database.ObservationVariableAttributeDetailsView
 import com.fieldbook.tracker.database.models.AttributeDefinition
 import com.fieldbook.tracker.database.models.TraitAttributes
 import com.fieldbook.tracker.objects.TraitObject
+import kotlin.text.isNullOrEmpty
 
 /**
  * Helper class to access ObservationVariableAttribute and ObservationVariableValue tables in a cleaner way
@@ -26,8 +27,8 @@ class TraitAttributeValuesHelper(var traitId: String? = null) {
         /**
          * Load all attribute values for ALL traits
          */
-        fun loadAttributeValuesForAllTraits(traits: List<TraitObject>) {
-            if (traits.isEmpty()) return
+        fun loadAttributeValuesForAllTraits(traits: List<TraitObject>?) {
+            if (traits.isNullOrEmpty()) return
 
             val traitIds = traits.map { it.id }
             val attributeDetails = ObservationVariableDetailsView.getAttributeDetailsForTraits(traitIds)
@@ -53,33 +54,31 @@ class TraitAttributeValuesHelper(var traitId: String? = null) {
     fun load() {
         if (isLoaded) return
 
-        traitId?.let { traitId ->
-            if (traitId.isEmpty()) {
-                isLoaded = true
-                return
-            }
+        if (traitId.isNullOrEmpty()) {
+            isLoaded = true
+            return
+        }
 
-            withDatabase { db ->
-                try {
-                    val cursor = db.rawQuery(GET_ATTRIBUTE_VALUE_FROM_VIEW, arrayOf(traitId))
-                    cursor.use { cursor ->
-                        if (cursor.moveToFirst()) {
-                            TraitAttributes.ALL.forEach { attribute ->
-                                cursor.getString(cursor.getColumnIndexOrThrow(attribute.key))?.let { value ->
-                                    if (value.isNotEmpty()) {
-                                        attributeValueMap[attribute.key] = value
-                                    }
+        withDatabase { db ->
+            try {
+                val cursor = db.rawQuery(GET_ATTRIBUTE_VALUE_FROM_VIEW, arrayOf(traitId))
+                cursor.use { cursor ->
+                    if (cursor.moveToFirst()) {
+                        TraitAttributes.ALL.forEach { attribute ->
+                            cursor.getString(cursor.getColumnIndexOrThrow(attribute.key))?.let { value ->
+                                if (value.isNotEmpty()) {
+                                    attributeValueMap[attribute.key] = value
                                 }
                             }
                         }
                     }
-                    //Log.d(TAG, "Loaded ${attributeValueMap.size} attributes for trait ID: $traitId")
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error loading attributes for trait ID: $traitId", e)
                 }
+                //Log.d(TAG, "Loaded ${attributeValueMap.size} attributes for trait ID: $traitId")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading attributes for trait ID: $traitId", e)
             }
-            isLoaded = true
         }
+        isLoaded = true
     }
 
     /**

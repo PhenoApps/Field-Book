@@ -24,6 +24,16 @@ class ObservationDao {
 
         const val TAG = "ObservationDao"
 
+        fun getById(id: String): ObservationModel? = withDatabase { db ->
+
+            db.query(Observation.tableName,
+                where = "${Observation.PK} = ?",
+                whereArgs = arrayOf(id))
+                .toFirst()
+                .let { ObservationModel(it) }
+
+        }
+
         fun getAll(): Array<ObservationModel> = withDatabase { db ->
 
             db.query(Observation.tableName)

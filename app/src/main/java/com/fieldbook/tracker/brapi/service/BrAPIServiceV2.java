@@ -1675,11 +1675,11 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
      * Assign group_name based on trial_name
      */
     private void addStudyToGroup(FieldObject field, DataHelper dataHelper) {
-        if (field.getTrial_name() != null && !field.getTrial_name().isEmpty()) {
-            Integer groupId = dataHelper.createOrGetStudyGroup(field.getTrial_name());
+        if (field.getTrialName() != null && !field.getTrialName().isEmpty()) {
+            Integer groupId = dataHelper.createOrGetStudyGroup(field.getTrialName());
             field.setGroupId(groupId);
 
-            dataHelper.updateStudyGroup(field.getExp_id(), groupId);
+            dataHelper.updateStudyGroup(field.getStudyId(), groupId);
         }
     }
 

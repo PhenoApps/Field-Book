@@ -12,7 +12,8 @@ import com.fieldbook.tracker.database.StudyGroupsTable
 class StudyGroupMigratorVersion14: FieldBookMigrator {
 
     companion object {
-        private const val TAG = "StudyGroupMigrator14"
+        const val TAG = "StudyGroupMigrator14"
+        const val VERSION = 14
     }
 
     override fun migrate(db: SQLiteDatabase): Result<Any> = runCatching {

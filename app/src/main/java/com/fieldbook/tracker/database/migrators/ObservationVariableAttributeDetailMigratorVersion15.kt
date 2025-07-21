@@ -9,6 +9,9 @@ import com.fieldbook.tracker.database.ObservationVariableAttributeDetailsView
 class ObservationVariableAttributeDetailMigratorVersion15: FieldBookMigrator {
 
     companion object {
+            const val TAG = "ObservationVariableAttributeDetailMigratorVersion15"
+            const val VERSION = 15
+
         val OBSERVATION_VARIABLE_ATTRIBUTE_DETAILS_VIEW = """
             CREATE VIEW IF NOT EXISTS ${ObservationVariableAttributeDetailsView.VIEW_NAME} 
             AS SELECT 

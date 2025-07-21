@@ -146,6 +146,6 @@ class TraitObject {
         additionalInfo = cursor.getString(additionalInfoIndex) ?: ""
         traitDataSource = cursor.getString(traitDataSourceIndex) ?: ""
 
-        loadAttributeAndValues()
+        // loadAttributeAndValues()
     }
 }

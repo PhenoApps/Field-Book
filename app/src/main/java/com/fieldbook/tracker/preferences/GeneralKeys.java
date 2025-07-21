@@ -5,8 +5,6 @@ import androidx.annotation.NonNull;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import kotlin.Pair;
-
 public class GeneralKeys {
     // @formatter:off
 

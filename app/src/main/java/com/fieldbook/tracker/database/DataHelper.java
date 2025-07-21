@@ -703,32 +703,6 @@ public class DataHelper {
         ObservationDao.Companion.updateObservationValue(id, value);
     }
 
-    public Observation getObservationByValue(String value) {
-
-        open();
-
-        return ObservationDao.Companion.getObservationByValue(value);
-
-        //        Observation o = new Observation();
-        //
-        //        Cursor cursor = db.query(USER_TRAITS, new String[]{"observation_db_id", "last_synced_time"}, "rid like ? and parent like ? and userValue like ?", new String[]{plotId, parent, value},
-        //                null, null, null
-        //        );
-        //
-        //        if (cursor.moveToFirst()) {
-        //            do {
-        //                o.setDbId(cursor.getString(0));
-        //                o.setLastSyncedTime(cursor.getString(1));
-        //            } while (cursor.moveToNext());
-        //        }
-        //
-        //        if (!cursor.isClosed()) {
-        //            cursor.close();
-        //        }
-        //
-        //        return o;
-    }
-
     /**
      * Check if a trait exists within the database
      * v1.6 - Amended to consider both trait and format

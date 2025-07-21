@@ -31,7 +31,13 @@ import com.fieldbook.tracker.database.SpectralUriTable
  * Therefore, each file will have a statically defined header, with all wavelength values for a given protocol.
  * Business logic will have to check if the connected device for a given trait respects this protocol.
  */
-class SpectralMigratorVersion13: FieldBookMigrator {
+class SpectralMigratorVersion16: FieldBookMigrator {
+
+    companion object {
+        const val TAG = "SpectralMigratorVersion16"
+        const val VERSION = 16
+    }
+
     override fun migrate(db: SQLiteDatabase): Result<Any> = runCatching {
 
         db.execSQL("DROP TABLE IF EXISTS spectral_dim_protocol;")
