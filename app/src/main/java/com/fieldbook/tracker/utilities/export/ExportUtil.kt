@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.utilities
+package com.fieldbook.tracker.utilities.export
 
 import android.Manifest
 import android.app.Activity
@@ -28,6 +28,9 @@ import com.fieldbook.tracker.objects.ImportFormat
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
+import com.fieldbook.tracker.utilities.CSVWriter
+import com.fieldbook.tracker.utilities.FileUtil
+import com.fieldbook.tracker.utilities.ZipUtil
 import dagger.hilt.android.qualifiers.ActivityContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -42,12 +45,16 @@ import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
 
-
 /**
  * Checks preconditions before collect and export.
  */
 
-class ExportUtil @Inject constructor(@ActivityContext private val context: Context, private val database: DataHelper) : CoroutineScope by MainScope() {
+class ExportUtil @Inject constructor(
+    @ActivityContext private val context: Context,
+    private val database: DataHelper,
+    private val spectralFileExporter: SpectralFileExporter
+) : CoroutineScope by MainScope() {
+
     companion object {
         private const val PERMISSIONS_REQUEST_EXPORT_DATA = 9990
         private const val PERMISSIONS_REQUEST_TRAIT_DATA = 9950
@@ -105,7 +112,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
     fun allFieldsBrAPI(): Boolean {
         fieldIds.forEach { fieldId ->
             val field = database.getFieldObject(fieldId)
-            val importFormat = field?.import_format
+            val importFormat = field?.dataSourceFormat
             if (importFormat != ImportFormat.BRAPI) {
                 Log.d(TAG, "Not all fields are BrAPI fields")
                 return false
@@ -168,13 +175,13 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
 
     fun exportBrAPI(fieldIds: List<Int>) {
         val activeFields = fieldIds.map { fieldId -> database.getFieldObject(fieldId) }
-        val nonMatchingSourceFields = activeFields.filter { !BrAPIService.checkMatchBrapiUrl(context, it.getExp_source()) }
+        val nonMatchingSourceFields = activeFields.filter { !BrAPIService.checkMatchBrapiUrl(context, it.getDataSource()) }
 
         if (nonMatchingSourceFields.isNotEmpty()) {
             val hostURL = BrAPIService.getHostUrl(context)
             val badSourceMsg = context.resources.getString(
                 R.string.brapi_field_non_matching_sources,
-                nonMatchingSourceFields.joinToString(", ") { it.getExp_source() },
+                nonMatchingSourceFields.joinToString(", ") { it.getDataSource() },
                 hostURL
             )
             Toast.makeText(context, badSourceMsg, Toast.LENGTH_LONG).show()
@@ -226,7 +233,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             bundleInfoMessage.visibility = View.VISIBLE
         } else {
             val fo = fields.first()
-            defaultFieldString = fo.exp_name
+            defaultFieldString = fo.name
             if (defaultFieldString.length > 4 && defaultFieldString.lowercase().endsWith(".csv")) {
                 defaultFieldString = defaultFieldString.substring(0, defaultFieldString.length - 4)
             }
@@ -361,7 +368,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
             val bundleChecked = preferences.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, false)
             val fo = database.getFieldObject(fieldId)
             var fieldFileString = exportFileString
-            if (multipleFields) { fieldFileString = "${timeStamp.format(Calendar.getInstance().time)}_${fo.exp_name}" }
+            if (multipleFields) { fieldFileString = "${timeStamp.format(Calendar.getInstance().time)}_${fo.name}" }
 
             if (checkDbBool) {
                 val columns = ArrayList<String>().apply {
@@ -371,7 +378,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                 try {
                     val cursorAndColumnsPair = when {
                         onlyUnique?.isChecked == true -> {
-                            database.getExportDBDataShort(columns.toTypedArray(), fo.unique_id, exportTrait, fieldId) to arrayListOf(fo.unique_id)
+                            database.getExportDBDataShort(columns.toTypedArray(), fo.uniqueId, exportTrait, fieldId) to arrayListOf(fo.uniqueId)
                         }
                         allColumns?.isChecked == true -> {
                             database.getExportDBData(columns.toTypedArray(), exportTrait, fieldId) to columns
@@ -395,14 +402,14 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
 
             if (checkTableBool) {
                 val columns = ArrayList<String>().apply {
-                    if (onlyUnique?.isChecked == true) add(fo.unique_id)
+                    if (onlyUnique?.isChecked == true) add(fo.uniqueId)
                     if (allColumns?.isChecked == true) addAll(database.getAllObservationUnitAttributeNames(fieldId))
                 }
                 Log.d(TAG, "Columns are: " + columns.joinToString())
 
                 val exportDataMethod: () -> Cursor = when {
                     onlyUnique?.isChecked == true -> {
-                        { database.getExportTableDataShort(fieldId, fo.unique_id, exportTrait) }
+                        { database.getExportTableDataShort(fieldId, fo.uniqueId, exportTrait) }
                     }
                     allColumns?.isChecked == true -> {
                         { database.getExportTableData(fieldId, exportTrait) }
@@ -427,12 +434,14 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                 handleBundledFiles(fieldId)
             }
 
+            spectralFileExporter.exportSpectralFile(fieldId)
+
             database.updateExportDate(fieldId)
-            Log.d(TAG, "Export finished successfully for field ${fo.exp_name}")
-            ExportResult.Success("Export successful for field ${fo.exp_name}")
+            Log.d(TAG, "Export finished successfully for field ${fo.name}")
+            ExportResult.Success("Export successful for field ${fo.name}")
         } catch (e: Exception) {
             val fo = database.getFieldObject(fieldId)
-            Log.e(TAG, "Export failed for field ${fo.exp_name}: ${e.message}", e)
+            Log.e(TAG, "Export failed for field ${fo.name}: ${e.message}", e)
             ExportResult.Failure(e)
         }
     }
@@ -486,7 +495,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
     private fun handleBundledFiles(fieldId: Int) {
         val fieldObject = database.getFieldObject(fieldId)
         fieldObject?.let {
-            val studyName = it.exp_name
+            val studyName = it.name
             val mediaDir = BaseDocumentTreeUtil.getFile(context, R.string.dir_plot_data, studyName)
             mediaDir?.let { dir ->
                 if (dir.exists() && dir.isDirectory) {
@@ -553,7 +562,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                 zipFile?.let { zf ->
                     val outputStream = BaseDocumentTreeUtil.getFileOutputStream(context, R.string.dir_field_export, zipFileName)
                     outputStream?.let { os ->
-                        ZipUtil.zip(context, files.toTypedArray(), os)
+                        ZipUtil.Companion.zip(context, files.toTypedArray(), os)
                         zf
                     }
                 }

@@ -28,7 +28,6 @@ import com.fieldbook.tracker.traits.formats.ui.ParameterScrollView
 import com.fieldbook.tracker.utilities.SoundHelperImpl
 import com.fieldbook.tracker.utilities.VibrateUtil
 import dagger.hilt.android.AndroidEntryPoint
-import io.swagger.client.model.Trait
 import org.phenoapps.utils.SoftKeyboardUtil
 import javax.inject.Inject
 
@@ -134,6 +133,7 @@ class NewTraitDialog(
             neutralBtn?.setText(R.string.dialog_back)
             neutralBtn?.setOnClickListener {
                 isShowingCameraOptions = false
+                isShowingSpectralOptions = false
                 traitFormatsRv.adapter = null
                 showFormatLayouts(Formats.getMainFormats())
             }
@@ -217,7 +217,16 @@ class NewTraitDialog(
 
         positiveBtn?.setText(R.string.dialog_save)
         positiveBtn?.setOnClickListener {
-            onSave(format)
+            if (format == Formats.INNO_SPECTRA) {
+                //TODO remove when added InnoSpectra Trait
+                Toast.makeText(
+                    context,
+                    R.string.not_yet_implemented,
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                onSave(format)
+            }
         }
 
         setupParametersLinearLayout(format)
@@ -504,7 +513,7 @@ class NewTraitDialog(
 
             context?.let {
 
-                initialTraitObject?.format = adapter.selectedFormat?.getDatabaseName()
+                initialTraitObject?.format = adapter.selectedFormat?.getDatabaseName().toString()
 
                 showFormatParameters(adapter.selectedFormat ?: Formats.TEXT)
 
@@ -513,6 +522,8 @@ class NewTraitDialog(
     }
 
     private var isShowingCameraOptions = false
+    private var isShowingSpectralOptions = false
+
     override fun onSelected(format: Formats) {
 
         if (format == Formats.BASE_PHOTO && !isShowingCameraOptions) {
@@ -522,6 +533,14 @@ class NewTraitDialog(
             traitFormatsRv.adapter = null
 
             showFormatLayouts(Formats.getCameraFormats(), showBack = true)
+
+        } else if (format == Formats.BASE_SPECTRAL && !isShowingSpectralOptions) {
+
+            isShowingSpectralOptions = true
+
+            traitFormatsRv.adapter = null
+
+            showFormatLayouts(Formats.getSpectralFormats(), showBack = true)
 
         } else {
 

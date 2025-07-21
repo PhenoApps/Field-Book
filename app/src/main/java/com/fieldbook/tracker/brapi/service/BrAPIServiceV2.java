@@ -5,7 +5,6 @@ import android.content.Context;
 import android.util.Log;
 import android.util.Pair;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.arch.core.util.Function;
 import androidx.preference.PreferenceManager;
@@ -34,7 +33,6 @@ import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.objects.TraitObject;
-import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.FailureFunction;
@@ -47,7 +45,6 @@ import org.brapi.client.v2.ApiResponse;
 import org.brapi.client.v2.BrAPIClient;
 import org.brapi.client.v2.model.exceptions.ApiException;
 import org.brapi.client.v2.model.queryParams.core.ProgramQueryParams;
-import org.brapi.client.v2.model.queryParams.core.SeasonQueryParams;
 import org.brapi.client.v2.model.queryParams.core.StudyQueryParams;
 import org.brapi.client.v2.model.queryParams.core.TrialQueryParams;
 import org.brapi.client.v2.model.queryParams.phenotype.ObservationQueryParams;
@@ -73,10 +70,7 @@ import org.brapi.v2.model.TimeAdapter;
 import org.brapi.v2.model.core.BrAPIProgram;
 import org.brapi.v2.model.core.BrAPIStudy;
 import org.brapi.v2.model.core.BrAPITrial;
-import org.brapi.v2.model.core.request.BrAPIStudySearchRequest;
-import org.brapi.v2.model.core.response.BrAPICommonCropNamesResponse;
 import org.brapi.v2.model.core.response.BrAPIProgramListResponse;
-import org.brapi.v2.model.core.response.BrAPISeasonListResponse;
 import org.brapi.v2.model.core.response.BrAPIStudyListResponse;
 import org.brapi.v2.model.core.response.BrAPIStudySingleResponse;
 import org.brapi.v2.model.core.response.BrAPITrialListResponse;
@@ -119,8 +113,6 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
-
-import kotlin.jvm.functions.Function1;
 
 public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService {
 
@@ -511,6 +503,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         studyDetails.setCommonCropName(study.getCommonCropName());
         studyDetails.setStudyDescription(study.getStudyDescription());
         studyDetails.setStudyLocation(study.getLocationName());
+        studyDetails.setTrialName(study.getTrialName());
         return studyDetails;
     }
 
@@ -1135,6 +1128,14 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     public void createObservations(List<Observation> observations,
                                    final Function<List<Observation>, Void> function,
                                    final Function<Integer, Void> failFunction) {
+
+        ArrayList<String> validObservationVariableDbIds = new ArrayList<>();
+        for (Observation observation : observations) {
+            if (observation.getVariableDbId() != null && !observation.getVariableDbId().isEmpty()) {
+                validObservationVariableDbIds.add(observation.getVariableDbId());
+            }
+        }
+
         try {
             BrapiV2ApiCallBack<BrAPIObservationListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationListResponse>() {
                 @Override
@@ -1148,7 +1149,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                                     mapObservations(
                                             phenotypesResponse.getResult().getData(),
                                             getExtVariableDbIdMapping(),
-                                            new ArrayList<>()
+                                            validObservationVariableDbIds
                                     )
                             );
                         }
@@ -1188,6 +1189,13 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                                    final Function<Integer, Void> failFunction) {
         try {
 
+            ArrayList<String> validObservationVariableDbIds = new ArrayList<>();
+            for (Observation observation : observations) {
+                if (observation.getVariableDbId() != null && !observation.getVariableDbId().isEmpty()) {
+                    validObservationVariableDbIds.add(observation.getVariableDbId());
+                }
+            }
+
             BrapiV2ApiCallBack<BrAPIObservationListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationListResponse>() {
                 @Override
                 public void onSuccess(BrAPIObservationListResponse observationsResponse, int i, Map<String, List<String>> map) {
@@ -1198,7 +1206,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                                     mapObservations(
                                             observationsResponse.getResult().getData(),
                                             getExtVariableDbIdMapping(),
-                                            new ArrayList<>()
+                                            validObservationVariableDbIds
                                     )
                             );
                         }
@@ -1332,15 +1340,18 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         for (BrAPIObservationVariable var : variables) {
 
             TraitObject trait = new TraitObject();
-            trait.setDefaultValue(var.getDefaultValue());
+
+            if (var.getDefaultValue() != null) {
+                trait.setDefaultValue(var.getDefaultValue());
+            }
 
             // Get the synonyms for easier reading. Set it as the trait name.
-            String synonym = var.getSynonyms().size() > 0 ? var.getSynonyms().get(0) : null;
+            String synonym = !var.getSynonyms().isEmpty() ? var.getSynonyms().get(0) : null;
             trait.setName(getPrioritizedValue(synonym, var.getObservationVariableName())); //This will default to the Observation Variable Name if available.
 
             //v5.1.0 bugfix branch update, getPrioritizedValue can return null, trait name should never be null
             // Skip the trait if there brapi trait field isn't present
-            if (var.getTrait() == null || trait.getName() == null) {
+            if (var.getTrait() == null) {
                 variablesMissingTrait += 1;
                 continue;
             }
@@ -1352,7 +1363,10 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             // Need to set where we are getting the data from so we don't push to a different
             // external link than where the trait was retrieved from.
             if (BrAPIService.getHostUrl(context) != null) {
-                trait.setTraitDataSource(BrAPIService.getHostUrl(context));
+                String hostUrl = BrAPIService.getHostUrl(context);
+                if (hostUrl != null) {
+                    trait.setTraitDataSource(hostUrl);
+                }
             } else {
                 // return null to indicate we couldn't process the traits
                 return null;
@@ -1545,29 +1559,29 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         else observationLevel = selectedObservationLevel.getObservationLevelName();
         try {
             FieldObject field = new FieldObject();
-            field.setStudy_db_id(studyDetails.getStudyDbId());
-            field.setExp_name(studyDetails.getStudyName());
-            field.setExp_alias(studyDetails.getStudyName());
-            field.setExp_species(studyDetails.getCommonCropName());
-            field.setCount(studyDetails.getNumberOfPlots().toString());
-            field.setObservation_level(observationLevel);
-            field.setImport_format(ImportFormat.BRAPI);
-            field.setTrial_name(studyDetails.getTrialName());
+            field.setStudyDbId(studyDetails.getStudyDbId());
+            field.setName(studyDetails.getStudyName());
+            field.setAlias(studyDetails.getStudyName());
+            field.setSpecies(studyDetails.getCommonCropName());
+            field.setEntryCount(studyDetails.getNumberOfPlots().toString());
+            field.setObservationLevel(observationLevel);
+            field.setDataSourceFormat(ImportFormat.BRAPI);
+            field.setTrialName(studyDetails.getTrialName());
             // Get our host url
             if (BrAPIService.getHostUrl(context) != null) {
-                field.setExp_source(BrAPIService.getHostUrl(context));
+                field.setDataSource(BrAPIService.getHostUrl(context));
             } else {
                 // Return an error notifying user we can't save this field
                 return new BrapiControllerResponse(false, "Host is null");
             }
 
-            field.setUnique_id("ObservationUnitDbId");
-            field.setPrimary_id(primaryId);
-            field.setSecondary_id(secondaryId);
-            field.setExp_sort(sortOrder);
+            field.setUniqueId("ObservationUnitDbId");
+            field.setPrimaryId(primaryId);
+            field.setSecondaryId(secondaryId);
+            field.setSortColumnsStringArray(sortOrder);
 
             // Do a pre-check to see if the field exists so we can show an error
-            int FieldUniqueStatus = dataHelper.checkBrapiStudyUnique(field.getObservation_level(), field.getStudy_db_id());
+            int FieldUniqueStatus = dataHelper.checkBrapiStudyUnique(field.getObservationLevel(), field.getStudyDbId());
             if (FieldUniqueStatus != -1) {
                 return new BrapiControllerResponse(false, this.notUniqueFieldMessage);
             }
@@ -1592,8 +1606,8 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
             DataHelper.db.beginTransaction();
             // All checks finished, insert our data.
-            int expId = dataHelper.createField(field, studyDetails.getAttributes(), true);
-            field.setExp_id(expId);
+            int studyId = dataHelper.createField(field, studyDetails.getAttributes(), true);
+            field.setStudyId(studyId);
 
             boolean fail = false;
             String failMessage = "";
@@ -1607,7 +1621,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 System.out.println("Size of study details: " + studyDetails.getValues().size());
 
                 for (List<String> dataRow : studyDetails.getValues()) {
-                    dataHelper.createFieldData(expId, studyDetails.getAttributes(), dataRow);
+                    dataHelper.createFieldData(studyId, studyDetails.getAttributes(), dataRow);
                     Log.d("BrAPIServiceV2", "Saving: Attributes: " + studyDetails.getAttributes());
                     Log.d("BrAPIServiceV2", "Saving: dataRow: " + dataRow);
                 }
@@ -1625,10 +1639,10 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 //                    System.out.println("Saving: unitDBId: "+obs.getUnitDbId());
 //                    System.out.println("Saving: varDbId: "+obs.getVariableDbId());
 //                    System.out.println("Saving: StudyId: "+studyDetails.getStudyDbId());
-//                    System.out.println("Saving: expId: "+expId);
+//                    System.out.println("Saving: studyId: "+studyId);
 //                    TraitObject trait = ObservationVariableDao.Companion.getTraitByName(obs.getVariableName());
 ////                    System.out.println("SavingL TraitId: "+trait.getId());
-//                    dataHelper.setTraitObservations(expId, obs);
+//                    dataHelper.setTraitObservations(studyId, obs);
 //                }
 
                 // If we haven't thrown an error by now, we are good.
@@ -1647,12 +1661,25 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             if (fail) {
                 return new BrapiControllerResponse(false, failMessage);
             } else {
+                addStudyToGroup(field, dataHelper);
                 return new BrapiControllerResponse(true, "", field);
             }
 
 
         } catch (Exception e) {
             return new BrapiControllerResponse(false, e.toString());
+        }
+    }
+
+    /**
+     * Assign group_name based on trial_name
+     */
+    private void addStudyToGroup(FieldObject field, DataHelper dataHelper) {
+        if (field.getTrialName() != null && !field.getTrialName().isEmpty()) {
+            Integer groupId = dataHelper.createOrGetStudyGroup(field.getTrialName());
+            field.setGroupId(groupId);
+
+            dataHelper.updateStudyGroup(field.getStudyId(), groupId);
         }
     }
 

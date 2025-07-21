@@ -162,15 +162,15 @@ public class FieldFileObject {
         public FieldObject createFieldObject() {
             FieldObject f = new FieldObject();
             if (name == null) {
-                f.setExp_name(this.getStem());
-                f.setExp_alias(this.getStem());
-                f.setExp_source(this.getFileStem());
-                f.setImport_format(ImportFormat.fromString(getExtension(this.getFileStem())));
+                f.setName(this.getStem());
+                f.setAlias(this.getStem());
+                f.setDataSource(this.getFileStem());
+                f.setDataSourceFormat(ImportFormat.fromString(getExtension(this.getFileStem())));
             } else {
-                f.setExp_name(name);
-                f.setExp_alias(name);
-                f.setExp_source(name + "." + getExtensionFromClass(this));
-                f.setImport_format(ImportFormat.fromString(getExtensionFromClass(this)));
+                f.setName(name);
+                f.setAlias(name);
+                f.setDataSource(name + "." + getExtensionFromClass(this));
+                f.setDataSourceFormat(ImportFormat.fromString(getExtensionFromClass(this)));
             }
             return f;
         }
