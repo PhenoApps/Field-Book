@@ -24,4 +24,5 @@ object StringUtil {
         return spannableString
     }
 
+    fun String?.escape() = this?.replace("\"", "\"\"")
 }

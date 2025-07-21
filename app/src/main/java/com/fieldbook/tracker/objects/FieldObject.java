@@ -30,6 +30,8 @@ public class FieldObject {
     private String observationCount;
     private String trialName;
     private String searchAttribute;
+    private Integer groupId;
+    private boolean isArchived;
 
     public String getTrialName() {
         return trialName;
@@ -249,5 +251,21 @@ public class FieldObject {
 
     public void setSearchAttribute(String searchAttribute) {
         this.searchAttribute = searchAttribute;
+    }
+
+    public Integer getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Integer groupId) {
+        this.groupId = groupId;
+    }
+
+    public boolean getArchived() {
+        return isArchived;
+    }
+
+    public void setArchived(boolean isArchived) {
+        this.isArchived = isArchived;
     }
 }

@@ -37,7 +37,7 @@ import com.fieldbook.tracker.objects.ImportFormat
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.traits.formats.Formats
-import com.fieldbook.tracker.utilities.ExportUtil
+import com.fieldbook.tracker.utilities.export.ExportUtil
 import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.SemanticDateUtil
 import com.google.android.material.chip.Chip
@@ -60,12 +60,14 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     @Inject
     lateinit var preferences: SharedPreferences
 
+    @Inject
+    lateinit var exportUtil: ExportUtil
+
     private var toolbar: Toolbar? = null
     private var fieldId: Int? = null
     private var fieldObject: FieldObject? = null
     private val PERMISSIONS_REQUEST_TRAIT_DATA = 9950
 
-    private lateinit var exportUtil: ExportUtil
     private lateinit var rootView: View
     private lateinit var fieldDisplayNameTextView: TextView
     private lateinit var importDateTextView: TextView
@@ -84,6 +86,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private lateinit var traitCountChip: Chip
     private lateinit var observationCountChip: Chip
     private lateinit var trialNameChip: Chip
+    private lateinit var studyGroupNameChip: Chip
     private lateinit var detailRecyclerView: RecyclerView
     private var adapter: FieldDetailAdapter? = null
 
@@ -93,7 +96,6 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         Log.d("FieldDetailFragment", "onCreateView Start")
         rootView = inflater.inflate(R.layout.fragment_field_detail, container, false)
         toolbar = rootView.findViewById(R.id.toolbar)
-        exportUtil = ExportUtil(requireActivity(), database)
         fieldDisplayNameTextView = rootView.findViewById(R.id.fieldDisplayName)
         importDateTextView = rootView.findViewById(R.id.importDateTextView)
         lastEditTextView = rootView.findViewById(R.id.lastEditTextView)
@@ -110,6 +112,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         observationCountChip = rootView.findViewById(R.id.observationCountChip)
         detailRecyclerView = rootView.findViewById(R.id.fieldDetailRecyclerView)
         trialNameChip = rootView.findViewById(R.id.trialNameChip)
+        studyGroupNameChip = rootView.findViewById(R.id.studyGroupName)
 
         fieldId = arguments?.getInt("fieldId")
         loadFieldDetails()
@@ -311,6 +314,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             if (trialNameChip.text.isNotBlank()) {
                 trialNameChip.visibility = View.VISIBLE
             }
+
+
         }
 
 //        val sortOrder = field.exp_sort.takeIf { !it.isNullOrBlank() } ?: getString(R.string.field_default_sort_order)
@@ -352,6 +357,13 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             observationCountChip.visibility = View.GONE
         }
 
+
+        studyGroupNameChip.visibility = View.GONE
+        val groupName = database.getStudyGroupNameById(field.groupId)
+        if (!groupName.isNullOrEmpty() && groupName != field.trialName) {
+            studyGroupNameChip.visibility = View.VISIBLE
+            studyGroupNameChip.text = groupName
+        }
     }
 
     private fun createTraitDetailItems(field: FieldObject): List<FieldDetailItem> {

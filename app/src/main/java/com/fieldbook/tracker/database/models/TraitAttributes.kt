@@ -32,7 +32,7 @@ object TraitAttributes {
     )
 
 
-    val ALL = listOf(MIN_VALUE, MAX_VALUE, CATEGORIES, CLOSE_KEYBOARD)
+    val ALL = listOf(MIN_VALUE, MAX_VALUE, CATEGORIES, CLOSE_KEYBOARD, CROP_IMAGE)
 
     fun byKey(key: String): AttributeDefinition? = ALL.find { it.key == key }
 }

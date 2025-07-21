@@ -125,7 +125,7 @@ class BrapiSyncObsDialog(private val context: Context, private val syncControlle
                 if (obj.externalDbId in existingTraitDbIds) {
                     println("Trait:" + obj.name)
                     println("ObsIds: " + obj.externalDbId)
-                    observationVariableDbIds.add(obj.externalDbId)
+                    obj.externalDbId?.let { observationVariableDbIds.add(it) }
                 }
             }
 

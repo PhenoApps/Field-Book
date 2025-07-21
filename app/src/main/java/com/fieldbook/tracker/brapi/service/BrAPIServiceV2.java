@@ -503,6 +503,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         studyDetails.setCommonCropName(study.getCommonCropName());
         studyDetails.setStudyDescription(study.getStudyDescription());
         studyDetails.setStudyLocation(study.getLocationName());
+        studyDetails.setTrialName(study.getTrialName());
         return studyDetails;
     }
 
@@ -1660,12 +1661,25 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             if (fail) {
                 return new BrapiControllerResponse(false, failMessage);
             } else {
+                addStudyToGroup(field, dataHelper);
                 return new BrapiControllerResponse(true, "", field);
             }
 
 
         } catch (Exception e) {
             return new BrapiControllerResponse(false, e.toString());
+        }
+    }
+
+    /**
+     * Assign group_name based on trial_name
+     */
+    private void addStudyToGroup(FieldObject field, DataHelper dataHelper) {
+        if (field.getTrialName() != null && !field.getTrialName().isEmpty()) {
+            Integer groupId = dataHelper.createOrGetStudyGroup(field.getTrialName());
+            field.setGroupId(groupId);
+
+            dataHelper.updateStudyGroup(field.getStudyId(), groupId);
         }
     }
 

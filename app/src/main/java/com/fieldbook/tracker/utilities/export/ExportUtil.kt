@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.utilities
+package com.fieldbook.tracker.utilities.export
 
 import android.Manifest
 import android.app.Activity
@@ -28,6 +28,9 @@ import com.fieldbook.tracker.objects.ImportFormat
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
+import com.fieldbook.tracker.utilities.CSVWriter
+import com.fieldbook.tracker.utilities.FileUtil
+import com.fieldbook.tracker.utilities.ZipUtil
 import dagger.hilt.android.qualifiers.ActivityContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -42,12 +45,16 @@ import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
 
-
 /**
  * Checks preconditions before collect and export.
  */
 
-class ExportUtil @Inject constructor(@ActivityContext private val context: Context, private val database: DataHelper) : CoroutineScope by MainScope() {
+class ExportUtil @Inject constructor(
+    @ActivityContext private val context: Context,
+    private val database: DataHelper,
+    private val spectralFileExporter: SpectralFileExporter
+) : CoroutineScope by MainScope() {
+
     companion object {
         private const val PERMISSIONS_REQUEST_EXPORT_DATA = 9990
         private const val PERMISSIONS_REQUEST_TRAIT_DATA = 9950
@@ -427,6 +434,8 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                 handleBundledFiles(fieldId)
             }
 
+            spectralFileExporter.exportSpectralFile(fieldId)
+
             database.updateExportDate(fieldId)
             Log.d(TAG, "Export finished successfully for field ${fo.name}")
             ExportResult.Success("Export successful for field ${fo.name}")
@@ -553,7 +562,7 @@ class ExportUtil @Inject constructor(@ActivityContext private val context: Conte
                 zipFile?.let { zf ->
                     val outputStream = BaseDocumentTreeUtil.getFileOutputStream(context, R.string.dir_field_export, zipFileName)
                     outputStream?.let { os ->
-                        ZipUtil.zip(context, files.toTypedArray(), os)
+                        ZipUtil.Companion.zip(context, files.toTypedArray(), os)
                         zf
                     }
                 }

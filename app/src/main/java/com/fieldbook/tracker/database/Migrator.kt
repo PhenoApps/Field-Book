@@ -9,6 +9,9 @@ import androidx.core.content.contentValuesOf
 import androidx.core.database.getBlobOrNull
 import androidx.core.database.getStringOrNull
 import com.fieldbook.tracker.database.migrators.RefactorMigratorVersion13
+import com.fieldbook.tracker.database.migrators.SpectralMigratorVersion16
+import com.fieldbook.tracker.database.migrators.StudyGroupMigratorVersion14
+import com.fieldbook.tracker.database.migrators.ObservationVariableAttributeDetailMigratorVersion15
 import com.fieldbook.tracker.objects.TraitObject
 
 /**
@@ -382,6 +385,39 @@ class Migrator {
 
         fun migrateToVersion13(db: SQLiteDatabase) {
             RefactorMigratorVersion13().migrate(db)
+                .onFailure {
+                    Log.e(TAG, "Failed to migrate to version 13", it)
+                }
+                .onSuccess {
+                    Log.d(TAG, "Migrated to version 13")
+                }
+        }
+
+        fun migrateToVersion14(db: SQLiteDatabase) {
+
+            StudyGroupMigratorVersion14().migrate(db)
+                .onFailure {
+                    Log.e(TAG, "Failed to migrate to version 14", it)
+                }
+                .onSuccess {
+                    Log.d(TAG, "Migrated to version 14")
+                }
+        }
+
+        fun migrateToVersion15(db: SQLiteDatabase) {
+
+            ObservationVariableAttributeDetailMigratorVersion15().migrate(db)
+                .onFailure {
+                    Log.e(TAG, "Failed to migrate to version 15", it)
+                }
+                .onSuccess {
+                    Log.d(TAG, "Migrated to version 15")
+                }
+        }
+
+        fun migrateToVersion16(db: SQLiteDatabase) {
+
+            SpectralMigratorVersion16().migrate(db)
                 .onFailure {
                     Log.e(TAG, "Failed to migrate to version 13", it)
                 }

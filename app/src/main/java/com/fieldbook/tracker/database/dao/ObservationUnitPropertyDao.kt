@@ -21,6 +21,7 @@ import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
+import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter
 
 class ObservationUnitPropertyDao {
 
@@ -104,7 +105,8 @@ class ObservationUnitPropertyDao {
             context: Context,
             studyId: Int,
             fieldList: Array<String?>,
-            traits: ArrayList<TraitObject>
+            traits: ArrayList<TraitObject>,
+            processor: ValueProcessorFormatAdapter
         ): Cursor? = withDatabase { db ->
 
             val traitRequiredFields =
@@ -167,10 +169,11 @@ class ObservationUnitPropertyDao {
             studyId: Int,
             fieldList: Array<String?>,
             uniqueName: String,
-            traits: ArrayList<TraitObject>
+            traits: ArrayList<TraitObject>,
+            processor: ValueProcessorFormatAdapter
         ): Cursor? {
             // Get the full data set
-            getExportDbData(context, studyId, fieldList, traits)?.use { fullCursor ->
+            getExportDbData(context, studyId, fieldList, traits, processor)?.use { fullCursor ->
                 val traitRequiredFields = arrayOf("trait", "userValue", "timeTaken", "person", "location", "rep")
                 val requiredColumns = mutableListOf(uniqueName).apply {
                     addAll(traitRequiredFields)
@@ -224,13 +227,16 @@ class ObservationUnitPropertyDao {
         fun getExportTableData(
             context: Context,
             studyId: Int,
-            traits: ArrayList<TraitObject>
+            traits: ArrayList<TraitObject>,
+            processor: ValueProcessorFormatAdapter
         ): Cursor? = withDatabase { db ->
             val headers = ObservationUnitAttributeDao.getAllNames(studyId)
 
             val selectAttributes = headers.joinToString(", ") { attributeName ->
                 "MAX(CASE WHEN attr.observation_unit_attribute_name = '$attributeName' THEN vals.observation_unit_value_name ELSE NULL END) AS \"$attributeName\""
             }
+
+            val traitNames = traits.map { DataHelper.replaceIdentifiers(it.name) }
 
             val selectObservations = traits.joinToString(", ") { trait ->
                 val traitName = DataHelper.replaceIdentifiers(trait.name)
@@ -254,7 +260,28 @@ class ObservationUnitPropertyDao {
             """.trimIndent()
 
             Log.d("getExportTableData", "Executing query: $query")
-            db.rawQuery(query, null)
+            val cursor = db.rawQuery(query, null)
+
+            val matrixCursor = MatrixCursor(cursor.columnNames).also {
+                while (cursor.moveToNext()) {
+                    val row = mutableListOf<String?>()
+                    for (i in 0 until cursor.columnCount) {
+                        val columnName = cursor.getColumnName(i)
+                        val value = cursor.getStringOrNull(i) ?: ""
+                        if (columnName in traitNames) {
+                            // Process trait values using the processor
+                            val format = cursor.getStringOrNull(cursor.getColumnIndex("observation_variable_field_book_format")) ?: ""
+                            row.add(processor.processValue(value, format))
+                        } else {
+                            row.add(value)
+                        }
+                    }
+                    it.addRow(row.toTypedArray())
+                }
+            }
+
+            cursor.close()
+            matrixCursor
         }
 
         /**
@@ -266,10 +293,11 @@ class ObservationUnitPropertyDao {
             context: Context,
             studyId: Int,
             uniqueName: String,
-            traits: ArrayList<TraitObject>
+            traits: ArrayList<TraitObject>,
+            processor: ValueProcessorFormatAdapter
         ): Cursor? {
 
-            getExportTableData(context, studyId, traits)?.use { cursor ->
+            getExportTableData(context, studyId, traits, processor)?.use { cursor ->
 
                 val requiredTraits = traits.map { it.name }.toTypedArray()
                 val requiredColumns = arrayOf(uniqueName) + requiredTraits

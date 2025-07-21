@@ -11,6 +11,7 @@ import com.fieldbook.tracker.database.Migrator.ObservationUnitAttribute
 import com.fieldbook.tracker.database.Migrator.ObservationUnitValue
 import com.fieldbook.tracker.database.Migrator.ObservationVariable
 import com.fieldbook.tracker.database.Migrator.Study
+import com.fieldbook.tracker.database.StudyGroupsTable
 import com.fieldbook.tracker.database.getTime
 import com.fieldbook.tracker.database.models.StudyModel
 import com.fieldbook.tracker.database.query
@@ -219,6 +220,8 @@ class StudyDao {
             it.observationCount = this["observation_count"]?.toString()
             it.trialName = this["trial_name"]?.toString()
             it.searchAttribute = this["observation_unit_search_attribute"]?.toString()
+            it.groupId = this["group_id"]?.toString()?.toIntOrNull()
+            it.archived = this["is_archived"].toString() == "true"
         }
 
         fun getAllFieldObjects(sortOrder: String): ArrayList<FieldObject> = withDatabase { db ->
@@ -275,6 +278,8 @@ class StudyDao {
                     trial_name,
                     count,
                     observation_unit_search_attribute,
+                    is_archived,
+                    group_id,
                     (SELECT COUNT(DISTINCT observation_unit_attribute_name) FROM observation_units_attributes AS A
                         JOIN observation_units_values AS V 
                             ON V.observation_unit_attribute_db_id = A.internal_id_observation_unit_attribute
@@ -606,6 +611,42 @@ class StudyDao {
                     where = "internal_id_study = ?",
                     whereArgs = arrayOf(id)
                 ).toFirst()
+            )
+        }
+
+        /**
+         * Returns study by its study_db_id
+         */
+        fun getStudyByDbId(studyDbId: String) = withDatabase { db ->
+            StudyModel(
+                db.query(
+                    Study.tableName,
+                    where = "study_db_id = ?",
+                    whereArgs = arrayOf(studyDbId)
+                ).toFirst()
+            )
+        }
+
+        /**
+         * Updates the group_id for a study
+         */
+        fun updateStudyGroup(studyId: Int, groupId: Int?) = withDatabase { db ->
+            db.update(
+                Study.tableName,
+                contentValuesOf(StudyGroupsTable.FK to groupId),
+                "${Study.PK} = ?", arrayOf("$studyId")
+            )
+        }
+
+        /**
+         * Updates the is_archived flag of a study
+         */
+        fun setIsArchived(studyId: Int, isArchived: Boolean) = withDatabase { db ->
+            val value = if (isArchived) "true" else "false"
+            db.update(
+                Study.tableName,
+                contentValuesOf("is_archived" to value),
+                "${Study.PK} = ?", arrayOf("$studyId")
             )
         }
     }

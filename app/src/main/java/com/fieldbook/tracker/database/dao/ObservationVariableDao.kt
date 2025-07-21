@@ -196,6 +196,8 @@ class ObservationVariableDao {
                     }
                     traits.add(trait)
                 }
+
+                TraitAttributeValuesHelper.loadAttributeValuesForAllTraits(traits)
             }
 
             if (sortOrder == "visible") {

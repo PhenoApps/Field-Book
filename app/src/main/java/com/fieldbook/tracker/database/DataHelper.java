@@ -18,17 +18,25 @@ import androidx.preference.PreferenceManager;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
+import com.fieldbook.tracker.database.dao.StudyGroupDao;
 import com.fieldbook.tracker.database.dao.ObservationDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitAttributeDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitPropertyDao;
 import com.fieldbook.tracker.database.dao.ObservationVariableDao;
+import com.fieldbook.tracker.database.dao.spectral.DeviceDao;
+import com.fieldbook.tracker.database.dao.spectral.ProtocolDao;
+import com.fieldbook.tracker.database.dao.spectral.SpectralDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.migrators.RefactorMigratorVersion13;
+import com.fieldbook.tracker.database.dao.spectral.UriDao;
+import com.fieldbook.tracker.database.migrators.SpectralMigratorVersion16;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.database.models.ObservationVariableModel;
+import com.fieldbook.tracker.database.models.StudyGroupModel;
 import com.fieldbook.tracker.database.models.StudyModel;
+import com.fieldbook.tracker.database.repository.SpectralRepository;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.SearchData;
@@ -37,6 +45,8 @@ import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.utilities.GeoJsonUtil;
 import com.fieldbook.tracker.utilities.ZipUtil;
+import com.fieldbook.tracker.utilities.export.SpectralFileProcessor;
+import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 import org.threeten.bp.OffsetDateTime;
@@ -47,6 +57,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,6 +65,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -66,7 +78,7 @@ import dagger.hilt.android.qualifiers.ActivityContext;
  */
 public class DataHelper {
 
-    public static final int DATABASE_VERSION = RefactorMigratorVersion13.VERSION;
+    public static final int DATABASE_VERSION = SpectralMigratorVersion16.VERSION;
     private static final String DATABASE_NAME = "fieldbook.db";
     public static SQLiteDatabase db;
     private static final String TAG = "Field Book";
@@ -79,6 +91,15 @@ public class DataHelper {
     private SharedPreferences preferences;
 
     private Bitmap missingPhoto;
+
+    private final SpectralDao spectralDao = new SpectralDao(this);
+    private final ProtocolDao protocolDao = new ProtocolDao(this);
+    private final UriDao uriDao = new UriDao(this);
+    private final DeviceDao deviceDao = new DeviceDao(this);
+    private final SpectralRepository proto = new SpectralRepository(spectralDao, protocolDao, deviceDao, uriDao);
+    private final SpectralFileProcessor spectralFileProcessor = new SpectralFileProcessor(proto);
+
+    private ValueProcessorFormatAdapter processor;
 
     private SearchQueryBuilder queryBuilder;
 
@@ -99,10 +120,17 @@ public class DataHelper {
 
             missingPhoto = BitmapFactory.decodeResource(context.getResources(), R.drawable.trait_photo_missing);
 
+            processor = new ValueProcessorFormatAdapter(context, spectralFileProcessor);
+
         } catch (Exception e) {
             e.printStackTrace();
             Log.w("FieldBook", "Unable to create or open database");
         }
+    }
+
+    public SQLiteDatabase getDb() {
+        open();
+        return openHelper.getWritableDatabase();
     }
 
     /**
@@ -280,6 +308,22 @@ public class DataHelper {
         open();
 
         return StudyDao.Companion.getById(id);
+    }
+
+    @Nullable
+    public StudyModel getStudyByDbId(String id) {
+
+        open();
+
+        return StudyDao.Companion.getStudyByDbId(id);
+    }
+
+    @Nullable
+    public ObservationModel getObservationById(String id) {
+
+        open();
+
+        return ObservationDao.Companion.getById(id);
     }
 
     @Nullable
@@ -505,7 +549,7 @@ public class DataHelper {
 
         open();
         return ObservationUnitPropertyDao.Companion.getExportDbData(
-                context, fieldId, fieldList, traits);
+                context, fieldId, fieldList, traits, processor);
 
     }
 
@@ -516,7 +560,7 @@ public class DataHelper {
 
         open();
         return ObservationUnitPropertyDao.Companion.getExportDbDataShort(
-                context, fieldId, fieldList, uniqueId, traits);
+                context, fieldId, fieldList, uniqueId, traits, processor);
 
     }
 
@@ -542,14 +586,14 @@ public class DataHelper {
     public Cursor getExportTableDataShort(int fieldId,  String uniqueId, ArrayList<TraitObject> traits) {
 
         open();
-        return ObservationUnitPropertyDao.Companion.getExportTableDataShort(context, fieldId, uniqueId, traits);
+        return ObservationUnitPropertyDao.Companion.getExportTableDataShort(context, fieldId, uniqueId, traits, processor);
 
     }
 
     public Cursor getExportTableData(int fieldId, ArrayList<TraitObject> traits) {
 
         open();
-        return ObservationUnitPropertyDao.Companion.getExportTableData(context, fieldId, traits);
+        return ObservationUnitPropertyDao.Companion.getExportTableData(context, fieldId, traits, processor);
 
     }
 
@@ -650,6 +694,13 @@ public class DataHelper {
         open();
 
         return ObservationDao.Companion.getObservation(studyId, plotId, traitDbId, rep);
+    }
+
+    public void updateObservationValue(int id, String value) {
+
+        open();
+
+        ObservationDao.Companion.updateObservationValue(id, value);
     }
 
     /**
@@ -920,6 +971,57 @@ public class DataHelper {
         close();
     }
 
+    /**
+     * Get all study group names
+     */
+    public List<StudyGroupModel> getAllStudyGroups() {
+        return StudyGroupDao.Companion.getAllStudyGroups();
+    }
+
+    /**
+     * Delete the unassigned study groups
+     */
+    public void deleteUnusedStudyGroups() {
+        StudyGroupDao.Companion.deleteUnusedStudyGroups();
+    }
+
+    /**
+     * Create a study group
+     */
+    public Integer createOrGetStudyGroup(String groupName) {
+        return StudyGroupDao.Companion.createOrGetStudyGroup(groupName);
+    }
+
+    public String getStudyGroupNameById(Integer groupId) {
+        return StudyGroupDao.Companion.getStudyGroupNameById(groupId);
+    }
+
+    public Integer getStudyGroupIdByName(String groupName) {
+        return StudyGroupDao.Companion.getStudyGroupIdByName(groupName);
+    }
+
+    /**
+     * Update the group_id for a study
+     */
+    public void updateStudyGroup(int studyId, Integer groupId) {
+        StudyDao.Companion.updateStudyGroup(studyId, groupId);
+    }
+
+    /**
+     * Update the is_archived flag for a study
+     */
+    public void setIsArchived(int studyId, boolean isArchived) {
+        StudyDao.Companion.setIsArchived(studyId, isArchived);
+    }
+
+    public boolean getStudyGroupIsExpanded(int studyId) {
+        return StudyGroupDao.Companion.getIsExpanded(studyId);
+    }
+
+    public void updateStudyGroupIsExpanded(int studyId, boolean value) {
+        StudyGroupDao.Companion.updateStudyGroupIsExpanded(studyId, value);
+    }
+
     public void deleteField(int studyId) {
 
         open();
@@ -1133,6 +1235,8 @@ public class DataHelper {
             open();
 
         }
+
+        open();
     }
 
     public static String getDatabasePath(Context context) {
@@ -1225,6 +1329,13 @@ public class DataHelper {
         open();
 
         return ObservationDao.Companion.getAllFromAYear(year);
+    }
+
+    public void deleteSpectralFact(String factId) {
+
+        open();
+
+        spectralDao.deleteSpectralFactById(factId);
     }
 
     public ObservationModel[] getRepeatedValues(String studyId, String plotId, String traitDbId) {
@@ -1530,6 +1641,22 @@ public class DataHelper {
             if (oldVersion <= 12 && newVersion >= 13) {
                 // migrate to version 13 for minor refactoring
                 Migrator.Companion.migrateToVersion13(db);
+            }
+
+            if (oldVersion <= 13 && newVersion >= 14) {
+                // migrate to version that has new tables to handle spectral data and device parameters
+                Migrator.Companion.migrateToVersion14(db);
+            }
+
+            if (oldVersion <= 14 && newVersion >= 15) {
+                // add study_groups table to add field grouping functionality
+                Migrator.Companion.migrateToVersion15(db);
+            }
+
+            if (oldVersion <= 15 && newVersion >= 16) {
+                // add observation_variable_attribute_details_view to simplify access to observation variable's attribute/values
+                // adds a trait_debug_helper_view to simplify debugging trait related data
+                Migrator.Companion.migrateToVersion16(db);
             }
         }
     }

@@ -24,6 +24,16 @@ class ObservationDao {
 
         const val TAG = "ObservationDao"
 
+        fun getById(id: String): ObservationModel? = withDatabase { db ->
+
+            db.query(Observation.tableName,
+                where = "${Observation.PK} = ?",
+                whereArgs = arrayOf(id))
+                .toFirst()
+                .let { ObservationModel(it) }
+
+        }
+
         fun getAll(): Array<ObservationModel> = withDatabase { db ->
 
             db.query(Observation.tableName)
@@ -581,6 +591,19 @@ class ObservationDao {
                 "internal_id_observation = ?",
                 arrayOf(observation.internal_id_observation.toString())
                 )
+        }
+
+        fun updateObservationValue(
+            id: Int,
+            value: String
+        ) = withDatabase { db ->
+            db.update(Observation.tableName,
+                ContentValues().apply {
+                    put("value", value)
+                },
+                "${Observation.PK} = ?",
+                arrayOf(id.toString())
+            )
         }
 
         //TODO

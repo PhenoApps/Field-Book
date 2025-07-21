@@ -29,6 +29,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -48,8 +49,15 @@ import com.fieldbook.tracker.adapters.InfoBarAdapter;
 import com.fieldbook.tracker.adapters.TraitsStatusAdapter;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.database.dao.spectral.DeviceDao;
+import com.fieldbook.tracker.database.dao.spectral.ProtocolDao;
+import com.fieldbook.tracker.database.dao.spectral.SpectralDao;
+import com.fieldbook.tracker.database.dao.spectral.UriDao;
+import com.fieldbook.tracker.database.factory.SpectralViewModelFactory;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
+import com.fieldbook.tracker.database.repository.SpectralRepository;
+import com.fieldbook.tracker.database.viewmodels.SpectralViewModel;
 import com.fieldbook.tracker.devices.camera.UsbCameraApi;
 import com.fieldbook.tracker.devices.camera.GoProApi;
 import com.fieldbook.tracker.devices.camera.CanonApi;
@@ -69,6 +77,7 @@ import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.traits.AbstractCameraTrait;
+import com.fieldbook.tracker.traits.SpectralTraitLayout;
 import com.fieldbook.tracker.traits.formats.Formats;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.traits.AudioTraitLayout;
@@ -97,6 +106,7 @@ import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.KeyboardListenerHelper;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.MediaKeyCodeActionHelper;
+import com.fieldbook.tracker.utilities.NixSensorHelper;
 import com.fieldbook.tracker.utilities.SensorHelper;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
@@ -224,6 +234,11 @@ public class CollectActivity extends ThemedActivity
 
     @Inject
     CameraXFacade cameraXFacade;
+
+    @Inject
+    NixSensorHelper nixSensorHelper;
+
+    private SpectralViewModel spectralViewModel;
 
     //used to track rotation relative to device
     private SensorHelper.RotationModel rotationModel = null;
@@ -370,6 +385,13 @@ public class CollectActivity extends ThemedActivity
 
         verifyPersonHelper.checkLastOpened();
 
+        SpectralDao spectralDao = new SpectralDao(database);
+        ProtocolDao protocolDao = new ProtocolDao(database);
+        DeviceDao deviceDao = new DeviceDao(database);
+        UriDao uriDao = new UriDao(database);
+
+        spectralViewModel = new SpectralViewModelFactory(new SpectralRepository(spectralDao, protocolDao, deviceDao, uriDao))
+                .create(SpectralViewModel.class);
     }
 
     @Override
@@ -752,6 +774,8 @@ public class CollectActivity extends ThemedActivity
                 String format = currentTrait.getFormat();
                 if (format != null && Formats.Companion.isCameraTrait(format)) {
                     ((AbstractCameraTrait) traitLayouts.getTraitLayout(format)).setImageNa();
+                } else if (format != null && Formats.Companion.isSpectralFormat(format)) {
+                    ((SpectralTraitLayout) traitLayouts.getTraitLayout(format)).setNa();
                 } else {
                     updateObservation(currentTrait, "NA", null);
                     setNaText();
@@ -768,11 +792,21 @@ public class CollectActivity extends ThemedActivity
                         getCurrentTrait().getId(), getObservationUnit(), getRep());
             }
             else {
-                new IntentIntegrator(CollectActivity.this)
-                        .setPrompt(getString(R.string.barcode_scanner_text))
-                        .setBeepEnabled(false)
-                        .setRequestCode(BARCODE_COLLECT_CODE)
-                        .initiateScan();
+                TraitObject trait = getCurrentTrait();
+                if (trait != null) {
+
+                    if (Objects.equals(trait.getFormat(), Formats.BASE_SPECTRAL.getDatabaseName())) {
+
+                        Toast.makeText(this, getString(R.string.act_collect_barcode_spectral), Toast.LENGTH_SHORT).show();
+
+                    } else {
+                        new IntentIntegrator(CollectActivity.this)
+                                .setPrompt(getString(R.string.barcode_scanner_text))
+                                .setBeepEnabled(false)
+                                .setRequestCode(BARCODE_COLLECT_CODE)
+                                .initiateScan();
+                    }
+                }
             }
 
         });
@@ -1166,6 +1200,8 @@ public class CollectActivity extends ThemedActivity
         preferences.edit().putInt(GeneralKeys.DATA_LOCK_STATE, dataLocked).apply();
 
         traitLayouts.unregisterAllReceivers();
+
+        nixSensorHelper.disconnect();
 
         super.onPause();
     }
@@ -1874,9 +1910,17 @@ public class CollectActivity extends ThemedActivity
      */
     public void deleteMultiMeasures(@NonNull List<ObservationModel> models) {
 
+        String studyId = getStudyId();
+        String obsUnitId = getObservationUnit();
+        String traitDbId = getTraitDbId();
+
         for (ObservationModel model : models) {
 
             deleteRep(model.getRep());
+
+            if (model.getObservation_variable_field_book_format() != null && Formats.Companion.isSpectralFormat(model.getObservation_variable_field_book_format())) {
+                database.deleteSpectralFact(model.getValue());
+            }
 
             ObservationModel[] currentModels = database.getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId());
 
@@ -2907,6 +2951,10 @@ public class CollectActivity extends ThemedActivity
         return canonApi;
     }
 
+    @NonNull
+    @Override
+    public NixSensorHelper getNixSensorHelper() { return nixSensorHelper; }
+
     @Override
     public void onSearchResultsClicked(String unique, String range, String plot, boolean reload) {
         searchUnique = unique;
@@ -3053,5 +3101,16 @@ public class CollectActivity extends ThemedActivity
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @NonNull
+    @Override
+    public SpectralViewModel getSpectralViewModel() {
+        return spectralViewModel;
+    }
+
+    @Override
+    public void updateNumberOfObservations() {
+        refreshRepeatedValuesToolbarIndicator();
     }
 }

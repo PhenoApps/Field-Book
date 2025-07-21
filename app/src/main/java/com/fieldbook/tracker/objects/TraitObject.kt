@@ -18,13 +18,17 @@ class TraitObject {
     var realPosition: Int = 0
     var id: String = ""
     var visible: Boolean = true
-    var externalDbId: String = ""
+    var externalDbId: String? = null
     var traitDataSource: String = ""
-    var additionalInfo: String = ""
+    var additionalInfo: String? = null
 
     var observationLevelNames: List<String>? = null
 
-    private val attributeValues by lazy { TraitAttributeValuesHelper(id) }
+    // do not bind this map tightly with a traitId
+    // traitId is null until the trait object inserted into the database
+    // but binding the UI inputs to attributes (minimum, maximum, etc) happens in
+    // ParameterScrollView's merge function BEFORE insertion into the db is done
+    private val attributeValues = TraitAttributeValuesHelper()
 
     var minimum: String
         get() = attributeValues.getString(TraitAttributes.MIN_VALUE)
@@ -48,19 +52,13 @@ class TraitObject {
 
 
     fun loadAttributeAndValues() {
+        attributeValues.traitId = id
         attributeValues.load()
     }
 
     fun saveAttributeValues() {
-        val attributeValuesHelper = TraitAttributeValuesHelper(id)
-        attributeValuesHelper.apply {
-            setValue(TraitAttributes.MIN_VALUE, minimum)
-            setValue(TraitAttributes.MAX_VALUE, maximum)
-            setValue(TraitAttributes.CATEGORIES, categories)
-            setValue(TraitAttributes.CLOSE_KEYBOARD, closeKeyboardOnOpen.toString())
-            setValue(TraitAttributes.CROP_IMAGE, cropImage.toString())
-        }
-        attributeValuesHelper.save()
+        attributeValues.traitId = id
+        attributeValues.save()
     }
 
     override fun equals(other: Any?): Boolean {
@@ -148,6 +146,6 @@ class TraitObject {
         additionalInfo = cursor.getString(additionalInfoIndex) ?: ""
         traitDataSource = cursor.getString(traitDataSourceIndex) ?: ""
 
-        loadAttributeAndValues()
+        // loadAttributeAndValues()
     }
 }

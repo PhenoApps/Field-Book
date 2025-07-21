@@ -167,4 +167,7 @@ fun <T> withDatabase(function: (SQLiteDatabase) -> T): T? = if (DataHelper.db !=
 
 var internalTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZZZZZ")
 
+var basicTimeFormatter = DateTimeFormatter.ofPattern("MM-dd-yy HH:mm:ss")
+
+
 
