@@ -43,6 +43,7 @@
     <string name="warning_traits_missing">Aucun caractère n\'a été défini. Veuillez définir les caractères avant de collecter les données.</string>
     <!-- Changelog -->
     <string name="changelog_title">journal des modifications</string>
+    <!--  Field Grouping  -->
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
@@ -382,6 +383,7 @@ Phenotypes et essais créés manuellement ou importés via CSV devront être exp
     <!-- usb camera trait -->
     <!-- gopro -->
     <!-- canon camera strings -->
+    <!-- spectral trait strings -->
     <string name="brapi_traits_filter_title">caractères</string>
     <string name="dialog_quick_goto_title">Raccourci rapide</string>
     <string name="traits_sort_default">défaut</string>
