@@ -57,6 +57,10 @@ import androidx.core.content.edit
 @AndroidEntryPoint
 class FieldDetailFragment : Fragment(), FieldSyncController {
 
+    companion object {
+        const val PERMISSIONS_REQUEST_TRAIT_DATA = 9950
+    }
+
     @Inject
     lateinit var database: DataHelper
 
@@ -69,7 +73,6 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private var toolbar: Toolbar? = null
     private var fieldId: Int? = null
     private var fieldObject: FieldObject? = null
-    private val PERMISSIONS_REQUEST_TRAIT_DATA = 9950
 
     private lateinit var rootView: View
     private lateinit var fieldDisplayNameTextView: TextView
@@ -610,7 +613,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             .setMessage(getString(R.string.dialog_unarchive_field_message))
             .setPositiveButton(getString(R.string.dialog_yes)) { d, _ ->
                 fieldId?.let { database.setIsArchived(it, false) }
-                fieldObject?.is_archived = false
+                fieldObject?.archived = false
                 setAsActiveField()
             }
             .setNegativeButton(getString(R.string.dialog_no)) { d, _ ->

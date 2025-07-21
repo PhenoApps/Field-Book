@@ -549,7 +549,7 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     }
 
     private void addArchivedHeaderToList(List<FieldViewItem> arrayList, List<FieldObject> fieldsList) {
-        long archivedCount = fieldsList.stream().filter(FieldObject::getIs_archived).count();
+        long archivedCount = fieldsList.stream().filter(FieldObject::getArchived).count();
         if (archivedCount > 0) { // add archived list item at the bottom
             String archivedVal = context.getString(R.string.group_archived_value);
             FieldViewItem archiveHeader = new FieldViewItem(archivedVal, archivedCount, true);
