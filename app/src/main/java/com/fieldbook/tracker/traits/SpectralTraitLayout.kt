@@ -726,7 +726,6 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         database.insertObservation(
             currentRange.uniqueId,
             currentTrait.id,
-            type(),
             "NA",
             (context as? CollectActivity)?.person,
             (context as? CollectActivity)?.locationByPreferences,

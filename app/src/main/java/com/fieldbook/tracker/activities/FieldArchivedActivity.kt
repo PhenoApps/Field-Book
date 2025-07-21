@@ -3,7 +3,6 @@ package com.fieldbook.tracker.activities
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import androidx.appcompat.widget.Toolbar
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.FieldAdapter
 import com.fieldbook.tracker.objects.FieldObject
@@ -48,7 +47,7 @@ class FieldArchivedActivity : BaseFieldActivity() {
         val archivedFields = ArrayList<FieldObject>()
 
         allFields.forEach {
-            if (it.is_archived) {
+            if (it.archived) {
                 archivedFields.add(it)
             }
         }

@@ -385,6 +385,7 @@
     <string name="main_toolbar_resources">Resources</string>
     <string name="main_trait_details">Trait details</string>
     <string name="main_infobar_data_missing">No data</string>
+    <string name="main_infobar_select_data">Select</string>
     <string name="main_toolbar_next_entry_no_data">Next entry with no data</string>
 
     <!-- InfoBars -->
@@ -781,6 +782,12 @@
 
     <string name="preferences_appearance_quickgoto">Quick GoTo</string>
     <string name="preferences_appearance_quickgoto_description">Change the middle section of main screen to the legacy Quick GoTo</string>
+
+    <string name="preferences_appearance_range_progress_bar">Entries progress bar</string>
+    <string name="preferences_appearance_range_progress_bar_description">Shows your current position in the field</string>
+
+    <string name="preferences_appearance_traits_progress_bar">Traits progress bar</string>
+    <string name="preferences_appearance_traits_progress_bar_description">Shows whether the active traits have data and highlights the current trait</string>
 
     <!-- Behavior -->
     <string name="preferences_behavior_title">Behavior</string>
@@ -1515,6 +1522,8 @@
     <string name="preferences_preferences_title">Preferences</string>
     <string name="nearby_share_export_preferences">Export Preferences</string>
     <string name="nearby_share_import_preferences">Import Preferences</string>
+    <string name="all_fields_processed">All fields processed</string>
+  
     <string name="spectral_trait_insert_note">Note</string>
     <string name="spectral_trait_insert_note_message">Write a note for the chosen entry.</string>
     <string name="trait_spectral_na_content_description">not applicable value placeholder</string>
@@ -1549,4 +1558,5 @@
     <string name="nix_error_bluetooth_unavailable">Bluetooth is unavailable.</string>
     <string name="nix_error_bluetooth_disabled">Bluetooth is disabled on the device.</string>
 
+    <string name="import_runnable_field_name_exists">Field name already exists.</string>
 </resources>

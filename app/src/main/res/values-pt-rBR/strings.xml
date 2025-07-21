@@ -621,6 +621,10 @@
     <string name="preferences_appearance_infobar_hide_prefix_description">Prefixo do Infobar será substituído por um ícone genérico</string>
     <string name="preferences_appearance_quickgoto">Ir Rápido Para</string>
     <string name="preferences_appearance_quickgoto_description">Altere a seção do meio da tela principal para o legado \"Ir Rápido para\"</string>
+    <string name="preferences_appearance_range_progress_bar">Barra de progresso de entradas</string>
+    <string name="preferences_appearance_range_progress_bar_description">Mostra sua posição atual no campo</string>
+    <string name="preferences_appearance_traits_progress_bar">Barra de progresso de características</string>
+    <string name="preferences_appearance_traits_progress_bar_description">Mostra se as características ativas têm dados e destacam a característica atual</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamento</string>
     <string name="preferences_behavior_movement_title">Movimento</string>

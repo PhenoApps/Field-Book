@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.widget.Group
 import androidx.fragment.app.DialogFragment
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.FieldEditorActivity
 import com.fieldbook.tracker.activities.ThemedActivity
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.FieldObject
@@ -57,7 +58,7 @@ import java.util.UUID
 class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
     DialogFragment(), CoroutineScope by MainScope() {
 
-    private val helper by lazy { DataHelper(context) }
+    private val helper by lazy { (activity as FieldEditorActivity).getDatabase() }
 
     private val scope by lazy { CoroutineScope(Dispatchers.IO) }
 
@@ -198,11 +199,12 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
             val nameText = nameEditText?.text
             if (!nameText.isNullOrBlank() && !rowsText.isNullOrBlank() && !colsText.isNullOrBlank()) {
 
-                //check that the text can be parsed as a whole number and is greater than 0
-                try {
+                val nameExists = helper.allFieldObjects.any { it.name == nameText.toString() }
 
-                    //use database to check if the field name is unique
-                    if (helper.checkFieldName(nameText.toString()) == -1) {
+                if (!nameExists) {
+
+                    //check that the text can be parsed as a whole number and is greater than 0
+                    try {
 
                         val rows = rowsText.toString().toInt()
 
@@ -219,22 +221,23 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
 
                         setupStartingPointSelection(nameText.toString())
 
-                    } else {
+                    } catch (e: NumberFormatException) {
 
-                        Toast.makeText(activity, R.string.dialog_field_creator_field_name_not_unique, Toast.LENGTH_LONG).show()
+                        e.printStackTrace()
 
-                        nameText.clear()
                     }
 
+                } else {
 
-                } catch (e: NumberFormatException) {
+                    Toast.makeText(activity, R.string.dialog_field_creator_field_name_not_unique, Toast.LENGTH_LONG).show()
 
-                    e.printStackTrace()
-
+                    nameText.clear()
                 }
 
             } else {
+
                 Toast.makeText(activity, R.string.dialog_field_creator_size_group_error, Toast.LENGTH_LONG).show()
+
             }
         }
     }
@@ -428,20 +431,21 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
         scope.launch {
             // Database operation might be time-consuming, so we run it on the IO dispatcher
             val createdFieldId = withContext(Dispatchers.IO) {
+                helper.open()
                 DataHelper.db.beginTransaction()
                 try {
                     Log.d("FieldCreatorDialog", "Inserting new field in the database.")
 
                     val field = FieldObject().apply {
-                        unique_id = "plot_id"
-                        primary_id = "Row"
-                        secondary_id = "Column"
-                        exp_sort = "Plot"
-                        exp_name = name
-                        exp_alias = name
-                        exp_source = activity.getString(R.string.field_book)
-                        import_format = ImportFormat.INTERNAL
-                        count = (fieldConfig.rows * fieldConfig.cols).toString()
+                        uniqueId = "plot_id"
+                        primaryId = "Row"
+                        secondaryId = "Column"
+                        sortColumnsStringArray = "Plot"
+                        this.name = name
+                        alias = name
+                        dataSource = activity.getString(R.string.field_book)
+                        dataSourceFormat = ImportFormat.INTERNAL
+                        entryCount = (fieldConfig.rows * fieldConfig.cols).toString()
                     }
 
                     val fieldColumns = listOf(
