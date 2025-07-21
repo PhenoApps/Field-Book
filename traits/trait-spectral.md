@@ -15,9 +15,9 @@ Spectral data can be collected in two ways depending on the sensor:
 
 <figure class="image" style="text-align: center">
     <p>
-      <img class="screenshot" src="../_static/images/traits/formats/spectral/trait_creator_dialog.png" width="250" />
-      <img class="screenshot" src="../_static/images/traits/formats/spectral/trait_creator_dialog_spectral_sub_layout.png" width="250" />
-      <img class="screenshot" src="../_static/images/traits/formats/spectral/trait_creator_dialog_spectral_options.png" width="250" />
+      <img src="../_static/images/traits/formats/spectral/trait_creator_dialog.png" width="250" />
+      <img src="../_static/images/traits/formats/spectral/trait_creator_dialog_spectral_sub_layout.png" width="250" />
+      <img src="../_static/images/traits/formats/spectral/trait_creator_dialog_spectral_options.png" width="250" />
     </p>
 </figure>
 
