@@ -65,7 +65,7 @@ class FieldArchivedActivity : BaseFieldActivity() {
         val archivedFields = ArrayList<FieldObject>()
 
         allFields.forEach {
-            if (it.is_archived) {
+            if (it.archived) {
                 archivedFields.add(it)
             }
         }

@@ -3,7 +3,6 @@ package com.fieldbook.tracker.utilities
 import android.content.Context
 import android.content.SharedPreferences
 import android.location.Location
-import android.util.Log
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.location.GPSTracker
@@ -41,7 +40,7 @@ class LocationCollectorUtil {
         }
 
         fun getLocationByCollectMode(context: Context, prefs: SharedPreferences,
-                                     expId: String, obsUnit: String,
+                                     studyId: String, obsUnit: String,
                                      internalGps: Location?, externalGps: Location?,
                                      database: DataHelper
         ): String {
@@ -62,12 +61,12 @@ class LocationCollectorUtil {
 
                     //if obs unit mode, search all observations within the current plot
                     //if a location already exists, use that location for this observation, otherwise use the most recent location
-                    location = database.getAllObservations(expId, obsUnit).getLocation() ?: recent ?: String()
+                    location = database.getAllObservations(studyId, obsUnit).getLocation() ?: recent ?: String()
 
                 } else if (locationCollectionMode == LocationPreferencesFragment.LOCATION_COLLECTION_STUDY) {
 
                     //similar to above but check if an observation has been saved for a field/study
-                    location = database.getAllObservations(expId).getLocation() ?: recent ?: String()
+                    location = database.getAllObservations(studyId).getLocation() ?: recent ?: String()
                 }
 
                 // Format location based on preference

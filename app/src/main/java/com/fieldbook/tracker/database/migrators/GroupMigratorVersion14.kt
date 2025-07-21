@@ -13,6 +13,7 @@ class GroupMigratorVersion14: FieldBookMigrator {
 
     companion object {
         private const val TAG = "GroupMigratorVersion14"
+        const val VERSION = 14
     }
 
     override fun migrate(db: SQLiteDatabase): Result<Any> = runCatching {

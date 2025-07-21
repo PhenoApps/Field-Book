@@ -459,7 +459,7 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
     private fun areFieldsGrouped(): Boolean {
         val allStudyGroups = db.allStudyGroups
 
-        val hasArchivedFields = fieldList.any { it.is_archived }
+        val hasArchivedFields = fieldList.any { it.archived }
         val hasGroups = allStudyGroups?.isNotEmpty() == true
         return hasArchivedFields || hasGroups
     }
@@ -626,7 +626,7 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
                     val model = closest.get()
                     val studyId = model.study_id
                     val study = db.getFieldObject(studyId)
-                    val studyName = study.exp_alias
+                    val studyName = study.alias
 
                     if (studyId == mPrefs.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)) {
                         SnackbarUtils.showNavigateSnack(
@@ -689,15 +689,6 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
                 }
 
                 mPrefs.edit { putString(GeneralKeys.FIELD_FILE, fieldFileName) }
-
-                if (db.checkFieldName(fieldFileName) >= 0) {
-                    Utils.makeToast(this, getString(R.string.fields_study_exists_message))
-                    mPrefs.edit {
-                        putString(GeneralKeys.FIELD_FILE, null)
-                        putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)
-                    }
-                    return
-                }
 
                 if (fieldFile.isOther()) {
                     Utils.makeToast(this, getString(R.string.import_error_unsupported))
@@ -828,7 +819,7 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
     }
 
     override fun showSortDialog(field: FieldObject?) {
-        val order = field?.exp_sort
+        val order = field?.sortColumnsStringArray
         val sortOrderList = ArrayList<String>()
 
         if (order != null) {
@@ -844,7 +835,7 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
                 this,
                 field,
                 sortOrderList.toTypedArray(),
-                db.rangeColumnNames
+                db.getAllObservationUnitAttributeNames(field.studyId)
             )
         }
 
@@ -860,11 +851,11 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
         val sortOrder = joiner.toString()
 
         try {
-            db.updateStudySort(sortOrder, field.exp_id)
+            db.updateStudySort(sortOrder, field.studyId)
 
-            field.exp_sort = sortOrder
+            field.sortColumnsStringArray = sortOrder
 
-            if (mPrefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0) == field.exp_id) {
+            if (mPrefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0) == field.studyId) {
                 fieldSwitcher.switchField(field)
                 CollectActivity.reloadData = true
             }
@@ -905,7 +896,7 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
         var anyFieldsInGroup = false
 
         for (fieldId in fieldIds) {
-            val field = fieldList.find { it.exp_id == fieldId }
+            val field = fieldList.find { it.studyId == fieldId }
 
             if (field != null) {
                 val groupName = db.getStudyGroupNameById(field.groupId)

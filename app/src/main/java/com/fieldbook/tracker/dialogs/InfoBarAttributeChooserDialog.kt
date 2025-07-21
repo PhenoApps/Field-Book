@@ -9,6 +9,11 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.activities.PreferencesActivity
 import com.fieldbook.tracker.preferences.GeneralKeys
+import androidx.core.content.edit
+import com.fieldbook.tracker.adapters.AttributeAdapter
+import com.fieldbook.tracker.adapters.AttributeAdapter.AttributeModel
+import com.fieldbook.tracker.preferences.DropDownKeyModel
+import org.w3c.dom.Attr
 
 /**
  * Dialog to choose an attribute for an InfoBar. Extends the AttributeChooserDialog
@@ -51,17 +56,41 @@ class InfobarAttributeChooserDialog : AttributeChooserDialog() {
     }
 
     /** Retrieves InfoBar's currently selected attribute. */
-    override fun getSelected(): String? {
+    override fun getSelected(): AttributeModel? {
         val infoBarPosition = arguments?.getInt(ARG_INFO_BAR_POSITION)
-        return PreferenceManager.getDefaultSharedPreferences(requireActivity())
-            .getString("DROP$infoBarPosition", null)
+        val keys = GeneralKeys.getDropDownKeys(infoBarPosition ?: 0)
+        val attributeLabel = PreferenceManager.getDefaultSharedPreferences(requireActivity())
+            .getString(keys.attributeKey, DropDownKeyModel.DEFAULT_ATTRIBUTE_LABEL)
+            ?: DropDownKeyModel.DEFAULT_ATTRIBUTE_LABEL
+        val traitId = PreferenceManager.getDefaultSharedPreferences(requireActivity())
+            .getString(keys.traitKey, DropDownKeyModel.DEFAULT_TRAIT_ID)
+            ?: DropDownKeyModel.DEFAULT_TRAIT_ID
+        val trait = if (traitId == DropDownKeyModel.DEFAULT_TRAIT_ID) {
+            null
+        } else {
+            (activity as CollectActivity).getDatabase().getTraitById(traitId)
+        }
+        return AttributeModel(attributeLabel, trait = trait)
     }
 
     /** Saves newly selected attribute to preferences and refreshes the InfoBars. */
-    override fun onAttributeClicked(label: String, position: Int) {
+    override fun onAttributeClicked(model: AttributeModel, position: Int) {
         val infoBarPosition = requireArguments().getInt(ARG_INFO_BAR_POSITION)
-        super.onAttributeClicked(label, position)
-        PreferenceManager.getDefaultSharedPreferences(requireActivity()).edit().putString("DROP$infoBarPosition", label).apply()
+        super.onAttributeClicked(model, position)
+
+        val keys = GeneralKeys.getDropDownKeys(infoBarPosition)
+
+        PreferenceManager.getDefaultSharedPreferences(requireActivity()).edit {
+            putString(
+                keys.attributeKey,
+                model.label
+            )
+            putString(
+                keys.traitKey,
+                model.trait?.id ?: DropDownKeyModel.DEFAULT_TRAIT_ID
+            )
+        }
+
         (activity as? CollectActivity)?.refreshInfoBarAdapter()
     }
 }

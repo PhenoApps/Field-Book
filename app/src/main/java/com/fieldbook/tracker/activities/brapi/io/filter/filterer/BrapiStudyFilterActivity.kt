@@ -98,7 +98,7 @@ class BrapiStudyFilterActivity(
     }
 
     override fun List<CheckboxListAdapter.Model>.filterExists(): List<CheckboxListAdapter.Model> {
-        val brapiIds = database.allFieldObjects.filter { it.exp_id >= 0 }.map { it.study_db_id }
+        val brapiIds = database.allFieldObjects.filter { it.studyId >= 0 }.map { it.studyDbId }
         return filter { it.id !in brapiIds }
     }
 
