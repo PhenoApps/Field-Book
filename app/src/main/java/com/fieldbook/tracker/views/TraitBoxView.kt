@@ -185,16 +185,6 @@ class TraitBoxView : ConstraintLayout {
 
         previousSelection = traitPosition
 
-        if (currentTrait != null) {
-            // Update last used trait so it is preserved when entry moves
-            controller.getPreferences().edit {
-                putString(
-                    GeneralKeys.LAST_USED_TRAIT,
-                    currentTrait!!.id
-                )
-            }
-        }
-
         traitTypeTv.text = currentTrait?.name
         traitDetails.text = currentTrait?.details ?: ""
 

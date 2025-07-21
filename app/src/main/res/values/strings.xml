@@ -1516,6 +1516,7 @@
     <string name="nearby_share_export_preferences">Export Preferences</string>
     <string name="nearby_share_import_preferences">Import Preferences</string>
     <string name="all_fields_processed">All fields processed</string>
+  
     <string name="spectral_trait_insert_note">Note</string>
     <string name="spectral_trait_insert_note_message">Write a note for the chosen entry.</string>
     <string name="trait_spectral_na_content_description">not applicable value placeholder</string>
@@ -1550,4 +1551,5 @@
     <string name="nix_error_bluetooth_unavailable">Bluetooth is unavailable.</string>
     <string name="nix_error_bluetooth_disabled">Bluetooth is disabled on the device.</string>
 
+    <string name="import_runnable_field_name_exists">Field name already exists.</string>
 </resources>

@@ -131,30 +131,43 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
             val nameText = nameEditText?.text
             if (!nameText.isNullOrBlank() && !rowsText.isNullOrBlank() && !colsText.isNullOrBlank()) {
 
-                //check that the text can be parsed as a whole number and is greater than 0
-                try {
+                val nameExists = helper.allFieldObjects.any { it.name == nameText.toString() }
 
-                    val rows = rowsText.toString().toInt()
+                if (!nameExists) {
 
-                    val cols = colsText.toString().toInt()
+                    //check that the text can be parsed as a whole number and is greater than 0
+                    try {
 
-                    if (rows < 1 || cols < 1
-                        || rows > Int.MAX_VALUE
-                        || cols > Int.MAX_VALUE) throw java.lang.NumberFormatException()
+                        val rows = rowsText.toString().toInt()
 
-                    //change current group visibility before setting up next group
-                    sizeGroup?.visibility = View.GONE
+                        val cols = colsText.toString().toInt()
 
-                    setupRadioGroup(nameText.toString(), rows, cols)
+                        if (rows < 1 || cols < 1
+                            || rows > Int.MAX_VALUE
+                            || cols > Int.MAX_VALUE) throw java.lang.NumberFormatException()
 
-                } catch (e: NumberFormatException) {
+                        //change current group visibility before setting up next group
+                        sizeGroup?.visibility = View.GONE
 
-                    e.printStackTrace()
+                        setupRadioGroup(nameText.toString(), rows, cols)
 
+                    } catch (e: NumberFormatException) {
+
+                        e.printStackTrace()
+
+                    }
+
+                } else {
+
+                    Toast.makeText(activity, R.string.dialog_field_creator_field_name_not_unique, Toast.LENGTH_LONG).show()
+
+                    nameText.clear()
                 }
 
             } else {
+
                 Toast.makeText(activity, R.string.dialog_field_creator_size_group_error, Toast.LENGTH_LONG).show()
+
             }
         }
     }
