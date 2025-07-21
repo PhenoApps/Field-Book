@@ -33,6 +33,7 @@
     <string name="warning_traits_missing">कोई विशेषता मौजूद नहीं है। कृपया आंकड़े एकत्र करने से पहले विशेषताओं का सिरजन करें।</string>
     <!-- Changelog -->
     <string name="changelog_title">पिछले संस्करण से बदलाव</string>
+    <!--  Field Grouping  -->
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
@@ -214,6 +215,7 @@
     <!-- usb camera trait -->
     <!-- gopro -->
     <!-- canon camera strings -->
+    <!-- spectral trait strings -->
     <string name="brapi_traits_filter_title">विशेषताएँ</string>
     <string name="traits_sort_default">पूर्व निर्धारित</string>
     <!--  NearbyShare  -->

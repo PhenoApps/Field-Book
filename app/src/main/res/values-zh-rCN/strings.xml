@@ -47,6 +47,7 @@
     <string name="warning_traits_missing">无性状存在。请先创建性状，再采集数据。</string>
     <!-- Changelog -->
     <string name="changelog_title">更改记录</string>
+    <!--  Field Grouping  -->
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
@@ -400,6 +401,7 @@
     <!-- usb camera trait -->
     <!-- gopro -->
     <!-- canon camera strings -->
+    <!-- spectral trait strings -->
     <string name="brapi_traits_filter_title">性状</string>
     <string name="dialog_quick_goto_title">快速转移</string>
     <string name="traits_sort_default">默认值</string>

@@ -44,6 +44,7 @@
     <string name="warning_traits_missing">لا توجد سمات، الرجاء أنشئ سمات قبل جمع البيانات.</string>
     <!-- Changelog -->
     <string name="changelog_title">سجل التغييرات</string>
+    <!--  Field Grouping  -->
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
@@ -393,6 +394,7 @@
     <!-- usb camera trait -->
     <!-- gopro -->
     <!-- canon camera strings -->
+    <!-- spectral trait strings -->
     <string name="brapi_traits_filter_title">السمات</string>
     <string name="dialog_quick_goto_title">إنتقل مباشرة إلى</string>
     <string name="traits_sort_default">افتراضي</string>

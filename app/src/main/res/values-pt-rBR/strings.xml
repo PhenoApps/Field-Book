@@ -79,6 +79,9 @@
     <string name="warning_traits_missing">Não existem caracteres. Por favor, crie caracteres antes de coletar dados.</string>
     <!-- Changelog -->
     <string name="changelog_title">Registro de alterações</string>
+    <!--  Field Grouping  -->
+    <string name="group_archive">Arquivar</string>
+    <string name="menu_archive">Arquivar</string>
     <!-- FIELDS -->
     <!-- General -->
     <string name="menu_fields_sort_list">Organizar Lista de Campos</string>
@@ -302,6 +305,7 @@
     <string name="main_toolbar_resources">Recursos</string>
     <string name="main_trait_details">Detalhes do caractere</string>
     <string name="main_infobar_data_missing">Não há dados</string>
+    <string name="main_infobar_select_data">Selecionar</string>
     <string name="main_toolbar_next_entry_no_data">Nova entrada de dados</string>
     <!-- InfoBars -->
     <string name="dialog_att_chooser_attributes">Atributos</string>
@@ -1120,6 +1124,8 @@
     <string name="dialog_brapi_filter_title">Filtros</string>
     <string name="dialog_brapi_filter_active">Ativo</string>
     <string name="dialog_brapi_filter_choices_title">Filtrar Por</string>
+    <!-- spectral trait strings -->
+    <string name="trait_spectral_connect_content_description">Inicia uma conexão do dispositivo.</string>
     <string name="brapi_studies_filter_title">Estudos</string>
     <string name="brapi_trials_filter_title">Estudos</string>
     <string name="brapi_filter_dialog_title">Filtrar Por</string>
@@ -1244,4 +1250,5 @@
     <string name="preferences_preferences_title">Preferências</string>
     <string name="nearby_share_export_preferences">Exportar Preferências</string>
     <string name="nearby_share_import_preferences">Importar Preferências</string>
+    <string name="usb_device_description">USB</string>
 </resources>
