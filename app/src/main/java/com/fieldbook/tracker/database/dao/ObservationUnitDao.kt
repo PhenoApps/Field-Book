@@ -141,14 +141,6 @@ class ObservationUnitDao {
 
         }
 
-        fun updateObservationUnitModels(models: List<ObservationUnitModel>) = withDatabase { db ->
-
-            models.forEach { unit ->
-
-                updateObservationUnit(unit, unit.geo_coordinates ?: "")
-            }
-        }
-
         fun updateObservationUnitModels(db: SQLiteDatabase, models: List<ObservationUnitModel>) {
 
             models.forEach { unit ->

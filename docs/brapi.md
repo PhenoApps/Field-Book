@@ -42,7 +42,7 @@ If your field was recently created in your database, you may need to reset the c
 Press the import button on the bottom of the screen to download the fields to Field Book.
 
 The final screen shows additional details for each selected field, including the number of entries, number of associated traits, location, and season.
-The tabs at the top can be used to change the observation level, primary ID, secondary ID, and sort order for the selected fields.
+The tabs at the top can be used to change the observation level and sort order for the selected fields.
 
 Press the Save button at the bottom of the screen to import the fields into Field Book.
 The fields and any linked traits will be saved for use in Field Book.

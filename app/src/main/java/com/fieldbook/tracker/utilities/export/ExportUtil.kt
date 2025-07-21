@@ -13,14 +13,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
-import android.widget.ListView
-import android.widget.RadioButton
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.FragmentActivity
 import androidx.preference.PreferenceManager
@@ -36,6 +29,7 @@ import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.CSVWriter
+import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.ZipUtil
 import dagger.hilt.android.qualifiers.ActivityContext
 import kotlinx.coroutines.CoroutineScope
@@ -48,8 +42,7 @@ import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 import java.io.OutputStreamWriter
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import java.util.*
 import javax.inject.Inject
 
 /**
@@ -73,7 +66,7 @@ class ExportUtil @Inject constructor(
     private var allColumns: RadioButton? = null
     private var allTraits: RadioButton? = null
     private var activeTraits: RadioButton? = null
-    private var exportTrait: java.util.ArrayList<TraitObject> = arrayListOf()
+    private var exportTrait: ArrayList<TraitObject> = arrayListOf()
     private var checkDbBool = false
     private var checkTableBool = false
     private var defaultFieldString = ""
@@ -104,9 +97,9 @@ class ExportUtil @Inject constructor(
     }
 
     fun export() {
-        val exporter = preferences.getString(PreferenceKeys.Companion.EXPORT_SOURCE_DEFAULT, "")
+        val exporter = preferences.getString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, "")
 
-        if (!allFieldsBrAPI() || exporter == "local" || !preferences.getBoolean(PreferenceKeys.Companion.BRAPI_ENABLED, false)) {
+        if (!allFieldsBrAPI() || exporter == "local" || !preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false)) {
             // use local export if any fields aren't all brapi, if brapi is disabled, or if local pref is set
             exportPermission()
         } else if (exporter == "brapi") {
@@ -119,7 +112,7 @@ class ExportUtil @Inject constructor(
     fun allFieldsBrAPI(): Boolean {
         fieldIds.forEach { fieldId ->
             val field = database.getFieldObject(fieldId)
-            val importFormat = field?.import_format
+            val importFormat = field?.dataSourceFormat
             if (importFormat != ImportFormat.BRAPI) {
                 Log.d(TAG, "Not all fields are BrAPI fields")
                 return false
@@ -158,7 +151,7 @@ class ExportUtil @Inject constructor(
 
         val exportArray = arrayOf(
             context.getString(R.string.export_source_local),
-            preferences.getString(PreferenceKeys.Companion.BRAPI_DISPLAY_NAME, context.getString(R.string.brapi_edit_display_name_default))
+            preferences.getString(PreferenceKeys.BRAPI_DISPLAY_NAME, context.getString(R.string.brapi_edit_display_name_default))
         )
 
         val adapter = ArrayAdapter(context, R.layout.list_item_dialog_list, exportArray)
@@ -182,13 +175,13 @@ class ExportUtil @Inject constructor(
 
     fun exportBrAPI(fieldIds: List<Int>) {
         val activeFields = fieldIds.map { fieldId -> database.getFieldObject(fieldId) }
-        val nonMatchingSourceFields = activeFields.filter { !BrAPIService.checkMatchBrapiUrl(context, it.getExp_source()) }
+        val nonMatchingSourceFields = activeFields.filter { !BrAPIService.checkMatchBrapiUrl(context, it.getDataSource()) }
 
         if (nonMatchingSourceFields.isNotEmpty()) {
             val hostURL = BrAPIService.getHostUrl(context)
             val badSourceMsg = context.resources.getString(
                 R.string.brapi_field_non_matching_sources,
-                nonMatchingSourceFields.joinToString(", ") { it.getExp_source() },
+                nonMatchingSourceFields.joinToString(", ") { it.getDataSource() },
                 hostURL
             )
             Toast.makeText(context, badSourceMsg, Toast.LENGTH_LONG).show()
@@ -240,7 +233,7 @@ class ExportUtil @Inject constructor(
             bundleInfoMessage.visibility = View.VISIBLE
         } else {
             val fo = fields.first()
-            defaultFieldString = fo.exp_name
+            defaultFieldString = fo.name
             if (defaultFieldString.length > 4 && defaultFieldString.lowercase().endsWith(".csv")) {
                 defaultFieldString = defaultFieldString.substring(0, defaultFieldString.length - 4)
             }
@@ -300,7 +293,7 @@ class ExportUtil @Inject constructor(
                 apply()
             }
 
-            BaseDocumentTreeUtil.Companion.getDirectory(context as Activity, R.string.dir_field_export)
+            BaseDocumentTreeUtil.getDirectory(context as Activity, R.string.dir_field_export)
 
             exportTrait.clear()
             if (isActiveTraitsChecked) {
@@ -328,7 +321,7 @@ class ExportUtil @Inject constructor(
         val positiveButton: Button = saveDialog.getButton(AlertDialog.BUTTON_POSITIVE)
         positiveButton.setOnClickListener {
 
-            val repeatedMeasuresEnabled = preferences.getBoolean(PreferenceKeys.Companion.REPEATED_VALUES_PREFERENCE_KEY, false)
+            val repeatedMeasuresEnabled = preferences.getBoolean(PreferenceKeys.REPEATED_VALUES_PREFERENCE_KEY, false)
 
             //show a warning if table is selected and repeated measures is enabled
             if (checkTable.isChecked && repeatedMeasuresEnabled) {
@@ -375,7 +368,7 @@ class ExportUtil @Inject constructor(
             val bundleChecked = preferences.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, false)
             val fo = database.getFieldObject(fieldId)
             var fieldFileString = exportFileString
-            if (multipleFields) { fieldFileString = "${timeStamp.format(Calendar.getInstance().time)}_${fo.exp_name}" }
+            if (multipleFields) { fieldFileString = "${timeStamp.format(Calendar.getInstance().time)}_${fo.name}" }
 
             if (checkDbBool) {
                 val columns = ArrayList<String>().apply {
@@ -385,7 +378,7 @@ class ExportUtil @Inject constructor(
                 try {
                     val cursorAndColumnsPair = when {
                         onlyUnique?.isChecked == true -> {
-                            database.getExportDBDataShort(columns.toTypedArray(), fo.unique_id, exportTrait, fieldId) to arrayListOf(fo.unique_id)
+                            database.getExportDBDataShort(columns.toTypedArray(), fo.uniqueId, exportTrait, fieldId) to arrayListOf(fo.uniqueId)
                         }
                         allColumns?.isChecked == true -> {
                             database.getExportDBData(columns.toTypedArray(), exportTrait, fieldId) to columns
@@ -409,14 +402,14 @@ class ExportUtil @Inject constructor(
 
             if (checkTableBool) {
                 val columns = ArrayList<String>().apply {
-                    if (onlyUnique?.isChecked == true) add(fo.unique_id)
+                    if (onlyUnique?.isChecked == true) add(fo.uniqueId)
                     if (allColumns?.isChecked == true) addAll(database.getAllObservationUnitAttributeNames(fieldId))
                 }
                 Log.d(TAG, "Columns are: " + columns.joinToString())
 
                 val exportDataMethod: () -> Cursor = when {
                     onlyUnique?.isChecked == true -> {
-                        { database.getExportTableDataShort(fieldId, fo.unique_id, exportTrait) }
+                        { database.getExportTableDataShort(fieldId, fo.uniqueId, exportTrait) }
                     }
                     allColumns?.isChecked == true -> {
                         { database.getExportTableData(fieldId, exportTrait) }
@@ -444,18 +437,18 @@ class ExportUtil @Inject constructor(
             spectralFileExporter.exportSpectralFile(fieldId)
 
             database.updateExportDate(fieldId)
-            Log.d(TAG, "Export finished successfully for field ${fo.exp_name}")
-            ExportResult.Success("Export successful for field ${fo.exp_name}")
+            Log.d(TAG, "Export finished successfully for field ${fo.name}")
+            ExportResult.Success("Export successful for field ${fo.name}")
         } catch (e: Exception) {
             val fo = database.getFieldObject(fieldId)
-            Log.e(TAG, "Export failed for field ${fo.exp_name}: ${e.message}", e)
+            Log.e(TAG, "Export failed for field ${fo.name}: ${e.message}", e)
             ExportResult.Failure(e)
         }
     }
 
-    private fun createExportFile(cursor: Cursor, fileType: String, fileString: String, columns: java.util.ArrayList<String>) {
+    private fun createExportFile(cursor: Cursor, fileType: String, fileString: String, columns: ArrayList<String>) {
         val fileName = "${fileString}_$fileType.csv"
-        val exportDir = BaseDocumentTreeUtil.Companion.getDirectory(context, R.string.dir_field_export)
+        val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
 
         val deviceName = preferences.getString(GeneralKeys.DEVICE_NAME, Build.MODEL) ?: Build.MODEL
 
@@ -502,8 +495,8 @@ class ExportUtil @Inject constructor(
     private fun handleBundledFiles(fieldId: Int) {
         val fieldObject = database.getFieldObject(fieldId)
         fieldObject?.let {
-            val studyName = it.exp_name
-            val mediaDir = BaseDocumentTreeUtil.Companion.getFile(context, R.string.dir_plot_data, studyName)
+            val studyName = it.name
+            val mediaDir = BaseDocumentTreeUtil.getFile(context, R.string.dir_plot_data, studyName)
             mediaDir?.let { dir ->
                 if (dir.exists() && dir.isDirectory) {
                     bundleMediaDirectories(studyName, dir)
@@ -526,7 +519,7 @@ class ExportUtil @Inject constructor(
      */
     private fun bundleMediaDirectories(studyName: String, mediaDir: DocumentFile) {
         // sanitize the trait names, this will be compared against already sanitized traitDirectories
-        val traitList: List<String> = exportTrait.map { trait -> com.fieldbook.tracker.utilities.FileUtil.sanitizeFileName(trait.name) }
+        val traitList = exportTrait.map { trait -> FileUtil.sanitizeFileName(trait.name) }
         val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
         val tempDirName = "temp_export_${timeStamp.format(Calendar.getInstance().time)}"
         tempDirectory = exportDir?.createDirectory(tempDirName)
@@ -561,13 +554,13 @@ class ExportUtil @Inject constructor(
     }
 
     private fun createZipFile(files: List<DocumentFile>, fileName: String): DocumentFile? {
-        val exportDir = BaseDocumentTreeUtil.Companion.getDirectory(context, R.string.dir_field_export)
+        val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
         val zipFileName = "${fileName}.zip"
         return exportDir?.let { dir ->
             if (dir.exists()) {
                 val zipFile = dir.createFile("application/zip", zipFileName)
                 zipFile?.let { zf ->
-                    val outputStream = BaseDocumentTreeUtil.Companion.getFileOutputStream(context, R.string.dir_field_export, zipFileName)
+                    val outputStream = BaseDocumentTreeUtil.getFileOutputStream(context, R.string.dir_field_export, zipFileName)
                     outputStream?.let { os ->
                         ZipUtil.Companion.zip(context, files.toTypedArray(), os)
                         zf
@@ -629,7 +622,7 @@ class ExportUtil @Inject constructor(
     }
 
     private fun archivePreviousExport(newFile: DocumentFile) {
-        val exportDir = BaseDocumentTreeUtil.Companion.getDirectory(context, R.string.dir_field_export)
+        val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
         val newFileName = newFile.name ?: return
         Log.d(TAG, "Exported file is $newFileName and overwrite checkbox was checked. Looking for previous exports to archive.")
 
@@ -644,7 +637,7 @@ class ExportUtil @Inject constructor(
 
             // Check if the truncated file name matches and the file name is not exactly the new file name
             if (fileName != newFileName && truncatedFileName == truncatedNewFileName) {
-                val oldDoc = BaseDocumentTreeUtil.Companion.getFile(context, R.string.dir_field_export, fileName)
+                val oldDoc = BaseDocumentTreeUtil.getFile(context, R.string.dir_field_export, fileName)
 
                 if (oldDoc != null) {
                     Log.d(TAG, "Archiving previous version: $fileName")
@@ -665,7 +658,7 @@ class ExportUtil @Inject constructor(
 
 
     private fun archiveFile(file: DocumentFile, newFileName: String) {
-        val archiveDir = BaseDocumentTreeUtil.Companion.getDirectory(context, R.string.dir_archive)
+        val archiveDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_archive)
         if (archiveDir != null && archiveDir.exists()) {
             val archivedFile = copyFileToDirectory(file, archiveDir, newFileName)
             if (archivedFile != null) {
@@ -701,7 +694,7 @@ class ExportUtil @Inject constructor(
      * Scan file to update file list and share exported file
      */
     private fun shareFile(docFile: DocumentFile) {
-        if (preferences.getBoolean(PreferenceKeys.Companion.ENABLE_SHARE, true)) {
+        if (preferences.getBoolean(PreferenceKeys.ENABLE_SHARE, true)) {
             val intent = Intent()
             intent.action = Intent.ACTION_SEND
             intent.type = "text/plain"

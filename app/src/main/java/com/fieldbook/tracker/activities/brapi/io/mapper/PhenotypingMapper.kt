@@ -26,11 +26,11 @@ fun BrAPIObservationVariable.toTraitObject(context: Context) = TraitObject().als
         it.traitDataSource = url
     }
 
-    scale?.validValues?.min?.let { min ->
+    scale?.validValues?.minimumValue?.let { min ->
         it.minimum = min.toString()
     }
 
-    scale?.validValues?.max?.let { max ->
+    scale?.validValues?.maximumValue?.let { max ->
         it.maximum = max.toString()
     }
 

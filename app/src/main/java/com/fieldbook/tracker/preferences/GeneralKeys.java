@@ -1,8 +1,11 @@
 package com.fieldbook.tracker.preferences;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import androidx.annotation.NonNull;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import kotlin.Pair;
 
 public class GeneralKeys {
     // @formatter:off
@@ -49,7 +52,9 @@ public class GeneralKeys {
 
     public static final String GEONAV_CONFIG_DEGREE_PRECISION       = GEONAV_PREFIX + "DEGREE_PRECISION";
   
-    public static final String GEONAV_POPUP_DISPLAY       = GEONAV_PREFIX + "POPUP_DISPLAY";
+    public static final String GEONAV_POPUP_DISPLAY                 = GEONAV_PREFIX + "POPUP_DISPLAY";
+
+    public static final String GEONAV_POPUP_TRAIT                   = GEONAV_PREFIX + "POPUP_TRAIT";
     // @formatter:on
 
     // GNSS
@@ -144,6 +149,7 @@ public class GeneralKeys {
 
     //summary filter
     public static final String SUMMARY_FILTER_ATTRIBUTES = "com.fieldbook.tracker.summary.SUMMARY_FILTER_ATTRIBUTES";
+    public static final String SUMMARY_FILTER_TRAITS = "com.fieldbook.tracker.summary.SUMMARY_FILTER_TRAITS";
 
     //Calendar Trait
     public static final String CALENDAR_LAST_SAVED_DATE = "com.fieldbook.tracker.CALENDAR_LAST_SAVED_DATE";
@@ -228,6 +234,29 @@ public class GeneralKeys {
 
     @NonNull
     public static final String SPECTRAL_MODE = "com.fieldbook.tracker.traits.spectral.MODE";
+
+    @NotNull
+    private static String getDropDownAttributeKey(int index) {
+        return "DROP" + index;
+    }
+
+    @NotNull
+    private static String getDropDownTraitKey(int index) {
+        return "DROP.TRAIT" + index;
+    }
+
+    @NotNull
+    public static String getIsInfoBarWordWrapped(int index) {
+        return "INFOBAR_WORD_WRAP_" + index;
+    }
+
+    @NotNull
+    public static DropDownKeyModel getDropDownKeys(int index) {
+        return new DropDownKeyModel(
+                getDropDownAttributeKey(index),
+                getDropDownTraitKey(index)
+        );
+    }
 
     private GeneralKeys() {
 

@@ -1,5 +1,7 @@
 package com.fieldbook.tracker.objects
 
+import android.database.Cursor
+import com.fieldbook.tracker.database.Migrator.ObservationVariable
 import com.fieldbook.tracker.database.dao.TraitAttributeValuesHelper
 import com.fieldbook.tracker.database.models.TraitAttributes
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
@@ -59,25 +61,6 @@ class TraitObject {
         attributeValues.save()
     }
 
-    fun isValidCategoricalValue(inputCategory: String): Boolean {
-        // Check if it's the new JSON format
-        try {
-            val c = CategoryJsonUtil.decode(inputCategory)
-
-            if (c.isNotEmpty()) {
-                // Get the value from the single-sized array
-                val labelVal = c[0]
-
-                // Check that this pair is a valid label/val pair in the category
-                return CategoryJsonUtil.contains(c, labelVal)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace() // If it fails to decode, assume it's an old string
-        }
-
-        return false
-    }
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || javaClass != other.javaClass) return false
@@ -130,5 +113,39 @@ class TraitObject {
         t.cropImage = this.cropImage
 
         return t
+    }
+
+    fun loadFromCursor(cursor: Cursor) {
+
+        val nameIndex = cursor.getColumnIndex("observation_variable_name")
+        val formatIndex = cursor.getColumnIndex("observation_variable_field_book_format")
+        val defaultValueIndex = cursor.getColumnIndex("default_value")
+        val detailsIndex = cursor.getColumnIndex("observation_variable_details")
+        val idIndex = cursor.getColumnIndex(ObservationVariable.PK)
+        val externalDbIdIndex = cursor.getColumnIndex("external_db_id")
+        val realPositionIndex = cursor.getColumnIndex("position")
+        val visibleIndex = cursor.getColumnIndex("visible")
+        val additionalInfoIndex = cursor.getColumnIndex("additional_info")
+        val traitDataSourceIndex = cursor.getColumnIndex("trait_data_source")
+
+        if (nameIndex == -1 || formatIndex == -1 || defaultValueIndex == -1 ||
+            detailsIndex == -1 || idIndex == -1 || externalDbIdIndex == -1 ||
+            realPositionIndex == -1 || visibleIndex == -1 || additionalInfoIndex == -1 ||
+            traitDataSourceIndex == -1) {
+            return
+        }
+
+        name = cursor.getString(nameIndex) ?: ""
+        format = cursor.getString(formatIndex) ?: ""
+        defaultValue = cursor.getString(defaultValueIndex) ?: ""
+        details = cursor.getString(detailsIndex) ?: ""
+        id = cursor.getString(idIndex) ?: ""
+        externalDbId = cursor.getString(externalDbIdIndex) ?: ""
+        realPosition = cursor.getInt(realPositionIndex)
+        visible = cursor.getString(visibleIndex) == "true"
+        additionalInfo = cursor.getString(additionalInfoIndex) ?: ""
+        traitDataSource = cursor.getString(traitDataSourceIndex) ?: ""
+
+        loadAttributeAndValues()
     }
 }

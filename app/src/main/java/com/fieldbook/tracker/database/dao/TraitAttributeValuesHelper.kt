@@ -73,7 +73,7 @@ class TraitAttributeValuesHelper(var traitId: String? = null) {
                             }
                         }
                     }
-                    Log.d(TAG, "Loaded ${attributeValueMap.size} attributes for trait ID: $traitId")
+                    //Log.d(TAG, "Loaded ${attributeValueMap.size} attributes for trait ID: $traitId")
                 } catch (e: Exception) {
                     Log.e(TAG, "Error loading attributes for trait ID: $traitId", e)
                 }
@@ -100,7 +100,7 @@ class TraitAttributeValuesHelper(var traitId: String? = null) {
                                 val rowsUpdated = ObservationVariableValueDao.update(traitId, attrId.toString(), attributeValue)
 
                                 if (rowsUpdated != null && rowsUpdated == 0) { // if nothing was updated, insert a new value instead
-                                    ObservationVariableValueDao.insertAttributeValue(attributeName, attributeValue, traitId)
+                                    ObservationVariableValueDao.insertAttributeValue(attrId.toString(), attributeValue, traitId)
                                 }
                             }
                         }

@@ -225,8 +225,10 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     }
 
     override fun startSync(field: FieldObject) {
-        val syncDialog = BrapiSyncObsDialog(requireActivity(), this, field)
-        syncDialog.show()
+        activity?.runOnUiThread {
+            val syncDialog = BrapiSyncObsDialog(requireActivity(), this, field)
+            syncDialog.show()
+        }
     }
 
     private fun disableDataChipRipples() {
@@ -280,23 +282,23 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         cardViewSync.visibility = View.GONE
         cardViewSync.setOnClickListener(null)
 
-        fieldDisplayNameTextView.text = field.exp_alias
-        val importDate = field.date_import
+        fieldDisplayNameTextView.text = field.alias
+        val importDate = field.dateImport
         if (!importDate.isNullOrEmpty()) {
             importDateTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), importDate)
         }
 
-        val expSource = field.exp_source ?: "${field.exp_name}.csv"
-        var importFormat: ImportFormat? = field.import_format
-        var entryCount = field.count.toString()
-        val attributeCount = field.attribute_count.toString()
-        val searchAttribute = (field.search_attribute ?: field.unique_id).toString()
+        val expSource = field.dataSource ?: "${field.name}.csv"
+        var importFormat: ImportFormat? = field.dataSourceFormat
+        var entryCount = field.entryCount.toString()
+        val attributeCount = field.attributeCount.toString()
+        val searchAttribute = (field.searchAttribute ?: field.uniqueId).toString()
 
         if (importFormat == ImportFormat.BRAPI) {
             cardViewSync.visibility = View.VISIBLE
             cardViewSync.setOnClickListener {
                 if (preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false)) {
-                    if (BrAPIService.checkMatchBrapiUrl(requireContext(), field.exp_source)) {
+                    if (BrAPIService.checkMatchBrapiUrl(requireContext(), field.dataSource)) {
                         startSync(field)
                     } else {
                         showWrongSourceDialog(field)
@@ -305,10 +307,10 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                     Toast.makeText(context, getString(R.string.brapi_enable_before_sync), Toast.LENGTH_LONG).show()
                 }
             }
-            entryCount = "${entryCount} ${field.observation_level}"
+            entryCount = "${entryCount} ${field.observationLevel}"
 
             trialNameChip.visibility = View.GONE
-            trialNameChip.text = field.trial_name
+            trialNameChip.text = field.trialName
             if (trialNameChip.text.isNotBlank()) {
                 trialNameChip.visibility = View.VISIBLE
             }
@@ -326,31 +328,31 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
 //        editUniqueChip.text = getString(R.string.field_edit_unique_id)
         editUniqueChip.text = searchAttribute
 
-        val lastEdit = field.date_edit
+        val lastEdit = field.dateEdit
         if (!lastEdit.isNullOrEmpty()) {
             lastEditTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastEdit)
         } else {
             getString(R.string.no_activity)
         }
 
-        val lastExport = field.date_export
+        val lastExport = field.dateExport
         if (!lastExport.isNullOrEmpty()) {
             lastExportTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastExport)
         } else {
             getString(R.string.no_activity)
         }
 
-        val lastSync = field.date_sync
+        val lastSync = field.dateSync
         if (!lastSync.isNullOrEmpty()) {
             lastSyncTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastSync)
         } else {
             getString(R.string.no_activity)
         }
 
-        traitCountChip.text = field.trait_count.toString()
-        if (field.observation_count.toInt() > 0) {
+        traitCountChip.text = field.traitCount.toString()
+        if (field.observationCount.toInt() > 0) {
             observationCountChip.visibility = View.VISIBLE
-            observationCountChip.text = field.observation_count.toString()
+            observationCountChip.text = field.observationCount.toString()
         } else {
             observationCountChip.visibility = View.GONE
         }
@@ -405,7 +407,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                     parentFragmentManager.popBackStack()
                 }
                 R.id.delete -> {
-                    (activity as? FieldEditorActivity)?.showDeleteConfirmationDialog(listOf(field.exp_id), true)
+                    (activity as? FieldEditorActivity)?.showDeleteConfirmationDialog(listOf(field.studyId), true)
                 }
             }
 
@@ -416,7 +418,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private fun showWrongSourceDialog(field: FieldObject) {
         val builder = AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
             .setTitle(getString(R.string.brapi_field_non_matching_sources_title))
-            .setMessage(String.format(getString(R.string.brapi_field_non_matching_sources), field.exp_source, BrAPIService.getHostUrl(context)))
+            .setMessage(String.format(getString(R.string.brapi_field_non_matching_sources), field.dataSource, BrAPIService.getHostUrl(context)))
             .setPositiveButton(getString(R.string.dialog_ok)) { d, _ ->
                 d.dismiss()
             }
@@ -430,7 +432,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
 
         val editText = dialogView.findViewById<EditText>(R.id.edit_text)
         val errorMessageView = dialogView.findViewById<TextView>(R.id.error_message)
-        editText.setText(field.exp_alias)
+        editText.setText(field.alias)
 
         val builder = AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
             .setTitle(getString(R.string.field_edit_display_name))
@@ -448,13 +450,13 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                 if (newName.isNotBlank()) {
                     val illegalCharactersMessage = FileUtil.checkForIllegalCharacters(newName)
                     if (illegalCharactersMessage.isEmpty()) {
-                        nameUniquenessCheck(newName, field.exp_id) { result ->
+                        nameUniquenessCheck(newName, field.studyId) { result ->
                             if (result.isUnique) {
                                 CoroutineScope(Dispatchers.IO).launch {
-                                    database.updateStudyAlias(field.exp_id, newName)
+                                    database.updateStudyAlias(field.studyId, newName)
                                     withContext(Dispatchers.Main) {
                                         fieldDisplayNameTextView.text = newName
-                                        field.exp_alias = newName
+                                        field.alias = newName
                                         (activity as? FieldAdapterController)?.queryAndLoadFields()
                                         dialog.dismiss() // Only dismiss if everything is fine
                                     }
@@ -477,7 +479,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     }
 
     private fun showChangeSearchAttributeDialog(field: FieldObject) {
-        (activity as? FieldEditorActivity)?.setActiveField(field.exp_id)
+        (activity as? FieldEditorActivity)?.setActiveField(field.studyId)
         
         val dialog = SearchAttributeChooserDialog()
         dialog.setOnSearchAttributeSelectedListener(object : SearchAttributeChooserDialog.OnSearchAttributeSelectedListener {
@@ -488,7 +490,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                     val count = if (applyToAll) {
                         database.updateSearchAttributeForAllFields(label)
                     } else {
-                        database.updateSearchAttribute(field.exp_id, label)
+                        database.updateSearchAttribute(field.studyId, label)
                         -1 // Use -1 to indicate single field update
                     }
                     
@@ -529,8 +531,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private fun nameUniquenessCheck(newName: String, currentFieldId: Int, callback: (NameCheckResult) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             val result = database.getAllFieldObjects().let { fields ->
-                fields.firstOrNull { it.exp_id != currentFieldId && (it.exp_name == newName || it.exp_alias == newName) }?.let { field ->
-                    val conflictType = if (field.exp_name == newName) "name" else "alias"
+                fields.firstOrNull { it.studyId != currentFieldId && (it.name == newName || it.alias == newName) }?.let { field ->
+                    val conflictType = if (field.name == newName) "name" else "alias"
                     NameCheckResult(isUnique = false, conflictType = conflictType)
                 } ?: NameCheckResult(isUnique = true)
             }
@@ -549,10 +551,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
 
     fun checkTraitsExist(callback: (Int) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
-            val currentSortOrder: String =
-            preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position") ?: ""
 
-            val traits = database.getVisibleTrait(currentSortOrder)
+            val traits = database.getVisibleTraits()
             val result = when {
                 traits.isEmpty() -> {
                     withContext(Dispatchers.Main) {
@@ -585,7 +585,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             )
         }
         if (EasyPermissions.hasPermissions(requireActivity(), *perms)) {
-            if (fieldObject?.date_import?.isNotEmpty() == true) {
+            if (fieldObject?.dateImport?.isNotEmpty() == true) {
                 val intent = Intent(context, CollectActivity::class.java)
                 startActivity(intent)
             }
