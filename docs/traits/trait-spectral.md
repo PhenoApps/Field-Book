@@ -5,11 +5,11 @@
 ## Overview
 
 The spectral trait format is used to capture data from external spectrometers and color sensors.
-This trait format currently supporst [Nix](https://www.nixsensor.com/) color sensors and spectrometers.
+This trait format currently supports [Nix](https://www.nixsensor.com/) color sensors and spectrometers.
 
 Spectral data can be collected in two ways depending on the sensor:
 1. **Color**: captures a hexadecimal representation of the color being scanned 
-2. **Spectral**: collects reflectance data from many wavelenths
+2. **Spectral**: collects reflectance data from many wavelengths
 
 ## Creation
 
@@ -24,7 +24,7 @@ Spectral data can be collected in two ways depending on the sensor:
 ## Connect
 
 Press the connect button to scan for compatible devices.
-The desired device can be selected from the dialog that is dispalyed.
+The desired device can be selected from the dialog that is displayed.
 
 <figure class="image" style="text-align: center">
     <p>
@@ -79,7 +79,7 @@ Only one sensor model may be used for each trait:entry combination.
 | 13RPN00002 | SPECTRO2_spectral_file.csv | nix   |
 
 While color scans are stored as hexadecimal values, spectral scans are stored in a secondary file with the spectral wavelengths as headers and reflectance values in the rows.
-This file can be automatically included in the exported file by exporting with media bundled which will create a folder sctructure similar to below.
+This file can be automatically included in the exported file by exporting with media bundled which will create a folder structure similar to below.
 In this example, the `SPECTRO2_spectral_file.csv` contains the reflectance values for the scans that were collected in `field_sample`.
 
 <figure class="image">
