@@ -9,7 +9,7 @@ data class DropDownKeyModel(
 ) {
 
     companion object {
-        const val DEFAULT_ATTRIBUTE_LABEL = ""
+        const val DEFAULT_ATTRIBUTE_LABEL = "plot_id"
         const val DEFAULT_TRAIT_ID = "-1"
     }
 

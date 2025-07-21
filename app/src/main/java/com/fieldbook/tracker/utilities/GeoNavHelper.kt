@@ -631,14 +631,19 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                                 val tv =
                                     snackView.findViewById<TextView>(R.id.geonav_snackbar_tv)
 
-                                val popupHeader =
+                                var popupHeader =
                                     preferences.getString(GeneralKeys.GEONAV_POPUP_DISPLAY,
                                         DropDownKeyModel.DEFAULT_ATTRIBUTE_LABEL) ?: DropDownKeyModel.DEFAULT_ATTRIBUTE_LABEL
 
-                                val popupTrait = 
+                                var popupTrait =
                                     preferences.getString(GeneralKeys.GEONAV_POPUP_TRAIT, null)?.let {
                                         database.getTraitById(it)
                                     }
+
+                                if (popupHeader.isEmpty()) {
+                                   popupHeader = DropDownKeyModel.DEFAULT_ATTRIBUTE_LABEL
+                                   popupTrait = null
+                                }
 
                                 tv.text = getPopupInfo(id, AttributeModel(popupHeader, trait = popupTrait))
 
