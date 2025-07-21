@@ -184,20 +184,26 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
 
     override fun initializeAdapter() {
         mAdapter = FieldAdapter(this, this, fieldGroupController, false)
-        mAdapter.setOnFieldSelectedListener { fieldId ->
-            val fragment = FieldDetailFragment()
-            val args = Bundle()
-            args.putInt("fieldId", fieldId)
-            fragment.arguments = args
+        mAdapter.setOnFieldActionListener(object : FieldAdapter.OnFieldActionListener {
+            override fun onFieldDetailSelected(fieldId: Int) {
+                val fragment = FieldDetailFragment()
+                val args = Bundle()
+                args.putInt("fieldId", fieldId)
+                fragment.arguments = args
 
-            // Disable touch events on the RecyclerView
-            recyclerView.isEnabled = false
+                // Disable touch events on the RecyclerView
+                recyclerView.isEnabled = false
 
-            supportFragmentManager.beginTransaction()
-                .replace(android.R.id.content, fragment, "FieldDetailFragmentTag")
-                .addToBackStack(null)
-                .commit()
-        }
+                supportFragmentManager.beginTransaction()
+                    .replace(android.R.id.content, fragment, "FieldDetailFragmentTag")
+                    .addToBackStack(null)
+                    .commit()
+            }
+
+            override fun onFieldSetActive(fieldId: Int) {
+                setActiveField(fieldId)
+            }
+        })
         recyclerView.adapter = mAdapter
     }
 
@@ -210,11 +216,7 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
         }
     }
 
-    override fun loadFields(): ArrayList<FieldObject> {
-        db.deleteUnusedStudyGroups()
-
-        return db.allFieldObjects
-    }
+    override fun loadFields(): ArrayList<FieldObject> = db.allFieldObjects
 
     override fun updateMenuItemsForSelectionMode(menu: Menu) {
         // call super to handle common items
@@ -237,15 +239,10 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
         val userHasToggledGrouping =
             mPrefs.getBoolean(GeneralKeys.USER_TOGGLED_FIELD_GROUPING, false)
 
-        groupToggleItem.isVisible = isGroupingPossible // change icon visibility
-
         if (!isGroupingPossible) { // if grouping is not possible, force disable grouping state
             mPrefs.edit {
                 putBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false)
-                putBoolean(
-                    GeneralKeys.USER_TOGGLED_FIELD_GROUPING,
-                    false
-                ) // set user toggle to false since forced
+                putBoolean(GeneralKeys.USER_TOGGLED_FIELD_GROUPING, false) // set user toggle to false since forced
             }
         } else if (!isGroupingEnabled && !userHasToggledGrouping) { // grouping was disabled AND user did not toggle it, enable grouping
             mPrefs.edit { putBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, true) }
@@ -255,14 +252,16 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
 
         isGroupingEnabled = mPrefs.getBoolean(GeneralKeys.FIELD_GROUPING_ENABLED, false)
 
-        // set collapse/expand visibility
-        collapseGroupsItem.isVisible = isGroupingEnabled
-        expandGroupsItem.isVisible = isGroupingEnabled
+        groupToggleItem.setIcon(if (isGroupingEnabled) R.drawable.ic_ungroup else R.drawable.ic_existing_group)
 
         mAdapter.resetFieldsList(fieldList)
 
         if (mAdapter.selectedItemCount > 0) { // in selection mode
             standardMenuItems.forEach { toggleMenuItem(it, false) }
+
+            toggleMenuItem(groupToggleItem, false)
+            toggleMenuItem(collapseGroupsItem, false)
+            toggleMenuItem(expandGroupsItem, false)
 
             toggleMenuItem(groupFieldsItem, true)
             toggleMenuItem(archiveFieldsItem, true)
@@ -270,7 +269,11 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
             toggleMenuItem(helpItem, mPrefs.getBoolean(PreferenceKeys.TIPS, false))
             toggleMenuItem(nearestPlotItem, true)
             toggleMenuItem(sortFieldsItem, true)
+
+            // show these items only if grouping is possible or enabled
             toggleMenuItem(groupToggleItem, isGroupingPossible)
+            toggleMenuItem(collapseGroupsItem, isGroupingEnabled)
+            toggleMenuItem(expandGroupsItem, isGroupingEnabled)
 
             toggleMenuItem(groupFieldsItem, false)
             toggleMenuItem(archiveFieldsItem, false)
@@ -387,24 +390,6 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
         }
 
         sequence.start()
-    }
-
-    fun setActiveField(studyId: Int) {
-        // get current field id and compare the input, only switch if they are different
-        val currentFieldId = mPrefs.getInt(GeneralKeys.SELECTED_FIELD_ID, -1)
-
-        if (currentFieldId == studyId) return
-
-        fieldSwitcher.switchField(studyId)
-        CollectActivity.reloadData = true
-
-        mAdapter.resetFieldsList(fieldList) // reset to update active icon indication
-
-        // Check if this is a BrAPI field and show BrAPI info dialog if so
-        // if (field.getImport_format() == ImportFormat.BRAPI) {
-        //     val brapiInfo = BrapiInfoDialog(this, getResources().getString(R.string.brapi_info_message));
-        //     brapiInfo.show();
-        // }
     }
 
     private fun fieldsListItemLocation(item: Int): Rect {
@@ -620,7 +605,10 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
             for (model in units) {
                 val latlng = model.geo_coordinates
                 if (latlng != null && latlng.isNotEmpty()) {
-                    coordinates.add(model)
+                    val study = db.getFieldObject(model.study_id)
+                    if (study != null && !study.is_archived) { // do not add archived field coordinates
+                        coordinates.add(model)
+                    }
                 }
             }
 
@@ -899,6 +887,8 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
     }
 
     private fun showGroupAssignmentDialog(fieldIds: List<Int>) {
+        db.deleteUnusedStudyGroups()
+
         val allStudyGroups = db.allStudyGroups
         val hasStudyGroups = allStudyGroups != null && allStudyGroups.isNotEmpty()
 
@@ -951,6 +941,7 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
                     }
                     queryAndLoadFields()
                     mAdapter.exitSelectionMode()
+                    db.deleteUnusedStudyGroups()
                 }
             }
         }
@@ -978,6 +969,7 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
                 }
                 mAdapter.exitSelectionMode()
                 queryAndLoadFields()
+                db.deleteUnusedStudyGroups()
             }
             .setNegativeButton(R.string.dialog_cancel) { dialog, _ -> dialog.dismiss() }
             .show()

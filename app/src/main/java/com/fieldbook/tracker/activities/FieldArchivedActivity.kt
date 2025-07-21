@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.activities
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -32,20 +33,26 @@ class FieldArchivedActivity : BaseFieldActivity() {
 
     override fun initializeAdapter() {
         mAdapter = FieldAdapter(this, this, fieldGroupController, true)
-        mAdapter.setOnFieldSelectedListener { fieldId ->
-            val fragment = FieldDetailFragment()
-            val args = Bundle()
-            args.putInt("fieldId", fieldId)
-            fragment.arguments = args
+        mAdapter.setOnFieldActionListener(object : FieldAdapter.OnFieldActionListener {
+            override fun onFieldDetailSelected(fieldId: Int) {
+                val fragment = FieldDetailFragment()
+                val args = Bundle()
+                args.putInt("fieldId", fieldId)
+                fragment.arguments = args
 
-            // Disable touch events on the RecyclerView
-            recyclerView.isEnabled = false
+                // Disable touch events on the RecyclerView
+                recyclerView.isEnabled = false
 
-            supportFragmentManager.beginTransaction()
-                .replace(android.R.id.content, fragment, "FieldDetailFragmentTag")
-                .addToBackStack(null)
-                .commit()
-        }
+                supportFragmentManager.beginTransaction()
+                    .replace(android.R.id.content, fragment, "FieldDetailFragmentTag")
+                    .addToBackStack(null)
+                    .commit()
+            }
+
+            override fun onFieldSetActive(fieldId: Int) {
+                showUnarchiveDialog(fieldId)
+            }
+        })
         recyclerView.adapter = mAdapter
     }
 
@@ -90,5 +97,21 @@ class FieldArchivedActivity : BaseFieldActivity() {
 
         val unarchiveFieldsItem = menu.findItem(R.id.menu_unarchive_fields)
         toggleMenuItem(unarchiveFieldsItem, mAdapter.selectedItemCount > 0)
+    }
+
+    private fun showUnarchiveDialog(fieldId: Int) {
+        AlertDialog.Builder(this, R.style.AppAlertDialog)
+            .setTitle(getString(R.string.dialog_unarchive_field_title))
+            .setMessage(getString(R.string.dialog_unarchive_field_message))
+            .setPositiveButton(getString(R.string.dialog_yes)) { d, _ ->
+                fieldId.let { db.setIsArchived(it, false) }
+                setActiveField(fieldId)
+
+                finish() // go back to field editor
+            }
+            .setNegativeButton(getString(R.string.dialog_no)) { d, _ ->
+                d.dismiss()
+            }
+            .show()
     }
 }

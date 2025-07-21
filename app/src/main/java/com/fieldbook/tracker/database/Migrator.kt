@@ -9,8 +9,8 @@ import androidx.core.content.contentValuesOf
 import androidx.core.database.getBlobOrNull
 import androidx.core.database.getStringOrNull
 import com.fieldbook.tracker.database.migrators.RefactorMigratorVersion13
+import com.fieldbook.tracker.database.migrators.GroupMigratorVersion14
 import com.fieldbook.tracker.database.migrators.SpectralMigratorVersion16
-import com.fieldbook.tracker.database.migrators.StudyGroupMigratorVersion14
 import com.fieldbook.tracker.database.migrators.ObservationVariableAttributeDetailMigratorVersion15
 import com.fieldbook.tracker.objects.TraitObject
 
@@ -395,7 +395,7 @@ class Migrator {
 
         fun migrateToVersion14(db: SQLiteDatabase) {
 
-            StudyGroupMigratorVersion14().migrate(db)
+            GroupMigratorVersion14().migrate(db)
                 .onFailure {
                     Log.e(TAG, "Failed to migrate to version 14", it)
                 }

@@ -119,7 +119,7 @@ To set or switch your active field, press the import source icon on the left sid
 
 If your fields have location data, pressing the <img class="icon" src="_static/icons/fields/compass-outline.png"> icon in the top toolbar will set the nearest active field.
 
-Pressing the <img class="icon" src="_static/icons/fields/sort.png"> icon in the top toolbar will display a dialog with different attributes that can be selected to sort the list of fields.
+Pressing the <img class="icon" src="_static/icons/fields/sort.png"> icon in the top toolbar will display a dialog with different attributes that can be selected to sort the list of fields. If grouping view is enabled, sorting by name will sort both the group headers and the fields within each group by name.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/fields/fields_sort_framed.png" width="350px"> 
@@ -127,12 +127,83 @@ Pressing the <img class="icon" src="_static/icons/fields/sort.png"> icon in the 
 </figure>
 
 For batch operations, long pressing one or more field items opens an action menu on the top toolbar.
-Use the action menu icons to <img class="icon" src="_static/icons/fields/check-all.png"> select all, <img class="icon" src="_static/icons/fields/file-export-outline.png"> export all, or <img class="icon" src="_static/icons/fields/delete.png"> delete all selected fields.
+Use the action menu icons to <img class="icon" src="_static/icons/fields/check-all.png"> select all, <img class="icon" src="_static/icons/fields/file-export-outline.png"> export all, <img class="icon" src="_static/icons/fields/delete.png"> delete all, <img class="icon" src="_static/icons/fields/grouping-options.png"> access the grouping options, or <img class="icon" src="_static/icons/fields/archive.png"> archive all selected fields.
 A confirmation dialog message will be displayed prior to field deletion.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/fields/fields_delete_framed.png" width="350px"> 
   <figcaption class="screenshot-caption"><i>Delete fields confirmation</i></figcaption> 
+</figure>
+
+### Grouping
+
+Fields can be grouped for better organization.
+When grouping is enabled, fields are displayed under expandable group headers in the fields list.
+The number of fields in each group is displayed in parentheses in the group header.
+
+Once a group exists, using the <img class="icon" src="_static/icons/fields/group.png"> grouping on or <img class="icon" src="_static/icons/fields/ungroup.png"> grouping off icon in the toolbar will toggle the organization of fields within groups.
+Use the expand all or collapse all options from the overflow menu to quickly manage the field visibility within each group.
+Individual groups can be expanded or collapsed by tapping the group header.
+Long pressing the group header will expand the group and select all fields within the group.
+
+#### Assigning and managing groups:
+- Select one or more fields with a long press, then tap the <img class="icon" src="_static/icons/fields/grouping-options.png"> grouping options icon.
+- Choose to assign fields to an existing group or create a new group.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/fields/assign_new_group_joined.png" width="1100px"> 
+  <figcaption class="screenshot-caption"><i>Assign a new group</i></figcaption> 
+</figure>
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/fields/assign_existing_group_joined.png" width="1100px"> 
+  <figcaption class="screenshot-caption"><i>Assign an existing group</i></figcaption> 
+</figure>
+
+- Fields imported via BrAPI will automatically be assigned a group with their trial name.
+- Fields can be removed from groups by selecting them and choosing the "Remove from group" option.
+- Groups that do not have any fields assigned to them are automatically deleted.
+- Fields without an assigned group appear under an "Ungrouped" header when grouping is enabled.
+
+### Archiving
+
+Fields that are no longer actively used can be archived to reduce clutter in the main fields list while preserving all data.
+Archived fields cannot be set as the active field, nor will their location data be searched when the <img class="icon" src="_static/icons/fields/compass-outline.png"> icon is pressed to find the nearest field.
+
+#### Archiving and accessing archived fields:
+- Select one or more fields and tap the <img class="icon" src="_static/icons/fields/archive.png"> archive icon. If the currently active field is selected for archiving, a prompt will be displayed to confirm or select which fields to archive.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/fields/archive_active_field_warning.png" width="350px"> 
+  <figcaption class="screenshot-caption"><i>Archive active field warning</i></figcaption> 
+</figure>
+
+- Archived fields are moved to an archived header at the bottom of the fields list which shows the number of archived studies in parentheses.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/fields/archived_header.png" width="350px"> 
+  <figcaption class="screenshot-caption"><i>Archived header</i></figcaption> 
+</figure>
+
+- Tap the archived fields item to view and manage archived studies in a separate screen.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/fields/archived_fields_screen.png" width="350px"> 
+  <figcaption class="screenshot-caption"><i>Archived fields screen</i></figcaption> 
+</figure>
+
+- From the archived screen, fields can be unarchived, exported, or permanently deleted. Unarchived fields return to their original group if they were previously assigned a group.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/fields/archived_screen_options.png" width="350px"> 
+  <figcaption class="screenshot-caption"><i>Archived fields screen batch options</i></figcaption> 
+</figure>
+
+- Since archived fields cannot be set as active, you will be prompted to unarchive the field when trying to set it active.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/fields/archived_field_active.png" width="700px"> 
+  <figcaption class="screenshot-caption"><i>Setting an archived field as active</i></figcaption> 
 </figure>
 
 ## Field details
