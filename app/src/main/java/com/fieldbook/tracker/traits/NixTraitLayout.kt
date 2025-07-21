@@ -66,31 +66,23 @@ class NixTraitLayout : SpectralTraitLayout {
         //check if device is connected to a network, if not show an error message
         //the nix requires internet access to verify license
         if (!isNetworkConnected()) {
-            Toast.makeText(
-                context,
-                R.string.nix_error_no_network,
-                Toast.LENGTH_LONG
-            ).show()
-            return
+            if ((context as CollectActivity).numNixInternetWarnings < 1) {
+                (context as CollectActivity).numNixInternetWarnings++
+                Toast.makeText(
+                    context,
+                    R.string.nix_error_no_network,
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     }
 
     //https://stackoverflow.com/questions/4238921/detect-whether-there-is-an-internet-connection-available-on-android
     private fun isNetworkConnected(): Boolean {
-        var hasWifi = false
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
-        val networkInfo = connectivityManager?.allNetworks ?: return false
-        for (network in networkInfo) {
-            val info = connectivityManager.getNetworkInfo(network)
-            if (info != null && info.isConnected) {
-                when (info.type) {
-                    ConnectivityManager.TYPE_WIFI -> hasWifi = true
-                }
-            }
-        }
-
-        return hasWifi
+        val activeNetworkInfo = connectivityManager?.getActiveNetworkInfo()
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected()
     }
 
     override fun establishConnection(): Boolean {

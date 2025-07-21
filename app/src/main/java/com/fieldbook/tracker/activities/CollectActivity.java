@@ -283,6 +283,8 @@ public class CollectActivity extends ThemedActivity
 
     public Handler myGuiHandler;
 
+    public int numNixInternetWarnings = 0;
+
     private SharedPreferences mPrefs;
 
     /**
