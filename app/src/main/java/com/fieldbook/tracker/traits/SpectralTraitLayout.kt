@@ -21,6 +21,7 @@ import com.fieldbook.tracker.database.models.spectral.SpectralFact
 import com.fieldbook.tracker.devices.spectrometers.Device
 import com.fieldbook.tracker.devices.spectrometers.SpectralFrame
 import com.fieldbook.tracker.devices.spectrometers.Spectrometer
+import com.fieldbook.tracker.devices.spectrometers.Spectrometer.ResultCallback
 import com.fieldbook.tracker.dialogs.SimpleListDialog
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.traits.formats.Formats
@@ -82,6 +83,8 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         controller.getSoundHelper()
     }
 
+    private var lastCapturedEntryId: String = String()
+
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
@@ -130,7 +133,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
         spectralDataList.clear()
 
-        loadSpectralFactsList()
+        loadSpectralFactsList(firstLoad = true)
 
         if (!establishConnection()) {
             setupConnectUi()
@@ -158,7 +161,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         setupConnectButton()
     }
 
-    private fun loadSpectralFactsList() {
+    private fun loadSpectralFactsList(firstLoad: Boolean = false) {
 
         spectralDataList.clear()
 
@@ -178,6 +181,19 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
             withContext(Dispatchers.Main) {
 
                 submitList()
+
+                if (firstLoad) {
+
+                    val index = spectralDataList.size - 1
+
+                    selected = index
+
+                    listOf(recycler, colorRecycler).forEachIndexed { i, r ->
+                        r?.postDelayed({
+                            r.scrollToPosition(index)
+                        }, i*50L)
+                    }
+                }
             }
         }
     }
@@ -211,7 +227,8 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
     override fun capture(
         device: Device,
         entryId: String,
-        traitId: String
+        traitId: String,
+        callback: ResultCallback
     ) {
         TODO("Not yet implemented")
     }
@@ -230,13 +247,18 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
         withContext(Dispatchers.Main) {
 
+
             collectInputView.visibility = GONE
 
             spectralDataList.add(fact)
 
             val index = spectralDataList.indexOf(fact)
 
-            selected = index
+            if (currentRange.uniqueId == lastCapturedEntryId) {
+
+                selected = index
+
+            }
 
             submitList()
 
@@ -280,11 +302,13 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         return null
     }
 
-    protected fun writeSpectralDataToFile(deviceType: String, frame: SpectralFrame): String? {
+    protected fun writeSpectralDataToFile(deviceType: String, frame: SpectralFrame, providesSpectral: Boolean): String? {
 
         getSpectralUri(deviceType)?.let { uri ->
 
-            //bisectAndWriteSpectralData(uri, frame)
+//            if (providesSpectral) {
+//                bisectAndWriteSpectralData(uri, frame)
+//            }
 
             return uri.toString()
         }
@@ -377,6 +401,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
                 devices,
                 devices.mapNotNull { it.displayableName }
             ) { device ->
+                Toast.makeText(context, context.getString(R.string.nix_device_connecting), Toast.LENGTH_SHORT).show()
                 connectDevice(device)
             }
         } else {
@@ -409,7 +434,16 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
             Log.d(TAG, "Capture button clicked")
 
-            capture(device, entryId, traitId)
+            lastCapturedEntryId = entryId
+
+            capture(device, entryId, traitId) { result ->
+
+                if (result) {
+
+                    submitList(submitPlaceholder = true)
+
+                }
+            }
 
             hapticFeedback.vibrate()
 
@@ -419,7 +453,8 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
     private fun submitLinesList(frames: List<SpectralFrame>) {
         val lineData = frames
             .mapIndexed { index, data ->
-                LineGraphSelectableAdapter.LineColorData(
+                if (data.traitId.isEmpty()) LineGraphSelectableAdapter.LineColorData.placeholder()
+                else LineGraphSelectableAdapter.LineColorData(
                     index,
                     if (index == selected) getColor(R.attr.fb_graph_item_selected_color) else getColor(
                         R.attr.fb_graph_item_unselected_color
@@ -437,7 +472,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         return colorResValue.data
     }
 
-    private fun submitList() {
+    private fun submitList(submitPlaceholder: Boolean = false) {
 
         background.launch(Dispatchers.Main) {
 
@@ -451,11 +486,28 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
                 }
                 .filter {
                     it.traitId == currentTrait.id && it.entryId == currentRange.uniqueId
-                }
+                }.toMutableList()
+
+            if (submitPlaceholder) {
+                frames.add(SpectralFrame.placeholder())
+            } else {
+                frames.removeIf { it.traitId.isEmpty() }
+            }
 
             when (state) {
-                State.Spectral -> submitSpectralList(frames)
+                State.Spectral -> submitSpectralList(frames, submitPlaceholder)
                 State.Color -> submitColorList(frames)
+            }
+
+            if (submitPlaceholder) {
+
+                val index = frames.size - 1
+
+                listOf(recycler, colorRecycler).forEachIndexed { i, r ->
+                    r?.postDelayed({
+                        r.scrollToPosition(index)
+                    }, i*50L)
+                }
             }
 
             controller.updateNumberOfObservations()
@@ -463,9 +515,9 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         }
     }
 
-    private fun submitSpectralList(frames: List<SpectralFrame>) {
+    private fun submitSpectralList(frames: List<SpectralFrame>, submitPlaceholder: Boolean = false) {
 
-        if (frames.isEmpty()) {
+        if (frames.isEmpty() && !submitPlaceholder) {
             lineChart?.visibility = GONE
             recycler?.visibility = GONE
         } else {
@@ -485,7 +537,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
                 it.traitId == currentTrait.id && it.entryId == currentRange.uniqueId
             }
 
-        if (frames.isEmpty()) {
+        if (frames.isEmpty() && !submitPlaceholder) {
             lineChart?.visibility = GONE
             recycler?.visibility = GONE
         } else {
@@ -520,7 +572,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
         lineChart!!.invalidate()
 
-        submitLinesList(frames)
+        submitLinesList(if (submitPlaceholder) frames + SpectralFrame.placeholder() else frames)
     }
 
     private fun submitColorList(frames: List<SpectralFrame>) {
@@ -531,7 +583,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
             colorRecycler?.visibility = VISIBLE
         }
 
-        (colorRecycler?.adapter as? ColorAdapter)?.submitList(frames.map { it.color })
+        (colorRecycler?.adapter as? ColorAdapter)?.submitList(frames.map { if (it.traitId.isEmpty()) "-1" else it.color })
     }
 
     private fun interpolate(
@@ -573,7 +625,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
         background.launch(Dispatchers.Main) {
 
-            progressBar?.visibility = if (flag) VISIBLE else INVISIBLE
+            //progressBar?.visibility = if (flag) VISIBLE else INVISIBLE
 
         }
     }

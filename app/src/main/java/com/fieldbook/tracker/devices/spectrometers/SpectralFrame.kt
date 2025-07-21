@@ -31,4 +31,18 @@ data class SpectralFrame(
     fun getValueList(): List<Float> {
         return values.split(" ").map { it.toFloat() }
     }
+
+    companion object {
+
+        fun placeholder(): SpectralFrame {
+            return SpectralFrame(
+                values = "",
+                wavelengths = "",
+                color = "#000000", // Default color
+                timestamp = "",
+                entryId = "",
+                traitId = ""
+            )
+        }
+    }
 }

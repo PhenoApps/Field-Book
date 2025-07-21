@@ -302,7 +302,9 @@ class ObservationUnitPropertyDao {
                 val requiredTraits = traits.map { it.name }.toTypedArray()
                 val requiredColumns = arrayOf(uniqueName) + requiredTraits
                 val matrixCursor = MatrixCursor(requiredColumns)
-                val traitStartIndex = cursor.columnCount - requiredTraits.size
+
+                //subtract one for the additional field book format for the value processor
+                val traitStartIndex = cursor.columnCount - requiredTraits.size - 1
 
                 while (cursor.moveToNext()) {
 

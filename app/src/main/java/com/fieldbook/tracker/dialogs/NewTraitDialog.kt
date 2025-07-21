@@ -217,16 +217,7 @@ class NewTraitDialog(
 
         positiveBtn?.setText(R.string.dialog_save)
         positiveBtn?.setOnClickListener {
-            if (format == Formats.INNO_SPECTRA) {
-                //TODO remove when added InnoSpectra Trait
-                Toast.makeText(
-                    context,
-                    R.string.not_yet_implemented,
-                    Toast.LENGTH_SHORT
-                ).show()
-            } else {
-                onSave(format)
-            }
+            onSave(format)
         }
 
         setupParametersLinearLayout(format)

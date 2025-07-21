@@ -1,9 +1,13 @@
 package com.fieldbook.tracker.adapters.spectral
 
+import android.content.Context
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.DiffUtil
@@ -33,10 +37,21 @@ class ColorAdapter(private val listener: Listener) : ListAdapter<String, ColorAd
 
         with(currentList[position]) {
             holder.itemView.tag = this
-            holder.colorView.setBackgroundColor(this.toColorInt())
-            holder.hexCodeText.text = this
-            holder.closeButton.setOnClickListener {
-                listener.onColorDeleted(position)
+            if (this == "-1") {
+                holder.hexCodeText.text = (listener as? Context)?.getString(R.string.loading) ?: ""
+                holder.progressBar.visibility = View.VISIBLE
+                holder.imageView.visibility = View.VISIBLE
+                holder.closeButton.visibility = View.GONE
+                holder.colorView.setBackgroundColor(Color.BLACK)
+            } else {
+                holder.progressBar.visibility = View.GONE
+                holder.imageView.visibility = View.GONE
+                holder.closeButton.visibility = View.VISIBLE
+                holder.colorView.setBackgroundColor(this.toColorInt())
+                holder.hexCodeText.text = this
+                holder.closeButton.setOnClickListener {
+                    listener.onColorDeleted(position)
+                }
             }
         }
     }
@@ -49,6 +64,8 @@ class ColorAdapter(private val listener: Listener) : ListAdapter<String, ColorAd
         var colorView: View = v.findViewById(R.id.color_preview)
         var hexCodeText: TextView = v.findViewById(R.id.color_hex_text)
         var closeButton: ImageButton = v.findViewById(R.id.close_btn)
+        var progressBar: ProgressBar = v.findViewById(R.id.progress_bar)
+        var imageView: ImageView = v.findViewById(R.id.image_view)
     }
 
     class DiffCallback : DiffUtil.ItemCallback<String>() {

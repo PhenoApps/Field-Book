@@ -288,6 +288,8 @@ public class CollectActivity extends ThemedActivity
 
     public Handler myGuiHandler;
 
+    public int numNixInternetWarnings = 0;
+
     private SharedPreferences mPrefs;
 
     /**
@@ -1201,8 +1203,6 @@ public class CollectActivity extends ThemedActivity
 
         traitLayouts.unregisterAllReceivers();
 
-        nixSensorHelper.disconnect();
-
         super.onPause();
     }
 
@@ -1225,6 +1225,8 @@ public class CollectActivity extends ThemedActivity
         getTraitLayout().onExit();
 
         traitLayoutRefresh();
+
+        //nixSensorHelper.disconnect();
 
         usbCameraApi.onDestroy();
 
