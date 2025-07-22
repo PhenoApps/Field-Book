@@ -248,7 +248,7 @@ class ObservationUnitPropertyDao {
             val orderByClause = getSortOrderClause(context, studyId.toString())
             //                SELECT units.internal_id_observation_unit AS id, $combinedSelection
             val query = """
-                SELECT $combinedSelection
+                SELECT $combinedSelection, observation_variable_field_book_format
                 FROM observation_units AS units
                 LEFT JOIN observation_units_values AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
                 LEFT JOIN observation_units_attributes AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
@@ -267,8 +267,8 @@ class ObservationUnitPropertyDao {
                     val row = mutableListOf<String?>()
                     for (i in 0 until cursor.columnCount) {
                         val columnName = cursor.getColumnName(i)
-                        val value = cursor.getStringOrNull(i) ?: ""
-                        if (columnName in traitNames) {
+                        val value = cursor.getStringOrNull(i)
+                        if (value != null && columnName in traitNames) {
                             // Process trait values using the processor
                             val format = cursor.getStringOrNull(cursor.getColumnIndex("observation_variable_field_book_format")) ?: ""
                             row.add(processor.processValue(value, format))
@@ -320,9 +320,9 @@ class ObservationUnitPropertyDao {
 
                         try {
 
-                            rowData.add(
-                                cursor.getStringOrNull(index + traitStartIndex)
-                            )
+                            val obsValue = cursor.getStringOrNull(index + traitStartIndex)
+
+                            rowData.add(obsValue)
 
                         } catch (e: Exception) {
 

@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.views
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.database.Cursor
 import android.os.Handler
 import android.text.Editable
@@ -9,7 +8,6 @@ import android.text.TextWatcher
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
-import android.view.View.OnTouchListener
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -371,7 +369,7 @@ class RangeBoxView : ConstraintLayout {
 
             // Refresh onscreen controls
             updateCurrentRange(rangeID[paging - 1])
-            saveLastPlot()
+            saveLastPlotAndTrait()
             if (cRange.uniqueId.isEmpty()) return
             if (controller.getPreferences().getBoolean(PreferenceKeys.PRIMARY_SOUND, false)) {
                 if (cRange.primaryId != lastRange && lastRange != "") {
@@ -478,10 +476,14 @@ class RangeBoxView : ConstraintLayout {
         rangeRight.performClick()
     }
 
-    fun saveLastPlot() {
-        val ed: SharedPreferences.Editor = controller.getPreferences().edit()
-        ed.putString(GeneralKeys.LAST_PLOT, cRange.uniqueId)
-        ed.apply()
+    fun saveLastPlotAndTrait() {
+        controller.getPreferences().edit {
+            putString(GeneralKeys.LAST_PLOT, cRange.uniqueId)
+            putString(
+                GeneralKeys.LAST_USED_TRAIT,
+                (controller.getTraitBox().currentTrait?.id ?: 0).toString()
+            )
+        }
     }
 
     private fun createTextWatcher(type: String): TextWatcher {
