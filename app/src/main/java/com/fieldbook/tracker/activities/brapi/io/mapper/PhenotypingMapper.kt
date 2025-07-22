@@ -17,7 +17,7 @@ fun BrAPIObservationVariable.toTraitObject(context: Context) = TraitObject().als
 
     val synonym = synonyms?.firstOrNull()
 
-    it.defaultValue = defaultValue
+    it.defaultValue = defaultValue ?: ""
     it.name = synonym ?: observationVariableName
     it.details = trait.traitDescription
     it.externalDbId = observationVariableDbId

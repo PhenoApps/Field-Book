@@ -34,10 +34,11 @@ import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.fragments.ImportDBFragment;
 import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.AppLanguageUtil;
-import com.fieldbook.tracker.utilities.ExportUtil;
+import com.fieldbook.tracker.utilities.export.ExportUtil;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.OldPhotosMigrator;
 import com.fieldbook.tracker.utilities.PersonNameManager;
@@ -385,14 +386,13 @@ public class ConfigActivity extends ThemedActivity {
      */
     private int checkTraitsExist() {
 
-        String currentSortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
-        String[] traits = database.getVisibleTrait(currentSortOrder);
+        ArrayList<TraitObject> traits = database.getVisibleTraits();
 
         if (!preferences.getBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)
                 || preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1) == -1) {
             Utils.makeToast(getApplicationContext(), getString(R.string.warning_field_missing));
             return -1;
-        } else if (traits.length == 0) {
+        } else if (traits.isEmpty()) {
             Utils.makeToast(getApplicationContext(), getString(R.string.warning_traits_missing));
             return -1;
         }
@@ -428,7 +428,7 @@ public class ConfigActivity extends ThemedActivity {
 
         int studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
 
-        int newStudyId = f.getExp_id();
+        int newStudyId = f.getStudyId();
 
         if (studyId != newStudyId) {
 
@@ -453,7 +453,7 @@ public class ConfigActivity extends ThemedActivity {
         int selectedField = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
         FieldObject field = database.getFieldObject(selectedField);
 
-        if (field != null && field.getDate_import() != null && !field.getDate_import().isEmpty()) {
+        if (field != null && field.getDateImport() != null && !field.getDateImport().isEmpty()) {
             Intent intent = new Intent(this, CollectActivity.class);
             startActivity(intent);
         }
@@ -467,7 +467,7 @@ public class ConfigActivity extends ThemedActivity {
         // first, search to try and match study alias
         for (FieldObject f : fields) {
 
-            if (f != null && f.getExp_alias() != null && f.getExp_alias().equals(barcode)) {
+            if (f != null && f.getAlias() != null && f.getAlias().equals(barcode)) {
 
                 return f;
 
@@ -477,7 +477,7 @@ public class ConfigActivity extends ThemedActivity {
         // second, if field is not found search for study name
         for (FieldObject f : fields) {
 
-            if (f != null && f.getExp_name() != null && f.getExp_name().equals(barcode)) {
+            if (f != null && f.getName() != null && f.getName().equals(barcode)) {
 
                 return f;
 
@@ -714,7 +714,7 @@ public class ConfigActivity extends ThemedActivity {
 
             if (fs.length > 0) {
 
-                switchField(fs[0].getExp_id());
+                switchField(fs[0].getStudyId());
             }
 
         } catch (Exception e) {

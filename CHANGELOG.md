@@ -8,10 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Nix hardware sensors now supported as a new Spectral trait type
+- Fields can now be grouped and archived
 
 ### Changed
 
 ### Fixed
+- Image file name sanitation now removes or replaces more characters
 
 ## [v6.2.5] - 2025-06-23
 

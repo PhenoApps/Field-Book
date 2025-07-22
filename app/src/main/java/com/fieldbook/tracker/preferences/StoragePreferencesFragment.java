@@ -24,7 +24,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.documentfile.provider.DocumentFile;
-import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
@@ -43,13 +42,10 @@ import com.fieldbook.tracker.utilities.ZipUtil;
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.UUID;
@@ -258,7 +254,7 @@ public class StoragePreferencesFragment extends PreferenceFragmentCompat impleme
 
                 if (fs.length > 0) {
 
-                    switchField(fs[0].getExp_id());
+                    switchField(fs[0].getStudyId());
                 }
 
             } catch (Exception e) {

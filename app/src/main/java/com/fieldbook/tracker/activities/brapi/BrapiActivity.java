@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.activities.brapi;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -53,6 +54,10 @@ public class BrapiActivity extends ThemedActivity {
     private BrapiObservationLevel selectedObservationLevel;
 
     private BrapiAuthDialogFragment brapiAuth = new BrapiAuthDialogFragment().newInstance();
+
+    public static Intent getIntent(Context context) {
+        return new Intent(context, BrapiActivity.class);
+    }
 
     @Override
     public void onDestroy() {
