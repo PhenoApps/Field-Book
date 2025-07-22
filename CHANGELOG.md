@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- Observation Variable Name is now searchable in the BrAPI trait importer
 - Image file name sanitation now removes or replaces more characters
 
 ## [v6.2.5] - 2025-06-23
