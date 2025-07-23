@@ -80,6 +80,7 @@
     <!-- Changelog -->
     <string name="changelog_title">Registro de Cambios</string>
     <!--  Field Grouping  -->
+    <string name="group_archived_value">Archivado</string>
     <string name="group_archive">Archivar</string>
     <string name="menu_archive">Archivar</string>
     <!-- FIELDS -->
@@ -1251,4 +1252,21 @@
     <string name="nearby_share_export_preferences">Exportar Preferencias</string>
     <string name="nearby_share_import_preferences">Importar Preferencias</string>
     <string name="usb_device_description">USB</string>
+    <string name="view_trait_nix_settings_battery_level">Nivel de Batería: %s</string>
+    <string name="view_trait_nix_settings_rssi">RSSI: %s</string>
+    <string name="view_trait_nix_settings_type">Tipo: %s</string>
+    <string name="view_trait_nix_settings_factory_note">Nota de Fábrica: %s</string>
+    <string name="view_trait_nix_settings_serial_number">Número de Serie: %s</string>
+    <string name="view_trait_nix_settings_firmware_version">Versión del Firmware: %s</string>
+    <string name="view_trait_nix_settings_software_version">Versión del Software: %s</string>
+    <string name="view_trait_nix_settings_external_power_state">Estado de Energía Externa: %s</string>
+    <string name="nix_error_internal">Error Interno de Nix</string>
+    <string name="nix_error_invalid_hardware_id">Hardware ID inválida</string>
+    <string name="nix_error_bluetooth_permissions">Debe aceptar permisos de bluetooth o intentar reiniciar la aplicación.</string>
+    <string name="nix_error_bluetooth_unavailable">Bluetooth no está disponible.</string>
+    <string name="nix_error_bluetooth_disabled">Bluetooth está desactivado en el dispositivo.</string>
+    <string name="list_item_color_placeholder_content_description">Marcador de posición para un nuevo escaneo</string>
+    <string name="loading">Cargando</string>
+    <string name="nix_error_no_network">Nix puede necesitar internet para funcionar correctamente.</string>
+    <string name="import_runnable_field_name_exists">El nombre del Campo ya existe.</string>
 </resources>
