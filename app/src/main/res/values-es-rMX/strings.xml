@@ -92,6 +92,17 @@
     <string name="dialog_group_name_warning">Este campo no puede estar en blanco</string>
     <string name="menu_group">Grupo</string>
     <string name="menu_archive">Archivar</string>
+    <string name="menu_groups_toggle">Alternar Visibilidad de Grupos</string>
+    <string name="group_toggle_icon">Alternar Grupo</string>
+    <string name="archived_fields">Campos Archivados</string>
+    <string name="menu_unarchive">Eliminar del archivo</string>
+    <string name="menu_collapse_all">Contraer Todo</string>
+    <string name="menu_expand_all">Expandir Todo</string>
+    <string name="archive_active_field_title">¿Archivar Campo Activo?</string>
+    <string name="archive_active_field_message">Ha seleccionado el campo activo para archivar. Si continúa, no habrá ningún campo activo. ¿Desea continuar?</string>
+    <string name="archive_others">Archivar Otros</string>
+    <string name="dialog_unarchive_field_title">¿Desarchivar Campo?</string>
+    <string name="dialog_unarchive_field_message">Este campo está actualmente archivado. Si continúa, este campo será desarchivado y se convertirá en el campo activo. ¿Desea continuar?</string>
     <!-- FIELDS -->
     <!-- General -->
     <string name="menu_fields_sort_list">Ordenar Lista de Campos</string>
@@ -259,6 +270,9 @@
     <string name="traits_format_usb_camera">Cámara USB</string>
     <string name="traits_format_go_pro_camera">GoPro</string>
     <string name="traits_format_angle">Ángulo</string>
+    <string name="traits_format_spectral">Espectral</string>
+    <string name="traits_format_nix">Nix</string>
+    <string name="traits_format_inno_spectra">InnoSpectra</string>
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Formato de Variable</string>
     <string name="trait_creator_title_layout">Diseño de Variable</string>
@@ -1136,6 +1150,12 @@
     <string name="dialog_brapi_filter_choices_title">Filtrar por</string>
     <!-- spectral trait strings -->
     <string name="trait_spectral_connect_content_description">Inicia una conexión de dispositivo.</string>
+    <string name="select_device">Seleccionar Dispositivo</string>
+    <string name="no_devices_found">Ningún Dispositivo encontrado</string>
+    <string name="list_item_color_close_content_description">Eliminar este color</string>
+    <string name="delete_color">Eliminar Observación Color</string>
+    <string name="delete_color_message">Esto eliminará permanentemente la observación</string>
+    <string name="nix_device_connecting">El dispositivo se está conectando.</string>
     <string name="brapi_studies_filter_title">Estudios</string>
     <string name="brapi_trials_filter_title">Ensayos</string>
     <string name="brapi_filter_dialog_title">Filtrar por</string>
@@ -1260,9 +1280,18 @@
     <string name="preferences_preferences_title">Preferencias</string>
     <string name="nearby_share_export_preferences">Exportar Preferencias</string>
     <string name="nearby_share_import_preferences">Importar Preferencias</string>
+    <string name="all_fields_processed">Todos los campos procesados</string>
+    <string name="spectral_trait_insert_note">Nota</string>
+    <string name="spectral_trait_insert_note_message">Escriba una nota para la entrada elegida.</string>
+    <string name="trait_spectral_na_content_description">valor de marcador de posición no aplicable</string>
+    <string name="act_collect_barcode_spectral">La captura de datos espectrales a través de la entrada de código de barras no está soportada en este momento.</string>
+    <string name="replace_observations">Eliminar y Reemplazar</string>
+    <string name="replace_observations_message">Las observaciones ya existen, ¿desea eliminarlas e insertar un valor NA?</string>
     <string name="usb_device_description">USB</string>
+    <string name="not_yet_implemented">Esta característica aún no está implementada.</string>
     <string name="view_trait_nix_color_option">Color</string>
     <string name="view_trait_nix_spectral_option">Espectral</string>
+    <string name="nix_trait_settings_title">Ajustes de %s</string>
     <string name="disconnect">Desconectar</string>
     <string name="nix_device_incompatible">Este dispositivo es incompatible, un tipo de dispositivo anterior ya ha guardado datos.</string>
     <string name="nix_error_unknown">"Se ha producido un error desconocido de Nix. "</string>
