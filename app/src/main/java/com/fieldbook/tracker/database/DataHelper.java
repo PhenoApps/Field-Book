@@ -1445,7 +1445,7 @@ public class DataHelper {
 
             ArrayList<TraitObject> list = new ArrayList<>();
 
-            Cursor cursor = db.query(TRAITS, new String[]{"id", "trait", "format", "defaultValue",
+            Cursor cursor = db.query(TRAITS, new String[]{"internal_id_observation_variable", "trait", "format", "defaultValue",
                             "minimum", "maximum", "details", "categories", "isVisible", "realPosition"},
                     null, null, null, null, "realPosition"
             );
