@@ -4,6 +4,8 @@ import android.app.AlertDialog
 import android.content.Context
 import android.net.ConnectivityManager
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.util.AttributeSet
 import android.util.Log
 import android.widget.Toast
@@ -23,6 +25,7 @@ import com.fieldbook.tracker.views.NixTraitSettingsView
 import com.nixsensor.universalsdk.CommandStatus
 import com.nixsensor.universalsdk.DeviceState
 import com.nixsensor.universalsdk.IDeviceCompat
+import com.nixsensor.universalsdk.IDeviceScanner
 import com.nixsensor.universalsdk.IMeasurementData
 import com.nixsensor.universalsdk.OnDeviceResultListener
 import com.nixsensor.universalsdk.ReferenceWhite
@@ -178,23 +181,17 @@ class NixTraitLayout : SpectralTraitLayout {
             return
         }
 
-        with((context as CollectActivity)) {
+        if (IDeviceScanner.isBluetoothPermissionGranted(context)) {
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            startSearch()
+
+        } else {
+
+            with((context as CollectActivity)) {
+
                 getSecurityChecker().withPermission(
-                    arrayOf(
-                        "android.permission.BLUETOOTH_SCAN",
-                        "android.permission.BLUETOOTH_CONNECT",
-                        "android.permission.BLUETOOTH_ADVERTISE"
-                    )
+                    IDeviceScanner.requiredBluetoothPermissions
                 ) {
-                    startSearch()
-                }
-            } else {
-                getSecurityChecker().withPermission(
-                    arrayOf(
-                        "android.permission.BLUETOOTH",
-                    )) {
                     startSearch()
                 }
             }
@@ -203,18 +200,28 @@ class NixTraitLayout : SpectralTraitLayout {
 
     private fun startSearch() {
 
-        controller.getNixSensorHelper().search {
+        if (IDeviceScanner.isBluetoothPermissionGranted(context)) {
 
-            if (!it) {
+            controller.getNixSensorHelper().search {}
 
-                recursionCount++
+        } else {
 
-                if (recursionCount > SEARCH_RECURSION_LIMIT) {
-                    collectActivity.finish()
-                }
+            recursionCount++
 
-                checkPermissionAndStartSearch()
+            if (recursionCount > SEARCH_RECURSION_LIMIT) {
+                Toast.makeText(
+                    context,
+                    R.string.nix_error_bluetooth_permissions,
+                    Toast.LENGTH_SHORT
+                ).show()
+                return
+            } else {
 
+                Handler(Looper.getMainLooper()).postDelayed(
+                    {
+                        checkPermissionAndStartSearch()
+                    }, 1000
+                )
             }
         }
     }
