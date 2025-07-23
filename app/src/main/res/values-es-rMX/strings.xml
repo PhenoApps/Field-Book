@@ -89,6 +89,8 @@
     <string name="group_remove">Eliminar del grupo</string>
     <string name="create_new_group">Crear Nuevo Grupo</string>
     <string name="dialog_group_name">Nombre del Grupo</string>
+    <string name="dialog_group_name_warning">Este campo no puede estar en blanco</string>
+    <string name="menu_group">Grupo</string>
     <string name="menu_archive">Archivar</string>
     <!-- FIELDS -->
     <!-- General -->
@@ -1259,6 +1261,17 @@
     <string name="nearby_share_export_preferences">Exportar Preferencias</string>
     <string name="nearby_share_import_preferences">Importar Preferencias</string>
     <string name="usb_device_description">USB</string>
+    <string name="view_trait_nix_color_option">Color</string>
+    <string name="view_trait_nix_spectral_option">Espectral</string>
+    <string name="disconnect">Desconectar</string>
+    <string name="nix_device_incompatible">Este dispositivo es incompatible, un tipo de dispositivo anterior ya ha guardado datos.</string>
+    <string name="nix_error_unknown">"Se ha producido un error desconocido de Nix. "</string>
+    <string name="nix_error_license">Hubo un problema con su licencia de Nix o conexión a Internet.</string>
+    <string name="nix_error_ambient_light">Se ha detectado demasiada luz ambiente.</string>
+    <string name="nix_error_timeout">Ha ocurrido un error de tiempo de espera.</string>
+    <string name="nix_error_low_power">La batería esta demasiado baja para escanear.</string>
+    <string name="nix_error_scan_not_supported">Este escaneo no está soportado por el dispositivo.</string>
+    <string name="nix_error_not_ready">El dispositivo no está listo.</string>
     <string name="view_trait_nix_settings_battery_level">Nivel de Batería: %s</string>
     <string name="view_trait_nix_settings_rssi">RSSI: %s</string>
     <string name="view_trait_nix_settings_type">Tipo: %s</string>
