@@ -81,7 +81,14 @@
     <string name="changelog_title">Registro de Cambios</string>
     <!--  Field Grouping  -->
     <string name="group_archived_value">Archivado</string>
+    <string name="fields_ungrouped">Desagrupado</string>
+    <string name="dialog_group_options">Opciones de Agrupamiento</string>
+    <string name="group_existing">Grupo existente</string>
     <string name="group_archive">Archivar</string>
+    <string name="group_new">Nuevo grupo</string>
+    <string name="group_remove">Eliminar del grupo</string>
+    <string name="create_new_group">Crear Nuevo Grupo</string>
+    <string name="dialog_group_name">Nombre del Grupo</string>
     <string name="menu_archive">Archivar</string>
     <!-- FIELDS -->
     <!-- General -->
