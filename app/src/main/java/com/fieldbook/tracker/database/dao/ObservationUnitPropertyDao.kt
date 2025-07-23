@@ -364,9 +364,11 @@ class ObservationUnitPropertyDao {
                 )
             }
 
+            if (select.isEmpty() && maxStatements.isEmpty()) return@withDatabase null
+
             val query = """
-                SELECT $select,
-                ${maxStatements.joinToString(",\n")}
+                SELECT ${if (select.isNotEmpty()) select else "props.id"}
+                ${if (maxStatements.isNotEmpty()) maxStatements.joinToString(",\n", ",") else String()}
                 FROM ObservationUnitProperty as props
                 LEFT JOIN observations o ON props.`${uniqueName}` = o.observation_unit_id AND o.${Study.FK} = $studyId
                 LEFT JOIN ${ObservationVariable.tableName} AS vars ON vars.${ObservationVariable.PK} = o.${ObservationVariable.FK}
