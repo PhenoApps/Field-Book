@@ -147,7 +147,11 @@ class ObservationUnitPropertyDao {
                     cursor.addRow(fieldList.map { row[it] } + traitRequiredFields.map {
                         when (it) {
                             "trait" -> row["observation_variable_name"]
-                            "userValue" -> CategoryJsonUtil.processValue(row)
+                            "userValue" -> {
+                                val value = row["value"]
+                                val format = row["observation_variable_field_book_format"]
+                                processor.processValue(value.toString(), format.toString())
+                            }
                             "timeTaken" -> row["observation_time_stamp"]
                             "person" -> row["collector"]
                             "location" -> row["geo_coordinates"]
@@ -270,8 +274,14 @@ class ObservationUnitPropertyDao {
                         val value = cursor.getStringOrNull(i)
                         if (value != null && columnName in traitNames) {
                             // Process trait values using the processor
-                            val format = cursor.getStringOrNull(cursor.getColumnIndex("observation_variable_field_book_format")) ?: ""
-                            row.add(processor.processValue(value, format))
+                            // must get obs trait by name here since the table query has multiple traits per row
+                            val trait = ObservationVariableDao.getTraitByName(columnName)
+                            if (trait == null) {
+                                Log.w("getExportTableData", "Trait not found for column: $columnName")
+                                row.add(value)
+                                continue
+                            }
+                            row.add(processor.processValue(value, trait.format))
                         } else {
                             row.add(value)
                         }

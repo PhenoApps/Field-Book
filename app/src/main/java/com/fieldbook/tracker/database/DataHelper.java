@@ -96,8 +96,6 @@ public class DataHelper {
     private final SpectralRepository proto = new SpectralRepository(spectralDao, protocolDao, deviceDao, uriDao);
     private final SpectralFileProcessor spectralFileProcessor = new SpectralFileProcessor(proto);
 
-    private ValueProcessorFormatAdapter processor;
-
     private SearchQueryBuilder queryBuilder;
 
     private final GroupDao studyGroupDao = new GroupDao(GroupsTable.Type.STUDY);
@@ -118,8 +116,6 @@ public class DataHelper {
                     Locale.getDefault());
 
             missingPhoto = BitmapFactory.decodeResource(context.getResources(), R.drawable.trait_photo_missing);
-
-            processor = new ValueProcessorFormatAdapter(context, spectralFileProcessor);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -547,6 +543,9 @@ public class DataHelper {
     public Cursor getExportDBData(String[] fieldList, ArrayList<TraitObject> traits, int fieldId) {
 
         open();
+
+        ValueProcessorFormatAdapter processor = new ValueProcessorFormatAdapter(context, spectralFileProcessor);
+
         return ObservationUnitPropertyDao.Companion.getExportDbData(
                 context, fieldId, fieldList, traits, processor);
 
@@ -558,6 +557,9 @@ public class DataHelper {
     public Cursor getExportDBDataShort(String[] fieldList, String uniqueId, ArrayList<TraitObject> traits, int fieldId) {
 
         open();
+
+        ValueProcessorFormatAdapter processor = new ValueProcessorFormatAdapter(context, spectralFileProcessor);
+
         return ObservationUnitPropertyDao.Companion.getExportDbDataShort(
                 context, fieldId, fieldList, uniqueId, traits, processor);
 
@@ -585,6 +587,9 @@ public class DataHelper {
     public Cursor getExportTableDataShort(int fieldId,  String uniqueId, ArrayList<TraitObject> traits) {
 
         open();
+
+        ValueProcessorFormatAdapter processor = new ValueProcessorFormatAdapter(context, spectralFileProcessor);
+
         return ObservationUnitPropertyDao.Companion.getExportTableDataShort(context, fieldId, uniqueId, traits, processor);
 
     }
@@ -592,6 +597,9 @@ public class DataHelper {
     public Cursor getExportTableData(int fieldId, ArrayList<TraitObject> traits) {
 
         open();
+
+        ValueProcessorFormatAdapter processor = new ValueProcessorFormatAdapter(context, spectralFileProcessor);
+
         return ObservationUnitPropertyDao.Companion.getExportTableData(context, fieldId, traits, processor);
 
     }
