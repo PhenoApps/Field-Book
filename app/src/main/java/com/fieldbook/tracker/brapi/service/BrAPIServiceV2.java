@@ -1242,7 +1242,9 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
     private BrAPIObservation convertToBrAPIObservation(Observation observation) {
         BrAPIObservation newObservation = new BrAPIObservation();
-        newObservation.setCollector(observation.getCollector().trim());
+        String collectorName = observation.getCollector();
+
+        newObservation.setCollector(collectorName != null ? collectorName.trim() : "");
         newObservation.setObservationDbId(observation.getDbId());
         newObservation.setObservationTimeStamp(TimeAdapter.convertFrom(observation.getTimestamp()));
         newObservation.setObservationUnitDbId(observation.getUnitDbId());
