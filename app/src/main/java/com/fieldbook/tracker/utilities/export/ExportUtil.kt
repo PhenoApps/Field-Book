@@ -430,11 +430,12 @@ class ExportUtil @Inject constructor(
                 }
             }
 
+            spectralFileExporter.exportSpectralFile(fieldId)
+
             if (bundleChecked) {
+
                 handleBundledFiles(fieldId)
             }
-
-            spectralFileExporter.exportSpectralFile(fieldId)
 
             database.updateExportDate(fieldId)
             Log.d(TAG, "Export finished successfully for field ${fo.name}")

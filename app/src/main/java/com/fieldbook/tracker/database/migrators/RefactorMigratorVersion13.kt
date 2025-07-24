@@ -261,8 +261,8 @@ class RefactorMigratorVersion13: FieldBookMigrator {
 
         //copy data from old table to new table
         db.execSQL("""
-            INSERT INTO observations_temp (${Observation.PK}, ${ObservationUnit.FK}, ${ObservationVariable.FK}, value, observation_time_stamp, collector, geo_coordinates, last_synced_time, additional_info, rep, notes)
-            SELECT ${Observation.PK}, ${ObservationUnit.FK}, ${ObservationVariable.FK}, value, observation_time_stamp, collector, geoCoordinates, last_synced_time, additional_info, rep, notes
+            INSERT INTO observations_temp (${Observation.PK}, ${ObservationUnit.FK}, ${ObservationVariable.FK}, study_id, value, observation_time_stamp, collector, geo_coordinates, last_synced_time, additional_info, rep, notes)
+            SELECT ${Observation.PK}, ${ObservationUnit.FK}, ${ObservationVariable.FK}, study_id, value, observation_time_stamp, collector, geoCoordinates, last_synced_time, additional_info, rep, notes
             FROM observations;
         """.trimIndent())
 

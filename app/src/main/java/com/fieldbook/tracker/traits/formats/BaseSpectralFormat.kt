@@ -22,6 +22,5 @@ open class BaseSpectralFormat(
     iconDrawableResourceId = iconDrawableResourceId,
     stringNameAux = stringNameAux,
     NameParameter(),
-    DefaultValueParameter(),
     DetailsParameter(),
 )

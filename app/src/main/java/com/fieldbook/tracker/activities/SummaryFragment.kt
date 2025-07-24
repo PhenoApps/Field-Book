@@ -180,6 +180,14 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
         }
 
         if ((attributeSet + traitSet).isEmpty()) {
+
+            (recyclerView?.adapter as? SummaryAdapter)?.let { adapter ->
+
+                adapter.submitList(emptyList<AttributeAdapter.AttributeModel>())
+
+                adapter.notifyItemRangeChanged(0, adapter.itemCount)
+            }
+
             return
         }
 
@@ -192,22 +200,32 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
         val pairList = arrayListOf<AttributeAdapter.AttributeModel>()
 
-        (recyclerView?.adapter as? SummaryAdapter)?.let { adapter ->
+        data?.use { cursor ->
 
-            data.moveToFirst()
+            (recyclerView?.adapter as? SummaryAdapter)?.let { adapter ->
 
-            try {
+                cursor.moveToFirst()
 
-                models.filter { it in filters }
-                    .forEach { model ->
+                try {
 
-                        val index = data.getColumnIndex(model.label)
+                    val chosenModels = models.filter {
+
+                        if (it.trait == null) {
+                            it in filters
+                        } else {
+                            it.trait.id in filters.mapNotNull { filterModel -> filterModel.trait?.id }
+                        }
+                    }
+
+                    chosenModels.forEach { model ->
+
+                        val index = cursor.getColumnIndex(model.label)
 
                         var value: String? = null
 
                         if (index > -1) {
 
-                            value = data.getString(index)
+                            value = cursor.getString(index)
 
                             try {
 
@@ -227,7 +245,6 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
                                         value = CategoryJsonUtil.flattenMultiCategoryValue(
                                             CategoryJsonUtil.decode(v), labelValPref == "value"
                                         )
-
                                     }
                                 }
 
@@ -245,15 +262,18 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
                         )
                     }
 
-            } catch (e: Exception) {
+                } catch (e: Exception) {
 
-                e.printStackTrace()
+                    e.printStackTrace()
 
+                }
+
+                val sortedPairList = pairList.filter { it.trait == null }.sortedBy { it.label } + pairList.filter { it.trait != null }.sortedBy { it.label }
+
+                adapter.submitList(sortedPairList)
+
+                adapter.notifyDataSetChanged()
             }
-
-            adapter.submitList(pairList)
-
-            adapter.notifyDataSetChanged()
         }
     }
 
@@ -312,23 +332,23 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
             val (attributeFilters, traitFilters) = getPersistedFilter(collector)
 
-            val attributeSet = hashSetOf<AttributeAdapter.AttributeModel>()
-            val traitSet = hashSetOf<AttributeAdapter.AttributeModel>()
-
-            val attributeModels = attributes.map { AttributeAdapter.AttributeModel(it) }
+            val attributeModels = attributes.map { AttributeAdapter.AttributeModel(it) }.sortedBy { it.label }
             val traitAttributeModels =
-                traits.map { AttributeAdapter.AttributeModel(it.name, trait = it) }
+                traits.map { AttributeAdapter.AttributeModel(it.name, trait = it) }.sortedBy { it.label }
 
             val models = (attributeModels + traitAttributeModels).toMutableList()
 
             //initialize which attributes are checked, if no filter is saved then check all
             val checked = attributeModels.map { model ->
                 if (attributeFilters == null) true
-                else model in attributeModels
+                else model in attributeFilters
             }.toBooleanArray() + traitAttributeModels.map {
                 if (traitFilters == null) true
-                else it in traitFilters
+                else traitFilters.map { it.trait?.id }.contains(it.trait?.id) == true
             }.toBooleanArray()
+
+            val loadableModels = hashSetOf<AttributeAdapter.AttributeModel>()
+            loadableModels.addAll(models.filterIndexed { index, _ -> checked[index] })
 
             filterDialog =
                 AlertDialog.Builder(activity, R.style.AppAlertDialog)
@@ -339,14 +359,14 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
                     ) { _, which, isChecked ->
                         val item = models[which]
                         if (isChecked) {
-                            models.add(item)
+                            loadableModels.add(item)
                         } else {
-                            models.remove(item)
+                            loadableModels.remove(item)
                         }
                     }.setPositiveButton(android.R.string.ok) { dialog, _ ->
-                        setPersistedFilter(ctx, models)
+                        setPersistedFilter(ctx, loadableModels.toList())
                         dialog.dismiss()
-                        loadData(collector, models)
+                        loadData(collector, loadableModels.filter { it.trait == null } + loadableModels.filter { it.trait != null })
                     }.setNegativeButton(android.R.string.cancel) { dialog, _ ->
                         dialog.dismiss()
                     }.setNeutralButton(R.string.dialog_fragment_summary_neutral_button) { _, _ -> }
@@ -362,7 +382,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
                     list.choiceMode = ListView.CHOICE_MODE_MULTIPLE
 
-                    val toggle = (attributeSet.size + traitSet.size) < models.size
+                    val toggle = loadableModels.size < models.size
 
                     models.forEachIndexed { index, _ ->
 
@@ -370,6 +390,12 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
                         checked[index] = toggle
 
+                        if (toggle) {
+                            val item = models[index]
+                            loadableModels.add(item)
+                        } else {
+                            loadableModels.remove(models[index])
+                        }
                     }
                 }
             }

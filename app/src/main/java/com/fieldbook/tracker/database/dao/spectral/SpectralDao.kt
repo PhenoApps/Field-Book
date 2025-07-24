@@ -153,7 +153,7 @@ class SpectralDao @Inject constructor(private val helper: DataHelper) {
                 spectralFact = SpectralFact(
                     id = id,
                     protocolId = cursor.getInt(protocolId),
-                    uriId = uriId,
+                    uriId = cursor.getInt(uriId),
                     deviceId = cursor.getInt(deviceId),
                     observationId = cursor.getInt(observationId),
                     data = cursor.getBlob(data),
@@ -194,7 +194,7 @@ class SpectralDao @Inject constructor(private val helper: DataHelper) {
                         SpectralFact(
                             id = cursor.getInt(id),
                             protocolId = cursor.getInt(protocolId),
-                            uriId = uriId,
+                            uriId = cursor.getInt(uriId),
                             deviceId = cursor.getInt(deviceId),
                             observationId = cursor.getInt(observationId),
                             data = cursor.getBlob(data),

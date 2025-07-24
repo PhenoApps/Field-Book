@@ -46,8 +46,18 @@ class NixSensorHelper @Inject constructor(@ActivityContext val context: Context)
     )
 
     init {
-        // Initialize the Nix Sensor SDK, save the active state
-        activate()?.let { licenseManagerState = it }
+
+        try {
+
+            // Initialize the Nix Sensor SDK, save the active state
+            activate()?.let { licenseManagerState = it }
+
+        } catch (e: Exception) {
+
+            Log.e(TAG, "Error initializing Nix Sensor SDK: ${e.message}")
+
+            e.printStackTrace()
+        }
 
         Log.d(TAG, "License manager state: $licenseManagerState")
     }
