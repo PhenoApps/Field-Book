@@ -1,5 +1,7 @@
 package com.fieldbook.tracker.utilities
 
+import androidx.compose.ui.Alignment
+
 data class FieldConfig(
     val rows: Int,
     val cols: Int,
@@ -22,6 +24,32 @@ enum class FieldStartCorner {
                 row == rows - 1 && col == 0 -> BOTTOM_LEFT
                 row == rows - 1 && col == cols - 1 -> BOTTOM_RIGHT
                 else -> null
+            }
+        }
+
+        val FieldStartCorner.displayText: String
+            get() = when (this) {
+                TOP_LEFT -> "TL"
+                TOP_RIGHT -> "TR"
+                BOTTOM_LEFT -> "BL"
+                BOTTOM_RIGHT -> "BR"
+            }
+
+        fun getCornerAlignment(corner: FieldStartCorner): Alignment {
+            return when (corner) {
+                TOP_LEFT -> Alignment.TopStart
+                TOP_RIGHT -> Alignment.TopEnd
+                BOTTOM_LEFT -> Alignment.BottomStart
+                BOTTOM_RIGHT -> Alignment.BottomEnd
+            }
+        }
+
+        fun getAvailableCorners(rows: Int, cols: Int): List<FieldStartCorner> {
+            return when {
+                rows == 1 && cols == 1 -> listOf(TOP_LEFT)
+                rows == 1 -> listOf(TOP_LEFT, TOP_RIGHT)
+                cols == 1 -> listOf(TOP_LEFT,BOTTOM_LEFT)
+                else -> entries
             }
         }
     }

@@ -143,6 +143,18 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
             }
         }
 
+    private val fieldCreatorLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val fieldId = result.data?.getIntExtra("fieldId", -1) ?: -1
+                if (fieldId != -1) {
+                    fieldSwitcher.switchField(fieldId)
+                    queryAndLoadFields()
+                    startFieldDetailFragment(fieldId)
+                }
+            }
+        }
+
     override fun getLayoutResourceId(): Int = R.layout.activity_fields
 
     override fun getToolbarId(): Int = R.id.field_toolbar
@@ -486,17 +498,7 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
                 0 -> if (checkDirectory()) loadLocalPermission()
                 1 -> if (checkDirectory()) loadCloud()
                 2 -> {
-                    val dialog = FieldCreatorDialogFragment(this)
-                    dialog.fieldCreationCallback =
-                        object : FieldCreatorDialogFragment.FieldCreationCallback {
-                            override fun onFieldCreated(studyDbId: Int) {
-                                fieldSwitcher.switchField(studyDbId)
-                                queryAndLoadFields()
-
-                                startFieldDetailFragment(studyDbId)
-                            }
-                        }
-                    dialog.show(supportFragmentManager, "FieldCreatorDialogFragment")
+                    fieldCreatorLauncher.launch(FieldCreatorActivity.getIntent(this))
                 }
 
                 3 -> loadBrAPI()

@@ -157,7 +157,7 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
     private fun setupSizeGroup() {
         fieldCreatorStep = FieldCreationStep.FIELD_SIZE
 
-        titleTextView?.setText(R.string.dialog_field_creator_ask_size)
+        titleTextView?.setText(R.string.field_creator_size_title)
 
         val sizeGroup = fieldCreatorDialog?.findViewById<Group>(R.id.dialog_field_creator_group_size)
 
@@ -245,7 +245,7 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
     private fun setupStartingPointSelection(name: String) {
         fieldCreatorStep = FieldCreationStep.START_POINT
 
-        titleTextView?.setText(R.string.dialog_field_creator_ask_start_point)
+        titleTextView?.setText(R.string.field_creator_start_point_title)
 
         val group = fieldCreatorDialog?.findViewById<Group>(R.id.dialog_field_creator_group_start_point)
 
@@ -292,9 +292,9 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
     }
 
     private fun setupPatternGroup(name: String) {
-        fieldCreatorStep = FieldCreationStep.WALKING_ORDER
+        fieldCreatorStep = FieldCreationStep.WALKING_PATTERN
 
-        titleTextView?.setText(R.string.dialog_field_creator_ask_pattern)
+        titleTextView?.setText(R.string.field_creator_pattern_title)
 
         val patternGroup = fieldCreatorDialog?.findViewById<Group>(R.id.dialog_field_creator_group_pattern)
 
@@ -505,7 +505,7 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
         val col = j.toString()
         val index = k.toString()
 
-        val (posX, posY) = FieldPlotCalculator.calculatePositionCoordinates(i, j, fieldConfig)
+        val (posX, posY) = FieldPlotCalculator.calculatePositionCoordinatesOld(i, j, fieldConfig)
 
         val values = listOf(row, col, index, uuid, "x_coordinate", "y_coordinate", posX.toString(), posY.toString())
 

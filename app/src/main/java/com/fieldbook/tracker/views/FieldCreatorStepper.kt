@@ -6,17 +6,13 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.binayshaw7777.kotstep.v3.KotStep
 import com.binayshaw7777.kotstep.v3.model.step.StepLayoutStyle
 import com.binayshaw7777.kotstep.v3.model.style.BorderStyle
@@ -98,27 +94,20 @@ fun FieldCreatorStepper(currentStep: FieldCreationStep) {
     ) {
         steps.forEach { step ->
             icons[step]?.let { icon ->
-                step(
-                    icon = icon,
-                    label = {
-                        // hide the label if COMPLETED or not the current step
-                        if (step == currentStep && currentStep != FieldCreationStep.COMPLETED) {
-                            step.label?.let { Text(stringResource(it)) }
-                        }
-                    }
-                )
+                step(icon = icon)
             }
         }
     }
 }
 
-enum class FieldCreationStep(val position: Int, val icon: Int?, val label: Int?) {
-    FIELD_SIZE(0, R.drawable.ic_field_config, R.string.field_creator_stepper_size),
-    START_POINT(1, R.drawable.ic_start_point, R.string.field_creator_stepper_start),
-    WALKING_ORDER(2, R.drawable.ic_walk, R.string.field_creator_stepper_pattern),
-    FIELD_PREVIEW(3, R.drawable.ic_field_preview, R.string.field_creator_stepper_preview),
+enum class FieldCreationStep(val position: Int, val icon: Int?) {
+    FIELD_SIZE(0, R.drawable.ic_field_config),
+    START_POINT(1, R.drawable.ic_start_point),
+    WALKING_PATTERN(2, R.drawable.ic_walk),
+    WALKING_DIRECTION(3, R.drawable.ic_direction_horizontal_linear),
+    FIELD_PREVIEW(4, R.drawable.ic_field_preview),
 
-    COMPLETED(4, null, null);
+    COMPLETED(5, null);
 
     companion object {
         // return all values except COMPLETED which is just denotes the state

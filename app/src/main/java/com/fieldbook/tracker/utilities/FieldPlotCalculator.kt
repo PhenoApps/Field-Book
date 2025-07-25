@@ -37,10 +37,23 @@ object FieldPlotCalculator {
     /**
      * Calculates physical coordinates for a plot based on row and column
      */
-    fun calculatePositionCoordinates(
+    fun calculatePositionCoordinatesOld(
         row: Int,
         col: Int,
         config: FieldConfig
+    ): Pair<Int, Int> {
+        return when (config.startCorner) {
+            FieldStartCorner.TOP_LEFT -> Pair(row, col)
+            FieldStartCorner.TOP_RIGHT -> Pair(row, config.cols - col + 1)
+            FieldStartCorner.BOTTOM_LEFT -> Pair(config.rows - row + 1, col)
+            FieldStartCorner.BOTTOM_RIGHT -> Pair(config.rows - row + 1, config.cols - col + 1)
+        }
+    }
+
+    fun calculatePositionCoordinates(
+        row: Int,
+        col: Int,
+        config: com.fieldbook.tracker.viewmodels.FieldConfig
     ): Pair<Int, Int> {
         return when (config.startCorner) {
             FieldStartCorner.TOP_LEFT -> Pair(row, col)
