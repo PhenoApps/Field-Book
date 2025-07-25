@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/title_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/field_creator_pattern_title"
+        style="@style/TextAppearance.AppCompat.Title"
+        android:gravity="center"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/field_creator_stepper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/title_text" />
+
+    <RadioGroup
+        android:id="@+id/pattern_radio_group"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/field_creator_stepper"
+        app:layout_constraintBottom_toTopOf="@id/next_button"
+        app:layout_constraintVertical_bias="0">
+
+        <LinearLayout
+            android:id="@+id/linear_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:focusable="true"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true">
+
+            <RadioButton
+                android:id="@+id/radio_linear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/field_creator_pattern_linear"
+                    style="?attr/textAppearanceListItem" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/field_creator_pattern_linear_summary"
+                    style="?attr/textAppearanceListItemSecondary" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/zigzag_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:focusable="true"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true">
+
+            <RadioButton
+                android:id="@+id/radio_zigzag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/field_creator_pattern_zigzag"
+                    style="?attr/textAppearanceListItem" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/field_creator_pattern_zigzag_summary"
+                    style="?attr/textAppearanceListItemSecondary" />
+            </LinearLayout>
+        </LinearLayout>
+    </RadioGroup>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/next_button"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:text="@string/next"
+        android:enabled="false"
+        android:textColor="?attr/fb_color_text_high_contrast_inverted"
+        android:background="@drawable/cell"
+        android:backgroundTint="?attr/fb_color_primary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

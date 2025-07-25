@@ -194,9 +194,34 @@
     <string name="act_field_editor_file_open_failed">File failed to open.</string>
 
     <!-- Field Creator  -->
-    <string name="dialog_field_creator_ask_size">Please choose a field name and size.</string>
-    <string name="dialog_field_creator_ask_start_point">Please choose a field starting point.</string>
-    <string name="dialog_field_creator_ask_pattern">Please choose a field pattern.</string>
+    <string name="field_creator_size_title">Field Details</string>
+    <string name="field_creator_start_point_title">Starting Point</string>
+    <string name="field_creator_pattern_title">Walking Pattern</string>
+    <string name="field_creator_direction_title">Walking Direction</string>
+    <string name="field_creator_preview_title">Review</string>
+
+    <string name="field_creator_size_field_name_hint">Field Name</string>
+    <string name="field_creator_size_rows_hint">Rows</string>
+    <string name="field_creator_size_columns_hint">Columns</string>
+
+    <string name="field_creator_start_point_instruction">Tap a corner to select starting point</string>
+    <string name="field_dimensions_format">Field: %d × %d</string>
+
+    <string name="field_creator_pattern_linear">Linear</string>
+    <string name="field_creator_pattern_linear_summary">Follow same direction after each row/column</string>
+    <string name="field_creator_pattern_zigzag">Serpentine/Zigzag</string>
+    <string name="field_creator_pattern_zigzag_summary">Alternate direction after each row/column</string>
+
+    <string name="field_creator_direction_horizontal">Horizontal</string>
+    <string name="field_creator_direction_horizontal_summary">Walk across rows</string>
+    <string name="field_creator_direction_vertical">Vertical</string>
+    <string name="field_creator_direction_vertical_summary">Walk down columns</string>
+
+    <string name="field_creator_preview_summary">Field: %s (%d x %d)</string>
+    <string name="field_creator_preview_large_field_warning">Large field detected. Creating many plots may take some time.</string>
+    <string name="field_creator_preview_creating_field">Creating field…</string>
+    <string name="field_creator_preview_create_button">Create Field</string>
+
     <string name="dialog_field_creator_ask_name_hint">Name</string>
     <string name="dialog_field_creator_ask_row_hint">Rows</string>
     <string name="dialog_field_creator_ask_columns_hint">Columns</string>
@@ -211,9 +236,17 @@
     <string name="dialog_field_creator_size_group_error">Please enter a valid name and format.</string>
     <string name="dialog_field_creator_field_name_not_unique">Field name already in use.</string>
     <string name="dialog_field_creator_large_field">Large Field Detected, transaction might take a long time.</string>
-    <string name="dialog_field_creator_linear_button_content_desc">Button to choose linear plot pattern.</string>
-    <string name="dialog_field_creator_zig_button_content_desc">Button to choose zig zag plot pattern.</string>
+    <string name="dialog_field_creator_horizontal_linear_button_content_desc">Button to choose horizontal linear plot pattern.</string>
+    <string name="dialog_field_creator_horizontal_zig_button_content_desc">Button to choose horizontal zig zag plot pattern.</string>
+    <string name="dialog_field_creator_vertical_linear_button_content_desc">Button to choose vertical linear plot pattern.</string>
+    <string name="dialog_field_creator_vertical_zig_button_content_desc">Button to choose vertical zig zag plot pattern.</string>
     <string name="dialog_field_creator_review_image_content_desc">Image showing orientation and plot pattern.</string>
+
+    <string name="field_creator_stepper_size">Size</string>
+    <string name="field_creator_stepper_start">Start Point</string>
+    <string name="field_creator_stepper_pattern">Walking Pattern</string>
+    <string name="field_creator_stepper_direction">Walking Direction</string>
+    <string name="field_creator_stepper_preview">Preview</string>
 
     <!-- Geo-Navigate to Field -->
     <string name="menu_fields_plot_by_distance_title">Select nearest field</string>
