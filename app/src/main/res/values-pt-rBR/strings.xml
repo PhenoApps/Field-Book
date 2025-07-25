@@ -1275,6 +1275,8 @@
     <string name="usb_device_description">USB</string>
     <string name="view_trait_nix_spectral_option">Espectral</string>
     <string name="disconnect">Desconectar</string>
+    <string name="nix_error_bluetooth_unavailable">Bluetooth indisponível.</string>
+    <string name="nix_error_bluetooth_disabled">Bluetooth está desativado no dispositivo.</string>
     <string name="loading">Carregando</string>
     <string name="nix_error_no_network">Nix pode exigir que a internet funcione corretamente.</string>
     <string name="import_runnable_field_name_exists">Nome do campo já existe.</string>
