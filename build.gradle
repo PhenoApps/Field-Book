@@ -34,10 +34,10 @@ allprojects {
 }
 
 ext {
-    extTruthVersion = "1.5.0"
-    coreVersion = "1.5.0"
-    testRulesVersion = "1.5.0"
-    extJUnitVersion = "1.0.0"
-    runnerVersion = "1.5.2"
-    espressoVersion = "3.3.0"
+    extTruthVersion = "1.6.0"
+    coreVersion = "1.6.1"
+    testRulesVersion = "1.6.1"
+    extJUnitVersion = "1.2.1"
+    runnerVersion = "1.6.2"
+    espressoVersion = "3.6.1"
 }
