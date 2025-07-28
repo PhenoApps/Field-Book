@@ -11,7 +11,7 @@ import com.fieldbook.tracker.views.FieldCreationStep
 import com.fieldbook.tracker.views.FieldGrid
 import com.google.android.material.button.MaterialButton
 
-class FieldCreatorStartPointFragment : FieldCreatorBaseFragment() {
+class FieldCreatorStartCornerFragment : FieldCreatorBaseFragment() {
 
     override fun getCurrentStep(): FieldCreationStep = FieldCreationStep.START_POINT
     override fun getLayoutResourceId(): Int = R.layout.fragment_field_creator_start_point
@@ -39,7 +39,7 @@ class FieldCreatorStartPointFragment : FieldCreatorBaseFragment() {
     private fun setupClickListeners() {
         nextButton.setOnClickListener {
             findNavController().navigate(
-                FieldCreatorStartPointFragmentDirections.actionFromStartPointToPatternType()
+                FieldCreatorStartCornerFragmentDirections.actionFromStartPointToPatternType()
             )
         }
     }

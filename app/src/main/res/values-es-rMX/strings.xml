@@ -144,7 +144,7 @@
     <string name="act_field_editor_file_open_failed">Error al abrir el archivo.</string>
     <!-- Field Creator  -->
     <string name="field_creator_size_title">Por favor, eligir un nombre y tamaño de Campo.</string>
-    <string name="field_creator_start_point_title">Por favor, eligir un punto de partida del Campo.</string>
+    <string name="field_creator_start_corner_title">Por favor, eligir un punto de partida del Campo.</string>
     <string name="field_creator_pattern_title">Por favor, eligir un patrón de Campo.</string>
     <string name="dialog_field_creator_ask_name_hint">Nombre</string>
     <string name="dialog_field_creator_ask_row_hint">Filas</string>

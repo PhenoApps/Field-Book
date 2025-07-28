@@ -13,7 +13,7 @@
     </fragment>
 
     <fragment android:id="@+id/start_point_fragment"
-        android:name="com.fieldbook.tracker.fragments.field_creator.FieldCreatorStartPointFragment"
+        android:name="com.fieldbook.tracker.fragments.field_creator.FieldCreatorStartCornerFragment"
         android:label="Start Point">
         <action android:id="@+id/action_from_start_point_to_pattern_type"
             app:destination="@+id/pattern_type_fragment">

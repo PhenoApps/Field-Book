@@ -194,8 +194,9 @@
     <string name="act_field_editor_file_open_failed">File failed to open.</string>
 
     <!-- Field Creator  -->
+    <string name="field_creator_activity_toolbar_title">Create New Field</string>
     <string name="field_creator_size_title">Field Details</string>
-    <string name="field_creator_start_point_title">Starting Point</string>
+    <string name="field_creator_start_corner_title">Starting Corner</string>
     <string name="field_creator_pattern_title">Walking Pattern</string>
     <string name="field_creator_direction_title">Walking Direction</string>
     <string name="field_creator_preview_title">Review</string>

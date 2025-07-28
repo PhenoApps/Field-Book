@@ -61,7 +61,8 @@
             android:configChanges="keyboardHidden|orientation"
             android:finishOnTaskLaunch="true"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
 
         <!-- Trait manager, for importing .trt files -->
         <activity

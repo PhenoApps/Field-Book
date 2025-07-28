@@ -17,22 +17,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.compose.ui.platform.ComposeView
-        android:id="@+id/field_creator_stepper"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/title_text" />
-
     <RadioGroup
         android:id="@+id/direction_radio_group"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/field_creator_stepper"
+        app:layout_constraintTop_toBottomOf="@id/title_text"
         app:layout_constraintBottom_toTopOf="@id/next_button"
         app:layout_constraintVertical_bias="0">
 

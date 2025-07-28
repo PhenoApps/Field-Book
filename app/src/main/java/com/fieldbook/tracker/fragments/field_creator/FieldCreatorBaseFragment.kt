@@ -4,15 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.viewmodels.FieldCreatorViewModel
 import com.fieldbook.tracker.views.FieldCreationStep
-import com.fieldbook.tracker.views.FieldCreatorStepper
 
 abstract class FieldCreatorBaseFragment : Fragment() {
 
@@ -31,19 +27,14 @@ abstract class FieldCreatorBaseFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         loadInitialState()
 
-        setupStepper(view)
+        updateActivityStepper()
         setupViews(view)
 
         observeViewModel()
     }
 
-    private fun setupStepper(view: View) {
-        val stepperComposeView = view.findViewById<ComposeView>(R.id.field_creator_stepper)
-        stepperComposeView?.setContent {
-            MaterialTheme {
-                FieldCreatorStepper(getCurrentStep())
-            }
-        }
+    private fun updateActivityStepper() {
+        fieldCreatorViewModel.updateCurrentStep(getCurrentStep())
     }
 
     protected abstract fun setupViews(view: View)

@@ -3,16 +3,23 @@ package com.fieldbook.tracker.activities
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.widget.Toolbar
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.platform.ComposeView
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.viewmodels.FieldCreatorViewModel
+import com.fieldbook.tracker.views.FieldCreationStep
+import com.fieldbook.tracker.views.FieldCreatorStepper
 
 class FieldCreatorActivity : ThemedActivity() {
 
     companion object {
         fun getIntent(context: Context): Intent = Intent(context, FieldCreatorActivity::class.java)
     }
+
+    private val fieldCreatorViewModel: FieldCreatorViewModel by viewModels()
+    private lateinit var stepperView: ComposeView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,21 +29,37 @@ class FieldCreatorActivity : ThemedActivity() {
         setSupportActionBar(toolbar)
 
         supportActionBar?.apply {
+            title = getString(R.string.field_creator_activity_toolbar_title)
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowHomeEnabled(true)
             setHomeButtonEnabled(true)
         }
 
-        val navHostFragment = supportFragmentManager
-            .findFragmentById(R.id.field_creator_nav_host) as NavHostFragment
-        val navController = navHostFragment.navController
+        stepperView = findViewById(R.id.field_creator_stepper)
+        setupStepper(getCurrentStepFromViewModel())
+        observeForStepper()
+    }
 
-        setupActionBarWithNavController(navController)
+    private fun setupStepper(step: FieldCreationStep) {
+        stepperView.setContent {
+            MaterialTheme {
+                FieldCreatorStepper(step)
+            }
+        }
+    }
+
+    private fun observeForStepper() {
+        fieldCreatorViewModel.currentStep.observe(this) { step ->
+            setupStepper(step)
+        }
+    }
+
+    private fun getCurrentStepFromViewModel(): FieldCreationStep {
+        return fieldCreatorViewModel.currentStep.value ?: FieldCreationStep.FIELD_SIZE
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        val navHostFragment = supportFragmentManager
-            .findFragmentById(R.id.field_creator_nav_host) as NavHostFragment
-        return navHostFragment.navController.navigateUp() || super.onSupportNavigateUp()
+        finish()
+        return true
     }
 }

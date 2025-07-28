@@ -12,6 +12,7 @@ import com.fieldbook.tracker.objects.ImportFormat
 import com.fieldbook.tracker.utilities.FieldPattern
 import com.fieldbook.tracker.utilities.FieldPlotCalculator
 import com.fieldbook.tracker.utilities.FieldStartCorner
+import com.fieldbook.tracker.views.FieldCreationStep
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -27,6 +28,9 @@ class FieldCreatorViewModel : ViewModel() {
 
     private val _creationResult = MutableLiveData<FieldCreationResult>()
     val creationResult: LiveData<FieldCreationResult> = _creationResult
+
+    private val _currentStep = MutableLiveData<FieldCreationStep>()
+    val currentStep: LiveData<FieldCreationStep> = _currentStep
 
     private var createFieldJob: Job? = null
 
@@ -55,6 +59,10 @@ class FieldCreatorViewModel : ViewModel() {
 
     fun updateDirection(isHorizontal: Boolean) {
         _fieldConfig.value = _fieldConfig.value?.copy(isHorizontal = isHorizontal)
+    }
+
+    fun updateCurrentStep(step: FieldCreationStep) {
+        _currentStep.value = step
     }
 
     fun validateBasicInfo(db: DataHelper): Boolean {
