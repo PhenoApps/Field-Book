@@ -59,7 +59,7 @@ class FieldCreatorSizeFragment : FieldCreatorBaseFragment() {
         setupButtonListener()
     }
 
-    override fun observeViewModel() {
+    override fun observeFieldCreatorViewModel() {
         fieldCreatorViewModel.fieldConfig.observe(viewLifecycleOwner) { state ->
             if (fieldNameEditText.text.toString() != state.fieldName) {
                 fieldNameEditText.setText(state.fieldName)

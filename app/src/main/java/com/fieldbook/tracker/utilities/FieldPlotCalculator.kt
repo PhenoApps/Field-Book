@@ -60,6 +60,7 @@ object FieldPlotCalculator {
             FieldStartCorner.TOP_RIGHT -> Pair(row, config.cols - col + 1)
             FieldStartCorner.BOTTOM_LEFT -> Pair(config.rows - row + 1, col)
             FieldStartCorner.BOTTOM_RIGHT -> Pair(config.rows - row + 1, config.cols - col + 1)
+            null -> TODO()
         }
     }
 }

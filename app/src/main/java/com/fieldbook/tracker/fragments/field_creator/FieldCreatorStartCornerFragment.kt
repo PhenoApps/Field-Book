@@ -13,7 +13,7 @@ import com.google.android.material.button.MaterialButton
 
 class FieldCreatorStartCornerFragment : FieldCreatorBaseFragment() {
 
-    override fun getCurrentStep(): FieldCreationStep = FieldCreationStep.START_POINT
+    override fun getCurrentStep(): FieldCreationStep = FieldCreationStep.START_CORNER
     override fun getLayoutResourceId(): Int = R.layout.fragment_field_creator_start_point
 
     private lateinit var fieldDimensionsText: TextView
@@ -28,11 +28,11 @@ class FieldCreatorStartCornerFragment : FieldCreatorBaseFragment() {
         setupClickListeners()
     }
 
-    override fun observeViewModel() {
+    override fun observeFieldCreatorViewModel() {
         fieldCreatorViewModel.fieldConfig.observe(viewLifecycleOwner) { state ->
             setupGridPreview(state)
 
-            nextButton.isEnabled = state.rows > 0 && state.cols > 0
+            nextButton.isEnabled = state.rows > 0 && state.cols > 0 && state.startCorner != null
         }
     }
 

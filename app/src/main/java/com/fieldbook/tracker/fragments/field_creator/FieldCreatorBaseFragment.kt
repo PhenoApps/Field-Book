@@ -30,7 +30,7 @@ abstract class FieldCreatorBaseFragment : Fragment() {
         updateActivityStepper()
         setupViews(view)
 
-        observeViewModel()
+        observeFieldCreatorViewModel()
     }
 
     private fun updateActivityStepper() {
@@ -53,5 +53,5 @@ abstract class FieldCreatorBaseFragment : Fragment() {
         }
     }
 
-    protected open fun observeViewModel() { }
+    protected open fun observeFieldCreatorViewModel() { }
 }

@@ -243,7 +243,7 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
     }
 
     private fun setupStartingPointSelection(name: String) {
-        fieldCreatorStep = FieldCreationStep.START_POINT
+        fieldCreatorStep = FieldCreationStep.START_CORNER
 
         titleTextView?.setText(R.string.field_creator_start_corner_title)
 

@@ -32,10 +32,10 @@ class FieldCreatorPatternTypeFragment : FieldCreatorBaseFragment() {
         setupClickListeners()
     }
 
-    override fun observeViewModel() {
+    override fun observeFieldCreatorViewModel() {
         fieldCreatorViewModel.fieldConfig.observe(viewLifecycleOwner) { state ->
             updateRadioButtons(state.isZigzag)
-            nextButton.isEnabled = true
+            nextButton.isEnabled = state.isZigzag != null
         }
     }
 
@@ -55,11 +55,23 @@ class FieldCreatorPatternTypeFragment : FieldCreatorBaseFragment() {
         fieldCreatorViewModel.updatePatternType(isZigzag)
     }
 
-    private fun updateRadioButtons(isZigzag: Boolean) {
+    private fun updateRadioButtons(isZigzag: Boolean?) {
         patternRadioGroup.setOnCheckedChangeListener(null)
 
-        radioZigzag.isChecked = isZigzag
-        radioLinear.isChecked = !isZigzag
+        when (isZigzag) {
+            true -> {
+                radioZigzag.isChecked = true
+                radioLinear.isChecked = false
+            }
+            false -> {
+                radioZigzag.isChecked = false
+                radioLinear.isChecked = true
+            }
+            null -> {
+                radioZigzag.isChecked = false
+                radioLinear.isChecked = false
+            }
+        }
 
         enablePatternRadioListener()
     }

@@ -198,12 +198,13 @@ data class FieldConfig(
     val fieldName: String = "",
     val rows: Int = 0,
     val cols: Int = 0,
-    val startCorner: FieldStartCorner = FieldStartCorner.TOP_LEFT,
-    val isZigzag: Boolean = false,
-    val isHorizontal: Boolean = true
+    val startCorner: FieldStartCorner? = null,
+    val isZigzag: Boolean? = null,
+    val isHorizontal: Boolean? = null
 ) {
-    val pattern: FieldPattern
+    val pattern: FieldPattern?
         get() = when {
+            isHorizontal == null || isZigzag == null -> null
             isHorizontal && !isZigzag -> FieldPattern.HORIZONTAL_LINEAR
             isHorizontal && isZigzag -> FieldPattern.HORIZONTAL_ZIGZAG
             !isHorizontal && !isZigzag -> FieldPattern.VERTICAL_LINEAR
@@ -235,7 +236,7 @@ data class ValidationError(
 
 private fun insertPlotData(db: DataHelper, studyDbId: Int, fieldColumns: List<String>, config: com.fieldbook.tracker.viewmodels.FieldConfig) {
     var plotIndex = 0
-    val pattern = config.pattern
+    val pattern = config.pattern ?: return
     val rows = config.rows
     val cols = config.cols
 

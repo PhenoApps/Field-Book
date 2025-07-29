@@ -7,7 +7,14 @@ import androidx.activity.viewModels
 import androidx.appcompat.widget.Toolbar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.platform.ComposeView
+import androidx.navigation.NavController
+import androidx.navigation.findNavController
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.fragments.field_creator.FieldCreatorDirectionFragmentDirections
+import com.fieldbook.tracker.fragments.field_creator.FieldCreatorPatternTypeFragmentDirections
+import com.fieldbook.tracker.fragments.field_creator.FieldCreatorSizeFragmentDirections
+import com.fieldbook.tracker.fragments.field_creator.FieldCreatorStartCornerFragmentDirections
+import com.fieldbook.tracker.viewmodels.FieldConfig
 import com.fieldbook.tracker.viewmodels.FieldCreatorViewModel
 import com.fieldbook.tracker.views.FieldCreationStep
 import com.fieldbook.tracker.views.FieldCreatorStepper
@@ -20,6 +27,10 @@ class FieldCreatorActivity : ThemedActivity() {
 
     private val fieldCreatorViewModel: FieldCreatorViewModel by viewModels()
     private lateinit var stepperView: ComposeView
+
+    private val navController: NavController by lazy {
+        findNavController(R.id.field_creator_nav_host)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,7 +54,12 @@ class FieldCreatorActivity : ThemedActivity() {
     private fun setupStepper(step: FieldCreationStep) {
         stepperView.setContent {
             MaterialTheme {
-                FieldCreatorStepper(step)
+                FieldCreatorStepper(
+                    currentStep = step,
+                    onStepClicked = { clickedStep ->
+                        handleStepClick(clickedStep)
+                    }
+                )
             }
         }
     }
@@ -57,6 +73,107 @@ class FieldCreatorActivity : ThemedActivity() {
     private fun getCurrentStepFromViewModel(): FieldCreationStep {
         return fieldCreatorViewModel.currentStep.value ?: FieldCreationStep.FIELD_SIZE
     }
+
+    /**
+     * Enables forward and backward navigation on pressing the stepper icons
+     *
+     * The ViewModel saves the user selected state at each step
+     * Forward navigation is only possible until the furthest step UNTIL the pressed icon
+     */
+    private fun handleStepClick(clickedStep: FieldCreationStep) {
+        val currentStep = getCurrentStepFromViewModel()
+        val furthestPossibleStep = findNextAvailableStep()
+
+        // if clicking on current step, do nothing
+        if (clickedStep == currentStep) return
+
+        // if clicking on a past step, navigate back
+        if (clickedStep.position < currentStep.position) {
+            navigateBackToStep(clickedStep)
+            return
+        } else { // going forward
+            if (clickedStep.position <= furthestPossibleStep.position) {
+                // allowed to go directly to the tapped step
+                navigateForwardToStep(clickedStep)
+            } else {
+                // only go as far as we can
+                navigateForwardToStep(furthestPossibleStep)
+            }
+        }
+
+    }
+
+    private fun isStepComplete(step: FieldCreationStep, config: FieldConfig?): Boolean {
+        return when (step) {
+            FieldCreationStep.FIELD_SIZE -> {
+                config != null && config.fieldName.isNotBlank() && config.rows > 0 && config.cols > 0
+            }
+            FieldCreationStep.START_CORNER -> {
+                config != null && config.startCorner != null
+            }
+            FieldCreationStep.WALKING_PATTERN -> {
+                config != null && config.isZigzag != null
+            }
+            FieldCreationStep.WALKING_DIRECTION -> {
+                config != null && config.isHorizontal != null
+            }
+            FieldCreationStep.FIELD_PREVIEW -> true
+            else -> false
+        }
+    }
+
+    private fun findNextAvailableStep(): FieldCreationStep {
+        val fieldConfig = fieldCreatorViewModel.fieldConfig.value
+
+        return when {
+            !isStepComplete(FieldCreationStep.FIELD_SIZE, fieldConfig) -> FieldCreationStep.FIELD_SIZE
+            !isStepComplete(FieldCreationStep.START_CORNER, fieldConfig) -> FieldCreationStep.START_CORNER
+            !isStepComplete(FieldCreationStep.WALKING_PATTERN, fieldConfig) -> FieldCreationStep.WALKING_PATTERN
+            !isStepComplete(FieldCreationStep.WALKING_DIRECTION, fieldConfig) -> FieldCreationStep.WALKING_DIRECTION
+            else -> FieldCreationStep.FIELD_PREVIEW
+        }
+    }
+
+    private fun navigateBackToStep(targetStep: FieldCreationStep) {
+        val targetFragmentId = when (targetStep) {
+            FieldCreationStep.FIELD_SIZE -> R.id.field_size_fragment
+            FieldCreationStep.START_CORNER -> R.id.start_point_fragment
+            FieldCreationStep.WALKING_PATTERN -> R.id.pattern_type_fragment
+            FieldCreationStep.WALKING_DIRECTION -> R.id.direction_fragment
+            FieldCreationStep.FIELD_PREVIEW -> R.id.field_preview_fragment
+            else -> return
+        }
+
+        navController.popBackStack(targetFragmentId, false)
+    }
+
+    private fun navigateForwardToStep(targetStep: FieldCreationStep) {
+        val currentStep = getCurrentStepFromViewModel()
+
+        var step = currentStep
+        while (step.position < targetStep.position) {
+            step = when (step) {
+                FieldCreationStep.FIELD_SIZE -> {
+                    navController.navigate(FieldCreatorSizeFragmentDirections.actionFromSizeToStartPoint())
+                    FieldCreationStep.START_CORNER
+                }
+                FieldCreationStep.START_CORNER -> {
+                    navController.navigate(FieldCreatorStartCornerFragmentDirections.actionFromStartPointToPatternType())
+                    FieldCreationStep.WALKING_PATTERN
+                }
+                FieldCreationStep.WALKING_PATTERN -> {
+                    navController.navigate(FieldCreatorPatternTypeFragmentDirections.actionFromPatternTypeToDirection())
+                    FieldCreationStep.WALKING_DIRECTION
+                }
+                FieldCreationStep.WALKING_DIRECTION -> {
+                    navController.navigate(FieldCreatorDirectionFragmentDirections.actionFromDirectionToPreview())
+                    FieldCreationStep.FIELD_PREVIEW
+                }
+                else -> step
+            }
+        }
+    }
+
 
     override fun onSupportNavigateUp(): Boolean {
         finish()

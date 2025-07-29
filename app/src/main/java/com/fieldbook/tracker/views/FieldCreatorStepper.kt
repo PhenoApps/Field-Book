@@ -3,10 +3,13 @@ package com.fieldbook.tracker.views
 import com.fieldbook.tracker.R
 import android.util.TypedValue
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -26,7 +29,7 @@ import com.binayshaw7777.kotstep.v3.util.ExperimentalKotStep
 
 @OptIn(ExperimentalKotStep::class)
 @Composable
-fun FieldCreatorStepper(currentStep: FieldCreationStep) {
+fun FieldCreatorStepper(currentStep: FieldCreationStep, onStepClicked: (FieldCreationStep) -> Unit = {}) {
     val context = LocalContext.current
     val theme = context.theme
     val typedValue = TypedValue()
@@ -84,17 +87,27 @@ fun FieldCreatorStepper(currentStep: FieldCreationStep) {
         step.icon?.let { ImageVector.vectorResource(id = it) }
     }
 
-    KotStep(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .horizontalScroll(rememberScrollState())
-            .height(100.dp),
-        currentStep = { currentStep.position.toFloat() },
-        style = kotStepStyle
+            .height(100.dp)
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        steps.forEach { step ->
-            icons[step]?.let { icon ->
-                step(icon = icon)
+        KotStep(
+            currentStep = { currentStep.position.toFloat() },
+            style = kotStepStyle
+        ) {
+            steps.forEach { step ->
+                icons[step]?.let { icon ->
+                    step(
+                        icon = icon,
+                        onClick = {
+                            onStepClicked(step)
+                        }
+                    )
+                }
             }
         }
     }
@@ -102,7 +115,7 @@ fun FieldCreatorStepper(currentStep: FieldCreationStep) {
 
 enum class FieldCreationStep(val position: Int, val icon: Int?) {
     FIELD_SIZE(0, R.drawable.ic_field_config),
-    START_POINT(1, R.drawable.ic_start_point),
+    START_CORNER(1, R.drawable.ic_start_point),
     WALKING_PATTERN(2, R.drawable.ic_walk),
     WALKING_DIRECTION(3, R.drawable.ic_direction_horizontal_linear),
     FIELD_PREVIEW(4, R.drawable.ic_field_preview),

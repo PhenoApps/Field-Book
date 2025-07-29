@@ -32,10 +32,10 @@ class FieldCreatorDirectionFragment : FieldCreatorBaseFragment() {
         setupClickListeners()
     }
 
-    override fun observeViewModel() {
+    override fun observeFieldCreatorViewModel() {
         fieldCreatorViewModel.fieldConfig.observe(viewLifecycleOwner) { state ->
             updateRadioButtons(state.isHorizontal)
-            nextButton.isEnabled = true
+            nextButton.isEnabled = state.isHorizontal != null
         }
     }
 
@@ -59,11 +59,23 @@ class FieldCreatorDirectionFragment : FieldCreatorBaseFragment() {
         fieldCreatorViewModel.updateDirection(isHorizontal)
     }
 
-    private fun updateRadioButtons(isHorizontal: Boolean) {
+    private fun updateRadioButtons(isHorizontal: Boolean?) {
         directionRadioGroup.setOnCheckedChangeListener(null)
 
-        radioHorizontal.isChecked = isHorizontal
-        radioVertical.isChecked = !isHorizontal
+        when (isHorizontal) {
+            true -> {
+                radioHorizontal.isChecked = true
+                radioVertical.isChecked = false
+            }
+            false -> {
+                radioHorizontal.isChecked = false
+                radioVertical.isChecked = true
+            }
+            null -> {
+                radioHorizontal.isChecked = false
+                radioVertical.isChecked = false
+            }
+        }
 
         enableDirectionRadioListener()
     }

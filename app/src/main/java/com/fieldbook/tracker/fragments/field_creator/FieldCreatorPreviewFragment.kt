@@ -37,7 +37,7 @@ class FieldCreatorPreviewFragment : FieldCreatorBaseFragment() {
         setupCreateButton()
     }
 
-    override fun observeViewModel() {
+    override fun observeFieldCreatorViewModel() {
         fieldCreatorViewModel.fieldConfig.observe(viewLifecycleOwner) { state ->
             fieldSummaryText.text = String.format(getString(R.string.field_creator_preview_summary), state.fieldName, state.rows, state.cols)
 
