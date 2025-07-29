@@ -99,6 +99,10 @@
     <string name="menu_collapse_all">Recolher Tudo</string>
     <string name="menu_expand_all">Expandir Tudo</string>
     <string name="archive_active_field_title">Arquivar Campo Ativo?</string>
+    <string name="archive_active_field_message">Você selecionou o campo ativo para arquivar. Se continuar, não haverá nenhum campo ativo. Você deseja continuar?</string>
+    <string name="archive_others">Arquivar Outros</string>
+    <string name="dialog_unarchive_field_title">Desarquivar Campo?</string>
+    <string name="dialog_unarchive_field_message">Este campo está arquivado atualmente. Se continuar, este campo será desarquivado e se tornará o campo ativo. Deseja continuar?</string>
     <!-- FIELDS -->
     <!-- General -->
     <string name="menu_fields_sort_list">Organizar Lista de Campos</string>
@@ -1151,6 +1155,7 @@
     <string name="list_item_color_close_content_description">Excluir esta cor</string>
     <string name="delete_color">Excluir Observação de Cor</string>
     <string name="delete_color_message">Isto irá excluir permanentemente a observação</string>
+    <string name="nix_device_connecting">Dispositivo está conectando.</string>
     <string name="brapi_studies_filter_title">Estudos</string>
     <string name="brapi_trials_filter_title">Estudos</string>
     <string name="brapi_filter_dialog_title">Filtrar Por</string>
@@ -1275,9 +1280,15 @@
     <string name="preferences_preferences_title">Preferências</string>
     <string name="nearby_share_export_preferences">Exportar Preferências</string>
     <string name="nearby_share_import_preferences">Importar Preferências</string>
+    <string name="all_fields_processed">Todos os campos processados</string>
+    <string name="spectral_trait_insert_note">Nota</string>
+    <string name="spectral_trait_insert_note_message">Escrever uma nota para a entrada selecionada.</string>
+    <string name="trait_spectral_na_content_description">valor espaço reservado não aplicável</string>
+    <string name="act_collect_barcode_spectral">Neste momento, não é possível coletar dados spectrais via entrada de código de barras.</string>
     <string name="replace_observations">Apagar e Substituir</string>
     <string name="replace_observations_message">Observações já existem, você gostaria de excluí-las e inserir um valor de NA?</string>
     <string name="usb_device_description">USB</string>
+    <string name="not_yet_implemented">Este recurso ainda não está implementado.</string>
     <string name="view_trait_nix_color_option">Cor</string>
     <string name="view_trait_nix_spectral_option">Espectral</string>
     <string name="nix_trait_settings_title">Configurações de %s</string>
