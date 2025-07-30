@@ -36,7 +36,7 @@ import com.fieldbook.tracker.utilities.FieldPlotCalculator
 import com.fieldbook.tracker.utilities.FieldStartCorner
 import com.fieldbook.tracker.views.FieldCreationStep
 import com.fieldbook.tracker.views.FieldCreatorStepper
-import com.fieldbook.tracker.views.FieldPreviewGrid
+import com.fieldbook.tracker.views.FieldPreviewGridOld
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -277,7 +277,7 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
                         .fillMaxWidth()
                         .padding(16.dp)
                 ) {
-                    FieldPreviewGrid(
+                    FieldPreviewGridOld(
                         config = fieldConfig.copy(showHeaders = true),
                         onCornerSelected = { corner ->
                             fieldConfig = fieldConfig.copy(startCorner = corner)
@@ -374,7 +374,7 @@ class FieldCreatorDialogFragment(private val activity: ThemedActivity) :
                     .fillMaxWidth()
                     .padding(8.dp)
             ) {
-                FieldPreviewGrid(
+                FieldPreviewGridOld(
                     config = fieldConfig.copy(showHeaders = false),
                     showPlotNumbers = true,
                     selectedCorner = fieldConfig.startCorner

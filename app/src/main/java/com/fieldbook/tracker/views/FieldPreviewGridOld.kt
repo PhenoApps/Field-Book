@@ -1,51 +1,42 @@
 package com.fieldbook.tracker.views
 
-import android.util.TypedValue
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.fieldbook.tracker.R
 import eu.wewox.lazytable.LazyTable
 import eu.wewox.lazytable.LazyTableItem
 import eu.wewox.lazytable.lazyTableDimensions
 import eu.wewox.lazytable.lazyTablePinConfiguration
+import com.fieldbook.tracker.utilities.FieldConfig
 import com.fieldbook.tracker.utilities.FieldStartCorner
 import com.fieldbook.tracker.utilities.FieldPlotCalculator
-import com.fieldbook.tracker.viewmodels.FieldConfig
 import eu.wewox.lazytable.LazyTableScope
 
 @Composable
-fun FieldPreviewGrid(
+fun FieldPreviewGridOld(
     config: FieldConfig,
     onCornerSelected: ((FieldStartCorner) -> Unit)? = null,
     selectedCorner: FieldStartCorner? = null,
     showPlotNumbers: Boolean = false,
-    height: Float = 200f,
-    showHeaders: Boolean = false
+    height: Float = 200f
 ) {
     if (config.rows <= 0 || config.cols <= 0) return
 
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(height.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
+            .height(height.dp)
     ) {
         LazyTable(
             dimensions = lazyTableDimensions(
@@ -58,7 +49,7 @@ fun FieldPreviewGrid(
                 rows = 0
             )
         ) {
-            if (showHeaders) {
+            if (config.showHeaders) {
                 renderGridWithHeaders(
                     lazyTable = this,
                     config = config,
@@ -90,9 +81,9 @@ private fun renderGridWithHeaders(
         layoutInfo = { LazyTableItem(column = it, row = 0) }
     ) { index ->
         if (index == 0) {
-            HeaderCell(text = "")
+            HeaderCell(text = "", config = config)
         } else {
-            HeaderCell(text = index.toString())
+            HeaderCell(text = index.toString(), config = config)
         }
     }
 
@@ -110,7 +101,7 @@ private fun renderGridWithHeaders(
 
         if (column == 0) {
             // row headers
-            HeaderCell(text = row.toString())
+            HeaderCell(text = row.toString(), config = config)
         } else {
             // data cells
             val isCorner = isCornerCell(row - 1, column - 1, config.rows, config.cols)
@@ -120,7 +111,7 @@ private fun renderGridWithHeaders(
             val isSelected = cornerType != null && cornerType == selectedCorner
 
             val plotNumber = if (showPlotNumbers && selectedCorner != null) {
-                FieldPlotCalculator.calculatePlotNumber(
+                FieldPlotCalculator.calculatePlotNumberOld(
                     rowIndex = row - 1,
                     colIndex = column - 1,
                     config = config.copy(startCorner = selectedCorner)
@@ -129,6 +120,7 @@ private fun renderGridWithHeaders(
 
             DataCell(
                 value = plotNumber?.toString() ?: "",
+                config = config,
                 isCorner = isCorner,
                 isSelected = isSelected,
                 onClick = if (isCorner && onCornerSelected != null) {
@@ -156,7 +148,7 @@ private fun renderGridWithoutHeaders(
         val column = index % config.cols
 
         val plotNumber = if (showPlotNumbers) {
-            FieldPlotCalculator.calculatePlotNumber(
+            FieldPlotCalculator.calculatePlotNumberOld(
                 rowIndex = row,
                 colIndex = column,
                 config = config
@@ -165,6 +157,7 @@ private fun renderGridWithoutHeaders(
 
         DataCell(
             value = plotNumber?.toString() ?: "",
+            config = config,
             isCorner = false,
             isSelected = false,
             onClick = null
@@ -180,13 +173,11 @@ private fun isCornerCell(row: Int, col: Int, rows: Int, cols: Int): Boolean {
 }
 
 @Composable
-private fun HeaderCell(text: String) {
-    val (cellTextColor, _, headerCellBgColor) = getColors()
-
+private fun HeaderCell(text: String, config: FieldConfig) {
     TableCell(
         text = text,
-        backgroundColor = Color(headerCellBgColor),
-        textColor = if (cellTextColor == 0) Color.Black else Color(cellTextColor),
+        backgroundColor = Color(config.headerCellBgColor),
+        textColor = if (config.cellTextColor == 0) Color.Black else Color(config.cellTextColor),
         isBorderVisible = false
     )
 }
@@ -194,20 +185,19 @@ private fun HeaderCell(text: String) {
 @Composable
 private fun DataCell(
     value: String,
+    config: FieldConfig,
     isCorner: Boolean = false,
     isSelected: Boolean = false,
     onClick: (() -> Unit)? = null
 ) {
-    val (cellTextColor, cellBgColor, _) = getColors()
-
     TableCell(
         text = value,
         backgroundColor = when {
             isSelected -> Color.Blue.copy(alpha = 0.3f)
             isCorner -> Color.Gray.copy(alpha = 0.2f)
-            else -> Color(cellBgColor)
+            else -> Color(config.cellBgColor)
         },
-        textColor = Color(cellTextColor),
+        textColor = Color(config.cellTextColor),
         onClick = onClick
     )
 }
@@ -241,24 +231,5 @@ private fun TableCell(
             color = textColor,
             textAlign = TextAlign.Center
         )
-    }
-}
-
-@Composable
-private fun getColors(): Triple<Int, Int, Int> {
-    val context = LocalContext.current
-    return remember {
-        val typedValue = TypedValue()
-        val theme = context.theme
-
-        theme.resolveAttribute(R.attr.cellTextColor, typedValue, true)
-        val cellTextColor = typedValue.data
-
-        theme.resolveAttribute(R.attr.emptyCellColor, typedValue, true)
-        val cellBgColor = typedValue.data
-
-        val headerCellBgColor = android.graphics.Color.WHITE
-
-        Triple(cellTextColor, cellBgColor, headerCellBgColor)
     }
 }

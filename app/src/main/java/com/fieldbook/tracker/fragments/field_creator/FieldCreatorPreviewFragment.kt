@@ -8,11 +8,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.compose.material3.*
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.viewmodels.FieldCreationResult
 import com.fieldbook.tracker.views.FieldCreationStep
-import com.fieldbook.tracker.views.FieldGrid
+import com.fieldbook.tracker.views.FieldPreviewGrid
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 
@@ -83,11 +82,11 @@ class FieldCreatorPreviewFragment : FieldCreatorBaseFragment() {
     private fun setupPreviewGrid(state: com.fieldbook.tracker.viewmodels.FieldConfig) {
         fieldPreviewGrid.setContent {
             MaterialTheme {
-                FieldGrid(
-                    rows = state.rows,
-                    cols = state.cols,
-                    showCornerButtons = false,
-                    maxSize = 400.dp
+                FieldPreviewGrid(
+                    config = state,
+                    showPlotNumbers = true,
+                    height = 400f,
+                    showHeaders = false
                 )
             }
         }
