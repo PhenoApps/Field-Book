@@ -222,6 +222,8 @@
     <string name="field_creator_preview_large_field_warning">Large field detected. Creating many plots may take some time.</string>
     <string name="field_creator_preview_creating_field">Creating field…</string>
     <string name="field_creator_preview_create_button">Create Field</string>
+    <string name="field_creator_preview_expand_button">Expand Grid</string>
+    <string name="field_creator_preview_collapse_button">Collapse Grid</string>
 
     <string name="dialog_field_creator_ask_name_hint">Name</string>
     <string name="dialog_field_creator_ask_row_hint">Rows</string>

@@ -25,6 +25,8 @@ class FieldCreatorPreviewFragment : FieldCreatorBaseFragment() {
     private lateinit var fieldPreviewGrid: ComposeView
     private lateinit var progressContainer: LinearLayout
     private lateinit var createFieldButton: MaterialButton
+    private lateinit var toggleViewButton: MaterialButton
+    private var previewState = PreviewState()
 
     override fun setupViews(view: View) {
         fieldSummaryText = view.findViewById(R.id.field_summary_text)
@@ -32,8 +34,10 @@ class FieldCreatorPreviewFragment : FieldCreatorBaseFragment() {
         fieldPreviewGrid = view.findViewById(R.id.field_preview_grid)
         progressContainer = view.findViewById(R.id.progress_container)
         createFieldButton = view.findViewById(R.id.create_field_button)
+        toggleViewButton = view.findViewById(R.id.toggle_view_button)
 
         setupCreateButton()
+        setupToggleButton()
     }
 
     override fun observeFieldCreatorViewModel() {
@@ -79,16 +83,46 @@ class FieldCreatorPreviewFragment : FieldCreatorBaseFragment() {
         }
     }
 
+    private fun setupToggleButton() {
+        toggleViewButton.setOnClickListener {
+            previewState = previewState.copy(isExpandedView = !previewState.isExpandedView)
+            updateToggleButtonText()
+            // refresh the grid
+            fieldCreatorViewModel.fieldConfig.value?.let { setupPreviewGrid(it) }
+        }
+    }
+
+    private fun updateToggleButtonText() {
+        toggleViewButton.text = if (previewState.isExpandedView) {
+            getString(R.string.field_creator_preview_collapse_button)
+        } else {
+            getString(R.string.field_creator_preview_expand_button)
+        }
+    }
+
     private fun setupPreviewGrid(state: com.fieldbook.tracker.viewmodels.FieldConfig) {
         fieldPreviewGrid.setContent {
             MaterialTheme {
                 FieldPreviewGrid(
                     config = state,
                     showPlotNumbers = true,
-                    height = 400f,
-                    showHeaders = false
+                    showHeaders = false,
+                    forceFullView = previewState.isExpandedView,
+                    onCollapsingStateChanged = { needsCollapsing ->
+                        // only update canCollapse when not in forced view
+                        if (!previewState.isExpandedView) {
+                            previewState = previewState.copy(canCollapse = needsCollapsing)
+                        }
+                        // show button if we grid can be collapsed/expanded
+                        toggleViewButton.visibility = if (previewState.canCollapse) View.VISIBLE else View.GONE
+                    }
                 )
             }
         }
     }
+
+    private data class PreviewState(
+        val isExpandedView: Boolean = false,
+        val canCollapse: Boolean = false
+    )
 }

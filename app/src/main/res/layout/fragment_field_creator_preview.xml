@@ -75,14 +75,30 @@
             android:gravity="center" />
     </LinearLayout>
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/toggle_view_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/field_creator_preview_expand_button"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone"
+        android:textColor="?attr/fb_color_text_high_contrast_inverted"
+        android:background="@drawable/cell"
+        android:backgroundTint="?attr/fb_color_primary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/warning_card"
+        app:layout_constraintBottom_toTopOf="@id/field_preview_grid" />
+
     <androidx.compose.ui.platform.ComposeView
         android:id="@+id/field_preview_grid"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/warning_card"
+        app:layout_constraintTop_toBottomOf="@id/toggle_view_button"
         app:layout_constraintBottom_toTopOf="@id/create_field_button"
+        android:layout_marginBottom="20dp"
         app:layout_constraintVertical_bias="0.0" />
 
     <com.google.android.material.button.MaterialButton
