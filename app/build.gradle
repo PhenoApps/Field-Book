@@ -136,6 +136,9 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
 
 dependencies {
 
+    //seven segment display compose ui
+    implementation 'com.github.rabross:SegmentedDisplay:0.4.0'
+
     //add zebra jar file to dependencies
     implementation fileTree(include: ['*.jar', '*.aar'], dir: 'libs')
 

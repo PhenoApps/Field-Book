@@ -3,7 +3,6 @@ package com.fieldbook.tracker.traits
 import android.app.AlertDialog
 import android.content.Context
 import android.net.ConnectivityManager
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
@@ -13,7 +12,7 @@ import androidx.core.content.edit
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.database.basicTimeFormatter
-import com.fieldbook.tracker.database.saver.NixSpectralSaver
+import com.fieldbook.tracker.database.saver.SpectralSaver
 import com.fieldbook.tracker.devices.spectrometers.Device
 import com.fieldbook.tracker.devices.spectrometers.SpectralFrame
 import com.fieldbook.tracker.devices.spectrometers.Spectrometer.ResultCallback
@@ -47,7 +46,7 @@ class NixTraitLayout : SpectralTraitLayout {
 
 
     private var recursionCount = 0
-    private val nixSaver = NixSpectralSaver(database)
+    private val nixSaver = SpectralSaver(database)
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
@@ -145,7 +144,7 @@ class NixTraitLayout : SpectralTraitLayout {
         background.launch {
 
             nixSaver.saveData(
-                NixSpectralSaver.RequiredData(
+                SpectralSaver.RequiredData(
                     viewModel = controller.getSpectralViewModel(),
                     deviceAddress = deviceAddress,
                     deviceName = deviceName,
@@ -497,7 +496,11 @@ class NixTraitLayout : SpectralTraitLayout {
                             .mapIndexed { i, w -> w }
                             .joinToString(" ") { fl -> fl.toString() }
 
-                        frame.values = data.spectralData!!.value.joinToString(" ") { it.toString() }
+                        frame.values = if (state == State.Spectral) {
+                            data.spectralData!!.value.joinToString(" ") { it.toString() }
+                        } else {
+                            "0000"
+                        }
 
                     }
 
