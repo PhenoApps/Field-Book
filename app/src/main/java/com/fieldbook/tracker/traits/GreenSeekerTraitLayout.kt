@@ -468,11 +468,11 @@ class GreenSeekerTraitLayout : BaseTraitLayout, LineGraphSelectableAdapter.Liste
                         }
                     }
 
-                    override fun onDataReceived(ndviValue: Float) {
+                    override fun onDataReceived(ndviValue: Int) {
                         ndviValues.add(ndviValue)
                     }
 
-                    override fun onAverageReceived(ndviValue: Float) {
+                    override fun onAverageReceived(ndviValue: Int) {
 //                        scope.launch {
 //                            controller.getInputView().text = ndviValue.toString()
 //                        }
@@ -487,20 +487,21 @@ class GreenSeekerTraitLayout : BaseTraitLayout, LineGraphSelectableAdapter.Liste
         //Toast.makeText(context, R.string.device_connected, Toast.LENGTH_SHORT).show()
     }
 
-    private var ndviValues = mutableListOf<Float>()
+    private var ndviValues = mutableListOf<Int>()
 
     private fun saveNdviValues() {
 
         //use spectral tables to save values
         if (ndviValues.isEmpty()) {
-            //Toast.makeText(context, R.string.no_data_captured, Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, R.string.no_data_captured, Toast.LENGTH_SHORT).show()
+            submitList()
             return
         }
 
         val entryId = currentRange.uniqueId
         val traitId = currentTrait.id
 
-        val avgString = ndviValues.average().toString()
+        val avgString = (ndviValues.average() / 100.0).toString()
         val average = avgString.substring(0, min(5, avgString.length))
 
         scope.launch(Dispatchers.Main) {

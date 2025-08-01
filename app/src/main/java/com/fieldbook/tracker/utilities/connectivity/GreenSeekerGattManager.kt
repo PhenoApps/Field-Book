@@ -98,8 +98,8 @@ class GreenSeekerGattManager @Inject constructor(
         fun onTriggerUp()
         fun onDeviceConnected()
         fun onDeviceDisconnected()
-        fun onDataReceived(ndviValue: Float)
-        fun onAverageReceived(ndviValue: Float)
+        fun onDataReceived(ndviValue: Int)
+        fun onAverageReceived(ndviValue: Int)
         fun onError(message: String)
     }
 
@@ -180,7 +180,7 @@ class GreenSeekerGattManager @Inject constructor(
                     // Handle data read Normalized Difference Vegetation Index (NDVI) fom 0.00 to 0.99
                     //https://ascommunications.co.uk/wp-content/uploads/2021/11/Greenseeker-Handheld-Quick-Reference-Guide-VEW.pdf
                     //Log.d("GATT", "NDVI Value: $ndviValue")
-                    listener?.onDataReceived(ndviValue / 100.0f)
+                    listener?.onDataReceived(ndviValue)
                 }
                 "u" -> {
                     //Log.d("GreenSeeker", "Device Trigger Up")
@@ -189,7 +189,7 @@ class GreenSeekerGattManager @Inject constructor(
                 "a" -> {
                     // Log.d("GreenSeeker", "Device Trigger Average")
                     //Log.d("GATT", "NDVI Avg Value: $ndviValue")
-                    listener?.onAverageReceived(ndviValue / 100.0f)
+                    listener?.onAverageReceived(ndviValue)
                 }
                 "e" -> {
                     //error to close or far
@@ -205,7 +205,7 @@ class GreenSeekerGattManager @Inject constructor(
                      */
                 }
             }
-            //Log.d("GATT", "Trigger: $trigger ${value.joinToString(", ")}")
+            Log.d("GreenSeeker", "Trigger: $trigger $ndviValue ${value.joinToString(", ")}")
         }
 
         override fun onCharacteristicWrite(
