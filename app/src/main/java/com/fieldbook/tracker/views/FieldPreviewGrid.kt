@@ -102,7 +102,9 @@ fun FieldPreviewGrid(
                         lazyTable = this,
                         config = config,
                         gridConfig = gridConfig,
-                        showPlotNumbers = showPlotNumbers
+                        showPlotNumbers = showPlotNumbers,
+                        selectedCorner = selectedCorner,
+                        onCornerSelected = onCornerSelected
                     )
                 }
             }
@@ -222,10 +224,10 @@ private fun renderCollapsedGridWithHeaders(
                             colIndex = actualColIndex,
                             config = config.copy(startCorner = selectedCorner)
                         )
-                    } else null
+                    } else ""
 
                     DataCell(
-                        value = plotNumber?.toString() ?: "",
+                        value = plotNumber.toString(),
                         isCorner = isCorner,
                         isSelected = isSelected,
                         onClick = if (isCorner && onCornerSelected != null) {
@@ -242,7 +244,9 @@ private fun renderCollapsedGridWithoutHeaders(
     lazyTable: LazyTableScope,
     config: FieldConfig,
     gridConfig: GridDisplayConfig,
-    showPlotNumbers: Boolean
+    showPlotNumbers: Boolean,
+    selectedCorner: FieldStartCorner? = null,
+    onCornerSelected: ((FieldStartCorner) -> Unit)? = null
 ) {
     lazyTable.items(
         count = gridConfig.displayRows * gridConfig.displayCols,
@@ -261,6 +265,12 @@ private fun renderCollapsedGridWithoutHeaders(
         when {
             actualRowIndex == -1 || actualColIndex == -1 -> EllipsisCell()
             else -> {
+                val isCorner = isCornerCell(actualRowIndex, actualColIndex, config.rows, config.cols)
+                val cornerType = if (isCorner)
+                    FieldStartCorner.fromPosition(actualRowIndex, actualColIndex, config.rows, config.cols)
+                else null
+                val isSelected = cornerType != null && cornerType == selectedCorner
+
                 val plotNumber = if (showPlotNumbers) {
                     FieldPlotCalculator.calculatePlotNumber(
                         rowIndex = actualRowIndex,
@@ -271,9 +281,11 @@ private fun renderCollapsedGridWithoutHeaders(
 
                 DataCell(
                     value = plotNumber.toString(),
-                    isCorner = false,
-                    isSelected = false,
-                    onClick = null
+                    isCorner = isCorner,
+                    isSelected = isSelected,
+                    onClick = if (isCorner && onCornerSelected != null) {
+                        { cornerType?.let { onCornerSelected(it) } }
+                    } else null
                 )
             }
         }
@@ -328,10 +340,10 @@ private fun renderGridWithHeaders(
                     colIndex = column - 1,
                     config = config.copy(startCorner = selectedCorner)
                 )
-            } else null
+            } else ""
 
             DataCell(
-                value = plotNumber?.toString() ?: "",
+                value = plotNumber.toString(),
                 isCorner = isCorner,
                 isSelected = isSelected,
                 onClick = if (isCorner && onCornerSelected != null) {

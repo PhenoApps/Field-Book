@@ -9,6 +9,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.viewmodels.FieldConfig
 import com.fieldbook.tracker.views.FieldCreationStep
 import com.fieldbook.tracker.views.FieldGrid
+import com.fieldbook.tracker.views.FieldPreviewGrid
 import com.google.android.material.button.MaterialButton
 
 class FieldCreatorStartCornerFragment : FieldCreatorBaseFragment() {
@@ -49,14 +50,14 @@ class FieldCreatorStartCornerFragment : FieldCreatorBaseFragment() {
 
         startPointContainer.setContent {
             MaterialTheme {
-                FieldGrid(
-                    rows = state.rows,
-                    cols = state.cols,
-                    showCornerButtons = true,
+                FieldPreviewGrid(
+                    config = state,
                     selectedCorner = state.startCorner,
                     onCornerSelected = { corner ->
                         fieldCreatorViewModel.updateStartCorner(corner)
-                    }
+                    },
+                    showPlotNumbers = false,
+                    forceFullView = false
                 )
             }
         }

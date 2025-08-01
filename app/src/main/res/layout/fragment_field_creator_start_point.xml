@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         style="@style/TextAppearance.AppCompat.Body1"
         android:gravity="center"
-        android:layout_marginBottom="4dp"
+        android:layout_marginBottom="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/title_text" />
@@ -36,21 +36,20 @@
         style="@style/TextAppearance.AppCompat.Caption"
         android:textColor="?android:attr/textColorSecondary"
         android:gravity="center"
-        android:layout_marginBottom="4dp"
+        android:layout_marginBottom="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/field_dimensions_text"
-        app:layout_constraintBottom_toTopOf="@id/start_point_container" />
+        app:layout_constraintTop_toBottomOf="@id/field_dimensions_text" />
 
     <androidx.compose.ui.platform.ComposeView
         android:id="@+id/start_point_container"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginBottom="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/instruction_text"
-        app:layout_constraintBottom_toTopOf="@id/next_button"
-        app:layout_constraintVertical_bias="0" />
+        app:layout_constraintBottom_toTopOf="@id/next_button" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/next_button"
