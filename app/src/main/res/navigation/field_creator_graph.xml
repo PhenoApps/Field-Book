@@ -42,6 +42,13 @@
         <action android:id="@+id/action_field_created"
             app:popUpTo="@id/field_creator_graph"
             app:popUpToInclusive="true"/>
+        <action android:id="@+id/action_from_preview_to_expanded_preview"
+            app:destination="@+id/expanded_preview_fragment"/>
+    </fragment>
+
+    <fragment android:id="@+id/expanded_preview_fragment"
+        android:name="com.fieldbook.tracker.fragments.field_creator.FieldCreatorExpandedPreviewFragment"
+        android:label="Expanded Preview">
     </fragment>
 
 </navigation>

@@ -3,6 +3,7 @@ package com.fieldbook.tracker.activities
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.widget.Toolbar
 import androidx.compose.material3.MaterialTheme
@@ -68,6 +69,14 @@ class FieldCreatorActivity : ThemedActivity() {
         fieldCreatorViewModel.currentStep.observe(this) { step ->
             setupStepper(step)
         }
+    }
+
+    fun hideStepperView() {
+        stepperView.visibility = View.GONE
+    }
+
+    fun showStepperView() {
+        stepperView.visibility = View.VISIBLE
     }
 
     private fun getCurrentStepFromViewModel(): FieldCreationStep {

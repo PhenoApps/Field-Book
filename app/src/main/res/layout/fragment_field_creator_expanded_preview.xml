@@ -6,10 +6,10 @@
     android:padding="16dp">
 
     <TextView
-        android:id="@+id/title_text"
+        android:id="@+id/expanded_title_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/field_creator_preview_title"
+        android:text="@string/field_creator_expanded_preview_title"
         style="@style/TextAppearance.AppCompat.Title"
         android:gravity="center"
         android:layout_marginBottom="16dp"
@@ -18,7 +18,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/field_summary_text"
+        android:id="@+id/expanded_field_summary_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         style="@style/TextViewStyle"
@@ -26,42 +26,22 @@
         android:layout_marginBottom="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/title_text" />
-
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/warning_card"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:visibility="gone"
-        app:cardCornerRadius="8dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/field_summary_text">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/field_creator_preview_large_field_warning"
-            android:textAppearance="?attr/textAppearanceBodyMedium"
-            android:padding="16dp" />
-
-    </com.google.android.material.card.MaterialCardView>
+        app:layout_constraintTop_toBottomOf="@id/expanded_title_text" />
 
     <LinearLayout
-        android:id="@+id/progress_container"
+        android:id="@+id/expanded_progress_container"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/create_field_button"
-        app:layout_constraintTop_toBottomOf="@id/warning_card"
+        app:layout_constraintBottom_toTopOf="@id/expanded_create_field_button"
+        app:layout_constraintTop_toBottomOf="@id/expanded_field_summary_text"
         app:layout_constraintVertical_bias="1.0">
 
         <com.google.android.material.progressindicator.LinearProgressIndicator
-            android:id="@+id/progress_indicator"
+            android:id="@+id/expanded_progress_indicator"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
@@ -75,34 +55,18 @@
             android:gravity="center" />
     </LinearLayout>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/expand_view_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/field_creator_preview_expand_button"
-        android:layout_marginBottom="8dp"
-        android:visibility="gone"
-        android:textColor="?attr/fb_color_text_high_contrast_inverted"
-        android:background="@drawable/cell"
-        android:backgroundTint="?attr/fb_color_primary"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/warning_card"
-        app:layout_constraintBottom_toTopOf="@id/field_preview_grid" />
-
     <androidx.compose.ui.platform.ComposeView
-        android:id="@+id/field_preview_grid"
+        android:id="@+id/expanded_field_preview_grid"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/expand_view_button"
-        app:layout_constraintBottom_toTopOf="@id/create_field_button"
-        android:layout_marginBottom="20dp"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toBottomOf="@id/expanded_field_summary_text"
+        app:layout_constraintBottom_toTopOf="@id/expanded_create_field_button"
+        android:layout_marginBottom="20dp" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/create_field_button"
+        android:id="@+id/expanded_create_field_button"
         android:layout_width="0dp"
         android:layout_height="56dp"
         android:text="@string/field_creator_preview_create_button"

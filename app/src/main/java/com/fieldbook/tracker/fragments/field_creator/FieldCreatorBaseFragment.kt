@@ -1,14 +1,22 @@
 package com.fieldbook.tracker.fragments.field_creator
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.viewmodels.FieldCreationResult
 import com.fieldbook.tracker.viewmodels.FieldCreatorViewModel
 import com.fieldbook.tracker.views.FieldCreationStep
+import com.google.android.material.button.MaterialButton
 
 abstract class FieldCreatorBaseFragment : Fragment() {
 
@@ -54,4 +62,48 @@ abstract class FieldCreatorBaseFragment : Fragment() {
     }
 
     protected open fun observeFieldCreatorViewModel() { }
+
+    protected fun setupFieldSummaryInfo(fieldSummaryText: TextView) {
+        fieldCreatorViewModel.fieldConfig.observe(viewLifecycleOwner) { state ->
+            fieldSummaryText.text = String.format(
+                getString(R.string.field_creator_preview_summary),
+                state.fieldName,
+                state.rows,
+                state.cols
+            )
+        }
+    }
+
+    protected fun setupFieldCreationObserver(progressContainer: LinearLayout, createFieldButton: MaterialButton) {
+        createFieldButton.setOnClickListener {
+            fieldCreatorViewModel.createField(db, context)
+        }
+
+        fieldCreatorViewModel.creationResult.observe(viewLifecycleOwner) { result ->
+            when (result) {
+                is FieldCreationResult.Loading -> {
+                    progressContainer.visibility = View.VISIBLE
+                    createFieldButton.isEnabled = false
+                }
+                is FieldCreationResult.Success -> {
+                    progressContainer.visibility = View.GONE
+                    activity?.let { activity ->
+                        val resultIntent = Intent().apply {
+                            putExtra("fieldId", result.studyDbId)
+                        }
+                        activity.setResult(Activity.RESULT_OK, resultIntent)
+                        activity.finish()
+                    }
+                }
+                is FieldCreationResult.Error -> {
+                    progressContainer.visibility = View.GONE
+                    createFieldButton.isEnabled = true
+                    Toast.makeText(context, "Failed to create field: ${result.message}", Toast.LENGTH_SHORT).show()
+                }
+                null -> {
+                    // initial state - do nothing
+                }
+            }
+        }
+    }
 }

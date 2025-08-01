@@ -1,15 +1,12 @@
 package com.fieldbook.tracker.fragments.field_creator
 
-import android.app.Activity
-import android.content.Intent
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.compose.material3.*
 import androidx.compose.ui.platform.ComposeView
+import androidx.navigation.fragment.findNavController
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.viewmodels.FieldCreationResult
 import com.fieldbook.tracker.views.FieldCreationStep
 import com.fieldbook.tracker.views.FieldPreviewGrid
 import com.google.android.material.button.MaterialButton
@@ -25,8 +22,7 @@ class FieldCreatorPreviewFragment : FieldCreatorBaseFragment() {
     private lateinit var fieldPreviewGrid: ComposeView
     private lateinit var progressContainer: LinearLayout
     private lateinit var createFieldButton: MaterialButton
-    private lateinit var toggleViewButton: MaterialButton
-    private var previewState = PreviewState()
+    private lateinit var expandViewButton: MaterialButton
 
     override fun setupViews(view: View) {
         fieldSummaryText = view.findViewById(R.id.field_summary_text)
@@ -34,69 +30,25 @@ class FieldCreatorPreviewFragment : FieldCreatorBaseFragment() {
         fieldPreviewGrid = view.findViewById(R.id.field_preview_grid)
         progressContainer = view.findViewById(R.id.progress_container)
         createFieldButton = view.findViewById(R.id.create_field_button)
-        toggleViewButton = view.findViewById(R.id.toggle_view_button)
+        expandViewButton = view.findViewById(R.id.expand_view_button)
 
-        setupCreateButton()
-        setupToggleButton()
+        setupExpandButton()
     }
 
     override fun observeFieldCreatorViewModel() {
+        setupFieldSummaryInfo(fieldSummaryText)
+
+        setupFieldCreationObserver(progressContainer, createFieldButton)
+
         fieldCreatorViewModel.fieldConfig.observe(viewLifecycleOwner) { state ->
-            fieldSummaryText.text = String.format(getString(R.string.field_creator_preview_summary), state.fieldName, state.rows, state.cols)
-
             warningCard.visibility = if (state.isLargeField) View.VISIBLE else View.GONE
-
             setupPreviewGrid(state)
         }
-
-        fieldCreatorViewModel.creationResult.observe(viewLifecycleOwner) { result ->
-            when (result) {
-                is FieldCreationResult.Loading -> {
-                    progressContainer.visibility = View.VISIBLE
-                    createFieldButton.isEnabled = false
-                }
-                is FieldCreationResult.Success -> {
-                    progressContainer.visibility = View.GONE
-                    activity?.let { activity ->
-                        val resultIntent = Intent().apply {
-                            putExtra("fieldId", result.studyDbId)
-                        }
-                        activity.setResult(Activity.RESULT_OK, resultIntent)
-                        activity.finish()
-                    }
-                }
-                is FieldCreationResult.Error -> {
-                    progressContainer.visibility = View.GONE
-                    createFieldButton.isEnabled = true
-                    Toast.makeText(context, "Failed to create field: ${result.message}", Toast.LENGTH_SHORT).show()
-                }
-                null -> {
-                    // initial state - do nothing
-                }
-            }
-        }
     }
 
-    private fun setupCreateButton() {
-        createFieldButton.setOnClickListener {
-            fieldCreatorViewModel.createField(db, context)
-        }
-    }
-
-    private fun setupToggleButton() {
-        toggleViewButton.setOnClickListener {
-            previewState = previewState.copy(isExpandedView = !previewState.isExpandedView)
-            updateToggleButtonText()
-            // refresh the grid
-            fieldCreatorViewModel.fieldConfig.value?.let { setupPreviewGrid(it) }
-        }
-    }
-
-    private fun updateToggleButtonText() {
-        toggleViewButton.text = if (previewState.isExpandedView) {
-            getString(R.string.field_creator_preview_collapse_button)
-        } else {
-            getString(R.string.field_creator_preview_expand_button)
+    private fun setupExpandButton() {
+        expandViewButton.setOnClickListener {
+            findNavController().navigate(FieldCreatorPreviewFragmentDirections.actionFromPreviewToExpandedPreview())
         }
     }
 
@@ -107,22 +59,13 @@ class FieldCreatorPreviewFragment : FieldCreatorBaseFragment() {
                     config = state,
                     showPlotNumbers = true,
                     showHeaders = false,
-                    forceFullView = previewState.isExpandedView,
+                    forceFullView = false,
                     onCollapsingStateChanged = { needsCollapsing ->
-                        // only update canCollapse when not in forced view
-                        if (!previewState.isExpandedView) {
-                            previewState = previewState.copy(canCollapse = needsCollapsing)
-                        }
-                        // show button if we grid can be collapsed/expanded
-                        toggleViewButton.visibility = if (previewState.canCollapse) View.VISIBLE else View.GONE
+                        // show expand button if grid can be expanded
+                        expandViewButton.visibility = if (needsCollapsing) View.VISIBLE else View.GONE
                     }
                 )
             }
         }
     }
-
-    private data class PreviewState(
-        val isExpandedView: Boolean = false,
-        val canCollapse: Boolean = false
-    )
 }
