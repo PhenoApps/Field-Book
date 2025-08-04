@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.fragments.field_creator
 
+import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.RadioButton
@@ -7,19 +8,20 @@ import android.widget.RadioGroup
 import androidx.navigation.fragment.findNavController
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.views.FieldCreationStep
-import com.google.android.material.button.MaterialButton
 
 class FieldCreatorPatternTypeFragment : FieldCreatorBaseFragment() {
 
     override fun getCurrentStep(): FieldCreationStep = FieldCreationStep.WALKING_PATTERN
     override fun getLayoutResourceId(): Int = R.layout.fragment_field_creator_pattern_type
+    override fun onForwardClick(): (() -> Unit)? = {
+        findNavController().navigate(FieldCreatorPatternTypeFragmentDirections.actionFromPatternTypeToDirection())
+    }
 
     private lateinit var patternRadioGroup: RadioGroup
     private lateinit var radioLinear: RadioButton
     private lateinit var radioZigzag: RadioButton
     private lateinit var linearContainer: LinearLayout
     private lateinit var zigzagContainer: LinearLayout
-    private lateinit var nextButton: MaterialButton
 
     override fun setupViews(view: View) {
         patternRadioGroup = view.findViewById(R.id.pattern_radio_group)
@@ -27,7 +29,6 @@ class FieldCreatorPatternTypeFragment : FieldCreatorBaseFragment() {
         radioZigzag = view.findViewById(R.id.radio_zigzag)
         linearContainer = view.findViewById(R.id.linear_container)
         zigzagContainer = view.findViewById(R.id.zigzag_container)
-        nextButton = view.findViewById(R.id.next_button)
 
         setupClickListeners()
     }
@@ -35,7 +36,9 @@ class FieldCreatorPatternTypeFragment : FieldCreatorBaseFragment() {
     override fun observeFieldCreatorViewModel() {
         fieldCreatorViewModel.fieldConfig.observe(viewLifecycleOwner) { state ->
             updateRadioButtons(state.isZigzag)
-            nextButton.isEnabled = state.isZigzag != null
+
+            val isForwardEnabled = state.isZigzag != null
+            updateForwardButtonState(isForwardEnabled)
         }
     }
 
@@ -45,10 +48,6 @@ class FieldCreatorPatternTypeFragment : FieldCreatorBaseFragment() {
         zigzagContainer.setOnClickListener { selectPattern(true) }
 
         enablePatternRadioListener()
-
-        nextButton.setOnClickListener {
-            findNavController().navigate(FieldCreatorPatternTypeFragmentDirections.actionFromPatternTypeToDirection())
-        }
     }
 
     private fun selectPattern(isZigzag: Boolean) {

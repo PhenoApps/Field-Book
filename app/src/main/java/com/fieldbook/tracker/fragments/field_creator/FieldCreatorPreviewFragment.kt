@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.fragments.field_creator
 
 import android.view.View
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.compose.material3.*
@@ -16,12 +17,13 @@ class FieldCreatorPreviewFragment : FieldCreatorBaseFragment() {
 
     override fun getCurrentStep(): FieldCreationStep = FieldCreationStep.FIELD_PREVIEW
     override fun getLayoutResourceId(): Int = R.layout.fragment_field_creator_preview
+    override fun onForwardClick(): (() -> Unit)? = null
 
     private lateinit var fieldSummaryText: TextView
     private lateinit var warningCard: MaterialCardView
     private lateinit var fieldPreviewGrid: ComposeView
     private lateinit var progressContainer: LinearLayout
-    private lateinit var createFieldButton: MaterialButton
+    private lateinit var createFieldButton: Button
     private lateinit var expandViewButton: MaterialButton
 
     override fun setupViews(view: View) {
@@ -29,8 +31,8 @@ class FieldCreatorPreviewFragment : FieldCreatorBaseFragment() {
         warningCard = view.findViewById(R.id.warning_card)
         fieldPreviewGrid = view.findViewById(R.id.field_preview_grid)
         progressContainer = view.findViewById(R.id.progress_container)
-        createFieldButton = view.findViewById(R.id.create_field_button)
         expandViewButton = view.findViewById(R.id.expand_view_button)
+        createFieldButton = view.findViewById(R.id.create_field_button)
 
         setupExpandButton()
     }

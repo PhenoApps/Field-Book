@@ -6,17 +6,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.viewmodels.FieldCreationResult
 import com.fieldbook.tracker.viewmodels.FieldCreatorViewModel
 import com.fieldbook.tracker.views.FieldCreationStep
-import com.google.android.material.button.MaterialButton
 
 abstract class FieldCreatorBaseFragment : Fragment() {
 
@@ -24,8 +25,13 @@ abstract class FieldCreatorBaseFragment : Fragment() {
 
     protected val fieldCreatorViewModel: FieldCreatorViewModel by activityViewModels()
 
+    // buttons for navigation between fragments
+    protected var backButton: ImageButton? = null
+    protected var forwardButton: ImageButton? = null
+
     protected abstract fun getCurrentStep(): FieldCreationStep
     protected abstract fun getLayoutResourceId(): Int
+    protected abstract fun onForwardClick(): (() -> Unit)?
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(getLayoutResourceId(), container, false)
@@ -33,10 +39,15 @@ abstract class FieldCreatorBaseFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        backButton = view.findViewById(R.id.back_button)
+        forwardButton = view.findViewById(R.id.forward_button)
+
         loadInitialState()
 
         updateActivityStepper()
         setupViews(view)
+        setupNavigationButtons()
 
         observeFieldCreatorViewModel()
     }
@@ -74,8 +85,8 @@ abstract class FieldCreatorBaseFragment : Fragment() {
         }
     }
 
-    protected fun setupFieldCreationObserver(progressContainer: LinearLayout, createFieldButton: MaterialButton) {
-        createFieldButton.setOnClickListener {
+    protected fun setupFieldCreationObserver(progressContainer: LinearLayout, createFieldButton: View?) {
+        createFieldButton?.setOnClickListener {
             fieldCreatorViewModel.createField(db, context)
         }
 
@@ -83,7 +94,7 @@ abstract class FieldCreatorBaseFragment : Fragment() {
             when (result) {
                 is FieldCreationResult.Loading -> {
                     progressContainer.visibility = View.VISIBLE
-                    createFieldButton.isEnabled = false
+                    createFieldButton?.isEnabled = false
                 }
                 is FieldCreationResult.Success -> {
                     progressContainer.visibility = View.GONE
@@ -97,13 +108,36 @@ abstract class FieldCreatorBaseFragment : Fragment() {
                 }
                 is FieldCreationResult.Error -> {
                     progressContainer.visibility = View.GONE
-                    createFieldButton.isEnabled = true
+                    createFieldButton?.isEnabled = true
                     Toast.makeText(context, "Failed to create field: ${result.message}", Toast.LENGTH_SHORT).show()
                 }
                 null -> {
                     // initial state - do nothing
                 }
             }
+        }
+    }
+
+    protected fun setupNavigationButtons() {
+        backButton?.setOnClickListener {
+            findNavController().popBackStack()
+        }
+
+        forwardButton?.let { button ->
+            button.isEnabled = false
+            button.alpha = 0.5f
+            button.setOnClickListener {
+                if (button.isEnabled) {
+                    onForwardClick()?.invoke()
+                }
+            }
+        }
+    }
+
+    protected fun updateForwardButtonState(enabled: Boolean) {
+        forwardButton?.let { button ->
+            button.isEnabled = enabled
+            button.alpha = if (enabled) 1.0f else 0.5f
         }
     }
 }

@@ -13,13 +13,15 @@ class FieldCreatorDirectionFragment : FieldCreatorBaseFragment() {
 
     override fun getCurrentStep(): FieldCreationStep = FieldCreationStep.WALKING_DIRECTION
     override fun getLayoutResourceId(): Int = R.layout.fragment_field_creator_direction
+    override fun onForwardClick(): (() -> Unit)? = {
+        findNavController().navigate(FieldCreatorDirectionFragmentDirections.actionFromDirectionToPreview())
+    }
 
     private lateinit var directionRadioGroup: RadioGroup
     private lateinit var radioHorizontal: RadioButton
     private lateinit var radioVertical: RadioButton
     private lateinit var horizontalContainer: LinearLayout
     private lateinit var verticalContainer: LinearLayout
-    private lateinit var nextButton: MaterialButton
 
     override fun setupViews(view: View) {
         directionRadioGroup = view.findViewById(R.id.direction_radio_group)
@@ -27,7 +29,6 @@ class FieldCreatorDirectionFragment : FieldCreatorBaseFragment() {
         radioVertical = view.findViewById(R.id.radio_vertical)
         horizontalContainer = view.findViewById(R.id.horizontal_container)
         verticalContainer = view.findViewById(R.id.vertical_container)
-        nextButton = view.findViewById(R.id.next_button)
 
         setupClickListeners()
     }
@@ -35,7 +36,9 @@ class FieldCreatorDirectionFragment : FieldCreatorBaseFragment() {
     override fun observeFieldCreatorViewModel() {
         fieldCreatorViewModel.fieldConfig.observe(viewLifecycleOwner) { state ->
             updateRadioButtons(state.isHorizontal)
-            nextButton.isEnabled = state.isHorizontal != null
+
+            val isForwardEnabled = state.isHorizontal != null
+            updateForwardButtonState(isForwardEnabled)
         }
     }
 
@@ -49,10 +52,6 @@ class FieldCreatorDirectionFragment : FieldCreatorBaseFragment() {
         }
 
         enableDirectionRadioListener()
-
-        nextButton.setOnClickListener {
-            findNavController().navigate(FieldCreatorDirectionFragmentDirections.actionFromDirectionToPreview())
-        }
     }
 
     private fun selectDirection(isHorizontal: Boolean) {

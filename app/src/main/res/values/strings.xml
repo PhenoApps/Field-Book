@@ -221,7 +221,7 @@
     <string name="field_creator_preview_summary">Field: %s (%d x %d)</string>
     <string name="field_creator_preview_large_field_warning">Large field detected. Creating many plots may take some time.</string>
     <string name="field_creator_preview_creating_field">Creating field…</string>
-    <string name="field_creator_preview_create_button">Create Field</string>
+    <string name="field_creator_preview_create_button">CREATE</string>
     <string name="field_creator_preview_expand_button">Expand Grid</string>
     <string name="field_creator_preview_collapse_button">Collapse Grid</string>
 

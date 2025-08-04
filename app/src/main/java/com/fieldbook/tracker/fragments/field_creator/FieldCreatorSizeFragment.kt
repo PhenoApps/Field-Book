@@ -1,16 +1,15 @@
 package com.fieldbook.tracker.fragments.field_creator
 
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.MenuItem
 import android.view.View
-import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import androidx.navigation.fragment.findNavController
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.activities.FieldCreatorActivity
 import com.fieldbook.tracker.views.FieldCreationStep
-import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 
@@ -18,6 +17,15 @@ class FieldCreatorSizeFragment : FieldCreatorBaseFragment() {
 
     override fun getCurrentStep(): FieldCreationStep = FieldCreationStep.FIELD_SIZE
     override fun getLayoutResourceId(): Int = R.layout.fragment_field_creator_size
+    override fun onForwardClick(): (() -> Unit)? = {
+        if (fieldCreatorViewModel.validateBasicInfo(db)) {
+            val state = fieldCreatorViewModel.fieldConfig.value
+            state?.let {
+                dismissKeyboard()
+                findNavController().navigate(FieldCreatorSizeFragmentDirections.actionFromSizeToStartPoint())
+            }
+        }
+    }
 
     private lateinit var fieldNameEditText: TextInputEditText
     private lateinit var rowsEditText: TextInputEditText
@@ -25,15 +33,10 @@ class FieldCreatorSizeFragment : FieldCreatorBaseFragment() {
     private lateinit var fieldNameInputLayout: TextInputLayout
     private lateinit var rowsInputLayout: TextInputLayout
     private lateinit var colsInputLayout: TextInputLayout
-    private lateinit var nextButton: MaterialButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -53,13 +56,13 @@ class FieldCreatorSizeFragment : FieldCreatorBaseFragment() {
         fieldNameInputLayout = view.findViewById(R.id.field_name_input_layout)
         rowsInputLayout = view.findViewById(R.id.rows_input_layout)
         colsInputLayout = view.findViewById(R.id.cols_input_layout)
-        nextButton = view.findViewById(R.id.next_button)
 
         setupTextWatchers()
-        setupButtonListener()
     }
 
     override fun observeFieldCreatorViewModel() {
+        updateForwardButtonState(true) // enable click on forward button to show validation errors
+
         fieldCreatorViewModel.fieldConfig.observe(viewLifecycleOwner) { state ->
             if (fieldNameEditText.text.toString() != state.fieldName) {
                 fieldNameEditText.setText(state.fieldName)
@@ -109,14 +112,10 @@ class FieldCreatorSizeFragment : FieldCreatorBaseFragment() {
         })
     }
 
-    private fun setupButtonListener() {
-        nextButton.setOnClickListener {
-            if (fieldCreatorViewModel.validateBasicInfo(db)) {
-                val state = fieldCreatorViewModel.fieldConfig.value
-                state?.let {
-                    findNavController().navigate(FieldCreatorSizeFragmentDirections.actionFromSizeToStartPoint())
-                }
-            }
+    private fun dismissKeyboard() {
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        view?.let { currentView ->
+            imm.hideSoftInputFromWindow(currentView.windowToken, 0)
         }
     }
 }
