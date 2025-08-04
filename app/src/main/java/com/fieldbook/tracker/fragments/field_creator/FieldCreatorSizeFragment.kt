@@ -4,9 +4,13 @@ import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import androidx.core.view.MenuProvider
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.views.FieldCreationStep
@@ -34,19 +38,23 @@ class FieldCreatorSizeFragment : FieldCreatorBaseFragment() {
     private lateinit var rowsInputLayout: TextInputLayout
     private lateinit var colsInputLayout: TextInputLayout
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
-    }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            android.R.id.home -> {
-                activity?.finish()
-                true
+        activity?.addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {}
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return when (menuItem.itemId) {
+                    android.R.id.home -> {
+                        activity?.finish()
+                        true
+                    }
+                    else -> false
+                }
             }
-            else -> super.onOptionsItemSelected(item)
-        }
+
+        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
     override fun setupViews(view: View) {
@@ -113,7 +121,7 @@ class FieldCreatorSizeFragment : FieldCreatorBaseFragment() {
     }
 
     private fun dismissKeyboard() {
-        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val imm = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         view?.let { currentView ->
             imm.hideSoftInputFromWindow(currentView.windowToken, 0)
         }
