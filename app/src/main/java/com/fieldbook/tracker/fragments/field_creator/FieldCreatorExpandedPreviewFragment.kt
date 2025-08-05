@@ -2,7 +2,7 @@ package com.fieldbook.tracker.fragments.field_creator
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.compose.material3.*
@@ -21,7 +21,7 @@ class FieldCreatorExpandedPreviewFragment : FieldCreatorBaseFragment() {
     private lateinit var fieldSummaryTv: TextView
     private lateinit var fieldGrid: ComposeView
     private lateinit var progressContainer: LinearLayout
-    private lateinit var createFieldButton: Button
+    private lateinit var createFieldButton: ImageButton
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

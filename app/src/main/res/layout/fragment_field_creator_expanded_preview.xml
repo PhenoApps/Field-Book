@@ -95,15 +95,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/bottom_navigation" />
 
-    <Button
+    <ImageButton
         android:id="@+id/create_field_button"
-        style="@style/AppIntroButtonStyleCompat"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/field_creator_preview_create_button"
-        android:textAppearance="@style/TextViewStyle.Bold"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="16dp"
+        android:background="?attr/selectableItemBackground"
+        android:contentDescription="@string/field_creator_preview_create_button"
+        android:src="@drawable/ic_check_bold"
         app:layout_constraintBottom_toBottomOf="@id/bottom_navigation"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/bottom_navigation"  />
+        app:layout_constraintTop_toTopOf="@id/bottom_navigation" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

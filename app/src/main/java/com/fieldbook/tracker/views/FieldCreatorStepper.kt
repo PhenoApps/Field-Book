@@ -115,8 +115,8 @@ fun FieldCreatorStepper(currentStep: FieldCreationStep, onStepClicked: (FieldCre
 
 enum class FieldCreationStep(val position: Int, val icon: Int?) {
     FIELD_SIZE(0, R.drawable.ic_field_config),
-    START_CORNER(1, R.drawable.ic_start_point),
-    WALKING_DIRECTION(2, R.drawable.ic_direction_horizontal_linear),
+    START_CORNER(1, R.drawable.ic_grid_corner),
+    WALKING_DIRECTION(2, R.drawable.ic_direction),
     WALKING_PATTERN(3, R.drawable.ic_walk),
     FIELD_PREVIEW(4, R.drawable.ic_field_preview),
 

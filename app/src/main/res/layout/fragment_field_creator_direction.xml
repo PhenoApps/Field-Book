@@ -31,17 +31,17 @@
             android:id="@+id/horizontal_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:focusable="true"
             android:orientation="horizontal"
             android:padding="16dp"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true">
+            android:gravity="center_vertical"
+            android:background="?attr/selectableItemBackground">
 
-            <RadioButton
-                android:id="@+id/radio_horizontal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp" />
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/ic_horizontal_dir"
+                app:tint="?attr/colorOnSurface" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -61,23 +61,29 @@
                     android:text="@string/field_creator_direction_horizontal_summary"
                     style="?attr/textAppearanceListItemSecondary" />
             </LinearLayout>
+
+            <RadioButton
+                android:id="@+id/radio_horizontal"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="16dp" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/vertical_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:focusable="true"
             android:orientation="horizontal"
             android:padding="16dp"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true">
+            android:gravity="center_vertical"
+            android:background="?attr/selectableItemBackground">
 
-            <RadioButton
-                android:id="@+id/radio_vertical"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp" />
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/ic_vertical_dir"
+                app:tint="?attr/colorOnSurface" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -97,6 +103,12 @@
                     android:text="@string/field_creator_direction_vertical_summary"
                     style="?attr/textAppearanceListItemSecondary" />
             </LinearLayout>
+
+            <RadioButton
+                android:id="@+id/radio_vertical"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="16dp" />
         </LinearLayout>
     </RadioGroup>
 

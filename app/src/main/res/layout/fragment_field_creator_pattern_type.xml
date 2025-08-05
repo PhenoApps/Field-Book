@@ -31,17 +31,20 @@
             android:id="@+id/linear_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:focusable="true"
             android:orientation="horizontal"
             android:padding="16dp"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true">
+            android:gravity="center_vertical"
+            android:focusable="true"
+            android:clickable="true"
+            android:background="?attr/selectableItemBackground">
 
-            <RadioButton
-                android:id="@+id/radio_linear"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp" />
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/ic_linear_pattern"
+                android:contentDescription="@string/field_creator_pattern_linear"
+                app:tint="?attr/colorOnSurface" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -61,23 +64,32 @@
                     android:text="@string/field_creator_pattern_linear_summary"
                     style="?attr/textAppearanceListItemSecondary" />
             </LinearLayout>
+
+            <RadioButton
+                android:id="@+id/radio_linear"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="16dp" />
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/zigzag_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:focusable="true"
             android:orientation="horizontal"
             android:padding="16dp"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true">
+            android:gravity="center_vertical"
+            android:focusable="true"
+            android:clickable="true"
+            android:background="?attr/selectableItemBackground">
 
-            <RadioButton
-                android:id="@+id/radio_zigzag"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp" />
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/ic_serpentine_pattern"
+                android:contentDescription="@string/field_creator_pattern_zigzag"
+                app:tint="?attr/colorOnSurface" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -97,6 +109,12 @@
                     android:text="@string/field_creator_pattern_zigzag_summary"
                     style="?attr/textAppearanceListItemSecondary" />
             </LinearLayout>
+
+            <RadioButton
+                android:id="@+id/radio_zigzag"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="16dp" />
         </LinearLayout>
     </RadioGroup>
 

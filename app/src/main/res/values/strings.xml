@@ -216,7 +216,7 @@
     <string name="field_creator_direction_horizontal">Horizontal</string>
     <string name="field_creator_direction_horizontal_summary">Walk across rows</string>
     <string name="field_creator_direction_vertical">Vertical</string>
-    <string name="field_creator_direction_vertical_summary">Walk down columns</string>
+    <string name="field_creator_direction_vertical_summary">Walk up/down columns</string>
 
     <string name="field_creator_preview_summary">Field: %s (%d x %d)</string>
     <string name="field_creator_preview_large_field_warning">Large field detected. Creating many plots may take some time.</string>
