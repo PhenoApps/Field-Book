@@ -120,11 +120,11 @@ class FieldCreatorActivity : ThemedActivity() {
             FieldCreationStep.START_CORNER -> {
                 config != null && config.startCorner != null
             }
-            FieldCreationStep.WALKING_PATTERN -> {
-                config != null && config.isZigzag != null
-            }
             FieldCreationStep.WALKING_DIRECTION -> {
                 config != null && config.isHorizontal != null
+            }
+            FieldCreationStep.WALKING_PATTERN -> {
+                config != null && config.isZigzag != null
             }
             FieldCreationStep.FIELD_PREVIEW -> true
             else -> false
@@ -137,8 +137,8 @@ class FieldCreatorActivity : ThemedActivity() {
         return when {
             !isStepComplete(FieldCreationStep.FIELD_SIZE, fieldConfig) -> FieldCreationStep.FIELD_SIZE
             !isStepComplete(FieldCreationStep.START_CORNER, fieldConfig) -> FieldCreationStep.START_CORNER
-            !isStepComplete(FieldCreationStep.WALKING_PATTERN, fieldConfig) -> FieldCreationStep.WALKING_PATTERN
             !isStepComplete(FieldCreationStep.WALKING_DIRECTION, fieldConfig) -> FieldCreationStep.WALKING_DIRECTION
+            !isStepComplete(FieldCreationStep.WALKING_PATTERN, fieldConfig) -> FieldCreationStep.WALKING_PATTERN
             else -> FieldCreationStep.FIELD_PREVIEW
         }
     }
@@ -147,9 +147,9 @@ class FieldCreatorActivity : ThemedActivity() {
         val targetFragmentId = when (targetStep) {
             FieldCreationStep.FIELD_SIZE -> R.id.field_size_fragment
             FieldCreationStep.START_CORNER -> R.id.start_point_fragment
-            FieldCreationStep.WALKING_PATTERN -> R.id.pattern_type_fragment
             FieldCreationStep.WALKING_DIRECTION -> R.id.direction_fragment
-            FieldCreationStep.FIELD_PREVIEW -> R.id.field_preview_fragment
+            FieldCreationStep.WALKING_PATTERN -> R.id.pattern_type_fragment
+            FieldCreationStep.FIELD_PREVIEW -> R.id.preview_fragment
             else -> return
         }
 
@@ -167,15 +167,15 @@ class FieldCreatorActivity : ThemedActivity() {
                     FieldCreationStep.START_CORNER
                 }
                 FieldCreationStep.START_CORNER -> {
-                    navController.navigate(FieldCreatorStartCornerFragmentDirections.actionFromStartPointToPatternType())
+                    navController.navigate(FieldCreatorStartCornerFragmentDirections.actionFromStartPointToDirection())
                     FieldCreationStep.WALKING_PATTERN
                 }
                 FieldCreationStep.WALKING_PATTERN -> {
-                    navController.navigate(FieldCreatorPatternTypeFragmentDirections.actionFromPatternTypeToDirection())
+                    navController.navigate(FieldCreatorPatternTypeFragmentDirections.actionFromPatternTypeToPreview())
                     FieldCreationStep.WALKING_DIRECTION
                 }
                 FieldCreationStep.WALKING_DIRECTION -> {
-                    navController.navigate(FieldCreatorDirectionFragmentDirections.actionFromDirectionToPreview())
+                    navController.navigate(FieldCreatorDirectionFragmentDirections.actionFromDirectionToPattern())
                     FieldCreationStep.FIELD_PREVIEW
                 }
                 else -> step

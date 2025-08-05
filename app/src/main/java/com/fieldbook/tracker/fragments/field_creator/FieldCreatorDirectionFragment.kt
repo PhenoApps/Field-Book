@@ -14,7 +14,7 @@ class FieldCreatorDirectionFragment : FieldCreatorBaseFragment() {
     override fun getCurrentStep(): FieldCreationStep = FieldCreationStep.WALKING_DIRECTION
     override fun getLayoutResourceId(): Int = R.layout.fragment_field_creator_direction
     override fun onForwardClick(): (() -> Unit)? = {
-        findNavController().navigate(FieldCreatorDirectionFragmentDirections.actionFromDirectionToPreview())
+        findNavController().navigate(FieldCreatorDirectionFragmentDirections.actionFromDirectionToPattern())
     }
 
     private lateinit var directionRadioGroup: RadioGroup

@@ -15,15 +15,7 @@
     <fragment android:id="@+id/start_point_fragment"
         android:name="com.fieldbook.tracker.fragments.field_creator.FieldCreatorStartCornerFragment"
         android:label="Start Point">
-        <action android:id="@+id/action_from_start_point_to_pattern_type"
-            app:destination="@+id/pattern_type_fragment">
-        </action>
-    </fragment>
-
-    <fragment android:id="@+id/pattern_type_fragment"
-        android:name="com.fieldbook.tracker.fragments.field_creator.FieldCreatorPatternTypeFragment"
-        android:label="Pattern Type">
-        <action android:id="@+id/action_from_pattern_type_to_direction"
+        <action android:id="@+id/action_from_start_point_to_direction"
             app:destination="@+id/direction_fragment">
         </action>
     </fragment>
@@ -31,12 +23,20 @@
     <fragment android:id="@+id/direction_fragment"
         android:name="com.fieldbook.tracker.fragments.field_creator.FieldCreatorDirectionFragment"
         android:label="Direction">
-        <action android:id="@+id/action_from_direction_to_preview"
-            app:destination="@+id/field_preview_fragment">
+        <action android:id="@+id/action_from_direction_to_pattern"
+            app:destination="@+id/pattern_type_fragment">
         </action>
     </fragment>
 
-    <fragment android:id="@+id/field_preview_fragment"
+    <fragment android:id="@+id/pattern_type_fragment"
+        android:name="com.fieldbook.tracker.fragments.field_creator.FieldCreatorPatternTypeFragment"
+        android:label="Pattern Type">
+        <action android:id="@+id/action_from_pattern_type_to_preview"
+            app:destination="@+id/preview_fragment">
+        </action>
+    </fragment>
+
+    <fragment android:id="@+id/preview_fragment"
         android:name="com.fieldbook.tracker.fragments.field_creator.FieldCreatorPreviewFragment"
         android:label="Preview">
         <action android:id="@+id/action_field_created"

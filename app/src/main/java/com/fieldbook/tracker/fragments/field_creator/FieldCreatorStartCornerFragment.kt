@@ -16,7 +16,7 @@ class FieldCreatorStartCornerFragment : FieldCreatorBaseFragment() {
     override fun getCurrentStep(): FieldCreationStep = FieldCreationStep.START_CORNER
     override fun getLayoutResourceId(): Int = R.layout.fragment_field_creator_start_point
     override fun onForwardClick(): (() -> Unit)? = {
-        findNavController().navigate(FieldCreatorStartCornerFragmentDirections.actionFromStartPointToPatternType())
+        findNavController().navigate(FieldCreatorStartCornerFragmentDirections.actionFromStartPointToDirection())
     }
 
     private lateinit var fieldDimensionsText: TextView

@@ -14,7 +14,7 @@ class FieldCreatorPatternTypeFragment : FieldCreatorBaseFragment() {
     override fun getCurrentStep(): FieldCreationStep = FieldCreationStep.WALKING_PATTERN
     override fun getLayoutResourceId(): Int = R.layout.fragment_field_creator_pattern_type
     override fun onForwardClick(): (() -> Unit)? = {
-        findNavController().navigate(FieldCreatorPatternTypeFragmentDirections.actionFromPatternTypeToDirection())
+        findNavController().navigate(FieldCreatorPatternTypeFragmentDirections.actionFromPatternTypeToPreview())
     }
 
     private lateinit var patternRadioGroup: RadioGroup
