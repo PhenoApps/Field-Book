@@ -185,7 +185,27 @@ class FieldCreatorActivity : ThemedActivity() {
 
 
     override fun onSupportNavigateUp(): Boolean {
-        finish()
-        return true
+        val currentStep = getCurrentStepFromViewModel()
+
+        if (currentStep.position == FieldCreationStep.FIELD_SIZE.position) { // if on first fragment, exit
+            finish()
+            return true
+        } else { // show warning before exiting
+            showExitWarningDialog()
+            return true
+        }
+    }
+
+    private fun showExitWarningDialog() {
+        AlertDialog.Builder(this, R.style.AppAlertDialog)
+            .setTitle(getString(R.string.field_creator_exit_dialog_title))
+            .setMessage(getString(R.string.field_creator_exit_dialog_message))
+            .setPositiveButton(getString(R.string.dialog_exit)) { _, _ ->
+                finish()
+            }
+            .setNegativeButton(getString(R.string.dialog_cancel)) { d, _ ->
+                d.dismiss()
+            }
+            .show()
     }
 }

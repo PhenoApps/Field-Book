@@ -24,6 +24,7 @@
     <string name="dialog_enable">Enable</string>
     <string name="dialog_delete">Delete</string>
     <string name="dialog_accept">Accept</string>
+    <string name="dialog_exit">Exit</string>
 
     <string name="barcode_scanner_text">Scan a barcode</string>
 
@@ -200,6 +201,9 @@
     <string name="field_creator_pattern_title">Walking Pattern</string>
     <string name="field_creator_direction_title">Walking Direction</string>
     <string name="field_creator_preview_title">Review</string>
+
+    <string name="field_creator_exit_dialog_title">Exit Field Creator</string>
+    <string name="field_creator_exit_dialog_message">Are you sure you want to exit? Your progress will be lost.</string>
 
     <string name="field_creator_size_field_name_hint">Field Name</string>
     <string name="field_creator_size_rows_hint">Rows</string>
