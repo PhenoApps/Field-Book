@@ -1,6 +1,5 @@
 package com.fieldbook.tracker.fragments.field_creator
 
-import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.RadioButton
@@ -43,44 +42,30 @@ class FieldCreatorPatternTypeFragment : FieldCreatorBaseFragment() {
     }
 
     private fun setupClickListeners() {
-        linearContainer.setOnClickListener { selectPattern(false) }
-
-        zigzagContainer.setOnClickListener { selectPattern(true) }
-
-        enablePatternRadioListener()
-    }
-
-    private fun selectPattern(isZigzag: Boolean) {
-        fieldCreatorViewModel.updatePatternType(isZigzag)
-    }
-
-    private fun updateRadioButtons(isZigzag: Boolean?) {
-        patternRadioGroup.setOnCheckedChangeListener(null)
-
-        when (isZigzag) {
-            true -> {
-                radioZigzag.isChecked = true
-                radioLinear.isChecked = false
-            }
-            false -> {
-                radioZigzag.isChecked = false
-                radioLinear.isChecked = true
-            }
-            null -> {
-                radioZigzag.isChecked = false
-                radioLinear.isChecked = false
+        patternRadioGroup.setOnCheckedChangeListener { _, checkedId ->
+            when (checkedId) {
+                radioLinear.id -> fieldCreatorViewModel.updatePatternType(false)
+                radioZigzag.id -> fieldCreatorViewModel.updatePatternType(true)
+                RadioGroup.NO_ID -> {
+                    // initial state
+                }
             }
         }
 
-        enablePatternRadioListener()
+        linearContainer.setOnClickListener {
+            patternRadioGroup.check(radioLinear.id)
+        }
+
+        zigzagContainer.setOnClickListener {
+            patternRadioGroup.check(radioZigzag.id)
+        }
     }
 
-    private fun enablePatternRadioListener() {
-        patternRadioGroup.setOnCheckedChangeListener { _, checkedId ->
-            when (checkedId) {
-                R.id.radio_linear -> selectPattern(false)
-                R.id.radio_zigzag -> selectPattern(true)
-            }
+    private fun updateRadioButtons(isZigzag: Boolean?) {
+        when (isZigzag) {
+            true -> patternRadioGroup.check(radioZigzag.id)
+            false -> patternRadioGroup.check(radioLinear.id)
+            null -> patternRadioGroup.clearCheck()
         }
     }
 }

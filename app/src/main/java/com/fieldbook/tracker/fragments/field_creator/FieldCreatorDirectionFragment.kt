@@ -7,7 +7,6 @@ import android.widget.RadioGroup
 import androidx.navigation.fragment.findNavController
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.views.FieldCreationStep
-import com.google.android.material.button.MaterialButton
 
 class FieldCreatorDirectionFragment : FieldCreatorBaseFragment() {
 
@@ -43,48 +42,29 @@ class FieldCreatorDirectionFragment : FieldCreatorBaseFragment() {
     }
 
     private fun setupClickListeners() {
+        directionRadioGroup.setOnCheckedChangeListener { _, checkedId ->
+            when (checkedId) {
+                radioHorizontal.id -> fieldCreatorViewModel.updateDirection(true)
+                radioVertical.id -> fieldCreatorViewModel.updateDirection(false)
+                RadioGroup.NO_ID -> {
+                    // initial state
+                }
+            }
+        }
+
         horizontalContainer.setOnClickListener {
-            selectDirection(true)
+            directionRadioGroup.check(radioHorizontal.id)
         }
-
         verticalContainer.setOnClickListener {
-            selectDirection(false)
+            directionRadioGroup.check(radioVertical.id)
         }
-
-        enableDirectionRadioListener()
-    }
-
-    private fun selectDirection(isHorizontal: Boolean) {
-        fieldCreatorViewModel.updateDirection(isHorizontal)
     }
 
     private fun updateRadioButtons(isHorizontal: Boolean?) {
-        directionRadioGroup.setOnCheckedChangeListener(null)
-
         when (isHorizontal) {
-            true -> {
-                radioHorizontal.isChecked = true
-                radioVertical.isChecked = false
-            }
-            false -> {
-                radioHorizontal.isChecked = false
-                radioVertical.isChecked = true
-            }
-            null -> {
-                radioHorizontal.isChecked = false
-                radioVertical.isChecked = false
-            }
-        }
-
-        enableDirectionRadioListener()
-    }
-
-    private fun enableDirectionRadioListener() {
-        directionRadioGroup.setOnCheckedChangeListener { _, checkedId ->
-            when (checkedId) {
-                R.id.radio_horizontal -> selectDirection(true)
-                R.id.radio_vertical -> selectDirection(false)
-            }
+            true -> directionRadioGroup.check(radioHorizontal.id)
+            false -> directionRadioGroup.check(radioVertical.id)
+            null -> directionRadioGroup.clearCheck()
         }
     }
 }

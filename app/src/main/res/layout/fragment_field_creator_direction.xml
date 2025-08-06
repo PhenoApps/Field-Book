@@ -66,6 +66,8 @@
                 android:id="@+id/radio_horizontal"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
+                android:clickable="false"
+                android:focusable="false"
                 android:layout_marginStart="16dp" />
         </LinearLayout>
 
@@ -108,6 +110,8 @@
                 android:id="@+id/radio_vertical"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
+                android:clickable="false"
+                android:focusable="false"
                 android:layout_marginStart="16dp" />
         </LinearLayout>
     </RadioGroup>
