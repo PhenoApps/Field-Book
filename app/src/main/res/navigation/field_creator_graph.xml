@@ -7,7 +7,7 @@
     <fragment android:id="@+id/field_size_fragment"
         android:name="com.fieldbook.tracker.fragments.field_creator.FieldCreatorSizeFragment"
         android:label="Field Size">
-        <action android:id="@+id/action_from_size_to_start_point"
+        <action android:id="@+id/action_from_size_to_start_corner"
             app:destination="@+id/start_point_fragment">
         </action>
     </fragment>

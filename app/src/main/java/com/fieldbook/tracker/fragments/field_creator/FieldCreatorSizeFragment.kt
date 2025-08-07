@@ -26,7 +26,7 @@ class FieldCreatorSizeFragment : FieldCreatorBaseFragment() {
             val state = fieldCreatorViewModel.fieldConfig.value
             state?.let {
                 dismissKeyboard()
-                findNavController().navigate(FieldCreatorSizeFragmentDirections.actionFromSizeToStartPoint())
+                findNavController().navigate(FieldCreatorSizeFragmentDirections.actionFromSizeToStartCorner())
             }
         }
     }

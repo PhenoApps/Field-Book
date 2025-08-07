@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.platform.ComposeView
@@ -161,21 +162,22 @@ class FieldCreatorActivity : ThemedActivity() {
 
         var step = currentStep
         while (step.position < targetStep.position) {
+            // navigate to next fragment and update the step
             step = when (step) {
                 FieldCreationStep.FIELD_SIZE -> {
-                    navController.navigate(FieldCreatorSizeFragmentDirections.actionFromSizeToStartPoint())
+                    navController.navigate(FieldCreatorSizeFragmentDirections.actionFromSizeToStartCorner())
                     FieldCreationStep.START_CORNER
                 }
                 FieldCreationStep.START_CORNER -> {
                     navController.navigate(FieldCreatorStartCornerFragmentDirections.actionFromStartPointToDirection())
                     FieldCreationStep.WALKING_PATTERN
                 }
-                FieldCreationStep.WALKING_PATTERN -> {
-                    navController.navigate(FieldCreatorPatternTypeFragmentDirections.actionFromPatternTypeToPreview())
-                    FieldCreationStep.WALKING_DIRECTION
-                }
                 FieldCreationStep.WALKING_DIRECTION -> {
                     navController.navigate(FieldCreatorDirectionFragmentDirections.actionFromDirectionToPattern())
+                    FieldCreationStep.WALKING_PATTERN
+                }
+                FieldCreationStep.WALKING_PATTERN -> {
+                    navController.navigate(FieldCreatorPatternTypeFragmentDirections.actionFromPatternTypeToPreview())
                     FieldCreationStep.FIELD_PREVIEW
                 }
                 else -> step
