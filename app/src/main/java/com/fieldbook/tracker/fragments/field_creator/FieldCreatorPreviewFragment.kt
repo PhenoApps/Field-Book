@@ -60,7 +60,6 @@ class FieldCreatorPreviewFragment : FieldCreatorBaseFragment() {
                 FieldPreviewGrid(
                     config = state,
                     showPlotNumbers = true,
-                    showHeaders = false,
                     forceFullView = false,
                     onCollapsingStateChanged = { needsCollapsing ->
                         // show expand button if grid can be expanded

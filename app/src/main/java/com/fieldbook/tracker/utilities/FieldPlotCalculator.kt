@@ -39,6 +39,8 @@ object FieldPlotCalculator {
         colIndex: Int,
         config: com.fieldbook.tracker.viewmodels.FieldConfig
     ): Int {
+        val pattern = config.pattern ?: return 1
+
         // adjust indices based on starting corner
         val (r, c) = when (config.startCorner) {
             FieldStartCorner.TOP_LEFT -> Pair(rowIndex, colIndex)
@@ -48,7 +50,7 @@ object FieldPlotCalculator {
             else -> TODO()
         }
 
-        return when (config.pattern) {
+        return when (pattern) {
             FieldPattern.HORIZONTAL_LINEAR -> r * config.cols + c + 1
             FieldPattern.HORIZONTAL_ZIGZAG ->
                 if (r % 2 == 0)
@@ -61,8 +63,6 @@ object FieldPlotCalculator {
                     c * config.rows + r + 1
                 else
                     c * config.rows + (config.rows - 1 - r) + 1
-
-            else -> TODO()
         }
     }
 

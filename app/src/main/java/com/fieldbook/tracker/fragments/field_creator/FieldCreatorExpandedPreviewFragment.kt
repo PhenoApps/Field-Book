@@ -52,7 +52,6 @@ class FieldCreatorExpandedPreviewFragment : FieldCreatorBaseFragment() {
                 FieldPreviewGrid(
                     config = state,
                     showPlotNumbers = true,
-                    showHeaders = false,
                     forceFullView = true,
                     onCollapsingStateChanged = null
                 )

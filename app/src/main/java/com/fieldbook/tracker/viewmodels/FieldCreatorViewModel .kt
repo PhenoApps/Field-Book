@@ -21,7 +21,7 @@ import kotlinx.coroutines.withContext
 class FieldCreatorViewModel : ViewModel() {
 
     private val _fieldConfig = MutableLiveData(FieldConfig())
-    val fieldConfig: LiveData<com.fieldbook.tracker.viewmodels.FieldConfig> = _fieldConfig
+    val fieldConfig: LiveData<FieldConfig> = _fieldConfig
 
     private val _validationErrors = MutableLiveData(ValidationError())
     val validationErrors: LiveData<ValidationError> = _validationErrors
@@ -234,7 +234,15 @@ data class ValidationError(
     val colsError: String? = null
 )
 
-private fun insertPlotData(db: DataHelper, studyDbId: Int, fieldColumns: List<String>, config: com.fieldbook.tracker.viewmodels.FieldConfig) {
+enum class PreviewMode {
+    BASIC_GRID,
+    CORNER_SELECTION,
+    DIRECTION_PREVIEW,
+    PATTERN_PREVIEW,
+    FINAL_PREVIEW
+}
+
+private fun insertPlotData(db: DataHelper, studyDbId: Int, fieldColumns: List<String>, config: FieldConfig) {
     var plotIndex = 0
     val pattern = config.pattern ?: return
     val rows = config.rows
@@ -271,7 +279,7 @@ private fun insertPlotData(db: DataHelper, studyDbId: Int, fieldColumns: List<St
 }
 
 private fun insertSinglePlot(db: DataHelper, studyDbId: Int, fieldColumns: List<String>,
-    row: Int, col: Int, plotIndex: Int, config: com.fieldbook.tracker.viewmodels.FieldConfig
+    row: Int, col: Int, plotIndex: Int, config: FieldConfig
 ) {
     val uuid = java.util.UUID.randomUUID().toString()
     val (posX, posY) = FieldPlotCalculator.calculatePositionCoordinates(row, col, config)

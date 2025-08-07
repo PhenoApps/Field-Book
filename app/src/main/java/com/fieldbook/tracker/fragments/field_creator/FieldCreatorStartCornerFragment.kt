@@ -1,6 +1,5 @@
 package com.fieldbook.tracker.fragments.field_creator
 
-import android.util.Log
 import android.view.View
 import android.widget.TextView
 import androidx.compose.material3.MaterialTheme
@@ -8,6 +7,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.navigation.fragment.findNavController
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.viewmodels.FieldConfig
+import com.fieldbook.tracker.viewmodels.PreviewMode
 import com.fieldbook.tracker.views.FieldCreationStep
 import com.fieldbook.tracker.views.FieldPreviewGrid
 
@@ -44,11 +44,12 @@ class FieldCreatorStartCornerFragment : FieldCreatorBaseFragment() {
             MaterialTheme {
                 FieldPreviewGrid(
                     config = state,
+                    previewMode = PreviewMode.CORNER_SELECTION,
                     selectedCorner = state.startCorner,
                     onCornerSelected = { corner ->
                         fieldCreatorViewModel.updateStartCorner(corner)
                     },
-                    showPlotNumbers = false,
+                    showPlotNumbers = state.startCorner != null,
                     forceFullView = false
                 )
             }
