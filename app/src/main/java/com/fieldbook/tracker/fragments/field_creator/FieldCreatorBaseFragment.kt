@@ -15,6 +15,8 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.utilities.FieldStartCorner
+import com.fieldbook.tracker.viewmodels.FieldConfig
 import com.fieldbook.tracker.viewmodels.FieldCreationResult
 import com.fieldbook.tracker.viewmodels.FieldCreatorViewModel
 import com.fieldbook.tracker.views.FieldCreationStep
@@ -138,6 +140,36 @@ abstract class FieldCreatorBaseFragment : Fragment() {
         forwardButton?.let { button ->
             button.isEnabled = enabled
             button.alpha = if (enabled) 1.0f else 0.5f
+        }
+    }
+
+    protected fun getDirectionHighlight(config: FieldConfig): Set<Pair<Int, Int>> {
+        val startCorner = config.startCorner ?: return emptySet()
+
+        return when (config.isHorizontal) {
+            true -> {
+                // highlight first row from starting corner
+                when (startCorner) {
+                    FieldStartCorner.TOP_LEFT, FieldStartCorner.TOP_RIGHT -> {
+                        (0 until config.cols).map { 0 to it }.toSet()
+                    }
+                    FieldStartCorner.BOTTOM_LEFT, FieldStartCorner.BOTTOM_RIGHT -> {
+                        (0 until config.cols).map { (config.rows - 1) to it }.toSet()
+                    }
+                }
+            }
+            false -> {
+                // highlight first column from starting corner
+                when (startCorner) {
+                    FieldStartCorner.TOP_LEFT, FieldStartCorner.BOTTOM_LEFT -> {
+                        (0 until config.rows).map { it to 0 }.toSet()
+                    }
+                    FieldStartCorner.TOP_RIGHT, FieldStartCorner.BOTTOM_RIGHT -> {
+                        (0 until config.rows).map { it to (config.cols - 1) }.toSet()
+                    }
+                }
+            }
+            null -> emptySet()
         }
     }
 }

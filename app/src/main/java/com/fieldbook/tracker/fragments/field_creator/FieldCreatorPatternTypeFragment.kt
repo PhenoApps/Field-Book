@@ -80,66 +80,26 @@ class FieldCreatorPatternTypeFragment : FieldCreatorBaseFragment() {
     }
 
     private fun updatePatternPreview(config: FieldConfig) {
-        if (config.rows <= 0 || config.cols <= 0 || config.startCorner == null || config.isHorizontal == null) return
-
         patternPreviewContainer.setContent {
             MaterialTheme {
-                if (config.rows > 0 && config.cols > 0 && config.isZigzag != null) {
-                    FieldPreviewGrid(
-                        config = config,
-                        previewMode = PreviewMode.PATTERN_PREVIEW,
-                        showPlotNumbers = true,
-                        forceFullView = false,
-                        highlightedCells = getPatternHighlight(config)
-                    )
-                }
+                FieldPreviewGrid( // show directional preview until user makes a choice
+                    config = config,
+                    previewMode = if (config.isZigzag != null) PreviewMode.PATTERN_PREVIEW else PreviewMode.DIRECTION_PREVIEW,
+                    selectedCorner = config.startCorner,
+                    showPlotNumbers = true,
+                    forceFullView = false,
+                    highlightedCells = if (config.isZigzag != null) getPatternHighlight(config) else getDirectionHighlight(config)
+                )
             }
         }
     }
 
     private fun getPatternHighlight(config: FieldConfig): Set<Pair<Int, Int>> {
-        val startCorner = config.startCorner ?: return emptySet()
-        if (config.isHorizontal == null) return emptySet() // Remove the zigzag check
-
-        return when (config.isHorizontal) {
-            true -> {
-                // highlight first two rows from starting corner
-                when (startCorner) {
-                    FieldStartCorner.TOP_LEFT, FieldStartCorner.TOP_RIGHT -> {
-                        val firstRow = (0 until config.cols).map { 0 to it }
-                        val secondRow = if (config.rows > 1) {
-                            (0 until config.cols).map { 1 to it }
-                        } else emptyList()
-                        (firstRow + secondRow).toSet()
-                    }
-                    FieldStartCorner.BOTTOM_LEFT, FieldStartCorner.BOTTOM_RIGHT -> {
-                        val firstRow = (0 until config.cols).map { (config.rows - 1) to it }
-                        val secondRow = if (config.rows > 1) {
-                            (0 until config.cols).map { (config.rows - 2) to it }
-                        } else emptyList()
-                        (firstRow + secondRow).toSet()
-                    }
-                }
+        // highlight all cells
+        return (0 until config.rows).flatMap { row ->
+            (0 until config.cols).map { col ->
+                row to col
             }
-            false -> {
-                // highlight first two columns from starting corner
-                when (startCorner) {
-                    FieldStartCorner.TOP_LEFT, FieldStartCorner.BOTTOM_LEFT -> {
-                        val firstCol = (0 until config.rows).map { it to 0 }
-                        val secondCol = if (config.cols > 1) {
-                            (0 until config.rows).map { it to 1 }
-                        } else emptyList()
-                        (firstCol + secondCol).toSet()
-                    }
-                    FieldStartCorner.TOP_RIGHT, FieldStartCorner.BOTTOM_RIGHT -> {
-                        val firstCol = (0 until config.rows).map { it to (config.cols - 1) }
-                        val secondCol = if (config.cols > 1) {
-                            (0 until config.rows).map { it to (config.cols - 2) }
-                        } else emptyList()
-                        (firstCol + secondCol).toSet()
-                    }
-                }
-            }
-        }
+        }.toSet()
     }
 }

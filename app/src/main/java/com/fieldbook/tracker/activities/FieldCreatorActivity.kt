@@ -170,7 +170,7 @@ class FieldCreatorActivity : ThemedActivity() {
                 }
                 FieldCreationStep.START_CORNER -> {
                     navController.navigate(FieldCreatorStartCornerFragmentDirections.actionFromStartPointToDirection())
-                    FieldCreationStep.WALKING_PATTERN
+                    FieldCreationStep.WALKING_DIRECTION
                 }
                 FieldCreationStep.WALKING_DIRECTION -> {
                     navController.navigate(FieldCreatorDirectionFragmentDirections.actionFromDirectionToPattern())

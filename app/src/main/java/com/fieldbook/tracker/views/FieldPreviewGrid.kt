@@ -53,8 +53,8 @@ fun FieldPreviewGrid(
 
     val effectiveShowNumbers = when (previewMode) {
         PreviewMode.BASIC_GRID -> false
-        PreviewMode.CORNER_SELECTION -> showPlotNumbers && selectedCorner != null // Only show when corner selected
-        PreviewMode.DIRECTION_PREVIEW -> showPlotNumbers && config.startCorner != null && config.isHorizontal != null
+        PreviewMode.CORNER_SELECTION -> showPlotNumbers && selectedCorner != null // only show when corner selected
+        PreviewMode.DIRECTION_PREVIEW -> showPlotNumbers && config.startCorner != null
         PreviewMode.PATTERN_PREVIEW -> showPlotNumbers && config.pattern != null
         PreviewMode.FINAL_PREVIEW -> showPlotNumbers
     }
@@ -68,7 +68,6 @@ fun FieldPreviewGrid(
 
         val maxDisplayRows = if (forceFullView) config.rows else (availableHeightPx / cellSizePx).toInt()
         val maxDisplayCols = if (forceFullView) config.cols else (availableWidthPx / cellSizePx).toInt()
-        Log.d("TAG", "FieldPreviewGrid: $availableWidthPx $availableWidthPx $maxDisplayRows $maxDisplayCols")
 
         val gridConfig = calculateGridDisplayConfig(
             totalRows = config.rows,
@@ -103,8 +102,8 @@ fun FieldPreviewGrid(
                     showPlotNumbers = effectiveShowNumbers,
                     selectedCorner = selectedCorner,
                     onCornerSelected = onCornerSelected,
-                    highlightedCells = highlightedCells, // Add this
-                    previewMode = previewMode // Add this
+                    highlightedCells = highlightedCells,
+                    previewMode = previewMode
                 )
             }
         }
@@ -182,12 +181,15 @@ private fun renderGrid(
         when {
             actualRowIndex == -1 || actualColIndex == -1 -> EllipsisCell()
             else -> {
-                val isCorner = previewMode == PreviewMode.CORNER_SELECTION &&
-                        isCornerCell(actualRowIndex, actualColIndex, config.rows, config.cols)
-                val cornerType = if (isCorner)
+                val isCorner = isCornerCell(actualRowIndex, actualColIndex, config.rows, config.cols)
+
+                val isCornerClickable = previewMode == PreviewMode.CORNER_SELECTION
+
+                val cornerType = if (isCorner) {
                     FieldStartCorner.fromPosition(actualRowIndex, actualColIndex, config.rows, config.cols)
-                else null
-                val isSelected = cornerType != null && cornerType == selectedCorner
+                } else null
+
+                val isSelected = cornerType != null && cornerType == config.startCorner
 
                 val plotNumber = if (showPlotNumbers) {
                     when (previewMode) {
@@ -195,21 +197,12 @@ private fun renderGrid(
                             if (isSelected) "1" else ""
                         }
                         PreviewMode.DIRECTION_PREVIEW -> {
-                            // show sequence for first row/col from the starting corner
-                            if (highlightedCells.contains(actualRowIndex to actualColIndex) && config.startCorner != null) {
+                            if (isSelected) { // show 1 in selected corner
+                                "1"
+                            } else if (highlightedCells.contains(actualRowIndex to actualColIndex) &&
+                                config.startCorner != null && config.isHorizontal != null) {
+                                // show sequence for first row/col from the starting corner
                                 getDirectionSequenceNumber(actualRowIndex, actualColIndex, config)
-                            } else ""
-                        }
-                        PreviewMode.PATTERN_PREVIEW -> {
-                            // show numbers for first 2 rows/cols from the starting corner
-                            if (config.pattern != null && config.startCorner != null) {
-                                if (shouldShowPatternNumber(actualRowIndex, actualColIndex, config)) {
-                                    FieldPlotCalculator.calculatePlotNumber(
-                                        rowIndex = actualRowIndex,
-                                        colIndex = actualColIndex,
-                                        config = config
-                                    ).toString()
-                                } else ""
                             } else ""
                         }
                         else -> {
@@ -226,10 +219,10 @@ private fun renderGrid(
 
                 DataCell(
                     value = plotNumber.toString(),
-                    isCorner = isCorner,
+                    isCorner = isCorner && previewMode == PreviewMode.CORNER_SELECTION,
                     isSelected = isSelected,
                     isHighlighted = highlightedCells.contains(actualRowIndex to actualColIndex),
-                    onClick = if (isCorner && onCornerSelected != null) {
+                    onClick = if (isCorner && isCornerClickable && onCornerSelected != null) {
                         { cornerType?.let { onCornerSelected(it) } }
                     } else null
                 )
@@ -392,10 +385,10 @@ private fun getColors(): Triple<Int, Int, Int> {
         theme.resolveAttribute(R.attr.emptyCellColor, typedValue, true)
         val cellBgColor = typedValue.data
 
-        theme.resolveAttribute(R.attr.fb_color_accent, typedValue, true)
-        val cellHighlightColor = typedValue.data
+        theme.resolveAttribute(R.attr.fb_color_primary, typedValue, true)
+        val selectedCornerColor = typedValue.data
 
-        Triple(cellTextColor, cellBgColor, cellHighlightColor)
+        Triple(cellTextColor, cellBgColor, selectedCornerColor)
     }
 }
 
