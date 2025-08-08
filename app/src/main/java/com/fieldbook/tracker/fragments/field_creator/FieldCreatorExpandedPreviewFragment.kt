@@ -4,13 +4,14 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageButton
 import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.compose.material3.*
 import androidx.compose.ui.platform.ComposeView
+import androidx.navigation.fragment.findNavController
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.FieldCreatorActivity
 import com.fieldbook.tracker.views.FieldCreationStep
 import com.fieldbook.tracker.views.FieldPreviewGrid
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class FieldCreatorExpandedPreviewFragment : FieldCreatorBaseFragment() {
 
@@ -18,10 +19,10 @@ class FieldCreatorExpandedPreviewFragment : FieldCreatorBaseFragment() {
     override fun getLayoutResourceId(): Int = R.layout.fragment_field_creator_expanded_preview
     override fun onForwardClick(): (() -> Unit)? = null
 
-    private lateinit var fieldSummaryTv: TextView
     private lateinit var fieldGrid: ComposeView
     private lateinit var progressContainer: LinearLayout
     private lateinit var createFieldButton: ImageButton
+    private lateinit var collapseViewFab: FloatingActionButton
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -30,15 +31,17 @@ class FieldCreatorExpandedPreviewFragment : FieldCreatorBaseFragment() {
     }
 
     override fun setupViews(view: View) {
-        fieldSummaryTv = view.findViewById(R.id.expanded_field_summary_text)
         fieldGrid = view.findViewById(R.id.expanded_field_preview_grid)
         progressContainer = view.findViewById(R.id.expanded_progress_container)
         createFieldButton = view.findViewById(R.id.create_field_button)
+        collapseViewFab = view.findViewById(R.id.collapse_view_fab)
+
+        collapseViewFab.setOnClickListener {
+            findNavController().popBackStack()
+        }
     }
 
     override fun observeFieldCreatorViewModel() {
-        setupFieldSummaryInfo(fieldSummaryTv)
-
         setupFieldCreationObserver(progressContainer, createFieldButton)
 
         fieldCreatorViewModel.fieldConfig.observe(viewLifecycleOwner) { state ->
