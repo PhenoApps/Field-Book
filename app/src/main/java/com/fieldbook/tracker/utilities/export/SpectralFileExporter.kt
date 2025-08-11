@@ -89,7 +89,7 @@ class SpectralFileExporter @Inject constructor(
             return
         }
 
-        val metadataHeader = "sample_name, device_id, device_name, comments, created_at, $deviceSpecificHeader"
+        val metadataHeader = "sample_name,device_id,device_name,comments,created_at,$deviceSpecificHeader"
 
         val firstFact = spectralFacts.maxBy {
             it.data.size
@@ -102,7 +102,7 @@ class SpectralFileExporter @Inject constructor(
             traitId = observation.observation_variable_db_id.toString()
         )
 
-        val header = "$metadataHeader, ${frameReference.wavelengths.replace(" ", ", ")}\n"
+        val header = "$metadataHeader,${frameReference.wavelengths.replace(" ", ",")}\n"
 
         try {
             context.contentResolver.openOutputStream(uri, "wt")?.bufferedWriter()?.use { writer ->
@@ -125,12 +125,12 @@ class SpectralFileExporter @Inject constructor(
                         entryId,
                         currentObservation.observation_variable_db_id.toString()
                     )
-                    val values = frame.values.replace(" ", ", ")
+                    val values = frame.values.replace(" ", ",")
 
                     if (values.isEmpty())
                         continue
 
-                    writer.write("\"${entryId.escape()}\", $deviceAddress, \"${deviceName.escape()}\", \"${comment.escape()}\", $createdAt, $color, $values\n")
+                    writer.write("\"${entryId.escape()}\",$deviceAddress,\"${deviceName.escape()}\",\"${comment.escape()}\",$createdAt,$color,$values\n")
                 }
             }
         } catch (e: IOException) {
