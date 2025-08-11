@@ -25,7 +25,7 @@ class ScaleGattManager @Inject constructor(
     interface ScaleListener {
         fun onDeviceConnected()
         fun onDeviceDisconnected()
-        fun onDataReceived(weight: String, isStable: Boolean = true)
+        fun onDataReceived(weight: String, unit: String, isStable: Boolean = true)
         fun logUnknownScaleBytes(serviceUuid: String, charUuid: String, value: String)
         fun onError(message: String)
     }
@@ -144,7 +144,7 @@ class ScaleGattManager @Inject constructor(
                     """.trimIndent()
                 )
                 pattern.matchEntire(weightString)?.destructured?.let { (prefix, value, unit) ->
-                    listener?.onDataReceived("${value.toFloat()}$unit", prefix == "ST")
+                    listener?.onDataReceived(value.toFloat().toString(), unit, prefix == "ST")
                 }
 
                 byteBuffer.clear()
@@ -166,7 +166,7 @@ class ScaleGattManager @Inject constructor(
 
                     //Log.d("StableWeight", "Header: $prefix, Value: $value, Unit: $unit")
 
-                    listener?.onDataReceived("${value.toFloat()}$unit", isStable = "S" in prefix)
+                    listener?.onDataReceived(value.toFloat().toString(), unit, isStable = "S" in prefix)
                 }
             }
         }
@@ -204,7 +204,7 @@ class ScaleGattManager @Inject constructor(
                         number to unit
                     }
                     .toList().firstOrNull()?.let { (num, unit) ->
-                        listener?.onDataReceived("${num.toFloat()}$unit")
+                        listener?.onDataReceived(num.toFloat().toString(), unit)
 
                     }
             }

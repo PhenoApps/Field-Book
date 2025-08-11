@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -65,6 +66,7 @@ class ScaleTraitLayout : BaseTraitLayout {
 
     private var deviceList: List<Device> = emptyList()
     private var lastWeightString: String = String()
+    private var numSegmentsForWeight = 13
 
     private val scope = CoroutineScope(Dispatchers.Main)
 
@@ -323,11 +325,11 @@ class ScaleTraitLayout : BaseTraitLayout {
                         }
                     }
 
-                    override fun onDataReceived(weight: String, isStable: Boolean) {
+                    override fun onDataReceived(weight: String, unit: String, isStable: Boolean) {
                         //Log.d(TAG, "Data received: $weight")
                         // Handle data received from the device
 
-                        lastWeightString = weight.replace(" ", "")
+                        lastWeightString = weight.replace(" ", "") + " " + unit
 
                         scope.launch {
                             composeView?.setContent {
@@ -371,96 +373,66 @@ class ScaleTraitLayout : BaseTraitLayout {
     }
 
     @Composable
-    fun ScaleDisplay(weight: String, isStable: Boolean) {
+    fun ScaleDisplay(weight: String = "-1337.0 kg", isStable: Boolean) {
+
+        val requiredSegments = weight.length
+
+        if (requiredSegments > numSegmentsForWeight) {
+            numSegmentsForWeight = requiredSegments
+        }
+
+        var offsetX = 0.dp
+        var padWeight = weight.padStart(numSegmentsForWeight, ' ')
+
         Column {
             Row(
-                modifier = Modifier
-                    .padding(24.dp, 24.dp, 24.dp, 0.dp)
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
             ) {
                 Box(modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.CenterEnd) {
-                    SegmentDisplay(
-                        modifier = Modifier.size(32.dp),
-                        led = SingleColorLed(Color.Black, Color.DarkGray.copy(alpha = 0.1f)),
-                        decoder = object : Decoder,
-                            com.rabross.segmenteddisplay.fourteen.Decoder {
-                            override val c: Int
-                                get() = 0
-                            override val d: Int
-                                get() = 0
-                            override val e: Int
-                                get() = 0
-                            override val f: Int
-                                get() = 0
-                            override val g1: Int
-                                get() = if (isStable) 1 else 0
-                            override val g2: Int
-                                get() = if (isStable) 1 else 0
-                            override val h: Int
-                                get() = if (isStable) 1 else 0
-                            override val i: Int
-                                get() = if (isStable) 1 else 0
-                            override val j: Int
-                                get() = if (isStable) 1 else 0
-                            override val k: Int
-                                get() = if (isStable) 1 else 0
-                            override val l: Int
-                                get() = if (isStable) 1 else 0
-                            override val m: Int
-                                get() = if (isStable) 1 else 0
-                            override val b: Int
-                                get() = 0
-                            override val a: Int
-                                get() = 0
-                        }
-                    )
+                    StableSegmentDisplay(isStable)
                 }
             }
-            Row(modifier = Modifier.padding(24.dp, 24.dp, 24.dp, 0.dp)) {
-                for (c in weight) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically) {
+
+                for (i in 0 until numSegmentsForWeight) {
+
+                    val c = if (i < padWeight.length) padWeight[i] else ' '
+
                     if (c.isDigit()) {
-                        SegmentDisplay(
-                            modifier = Modifier.weight(1f),
+                        com.rabross.segmenteddisplay.seven.SegmentDisplay(
+                            modifier = Modifier.weight(1f).offset(x = offsetX),
                             led = SingleColorLed(Color.Black, Color.DarkGray.copy(alpha = 0.1f)),
-                            decoder = BinaryDecoder(
-                                BinaryDecoder.mapToDisplay(c.uppercaseChar())
+                            decoder = com.rabross.segmenteddisplay.seven.BinaryDecoder(
+                                com.rabross.segmenteddisplay.seven.BinaryDecoder.mapToDisplay(c.digitToInt())
                             )
                         )
                     } else if (c == '.') {
+
+                        offsetX = (-16).dp
+
                         // Display a dot for decimal point
                         DecimalDelimiter(
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.weight(1f).offset(x = -(8).dp),
                         )
+
                     } else if (c == '-') {
 
-                        // just toggle the middle segment
+                        NegativeSegmentDisplay(Modifier.weight(1f))
+
+                    } else if (c == ' ') {
+
+                        //space between unit and numbers
                         com.rabross.segmenteddisplay.seven.SegmentDisplay(
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.weight(1f).offset(x = offsetX),
                             led = SingleColorLed(Color.Black, Color.DarkGray.copy(alpha = 0.1f)),
-                            decoder = object : Decoder,
-                                com.rabross.segmenteddisplay.seven.Decoder {
-                                override val a: Int
-                                    get() = 0
-                                override val b: Int
-                                    get() = 0 // Middle segment on for negative sign
-                                override val c: Int
-                                    get() = 0
-                                override val d: Int
-                                    get() = 0
-                                override val e: Int
-                                    get() = 0
-                                override val f: Int
-                                    get() = 0
-                                override val g: Int
-                                    get() = 1
-                            }
                         )
 
                     } else {
-                        if (c == ' ') continue
                         SegmentDisplay(
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.weight(1f).offset(x = offsetX),
                             led = SingleColorLed(Color.Black, Color.DarkGray.copy(alpha = 0.1f)),
                             decoder = BinaryDecoder(
                                 BinaryDecoder.mapToDisplay(c.uppercaseChar())
@@ -470,6 +442,32 @@ class ScaleTraitLayout : BaseTraitLayout {
                 }
             }
         }
+    }
+
+    @Composable
+    fun NegativeSegmentDisplay(modifier: Modifier) {
+        // just toggle the middle segment
+        com.rabross.segmenteddisplay.seven.SegmentDisplay(
+            modifier = modifier,
+            led = SingleColorLed(Color.Black, Color.DarkGray.copy(alpha = 0.1f)),
+            decoder = object : Decoder,
+                com.rabross.segmenteddisplay.seven.Decoder {
+                override val a: Int
+                    get() = 0
+                override val b: Int
+                    get() = 0 // Middle segment on for negative sign
+                override val c: Int
+                    get() = 0
+                override val d: Int
+                    get() = 0
+                override val e: Int
+                    get() = 0
+                override val f: Int
+                    get() = 0
+                override val g: Int
+                    get() = 1
+            }
+        )
     }
 
     @Composable
@@ -507,8 +505,47 @@ class ScaleTraitLayout : BaseTraitLayout {
         }
     }
 
+    @Composable
+    fun StableSegmentDisplay(isStable: Boolean = true) {
+        SegmentDisplay(
+            modifier = Modifier.size(32.dp),
+            led = SingleColorLed(Color.Black, Color.DarkGray.copy(alpha = 0.1f)),
+            decoder = object : Decoder,
+                com.rabross.segmenteddisplay.fourteen.Decoder {
+                override val c: Int
+                    get() = 0
+                override val d: Int
+                    get() = 0
+                override val e: Int
+                    get() = 0
+                override val f: Int
+                    get() = 0
+                override val g1: Int
+                    get() = if (isStable) 1 else 0
+                override val g2: Int
+                    get() = if (isStable) 1 else 0
+                override val h: Int
+                    get() = if (isStable) 1 else 0
+                override val i: Int
+                    get() = if (isStable) 1 else 0
+                override val j: Int
+                    get() = if (isStable) 1 else 0
+                override val k: Int
+                    get() = if (isStable) 1 else 0
+                override val l: Int
+                    get() = if (isStable) 1 else 0
+                override val m: Int
+                    get() = if (isStable) 1 else 0
+                override val b: Int
+                    get() = 0
+                override val a: Int
+                    get() = 0
+            }
+        )
+    }
+
     private fun DrawScope.drawDelimiter(downDotColor: Color, radius: Float, offset: Offset, size: Size) {
-        val downDotCenterOffset = Offset(size.width / 2 + offset.x, size.height / 4 * 3 + offset.y)
+        val downDotCenterOffset = Offset(size.width / 2 + offset.x, size.height)
         drawCircle(downDotColor, radius, downDotCenterOffset)
     }
 
