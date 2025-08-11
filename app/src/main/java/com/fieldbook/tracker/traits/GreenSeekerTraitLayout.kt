@@ -519,7 +519,7 @@ class GreenSeekerTraitLayout : BaseTraitLayout, LineGraphSelectableAdapter.Liste
 
             it.wavelengths = ndviValues.mapIndexed { index, fl -> index.toFloat() }.joinToString(" ") { it.toString() }
 
-            it.values = ndviValues.joinToString(" ") { it.toString() }
+            it.values = ndviValues.joinToString(" ") { (it / 100.0).toString() }
 
         }
 
