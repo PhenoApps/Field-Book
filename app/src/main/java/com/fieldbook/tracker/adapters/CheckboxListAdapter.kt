@@ -36,6 +36,7 @@ class CheckboxListAdapter(
         val label: String,
         val subLabel: String,
         var iconResId: Int? = null,
+        var searchableTexts: List<String> = emptyList()
     ) {
         override fun equals(other: Any?): Boolean {
             return id == (other as? Model)?.id
