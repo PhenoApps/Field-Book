@@ -139,11 +139,11 @@ class TextTraitLayout : BaseTraitLayout {
                     val actionOnScanLineFeed =
                         prefs.getString(PreferenceKeys.RETURN_CHARACTER, "0") ?: "0"
 
-                    if (actionOnScanLineFeed == "0") {
+                    if (actionOnScanLineFeed == "1") {
                         controller.getRangeBox().moveEntryRight()
                     }
 
-                    if (actionOnScanLineFeed == "1") {
+                    if (actionOnScanLineFeed == "2") {
                         controller.getTraitBox().moveTrait(TraitBoxView.MoveDirection.RIGHT)
                     }
 
