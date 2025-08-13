@@ -1559,4 +1559,6 @@
     <string name="nix_error_no_network">Nix may require internet to work properly.</string>
 
     <string name="import_runnable_field_name_exists">Field name already exists.</string>
+    <string name="enabled">enabled</string>
+    <string name="disabled">disabled</string>
 </resources>

@@ -127,10 +127,9 @@ class TraitBoxView : ConstraintLayout {
             val newState = traitTypeTv.maxLines == 1
             applyWordWrapState(traitTypeTv, newState)
 
-            val message = String.format(
-                controller.getContext().getString(R.string.trait_box_word_wrap_toast),
-                if (newState) "enabled" else "disabled"
-            )
+            val message = controller.getContext().getString(R.string.trait_box_word_wrap_toast,
+                context.getString(if (newState) R.string.enabled else R.string.disabled))
+
             Utils.makeToast(controller.getContext(), message)
 
             controller.getPreferences().edit { putBoolean(GeneralKeys.TRAIT_TYPE_WORD_WRAP, newState) }
