@@ -29,7 +29,7 @@
         <!-- padding should be half the size of the thumb -->
         <SeekBar
             android:layout_width="128dp"
-            android:layout_height="42dp"
+            android:layout_height="0dp"
             android:paddingStart="21dp"
             android:paddingEnd="21dp"
             android:min="0"
@@ -52,17 +52,6 @@
             app:layout_constraintStart_toEndOf="@id/traitBooleanSeekBar"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-
-        <ImageView
-            android:id="@+id/unsetImage"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_marginTop="37dp"
-            android:src="@drawable/trait_boolean_neutral"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/traitBooleanSeekBar"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

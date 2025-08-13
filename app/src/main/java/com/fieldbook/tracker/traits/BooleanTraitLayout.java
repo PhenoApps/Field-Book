@@ -3,7 +3,6 @@ package com.fieldbook.tracker.traits;
 import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -35,7 +34,12 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
 
 
     @Override
-    public void setNaTraitsText() { }
+    public void setNaTraitsText() {
+        // set the seekbar to unset state
+        threeStateSeekBar.setOnSeekBarChangeListener(null);
+        threeStateSeekBar.setProgress(ThreeState.NEUTRAL.getValue());
+        threeStateSeekBar.setOnSeekBarChangeListener(this);
+    }
 
     @Override
     public String type() {
@@ -52,14 +56,12 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
 
         String on = getContext().getString(R.string.trait_boolean_on);
         String off = getContext().getString(R.string.trait_boolean_off);
-        String unset = getContext().getString(R.string.trait_boolean_unset);
 
         threeStateSeekBar = act.findViewById(R.id.traitBooleanSeekBar);
         threeStateSeekBar.setOnSeekBarChangeListener(this);
 
         ImageView onImageView = act.findViewById(R.id.onImage);
         ImageView offImageView = act.findViewById(R.id.offImage);
-        ImageView unsetImageView = act.findViewById(R.id.unsetImage);
 
         onImageView.setOnClickListener((View v) -> {
             triggerTts(on);
@@ -69,11 +71,6 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
         offImageView.setOnClickListener((View v) -> {
             triggerTts(off);
             threeStateSeekBar.setProgress(ThreeState.OFF.getValue());
-        });
-
-        unsetImageView.setOnClickListener((View v) -> {
-            triggerTts(unset);
-            threeStateSeekBar.setProgress(ThreeState.NEUTRAL.getValue());
         });
 
         threeStateSeekBar.requestFocus();
