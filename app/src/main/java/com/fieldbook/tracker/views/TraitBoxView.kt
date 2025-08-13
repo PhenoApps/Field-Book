@@ -121,7 +121,7 @@ class TraitBoxView : ConstraintLayout {
     }
 
     fun handleTraitTypeWrapping() {
-        val isWordWrapEnabled = controller.getPreferences().getBoolean(GeneralKeys.TRAIT_TYPE_WORD_WRAP, true)
+        val isWordWrapEnabled = controller.getPreferences().getBoolean(GeneralKeys.TRAIT_TYPE_WORD_WRAP, false)
         applyWordWrapState(traitTypeTv, isWordWrapEnabled)
         traitTypeTv.setOnLongClickListener { view ->
             val newState = traitTypeTv.maxLines == 1
