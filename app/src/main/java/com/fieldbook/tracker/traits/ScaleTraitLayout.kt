@@ -66,7 +66,7 @@ class ScaleTraitLayout : BaseTraitLayout {
 
     private var deviceList: List<Device> = emptyList()
     private var lastWeightString: String = String()
-    private var numSegmentsForWeight = 13
+    private var numSegmentsForWeight = 11
 
     private val scope = CoroutineScope(Dispatchers.Main)
 
@@ -404,7 +404,7 @@ class ScaleTraitLayout : BaseTraitLayout {
                     if (c.isDigit()) {
                         com.rabross.segmenteddisplay.seven.SegmentDisplay(
                             modifier = Modifier.weight(1f).offset(x = offsetX),
-                            led = SingleColorLed(Color.Black, Color.DarkGray.copy(alpha = 0.1f)),
+                            led = SingleColorLed(Color.Black, Color.DarkGray.copy(alpha = 0.05f)),
                             decoder = com.rabross.segmenteddisplay.seven.BinaryDecoder(
                                 com.rabross.segmenteddisplay.seven.BinaryDecoder.mapToDisplay(c.digitToInt())
                             )
@@ -427,13 +427,13 @@ class ScaleTraitLayout : BaseTraitLayout {
                         //space between unit and numbers
                         com.rabross.segmenteddisplay.seven.SegmentDisplay(
                             modifier = Modifier.weight(1f).offset(x = offsetX),
-                            led = SingleColorLed(Color.Black, Color.DarkGray.copy(alpha = 0.1f)),
+                            led = SingleColorLed(Color.Black, Color.DarkGray.copy(alpha = 0.05f)),
                         )
 
                     } else {
                         SegmentDisplay(
                             modifier = Modifier.weight(1f).offset(x = offsetX),
-                            led = SingleColorLed(Color.Black, Color.DarkGray.copy(alpha = 0.1f)),
+                            led = SingleColorLed(Color.Black, Color.DarkGray.copy(alpha = 0.05f)),
                             decoder = BinaryDecoder(
                                 BinaryDecoder.mapToDisplay(c.uppercaseChar())
                             )
