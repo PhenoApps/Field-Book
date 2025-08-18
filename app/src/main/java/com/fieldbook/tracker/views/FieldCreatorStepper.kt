@@ -26,6 +26,7 @@ import com.binayshaw7777.kotstep.v3.model.style.LineStyles
 import com.binayshaw7777.kotstep.v3.model.style.StepStyle
 import com.binayshaw7777.kotstep.v3.model.style.StepStyles
 import com.binayshaw7777.kotstep.v3.util.ExperimentalKotStep
+import com.fieldbook.tracker.enums.FieldCreationStep
 
 @OptIn(ExperimentalKotStep::class)
 @Composable
@@ -109,23 +110,6 @@ fun FieldCreatorStepper(currentStep: FieldCreationStep, onStepClicked: (FieldCre
                     )
                 }
             }
-        }
-    }
-}
-
-enum class FieldCreationStep(val position: Int, val icon: Int?) {
-    FIELD_SIZE(0, R.drawable.ic_field_config),
-    START_CORNER(1, R.drawable.ic_grid_corner),
-    WALKING_DIRECTION(2, R.drawable.ic_direction),
-    WALKING_PATTERN(3, R.drawable.ic_walk),
-    FIELD_PREVIEW(4, R.drawable.ic_field_preview),
-
-    COMPLETED(5, null);
-
-    companion object {
-        // return all values except COMPLETED which is just denotes the state
-        fun displayableEntries(): Array<FieldCreationStep> {
-            return entries.filterNot { it == COMPLETED }.toTypedArray()
         }
     }
 }

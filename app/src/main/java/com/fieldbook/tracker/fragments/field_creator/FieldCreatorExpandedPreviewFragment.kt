@@ -1,18 +1,16 @@
 package com.fieldbook.tracker.fragments.field_creator
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.compose.material3.*
 import androidx.compose.ui.platform.ComposeView
-import androidx.navigation.fragment.findNavController
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.FieldCreatorActivity
 import com.fieldbook.tracker.viewmodels.FieldConfig
-import com.fieldbook.tracker.views.FieldCreationStep
+import com.fieldbook.tracker.enums.FieldCreationStep
 import com.fieldbook.tracker.views.FieldPreviewGrid
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.floatingactionbutton.FloatingActionButton

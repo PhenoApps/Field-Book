@@ -11,8 +11,8 @@ import com.fieldbook.tracker.R
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.getValue
 import com.fieldbook.tracker.viewmodels.FieldConfig
-import com.fieldbook.tracker.viewmodels.PreviewMode
-import com.fieldbook.tracker.views.FieldCreationStep
+import com.fieldbook.tracker.enums.GridPreviewMode
+import com.fieldbook.tracker.enums.FieldCreationStep
 import com.fieldbook.tracker.views.FieldPreviewGrid
 
 class FieldCreatorPatternTypeFragment : FieldCreatorBaseFragment() {
@@ -87,7 +87,7 @@ class FieldCreatorPatternTypeFragment : FieldCreatorBaseFragment() {
 
                 FieldPreviewGrid( // show directional preview until user makes a choice
                     config = config,
-                    previewMode = if (config.isZigzag != null) PreviewMode.PATTERN_PREVIEW else PreviewMode.DIRECTION_PREVIEW,
+                    gridPreviewMode = if (config.isZigzag != null) GridPreviewMode.PATTERN_PREVIEW else GridPreviewMode.DIRECTION_PREVIEW,
                     selectedCorner = config.startCorner,
                     showPlotNumbers = true,
                     forceFullView = false,

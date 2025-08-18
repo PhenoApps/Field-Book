@@ -12,13 +12,13 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.enums.FieldCreationStep
 import com.fieldbook.tracker.fragments.field_creator.FieldCreatorDirectionFragmentDirections
 import com.fieldbook.tracker.fragments.field_creator.FieldCreatorPatternTypeFragmentDirections
 import com.fieldbook.tracker.fragments.field_creator.FieldCreatorSizeFragmentDirections
 import com.fieldbook.tracker.fragments.field_creator.FieldCreatorStartCornerFragmentDirections
 import com.fieldbook.tracker.viewmodels.FieldConfig
 import com.fieldbook.tracker.viewmodels.FieldCreatorViewModel
-import com.fieldbook.tracker.views.FieldCreationStep
 import com.fieldbook.tracker.views.FieldCreatorStepper
 
 class FieldCreatorActivity : ThemedActivity() {

@@ -15,11 +15,11 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
-import com.fieldbook.tracker.utilities.FieldStartCorner
+import com.fieldbook.tracker.enums.FieldCreationStep
+import com.fieldbook.tracker.enums.FieldStartCorner
 import com.fieldbook.tracker.viewmodels.FieldConfig
 import com.fieldbook.tracker.viewmodels.FieldCreationResult
 import com.fieldbook.tracker.viewmodels.FieldCreatorViewModel
-import com.fieldbook.tracker.views.FieldCreationStep
 
 abstract class FieldCreatorBaseFragment : Fragment() {
 

@@ -7,11 +7,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.enums.FieldCreationStep
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.ImportFormat
-import com.fieldbook.tracker.utilities.FieldPattern
-import com.fieldbook.tracker.utilities.FieldStartCorner
-import com.fieldbook.tracker.views.FieldCreationStep
+import com.fieldbook.tracker.enums.FieldWalkingPattern
+import com.fieldbook.tracker.enums.FieldStartCorner
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -207,13 +207,13 @@ data class FieldConfig(
     val isZigzag: Boolean? = null,
     val isHorizontal: Boolean? = null
 ) {
-    val pattern: FieldPattern?
+    val pattern: FieldWalkingPattern?
         get() = when {
             isHorizontal == null || isZigzag == null -> null
-            isHorizontal && !isZigzag -> FieldPattern.HORIZONTAL_LINEAR
-            isHorizontal && isZigzag -> FieldPattern.HORIZONTAL_ZIGZAG
-            !isHorizontal && !isZigzag -> FieldPattern.VERTICAL_LINEAR
-            else -> FieldPattern.VERTICAL_ZIGZAG
+            isHorizontal && !isZigzag -> FieldWalkingPattern.HORIZONTAL_LINEAR
+            isHorizontal && isZigzag -> FieldWalkingPattern.HORIZONTAL_ZIGZAG
+            !isHorizontal && !isZigzag -> FieldWalkingPattern.VERTICAL_LINEAR
+            else -> FieldWalkingPattern.VERTICAL_ZIGZAG
         }
 
     val totalPlots: Int
@@ -239,14 +239,6 @@ data class ValidationError(
     val colsError: String? = null
 )
 
-enum class PreviewMode {
-    BASIC_GRID,
-    CORNER_SELECTION,
-    DIRECTION_PREVIEW,
-    PATTERN_PREVIEW,
-    FINAL_PREVIEW
-}
-
 private fun insertPlotData(db: DataHelper, studyDbId: Int, fieldColumns: List<String>, config: FieldConfig) {
     var plotIndex = 0
     val pattern = config.pattern ?: return
@@ -254,7 +246,7 @@ private fun insertPlotData(db: DataHelper, studyDbId: Int, fieldColumns: List<St
     val cols = config.cols
 
     when (pattern) {
-        FieldPattern.HORIZONTAL_LINEAR, FieldPattern.HORIZONTAL_ZIGZAG -> {
+        FieldWalkingPattern.HORIZONTAL_LINEAR, FieldWalkingPattern.HORIZONTAL_ZIGZAG -> {
             var ltr = true
             for (i in 1..rows) { // outer: rows
                 for (j in if (ltr) 1..cols else cols downTo 1) { // inner: cols, L→R or R→L
@@ -262,12 +254,12 @@ private fun insertPlotData(db: DataHelper, studyDbId: Int, fieldColumns: List<St
                     insertSinglePlot(db, studyDbId, fieldColumns, i, j, plotIndex)
                 }
                 // flip the direction before iterating over columns again
-                if (pattern == FieldPattern.HORIZONTAL_ZIGZAG) {
+                if (pattern == FieldWalkingPattern.HORIZONTAL_ZIGZAG) {
                     ltr = !ltr
                 }
             }
         }
-        FieldPattern.VERTICAL_LINEAR, FieldPattern.VERTICAL_ZIGZAG -> {
+        FieldWalkingPattern.VERTICAL_LINEAR, FieldWalkingPattern.VERTICAL_ZIGZAG -> {
             var topToBottom = true
             for (j in 1..cols) { // outer: cols
                 for (i in if (topToBottom) 1..rows else rows downTo 1) { // inner: rows, T→B or B→T
@@ -275,7 +267,7 @@ private fun insertPlotData(db: DataHelper, studyDbId: Int, fieldColumns: List<St
                     insertSinglePlot(db, studyDbId, fieldColumns, i, j, plotIndex)
                 }
                 // flip the direction before iterating over columns again
-                if (pattern == FieldPattern.VERTICAL_ZIGZAG) {
+                if (pattern == FieldWalkingPattern.VERTICAL_ZIGZAG) {
                     topToBottom = !topToBottom
                 }
             }

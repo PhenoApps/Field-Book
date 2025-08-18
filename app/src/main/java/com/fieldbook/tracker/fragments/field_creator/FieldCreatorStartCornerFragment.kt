@@ -7,8 +7,8 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.navigation.fragment.findNavController
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.viewmodels.FieldConfig
-import com.fieldbook.tracker.viewmodels.PreviewMode
-import com.fieldbook.tracker.views.FieldCreationStep
+import com.fieldbook.tracker.enums.GridPreviewMode
+import com.fieldbook.tracker.enums.FieldCreationStep
 import com.fieldbook.tracker.views.FieldPreviewGrid
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.getValue
@@ -48,7 +48,7 @@ class FieldCreatorStartCornerFragment : FieldCreatorBaseFragment() {
 
                 FieldPreviewGrid(
                     config = state,
-                    previewMode = PreviewMode.CORNER_SELECTION,
+                    gridPreviewMode = GridPreviewMode.CORNER_SELECTION,
                     selectedCorner = state.startCorner,
                     onCornerSelected = { corner ->
                         fieldCreatorViewModel.updateStartCorner(corner)

@@ -29,17 +29,17 @@ import eu.wewox.lazytable.LazyTable
 import eu.wewox.lazytable.LazyTableItem
 import eu.wewox.lazytable.lazyTableDimensions
 import eu.wewox.lazytable.lazyTablePinConfiguration
-import com.fieldbook.tracker.utilities.FieldStartCorner
+import com.fieldbook.tracker.enums.FieldStartCorner
 import com.fieldbook.tracker.utilities.FieldPlotCalculator
 import com.fieldbook.tracker.viewmodels.FieldConfig
-import com.fieldbook.tracker.viewmodels.PreviewMode
+import com.fieldbook.tracker.enums.GridPreviewMode
 import eu.wewox.lazytable.LazyTableScope
 import kotlin.math.min
 
 @Composable
 fun FieldPreviewGrid(
     config: FieldConfig,
-    previewMode: PreviewMode = PreviewMode.FINAL_PREVIEW,
+    gridPreviewMode: GridPreviewMode = GridPreviewMode.FINAL_PREVIEW,
     onCornerSelected: ((FieldStartCorner) -> Unit)? = null,
     selectedCorner: FieldStartCorner? = null,
     showPlotNumbers: Boolean = false,
@@ -52,12 +52,12 @@ fun FieldPreviewGrid(
 ) {
     if (config.rows <= 0 || config.cols <= 0) return
 
-    val effectiveShowNumbers = when (previewMode) {
-        PreviewMode.BASIC_GRID -> false
-        PreviewMode.CORNER_SELECTION -> showPlotNumbers && selectedCorner != null // only show when corner selected
-        PreviewMode.DIRECTION_PREVIEW -> showPlotNumbers && config.startCorner != null
-        PreviewMode.PATTERN_PREVIEW -> showPlotNumbers && config.pattern != null
-        PreviewMode.FINAL_PREVIEW -> showPlotNumbers
+    val effectiveShowNumbers = when (gridPreviewMode) {
+        GridPreviewMode.BASIC_GRID -> false
+        GridPreviewMode.CORNER_SELECTION -> showPlotNumbers && selectedCorner != null // only show when corner selected
+        GridPreviewMode.DIRECTION_PREVIEW -> showPlotNumbers && config.startCorner != null
+        GridPreviewMode.PATTERN_PREVIEW -> showPlotNumbers && config.pattern != null
+        GridPreviewMode.FINAL_PREVIEW -> showPlotNumbers
     }
 
     BoxWithConstraints {val density = LocalDensity.current
@@ -124,7 +124,7 @@ fun FieldPreviewGrid(
                     showPlotNumbers = effectiveShowNumbers,
                     onCornerSelected = onCornerSelected,
                     highlightedCells = highlightedCells,
-                    previewMode = previewMode
+                    gridPreviewMode = gridPreviewMode
                 )
             }
         }
@@ -182,7 +182,7 @@ private fun renderGrid(
     showPlotNumbers: Boolean,
     onCornerSelected: ((FieldStartCorner) -> Unit)? = null,
     highlightedCells: Set<Pair<Int, Int>> = emptySet(),
-    previewMode: PreviewMode = PreviewMode.FINAL_PREVIEW
+    gridPreviewMode: GridPreviewMode = GridPreviewMode.FINAL_PREVIEW
 ) {
     lazyTable.items(
         count = gridConfig.displayRows * gridConfig.displayCols,
@@ -203,7 +203,7 @@ private fun renderGrid(
             else -> {
                 val isCorner = isCornerCell(actualRowIndex, actualColIndex, config.rows, config.cols)
 
-                val isCornerClickable = previewMode == PreviewMode.CORNER_SELECTION
+                val isCornerClickable = gridPreviewMode == GridPreviewMode.CORNER_SELECTION
 
                 val cornerType = if (isCorner) {
                     FieldStartCorner.fromPosition(actualRowIndex, actualColIndex, config.rows, config.cols)
@@ -212,11 +212,11 @@ private fun renderGrid(
                 val isSelected = cornerType != null && cornerType == config.startCorner
 
                 val plotNumber = if (showPlotNumbers) {
-                    when (previewMode) {
-                        PreviewMode.CORNER_SELECTION -> {
+                    when (gridPreviewMode) {
+                        GridPreviewMode.CORNER_SELECTION -> {
                             if (isSelected) "1" else ""
                         }
-                        PreviewMode.DIRECTION_PREVIEW -> {
+                        GridPreviewMode.DIRECTION_PREVIEW -> {
                             if (isSelected) { // show 1 in selected corner
                                 "1"
                             } else if (highlightedCells.contains(actualRowIndex to actualColIndex) &&
@@ -239,7 +239,7 @@ private fun renderGrid(
 
                 DataCell(
                     value = plotNumber.toString(),
-                    isCorner = isCorner && previewMode == PreviewMode.CORNER_SELECTION,
+                    isCorner = isCorner && gridPreviewMode == GridPreviewMode.CORNER_SELECTION,
                     isSelected = isSelected,
                     isHighlighted = highlightedCells.contains(actualRowIndex to actualColIndex),
                     onClick = if (isCorner && isCornerClickable && onCornerSelected != null) {

@@ -32,7 +32,6 @@ import com.fieldbook.tracker.async.ImportRunnableTask
 import com.fieldbook.tracker.brapi.BrapiInfoDialogFragment
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.models.ObservationUnitModel
-import com.fieldbook.tracker.dialogs.FieldCreatorDialogFragment
 import com.fieldbook.tracker.dialogs.FieldSortDialogFragment
 import com.fieldbook.tracker.dialogs.ListAddDialog
 import com.fieldbook.tracker.dialogs.ListSortDialog

@@ -1,15 +1,4 @@
-package com.fieldbook.tracker.utilities
-
-data class FieldConfig(
-    val rows: Int,
-    val cols: Int,
-    val pattern: FieldPattern = FieldPattern.HORIZONTAL_LINEAR,
-    val startCorner: FieldStartCorner = FieldStartCorner.TOP_LEFT,
-    val cellTextColor: Int,
-    val cellBgColor: Int,
-    val headerCellBgColor: Int,
-    val showHeaders: Boolean = false
-)
+package com.fieldbook.tracker.enums
 
 enum class FieldStartCorner {
     TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT;
@@ -25,11 +14,4 @@ enum class FieldStartCorner {
             }
         }
     }
-}
-
-enum class FieldPattern {
-    HORIZONTAL_LINEAR,
-    HORIZONTAL_ZIGZAG,
-    VERTICAL_LINEAR,
-    VERTICAL_ZIGZAG
 }
