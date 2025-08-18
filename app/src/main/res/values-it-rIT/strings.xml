@@ -77,6 +77,9 @@
     <string name="warning_traits_missing">Il carattere non esiste. Crea un carattere prima di rilevare il dato</string>
     <!-- Changelog -->
     <string name="changelog_title">Diario di modifiche</string>
+    <!--  Field Grouping  -->
+    <string name="group_archive">Archivio</string>
+    <string name="menu_archive">Archivio</string>
     <!-- FIELDS -->
     <!-- General -->
     <string name="menu_fields_sort_list">Ordina per elenco di campi</string>
@@ -510,6 +513,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <!-- usb camera trait -->
     <!-- gopro -->
     <!-- canon camera strings -->
+    <!-- spectral trait strings -->
     <string name="sort">Ordina</string>
     <string name="brapi_traits_filter_title">Caratteri</string>
     <string name="dialog_quick_goto_title">Tasto Rapido</string>

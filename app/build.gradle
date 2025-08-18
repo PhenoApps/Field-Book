@@ -16,6 +16,10 @@ props.each { prop ->
     project.ext.set(prop.key, prop.value)
 }
 
+Properties localProperties = new Properties()
+localProperties.load(new FileInputStream("$project.rootDir/local.properties"))
+String nixLicense = localProperties.getProperty("NIX_LICENSE", "")
+
 private Integer makeVersionCode() {
     int major = ext.majorVersion as Integer
     int minor = ext.minorVersion as Integer
@@ -70,6 +74,9 @@ android {
         versionName = makeVersionName()
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField "String", "NIX_LICENSE", "\"${nixLicense.replaceAll("\"", "\\\\\"")}\""
+
     }
 
     buildTypes {

@@ -40,6 +40,7 @@ import org.brapi.v2.model.core.BrAPIStudy
 import org.brapi.v2.model.core.BrAPITrial
 import androidx.core.content.edit
 import androidx.core.view.isNotEmpty
+import androidx.core.content.edit
 
 /**
  * List Filter activity base class for BrAPI filter activities
@@ -91,7 +92,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
     protected val intentLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) finish()
+            if (result.resultCode == Activity.RESULT_OK) finish()
             else restoreModels()
         }
 
@@ -104,7 +105,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
                         getString(R.string.brapi_v1_is_not_compatible),
                         Toast.LENGTH_SHORT
                     ).show()
-                    setResult(RESULT_CANCELED)
+                    setResult(Activity.RESULT_CANCELED)
                     finish()
                 }
             }
@@ -161,7 +162,12 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
                 chip.setOnCloseIconClickListener {
                     val currentTexts = prefs.getStringSet("${filterName}${GeneralKeys.LIST_FILTER_TEXTS}", setOf())?.toMutableSet()
                     currentTexts?.remove(text)
-                    prefs.edit { putStringSet("${filterName}${GeneralKeys.LIST_FILTER_TEXTS}", currentTexts) }
+                    prefs.edit {
+                        putStringSet(
+                            "${filterName}${GeneralKeys.LIST_FILTER_TEXTS}",
+                            currentTexts
+                        )
+                    }
                     chipGroup.removeView(chip)
                     restoreModels()
                 }

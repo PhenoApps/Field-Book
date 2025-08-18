@@ -288,6 +288,8 @@ public class CollectActivity extends ThemedActivity
 
     public Handler myGuiHandler;
 
+    public int numNixInternetWarnings = 0;
+
     private SharedPreferences mPrefs;
 
     /**
@@ -691,7 +693,7 @@ public class CollectActivity extends ThemedActivity
 
     @Override
     public void refreshMain() {
-        rangeBox.saveLastPlot();
+        rangeBox.saveLastPlotAndTrait();
         rangeBox.refresh();
 
         Log.d(TAG, "Refresh main.");
@@ -1201,8 +1203,6 @@ public class CollectActivity extends ThemedActivity
 
         traitLayouts.unregisterAllReceivers();
 
-        nixSensorHelper.disconnect();
-
         super.onPause();
     }
 
@@ -1213,7 +1213,7 @@ public class CollectActivity extends ThemedActivity
 
         //save last plot id
         if (preferences.getBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)) {
-            rangeBox.saveLastPlot();
+            rangeBox.saveLastPlotAndTrait();
         }
 
         try {
@@ -1225,6 +1225,8 @@ public class CollectActivity extends ThemedActivity
         getTraitLayout().onExit();
 
         traitLayoutRefresh();
+
+        //nixSensorHelper.disconnect();
 
         usbCameraApi.onDestroy();
 

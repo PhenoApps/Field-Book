@@ -33,7 +33,7 @@
             android:paddingStart="21dp"
             android:paddingEnd="21dp"
             android:min="0"
-            android:max="1"
+            android:max="2"
             android:progressDrawable="@drawable/three_state_seek_bar_progress"
             android:thumb="@drawable/three_state_seek_bar_thumb"
             android:id="@+id/traitBooleanSeekBar"

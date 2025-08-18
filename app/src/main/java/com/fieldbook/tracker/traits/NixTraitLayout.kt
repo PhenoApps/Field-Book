@@ -2,7 +2,10 @@ package com.fieldbook.tracker.traits
 
 import android.app.AlertDialog
 import android.content.Context
+import android.net.ConnectivityManager
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.util.AttributeSet
 import android.util.Log
 import android.widget.Toast
@@ -13,6 +16,7 @@ import com.fieldbook.tracker.database.basicTimeFormatter
 import com.fieldbook.tracker.database.saver.NixSpectralSaver
 import com.fieldbook.tracker.devices.spectrometers.Device
 import com.fieldbook.tracker.devices.spectrometers.SpectralFrame
+import com.fieldbook.tracker.devices.spectrometers.Spectrometer.ResultCallback
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.traits.SpectralTraitLayout.State.Color
 import com.fieldbook.tracker.traits.formats.Formats
@@ -21,6 +25,7 @@ import com.fieldbook.tracker.views.NixTraitSettingsView
 import com.nixsensor.universalsdk.CommandStatus
 import com.nixsensor.universalsdk.DeviceState
 import com.nixsensor.universalsdk.IDeviceCompat
+import com.nixsensor.universalsdk.IDeviceScanner
 import com.nixsensor.universalsdk.IMeasurementData
 import com.nixsensor.universalsdk.OnDeviceResultListener
 import com.nixsensor.universalsdk.ReferenceWhite
@@ -28,6 +33,7 @@ import com.nixsensor.universalsdk.ScanMode
 import com.serenegiant.bluetooth.BluetoothManager
 import kotlinx.coroutines.launch
 import org.threeten.bp.OffsetDateTime
+
 
 /**
  * https://nixsensor.github.io/nix-universal-sdk-android-doc/device-operations/
@@ -55,6 +61,31 @@ class NixTraitLayout : SpectralTraitLayout {
 
     override fun type(): String {
         return Formats.NIX.getDatabaseName()
+    }
+
+    override fun loadLayout() {
+        super.loadLayout()
+
+        //check if device is connected to a network, if not show an error message
+        //the nix requires internet access to verify license
+        if (!isNetworkConnected()) {
+            if ((context as CollectActivity).numNixInternetWarnings < 1) {
+                (context as CollectActivity).numNixInternetWarnings++
+                Toast.makeText(
+                    context,
+                    R.string.nix_error_no_network,
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    //https://stackoverflow.com/questions/4238921/detect-whether-there-is-an-internet-connection-available-on-android
+    private fun isNetworkConnected(): Boolean {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
+        val activeNetworkInfo = connectivityManager?.getActiveNetworkInfo()
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected()
     }
 
     override fun establishConnection(): Boolean {
@@ -150,23 +181,17 @@ class NixTraitLayout : SpectralTraitLayout {
             return
         }
 
-        with((context as CollectActivity)) {
+        if (IDeviceScanner.isBluetoothPermissionGranted(context)) {
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            startSearch()
+
+        } else {
+
+            with((context as CollectActivity)) {
+
                 getSecurityChecker().withPermission(
-                    arrayOf(
-                        "android.permission.BLUETOOTH_SCAN",
-                        "android.permission.BLUETOOTH_CONNECT",
-                        "android.permission.BLUETOOTH_ADVERTISE"
-                    )
+                    IDeviceScanner.requiredBluetoothPermissions
                 ) {
-                    startSearch()
-                }
-            } else {
-                getSecurityChecker().withPermission(
-                    arrayOf(
-                        "android.permission.BLUETOOTH",
-                    )) {
                     startSearch()
                 }
             }
@@ -175,18 +200,28 @@ class NixTraitLayout : SpectralTraitLayout {
 
     private fun startSearch() {
 
-        controller.getNixSensorHelper().search {
+        if (IDeviceScanner.isBluetoothPermissionGranted(context)) {
 
-            if (!it) {
+            controller.getNixSensorHelper().search {}
 
-                recursionCount++
+        } else {
 
-                if (recursionCount > SEARCH_RECURSION_LIMIT) {
-                    collectActivity.finish()
-                }
+            recursionCount++
 
-                checkPermissionAndStartSearch()
+            if (recursionCount > SEARCH_RECURSION_LIMIT) {
+                Toast.makeText(
+                    context,
+                    R.string.nix_error_bluetooth_permissions,
+                    Toast.LENGTH_SHORT
+                ).show()
+                return
+            } else {
 
+                Handler(Looper.getMainLooper()).postDelayed(
+                    {
+                        checkPermissionAndStartSearch()
+                    }, 1000
+                )
             }
         }
     }
@@ -256,6 +291,8 @@ class NixTraitLayout : SpectralTraitLayout {
                     saveDevice(device)
                     enableCapture(device)
                     ensureSpectralCompat(nixDevice)
+                } else {
+                    setupConnectUi()
                 }
             }
         }
@@ -311,7 +348,7 @@ class NixTraitLayout : SpectralTraitLayout {
         }
     }
 
-    override fun capture(device: Device, entryId: String, traitId: String) {
+    override fun capture(device: Device, entryId: String, traitId: String, callback: ResultCallback) {
 
         getDevice(device)?.let { nixDevice ->
 
@@ -328,6 +365,8 @@ class NixTraitLayout : SpectralTraitLayout {
                 enableCapture(device)
                 return@let
             }
+
+            callback.onResult(true)
 
             nixDevice.measure(object : OnDeviceResultListener {
                 override fun onDeviceResult(
@@ -462,7 +501,7 @@ class NixTraitLayout : SpectralTraitLayout {
 
                     }
 
-                    writeSpectralDataToFile(data.deviceType.toString(), frame)?.let { spectralUri ->
+                    writeSpectralDataToFile(data.deviceType.toString(), frame, data.providesSpectral)?.let { spectralUri ->
 
                         writeSpectralDataToDatabase(frame, color, spectralUri, entryId, traitId)
 

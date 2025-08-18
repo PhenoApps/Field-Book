@@ -8,11 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Trait name wrapping in Collect can now be toggled with a long-press
+- Nix hardware sensors now supported as a new Spectral trait type
 - Fields can now be grouped and archived
 
 ### Changed
+- Boolean traits now have a visual unset state
 
 ### Fixed
+- Exif user comment tag no longer populated by incorrect data
+- Return character setting is now interpreted correctly
+- Observation Variable Name is now searchable in the BrAPI trait importer
+- Image file name sanitation now removes or replaces more characters
 
 ## [v6.2.5] - 2025-06-23
 

@@ -1,10 +1,9 @@
 package com.fieldbook.tracker.utilities
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.widget.Toast
+import com.fieldbook.tracker.BuildConfig
 import com.fieldbook.tracker.R
 import com.nixsensor.universalsdk.DeviceCompat
 import com.nixsensor.universalsdk.DeviceScanner
@@ -24,7 +23,7 @@ class NixSensorHelper @Inject constructor(@ActivityContext val context: Context)
 
     companion object {
         private const val TAG = "Nix"
-        private const val SCAN_PERIOD_MS = 30000L
+        //private const val SCAN_PERIOD_MS = 30000L
     }
 
     data class NixDevice(
@@ -47,17 +46,25 @@ class NixSensorHelper @Inject constructor(@ActivityContext val context: Context)
     )
 
     init {
-        // Initialize the Nix Sensor SDK, save the active state
-        activate()?.let { licenseManagerState = it }
+
+        try {
+
+            // Initialize the Nix Sensor SDK, save the active state
+            activate()?.let { licenseManagerState = it }
+
+        } catch (e: Exception) {
+
+            Log.e(TAG, "Error initializing Nix Sensor SDK: ${e.message}")
+
+            e.printStackTrace()
+        }
 
         Log.d(TAG, "License manager state: $licenseManagerState")
     }
 
     private fun readNixLicense(): NixLicense? {
         return try {
-            val jsonString = context.assets.open("nix/license.json").bufferedReader().use {
-                it.readText()
-            }
+            val jsonString = BuildConfig.NIX_LICENSE
             Json.decodeFromString<NixLicense>(jsonString)
         } catch (e: IOException) {
             e.printStackTrace()
@@ -221,6 +228,7 @@ class NixSensorHelper @Inject constructor(@ActivityContext val context: Context)
     }
 
     fun disconnect() {
+        stopScan()
         connectedDevice?.disconnect()
         connectedDevice = null
     }

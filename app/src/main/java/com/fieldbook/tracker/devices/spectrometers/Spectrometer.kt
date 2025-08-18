@@ -19,7 +19,7 @@ interface Spectrometer {
 
     fun saveDevice(device: Device)
 
-    fun capture(device: Device, entryId: String, traitId: String)
+    fun capture(device: Device, entryId: String, traitId: String, callback: ResultCallback)
 
     //each device must implement a database saver that takes some internal model and converts it
     //to field book's SpectralFact model for database representation
@@ -31,4 +31,8 @@ interface Spectrometer {
         entryId: String,
         traitId: String
     )
+
+    fun interface ResultCallback {
+        fun onResult(result: Boolean)
+    }
 }

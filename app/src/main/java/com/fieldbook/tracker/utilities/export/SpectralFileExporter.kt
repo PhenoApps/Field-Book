@@ -28,10 +28,14 @@ class SpectralFileExporter @Inject constructor(
         studyId: Int
     ): Result<Unit> = runCatching {
         val observations = databaseHelper.getAllObservations(studyId.toString())
+        val spectralTraitIds = (databaseHelper.allTraitObjects
+            ?.filter { it.format in Formats.Companion.getSpectralFormats()
+            .map { it.getDatabaseName() } }
+            ?: emptyList())
+            .map { it.id }
 
         val spectralFactObservations = observations.filter { observation ->
-            observation.observation_variable_field_book_format in Formats.Companion.getSpectralFormats()
-                .map { it.getDatabaseName() } && observation.study_id == studyId.toString()
+            observation.observation_variable_db_id.toString() in spectralTraitIds && observation.study_id == studyId.toString()
         }
 
         spectralFactObservations.groupBy { it.observation_variable_db_id }
@@ -81,7 +85,7 @@ class SpectralFileExporter @Inject constructor(
             return
         }
 
-        val metadataHeader = "sample_name, device_id, device_name, comments, created_at"
+        val metadataHeader = "sample_name, device_id, device_name, comments, created_at, color"
 
         val firstFact = spectralFacts.first()
         val observation = databaseHelper.getObservationById(firstFact.observationId.toString())
@@ -94,7 +98,7 @@ class SpectralFileExporter @Inject constructor(
         val header = "$metadataHeader, ${frameReference.wavelengths.replace(" ", ", ")}\n"
 
         try {
-            context.contentResolver.openOutputStream(uri, "w")?.bufferedWriter()?.use { writer ->
+            context.contentResolver.openOutputStream(uri, "wt")?.bufferedWriter()?.use { writer ->
                 writer.write(header)
 
                 for (fact in spectralFacts) {
@@ -108,6 +112,7 @@ class SpectralFileExporter @Inject constructor(
                     val deviceName = device?.name ?: ""
                     val comment = fact.comment ?: ""
                     val createdAt = fact.createdAt
+                    val color = fact.color
 
                     val frame = fact.toSpectralFrame(
                         entryId,
@@ -118,7 +123,7 @@ class SpectralFileExporter @Inject constructor(
                     if (values.isEmpty())
                         continue
 
-                    writer.write("\"${entryId.escape()}\", $deviceAddress, \"${deviceName.escape()}\", \"${comment.escape()}\", $createdAt, $values\n")
+                    writer.write("\"${entryId.escape()}\", $deviceAddress, \"${deviceName.escape()}\", \"${comment.escape()}\", $createdAt, $color, $values\n")
                 }
             }
         } catch (e: IOException) {

@@ -147,7 +147,11 @@ class ObservationUnitPropertyDao {
                     cursor.addRow(fieldList.map { row[it] } + traitRequiredFields.map {
                         when (it) {
                             "trait" -> row["observation_variable_name"]
-                            "userValue" -> CategoryJsonUtil.processValue(row)
+                            "userValue" -> {
+                                val value = row["value"]
+                                val format = row["observation_variable_field_book_format"]
+                                processor.processValue(value.toString(), format.toString())
+                            }
                             "timeTaken" -> row["observation_time_stamp"]
                             "person" -> row["collector"]
                             "location" -> row["geo_coordinates"]
@@ -248,7 +252,7 @@ class ObservationUnitPropertyDao {
             val orderByClause = getSortOrderClause(context, studyId.toString())
             //                SELECT units.internal_id_observation_unit AS id, $combinedSelection
             val query = """
-                SELECT $combinedSelection
+                SELECT $combinedSelection, observation_variable_field_book_format
                 FROM observation_units AS units
                 LEFT JOIN observation_units_values AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
                 LEFT JOIN observation_units_attributes AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
@@ -267,11 +271,17 @@ class ObservationUnitPropertyDao {
                     val row = mutableListOf<String?>()
                     for (i in 0 until cursor.columnCount) {
                         val columnName = cursor.getColumnName(i)
-                        val value = cursor.getStringOrNull(i) ?: ""
-                        if (columnName in traitNames) {
+                        val value = cursor.getStringOrNull(i)
+                        if (value != null && columnName in traitNames) {
                             // Process trait values using the processor
-                            val format = cursor.getStringOrNull(cursor.getColumnIndex("observation_variable_field_book_format")) ?: ""
-                            row.add(processor.processValue(value, format))
+                            // must get obs trait by name here since the table query has multiple traits per row
+                            val trait = ObservationVariableDao.getTraitByName(columnName)
+                            if (trait == null) {
+                                Log.w("getExportTableData", "Trait not found for column: $columnName")
+                                row.add(value)
+                                continue
+                            }
+                            row.add(processor.processValue(value, trait.format))
                         } else {
                             row.add(value)
                         }
@@ -302,7 +312,9 @@ class ObservationUnitPropertyDao {
                 val requiredTraits = traits.map { it.name }.toTypedArray()
                 val requiredColumns = arrayOf(uniqueName) + requiredTraits
                 val matrixCursor = MatrixCursor(requiredColumns)
-                val traitStartIndex = cursor.columnCount - requiredTraits.size
+
+                //subtract one for the additional field book format for the value processor
+                val traitStartIndex = cursor.columnCount - requiredTraits.size - 1
 
                 while (cursor.moveToNext()) {
 
@@ -318,9 +330,9 @@ class ObservationUnitPropertyDao {
 
                         try {
 
-                            rowData.add(
-                                cursor.getStringOrNull(index + traitStartIndex)
-                            )
+                            val obsValue = cursor.getStringOrNull(index + traitStartIndex)
+
+                            rowData.add(obsValue)
 
                         } catch (e: Exception) {
 
@@ -362,9 +374,11 @@ class ObservationUnitPropertyDao {
                 )
             }
 
+            if (select.isEmpty() && maxStatements.isEmpty()) return@withDatabase null
+
             val query = """
-                SELECT $select,
-                ${maxStatements.joinToString(",\n")}
+                SELECT ${if (select.isNotEmpty()) select else "props.id"}
+                ${if (maxStatements.isNotEmpty()) maxStatements.joinToString(",\n", ",") else String()}
                 FROM ObservationUnitProperty as props
                 LEFT JOIN observations o ON props.`${uniqueName}` = o.observation_unit_id AND o.${Study.FK} = $studyId
                 LEFT JOIN ${ObservationVariable.tableName} AS vars ON vars.${ObservationVariable.PK} = o.${ObservationVariable.FK}
