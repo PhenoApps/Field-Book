@@ -138,6 +138,7 @@
         <item name="activeCellColor">@color/main_primary_dark</item>
         <item name="activeCellTextColor">@color/WHITE</item>
         <item name="cellTextColor">@color/main_color_text_dark</item>
+        <item name="tableBorderColor">@color/BLACK</item>
 
         <item name="fb_graph_item_selected_color">?attr/fb_color_primary</item>
         <item name="fb_graph_item_unselected_color">?attr/fb_color_background</item>

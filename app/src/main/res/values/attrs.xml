@@ -326,6 +326,7 @@
     <attr name="activeCellColor" format="color"/>
     <attr name="activeCellTextColor" format="color"/>
     <attr name="cellTextColor" format="color"/>
+    <attr name="tableBorderColor" format="color"/>
 
     <!-- stepper ui colors -->
     <attr name="stepper_icon_color" format="color"/>

@@ -1,39 +1,40 @@
 package com.fieldbook.tracker.views
 
-import android.util.TypedValue
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.fieldbook.tracker.R
 import eu.wewox.lazytable.LazyTable
 import eu.wewox.lazytable.LazyTableItem
 import eu.wewox.lazytable.lazyTableDimensions
 import eu.wewox.lazytable.lazyTablePinConfiguration
 import com.fieldbook.tracker.enums.FieldStartCorner
-import com.fieldbook.tracker.utilities.FieldPlotCalculator
 import com.fieldbook.tracker.viewmodels.FieldConfig
 import com.fieldbook.tracker.enums.GridPreviewMode
+import com.fieldbook.tracker.ui.grid.CellType
+import com.fieldbook.tracker.ui.grid.FieldGridCell
+import com.fieldbook.tracker.ui.grid.GridColors
+import com.fieldbook.tracker.ui.grid.GridDisplay
+import com.fieldbook.tracker.ui.grid.calculateGridDisplay
+import com.fieldbook.tracker.ui.grid.directionSequenceLabel
+import com.fieldbook.tracker.ui.grid.isCornerCell
+import com.fieldbook.tracker.ui.grid.mapDisplayToActual
+import com.fieldbook.tracker.ui.grid.plotNumberLabel
+import com.fieldbook.tracker.ui.grid.rememberGridColors
 import eu.wewox.lazytable.LazyTableScope
+import kotlin.math.max
 import kotlin.math.min
 
 @Composable
@@ -52,15 +53,22 @@ fun FieldPreviewGrid(
 ) {
     if (config.rows <= 0 || config.cols <= 0) return
 
-    val effectiveShowNumbers = when (gridPreviewMode) {
-        GridPreviewMode.BASIC_GRID -> false
-        GridPreviewMode.CORNER_SELECTION -> showPlotNumbers && selectedCorner != null // only show when corner selected
-        GridPreviewMode.DIRECTION_PREVIEW -> showPlotNumbers && config.startCorner != null
-        GridPreviewMode.PATTERN_PREVIEW -> showPlotNumbers && config.pattern != null
-        GridPreviewMode.FINAL_PREVIEW -> showPlotNumbers
+    val colors = rememberGridColors()
+
+    val effectiveShowNumbers by remember(config, gridPreviewMode, selectedCorner) {
+        derivedStateOf {
+            when (gridPreviewMode) {
+                GridPreviewMode.BASIC_GRID -> false
+                GridPreviewMode.CORNER_SELECTION -> showPlotNumbers && selectedCorner != null
+                GridPreviewMode.DIRECTION_PREVIEW -> showPlotNumbers && config.startCorner != null
+                GridPreviewMode.PATTERN_PREVIEW -> showPlotNumbers && config.pattern != null
+                GridPreviewMode.FINAL_PREVIEW -> showPlotNumbers
+            }
+        }
     }
 
-    BoxWithConstraints {val density = LocalDensity.current
+    BoxWithConstraints {
+        val density = LocalDensity.current
         val cellSize = 40.dp
         val cellSizePx = with(density) { cellSize.toPx() }
 
@@ -69,36 +77,64 @@ fun FieldPreviewGrid(
 
         // for forced full view, show all rows/cols
         // if reference grid dimensions available, use that, else calc using default cellSize
-        val maxDisplayRows = if (forceFullView) {
-            config.rows
-        } else useReferenceGridDimensions?.first  // Use stored reference dimensions
+        val maxDisplayRows =
+            if (forceFullView) config.rows
+            else useReferenceGridDimensions?.first  // use stored reference dimensions
             ?: (availableHeightPx / cellSizePx).toInt()
 
-        val maxDisplayCols = if (forceFullView) {
-            config.cols
-        } else useReferenceGridDimensions?.second  // Use stored reference dimensions
+        val maxDisplayCols =
+            if (forceFullView) config.cols
+            else useReferenceGridDimensions?.second  // use stored reference dimensions
             ?: (availableWidthPx / cellSizePx).toInt()
-        val gridConfig = calculateGridDisplayConfig(
-            totalRows = config.rows,
-            totalCols = config.cols,
-            maxDisplayRows = maxDisplayRows,
-            maxDisplayCols = maxDisplayCols
-        )
 
-        // save the calculated grid dimensions
-        onGridDimensionsCalculated?.invoke(gridConfig.displayRows, gridConfig.displayCols)
-
-        // calculate dynamic cell size if using reference dimensions
-        val dynamicCellSize = if (useReferenceGridDimensions != null && !forceFullView) {
-            val maxCellWidth = availableWidthPx / gridConfig.displayCols
-            val maxCellHeight = availableHeightPx / gridConfig.displayRows
-            val cellSizeToUse = minOf(maxCellWidth, maxCellHeight, cellSizePx)
-            with(density) { cellSizeToUse.toDp() }
-        } else {
-            cellSize
+        val gridDisplay by remember(config.rows, config.cols, maxDisplayRows, maxDisplayCols) {
+            derivedStateOf {
+                calculateGridDisplay(config.rows, config.cols, maxDisplayRows, maxDisplayCols)
+            }
         }
 
-        val needsCollapsing = gridConfig.hasRowEllipsis || gridConfig.hasColEllipsis
+        // save the calculated grid dimensions
+        onGridDimensionsCalculated?.invoke(gridDisplay.displayRows, gridDisplay.displayCols)
+
+        // calculate dynamic cell size if using reference dimensions
+        val dynamicCellSize: Dp by remember(
+            useReferenceGridDimensions, forceFullView, availableWidthPx, availableHeightPx, gridDisplay.displayCols, gridDisplay.displayRows
+        ) {
+            derivedStateOf {
+                if (useReferenceGridDimensions != null && !forceFullView) {
+                    val maxCellW = availableWidthPx / gridDisplay.displayCols
+                    val maxCellH = availableHeightPx / gridDisplay.displayRows
+                    val px = min(min(maxCellW, maxCellH), cellSizePx)
+                    with(density) { px.toDp() }
+                } else cellSize
+            }
+        }
+
+        val maxDigits by remember(config, gridPreviewMode, effectiveShowNumbers) {
+            derivedStateOf {
+                if (!effectiveShowNumbers) 1 else when (gridPreviewMode) {
+                    GridPreviewMode.CORNER_SELECTION -> 1
+                    GridPreviewMode.DIRECTION_PREVIEW -> max(config.rows, config.cols).toString().length
+                    else -> (config.rows * config.cols).toString().length
+                }
+            }
+        }
+
+        // set uniform cell font size
+        val uniformFontSize: TextUnit by remember(maxDigits) {
+            derivedStateOf {
+                when {
+                    maxDigits <= 3 -> 12.sp
+                    maxDigits <= 5 -> 10.sp
+                    maxDigits <= 8 -> 8.sp
+                    else -> 6.sp
+                }
+            }
+        }
+
+        val needsCollapsing by remember(gridDisplay) {
+            derivedStateOf { gridDisplay.rowHasEllipsis || gridDisplay.colHasEllipsis }
+        }
         onCollapsingStateChanged?.invoke(needsCollapsing)
 
         Row(
@@ -112,340 +148,84 @@ fun FieldPreviewGrid(
                     rowSize = { dynamicCellSize }
                 ),
                 contentPadding = PaddingValues(0.dp),
-                pinConfiguration = lazyTablePinConfiguration(
-                    columns = 0,
-                    rows = 0
-                )
+                pinConfiguration = lazyTablePinConfiguration(columns = 0, rows = 0)
             ) {
                 renderGrid(
                     lazyTable = this,
                     config = config,
-                    gridConfig = gridConfig,
+                    gridDisplay = gridDisplay,
                     showPlotNumbers = effectiveShowNumbers,
                     onCornerSelected = onCornerSelected,
                     highlightedCells = highlightedCells,
-                    gridPreviewMode = gridPreviewMode
+                    gridPreviewMode = gridPreviewMode,
+                    colors = colors,
+                    fontSize = uniformFontSize
                 )
             }
         }
-    }
-}
-
-private fun calculateGridDisplayConfig(
-    totalRows: Int,
-    totalCols: Int,
-    maxDisplayRows: Int,
-    maxDisplayCols: Int
-): GridDisplayConfig {
-    val needsRowCollapse = totalRows > maxDisplayRows
-    val needsColCollapse = totalCols > maxDisplayCols
-
-    return if (needsRowCollapse || needsColCollapse) {
-        val showRowsCount = min(maxDisplayRows, totalRows)
-        val showColsCount = min(maxDisplayCols, totalCols)
-
-        val rowsPerSide = if (needsRowCollapse) (showRowsCount - 1) / 2 else showRowsCount
-        val colsPerSide = if (needsColCollapse) (showColsCount - 1) / 2 else showColsCount
-
-        GridDisplayConfig(
-            displayRows = if (needsRowCollapse) rowsPerSide * 2 + 1  else totalRows,
-            displayCols = if (needsColCollapse) colsPerSide * 2 + 1 else totalCols,
-            showRowsStart = rowsPerSide,
-            showRowsEnd = if (needsRowCollapse) rowsPerSide else 0,
-            showColsStart = colsPerSide,
-            showColsEnd = if (needsColCollapse) colsPerSide else 0,
-            hasRowEllipsis = needsRowCollapse,
-            hasColEllipsis = needsColCollapse,
-            rowEllipsisPosition = rowsPerSide,
-            colEllipsisPosition = colsPerSide
-        )
-    } else {
-        GridDisplayConfig(
-            displayRows = totalRows,
-            displayCols = totalCols,
-            showRowsStart = totalRows,
-            showRowsEnd = 0,
-            showColsStart = totalCols,
-            showColsEnd = 0,
-            hasRowEllipsis = false,
-            hasColEllipsis = false,
-            rowEllipsisPosition = -1,
-            colEllipsisPosition = -1
-        )
     }
 }
 
 private fun renderGrid(
     lazyTable: LazyTableScope,
     config: FieldConfig,
-    gridConfig: GridDisplayConfig,
+    gridDisplay: GridDisplay,
     showPlotNumbers: Boolean,
     onCornerSelected: ((FieldStartCorner) -> Unit)? = null,
     highlightedCells: Set<Pair<Int, Int>> = emptySet(),
-    gridPreviewMode: GridPreviewMode = GridPreviewMode.FINAL_PREVIEW
+    gridPreviewMode: GridPreviewMode,
+    colors: GridColors,
+    fontSize: TextUnit
 ) {
     lazyTable.items(
-        count = gridConfig.displayRows * gridConfig.displayCols,
+        count = gridDisplay.displayRows * gridDisplay.displayCols,
         layoutInfo = {
-            val row = it / gridConfig.displayCols
-            val column = it % gridConfig.displayCols
+            val row = it / gridDisplay.displayCols
+            val column = it % gridDisplay.displayCols
             LazyTableItem(column = column, row = row)
         }
     ) { index ->
-        val displayRow = index / gridConfig.displayCols
-        val displayColumn = index % gridConfig.displayCols
+        val displayRow = index / gridDisplay.displayCols
+        val displayColumn = index % gridDisplay.displayCols
 
-        val actualRowIndex = getActualRowIndex(displayRow, gridConfig, config.rows)
-        val actualColIndex = getActualColumnIndex(displayColumn, gridConfig, config.cols)
+        val actualRowIndex = mapDisplayToActual(displayRow, gridDisplay.headRowCount, gridDisplay.tailRowCount, config.rows, gridDisplay.rowHasEllipsis)
+        val actualColIndex = mapDisplayToActual(displayColumn, gridDisplay.headColCount, gridDisplay.tailColCount, config.cols, gridDisplay.colHasEllipsis)
 
-        when {
-            actualRowIndex == -1 || actualColIndex == -1 -> EllipsisCell()
-            else -> {
-                val isCorner = isCornerCell(actualRowIndex, actualColIndex, config.rows, config.cols)
+        if (actualRowIndex == -1 || actualColIndex == -1) { // ellipsis cell
+            FieldGridCell("⋯", CellType.REGULAR, colors.copy(highlight = colors.highlight), fontSize = fontSize, onClick = null)
+            return@items
+        }
 
-                val isCornerClickable = gridPreviewMode == GridPreviewMode.CORNER_SELECTION
+        val isCorner = isCornerCell(actualRowIndex, actualColIndex, config.rows, config.cols)
+        val cornerType = if (isCorner) {
+            FieldStartCorner.fromPosition(actualRowIndex, actualColIndex, config.rows, config.cols)
+        } else null
+        val isSelected = cornerType != null && cornerType == config.startCorner
+        val isHighlighted = highlightedCells.contains(actualRowIndex to actualColIndex)
 
-                val cornerType = if (isCorner) {
-                    FieldStartCorner.fromPosition(actualRowIndex, actualColIndex, config.rows, config.cols)
-                } else null
-
-                val isSelected = cornerType != null && cornerType == config.startCorner
-
-                val plotNumber = if (showPlotNumbers) {
-                    when (gridPreviewMode) {
-                        GridPreviewMode.CORNER_SELECTION -> {
-                            if (isSelected) "1" else ""
-                        }
-                        GridPreviewMode.DIRECTION_PREVIEW -> {
-                            if (isSelected) { // show 1 in selected corner
-                                "1"
-                            } else if (highlightedCells.contains(actualRowIndex to actualColIndex) &&
-                                config.startCorner != null && config.isHorizontal != null) {
-                                // show sequence for first row/col from the starting corner
-                                getDirectionSequenceNumber(actualRowIndex, actualColIndex, config)
-                            } else ""
-                        }
-                        else -> {
-                            if (config.pattern != null) {
-                                FieldPlotCalculator.calculatePlotNumber(
-                                    rowIndex = actualRowIndex,
-                                    colIndex = actualColIndex,
-                                    config = config
-                                ).toString()
-                            } else ""
-                        }
-                    }
+        val cellLabel = if (!showPlotNumbers) "" else when (gridPreviewMode) {
+            GridPreviewMode.CORNER_SELECTION -> if (isSelected) "1" else ""
+            GridPreviewMode.DIRECTION_PREVIEW -> {
+                if (isSelected) "1"
+                else if (isHighlighted && config.startCorner != null && config.isHorizontal != null) {
+                    directionSequenceLabel(actualRowIndex, actualColIndex, config)
                 } else ""
-
-                DataCell(
-                    value = plotNumber.toString(),
-                    isCorner = isCorner && gridPreviewMode == GridPreviewMode.CORNER_SELECTION,
-                    isSelected = isSelected,
-                    isHighlighted = highlightedCells.contains(actualRowIndex to actualColIndex),
-                    onClick = if (isCorner && isCornerClickable && onCornerSelected != null) {
-                        { cornerType?.let { onCornerSelected(it) } }
-                    } else null
-                )
             }
+            else -> plotNumberLabel(actualRowIndex, actualColIndex, config)
         }
-    }
-}
 
-private fun isCornerCell(row: Int, col: Int, rows: Int, cols: Int): Boolean {
-    return (row == 0 && col == 0) ||  // top left
-            (row == 0 && col == cols - 1) ||  // top right
-            (row == rows - 1 && col == 0) ||  // bottom left
-            (row == rows - 1 && col == cols - 1)  // bottom right
-}
-
-data class GridDisplayConfig(
-    val displayRows: Int,
-    val displayCols: Int,
-    val showRowsStart: Int,
-    val showRowsEnd: Int,
-    val showColsStart: Int,
-    val showColsEnd: Int,
-    val hasRowEllipsis: Boolean,
-    val hasColEllipsis: Boolean,
-    val rowEllipsisPosition: Int,
-    val colEllipsisPosition: Int
-)
-
-private fun getActualRowIndex(displayIndex: Int, gridConfig: GridDisplayConfig, totalRows: Int): Int {
-    return when {
-        !gridConfig.hasRowEllipsis -> displayIndex
-        displayIndex < gridConfig.showRowsStart -> displayIndex
-        displayIndex == gridConfig.showRowsStart -> -1 // Ellipsis position
-        else -> {
-            val endRowOffset = displayIndex - gridConfig.showRowsStart - 1 // offset from ellipsis
-            totalRows - gridConfig.showRowsEnd + endRowOffset
+        val cellType = when {
+            isSelected -> CellType.SELECTED
+            isHighlighted -> CellType.HIGHLIGHTED
+            isCorner && gridPreviewMode == GridPreviewMode.CORNER_SELECTION -> CellType.CORNER
+            else -> CellType.REGULAR
         }
-    }
-}
 
-private fun getActualColumnIndex(displayIndex: Int, gridConfig: GridDisplayConfig, totalCols: Int): Int {
-    return when {
-        !gridConfig.hasColEllipsis -> displayIndex
-        displayIndex < gridConfig.showColsStart -> displayIndex
-        displayIndex == gridConfig.showColsStart -> -1 // Ellipsis position
-        else -> {
-            val endColOffset = displayIndex - gridConfig.showColsStart - 1 // offset from ellipsis
-            totalCols - gridConfig.showColsEnd + endColOffset
-        }
-    }
-}
 
-@Composable
-private fun EllipsisCell() {
-    val (cellTextColor, cellBgColor, _) = getColors()
+        val onClick = if (isCorner && gridPreviewMode == GridPreviewMode.CORNER_SELECTION && onCornerSelected != null) {
+            { cornerType?.let { onCornerSelected(it) }; Unit }
+        } else null
 
-    TableCell(
-        text = "⋯",
-        backgroundColor = Color(cellBgColor).copy(alpha = 0.7f),
-        textColor = Color(cellTextColor).copy(alpha = 0.7f),
-        onClick = null
-    )
-}
-
-@Composable
-private fun HeaderCell(text: String) {
-    val (cellTextColor, _, headerCellBgColor) = getColors()
-
-    TableCell(
-        text = text,
-        backgroundColor = Color(headerCellBgColor),
-        textColor = if (cellTextColor == 0) Color.Black else Color(cellTextColor),
-        isBorderVisible = false
-    )
-}
-
-@Composable
-private fun DataCell(
-    value: String,
-    isCorner: Boolean = false,
-    isSelected: Boolean = false,
-    isHighlighted: Boolean = false,
-    onClick: (() -> Unit)? = null
-) {
-    val (cellTextColor, cellBgColor, cellHighlightColor) = getColors()
-
-    TableCell(
-        text = value,
-        backgroundColor = when {
-            isSelected -> Color(cellHighlightColor)
-            isHighlighted -> Color(cellHighlightColor).copy(alpha = 0.3f)
-            isCorner -> Color(cellHighlightColor).copy(alpha = 0.5f)
-            else -> Color(cellBgColor)
-        },
-        textColor = Color(cellTextColor),
-        onClick = onClick
-    )
-}
-
-@Composable
-private fun TableCell(
-    text: String,
-    backgroundColor: Color,
-    textColor: Color,
-    isBorderVisible: Boolean = true,
-    onClick: (() -> Unit)? = null
-) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .background(backgroundColor)
-            .border(
-                width = if (isBorderVisible) 1.dp else 0.dp,
-                color = if (textColor == Color.Transparent) Color.Gray else textColor
-            )
-            .then(
-                if (onClick != null) {
-                    Modifier.clickable(onClick = onClick)
-                } else {
-                    Modifier
-                }
-            )
-    ) {
-        Text(
-            text = text,
-            color = textColor,
-            textAlign = TextAlign.Center,
-            fontSize = 12.sp,
-            maxLines = 1,
-            overflow = TextOverflow.Visible,
-            modifier = Modifier
-                .fillMaxSize()
-                .wrapContentSize(Alignment.Center),
-            onTextLayout = { textLayoutResult ->
-                // This will be called when text is laid out
-            },
-            // Use a smaller font size for longer text
-            style = LocalTextStyle.current.copy(
-                fontSize = when {
-                    text.length <= 3 -> 12.sp
-                    text.length <= 5 -> 10.sp
-                    text.length <= 8 -> 8.sp
-                    else -> 6.sp
-                }
-            )
-        )
-    }
-}
-
-@Composable
-private fun getColors(): Triple<Int, Int, Int> {
-    val context = LocalContext.current
-    return remember {
-        val typedValue = TypedValue()
-        val theme = context.theme
-
-        theme.resolveAttribute(R.attr.cellTextColor, typedValue, true)
-        val cellTextColor = typedValue.data
-
-        theme.resolveAttribute(R.attr.emptyCellColor, typedValue, true)
-        val cellBgColor = typedValue.data
-
-        theme.resolveAttribute(R.attr.fb_color_primary, typedValue, true)
-        val selectedCornerColor = typedValue.data
-
-        Triple(cellTextColor, cellBgColor, selectedCornerColor)
-    }
-}
-
-private fun getDirectionSequenceNumber(
-    actualRowIndex: Int,
-    actualColIndex: Int,
-    config: FieldConfig
-): String {
-    val startCorner = config.startCorner ?: return ""
-
-    return when (config.isHorizontal) {
-        true -> {
-            // for horizontal direction, show sequence across columns
-            when (startCorner) {
-                FieldStartCorner.TOP_LEFT, FieldStartCorner.BOTTOM_LEFT -> {
-                    // moving left to right
-                    (actualColIndex + 1).toString()
-                }
-                FieldStartCorner.TOP_RIGHT, FieldStartCorner.BOTTOM_RIGHT -> {
-                    // moving right to left
-                    (config.cols - actualColIndex).toString()
-                }
-            }
-        }
-        false -> {
-            // for vertical direction, show sequence down rows
-            when (startCorner) {
-                FieldStartCorner.TOP_LEFT, FieldStartCorner.TOP_RIGHT -> {
-                    // moving top to bottom
-                    (actualRowIndex + 1).toString()
-                }
-                FieldStartCorner.BOTTOM_LEFT, FieldStartCorner.BOTTOM_RIGHT -> {
-                    // moving bottom to top
-                    (config.rows - actualRowIndex).toString()
-                }
-            }
-        }
-        null -> ""
+        FieldGridCell(cellLabel, cellType, colors, fontSize, onClick)
     }
 }
