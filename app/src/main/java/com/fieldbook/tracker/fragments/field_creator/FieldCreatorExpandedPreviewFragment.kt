@@ -9,7 +9,11 @@ import androidx.compose.material3.*
 import androidx.compose.ui.platform.ComposeView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.FieldCreatorActivity
-import com.fieldbook.tracker.viewmodels.FieldConfig
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import com.fieldbook.tracker.enums.FieldCreationStep
 import com.fieldbook.tracker.views.FieldPreviewGrid
 import com.google.android.material.card.MaterialCardView
@@ -53,6 +57,8 @@ class FieldCreatorExpandedPreviewFragment : FieldCreatorBaseFragment() {
         collapseViewFab.setOnClickListener {
             toggleExpandedView()
         }
+
+        setupExpandedPreviewGrid()
     }
 
     override fun observeFieldCreatorViewModel() {
@@ -64,19 +70,23 @@ class FieldCreatorExpandedPreviewFragment : FieldCreatorBaseFragment() {
             if (!isPreviewExpanded) {
                 warningCard.visibility = if (state.isLargeField) View.VISIBLE else View.GONE
             }
-            setupExpandedPreviewGrid(state)
         }
     }
 
-    private fun setupExpandedPreviewGrid(state: FieldConfig) {
+    private fun setupExpandedPreviewGrid() {
         fieldGrid.setContent {
             MaterialTheme {
-                FieldPreviewGrid(
-                    config = state,
-                    showPlotNumbers = true,
-                    forceFullView = isPreviewExpanded,
-                    onCollapsingStateChanged = null
-                )
+                val config by fieldCreatorViewModel.fieldConfig.observeAsState()
+                var isExpanded by remember { mutableStateOf(isPreviewExpanded) }
+
+                config?.let { state ->
+                    FieldPreviewGrid(
+                        config = state,
+                        showPlotNumbers = true,
+                        forceFullView = isExpanded,
+                        onCollapsingStateChanged = null
+                    )
+                }
             }
         }
     }
@@ -96,8 +106,5 @@ class FieldCreatorExpandedPreviewFragment : FieldCreatorBaseFragment() {
             warningCard.visibility = if (state?.isLargeField == true) View.VISIBLE else View.GONE
             collapseViewFab.setImageResource(R.drawable.ic_arrow_expand_all)
         }
-
-        // refresh the grid
-        fieldCreatorViewModel.fieldConfig.value?.let { setupExpandedPreviewGrid(it) }
     }
 }

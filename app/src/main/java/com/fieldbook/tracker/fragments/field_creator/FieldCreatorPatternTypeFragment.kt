@@ -39,6 +39,8 @@ class FieldCreatorPatternTypeFragment : FieldCreatorBaseFragment() {
         patternPreviewContainer = view.findViewById(R.id.pattern_preview_container)
 
         setupClickListeners()
+
+        updatePatternPreview()
     }
 
     override fun observeFieldCreatorViewModel() {
@@ -47,8 +49,6 @@ class FieldCreatorPatternTypeFragment : FieldCreatorBaseFragment() {
 
             val isForwardEnabled = state.isZigzag != null
             updateForwardButtonState(isForwardEnabled)
-
-            updatePatternPreview(state)
         }
     }
 
@@ -80,20 +80,23 @@ class FieldCreatorPatternTypeFragment : FieldCreatorBaseFragment() {
         }
     }
 
-    private fun updatePatternPreview(config: FieldConfig) {
+    private fun updatePatternPreview() {
         patternPreviewContainer.setContent {
             MaterialTheme {
+                val config by fieldCreatorViewModel.fieldConfig.observeAsState()
                 val referenceGridDimensions by fieldCreatorViewModel.referenceGridDimensions.observeAsState()
 
-                FieldPreviewGrid( // show directional preview until user makes a choice
-                    config = config,
-                    gridPreviewMode = if (config.isZigzag != null) GridPreviewMode.PATTERN_PREVIEW else GridPreviewMode.DIRECTION_PREVIEW,
-                    selectedCorner = config.startCorner,
-                    showPlotNumbers = true,
-                    forceFullView = false,
-                    highlightedCells = if (config.isZigzag != null) getPatternHighlight(config) else getDirectionHighlight(config),
-                    useReferenceGridDimensions = referenceGridDimensions
-                )
+                config?.let { state ->
+                    FieldPreviewGrid( // show directional preview until user makes a choice
+                        config = state,
+                        gridPreviewMode = if (state.isZigzag != null) GridPreviewMode.PATTERN_PREVIEW else GridPreviewMode.DIRECTION_PREVIEW,
+                        selectedCorner = state.startCorner,
+                        showPlotNumbers = true,
+                        forceFullView = false,
+                        highlightedCells = if (state.isZigzag != null) getPatternHighlight(state) else getDirectionHighlight(state),
+                        useReferenceGridDimensions = referenceGridDimensions
+                    )
+                }
             }
         }
     }

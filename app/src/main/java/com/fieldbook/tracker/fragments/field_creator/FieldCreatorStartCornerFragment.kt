@@ -6,7 +6,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.platform.ComposeView
 import androidx.navigation.fragment.findNavController
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.viewmodels.FieldConfig
 import com.fieldbook.tracker.enums.GridPreviewMode
 import com.fieldbook.tracker.enums.FieldCreationStep
 import com.fieldbook.tracker.views.FieldPreviewGrid
@@ -22,16 +21,18 @@ class FieldCreatorStartCornerFragment : FieldCreatorBaseFragment() {
     }
 
     private lateinit var fieldDimensionsText: TextView
-    private lateinit var startPointContainer: ComposeView
+    private lateinit var startCornerGrid: ComposeView
 
     override fun setupViews(view: View) {
         fieldDimensionsText = view.findViewById(R.id.field_dimensions_text)
-        startPointContainer = view.findViewById(R.id.start_point_container)
+        startCornerGrid = view.findViewById(R.id.start_corner_container)
+
+        setupGridPreview()
     }
 
     override fun observeFieldCreatorViewModel() {
         fieldCreatorViewModel.fieldConfig.observe(viewLifecycleOwner) { state ->
-            setupGridPreview(state)
+            fieldDimensionsText.text = getString(R.string.field_dimensions_format, state.rows, state.cols)
 
             val canProceed = state.rows > 0 && state.cols > 0 && state.startCorner != null
             updateForwardButtonState(canProceed)
@@ -39,24 +40,25 @@ class FieldCreatorStartCornerFragment : FieldCreatorBaseFragment() {
     }
 
 
-    private fun setupGridPreview(state: FieldConfig) {
-        fieldDimensionsText.text = getString(R.string.field_dimensions_format, state.rows, state.cols)
-
-        startPointContainer.setContent {
+    private fun setupGridPreview() {
+        startCornerGrid.setContent {
             MaterialTheme {
+                val config by fieldCreatorViewModel.fieldConfig.observeAsState()
                 val referenceGridDimensions by fieldCreatorViewModel.referenceGridDimensions.observeAsState()
 
-                FieldPreviewGrid(
-                    config = state,
-                    gridPreviewMode = GridPreviewMode.CORNER_SELECTION,
-                    selectedCorner = state.startCorner,
-                    onCornerSelected = { corner ->
-                        fieldCreatorViewModel.updateStartCorner(corner)
-                    },
-                    showPlotNumbers = state.startCorner != null,
-                    forceFullView = false,
-                    useReferenceGridDimensions = referenceGridDimensions
-                )
+                config?.let { state ->
+                    FieldPreviewGrid(
+                        config = state,
+                        gridPreviewMode = GridPreviewMode.CORNER_SELECTION,
+                        selectedCorner = state.startCorner,
+                        onCornerSelected = { corner ->
+                            fieldCreatorViewModel.updateStartCorner(corner)
+                        },
+                        showPlotNumbers = state.startCorner != null,
+                        forceFullView = false,
+                        useReferenceGridDimensions = referenceGridDimensions
+                    )
+                }
             }
         }
     }

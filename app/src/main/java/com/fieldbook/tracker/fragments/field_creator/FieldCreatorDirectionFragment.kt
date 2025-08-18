@@ -11,7 +11,6 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.navigation.fragment.findNavController
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.enums.FieldCreationStep
-import com.fieldbook.tracker.viewmodels.FieldConfig
 import com.fieldbook.tracker.enums.GridPreviewMode
 import com.fieldbook.tracker.views.FieldPreviewGrid
 
@@ -39,6 +38,8 @@ class FieldCreatorDirectionFragment : FieldCreatorBaseFragment() {
         directionPreviewContainer = view.findViewById(R.id.direction_preview_container)
 
         setupClickListeners()
+
+        updateDirectionPreview()
     }
 
     override fun observeFieldCreatorViewModel() {
@@ -47,8 +48,6 @@ class FieldCreatorDirectionFragment : FieldCreatorBaseFragment() {
 
             val isForwardEnabled = state.isHorizontal != null
             updateForwardButtonState(isForwardEnabled)
-
-            updateDirectionPreview(state)
         }
     }
 
@@ -79,20 +78,23 @@ class FieldCreatorDirectionFragment : FieldCreatorBaseFragment() {
         }
     }
 
-    private fun updateDirectionPreview(config: FieldConfig) {
+    private fun updateDirectionPreview() {
         directionPreviewContainer.setContent {
             MaterialTheme {
+                val config by fieldCreatorViewModel.fieldConfig.observeAsState()
                 val referenceGridDimensions by fieldCreatorViewModel.referenceGridDimensions.observeAsState()
 
-                FieldPreviewGrid(
-                    config = config,
-                    gridPreviewMode = GridPreviewMode.DIRECTION_PREVIEW,
-                    selectedCorner = config.startCorner,
-                    showPlotNumbers = true,
-                    forceFullView = false,
-                    highlightedCells = getDirectionHighlight(config),
-                    useReferenceGridDimensions = referenceGridDimensions
-                )
+                config?.let { state ->
+                    FieldPreviewGrid(
+                        config = state,
+                        gridPreviewMode = GridPreviewMode.DIRECTION_PREVIEW,
+                        selectedCorner = state.startCorner,
+                        showPlotNumbers = true,
+                        forceFullView = false,
+                        highlightedCells = getDirectionHighlight(state),
+                        useReferenceGridDimensions = referenceGridDimensions
+                    )
+                }
             }
         }
     }

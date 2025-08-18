@@ -42,7 +42,7 @@
         app:layout_constraintTop_toBottomOf="@id/field_dimensions_text" />
 
     <androidx.compose.ui.platform.ComposeView
-        android:id="@+id/start_point_container"
+        android:id="@+id/start_corner_container"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginBottom="16dp"

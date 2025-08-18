@@ -33,9 +33,9 @@
         android:id="@+id/expanded_warning_card"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
         android:visibility="gone"
         app:cardCornerRadius="8dp"
+        android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/expanded_field_summary_text">
@@ -58,7 +58,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/bottom_separator"
-        app:layout_constraintTop_toBottomOf="@+id/warning_card"
+        app:layout_constraintTop_toBottomOf="@id/expanded_warning_card"
         app:layout_constraintVertical_bias="1.0">
 
         <com.google.android.material.progressindicator.LinearProgressIndicator
@@ -80,9 +80,10 @@
         android:id="@+id/expanded_field_preview_grid"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/warning_card"
+        app:layout_constraintTop_toBottomOf="@id/expanded_warning_card"
         app:layout_constraintBottom_toTopOf="@id/bottom_separator"
         android:layout_marginBottom="20dp" />
 

@@ -10,12 +10,13 @@ import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.MenuProvider
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.viewmodels.FieldConfig
 import com.fieldbook.tracker.enums.FieldCreationStep
 import com.fieldbook.tracker.views.FieldPreviewGrid
 import com.google.android.material.textfield.TextInputEditText
@@ -41,7 +42,7 @@ class FieldCreatorSizeFragment : FieldCreatorBaseFragment() {
     private lateinit var fieldNameInputLayout: TextInputLayout
     private lateinit var rowsInputLayout: TextInputLayout
     private lateinit var colsInputLayout: TextInputLayout
-    private lateinit var previewContainer: ComposeView
+    private lateinit var sizePreviewGrid: ComposeView
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -73,9 +74,11 @@ class FieldCreatorSizeFragment : FieldCreatorBaseFragment() {
         fieldNameInputLayout = view.findViewById(R.id.field_name_input_layout)
         rowsInputLayout = view.findViewById(R.id.rows_input_layout)
         colsInputLayout = view.findViewById(R.id.cols_input_layout)
-        previewContainer = view.findViewById(R.id.size_preview_container)
+        sizePreviewGrid = view.findViewById(R.id.size_preview_container)
 
         setupTextWatchers()
+
+        updateSizePreview()
     }
 
     override fun observeFieldCreatorViewModel() {
@@ -91,8 +94,6 @@ class FieldCreatorSizeFragment : FieldCreatorBaseFragment() {
             if (colsEditText.text.toString() != state.cols.toString() && state.cols > 0) {
                 colsEditText.setText(state.cols.toString())
             }
-
-            updatePreview(state)
         }
 
         fieldCreatorViewModel.validationErrors.observe(viewLifecycleOwner) { errors ->
@@ -132,19 +133,26 @@ class FieldCreatorSizeFragment : FieldCreatorBaseFragment() {
         })
     }
 
-    private fun updatePreview(config: FieldConfig) {
-        previewContainer.setContent {
+    private fun updateSizePreview() {
+        sizePreviewGrid.setContent {
             MaterialTheme {
-                if (config.rows > 0 && config.cols > 0) {
-                    FieldPreviewGrid(
-                        config = config,
-                        showPlotNumbers = false,
-                        forceFullView = false,
-                        onGridDimensionsCalculated = { displayRows, displayCols ->
-                            // store the dimensions for other fragments to use
-                            fieldCreatorViewModel.setReferenceGridDimensions(displayRows, displayCols)
-                        },
-                    )
+                val config by fieldCreatorViewModel.fieldConfig.observeAsState()
+
+                config?.let { state ->
+                    if (state.rows > 0 && state.cols > 0) {
+                        FieldPreviewGrid(
+                            config = state,
+                            showPlotNumbers = false,
+                            forceFullView = false,
+                            onGridDimensionsCalculated = { displayRows, displayCols ->
+                                // store the dimensions for other fragments to use
+                                fieldCreatorViewModel.setReferenceGridDimensions(
+                                    displayRows,
+                                    displayCols
+                                )
+                            },
+                        )
+                    }
                 }
             }
         }
