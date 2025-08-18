@@ -139,7 +139,11 @@ class FieldCreatorSizeFragment : FieldCreatorBaseFragment() {
                     FieldPreviewGrid(
                         config = config,
                         showPlotNumbers = false,
-                        forceFullView = false
+                        forceFullView = false,
+                        onGridDimensionsCalculated = { displayRows, displayCols ->
+                            // store the dimensions for other fragments to use
+                            fieldCreatorViewModel.setReferenceGridDimensions(displayRows, displayCols)
+                        },
                     )
                 }
             }

@@ -5,6 +5,8 @@ import android.widget.LinearLayout
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.navigation.fragment.findNavController
 import com.fieldbook.tracker.R
@@ -80,6 +82,8 @@ class FieldCreatorDirectionFragment : FieldCreatorBaseFragment() {
     private fun updateDirectionPreview(config: FieldConfig) {
         directionPreviewContainer.setContent {
             MaterialTheme {
+                val referenceGridDimensions by fieldCreatorViewModel.referenceGridDimensions.observeAsState()
+
                 FieldPreviewGrid(
                     config = config,
                     previewMode = PreviewMode.DIRECTION_PREVIEW,
@@ -87,7 +91,7 @@ class FieldCreatorDirectionFragment : FieldCreatorBaseFragment() {
                     showPlotNumbers = true,
                     forceFullView = false,
                     highlightedCells = getDirectionHighlight(config),
-                    maxDisplayPercentage = 0.95f
+                    useReferenceGridDimensions = referenceGridDimensions
                 )
             }
         }

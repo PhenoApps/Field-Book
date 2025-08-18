@@ -10,6 +10,8 @@ import com.fieldbook.tracker.viewmodels.FieldConfig
 import com.fieldbook.tracker.viewmodels.PreviewMode
 import com.fieldbook.tracker.views.FieldCreationStep
 import com.fieldbook.tracker.views.FieldPreviewGrid
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.getValue
 
 class FieldCreatorStartCornerFragment : FieldCreatorBaseFragment() {
 
@@ -42,6 +44,8 @@ class FieldCreatorStartCornerFragment : FieldCreatorBaseFragment() {
 
         startPointContainer.setContent {
             MaterialTheme {
+                val referenceGridDimensions by fieldCreatorViewModel.referenceGridDimensions.observeAsState()
+
                 FieldPreviewGrid(
                     config = state,
                     previewMode = PreviewMode.CORNER_SELECTION,
@@ -50,7 +54,8 @@ class FieldCreatorStartCornerFragment : FieldCreatorBaseFragment() {
                         fieldCreatorViewModel.updateStartCorner(corner)
                     },
                     showPlotNumbers = state.startCorner != null,
-                    forceFullView = false
+                    forceFullView = false,
+                    useReferenceGridDimensions = referenceGridDimensions
                 )
             }
         }

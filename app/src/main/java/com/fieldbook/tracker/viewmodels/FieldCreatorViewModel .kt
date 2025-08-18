@@ -32,6 +32,9 @@ class FieldCreatorViewModel : ViewModel() {
     private val _currentStep = MutableLiveData<FieldCreationStep>()
     val currentStep: LiveData<FieldCreationStep> = _currentStep
 
+    private val _referenceGridDimensions = MutableLiveData<Pair<Int, Int>?>(null)
+    val referenceGridDimensions: LiveData<Pair<Int, Int>?> = _referenceGridDimensions
+
     private var createFieldJob: Job? = null
 
     fun updateFieldName(name: String) {
@@ -63,6 +66,10 @@ class FieldCreatorViewModel : ViewModel() {
 
     fun updateCurrentStep(step: FieldCreationStep) {
         _currentStep.value = step
+    }
+
+    fun setReferenceGridDimensions(displayRows: Int, displayCols: Int) {
+        _referenceGridDimensions.value = Pair(displayRows, displayCols)
     }
 
     fun validateBasicInfo(db: DataHelper): Boolean {

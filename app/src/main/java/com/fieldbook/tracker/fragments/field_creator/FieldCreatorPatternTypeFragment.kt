@@ -8,7 +8,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.platform.ComposeView
 import androidx.navigation.fragment.findNavController
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.utilities.FieldStartCorner
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.getValue
 import com.fieldbook.tracker.viewmodels.FieldConfig
 import com.fieldbook.tracker.viewmodels.PreviewMode
 import com.fieldbook.tracker.views.FieldCreationStep
@@ -82,13 +83,16 @@ class FieldCreatorPatternTypeFragment : FieldCreatorBaseFragment() {
     private fun updatePatternPreview(config: FieldConfig) {
         patternPreviewContainer.setContent {
             MaterialTheme {
+                val referenceGridDimensions by fieldCreatorViewModel.referenceGridDimensions.observeAsState()
+
                 FieldPreviewGrid( // show directional preview until user makes a choice
                     config = config,
                     previewMode = if (config.isZigzag != null) PreviewMode.PATTERN_PREVIEW else PreviewMode.DIRECTION_PREVIEW,
                     selectedCorner = config.startCorner,
                     showPlotNumbers = true,
                     forceFullView = false,
-                    highlightedCells = if (config.isZigzag != null) getPatternHighlight(config) else getDirectionHighlight(config)
+                    highlightedCells = if (config.isZigzag != null) getPatternHighlight(config) else getDirectionHighlight(config),
+                    useReferenceGridDimensions = referenceGridDimensions
                 )
             }
         }

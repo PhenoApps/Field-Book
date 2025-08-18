@@ -1,6 +1,5 @@
 package com.fieldbook.tracker.views
 
-import android.util.Log
 import android.util.TypedValue
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -48,6 +47,8 @@ fun FieldPreviewGrid(
     forceFullView: Boolean = false,
     onCollapsingStateChanged: ((Boolean) -> Unit)? = null,
     highlightedCells: Set<Pair<Int, Int>> = emptySet(),
+    useReferenceGridDimensions: Pair<Int, Int>? = null,
+    onGridDimensionsCalculated: ((displayRows: Int, displayCols: Int) -> Unit)? = null
 ) {
     if (config.rows <= 0 || config.cols <= 0) return
 
@@ -66,15 +67,36 @@ fun FieldPreviewGrid(
         val availableHeightPx = with(density) { (maxHeight * maxDisplayPercentage).toPx() }
         val availableWidthPx = with(density) { (maxWidth * maxDisplayPercentage).toPx() }
 
-        val maxDisplayRows = if (forceFullView) config.rows else (availableHeightPx / cellSizePx).toInt()
-        val maxDisplayCols = if (forceFullView) config.cols else (availableWidthPx / cellSizePx).toInt()
+        // for forced full view, show all rows/cols
+        // if reference grid dimensions available, use that, else calc using default cellSize
+        val maxDisplayRows = if (forceFullView) {
+            config.rows
+        } else useReferenceGridDimensions?.first  // Use stored reference dimensions
+            ?: (availableHeightPx / cellSizePx).toInt()
 
+        val maxDisplayCols = if (forceFullView) {
+            config.cols
+        } else useReferenceGridDimensions?.second  // Use stored reference dimensions
+            ?: (availableWidthPx / cellSizePx).toInt()
         val gridConfig = calculateGridDisplayConfig(
             totalRows = config.rows,
             totalCols = config.cols,
             maxDisplayRows = maxDisplayRows,
             maxDisplayCols = maxDisplayCols
         )
+
+        // save the calculated grid dimensions
+        onGridDimensionsCalculated?.invoke(gridConfig.displayRows, gridConfig.displayCols)
+
+        // calculate dynamic cell size if using reference dimensions
+        val dynamicCellSize = if (useReferenceGridDimensions != null && !forceFullView) {
+            val maxCellWidth = availableWidthPx / gridConfig.displayCols
+            val maxCellHeight = availableHeightPx / gridConfig.displayRows
+            val cellSizeToUse = minOf(maxCellWidth, maxCellHeight, cellSizePx)
+            with(density) { cellSizeToUse.toDp() }
+        } else {
+            cellSize
+        }
 
         val needsCollapsing = gridConfig.hasRowEllipsis || gridConfig.hasColEllipsis
         onCollapsingStateChanged?.invoke(needsCollapsing)
@@ -86,8 +108,8 @@ fun FieldPreviewGrid(
         ) {
             LazyTable(
                 dimensions = lazyTableDimensions(
-                    columnSize = { 40.dp },
-                    rowSize = { 40.dp }
+                    columnSize = { dynamicCellSize },
+                    rowSize = { dynamicCellSize }
                 ),
                 contentPadding = PaddingValues(0.dp),
                 pinConfiguration = lazyTablePinConfiguration(
@@ -100,7 +122,6 @@ fun FieldPreviewGrid(
                     config = config,
                     gridConfig = gridConfig,
                     showPlotNumbers = effectiveShowNumbers,
-                    selectedCorner = selectedCorner,
                     onCornerSelected = onCornerSelected,
                     highlightedCells = highlightedCells,
                     previewMode = previewMode
@@ -159,7 +180,6 @@ private fun renderGrid(
     config: FieldConfig,
     gridConfig: GridDisplayConfig,
     showPlotNumbers: Boolean,
-    selectedCorner: FieldStartCorner? = null,
     onCornerSelected: ((FieldStartCorner) -> Unit)? = null,
     highlightedCells: Set<Pair<Int, Int>> = emptySet(),
     previewMode: PreviewMode = PreviewMode.FINAL_PREVIEW
@@ -427,39 +447,5 @@ private fun getDirectionSequenceNumber(
             }
         }
         null -> ""
-    }
-}
-
-private fun shouldShowPatternNumber(
-    actualRowIndex: Int,
-    actualColIndex: Int,
-    config: FieldConfig
-): Boolean {
-    val startCorner = config.startCorner ?: return false
-
-    return when (config.isHorizontal) {
-        true -> {
-            // for horizontal pattern, show first 2 rows from starting corner
-            when (startCorner) {
-                FieldStartCorner.TOP_LEFT, FieldStartCorner.TOP_RIGHT -> {
-                    actualRowIndex < 2 // first 2 rows from top
-                }
-                FieldStartCorner.BOTTOM_LEFT, FieldStartCorner.BOTTOM_RIGHT -> {
-                    actualRowIndex >= config.rows - 2 // first 2 rows from bottom
-                }
-            }
-        }
-        false -> {
-            // for vertical pattern, show first 2 columns from starting corner
-            when (startCorner) {
-                FieldStartCorner.TOP_LEFT, FieldStartCorner.BOTTOM_LEFT -> {
-                    actualColIndex < 2 // first 2 columns from left
-                }
-                FieldStartCorner.TOP_RIGHT, FieldStartCorner.BOTTOM_RIGHT -> {
-                    actualColIndex >= config.cols - 2 // first 2 columns from right
-                }
-            }
-        }
-        null -> false
     }
 }

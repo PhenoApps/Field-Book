@@ -144,6 +144,7 @@ dependencies {
 
     //live data
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.8.7'
+    implementation "androidx.compose.runtime:runtime-livedata:1.7.8"
 
     implementation 'androidx.appcompat:appcompat:1.7.0-alpha02'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
