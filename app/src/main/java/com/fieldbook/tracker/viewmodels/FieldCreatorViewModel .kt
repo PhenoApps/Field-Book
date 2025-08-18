@@ -10,7 +10,6 @@ import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.ImportFormat
 import com.fieldbook.tracker.utilities.FieldPattern
-import com.fieldbook.tracker.utilities.FieldPlotCalculator
 import com.fieldbook.tracker.utilities.FieldStartCorner
 import com.fieldbook.tracker.views.FieldCreationStep
 import kotlinx.coroutines.Dispatchers
@@ -102,7 +101,6 @@ class FieldCreatorViewModel : ViewModel() {
         return !hasErrors
     }
 
-    // Create the field
     fun createField(db: DataHelper, context: Context?) {
         val state = _fieldConfig.value ?: return
 
@@ -125,7 +123,7 @@ class FieldCreatorViewModel : ViewModel() {
                             sortColumnsStringArray = "Plot"
                             name = state.fieldName
                             alias = state.fieldName
-                            dataSource = context?.getString(R.string.field_book) // You might want to pass this as parameter
+                            dataSource = context?.getString(R.string.field_book)
                             dataSourceFormat = ImportFormat.INTERNAL
                             entryCount = (state.rows * state.cols).toString()
                         }
@@ -261,7 +259,7 @@ private fun insertPlotData(db: DataHelper, studyDbId: Int, fieldColumns: List<St
             for (i in 1..rows) { // outer: rows
                 for (j in if (ltr) 1..cols else cols downTo 1) { // inner: cols, L→R or R→L
                     plotIndex++
-                    insertSinglePlot(db, studyDbId, fieldColumns, i, j, plotIndex, config)
+                    insertSinglePlot(db, studyDbId, fieldColumns, i, j, plotIndex)
                 }
                 // flip the direction before iterating over columns again
                 if (pattern == FieldPattern.HORIZONTAL_ZIGZAG) {
@@ -274,7 +272,7 @@ private fun insertPlotData(db: DataHelper, studyDbId: Int, fieldColumns: List<St
             for (j in 1..cols) { // outer: cols
                 for (i in if (topToBottom) 1..rows else rows downTo 1) { // inner: rows, T→B or B→T
                     plotIndex++
-                    insertSinglePlot(db, studyDbId, fieldColumns, i, j, plotIndex, config)
+                    insertSinglePlot(db, studyDbId, fieldColumns, i, j, plotIndex)
                 }
                 // flip the direction before iterating over columns again
                 if (pattern == FieldPattern.VERTICAL_ZIGZAG) {
@@ -286,10 +284,10 @@ private fun insertPlotData(db: DataHelper, studyDbId: Int, fieldColumns: List<St
 }
 
 private fun insertSinglePlot(db: DataHelper, studyDbId: Int, fieldColumns: List<String>,
-    row: Int, col: Int, plotIndex: Int, config: FieldConfig
+    row: Int, col: Int, plotIndex: Int
 ) {
     val uuid = java.util.UUID.randomUUID().toString()
-    val (posX, posY) = FieldPlotCalculator.calculatePositionCoordinates(row, col, config)
+    val (posX, posY) = row to col
 
     val values = listOf(row.toString(), col.toString(), plotIndex.toString(),
         uuid, "x_coordinate", "y_coordinate", posX.toString(), posY.toString())
