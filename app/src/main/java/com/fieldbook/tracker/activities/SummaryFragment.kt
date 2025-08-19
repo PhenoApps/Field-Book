@@ -21,6 +21,7 @@ import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
+import com.fieldbook.tracker.utilities.InsetHandler
 import com.google.gson.JsonParseException
 import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.utils.SoftKeyboardUtil
@@ -71,6 +72,8 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
         recyclerView?.adapter = SummaryAdapter(this)
 
         setup()
+
+        InsetHandler.setupFragmentWithTopInsetsOnly(view, toolbar)
 
         return view
 
@@ -248,7 +251,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
                                     }
                                 }
 
-                            } catch (ignore: JsonParseException) {
+                            } catch (_: JsonParseException) {
                             }
 
                         }

@@ -8,6 +8,8 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -53,6 +55,7 @@ import javax.inject.Inject
 import androidx.core.content.edit
 import androidx.databinding.DataBindingUtil
 import com.fieldbook.tracker.databinding.ActivityDataGridBinding
+import com.fieldbook.tracker.utilities.InsetHandler
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import eu.wewox.lazytable.LazyTableState
 import eu.wewox.lazytable.lazyTablePinConfiguration
@@ -111,6 +114,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
 
         //this activity uses databinding to inflate the content layout
         //this creates a 'binding' variable that has all the views as fields, an alternative to findViewById
@@ -120,6 +124,8 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
         )
 
         setSupportActionBar(binding.toolbar)
+
+        InsetHandler.setupStandardInsets(binding.root, binding.toolbar)
 
         if (supportActionBar != null) {
             supportActionBar?.title = null

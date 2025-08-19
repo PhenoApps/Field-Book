@@ -13,8 +13,10 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.enableEdgeToEdge
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
@@ -27,6 +29,7 @@ import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.databinding.ActivityScannerBinding
 import com.fieldbook.tracker.utilities.DocumentTreeUtil
 import com.fieldbook.tracker.utilities.FileUtil
+import com.fieldbook.tracker.utilities.InsetHandler
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.mlkit.vision.barcode.BarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
@@ -56,6 +59,8 @@ class ScannerActivity : ThemedActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+
         binding = ActivityScannerBinding.inflate(layoutInflater)
         setContentView(binding.root)
         cameraSelector =
@@ -70,6 +75,8 @@ class ScannerActivity : ThemedActivity() {
         )
 
         setupShutterButton()
+
+        setupScannerInsets()
     }
 
     private fun setupShutterButton() {
@@ -140,7 +147,7 @@ class ScannerActivity : ThemedActivity() {
                                         it.putExtra(EXTRA_PHOTO_URI, file.uri.toString())
                                     }
 
-                                    setResult(Activity.RESULT_OK, intent)
+                                    setResult(RESULT_OK, intent)
                                     finish()
                                 }
                             })
@@ -170,7 +177,7 @@ class ScannerActivity : ThemedActivity() {
                 .build()
         }
         imageCapture = ImageCapture.Builder().build()
-        cameraPreview.setSurfaceProvider(binding.previewView.surfaceProvider)
+        cameraPreview.surfaceProvider = binding.previewView.surfaceProvider
 
         try {
 
@@ -228,7 +235,7 @@ class ScannerActivity : ThemedActivity() {
                     }
 
                     //set the result with the intent data to be processed in onActivityResult
-                    setResult(Activity.RESULT_OK, intent)
+                    setResult(RESULT_OK, intent)
                     finish()
                 }
             }.addOnFailureListener {
@@ -236,6 +243,10 @@ class ScannerActivity : ThemedActivity() {
             }.addOnCompleteListener {
                 imageProxy.close()
             }
+    }
+
+    private fun setupScannerInsets() {
+        InsetHandler.setupCameraInsets(binding.root, binding.previewView, binding.actScannerCaptureBtn)
     }
 
     companion object {

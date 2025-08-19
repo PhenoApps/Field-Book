@@ -17,9 +17,11 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -38,6 +40,7 @@ import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.AppLanguageUtil;
+import com.fieldbook.tracker.utilities.InsetHandler;
 import com.fieldbook.tracker.utilities.export.ExportUtil;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.OldPhotosMigrator;
@@ -159,6 +162,8 @@ public class ConfigActivity extends ThemedActivity {
         AppLanguageUtil.Companion.refreshAppText(this);
 
         super.onCreate(savedInstanceState);
+
+        EdgeToEdge.enable(this);
 
         checkBrapiToken();
 
@@ -299,6 +304,7 @@ public class ConfigActivity extends ThemedActivity {
     private void loadScreen() {
         setContentView(R.layout.activity_config);
         initToolbar();
+        setupConfigWindowInsets();
 
         settingsList = findViewById(R.id.myList);
 
@@ -800,5 +806,12 @@ public class ConfigActivity extends ThemedActivity {
 
             CollectActivity.reloadData = true;
         }
+    }
+
+    private void setupConfigWindowInsets() {
+        View rootView = findViewById(android.R.id.content);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+
+        InsetHandler.INSTANCE.setupStandardInsets(rootView, toolbar);
     }
 }

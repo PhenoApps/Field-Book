@@ -33,6 +33,7 @@ import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -60,6 +61,7 @@ import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.FileUtil;
+import com.fieldbook.tracker.utilities.InsetHandler;
 import com.fieldbook.tracker.utilities.SharedPreferenceUtils;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
@@ -315,8 +317,10 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
 
         setContentView(R.layout.activity_traits);
+        setupTraitEditorInsets();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
 
@@ -1005,5 +1009,13 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
             brapiDialogShown = displayBrapiInfo(TraitEditorActivity.this, null, true);
         }
         queryAndLoadTraits();
+    }
+
+    private void setupTraitEditorInsets() {
+        View rootView = findViewById(android.R.id.content);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        FloatingActionButton fab = findViewById(R.id.newTrait);
+
+        InsetHandler.INSTANCE.setupStandardInsets(rootView, toolbar);
     }
 }

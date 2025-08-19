@@ -6,7 +6,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
+import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -17,6 +19,7 @@ import com.fieldbook.tracker.adapters.StatisticsAdapter;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.dialogs.StatisticsCalendarFragment;
+import com.fieldbook.tracker.utilities.InsetHandler;
 import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
@@ -47,6 +50,8 @@ public class StatisticsActivity extends ThemedActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+
         setContentView(R.layout.activity_statistics);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -95,6 +100,7 @@ public class StatisticsActivity extends ThemedActivity {
 
         loadData();
 
+        setupStatisticsInsets(toolbar);
     }
 
     @Override
@@ -159,4 +165,8 @@ public class StatisticsActivity extends ThemedActivity {
         rvStatisticsCard.post(() -> loadingDialog.dismiss());
     }
 
+    private void setupStatisticsInsets(Toolbar toolbar) {
+        View rootView = findViewById(android.R.id.content);
+        InsetHandler.INSTANCE.setupStandardInsets(rootView, toolbar);
+    }
 }

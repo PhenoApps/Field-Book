@@ -31,6 +31,7 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -102,6 +103,7 @@ import com.fieldbook.tracker.utilities.GeoJsonUtil;
 import com.fieldbook.tracker.utilities.GeoNavHelper;
 import com.fieldbook.tracker.utilities.GnssThreadHelper;
 import com.fieldbook.tracker.utilities.InfoBarHelper;
+import com.fieldbook.tracker.utilities.InsetHandler;
 import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.KeyboardListenerHelper;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
@@ -330,6 +332,7 @@ public class CollectActivity extends ThemedActivity
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
 
         gps = new GPSTracker(this, this, 0, 10000);
 
@@ -555,6 +558,7 @@ public class CollectActivity extends ThemedActivity
 
     private void loadScreen() {
         setContentView(R.layout.activity_collect);
+        setupCollectInsets();
 
         initToolbars();
 
@@ -3114,5 +3118,12 @@ public class CollectActivity extends ThemedActivity
     @Override
     public void updateNumberOfObservations() {
         refreshRepeatedValuesToolbarIndicator();
+    }
+
+    private void setupCollectInsets() {
+        View rootView = findViewById(android.R.id.content);
+        Toolbar topToolbar = findViewById(R.id.toolbar);
+
+        InsetHandler.INSTANCE.setupStandardInsets(rootView, topToolbar);
     }
 }

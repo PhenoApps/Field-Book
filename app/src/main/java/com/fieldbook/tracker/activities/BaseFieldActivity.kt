@@ -8,8 +8,10 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,8 +25,10 @@ import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.FieldGroupControllerImpl
 import com.fieldbook.tracker.utilities.FieldSwitchImpl
+import com.fieldbook.tracker.utilities.InsetHandler
 import com.fieldbook.tracker.utilities.export.ExportUtil
 import com.fieldbook.tracker.views.SearchBar
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.ArrayList
 import javax.inject.Inject
@@ -75,6 +79,7 @@ abstract class BaseFieldActivity : ThemedActivity(), FieldAdapterController, Fie
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContentView(getLayoutResourceId())
 
         val toolbar = findViewById<Toolbar>(getToolbarId())
@@ -94,6 +99,7 @@ abstract class BaseFieldActivity : ThemedActivity(), FieldAdapterController, Fie
         initializeAdapter()
 
         setupViews()
+        setupFieldsWindowInsets()
 
         searchBar = findViewById(getSearchBarId())
 
@@ -307,6 +313,13 @@ abstract class BaseFieldActivity : ThemedActivity(), FieldAdapterController, Fie
         //     val brapiInfo = BrapiInfoDialog(this, getResources().getString(R.string.brapi_info_message));
         //     brapiInfo.show();
         // }
+    }
+
+    protected fun setupFieldsWindowInsets() {
+        val rootView = findViewById<View>(android.R.id.content)
+        val toolbar = findViewById<Toolbar>(getToolbarId())
+
+        InsetHandler.setupStandardInsets(rootView, toolbar)
     }
 
     override fun getDatabase(): DataHelper = db
