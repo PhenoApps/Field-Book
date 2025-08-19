@@ -98,6 +98,12 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
             if (!act.isTraitBlocked) {
 
+                val current = getSelectedModel()
+
+                if (current != null && !act.validateData(current.value)) {
+                    return@setOnClickListener
+                }
+
                 if (pager.currentItem < (pager.adapter?.count ?: 1) - 1) {
 
                     setCurrentItem(pager.currentItem + 1)
@@ -116,6 +122,12 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
             val act = context as CollectActivity
 
             if (!act.isTraitBlocked) {
+
+                val current = getSelectedModel()
+
+                if (current != null && !act.validateData(current.value)) {
+                    return@setOnClickListener
+                }
 
                 if (pager.currentItem > 0) {
 
@@ -140,6 +152,10 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
                 //only add new measurements if the current one has been observed
                 if (current != null && current.value.isNotEmpty()) {
+
+                    if (!act.validateData(current.value)) {
+                        return@setOnClickListener
+                    }
 
                     val model =
                         insertNewRep((mValues.maxOf { it.model.rep.toInt() } + 1).toString())
