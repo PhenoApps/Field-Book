@@ -11,6 +11,7 @@ import android.widget.ListView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
@@ -25,6 +26,7 @@ import com.fieldbook.tracker.brapi.service.BrAPIServiceV1
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV2
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.preferences.PreferenceKeys
+import com.fieldbook.tracker.utilities.InsetHandler
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.crashlytics.FirebaseCrashlytics
@@ -126,10 +128,14 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         studyList = findViewById(R.id.act_list_filter_rv)
         importButton = findViewById(R.id.act_study_importer_import_button)
 
-        setSupportActionBar(findViewById(R.id.act_list_filter_tb))
+        val toolbar = findViewById<Toolbar>(R.id.act_list_filter_tb)
+        setSupportActionBar(toolbar)
 
         supportActionBar?.setTitle(R.string.act_brapi_study_import_title)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        val rootView = findViewById<View>(android.R.id.content)
+        InsetHandler.setupStandardInsets(rootView, toolbar)
 
         parseIntentExtras()
 

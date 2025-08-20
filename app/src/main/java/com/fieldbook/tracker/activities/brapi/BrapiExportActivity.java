@@ -12,7 +12,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.widget.Toolbar;
 import androidx.arch.core.util.Function;
 
@@ -92,8 +91,6 @@ public class BrapiExportActivity extends ThemedActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        EdgeToEdge.enable(this);
 
         if (Utils.isConnected(this)) {
             if (BrAPIService.hasValidBaseUrl(this)) {

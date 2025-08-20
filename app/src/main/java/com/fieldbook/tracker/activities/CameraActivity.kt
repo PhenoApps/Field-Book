@@ -8,7 +8,6 @@ import android.util.Size
 import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
 import androidx.annotation.OptIn
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
 import androidx.camera.core.Camera
@@ -48,7 +47,6 @@ class CameraActivity : ThemedActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
 
         //get trait id from extras
         traitId = intent.getStringExtra(EXTRA_TRAIT_ID)

@@ -9,7 +9,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.widget.Toolbar;
 
 import com.fieldbook.tracker.R;
@@ -61,8 +60,6 @@ public class BrapiTraitActivity extends ThemedActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        EdgeToEdge.enable(this);
 
         // Load the traits from breedbase if user is connected to the internet
         if (Utils.isConnected(this)) {

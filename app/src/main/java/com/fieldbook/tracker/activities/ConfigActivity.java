@@ -21,7 +21,6 @@ import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -162,8 +161,6 @@ public class ConfigActivity extends ThemedActivity {
         AppLanguageUtil.Companion.refreshAppText(this);
 
         super.onCreate(savedInstanceState);
-
-        EdgeToEdge.enable(this);
 
         checkBrapiToken();
 

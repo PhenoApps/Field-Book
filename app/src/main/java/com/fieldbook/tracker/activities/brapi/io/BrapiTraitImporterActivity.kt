@@ -28,6 +28,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import javax.inject.Inject
 import androidx.core.content.edit
+import com.fieldbook.tracker.utilities.InsetHandler
 
 @AndroidEntryPoint
 class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedActivity(),
@@ -69,6 +70,9 @@ class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedAc
         setupToolbar()
 
         parseIntentExtras()
+
+        val rootView = findViewById<View>(android.R.id.content)
+        InsetHandler.setupStandardInsets(rootView, toolbar)
 
     }
 

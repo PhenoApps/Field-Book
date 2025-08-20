@@ -1,14 +1,11 @@
 package com.fieldbook.tracker.activities
 
 import android.os.Bundle
-import android.view.View
-import androidx.activity.enableEdgeToEdge
 import androidx.core.os.bundleOf
 import androidx.fragment.app.add
 import androidx.fragment.app.commit
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.fragments.CropImageFragment
-import com.fieldbook.tracker.utilities.InsetHandler
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -20,7 +17,6 @@ class CropImageActivity: ThemedActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
 
         setContentView(R.layout.activity_crop_image)
         if (savedInstanceState == null) {
