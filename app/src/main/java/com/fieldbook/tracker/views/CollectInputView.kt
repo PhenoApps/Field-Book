@@ -131,7 +131,7 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
      */
     fun clear() {
         if (isRepeatEnabled()) {
-            repeatView.clear()
+            repeatView.text = ""
         } else editText.text.clear()
     }
 
