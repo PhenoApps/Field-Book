@@ -376,32 +376,37 @@ class GreenSeekerTraitLayout : BaseTraitLayout, LineGraphSelectableAdapter.Liste
             val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
             val adapter = bluetoothManager.adapter
 
-            adapter.bondedDevices.forEach { device ->
+//            adapter.bondedDevices.forEach { bonded ->
+//                deviceList = deviceList + Device(bonded).apply {
+//                    displayableName = bonded.name ?: deviceType
+//                }
+//            }
+            //adapter.bondedDevices.forEach { device ->
 
-                val address = prefs.getString(GeneralKeys.GREEN_SEEKER_ADDRESS, null)
-                val scanner = (context as CollectActivity).bleScanner.apply {
-                    onDeviceFound = { device ->
-                        if (!found) {
-                            if (device.name != null && device.name.isNotEmpty()) {
-                                //Log.d("BLEScanner", "Discovered device: ${device.name}")
-                                if ("GreenSeeker" in device.name) {
-                                    if (address != null && device.address == address) {
-                                        found = true
-                                        stopScanning()
-                                        connectDevice(Device(device))
-                                    }
-                                    //Log.d("BLEScanner", "Adding GreenSeeker device: ${device.name}")
-                                    deviceList = deviceList + Device(device).apply {
-                                        displayableName = device.name
-                                    }
+            val address = prefs.getString(GeneralKeys.GREEN_SEEKER_ADDRESS, null)
+            val scanner = (context as CollectActivity).bleScanner.apply {
+                onDeviceFound = { device ->
+                    if (!found) {
+                        if (device.name != null && device.name.isNotEmpty()) {
+                            //Log.d("BLEScanner", "Discovered device: ${device.name}")
+                            if ("GreenSeeker" in device.name) {
+                                if (address != null && device.address == address) {
+                                    found = true
+                                    stopScanning()
+                                    connectDevice(Device(device))
+                                }
+                                //Log.d("BLEScanner", "Adding GreenSeeker device: ${device.name}")
+                                deviceList = deviceList + Device(device).apply {
+                                    displayableName = device.name
                                 }
                             }
                         }
                     }
                 }
-
-                scanner.startScanning()
             }
+
+            scanner.startScanning()
+            //}
         }
     }
 
