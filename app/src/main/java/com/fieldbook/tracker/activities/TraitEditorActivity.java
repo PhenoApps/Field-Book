@@ -977,7 +977,16 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         for (int i = 0; i < allTraits.size(); i++) {
             newTraitName = traitName + "-Copy-(" + i + ")";
-            if (!Arrays.asList(allTraits).contains(newTraitName)) {
+
+            boolean nameExists = false;
+            for (TraitObject trait : allTraits) {
+                if (trait.getName().equals(newTraitName)) {
+                    nameExists = true;
+                    break;
+                }
+            }
+
+            if (!nameExists) {
                 return newTraitName;
             }
         }
