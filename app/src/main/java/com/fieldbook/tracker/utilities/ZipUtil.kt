@@ -68,7 +68,7 @@ class ZipUtil {
 
                     }
 
-                    parents.removeLast()
+                    parents.removeAt(parents.lastIndex)
 
                 }
 
@@ -83,19 +83,17 @@ class ZipUtil {
 
                     ctx.contentResolver?.openInputStream(file.uri)?.let { inputStream ->
 
-                        var entry : ZipEntry
-
                         // if no parent directory, add the current file to the root of the zip
                         // if there was a parent directory, add the current file inside parent directory
-                        if (parentDir.isEmpty()){
-                            entry = ZipEntry("${file.name}")
+                        var entry : ZipEntry = if (parentDir.isEmpty()){
+                            ZipEntry("${file.name}")
                         }else{
-                            entry = ZipEntry("$parentDir/${file.name}")
+                            ZipEntry("$parentDir/${file.name}")
                         }
 
                         output.putNextEntry(entry)
 
-                        val bufferSize = 8192 //default buffersize for BufferedWriter
+                        val bufferSize = 8192 //default buffer size for BufferedWriter
 
                         val origin = BufferedInputStream(inputStream, bufferSize)
 
@@ -121,14 +119,12 @@ class ZipUtil {
 
                     val path = file.name
 
-                    var entry : ZipEntry
-
                     // if no parent directory, add the current directory to the root of the zip
                     // if there was a parent directory, add the current directory inside parent directory
-                    if (parentDir.isEmpty()){
-                        entry = ZipEntry("$path/")
+                    var entry : ZipEntry = if (parentDir.isEmpty()){
+                        ZipEntry("$path/")
                     }else{
-                        entry = ZipEntry("$parentDir/$path/")
+                        ZipEntry("$parentDir/$path/")
                     }
 
                     output.putNextEntry(entry)
@@ -189,13 +185,13 @@ class ZipUtil {
 
                                 // only process .db files (not .xml) for sample_db.zip
                                 if (isSampleDb) {
-                                    Log.d("ZipUtil", "Skip processing ${ze?.name} for sample_db.zip")
+                                    Log.d("ZipUtil", "Skip processing ${ze.name} for sample_db.zip")
                                     continue
                                 }
 
                                 var prefMap: Map<*, *>
 
-                                val zipEntry = ze?.name
+                                val zipEntry = ze.name
 
                                 // if the preferences are stored in .xml file
                                 if (zipEntry != null && zipEntry.endsWith(".xml")){
@@ -214,7 +210,7 @@ class ZipUtil {
                                     }
                                 } else{
                                     // if the preferences are encoded in a file
-                                    Log.d("ZipUtil", "Unzip - Found encoded preference file: ${ze?.name}")
+                                    Log.d("ZipUtil", "Unzip - Found encoded preference file: ${ze.name}")
 
                                     // Read the entry into a temporary byte array to avoid corrupting the ZipInputStream, then process it
                                     val tempData = zin.readBytes()
@@ -307,7 +303,7 @@ class ZipUtil {
             for (i in 0 until childNodes.length) {
                 val childNode: Node = childNodes.item(i)
                 if (childNode is Element) {
-                    val childElement: Element = childNode as Element
+                    val childElement: Element = childNode
 
                     // the expected xml file has a maximum of four types of tags
                     // i.e. string, boolean, int, set
@@ -342,10 +338,10 @@ class ZipUtil {
                         val setChildNodes: NodeList = childElement.childNodes
                         for (j in 0 until setChildNodes.length) {
                             val setChildNode: Node = setChildNodes.item(j)
-                            if (setChildNode is Element && (setChildNode as Element).tagName
+                            if (setChildNode is Element && setChildNode.tagName
                                     .equals("string")
                             ) {
-                                set.add(setChildNode.getTextContent().trim())
+                                set.add(setChildNode.textContent.trim())
                             }
                         }
                         map[name] = set
