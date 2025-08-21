@@ -35,7 +35,7 @@ class RepeatedValuesPagerAdapter(private val mContext: Context) : PagerAdapter()
 
         // Set the long click listener
         editText.setOnLongClickListener {
-            (mContext as CollectActivity).showObservationMetadataDialog()
+            (mContext as CollectActivity).showObservationMetadataDialog(null)
             true
         }
 
