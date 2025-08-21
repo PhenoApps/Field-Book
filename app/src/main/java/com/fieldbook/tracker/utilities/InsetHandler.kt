@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.utilities
 
+import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.Toolbar
@@ -8,6 +9,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import android.widget.ImageButton
 import androidx.core.graphics.Insets
+import androidx.preference.PreferenceFragmentCompat
+import com.fieldbook.tracker.R
 
 object InsetHandler {
 
@@ -23,25 +26,6 @@ object InsetHandler {
 
             rootView.updatePadding(bottom = systemBars.bottom)
 
-            insets
-        }
-
-        ViewCompat.requestApplyInsets(rootView)
-    }
-
-    /**
-     * Fragment inset handling - only handles top insets for toolbar, lets scrollable content handle bottom insets naturally
-     */
-    fun setupFragmentInsets(rootView: View, toolbar: Toolbar? = null) {
-        ViewCompat.setOnApplyWindowInsetsListener(rootView) { v, insets ->
-            val systemBars =
-                insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
-
-            // Only apply top padding to toolbar
-            toolbar?.updatePadding(top = systemBars.top)
-
-            // Don't apply bottom padding to root view - let the scrollable content handle it
-            // Return insets so child views can consume them if needed
             insets
         }
 
@@ -103,6 +87,28 @@ object InsetHandler {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
 
             rootView.updatePadding(bottom = systemBars.bottom, top = systemBars.top)
+
+            insets
+        }
+
+        ViewCompat.requestApplyInsets(rootView)
+    }
+
+    /**
+     * For preference activity - apply insets to toolbar, and top and bottom insets for rootView
+     */
+    fun setupPreferenceInsets(rootView: View, toolbar: Toolbar?) {
+        ViewCompat.setOnApplyWindowInsetsListener(rootView) { v, insets ->
+            val systemBars = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+            )
+
+            toolbar?.updatePadding(top = systemBars.top)
+
+            rootView.updatePadding(
+                top = systemBars.top,
+                bottom = systemBars.bottom
+            )
 
             insets
         }
