@@ -60,7 +60,9 @@ class ExifUtil {
 
                         val exif = ExifInterface(desc.fileDescriptor)
 
-                        exif.setAttribute(ExifInterface.TAG_USER_COMMENT, data)
+                        val userCommentCharsetPrefix = byteArrayOf(0x41, 0x53, 0x43, 0x49, 0x49, 0x00, 0x00, 0x00) // ASCII
+                        val userComment = userCommentCharsetPrefix + data.toByteArray(Charsets.US_ASCII)
+                        exif.setAttribute(ExifInterface.TAG_USER_COMMENT, String(userComment, Charsets.US_ASCII))
                         exif.saveAttributes()
                     }
                 }
