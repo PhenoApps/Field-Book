@@ -12,7 +12,7 @@
         <item name="colorAccent">?attr/fb_color_accent</item>
     </style>
 
-    <style name="PreferenceTheme" parent="BaseAppTheme">
+    <style name="PreferenceTheme" parent="ActionBarTheme">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
 

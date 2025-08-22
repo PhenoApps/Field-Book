@@ -69,7 +69,9 @@ public class PreferencesFragment extends BasePreferenceFragment implements Nearb
         config.index(R.xml.preferences_experimental);
         config.index(R.xml.preferences_location);
 
-        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.settings_advanced));
+        if (getActivity() != null && ((PreferencesActivity) getActivity()).getSupportActionBar() != null) {
+            ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.settings_advanced));
+        }
         setHasOptionsMenu(true);
     }
 
