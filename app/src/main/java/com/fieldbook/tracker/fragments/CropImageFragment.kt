@@ -2,13 +2,13 @@ package com.fieldbook.tracker.fragments
 
 import android.content.SharedPreferences
 import android.graphics.Bitmap
-import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.BitmapLoader
+import com.fieldbook.tracker.utilities.InsetHandler
 import com.fieldbook.tracker.views.CropImageView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -18,6 +18,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import androidx.core.content.edit
+import androidx.core.net.toUri
 
 /**
  * Controller code for handling user input for cropping an image.
@@ -42,6 +44,8 @@ class CropImageFragment: Fragment(R.layout.crop_image_fragment), CoroutineScope 
         val imageUri = requireArguments().getString(EXTRA_IMAGE_URI) ?: ""
         cropImageView = view.findViewById(R.id.crop_image_view)
         setupCropImageView(traitId, imageUri)
+
+        cropImageView?.let { InsetHandler.setupCropImageInsets(it) }
     }
 
     private fun setupCropImageView(traitId: Int, imageUri: String) {
@@ -51,11 +55,11 @@ class CropImageFragment: Fragment(R.layout.crop_image_fragment), CoroutineScope 
             override fun onCropImageSaved(rectCoordinates: String) {
 
                 //save the coordinate text to preferences, make the key relative to the input trait id
-                prefs.edit().putString(GeneralKeys.getCropCoordinatesKey(traitId), rectCoordinates).apply()
+                prefs.edit { putString(GeneralKeys.getCropCoordinatesKey(traitId), rectCoordinates) }
 
                 launch(Dispatchers.IO) {
 
-                    val uri = Uri.parse(imageUri)
+                    val uri = imageUri.toUri()
 
                     val croppedBmp = BitmapLoader.cropBitmap(context, uri, rectCoordinates)
 

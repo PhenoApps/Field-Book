@@ -13,6 +13,8 @@
     </style>
 
     <style name="PreferenceTheme" parent="ActionBarTheme">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
 
         <item name="buttonStyle">@style/ButtonStyle</item>
         <item name="toolbarStyle">@style/AppToolbar</item>

@@ -29,7 +29,7 @@ public class AppearancePreferencesFragment extends PreferenceFragmentCompat {
         boolean flag = prefs.getBoolean(GeneralKeys.THEME_FLAG, false);
         if (flag) {
             getParentFragmentManager().beginTransaction()
-                    .replace(android.R.id.content, new ThemePreferencesFragment())
+                    .replace(R.id.prefs_container, new ThemePreferencesFragment())
                     .addToBackStack("AppearanceFrag").commit();
             prefs.edit().putBoolean(GeneralKeys.THEME_FLAG, false).apply();
         }

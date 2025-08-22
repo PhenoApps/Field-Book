@@ -20,6 +20,7 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -38,6 +39,7 @@ import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.AppLanguageUtil;
+import com.fieldbook.tracker.utilities.InsetHandler;
 import com.fieldbook.tracker.utilities.export.ExportUtil;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.OldPhotosMigrator;
@@ -174,6 +176,8 @@ public class ConfigActivity extends ThemedActivity {
 
         // save the current person name
         nameManager.migrateExistingPersonName();
+
+        setupBackCallback();
     }
 
     private void versionBasedSetup() {
@@ -299,6 +303,7 @@ public class ConfigActivity extends ThemedActivity {
     private void loadScreen() {
         setContentView(R.layout.activity_config);
         initToolbar();
+        setupConfigWindowInsets();
 
         settingsList = findViewById(R.id.myList);
 
@@ -690,17 +695,24 @@ public class ConfigActivity extends ThemedActivity {
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
 
-    @Override
-    public void onBackPressed() {
-        if (doubleBackToExitPressedOnce) {
-            super.onBackPressed();
-            return;
-        }
+    private void setupBackCallback() {
+        OnBackPressedCallback doubleBackCallback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (doubleBackToExitPressedOnce) { // exits the app
+                    setEnabled(false); // stop intercepting back presses
+                    getOnBackPressedDispatcher().onBackPressed(); // call system's back handler toe exit
+                    return;
+                }
 
-        this.doubleBackToExitPressedOnce = true;
-        Toast.makeText(this, "Press back again to exit", Toast.LENGTH_SHORT).show();
+                doubleBackToExitPressedOnce = true;
+                Toast.makeText(ConfigActivity.this, "Press back again to exit", Toast.LENGTH_SHORT).show();
 
-        new Handler().postDelayed(() -> doubleBackToExitPressedOnce = false, 2000);
+                new Handler().postDelayed(() -> doubleBackToExitPressedOnce = false, 2000);
+            }
+        };
+
+        getOnBackPressedDispatcher().addCallback(this, doubleBackCallback);
     }
 
     /**
@@ -800,5 +812,12 @@ public class ConfigActivity extends ThemedActivity {
 
             CollectActivity.reloadData = true;
         }
+    }
+
+    private void setupConfigWindowInsets() {
+        View rootView = findViewById(android.R.id.content);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+
+        InsetHandler.INSTANCE.setupStandardInsets(rootView, toolbar);
     }
 }
