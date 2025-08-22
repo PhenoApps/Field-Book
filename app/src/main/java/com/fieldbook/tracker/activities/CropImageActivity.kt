@@ -31,5 +31,7 @@ class CropImageActivity: ThemedActivity() {
                 add<CropImageFragment>(R.id.fragment_container_view, args = bundle)
             }
         }
+
+        onBackPressedDispatcher.addCallback(this, standardBackCallback())
     }
 }

@@ -99,6 +99,8 @@ public class BrapiActivity extends ThemedActivity {
             Toast.makeText(getApplicationContext(), R.string.device_offline_warning, Toast.LENGTH_SHORT).show();
             finish();
         }
+
+        getOnBackPressedDispatcher().addCallback(this, standardBackCallback());
     }
 
     @Override

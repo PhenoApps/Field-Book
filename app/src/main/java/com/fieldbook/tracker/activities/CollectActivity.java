@@ -31,6 +31,7 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -161,8 +162,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 @SuppressLint("ClickableViewAccessibility")
 public class CollectActivity extends ThemedActivity
-        implements SummaryFragment.SummaryOpenListener,
-        CollectController,
+        implements CollectController,
         CollectRangeController,
         CollectTraitController,
         GeoNavController,
@@ -311,9 +311,6 @@ public class CollectActivity extends ThemedActivity
 
     private SecureBluetoothActivityImpl secureBluetooth;
 
-    //summary fragment listener
-    private boolean isNavigatingFromSummary = false;
-
     /**
      * Multi Measure delete dialogs
      */
@@ -333,6 +330,8 @@ public class CollectActivity extends ThemedActivity
         super.onCreate(savedInstanceState);
 
         gps = new GPSTracker(this, this, 0, 10000);
+        
+        setupBackCallback();
 
         guiThread.start();
         myGuiHandler = new Handler(guiThread.getLooper()) {
@@ -2084,7 +2083,6 @@ public class CollectActivity extends ThemedActivity
     private void showSummary() {
 
         SummaryFragment fragment = new SummaryFragment();
-        fragment.setListener(this);
 
         getSupportFragmentManager().beginTransaction()
                 .add(android.R.id.content, fragment)
@@ -2384,44 +2382,31 @@ public class CollectActivity extends ThemedActivity
         }
     }
 
-    @Override
-    public void onBackPressed() {
+    private void setupBackCallback() {
+        OnBackPressedCallback backPressedCallback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                int count = getSupportFragmentManager().getBackStackEntryCount();
 
-        super.onBackPressed();
-        FragmentManager m = getSupportFragmentManager();
-        int count = getSupportFragmentManager().getBackStackEntryCount();
-
-        String format = traitBox.getCurrentFormat();
-
-        if (count == 0) {
-
-            if (isNavigatingFromSummary) {
-
-                isNavigatingFromSummary = false;
-
-            } else if (format.equals(CanonTraitLayout.type)) {
-
-                canonApi.stopSession();
-
-                wifiHelper.disconnect();
-
-            }else {
-
-                finish();
-
+                if (count == 0) {
+                        String format = traitBox.getCurrentFormat();
+                        if (format.equals(CanonTraitLayout.type)) {
+                            canonApi.stopSession();
+                            wifiHelper.disconnect();
+                        }
+                        finish();
+                } else {
+                    getSupportFragmentManager().popBackStack();
+                }
             }
+        };
 
-
-        } else {
-
-            getSupportFragmentManager().popBackStack();
-
-        }
+        getOnBackPressedDispatcher().addCallback(this, backPressedCallback);
     }
 
     @Override
     public boolean onSupportNavigateUp() {
-        onBackPressed();
+        getOnBackPressedDispatcher().onBackPressed();
         return true;
     }
 
@@ -2549,11 +2534,6 @@ public class CollectActivity extends ThemedActivity
                 getPerson(),
                 getLocationByPreferences(), "", studyId, "",
                 null, null);
-    }
-
-    @Override
-    public void onSummaryDestroy() {
-        isNavigatingFromSummary = true;
     }
 
     @NonNull

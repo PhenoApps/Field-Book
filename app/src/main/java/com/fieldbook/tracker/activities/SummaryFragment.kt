@@ -35,25 +35,9 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
     private var prevButton: ImageView? = null
     private var toolbar: Toolbar? = null
     private var filterDialog: AlertDialog? = null
-    private var listener: SummaryOpenListener? = null
 
     @Inject
     lateinit var database: DataHelper
-
-    fun interface SummaryOpenListener {
-        fun onSummaryDestroy()
-    }
-
-    fun setListener(listener: SummaryOpenListener) {
-
-        this.listener = listener
-
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        listener?.onSummaryDestroy()
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?

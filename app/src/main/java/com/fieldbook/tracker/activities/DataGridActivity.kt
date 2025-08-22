@@ -154,6 +154,8 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
                 }
             }
         }
+
+        onBackPressedDispatcher.addCallback(this, standardBackCallback())
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

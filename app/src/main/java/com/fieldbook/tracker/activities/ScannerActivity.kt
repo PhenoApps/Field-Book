@@ -75,6 +75,8 @@ class ScannerActivity : ThemedActivity() {
         setupShutterButton()
 
         setupScannerInsets()
+
+        onBackPressedDispatcher.addCallback(this, standardBackCallback())
     }
 
     private fun setupShutterButton() {

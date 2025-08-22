@@ -8,10 +8,13 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -64,6 +67,7 @@ public class AboutActivity extends MaterialAboutActivity {
         circularProgressDrawable.start();
 
         setupWindowInsets();
+        setupBackCallback();
     }
 
     private void setupWindowInsets() {
@@ -87,6 +91,17 @@ public class AboutActivity extends MaterialAboutActivity {
             }
         }
         return null;
+    }
+
+    private void setupBackCallback() {
+        OnBackPressedCallback doubleBackCallback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                finish();
+            }
+        };
+
+        getOnBackPressedDispatcher().addCallback(this, doubleBackCallback);
     }
 
     private MaterialAboutActionItem.Builder updatesButtonBuilder;

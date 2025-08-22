@@ -151,6 +151,7 @@ class BrapiStudyFilterActivity(
 
         fetchDescriptionTv.text = getString(R.string.act_brapi_list_filter_loading_studies)
 
+        onBackPressedDispatcher.addCallback(this, standardBackCallback())
     }
 
     override fun showNextButton(): Boolean {
@@ -178,7 +179,7 @@ class BrapiStudyFilterActivity(
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed();
             return true
         } else if (item.itemId == R.id.action_brapi_filter) {
             showFilterChoiceDialog()

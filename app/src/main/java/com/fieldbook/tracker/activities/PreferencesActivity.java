@@ -77,6 +77,8 @@ public class PreferencesActivity extends ThemedActivity implements PreferenceFra
 
         View rootView = findViewById(R.id.prefs_container);
         InsetHandler.INSTANCE.setupPreferenceInsets(rootView, toolbar);
+
+        getOnBackPressedDispatcher().addCallback(this, fragmentBasedBackCallback());
     }
 
     @Override
@@ -97,7 +99,7 @@ public class PreferencesActivity extends ThemedActivity implements PreferenceFra
 
         if (item.getItemId() == android.R.id.home) {
             setResult(RESULT_OK);
-            onBackPressed();
+            getOnBackPressedDispatcher().onBackPressed();
             return true;
         }
 

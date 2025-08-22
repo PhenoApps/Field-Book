@@ -103,7 +103,7 @@ class TextTraitLayout : BaseTraitLayout {
 
             if (event.keyCode == KeyEvent.KEYCODE_BACK) {
 
-                (context as CollectActivity).onBackPressed()
+                (context as CollectActivity).onBackPressedDispatcher.onBackPressed()
 
                 return@setOnKeyListener true
             }

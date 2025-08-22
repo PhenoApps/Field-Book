@@ -75,6 +75,7 @@ abstract class ListFilterActivity : ThemedActivity(),
 
         initUi()
 
+        onBackPressedDispatcher.addCallback(this, standardBackCallback())
     }
 
     override fun onDestroy() {

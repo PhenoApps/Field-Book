@@ -75,6 +75,8 @@ public class BrapiAuthActivity extends ThemedActivity {
                 authorizeBrAPI(preferences, this);
             }
         }
+
+        getOnBackPressedDispatcher().addCallback(this, standardBackCallback());
     }
 
     @Override

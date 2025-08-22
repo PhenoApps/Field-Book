@@ -67,6 +67,8 @@ class CameraActivity : ThemedActivity() {
         setupCameraTitleView()
 
         setupCameraInsets()
+
+        onBackPressedDispatcher.addCallback(this, standardBackCallback())
     }
 
     private fun onSettingsChanged() {

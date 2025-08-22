@@ -8,9 +8,9 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
-import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -27,7 +27,6 @@ import com.fieldbook.tracker.utilities.FieldSwitchImpl
 import com.fieldbook.tracker.utilities.InsetHandler
 import com.fieldbook.tracker.utilities.export.ExportUtil
 import com.fieldbook.tracker.views.SearchBar
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.ArrayList
 import javax.inject.Inject
@@ -102,6 +101,8 @@ abstract class BaseFieldActivity : ThemedActivity(), FieldAdapterController, Fie
         searchBar = findViewById(getSearchBarId())
 
         queryAndLoadFields()
+
+        setupBackCallback()
     }
 
     override fun onResume() {
@@ -284,15 +285,20 @@ abstract class BaseFieldActivity : ThemedActivity(), FieldAdapterController, Fie
         }
     }
 
-    override fun onBackPressed() {
-        if (supportFragmentManager.backStackEntryCount > 0) {
-            // Return to Fields screen if pressed in detail fragment
-            mAdapter.notifyDataSetChanged()
-            supportFragmentManager.popBackStack()
-            recyclerView.isEnabled = true // Re-enable touch events
-        } else {
-            super.onBackPressed()
+    private fun setupBackCallback() {
+        val backCallback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (supportFragmentManager.backStackEntryCount > 0) {
+                    // Return to Fields screen if pressed in detail fragment
+                    mAdapter.notifyDataSetChanged()
+                    supportFragmentManager.popBackStack()
+                    recyclerView.isEnabled = true // Re-enable touch events
+                } else {
+                    finish()
+                }
+            }
         }
+        onBackPressedDispatcher.addCallback(this, backCallback)
     }
 
     fun setActiveField(studyId: Int) {

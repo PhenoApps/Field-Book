@@ -99,6 +99,8 @@ public class StatisticsActivity extends ThemedActivity {
         loadData();
 
         setupStatisticsInsets(toolbar);
+
+        getOnBackPressedDispatcher().addCallback(this, fragmentBasedBackCallback());
     }
 
     @Override
@@ -118,7 +120,7 @@ public class StatisticsActivity extends ThemedActivity {
             StatisticsCalendarFragment calendarFragment = new StatisticsCalendarFragment(this);
             getSupportFragmentManager().beginTransaction().replace(android.R.id.content, calendarFragment).addToBackStack(null).commit();
         } else if (itemId == android.R.id.home) {
-            onBackPressed();
+            getOnBackPressedDispatcher().onBackPressed();
         }
         return super.onOptionsItemSelected(item);
     }

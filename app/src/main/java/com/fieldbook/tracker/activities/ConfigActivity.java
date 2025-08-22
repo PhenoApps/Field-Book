@@ -17,10 +17,10 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -176,6 +176,8 @@ public class ConfigActivity extends ThemedActivity {
 
         // save the current person name
         nameManager.migrateExistingPersonName();
+
+        setupBackCallback();
     }
 
     private void versionBasedSetup() {
@@ -693,17 +695,24 @@ public class ConfigActivity extends ThemedActivity {
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
 
-    @Override
-    public void onBackPressed() {
-        if (doubleBackToExitPressedOnce) {
-            super.onBackPressed();
-            return;
-        }
+    private void setupBackCallback() {
+        OnBackPressedCallback doubleBackCallback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (doubleBackToExitPressedOnce) { // exits the app
+                    setEnabled(false); // stop intercepting back presses
+                    getOnBackPressedDispatcher().onBackPressed(); // call system's back handler toe exit
+                    return;
+                }
 
-        this.doubleBackToExitPressedOnce = true;
-        Toast.makeText(this, "Press back again to exit", Toast.LENGTH_SHORT).show();
+                doubleBackToExitPressedOnce = true;
+                Toast.makeText(ConfigActivity.this, "Press back again to exit", Toast.LENGTH_SHORT).show();
 
-        new Handler().postDelayed(() -> doubleBackToExitPressedOnce = false, 2000);
+                new Handler().postDelayed(() -> doubleBackToExitPressedOnce = false, 2000);
+            }
+        };
+
+        getOnBackPressedDispatcher().addCallback(this, doubleBackCallback);
     }
 
     /**

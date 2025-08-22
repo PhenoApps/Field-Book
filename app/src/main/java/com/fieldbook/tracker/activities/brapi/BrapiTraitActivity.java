@@ -89,6 +89,8 @@ public class BrapiTraitActivity extends ThemedActivity {
             Toast.makeText(getApplicationContext(), R.string.device_offline_warning, Toast.LENGTH_SHORT).show();
             finish();
         }
+
+        getOnBackPressedDispatcher().addCallback(this, standardBackCallback());
     }
 
     // Load the toolbar with various elements

@@ -11,6 +11,7 @@ import android.widget.ListView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedDispatcher
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -139,6 +140,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
         parseIntentExtras()
 
+        OnBackPressedDispatcher().addCallback(this, standardBackCallback())
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -547,7 +549,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 Toast.makeText(this@BrapiStudyImportActivity,
                     getString(R.string.failed_to_fetch_observation_units), Toast.LENGTH_SHORT).show()
 
-                onBackPressed()
+                onBackPressedDispatcher.onBackPressed()
 
             }
 
