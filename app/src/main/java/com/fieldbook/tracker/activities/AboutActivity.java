@@ -9,9 +9,15 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.preference.PreferenceManager;
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
@@ -27,6 +33,8 @@ import com.fieldbook.tracker.dialogs.CitationDialog;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
+import com.fieldbook.tracker.utilities.InsetHandler;
+import com.google.android.material.appbar.AppBarLayout;
 import com.mikepenz.aboutlibraries.LibsBuilder;
 
 import org.json.JSONException;
@@ -54,6 +62,31 @@ public class AboutActivity extends MaterialAboutActivity {
         circularProgressDrawable = new CircularProgressDrawable(this);
         circularProgressDrawable.setStyle(CircularProgressDrawable.DEFAULT);
         circularProgressDrawable.start();
+
+        setupWindowInsets();
+    }
+
+    private void setupWindowInsets() {
+        View rootView = findViewById(android.R.id.content);
+        AppBarLayout appBarLayout = findAppBarLayout(rootView);
+
+       InsetHandler.INSTANCE.setupAboutActivityInsets(rootView, appBarLayout);
+    }
+
+    private AppBarLayout findAppBarLayout(View parent) {
+        if (parent instanceof AppBarLayout) {
+            return (AppBarLayout) parent;
+        }
+        if (parent instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) parent;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                AppBarLayout result = findAppBarLayout(group.getChildAt(i));
+                if (result != null) {
+                    return result;
+                }
+            }
+        }
+        return null;
     }
 
     private MaterialAboutActionItem.Builder updatesButtonBuilder;

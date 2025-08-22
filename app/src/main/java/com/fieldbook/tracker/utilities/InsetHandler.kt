@@ -11,6 +11,7 @@ import android.widget.ImageButton
 import androidx.core.graphics.Insets
 import androidx.preference.PreferenceFragmentCompat
 import com.fieldbook.tracker.R
+import com.google.android.material.appbar.AppBarLayout
 
 object InsetHandler {
 
@@ -109,6 +110,21 @@ object InsetHandler {
                 top = systemBars.top,
                 bottom = systemBars.bottom
             )
+
+            insets
+        }
+
+        ViewCompat.requestApplyInsets(rootView)
+    }
+
+    fun setupAboutActivityInsets(rootView: View, appBarLayout: AppBarLayout? = null) {
+        ViewCompat.setOnApplyWindowInsetsListener(rootView) { v, insets ->
+            val systemBars =
+                insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
+
+            appBarLayout?.updatePadding(top = systemBars.top)
+
+            rootView.updatePadding(bottom = systemBars.bottom)
 
             insets
         }
