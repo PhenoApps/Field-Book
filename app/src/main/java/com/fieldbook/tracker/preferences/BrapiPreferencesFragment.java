@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -17,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowMetrics;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -308,9 +310,15 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             Gson gson = new Gson();
             String jsonConfig = gson.toJson(config);
 
-            DisplayMetrics displayMetrics = new DisplayMetrics();
-            act.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-            int screenWidth = displayMetrics.widthPixels;
+            int screenWidth;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                WindowMetrics windowMetrics = act.getWindowManager().getCurrentWindowMetrics();
+                screenWidth = windowMetrics.getBounds().width();
+            } else {
+                DisplayMetrics displayMetrics = new DisplayMetrics();
+                act.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+                screenWidth = displayMetrics.widthPixels;
+            }
 
             // Set the QR Code size to be 80% of the screen width
             int qrCodeSize = (int) (screenWidth * 0.8);
