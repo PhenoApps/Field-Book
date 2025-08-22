@@ -1,6 +1,5 @@
 package com.fieldbook.tracker.utilities
 
-import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.Toolbar
@@ -9,8 +8,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
 import android.widget.ImageButton
 import androidx.core.graphics.Insets
-import androidx.preference.PreferenceFragmentCompat
-import com.fieldbook.tracker.R
 import com.google.android.material.appbar.AppBarLayout
 
 object InsetHandler {
@@ -39,7 +36,7 @@ object InsetHandler {
      */
     fun setupFragmentWithTopInsetsOnly(rootView: View, toolbar: Toolbar? = null) {
         ViewCompat.setOnApplyWindowInsetsListener(rootView) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
 
             toolbar?.updatePadding(top = systemBars.top)
 
@@ -85,7 +82,7 @@ object InsetHandler {
      */
     fun setupCropImageInsets(rootView: View) {
         ViewCompat.setOnApplyWindowInsetsListener(rootView) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
 
             rootView.updatePadding(bottom = systemBars.bottom, top = systemBars.top)
 
