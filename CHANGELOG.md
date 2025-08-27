@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Boolean traits now have a visual unset state
 
 ### Fixed
+- Importing traits from BrAPI without trait details no longer leads to a crash
 - Repeated measures no longer ignore trait limits
 - Keyboard backspace no longer moves cursor to the end of the current value in text traits
 - Field name is no longer an option in the Collect Search dialog
