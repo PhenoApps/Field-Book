@@ -45,8 +45,6 @@ abstract class FieldCreatorBaseFragment : Fragment() {
         backButton = view.findViewById(R.id.back_button)
         forwardButton = view.findViewById(R.id.forward_button)
 
-        loadInitialState()
-
         updateActivityStepper()
         setupViews(view)
         setupNavigationButtons()
@@ -59,20 +57,6 @@ abstract class FieldCreatorBaseFragment : Fragment() {
     }
 
     protected abstract fun setupViews(view: View)
-
-    private fun loadInitialState() {
-        val currentState = fieldCreatorViewModel.fieldConfig.value
-        if (currentState?.fieldName?.isEmpty() == true && arguments != null) {
-            fieldCreatorViewModel.loadState(
-                fieldName = arguments?.getString("fieldName"),
-                rows = arguments?.getInt("rows")?.takeIf { it > 0 },
-                cols = arguments?.getInt("cols")?.takeIf { it > 0 },
-                startCorner = arguments?.getString("startCorner"),
-                isZigzag = arguments?.getBoolean("isZigzag"),
-                isHorizontal = arguments?.getBoolean("isHorizontal")
-            )
-        }
-    }
 
     protected open fun observeFieldCreatorViewModel() { }
 

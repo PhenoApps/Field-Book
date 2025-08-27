@@ -152,7 +152,7 @@ class FieldCreatorViewModel : ViewModel() {
     fun createField(db: DataHelper, context: Context?) {
         val state = _fieldConfig.value ?: return
 
-        // Cancel any existing job
+        // cancel any existing job
         createFieldJob?.cancel()
 
         createFieldJob = viewModelScope.launch {
@@ -207,38 +207,10 @@ class FieldCreatorViewModel : ViewModel() {
                 _creationResult.value = FieldCreationResult.Success(studyDbId)
             } catch (e: Exception) {
                 _creationResult.value = FieldCreationResult.Error(
-                    e.message ?: "Failed to create field"
+                    e.message ?: context?.getString(R.string.field_creation_failed_error) ?: ""
                 )
             }
         }
-    }
-
-    // Reset state for new field creation
-    fun reset() {
-        _fieldConfig.value = FieldConfig()
-        _validationErrors.value = ValidationError()
-        _creationResult.value = null
-        createFieldJob?.cancel()
-    }
-
-    // Load existing state (for restoration after process death)
-    fun loadState(
-        fieldName: String? = null,
-        rows: Int? = null,
-        cols: Int? = null,
-        startCorner: String? = null,
-        isZigzag: Boolean? = null,
-        isHorizontal: Boolean? = null
-    ) {
-        val currentState = _fieldConfig.value ?: FieldConfig()
-        _fieldConfig.value = currentState.copy(
-            fieldName = fieldName ?: currentState.fieldName,
-            rows = rows ?: currentState.rows,
-            cols = cols ?: currentState.cols,
-            startCorner = startCorner?.let { FieldStartCorner.valueOf(it) } ?: currentState.startCorner,
-            isZigzag = isZigzag ?: currentState.isZigzag,
-            isHorizontal = isHorizontal ?: currentState.isHorizontal
-        )
     }
 
     override fun onCleared() {
