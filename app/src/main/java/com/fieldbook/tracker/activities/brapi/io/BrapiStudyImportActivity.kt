@@ -623,6 +623,8 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         sortId: String
     ) {
 
+        var maxVariableIndex = db.allTraitObjects.size - 1
+
         attributesTable?.get(study.studyDbId)?.let { studyAttributes ->
 
             observationUnits[study.studyDbId]?.filter {
@@ -639,7 +641,9 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                     details.trialName = study.trialName
 
                     details.traits = observationVariables[study.studyDbId]?.toList()
-                        ?.map { it.toTraitObject(this@BrapiStudyImportActivity) } ?: listOf()
+                        ?.map { it.toTraitObject(this@BrapiStudyImportActivity).also {
+                            it.realPosition = maxVariableIndex++
+                        } } ?: listOf()
 
                     val geoCoordinateColumnName = "geo_coordinates"
 
