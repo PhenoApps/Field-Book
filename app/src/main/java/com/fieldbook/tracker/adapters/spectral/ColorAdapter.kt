@@ -15,21 +15,24 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import androidx.core.graphics.toColorInt
+import com.fieldbook.tracker.activities.CollectActivity
 
 /**
  * Reference:
  * https://developer.android.com/guide/topics/ui/layout/recyclerview
  */
 
-class ColorAdapter(private val listener: Listener) : ListAdapter<String, ColorAdapter.ViewHolder>(DiffCallback()) {
+class ColorAdapter(private val context: Context, private val listener: Listener) : ListAdapter<String, ColorAdapter.ViewHolder>(DiffCallback()) {
 
     interface Listener {
         fun onColorDeleted(position: Int, onDelete: (() -> Unit)? = null)
+        fun onColorLongClicked(position: Int)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val v = LayoutInflater.from(parent.context)
             .inflate(R.layout.list_item_color, parent, false)
+
         return ViewHolder(v as ConstraintLayout)
     }
 
@@ -43,6 +46,9 @@ class ColorAdapter(private val listener: Listener) : ListAdapter<String, ColorAd
                 holder.imageView.visibility = View.VISIBLE
                 holder.closeButton.visibility = View.GONE
                 holder.colorView.setBackgroundColor(Color.BLACK)
+                holder.colorView.setOnLongClickListener {
+                    false
+                }
             } else {
                 holder.progressBar.visibility = View.GONE
                 holder.imageView.visibility = View.GONE
@@ -51,6 +57,10 @@ class ColorAdapter(private val listener: Listener) : ListAdapter<String, ColorAd
                 holder.hexCodeText.text = this
                 holder.closeButton.setOnClickListener {
                     listener.onColorDeleted(position)
+                }
+                holder.colorView.setOnLongClickListener {
+                    listener.onColorLongClicked(position)
+                    true
                 }
             }
         }
