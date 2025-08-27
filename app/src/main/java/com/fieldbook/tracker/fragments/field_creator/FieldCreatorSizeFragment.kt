@@ -9,6 +9,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.TextView
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.getValue
@@ -18,7 +19,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.enums.FieldCreationStep
+import com.fieldbook.tracker.viewmodels.FieldConfig
 import com.fieldbook.tracker.views.FieldPreviewGrid
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 
@@ -27,7 +30,7 @@ class FieldCreatorSizeFragment : FieldCreatorBaseFragment() {
     override fun getCurrentStep(): FieldCreationStep = FieldCreationStep.FIELD_SIZE
     override fun getLayoutResourceId(): Int = R.layout.fragment_field_creator_size
     override fun onForwardClick(): (() -> Unit)? = {
-        if (fieldCreatorViewModel.validateNameAndDimensions(db)) {
+        if (fieldCreatorViewModel.validateNameAndDimensions(db, context)) {
             val state = fieldCreatorViewModel.fieldConfig.value
             state?.let {
                 dismissKeyboard()
@@ -43,6 +46,8 @@ class FieldCreatorSizeFragment : FieldCreatorBaseFragment() {
     private lateinit var rowsInputLayout: TextInputLayout
     private lateinit var colsInputLayout: TextInputLayout
     private lateinit var sizePreviewGrid: ComposeView
+    private lateinit var fieldDimensionsErrorText: TextView
+    private lateinit var largeFieldWarningCard: MaterialCardView
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -75,6 +80,8 @@ class FieldCreatorSizeFragment : FieldCreatorBaseFragment() {
         rowsInputLayout = view.findViewById(R.id.rows_input_layout)
         colsInputLayout = view.findViewById(R.id.cols_input_layout)
         sizePreviewGrid = view.findViewById(R.id.size_preview_container)
+        fieldDimensionsErrorText = view.findViewById(R.id.field_dimensions_error_text)
+        largeFieldWarningCard = view.findViewById(R.id.large_field_warning_card)
 
         setupTextWatchers()
 
@@ -90,16 +97,30 @@ class FieldCreatorSizeFragment : FieldCreatorBaseFragment() {
             }
             if (rowsEditText.text.toString() != state.rows.toString() && state.rows > 0) {
                 rowsEditText.setText(state.rows.toString())
+                rowsEditText.setSelection(rowsEditText.text?.length ?: 0) // keep cursor at the end in case of errors
             }
             if (colsEditText.text.toString() != state.cols.toString() && state.cols > 0) {
                 colsEditText.setText(state.cols.toString())
+                colsEditText.setSelection(colsEditText.text?.length ?: 0) // keep cursor at the end in case of errors
             }
+
+            // show large field card if total plots <= max
+            val totalPlots = state.rows * state.cols
+            val isValidLargeField = state.isLargeField && totalPlots <= FieldConfig.MAX_TOTAL_PLOTS
+            largeFieldWarningCard.visibility = if (isValidLargeField) View.VISIBLE else View.GONE
         }
 
         fieldCreatorViewModel.validationErrors.observe(viewLifecycleOwner) { errors ->
             fieldNameInputLayout.error = errors.fieldNameError
             rowsInputLayout.error = errors.rowsError
             colsInputLayout.error = errors.colsError
+
+            if (errors.dimensionsError != null) {
+                fieldDimensionsErrorText.text = errors.dimensionsError
+                fieldDimensionsErrorText.visibility = View.VISIBLE
+            } else {
+                fieldDimensionsErrorText.visibility = View.GONE
+            }
         }
     }
 
@@ -116,7 +137,7 @@ class FieldCreatorSizeFragment : FieldCreatorBaseFragment() {
             override fun afterTextChanged(s: Editable?) {
                 val rows = s.toString().toIntOrNull() ?: 0
                 val cols = colsEditText.text.toString().toIntOrNull() ?: 0
-                fieldCreatorViewModel.updateDimensions(rows, cols)
+                fieldCreatorViewModel.updateDimensions(rows, cols, context)
             }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -126,7 +147,7 @@ class FieldCreatorSizeFragment : FieldCreatorBaseFragment() {
             override fun afterTextChanged(s: Editable?) {
                 val rows = rowsEditText.text.toString().toIntOrNull() ?: 0
                 val cols = s.toString().toIntOrNull() ?: 0
-                fieldCreatorViewModel.updateDimensions(rows, cols)
+                fieldCreatorViewModel.updateDimensions(rows, cols, context)
             }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -151,6 +172,7 @@ class FieldCreatorSizeFragment : FieldCreatorBaseFragment() {
                                     displayCols
                                 )
                             },
+                            maxDisplayPercentage = 0.9f
                         )
                     }
                 }

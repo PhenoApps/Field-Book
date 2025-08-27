@@ -46,7 +46,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/field_name_input_layout"
-        app:layout_constraintBottom_toTopOf="@id/bottom_separator"
         app:layout_constraintVertical_bias="0">
 
         <com.google.android.material.textfield.TextInputLayout
@@ -84,6 +83,41 @@
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/field_dimensions_error_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:visibility="gone"
+        android:text="@string/warning_field_missing"
+        style="@style/TextAppearance.AppCompat.Body1"
+        android:textColor="?attr/fb_error_message_color"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/dimensions_container" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/large_field_warning_card"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:cardCornerRadius="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/field_dimensions_error_text">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/field_creator_preview_large_field_warning"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:padding="16dp" />
+
+    </com.google.android.material.card.MaterialCardView>
+
     <androidx.compose.ui.platform.ComposeView
         android:id="@+id/size_preview_container"
         android:layout_width="0dp"
@@ -91,7 +125,7 @@
         android:layout_marginTop="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/dimensions_container"
+        app:layout_constraintTop_toBottomOf="@id/large_field_warning_card"
         app:layout_constraintBottom_toTopOf="@id/bottom_separator"
         app:layout_constraintVertical_bias="0" />
 

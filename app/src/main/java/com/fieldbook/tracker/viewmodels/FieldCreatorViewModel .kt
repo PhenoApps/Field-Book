@@ -12,10 +12,13 @@ import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.ImportFormat
 import com.fieldbook.tracker.enums.FieldWalkingPattern
 import com.fieldbook.tracker.enums.FieldStartCorner
+import com.fieldbook.tracker.viewmodels.FieldConfig.Companion.formatted
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.NumberFormat
+import java.util.Locale
 
 class FieldCreatorViewModel : ViewModel() {
 
@@ -43,12 +46,33 @@ class FieldCreatorViewModel : ViewModel() {
         }
     }
 
-    fun updateDimensions(rows: Int, cols: Int) {
-        _fieldConfig.value = _fieldConfig.value?.copy(rows = rows, cols = cols)
-        val currentErrors = _validationErrors.value
-        if (currentErrors?.rowsError != null || currentErrors?.colsError != null) {
-            _validationErrors.value = currentErrors.copy(rowsError = null, colsError = null)
+    fun updateDimensions(rows: Int, cols: Int, context: Context?) {
+        var errors = _validationErrors.value ?: ValidationError()
+
+        val validRows = if (rows > FieldConfig.MAX_ROWS) { // keep previous value and show error
+            errors = errors.copy(
+                rowsError = context?.getString(R.string.field_creator_rows_exceeded_error, FieldConfig.MAX_ROWS.formatted())
+            )
+            _fieldConfig.value?.rows ?: 0
+        } else {
+            errors = errors.copy(rowsError = null)
+            rows
         }
+
+        val validCols = if (cols > FieldConfig.MAX_COLS) { // keep previous value and show error
+            errors = errors.copy(
+                colsError = context?.getString(R.string.field_creator_cols_exceeded_error, FieldConfig.MAX_COLS.formatted())
+            )
+            _fieldConfig.value?.cols ?: 0
+        } else {
+            errors = errors.copy(colsError = null)
+            cols
+        }
+
+        errors = errors.copy(dimensionsError = validateDimensionsError(validRows, validCols, context))
+
+        _fieldConfig.value = _fieldConfig.value?.copy(rows = validRows, cols = validCols)
+        _validationErrors.value = errors
     }
 
     fun updateStartCorner(corner: FieldStartCorner) {
@@ -71,55 +95,58 @@ class FieldCreatorViewModel : ViewModel() {
         _referenceGridDimensions.value = Pair(displayRows, displayCols)
     }
 
-    fun validateNameAndDimensions(db: DataHelper): Boolean {
+    fun validateNameAndDimensions(db: DataHelper, context: Context?): Boolean {
         val state = _fieldConfig.value ?: return false
         var hasErrors = false
         var errors = ValidationError()
 
         if (state.fieldName.isBlank()) {
-            errors = errors.copy(fieldNameError = "Field name is required")
+            errors = errors.copy(fieldNameError = context?.getString(R.string.field_name_required_error))
             hasErrors = true
         } else {
             val nameExists = db.allFieldObjects.any { it.name == state.fieldName }
             if (nameExists) {
-                errors = errors.copy(fieldNameError = "Field name already exists")
+                errors = errors.copy(fieldNameError = context?.getString(R.string.field_name_exists_error))
                 hasErrors = true
             }
         }
 
         if (state.rows < 1) {
-            errors = errors.copy(rowsError = "Rows must be a positive number")
+            errors = errors.copy(rowsError = context?.getString(R.string.field_creator_positive_number_error))
             hasErrors = true
         } else if (state.rows > FieldConfig.MAX_ROWS) {
-            errors = errors.copy(rowsError = "Rows cannot exceed ${FieldConfig.MAX_ROWS}")
+            errors = errors.copy(rowsError = context?.getString(R.string.field_creator_rows_exceeded_error, FieldConfig.MAX_ROWS.formatted()))
             hasErrors = true
         }
 
         if (state.cols < 1) {
-            errors = errors.copy(colsError = "Columns must be a positive number")
+            errors = errors.copy(colsError = context?.getString(R.string.field_creator_positive_number_error))
             hasErrors = true
         } else if (state.cols > FieldConfig.MAX_COLS) {
-            errors = errors.copy(colsError = "Columns cannot exceed ${FieldConfig.MAX_COLS}")
+            errors = errors.copy(colsError = context?.getString(R.string.field_creator_cols_exceeded_error, FieldConfig.MAX_COLS.formatted()))
             hasErrors = true
         }
 
-        // allow max 100k plots
-        if (state.rows > 0 && state.cols > 0 && state.rows <= FieldConfig.MAX_ROWS && state.cols <= FieldConfig.MAX_COLS) {
-            val totalPlots = state.rows * state.cols
-            if (totalPlots > FieldConfig.MAX_TOTAL_PLOTS) {
-                val errorMessage = "Total plots cannot exceed ${FieldConfig.MAX_TOTAL_PLOTS}. Current total: $totalPlots"
-                if (errors.rowsError == null) {
-                    errors = errors.copy(rowsError = errorMessage)
-                }
-                if (errors.colsError == null) {
-                    errors = errors.copy(colsError = errorMessage)
-                }
-                hasErrors = true
-            }
-        }
+        val dimensionsError = validateDimensionsError(state.rows, state.cols, context)
+        errors = errors.copy(dimensionsError = dimensionsError)
+        if (dimensionsError != null) hasErrors = true
 
         _validationErrors.value = errors
         return !hasErrors
+    }
+
+    private fun validateDimensionsError(rows: Int, cols: Int, context: Context?): String? {
+        if (rows > 0 && cols > 0 && rows <= FieldConfig.MAX_ROWS && cols <= FieldConfig.MAX_COLS) {
+            val totalPlots = rows * cols
+            if (totalPlots > FieldConfig.MAX_TOTAL_PLOTS) {
+                return context?.getString(
+                    R.string.field_creator_total_plots_exceeded_error,
+                    FieldConfig.MAX_TOTAL_PLOTS.formatted(),
+                    totalPlots.formatted()
+                )
+            }
+        }
+        return null
     }
 
     fun createField(db: DataHelper, context: Context?) {
@@ -248,6 +275,10 @@ data class FieldConfig(
         const val MAX_ROWS = 10000
         const val MAX_COLS = 10000
         const val MAX_TOTAL_PLOTS = 100000
+
+        fun Int.formatted(): String {
+            return NumberFormat.getNumberInstance(Locale.getDefault()).format(this)
+        }
     }
 }
 
@@ -260,7 +291,8 @@ sealed class FieldCreationResult {
 data class ValidationError(
     val fieldNameError: String? = null,
     val rowsError: String? = null,
-    val colsError: String? = null
+    val colsError: String? = null,
+    val dimensionsError: String? = null
 )
 
 private fun insertPlotData(db: DataHelper, studyDbId: Int, fieldColumns: List<String>, config: FieldConfig) {
