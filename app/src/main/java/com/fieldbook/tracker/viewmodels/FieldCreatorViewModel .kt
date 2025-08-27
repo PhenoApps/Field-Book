@@ -71,7 +71,7 @@ class FieldCreatorViewModel : ViewModel() {
         _referenceGridDimensions.value = Pair(displayRows, displayCols)
     }
 
-    fun validateBasicInfo(db: DataHelper): Boolean {
+    fun validateNameAndDimensions(db: DataHelper): Boolean {
         val state = _fieldConfig.value ?: return false
         var hasErrors = false
         var errors = ValidationError()
@@ -90,11 +90,32 @@ class FieldCreatorViewModel : ViewModel() {
         if (state.rows < 1) {
             errors = errors.copy(rowsError = "Rows must be a positive number")
             hasErrors = true
+        } else if (state.rows > FieldConfig.MAX_ROWS) {
+            errors = errors.copy(rowsError = "Rows cannot exceed ${FieldConfig.MAX_ROWS}")
+            hasErrors = true
         }
 
         if (state.cols < 1) {
             errors = errors.copy(colsError = "Columns must be a positive number")
             hasErrors = true
+        } else if (state.cols > FieldConfig.MAX_COLS) {
+            errors = errors.copy(colsError = "Columns cannot exceed ${FieldConfig.MAX_COLS}")
+            hasErrors = true
+        }
+
+        // allow max 100k plots
+        if (state.rows > 0 && state.cols > 0 && state.rows <= FieldConfig.MAX_ROWS && state.cols <= FieldConfig.MAX_COLS) {
+            val totalPlots = state.rows * state.cols
+            if (totalPlots > FieldConfig.MAX_TOTAL_PLOTS) {
+                val errorMessage = "Total plots cannot exceed ${FieldConfig.MAX_TOTAL_PLOTS}. Current total: $totalPlots"
+                if (errors.rowsError == null) {
+                    errors = errors.copy(rowsError = errorMessage)
+                }
+                if (errors.colsError == null) {
+                    errors = errors.copy(colsError = errorMessage)
+                }
+                hasErrors = true
+            }
         }
 
         _validationErrors.value = errors
@@ -224,6 +245,9 @@ data class FieldConfig(
 
     companion object {
         const val LARGE_FIELD_THRESHOLD = 2500
+        const val MAX_ROWS = 10000
+        const val MAX_COLS = 10000
+        const val MAX_TOTAL_PLOTS = 100000
     }
 }
 

@@ -27,7 +27,7 @@ class FieldCreatorSizeFragment : FieldCreatorBaseFragment() {
     override fun getCurrentStep(): FieldCreationStep = FieldCreationStep.FIELD_SIZE
     override fun getLayoutResourceId(): Int = R.layout.fragment_field_creator_size
     override fun onForwardClick(): (() -> Unit)? = {
-        if (fieldCreatorViewModel.validateBasicInfo(db)) {
+        if (fieldCreatorViewModel.validateNameAndDimensions(db)) {
             val state = fieldCreatorViewModel.fieldConfig.value
             state?.let {
                 dismissKeyboard()
