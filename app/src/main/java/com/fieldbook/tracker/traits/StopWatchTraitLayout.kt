@@ -4,7 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
 import android.util.Log
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
@@ -27,13 +27,13 @@ class StopWatchTraitLayout : BaseTraitLayout {
         defStyleAttr
     )
 
-    private val elapsedSeconds = mutableIntStateOf(0)
+    private val elapsedMillis = mutableLongStateOf(0L)
     private val isRunning = mutableStateOf(false)
 
     //stops the timer and resets the time
     override fun deleteTraitListener() {
         isRunning.value = false
-        elapsedSeconds.intValue = 0
+        elapsedMillis.longValue = 0L
         super.deleteTraitListener()
     }
 
@@ -52,6 +52,7 @@ class StopWatchTraitLayout : BaseTraitLayout {
     override fun loadLayout() {
         super.loadLayout()
         setupUi()
+        refreshLayout(onNew = false)
     }
 
     override fun refreshLayout(onNew: Boolean?) {
@@ -61,24 +62,28 @@ class StopWatchTraitLayout : BaseTraitLayout {
         if (savedTime.isNotEmpty() && !onNew!!) {
             parseAndSetTime(savedTime)
         } else {
-            elapsedSeconds.intValue = 0
+            elapsedMillis.longValue = 0L
         }
     }
 
     private fun parseAndSetTime(timeString: String) {
         try {
-            val parts = timeString.split(":").map { it.toInt() }
+            val parts = timeString.split(":")
             if (parts.size == 3) {
-                val hours = parts[0]
-                val minutes = parts[1]
-                val seconds = parts[2]
-                elapsedSeconds.intValue = hours * 3600 + minutes * 60 + seconds
+                val hours = parts[0].toIntOrNull() ?: 0
+                val minutes = parts[1].toIntOrNull() ?: 0
+
+                val secAndMillis = parts[2].split(".")
+                val seconds = secAndMillis.getOrNull(0)?.toIntOrNull() ?: 0
+                val millis = secAndMillis.getOrNull(1)?.padEnd(3, '0')?.take(3)?.toIntOrNull() ?: 0
+
+                elapsedMillis.longValue = hours * 3600000L + minutes * 60000L + seconds * 1000 + millis
             } else {
-                elapsedSeconds.intValue = 0
+                elapsedMillis.longValue = 0L
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error parsing saved time: $timeString", e)
-            elapsedSeconds.intValue = 0
+            elapsedMillis.longValue = 0L
         }
     }
 
@@ -92,7 +97,7 @@ class StopWatchTraitLayout : BaseTraitLayout {
 
         composeView?.setContent {
             CircularTimer(
-                elapsedSeconds = elapsedSeconds,
+                elapsedMillis = elapsedMillis,
                 isRunning = isRunning,
                 progressArcColor = arcColor,
                 iconBackgroundColor = iconBackgroundColor,
