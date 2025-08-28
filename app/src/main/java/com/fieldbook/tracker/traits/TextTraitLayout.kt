@@ -101,13 +101,6 @@ class TextTraitLayout : BaseTraitLayout {
                 scan = inputEditText?.text?.toString() ?: ""
             }
 
-            if (event.keyCode == KeyEvent.KEYCODE_BACK) {
-
-                (context as CollectActivity).onBackPressedDispatcher.onBackPressed()
-
-                return@setOnKeyListener true
-            }
-
             if (event.action == KeyEvent.ACTION_DOWN) {
 
                 scan = if (code != KeyEvent.KEYCODE_ENTER && event.unicodeChar != 10) {
