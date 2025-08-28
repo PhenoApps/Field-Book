@@ -148,8 +148,8 @@ fun CircularTimer(
             }
 
             TimerButton(Icons.Default.Save, saveLabel, iconBackgroundColor) {
-                onSaveCallback(formattedTime)
                 isRunning.value = false
+                onSaveCallback(formattedTime)
             }
         }
     }
