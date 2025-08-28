@@ -283,7 +283,7 @@ abstract class BaseFieldActivity : ThemedActivity(), FieldAdapterController, Fie
     protected fun startFieldDetailFragment(fieldId: Int) {
         val fragment = FieldDetailFragment()
         val args = Bundle()
-        args.putInt("fieldId", fieldId)
+        args.putInt(GeneralKeys.FIELD_DETAIL_FIELD_ID, fieldId)
         fragment.arguments = args
 
         // Disable touch events on the RecyclerView

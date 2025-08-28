@@ -20,6 +20,18 @@ import kotlinx.coroutines.withContext
 import java.text.NumberFormat
 import java.util.Locale
 
+/**
+ * Used for state management across field creator activity and fragments
+ *
+ * Handles all data validation, logic and db related operation
+ * Uses LiveData for reactive UI updates across fragments/activity
+ *
+ * FieldConfig: contains the name, rows, cols, start corner, walking direction and pattern
+ * ValidationErrors: used in FieldCreatorSizeFragment to validate input
+ * CreationResult: denotes the status of field creation during preview/expanded preview
+ * FieldCreationStep: tracks the current step used to manage stepper UI
+ * ReferenceGridDimensions: maintains consistent grid sizing across fragments
+ */
 class FieldCreatorViewModel : ViewModel() {
 
     private val _fieldConfig = MutableLiveData(FieldConfig())
@@ -46,6 +58,9 @@ class FieldCreatorViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Only update the dimensions if rows/cols are <= max
+     */
     fun updateDimensions(rows: Int, cols: Int, context: Context?) {
         var errors = _validationErrors.value ?: ValidationError()
 

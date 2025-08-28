@@ -15,6 +15,14 @@ import com.fieldbook.tracker.enums.GridPreviewMode
 import com.fieldbook.tracker.enums.FieldCreationStep
 import com.fieldbook.tracker.views.FieldPreviewGrid
 
+/**
+ * Sets the walking pattern to follow: linear or serpentine
+ *
+ * Updates: fieldConfig.isZigzag
+ * Observes: fieldConfig and referenceGridDimensions
+ *
+ * The forward button is enabled once user makes a choice
+ */
 class FieldCreatorPatternTypeFragment : FieldCreatorBaseFragment() {
 
     override fun getCurrentStep(): FieldCreationStep = FieldCreationStep.WALKING_PATTERN

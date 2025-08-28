@@ -17,6 +17,16 @@ import com.fieldbook.tracker.views.FieldPreviewGrid
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
+/**
+ * Show a collapsed field preview
+ *
+ * Updates: createField()
+ * Observes: fieldConfig and creationResult
+ *
+ * If the field is too large, show a FAB to go to expanded preview
+ *
+ * Go back to activity when field is created successfully
+ */
 class FieldCreatorPreviewFragment : FieldCreatorBaseFragment() {
 
     override fun getCurrentStep(): FieldCreationStep = FieldCreationStep.FIELD_PREVIEW

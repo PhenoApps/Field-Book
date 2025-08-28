@@ -21,6 +21,14 @@ import com.fieldbook.tracker.viewmodels.FieldConfig
 import com.fieldbook.tracker.viewmodels.FieldCreatorViewModel
 import com.fieldbook.tracker.views.FieldCreatorStepper
 
+/**
+ * Activity consists of toolbar, stepper UI, and fragment container
+ *
+ * Manages:
+ * - stepper UI to show current progress and allows step navigation
+ * - step validation to prevent skipping incomplete steps
+ * - exit confirmation when user taps on toolbar back button
+ */
 class FieldCreatorActivity : ThemedActivity() {
 
     companion object {
@@ -87,7 +95,7 @@ class FieldCreatorActivity : ThemedActivity() {
     /**
      * Enables forward and backward navigation on pressing the stepper icons
      *
-     * The ViewModel saves the user selected state at each step
+     * The viewmodel saves the user selected state at each step
      * Forward navigation is only possible until the furthest step UNTIL the pressed icon
      */
     private fun handleStepClick(clickedStep: FieldCreationStep) {

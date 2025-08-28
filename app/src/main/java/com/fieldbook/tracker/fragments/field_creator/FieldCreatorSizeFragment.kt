@@ -25,6 +25,17 @@ import com.google.android.material.card.MaterialCardView
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 
+/**
+ * Sets field name and dimensions
+ *
+ * Updates:
+ * - fieldConfig.fieldName, fieldConfig.rows, fieldConfig.cols
+ * - also updates referenceGridDimensions in viewmodel so that other fragments show the same rows/cols
+ *
+ * Observes: validation errors and field config
+ *
+ * The forward button is enabled/clickable by default to validate and show errors to the user
+ */
 class FieldCreatorSizeFragment : FieldCreatorBaseFragment() {
 
     override fun getCurrentStep(): FieldCreationStep = FieldCreationStep.FIELD_SIZE

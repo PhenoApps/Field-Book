@@ -12,6 +12,14 @@ import com.fieldbook.tracker.views.FieldPreviewGrid
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.getValue
 
+/**
+ * Sets start corner to walk from in the field: top left, top right, bottom left, bottom right
+ *
+ * Updates: fieldConfig.startCorner
+ * Observes: fieldConfig and referenceGridDimensions
+ *
+ * The forward button is enabled/clickable once a corner is selected
+ */
 class FieldCreatorStartCornerFragment : FieldCreatorBaseFragment() {
 
     override fun getCurrentStep(): FieldCreationStep = FieldCreationStep.START_CORNER

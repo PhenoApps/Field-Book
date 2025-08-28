@@ -21,6 +21,17 @@ import com.fieldbook.tracker.viewmodels.FieldConfig
 import com.fieldbook.tracker.viewmodels.FieldCreationResult
 import com.fieldbook.tracker.viewmodels.FieldCreatorViewModel
 
+/**
+ * Serves as a base for all field creator fragments
+ *
+ * fieldCreatorViewModel: Shared activity-scoped instance
+ *
+ * Each fragment needs to:
+ * - implement getCurrentStep() to update stepper UI
+ * - observe relevant LiveData streams in observeFieldCreatorViewModel()
+ * - manage navigation using the updateForwardButtonState() method to manage bottom arrow icons
+ * - call onForwardClick() to define next step navigation
+ */
 abstract class FieldCreatorBaseFragment : Fragment() {
 
     protected val db by lazy { DataHelper(requireContext()) }

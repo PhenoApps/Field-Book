@@ -14,6 +14,14 @@ import com.fieldbook.tracker.enums.FieldCreationStep
 import com.fieldbook.tracker.enums.GridPreviewMode
 import com.fieldbook.tracker.views.FieldPreviewGrid
 
+/**
+ * Sets the walking direction to follow: horizontal or vertical
+ *
+ * Updates: fieldConfig.isHorizontal
+ * Observes: fieldConfig and referenceGridDimensions
+ *
+ * The forward button is enabled once user makes a choice
+ */
 class FieldCreatorDirectionFragment : FieldCreatorBaseFragment() {
 
     override fun getCurrentStep(): FieldCreationStep = FieldCreationStep.WALKING_DIRECTION

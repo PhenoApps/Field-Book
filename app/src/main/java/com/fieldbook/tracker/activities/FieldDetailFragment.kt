@@ -53,7 +53,6 @@ import javax.inject.Inject
 import androidx.core.view.isGone
 import androidx.core.content.edit
 
-
 @AndroidEntryPoint
 class FieldDetailFragment : Fragment(), FieldSyncController {
 
@@ -99,7 +98,6 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
-        Log.d("FieldDetailFragment", "onCreateView Start")
         rootView = inflater.inflate(R.layout.fragment_field_detail, container, false)
         toolbar = rootView.findViewById(R.id.toolbar)
         fieldDisplayNameTextView = rootView.findViewById(R.id.fieldDisplayName)
@@ -120,7 +118,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         trialNameChip = rootView.findViewById(R.id.trialNameChip)
         studyGroupNameChip = rootView.findViewById(R.id.studyGroupName)
 
-        fieldId = arguments?.getInt("fieldId")
+        fieldId = arguments?.getInt(GeneralKeys.FIELD_DETAIL_FIELD_ID)
         loadFieldDetails()
 
         val overviewExpandCollapseIcon: ImageView = rootView.findViewById(R.id.overview_expand_collapse_icon)
