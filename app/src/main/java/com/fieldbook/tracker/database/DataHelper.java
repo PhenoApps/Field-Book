@@ -29,7 +29,7 @@ import com.fieldbook.tracker.database.dao.spectral.ProtocolDao;
 import com.fieldbook.tracker.database.dao.spectral.SpectralDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.spectral.UriDao;
-import com.fieldbook.tracker.database.migrators.SpectralMigratorVersion16;
+import com.fieldbook.tracker.database.migrators.StudyConfigurationVersion17;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.database.models.ObservationVariableModel;
@@ -75,7 +75,7 @@ import dagger.hilt.android.qualifiers.ActivityContext;
  */
 public class DataHelper {
 
-    public static final int DATABASE_VERSION = SpectralMigratorVersion16.VERSION;
+    public static final int DATABASE_VERSION = StudyConfigurationVersion17.VERSION;
     private static final String DATABASE_NAME = "fieldbook.db";
     public static SQLiteDatabase db;
     private static final String TAG = "Field Book";
@@ -1664,6 +1664,11 @@ public class DataHelper {
                 // add observation_variable_attribute_details_view to simplify access to observation variable's attribute/values
                 // adds a trait_debug_helper_view to simplify debugging trait related data
                 Migrator.Companion.migrateToVersion16(db);
+            }
+
+            if (oldVersion <= 16 && newVersion >= 17) {
+                // add field creator configuration columns to studies table (start corner, walking directiop/pattern)
+                Migrator.Companion.migrateToVersion17(db);
             }
         }
     }
