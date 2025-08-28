@@ -189,6 +189,13 @@ class FieldCreatorViewModel : ViewModel() {
                             dataSource = context?.getString(R.string.field_book)
                             dataSourceFormat = ImportFormat.INTERNAL
                             entryCount = (state.rows * state.cols).toString()
+                            startCorner = state.startCorner?.name
+                            walkingDirection = if (state.isHorizontal == true) "horizontal" else "vertical"
+                            walkingPattern = when (state.isZigzag) {
+                                true -> "serpentine"
+                                false -> "linear"
+                                else -> null
+                            }
                         }
 
                         val fieldColumns = listOf(

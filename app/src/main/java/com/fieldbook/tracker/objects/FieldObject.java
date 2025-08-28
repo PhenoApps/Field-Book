@@ -32,6 +32,9 @@ public class FieldObject {
     private String searchAttribute;
     private Integer groupId;
     private boolean isArchived;
+    private String startCorner;
+    private String walkingDirection;
+    private String walkingPattern;
 
     public String getTrialName() {
         return trialName;
@@ -267,5 +270,29 @@ public class FieldObject {
 
     public void setArchived(boolean isArchived) {
         this.isArchived = isArchived;
+    }
+
+    public String getStartCorner() {
+        return startCorner;
+    }
+
+    public void setStartCorner(String startCorner) {
+        this.startCorner = startCorner;
+    }
+
+    public String getWalkingDirection() {
+        return walkingDirection;
+    }
+
+    public void setWalkingDirection(String walkingDirection) {
+        this.walkingDirection = walkingDirection;
+    }
+
+    public String getWalkingPattern() {
+        return walkingPattern;
+    }
+
+    public void setWalkingPattern(String walkingPattern) {
+        this.walkingPattern = walkingPattern;
     }
 }
