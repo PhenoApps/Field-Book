@@ -27,6 +27,7 @@ import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.utilities.BrapiExportUtil;
+import com.fieldbook.tracker.utilities.InsetHandler;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.text.SimpleDateFormat;
@@ -155,6 +156,8 @@ public class BrapiExportActivity extends ThemedActivity {
             Toast.makeText(getApplicationContext(), R.string.device_offline_warning, Toast.LENGTH_SHORT).show();
             finish();
         }
+
+        getOnBackPressedDispatcher().addCallback(this, standardBackCallback());
     }
 
     private void loadToolbar() {
@@ -167,6 +170,9 @@ public class BrapiExportActivity extends ThemedActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
         }
+
+        View rootView = findViewById(android.R.id.content);
+        InsetHandler.INSTANCE.setupStandardInsets(rootView, toolbar);
     }
 
     @Override

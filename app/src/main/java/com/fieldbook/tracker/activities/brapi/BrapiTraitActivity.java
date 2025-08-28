@@ -4,14 +4,12 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
-import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
@@ -23,11 +21,11 @@ import com.fieldbook.tracker.brapi.service.BrapiPaginationManager;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.utilities.InsetHandler;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiFunction;
 
 import javax.inject.Inject;
 
@@ -91,6 +89,8 @@ public class BrapiTraitActivity extends ThemedActivity {
             Toast.makeText(getApplicationContext(), R.string.device_offline_warning, Toast.LENGTH_SHORT).show();
             finish();
         }
+
+        getOnBackPressedDispatcher().addCallback(this, standardBackCallback());
     }
 
     // Load the toolbar with various elements
@@ -104,6 +104,9 @@ public class BrapiTraitActivity extends ThemedActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
         }
+
+        View rootView = findViewById(android.R.id.content);
+        InsetHandler.INSTANCE.setupStandardInsets(rootView, toolbar);
     }
 
     // Load the traits from server
@@ -120,89 +123,73 @@ public class BrapiTraitActivity extends ThemedActivity {
         paginationManager.refreshPageIndicator();
 
         // Call our API to get the data
-        brAPIService.getOntology(paginationManager, new BiFunction<List<TraitObject>, Integer, Void>() {
-            @Override
-            public Void apply(final List<TraitObject> traits, Integer variablesMissingTrait) {
+        brAPIService.getOntology(paginationManager, (traits, variablesMissingTrait) -> {
 
-                (BrapiTraitActivity.this).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
+            (BrapiTraitActivity.this).runOnUiThread(() -> {
 
-                            if (variablesMissingTrait > 0) {
-                                Toast.makeText(getApplicationContext(),
-                                        getString(R.string.brapi_skipped_traits, variablesMissingTrait),
-                                        Toast.LENGTH_LONG).show();
-                            }
-
-                            // Build our array adapter
-                            traitList.setAdapter(BrapiTraitActivity.this.buildTraitsArrayAdapter(traits));
-
-                            // Check to see if any of the traits are selected traits
-                            for (Integer i = 0; i < traits.size(); i++) {
-
-                                TraitObject trait = traits.get(i);
-
-                                // Check to see if it is a selected trait
-                                for (TraitObject selectedTrait : selectedTraits) {
-
-                                    if (trait.getName().equals(selectedTrait.getName())) {
-                                        traitList.setItemChecked(i, true);
-                                        break;
-                                    }
-                                }
-                            }
-
-                            // Set our on click listener for each item
-                            traitList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                                @Override
-                                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                                    if (traitList.isItemChecked(position)) {
-                                        // It is checked now, it wasn't before
-                                        selectedTraits.add(traits.get(position));
-                                    } else {
-                                        // It was checked before, remove from selection
-                                        TraitObject trait = traits.get(position);
-
-                                        for (TraitObject selectedTrait : selectedTraits) {
-
-                                            if (trait.getName().equals(selectedTrait.getName())) {
-                                                selectedTraits.remove(selectedTrait);
-                                                break;
-                                            }
-                                        }
-                                    }
-                                }
-                            });
-
-                            traitList.setVisibility(View.VISIBLE);
-
-                            findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-                        }
-                });
-                return null;
-            }
-
-        }, new Function<Integer, Void>() {
-            @Override
-            public Void apply(final Integer code) {
-                (BrapiTraitActivity.this).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Show error message. We don't finish the activity intentionally.
-                        if(BrAPIService.isConnectionError(code)){
-                            if (BrAPIService.handleConnectionError(BrapiTraitActivity.this, code)) {
-                                showBrapiAuthDialog();
-                            }
-                        }else {
-                            Toast.makeText(getApplicationContext(), getString(R.string.brapi_ontology_error), Toast.LENGTH_LONG).show();
-                        }
-                        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                    if (variablesMissingTrait > 0) {
+                        Toast.makeText(getApplicationContext(),
+                                getString(R.string.brapi_skipped_traits, variablesMissingTrait),
+                                Toast.LENGTH_LONG).show();
                     }
-                });
 
-                return null;
-            }
+                    // Build our array adapter
+                    traitList.setAdapter(BrapiTraitActivity.this.buildTraitsArrayAdapter(traits));
+
+                    // Check to see if any of the traits are selected traits
+                    for (int i = 0; i < traits.size(); i++) {
+
+                        TraitObject trait = traits.get(i);
+
+                        // Check to see if it is a selected trait
+                        for (TraitObject selectedTrait : selectedTraits) {
+
+                            if (trait.getName().equals(selectedTrait.getName())) {
+                                traitList.setItemChecked(i, true);
+                                break;
+                            }
+                        }
+                    }
+
+                    // Set our on click listener for each item
+                    traitList.setOnItemClickListener((parent, view, position, id) -> {
+
+                        if (traitList.isItemChecked(position)) {
+                            // It is checked now, it wasn't before
+                            selectedTraits.add(traits.get(position));
+                        } else {
+                            // It was checked before, remove from selection
+                            TraitObject trait = traits.get(position);
+
+                            for (TraitObject selectedTrait : selectedTraits) {
+
+                                if (trait.getName().equals(selectedTrait.getName())) {
+                                    selectedTraits.remove(selectedTrait);
+                                    break;
+                                }
+                            }
+                        }
+                    });
+
+                    traitList.setVisibility(View.VISIBLE);
+
+                    findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+                });
+            return null;
+        }, code -> {
+            (BrapiTraitActivity.this).runOnUiThread(() -> {
+                // Show error message. We don't finish the activity intentionally.
+                if(BrAPIService.isConnectionError(code)){
+                    if (BrAPIService.handleConnectionError(BrapiTraitActivity.this, code)) {
+                        showBrapiAuthDialog();
+                    }
+                }else {
+                    Toast.makeText(getApplicationContext(), getString(R.string.brapi_ontology_error), Toast.LENGTH_LONG).show();
+                }
+                findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+            });
+
+            return null;
         });
     }
 
@@ -219,7 +206,7 @@ public class BrapiTraitActivity extends ThemedActivity {
     }
 
     // Transforms the trait data to display it on the screen.
-    private ArrayAdapter buildTraitsArrayAdapter(List<TraitObject> traits) {
+    private ArrayAdapter<String> buildTraitsArrayAdapter(List<TraitObject> traits) {
 
         ArrayList<String> itemDataList = new ArrayList<>();
 
@@ -256,12 +243,12 @@ public class BrapiTraitActivity extends ThemedActivity {
     public String saveTraits() {
 
         // Check if there are any traits selected
-        if (selectedTraits.size() == 0) {
+        if (selectedTraits.isEmpty()) {
             return "No traits are selected";
         }
 
-        Integer totalTraits = selectedTraits.size();
-        Integer successfulSaves = 0;
+        int totalTraits = selectedTraits.size();
+        int successfulSaves = 0;
         String secondaryMessage = "";
         // For now, only give the ability to create new variables
         // Determine later if the need to edit existing variables is needed.
@@ -276,7 +263,6 @@ public class BrapiTraitActivity extends ThemedActivity {
             if (existingTraitByName != null) {
                 secondaryMessage = getResources().getString(R.string.brapi_trait_already_exists, trait.getName());
                 // Skip this one, continue on.
-                continue;
             }else if (existingTraitByExId != null) {
                 // Update existing trait
                 trait.setId(existingTraitByExId.getId());
@@ -298,16 +284,16 @@ public class BrapiTraitActivity extends ThemedActivity {
 
         // Check how successful we were at saving our traits.
         if (successfulSaves == 0) {
-            return secondaryMessage != "" ? secondaryMessage : getResources().getString(R.string.brapi_error_saving_all_traits);
+            return !secondaryMessage.isEmpty() ? secondaryMessage : getResources().getString(R.string.brapi_error_saving_all_traits);
         } else if (successfulSaves < totalTraits) {
-            return secondaryMessage != "" ? secondaryMessage : getResources().getString(R.string.brapi_error_saving_some_traits);
+            return !secondaryMessage.isEmpty() ? secondaryMessage : getResources().getString(R.string.brapi_error_saving_some_traits);
         }
 
         // Check if we had a secondary message to show.
         // Current this secondaryMessage will always be empty for the success message.
         // Putting selection for secondaryMessage in here now for potential future use with
         // more detailed success and failure messages. 
-        return secondaryMessage != "" ? secondaryMessage : getResources().getString(R.string.brapi_traits_saved_success);
+        return !secondaryMessage.isEmpty() ? secondaryMessage : getResources().getString(R.string.brapi_traits_saved_success);
     }
 
     @Override

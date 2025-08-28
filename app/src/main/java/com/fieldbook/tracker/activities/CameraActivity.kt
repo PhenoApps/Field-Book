@@ -3,7 +3,9 @@ package com.fieldbook.tracker.activities
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.util.Size
+import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.annotation.OptIn
@@ -16,6 +18,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.traits.AbstractCameraTrait
 import com.fieldbook.tracker.utilities.CameraXFacade
+import com.fieldbook.tracker.utilities.InsetHandler
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import java.util.concurrent.ExecutorService
@@ -62,6 +65,10 @@ class CameraActivity : ThemedActivity() {
         }
 
         setupCameraTitleView()
+
+        setupCameraInsets()
+
+        onBackPressedDispatcher.addCallback(this, standardBackCallback())
     }
 
     private fun onSettingsChanged() {
@@ -163,5 +170,11 @@ class CameraActivity : ThemedActivity() {
             finishActivity(RESULT_CANCELED)
 
         }
+    }
+
+    private fun setupCameraInsets() {
+        val rootView = findViewById<View>(android.R.id.content)
+
+        InsetHandler.setupCameraInsets(rootView, titleTextView, shutterButton)
     }
 }

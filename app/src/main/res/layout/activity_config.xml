@@ -9,10 +9,10 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fitsSystemWindows="true"
         android:minHeight="?attr/actionBarSize"/>
 
     <FrameLayout
+        android:id="@+id/config_content_frame"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
@@ -21,7 +21,8 @@
             android:id="@+id/myList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:choiceMode="singleChoice" />
+            android:choiceMode="singleChoice"
+            android:clipToPadding="false" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:layout_width="wrap_content"
