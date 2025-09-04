@@ -35,11 +35,14 @@ class TraitAttributeValuesHelper(var traitId: String? = null) {
 
             traits.forEach { trait ->
                 attributeDetails[trait.id]?.let { attributes ->
-                    attributes["validValuesMin"]?.let { trait.minimum = it }
-                    attributes["validValuesMax"]?.let { trait.maximum = it }
-                    attributes["category"]?.let { trait.categories = it }
-                    attributes["closeKeyboardOnOpen"]?.let { trait.closeKeyboardOnOpen = it.toBoolean() }
-                    attributes["cropImage"]?.let { trait.cropImage = it.toBoolean() }
+                    with (ObservationVariableAttributeDetailsView) {
+                        attributes[VALID_VALUES_MIN]?.let { trait.minimum = it }
+                        attributes[VALID_VALUES_MAX]?.let { trait.maximum = it }
+                        attributes[CATEGORY]?.let { trait.categories = it }
+                        attributes[CLOSE_KEYBOARD_ON_OPEN]?.let { trait.closeKeyboardOnOpen = it.toBoolean() }
+                        attributes[CROP_IMAGE]?.let { trait.cropImage = it.toBoolean() }
+                        attributes[SAVE_IMAGE]?.let { trait.saveImage = it.toBoolean() }
+                    }
                 }
             }
         }

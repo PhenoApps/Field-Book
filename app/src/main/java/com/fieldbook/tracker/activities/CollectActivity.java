@@ -1444,7 +1444,7 @@ public class CollectActivity extends ThemedActivity
                         getLocationByPreferences(), "", studyId, observationDbId,
                         lastSyncedTime, rep);
 
-                updateCurrentTraitStatus(true);
+                runOnUiThread(() -> updateCurrentTraitStatus(true));
             }
         }
 

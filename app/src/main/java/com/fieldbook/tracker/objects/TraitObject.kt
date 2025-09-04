@@ -50,6 +50,9 @@ class TraitObject {
         get() = attributeValues.getBoolean(TraitAttributes.CROP_IMAGE)
         set(value) = attributeValues.setValue(TraitAttributes.CROP_IMAGE, value.toString())
 
+    var saveImage: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.SAVE_IMAGE)
+        set(value) = attributeValues.setValue(TraitAttributes.SAVE_IMAGE, value.toString())
 
     fun loadAttributeAndValues() {
         attributeValues.traitId = id
