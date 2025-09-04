@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.interfaces.CollectController
 import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.objects.TraitObject
@@ -55,7 +56,7 @@ class GoProApi @Inject constructor(
         fun onInitializeGatt()
         fun onStreamReady()
         fun onStreamRequested()
-        fun onImageRequestReady(bytes: ByteArray, data: ImageRequestData)
+        fun onImageRequestReady(bytes: ByteArray, data: ImageRequestData, model: GoProImage? = null)
         fun onBusyStateChanged(isBusy: Int, isEncoding: Int)
     }
 
@@ -243,7 +244,7 @@ class GoProApi @Inject constructor(
     /**
      * http request to read media list (files on gopro device)
      */
-    fun queryMedia() {
+    fun queryMedia(requestAndSaveImage: Boolean = true) {
 
         val model = if (range.isNotEmpty()) range.removeAt(0) else lastMoved
 
@@ -271,7 +272,7 @@ class GoProApi @Inject constructor(
 
                 } else {
 
-                    parseMediaQueryResponse(response.body?.string() ?: "{}", model!!)
+                    parseMediaQueryResponse(response.body?.string() ?: "{}", model!!, requestAndSaveImage)
 
                     Log.i(TAG, "Media query success.")
 
@@ -376,7 +377,8 @@ class GoProApi @Inject constructor(
      */
     private fun parseMediaQueryResponse(
         responseBody: String,
-        model: ImageRequestData
+        model: ImageRequestData,
+        requestAndSaveImage: Boolean = true
     ) {
 
         try {
@@ -422,11 +424,16 @@ class GoProApi @Inject constructor(
                 }
             }
 
-            val latest = images.maxBy { it.fileName.split(".")[0].split(FILE_SYSTEM_PREFIX)[1].toInt() }.url
+            val latest = images.maxBy { it.fileName.split(".")[0].split(FILE_SYSTEM_PREFIX)[1].toInt() }
 
-            if (latest !in requestedUrls) {
-                requestedUrls.add(latest)
-                requestFileUrl(latest, model)
+            if (latest.url !in requestedUrls) {
+                requestedUrls.add(latest.url)
+
+                if (requestAndSaveImage) {
+                    requestFileUrl(latest.url, model)
+                } else {
+                    saveImageName(latest, model)
+                }
             }
 
         } catch (e: JSONException) {
@@ -434,6 +441,15 @@ class GoProApi @Inject constructor(
             e.printStackTrace()
 
         }
+    }
+
+    private fun saveImageName(latest: GoProImage, model: ImageRequestData) {
+
+        callbacks?.onImageRequestReady(
+            byteArrayOf(),
+            model,
+            latest
+        )
     }
 
     /**
