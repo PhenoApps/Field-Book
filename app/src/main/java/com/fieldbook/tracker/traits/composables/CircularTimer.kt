@@ -148,8 +148,20 @@ fun CircularTimer(
             }
 
             TimerButton(Icons.Default.Save, saveLabel, iconBackgroundColor) {
+
                 isRunning.value = false
                 onSaveCallback(formattedTime)
+
+                val parts = formattedTime.split(":")
+                val hours = parts[0].toIntOrNull() ?: 0
+                val minutes = parts[1].toIntOrNull() ?: 0
+                val secAndMillis = parts[2].split(".")
+                val seconds = secAndMillis.getOrNull(0)?.toIntOrNull() ?: 0
+                val millis = secAndMillis.getOrNull(1)?.padEnd(3, '0')?.take(3)?.toIntOrNull() ?: 0
+                val now = hours * 3600000L + minutes * 60000L + seconds * 1000 + millis
+
+                //reset the ui to the saved time exactly
+                elapsedMillis.value = now
             }
         }
     }

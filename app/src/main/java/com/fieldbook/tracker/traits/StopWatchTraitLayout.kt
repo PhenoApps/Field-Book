@@ -51,13 +51,17 @@ class StopWatchTraitLayout : BaseTraitLayout {
 
     override fun loadLayout() {
         super.loadLayout()
-        setupUi()
+        isRunning.value = false
         refreshLayout(onNew = false)
+        setupUi()
     }
 
     override fun refreshLayout(onNew: Boolean?) {
         super.refreshLayout(onNew)
-        if (currentObservation == null) return
+        if (currentObservation == null) {
+            elapsedMillis.longValue = 0L
+            return
+        }
         val savedTime = currentObservation.value
         if (savedTime.isNotEmpty() && !onNew!!) {
             parseAndSetTime(savedTime)
