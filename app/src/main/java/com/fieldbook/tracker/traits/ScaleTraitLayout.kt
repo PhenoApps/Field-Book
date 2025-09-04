@@ -60,7 +60,6 @@ class ScaleTraitLayout : BaseTraitLayout {
     private var composeView: ComposeView? = null
     private var connectButton: FloatingActionButton? = null
     private var captureButton: FloatingActionButton? = null
-    private var disconnectButton: FloatingActionButton? = null
     private var lineChart: LineChart? = null
     private var settingsButton: FloatingActionButton? = null
 
@@ -149,7 +148,6 @@ class ScaleTraitLayout : BaseTraitLayout {
 
             dialog = AlertDialog.Builder(context, R.style.AppAlertDialog)
                 .setTitle(context.getString(R.string.device_settings_dialog_title))
-                .setView(settingsView)
                 .setPositiveButton(android.R.string.ok) { dialog, _ ->
                     dialog.dismiss()
                 }
@@ -165,7 +163,6 @@ class ScaleTraitLayout : BaseTraitLayout {
         (context as CollectActivity).getNixSensorHelper().connectedDevice = null
         connectButton?.visibility = VISIBLE
         captureButton?.visibility = GONE
-        disconnectButton?.visibility = GONE
         settingsButton?.visibility = GONE
         startDeviceSearch()
         setupConnectButton()
@@ -236,7 +233,7 @@ class ScaleTraitLayout : BaseTraitLayout {
                     //Log.d("GATT", "Found saved device: ${device.name}")
                     connectDevice(Device(device))
 
-                    return@forEach
+                    return@withPermission
                 }
             }
 
@@ -552,7 +549,6 @@ class ScaleTraitLayout : BaseTraitLayout {
     private fun enableCapture(device: Device) {
         connectButton?.visibility = INVISIBLE
         captureButton?.visibility = VISIBLE
-        disconnectButton?.visibility = VISIBLE
         settingsButton?.visibility = VISIBLE
         captureButton?.isEnabled = true
         setupCaptureButton(device)

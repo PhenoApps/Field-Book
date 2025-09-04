@@ -62,7 +62,7 @@ class ScaleGattManager @Inject constructor(
 
             if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.d("GATT", "Disconnected from device: ${gatt.device.address}")
-                listener?.onDeviceConnected()
+                listener?.onDeviceDisconnected()
                 gatt.close()
                 bluetoothGatt = null
                 return
@@ -144,7 +144,7 @@ class ScaleGattManager @Inject constructor(
                     """.trimIndent()
                 )
                 pattern.matchEntire(weightString)?.destructured?.let { (prefix, value, unit) ->
-                    listener?.onDataReceived(value.toFloat().toString(), unit, prefix == "ST")
+                    listener?.onDataReceived(value, unit, prefix == "ST")
                 }
 
                 byteBuffer.clear()
@@ -166,7 +166,7 @@ class ScaleGattManager @Inject constructor(
 
                     //Log.d("StableWeight", "Header: $prefix, Value: $value, Unit: $unit")
 
-                    listener?.onDataReceived(value.toFloat().toString(), unit, isStable = "S" in prefix)
+                    listener?.onDataReceived(value, unit, isStable = "S" in prefix)
                 }
             }
         }
@@ -204,7 +204,7 @@ class ScaleGattManager @Inject constructor(
                         number to unit
                     }
                     .toList().firstOrNull()?.let { (num, unit) ->
-                        listener?.onDataReceived(num.toFloat().toString(), unit)
+                        listener?.onDataReceived(num, unit)
 
                     }
             }
