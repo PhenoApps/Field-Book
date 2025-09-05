@@ -250,11 +250,14 @@ class BrapiSyncObsDialog(private val context: Context, private val syncControlle
             println("dbId: ${studyObservations.fieldBookStudyDbId}")
             val dataHelper = DataHelper(context)
 
+            var maxPosition = dataHelper.maxPositionFromTraits + 1
             val traitIdToType = mutableMapOf<String,String>()
             try {
                 //Sync the traits first and update date
                 for (trait in studyObservations.traitList) {
-                    dataHelper.insertTraits(trait)
+                    dataHelper.insertTraits(trait.also {
+                        it.realPosition = maxPosition++
+                    })
                 }
                 //link up the ids to the type for when we add in the observations
                 for (trait in studyObservations.traitList) {

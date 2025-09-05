@@ -51,6 +51,7 @@ import org.brapi.v2.model.pheno.BrAPIPositionCoordinateTypeEnum
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.collections.set
+import kotlin.math.max
 
 /**
  * receive study information including trial
@@ -623,7 +624,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         sortId: String
     ) {
 
-        var maxVariableIndex = db.allTraitObjects.size - 1
+        var maxVariableIndex = db.maxPositionFromTraits + 1
 
         attributesTable?.get(study.studyDbId)?.let { studyAttributes ->
 

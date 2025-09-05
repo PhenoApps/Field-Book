@@ -100,7 +100,7 @@ class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedAc
             it.submitList(cache)
         }
 
-        var nextPosition = database.allTraitObjects?.size ?: 0
+        var nextPosition = database.maxPositionFromTraits + 1
 
         finishButton?.setOnClickListener {
 
