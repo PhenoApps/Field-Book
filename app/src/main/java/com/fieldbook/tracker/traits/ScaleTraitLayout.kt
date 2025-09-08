@@ -233,7 +233,7 @@ class ScaleTraitLayout : BaseTraitLayout {
                     //Log.d("GATT", "Found saved device: ${device.name}")
                     connectDevice(Device(device))
 
-                    return@withPermission
+                    return@forEach
                 }
             }
 

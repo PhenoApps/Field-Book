@@ -36,8 +36,14 @@ class ScaleGattManager @Inject constructor(
         const val andWeightUUID = "5699d646-0c53-11e7-93ae-92361f002671"
     }
 
+    enum class DeviceState {
+        CONNECTED, DISCONNECTED
+    }
+
+    private var deviceState: DeviceState = DeviceState.DISCONNECTED
+
     var isConnected
-        get() = bluetoothGatt != null
+        get() = bluetoothGatt != null && deviceState == DeviceState.CONNECTED
         private set(_) {
             // This property is read-only, so we don't need to set it.
         }
@@ -57,19 +63,19 @@ class ScaleGattManager @Inject constructor(
 
             if (status != BluetoothGatt.GATT_SUCCESS) {
                 Log.e("GATT", "Connection failed with status: $status")
+                disconnect()
                 return
             }
 
             if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.d("GATT", "Disconnected from device: ${gatt.device.address}")
-                listener?.onDeviceDisconnected()
-                gatt.close()
-                bluetoothGatt = null
+                disconnect()
                 return
             }
 
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 Log.d("GATT", "Connected to device: ${gatt.device.address}")
+                deviceState = DeviceState.CONNECTED
                 listener?.onDeviceConnected()
                 gatt.discoverServices()
             }
@@ -256,6 +262,8 @@ class ScaleGattManager @Inject constructor(
     }
 
     fun disconnect() {
+        deviceState = DeviceState.DISCONNECTED
+        listener?.onDeviceDisconnected()
         bluetoothGatt?.disconnect()
         bluetoothGatt?.close()
         bluetoothGatt = null
