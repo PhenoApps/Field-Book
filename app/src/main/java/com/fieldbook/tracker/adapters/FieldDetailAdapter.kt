@@ -131,9 +131,11 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
         holder.noChartAvailableTextView.text = message
     }
 
-    private fun parseCategories(categories: String): List<String> {
+    private fun parseCategories(categories: String?): List<String> {
         return try {
-            if (categories.startsWith("[")) {
+            if (categories.isNullOrEmpty()) {
+                emptyList()
+            } else if (categories.startsWith("[")) {
                 val parsedCategories = CategoryJsonUtil.decode(categories)
                 parsedCategories.map { it.value }
             } else {
@@ -156,7 +158,7 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
 data class FieldDetailItem(
     val title: String,
     val format: String,
-    val categories: String,
+    val categories: String?,
     val subtitle: String,
     val icon: Drawable?,
     val observations: List<String>? = null,

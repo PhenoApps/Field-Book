@@ -6,13 +6,13 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -31,7 +31,6 @@ import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.dialogs.SearchAttributeChooserDialog
 import com.fieldbook.tracker.dialogs.BrapiSyncObsDialog
-import com.fieldbook.tracker.interfaces.FieldAdapterController
 import com.fieldbook.tracker.interfaces.FieldSortController
 import com.fieldbook.tracker.interfaces.FieldSyncController
 import com.fieldbook.tracker.objects.FieldObject
@@ -39,7 +38,7 @@ import com.fieldbook.tracker.objects.ImportFormat
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.traits.formats.Formats
-import com.fieldbook.tracker.utilities.ExportUtil
+import com.fieldbook.tracker.utilities.export.ExportUtil
 import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.SemanticDateUtil
 import com.google.android.material.chip.Chip
@@ -51,10 +50,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import pub.devrel.easypermissions.EasyPermissions
 import javax.inject.Inject
+import androidx.core.view.isGone
+import androidx.core.content.edit
 
 
 @AndroidEntryPoint
 class FieldDetailFragment : Fragment(), FieldSyncController {
+
+    companion object {
+        const val PERMISSIONS_REQUEST_TRAIT_DATA = 9950
+    }
 
     @Inject
     lateinit var database: DataHelper
@@ -62,12 +67,13 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     @Inject
     lateinit var preferences: SharedPreferences
 
+    @Inject
+    lateinit var exportUtil: ExportUtil
+
     private var toolbar: Toolbar? = null
     private var fieldId: Int? = null
     private var fieldObject: FieldObject? = null
-    private val PERMISSIONS_REQUEST_TRAIT_DATA = 9950
 
-    private lateinit var exportUtil: ExportUtil
     private lateinit var rootView: View
     private lateinit var fieldDisplayNameTextView: TextView
     private lateinit var importDateTextView: TextView
@@ -86,6 +92,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private lateinit var traitCountChip: Chip
     private lateinit var observationCountChip: Chip
     private lateinit var trialNameChip: Chip
+    private lateinit var studyGroupNameChip: Chip
     private lateinit var detailRecyclerView: RecyclerView
     private var adapter: FieldDetailAdapter? = null
 
@@ -95,7 +102,6 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         Log.d("FieldDetailFragment", "onCreateView Start")
         rootView = inflater.inflate(R.layout.fragment_field_detail, container, false)
         toolbar = rootView.findViewById(R.id.toolbar)
-        exportUtil = ExportUtil(requireActivity(), database)
         fieldDisplayNameTextView = rootView.findViewById(R.id.fieldDisplayName)
         importDateTextView = rootView.findViewById(R.id.importDateTextView)
         lastEditTextView = rootView.findViewById(R.id.lastEditTextView)
@@ -112,6 +118,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         observationCountChip = rootView.findViewById(R.id.observationCountChip)
         detailRecyclerView = rootView.findViewById(R.id.fieldDetailRecyclerView)
         trialNameChip = rootView.findViewById(R.id.trialNameChip)
+        studyGroupNameChip = rootView.findViewById(R.id.studyGroupName)
 
         fieldId = arguments?.getInt("fieldId")
         loadFieldDetails()
@@ -126,14 +133,14 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         overviewExpandCollapseIcon.setImageResource(if (overviewIsCollapsed) R.drawable.ic_chevron_down else R.drawable.ic_chevron_up)
 
         overviewCollapsibleHeader.setOnClickListener { v: View? ->
-            if (overviewCollapsibleContent.visibility == View.GONE) {
+            if (overviewCollapsibleContent.isGone) {
                 overviewCollapsibleContent.visibility = View.VISIBLE
                 overviewExpandCollapseIcon.setImageResource(R.drawable.ic_chevron_up)
-                preferences.edit().putBoolean(GeneralKeys.FIELD_DETAIL_OVERVIEW_COLLAPSED, false).apply()
+                preferences.edit { putBoolean(GeneralKeys.FIELD_DETAIL_OVERVIEW_COLLAPSED, false) }
             } else {
                 overviewCollapsibleContent.visibility = View.GONE
                 overviewExpandCollapseIcon.setImageResource(R.drawable.ic_chevron_down)
-                preferences.edit().putBoolean(GeneralKeys.FIELD_DETAIL_OVERVIEW_COLLAPSED, true).apply()
+                preferences.edit { putBoolean(GeneralKeys.FIELD_DETAIL_OVERVIEW_COLLAPSED, true) }
             }
         }
 
@@ -144,8 +151,11 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             fieldId?.let { id ->
                 checkTraitsExist { result ->
                     if (result >= 0) {
-                        (activity as? FieldEditorActivity)?.setActiveField(id)
-                        startCollectActivity()
+                        if (fieldObject?.archived == true) {
+                            showUnarchiveDialog() // give a warning for archived fields
+                        } else {
+                            setAsActiveField()
+                        }
                     }
                 }
             } ?: Log.e("FieldDetailFragment", "Field ID is null, cannot collect data")
@@ -171,14 +181,14 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         dataExpandCollapseIcon.setImageResource(if (dataIsCollapsed) R.drawable.ic_chevron_down else R.drawable.ic_chevron_up)
 
         dataCollapsibleHeader.setOnClickListener { v: View? ->
-            if (dataCollapsibleContent.visibility == View.GONE) {
+            if (dataCollapsibleContent.isGone) {
                 dataCollapsibleContent.visibility = View.VISIBLE
                 dataExpandCollapseIcon.setImageResource(R.drawable.ic_chevron_up)
-                preferences.edit().putBoolean(GeneralKeys.FIELD_DETAIL_DATA_COLLAPSED, false).apply()
+                preferences.edit { putBoolean(GeneralKeys.FIELD_DETAIL_DATA_COLLAPSED, false) }
             } else {
                 dataCollapsibleContent.visibility = View.GONE
                 dataExpandCollapseIcon.setImageResource(R.drawable.ic_chevron_down)
-                preferences.edit().putBoolean(GeneralKeys.FIELD_DETAIL_DATA_COLLAPSED, true).apply()
+                preferences.edit { putBoolean(GeneralKeys.FIELD_DETAIL_DATA_COLLAPSED, true) }
             }
         }
 
@@ -209,7 +219,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         rootView.setOnTouchListener { v, event ->
-            // Consume touch event to prevent propagation to FieldEditor RecyclerView
+            // Consume touch event to prevent propagation to FieldEditor/FieldArchived RecyclerView
             true
         }
     }
@@ -224,8 +234,10 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     }
 
     override fun startSync(field: FieldObject) {
-        val syncDialog = BrapiSyncObsDialog(requireActivity(), this, field)
-        syncDialog.show()
+        activity?.runOnUiThread {
+            val syncDialog = BrapiSyncObsDialog(requireActivity(), this, field)
+            syncDialog.show()
+        }
     }
 
     private fun disableDataChipRipples() {
@@ -279,23 +291,23 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         cardViewSync.visibility = View.GONE
         cardViewSync.setOnClickListener(null)
 
-        fieldDisplayNameTextView.text = field.exp_alias
-        val importDate = field.date_import
+        fieldDisplayNameTextView.text = field.alias
+        val importDate = field.dateImport
         if (!importDate.isNullOrEmpty()) {
             importDateTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), importDate)
         }
 
-        val expSource = field.exp_source ?: "${field.exp_name}.csv"
-        var importFormat: ImportFormat? = field.import_format
-        var entryCount = field.count.toString()
-        val attributeCount = field.attribute_count.toString()
-        val searchAttribute = (field.search_attribute ?: field.unique_id).toString()
+        val expSource = field.dataSource ?: "${field.name}.csv"
+        var importFormat: ImportFormat? = field.dataSourceFormat
+        var entryCount = field.entryCount.toString()
+        val attributeCount = field.attributeCount.toString()
+        val searchAttribute = (field.searchAttribute ?: field.uniqueId).toString()
 
         if (importFormat == ImportFormat.BRAPI) {
             cardViewSync.visibility = View.VISIBLE
             cardViewSync.setOnClickListener {
                 if (preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false)) {
-                    if (BrAPIService.checkMatchBrapiUrl(requireContext(), field.exp_source)) {
+                    if (BrAPIService.checkMatchBrapiUrl(requireContext(), field.dataSource)) {
                         startSync(field)
                     } else {
                         showWrongSourceDialog(field)
@@ -304,13 +316,15 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                     Toast.makeText(context, getString(R.string.brapi_enable_before_sync), Toast.LENGTH_LONG).show()
                 }
             }
-            entryCount = "${entryCount} ${field.observation_level}"
+            entryCount = "$entryCount ${field.observationLevel}"
 
             trialNameChip.visibility = View.GONE
-            trialNameChip.text = field.trial_name
+            trialNameChip.text = field.trialName
             if (trialNameChip.text.isNotBlank()) {
                 trialNameChip.visibility = View.VISIBLE
             }
+
+
         }
 
 //        val sortOrder = field.exp_sort.takeIf { !it.isNullOrBlank() } ?: getString(R.string.field_default_sort_order)
@@ -323,39 +337,46 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
 //        editUniqueChip.text = getString(R.string.field_edit_unique_id)
         editUniqueChip.text = searchAttribute
 
-        val lastEdit = field.date_edit
+        val lastEdit = field.dateEdit
         if (!lastEdit.isNullOrEmpty()) {
             lastEditTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastEdit)
         } else {
             getString(R.string.no_activity)
         }
 
-        val lastExport = field.date_export
+        val lastExport = field.dateExport
         if (!lastExport.isNullOrEmpty()) {
             lastExportTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastExport)
         } else {
             getString(R.string.no_activity)
         }
 
-        val lastSync = field.date_sync
+        val lastSync = field.dateSync
         if (!lastSync.isNullOrEmpty()) {
             lastSyncTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastSync)
         } else {
             getString(R.string.no_activity)
         }
 
-        traitCountChip.text = field.trait_count.toString()
-        if (field.observation_count.toInt() > 0) {
+        traitCountChip.text = field.traitCount.toString()
+        if (field.observationCount.toInt() > 0) {
             observationCountChip.visibility = View.VISIBLE
-            observationCountChip.text = field.observation_count.toString()
+            observationCountChip.text = field.observationCount.toString()
         } else {
             observationCountChip.visibility = View.GONE
         }
 
+
+        studyGroupNameChip.visibility = View.GONE
+        val groupName = database.getStudyGroupNameById(field.groupId)
+        if (!groupName.isNullOrEmpty() && groupName != field.trialName) {
+            studyGroupNameChip.visibility = View.VISIBLE
+            studyGroupNameChip.text = groupName
+        }
     }
 
     private fun createTraitDetailItems(field: FieldObject): List<FieldDetailItem> {
-        field.getTraitDetails()?.let { traitDetails ->
+        field.traitDetails?.let { traitDetails ->
             return traitDetails.map { traitDetail ->
                 val iconRes = Formats.entries
                     .find { it.getDatabaseName() == traitDetail.format }?.getIcon()
@@ -395,7 +416,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                     parentFragmentManager.popBackStack()
                 }
                 R.id.delete -> {
-                    (activity as? FieldEditorActivity)?.showDeleteConfirmationDialog(listOf(field.exp_id), true)
+                    (activity as? BaseFieldActivity)?.showDeleteConfirmationDialog(listOf(field.studyId), true)
                 }
             }
 
@@ -406,7 +427,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private fun showWrongSourceDialog(field: FieldObject) {
         val builder = AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
             .setTitle(getString(R.string.brapi_field_non_matching_sources_title))
-            .setMessage(String.format(getString(R.string.brapi_field_non_matching_sources), field.exp_source, BrAPIService.getHostUrl(context)))
+            .setMessage(String.format(getString(R.string.brapi_field_non_matching_sources), field.dataSource, BrAPIService.getHostUrl(context)))
             .setPositiveButton(getString(R.string.dialog_ok)) { d, _ ->
                 d.dismiss()
             }
@@ -420,7 +441,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
 
         val editText = dialogView.findViewById<EditText>(R.id.edit_text)
         val errorMessageView = dialogView.findViewById<TextView>(R.id.error_message)
-        editText.setText(field.exp_alias)
+        editText.setText(field.alias)
 
         val builder = AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
             .setTitle(getString(R.string.field_edit_display_name))
@@ -438,14 +459,14 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                 if (newName.isNotBlank()) {
                     val illegalCharactersMessage = FileUtil.checkForIllegalCharacters(newName)
                     if (illegalCharactersMessage.isEmpty()) {
-                        nameUniquenessCheck(newName, field.exp_id) { result ->
+                        nameUniquenessCheck(newName, field.studyId) { result ->
                             if (result.isUnique) {
                                 CoroutineScope(Dispatchers.IO).launch {
-                                    database.updateStudyAlias(field.exp_id, newName)
+                                    database.updateStudyAlias(field.studyId, newName)
                                     withContext(Dispatchers.Main) {
                                         fieldDisplayNameTextView.text = newName
-                                        field.exp_alias = newName
-                                        (activity as? FieldAdapterController)?.queryAndLoadFields()
+                                        field.alias = newName
+                                        (activity as? BaseFieldActivity)?.queryAndLoadFields()
                                         dialog.dismiss() // Only dismiss if everything is fine
                                     }
                                 }
@@ -467,7 +488,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     }
 
     private fun showChangeSearchAttributeDialog(field: FieldObject) {
-        (activity as? FieldEditorActivity)?.setActiveField(field.exp_id)
+        (activity as? BaseFieldActivity)?.setActiveField(field.studyId)
         
         val dialog = SearchAttributeChooserDialog()
         dialog.setOnSearchAttributeSelectedListener(object : SearchAttributeChooserDialog.OnSearchAttributeSelectedListener {
@@ -478,7 +499,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                     val count = if (applyToAll) {
                         database.updateSearchAttributeForAllFields(label)
                     } else {
-                        database.updateSearchAttribute(field.exp_id, label)
+                        database.updateSearchAttribute(field.studyId, label)
                         -1 // Use -1 to indicate single field update
                     }
                     
@@ -502,7 +523,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                         
                         // If apply to all was selected, refresh the parent activity's field list
                         if (applyToAll) {
-                            (activity as? FieldAdapterController)?.queryAndLoadFields()
+                            (activity as? BaseFieldActivity)?.queryAndLoadFields()
                         }
                     }
                 }
@@ -519,8 +540,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private fun nameUniquenessCheck(newName: String, currentFieldId: Int, callback: (NameCheckResult) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             val result = database.getAllFieldObjects().let { fields ->
-                fields.firstOrNull { it.exp_id != currentFieldId && (it.exp_name == newName || it.exp_alias == newName) }?.let { field ->
-                    val conflictType = if (field.exp_name == newName) "name" else "alias"
+                fields.firstOrNull { it.studyId != currentFieldId && (it.name == newName || it.alias == newName) }?.let { field ->
+                    val conflictType = if (field.name == newName) "name" else "alias"
                     NameCheckResult(isUnique = false, conflictType = conflictType)
                 } ?: NameCheckResult(isUnique = true)
             }
@@ -539,10 +560,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
 
     fun checkTraitsExist(callback: (Int) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
-            val currentSortOrder: String =
-            preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position") ?: ""
 
-            val traits = database.getVisibleTrait(currentSortOrder)
+            val traits = database.getVisibleTraits()
             val result = when {
                 traits.isEmpty() -> {
                     withContext(Dispatchers.Main) {
@@ -575,7 +594,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             )
         }
         if (EasyPermissions.hasPermissions(requireActivity(), *perms)) {
-            if (fieldObject?.date_import?.isNotEmpty() == true) {
+            if (fieldObject?.dateImport?.isNotEmpty() == true) {
                 val intent = Intent(context, CollectActivity::class.java)
                 startActivity(intent)
             }
@@ -585,6 +604,35 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                 this, getString(R.string.permission_rationale_trait_features),
                 PERMISSIONS_REQUEST_TRAIT_DATA, *perms
             )
+        }
+    }
+
+    private fun showUnarchiveDialog() {
+        AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
+            .setTitle(getString(R.string.dialog_unarchive_field_title))
+            .setMessage(getString(R.string.dialog_unarchive_field_message))
+            .setPositiveButton(getString(R.string.dialog_yes)) { d, _ ->
+                fieldId?.let { database.setIsArchived(it, false) }
+                fieldObject?.archived = false
+                setAsActiveField()
+            }
+            .setNegativeButton(getString(R.string.dialog_no)) { d, _ ->
+                d.dismiss()
+            }
+            .show()
+    }
+
+    private fun setAsActiveField() {
+        fieldId?.let { id ->
+            (activity as? BaseFieldActivity)?.apply {
+                setActiveField(id)
+                queryAndLoadFields()
+            }
+            (activity as? FieldArchivedActivity)?.finish()
+
+            Handler(Looper.getMainLooper()).postDelayed({
+                startCollectActivity()
+            }, 100)
         }
     }
 

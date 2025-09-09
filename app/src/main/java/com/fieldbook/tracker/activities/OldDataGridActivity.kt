@@ -34,6 +34,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import androidx.core.content.edit
 
 /**
  * @author Chaney
@@ -166,8 +167,9 @@ class OldDataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITa
             }
             R.id.menu_data_grid_action_header_view -> {
 
-                //get all available obs. property columns
-                val columns = database.rangeColumns
+                val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+                // get all available obs. property columns
+                val columns = database.getAllObservationUnitAttributeNames(studyId)
 
                 if (columns.isNotEmpty()) {
                     val rowHeader = getCurrentRowHeader()
@@ -179,7 +181,12 @@ class OldDataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITa
                         .setSingleChoiceItems(columns, rowHeaderIndex) { dialog, which ->
 
                             // Update the preference to the determined row header
-                            preferences.edit().putString(GeneralKeys.DATAGRID_PREFIX_TRAIT, columns[which]).apply()
+                            preferences.edit {
+                                putString(
+                                    GeneralKeys.DATAGRID_PREFIX_TRAIT,
+                                    columns[which]
+                                )
+                            }
 
                             initialize()
 
@@ -207,7 +214,8 @@ class OldDataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITa
         val uniqueHeader = preferences.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
 
         val rowHeader = getCurrentRowHeader()
-        val rowHeaderIndex = database.rangeColumns.indexOf(rowHeader).takeIf { it >= 0 } ?: 0
+        val rowHeaderIndex = database.getAllObservationUnitAttributeNames(studyId)
+            .indexOf(rowHeader).takeIf { it >= 0 } ?: 0
 
         if (rowHeader.isNotBlank()) {
 
@@ -384,8 +392,9 @@ class OldDataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITa
     private fun getCurrentRowHeader(): String {
         val uniqueHeader = preferences.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
         val rowHeader = preferences.getString(GeneralKeys.DATAGRID_PREFIX_TRAIT, uniqueHeader) ?: ""
-
-        return if (rowHeader in database.rangeColumnNames) {
+        val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+        val unitAttributes = database.getAllObservationUnitAttributeNames(studyId)
+        return if (rowHeader in unitAttributes) {
             Log.d("DataGridActivity", "Using saved row header from preferences: $rowHeader")
             rowHeader
         } else {

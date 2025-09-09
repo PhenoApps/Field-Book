@@ -31,7 +31,7 @@
         <item name="fb_trait_boolean_true_color">@color/main_trait_boolean_true_color</item>
         <item name="fb_bluetooth_connected_color">@color/main_bluetooth_connected_color</item>
         <item name="fb_color_hint_text">@color/main_color_hint_text</item>
-        <item name="fb_color_indeterminate_progress_bar">@color/main_primary_dark</item>
+        <item name="fb_color_indeterminate_progress_bar">?attr/fb_color_primary_dark</item>
         <item name="fb_spinner_focused">@color/main_color_accent</item>
         <item name="fb_spinner_selected">@color/main_primary_transparent</item>
         <item name="fb_trait_percent_background_center_color">
@@ -138,6 +138,11 @@
         <item name="activeCellColor">@color/main_primary_dark</item>
         <item name="activeCellTextColor">@color/WHITE</item>
         <item name="cellTextColor">@color/main_color_text_dark</item>
+
+        <item name="fb_graph_item_selected_color">?attr/fb_color_primary</item>
+        <item name="fb_graph_item_unselected_color">?attr/fb_color_background</item>
+        <item name="fb_graph_item_text_color">?attr/fb_button_text_color</item>
+
     </style>
 
     <!-- Blue Theme -->
@@ -155,7 +160,6 @@
         <item name="fb_color_text_light">@color/WHITE</item>
         <item name="fb_color_hint_text">@color/BLACK</item>
         <item name="fb_color_text_dark">@color/BLACK</item>
-        <item name="fb_color_indeterminate_progress_bar">@color/main_primary_dark</item>
         <item name="fb_spinner_focused">@color/blue_color_accent</item>
         <item name="fb_spinner_selected">@color/blue_primary_transparent</item>
         <item name="fb_trait_percent_background_center_color">@color/blue_trait_percent_background_center_color</item>
@@ -208,7 +212,6 @@
         <item name="fb_color_hint_text">@color/high_contrast_color_hint_text</item>
         <item name="fb_color_background">@color/high_contrast_color_background</item>
         <item name="fb_color_text_button_background">?attr/fb_color_primary</item>
-        <item name="fb_color_indeterminate_progress_bar">?attr/fb_color_primary_dark</item>
         <item name="fb_spinner_focused">@color/high_contrast_color_accent</item>
         <item name="fb_spinner_selected">@color/high_contrast_primary_transparent</item>
         <item name="fb_trait_percent_background_center_color">
@@ -322,6 +325,9 @@
         <item name="fb_second_chip_color">@color/high_contrast_chip_second_color</item>
         <item name="fb_third_chip_color">@color/high_contrast_chip_third_color</item>
 
+        <item name="fb_graph_item_selected_color">?attr/fb_color_accent</item>
+        <item name="fb_graph_item_unselected_color">@color/GRAY</item>
+        <item name="fb_graph_item_text_color">?attr/fb_color_primary</item>
 
         <!-- DataGrid -->
         <item name="dataFilledColor">@color/high_contrast_data_filled_color</item>

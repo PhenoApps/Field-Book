@@ -44,6 +44,7 @@
     <string name="warning_traits_missing">Không có tính trạng nào tồn tại. Xin vui lòng tạo tính trạng trước khi thu thập số liệu.</string>
     <!-- Changelog -->
     <string name="changelog_title">Nhật ký thay đổi</string>
+    <!--  Field Grouping  -->
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
@@ -393,6 +394,7 @@ Các tính trạng và ruộng được tạo thủ công hoặc được nhập
     <!-- usb camera trait -->
     <!-- gopro -->
     <!-- canon camera strings -->
+    <!-- spectral trait strings -->
     <string name="brapi_traits_filter_title">(Các) Tính trạng</string>
     <string name="dialog_quick_goto_title">Đi đến (nghiệm thức) nhanh</string>
     <string name="traits_sort_default">Mặc định</string>

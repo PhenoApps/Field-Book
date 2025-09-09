@@ -11,10 +11,14 @@ import android.widget.ImageView
 import androidx.camera.view.PreviewView
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.CollectActivity
+import com.fieldbook.tracker.database.models.ObservationModel
+import com.fieldbook.tracker.dialogs.ObservationMetadataFragment
 import com.fieldbook.tracker.utilities.BitmapLoader
 import java.io.FileNotFoundException
 
@@ -51,6 +55,8 @@ class ImageAdapter(private val context: Context, private val listener: ImageItem
 
         fun onItemDeleted(model: Model)
 
+        fun onItemLongClicked(model: Model)
+
     }
 
     abstract inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -67,6 +73,11 @@ class ImageAdapter(private val context: Context, private val listener: ImageItem
             // Define click listener for the ViewHolder's View.
             view.setOnClickListener {
                 listener.onItemClicked(view.tag as Model)
+            }
+
+            view.setOnLongClickListener {
+                listener.onItemLongClicked(view.tag as Model)
+                true
             }
 
             closeButton.setOnClickListener {

@@ -200,7 +200,7 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
 
                     controller.getSoundHelper().playShutter()
 
-                    saveBitmapToStorage(type(), bmp, currentRange)
+                    saveBitmapToStorage(bmp, currentRange, currentTrait)
 
                     activity?.runOnUiThread {
 

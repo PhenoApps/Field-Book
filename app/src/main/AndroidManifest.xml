@@ -47,6 +47,14 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
+        <activity
+            android:name=".activities.FieldArchivedActivity"
+            android:alwaysRetainTaskState="false"
+            android:configChanges="keyboardHidden|orientation"
+            android:finishOnTaskLaunch="true"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+
         <!-- Trait manager, for importing .trt files -->
         <activity
             android:name=".activities.TraitEditorActivity"
@@ -78,12 +86,6 @@
             android:name=".activities.OldDataGridActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop" /> <!-- available within the collect activity, user can search by building sql statements -->
-        <activity
-            android:name=".activities.SearchActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize|locale"
-            android:launchMode="singleTop"
-            android:theme="@style/ActivityDialog"
-            android:windowSoftInputMode="adjustResize" /> <!-- this must be set here even though it uses ThemedActivity -->
         <!-- The settings page, each category has its own fragment class -->
         <activity
             android:name=".activities.PreferencesActivity"
@@ -301,7 +303,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" tools:remove="android:maxSdkVersion" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />

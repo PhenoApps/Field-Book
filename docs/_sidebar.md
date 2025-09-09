@@ -14,10 +14,12 @@
   * [Numeric](traits/trait-numeric.md)
   * [Percent](traits/trait-percent.md)
   * [Text](traits/trait-text.md)
+  * [Angle](traits/trait-angle.md)
   * [Disease Rating](traits/trait-disease.md)
   * [GNSS](traits/trait-gnss.md)
   * [Photo](traits/trait-photo.md)
   * [Zebra Label Print](traits/trait-zebra.md)
+  * [Spectral](traits/trait-spectral.md)
 * Function
   * [Collect](collect.md)
   * [Export](export.md)

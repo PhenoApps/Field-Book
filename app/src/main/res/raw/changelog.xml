@@ -1,5 +1,13 @@
 <changelog>
 
+    <release date="2025-06-23" versionCode="60205" versionName="v6.2.5">
+        <bugfix>BrAPI Sync improved to avoid observation miscounts and other failures</bugfix>
+        <bugfix>0x00 character now removed from pasted text values</bugfix>
+    </release>
+
+    <release date="2025-06-09" versionCode="60204" versionName="v6.2.4">
+    </release>
+
     <release date="2025-06-02" versionCode="60203" versionName="v6.2.3">
         <new>New option to disable progress bars in Collect</new>
         <bugfix>BrAPI min/max values are now imported correctly</bugfix>

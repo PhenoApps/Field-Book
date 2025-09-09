@@ -176,7 +176,7 @@ class GoProTraitLayout :
 
         ui.launch {
 
-            saveJpegToStorage(type(), bytes, data.range, data.time, SaveState.SINGLE_SHOT)
+            saveJpegToStorage(bytes, data.range, data.trait, data.time, SaveState.SINGLE_SHOT)
 
             shutterButton?.isEnabled = true
 
