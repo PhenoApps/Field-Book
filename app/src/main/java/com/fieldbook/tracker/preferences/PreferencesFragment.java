@@ -57,7 +57,7 @@ public class PreferencesFragment extends BasePreferenceFragment implements Nearb
         searchPreference = findPreference("searchPreference");
         SearchConfiguration config = searchPreference.getSearchConfiguration();
         config.setActivity((AppCompatActivity) getActivity());
-        config.setFragmentContainerViewId(android.R.id.content);
+        config.setFragmentContainerViewId(R.id.prefs_container);
         
         config.index(R.xml.preferences_appearance);
         config.index(R.xml.preferences_theme);
@@ -69,7 +69,9 @@ public class PreferencesFragment extends BasePreferenceFragment implements Nearb
         config.index(R.xml.preferences_experimental);
         config.index(R.xml.preferences_location);
 
-        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.settings_advanced));
+        if (getActivity() != null && ((PreferencesActivity) getActivity()).getSupportActionBar() != null) {
+            ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.settings_advanced));
+        }
         setHasOptionsMenu(true);
     }
 

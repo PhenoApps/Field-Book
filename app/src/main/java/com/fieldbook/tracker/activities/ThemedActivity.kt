@@ -1,18 +1,18 @@
 package com.fieldbook.tracker.activities
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.WindowManager
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.SharedPreferenceUtils
 import dagger.hilt.android.AndroidEntryPoint
@@ -204,6 +204,7 @@ open class ThemedActivity: AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         applyTheme(this)
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
     }
 
     override fun onResume() {
@@ -216,9 +217,31 @@ open class ThemedActivity: AppCompatActivity() {
         disableTransitionAnimations()
     }
 
-    override fun onBackPressed() {
-        super.onBackPressed()
-        disableTransitionAnimations()
+    /**
+     * Register this callback in activities where you would have called super.onBackPressed()
+     * Do not register in activities which already have custom OnBackPressedCallback eg. Config, CollectActivity
+     */
+    protected fun standardBackCallback(): OnBackPressedCallback {
+        return object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                finish()
+            }
+        }
+    }
+
+    /**
+     * Use this for activities which have fragments and don't require special handling eg. Statistics, Preferences activities
+     */
+    protected fun fragmentBasedBackCallback(): OnBackPressedCallback {
+        return object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (supportFragmentManager.backStackEntryCount > 0) {
+                    supportFragmentManager.popBackStack()
+                } else {
+                    finish()
+                }
+            }
+        }
     }
 
     override fun finish() {

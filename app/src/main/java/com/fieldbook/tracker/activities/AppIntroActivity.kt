@@ -2,6 +2,7 @@ package com.fieldbook.tracker.activities
 
 import android.graphics.Color
 import android.os.Bundle
+import androidx.activity.enableEdgeToEdge
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.fieldbook.tracker.R
@@ -15,6 +16,7 @@ class AppIntroActivity : AppIntro() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
 
         // field book info 1
         addSlide(

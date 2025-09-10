@@ -122,7 +122,7 @@ class SensorHelper @Inject constructor(@ActivityContext private val context: Con
     private fun getDeviceRotation(): Int {
         val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            context.display?.rotation ?: Surface.ROTATION_0
+            context.display.rotation
         } else {
             windowManager.defaultDisplay.rotation
         }

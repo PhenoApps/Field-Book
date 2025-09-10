@@ -5,7 +5,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -14,7 +13,6 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
-import androidx.arch.core.util.Function;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.ThemedActivity;
@@ -23,6 +21,7 @@ import com.fieldbook.tracker.brapi.model.BrapiTrial;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.brapi.service.BrapiPaginationManager;
+import com.fieldbook.tracker.utilities.InsetHandler;
 import com.fieldbook.tracker.utilities.Utils;
 
 import java.util.ArrayList;
@@ -59,6 +58,8 @@ public class BrapiTrialActivity extends ThemedActivity {
             Toast.makeText(getApplicationContext(), R.string.device_offline_warning, Toast.LENGTH_SHORT).show();
             finish();
         }
+
+        getOnBackPressedDispatcher().addCallback(this, standardBackCallback());
     }
 
     @Override
@@ -78,6 +79,9 @@ public class BrapiTrialActivity extends ThemedActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
         }
+
+        View rootView = findViewById(android.R.id.content);
+        InsetHandler.INSTANCE.setupStandardInsets(rootView, toolbar);
     }
 
     private void loadTrials() {
@@ -89,45 +93,29 @@ public class BrapiTrialActivity extends ThemedActivity {
 
         String programDbId = getIntent().getStringExtra(BrapiActivity.PROGRAM_DB_ID_INTENT_PARAM);
 
-        brAPIService.getTrials(programDbId, paginationManager, new Function<List<BrapiTrial>, Void>() {
-            @Override
-            public Void apply(List<BrapiTrial> trials) {
-                (BrapiTrialActivity.this).runOnUiThread(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        trialsView.setAdapter(BrapiTrialActivity.this.buildTrialsArrayAdapter(trials));
-                        trialsView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                            @Override
-                            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                                brapiTrial = trials.get(position);
-                            }
-                        });
-                        trialsView.setVisibility(View.VISIBLE);
-                        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+        brAPIService.getTrials(programDbId, paginationManager, trials -> {
+            (BrapiTrialActivity.this).runOnUiThread(() -> {
+                trialsView.setAdapter(BrapiTrialActivity.this.buildTrialsArrayAdapter(trials));
+                trialsView.setOnItemClickListener((parent, view, position, id) ->
+                        brapiTrial = trials.get(position)
+                );
+                trialsView.setVisibility(View.VISIBLE);
+                findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+            });
+            return null;
+        }, code -> {
+            (BrapiTrialActivity.this).runOnUiThread(() -> {
+                // Show error message. We don't finish the activity intentionally.
+                if(BrAPIService.isConnectionError(code)){
+                    if (BrAPIService.handleConnectionError(BrapiTrialActivity.this, code)) {
+                        showBrapiAuthDialog();
                     }
-                });
-                return null;
-            }
-        }, new Function<Integer, Void>() {
-            @Override
-            public Void apply(Integer code) {
-                (BrapiTrialActivity.this).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Show error message. We don't finish the activity intentionally.
-                        if(BrAPIService.isConnectionError(code)){
-                            if (BrAPIService.handleConnectionError(BrapiTrialActivity.this, code)) {
-                                showBrapiAuthDialog();
-                            }
-                        }else {
-                            Toast.makeText(getApplicationContext(), getString(R.string.brapi_trials_error), Toast.LENGTH_LONG).show();
-                        }
-                        findViewById(R.id.loadingPanel).setVisibility(View.GONE);
-                    }
-                });
-                return null;
-            }
+                }else {
+                    Toast.makeText(getApplicationContext(), getString(R.string.brapi_trials_error), Toast.LENGTH_LONG).show();
+                }
+                findViewById(R.id.loadingPanel).setVisibility(View.GONE);
+            });
+            return null;
         });
     }
 
@@ -151,7 +139,7 @@ public class BrapiTrialActivity extends ThemedActivity {
             else
                 itemDataList.add(trial.trialDbId);
         }
-        return new ArrayAdapter(this, android.R.layout.simple_list_item_single_choice, itemDataList);
+        return new ArrayAdapter<>(this, android.R.layout.simple_list_item_single_choice, itemDataList);
     }
 
     public void buttonClicked(View view) {
