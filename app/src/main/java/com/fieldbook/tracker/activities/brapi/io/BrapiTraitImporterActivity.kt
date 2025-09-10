@@ -100,6 +100,8 @@ class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedAc
             it.submitList(cache)
         }
 
+        var nextPosition = database.maxPositionFromTraits + 1
+
         finishButton?.setOnClickListener {
 
             recyclerView?.visibility = View.GONE
@@ -114,7 +116,9 @@ class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedAc
 
             varUpdates.forEach { (t, u) ->
                 if (t in dbIds!!) {
-                    database.insertTraits(u)
+                    database.insertTraits(u.apply {
+                        realPosition = nextPosition++
+                    })
                 }
             }
 
