@@ -67,4 +67,5 @@ object ObservationVariableAttributeDetailsView {
     const val CATEGORY = "category"
     const val CLOSE_KEYBOARD_ON_OPEN = "closeKeyboardOnOpen"
     const val CROP_IMAGE = "cropImage"
+    const val SAVE_IMAGE = "saveImage"
 }

@@ -8,6 +8,18 @@
     android:layout_height="wrap_content"
     android:background="@drawable/cell">
 
+    <TextView
+        android:id="@+id/list_item_image_label_tv"
+        android:singleLine="true"
+        android:ellipsize="marquee"
+        android:gravity="center"
+        android:visibility="gone"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
     <androidx.cardview.widget.CardView
         android:layout_width="@dimen/camera_preview_portrait_width"
         android:layout_height="@dimen/camera_preview_portrait_height"
@@ -16,7 +28,7 @@
         app:cardElevation="0dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/list_item_image_label_tv"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <ImageView

@@ -16,6 +16,8 @@ import com.fieldbook.tracker.database.internalTimeFormatter
 import com.fieldbook.tracker.devices.camera.GoProApi
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.FileUtil
+import com.fieldbook.tracker.views.CanonCameraTraitSettingsView
+import com.fieldbook.tracker.views.GoProCameraSettingsView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -150,7 +152,7 @@ class GoProTraitLayout :
             controller.getGoProApi().shutterOn()
 
             Handler(Looper.getMainLooper()).postDelayed({
-                controller.getGoProApi().queryMedia()
+                controller.getGoProApi().queryMedia(requestAndSaveImage = currentTrait.saveImage)
                 shutterButton?.isEnabled = true
             }, GO_PRO_9_QUERY_DELAY)
 
@@ -172,11 +174,15 @@ class GoProTraitLayout :
         }
     }
 
-    override fun onImageRequestReady(bytes: ByteArray, data: GoProApi.ImageRequestData) {
+    override fun onImageRequestReady(
+        bytes: ByteArray,
+        data: GoProApi.ImageRequestData,
+        model: GoProApi.GoProImage?
+    ) {
 
         ui.launch {
 
-            saveJpegToStorage(bytes, data.range, data.trait, data.time, SaveState.SINGLE_SHOT)
+            saveJpegToStorage(bytes, data.range, data.trait, data.time, SaveState.SINGLE_SHOT, goProImage = model)
 
             shutterButton?.isEnabled = true
 
@@ -202,7 +208,7 @@ class GoProTraitLayout :
             if (old) {
                 Log.d(TAG, "Capture is done")
                 //capture is done
-                controller.getGoProApi().queryMedia()
+                controller.getGoProApi().queryMedia(requestAndSaveImage = currentTrait.saveImage)
             }
 
             controller.getGoProApi().lastMoved = getImageRequestData()
@@ -221,6 +227,12 @@ class GoProTraitLayout :
         dialogWaitForStream?.dismiss()
         initializeCameraShutterButton()
         shutterButton?.visibility = View.VISIBLE
+        settingsButton?.visibility = View.VISIBLE
+
+        settingsButton?.setOnClickListener {
+
+            showSettings()
+        }
     }
 
     private fun createPlayer() {
@@ -282,5 +294,20 @@ class GoProTraitLayout :
         ui.launch {
             dialogWaitForStream?.show()
         }
+    }
+
+    override fun showSettings() {
+        val settingsView = GoProCameraSettingsView(context, currentTrait)
+
+        AlertDialog.Builder(context, R.style.AppAlertDialog)
+            .setTitle(R.string.go_pro_trait_settings_title)
+            .setView(settingsView)
+            .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                settingsView.commitChanges()
+                dialog.dismiss()
+            }
+            .setView(settingsView)
+            .create()
+            .show()
     }
 }

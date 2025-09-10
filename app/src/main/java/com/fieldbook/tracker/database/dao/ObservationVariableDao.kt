@@ -294,7 +294,8 @@ class ObservationVariableDao {
         fun editTraits(id: String, trait: String, format: String, defaultValue: String,
                        minimum: String, maximum: String, details: String, categories: String,
                        closeKeyboardOnOpen: Boolean,
-                       cropImage: Boolean): Long = withDatabase { db ->
+                       cropImage: Boolean,
+                       saveImage: Boolean): Long = withDatabase { db ->
 
            val contentValues = ContentValues().apply {
                put("observation_variable_name", trait)
@@ -319,6 +320,7 @@ class ObservationVariableDao {
                     this.categories = categories
                     this.closeKeyboardOnOpen = closeKeyboardOnOpen
                     this.cropImage = cropImage
+                    this.saveImage = saveImage
                 }
 
                 traitObj.saveAttributeValues()

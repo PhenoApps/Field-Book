@@ -29,6 +29,7 @@ import com.fieldbook.tracker.database.dao.spectral.ProtocolDao;
 import com.fieldbook.tracker.database.dao.spectral.SpectralDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.spectral.UriDao;
+import com.fieldbook.tracker.database.views.ObservationVariableAttributeDetailViewCreator;
 import com.fieldbook.tracker.database.migrators.SpectralMigratorVersion16;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
@@ -902,12 +903,13 @@ public class DataHelper {
     public long editTraits(String traitDbId, String trait, String format, String defaultValue,
                            String minimum, String maximum, String details, String categories,
                            Boolean closeKeyboardOnOpen,
-                           Boolean cropImage) {
+                           Boolean cropImage,
+                           Boolean saveImage) {
 
         open();
 
         return ObservationVariableDao.Companion.editTraits(traitDbId, trait, format, defaultValue,
-                minimum, maximum, details, categories, closeKeyboardOnOpen, cropImage);
+                minimum, maximum, details, categories, closeKeyboardOnOpen, cropImage, saveImage);
     }
 
     /**
@@ -945,7 +947,8 @@ public class DataHelper {
 
         return ObservationVariableDao.Companion.editTraits(trait.getId(), trait.getName(),
                 trait.getFormat(), trait.getDefaultValue(), trait.getMinimum(), trait.getMaximum(),
-                trait.getDetails(), trait.getCategories(), trait.getCloseKeyboardOnOpen(), trait.getCropImage());
+                trait.getDetails(), trait.getCategories(), trait.getCloseKeyboardOnOpen(), trait.getCropImage(),
+                trait.getSaveImage());
     }
 
     public boolean checkUnique(HashMap<String, String> values) {
@@ -1385,6 +1388,9 @@ public class DataHelper {
         String PLOT_VALUES = "plot_values";
         String TICK = "`";
 
+        ObservationVariableAttributeDetailViewCreator observationVariableAttributeViewCreator
+                = new ObservationVariableAttributeDetailViewCreator();
+
         OpenHelper(DataHelper helper) {
             super(helper.context, DATABASE_NAME, null, DATABASE_VERSION);
             preferences = PreferenceManager.getDefaultSharedPreferences(helper.context);
@@ -1399,6 +1405,7 @@ public class DataHelper {
             //enables foreign keys for cascade deletes
             db.rawQuery("PRAGMA foreign_keys=ON;", null).close();
 
+            observationVariableAttributeViewCreator.createViews(db);
         }
 
         @Override
@@ -1651,18 +1658,14 @@ public class DataHelper {
             }
 
             if (oldVersion <= 13 && newVersion >= 14) {
-                // migrate to version that has new tables to handle spectral data and device parameters
+                //groups table migration
                 Migrator.Companion.migrateToVersion14(db);
             }
 
-            if (oldVersion <= 14 && newVersion >= 15) {
-                // add study_groups table to add field grouping functionality
-                Migrator.Companion.migrateToVersion15(db);
-            }
+            //skipped version 15
 
             if (oldVersion <= 15 && newVersion >= 16) {
-                // add observation_variable_attribute_details_view to simplify access to observation variable's attribute/values
-                // adds a trait_debug_helper_view to simplify debugging trait related data
+                //spectral data migration
                 Migrator.Companion.migrateToVersion16(db);
             }
         }

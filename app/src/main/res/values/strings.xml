@@ -1362,6 +1362,8 @@
     <!-- gopro -->
     <string name="dialog_go_pro_wait_stream_title">Waiting for live preview</string>
     <string name="dialog_go_pro_wait_stream_message">This may take a minute.</string>
+    <string name="view_trait_photo_settings_save_image_title">Save Image</string>
+    <string name="go_pro_trait_settings_title">GoPro Settings</string>
 
     <!-- canon camera strings -->
     <string name="canon_frag_connect_btn_content_description">shutter button</string>
@@ -1563,4 +1565,7 @@
     <string name="import_runnable_field_name_exists">Field name already exists.</string>
     <string name="enabled">enabled</string>
     <string name="disabled">disabled</string>
+
+    <string name="traits_save_image_parameter">Save Image</string>
+
 </resources>
