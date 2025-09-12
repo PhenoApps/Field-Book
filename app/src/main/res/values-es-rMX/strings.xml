@@ -1323,4 +1323,7 @@
     <string name="import_runnable_field_name_exists">El nombre del Campo ya existe.</string>
     <string name="enabled">activado</string>
     <string name="disabled">desactivado</string>
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="reset">Restablecer</string>
+    <string name="save">Guardar</string>
 </resources>
