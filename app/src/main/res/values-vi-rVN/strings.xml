@@ -399,4 +399,6 @@ Các tính trạng và ruộng được tạo thủ công hoặc được nhập
     <string name="dialog_quick_goto_title">Đi đến (nghiệm thức) nhanh</string>
     <string name="traits_sort_default">Mặc định</string>
     <!--  NearbyShare  -->
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="save">Lưu</string>
 </resources>
