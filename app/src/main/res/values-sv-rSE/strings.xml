@@ -342,4 +342,6 @@ Karaktärer och fält som skapats manuellt eller importerats via CSV kommer beh�
     <string name="dialog_quick_goto_title">Snabbhopp</string>
     <string name="traits_sort_default">Standard</string>
     <!--  NearbyShare  -->
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="save">Spara</string>
 </resources>
