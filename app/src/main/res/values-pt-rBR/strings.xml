@@ -241,7 +241,6 @@
     <string name="import_error_format_trait">Somente arquivos TRT podem ser importados como uma lista de características</string>
     <string name="traits_export_check">Exportar lista de características atual?</string>
     <string name="traits_dialog_export">Exportar</string>
-    <string name="dialog_delete_traits_message">Gostaria de excluir todas as características atuais?</string>
     <string name="traits_toolbar_delete_all">Excluir todas as características</string>
     <string name="act_trait_editor_no_traits_exist">Não existem características.</string>
     <!-- Trait item menu -->
