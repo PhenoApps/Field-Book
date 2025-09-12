@@ -215,4 +215,6 @@
     <string name="brapi_traits_filter_title">Wanta ideefanonn guuramuuf</string>
     <string name="traits_sort_default">Akkuma jirutti</string>
     <!--  NearbyShare  -->
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="save">Olkaa\'i</string>
 </resources>
