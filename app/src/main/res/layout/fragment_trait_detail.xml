@@ -17,6 +17,14 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <ProgressBar
+        android:id="@+id/trait_detail_progress_bar"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:indeterminate="true"
+        style="@style/IndeterminateProgressStyle"
+        android:visibility="gone" />
+
     <!-- Nested Scroll view -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -227,7 +235,7 @@
                             app:chipStrokeWidth="2dp" />
 
                         <com.google.android.material.chip.Chip
-                            android:id="@+id/brapiLabelChip"
+                            android:id="@+id/brapi_swap_name_chip"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             app:chipIcon="@drawable/ic_swap_horizontal"

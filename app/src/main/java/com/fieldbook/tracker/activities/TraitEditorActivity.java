@@ -58,6 +58,7 @@ import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
+import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter;
 import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.FileUtil;
 import com.fieldbook.tracker.utilities.SharedPreferenceUtils;
@@ -795,7 +796,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
             String fileName = data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY);
             
             // First, handle the ResourceFileParameter case (for trait creation/editing)
-            com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter.Companion.handleActivityResult(requestCode, resultCode, data);
+            ResourceFileParameter.Companion.handleActivityResult(requestCode, resultCode, data);
             
             // Then, check if we're in the TraitDetailFragment and update it
             TraitDetailFragment fragment = (TraitDetailFragment) getSupportFragmentManager()
@@ -953,20 +954,11 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         CollectActivity.reloadData = true;
     }
 
-    private void refreshTraitDetailFragment() {
-        TraitDetailFragment fragment = (TraitDetailFragment) getSupportFragmentManager()
-                .findFragmentByTag("TraitDetailFragmentTag");
-        if (fragment != null) {
-            fragment.loadTraitDetails();
-        }
-    }
-
     @Override
     public void onNewTraitDialogDismiss() {
         if (!brapiDialogShown) {
             brapiDialogShown = displayBrapiInfo(TraitEditorActivity.this, null, true);
         }
         queryAndLoadTraits();
-        refreshTraitDetailFragment();
     }
 }
