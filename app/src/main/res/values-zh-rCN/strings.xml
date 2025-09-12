@@ -406,4 +406,6 @@
     <string name="dialog_quick_goto_title">快速转移</string>
     <string name="traits_sort_default">默认值</string>
     <!--  NearbyShare  -->
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="save">保存</string>
 </resources>
