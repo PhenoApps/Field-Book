@@ -903,12 +903,29 @@ public class DataHelper {
     public long editTraits(String traitDbId, String trait, String format, String defaultValue,
                            String minimum, String maximum, String details, String categories,
                            Boolean closeKeyboardOnOpen,
-                           Boolean cropImage) {
+                           Boolean saveImage,
+                           Boolean cropImage, Boolean useDayOfYear, Boolean displayValue, String resourceFile) {
 
         open();
 
         return ObservationVariableDao.Companion.editTraits(traitDbId, trait, format, defaultValue,
-                minimum, maximum, details, categories, closeKeyboardOnOpen, cropImage);
+                minimum, maximum, details, categories, closeKeyboardOnOpen, cropImage,
+                saveImage, useDayOfYear, displayValue, resourceFile);
+//        try {
+//            ContentValues c = new ContentValues();
+//            c.put("trait", trait);
+//            c.put("format", format);
+//            c.put("defaultValue", defaultValue);
+//            c.put("minimum", minimum);
+//            c.put("maximum", maximum);
+//            c.put("details", details);
+//            c.put("categories", categories);
+//
+//            return db.update(TRAITS, c, "id = ?", new String[]{id});
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return -1;
+//        }
     }
 
     /**
@@ -946,7 +963,9 @@ public class DataHelper {
 
         return ObservationVariableDao.Companion.editTraits(trait.getId(), trait.getName(),
                 trait.getFormat(), trait.getDefaultValue(), trait.getMinimum(), trait.getMaximum(),
-                trait.getDetails(), trait.getCategories(), trait.getCloseKeyboardOnOpen(), trait.getCropImage());
+                trait.getDetails(), trait.getCategories(), trait.getCloseKeyboardOnOpen(), trait.getCropImage(),
+                trait.getSaveImage(),
+                trait.getUseDayOfYear(), trait.getDisplayValue(), trait.getResourceFile());
     }
 
     public boolean checkUnique(HashMap<String, String> values) {
@@ -1304,6 +1323,15 @@ public class DataHelper {
         open();
 
         return ObservationDao.Companion.getAllOfTrait(traitDbId);
+    }
+
+    /**
+     * Get the count of missing observations for a trait
+     * @param traitId the trait ID
+     * @return the count of missing observations
+     */
+    public int getMissingObservationsCount(String traitId) {
+        return ObservationDao.Companion.getMissingObservationsCount(traitId);
     }
 
     public ObservationModel[] getAllObservations(SQLiteDatabase db) {

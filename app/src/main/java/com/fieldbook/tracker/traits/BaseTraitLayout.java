@@ -22,14 +22,12 @@ import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.interfaces.CollectController;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
-import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.views.CollectInputView;
 import com.fieldbook.tracker.views.RepeatedValuesView;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 public abstract class BaseTraitLayout extends LinearLayout {
 

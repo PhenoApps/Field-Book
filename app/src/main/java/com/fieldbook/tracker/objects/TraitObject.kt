@@ -54,6 +54,18 @@ class TraitObject {
         get() = attributeValues.getBoolean(TraitAttributes.SAVE_IMAGE)
         set(value) = attributeValues.setValue(TraitAttributes.SAVE_IMAGE, value.toString())
 
+    var useDayOfYear: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.USE_DAY_OF_YEAR)
+        set(value) = attributeValues.setValue(TraitAttributes.USE_DAY_OF_YEAR, value.toString())
+
+    var displayValue: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.DISPLAY_VALUE)
+        set(value) = attributeValues.setValue(TraitAttributes.DISPLAY_VALUE, value.toString())
+
+    var resourceFile: String
+        get() = attributeValues.getString(TraitAttributes.RESOURCE_FILE)
+        set(value) = attributeValues.setValue(TraitAttributes.RESOURCE_FILE, value.toString())
+
     fun loadAttributeAndValues() {
         attributeValues.traitId = id
         attributeValues.load()
@@ -85,7 +97,11 @@ class TraitObject {
                 additionalInfo == that.additionalInfo &&
                 observationLevelNames == that.observationLevelNames &&
                 closeKeyboardOnOpen == that.closeKeyboardOnOpen &&
-                cropImage == that.cropImage
+                cropImage == that.cropImage &&
+                saveImage == that.saveImage &&
+                useDayOfYear == that.useDayOfYear &&
+                displayValue == that.displayValue &&
+                resourceFile == that.resourceFile
     }
 
     override fun hashCode(): Int {
@@ -114,6 +130,10 @@ class TraitObject {
         t.observationLevelNames = this.observationLevelNames
         t.closeKeyboardOnOpen = this.closeKeyboardOnOpen
         t.cropImage = this.cropImage
+        t.saveImage = this.saveImage
+        t.useDayOfYear = this.useDayOfYear
+        t.displayValue = this.displayValue
+        t.resourceFile = this.resourceFile
 
         return t
     }

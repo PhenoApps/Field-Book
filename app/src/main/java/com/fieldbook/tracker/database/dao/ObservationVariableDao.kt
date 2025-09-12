@@ -259,6 +259,10 @@ class ObservationVariableDao {
                 Log.d("ObservationVariableDao", "categories: ${t.categories}")
                 Log.d("ObservationVariableDao", "closeKeyboardOnOpen: ${t.closeKeyboardOnOpen}")
                 Log.d("ObservationVariableDao", "cropImage: ${t.cropImage}")
+                Log.d("ObservationVariableDao", "saveImage: ${t.saveImage}")
+                Log.d("ObservationVariableDao", "useDayOfYear: ${t.useDayOfYear}")
+                Log.d("ObservationVariableDao", "displayValue: ${t.displayValue}")
+                Log.d("ObservationVariableDao", "resourceFile: ${t.resourceFile}")
 
                 val varRowId = db.insert(ObservationVariable.tableName, null, contentValues)
 
@@ -294,7 +298,11 @@ class ObservationVariableDao {
         fun editTraits(id: String, trait: String, format: String, defaultValue: String,
                        minimum: String, maximum: String, details: String, categories: String,
                        closeKeyboardOnOpen: Boolean,
-                       cropImage: Boolean): Long = withDatabase { db ->
+                       cropImage: Boolean,
+                       saveImage: Boolean,
+                       useDayOfYear: Boolean,
+                       displayValue: Boolean,
+                       resourceFile: String): Long = withDatabase { db ->
 
            val contentValues = ContentValues().apply {
                put("observation_variable_name", trait)
@@ -319,6 +327,10 @@ class ObservationVariableDao {
                     this.categories = categories
                     this.closeKeyboardOnOpen = closeKeyboardOnOpen
                     this.cropImage = cropImage
+                    this.saveImage = saveImage
+                    this.useDayOfYear = useDayOfYear
+                    this.displayValue = displayValue
+                    this.resourceFile = resourceFile
                 }
 
                 traitObj.saveAttributeValues()

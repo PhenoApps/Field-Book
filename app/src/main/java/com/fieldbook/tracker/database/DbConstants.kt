@@ -68,4 +68,7 @@ object ObservationVariableAttributeDetailsView {
     const val CLOSE_KEYBOARD_ON_OPEN = "closeKeyboardOnOpen"
     const val CROP_IMAGE = "cropImage"
     const val SAVE_IMAGE = "saveImage"
+    const val USE_DAY_OF_YEAR = "useDayOfYear"
+    const val DISPLAY_VALUE = "displayValue"
+    const val RESOURCE_FILE = "resourceFile"
 }
