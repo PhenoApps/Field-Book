@@ -279,7 +279,7 @@
 
     <string name="traits_export_check">Export current trait list?</string>
     <string name="traits_dialog_export">Export</string>
-    <string name="dialog_delete_traits_message">Would you like to delete all current traits?</string>
+    <string name="dialog_delete_traits_message">Would you like to delete all current traits? Deleting a trait also deletes data that has been collected for that trait.</string>
 
     <string name="traits_toolbar_delete_all">Delete all traits</string>
     <string name="act_trait_editor_no_traits_exist">No traits exist.</string>
