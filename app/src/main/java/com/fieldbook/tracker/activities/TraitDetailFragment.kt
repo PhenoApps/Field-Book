@@ -42,6 +42,7 @@ import androidx.core.view.size
 import androidx.fragment.app.viewModels
 import com.fieldbook.tracker.databinding.FragmentTraitDetailBinding
 import com.fieldbook.tracker.utilities.Utils
+import com.fieldbook.tracker.viewmodels.CopyTraitStatus
 import com.fieldbook.tracker.viewmodels.TraitDetailUiState
 import com.fieldbook.tracker.viewmodels.TraitDetailViewModel
 import com.fieldbook.tracker.viewmodels.factory.TraitDetailViewModelFactory
@@ -93,6 +94,10 @@ class TraitDetailFragment : Fragment() {
         }
     }
 
+    fun refresh() {
+        traitId?.let { viewModel.loadTraitDetails(it) }
+    }
+
     private fun observeTraitDetailViewModel() {
         viewModel.uiState.observe(viewLifecycleOwner) { state ->
             when (state) {
@@ -112,6 +117,19 @@ class TraitDetailFragment : Fragment() {
                     }
 
                     state.observationData?.let { renderObservationData(it) }
+                }
+            }
+        }
+
+        viewModel.copyTraitStatus.observe(viewLifecycleOwner) { status ->
+            when (status) {
+                is CopyTraitStatus.Error -> {
+                    Utils.makeToast(context, getString(status.messageRes))
+                }
+                is CopyTraitStatus.Success -> {
+                    // refresh UI
+                    (activity as? TraitEditorActivity)?.queryAndLoadTraits()
+                    CollectActivity.reloadData = true
                 }
             }
         }
@@ -537,35 +555,18 @@ class TraitDetailFragment : Fragment() {
     }
 
     private fun showCopyTraitDialog(trait: TraitObject) {
-        val builder = AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
-        builder.setTitle(getString(R.string.traits_options_copy_title))
-        
-        // Set up the input field
         val input = EditText(requireContext())
         val suggestedName = copyTraitName(trait.name)
         input.setText(suggestedName)
-        builder.setView(input)
-        
-        builder.setPositiveButton(getString(R.string.dialog_save)) { _, _ ->
-            CoroutineScope(Dispatchers.IO).launch {
-                val pos = database.getMaxPositionFromTraits() + 1
-                val newTraitName = input.text.toString().trim()
-                
-                trait.name = newTraitName
-                trait.visible = true
-                trait.realPosition = pos
-                
-                database.insertTraits(trait)
-                
-                withContext(Dispatchers.Main) {
-                    (activity as? TraitEditorActivity)?.queryAndLoadTraits()
-                    CollectActivity.reloadData = true
-                }
+
+        AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
+            .setTitle(getString(R.string.traits_options_copy_title))
+            .setView(input)
+            .setPositiveButton(getString(R.string.dialog_save)) { _, _ ->
+                viewModel.copyTrait(trait, input.text.toString().trim())
             }
-        }
-        
-        builder.setNegativeButton(getString(R.string.dialog_cancel), null)
-        builder.show()
+            .setNegativeButton(getString(R.string.dialog_cancel), null)
+            .show()
     }
 
     private fun showDeleteTraitDialog(trait: TraitObject) {

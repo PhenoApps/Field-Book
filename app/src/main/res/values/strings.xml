@@ -368,6 +368,8 @@
     <string name="trait_brapi_value_display">Show Values (e.g. %s)</string>
     <string name="error_loading_trait_detail">Error loading trait info</string>
     <string name="error_updating_trait_resource_file">Error updating trait resource file</string>
+    <string name="error_empty_trait_name">Trait name cannot be empty</string>
+    <string name="error_copy_trait">Error while copying trait</string>
 
     <!-- <string name="trait_date_format_example">Date: %s</string>
     <string name="trait_day_format_example">Day of Year: %d</string>

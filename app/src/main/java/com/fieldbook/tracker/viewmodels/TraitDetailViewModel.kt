@@ -26,6 +26,9 @@ class TraitDetailViewModel(
     private val _uiState = MutableLiveData<TraitDetailUiState>()
     val uiState: LiveData<TraitDetailUiState> = _uiState
 
+    private val _copyTraitStatus = MutableLiveData<CopyTraitStatus>()
+    val copyTraitStatus: LiveData<CopyTraitStatus> = _copyTraitStatus
+
     data class ObservationData(
         val fieldCount: Int,
         val observationCount: Int,
@@ -100,6 +103,31 @@ class TraitDetailViewModel(
             }
         }
     }
+
+    fun copyTrait(trait: TraitObject, newName: String) {
+        viewModelScope.launch {
+            if (newName.isEmpty()) {
+                _copyTraitStatus.value = CopyTraitStatus.Error(R.string.error_empty_trait_name)
+                return@launch
+            }
+
+            try {
+                withContext(ioDispatcher) {
+                    val pos = database.getMaxPositionFromTraits() + 1
+
+                    trait.name = newName
+                    trait.visible = true
+                    trait.realPosition = pos
+
+                    database.insertTraits(trait)
+                }
+                _copyTraitStatus.value = CopyTraitStatus.Success(newName)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error copying trait: ", e)
+                _copyTraitStatus.value = CopyTraitStatus.Error(R.string.error_copy_trait)
+            }
+        }
+    }
 }
 
 sealed class TraitDetailUiState {
@@ -109,4 +137,9 @@ sealed class TraitDetailUiState {
         val observationData: TraitDetailViewModel.ObservationData?
     ) : TraitDetailUiState()
     data class Error(val messageRes: Int) : TraitDetailUiState()
+}
+
+sealed class CopyTraitStatus {
+    data class Success(val newName: String): CopyTraitStatus()
+    data class Error(val messageRes: Int): CopyTraitStatus()
 }

@@ -954,11 +954,20 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         CollectActivity.reloadData = true;
     }
 
+    private void refreshTraitDetailFragment() {
+        TraitDetailFragment fragment = (TraitDetailFragment) getSupportFragmentManager()
+                .findFragmentByTag("TraitDetailFragmentTag");
+        if (fragment != null) {
+            fragment.refresh();
+        }
+    }
+
     @Override
     public void onNewTraitDialogDismiss() {
         if (!brapiDialogShown) {
             brapiDialogShown = displayBrapiInfo(TraitEditorActivity.this, null, true);
         }
         queryAndLoadTraits();
+        refreshTraitDetailFragment();
     }
 }
