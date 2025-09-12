@@ -246,7 +246,7 @@ class TraitDetailFragment : Fragment() {
 
         updateVisibilityChip(trait)
 
-        binding.resourceChip.text = if (!trait.resourceFile.isNullOrEmpty()) {
+        binding.resourceChip.text = if (trait.resourceFile.isNotEmpty()) {
             val fileObject = FieldFileObject.create(requireContext(), trait.resourceFile.toUri(), null, null)
             fileObject.fileStem
         } else {
@@ -262,8 +262,9 @@ class TraitDetailFragment : Fragment() {
         }
 
         // Only show the BrAPI label chip for BrAPI traits
-        val isBrapiTrait = trait.externalDbId != null && trait.externalDbId.isNotEmpty()
-        || trait.traitDataSource?.contains("brapi", ignoreCase = true) == true
+        val isBrapiTrait =
+            trait.externalDbId != null && (trait.externalDbId?.isNotEmpty() == true)
+                    || trait.traitDataSource.contains("brapi", ignoreCase = true) == true
 
         binding.brapiSwapNameChip.visibility = if (isBrapiTrait) View.VISIBLE else View.GONE
         binding.brapiSwapNameChip.text = getString(R.string.trait_brapi_swap_name)
@@ -273,7 +274,7 @@ class TraitDetailFragment : Fragment() {
         
         traitHasBrapiCategories = isBrapiTrait && 
                                 (trait.format == "categorical" || trait.format == "multicat") &&
-                                !trait.categories.isNullOrEmpty()
+                                trait.categories.isNotEmpty()
         
         // For BrAPI label/value toggle
         if (traitHasBrapiCategories) {
@@ -464,7 +465,7 @@ class TraitDetailFragment : Fragment() {
             binding.histogram.visibility = View.GONE
             binding.noChartAvailableTextView.visibility = View.GONE
             
-            val parsedCategories = parseCategories(trait.categories ?: "")
+            val parsedCategories = parseCategories(trait.categories)
             
             HorizontalBarChartHelper.setupHorizontalBarChart(
                 requireContext(),
@@ -542,11 +543,11 @@ class TraitDetailFragment : Fragment() {
         }
         
         var newTraitName = ""
-        val allTraits = database.getAllTraitNames()
+        val allTraits = database.getAllTraitObjects()
         
         for (i in 0 until allTraits.size) {
             newTraitName = "$baseName-Copy-($i)"
-            if (!allTraits.contains(newTraitName)) {
+            if (!allTraits.any { it.name == newTraitName }) {
                 return newTraitName
             }
         }

@@ -3,7 +3,6 @@ package com.fieldbook.tracker.activities;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Rect;
@@ -62,7 +61,6 @@ import org.phenoapps.utils.BaseDocumentTreeUtil;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;

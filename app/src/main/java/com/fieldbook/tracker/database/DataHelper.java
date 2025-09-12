@@ -680,14 +680,6 @@ public class DataHelper {
         return ObservationVariableDao.Companion.getTraitVisibility();
     }
 
-    public TraitObject getTraitById(Integer traitId) {
-
-        open();
-
-        return ObservationVariableDao.Companion.getTraitById(traitId);
-
-    }
-
     /**
      * Returns saved data based on plot_id
      * v1.6 - Amended to consider both trait and format
@@ -911,13 +903,14 @@ public class DataHelper {
     public long editTraits(String traitDbId, String trait, String format, String defaultValue,
                            String minimum, String maximum, String details, String categories,
                            Boolean closeKeyboardOnOpen,
+                           Boolean saveImage,
                            Boolean cropImage, Boolean useDayOfYear, Boolean displayValue, String resourceFile) {
 
         open();
 
         return ObservationVariableDao.Companion.editTraits(traitDbId, trait, format, defaultValue,
-                minimum, maximum, details, categories, closeKeyboardOnOpen, cropImage);
-                minimum, maximum, details, categories, closeKeyboardOnOpen, cropImage, useDayOfYear, displayValue, resourceFile);
+                minimum, maximum, details, categories, closeKeyboardOnOpen, cropImage,
+                saveImage, useDayOfYear, displayValue, resourceFile);
 //        try {
 //            ContentValues c = new ContentValues();
 //            c.put("trait", trait);
@@ -971,6 +964,7 @@ public class DataHelper {
         return ObservationVariableDao.Companion.editTraits(trait.getId(), trait.getName(),
                 trait.getFormat(), trait.getDefaultValue(), trait.getMinimum(), trait.getMaximum(),
                 trait.getDetails(), trait.getCategories(), trait.getCloseKeyboardOnOpen(), trait.getCropImage(),
+                trait.getSaveImage(),
                 trait.getUseDayOfYear(), trait.getDisplayValue(), trait.getResourceFile());
     }
 

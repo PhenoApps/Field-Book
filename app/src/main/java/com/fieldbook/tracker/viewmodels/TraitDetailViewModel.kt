@@ -40,8 +40,7 @@ class TraitDetailViewModel(
         viewModelScope.launch {
             _uiState.value = TraitDetailUiState.Loading
             try {
-                val idInt = traitId.toInt()
-                val trait = withContext(ioDispatcher) { database.getTraitById(idInt) }
+                val trait = withContext(ioDispatcher) { database.getTraitById(traitId) }
 
                 trait?.let {
                     val observationData = loadObservationData(it)
@@ -85,11 +84,12 @@ class TraitDetailViewModel(
         viewModelScope.launch {
             try {
                 val updatedTrait = withContext(ioDispatcher) {
-                    val trait = database.getTraitById(traitId.toInt())
+                    val trait = database.getTraitById(traitId)
+                    Log.d(TAG, "updateResourceFile: ${trait?.name}")
                     trait?.let {
                         it.resourceFile = fileUri
-                        database.updateTrait(it)
                     }
+                    trait.saveAttributeValues()
                     trait
                 }
                 updatedTrait?.let {

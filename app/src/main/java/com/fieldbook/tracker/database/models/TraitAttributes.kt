@@ -39,7 +39,26 @@ object TraitAttributes {
         defaultValue = "true"
     )
 
-    val ALL = listOf(MIN_VALUE, MAX_VALUE, CATEGORIES, CLOSE_KEYBOARD, CROP_IMAGE, SAVE_IMAGE)
+    val USE_DAY_OF_YEAR = AttributeDefinition(
+        key = ObservationVariableAttributeDetailsView.USE_DAY_OF_YEAR,
+        valueType = ValueType.BOOLEAN,
+        defaultValue = "false"
+    )
+
+    val DISPLAY_VALUE = AttributeDefinition(
+        key = ObservationVariableAttributeDetailsView.DISPLAY_VALUE,
+        valueType = ValueType.BOOLEAN,
+        defaultValue = "false"
+    )
+
+    val RESOURCE_FILE = AttributeDefinition(
+        key = ObservationVariableAttributeDetailsView.RESOURCE_FILE,
+        valueType = ValueType.STRING,
+    )
+
+    val ALL = listOf(MIN_VALUE, MAX_VALUE, CATEGORIES, CLOSE_KEYBOARD, CROP_IMAGE, SAVE_IMAGE,
+        USE_DAY_OF_YEAR, DISPLAY_VALUE, RESOURCE_FILE
+    )
 
     fun byKey(key: String): AttributeDefinition? = ALL.find { it.key == key }
 }
