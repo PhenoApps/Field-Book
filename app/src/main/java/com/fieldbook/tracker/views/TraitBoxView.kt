@@ -118,6 +118,8 @@ class TraitBoxView : ConstraintLayout {
         } else {
             traitsStatusBarRv?.visibility = GONE
         }
+
+        updateTraitBoxArrows()
     }
 
     fun handleTraitTypeWrapping() {
@@ -186,7 +188,14 @@ class TraitBoxView : ConstraintLayout {
         }
 
         updateTraitsStatusBar()
+        updateTraitBoxArrows()
+    }
 
+    private fun updateTraitBoxArrows() { // hide arrows if only one trait is active
+        val shouldShowArrows = visibleTraitsList.size > 1
+
+        traitLeft.visibility = if (shouldShowArrows) VISIBLE else GONE
+        traitRight.visibility = if (shouldShowArrows) VISIBLE else GONE
     }
 
     fun getRecyclerView(): RecyclerView? {
