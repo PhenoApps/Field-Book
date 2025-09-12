@@ -54,3 +54,7 @@ Navigate between these to:
  - Learn more <img class="icon" src="_static/icons/home/information.png"> [About](about.md) Field Book or check for updates
 
 The <img class="icon" src="_static/icons/home/history.png"> Changelog can be accessed from the top toolbar to see new features and additions to the app.
+
+## License
+
+All text, images, and presentations available as part of the documentation for Field Book can be reused under a CC BY-SA license.

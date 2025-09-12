@@ -45,6 +45,7 @@
     <string name="warning_traits_missing">調査形質のデータがありません。調査を開始する前に形質データを作成してください。</string>
     <!-- Changelog -->
     <string name="changelog_title">変更履歴</string>
+    <!--  Field Grouping  -->
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
@@ -396,6 +397,7 @@
     <!-- usb camera trait -->
     <!-- gopro -->
     <!-- canon camera strings -->
+    <!-- spectral trait strings -->
     <string name="brapi_traits_filter_title">形質</string>
     <string name="dialog_quick_goto_title">Quick GoTo機能</string>
     <string name="traits_sort_default">初期値</string>

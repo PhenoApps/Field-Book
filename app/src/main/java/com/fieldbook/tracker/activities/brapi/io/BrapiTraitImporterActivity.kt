@@ -21,16 +21,13 @@ import com.fieldbook.tracker.dialogs.NewTraitDialog
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.TextTraitLayout
 import com.fieldbook.tracker.traits.formats.Formats
-import com.fieldbook.tracker.traits.formats.TextFormat
-import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.button.MaterialButton
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
 import javax.inject.Inject
+import androidx.core.content.edit
 
 @AndroidEntryPoint
 class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedActivity(),
@@ -103,6 +100,8 @@ class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedAc
             it.submitList(cache)
         }
 
+        var nextPosition = database.maxPositionFromTraits + 1
+
         finishButton?.setOnClickListener {
 
             recyclerView?.visibility = View.GONE
@@ -117,11 +116,13 @@ class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedAc
 
             varUpdates.forEach { (t, u) ->
                 if (t in dbIds!!) {
-                    database.insertTraits(u)
+                    database.insertTraits(u.apply {
+                        realPosition = nextPosition++
+                    })
                 }
             }
 
-            prefs.edit().remove(BrapiTraitFilterActivity.FILTER_NAME).apply()
+            prefs.edit { remove(BrapiTraitFilterActivity.FILTER_NAME) }
 
             setResult(Activity.RESULT_OK)
             finish()

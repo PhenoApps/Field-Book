@@ -1,17 +1,24 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'androidx.navigation.safeargs'
 apply plugin: 'com.google.dagger.hilt.android'
 apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 apply plugin: 'com.google.devtools.ksp'
+apply plugin: "org.jetbrains.kotlin.plugin.serialization"
+apply plugin: "kotlin-parcelize"
 
 Properties props = new Properties()
 props.load(new FileInputStream("$project.rootDir/version.properties"))
 props.each { prop ->
     project.ext.set(prop.key, prop.value)
 }
+
+Properties localProperties = new Properties()
+localProperties.load(new FileInputStream("$project.rootDir/local.properties"))
+String nixLicense = localProperties.getProperty("NIX_LICENSE", "")
 
 private Integer makeVersionCode() {
     int major = ext.majorVersion as Integer
@@ -67,6 +74,9 @@ android {
         versionName = makeVersionName()
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField "String", "NIX_LICENSE", "\"${nixLicense.replaceAll("\"", "\\\\\"")}\""
+
     }
 
     buildTypes {
@@ -129,8 +139,18 @@ dependencies {
     //add zebra jar file to dependencies
     implementation fileTree(include: ['*.jar', '*.aar'], dir: 'libs')
 
+    //nix (color sensors) universal sdk
+    implementation "com.nixsensor:universalsdk:4.2.1"
+    // Optional dependency used to enable USB support
+    implementation 'com.github.mik3y:usb-serial-for-android:v3.8.1'
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+
     //zebra dependency
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.0'
+
+    //live data
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.8.7'
 
     implementation 'androidx.appcompat:appcompat:1.7.0-alpha02'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
@@ -254,6 +274,9 @@ dependencies {
 
     // Add Compose related plugins
     implementation platform('androidx.compose:compose-bom:2025.03.00')
+
+    implementation "androidx.compose.material:material-icons-extended:1.6.0"
+
     // Integration with activities
     implementation 'androidx.activity:activity-compose:1.7.2'
 

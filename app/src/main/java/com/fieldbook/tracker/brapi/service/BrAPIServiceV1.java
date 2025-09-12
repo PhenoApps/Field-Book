@@ -25,7 +25,6 @@ import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.objects.TraitObject;
-import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.FailureFunction;
@@ -1144,31 +1143,25 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
 
         try {
             FieldObject field = new FieldObject();
-            field.setStudy_db_id(studyDetails.getStudyDbId());
-            field.setExp_name(studyDetails.getStudyName());
-            field.setExp_alias(studyDetails.getStudyName());
-            field.setExp_species(studyDetails.getCommonCropName());
-            field.setCount(studyDetails.getNumberOfPlots().toString());
-            field.setImport_format(ImportFormat.BRAPI);
+            field.setStudyDbId(studyDetails.getStudyDbId());
+            field.setName(studyDetails.getStudyName());
+            field.setAlias(studyDetails.getStudyName());
+            field.setSpecies(studyDetails.getCommonCropName());
+            field.setEntryCount(studyDetails.getNumberOfPlots().toString());
+            field.setDataSourceFormat(ImportFormat.BRAPI);
 
             // Get our host url
             if (BrAPIService.getHostUrl(context) != null) {
-                field.setExp_source(BrAPIService.getHostUrl(context));
+                field.setDataSource(BrAPIService.getHostUrl(context));
             } else {
                 // Return an error notifying user we can't save this field
                 return new BrapiControllerResponse(false, "Host is null");
             }
 
-            field.setUnique_id("observationUnitDbId");
-            field.setPrimary_id(primaryId);
-            field.setSecondary_id(secondaryId);
-            field.setExp_sort(sortOrder);
-
-            // Do a pre-check to see if the field exists so we can show an error
-            int FieldUniqueStatus = dataHelper.checkFieldName(field.getExp_name());
-            if (FieldUniqueStatus != -1) {
-                return new BrapiControllerResponse(false, this.notUniqueFieldMessage);
-            }
+            field.setUniqueId("observationUnitDbId");
+            field.setPrimaryId(primaryId);
+            field.setSecondaryId(secondaryId);
+            field.setSortColumnsStringArray(sortOrder);
 
             // Check that there are not duplicate unique ids in the database
             HashMap<String, String> checkMap = new HashMap<>();
@@ -1190,8 +1183,8 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
 
             DataHelper.db.beginTransaction();
             // All checks finished, insert our data.
-            int expId = dataHelper.createField(field, studyDetails.getAttributes(), true);
-            field.setExp_id(expId);
+            int studyId = dataHelper.createField(field, studyDetails.getAttributes(), true);
+            field.setStudyId(studyId);
 
             boolean fail = false;
             String failMessage = "";
@@ -1204,7 +1197,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
                 System.out.println("Size of study details: "+studyDetails.getValues().size());
 
                 for (List<String> dataRow : studyDetails.getValues()) {
-                    dataHelper.createFieldData(expId, studyDetails.getAttributes(), dataRow);
+                    dataHelper.createFieldData(studyId, studyDetails.getAttributes(), dataRow);
                 }
 
                 // Insert the traits already associated with this study
@@ -1220,10 +1213,10 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
 //                    System.out.println("Saving: unitDBId: "+obs.getUnitDbId());
 //                    System.out.println("Saving: varDbId: "+obs.getVariableDbId());
 //                    System.out.println("Saving: StudyId: "+studyDetails.getStudyDbId());
-//                    System.out.println("Saving: expId: "+expId);
+//                    System.out.println("Saving: studyId: "+studyId);
 //                    TraitObject trait = ObservationVariableDao.Companion.getTraitByName(obs.getVariableName());
 ////                    System.out.println("SavingL TraitId: "+trait.getId());
-//                    dataHelper.setTraitObservations(expId, obs);
+//                    dataHelper.setTraitObservations(studyId, obs);
 //                }
 
                 // If we haven't thrown an error by now, we are good.

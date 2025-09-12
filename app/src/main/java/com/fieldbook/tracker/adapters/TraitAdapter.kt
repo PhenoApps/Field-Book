@@ -85,7 +85,7 @@ class TraitAdapter(private val sorter: TraitSorter):
 
         val size = list.size
         for (i in 0 until size) {
-            sorter.getDatabase().updateTraitPosition(list[i].id, i)
+            sorter.getDatabase().updateTraitPosition(list[i].id, i + 1)
         }
     }
 

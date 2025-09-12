@@ -214,7 +214,8 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
         val showLabel = preferences.getString(PreferenceKeys.LABELVAL_CUSTOMIZE, "value") == "value"
         val uniqueHeader = preferences.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
         val rowHeader = getCurrentRowHeader()
-        val rowHeaderIndex = database.rangeColumns.indexOf(rowHeader).takeIf { it >= 0 } ?: 0
+        val rowHeaderIndex = database.getAllObservationUnitAttributeNames(studyId)
+            .indexOf(rowHeader).takeIf { it >= 0 } ?: 0
 
         if (rowHeader.isBlank()) {
             isLoading = false
@@ -500,8 +501,9 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
     private fun getCurrentRowHeader(): String {
         val uniqueHeader = preferences.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
         val rowHeader = preferences.getString(GeneralKeys.DATAGRID_PREFIX_TRAIT, uniqueHeader) ?: ""
-
-        return if (rowHeader in database.rangeColumnNames) {
+        val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+        val unitAttributes = database.getAllObservationUnitAttributeNames(studyId)
+        return if (rowHeader in unitAttributes) {
             Log.d("DataGridActivity", "Using saved row header from preferences: $rowHeader")
             rowHeader
         } else {
@@ -584,8 +586,10 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
      * Shows dialog to choose a prefix trait to be displayed.
      */
     private fun showHeaderPickerDialog() {
+
+        val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
         // get all available obs. property columns
-        val columns = database.rangeColumns
+        val columns = database.getAllObservationUnitAttributeNames(studyId)
 
         if (columns.isNotEmpty()) {
             val rowHeader = getCurrentRowHeader()

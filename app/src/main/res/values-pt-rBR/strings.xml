@@ -79,6 +79,30 @@
     <string name="warning_traits_missing">Não existem caracteres. Por favor, crie caracteres antes de coletar dados.</string>
     <!-- Changelog -->
     <string name="changelog_title">Registro de alterações</string>
+    <!--  Field Grouping  -->
+    <string name="group_archived_value">Arquivado</string>
+    <string name="fields_ungrouped">Desagrupados</string>
+    <string name="dialog_group_options">Opções de Agrupamento</string>
+    <string name="group_existing">Grupo existente</string>
+    <string name="group_archive">Arquivar</string>
+    <string name="group_new">Novo grupo</string>
+    <string name="group_remove">Remover do grupo</string>
+    <string name="create_new_group">Criar Novo Grupo</string>
+    <string name="dialog_group_name">Nome do Grupo</string>
+    <string name="dialog_group_name_warning">Campo não pode ficar em branco</string>
+    <string name="menu_group">Grupo</string>
+    <string name="menu_archive">Arquivar</string>
+    <string name="menu_groups_toggle">Alternar Visibilidade de Grupos</string>
+    <string name="group_toggle_icon">Alternar Grupo</string>
+    <string name="archived_fields">Campos Arquivados</string>
+    <string name="menu_unarchive">Remover do arquivo</string>
+    <string name="menu_collapse_all">Recolher Tudo</string>
+    <string name="menu_expand_all">Expandir Tudo</string>
+    <string name="archive_active_field_title">Arquivar Campo Ativo?</string>
+    <string name="archive_active_field_message">Você selecionou o campo ativo para arquivar. Se continuar, não haverá nenhum campo ativo. Você deseja continuar?</string>
+    <string name="archive_others">Arquivar Outros</string>
+    <string name="dialog_unarchive_field_title">Desarquivar Campo?</string>
+    <string name="dialog_unarchive_field_message">Este campo está arquivado atualmente. Se continuar, este campo será desarquivado e se tornará o campo ativo. Deseja continuar?</string>
     <!-- FIELDS -->
     <!-- General -->
     <string name="menu_fields_sort_list">Organizar Lista de Campos</string>
@@ -246,6 +270,9 @@
     <string name="traits_format_usb_camera">Câmera USB</string>
     <string name="traits_format_go_pro_camera">GoPro</string>
     <string name="traits_format_angle">Ângulo</string>
+    <string name="traits_format_spectral">Espectral</string>
+    <string name="traits_format_nix">Nix</string>
+    <string name="traits_format_inno_spectra">InnoSpectra</string>
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Formato de Característica</string>
     <string name="trait_creator_title_layout">Disposição de Característica</string>
@@ -262,6 +289,7 @@
     <string name="traits_create_photo_maximum">Número máximo de fotos</string>
     <string name="traits_create_true">Verdadeiro</string>
     <string name="traits_create_false">Falso</string>
+    <string name="traits_create_unset">Desmarcar</string>
     <string name="traits_create_categories_text">Separar items com uma /</string>
     <string name="traits_create_camera">Câmera</string>
     <string name="traits_create_close_keyboard">Fechar o teclado</string>
@@ -302,6 +330,7 @@
     <string name="main_toolbar_resources">Recursos</string>
     <string name="main_trait_details">Detalhes do caractere</string>
     <string name="main_infobar_data_missing">Não há dados</string>
+    <string name="main_infobar_select_data">Selecionar</string>
     <string name="main_toolbar_next_entry_no_data">Nova entrada de dados</string>
     <!-- InfoBars -->
     <string name="dialog_att_chooser_attributes">Atributos</string>
@@ -351,6 +380,7 @@
     <string name="activity_collect_locked_state">Bloqueado - entrada de dados, modificação e exclusão estão desabilitados</string>
     <string name="activity_collect_frozen_state">Congelado - uma vez que os dados são salvos, eles não podem ser modificados ou excluídos</string>
     <string name="activity_collect_unlocked_state">Desbloqueado - sem restrições na entrada de dados, modificação ou exclusão de dados</string>
+    <string name="trait_box_word_wrap_toast">Quebrar palavras %s para Características</string>
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">Seu dispositivo não tem uma câmera que possa ser usada para tirar uma foto.</string>
     <string name="trait_delete_warning_photo">Você tem certeza que deseja excluir esta foto?</string>
@@ -382,6 +412,7 @@
     <!-- Trait Layout: Boolean -->
     <string name="trait_boolean_on">Ativado</string>
     <string name="trait_boolean_off">Desativado</string>
+    <string name="trait_boolean_unset">Desmarcar</string>
     <!-- Trait Layout: GoPro -->
     <string name="trait_go_pro_capture_button_text">Capturar\n</string>
     <string name="trait_go_pro_await_device_title">Procurando um GoPros</string>
@@ -621,6 +652,10 @@
     <string name="preferences_appearance_infobar_hide_prefix_description">Prefixo do Infobar será substituído por um ícone genérico</string>
     <string name="preferences_appearance_quickgoto">Ir Rápido Para</string>
     <string name="preferences_appearance_quickgoto_description">Altere a seção do meio da tela principal para o legado \"Ir Rápido para\"</string>
+    <string name="preferences_appearance_range_progress_bar">Barra de progresso de entradas</string>
+    <string name="preferences_appearance_range_progress_bar_description">Mostra sua posição atual no campo</string>
+    <string name="preferences_appearance_traits_progress_bar">Barra de progresso de características</string>
+    <string name="preferences_appearance_traits_progress_bar_description">Mostra se as características ativas têm dados e destacam a característica atual</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamento</string>
     <string name="preferences_behavior_movement_title">Movimento</string>
@@ -1116,6 +1151,14 @@
     <string name="dialog_brapi_filter_title">Filtros</string>
     <string name="dialog_brapi_filter_active">Ativo</string>
     <string name="dialog_brapi_filter_choices_title">Filtrar Por</string>
+    <!-- spectral trait strings -->
+    <string name="trait_spectral_connect_content_description">Inicia uma conexão do dispositivo.</string>
+    <string name="select_device">Selecionar Dispositivo</string>
+    <string name="no_devices_found">Não foram encontrados dispositivos</string>
+    <string name="list_item_color_close_content_description">Excluir esta cor</string>
+    <string name="delete_color">Excluir Observação de Cor</string>
+    <string name="delete_color_message">Isto irá excluir permanentemente a observação</string>
+    <string name="nix_device_connecting">Dispositivo está conectando.</string>
     <string name="brapi_studies_filter_title">Estudos</string>
     <string name="brapi_trials_filter_title">Estudos</string>
     <string name="brapi_filter_dialog_title">Filtrar Por</string>
@@ -1240,4 +1283,44 @@
     <string name="preferences_preferences_title">Preferências</string>
     <string name="nearby_share_export_preferences">Exportar Preferências</string>
     <string name="nearby_share_import_preferences">Importar Preferências</string>
+    <string name="all_fields_processed">Todos os campos processados</string>
+    <string name="spectral_trait_insert_note">Nota</string>
+    <string name="spectral_trait_insert_note_message">Escrever uma nota para a entrada selecionada.</string>
+    <string name="trait_spectral_na_content_description">valor espaço reservado não aplicável</string>
+    <string name="act_collect_barcode_spectral">Neste momento, não é possível coletar dados spectrais via entrada de código de barras.</string>
+    <string name="replace_observations">Apagar e Substituir</string>
+    <string name="replace_observations_message">Observações já existem, você gostaria de excluí-las e inserir um valor de NA?</string>
+    <string name="usb_device_description">USB</string>
+    <string name="not_yet_implemented">Este recurso ainda não está implementado.</string>
+    <string name="view_trait_nix_color_option">Cor</string>
+    <string name="view_trait_nix_spectral_option">Espectral</string>
+    <string name="nix_trait_settings_title">Configurações de %s</string>
+    <string name="disconnect">Desconectar</string>
+    <string name="nix_device_incompatible">Este dispositivo é incompatível, um tipo de dispositivo anterior já salvo dados.</string>
+    <string name="nix_error_unknown">"Ocorreu um erro desconhecido de Nix. "</string>
+    <string name="nix_error_license">Houve um problema com sua licença Nix ou conexão com a internet.</string>
+    <string name="nix_error_ambient_light">Foi detectada muita luz ambiente.</string>
+    <string name="nix_error_timeout">Ocorreu um erro de tempo limite.</string>
+    <string name="nix_error_low_power">As baterias são muito baixas para escanear.</string>
+    <string name="nix_error_scan_not_supported">Esta escaneada não é suportada pelo dispositivo.</string>
+    <string name="nix_error_not_ready">O dispositivo não está pronto.</string>
+    <string name="view_trait_nix_settings_battery_level">Nível de Bateria: %s</string>
+    <string name="view_trait_nix_settings_rssi">RSSI: %s</string>
+    <string name="view_trait_nix_settings_type">Tipo: %s</string>
+    <string name="view_trait_nix_settings_factory_note">Nota de Fábrica: %s</string>
+    <string name="view_trait_nix_settings_serial_number">Número de Série: %s</string>
+    <string name="view_trait_nix_settings_firmware_version">Versão de Firmware: %s</string>
+    <string name="view_trait_nix_settings_software_version">Versão do Software: %s</string>
+    <string name="view_trait_nix_settings_external_power_state">Estado de Energia Externa: %s</string>
+    <string name="nix_error_internal">Erro Interno Nix</string>
+    <string name="nix_error_invalid_hardware_id">ID de hardware inválido</string>
+    <string name="nix_error_bluetooth_permissions">Você deve aceitar permissões Bluetooth ou tentar reiniciar o aplicativo.</string>
+    <string name="nix_error_bluetooth_unavailable">Bluetooth indisponível.</string>
+    <string name="nix_error_bluetooth_disabled">Bluetooth está desativado no dispositivo.</string>
+    <string name="list_item_color_placeholder_content_description">Espaço reservado para uma nova escaneada</string>
+    <string name="loading">Carregando</string>
+    <string name="nix_error_no_network">Nix pode exigir que a internet funcione corretamente.</string>
+    <string name="import_runnable_field_name_exists">Nome do campo já existe.</string>
+    <string name="enabled">habilitado</string>
+    <string name="disabled">desabilitado</string>
 </resources>

@@ -67,6 +67,7 @@
     <string name="warning_traits_missing">Det finns inga karaktärer. Skapa karaktärerinnan du samlar in data.</string>
     <!-- Changelog -->
     <string name="changelog_title">Ändringslogg</string>
+    <!--  Field Grouping  -->
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
@@ -336,6 +337,7 @@ Karaktärer och fält som skapats manuellt eller importerats via CSV kommer beh�
     <!-- usb camera trait -->
     <!-- gopro -->
     <!-- canon camera strings -->
+    <!-- spectral trait strings -->
     <string name="brapi_traits_filter_title">Karaktärer</string>
     <string name="dialog_quick_goto_title">Snabbhopp</string>
     <string name="traits_sort_default">Standard</string>

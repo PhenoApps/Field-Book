@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.views
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.database.Cursor
 import android.os.Handler
 import android.text.Editable
@@ -9,7 +8,6 @@ import android.text.TextWatcher
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
-import android.view.View.OnTouchListener
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -26,6 +24,8 @@ import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.Utils
 import java.util.*
+import androidx.core.content.edit
+import com.fieldbook.tracker.adapters.AttributeAdapter
 
 class RangeBoxView : ConstraintLayout {
 
@@ -67,6 +67,8 @@ class RangeBoxView : ConstraintLayout {
 
     private var exportDataCursor: Cursor? = null
 
+    private val studyId: Int
+
     init {
 
         val v = inflate(context, R.layout.view_range_box, this)
@@ -81,7 +83,9 @@ class RangeBoxView : ConstraintLayout {
 
         this.controller = context as CollectRangeController
 
-        rangeID = this.controller.getDatabase().allRangeID
+        studyId = controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+
+        rangeID = this.controller.getDatabase().getAllRangeID(studyId)
         cRange = RangeObject()
         cRange.secondaryId = ""
         cRange.uniqueId = ""
@@ -172,9 +176,14 @@ class RangeBoxView : ConstraintLayout {
         primaryNameTv.setOnClickListener {
             attributeChooserDialog.setOnAttributeSelectedListener(object :
                 AttributeChooserDialog.OnAttributeSelectedListener {
-                override fun onAttributeSelected(label: String) {
+                override fun onAttributeSelected(model: AttributeAdapter.AttributeModel) {
                     //update preference primary name
-                    controller.getPreferences().edit().putString(GeneralKeys.PRIMARY_NAME, label).apply()
+                    controller.getPreferences().edit {
+                        putString(
+                            GeneralKeys.PRIMARY_NAME,
+                            model.label
+                        )
+                    }
                     setName()
                     refresh()
                 }
@@ -188,9 +197,14 @@ class RangeBoxView : ConstraintLayout {
         secondaryNameTv.setOnClickListener {
             attributeChooserDialog.setOnAttributeSelectedListener(object :
                 AttributeChooserDialog.OnAttributeSelectedListener {
-                override fun onAttributeSelected(label: String) {
+                override fun onAttributeSelected(model: AttributeAdapter.AttributeModel) {
                     //update preference primary name
-                    controller.getPreferences().edit().putString(GeneralKeys.SECONDARY_NAME, label).apply()
+                    controller.getPreferences().edit {
+                        putString(
+                            GeneralKeys.SECONDARY_NAME,
+                            model.label
+                        )
+                    }
                     setName()
                     refresh()
                 }
@@ -265,12 +279,6 @@ class RangeBoxView : ConstraintLayout {
         }
     }
 
-    private fun repeatUpdate() {
-
-        controller.getTraitBox().setNewTraits(getPlotID())
-
-    }
-
     private fun truncate(s: String, maxLen: Int): String {
         return if (s.length > maxLen) s.substring(0, maxLen - 1) + ":" else s
     }
@@ -335,7 +343,6 @@ class RangeBoxView : ConstraintLayout {
                     }
                     repeatHandler?.removeCallbacks(action)
                     repeatHandler = null
-                    repeatUpdate()
                 }
                 MotionEvent.ACTION_CANCEL -> {
                     control.setImageResource(imageID2)
@@ -362,7 +369,7 @@ class RangeBoxView : ConstraintLayout {
 
             // Refresh onscreen controls
             updateCurrentRange(rangeID[paging - 1])
-            saveLastPlot()
+            saveLastPlotAndTrait()
             if (cRange.uniqueId.isEmpty()) return
             if (controller.getPreferences().getBoolean(PreferenceKeys.PRIMARY_SOUND, false)) {
                 if (cRange.primaryId != lastRange && lastRange != "") {
@@ -371,7 +378,6 @@ class RangeBoxView : ConstraintLayout {
                 }
             }
             display()
-            controller.getTraitBox().setNewTraits(getPlotID())
             controller.initWidgets(true)
 
             Log.d("Field Book", "refresh widgets range box repeate key press")
@@ -442,7 +448,6 @@ class RangeBoxView : ConstraintLayout {
             updateCurrentRange(rangeID[0])
             lastRange = cRange.primaryId
             display()
-            controller.getTraitBox().setNewTraits(cRange.uniqueId)
         } else { //if no fields, print a message and finish with result canceled
             Utils.makeToast(context, context.getString(R.string.act_collect_no_plots))
             controller.cancelAndFinish()
@@ -471,10 +476,14 @@ class RangeBoxView : ConstraintLayout {
         rangeRight.performClick()
     }
 
-    fun saveLastPlot() {
-        val ed: SharedPreferences.Editor = controller.getPreferences().edit()
-        ed.putString(GeneralKeys.LAST_PLOT, cRange.uniqueId)
-        ed.apply()
+    fun saveLastPlotAndTrait() {
+        controller.getPreferences().edit {
+            putString(GeneralKeys.LAST_PLOT, cRange.uniqueId)
+            putString(
+                GeneralKeys.LAST_USED_TRAIT,
+                (controller.getTraitBox().currentTrait?.id ?: 0).toString()
+            )
+        }
     }
 
     private fun createTextWatcher(type: String): TextWatcher {
@@ -501,7 +510,7 @@ class RangeBoxView : ConstraintLayout {
     }
 
     fun setAllRangeID() {
-        rangeID = controller.getDatabase().allRangeID
+        rangeID = controller.getDatabase().getAllRangeID(studyId)
     }
 
     fun setRange(id: Int) {
@@ -589,13 +598,12 @@ class RangeBoxView : ConstraintLayout {
 
         return when (skipMode) {
             1 -> {
-                val currentTraitString = controller.getTraitBox().currentTrait?.name
-                val currentTraitObj = controller.getDatabase().getDetail(currentTraitString)
-                moveToNextUncollectedObs(pos, step, arrayListOf(currentTraitObj))
+                val traits = ArrayList<TraitObject>()
+                controller.getTraitBox().currentTrait.let { traits.add(it!!) }
+                moveToNextUncollectedObs(pos, step, traits)
             }
             2 -> {
-                val sortOrder = controller.getPreferences().getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position")
-                val visibleTraits = ArrayList(controller.getDatabase().getVisibleTraitObjects(sortOrder).filterNotNull())
+                val visibleTraits = ArrayList(controller.getDatabase().getVisibleTraits().filterNotNull())
                 moveToNextUncollectedObs(pos, step, visibleTraits)
             }
             else -> moveSimply(pos, step)
@@ -617,7 +625,6 @@ class RangeBoxView : ConstraintLayout {
 
     private fun moveToNextUncollectedObs(currentPos: Int, direction: Int, traits: ArrayList<TraitObject>): Int {
 
-        val studyId = controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
         val uniqueName = controller.getPreferences().getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
         val exportDataCursor = controller.getDatabase().getExportTableDataShort(studyId, uniqueName, traits)
         val traitNames = traits.map { it.name }
@@ -652,7 +659,12 @@ class RangeBoxView : ConstraintLayout {
                     if (traitName in traitNames) {
                         val value = cursor.getString(i)
                         if (value == null) {
-                            controller.getPreferences().edit().putString(GeneralKeys.LAST_USED_TRAIT, traitName).apply()
+                            controller.getPreferences().edit {
+                                putString(
+                                    GeneralKeys.LAST_USED_TRAIT,
+                                    traits.find { it.name == traitName }?.id ?: ""
+                                )
+                            }
                             if (pos == currentPos) {
                                 // We are back where we started, notify that current entry is only one without data
                                 Utils.makeToast(context, context.getString(R.string.collect_sole_entry_without_data))

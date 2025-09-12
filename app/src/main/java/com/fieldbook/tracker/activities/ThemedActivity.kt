@@ -168,7 +168,7 @@ open class ThemedActivity: AppCompatActivity() {
                 }
 
                 //TODO this doesn't seem to be doing its job (must be set in manifest)
-                if ((activity is SearchActivity) || (activity is FileExploreActivity)) {
+                if (activity is FileExploreActivity) {
 
                     when (themeIndex) {
                         0 -> {

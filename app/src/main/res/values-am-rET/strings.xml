@@ -33,6 +33,7 @@
     <string name="warning_traits_missing">ጣባዮች የሉም፤</string>
     <!-- Changelog -->
     <string name="changelog_title">ከመጨረሸ እድሳት ቀይረዉ</string>
+    <!--  Field Grouping  -->
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
@@ -214,6 +215,7 @@
     <!-- usb camera trait -->
     <!-- gopro -->
     <!-- canon camera strings -->
+    <!-- spectral trait strings -->
     <string name="brapi_traits_filter_title">ጸባዮች</string>
     <string name="traits_sort_default">እንደነበረ</string>
     <!--  NearbyShare  -->

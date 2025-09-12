@@ -66,6 +66,7 @@ import android.widget.CheckBox
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.FieldEditorActivity
+import com.fieldbook.tracker.adapters.AttributeAdapter
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.BackgroundUiTask
 
@@ -140,9 +141,9 @@ class SearchAttributeChooserDialog : AttributeChooserDialog(
         }
     }
 
-    override fun onAttributeClicked(label: String, position: Int) {
-        val applyToAll = applyAllCheckbox?.isChecked ?: false
-        onSearchAttributeSelectedListener?.onSearchAttributeSelected(label, applyToAll)
+    override fun onAttributeClicked(model: AttributeAdapter.AttributeModel, position: Int) {
+        val applyToAll = applyAllCheckbox.isChecked
+        onSearchAttributeSelectedListener?.onSearchAttributeSelected(model.label, applyToAll)
         dismiss()
     }
 }

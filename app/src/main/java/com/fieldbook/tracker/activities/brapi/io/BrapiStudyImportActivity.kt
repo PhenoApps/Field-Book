@@ -1,6 +1,5 @@
 package com.fieldbook.tracker.activities.brapi.io
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -24,10 +23,12 @@ import com.fieldbook.tracker.brapi.model.BrapiStudyDetails
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV1
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV2
+import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -48,7 +49,9 @@ import org.brapi.v2.model.pheno.BrAPIObservationUnit
 import org.brapi.v2.model.pheno.BrAPIObservationVariable
 import org.brapi.v2.model.pheno.BrAPIPositionCoordinateTypeEnum
 import java.util.Locale
+import javax.inject.Inject
 import kotlin.collections.set
+import kotlin.math.max
 
 /**
  * receive study information including trial
@@ -56,6 +59,7 @@ import kotlin.collections.set
  * get obs. levels
  * get observation units, and traits, germplasm
  */
+@AndroidEntryPoint
 class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope() {
 
     companion object {
@@ -80,7 +84,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                         getString(R.string.brapi_v1_is_not_compatible),
                         Toast.LENGTH_SHORT
                     ).show()
-                    setResult(Activity.RESULT_CANCELED)
+                    setResult(RESULT_CANCELED)
                     finish()
                 }
             }
@@ -108,6 +112,9 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
     private var attributesTable: HashMap<String, Map<String, Map<String, String>>>? = null
 
+    @Inject
+    lateinit var db: DataHelper
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -133,7 +140,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
         when (item.itemId) {
             android.R.id.home -> {
-                setResult(Activity.RESULT_CANCELED)
+                setResult(RESULT_CANCELED)
                 finish()
                 return true
             }
@@ -150,7 +157,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         if (studyDbIds.isEmpty()) {
             // fetch study info
             Toast.makeText(this, getString(R.string.no_studydbids_provided), Toast.LENGTH_SHORT).show()
-            setResult(Activity.RESULT_CANCELED)
+            setResult(RESULT_CANCELED)
             finish()
         } else {
 
@@ -187,7 +194,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
                     Toast.makeText(this@BrapiStudyImportActivity, getString(R.string.failed_to_fetch_observation_levels), Toast.LENGTH_SHORT).show()
 
-                    setResult(Activity.RESULT_CANCELED)
+                    setResult(RESULT_CANCELED)
 
                     finish()
                 }
@@ -555,6 +562,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
             importButton.isEnabled = false
 
             launch(Dispatchers.IO) {
+                val successfullyImportedStudies = mutableListOf<String>()
 
                 val level = BrapiObservationLevel().also {
                     it.observationLevelName = try {
@@ -581,6 +589,8 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
                             saveStudy(it, level, sortOrder)
 
+                            successfullyImportedStudies.add(id) // track the successfully imported fields
+
                         }
 
                     } catch (e: Exception) {
@@ -595,7 +605,13 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                     }
                 }
 
-                setResult(Activity.RESULT_OK)
+                val resultIntent = Intent()
+                if (successfullyImportedStudies.size == 1) { // switch active field if only one study was imported
+                    val studyModel = db.getStudyByDbId(successfullyImportedStudies.first())
+                    val fieldId = studyModel?.internal_id_study
+                    resultIntent.putExtra("fieldId", fieldId ?: -1)
+                }
+                setResult(RESULT_OK, resultIntent)
                 finish()
 
             }
@@ -607,6 +623,8 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         level: BrapiObservationLevel,
         sortId: String
     ) {
+
+        var maxVariableIndex = db.maxPositionFromTraits + 1
 
         attributesTable?.get(study.studyDbId)?.let { studyAttributes ->
 
@@ -624,7 +642,9 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                     details.trialName = study.trialName
 
                     details.traits = observationVariables[study.studyDbId]?.toList()
-                        ?.map { it.toTraitObject(this@BrapiStudyImportActivity) } ?: listOf()
+                        ?.map { it.toTraitObject(this@BrapiStudyImportActivity).also {
+                            it.realPosition = maxVariableIndex++
+                        } } ?: listOf()
 
                     val geoCoordinateColumnName = "geo_coordinates"
 

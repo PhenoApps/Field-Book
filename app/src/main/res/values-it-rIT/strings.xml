@@ -77,6 +77,9 @@
     <string name="warning_traits_missing">Il carattere non esiste. Crea un carattere prima di rilevare il dato</string>
     <!-- Changelog -->
     <string name="changelog_title">Diario di modifiche</string>
+    <!--  Field Grouping  -->
+    <string name="group_archive">Archivio</string>
+    <string name="menu_archive">Archivio</string>
     <!-- FIELDS -->
     <!-- General -->
     <string name="menu_fields_sort_list">Ordina per elenco di campi</string>
@@ -111,10 +114,6 @@
     <string name="fields_delete">Cancella</string>
     <string name="fields_delete_study">Cancella campo</string>
     <string name="fields_delete_study_confirmation">Sei sicuro di voler cancellare questo campo? Verranno cancellati anche tutti i dati associati a questo campo.</string>
-    <plurals name="fields_delete_confirmation">
-        <item quantity="one">Sei sicuro di voler cancellare il campo \"%s\"?</item>
-        <item quantity="other">Sei sicuro di voler cancellare questo campo: \"%s\"?</item>
-    </plurals>
     <!-- Import -->
     <string name="fields_new_button_content_description">Aggiungi un nuovo campo.</string>
     <string name="fields_new_dialog_title">Nuovo campo</string>
@@ -510,6 +509,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <!-- usb camera trait -->
     <!-- gopro -->
     <!-- canon camera strings -->
+    <!-- spectral trait strings -->
     <string name="sort">Ordina</string>
     <string name="brapi_traits_filter_title">Caratteri</string>
     <string name="dialog_quick_goto_title">Tasto Rapido</string>

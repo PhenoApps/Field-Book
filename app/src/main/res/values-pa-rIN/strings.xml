@@ -12,6 +12,7 @@
     <!-- File manager  -->
     <!-- Warnings/Catches -->
     <!-- Changelog -->
+    <!--  Field Grouping  -->
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
@@ -91,5 +92,6 @@
     <!-- usb camera trait -->
     <!-- gopro -->
     <!-- canon camera strings -->
+    <!-- spectral trait strings -->
     <!--  NearbyShare  -->
 </resources>

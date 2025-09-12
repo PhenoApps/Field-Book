@@ -37,6 +37,8 @@ class DocumentTreeUtil: BaseDocumentTreeUtil() {
 
             if (context != null) {
 
+                val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
+
                 val prefs = PreferenceManager.getDefaultSharedPreferences(context)
                 val field = prefs.getString(GeneralKeys.FIELD_FILE, "") ?: ""
 
@@ -44,11 +46,11 @@ class DocumentTreeUtil: BaseDocumentTreeUtil() {
                     val plotDataDirName = context.getString(R.string.dir_plot_data)
                     val fieldDir = createDir(context, plotDataDirName, field)
                     if (fieldDir != null) {
-                        var traitDir = fieldDir.findFile(traitName)
+                        var traitDir = fieldDir.findFile(sanitizedTraitName)
                         if (traitDir == null || !traitDir.exists()) {
-                            fieldDir.createDirectory(traitName)
+                            fieldDir.createDirectory(sanitizedTraitName)
                         }
-                        traitDir = fieldDir.findFile(traitName)
+                        traitDir = fieldDir.findFile(sanitizedTraitName)
                         if (traitDir != null && traitDir.findFile(".nomedia")?.exists() != true) {
                             traitDir.createFile("*/*", ".nomedia")
                         }

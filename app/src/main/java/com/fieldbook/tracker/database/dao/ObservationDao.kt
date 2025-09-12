@@ -5,6 +5,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.core.content.contentValuesOf
 import com.fieldbook.tracker.brapi.model.FieldBookImage
 import com.fieldbook.tracker.database.*
@@ -20,6 +21,18 @@ import com.fieldbook.tracker.brapi.model.Observation as BrapiObservation
 class ObservationDao {
 
     companion object {
+
+        const val TAG = "ObservationDao"
+
+        fun getById(id: String): ObservationModel? = withDatabase { db ->
+
+            db.query(Observation.tableName,
+                where = "${Observation.PK} = ?",
+                whereArgs = arrayOf(id))
+                .toFirst()
+                .let { ObservationModel(it) }
+
+        }
 
         fun getAll(): Array<ObservationModel> = withDatabase { db ->
 
@@ -71,16 +84,23 @@ class ObservationDao {
 
         fun getAll(studyId: String, obsUnit: String, traitDbId: String): Array<ObservationModel> = withDatabase { db ->
 
-                val traitObj = ObservationVariableDao.getTraitById(traitDbId.toInt())
-                db.query(
-                    Observation.tableName,
-                    where = "${Study.FK} = ? AND ${ObservationUnit.FK} = ? AND observation_variable_db_id = ? AND observation_variable_field_book_format = ?",
-                    whereArgs = arrayOf(studyId, obsUnit, traitDbId, traitObj?.format ?: "text")
-                )
-                    .toTable()
+            val query = """
+                SELECT *
+                FROM observations
+                JOIN observation_variables
+                    ON observations.observation_variable_db_id = observation_variables.internal_id_observation_variable
+                WHERE study_id = ? AND observation_unit_id = ? AND observation_variable_db_id = ?
+            """.trimIndent()
+
+            //Log.d(TAG, query)
+
+            db.rawQuery(query, arrayOf(studyId, obsUnit, traitDbId.toString())).use {
+
+                it.toTable()
                     .map { ObservationModel(it) }
                     .sortedBy { it.rep.toInt() }
                     .toTypedArray()
+            }
 
             } ?: emptyArray()
 
@@ -184,14 +204,11 @@ class ObservationDao {
         } ?: emptyList()
 
         /**
-         * TODO: this can be replaced with a view
          * important note:  observationUnitDbId and observationUnitName are unit attributes that
          * are required to have for brapi fields; otherwise, this query will fail.
          */
         @SuppressLint("Recycle")
-
-
-        fun getObservations(fieldId: Int, hostUrl: String): List<com.fieldbook.tracker.brapi.model.Observation> = withDatabase { db ->
+        fun getBrapiObservations(fieldId: Int, hostUrl: String): List<com.fieldbook.tracker.brapi.model.Observation> = withDatabase { db ->
             db.rawQuery("""
                 SELECT
                     DISTINCT obs.observation_unit_id AS unitDbId,
@@ -358,12 +375,11 @@ class ObservationDao {
 
         } ?: emptyList()
 
-        fun getUserTraitObservations(studyId: String): List<com.fieldbook.tracker.brapi.model.Observation> =
+        fun getLocalObservations(studyId: String): List<com.fieldbook.tracker.brapi.model.Observation> =
             withDatabase { db ->
 
                 db.query(
                     sNonImageObservationsViewName,
-                    // TODO change study_db_id to match ${Study.FK} in db
                     where = "study_db_id = ? AND (trait_data_source = 'local' OR trait_data_source IS NULL)",
                     whereArgs = arrayOf(studyId)
                 ).toTable()
@@ -403,14 +419,14 @@ class ObservationDao {
          * In this case parent is the variable name and trait is the format
          */
         fun insertObservation(
-            plotId: String, traitDbId: String, traitFormat: String,
+            plotId: String, traitDbId: String,
             value: String, person: String, location: String,
             notes: String, studyId: String, observationDbId: String?,
             lastSyncedTime: OffsetDateTime?,
             rep: String? = (getRep(studyId, plotId, traitDbId) + 1).toString()
         ): Long = withDatabase { db ->
 
-            val traitObj = ObservationVariableDao.getTraitById(traitDbId.toInt())
+            val traitObj = ObservationVariableDao.getTraitById(traitDbId)
             val internalTraitId = if (traitObj == null) {
                 -1
             } else {
@@ -419,30 +435,31 @@ class ObservationDao {
 
             val timestamp = try {
                 OffsetDateTime.now().format(internalTimeFormatter)
-            } catch (e: Exception) { //ZoneRulesException
+            } catch (_: Exception) { //ZoneRulesException
                 String()
             }
 
+            //remove null control characters which are added to strings by some devices (Samsung)
+            //when the user pastes clipboard data
+            val removeNullCharacters = value.replace("\u0000", "")
+
             db.insert(Observation.tableName, null, contentValuesOf(
-                "observation_variable_name" to traitObj?.name,
                 "observation_db_id" to observationDbId,
-                "observation_variable_field_book_format" to traitFormat,
-                "value" to value,
+                "value" to removeNullCharacters,
                 "observation_time_stamp" to timestamp,
                 "collector" to person,
-                "geoCoordinates" to location,
+                "geo_coordinates" to location,
                 "last_synced_time" to lastSyncedTime?.format(internalTimeFormatter),
                 "rep" to rep,
                 "notes" to notes,
                 Study.FK to studyId.toInt(),
-                // "additional_info" to model.additional_info,
                 ObservationUnit.FK to plotId,
                 ObservationVariable.FK to internalTraitId
             ))
 
         } ?: -1L
 
-        fun insertObservation(studyId: Int, model: BrapiObservation, traitIdToTypeMap:Map<String,String>): Int = withDatabase { db ->
+        fun insertObservation(studyId: Int, model: BrapiObservation): Int = withDatabase { db ->
 
             if (getObservation("$studyId", model.unitDbId, model.variableDbId, model.rep ?: "1")?.dbId != null) {
                 println(
@@ -459,15 +476,12 @@ class ObservationDao {
             }
             else {
                 //get observationVariableFieldbookformat based on the variableName
-                val variableFormat = traitIdToTypeMap[model.variableDbId]?: ObservationVariableDao.getTraitByName(model.variableName)!!.format
                 val varRowId =  db.insert(Observation.tableName, null, contentValuesOf(
-                    "observation_variable_name" to model.variableName,
-                    "observation_variable_field_book_format" to variableFormat,
                     "value" to model.value,
                     "observation_time_stamp" to model.timestamp?.format(internalTimeFormatter),
                     "collector" to model.collector,
 //                "geoCoordinates" to model.geo_coordinates,
-                    "geoCoordinates" to null,
+                    "geo_coordinates" to null,
                     "last_synced_time" to model.lastSyncedTime?.format(internalTimeFormatter),
 //                "additional_info" to model.additional_info,
                     "additional_info" to null,
@@ -485,21 +499,25 @@ class ObservationDao {
         fun getUserDetail(studyId: String, plotId: String): HashMap<String, String> =
             withDatabase { db ->
 
-                hashMapOf(*db.query(
-                    Observation.tableName,
-                    arrayOf(
-                        "observation_variable_name",
-                        "observation_variable_field_book_format",
-                        "value",
-                        ObservationUnit.FK
-                    ),
-                    where = "${ObservationUnit.FK} = ? AND ${Study.FK} = ?",
-                    whereArgs = arrayOf(plotId, studyId)
-                )
-                    .toTable().map {
-                        (it["observation_variable_name"] as? String ?: "") to it["value"].toString()
-                    }
-                    .toTypedArray())
+                val query = """
+                    SELECT DISTINCT
+                    V.observation_variable_name,
+                    V.observation_variable_field_book_format,
+                    obs.value,
+                    obs.${ObservationUnit.FK}
+                    FROM observations AS obs
+                    JOIN observation_variables AS V 
+                        ON V.${ObservationVariable.PK} = obs.${ObservationVariable.FK}
+                    WHERE obs.${ObservationUnit.FK} = ? AND obs.${Study.FK} = ?
+                """.trimIndent()
+
+                //Log.d(TAG, query)
+
+                db.rawQuery(query, arrayOf(plotId, studyId)).use {
+                    hashMapOf(*it.toTable().map { row ->
+                        (row["observation_variable_name"] as? String ?: "") to (row["value"]?.toString() ?: "")
+                    }.toTypedArray())
+                }
 
         } ?: hashMapOf()
 
@@ -520,46 +538,24 @@ class ObservationDao {
 
             BrapiObservation().apply {
 
-                val traitObj = ObservationVariableDao.getTraitById(traitDbId.toInt())
+                val query = """
+                    SELECT ${Observation.PK}, ${ObservationUnit.FK}, observation_db_id, observation_time_stamp, last_synced_time
+                    FROM observations
+                    JOIN observation_variables 
+                        ON observations.observation_variable_db_id = observation_variables.internal_id_observation_variable
+                    WHERE study_id = ? AND observation_variable_db_id = ? AND ${ObservationUnit.FK} = ? AND rep = ?
+                """.trimIndent()
 
-                db.query(
-                    Observation.tableName,
-                    arrayOf(
-                        Observation.PK,
-                        ObservationUnit.FK,
-                        "observation_db_id",
-                        "observation_time_stamp",
-                        "last_synced_time"
-                    ),
-                    where = "${Study.FK} = ? AND observation_variable_db_id = ? AND ${ObservationUnit.FK} = ? AND rep = ? AND observation_variable_field_book_format = ?",
-                    whereArgs = arrayOf(studyId, traitDbId, plotId, rep, traitObj?.format ?: "text")
-                ).toTable().forEach {
+                //Log.d(TAG, query)
 
-                    dbId = getStringVal(it, "observation_db_id")
-                    unitDbId = getStringVal(it, ObservationUnit.FK)
-                    setRep((it["rep"] ?: "1").toString())
-                    setTimestamp(getStringVal(it, "observation_time_stamp"))
-                    setLastSyncedTime(getStringVal(it, "last_synced_time"))
-                }
-            }
-        }
-
-        fun getObservationByValue(
-            studyId: String,
-            plotId: String,
-            traitDbId: String,
-            value: String
-        ): BrapiObservation? = withDatabase { db ->
-
-            BrapiObservation().apply {
-                db.query(
-                    Observation.tableName,
-                    arrayOf("observation_db_id", "last_synced_time"),
-                    where = "${Study.FK} = ? AND ${ObservationUnit.FK} = ? AND observation_variable_db_id = ? AND value = ?",
-                    whereArgs = arrayOf(studyId, plotId, traitDbId, value)
-                ).toFirst().let {
-                    dbId = getStringVal(it, "observation_db_id")
-                    setLastSyncedTime(getStringVal(it, "last_synced_time"))
+                db.rawQuery(query, arrayOf(studyId, traitDbId, plotId, rep)).use {
+                    it.toFirst().let { row ->
+                        dbId = getStringVal(row, "observation_db_id")
+                        unitDbId = getStringVal(row, ObservationUnit.FK)
+                        setRep(getStringVal(row, "rep"))
+                        setTimestamp(getStringVal(row, "observation_time_stamp"))
+                        setLastSyncedTime(getStringVal(row, "last_synced_time"))
+                    }
                 }
             }
         }
@@ -603,22 +599,6 @@ class ObservationDao {
         fun delete(id: String) = withDatabase { db ->
             db.delete(Observation.tableName,
                 "${Observation.PK} = ?", arrayOf(id))
-        }
-
-        fun updateObservationModels(observations: List<ObservationModel>) = withDatabase { db ->
-
-            observations.forEach {
-
-                db.update(
-                    Observation.tableName,
-                    ContentValues().apply {
-                        put(Observation.PK, it.internal_id_observation)
-                        put("value", it.value)
-                    },
-                    "${Observation.PK} = ?", arrayOf(it.internal_id_observation.toString())
-                )
-
-            }
         }
 
         fun updateObservationModels(db: SQLiteDatabase, observations: List<ObservationModel>) {
@@ -668,6 +648,19 @@ class ObservationDao {
                 )
         }
 
+        fun updateObservationValue(
+            id: Int,
+            value: String
+        ) = withDatabase { db ->
+            db.update(Observation.tableName,
+                ContentValues().apply {
+                    put("value", value)
+                },
+                "${Observation.PK} = ?",
+                arrayOf(id.toString())
+            )
+        }
+
         //TODO
         fun updateImage(image: FieldBookImage, writeLastSyncedTime: Boolean) = withDatabase {
 
@@ -691,62 +684,18 @@ class ObservationDao {
          */
         fun getRep(studyId: String, plotId: String, traitDbId: String): Int = withDatabase { db ->
 
-            val traitObj = ObservationVariableDao.getTraitById(traitDbId.toInt())
-            val format = traitObj?.format ?: "text"
-            db.query(
-                Observation.tableName,
-                where = "${Study.FK} = ? AND ${ObservationUnit.FK} = ? AND observation_variable_db_id = ? AND observation_variable_field_book_format = ?",
-                whereArgs = arrayOf(studyId, plotId, traitDbId, format)
-            )
-                .toTable().size
+            val query = """
+                SELECT *
+                FROM observations
+                WHERE study_id = ? AND observation_unit_id = ? AND observation_variable_db_id = ?
+            """.trimIndent()
+
+            //Log.d(TAG, query)
+
+            db.rawQuery(query, arrayOf(studyId, plotId, traitDbId)).use { cursor ->
+                cursor.toTable().size
+            }
 
         } ?: 0
-
-        /**
-         * Unit -> plot/unit internal id
-         * variable name -> trait/variable readable name
-         * variable -> trait/variable db id
-         * format -> trait/variable observation_field_book_format
-         */
-//        fun randomObservation(unit: String, uniqueName: String, format: String, variableName: String, variable: String): ObservationModel = ObservationModel(mapOf(
-//                "observation_variable_name" to variableName,
-//                "observation_variable_field_book_format" to format,
-//                "value" to UUID.randomUUID().toString(),
-//                "observation_time_stamp" to "2019-10-15 12:14:590-0400",
-//                "collector" to UUID.randomUUID().toString(),
-//                "geo_coordinates" to UUID.randomUUID().toString(),
-//                "observation_db_id" to uniqueName,
-//                "last_synced_time" to "2019-10-15 12:14:590-0400",
-//                "additional_info" to UUID.randomUUID().toString(),
-//                Study.FK to UUID.randomUUID().toString(),
-//                ObservationUnit.FK to unit.toInt(),
-//                ObservationVariable.FK to variable.toInt()))
-
-        /**
-         * Inserts ten random observations per plot/trait pairs.
-         */
-//        private fun insertRandomObservations() {
-//
-//            ObservationUnitDao.getAll().sliceArray(0 until 10).forEach { unit ->
-//
-//                ObservationVariableDao.getAllTraitObjects().forEach { traitObject ->
-//
-//                    for (i in 0..10) {
-//
-//                        val obs = randomObservation(
-//                                unit.internal_id_observation_unit.toString(),
-//                                unit.observation_unit_db_id,
-//                                traitObject.format,
-//                                traitObject.trait,
-//                                traitObject.id)
-//
-//                        insertObservation(obs)
-//
-////                println(newRowid)
-////                    println("Inserting $newRowid $rowid")
-//                    }
-//                }
-//            }
-//        }
     }
 }

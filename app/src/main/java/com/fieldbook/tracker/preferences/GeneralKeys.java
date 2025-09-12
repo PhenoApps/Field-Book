@@ -1,5 +1,7 @@
 package com.fieldbook.tracker.preferences;
 
+import androidx.annotation.NonNull;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,7 +50,9 @@ public class GeneralKeys {
 
     public static final String GEONAV_CONFIG_DEGREE_PRECISION       = GEONAV_PREFIX + "DEGREE_PRECISION";
   
-    public static final String GEONAV_POPUP_DISPLAY       = GEONAV_PREFIX + "POPUP_DISPLAY";
+    public static final String GEONAV_POPUP_DISPLAY                 = GEONAV_PREFIX + "POPUP_DISPLAY";
+
+    public static final String GEONAV_POPUP_TRAIT                   = GEONAV_PREFIX + "POPUP_TRAIT";
     // @formatter:on
 
     // GNSS
@@ -78,6 +82,7 @@ public class GeneralKeys {
     public static final String TRAITS_EXPORTED = "TraitsExported";
     public static final String ALL_TRAITS_VISIBLE = "allTraitsVisible";
     public static final String LAST_USED_TRAIT = "com.fieldbook.tracker.LAST_USED_TRAIT";
+    public static final String TRAIT_TYPE_WORD_WRAP = "com.fieldbook.tracker.TRAIT_TYPE_WORD_WRAP";
     public static final String LAST_USED_RESOURCE_FILE = "com.fieldbook.tracker.LAST_USED_RESOURCE_FILE";
 
     //themes
@@ -146,6 +151,7 @@ public class GeneralKeys {
 
     //summary filter
     public static final String SUMMARY_FILTER_ATTRIBUTES = "com.fieldbook.tracker.summary.SUMMARY_FILTER_ATTRIBUTES";
+    public static final String SUMMARY_FILTER_TRAITS = "com.fieldbook.tracker.summary.SUMMARY_FILTER_TRAITS";
 
     //Calendar Trait
     public static final String CALENDAR_LAST_SAVED_DATE = "com.fieldbook.tracker.CALENDAR_LAST_SAVED_DATE";
@@ -184,7 +190,16 @@ public class GeneralKeys {
 
     @NotNull
     public static final String TRAITS_LIST_SORT_ORDER = "com.fieldbook.tracker.traits_list_sort_order";
-    
+
+    // stores the state of whether field grouping functionality is enabled/disabled
+    public static final String FIELD_GROUPING_ENABLED = "com.fieldbook.tracker.field_grouping_enabled";
+
+    // field grouping can be toggled by the user, or can be forced to toggle programmatically
+    // this key tracks if the user has toggled the grouping
+    public static final String USER_TOGGLED_FIELD_GROUPING = "com.fieldbook.tracker.user_toggled_field_grouping";
+
+    // simply store the state of whether the "Ungrouped" fields is expanded or not
+    public static final String UNGROUPED_FIELDS_EXPANDED = "com.fieldbook.tracker.ungrouped_fields_expanded";
     // app intro
     public static final String LOAD_SAMPLE_DATA = "com.fieldbook.tracker.load_sample_data";
 
@@ -204,6 +219,45 @@ public class GeneralKeys {
     @NotNull
     public static String getCropCoordinatesKey(int traitId) {
         return "com.fieldbook.tracker.crop_coordinates." + traitId;
+    }
+
+    /**
+     * InnoSpectra Nano
+     */
+
+    @NonNull
+    public static final String INNOSPECTRA_NANO_CONFIG_INDEX = "com.fieldbook.tracker.traits.innospectra_nano.INDEX";
+
+    @NonNull
+    public static final String NIX_NAME = "com.fieldbook.tracker.traits.nix.NAME";
+
+    @NonNull
+    public static final String NIX_ADDRESS = "com.fieldbook.tracker.traits.nix.ADDRESS";
+
+    @NonNull
+    public static final String SPECTRAL_MODE = "com.fieldbook.tracker.traits.spectral.MODE";
+
+    @NotNull
+    private static String getDropDownAttributeKey(int index) {
+        return "DROP" + index;
+    }
+
+    @NotNull
+    private static String getDropDownTraitKey(int index) {
+        return "DROP.TRAIT" + index;
+    }
+
+    @NotNull
+    public static String getIsInfoBarWordWrapped(int index) {
+        return "INFOBAR_WORD_WRAP_" + index;
+    }
+
+    @NotNull
+    public static DropDownKeyModel getDropDownKeys(int index) {
+        return new DropDownKeyModel(
+                getDropDownAttributeKey(index),
+                getDropDownTraitKey(index)
+        );
     }
 
     private GeneralKeys() {

@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.CheckBox
 import android.widget.ProgressBar
+import androidx.core.content.edit
 import androidx.fragment.app.DialogFragment
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -48,7 +49,7 @@ open class AttributeChooserDialog(
     }
 
     interface OnAttributeSelectedListener {
-        fun onAttributeSelected(label: String)
+        fun onAttributeSelected(model: AttributeAdapter.AttributeModel)
     }
 
     protected lateinit var tabLayout: TabLayout
@@ -57,8 +58,8 @@ open class AttributeChooserDialog(
     protected lateinit var applyAllCheckbox: CheckBox
 
     protected var attributes = arrayOf<String>()
-    protected var traits = arrayOf<TraitObject>()
-    protected var other = arrayOf<TraitObject>()
+    protected var visibleTraits = arrayOf<TraitObject>()
+    protected var nonVisibleTraits = arrayOf<TraitObject>()
     protected var attributeSelectedListener: OnAttributeSelectedListener? = null
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -80,8 +81,10 @@ open class AttributeChooserDialog(
         recyclerView.adapter = AttributeAdapter(this, null)
 
         //toggle view of traits/other based on class param
-        tabLayout.getTabAt(1)?.view?.visibility = if (showTraits) TabLayout.VISIBLE else TabLayout.GONE
-        tabLayout.getTabAt(2)?.view?.visibility = if (showOther) TabLayout.VISIBLE else TabLayout.GONE
+        tabLayout.getTabAt(1)?.view?.visibility =
+            if (showTraits) TabLayout.VISIBLE else TabLayout.GONE
+        tabLayout.getTabAt(2)?.view?.visibility =
+            if (showOther) TabLayout.VISIBLE else TabLayout.GONE
 
         val builder = AlertDialog.Builder(requireActivity(), R.style.AppAlertDialog)
             .setView(view)
@@ -98,7 +101,8 @@ open class AttributeChooserDialog(
             BackgroundUiTask.execute(
                 backgroundBlock = ::loadData,
                 uiBlock = ::setupTabLayout,
-                onCanceled = ::setupTabLayout)
+                onCanceled = ::setupTabLayout
+            )
         }
 
         return dialog
@@ -114,15 +118,16 @@ open class AttributeChooserDialog(
         //query database for attributes/traits to use
         try {
             val activity = requireActivity() as CollectActivity
-            attributes = activity.getDatabase().getAllObservationUnitAttributeNames(activity.studyId.toInt())
+            attributes =
+                activity.getDatabase().getAllObservationUnitAttributeNames(activity.studyId.toInt())
             val attributesList = attributes.toMutableList()
             if (showSystemAttributes) {
                 attributesList.add(0, getString(R.string.field_name_attribute))
             }
             attributes = attributesList.toTypedArray()
-            traits = activity.getDatabase().allTraitObjects.toTypedArray()
-            other = traits.filter { !it.visible }.toTypedArray()
-            traits = traits.filter { it.visible }.toTypedArray()
+            visibleTraits = activity.getDatabase().allTraitObjects.toTypedArray()
+            nonVisibleTraits = visibleTraits.filter { !it.visible }.toTypedArray()
+            visibleTraits = visibleTraits.filter { it.visible }.toTypedArray()
         } catch (e: Exception) {
             Log.d(TAG, "Error occurred when querying for attributes in Collect Activity.")
             e.printStackTrace()
@@ -152,7 +157,7 @@ open class AttributeChooserDialog(
                     tab?.let { t ->
                         loadTab(t.text.toString())
                         PreferenceManager.getDefaultSharedPreferences(requireActivity())
-                            .edit().putInt(GeneralKeys.ATTR_CHOOSER_DIALOG_TAB, t.position).apply()
+                            .edit { putInt(GeneralKeys.ATTR_CHOOSER_DIALOG_TAB, t.position) }
                     }
                 }
 
@@ -165,7 +170,14 @@ open class AttributeChooserDialog(
             })
 
             //manually select the first tab based on preferences
-            val tabIndex = PreferenceManager.getDefaultSharedPreferences(requireActivity()).getInt(GeneralKeys.ATTR_CHOOSER_DIALOG_TAB, 0)
+            var tabIndex = PreferenceManager.getDefaultSharedPreferences(requireActivity())
+                .getInt(GeneralKeys.ATTR_CHOOSER_DIALOG_TAB, 0)
+
+            if (!showTraits && tabIndex == 1) {
+                tabIndex = 0
+            } else if (!showOther && tabIndex == 2) {
+                tabIndex = 0
+            }
 
             tabLayout.selectTab(tabLayout.getTabAt(tabIndex))
 
@@ -178,7 +190,7 @@ open class AttributeChooserDialog(
     }
 
     /** Placeholder method; overridden in infoBar class where selection is needed. */
-    protected open fun getSelected(): String? = null
+    protected open fun getSelected(): AttributeAdapter.AttributeModel? = null
 
     /** Handles loading data into the recycler view adapter. */
     protected fun loadTab(label: String) {
@@ -186,21 +198,34 @@ open class AttributeChooserDialog(
         val traitsLabel = getString(R.string.dialog_att_chooser_traits)
 
         // Get values to display based on cached arrays
-        val optionLabels = when (label) {
-            attributesLabel -> attributes
-            traitsLabel -> traits.filter { it.visible }.map { it.name }.toTypedArray()
-            else -> other.map { it.name }.toTypedArray()
+        val optionLabels: List<AttributeAdapter.AttributeModel> = when (label) {
+
+            attributesLabel -> attributes.map { AttributeAdapter.AttributeModel(label = it) }
+
+            traitsLabel -> visibleTraits.map {
+                AttributeAdapter.AttributeModel(
+                    label = it.name,
+                    trait = it
+                )
+            }
+
+            else -> nonVisibleTraits.map {
+                AttributeAdapter.AttributeModel(
+                    label = it.name,
+                    trait = it
+                )
+            }
         }
 
         // Initialize the adapter with the optionLabels. Highlight 'selected' if defined.
         val selected = getSelected()
         recyclerView.adapter = AttributeAdapter(this, selected).apply {
-            submitList(optionLabels.toList())
+            submitList(optionLabels)
         }
     }
 
-    override fun onAttributeClicked(label: String, position: Int) {
-        attributeSelectedListener?.onAttributeSelected(label) ?: run {
+    override fun onAttributeClicked(model: AttributeAdapter.AttributeModel, position: Int) {
+        attributeSelectedListener?.onAttributeSelected(model) ?: run {
             Log.w(TAG, "No OnAttributeSelectedListener set for AttributeChooserDialog.")
         }
         dismiss()

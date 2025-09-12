@@ -54,14 +54,5 @@ class ObservationVariableAttributeDao {
             id
 
         } ?: -1
-
-//        fun getAll() = withDatabase { it.query(ObservationVariableAttribute.tableName).toTable() }
-
-        fun getAllNames() = withDatabase { db ->
-            db.query(ObservationVariableAttribute.tableName, select = arrayOf("observation_variable_attribute_name"))
-                    .toTable()
-                    .map { it["observation_variable_attribute_name"].toString() }
-        }
-
     }
 }

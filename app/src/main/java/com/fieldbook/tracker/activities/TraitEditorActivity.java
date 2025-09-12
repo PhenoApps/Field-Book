@@ -27,7 +27,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
@@ -223,7 +222,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
             FieldObject field = database.getFieldObject(studyId);
 
-            if (!field.getExp_name().equals("") && field.getImport_format() == ImportFormat.BRAPI) {
+            if (!field.getName().equals("") && field.getDataSourceFormat() == ImportFormat.BRAPI) {
 
                 // noCheckTrait is used when the trait should not be checked, but the dialog
                 // should be shown.
@@ -235,28 +234,28 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                 }
 
                 // Check if this is a BrAPI trait
-                if (traitName != null) {
-
-                    // Just returns an empty trait object in the case the trait isn't found
-                    TraitObject trait = database.getDetail(traitName);
-                    if (trait.getName() == null) {
-                        return false;
-                    }
-
-                    if (trait.getExternalDbId() == null || trait.getExternalDbId().equals("local") || trait.getExternalDbId().equals("")) {
-
-                        // Show info dialog if a BrAPI field is selected.
-                        BrapiInfoDialogFragment dialogFragment = new BrapiInfoDialogFragment().newInstance(getResources().getString(R.string.brapi_info_message));
-                        dialogFragment.show(this.getSupportFragmentManager(), "brapiInfoDialogFragment");
-
-                        // Only show the info dialog on the first non-BrAPI trait selected.
-                        return true;
-
-                    } else {
-                        // Dialog was not shown
-                        return false;
-                    }
-                }
+//                if (traitName != null) {
+//
+//                    // Just returns an empty trait object in the case the trait isn't found
+//                    TraitObject trait = database.getDetail(traitName);
+//                    if (trait.getName() == null) {
+//                        return false;
+//                    }
+//
+//                    if (trait.getExternalDbId() == null || trait.getExternalDbId().equals("local") || trait.getExternalDbId().equals("")) {
+//
+//                        // Show info dialog if a BrAPI field is selected.
+//                        BrapiInfoDialogFragment dialogFragment = new BrapiInfoDialogFragment().newInstance(getResources().getString(R.string.brapi_info_message));
+//                        dialogFragment.show(this.getSupportFragmentManager(), "brapiInfoDialogFragment");
+//
+//                        // Only show the info dialog on the first non-BrAPI trait selected.
+//                        return true;
+//
+//                    } else {
+//                        // Dialog was not shown
+//                        return false;
+//                    }
+//                }
             }
         } catch (Exception e) {
             Log.e("error", e.toString());
@@ -356,13 +355,13 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     public void onTraitSelected(String traitId) {
         // Disable touch events on the RecyclerView
         traitList.setEnabled(false);
-        
+
         // Create and show the TraitDetailFragment
         TraitDetailFragment fragment = new TraitDetailFragment();
         Bundle args = new Bundle();
         args.putString("traitId", traitId);
         fragment.setArguments(args);
-        
+
         getSupportFragmentManager().beginTransaction()
             .replace(android.R.id.content, fragment, "TraitDetailFragmentTag")
             .addToBackStack(null)
@@ -419,7 +418,8 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                             //Todo add overflow menu action
                     );
 
-            if (database.getTraitColumnData("trait") != null) {
+            ArrayList<TraitObject> traits = database.getAllTraitObjects();
+            if (traits != null && !traits.isEmpty()) {
                 sequence.target(traitsTapTargetRect(traitsListItemLocation(0, 4), getString(R.string.tutorial_traits_visibility_title), getString(R.string.tutorial_traits_visibility_description)));
                 sequence.target(traitsTapTargetRect(traitsListItemLocation(0, 2), getString(R.string.tutorial_traits_format_title), getString(R.string.tutorial_traits_format_description)));
             }
@@ -758,9 +758,9 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                                        @Nullable DialogInterface.OnClickListener onNegative,
                                        @Nullable DialogInterface.OnDismissListener onDismiss) {
 
-        String[] allTraits = database.getTraitColumnData("trait");
+        ArrayList<TraitObject> traits = database.getAllTraitObjects();
 
-        if (allTraits == null) {
+        if (traits == null || traits.isEmpty()) {
             Utils.makeToast(getApplicationContext(), getString(R.string.warning_traits_missing_modify));
             return;
         }
@@ -794,10 +794,10 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         // }
         if (requestCode == REQUEST_RESOURCE_FILE_CODE && resultCode == RESULT_OK && data != null) {
             String fileName = data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY);
-            
+
             // First, handle the ResourceFileParameter case (for trait creation/editing)
             ResourceFileParameter.Companion.handleActivityResult(requestCode, resultCode, data);
-            
+
             // Then, check if we're in the TraitDetailFragment and update it
             TraitDetailFragment fragment = (TraitDetailFragment) getSupportFragmentManager()
                     .findFragmentByTag("TraitDetailFragmentTag");

@@ -7,36 +7,38 @@ import java.util.List;
  * Simple wrapper class for field data
  */
 public class FieldObject {
-    private int exp_id;
-    private String study_db_id;
-    private String exp_name;
-    private String exp_alias;
-    private String unique_id;
-    private String primary_id;
-    private String secondary_id;
-    private String exp_layout;
-    private String exp_species;
-    private String exp_sort;
-    private String date_import;
-    private String date_edit;
-    private String date_export;
-    private String date_sync;
-    private String count;
-    private String exp_source;
-    private ImportFormat import_format;
-    private String observation_level;
-    private String attribute_count;
-    private String trait_count;
-    private String observation_count;
-    private String trial_name;
-    private String search_attribute;
+    private int studyId;
+    private String studyDbId;
+    private String name;
+    private String alias;
+    private String uniqueId;
+    private String primaryId;
+    private String secondaryId;
+    private String layout;
+    private String species;
+    private String sortColumnsStringArray;
+    private String dateImport;
+    private String dateEdit;
+    private String dateExport;
+    private String dateSync;
+    private String entryCount;
+    private String dataSource;
+    private ImportFormat dataSourceFormat;
+    private String observationLevel;
+    private String attributeCount;
+    private String traitCount;
+    private String observationCount;
+    private String trialName;
+    private String searchAttribute;
+    private Integer groupId;
+    private boolean isArchived;
 
-    public String getTrial_name() {
-        return trial_name;
+    public String getTrialName() {
+        return trialName;
     }
 
-    public void setTrial_name(String trial_name) {
-        this.trial_name = trial_name;
+    public void setTrialName(String trialName) {
+        this.trialName = trialName;
     }
 
     public static class TraitDetail {
@@ -79,175 +81,191 @@ public class FieldObject {
     public FieldObject() {
     }
 
-    public int getExp_id() {
-        return exp_id;
+    public int getStudyId() {
+        return studyId;
     }
 
-    public void setExp_id(int exp_id) {
-        this.exp_id = exp_id;
+    public void setStudyId(int studyId) {
+        this.studyId = studyId;
     }
 
-    public String getStudy_db_id() {
-        return study_db_id;
+    public String getStudyDbId() {
+        return studyDbId;
     }
 
-    public void setStudy_db_id(String study_db_id) {
-        this.study_db_id = study_db_id;
+    public void setStudyDbId(String studyDbId) {
+        this.studyDbId = studyDbId;
     }
 
-    public String getExp_name() {
-        return exp_name;
+    public String getName() {
+        return name;
     }
 
-    public void setExp_name(String exp_name) {
-        this.exp_name = exp_name;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getExp_alias() {
-        return exp_alias;
+    public String getAlias() {
+        return alias;
     }
 
-    public void setExp_alias(String exp_alias) {
-        this.exp_alias = exp_alias;
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 
-    public String getUnique_id() {
-        return unique_id;
+    public String getUniqueId() {
+        return uniqueId;
     }
 
-    public void setUnique_id(String unique_id) {
-        this.unique_id = unique_id;
+    public void setUniqueId(String uniqueId) {
+        this.uniqueId = uniqueId;
     }
 
-    public String getPrimary_id() {
-        return primary_id;
+    public String getPrimaryId() {
+        return primaryId;
     }
 
-    public void setPrimary_id(String primary_id) {
-        this.primary_id = primary_id;
+    public void setPrimaryId(String primaryId) {
+        this.primaryId = primaryId;
     }
 
-    public String getSecondary_id() {
-        return secondary_id;
+    public String getSecondaryId() {
+        return secondaryId;
     }
 
-    public void setSecondary_id(String secondary_id) {
-        this.secondary_id = secondary_id;
+    public void setSecondaryId(String secondaryId) {
+        this.secondaryId = secondaryId;
     }
 
-    public String getExp_layout() {
-        return exp_layout;
+    public String getLayout() {
+        return layout;
     }
 
-    public void setExp_layout(String exp_layout) {
-        this.exp_layout = exp_layout;
+    public void setLayout(String layout) {
+        this.layout = layout;
     }
 
-    public String getExp_species() {
-        return exp_species;
+    public String getSpecies() {
+        return species;
     }
 
-    public void setExp_species(String exp_species) {
-        this.exp_species = exp_species;
+    public void setSpecies(String species) {
+        this.species = species;
     }
 
-    public String getExp_sort() {
-        return exp_sort;
+    public String getSortColumnsStringArray() {
+        return sortColumnsStringArray;
     }
 
-    public void setExp_sort(String exp_sort) {
-        this.exp_sort = exp_sort;
+    public void setSortColumnsStringArray(String sortColumnsStringArray) {
+        this.sortColumnsStringArray = sortColumnsStringArray;
     }
 
-    public String getDate_import() {
-        return date_import;
+    public String getDateImport() {
+        return dateImport;
     }
 
-    public void setDate_import(String date_import) {
-        this.date_import = date_import;
+    public void setDateImport(String dateImport) {
+        this.dateImport = dateImport;
     }
 
-    public String getDate_edit() {
-        return date_edit;
+    public String getDateEdit() {
+        return dateEdit;
     }
 
-    public void setDate_edit(String date_edit) {
-        this.date_edit = date_edit;
+    public void setDateEdit(String dateEdit) {
+        this.dateEdit = dateEdit;
     }
 
-    public String getDate_export() {
-        return date_export;
+    public String getDateExport() {
+        return dateExport;
     }
 
-    public void setDate_export(String date_export) {
-        this.date_export = date_export;
+    public void setDateExport(String dateExport) {
+        this.dateExport = dateExport;
     }
 
-    public String getDate_sync() {
-        return date_sync;
+    public String getDateSync() {
+        return dateSync;
     }
 
-    public void setDate_sync(String date_sync) {
-        this.date_sync = date_sync;
+    public void setDateSync(String dateSync) {
+        this.dateSync = dateSync;
     }
 
-    public String getCount() {
-        return count;
+    public String getEntryCount() {
+        return entryCount;
     }
 
-    public void setCount(String count) {
-        this.count = count;
+    public void setEntryCount(String entryCount) {
+        this.entryCount = entryCount;
     }
 
-    public String getExp_source() {
-        return exp_source;
+    public String getDataSource() {
+        return dataSource;
     }
 
-    public void setExp_source(String exp_source) {
-        this.exp_source = exp_source;
+    public void setDataSource(String dataSource) {
+        this.dataSource = dataSource;
     }
 
-    public ImportFormat getImport_format() {
-        return import_format;
+    public ImportFormat getDataSourceFormat() {
+        return dataSourceFormat;
     }
 
-    public void setImport_format(ImportFormat import_format) {
-        this.import_format = import_format;
+    public void setDataSourceFormat(ImportFormat dataSourceFormat) {
+        this.dataSourceFormat = dataSourceFormat;
     }
 
-    public String getObservation_level() {
-        return observation_level;
+    public String getObservationLevel() {
+        return observationLevel;
     }
 
-    public void setObservation_level(String observation_level) {
-        this.observation_level = observation_level;
+    public void setObservationLevel(String observationLevel) {
+        this.observationLevel = observationLevel;
     }
-    public String getAttribute_count() {
-        return attribute_count;
-    }
-
-    public void setAttribute_count(String attribute_count) {
-        this.attribute_count = attribute_count;
-    }
-    public String getTrait_count() {
-        return trait_count;
+    public String getAttributeCount() {
+        return attributeCount;
     }
 
-    public void setTrait_count(String trait_count) {
-        this.trait_count = trait_count;
+    public void setAttributeCount(String attributeCount) {
+        this.attributeCount = attributeCount;
     }
-    public String getObservation_count() {
-        return observation_count;
-    }
-
-    public void setObservation_count(String observation_count) {
-        this.observation_count = observation_count;
-    }
-    public String getSearch_attribute() {
-        return search_attribute;
+    public String getTraitCount() {
+        return traitCount;
     }
 
-    public void setSearch_attribute(String search_attribute) {
-        this.search_attribute = search_attribute;
+    public void setTraitCount(String traitCount) {
+        this.traitCount = traitCount;
+    }
+    public String getObservationCount() {
+        return observationCount;
+    }
+
+    public void setObservationCount(String observationCount) {
+        this.observationCount = observationCount;
+    }
+    public String getSearchAttribute() {
+        return searchAttribute;
+    }
+
+    public void setSearchAttribute(String searchAttribute) {
+        this.searchAttribute = searchAttribute;
+    }
+
+    public Integer getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Integer groupId) {
+        this.groupId = groupId;
+    }
+
+    public boolean getArchived() {
+        return isArchived;
+    }
+
+    public void setArchived(boolean isArchived) {
+        this.isArchived = isArchived;
     }
 }

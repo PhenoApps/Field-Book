@@ -26,6 +26,7 @@ import com.fieldbook.tracker.adapters.ImageAdapter
 import com.fieldbook.tracker.database.internalTimeFormatter
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.objects.RangeObject
+import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.provider.GenericFileProvider
 import com.fieldbook.tracker.traits.formats.Formats
@@ -176,15 +177,15 @@ abstract class AbstractCameraTrait :
     }
 
     protected fun saveJpegToStorage(
-        format: String,
         data: ByteArray,
         obsUnit: RangeObject,
+        traitObj: TraitObject,
         saveTime: String,
         saveState: SaveState,
         offset: Int? = null
     ) {
 
-        saveToStorage(format, obsUnit, saveTime, saveState) { uri ->
+        saveToStorage(obsUnit, traitObj, saveTime, saveState) { uri ->
 
             if (saveState != SaveState.SINGLE_SHOT) {
 
@@ -244,10 +245,10 @@ abstract class AbstractCameraTrait :
         }
     }
 
-    protected fun saveBitmapToStorage(format: String, bmp: Bitmap, obsUnit: RangeObject) {
+    protected fun saveBitmapToStorage(bmp: Bitmap, obsUnit: RangeObject, traitObj: TraitObject) {
 
         saveToStorage(
-            format, obsUnit, saveTime = FileUtil.sanitizeFileName(
+            obsUnit, traitObj, saveTime = FileUtil.sanitizeFileName(
                 OffsetDateTime.now().format(
                     internalTimeFormatter
                 )
@@ -262,7 +263,7 @@ abstract class AbstractCameraTrait :
         }
     }
 
-    private fun writeExif(file: DocumentFile, studyId: String, timestamp: String) {
+    private fun writeExif(file: DocumentFile, studyId: String, entryId: String, traitId: String, timestamp: String) {
 
         //if sdk > 24, can write exif information to the image
         //goal is to encode observation variable model into the user comments
@@ -273,8 +274,8 @@ abstract class AbstractCameraTrait :
                 (controller.getContext() as CollectActivity).person,
                 timestamp,
                 database.getStudyById(studyId),
-                database.getObservationUnitById(currentRange.uniqueId),
-                database.getObservationVariableById(currentTrait.id),
+                database.getObservationUnitById(entryId),
+                database.getObservationVariableById(traitId),
                 file.uri,
                 controller.getRotationRelativeToDevice()
             )
@@ -282,14 +283,15 @@ abstract class AbstractCameraTrait :
     }
 
     private fun saveToStorage(
-        format: String,
         obsUnit: RangeObject,
+        traitObj: TraitObject,
         saveTime: String,
         saveState: SaveState,
         saver: (Uri) -> Unit
     ) {
 
         val plot = obsUnit.uniqueId
+        val traitId = traitObj.id.toString()
         val studyId = collectActivity.studyId
         val person = (activity as? CollectActivity)?.person
         val location = (activity as? CollectActivity)?.locationByPreferences
@@ -298,7 +300,7 @@ abstract class AbstractCameraTrait :
         background.launch {
 
             //get current trait's trait name, use it as a plot_media directory
-            currentTrait.name?.let { traitName ->
+            currentTrait.name.let { traitName ->
 
                 val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
 
@@ -317,7 +319,7 @@ abstract class AbstractCameraTrait :
                             saver.invoke(file.uri)
 
                             database.insertObservation(
-                                plot, traitDbId, format, file.uri.toString(),
+                                plot, traitDbId, file.uri.toString(),
                                 person,
                                 location, "", studyId,
                                 null,
@@ -327,7 +329,7 @@ abstract class AbstractCameraTrait :
 
                             if (saveState == SaveState.SINGLE_SHOT) {
 
-                                writeExif(file, studyId, saveTime)
+                                writeExif(file, studyId, plot, traitId, saveTime)
 
                                 notifyItemInserted(file.uri)
                             }
@@ -347,7 +349,7 @@ abstract class AbstractCameraTrait :
 
                                 saver.invoke(file.uri)
 
-                                writeExif(file, studyId, saveTime)
+                                writeExif(file, studyId, plot, traitId, saveTime)
 
                                 notifyItemInserted(file.uri)
 
@@ -622,7 +624,6 @@ abstract class AbstractCameraTrait :
         database.insertObservation(
             currentRange.uniqueId,
             currentTrait.id,
-            currentTrait.format,
             "NA",
             (activity as? CollectActivity)?.person,
             (activity as? CollectActivity)?.locationByPreferences,
@@ -757,6 +758,10 @@ abstract class AbstractCameraTrait :
     override fun onItemDeleted(model: ImageAdapter.Model) {
 
         showDeleteImageDialog(model, false)
+    }
+
+    override fun onItemLongClicked(model: ImageAdapter.Model) {
+        (context as CollectActivity).showObservationMetadataDialog(model.id)
     }
 
     override fun refreshLock() {
