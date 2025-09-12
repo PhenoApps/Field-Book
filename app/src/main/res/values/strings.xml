@@ -314,6 +314,7 @@
     <string name="traits_format_spectral">Spectral</string>
     <string name="traits_format_nix">Nix</string>
     <string name="traits_format_inno_spectra">InnoSpectra</string>
+    <string name="traits_format_stop_watch">Stopwatch</string>
 
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Trait Format</string>
@@ -1561,6 +1562,13 @@
     <string name="nix_error_no_network">Nix may require internet to work properly.</string>
 
     <string name="import_runnable_field_name_exists">Field name already exists.</string>
+
     <string name="enabled">enabled</string>
     <string name="disabled">disabled</string>
+
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="reset">Reset</string>
+    <string name="play">Play</string>
+    <string name="pause">Pause</string>
+    <string name="save">Save</string>
 </resources>
