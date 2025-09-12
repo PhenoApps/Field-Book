@@ -219,4 +219,6 @@
     <string name="brapi_traits_filter_title">ጸባዮች</string>
     <string name="traits_sort_default">እንደነበረ</string>
     <!--  NearbyShare  -->
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="save">አስቀምጥ</string>
 </resources>
