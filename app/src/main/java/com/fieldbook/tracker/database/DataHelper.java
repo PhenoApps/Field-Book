@@ -30,7 +30,6 @@ import com.fieldbook.tracker.database.dao.spectral.SpectralDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.spectral.UriDao;
 import com.fieldbook.tracker.database.views.ObservationVariableAttributeDetailViewCreator;
-import com.fieldbook.tracker.database.migrators.SpectralMigratorVersion16;
 import com.fieldbook.tracker.database.migrators.StudyConfigurationVersion17;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;

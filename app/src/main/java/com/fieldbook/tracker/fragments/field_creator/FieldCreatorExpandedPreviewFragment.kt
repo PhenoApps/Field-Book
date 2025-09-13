@@ -11,9 +11,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.FieldCreatorActivity
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.lifecycle.MutableLiveData
 import com.fieldbook.tracker.enums.FieldCreationStep
 import com.fieldbook.tracker.views.FieldPreviewGrid
 import com.google.android.material.card.MaterialCardView
@@ -41,7 +39,7 @@ class FieldCreatorExpandedPreviewFragment : FieldCreatorBaseFragment() {
     private lateinit var createFieldButton: ImageButton
     private lateinit var collapseViewFab: FloatingActionButton
 
-    private var isPreviewExpanded = true
+    private val isExpanded = MutableLiveData(true)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -75,7 +73,8 @@ class FieldCreatorExpandedPreviewFragment : FieldCreatorBaseFragment() {
         setupFieldCreationObserver(progressContainer, createFieldButton)
 
         fieldCreatorViewModel.fieldConfig.observe(viewLifecycleOwner) { state ->
-            if (!isPreviewExpanded) {
+            val currentExpanded = isExpanded.value != false
+            if (!currentExpanded) {
                 warningCard.visibility = if (state.isLargeField) View.VISIBLE else View.GONE
             }
         }
@@ -85,13 +84,13 @@ class FieldCreatorExpandedPreviewFragment : FieldCreatorBaseFragment() {
         fieldGrid.setContent {
             MaterialTheme {
                 val config by fieldCreatorViewModel.fieldConfig.observeAsState()
-                var isExpanded by remember { mutableStateOf(isPreviewExpanded) }
+                val expanded by isExpanded.observeAsState(true)
 
                 config?.let { state ->
                     FieldPreviewGrid(
                         config = state,
                         showPlotNumbers = true,
-                        forceFullView = isExpanded,
+                        forceFullView = expanded,
                         onCollapsingStateChanged = null
                     )
                 }
@@ -100,9 +99,11 @@ class FieldCreatorExpandedPreviewFragment : FieldCreatorBaseFragment() {
     }
 
     private fun toggleExpandedView() {
-        isPreviewExpanded = !isPreviewExpanded
+        val expandedState = isExpanded.value != false
+        val newExpandedState = !expandedState
+        isExpanded.value = newExpandedState
 
-        if (isPreviewExpanded) { // expanded view
+        if (newExpandedState) { // expanded view
             titleText.visibility = View.GONE
             fieldSummaryTv.visibility = View.GONE
             warningCard.visibility = View.GONE
