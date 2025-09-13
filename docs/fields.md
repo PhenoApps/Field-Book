@@ -89,19 +89,42 @@ The <img class="icon" src="_static/icons/fields/menu.png"> menu icon in the uppe
 
 #### Create New
 
-Creating a new field directly in Field Book requires a field name, dimensions, starting corner for entry ordering, and whether entries should progress in a zigzag or serpentine order.
+Creating a new field directly in Field Book requires a field name, dimensions, starting corner for entry ordering, walking direction and pattern.
 Universal unique IDs will be generated for all entries.
 
+Press the <img class="icon" src="_static/icons/fields/chevron-left.png"> left icon or <img class="icon" src="_static/icons/fields/chevron-right.png"> right icon to move between steps when available.
+You can also use the stepper to move between steps.
+
 <figure class="image">
-  <img class="screenshot" src="_static/images/fields/fields_create_joined.png" width="1100px"> 
-  <figcaption class="screenshot-caption"><i>Required input during field creation</i></figcaption> 
+  <img class="screenshot" src="_static/images/fields/field_create_stepper.png" width="350px"> 
+  <figcaption class="screenshot-caption"><i>Stepper</i></figcaption> 
 </figure>
 
-Confirm the planned settings are as expected, then press OK.
+Plot numbers indicate the sequence you'll follow when collecting data in the field.
 
 <figure class="image">
-  <img class="screenshot" src="_static/images/fields/fields_create_2_joined.png" width="700px"> 
-  <figcaption class="screenshot-caption"><i>Confirmation and a newly created field</i></figcaption> 
+  <img class="screenshot" src="_static/images/fields/field_create1.png" width="700px"> 
+  <figcaption class="screenshot-caption"><i>Input field name, dimensions and starting corner</i></figcaption> 
+</figure>
+
+Direction determines whether entries progress horizontally or vertically, and pattern determines whether they follow a linear or serpentine path.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/fields/field_create2.png" width="700px"> 
+  <figcaption class="screenshot-caption"><i>Choose direction and pattern</i></figcaption> 
+</figure>
+
+Use the <img class="icon" src="_static/icons/fields/expand-all.png"> expand icon to see the full preview, and <img class="icon" src="_static/icons/fields/collapse-all.png"> collapse icon to see collapsed preview of the field when available.
+Confirm the planned settings are as expected, then press <img class="icon" src="_static/icons/fields/check-bold.png"> done icon.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/fields/field_create3.png" width="700px"> 
+  <figcaption class="screenshot-caption"><i>Review field</i></figcaption> 
+</figure>
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/fields/field_create4.png" width="350px"> 
+  <figcaption class="screenshot-caption"><i>Newly created field</i></figcaption> 
 </figure>
 
 #### Breeding API (BrAPI)
