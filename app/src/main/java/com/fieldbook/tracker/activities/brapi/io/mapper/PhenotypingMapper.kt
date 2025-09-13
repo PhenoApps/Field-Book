@@ -19,7 +19,7 @@ fun BrAPIObservationVariable.toTraitObject(context: Context) = TraitObject().als
 
     it.defaultValue = defaultValue ?: ""
     it.name = synonym ?: observationVariableName
-    it.details = trait.traitDescription
+    it.details = trait.traitDescription ?: ""
     it.externalDbId = observationVariableDbId
 
     BrAPIService.getHostUrl(context)?.let { url ->

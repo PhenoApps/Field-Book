@@ -760,6 +760,10 @@ abstract class AbstractCameraTrait :
         showDeleteImageDialog(model, false)
     }
 
+    override fun onItemLongClicked(model: ImageAdapter.Model) {
+        (context as CollectActivity).showObservationMetadataDialog(model.id)
+    }
+
     override fun refreshLock() {
         super.refreshLock()
         (context as CollectActivity).traitLockData()

@@ -35,7 +35,8 @@ class RepeatedValuesPagerAdapter(private val mContext: Context) : PagerAdapter()
 
         // Set the long click listener
         editText.setOnLongClickListener {
-            (mContext as CollectActivity).showObservationMetadataDialog()
+            val observationId = items[position].model.internal_id_observation
+            (mContext as CollectActivity).showObservationMetadataDialog(observationId)
             true
         }
 

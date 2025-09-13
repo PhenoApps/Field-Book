@@ -110,7 +110,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         settingsButton = act.findViewById(R.id.settings_btn)
 
         recycler?.adapter = LineGraphSelectableAdapter(this)
-        colorRecycler?.adapter = ColorAdapter(this)
+        colorRecycler?.adapter = ColorAdapter(context, this)
     }
 
     override fun afterLoadNotExists(act: CollectActivity?) {
@@ -925,6 +925,15 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
             }.onFailure {
                 Log.e(TAG, "Failed to delete color", it)
             }
+        }
+    }
+
+    override fun onColorLongClicked(position: Int) {
+        try {
+            val obsId = spectralDataList[position]?.observationId
+            (context as? CollectActivity)?.showObservationMetadataDialog(obsId)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }

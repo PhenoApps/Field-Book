@@ -1444,7 +1444,7 @@ public class CollectActivity extends ThemedActivity
                         getLocationByPreferences(), "", studyId, observationDbId,
                         lastSyncedTime, rep);
 
-                updateCurrentTraitStatus(true);
+                runOnUiThread(() -> updateCurrentTraitStatus(true));
             }
         }
 
@@ -2817,22 +2817,35 @@ public class CollectActivity extends ThemedActivity
         return gps.getLocation(0, 0);
     }
 
-    public void showObservationMetadataDialog(){
-        ObservationModel currentObservationObject = getCurrentObservation();
-        if (currentObservationObject != null){
-            DialogFragment dialogFragment = new ObservationMetadataFragment().newInstance(currentObservationObject);
+    private void showObservationMetadataDialog(@Nullable ObservationModel model) {
+
+        if (model != null){
+            DialogFragment dialogFragment = new ObservationMetadataFragment().newInstance(model);
             dialogFragment.show(this.getSupportFragmentManager(), "observationMetadata");
         }
     }
 
+    public void showObservationMetadataDialog(Integer observationId){
+        ObservationModel currentObservationObject = getDatabase().getObservationById(String.valueOf(observationId));
+        showObservationMetadataDialog(currentObservationObject);
+    }
+
+    public void showObservationMetadataDialog() {
+        ObservationModel currentObservationObject = getCurrentObservation();
+        showObservationMetadataDialog(currentObservationObject);
+    }
+
     public ObservationModel getCurrentObservation() {
         String rep = getCollectInputView().getRep();
-        List<ObservationModel> models = Arrays.asList(getDatabase().getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId()));
-            for (ObservationModel m : models) {
+
+        ObservationModel[] models = getDatabase().getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId());
+
+        for (ObservationModel m : models) {
             if (rep.equals(m.getRep())) {
                 return m;
             }
         }
+
         return null;
     }
 
