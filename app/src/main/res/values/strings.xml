@@ -205,6 +205,8 @@
     <string name="field_creator_exit_dialog_title">Exit Field Creator</string>
     <string name="field_creator_exit_dialog_message">Are you sure you want to exit? Your progress will be lost.</string>
 
+    <string name="field_creator_creation_in_progress">Field creation is in progress. Please wait…</string>s
+
     <string name="field_creator_size_field_name_hint">Field Name</string>
     <string name="field_creator_size_rows_hint">Rows</string>
     <string name="field_creator_size_columns_hint">Columns</string>

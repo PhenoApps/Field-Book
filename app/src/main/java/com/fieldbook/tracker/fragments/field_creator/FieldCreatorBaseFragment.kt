@@ -14,12 +14,14 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.FieldCreatorActivity
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.enums.FieldCreationStep
 import com.fieldbook.tracker.enums.FieldStartCorner
 import com.fieldbook.tracker.viewmodels.FieldConfig
 import com.fieldbook.tracker.viewmodels.FieldCreationResult
 import com.fieldbook.tracker.viewmodels.FieldCreatorViewModel
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 /**
  * Serves as a base for all field creator fragments
@@ -82,8 +84,12 @@ abstract class FieldCreatorBaseFragment : Fragment() {
         }
     }
 
-    protected fun setupFieldCreationObserver(progressContainer: LinearLayout, createFieldButton: View?) {
-        createFieldButton?.setOnClickListener {
+    protected fun setupFieldCreationObserver(
+        progressContainer: LinearLayout,
+        createFieldButton: View,
+        changeViewTypeFab: FloatingActionButton
+    ) {
+        createFieldButton.setOnClickListener {
             fieldCreatorViewModel.createField(db, context)
         }
 
@@ -91,7 +97,16 @@ abstract class FieldCreatorBaseFragment : Fragment() {
             when (result) {
                 is FieldCreationResult.Loading -> {
                     progressContainer.visibility = View.VISIBLE
-                    createFieldButton?.isEnabled = false
+                    changeViewTypeFab.visibility = View.GONE
+                    createFieldButton.let {
+                        it.isEnabled = false
+                        it.alpha = 0.5f
+                    }
+
+                    updateForwardButtonState(false)
+                    updateBackButtonState(false)
+
+                    (activity as FieldCreatorActivity).setCreationInProgress(true)
                 }
                 is FieldCreationResult.Success -> {
                     progressContainer.visibility = View.GONE
@@ -105,7 +120,17 @@ abstract class FieldCreatorBaseFragment : Fragment() {
                 }
                 is FieldCreationResult.Error -> {
                     progressContainer.visibility = View.GONE
-                    createFieldButton?.isEnabled = true
+                    changeViewTypeFab.visibility = View.VISIBLE
+                    createFieldButton.let {
+                        it.isEnabled = true
+                        it.alpha = 1.0f
+                    }
+
+                    updateForwardButtonState(true)
+                    updateBackButtonState(true)
+
+                    (activity as FieldCreatorActivity).setCreationInProgress(false)
+
                     Toast.makeText(context, "Failed to create field: ${result.message}", Toast.LENGTH_SHORT).show()
                 }
                 null -> {
@@ -133,6 +158,13 @@ abstract class FieldCreatorBaseFragment : Fragment() {
 
     protected fun updateForwardButtonState(enabled: Boolean) {
         forwardButton?.let { button ->
+            button.isEnabled = enabled
+            button.alpha = if (enabled) 1.0f else 0.5f
+        }
+    }
+
+    private fun updateBackButtonState(enabled: Boolean) {
+        backButton?.let { button ->
             button.isEnabled = enabled
             button.alpha = if (enabled) 1.0f else 0.5f
         }

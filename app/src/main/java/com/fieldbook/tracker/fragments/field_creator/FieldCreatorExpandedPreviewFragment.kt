@@ -70,7 +70,7 @@ class FieldCreatorExpandedPreviewFragment : FieldCreatorBaseFragment() {
     override fun observeFieldCreatorViewModel() {
         setupFieldSummaryInfo(fieldSummaryTv)
 
-        setupFieldCreationObserver(progressContainer, createFieldButton)
+        setupFieldCreationObserver(progressContainer, createFieldButton, collapseViewFab)
 
         fieldCreatorViewModel.fieldConfig.observe(viewLifecycleOwner) { state ->
             val currentExpanded = isExpanded.value != false

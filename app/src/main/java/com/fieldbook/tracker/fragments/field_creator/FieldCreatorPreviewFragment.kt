@@ -62,7 +62,7 @@ class FieldCreatorPreviewFragment : FieldCreatorBaseFragment() {
     override fun observeFieldCreatorViewModel() {
         setupFieldSummaryInfo(fieldSummaryText)
 
-        setupFieldCreationObserver(progressContainer, createFieldButton)
+        setupFieldCreationObserver(progressContainer, createFieldButton, expandViewFab)
 
         fieldCreatorViewModel.fieldConfig.observe(viewLifecycleOwner) { state ->
             warningCard.visibility = if (state.isLargeField) View.VISIBLE else View.GONE

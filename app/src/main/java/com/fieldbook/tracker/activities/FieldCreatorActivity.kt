@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
@@ -17,6 +18,7 @@ import com.fieldbook.tracker.fragments.field_creator.FieldCreatorDirectionFragme
 import com.fieldbook.tracker.fragments.field_creator.FieldCreatorPatternTypeFragmentDirections
 import com.fieldbook.tracker.fragments.field_creator.FieldCreatorSizeFragmentDirections
 import com.fieldbook.tracker.fragments.field_creator.FieldCreatorStartCornerFragmentDirections
+import com.fieldbook.tracker.utilities.Utils
 import com.fieldbook.tracker.viewmodels.FieldConfig
 import com.fieldbook.tracker.viewmodels.FieldCreatorViewModel
 import com.fieldbook.tracker.views.FieldCreatorStepper
@@ -35,6 +37,9 @@ class FieldCreatorActivity : ThemedActivity() {
         fun getIntent(context: Context): Intent = Intent(context, FieldCreatorActivity::class.java)
     }
 
+    private var isCreatingField = false // allows cancelling of field creation once task is initiated
+    private lateinit var onBackPressedCallback: OnBackPressedCallback
+
     private val fieldCreatorViewModel: FieldCreatorViewModel by viewModels()
     private lateinit var stepperView: ComposeView
 
@@ -44,6 +49,8 @@ class FieldCreatorActivity : ThemedActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setupBackCallback()
+
         setContentView(R.layout.activity_field_creator)
 
         val toolbar = findViewById<Toolbar>(R.id.field_creator_toolbar)
@@ -60,6 +67,17 @@ class FieldCreatorActivity : ThemedActivity() {
         setupStepper(getCurrentStepFromViewModel())
         observeForStepper()
     }
+
+    fun setCreationInProgress(inProgress: Boolean) {
+        isCreatingField = inProgress
+
+        // enable interception when creation is active
+        onBackPressedCallback.isEnabled = inProgress
+
+        stepperView.isEnabled = !inProgress
+        stepperView.alpha = if (inProgress) 0.5f else 1.0f
+    }
+
 
     private fun setupStepper(step: FieldCreationStep) {
         stepperView.setContent {
@@ -99,6 +117,10 @@ class FieldCreatorActivity : ThemedActivity() {
      * Forward navigation is only possible until the furthest step UNTIL the pressed icon
      */
     private fun handleStepClick(clickedStep: FieldCreationStep) {
+        if (isCreatingField) { // disabled navigation when field creation in progress
+            return
+        }
+
         val currentStep = getCurrentStepFromViewModel()
         val furthestPossibleStep = findNextAvailableStep()
 
@@ -195,6 +217,11 @@ class FieldCreatorActivity : ThemedActivity() {
 
 
     override fun onSupportNavigateUp(): Boolean {
+        if (isCreatingField) {
+            showCreationMessage()
+            return true
+        }
+
         val currentStep = getCurrentStepFromViewModel()
 
         if (currentStep.position == FieldCreationStep.FIELD_SIZE.position) { // if on first fragment, exit
@@ -204,6 +231,15 @@ class FieldCreatorActivity : ThemedActivity() {
             showExitWarningDialog()
             return true
         }
+    }
+
+    private fun setupBackCallback() {
+        onBackPressedCallback = object : OnBackPressedCallback(false) { // initially don't intercept
+            override fun handleOnBackPressed() {
+                showCreationMessage()
+            }
+        }
+        onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
     }
 
     private fun showExitWarningDialog() {
@@ -217,5 +253,9 @@ class FieldCreatorActivity : ThemedActivity() {
                 d.dismiss()
             }
             .show()
+    }
+
+    private fun showCreationMessage() {
+        Utils.makeToast(this, getString(R.string.field_creator_creation_in_progress))
     }
 }
