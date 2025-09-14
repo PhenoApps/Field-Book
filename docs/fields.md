@@ -123,7 +123,7 @@ Confirm the planned settings are as expected, then press <img class="icon" src="
 </figure>
 
 <figure class="image">
-  <img class="screenshot" src="_static/images/fields/field_create4.png" width="350px"> 
+  <img class="screenshot" src="_static/images/fields/field_create4.png" width="700px"> 
   <figcaption class="screenshot-caption"><i>Newly created field</i></figcaption> 
 </figure>
 
