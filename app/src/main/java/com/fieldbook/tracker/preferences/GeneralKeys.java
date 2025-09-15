@@ -82,6 +82,7 @@ public class GeneralKeys {
     public static final String TRAITS_EXPORTED = "TraitsExported";
     public static final String ALL_TRAITS_VISIBLE = "allTraitsVisible";
     public static final String LAST_USED_TRAIT = "com.fieldbook.tracker.LAST_USED_TRAIT";
+    public static final String TRAIT_TYPE_WORD_WRAP = "com.fieldbook.tracker.TRAIT_TYPE_WORD_WRAP";
     public static final String LAST_USED_RESOURCE_FILE = "com.fieldbook.tracker.LAST_USED_RESOURCE_FILE";
 
     //themes

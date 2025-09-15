@@ -237,39 +237,6 @@ public class ConfigActivity extends ThemedActivity {
         Log.d(TAG, "preferencesSetup: " + BuildConfig.DEBUG);
 
         firstRunSetup();
-
-        migratePreferencesToDefault();
-    }
-
-    /**
-     * Transfer "Settings" preference file map values to default preferences map
-     */
-    private void migratePreferencesToDefault() {
-
-        SharedPreferences oldPreferences = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE);
-        Set<? extends Map.Entry<String, ?>> entries = oldPreferences.getAll().entrySet();
-
-        SharedPreferences.Editor edit = preferences.edit();
-        for (Map.Entry<String, ?> entry : entries) {
-            Object value = entry.getValue();
-            String key = entry.getKey();
-
-            if (value instanceof Boolean) {
-                edit.putBoolean(key, ((Boolean) value));
-            } else if (value instanceof String) {
-                edit.putString(key, ((String) value));
-            } else if (value instanceof Float) {
-                edit.putFloat(key, ((Float) value));
-            } else if (value instanceof Integer) {
-                edit.putInt(key, ((Integer) value));
-            } else if (value instanceof Long) {
-                edit.putLong(key, ((Long) value));
-            } else if (value instanceof HashSet) {
-                edit.putStringSet(key, ((HashSet<String>) value));
-            }
-        }
-
-        edit.apply();
     }
 
     private void showChangelog(Boolean managedShow, Boolean rateButton) {

@@ -402,4 +402,6 @@
     <string name="dialog_quick_goto_title">Quick GoTo機能</string>
     <string name="traits_sort_default">初期値</string>
     <!--  NearbyShare  -->
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="save">保存</string>
 </resources>

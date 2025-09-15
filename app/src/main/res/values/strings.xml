@@ -279,7 +279,7 @@
 
     <string name="traits_export_check">Export current trait list?</string>
     <string name="traits_dialog_export">Export</string>
-    <string name="dialog_delete_traits_message">Would you like to delete all current traits?</string>
+    <string name="dialog_delete_traits_message">Would you like to delete all current traits? Deleting a trait also deletes data that has been collected for that trait.</string>
 
     <string name="traits_toolbar_delete_all">Delete all traits</string>
     <string name="act_trait_editor_no_traits_exist">No traits exist.</string>
@@ -316,6 +316,7 @@
     <string name="traits_format_inno_spectra">InnoSpectra</string>
     <string name="traits_format_green_seeker">Green Seeker</string>
     <string name="traits_format_scale">Scale</string>
+    <string name="traits_format_stop_watch">Stopwatch</string>
 
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Trait Format</string>
@@ -335,6 +336,7 @@
     <string name="traits_create_photo_maximum">Maximum number of photos</string>
     <string name="traits_create_true">True</string>
     <string name="traits_create_false">False</string>
+    <string name="traits_create_unset">Unset</string>
     <string name="traits_create_categories_text">Use / to separate categories</string>
     <string name="traits_create_camera">Camera</string>
     <string name="traits_create_close_keyboard">Close Keyboard</string>
@@ -440,6 +442,7 @@
     <string name="activity_collect_frozen_state">Frozen - once data is saved it cannot be modified or deleted</string>
     <string name="activity_collect_unlocked_state">Unlocked - no restrictions on data entry, modification, or deletion</string>
 
+    <string name="trait_box_word_wrap_toast">Word wrap %s for traits</string>
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">Your device does not have a camera that can be used to take a photo.</string>
     <string name="trait_delete_warning_photo">Are you sure you want to delete this photo?</string>
@@ -475,6 +478,7 @@
     <!-- Trait Layout: Boolean -->
     <string name="trait_boolean_on">On</string>
     <string name="trait_boolean_off">Off</string>
+    <string name="trait_boolean_unset">Unset</string>
 
     <!-- Trait Layout: GoPro -->
     <string name="trait_go_pro_capture_button_text">Capture\n</string>
@@ -1560,6 +1564,15 @@
     <string name="nix_error_no_network">Nix may require internet to work properly.</string>
 
     <string name="import_runnable_field_name_exists">Field name already exists.</string>
+
+    <string name="enabled">enabled</string>
+    <string name="disabled">disabled</string>
+
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="reset">Reset</string>
+    <string name="play">Play</string>
+    <string name="pause">Pause</string>
+    <string name="save">Save</string>
     <string name="device_settings_dialog_name">Name: %s</string>
     <string name="device_settings_dialog_address">Address: %s</string>
     <string name="device_settings_dialog_unknown_name">Unknown Bluetooth Device</string>
