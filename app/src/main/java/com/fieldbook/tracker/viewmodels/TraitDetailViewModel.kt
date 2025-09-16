@@ -44,7 +44,9 @@ class TraitDetailViewModel(
 
                 trait?.let {
                     val observationData = loadObservationData(it)
-                    _uiState.value = TraitDetailUiState.Success(trait, observationData)
+                    _uiState.value = TraitDetailUiState.Success(it.also {
+                        it.loadAttributeAndValues()
+                    }, observationData)
                 }
 
             } catch (e: Exception) {

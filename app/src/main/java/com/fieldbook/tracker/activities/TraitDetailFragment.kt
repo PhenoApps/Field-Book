@@ -40,6 +40,7 @@ import java.util.Calendar
 import javax.inject.Inject
 import androidx.core.view.size
 import androidx.fragment.app.viewModels
+import com.fieldbook.tracker.database.ObservationVariableAttributeDetailsView
 import com.fieldbook.tracker.databinding.FragmentTraitDetailBinding
 import com.fieldbook.tracker.utilities.Utils
 import com.fieldbook.tracker.viewmodels.CopyTraitStatus
@@ -255,7 +256,7 @@ class TraitDetailFragment : Fragment() {
 
         if (trait.format == "date") {
             binding.dateFormatChip.visibility = View.VISIBLE
-            val isUseDayOfYear = preferences.getBoolean(PreferenceKeys.USE_DAY_OF_YEAR, false)
+            val isUseDayOfYear = trait.useDayOfYear
             updateDateFormatChip(isUseDayOfYear)
         } else {
             binding.dateFormatChip.visibility = View.GONE
