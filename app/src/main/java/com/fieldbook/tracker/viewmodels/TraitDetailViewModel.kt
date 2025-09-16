@@ -106,6 +106,17 @@ class TraitDetailViewModel(
         }
     }
 
+    fun updateTraitOptions(trait: TraitObject) {
+
+        viewModelScope.launch {
+            try {
+                trait.saveAttributeValues()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error updating trait options: ", e)
+            }
+        }
+    }
+
     fun copyTrait(trait: TraitObject, newName: String) {
         viewModelScope.launch {
             if (newName.isEmpty()) {

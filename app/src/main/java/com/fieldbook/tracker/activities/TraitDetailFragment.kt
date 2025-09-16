@@ -41,6 +41,7 @@ import javax.inject.Inject
 import androidx.core.view.size
 import androidx.fragment.app.viewModels
 import com.fieldbook.tracker.database.ObservationVariableAttributeDetailsView
+import com.fieldbook.tracker.database.models.TraitAttributes
 import com.fieldbook.tracker.databinding.FragmentTraitDetailBinding
 import com.fieldbook.tracker.utilities.Utils
 import com.fieldbook.tracker.viewmodels.CopyTraitStatus
@@ -82,8 +83,6 @@ class TraitDetailFragment : Fragment() {
 
         setupAllCollapsibleSections()
 
-        setupClickListeners()
-
         return binding.root
     }
 
@@ -116,6 +115,8 @@ class TraitDetailFragment : Fragment() {
                     if (binding.toolbar.menu?.size == 0) { // setup toolbar menu
                         setupToolbar()
                     }
+
+                    setupClickListeners(state.trait)
 
                     state.observationData?.let { renderObservationData(it) }
                 }
@@ -175,7 +176,7 @@ class TraitDetailFragment : Fragment() {
         )
     }
 
-    private fun setupClickListeners() {
+    private fun setupClickListeners(trait: TraitObject) {
         binding.resourceChip.setOnClickListener {
             val dir = BaseDocumentTreeUtil.Companion.getDirectory(requireContext(), R.string.dir_resources)
             if (dir != null && dir.exists()) {
@@ -198,7 +199,7 @@ class TraitDetailFragment : Fragment() {
         }
 
         binding.dateFormatChip.setOnClickListener {
-            showDateFormatDialog()
+            showDateFormatDialog(trait)
         }
 
         binding.brapiLabelValueChip.setOnClickListener {
@@ -291,7 +292,7 @@ class TraitDetailFragment : Fragment() {
         }
     }
 
-    private fun showDateFormatDialog() {
+    private fun showDateFormatDialog(trait: TraitObject) {
         val calendar = Calendar.getInstance()
         
         // Format as standard date (YYYY-MM-DD)
@@ -308,15 +309,17 @@ class TraitDetailFragment : Fragment() {
             getString(R.string.trait_day_format_display, dayOfYear)
         )
         
-        val currentSelection = if (preferences.getBoolean(PreferenceKeys.USE_DAY_OF_YEAR, false)) 1 else 0
+        val currentSelection = if (trait.useDayOfYear) 1 else 0
         
         AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
             .setTitle(getString(R.string.trait_date_format_dialog_title))
             .setSingleChoiceItems(options, currentSelection) { dialog, which ->
-                // Save the preference
-                preferences.edit { putBoolean(PreferenceKeys.USE_DAY_OF_YEAR, which == 1) }
+                val useDayOfYear = which == 1
+                viewModel.updateTraitOptions(trait.also {
+                    it.useDayOfYear = useDayOfYear
+                })
                 // Update the chip text
-                updateDateFormatChip(which == 1)
+                updateDateFormatChip(useDayOfYear)
                 dialog.dismiss()
             }
             .setNegativeButton(R.string.dialog_cancel, null)
