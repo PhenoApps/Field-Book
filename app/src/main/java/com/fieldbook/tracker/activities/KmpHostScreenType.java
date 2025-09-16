@@ -1,7 +1,8 @@
 package com.fieldbook.tracker.activities;
 
 public enum KmpHostScreenType {
-    CONFIG("config");
+    CONFIG("config"),
+    SCANNER("scanner");
 
     private final String value;
 

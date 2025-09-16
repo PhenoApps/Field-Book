@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.fieldbook.shared.ConfigScreen
+import com.fieldbook.shared.ScannerScreen
 
 class KmpHostActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -13,6 +14,18 @@ class KmpHostActivity : ComponentActivity() {
         setContent {
             when (hostScreenType) {
                 KmpHostScreenType.CONFIG -> ConfigScreen(onBack = { finish() })
+                KmpHostScreenType.SCANNER -> {
+                    ScannerScreen(
+                        onBack = { finish() },
+                        onResult = { qrCode ->
+                            val resultIntent = android.content.Intent().apply {
+                                putExtra(ScannerActivity.EXTRA_BARCODE, qrCode)
+                            }
+                            setResult(RESULT_OK, resultIntent)
+                            finish()
+                        }
+                    )
+                }
             }
         }
     }

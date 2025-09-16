@@ -392,7 +392,11 @@ public class ConfigActivity extends ThemedActivity {
 
         barcodeSearchFab = findViewById(R.id.act_config_search_fab);
         barcodeSearchFab.setOnClickListener(v -> {
-            if (mlkitEnabled) {
+            if (useKmp) {
+                Intent kmpIntent = new Intent(ConfigActivity.this, KmpHostActivity.class);
+                kmpIntent.putExtra(KmpHostActivity.EXTRA_SCREEN, KmpHostScreenType.SCANNER.getValue());
+                startActivityForResult(kmpIntent, REQUEST_BARCODE);
+            } else if (mlkitEnabled) {
                 ScannerActivity.Companion.requestCameraAndStartScanner(this, REQUEST_BARCODE, null, null, null);
             } else {
                 new IntentIntegrator(this)
@@ -567,6 +571,10 @@ public class ConfigActivity extends ThemedActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
+        boolean useKmp = PreferenceManager.getDefaultSharedPreferences(this)
+                .getBoolean(PreferenceKeys.USE_KMP, false);
+
         if (requestCode == REQUEST_APP_INTRO_CODE) {
             if (resultCode != Activity.RESULT_OK) finish();
             else {
@@ -605,8 +613,8 @@ public class ConfigActivity extends ThemedActivity {
 
                 // get barcode from scan result
                 String scannedBarcode;
-                if (mlkitEnabled) {
-                    scannedBarcode = data.getStringExtra("barcode");
+                if (mlkitEnabled || useKmp) {
+                    scannedBarcode = data.getStringExtra(ScannerActivity.EXTRA_BARCODE);
                 } else {
                     IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
                     scannedBarcode = plotDataResult.getContents();
