@@ -466,6 +466,7 @@ class NewTraitDialog(
         database.editTraits(
             traitObject.id,
             traitObject.name,
+            traitObject.alias,
             traitObject.format,
             traitObject.defaultValue,
             traitObject.minimum,
@@ -477,7 +478,8 @@ class NewTraitDialog(
             traitObject.saveImage,
             traitObject.useDayOfYear,
             traitObject.displayValue,
-            traitObject.resourceFile
+            traitObject.resourceFile,
+            traitObject.synonyms
         )
     }
 

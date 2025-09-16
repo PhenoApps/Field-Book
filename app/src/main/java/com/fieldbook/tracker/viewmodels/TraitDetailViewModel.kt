@@ -48,6 +48,7 @@ class TraitDetailViewModel(
                 }
 
             } catch (e: Exception) {
+                Log.e(TAG, "Error loading trait details: ", e)
                 _uiState.value = TraitDetailUiState.Error(R.string.error_loading_trait_detail)
             }
         }
@@ -85,7 +86,6 @@ class TraitDetailViewModel(
             try {
                 val updatedTrait = withContext(ioDispatcher) {
                     val trait = database.getTraitById(traitId)
-                    Log.d(TAG, "updateResourceFile: ${trait?.name}")
                     trait?.let {
                         it.resourceFile = fileUri
                     }
@@ -115,9 +115,12 @@ class TraitDetailViewModel(
                 withContext(ioDispatcher) {
                     val pos = database.getMaxPositionFromTraits() + 1
 
-                    trait.name = newName
-                    trait.visible = true
-                    trait.realPosition = pos
+                    trait.apply {
+                        name = newName
+                        alias = newName
+                        visible = true
+                        realPosition = pos
+                    }
 
                     database.insertTraits(trait)
                 }

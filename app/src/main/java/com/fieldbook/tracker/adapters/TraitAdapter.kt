@@ -109,7 +109,7 @@ class TraitAdapter(private val sorter: TraitSorter):
         // contents of the view with that element
         with (currentList[position]) {
             viewHolder.itemView.tag = this
-            viewHolder.nameTextView.text = this.name
+            viewHolder.nameTextView.text = this.alias
 
             val icon = Formats.entries
                 .find { it.getDatabaseName() == this.format }?.getIcon()

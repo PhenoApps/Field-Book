@@ -29,8 +29,8 @@ import com.fieldbook.tracker.database.dao.spectral.ProtocolDao;
 import com.fieldbook.tracker.database.dao.spectral.SpectralDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.spectral.UriDao;
+import com.fieldbook.tracker.database.migrators.TraitAliasVersion18;
 import com.fieldbook.tracker.database.views.ObservationVariableAttributeDetailViewCreator;
-import com.fieldbook.tracker.database.migrators.SpectralMigratorVersion16;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.database.models.ObservationVariableModel;
@@ -76,7 +76,7 @@ import dagger.hilt.android.qualifiers.ActivityContext;
  */
 public class DataHelper {
 
-    public static final int DATABASE_VERSION = SpectralMigratorVersion16.VERSION;
+    public static final int DATABASE_VERSION = TraitAliasVersion18.VERSION;
     private static final String DATABASE_NAME = "fieldbook.db";
     public static SQLiteDatabase db;
     private static final String TAG = "Field Book";
@@ -900,17 +900,18 @@ public class DataHelper {
     /**
      * V2 - Edit existing trait
      */
-    public long editTraits(String traitDbId, String trait, String format, String defaultValue,
+    public long editTraits(String traitDbId, String trait, String traitAlias,String format, String defaultValue,
                            String minimum, String maximum, String details, String categories,
                            Boolean closeKeyboardOnOpen,
                            Boolean saveImage,
-                           Boolean cropImage, Boolean useDayOfYear, Boolean displayValue, String resourceFile) {
+                           Boolean cropImage, Boolean useDayOfYear, Boolean displayValue, String resourceFile,
+                           List<String> synonyms) {
 
         open();
 
-        return ObservationVariableDao.Companion.editTraits(traitDbId, trait, format, defaultValue,
+        return ObservationVariableDao.Companion.editTraits(traitDbId, trait, traitAlias, format, defaultValue,
                 minimum, maximum, details, categories, closeKeyboardOnOpen, cropImage,
-                saveImage, useDayOfYear, displayValue, resourceFile);
+                saveImage, useDayOfYear, displayValue, resourceFile, synonyms);
 //        try {
 //            ContentValues c = new ContentValues();
 //            c.put("trait", trait);
@@ -943,6 +944,13 @@ public class DataHelper {
         return ObservationVariableDao.Companion.getTraitByName(name);
     }
 
+    public TraitObject getTraitByAlias(String name) {
+
+        open();
+
+        return ObservationVariableDao.Companion.getTraitByAlias(name);
+    }
+
     public TraitObject getTraitById(String id) {
 
         open();
@@ -961,11 +969,11 @@ public class DataHelper {
 
         open();
 
-        return ObservationVariableDao.Companion.editTraits(trait.getId(), trait.getName(),
+        return ObservationVariableDao.Companion.editTraits(trait.getId(), trait.getName(), trait.getAlias(),
                 trait.getFormat(), trait.getDefaultValue(), trait.getMinimum(), trait.getMaximum(),
                 trait.getDetails(), trait.getCategories(), trait.getCloseKeyboardOnOpen(), trait.getCropImage(),
                 trait.getSaveImage(),
-                trait.getUseDayOfYear(), trait.getDisplayValue(), trait.getResourceFile());
+                trait.getUseDayOfYear(), trait.getDisplayValue(), trait.getResourceFile(), trait.getSynonyms());
     }
 
     public boolean checkUnique(HashMap<String, String> values) {
@@ -1693,6 +1701,11 @@ public class DataHelper {
             if (oldVersion <= 15 && newVersion >= 16) {
                 //spectral data migration
                 Migrator.Companion.migrateToVersion16(db);
+            }
+
+            if (oldVersion <= 17 && newVersion >= 18) {
+                // add trait alias column migration
+                Migrator.Companion.migrateToVersion18(db);
             }
         }
     }

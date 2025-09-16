@@ -4,7 +4,8 @@ import android.database.Cursor
 import com.fieldbook.tracker.database.Migrator.ObservationVariable
 import com.fieldbook.tracker.database.dao.TraitAttributeValuesHelper
 import com.fieldbook.tracker.database.models.TraitAttributes
-import com.fieldbook.tracker.utilities.CategoryJsonUtil
+import com.fieldbook.tracker.utilities.SynonymsUtil.deserializeSynonyms
+import com.fieldbook.tracker.utilities.SynonymsUtil.serializeSynonyms
 import java.util.*
 
 /**
@@ -12,6 +13,7 @@ import java.util.*
  */
 class TraitObject {
     var name: String = ""
+    var alias: String = ""
     var format: String = ""
     var defaultValue: String = ""
     var details: String = ""
@@ -64,7 +66,11 @@ class TraitObject {
 
     var resourceFile: String
         get() = attributeValues.getString(TraitAttributes.RESOURCE_FILE)
-        set(value) = attributeValues.setValue(TraitAttributes.RESOURCE_FILE, value.toString())
+        set(value) = attributeValues.setValue(TraitAttributes.RESOURCE_FILE, value)
+
+    var synonyms: List<String>
+        get() = deserializeSynonyms(attributeValues.getString(TraitAttributes.VARIABLE_SYNONYMS))
+        set(value) = attributeValues.setValue(TraitAttributes.VARIABLE_SYNONYMS, serializeSynonyms(value))
 
     fun loadAttributeAndValues() {
         attributeValues.traitId = id
@@ -84,6 +90,7 @@ class TraitObject {
 
         return realPosition == that.realPosition &&
                 name == that.name &&
+                alias == that.alias &&
                 format == that.format &&
                 defaultValue == that.defaultValue &&
                 minimum == that.minimum &&
@@ -101,20 +108,23 @@ class TraitObject {
                 saveImage == that.saveImage &&
                 useDayOfYear == that.useDayOfYear &&
                 displayValue == that.displayValue &&
-                resourceFile == that.resourceFile
+                resourceFile == that.resourceFile &&
+                synonyms == that.synonyms
     }
 
     override fun hashCode(): Int {
         return Objects.hash(
-            name, format, defaultValue, minimum, maximum, details, categories,
+            name, alias, format, defaultValue, minimum, maximum, details, categories,
             realPosition, id, visible, externalDbId, traitDataSource,
-            additionalInfo, observationLevelNames, closeKeyboardOnOpen, cropImage
+            additionalInfo, observationLevelNames, closeKeyboardOnOpen, cropImage,
+            saveImage, useDayOfYear, displayValue, resourceFile, synonyms
         )
     }
 
     fun clone(): TraitObject {
         val t = TraitObject()
         t.name = this.name
+        t.alias = this.alias
         t.format = this.format
         t.defaultValue = this.defaultValue
         t.minimum = this.minimum
@@ -134,6 +144,7 @@ class TraitObject {
         t.useDayOfYear = this.useDayOfYear
         t.displayValue = this.displayValue
         t.resourceFile = this.resourceFile
+        t.synonyms = this.synonyms
 
         return t
     }
@@ -141,6 +152,7 @@ class TraitObject {
     fun loadFromCursor(cursor: Cursor) {
 
         val nameIndex = cursor.getColumnIndex("observation_variable_name")
+        val aliasIndex = cursor.getColumnIndex("observation_variable_alias")
         val formatIndex = cursor.getColumnIndex("observation_variable_field_book_format")
         val defaultValueIndex = cursor.getColumnIndex("default_value")
         val detailsIndex = cursor.getColumnIndex("observation_variable_details")
@@ -151,7 +163,7 @@ class TraitObject {
         val additionalInfoIndex = cursor.getColumnIndex("additional_info")
         val traitDataSourceIndex = cursor.getColumnIndex("trait_data_source")
 
-        if (nameIndex == -1 || formatIndex == -1 || defaultValueIndex == -1 ||
+        if (nameIndex == -1 || aliasIndex == -1 || formatIndex == -1 || defaultValueIndex == -1 ||
             detailsIndex == -1 || idIndex == -1 || externalDbIdIndex == -1 ||
             realPositionIndex == -1 || visibleIndex == -1 || additionalInfoIndex == -1 ||
             traitDataSourceIndex == -1) {
@@ -159,6 +171,7 @@ class TraitObject {
         }
 
         name = cursor.getString(nameIndex) ?: ""
+        alias = cursor.getString(aliasIndex) ?: ""
         format = cursor.getString(formatIndex) ?: ""
         defaultValue = cursor.getString(defaultValueIndex) ?: ""
         details = cursor.getString(detailsIndex) ?: ""

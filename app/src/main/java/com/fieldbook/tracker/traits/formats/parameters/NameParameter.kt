@@ -62,13 +62,20 @@ class NameParameter : BaseFormatParameter(
         }
 
         override fun merge(traitObject: TraitObject) = traitObject.apply {
-            name = nameEt.text.toString().trim { it <= ' ' }
+            val inputText = nameEt.text.toString().trim { it <= ' ' }
+
+            if (id.isEmpty()) { // new trait - assign to both name and alias
+                name = inputText
+                alias = inputText
+            } else { // edit trait - assign only to alias
+                alias = inputText
+            }
         }
 
         override fun load(traitObject: TraitObject?): Boolean {
             try {
-                traitObject?.name?.let { name ->
-                    nameEt.setText(name)
+                traitObject?.alias?.let { alias ->
+                    nameEt.setText(alias)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -82,11 +89,11 @@ class NameParameter : BaseFormatParameter(
 
                 textInputLayout.endIconDrawable = null
 
-                val name = nameEt.text.toString().trim { it <= ' ' }
+                val inputText = nameEt.text.toString().trim { it <= ' ' }
 
                 var backendError: String? = null
 
-                if (name.isBlank()) {
+                if (inputText.isBlank()) {
 
                     result = false
 
@@ -94,7 +101,11 @@ class NameParameter : BaseFormatParameter(
 
                 } else {
 
-                    val exists = database.getTraitByName(name) != null
+                    val traitByName = database.getTraitByName(inputText)
+
+                    val traitByAlias = database.getTraitByAlias(inputText)
+
+                    val exists = (traitByName != null) || (traitByAlias != null)
 
                     if (initialTraitObject == null) {
 
@@ -108,14 +119,16 @@ class NameParameter : BaseFormatParameter(
 
                     } else {
 
-                        //check if trait was renamed
-                        val originalName = initialTraitObject.name
-                        if (exists && originalName.lowercase() != name.lowercase()) {
+                        if (exists) {
+                            //check if trait was renamed
+                            val conflictingTrait = traitByName ?: traitByAlias
+                            if (conflictingTrait.id != initialTraitObject.id) {
 
-                            result = false
+                                result = false
 
-                            backendError = duplicateNameError
+                                backendError = duplicateNameError
 
+                            }
                         }
                     }
                 }

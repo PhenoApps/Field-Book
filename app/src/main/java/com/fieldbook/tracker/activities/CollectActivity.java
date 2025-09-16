@@ -2757,7 +2757,7 @@ public class CollectActivity extends ThemedActivity
             //add all visible traits
             TraitObject[] traits = getDatabase().getVisibleTraits().toArray(new TraitObject[0]);
             for (TraitObject traitObject : traits) {
-                items.add(new AttributeAdapter.AttributeModel(traitObject.getName(), null, traitObject));
+                items.add(new AttributeAdapter.AttributeModel(traitObject.getAlias(), null, traitObject));
             }
 
             return items;

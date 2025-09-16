@@ -30,10 +30,6 @@ import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.phenoapps.utils.BaseDocumentTreeUtil
 import java.math.BigDecimal
 import java.util.Calendar
@@ -235,7 +231,7 @@ class TraitDetailFragment : Fragment() {
     }
 
     private fun updateTraitData(trait: TraitObject) {
-        binding.traitDisplayName.text = trait.name
+        binding.traitDisplayName.text = trait.alias
 
         binding.sourceChip.text = trait.traitDataSource
         binding.formatChip.text = trait.format
@@ -541,23 +537,23 @@ class TraitDetailFragment : Fragment() {
         if (baseName.contains("-Copy")) {
             baseName = baseName.substring(0, baseName.indexOf("-Copy"))
         }
-        
-        var newTraitName = ""
+
         val allTraits = database.getAllTraitObjects()
-        
-        for (i in 0 until allTraits.size) {
-            newTraitName = "$baseName-Copy-($i)"
-            if (!allTraits.any { it.name == newTraitName }) {
+
+        var i = 0
+        while (true) { // run until no match against names AND aliases
+            val newTraitName = "$baseName-Copy-($i)"
+            if (!allTraits.any { it.name == newTraitName } &&
+                !allTraits.any { it.alias == newTraitName }) {
                 return newTraitName
             }
+            i++
         }
-        
-        return "" // not come here
     }
 
     private fun showCopyTraitDialog(trait: TraitObject) {
         val input = EditText(requireContext())
-        val suggestedName = copyTraitName(trait.name)
+        val suggestedName = copyTraitName(trait.alias)
         input.setText(suggestedName)
 
         AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)

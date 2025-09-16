@@ -1348,8 +1348,11 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             }
 
             // Get the synonyms for easier reading. Set it as the trait name.
-            String synonym = !var.getSynonyms().isEmpty() ? var.getSynonyms().get(0) : null;
-            trait.setName(getPrioritizedValue(synonym, var.getObservationVariableName())); //This will default to the Observation Variable Name if available.
+            String name = var.getObservationVariableName();
+            trait.setName(name);
+            trait.setAlias(name);
+
+            trait.setSynonyms(var.getSynonyms() != null ? var.getSynonyms() : new ArrayList<>());
 
             //v5.1.0 bugfix branch update, getPrioritizedValue can return null, trait name should never be null
             // Skip the trait if there brapi trait field isn't present

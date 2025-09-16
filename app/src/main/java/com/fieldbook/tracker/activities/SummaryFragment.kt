@@ -128,7 +128,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
                 val attributeModels = attributes.map { AttributeAdapter.AttributeModel(it) }
                 val traitAttributeModels =
-                    traits.map { AttributeAdapter.AttributeModel(it.name, trait = it) }
+                    traits.map { AttributeAdapter.AttributeModel(it.alias, trait = it) }
                 val models = attributeModels + traitAttributeModels
 
                 loadData(collector, models)
@@ -300,7 +300,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
         val traitSet = if (traitIds == null) null else hashSetOf<AttributeAdapter.AttributeModel>()
         traitSet?.addAll(traitIds?.mapNotNull { traitId ->
             val trait = ctx.database.getTraitById(traitId)
-            AttributeAdapter.AttributeModel(label = trait.name, trait = trait)
+            AttributeAdapter.AttributeModel(label = trait.alias, trait = trait)
         }?.toTypedArray() ?: emptyArray())
 
         return attributeSet?.toSet() to traitSet?.toSet()
@@ -334,7 +334,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
             val attributeModels = attributes.map { AttributeAdapter.AttributeModel(it) }.sortedBy { it.label }
             val traitAttributeModels =
-                traits.map { AttributeAdapter.AttributeModel(it.name, trait = it) }.sortedBy { it.label }
+                traits.map { AttributeAdapter.AttributeModel(it.alias, trait = it) }.sortedBy { it.label }
 
             val models = (attributeModels + traitAttributeModels).toMutableList()
 

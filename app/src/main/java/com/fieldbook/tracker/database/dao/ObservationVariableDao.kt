@@ -2,7 +2,6 @@ package com.fieldbook.tracker.database.dao
 
 import android.annotation.SuppressLint
 import android.content.ContentValues
-import android.content.Context
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.util.Log
@@ -48,6 +47,14 @@ class ObservationVariableDao {
 
         }
 
+        fun getTraitByAlias(alias: String): TraitObject? = withDatabase { db ->
+
+            db.query(ObservationVariable.tableName,
+                where = "observation_variable_alias = ? COLLATE NOCASE",
+                whereArgs = arrayOf(alias)).toFirst().toTraitObject()
+
+        }
+
         fun getTraitByExternalDbId(externalDbId: String, traitDataSource: String): TraitObject? = withDatabase { db ->
 
             db.query(ObservationVariable.tableName,
@@ -60,6 +67,7 @@ class ObservationVariableDao {
 
             it.id = this[ObservationVariable.PK].toString()
             it.name = this["observation_variable_name"] as? String ?: ""
+            it.alias = this["observation_variable_alias"] as? String ?: ""
             it.format = this["observation_variable_field_book_format"] as? String ?: ""
             it.defaultValue = this["default_value"].toString()
             it.details = this["observation_variable_details"].toString()
@@ -129,6 +137,7 @@ class ObservationVariableDao {
                     cursor.addRow(requiredFields.map {
                         when (it) {
                             "trait" -> trait.name
+                            "traitAlias" -> trait.alias
                             "format" -> trait.format
                             "defaultValue" -> trait.defaultValue
                             "minimum" -> trait.minimum
@@ -155,6 +164,7 @@ class ObservationVariableDao {
                     addRow(requiredFields.map { field ->
                         when (field) {
                             "trait" -> trait.name
+                            "traitAlias" -> trait.alias
                             "format" -> trait.format
                             "defaultValue" -> trait.defaultValue
                             "minimum" -> trait.minimum
@@ -236,6 +246,7 @@ class ObservationVariableDao {
                     put("external_db_id", t.externalDbId)
                     put("trait_data_source", t.traitDataSource)
                     put("observation_variable_name", t.name)
+                    put("observation_variable_alias", t.alias)
                     put("observation_variable_details", t.details)
                     put("observation_variable_field_book_format", t.format)
                     put("default_value", t.defaultValue)
@@ -295,17 +306,19 @@ class ObservationVariableDao {
             }, "${ObservationVariable.PK} = ?", arrayOf(id))
         }
 
-        fun editTraits(id: String, trait: String, format: String, defaultValue: String,
+        fun editTraits(id: String, trait: String, traitAlias: String, format: String, defaultValue: String,
                        minimum: String, maximum: String, details: String, categories: String,
                        closeKeyboardOnOpen: Boolean,
                        cropImage: Boolean,
                        saveImage: Boolean,
                        useDayOfYear: Boolean,
                        displayValue: Boolean,
-                       resourceFile: String): Long = withDatabase { db ->
+                       resourceFile: String,
+                       synonyms: List<String>): Long = withDatabase { db ->
 
            val contentValues = ContentValues().apply {
                put("observation_variable_name", trait)
+               put("observation_variable_alias", traitAlias)
                put("observation_variable_field_book_format", format)
                put("default_value", defaultValue)
                put("observation_variable_details", details)
@@ -331,6 +344,7 @@ class ObservationVariableDao {
                     this.useDayOfYear = useDayOfYear
                     this.displayValue = displayValue
                     this.resourceFile = resourceFile
+                    this.synonyms = synonyms
                 }
 
                 traitObj.saveAttributeValues()
@@ -348,6 +362,11 @@ class ObservationVariableDao {
                 "internal_id_observation_variable = ?",
                 arrayOf(traitDbId)
             )
+        }
+
+        fun updateTraitAlias(traitDbId: String, newName: String) = withDatabase { db ->
+            val contentValues = ContentValues().apply { put("observation_variable_alias", newName) }
+            db.update(ObservationVariable.tableName, contentValues, "${ObservationVariable.PK} = ?", arrayOf(traitDbId))
         }
     }
 }

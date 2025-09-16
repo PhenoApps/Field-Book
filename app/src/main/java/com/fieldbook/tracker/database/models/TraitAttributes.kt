@@ -56,8 +56,13 @@ object TraitAttributes {
         valueType = ValueType.STRING,
     )
 
+    val VARIABLE_SYNONYMS = AttributeDefinition(
+        key = ObservationVariableAttributeDetailsView.VARIABLE_SYNONYMS,
+        valueType = ValueType.STRING,
+    )
+
     val ALL = listOf(MIN_VALUE, MAX_VALUE, CATEGORIES, CLOSE_KEYBOARD, CROP_IMAGE, SAVE_IMAGE,
-        USE_DAY_OF_YEAR, DISPLAY_VALUE, RESOURCE_FILE
+        USE_DAY_OF_YEAR, DISPLAY_VALUE, RESOURCE_FILE, VARIABLE_SYNONYMS
     )
 
     fun byKey(key: String): AttributeDefinition? = ALL.find { it.key == key }

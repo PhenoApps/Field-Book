@@ -19,7 +19,6 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_gravity="center_vertical"
-        android:layout_toEndOf="@+id/spacer1"
         android:scaleX="1.1"
         android:scaleY="1.1"
         android:text="" />
@@ -52,6 +51,7 @@
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_toEndOf="@+id/spacer3"
+        android:layout_toStartOf="@+id/dragSort"
         android:ellipsize="end"
         android:singleLine="true"
         tools:text="insect damage"/>
