@@ -36,9 +36,9 @@ import java.util.Calendar
 import javax.inject.Inject
 import androidx.core.view.size
 import androidx.fragment.app.viewModels
-import com.fieldbook.tracker.database.ObservationVariableAttributeDetailsView
-import com.fieldbook.tracker.database.models.TraitAttributes
 import com.fieldbook.tracker.databinding.FragmentTraitDetailBinding
+import com.fieldbook.tracker.utilities.TraitNameValidator
+import com.fieldbook.tracker.utilities.TraitNameValidator.validateTraitAlias
 import com.fieldbook.tracker.utilities.Utils
 import com.fieldbook.tracker.viewmodels.CopyTraitStatus
 import com.fieldbook.tracker.viewmodels.TraitDetailUiState
@@ -191,7 +191,7 @@ class TraitDetailFragment : Fragment() {
         }
 
         binding.brapiSwapNameChip.setOnClickListener {
-            // Set brapi label behavior for this trait
+            showSwapNameDialog(trait)
         }
 
         binding.dateFormatChip.setOnClickListener {
@@ -264,7 +264,9 @@ class TraitDetailFragment : Fragment() {
             trait.externalDbId != null && (trait.externalDbId?.isNotEmpty() == true)
                     || trait.traitDataSource.contains("brapi", ignoreCase = true) == true
 
-        binding.brapiSwapNameChip.visibility = if (isBrapiTrait) View.VISIBLE else View.GONE
+        val hasSynonyms = trait.synonyms.isNotEmpty()
+
+        binding.brapiSwapNameChip.visibility = if (isBrapiTrait && hasSynonyms) View.VISIBLE else View.GONE
         binding.brapiSwapNameChip.text = getString(R.string.trait_brapi_swap_name)
 
         // Show/hide BrAPI label/value chip based on trait source and format
@@ -286,6 +288,32 @@ class TraitDetailFragment : Fragment() {
         } else {
             binding.brapiLabelValueChip.visibility = View.GONE
         }
+    }
+
+    private fun showSwapNameDialog(trait: TraitObject) {
+        val synonyms = trait.synonyms.toTypedArray()
+
+        // check if current alias is present in synonyms array
+        val currentSelection = synonyms.indexOf(trait.alias).takeIf { it >= 0 } ?: -1
+
+        var selectedSynonym: String? = null
+        AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
+            .setTitle(getString(R.string.trait_swap_name_dialog_title))
+            .setSingleChoiceItems(synonyms, currentSelection) { _, which ->
+                selectedSynonym = synonyms[which]
+            }
+            .setPositiveButton(getString(R.string.trait_swap_name_set_alias)) { _, _ ->
+                selectedSynonym?.let { newAlias ->
+                    val errorRes = validateTraitAlias(newAlias, database, trait)
+                    if (errorRes != null) {
+                        Utils.makeToast(context, getString(errorRes))
+                        return@setPositiveButton
+                    }
+                    viewModel.updateTraitAlias(trait, newAlias)
+                }
+            }
+            .setNegativeButton(getString(R.string.dialog_cancel), null)
+            .show()
     }
 
     private fun showDateFormatDialog(trait: TraitObject) {

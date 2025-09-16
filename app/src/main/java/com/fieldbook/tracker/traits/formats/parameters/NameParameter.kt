@@ -8,6 +8,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.ValidationResult
+import com.fieldbook.tracker.utilities.TraitNameValidator.validateTraitAlias
 import com.google.android.material.textfield.TextInputEditText
 
 class NameParameter : BaseFormatParameter(
@@ -91,51 +92,17 @@ class NameParameter : BaseFormatParameter(
 
                 val inputText = nameEt.text.toString().trim { it <= ' ' }
 
-                var backendError: String? = null
+                val errorRes = validateTraitAlias(inputText, database, initialTraitObject)
 
-                if (inputText.isBlank()) {
-
+                if (errorRes != null) { // blank/duplicate
                     result = false
-
-                    backendError = emptyOrNullNameError
-
-                } else {
-
-                    val traitByName = database.getTraitByName(inputText)
-
-                    val traitByAlias = database.getTraitByAlias(inputText)
-
-                    val exists = (traitByName != null) || (traitByAlias != null)
-
-                    if (initialTraitObject == null) {
-
-                        if (exists) {
-
-                            result = false
-
-                            backendError = duplicateNameError
-
-                        }
-
-                    } else {
-
-                        if (exists) {
-                            //check if trait was renamed
-                            val conflictingTrait = traitByName ?: traitByAlias
-                            if (conflictingTrait.id != initialTraitObject.id) {
-
-                                result = false
-
-                                backendError = duplicateNameError
-
-                            }
-                        }
-                    }
+                    error = nameEt.context.getString(errorRes)
+                    nameEt.error = error
+                } else { // no error
+                    result = true
+                    error = null
+                    nameEt.error = null
                 }
-
-                error = backendError
-
-                nameEt.error = backendError
             }
     }
 }

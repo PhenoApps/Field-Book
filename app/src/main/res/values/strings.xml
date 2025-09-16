@@ -402,6 +402,9 @@
     <string name="error_updating_trait_resource_file">Error updating trait resource file</string>
     <string name="error_empty_trait_name">Trait name cannot be empty</string>
     <string name="error_copy_trait">Error while copying trait</string>
+    <string name="trait_swap_name_dialog_title">Select synonym as trait alias</string>
+    <string name="trait_swap_name_set_alias">Set Alias</string>
+    <string name="error_updating_trait_alias">Error updating trait alias</string>
 
     <!-- <string name="trait_date_format_example">Date: %s</string>
     <string name="trait_day_format_example">Day of Year: %d</string>

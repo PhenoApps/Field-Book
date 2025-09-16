@@ -117,6 +117,24 @@ class TraitDetailViewModel(
         }
     }
 
+    fun updateTraitAlias(trait: TraitObject, newAlias: String) {
+        viewModelScope.launch {
+            try {
+                val updatedTrait = withContext(ioDispatcher) {
+                    trait.alias = newAlias
+                    database.updateTrait(trait)
+                    trait
+                }
+
+                val obsData = (_uiState.value as? TraitDetailUiState.Success)?.observationData
+                _uiState.value = TraitDetailUiState.Success(updatedTrait, obsData)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error updating trait alias: ", e)
+                _uiState.value = TraitDetailUiState.Error(R.string.error_updating_trait_alias)
+            }
+        }
+    }
+
     fun copyTrait(trait: TraitObject, newName: String) {
         viewModelScope.launch {
             if (newName.isEmpty()) {
