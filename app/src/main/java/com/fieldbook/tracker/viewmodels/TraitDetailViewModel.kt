@@ -44,7 +44,9 @@ class TraitDetailViewModel(
 
                 trait?.let {
                     val observationData = loadObservationData(it)
-                    _uiState.value = TraitDetailUiState.Success(trait, observationData)
+                    _uiState.value = TraitDetailUiState.Success(it.also {
+                        it.loadAttributeAndValues()
+                    }, observationData)
                 }
 
             } catch (e: Exception) {
@@ -100,6 +102,17 @@ class TraitDetailViewModel(
             } catch (e: Exception) {
                 Log.e(TAG, "Error updating resource file: ", e)
                 _uiState.value = TraitDetailUiState.Error(R.string.error_updating_trait_resource_file)
+            }
+        }
+    }
+
+    fun updateTraitOptions(trait: TraitObject) {
+
+        viewModelScope.launch {
+            try {
+                trait.saveAttributeValues()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error updating trait options: ", e)
             }
         }
     }
