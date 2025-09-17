@@ -18,6 +18,11 @@ import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.dialogs.DatePickerFragment;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
+import com.fieldbook.tracker.traits.formats.DateFormat;
+import com.fieldbook.tracker.traits.formats.Formats;
+import com.fieldbook.tracker.traits.formats.coders.DateJsonCoder;
+import com.fieldbook.tracker.traits.formats.coders.StringCoder;
+import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -190,11 +195,14 @@ public class DateTraitLayout extends BaseTraitLayout {
             String previewText = datePreviewText.getText().toString();
             getCollectInputView().setText(previewText);
 
-            if (getPrefs().getBoolean(PreferenceKeys.USE_DAY_OF_YEAR, false)) {
-                updateObservation(getCurrentTrait(), String.valueOf(calendar.get(Calendar.DAY_OF_YEAR)));
-            } else {
-                updateObservation(getCurrentTrait(), dateFormat.format(calendar.getTime()));
-            }
+            DateJsonCoder.DateJson encodedDate = new DateJsonCoder.DateJson(
+                    dateFormat.format(calendar.getTime()),
+                    String.valueOf(calendar.get(Calendar.DAY_OF_YEAR))
+            );
+
+            String dateString = ((StringCoder) Formats.DATE.getTraitFormatDefinition()).encode(encodedDate);
+
+            updateObservation(getCurrentTrait(), dateString);
 
             isBlocked = false;
         });
@@ -240,7 +248,12 @@ public class DateTraitLayout extends BaseTraitLayout {
     private void loadSelectedDate() {
         try {
             ObservationModel model = getCurrentObservation();
-            date = model.getValue();
+            Object dateVal = new DateJsonCoder().decode(model.getValue());
+            if (dateVal instanceof DateJsonCoder.DateJson) {
+                date = ((DateJsonCoder.DateJson) dateVal).getFormattedDate();
+            } else {
+                date = model.getValue();
+            }
             log();
             //afterLoadExists((CollectActivity) getContext(), date);
         } catch (Exception e) {
@@ -294,8 +307,20 @@ public class DateTraitLayout extends BaseTraitLayout {
 
             forceDataSavedColor();
 
-            //there is a FB preference to save dates as Day of year between 1-365
-            if (value.length() < 4 && value.length() > 0) {
+            Object dateVal = new DateJsonCoder().decode(value);
+
+            if (dateVal instanceof DateJsonCoder.DateJson) {
+
+                date = ((DateJsonCoder.DateJson) dateVal).getFormattedDate();
+
+                log();
+
+                parseDateAndView();
+
+            } else if (value.length() < 4 && value.length() > 0) {
+
+                //there is a FB preference to save dates as Day of year between 1-365
+
                 Calendar calendar = Calendar.getInstance();
 
                 //convert day of year to yyyy-mm-dd string
@@ -407,7 +432,14 @@ public class DateTraitLayout extends BaseTraitLayout {
     public String decodeValue(String value) {
         Calendar c = Calendar.getInstance();
         try {
-            Date d = dateFormat.parse(value);
+            Date d = null;
+            Object val = new DateJsonCoder().decode(value);
+            if (val instanceof DateJsonCoder.DateJson) {
+                DateJsonCoder.DateJson dateJson = (DateJsonCoder.DateJson) val;
+                d = dateFormat.parse(dateJson.getFormattedDate());
+            } else {
+                d = dateFormat.parse(value);
+            }
             if (d != null) {
                 c.setTime(d);
             }
@@ -420,9 +452,17 @@ public class DateTraitLayout extends BaseTraitLayout {
     @NonNull
     @Override
     public Boolean validate(String data) {
-        boolean useDayOfYear = getPrefs().getBoolean(PreferenceKeys.USE_DAY_OF_YEAR, false);
+        Object dateJson = new DateJsonCoder().decode(data);
+        if (dateJson instanceof DateJsonCoder.DateJson) {
+            return true;
+        } else {
+            return validateString(data);
+        }
+    }
+
+    private Boolean validateString(String data) {
         try {
-            if (useDayOfYear) {
+            if (getCurrentTrait().getUseDayOfYear()) {
                 Integer.parseInt(data);
             } else {
                 Date d = dateFormat.parse(data);

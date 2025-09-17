@@ -2,10 +2,13 @@ package com.fieldbook.tracker.utilities.export
 
 import android.content.Context
 import android.util.Log
+import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.CategoricalTraitLayout
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.traits.formats.presenters.UriPresenter
+import com.fieldbook.tracker.traits.formats.presenters.ValuePresenter
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
+import com.fieldbook.tracker.utilities.DateJsonUtil
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
@@ -18,12 +21,20 @@ class ValueProcessorFormatAdapter @Inject constructor(
         private const val TAG = "ValueProcessorFA"
     }
 
-    fun processValue(value: String, format: String): String? {
-        return when (format) {
+    fun processValue(value: String, trait: TraitObject): String? {
+        return when (trait.format) {
+
+            in setOf(Formats.DATE.getDatabaseName()) -> {
+
+                val dateValue = DateJsonUtil.decode(value)
+
+                return (Formats.DATE.getTraitFormatDefinition() as ValuePresenter).represent(context, dateValue, trait)
+            }
+
             in CategoricalTraitLayout.POSSIBLE_VALUES + setOf("multicat") -> return CategoryJsonUtil.processValue(
                 buildMap {
                     put("value", value)
-                    put("observation_variable_field_book_format", format)
+                    put("observation_variable_field_book_format", trait.format)
                 })
 
             in Formats.getSpectralFormats().map { it.getDatabaseName() } -> {
@@ -41,6 +52,7 @@ class ValueProcessorFormatAdapter @Inject constructor(
             }
 
             else -> value
+
         }.toString()
     }
 }

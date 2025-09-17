@@ -24,6 +24,7 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.StatisticObject;
+import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.traits.formats.Formats;
 import com.fieldbook.tracker.traits.formats.TraitFormat;
 import com.fieldbook.tracker.traits.formats.coders.StringCoder;
@@ -210,7 +211,7 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
         for (ObservationModel observation : observations) {
             if (observation.getObservation_unit_id().equals(unitWithMostObservations)) {
                 final String traitFormat = observation.getObservation_variable_field_book_format();
-
+                TraitObject trait = database.getTraitById(String.valueOf(observation.getObservation_variable_db_id()));
                 if (traitFormat != null) {
 
                     TraitFormat formats = Formats.Companion.findTrait(traitFormat);
@@ -225,7 +226,7 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
 
                     if (formats instanceof ValuePresenter) {
 
-                        unitWithMostObservationsList.add(observation.getObservation_variable_name() + ": " + ((ValuePresenter) formats).represent(originActivity, valueModel));
+                        unitWithMostObservationsList.add(observation.getObservation_variable_name() + ": " + ((ValuePresenter) formats).represent(originActivity, valueModel, trait));
 
                     } else {
 

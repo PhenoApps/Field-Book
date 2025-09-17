@@ -233,18 +233,30 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
                                     value?.let { v ->
 
-                                        //read the preferences, default to displaying values instead of labels
-                                        val labelValPref: String =
-                                            PreferenceManager.getDefaultSharedPreferences(act)
-                                                .getString(
-                                                    PreferenceKeys.LABELVAL_CUSTOMIZE,
-                                                    "value"
-                                                )
-                                                ?: "value"
+                                        if (model.trait == null) {
 
-                                        value = CategoryJsonUtil.flattenMultiCategoryValue(
-                                            CategoryJsonUtil.decode(v), labelValPref == "value"
-                                        )
+                                            //attribute
+                                            value = v
+
+                                        } else {
+
+                                            //model.trait.loadAttributeAndValues()
+
+                                            value = database.valueFormatter.processValue(v, model.trait)
+
+                                        }
+//                                        //read the preferences, default to displaying values instead of labels
+//                                        val labelValPref: String =
+//                                            PreferenceManager.getDefaultSharedPreferences(act)
+//                                                .getString(
+//                                                    PreferenceKeys.LABELVAL_CUSTOMIZE,
+//                                                    "value"
+//                                                )
+//                                                ?: "value"
+//
+//                                        value = CategoryJsonUtil.flattenMultiCategoryValue(
+//                                            CategoryJsonUtil.decode(v), labelValPref == "value"
+//                                        )
                                     }
                                 }
 

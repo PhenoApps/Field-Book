@@ -405,6 +405,7 @@
     <string name="trait_swap_name_dialog_title">Select synonym as trait alias</string>
     <string name="trait_swap_name_set_alias">Set Alias</string>
     <string name="error_updating_trait_alias">Error updating trait alias</string>
+    <string name="error_updating_trait_options">Error updating trait options</string>
 
     <!-- <string name="trait_date_format_example">Date: %s</string>
     <string name="trait_day_format_example">Day of Year: %d</string>

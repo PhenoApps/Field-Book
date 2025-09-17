@@ -36,10 +36,14 @@ import java.util.Calendar
 import javax.inject.Inject
 import androidx.core.view.size
 import androidx.fragment.app.viewModels
+import com.fieldbook.tracker.database.dao.spectral.SpectralDao
+import com.fieldbook.tracker.database.repository.SpectralRepository
 import com.fieldbook.tracker.databinding.FragmentTraitDetailBinding
 import com.fieldbook.tracker.utilities.TraitNameValidator
 import com.fieldbook.tracker.utilities.TraitNameValidator.validateTraitAlias
 import com.fieldbook.tracker.utilities.Utils
+import com.fieldbook.tracker.utilities.export.SpectralFileProcessor
+import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter
 import com.fieldbook.tracker.viewmodels.CopyTraitStatus
 import com.fieldbook.tracker.viewmodels.TraitDetailUiState
 import com.fieldbook.tracker.viewmodels.TraitDetailViewModel
@@ -73,7 +77,7 @@ class TraitDetailFragment : Fragment() {
 
         traitId = arguments?.getString("traitId")
 
-        traitId?.let { viewModel.loadTraitDetails(it) }
+        traitId?.let { viewModel.loadTraitDetails(database.valueFormatter, it) }
 
         observeTraitDetailViewModel()
 
@@ -91,7 +95,7 @@ class TraitDetailFragment : Fragment() {
     }
 
     fun refresh() {
-        traitId?.let { viewModel.loadTraitDetails(it) }
+        traitId?.let { viewModel.loadTraitDetails(database.valueFormatter, it) }
     }
 
     private fun observeTraitDetailViewModel() {
@@ -339,7 +343,7 @@ class TraitDetailFragment : Fragment() {
             .setTitle(getString(R.string.trait_date_format_dialog_title))
             .setSingleChoiceItems(options, currentSelection) { dialog, which ->
                 val useDayOfYear = which == 1
-                viewModel.updateTraitOptions(trait.also {
+                viewModel.updateTraitOptions(database.valueFormatter, trait.also {
                     it.useDayOfYear = useDayOfYear
                 })
                 // Update the chip text

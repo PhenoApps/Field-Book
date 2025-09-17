@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.TraitObject
-import com.fieldbook.tracker.utilities.CategoryJsonUtil
+import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -36,14 +36,14 @@ class TraitDetailViewModel(
         val processedObservations: List<String>,
     )
 
-    fun loadTraitDetails(traitId: String) {
+    fun loadTraitDetails(valueFormatter: ValueProcessorFormatAdapter, traitId: String) {
         viewModelScope.launch {
             _uiState.value = TraitDetailUiState.Loading
             try {
                 val trait = withContext(ioDispatcher) { database.getTraitById(traitId) }
 
                 trait?.let {
-                    val observationData = loadObservationData(it)
+                    val observationData = loadObservationData(valueFormatter, it)
                     _uiState.value = TraitDetailUiState.Success(it.also {
                         it.loadAttributeAndValues()
                     }, observationData)
@@ -56,7 +56,7 @@ class TraitDetailViewModel(
         }
     }
 
-    private suspend fun loadObservationData(trait: TraitObject): ObservationData =
+    private suspend fun loadObservationData(valueFormatter: ValueProcessorFormatAdapter, trait: TraitObject): ObservationData =
         withContext(ioDispatcher) {
             val observations = database.getAllObservationsOfVariable(trait.id)
             val fieldsWithObservations = observations.map { it.study_id }.distinct()
@@ -67,12 +67,9 @@ class TraitDetailViewModel(
             else 0f
 
             val processedObservations = observations.map { obs ->
-                CategoryJsonUtil.processValue(
-                    buildMap {
-                        put("observation_variable_field_book_format", trait.format)
-                        put("value", obs.value)
-                    }
-                ) ?: ""
+
+                valueFormatter.processValue(obs.value, trait) ?: obs.value
+
             }
 
             ObservationData(
@@ -106,13 +103,16 @@ class TraitDetailViewModel(
         }
     }
 
-    fun updateTraitOptions(trait: TraitObject) {
-
+    fun updateTraitOptions(valueFormatter: ValueProcessorFormatAdapter, trait: TraitObject) {
         viewModelScope.launch {
             try {
                 trait.saveAttributeValues()
+                //reload the observations, in case they need reformatting in the graph
+                val obsData = loadObservationData(valueFormatter, trait)
+                _uiState.value = TraitDetailUiState.Success(trait, obsData)
             } catch (e: Exception) {
                 Log.e(TAG, "Error updating trait options: ", e)
+                _uiState.value = TraitDetailUiState.Error(R.string.error_updating_trait_options)
             }
         }
     }

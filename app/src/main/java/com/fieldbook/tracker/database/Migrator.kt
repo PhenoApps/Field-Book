@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.core.content.contentValuesOf
 import androidx.core.database.getBlobOrNull
 import androidx.core.database.getStringOrNull
+import com.fieldbook.tracker.database.migrators.DateFormatVersion19
 import com.fieldbook.tracker.database.migrators.RefactorMigratorVersion13
 import com.fieldbook.tracker.database.migrators.GroupMigratorVersion14
 import com.fieldbook.tracker.database.migrators.SpectralMigratorVersion16
@@ -423,6 +424,17 @@ class Migrator {
                 }
                 .onSuccess {
                     Log.d(TAG, "Migrated to version 18")
+                }
+        }
+
+        fun migrateToVersion19(db: SQLiteDatabase) {
+
+            DateFormatVersion19().migrate(db)
+                .onFailure {
+                    Log.e(TAG, "Failed to migrate to version 19", it)
+                }
+                .onSuccess {
+                    Log.d(TAG, "Migrated to version 19")
                 }
         }
     }

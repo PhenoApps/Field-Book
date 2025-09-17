@@ -1819,10 +1819,11 @@ public class CollectActivity extends ThemedActivity
 
         for (ObservationModel m: values) {
             if (!m.getValue().isEmpty()) {
+                TraitObject trait = database.getTraitById(String.valueOf(m.getObservation_variable_db_id()));
                 String format = m.getObservation_variable_field_book_format();
                 if (format != null) {
 
-                    TraitFormat traitFormat = Formats.Companion.findTrait( format);
+                    TraitFormat traitFormat = Formats.Companion.findTrait(format);
 
                     Object valueModel = m.getValue();
 
@@ -1834,7 +1835,7 @@ public class CollectActivity extends ThemedActivity
 
                     if (traitFormat instanceof ValuePresenter) {
 
-                        is.add(((ValuePresenter) traitFormat).represent(this, valueModel));
+                        is.add(((ValuePresenter) traitFormat).represent(this, valueModel, trait));
                         observations.add(m);
 
                     } else {

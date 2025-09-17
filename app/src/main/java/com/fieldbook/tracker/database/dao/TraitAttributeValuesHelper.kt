@@ -42,6 +42,7 @@ class TraitAttributeValuesHelper(var traitId: String? = null) {
                         attributes[CLOSE_KEYBOARD_ON_OPEN]?.let { trait.closeKeyboardOnOpen = it.toBoolean() }
                         attributes[CROP_IMAGE]?.let { trait.cropImage = it.toBoolean() }
                         attributes[SAVE_IMAGE]?.let { trait.saveImage = it.toBoolean() }
+                        attributes[USE_DAY_OF_YEAR]?.let { trait.useDayOfYear = it.toBoolean() }
                     }
                 }
             }
