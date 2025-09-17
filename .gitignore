@@ -15,7 +15,8 @@ out/
 
 # Gradle files
 .gradle/
-gradle/
+gradle/*
+!gradle/libs.versions.toml
 build/
 gradlew
 gradlew.bat

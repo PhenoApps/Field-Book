@@ -5,6 +5,7 @@ plugins {
     id("com.android.kotlin.multiplatform.library")
     id("org.jetbrains.kotlin.plugin.compose") version "2.1.10" // same as main app build.gradle
     id("org.jetbrains.compose") version "1.7.3" // compatible with compileSdk = 34
+    alias(libs.plugins.app.cash.sqldelight)
 }
 
 kotlin {
@@ -75,6 +76,7 @@ kotlin {
                 // Add Android-specific dependencies here. Note that this source set depends on
                 // commonMain by default and will correctly pull the Android artifacts of any KMP
                 // dependencies declared in commonMain.
+                implementation("app.cash.sqldelight:android-driver:2.1.0")
             }
         }
 
@@ -93,6 +95,7 @@ kotlin {
                 // part of KMP’s default source set hierarchy. Note that this source set depends
                 // on common by default and will correctly pull the iOS artifacts of any
                 // KMP dependencies declared in commonMain.
+                implementation("app.cash.sqldelight:native-driver:2.1.0")
             }
         }
     }
@@ -101,4 +104,12 @@ kotlin {
 
 compose.resources {
     packageOfResClass = "com.fieldbook.shared.generated.resources"
+}
+
+sqldelight {
+    databases {
+        create("FieldbookDatabase") {
+            packageName.set("com.fieldbook.shared.sqldelight")
+        }
+    }
 }

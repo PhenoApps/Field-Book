@@ -2,7 +2,8 @@ package com.fieldbook.tracker.activities;
 
 public enum KmpHostScreenType {
     CONFIG("config"),
-    SCANNER("scanner");
+    SCANNER("scanner"),
+    FIELD_EDITOR("field_editor");
 
     private final String value;
 
@@ -23,4 +24,3 @@ public enum KmpHostScreenType {
         return CONFIG;
     }
 }
-

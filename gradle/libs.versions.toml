@@ -1,0 +1,6 @@
+[versions]
+
+[libraries]
+
+[plugins]
+app-cash-sqldelight = { id = "app.cash.sqldelight", version = "2.1.0" }

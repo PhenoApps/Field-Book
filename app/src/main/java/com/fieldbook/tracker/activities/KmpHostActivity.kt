@@ -5,6 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.fieldbook.shared.ConfigScreen
 import com.fieldbook.shared.ScannerScreen
+import com.fieldbook.shared.activities.FieldEditorScreen
+import com.fieldbook.shared.sqldelight.DriverFactory
 
 class KmpHostActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,6 +26,12 @@ class KmpHostActivity : ComponentActivity() {
                             setResult(RESULT_OK, resultIntent)
                             finish()
                         }
+                    )
+                }
+                KmpHostScreenType.FIELD_EDITOR -> {
+                    FieldEditorScreen(
+                        driverFactory = DriverFactory(context = this),
+                        onBack = { finish() }
                     )
                 }
             }
