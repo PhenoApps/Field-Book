@@ -129,6 +129,7 @@
     <string name="import_error_column_choice">Le colonne non possono essere utilizzate per la stessa assegnazione</string>
     <string name="import_error_unique">La colonna identificatore unico contiene duplicati o è già stata utilizzata in un altro file</string>
     <string name="import_error_format_field">Solo i file CSV e XLS possono essere importati come campo</string>
+    <string name="act_field_editor_no_suitable_columns_error">Il file d\'importazione non ha colonne adatte da cui scegliere.</string>
     <string name="fields_study_exists_message">Un campo con questo nome esiste già. Vuoi sovrascrivere?</string>
     <string name="act_field_editor_failed_to_read_columns">Field Book non può caricare il file.</string>
     <string name="act_field_editor_load_file_failed">Si è verificato un errore durante il caricamento del file.</string>
