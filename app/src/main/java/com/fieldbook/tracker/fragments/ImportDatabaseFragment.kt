@@ -2,13 +2,17 @@ package com.fieldbook.tracker.fragments
 
 import android.app.ProgressDialog
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.Html
 import android.util.Log
+import androidx.core.content.edit
+import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -19,16 +23,21 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.phenoapps.utils.BaseDocumentTreeUtil
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class ImportDBFragment : Fragment(){
+class ImportDatabaseFragment : Fragment() {
+
+    companion object {
+        const val TAG = "ImportDatabaseFragment"
+        const val FILE_EXTRA = "file"
+    }
 
     @Inject
     lateinit var database: DataHelper
 
     private var dialog: ProgressDialog? = null
+
     private var fail: Boolean = false
 
     //coroutine scope for launching background process
@@ -36,8 +45,8 @@ class ImportDBFragment : Fragment(){
         CoroutineScope(Dispatchers.IO)
     }
 
-
     private var mContext: Context? = null
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
         mContext = context
@@ -56,59 +65,125 @@ class ImportDBFragment : Fragment(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val fileString = arguments?.getString(FILE_EXTRA, null)
+
         scope.launch {
 
-            withContext(Dispatchers.Main){
-                showImportDialog()
-            }
+            withContext(Dispatchers.Main) {
 
-            // Load database with sample data
-            try {
-                val sampleDatabase = BaseDocumentTreeUtil.getFile(
-                    mContext,
-                    R.string.dir_database, "sample_db.zip"
-                )
-                if (sampleDatabase != null && sampleDatabase.exists()) {
-                    // database import might take some time
-                    withContext(Dispatchers.IO){
-                        invokeDBImport(sampleDatabase)
-                    }
-                }
-            } catch (e: Exception){
-                Log.d("Database", e.toString())
-                e.printStackTrace()
-                fail = true
-            }
-
-            withContext(Dispatchers.Main){
-
-                dialog?.dismiss()
-                if (fail) {
-                    Utils.makeToast(mContext, context?.getString(R.string.import_error_general))
-                }
-
-                // reset the preference value
-                val prefs = mContext?.let { PreferenceManager.getDefaultSharedPreferences(it) }
-                prefs?.edit()?.putBoolean(GeneralKeys.LOAD_SAMPLE_DATA, false)?.apply()
-                val temp = prefs?.getBoolean(GeneralKeys.LOAD_SAMPLE_DATA,true)
-
-                try {
-                    selectFirstField()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
+                showProgressBarLoadingDialog()
 
             }
 
+            if (fileString != null) {
+
+                importSelectedFile(fileString)
+
+            }
+
+            endImportAndSelectField()
         }
     }
 
-    private fun invokeDBImport(dbFile: DocumentFile) {
-        database.open()
-        database.importDatabase(dbFile)
+    private fun importSelectedFile(fileString: String) {
+
+        val file = getFileFromUri(fileString)
+
+        if (file != null && file.name != null) {
+
+            database.close()
+
+            try {
+
+                database.open()
+
+                database.importDatabase(file) // (handles both .db and .zip)
+
+                //clear old preferences if we imported a .db file without any other data
+                //zip files should contain preference data
+                if (file.name?.endsWith(".db") ?: false) {
+
+                    clearPreferences()
+
+                }
+
+                selectFirstField()
+
+            } catch (e: Exception) {
+
+                Log.d(TAG, e.toString())
+
+                e.printStackTrace()
+
+                fail = true
+            }
+        }
     }
 
-    private fun showImportDialog() {
+    private fun clearPreferences() {
+
+        // clear the previous preferences after a .db import
+        val preferences: SharedPreferences? = mContext?.let {
+            PreferenceManager.getDefaultSharedPreferences(it)
+        }
+
+        preferences?.edit {
+            putInt(GeneralKeys.SELECTED_FIELD_ID, -1)
+            putString(GeneralKeys.UNIQUE_NAME, "")
+            putString(GeneralKeys.PRIMARY_NAME, "")
+            putString(GeneralKeys.SECONDARY_NAME, "")
+            putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)
+            apply()
+        }
+    }
+
+    private suspend fun endImportAndSelectField() {
+
+        withContext(Dispatchers.Main) {
+
+            dialog?.dismiss()
+
+            if (fail) {
+
+                Utils.makeToast(mContext, context?.getString(R.string.import_error_general))
+
+            }
+
+            try {
+
+                selectFirstField()
+
+            } catch (e: Exception) {
+
+                e.printStackTrace()
+
+            }
+
+            CollectActivity.reloadData = true
+        }
+    }
+
+    private fun getFileFromUri(uriString: String): DocumentFile? {
+
+        return try {
+
+            mContext?.let { ctx ->
+
+                return DocumentFile.fromSingleUri(ctx, uriString.toUri())
+
+            }
+
+            null
+
+        } catch (e: Exception) {
+
+            e.printStackTrace()
+
+            null
+        }
+    }
+
+    private fun showProgressBarLoadingDialog() {
         // show only if the fragment is added to the activity
         if (isAdded) {
             dialog = ProgressDialog(mContext, R.style.AppAlertDialog)
@@ -145,5 +220,4 @@ class ImportDBFragment : Fragment(){
         val fieldSwitcher = mContext?.let { FieldSwitchImpl(it) }
         fieldSwitcher?.switchField(studyId)
     }
-
 }

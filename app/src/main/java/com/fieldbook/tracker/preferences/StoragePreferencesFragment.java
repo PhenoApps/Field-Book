@@ -28,13 +28,12 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.activities.DefineStorageActivity;
 import com.fieldbook.tracker.activities.FileExploreActivity;
 import com.fieldbook.tracker.activities.PreferencesActivity;
 import com.fieldbook.tracker.database.DataHelper;
-import com.fieldbook.tracker.objects.FieldObject;
-import com.fieldbook.tracker.utilities.FieldSwitchImpl;
+import com.fieldbook.tracker.fragments.ExportDatabaseFragment;
+import com.fieldbook.tracker.fragments.ImportDatabaseFragment;
 import com.fieldbook.tracker.utilities.FileUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.ZipUtil;
@@ -75,7 +74,6 @@ public class StoragePreferencesFragment extends PreferenceFragmentCompat impleme
     private AlertDialog dbSaveDialog;
     private EditText exportFile;
     private String exportFileString = "";
-    public static Handler mHandler = new Handler();
     private Preference defaultStorageLocation;
 
     @Override
@@ -188,95 +186,17 @@ public class StoragePreferencesFragment extends PreferenceFragmentCompat impleme
     }
 
     private void invokeImportDatabase(DocumentFile docFile) {
-        mHandler.post(() -> new ImportDBTask(docFile).execute(0));
-    }
 
-    public class ImportDBTask extends AsyncTask<Integer, Integer, Integer> {
-        boolean fail;
-        ProgressDialog dialog;
-        DocumentFile file;
+        Bundle args = new Bundle();
+        args.putString(ImportDatabaseFragment.FILE_EXTRA, docFile.getUri().toString());
 
-        public ImportDBTask(DocumentFile file) {
-            this.file = file;
-        }
+        ImportDatabaseFragment importDatabaseFragment = new ImportDatabaseFragment();
+        importDatabaseFragment.setArguments(args);
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            fail = false;
-            dialog = new ProgressDialog(getContext());
-            dialog.setIndeterminate(true);
-            dialog.setCancelable(false);
-            dialog.setMessage(Html.fromHtml(getString(R.string.import_dialog_importing)));
-            dialog.show();
-        }
-
-        @Override
-        protected Integer doInBackground(Integer... params) {
-            if (file != null && file.getName() != null) {
-                database.close();
-
-                try {
-                    database.importDatabase(file); // (handles both .db and .zip)
-                    if (file.getName().endsWith(".db")){
-                        clearPreferences();
-                    }
-
-                    if (file.getName().equals("sample_db.zip") || file.getName().equals("sample.db")) {
-                        selectFirstField();
-                    } 
-                } catch (Exception e) {
-                    Log.d("Database", e.toString());
-                    e.printStackTrace();
-                    fail = true;
-                }
-            }
-            return 0;
-        }
-
-        private void clearPreferences() {
-            // clear the previous preferences after a .db import
-            SharedPreferences.Editor edit = preferences.edit();
-
-            edit.putInt(GeneralKeys.SELECTED_FIELD_ID, -1);
-            edit.putString(GeneralKeys.UNIQUE_NAME, "");
-            edit.putString(GeneralKeys.PRIMARY_NAME, "");
-            edit.putString(GeneralKeys.SECONDARY_NAME, "");
-            edit.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false);
-            edit.apply();
-        }
-
-        public void selectFirstField() {
-
-            try {
-
-                FieldObject[] fs = database.getAllFieldObjects().toArray(new FieldObject[0]);
-
-                if (fs.length > 0) {
-
-                    switchField(fs[0].getStudyId());
-                }
-
-            } catch (Exception e) {
-
-                e.printStackTrace();
-
-            }
-        }
-
-        private void switchField(int studyId) {
-            FieldSwitchImpl fieldSwitcher = new FieldSwitchImpl(context.getApplicationContext());
-            fieldSwitcher.switchField(studyId);
-        }
-
-        @Override
-        protected void onPostExecute(Integer result) {
-            if (dialog.isShowing()) dialog.dismiss();
-            if (fail) {
-                Utils.makeToast(getContext(), getString(R.string.import_error_general));
-            }
-            CollectActivity.reloadData = true;
-        }
+        getChildFragmentManager().beginTransaction()
+                .add(importDatabaseFragment, "com.fieldbook.tracker.fragments.ImportDatabaseFragment")
+                .addToBackStack(null)
+                .commit();
     }
 
     private void showDatabaseExportDialog() {
@@ -293,7 +213,24 @@ public class StoragePreferencesFragment extends PreferenceFragmentCompat impleme
                 .setPositiveButton(getString(R.string.dialog_save), (dialog, which) -> {
                     dbSaveDialog.dismiss();
                     exportFileString = exportFile.getText().toString();
-                    mHandler.post(exportDB);
+
+                    if (!exportFileString.isBlank()) {
+
+                        Bundle args = new Bundle();
+                        args.putString(ExportDatabaseFragment.EXTRA_FILE_NAME, exportFileString);
+
+                        ExportDatabaseFragment exportDatabaseFragment = new ExportDatabaseFragment();
+                        exportDatabaseFragment.setArguments(args);
+
+                        getChildFragmentManager().beginTransaction()
+                                .add(exportDatabaseFragment, "com.fieldbook.tracker.fragments.ExportDatabaseFragment")
+                                .addToBackStack(null)
+                                .commit();
+                    } else {
+
+                        Utils.makeToast(context, getString(R.string.database_export_invalid_filename));
+
+                    }
                 })
                 .setNegativeButton(getString(R.string.dialog_cancel), (dialog, which) -> dialog.dismiss());
         dbSaveDialog = builder.create();
@@ -301,75 +238,6 @@ public class StoragePreferencesFragment extends PreferenceFragmentCompat impleme
         android.view.WindowManager.LayoutParams params = dbSaveDialog.getWindow().getAttributes();
         params.width = LinearLayout.LayoutParams.MATCH_PARENT;
         dbSaveDialog.getWindow().setAttributes(params);
-    }
-
-    private final Runnable exportDB = new Runnable() {
-        public void run() {
-            new ExportDBTask().execute(0);
-        }
-    };
-
-    private class ExportDBTask extends AsyncTask<Integer, Integer, Integer> {
-        boolean fail;
-        ProgressDialog dialog;
-        String error;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            fail = false;
-            dialog = new ProgressDialog(getContext());
-            dialog.setIndeterminate(true);
-            dialog.setCancelable(false);
-            dialog.setMessage(Html.fromHtml(getString(R.string.export_progress)));
-            dialog.show();
-        }
-
-        @Override
-        protected Integer doInBackground(Integer... params) {
-            String dbPath = DataHelper.getDatabasePath(context);
-            DocumentFile databaseDir = BaseDocumentTreeUtil.Companion.getDirectory(context, R.string.dir_database);
-            if (databaseDir != null && databaseDir.exists()) {
-                DocumentFile zipFile = databaseDir.createFile("*/*", exportFileString + ".zip");
-                if (zipFile != null && zipFile.exists()) {
-                    try {
-                        String tempName = UUID.randomUUID().toString();
-                        DocumentFile tempOutput = databaseDir.createFile("*/*", tempName);
-                        OutputStream tempStream = BaseDocumentTreeUtil.Companion.getFileOutputStream(context, R.string.dir_database, tempName);
-                        ObjectOutputStream objectStream = new ObjectOutputStream(tempStream);
-                        OutputStream zipOutput = context.getContentResolver().openOutputStream(zipFile.getUri());
-                        objectStream.writeObject(preferences.getAll());
-                        objectStream.close();
-                        if (tempStream != null) tempStream.close();
-                        ZipUtil.Companion.zip(context,
-                                new DocumentFile[]{DocumentFile.fromFile(new File(dbPath)), tempOutput},
-                                zipOutput);
-                        FileUtil.shareFile(context, preferences, zipFile);
-                        if (tempOutput != null && !tempOutput.delete()) {
-                            throw new IOException();
-                        }
-                    } catch (IOException e) {
-                        fail = true;
-                        e.printStackTrace();
-                    }
-                } else {
-                    fail = true;
-                }
-            } else {
-                fail = true;
-            }
-            return 0;
-        }
-
-        @Override
-        protected void onPostExecute(Integer result) {
-            if (dialog.isShowing()) dialog.dismiss();
-            if (fail) {
-                Utils.makeToast(getContext(), getString(R.string.export_error_general));
-            } else {
-                Utils.makeToast(getContext(), getString(R.string.export_complete));
-            }
-        }
     }
 
     private void showDatabaseResetDialog1() {
