@@ -45,10 +45,10 @@ object TraitAttributes {
         defaultValue = "false"
     )
 
-    val DISPLAY_VALUE = AttributeDefinition(
-        key = ObservationVariableAttributeDetailsView.DISPLAY_VALUE,
+    val CATEGORY_DISPLAY_VALUE = AttributeDefinition(
+        key = ObservationVariableAttributeDetailsView.CATEGORY_DISPLAY_VALUE,
         valueType = ValueType.BOOLEAN,
-        defaultValue = "false"
+        defaultValue = "false" // todo default to using PreferenceKeys.LABELVAL_CUSTOMIZE when empty string??
     )
 
     val RESOURCE_FILE = AttributeDefinition(
@@ -62,7 +62,7 @@ object TraitAttributes {
     )
 
     val ALL = listOf(MIN_VALUE, MAX_VALUE, CATEGORIES, CLOSE_KEYBOARD, CROP_IMAGE, SAVE_IMAGE,
-        USE_DAY_OF_YEAR, DISPLAY_VALUE, RESOURCE_FILE, VARIABLE_SYNONYMS
+        USE_DAY_OF_YEAR, CATEGORY_DISPLAY_VALUE, RESOURCE_FILE, VARIABLE_SYNONYMS
     )
 
     fun byKey(key: String): AttributeDefinition? = ALL.find { it.key == key }

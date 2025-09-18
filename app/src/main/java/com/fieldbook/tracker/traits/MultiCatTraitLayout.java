@@ -13,8 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
-import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.Utils;
@@ -22,7 +20,6 @@ import com.google.android.flexbox.AlignItems;
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexWrap;
 import com.google.android.flexbox.FlexboxLayoutManager;
-import com.google.gson.JsonParseException;
 
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 
@@ -32,10 +29,6 @@ import java.util.StringJoiner;
 
 public class MultiCatTraitLayout extends BaseTraitLayout {
     //todo this can eventually be merged with multicattraitlayout when we can support a switch in traits on how many categories to allow user to select
-
-    //on load layout, check preferences and save to variable
-    //this will choose whether to display the label or value in subsequent functions
-    private boolean showLabel = true;
 
     private ArrayList<BrAPIScaleValidValuesCategories> categoryList;
 
@@ -108,9 +101,6 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
     public void afterLoadExists(CollectActivity act, @Nullable String value) {
         super.afterLoadExists(act, value);
 
-        String labelValPref = getPrefs().getString(PreferenceKeys.LABELVAL_CUSTOMIZE,"value");
-        showLabel = !labelValPref.equals("value");
-
         categoryList = new ArrayList<>();
 
         loadScale();
@@ -120,6 +110,10 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
         setAdapter();
 
         refreshLock();
+    }
+
+    private boolean shouldDisplayValues() {
+        return getCurrentTrait().getCategoryDisplayValue();
     }
 
     private void setAdapter() {
@@ -144,11 +138,11 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
 
                 holder.mButton.setOnClickListener(createClickListener(holder.mButton,position));
 
-                if (showLabel) {
-                    holder.mButton.setText(cat[position].getLabel());
+                if (shouldDisplayValues()) {
+                    holder.mButton.setText(cat[position].getValue());
 
                 } else {
-                    holder.mButton.setText(cat[position].getValue());
+                    holder.mButton.setText(cat[position].getLabel());
                 }
 
                 //has category checks the loaded categoryList to see if this button has been selected
@@ -236,9 +230,9 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
 
                 StringJoiner joiner = new StringJoiner(":");
                 for (BrAPIScaleValidValuesCategories c : categoryList) {
-                    if (showLabel) {
-                        joiner.add(c.getLabel());
-                    } else joiner.add(c.getValue());
+                    if (shouldDisplayValues()) {
+                        joiner.add(c.getValue());
+                    } else joiner.add(c.getLabel());
                 }
 
                 getCollectInputView().setText(joiner.toString());
@@ -247,9 +241,9 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
 
                 updateObservation(getCurrentTrait(), json);
 
-                if (showLabel) {
-                    triggerTts(cat.getLabel());
-                } else triggerTts(cat.getValue());
+                if (shouldDisplayValues()) {
+                    triggerTts(cat.getValue());
+                } else triggerTts(cat.getLabel());
             }
         };
     }
@@ -313,8 +307,8 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
 
         for (BrAPIScaleValidValuesCategories c : categoryList) {
             String value;
-            if (showLabel) value = c.getLabel();
-            else value = c.getValue();
+            if (shouldDisplayValues()) value = c.getValue();
+            else value = c.getLabel();
             joiner.add(value);
         }
 
@@ -353,9 +347,9 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
         StringJoiner joiner = new StringJoiner(":");
         ArrayList<BrAPIScaleValidValuesCategories> scale = CategoryJsonUtil.Companion.decode(value);
         for (BrAPIScaleValidValuesCategories s : scale) {
-            if (showLabel) {
-                joiner.add(s.getLabel());
-            } else joiner.add(s.getValue());
+            if (shouldDisplayValues()) {
+                joiner.add(s.getValue());
+            } else joiner.add(s.getLabel());
         }
         return joiner.toString();
     }

@@ -60,9 +60,9 @@ class TraitObject {
         get() = attributeValues.getBoolean(TraitAttributes.USE_DAY_OF_YEAR)
         set(value) = attributeValues.setValue(TraitAttributes.USE_DAY_OF_YEAR, value.toString())
 
-    var displayValue: Boolean
-        get() = attributeValues.getBoolean(TraitAttributes.DISPLAY_VALUE)
-        set(value) = attributeValues.setValue(TraitAttributes.DISPLAY_VALUE, value.toString())
+    var categoryDisplayValue: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.CATEGORY_DISPLAY_VALUE)
+        set(value) = attributeValues.setValue(TraitAttributes.CATEGORY_DISPLAY_VALUE, value.toString())
 
     var resourceFile: String
         get() = attributeValues.getString(TraitAttributes.RESOURCE_FILE)
@@ -107,7 +107,7 @@ class TraitObject {
                 cropImage == that.cropImage &&
                 saveImage == that.saveImage &&
                 useDayOfYear == that.useDayOfYear &&
-                displayValue == that.displayValue &&
+                categoryDisplayValue == that.categoryDisplayValue &&
                 resourceFile == that.resourceFile &&
                 synonyms == that.synonyms
     }
@@ -117,7 +117,7 @@ class TraitObject {
             name, alias, format, defaultValue, minimum, maximum, details, categories,
             realPosition, id, visible, externalDbId, traitDataSource,
             additionalInfo, observationLevelNames, closeKeyboardOnOpen, cropImage,
-            saveImage, useDayOfYear, displayValue, resourceFile, synonyms
+            saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms
         )
     }
 
@@ -142,7 +142,7 @@ class TraitObject {
         t.cropImage = this.cropImage
         t.saveImage = this.saveImage
         t.useDayOfYear = this.useDayOfYear
-        t.displayValue = this.displayValue
+        t.categoryDisplayValue = this.categoryDisplayValue
         t.resourceFile = this.resourceFile
         t.synonyms = this.synonyms
 

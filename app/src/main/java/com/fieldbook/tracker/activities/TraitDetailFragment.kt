@@ -26,7 +26,6 @@ import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.FieldFileObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
-import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import dagger.hilt.android.AndroidEntryPoint
@@ -36,14 +35,9 @@ import java.util.Calendar
 import javax.inject.Inject
 import androidx.core.view.size
 import androidx.fragment.app.viewModels
-import com.fieldbook.tracker.database.dao.spectral.SpectralDao
-import com.fieldbook.tracker.database.repository.SpectralRepository
 import com.fieldbook.tracker.databinding.FragmentTraitDetailBinding
-import com.fieldbook.tracker.utilities.TraitNameValidator
 import com.fieldbook.tracker.utilities.TraitNameValidator.validateTraitAlias
 import com.fieldbook.tracker.utilities.Utils
-import com.fieldbook.tracker.utilities.export.SpectralFileProcessor
-import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter
 import com.fieldbook.tracker.viewmodels.CopyTraitStatus
 import com.fieldbook.tracker.viewmodels.TraitDetailUiState
 import com.fieldbook.tracker.viewmodels.TraitDetailViewModel
@@ -203,7 +197,7 @@ class TraitDetailFragment : Fragment() {
         }
 
         binding.brapiLabelValueChip.setOnClickListener {
-            showBrapiLabelValueDialog()
+            showBrapiLabelValueDialog(trait)
         }
     }
 
@@ -283,12 +277,7 @@ class TraitDetailFragment : Fragment() {
         // For BrAPI label/value toggle
         if (traitHasBrapiCategories) {
             binding.brapiLabelValueChip.visibility = View.VISIBLE
-            // Check if there's a trait-specific preference, otherwise use the global one
-            val traitSpecificKey = "LABELVAL_CUSTOMIZE_${trait.id}"
-            val defaultValue = preferences.getString(PreferenceKeys.LABELVAL_CUSTOMIZE, "label")
-            val useValues = preferences.getString(traitSpecificKey, defaultValue) == "value"
-            
-            updateBrapiLabelValueChip(useValues)
+            updateBrapiLabelValueChip(trait)
         } else {
             binding.brapiLabelValueChip.visibility = View.GONE
         }
@@ -354,32 +343,26 @@ class TraitDetailFragment : Fragment() {
             .show()
     }
 
-    // Update the showBrapiLabelValueDialog method
-    private fun showBrapiLabelValueDialog() {
+    private fun showBrapiLabelValueDialog(trait: TraitObject) {
         if (!traitHasBrapiCategories) return
 
-        // Get the first category example
-        val categories = traitObject?.categories ?: return
+        val categories = trait.categories
         val firstCategory = parseCategoryExample(categories)
         
         val options = arrayOf(
             getString(R.string.trait_brapi_label_display, firstCategory.first),
             getString(R.string.trait_brapi_value_display, firstCategory.second)
         )
-        
-        // Get trait-specific preference or fall back to global preference
-        val traitSpecificKey = "LABELVAL_CUSTOMIZE_${traitId}"
-        val defaultValue = preferences.getString(PreferenceKeys.LABELVAL_CUSTOMIZE, "label")
-        val currentSelection = if (preferences.getString(traitSpecificKey, defaultValue) == "value") 1 else 0
-        
+
+        val currentSelection = if (trait.categoryDisplayValue) 1 else 0
+
         AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
             .setTitle(getString(R.string.trait_brapi_display_dialog_title))
             .setSingleChoiceItems(options, currentSelection) { dialog, which ->
-                // Save the preference
-                val value = if (which == 1) "value" else "label"
-                preferences.edit { putString(traitSpecificKey, value) }
-                // Update the chip text
-                updateBrapiLabelValueChip(which == 1)
+                val useValues = which == 1
+                trait.categoryDisplayValue = useValues
+                viewModel.updateTraitOptions(database.valueFormatter, trait)
+                updateBrapiLabelValueChip(trait)
                 dialog.dismiss()
             }
             .setNegativeButton(R.string.dialog_cancel, null)
@@ -438,15 +421,14 @@ class TraitDetailFragment : Fragment() {
     }
 
     // Update the updateBrapiLabelValueChip method
-    private fun updateBrapiLabelValueChip(useValues: Boolean) {
+    private fun updateBrapiLabelValueChip(trait: TraitObject) {
         if (!traitHasBrapiCategories) return
 
         // Get the first category from the trait to use as an example
-        val categories = traitObject?.categories ?: return
-        val firstCategory = parseCategoryExample(categories)
+        val firstCategory = parseCategoryExample(trait.categories)
 
         // Set the chip text based on the selected format
-        if (useValues) {
+        if (trait.categoryDisplayValue) {
             binding.brapiLabelValueChip.text = getString(R.string.trait_brapi_value_display, firstCategory.second)
         } else {
             binding.brapiLabelValueChip.text = getString(R.string.trait_brapi_label_display, firstCategory.first)

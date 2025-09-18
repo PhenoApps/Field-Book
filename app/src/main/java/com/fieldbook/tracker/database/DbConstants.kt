@@ -69,7 +69,7 @@ object ObservationVariableAttributeDetailsView {
     const val CROP_IMAGE = "cropImage"
     const val SAVE_IMAGE = "saveImage"
     const val USE_DAY_OF_YEAR = "useDayOfYear"
-    const val DISPLAY_VALUE = "displayValue"
+    const val CATEGORY_DISPLAY_VALUE = "categoryDisplayValue"
     const val RESOURCE_FILE = "resourceFile"
     const val VARIABLE_SYNONYMS = "synonyms"
 }

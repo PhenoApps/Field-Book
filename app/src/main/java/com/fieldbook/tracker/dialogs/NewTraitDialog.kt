@@ -16,7 +16,6 @@ import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.activities.TraitEditorActivity
 import com.fieldbook.tracker.adapters.TraitFormatAdapter
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.TraitObject
@@ -477,7 +476,7 @@ class NewTraitDialog(
             traitObject.cropImage,
             traitObject.saveImage,
             traitObject.useDayOfYear,
-            traitObject.displayValue,
+            traitObject.categoryDisplayValue,
             traitObject.resourceFile,
             traitObject.synonyms
         )

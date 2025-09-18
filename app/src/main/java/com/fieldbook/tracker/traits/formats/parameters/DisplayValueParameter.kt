@@ -3,7 +3,6 @@ package com.fieldbook.tracker.traits.formats.parameters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Switch
 import android.widget.ToggleButton
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
@@ -23,7 +22,6 @@ class DisplayValueParameter @Inject constructor(
     defaultLayoutId,
     parameter
 ) {
-    val attributeName = "displayValue"
     val defaultValue = false
 
     override fun createViewHolder(parent: ViewGroup): ViewHolder {
@@ -44,19 +42,19 @@ class DisplayValueParameter @Inject constructor(
         }
 
         override fun merge(traitObject: TraitObject): TraitObject {
-            traitObject.displayValue = toggleButton.isChecked
+            traitObject.categoryDisplayValue = toggleButton.isChecked
             return traitObject
         }
 
         override fun load(traitObject: TraitObject?): Boolean {
             initialTraitObject = traitObject
-            toggleButton.isChecked = traitObject?.displayValue ?: defaultValue
+            toggleButton.isChecked = traitObject?.categoryDisplayValue ?: defaultValue
             return true
         }
 
-        override fun validate(database: DataHelper, initialTraitObject: TraitObject?): ValidationResult {
-            // Boolean toggle doesn't need validation
-            return ValidationResult(true)
-        }
+        override fun validate(
+            database: DataHelper,
+            initialTraitObject: TraitObject?
+        ) = ValidationResult()
     }
 }

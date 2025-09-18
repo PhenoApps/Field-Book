@@ -7,6 +7,7 @@ import com.fieldbook.tracker.database.ObservationVariableAttributeDetailsView
 import com.fieldbook.tracker.database.models.AttributeDefinition
 import com.fieldbook.tracker.database.models.TraitAttributes
 import com.fieldbook.tracker.objects.TraitObject
+import com.fieldbook.tracker.utilities.SynonymsUtil.deserializeSynonyms
 import kotlin.text.isNullOrEmpty
 
 /**
@@ -43,6 +44,9 @@ class TraitAttributeValuesHelper(var traitId: String? = null) {
                         attributes[CROP_IMAGE]?.let { trait.cropImage = it.toBoolean() }
                         attributes[SAVE_IMAGE]?.let { trait.saveImage = it.toBoolean() }
                         attributes[USE_DAY_OF_YEAR]?.let { trait.useDayOfYear = it.toBoolean() }
+                        attributes[CATEGORY_DISPLAY_VALUE]?.let { trait.categoryDisplayValue = it.toBoolean() }
+                        attributes[RESOURCE_FILE]?.let { trait.resourceFile = it }
+                        attributes[VARIABLE_SYNONYMS]?.let { trait.synonyms = deserializeSynonyms(it) }
                     }
                 }
             }
@@ -121,12 +125,14 @@ class TraitAttributeValuesHelper(var traitId: String? = null) {
     }
 
     fun getBoolean(attribute: AttributeDefinition): Boolean {
+        Log.d(TAG, "getBoolean: ${attribute.key} ${attributeValueMap[attribute.key]}")
         return getString(attribute).toBoolean()
     }
 
     fun setValue(attribute: AttributeDefinition, value: String) {
         ensureLoaded()
         attributeValueMap[attribute.key] = value
+        Log.d(TAG, "getBoolean: ${attribute.key} ${attributeValueMap[attribute.key]}")
     }
 
     private fun ensureLoaded() {

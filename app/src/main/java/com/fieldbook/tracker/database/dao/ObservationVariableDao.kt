@@ -272,7 +272,7 @@ class ObservationVariableDao {
                 Log.d("ObservationVariableDao", "cropImage: ${t.cropImage}")
                 Log.d("ObservationVariableDao", "saveImage: ${t.saveImage}")
                 Log.d("ObservationVariableDao", "useDayOfYear: ${t.useDayOfYear}")
-                Log.d("ObservationVariableDao", "displayValue: ${t.displayValue}")
+                Log.d("ObservationVariableDao", "displayValue: ${t.categoryDisplayValue}")
                 Log.d("ObservationVariableDao", "resourceFile: ${t.resourceFile}")
 
                 val varRowId = db.insert(ObservationVariable.tableName, null, contentValues)
@@ -312,7 +312,7 @@ class ObservationVariableDao {
                        cropImage: Boolean,
                        saveImage: Boolean,
                        useDayOfYear: Boolean,
-                       displayValue: Boolean,
+                       categoryDisplayValue: Boolean,
                        resourceFile: String,
                        synonyms: List<String>): Long = withDatabase { db ->
 
@@ -342,7 +342,7 @@ class ObservationVariableDao {
                     this.cropImage = cropImage
                     this.saveImage = saveImage
                     this.useDayOfYear = useDayOfYear
-                    this.displayValue = displayValue
+                    this.categoryDisplayValue = categoryDisplayValue
                     this.resourceFile = resourceFile
                     this.synonyms = synonyms
                 }

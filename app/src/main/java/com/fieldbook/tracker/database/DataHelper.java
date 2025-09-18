@@ -30,7 +30,6 @@ import com.fieldbook.tracker.database.dao.spectral.SpectralDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.spectral.UriDao;
 import com.fieldbook.tracker.database.migrators.DateFormatVersion19;
-import com.fieldbook.tracker.database.migrators.TraitAliasVersion18;
 import com.fieldbook.tracker.database.views.ObservationVariableAttributeDetailViewCreator;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
@@ -909,14 +908,14 @@ public class DataHelper {
                            String minimum, String maximum, String details, String categories,
                            Boolean closeKeyboardOnOpen,
                            Boolean saveImage,
-                           Boolean cropImage, Boolean useDayOfYear, Boolean displayValue, String resourceFile,
+                           Boolean cropImage, Boolean useDayOfYear, Boolean categoryDisplayValue, String resourceFile,
                            List<String> synonyms) {
 
         open();
 
         return ObservationVariableDao.Companion.editTraits(traitDbId, trait, traitAlias, format, defaultValue,
                 minimum, maximum, details, categories, closeKeyboardOnOpen, cropImage,
-                saveImage, useDayOfYear, displayValue, resourceFile, synonyms);
+                saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms);
 //        try {
 //            ContentValues c = new ContentValues();
 //            c.put("trait", trait);
@@ -978,7 +977,7 @@ public class DataHelper {
                 trait.getFormat(), trait.getDefaultValue(), trait.getMinimum(), trait.getMaximum(),
                 trait.getDetails(), trait.getCategories(), trait.getCloseKeyboardOnOpen(), trait.getCropImage(),
                 trait.getSaveImage(),
-                trait.getUseDayOfYear(), trait.getDisplayValue(), trait.getResourceFile(), trait.getSynonyms());
+                trait.getUseDayOfYear(), trait.getCategoryDisplayValue(), trait.getResourceFile(), trait.getSynonyms());
     }
 
     public boolean checkUnique(HashMap<String, String> values) {
