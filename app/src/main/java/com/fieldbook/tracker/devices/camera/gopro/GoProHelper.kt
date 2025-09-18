@@ -47,7 +47,6 @@ import okhttp3.Request
 import okhttp3.Response
 import org.json.JSONException
 import org.json.JSONObject
-import org.phenoapps.fragments.gopro.GoProController
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
@@ -68,6 +67,7 @@ open class GoProHelper(val context: Context, val onReady: OnGoProStreamReady) : 
     interface OnGoProStreamReady {
         fun onStreamReady()
         fun onImageRequestReady(bitmap: Bitmap, data: Map<String, String>)
+        fun onImageUrlSaved(image: GoProImage)
     }
 
     companion object {
@@ -652,7 +652,7 @@ open class GoProHelper(val context: Context, val onReady: OnGoProStreamReady) : 
     /**
      * http request to read media list (files on gopro device)
      */
-    override fun queryMedia(data: Map<String, String>) {
+    override fun queryMedia(data: Map<String, String>, requestAndSaveImage: Boolean) {
 
         Log.d(TAG, "Attempting media list query.")
 
@@ -678,7 +678,7 @@ open class GoProHelper(val context: Context, val onReady: OnGoProStreamReady) : 
 
                 } else {
 
-                    parseMediaQueryResponse(response.body?.string() ?: "{}", data)
+                    parseMediaQueryResponse(response.body?.string() ?: "{}", data, requestAndSaveImage)
 
                     Log.i(TAG, "Media query success.")
 
@@ -692,7 +692,7 @@ open class GoProHelper(val context: Context, val onReady: OnGoProStreamReady) : 
     /**
      * parses media list response and returns the last requests the most recent file
      */
-    private fun parseMediaQueryResponse(responseBody: String, data: Map<String, String>) {
+    private fun parseMediaQueryResponse(responseBody: String, data: Map<String, String>, requestAndSaveImage: Boolean = true) {
 
         try {
 
@@ -734,9 +734,13 @@ open class GoProHelper(val context: Context, val onReady: OnGoProStreamReady) : 
                 }
             }
 
-            val latest = images.maxBy { it.mod }.url
+            val latest = images.maxBy { it.mod }
 
-            requestFileUrl(latest, data)
+            if (requestAndSaveImage) {
+                requestFileUrl(latest.url, data)
+            } else {
+                onReady.onImageUrlSaved(latest)
+            }
 
         } catch (e: JSONException) {
 
