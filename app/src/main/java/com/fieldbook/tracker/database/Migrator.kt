@@ -11,6 +11,7 @@ import androidx.core.database.getStringOrNull
 import com.fieldbook.tracker.database.migrators.RefactorMigratorVersion13
 import com.fieldbook.tracker.database.migrators.GroupMigratorVersion14
 import com.fieldbook.tracker.database.migrators.SpectralMigratorVersion16
+import com.fieldbook.tracker.database.migrators.StudyConfigurationVersion17
 import com.fieldbook.tracker.objects.TraitObject
 
 /**
@@ -407,10 +408,21 @@ class Migrator {
 
             SpectralMigratorVersion16().migrate(db)
                 .onFailure {
-                    Log.e(TAG, "Failed to migrate to version 13", it)
+                    Log.e(TAG, "Failed to migrate to version 16", it)
                 }
                 .onSuccess {
-                    Log.d(TAG, "Migrated to version 13")
+                    Log.d(TAG, "Migrated to version 16")
+                }
+        }
+
+        fun migrateToVersion17(db: SQLiteDatabase) {
+
+            StudyConfigurationVersion17().migrate(db)
+                .onFailure {
+                    Log.e(TAG, "Failed to migrate to version 17", it)
+                }
+                .onSuccess {
+                    Log.d(TAG, "Migrated to version 17")
                 }
         }
     }
