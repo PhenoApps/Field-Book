@@ -289,6 +289,7 @@
     <string name="traits_create_photo_maximum">Número máximo de fotos</string>
     <string name="traits_create_true">Verdadeiro</string>
     <string name="traits_create_false">Falso</string>
+    <string name="traits_create_unset">Desmarcar</string>
     <string name="traits_create_categories_text">Separar items com uma /</string>
     <string name="traits_create_camera">Câmera</string>
     <string name="traits_create_close_keyboard">Fechar o teclado</string>
@@ -379,6 +380,7 @@
     <string name="activity_collect_locked_state">Bloqueado - entrada de dados, modificação e exclusão estão desabilitados</string>
     <string name="activity_collect_frozen_state">Congelado - uma vez que os dados são salvos, eles não podem ser modificados ou excluídos</string>
     <string name="activity_collect_unlocked_state">Desbloqueado - sem restrições na entrada de dados, modificação ou exclusão de dados</string>
+    <string name="trait_box_word_wrap_toast">Quebrar palavras %s para Características</string>
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">Seu dispositivo não tem uma câmera que possa ser usada para tirar uma foto.</string>
     <string name="trait_delete_warning_photo">Você tem certeza que deseja excluir esta foto?</string>
@@ -410,6 +412,7 @@
     <!-- Trait Layout: Boolean -->
     <string name="trait_boolean_on">Ativado</string>
     <string name="trait_boolean_off">Desativado</string>
+    <string name="trait_boolean_unset">Desmarcar</string>
     <!-- Trait Layout: GoPro -->
     <string name="trait_go_pro_capture_button_text">Capturar\n</string>
     <string name="trait_go_pro_await_device_title">Procurando um GoPros</string>
@@ -1318,4 +1321,9 @@
     <string name="loading">Carregando</string>
     <string name="nix_error_no_network">Nix pode exigir que a internet funcione corretamente.</string>
     <string name="import_runnable_field_name_exists">Nome do campo já existe.</string>
+    <string name="enabled">habilitado</string>
+    <string name="disabled">desabilitado</string>
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="reset">Restabelecer</string>
+    <string name="save">Salvar</string>
 </resources>

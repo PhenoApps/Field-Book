@@ -279,7 +279,7 @@
 
     <string name="traits_export_check">Export current trait list?</string>
     <string name="traits_dialog_export">Export</string>
-    <string name="dialog_delete_traits_message">Would you like to delete all current traits?</string>
+    <string name="dialog_delete_traits_message">Would you like to delete all current traits? Deleting a trait also deletes data that has been collected for that trait.</string>
 
     <string name="traits_toolbar_delete_all">Delete all traits</string>
     <string name="act_trait_editor_no_traits_exist">No traits exist.</string>
@@ -314,6 +314,7 @@
     <string name="traits_format_spectral">Spectral</string>
     <string name="traits_format_nix">Nix</string>
     <string name="traits_format_inno_spectra">InnoSpectra</string>
+    <string name="traits_format_stop_watch">Stopwatch</string>
 
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Trait Format</string>
@@ -1563,9 +1564,16 @@
     <string name="nix_error_no_network">Nix may require internet to work properly.</string>
 
     <string name="import_runnable_field_name_exists">Field name already exists.</string>
+
     <string name="enabled">enabled</string>
     <string name="disabled">disabled</string>
 
     <string name="traits_save_image_parameter">Save Image</string>
+
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="reset">Reset</string>
+    <string name="play">Play</string>
+    <string name="pause">Pause</string>
+    <string name="save">Save</string>
 
 </resources>

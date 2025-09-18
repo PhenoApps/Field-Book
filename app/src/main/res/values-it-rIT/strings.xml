@@ -114,10 +114,6 @@
     <string name="fields_delete">Cancella</string>
     <string name="fields_delete_study">Cancella campo</string>
     <string name="fields_delete_study_confirmation">Sei sicuro di voler cancellare questo campo? Verranno cancellati anche tutti i dati associati a questo campo.</string>
-    <plurals name="fields_delete_confirmation">
-        <item quantity="one">Sei sicuro di voler cancellare il campo \"%s\"?</item>
-        <item quantity="other">Sei sicuro di voler cancellare questo campo: \"%s\"?</item>
-    </plurals>
     <!-- Import -->
     <string name="fields_new_button_content_description">Aggiungi un nuovo campo.</string>
     <string name="fields_new_dialog_title">Nuovo campo</string>
@@ -520,4 +516,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="dialog_quick_goto_go">Vai</string>
     <string name="traits_sort_default">Impostazioni predefinite</string>
     <!--  NearbyShare  -->
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="reset">Ripristina</string>
+    <string name="save">Salva</string>
 </resources>

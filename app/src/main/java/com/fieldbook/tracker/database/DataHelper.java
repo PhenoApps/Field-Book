@@ -1447,7 +1447,7 @@ public class DataHelper {
             }
 
             //migrate handles database upgrade from 8 -> 9
-            Migrator.Companion.createTables(db, getAllTraitObjects(db));
+            Migrator.Companion.createTables(db, getAllOldTraitObjects(db));
 
             //this will force new databases to have full updates, otherwise sqliteopenhelper will not upgrade
             onUpgrade(db, 9, DATABASE_VERSION);
@@ -1456,11 +1456,11 @@ public class DataHelper {
         /**
          * Copy of getAllTraitObjects in DataHelper to migrate to version 9.
          */
-        public ArrayList<TraitObject> getAllTraitObjects(SQLiteDatabase db) {
+        public ArrayList<TraitObject> getAllOldTraitObjects(SQLiteDatabase db) {
 
             ArrayList<TraitObject> list = new ArrayList<>();
 
-            Cursor cursor = db.query(TRAITS, new String[]{"internal_id_observation_variable", "trait", "format", "defaultValue",
+            Cursor cursor = db.query(TRAITS, new String[]{"id", "trait", "format", "defaultValue",
                             "minimum", "maximum", "details", "categories", "isVisible", "realPosition"},
                     null, null, null, null, "realPosition"
             );
@@ -1623,7 +1623,7 @@ public class DataHelper {
                     Log.e(TAG, e.getMessage());
                 }
 
-                Migrator.Companion.migrateSchema(db, getAllTraitObjects(db));
+                Migrator.Companion.migrateSchema(db, getAllOldTraitObjects(db));
 
                 preferences.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, -1).apply();
             }
