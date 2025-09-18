@@ -95,7 +95,7 @@ public class DataHelper {
     private final UriDao uriDao = new UriDao(this);
     private final DeviceDao deviceDao = new DeviceDao(this);
     private final SpectralRepository proto = new SpectralRepository(spectralDao, protocolDao, deviceDao, uriDao);
-    private final SpectralFileProcessor spectralFileProcessor = new SpectralFileProcessor(proto);
+    private final SpectralFileProcessor spectralFileProcessor = new SpectralFileProcessor(this, proto);
 
     private SearchQueryBuilder queryBuilder;
 

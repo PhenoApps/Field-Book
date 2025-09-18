@@ -20,6 +20,8 @@
   * [Photo](traits/trait-photo.md)
   * [Zebra Label Print](traits/trait-zebra.md)
   * [Spectral](traits/trait-spectral.md)
+  * [Scales](traits/trait-scales.md)
+  * [Greenseeker](traits/trait-greenseeker.md)
 * Function
   * [Collect](collect.md)
   * [Export](export.md)
