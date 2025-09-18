@@ -11,6 +11,7 @@ class DateFormatVersion19 : FieldBookMigrator {
     companion object {
         const val TAG = "DateFormatVersion19"
         const val VERSION = 19
+        private const val UNKNOWN_YEAR = "????"
     }
 
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -22,7 +23,7 @@ class DateFormatVersion19 : FieldBookMigrator {
             SELECT internal_id_observation, value 
             FROM observations AS O
             JOIN observation_variables AS OV ON O.observation_variable_db_id = OV.internal_id_observation_variable
-            WHERE observation_variable_field_book_format = 'date'
+            WHERE OV.observation_variable_field_book_format = 'date'
             """, null)
 
         //encode the value into json and update the observation
@@ -52,12 +53,18 @@ class DateFormatVersion19 : FieldBookMigrator {
                     dateJson.dayOfYear = value
                     //format day of year into formatted date
                     try {
-                        val calendar = Calendar.getInstance()
-                        calendar.set(Calendar.DAY_OF_YEAR, value.toInt())
-                        val year = calendar.get(Calendar.YEAR)
-                        calendar.set(Calendar.YEAR, year)
-                        val formattedDate = dateFormat.format(calendar.time)
-                        dateJson.formattedDate = formattedDate
+                        val dayOfYear = value.toInt()
+                        val year = getYear(dayOfYear)
+
+                        val calendar = Calendar.getInstance().apply {
+                            set(Calendar.YEAR, year)
+                            set(Calendar.DAY_OF_YEAR, dayOfYear)
+                        }
+
+                        val mm = String.format(Locale.getDefault(), "%02d", calendar.get(Calendar.MONTH) + 1)
+                        val dd = String.format(Locale.getDefault(), "%02d", calendar.get(Calendar.DAY_OF_MONTH))
+
+                        dateJson.formattedDate = "$UNKNOWN_YEAR-$mm-$dd"
                     } catch (e: Exception) {
                         dateJson.formattedDate = ""
                     }
@@ -69,5 +76,23 @@ class DateFormatVersion19 : FieldBookMigrator {
         }
 
         cursor.close()
+    }
+
+    private fun getYear(dayOfYear: Int): Int {
+        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+        return if (dayOfYear == 366) { // find the most recent leap year
+            var year = currentYear
+            val tempCalendar = Calendar.getInstance()
+            while (true) {
+                tempCalendar.set(Calendar.YEAR, year)
+                if (tempCalendar.getActualMaximum(Calendar.DAY_OF_YEAR) == 366) {
+                    break
+                }
+                year--
+            }
+            year
+        } else {
+            currentYear
+        }
     }
 }
