@@ -60,7 +60,9 @@ fun FieldEditorScreen(
         try {
             val repo = StudiesRepo(db)
             fields = repo.getAllFields()
+            println("Fields loaded: $fields")
         } catch (e: Exception) {
+            e.printStackTrace();
             error = e.message ?: "Unknown error"
         } finally {
             loading = false

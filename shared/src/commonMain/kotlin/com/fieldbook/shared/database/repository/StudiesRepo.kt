@@ -12,7 +12,7 @@ class StudiesRepo(private val db: FieldbookDatabase) {
             SortOrder.DateImport ->
                 db.studiesQueries.allByDateDesc().executeAsList().map { r ->
                     FieldObject(
-                        expId = r.study_db_id.toInt(),
+                        expId = r.internal_id_study.toInt(),
                         expName = r.study_name.orEmpty(),
                         expAlias = r.study_alias.orEmpty(),
                         uniqueId = r.study_unique_id_name.orEmpty(),
@@ -25,7 +25,7 @@ class StudiesRepo(private val db: FieldbookDatabase) {
             SortOrder.Visible ->
                 db.studiesQueries.allByVisibleAsc().executeAsList().map { r ->
                     FieldObject(
-                        expId = r.study_db_id.toInt(),
+                        expId = r.internal_id_study.toInt(),
                         expName = r.study_name.orEmpty(),
                         expAlias = r.study_alias.orEmpty(),
                         uniqueId = r.study_unique_id_name.orEmpty(),
@@ -38,7 +38,7 @@ class StudiesRepo(private val db: FieldbookDatabase) {
             SortOrder.Name ->
                 db.studiesQueries.allByNameAsc().executeAsList().map { r ->
                     FieldObject(
-                        expId = r.study_db_id.toInt(),
+                        expId = r.internal_id_study.toInt(),
                         expName = r.study_name.orEmpty(),
                         expAlias = r.study_alias.orEmpty(),
                         uniqueId = r.study_unique_id_name.orEmpty(),
