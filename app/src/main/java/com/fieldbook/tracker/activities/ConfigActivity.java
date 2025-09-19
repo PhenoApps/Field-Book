@@ -336,9 +336,15 @@ public class ConfigActivity extends ThemedActivity {
             Intent intent = new Intent();
             switch (position) {
                 case 0:
-                    intent.setClassName(ConfigActivity.this,
-                            FieldEditorActivity.class.getName());
-                    startActivity(intent);
+                    if (useKmp) {
+                        Intent kmpIntent = new Intent(ConfigActivity.this, KmpHostActivity.class);
+                        kmpIntent.putExtra(KmpHostActivity.EXTRA_SCREEN, KmpHostScreenType.FIELD_EDITOR.getValue());
+                        startActivity(kmpIntent);
+                    } else {
+                        intent.setClassName(ConfigActivity.this,
+                                FieldEditorActivity.class.getName());
+                        startActivity(intent);
+                    }
                     break;
                 case 1:
                     intent.setClassName(ConfigActivity.this,
