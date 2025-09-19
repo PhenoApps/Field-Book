@@ -17,12 +17,9 @@ import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.dialogs.DatePickerFragment;
 import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.preferences.PreferenceKeys;
-import com.fieldbook.tracker.traits.formats.DateFormat;
 import com.fieldbook.tracker.traits.formats.Formats;
 import com.fieldbook.tracker.traits.formats.coders.DateJsonCoder;
 import com.fieldbook.tracker.traits.formats.coders.StringCoder;
-import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -35,6 +32,7 @@ import java.util.Locale;
 
 public class DateTraitLayout extends BaseTraitLayout {
 
+    private static final String UNKNOWN_YEAR_PREFIX = "????-";
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private final SimpleDateFormat previewFormat = new SimpleDateFormat("MMM dd", Locale.getDefault());
 
@@ -220,8 +218,7 @@ public class DateTraitLayout extends BaseTraitLayout {
     private void updatePreviewDate(Calendar calendar) {
         date = dateFormat.format(calendar.getTime());
         log();
-        setDatePreviewText(getMonthForInt(calendar.get(Calendar.MONTH)),
-                String.format(Locale.getDefault(),"%02d", calendar.get(Calendar.DAY_OF_MONTH)));
+        updatePreviewText(calendar);
     }
 
     private void updateViewDate(Calendar calendar) {
@@ -237,8 +234,7 @@ public class DateTraitLayout extends BaseTraitLayout {
                 .putString(GeneralKeys.CALENDAR_LAST_SAVED_DATE, yearText + "-" + monthText + "-" + dayOfMonth)
                 .apply();
 
-        setDateText(getMonthForInt(calendar.get(Calendar.MONTH)),
-                String.format(Locale.getDefault(),"%02d", calendar.get(Calendar.DAY_OF_MONTH)));
+        updateDateText(calendar);
     }
 
     private void log() {
@@ -266,11 +262,19 @@ public class DateTraitLayout extends BaseTraitLayout {
         Calendar calendar = Calendar.getInstance();
 
         try {
-            calendar.setTime(dateFormat.parse(date));
+            if (date.startsWith(UNKNOWN_YEAR_PREFIX)) {
+                String[] parts = date.split("-");
+                if (parts.length == 3) {
+                    int month = Integer.parseInt(parts[1]) - 1;
+                    int day = Integer.parseInt(parts[2]);
 
-            //set month/day text and color
-            setDateText(getMonthForInt(calendar.get(Calendar.MONTH)), String.format(Locale.getDefault(),
-                    "%02d", calendar.get(Calendar.DAY_OF_MONTH)));
+                    // set calendar to current year with extracted month/day
+                    calendar.set(Calendar.MONTH, month);
+                    calendar.set(Calendar.DAY_OF_MONTH, day);
+                }
+            } else calendar.setTime(dateFormat.parse(date));
+
+            updateDateText(calendar);
 
         } catch (ParseException | NullPointerException e) {
             e.printStackTrace();
@@ -311,13 +315,18 @@ public class DateTraitLayout extends BaseTraitLayout {
 
             if (dateVal instanceof DateJsonCoder.DateJson) {
 
-                date = ((DateJsonCoder.DateJson) dateVal).getFormattedDate();
+                DateJsonCoder.DateJson dateJson = (DateJsonCoder.DateJson) dateVal;
+                date = dateJson.getFormattedDate();
 
                 log();
 
-                parseDateAndView();
+                if (getCurrentTrait().getUseDayOfYear()) {
+                    getCollectInputView().setText(dateJson.getDayOfYear());
+                } else {
+                    parseDateAndView();
+                }
 
-            } else if (value.length() < 4 && value.length() > 0) {
+            } else if (value.length() < 4 && !value.isEmpty()) {
 
                 //there is a FB preference to save dates as Day of year between 1-365
 
@@ -331,8 +340,7 @@ public class DateTraitLayout extends BaseTraitLayout {
                 date = dateFormat.format(calendar.getTime());
                 log();
 
-                setDateText(getMonthForInt(calendar.get(Calendar.MONTH)), String.format(Locale.getDefault(), "%02d", calendar.get(Calendar.DAY_OF_MONTH)));
-
+                updateDateText(calendar);
             } else if (value.contains(".")) {
                 //convert from yyyy.mm.dd to yyyy-mm-dd
                 String[] oldDate = value.split("\\.");
@@ -340,7 +348,13 @@ public class DateTraitLayout extends BaseTraitLayout {
                 log();
 
                 //set month/day text and color
-                setDateText(getMonthForInt(Integer.parseInt(oldDate[1]) - 1), oldDate[2]);
+                Calendar calendar = Calendar.getInstance();
+                try {
+                    calendar.setTime(dateFormat.parse(date));
+                    updateDateText(calendar);
+                } catch (ParseException e) {
+                    setDateText(getMonthForInt(Integer.parseInt(oldDate[1]) - 1), oldDate[2]);
+                }
 
             } else {
 
@@ -420,8 +434,34 @@ public class DateTraitLayout extends BaseTraitLayout {
         return month;
     }
 
+    private void updatePreviewText(Calendar calendar) {
+        if (getCurrentTrait().getUseDayOfYear()) {
+            setDatePreviewText(String.valueOf(calendar.get(Calendar.DAY_OF_YEAR)));
+        } else {
+            setDatePreviewText(getMonthForInt(calendar.get(Calendar.MONTH)),
+                    String.format(Locale.getDefault(), "%02d", calendar.get(Calendar.DAY_OF_MONTH)));
+        }
+    }
+
+    private void setDatePreviewText(String dayOfYear) {
+        datePreviewText.setText(dayOfYear);
+    }
+
     private void setDatePreviewText(String month, String day) {
         datePreviewText.setText(month + " " + day);
+    }
+
+    private void updateDateText(Calendar calendar) {
+        if (getCurrentTrait().getUseDayOfYear()) {
+            setDateText(String.valueOf(calendar.get(Calendar.DAY_OF_YEAR)));
+        } else {
+            setDateText(getMonthForInt(calendar.get(Calendar.MONTH)),
+                    String.format(Locale.getDefault(), "%02d", calendar.get(Calendar.DAY_OF_MONTH)));
+        }
+    }
+
+    private void setDateText(String dayOfYear) {
+        getCollectInputView().setText(dayOfYear);
     }
 
     private void setDateText(String month, String day) {
@@ -436,7 +476,22 @@ public class DateTraitLayout extends BaseTraitLayout {
             Object val = new DateJsonCoder().decode(value);
             if (val instanceof DateJsonCoder.DateJson) {
                 DateJsonCoder.DateJson dateJson = (DateJsonCoder.DateJson) val;
-                d = dateFormat.parse(dateJson.getFormattedDate());
+                if (getCurrentTrait().getUseDayOfYear()) {
+                    return dateJson.getDayOfYear();
+                }
+
+                String formattedDate = dateJson.getFormattedDate();
+
+                if (formattedDate.startsWith(UNKNOWN_YEAR_PREFIX)) {
+                    String[] parts = formattedDate.split("-");
+                    if (parts.length == 3) {
+                        int month = Integer.parseInt(parts[1]) - 1;
+                        int day = Integer.parseInt(parts[2]);
+                        return getMonthForInt(month) + " " + String.format(Locale.getDefault(), "%02d", day);
+                    }
+                } else {
+                    d = dateFormat.parse(formattedDate);
+                }
             } else {
                 d = dateFormat.parse(value);
             }
@@ -446,7 +501,12 @@ public class DateTraitLayout extends BaseTraitLayout {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        return getMonthForInt(c.get(Calendar.MONTH)) + " " + String.format(Locale.getDefault(), "%02d", c.get(Calendar.DAY_OF_MONTH));
+
+        if (getCurrentTrait().getUseDayOfYear()) {
+            return String.valueOf(c.get(Calendar.DAY_OF_YEAR));
+        } else {
+            return getMonthForInt(c.get(Calendar.MONTH)) + " " + String.format(Locale.getDefault(), "%02d", c.get(Calendar.DAY_OF_MONTH));
+        }
     }
 
     @NonNull
@@ -465,7 +525,16 @@ public class DateTraitLayout extends BaseTraitLayout {
             if (getCurrentTrait().getUseDayOfYear()) {
                 Integer.parseInt(data);
             } else {
-                Date d = dateFormat.parse(data);
+                if (data.startsWith(UNKNOWN_YEAR_PREFIX)) {
+                    String[] parts = data.split("-");
+                    if (parts.length == 3) {
+                        int month = Integer.parseInt(parts[1]);
+                        int day = Integer.parseInt(parts[2]);
+                        return month >= 1 && month <= 12 && day >= 1 && day <= 31;
+                    }
+                } else {
+                    Date d = dateFormat.parse(data);
+                }
             }
             return true;
         } catch (Exception e) {

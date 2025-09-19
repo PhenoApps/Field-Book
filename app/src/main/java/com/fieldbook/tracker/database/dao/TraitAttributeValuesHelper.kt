@@ -125,14 +125,12 @@ class TraitAttributeValuesHelper(var traitId: String? = null) {
     }
 
     fun getBoolean(attribute: AttributeDefinition): Boolean {
-        Log.d(TAG, "getBoolean: ${attribute.key} ${attributeValueMap[attribute.key]}")
         return getString(attribute).toBoolean()
     }
 
     fun setValue(attribute: AttributeDefinition, value: String) {
         ensureLoaded()
         attributeValueMap[attribute.key] = value
-        Log.d(TAG, "getBoolean: ${attribute.key} ${attributeValueMap[attribute.key]}")
     }
 
     private fun ensureLoaded() {
