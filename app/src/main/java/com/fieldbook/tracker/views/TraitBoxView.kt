@@ -214,7 +214,7 @@ class TraitBoxView : ConstraintLayout {
 
         previousSelection = traitPosition
 
-        traitTypeTv.text = currentTrait?.name
+        traitTypeTv.text = currentTrait?.alias
         traitDetails.text = currentTrait?.details ?: ""
 
         handleTraitTypeWrapping()
@@ -235,7 +235,7 @@ class TraitBoxView : ConstraintLayout {
 
         builder.setTitle(R.string.select_trait)
             .setCancelable(true)
-            .setSingleChoiceItems(visibleTraits.map { it.name }.toTypedArray(), getSelectedItemPosition()) { dialog, index ->
+            .setSingleChoiceItems(visibleTraits.map { it.alias }.toTypedArray(), getSelectedItemPosition()) { dialog, index ->
                 // Update selected trait
                 currentTrait = visibleTraits[index]
                 loadLayout()

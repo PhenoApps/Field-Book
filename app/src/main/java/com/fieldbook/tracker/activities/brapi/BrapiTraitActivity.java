@@ -271,9 +271,10 @@ public class BrapiTraitActivity extends ThemedActivity {
             TraitObject trait = selectedTraits.get(i);
 
             TraitObject existingTraitByName = database.getTraitByName(trait.getName());
+            TraitObject existingTraitByAlias = database.getTraitByAlias(trait.getName());
             TraitObject existingTraitByExId = database.getTraitByExternalDbId(trait.getExternalDbId(), trait.getTraitDataSource());
             // Check if the trait already exists
-            if (existingTraitByName != null) {
+            if (existingTraitByName != null || existingTraitByAlias != null) {
                 secondaryMessage = getResources().getString(R.string.brapi_trait_already_exists, trait.getName());
                 // Skip this one, continue on.
                 continue;
@@ -285,6 +286,7 @@ public class BrapiTraitActivity extends ThemedActivity {
             }else{
                 // Insert our new trait
                 trait.setRealPosition(pos + i);
+                trait.setAlias(trait.getName());
                 long saveStatus = database.insertTraits(trait);
                 successfulSaves += saveStatus == -1 ? 0 : 1;
             }

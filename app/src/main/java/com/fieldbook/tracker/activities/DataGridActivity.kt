@@ -381,7 +381,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
                     } else {
                         val traitIndex = index - 1
                         if (traitIndex < mTraits.size) {
-                            HeaderCell(text = mTraits[traitIndex].name)
+                            HeaderCell(text = mTraits[traitIndex].alias)
                         } else {
                             HeaderCell(text = "")
                         }

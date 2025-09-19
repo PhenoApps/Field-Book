@@ -16,7 +16,6 @@ import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.activities.TraitEditorActivity
 import com.fieldbook.tracker.adapters.TraitFormatAdapter
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.TraitObject
@@ -466,6 +465,7 @@ class NewTraitDialog(
         database.editTraits(
             traitObject.id,
             traitObject.name,
+            traitObject.alias,
             traitObject.format,
             traitObject.defaultValue,
             traitObject.minimum,
@@ -473,7 +473,12 @@ class NewTraitDialog(
             traitObject.details,
             traitObject.categories,
             traitObject.closeKeyboardOnOpen,
-            traitObject.cropImage
+            traitObject.cropImage,
+            traitObject.saveImage,
+            traitObject.useDayOfYear,
+            traitObject.categoryDisplayValue,
+            traitObject.resourceFile,
+            traitObject.synonyms
         )
     }
 

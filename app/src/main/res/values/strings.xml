@@ -262,6 +262,7 @@
 
 
     <!-- TRAITS -->
+
     <!-- Sort -->
     <string name="traits_toolbar_sort">Sort Traits</string>
     <string name="traits_sort_name">Name</string>
@@ -370,6 +371,52 @@
     <string name="select_trait">Select Trait</string>
     <string name="edit_traits">Edit</string>
 
+    <!-- Trait Detail Strings -->
+    <string name="trait_detail_title">Trait Details</string>
+    <string name="trait_format_details">Format Details</string>
+    <string name="trait_data_title">Observation Data</string>
+    <string name="trait_default_value">Default Value: %s</string>
+    <string name="trait_min_value">Minimum Value: %s</string>
+    <string name="trait_max_value">Maximum Value: %s</string>
+    <string name="trait_categories">Categories: %s</string>
+    <string name="trait_details">Details: %s</string>
+    <string name="trait_visible">Visible</string>
+    <string name="trait_hidden">Hidden</string>
+    <string name="trait_options_title">Options</string>
+    <string name="trait_resource_chip_title">Set resource file</string>
+    <string name="trait_brapi_swap_name">Swap name field</string>
+    <string name="trait_observation_data">Data</string>
+    <string name="trait_observation_count">%d observations</string>
+    <string name="trait_not_chartable">This trait format cannot be visualized in a chart</string>
+    <string name="traits_options_copy_title">Copy Trait</string>
+    <string name="trait_name_empty_error">Trait name cannot be empty</string>
+    <string name="trait_name_exists_error">A trait with this name already exists</string>
+    <string name="trait_copied_success">Trait copied to %1$s</string>
+    <string name="trait_date_format_dialog_title">Select Date Format</string>
+    <string name="trait_date_format_display">Date (%s)</string>
+    <string name="trait_day_format_display">Day of Year (%d)</string>
+    <string name="trait_brapi_display_dialog_title">Select Button Text</string>
+    <string name="trait_brapi_label_display">Show Labels (e.g. %s)</string>
+    <string name="trait_brapi_value_display">Show Values (e.g. %s)</string>
+    <string name="error_loading_trait_detail">Error loading trait info</string>
+    <string name="error_updating_trait_resource_file">Error updating trait resource file</string>
+    <string name="error_empty_trait_name">Trait name cannot be empty</string>
+    <string name="error_copy_trait">Error while copying trait</string>
+    <string name="trait_swap_name_dialog_title">Select synonym as trait alias</string>
+    <string name="trait_swap_name_set_alias">Set Alias</string>
+    <string name="error_updating_trait_alias">Error updating trait alias</string>
+    <string name="error_updating_trait_options">Error updating trait options</string>
+
+    <!-- <string name="trait_date_format_example">Date: %s</string>
+    <string name="trait_day_format_example">Day of Year: %d</string>
+    <string name="trait_brapi_label_example">Label: %s</string>
+    <string name="trait_brapi_value_example">Value: %s</string> -->
+
+    <string name="trait_parameter_display_value">Display Value</string>
+    <string name="trait_parameter_resource_file">Resource File</string>
+    <string name="trait_parameter_use_day_of_year">Use Day of Year</string>
+    <string name="list_item_trait_parameter_resource_file_hint">Select a resource file</string>
+    <string name="trait_resource_file_updated">Resource File Updated</string>
 
     <!-- COLLECT -->
 

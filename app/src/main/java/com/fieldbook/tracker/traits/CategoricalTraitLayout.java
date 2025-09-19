@@ -14,10 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
-import com.fieldbook.tracker.preferences.GeneralKeys;
-import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
-import com.fieldbook.tracker.utilities.Utils;
 import com.google.android.flexbox.AlignItems;
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexWrap;
@@ -53,6 +50,10 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
             if (name.equals(traitFormat)) return true;
         }
         return false;
+    }
+
+    private boolean shouldDisplayValues() {
+        return getCurrentTrait().getCategoryDisplayValue();
     }
 
     @Override
@@ -99,9 +100,6 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
     public void afterLoadExists(CollectActivity act, @Nullable String value) {
         super.afterLoadExists(act, value);
 
-        //read the preferences, default to displaying values instead of labels
-        String labelValPref = getPrefs().getString(PreferenceKeys.LABELVAL_CUSTOMIZE,"value");
-
         //read the json object stored in additional info of the trait object (only in BrAPI imported traits)
         ArrayList<BrAPIScaleValidValuesCategories> cats = getCategories();
 
@@ -122,7 +120,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                     if (CategoryJsonUtil.Companion.contains(cats, labelVal)) {
 
                         //display the category based on preferences
-                        if (labelValPref.equals("value")) {
+                        if (shouldDisplayValues()) {
 
                             getCollectInputView().setText(labelVal.getValue());
 
@@ -177,8 +175,6 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
     private void setAdapter(ArrayList<BrAPIScaleValidValuesCategories> cats) {
 
-        String labelValPref = getPrefs().getString(PreferenceKeys.LABELVAL_CUSTOMIZE,"value");
-
         FlexboxLayoutManager layoutManager = new FlexboxLayoutManager(getContext());
         layoutManager.setFlexWrap(FlexWrap.WRAP);
         layoutManager.setFlexDirection(FlexDirection.ROW);
@@ -195,7 +191,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                 BrAPIScaleValidValuesCategories pair = cats.get(position);
 
                 //update button with the preference based text
-                if (labelValPref.equals("value")) {
+                if (shouldDisplayValues()) {
 
                     holder.mButton.setText(pair.getValue());
 
@@ -212,7 +208,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                 //update the button's state if this category is selected
                 String currentText = getCollectInputView().getText();
 
-                if (labelValPref.equals("value")) {
+                if (shouldDisplayValues()) {
 
                     if (currentText.equals(pair.getValue())) {
 
@@ -310,10 +306,9 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
     @Override
     public String decodeValue(String value) {
-        String labelValPref = getPrefs().getString(PreferenceKeys.LABELVAL_CUSTOMIZE,"value");
         ArrayList<BrAPIScaleValidValuesCategories> scale = CategoryJsonUtil.Companion.decode(value);
         if (!scale.isEmpty()) {
-            if (labelValPref.equals("value")) {
+            if (shouldDisplayValues()) {
                 return scale.get(0).getValue();
             } else return scale.get(0).getLabel();
         } else return "";

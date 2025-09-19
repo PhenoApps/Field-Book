@@ -6,6 +6,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.traits.formats.parameters.CropImageParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
+import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 import com.fieldbook.tracker.traits.formats.presenters.UriPresenter
 import com.fieldbook.tracker.traits.formats.presenters.ValuePresenter
 
@@ -27,5 +28,6 @@ open class BasePhotoFormat(
     stringNameAux = stringNameAux,
     NameParameter(),
     DetailsParameter(),
-    CropImageParameter()
+    CropImageParameter(),
+    ResourceFileParameter()
 ), ValuePresenter by UriPresenter()

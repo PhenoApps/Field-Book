@@ -78,7 +78,7 @@ class InfoBarHelper @Inject constructor(@ActivityContext private val context: Co
                 )
             } else {
                 val trait = database.getTraitById(traitId)
-                AttributeModel(trait.name, trait = trait)
+                AttributeModel(trait.alias, trait = trait)
             }
 
             //query the database for the label's value

@@ -204,14 +204,14 @@ open class AttributeChooserDialog(
 
             traitsLabel -> visibleTraits.map {
                 AttributeAdapter.AttributeModel(
-                    label = it.name,
+                    label = it.alias,
                     trait = it
                 )
             }
 
             else -> nonVisibleTraits.map {
                 AttributeAdapter.AttributeModel(
-                    label = it.name,
+                    label = it.alias,
                     trait = it
                 )
             }
