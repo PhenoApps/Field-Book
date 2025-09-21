@@ -3,8 +3,6 @@ package com.fieldbook.tracker.traits.formats.parameters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CompoundButton
-import android.widget.Switch
 import android.widget.ToggleButton
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper

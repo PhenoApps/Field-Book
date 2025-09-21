@@ -314,7 +314,9 @@ class ObservationVariableDao {
                        useDayOfYear: Boolean,
                        categoryDisplayValue: Boolean,
                        resourceFile: String,
-                       synonyms: List<String>): Long = withDatabase { db ->
+                       synonyms: List<String>,
+                       decimalPlacesRequired: String,
+                       mathSymbolsEnabled: Boolean): Long = withDatabase { db ->
 
            val contentValues = ContentValues().apply {
                put("observation_variable_name", trait)
@@ -345,6 +347,8 @@ class ObservationVariableDao {
                     this.categoryDisplayValue = categoryDisplayValue
                     this.resourceFile = resourceFile
                     this.synonyms = synonyms
+                    this.maxDecimalPlaces = decimalPlacesRequired
+                    this.mathSymbolsEnabled = mathSymbolsEnabled
                 }
 
                 traitObj.saveAttributeValues()

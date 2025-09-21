@@ -83,6 +83,24 @@ public class NumericTraitLayout extends BaseTraitLayout {
         numberButtons.get(R.id.k1).requestFocus();
     }
 
+    private void updateButtonVisibility(TraitObject traitObject) {
+        boolean mathSymbolsEnabled = traitObject.getMathSymbolsEnabled();
+
+        Button[] mathButtons = {
+                numberButtons.get(R.id.k1),
+                numberButtons.get(R.id.k5),
+                numberButtons.get(R.id.k9),
+                numberButtons.get(R.id.k13)
+        };
+
+        int visibility = mathSymbolsEnabled ? View.VISIBLE : View.GONE;
+        for (Button button : mathButtons) {
+            if (button != null) {
+                button.setVisibility(visibility);
+            }
+        }
+    }
+
     @Override
     public void refreshLock() {
         super.refreshLock();
@@ -92,6 +110,13 @@ public class NumericTraitLayout extends BaseTraitLayout {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void loadLayout() {
+        super.loadLayout();
+
+        updateButtonVisibility(getCurrentTrait());
     }
 
     @Override
@@ -122,6 +147,35 @@ public class NumericTraitLayout extends BaseTraitLayout {
             });
 
             return false;
+        }
+
+        int maxDecimalPlaces = Integer.parseInt(trait.getMaxDecimalPlaces());
+
+        if (!trait.getMathSymbolsEnabled() && containsMathematicalSymbols(data)) {
+
+            getCollectActivity().runOnUiThread(() -> {
+                Utils.makeToast(controller.getContext(),
+                        controller.getContext().getString(R.string.trait_error_mathematical_symbols_disabled));
+            });
+
+            return false;
+
+        } else if (maxDecimalPlaces >= 0) { // validate decimal places
+            if (!isValidDecimalPlaces(data, maxDecimalPlaces)) {
+
+                getCollectActivity().runOnUiThread(() -> {
+
+                    if (maxDecimalPlaces == 0) {
+                        Utils.makeToast(controller.getContext(),
+                                controller.getContext().getString(R.string.trait_error_integers_only));
+                    } else {
+                        Utils.makeToast(controller.getContext(),
+                                controller.getContext().getString(R.string.trait_error_decimal_places, maxDecimalPlaces));
+                    }
+
+                });
+                return false;
+            }
         }
 
         return true;
@@ -159,6 +213,31 @@ public class NumericTraitLayout extends BaseTraitLayout {
         } else {
             return false;
         }
+    }
+
+    private boolean isValidDecimalPlaces(String value, int maxDecimalPlaces) {
+        if (value.isEmpty()) return true;
+
+        try {
+            double doubleValue = Double.parseDouble(value);
+            if (maxDecimalPlaces == 0) { // must be an integer
+                return doubleValue == (double) ((int) doubleValue);
+            } else {
+                int decimalIndex = value.indexOf('.');
+                if (decimalIndex == -1) return true; // no decimal point present
+
+                String decimalPart = value.substring(decimalIndex + 1);
+                return decimalPart.length() <= maxDecimalPlaces;
+            }
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private boolean containsMathematicalSymbols(String data) {
+        if (data == null || data.isEmpty()) return false;
+
+        return data.contains("+") || data.contains("-") || data.contains("*") || data.contains(";");
     }
 
     private class NumberButtonOnClickListener implements OnClickListener {

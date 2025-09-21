@@ -61,15 +61,28 @@ object TraitAttributes {
         valueType = ValueType.STRING,
     )
 
+    val DECIMAL_PLACES_REQUIRED = AttributeDefinition(
+        key = ObservationVariableAttributeDetailsView.DECIMAL_PLACES_REQUIRED,
+        valueType = ValueType.STRING,
+        defaultValue = "-1"
+    )
+
+    val MATH_SYMBOLS_ENABLED = AttributeDefinition(
+        key = ObservationVariableAttributeDetailsView.MATH_SYMBOLS_ENABLED,
+        valueType = ValueType.STRING,
+        defaultValue = "true"
+    )
+
     val ALL = listOf(MIN_VALUE, MAX_VALUE, CATEGORIES, CLOSE_KEYBOARD, CROP_IMAGE, SAVE_IMAGE,
-        USE_DAY_OF_YEAR, CATEGORY_DISPLAY_VALUE, RESOURCE_FILE, VARIABLE_SYNONYMS
+        USE_DAY_OF_YEAR, CATEGORY_DISPLAY_VALUE, RESOURCE_FILE, VARIABLE_SYNONYMS,
+        DECIMAL_PLACES_REQUIRED, MATH_SYMBOLS_ENABLED
     )
 
     fun byKey(key: String): AttributeDefinition? = ALL.find { it.key == key }
 }
 
 enum class ValueType {
-    STRING, BOOLEAN,
+    STRING, BOOLEAN, INT
 }
 
 data class AttributeDefinition(

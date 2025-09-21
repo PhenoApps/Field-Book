@@ -4,8 +4,10 @@ import android.content.Context
 import android.view.View
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.traits.formats.parameters.BaseFormatParameter
+import com.fieldbook.tracker.traits.formats.parameters.DecimalPlacesParameter
 import com.fieldbook.tracker.traits.formats.parameters.DefaultNumericParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
+import com.fieldbook.tracker.traits.formats.parameters.MathSymbolsParameter
 import com.fieldbook.tracker.traits.formats.parameters.MaximumParameter
 import com.fieldbook.tracker.traits.formats.parameters.MinimumParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
@@ -26,6 +28,8 @@ open class NumericFormat(
             DefaultNumericParameter<Double>(),
             MinimumParameter<Double>(),
             MaximumParameter<Double>(),
+            DecimalPlacesParameter(),
+            MathSymbolsParameter(),
             DetailsParameter(),
             ResourceFileParameter()
         )
@@ -51,6 +55,7 @@ open class NumericFormat(
                 context.getString(R.string.traits_create_warning_percent_value_required)
             val magnitudeRelationError =
                 context.getString(R.string.traits_create_warning_percent_magnitude_relation)
+            val mathSymbolsConflictError = context.getString(R.string.traits_create_warning_math_symbols_conflict)
 
             val defaultParameter =
                 parameterViewHolders.find { it is DefaultNumericParameter<*>.ViewHolder } as? DefaultNumericParameter<*>.ViewHolder
@@ -58,8 +63,13 @@ open class NumericFormat(
                 parameterViewHolders.find { it is MaximumParameter<*>.ViewHolder } as? MaximumParameter<*>.ViewHolder
             val minParameter =
                 parameterViewHolders.find { it is MinimumParameter<*>.ViewHolder } as? MinimumParameter<*>.ViewHolder
+            val decimalPlacesParameter =
+                parameterViewHolders.find { it is DecimalPlacesParameter.ViewHolder } as? DecimalPlacesParameter.ViewHolder
+            val mathSymbolsParameter =
+                parameterViewHolders.find { it is MathSymbolsParameter.ViewHolder } as? MathSymbolsParameter.ViewHolder
 
-            if (maxParameter == null || minParameter == null) {
+
+            if (maxParameter == null || minParameter == null || decimalPlacesParameter == null || mathSymbolsParameter == null) {
 
                 result = false
 
@@ -76,18 +86,29 @@ open class NumericFormat(
 
             val maxValue = maxParameter.numericEt.text.toString()
             val minValue = minParameter.numericEt.text.toString()
+            val maxDouble: Double? = if (maxValue.isNotBlank()) maxValue.toDouble() else null
+            val minDouble: Double? = if (minValue.isNotBlank()) minValue.toDouble() else null
 
-            val maxDouble: Double? = if (maxValue.isNotBlank()) {
+            val mathSymbolsEnabled = mathSymbolsParameter.toggleButton.isChecked
+            val decimalPlaces = when (decimalPlacesParameter.radioGroup.checkedRadioButtonId) {
+                R.id.radio_no_restriction -> -1
+                R.id.radio_integer -> 0
+                R.id.max_decimal_radio -> {
+                    val customInput = decimalPlacesParameter.maxDecimalEt.text.toString()
+                    if (customInput.isNotBlank()) customInput.toIntOrNull() ?: -1 else -1
+                }
+                else -> -1
+            }
 
-                maxValue.toDouble()
+            if (mathSymbolsEnabled && decimalPlaces >= 0) { // both have to be mutually exclusive
+                result = false
+                mathSymbolsParameter.textInputLayout.error = mathSymbolsConflictError
+                decimalPlacesParameter.textInputLayout.error = mathSymbolsConflictError
+                return@apply
+            }
 
-            } else null
-
-            val minDouble: Double? = if (minValue.isNotBlank()) {
-
-                minValue.toDouble()
-
-            } else null
+            mathSymbolsParameter.textInputLayout.error = null
+            decimalPlacesParameter.textInputLayout.error = null
 
             if (minParameter.isRequired == true && minDouble == null) {
 

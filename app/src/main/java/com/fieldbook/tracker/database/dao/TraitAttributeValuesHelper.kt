@@ -47,6 +47,8 @@ class TraitAttributeValuesHelper(var traitId: String? = null) {
                         attributes[CATEGORY_DISPLAY_VALUE]?.let { trait.categoryDisplayValue = it.toBoolean() }
                         attributes[RESOURCE_FILE]?.let { trait.resourceFile = it }
                         attributes[VARIABLE_SYNONYMS]?.let { trait.synonyms = deserializeSynonyms(it) }
+                        attributes[DECIMAL_PLACES_REQUIRED]?.let { trait.maxDecimalPlaces = it }
+                        attributes[MATH_SYMBOLS_ENABLED]?.let { trait.mathSymbolsEnabled = it.toBoolean() }
                     }
                 }
             }
@@ -126,6 +128,10 @@ class TraitAttributeValuesHelper(var traitId: String? = null) {
 
     fun getBoolean(attribute: AttributeDefinition): Boolean {
         return getString(attribute).toBoolean()
+    }
+
+    fun getInt(attribute: AttributeDefinition): Int {
+        return getString(attribute).toInt()
     }
 
     fun setValue(attribute: AttributeDefinition, value: String) {

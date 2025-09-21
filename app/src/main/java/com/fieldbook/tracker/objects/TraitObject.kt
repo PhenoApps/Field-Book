@@ -72,6 +72,14 @@ class TraitObject {
         get() = deserializeSynonyms(attributeValues.getString(TraitAttributes.VARIABLE_SYNONYMS))
         set(value) = attributeValues.setValue(TraitAttributes.VARIABLE_SYNONYMS, serializeSynonyms(value))
 
+    var maxDecimalPlaces: String
+        get() = attributeValues.getString(TraitAttributes.DECIMAL_PLACES_REQUIRED)
+        set(value) = attributeValues.setValue(TraitAttributes.DECIMAL_PLACES_REQUIRED, value)
+
+    var mathSymbolsEnabled: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.MATH_SYMBOLS_ENABLED)
+        set(value) = attributeValues.setValue(TraitAttributes.MATH_SYMBOLS_ENABLED, value.toString())
+
     fun loadAttributeAndValues() {
         attributeValues.traitId = id
         attributeValues.load()
@@ -109,7 +117,9 @@ class TraitObject {
                 useDayOfYear == that.useDayOfYear &&
                 categoryDisplayValue == that.categoryDisplayValue &&
                 resourceFile == that.resourceFile &&
-                synonyms == that.synonyms
+                synonyms == that.synonyms &&
+                maxDecimalPlaces == that.maxDecimalPlaces &&
+                mathSymbolsEnabled == that.mathSymbolsEnabled
     }
 
     override fun hashCode(): Int {
@@ -117,7 +127,8 @@ class TraitObject {
             name, alias, format, defaultValue, minimum, maximum, details, categories,
             realPosition, id, visible, externalDbId, traitDataSource,
             additionalInfo, observationLevelNames, closeKeyboardOnOpen, cropImage,
-            saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms
+            saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms,
+            maxDecimalPlaces, mathSymbolsEnabled
         )
     }
 
@@ -145,6 +156,8 @@ class TraitObject {
         t.categoryDisplayValue = this.categoryDisplayValue
         t.resourceFile = this.resourceFile
         t.synonyms = this.synonyms
+        t.maxDecimalPlaces = this.maxDecimalPlaces
+        t.mathSymbolsEnabled = this.mathSymbolsEnabled
 
         return t
     }

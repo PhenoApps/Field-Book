@@ -336,9 +336,14 @@
     <string name="traits_create_true">True</string>
     <string name="traits_create_false">False</string>
     <string name="traits_create_unset">Unset</string>
+    <string name="traits_create_enabled">Enabled</string>
+    <string name="traits_create_disabled">Disabled</string>
     <string name="traits_create_categories_text">Use / to separate categories</string>
     <string name="traits_create_camera">Camera</string>
     <string name="traits_create_close_keyboard">Close Keyboard</string>
+    <string name="trait_parameter_decimal_places">Decimal Places</string>
+    <string name="trait_parameter_decimal_places_hint">Number of decimal places (-1 for unlimited, 0 for integers)</string>
+    <string name="trait_parameter_decimal_places_error">Value must be between -1 and 10</string>
 
     <string name="traits_create_warning_name_blank">Trait name cannot be blank</string>
     <string name="traits_create_warning_duplicate">Trait already exists</string>
@@ -367,6 +372,19 @@
     <string name="dialog_new_trait_error_cannot_update_to_brapi_trait">Traits cannot be updated to BrAPI traits.</string>
     <string name="required">Required</string>
     <string name="traits_create_warning_percent_value_required">Value required</string>
+
+    <!-- Decimal Places Radio Options -->
+    <string name="trait_parameter_decimal_places_no_restriction">No restriction</string>
+    <string name="trait_parameter_decimal_places_integer_only">Integers only</string>
+    <string name="trait_parameter_decimal_places_allowed">Allow decimal input</string>
+    <string name="trait_parameter_decimal_places_custom">Maximum decimal places:</string>
+    <string name="trait_parameter_decimal_places_custom_hint">1–10</string>
+    <string name="trait_parameter_decimal_places_custom_required">Please enter number of decimal places (1–10)</string>
+    <string name="trait_parameter_decimal_places_custom_error">Value must be between 1 and 10</string>
+    <string name="trait_parameter_invalid_number">Invalid number</string>
+
+    <string name="trait_parameter_mathematical_symbols">Mathematical Symbols</string>
+    <string name="traits_create_warning_math_symbols_conflict">Mathematical symbols and decimal place restrictions cannot be applied simultaneously</string>
 
     <string name="select_trait">Select Trait</string>
     <string name="edit_traits">Edit</string>
@@ -423,6 +441,10 @@
     <!-- Validation -->
     <string name="trait_error_minimum_value">Value is less than allowed minimum</string>
     <string name="trait_error_maximum_value">Value is larger than allowed maximum</string>
+    <string name="trait_error_decimal_places">Value cannot have more than %d decimal places</string>
+    <string name="trait_error_mathematical_symbols_disabled">Mathematical symbols are not allowed</string>
+    <string name="trait_error_integers_only">Only integer values are allowed</string>
+
     <string name="trait_error_disease_severity">Severity already stored</string>
     <string name="act_collect_study_names_empty">The selected study has empty unique, primary, or secondary names.</string>
 

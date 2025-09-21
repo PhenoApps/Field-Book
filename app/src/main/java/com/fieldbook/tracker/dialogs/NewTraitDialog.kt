@@ -478,7 +478,9 @@ class NewTraitDialog(
             traitObject.useDayOfYear,
             traitObject.categoryDisplayValue,
             traitObject.resourceFile,
-            traitObject.synonyms
+            traitObject.synonyms,
+            traitObject.maxDecimalPlaces,
+            traitObject.mathSymbolsEnabled
         )
     }
 
