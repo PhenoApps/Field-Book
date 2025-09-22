@@ -3,6 +3,7 @@ package com.fieldbook.tracker.activities
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import com.fieldbook.shared.CollectScreen
 import com.fieldbook.shared.ConfigScreen
 import com.fieldbook.shared.ScannerScreen
 import com.fieldbook.shared.activities.FieldEditorScreen
@@ -30,6 +31,12 @@ class KmpHostActivity : ComponentActivity() {
                 }
                 KmpHostScreenType.FIELD_EDITOR -> {
                     FieldEditorScreen(
+                        driverFactory = DriverFactory(context = this),
+                        onBack = { finish() }
+                    )
+                }
+                KmpHostScreenType.COLLECT -> {
+                    CollectScreen(
                         driverFactory = DriverFactory(context = this),
                         onBack = { finish() }
                     )

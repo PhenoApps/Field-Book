@@ -3,7 +3,7 @@ package com.fieldbook.shared.database.repository
 import com.fieldbook.shared.database.models.FieldObject
 import com.fieldbook.shared.sqldelight.FieldbookDatabase
 
-class StudiesRepo(private val db: FieldbookDatabase) {
+class StudiesRepository(private val db: FieldbookDatabase) {
 
     enum class SortOrder { DateImport, Visible, Name }
 

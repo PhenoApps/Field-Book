@@ -1,0 +1,16 @@
+-- traits.sq
+
+CREATE TABLE traits (
+  id TEXT NOT NULL PRIMARY KEY,
+  name TEXT,
+  format TEXT,
+  min REAL,
+  max REAL
+);
+
+selectAll:
+SELECT * FROM traits;
+
+selectById:
+SELECT * FROM traits WHERE id = ?;
+

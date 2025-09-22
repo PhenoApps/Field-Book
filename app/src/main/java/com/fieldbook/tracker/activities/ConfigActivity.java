@@ -57,6 +57,7 @@ import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
 import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.checkerframework.checker.units.qual.K;
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 
 import java.util.ArrayList;
@@ -490,12 +491,20 @@ public class ConfigActivity extends ThemedActivity {
     }
 
     private void startCollectActivity() {
+        boolean useKmp = PreferenceManager.getDefaultSharedPreferences(this)
+                .getBoolean(PreferenceKeys.USE_KMP, false);
 
         int selectedField = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
         FieldObject field = database.getFieldObject(selectedField);
 
         if (field != null && field.getDate_import() != null && !field.getDate_import().isEmpty()) {
-            Intent intent = new Intent(this, CollectActivity.class);
+            Intent intent;
+            if (useKmp) {
+                intent = new Intent(this, KmpHostActivity.class);
+                intent.putExtra(KmpHostActivity.EXTRA_SCREEN, KmpHostScreenType.COLLECT.getValue());
+            } else {
+                intent = new Intent(this, CollectActivity.class);
+            }
             startActivity(intent);
         }
     }

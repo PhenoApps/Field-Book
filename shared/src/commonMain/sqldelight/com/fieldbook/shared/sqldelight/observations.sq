@@ -1,0 +1,6 @@
+CREATE TABLE observations (
+  id INTEGER NOT NULL PRIMARY KEY,
+  study_id INTEGER NOT NULL REFERENCES studies(internal_id_study),
+  observation_variable_name TEXT,
+  observation_variable_db_id INTEGER NOT NULL
+);

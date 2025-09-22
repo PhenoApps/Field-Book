@@ -1,0 +1,10 @@
+-- observation_variables.sq
+
+
+CREATE TABLE observation_variables (
+  internal_id_observation_variable INTEGER NOT NULL PRIMARY KEY,
+  observation_variable_name TEXT,
+  position INTEGER
+);
+getAllTraits:
+SELECT * FROM observation_variables;
