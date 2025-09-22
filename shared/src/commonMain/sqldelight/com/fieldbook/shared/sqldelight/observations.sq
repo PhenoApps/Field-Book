@@ -2,5 +2,13 @@ CREATE TABLE observations (
   id INTEGER NOT NULL PRIMARY KEY,
   study_id INTEGER NOT NULL REFERENCES studies(internal_id_study),
   observation_variable_name TEXT,
-  observation_variable_db_id INTEGER NOT NULL
+  observation_variable_db_id INTEGER NOT NULL,
+  observation_unit_id TEXT NOT NULL,
+  value TEXT
 );
+
+-- Get user detail for a given plotId (observation_unit_id)
+getUserDetail:
+SELECT observation_variable_name, value
+FROM observations
+WHERE observation_unit_id = ?;
