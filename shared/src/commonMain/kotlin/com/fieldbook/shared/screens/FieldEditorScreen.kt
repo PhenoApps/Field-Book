@@ -1,4 +1,4 @@
-package com.fieldbook.shared.activities
+package com.fieldbook.shared.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

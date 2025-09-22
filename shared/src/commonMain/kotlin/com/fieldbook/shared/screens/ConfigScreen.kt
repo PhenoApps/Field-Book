@@ -1,5 +1,6 @@
-package com.fieldbook.shared
+package com.fieldbook.shared.screens
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,7 +58,7 @@ fun ConfigScreen(onBack: (() -> Unit)? = null) {
             Res.drawable.ic_tb_info
         )
         Surface(modifier = Modifier.fillMaxSize()) {
-            androidx.compose.foundation.layout.Column(modifier = Modifier.fillMaxSize()) {
+            Column(modifier = Modifier.fillMaxSize()) {
                 TopAppBar(
                     title = { Text(text = "KMP Module") },
                     navigationIcon = {
@@ -69,7 +71,7 @@ fun ConfigScreen(onBack: (() -> Unit)? = null) {
                             }
                         }
                     },
-                    colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
+                    colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         titleContentColor = MaterialTheme.colorScheme.onPrimary,
                         navigationIconContentColor = MaterialTheme.colorScheme.onPrimary

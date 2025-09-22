@@ -1,12 +1,13 @@
 package com.fieldbook.tracker.activities
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.fieldbook.shared.CollectScreen
-import com.fieldbook.shared.ConfigScreen
-import com.fieldbook.shared.ScannerScreen
-import com.fieldbook.shared.activities.FieldEditorScreen
+import com.fieldbook.shared.screens.CollectScreen
+import com.fieldbook.shared.screens.ConfigScreen
+import com.fieldbook.shared.screens.ScannerScreen
+import com.fieldbook.shared.screens.FieldEditorScreen
 import com.fieldbook.shared.sqldelight.DriverFactory
 
 class KmpHostActivity : ComponentActivity() {
@@ -21,7 +22,7 @@ class KmpHostActivity : ComponentActivity() {
                     ScannerScreen(
                         onBack = { finish() },
                         onResult = { qrCode ->
-                            val resultIntent = android.content.Intent().apply {
+                            val resultIntent = Intent().apply {
                                 putExtra(ScannerActivity.EXTRA_BARCODE, qrCode)
                             }
                             setResult(RESULT_OK, resultIntent)
