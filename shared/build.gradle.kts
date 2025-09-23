@@ -62,6 +62,7 @@ kotlin {
                 implementation(compose.components.resources)
                 implementation("io.github.kashif-mehmood-km:camerak:0.0.6")
                 implementation("io.github.kashif-mehmood-km:qr_scanner_plugin:0.0.6")
+                implementation(libs.multiplatform.settings)
             }
         }
 

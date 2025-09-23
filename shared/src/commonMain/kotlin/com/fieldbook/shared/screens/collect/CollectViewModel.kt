@@ -10,13 +10,16 @@ import com.fieldbook.shared.database.repository.TraitRepository
 import com.fieldbook.shared.database.repository.ObservationRepository
 import com.fieldbook.shared.sqldelight.DriverFactory
 import com.fieldbook.shared.sqldelight.FieldbookDatabase
+import com.russhwolf.settings.Settings
+import com.fieldbook.shared.preferences.GeneralKeys
+
 
 class CollectViewModel(driverFactory: DriverFactory) {
-    private val studyId = 1L // TODO: get from data store / shared prefs
     private val db = FieldbookDatabase(driverFactory.createDriver())
     private val observationUnitRepository = ObservationUnitRepository(db)
     private val traitRepository = TraitRepository(db)
     private val observationRepository = ObservationRepository(db)
+    private val settings: Settings = Settings()
 
     var units by mutableStateOf<List<ObservationUnitModel>>(emptyList())
         private set
@@ -86,9 +89,10 @@ class CollectViewModel(driverFactory: DriverFactory) {
     private fun loadTraitValues() {
         val unit = units.getOrNull(currentUnitIndex)
         val plotId = unit?.observation_unit_db_id
+        val studyId = settings.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
         if (plotId != null && plotId != lastUnitId) {
             traitValuesLoading = true
-            traitValues = observationRepository.getUserDetail(studyId, plotId)
+            traitValues = observationRepository.getUserDetail(studyId.toLong(), plotId)
             traitValuesLoading = false
             lastUnitId = plotId
         }
