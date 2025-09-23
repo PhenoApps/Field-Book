@@ -9,6 +9,6 @@ CREATE TABLE observations (
 
 -- Get user detail for a given studyId and plotId (observation_unit_id)
 getUserDetail:
-SELECT observation_variable_name, value
+SELECT observation_variable_db_id, value
 FROM observations
 WHERE study_id = ? AND observation_unit_id = ?;

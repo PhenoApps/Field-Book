@@ -9,7 +9,7 @@ data class TraitObject(
     var details: String? = null,
     var categories: String? = null,
     var realPosition: Int = 0,
-    var id: String? = null,
+    var id: Long? = null,
     var visible: Boolean? = null,
     var externalDbId: String? = null,
     var traitDataSource: String? = null,

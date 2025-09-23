@@ -17,8 +17,10 @@ CREATE TABLE observation_units (
 
 -- Select all observation units
 selectAll:
-SELECT * FROM observation_units;
+SELECT * FROM observation_units
+WHERE study_id = ?;
 
 -- Select observation unit by observation_unit_db_id
 selectById:
-SELECT * FROM observation_units WHERE observation_unit_db_id = ?;
+SELECT * FROM observation_units WHERE observation_unit_db_id = ?
+AND study_id = ?;

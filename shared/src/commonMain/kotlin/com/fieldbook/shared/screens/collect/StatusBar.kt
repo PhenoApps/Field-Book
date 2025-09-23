@@ -17,6 +17,7 @@ import com.fieldbook.shared.generated.resources.circle_filled
 import com.fieldbook.shared.generated.resources.circle_outline
 import com.fieldbook.shared.generated.resources.square_rounded_filled
 import com.fieldbook.shared.generated.resources.square_rounded_outline
+import androidx.compose.material3.MaterialTheme
 
 @Composable
 fun StatusBar(
@@ -44,16 +45,24 @@ fun StatusBar(
         viewModel.traits.forEachIndexed { index, trait ->
             val hasObservation = viewModel.traitValues[trait.id] != null
             val isCurrent = index == viewModel.currentTraitIndex
+            val iconRes = if (isCurrent) {
+                if (hasObservation) Res.drawable.square_rounded_filled else Res.drawable.square_rounded_outline
+            } else {
+                if (hasObservation) Res.drawable.circle_filled else Res.drawable.circle_outline
+            }
+            val iconColor = if (isCurrent) {
+                MaterialTheme.colorScheme.primaryContainer
+            } else {
+                MaterialTheme.colorScheme.secondary
+            }
             Surface(
-                color = if (isCurrent) Color(0xFF4CAF50) else Color.Transparent,
+                color = Color.Transparent,
                 modifier = Modifier.padding(horizontal = 2.dp)
             ) {
                 Icon(
-                    painter = painterResource(
-                        if (hasObservation) Res.drawable.circle_filled else Res.drawable.circle_outline
-                    ),
+                    painter = painterResource(iconRes),
                     contentDescription = trait.name,
-                    tint = if (isCurrent) Color.White else Color.Gray,
+                    tint = iconColor,
                     modifier = Modifier.size(24.dp)
                 )
             }

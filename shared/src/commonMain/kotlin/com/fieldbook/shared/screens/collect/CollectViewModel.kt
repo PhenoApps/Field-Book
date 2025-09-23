@@ -21,6 +21,8 @@ class CollectViewModel(driverFactory: DriverFactory) {
     private val observationRepository = ObservationRepository(db)
     private val settings: Settings = Settings()
 
+    private val studyId: Int = settings.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+
     var units by mutableStateOf<List<ObservationUnitModel>>(emptyList())
         private set
     var unitLoading by mutableStateOf(true)
@@ -39,7 +41,7 @@ class CollectViewModel(driverFactory: DriverFactory) {
     var currentTraitIndex by mutableStateOf(0)
         private set
 
-    var traitValues by mutableStateOf<Map<String, String>>(emptyMap())
+    var traitValues by mutableStateOf<Map<Long, String>>(emptyMap())
         private set
     var traitValuesLoading by mutableStateOf(true)
         private set
@@ -53,7 +55,7 @@ class CollectViewModel(driverFactory: DriverFactory) {
 
     private fun loadUnits() {
         try {
-            units = observationUnitRepository.getAllObservationUnits()
+            units = observationUnitRepository.getAllObservationUnits(studyId.toLong())
             unitLoading = false
         } catch (e: Exception) {
             e.printStackTrace()
@@ -89,7 +91,6 @@ class CollectViewModel(driverFactory: DriverFactory) {
     private fun loadTraitValues() {
         val unit = units.getOrNull(currentUnitIndex)
         val plotId = unit?.observation_unit_db_id
-        val studyId = settings.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
         if (plotId != null && plotId != lastUnitId) {
             traitValuesLoading = true
             traitValues = observationRepository.getUserDetail(studyId.toLong(), plotId)

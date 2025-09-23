@@ -24,13 +24,14 @@ class ObservationUnitRepository(private val db: FieldbookDatabase) {
         )
     }
 
-    fun getAllObservationUnits(): List<ObservationUnitModel> {
-        return db.observation_unitsQueries.selectAll().executeAsList().map { r ->
+    fun getAllObservationUnits(studyId: Long?): List<ObservationUnitModel> {
+        return db.observation_unitsQueries.selectAll(studyId).executeAsList().map { r ->
             ObservationUnitModel(r.toMap())
         }
     }
-    fun getObservationUnitById(id: String): ObservationUnitModel? {
-        return db.observation_unitsQueries.selectById(id).executeAsOneOrNull()?.let { r ->
+
+    fun getObservationUnitById(studyId: Long?, id: String): ObservationUnitModel? {
+        return db.observation_unitsQueries.selectById(id, studyId).executeAsOneOrNull()?.let { r ->
             ObservationUnitModel(r.toMap())
         }
     }

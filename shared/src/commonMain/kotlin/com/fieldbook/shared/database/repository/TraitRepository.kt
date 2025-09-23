@@ -8,7 +8,7 @@ class TraitRepository(private val db: FieldbookDatabase) {
     private fun Observation_variables.toTraitObject(): TraitObject {
         return TraitObject(
             name = observation_variable_name ?: "",
-            id = internal_id_observation_variable.toString(),
+            id = internal_id_observation_variable,
             realPosition = position?.toInt() ?: 0
             // Other fields use default values from TraitObject
         )
