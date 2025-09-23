@@ -63,12 +63,7 @@ fun CollectScreen(
                     ) {
                         Spacer(Modifier.height(24.dp))
                         TraitBox(
-                            traits = viewModel.traits,
-                            currentTraitIndex = viewModel.currentTraitIndex,
-                            onPrevTrait = { viewModel.updateCurrentTraitIndex(viewModel.currentTraitIndex - 1) },
-                            onNextTrait = { viewModel.updateCurrentTraitIndex(viewModel.currentTraitIndex + 1) },
-                            traitValues = viewModel.traitValues,
-                            traitValuesLoading = viewModel.traitValuesLoading,
+                            viewModel = viewModel,
                             modifier = Modifier.fillMaxWidth()
                         )
                         Spacer(Modifier.height(24.dp))

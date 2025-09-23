@@ -15,12 +15,7 @@ import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun TraitBox(
-    traits: List<TraitObject>,
-    currentTraitIndex: Int,
-    onPrevTrait: () -> Unit,
-    onNextTrait: () -> Unit,
-    traitValues: Map<String, String>,
-    traitValuesLoading: Boolean,
+    viewModel: CollectViewModel,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -36,8 +31,8 @@ fun TraitBox(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             IconButton(
-                onClick = onPrevTrait,
-                enabled = currentTraitIndex > 0,
+                onClick = { viewModel.updateCurrentTraitIndex(viewModel.currentTraitIndex - 1) },
+                enabled = viewModel.currentTraitIndex > 0,
                 modifier = Modifier.size(56.dp)
             ) {
                 Icon(
@@ -49,7 +44,7 @@ fun TraitBox(
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("Trait", style = MaterialTheme.typography.titleLarge)
-                val trait = traits.getOrNull(currentTraitIndex)
+                val trait = viewModel.traits.getOrNull(viewModel.currentTraitIndex)
                 trait?.let {
                     Text("ID: ${it.id}", style = MaterialTheme.typography.bodyLarge)
                     Text("Name: ${it.name}", style = MaterialTheme.typography.bodyMedium)
@@ -59,8 +54,8 @@ fun TraitBox(
                 }
             }
             IconButton(
-                onClick = onNextTrait,
-                enabled = currentTraitIndex < traits.size - 1,
+                onClick = { viewModel.updateCurrentTraitIndex(viewModel.currentTraitIndex + 1) },
+                enabled = viewModel.currentTraitIndex < viewModel.traits.size - 1,
                 modifier = Modifier.size(56.dp)
             ) {
                 Icon(
@@ -73,10 +68,7 @@ fun TraitBox(
         }
         Spacer(Modifier.height(16.dp))
         StatusBar(
-            traits = traits.map { it.id!! },
-            traitsValue = traitValues,
-            currentIndex = currentTraitIndex,
-            loading = traitValuesLoading,
+            viewModel = viewModel,
             modifier = Modifier.fillMaxWidth()
         )
     }

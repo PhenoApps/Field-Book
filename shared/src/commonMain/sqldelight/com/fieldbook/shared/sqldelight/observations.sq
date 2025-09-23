@@ -7,8 +7,8 @@ CREATE TABLE observations (
   value TEXT
 );
 
--- Get user detail for a given plotId (observation_unit_id)
+-- Get user detail for a given studyId and plotId (observation_unit_id)
 getUserDetail:
 SELECT observation_variable_name, value
 FROM observations
-WHERE observation_unit_id = ?;
+WHERE study_id = ? AND observation_unit_id = ?;

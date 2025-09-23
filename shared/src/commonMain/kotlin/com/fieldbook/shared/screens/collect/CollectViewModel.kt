@@ -12,6 +12,7 @@ import com.fieldbook.shared.sqldelight.DriverFactory
 import com.fieldbook.shared.sqldelight.FieldbookDatabase
 
 class CollectViewModel(driverFactory: DriverFactory) {
+    private val studyId = 1L // TODO: get from data store / shared prefs
     private val db = FieldbookDatabase(driverFactory.createDriver())
     private val observationUnitRepository = ObservationUnitRepository(db)
     private val traitRepository = TraitRepository(db)
@@ -44,6 +45,7 @@ class CollectViewModel(driverFactory: DriverFactory) {
     init {
         loadUnits()
         loadTraits()
+        loadTraitValues()
     }
 
     private fun loadUnits() {
@@ -86,7 +88,7 @@ class CollectViewModel(driverFactory: DriverFactory) {
         val plotId = unit?.observation_unit_db_id
         if (plotId != null && plotId != lastUnitId) {
             traitValuesLoading = true
-            traitValues = observationRepository.UserDetail(plotId)
+            traitValues = observationRepository.getUserDetail(studyId, plotId)
             traitValuesLoading = false
             lastUnitId = plotId
         }

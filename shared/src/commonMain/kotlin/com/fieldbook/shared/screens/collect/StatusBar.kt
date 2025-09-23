@@ -20,13 +20,10 @@ import com.fieldbook.shared.generated.resources.square_rounded_outline
 
 @Composable
 fun StatusBar(
-    traits: List<String>,
-    traitsValue: Map<String, Any?>, // presence means hasObservation
-    currentIndex: Int,
-    loading: Boolean,
+    viewModel: CollectViewModel,
     modifier: Modifier = Modifier,
 ) {
-    if (loading) {
+    if (viewModel.traitValuesLoading) {
         Box(
             modifier = modifier
                 .height(32.dp)
@@ -39,47 +36,26 @@ fun StatusBar(
     }
     Row(
         modifier = modifier
+            .horizontalScroll(rememberScrollState())
             .height(32.dp)
-            .horizontalScroll(rememberScrollState()),
+            .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        traits.forEachIndexed { index, trait ->
-            val isSelected = index == currentIndex
-            val hasObservation = traitsValue.containsKey(trait)
-            val iconRes = when {
-                isSelected && hasObservation -> Res.drawable.square_rounded_filled
-                isSelected && !hasObservation -> Res.drawable.square_rounded_outline
-                !isSelected && hasObservation -> Res.drawable.circle_filled
-                else -> Res.drawable.circle_outline
-            }
-            val color = when {
-                isSelected && hasObservation -> Color(0xFF388E3C) // green
-                isSelected && !hasObservation -> Color(0xFF8D6E63) // brown
-                else -> Color(0xFF8D6E63) // brown for outline/fill
-            }
-            Box(
-                modifier = Modifier
-                    .padding(horizontal = 4.dp)
-                    .size(24.dp),
-                contentAlignment = Alignment.Center
+        viewModel.traits.forEachIndexed { index, trait ->
+            val hasObservation = viewModel.traitValues[trait.id] != null
+            val isCurrent = index == viewModel.currentTraitIndex
+            Surface(
+                color = if (isCurrent) Color(0xFF4CAF50) else Color.Transparent,
+                modifier = Modifier.padding(horizontal = 2.dp)
             ) {
-                Surface(
-                    color = Color.Transparent,
-                    shape = if (isSelected) androidx.compose.foundation.shape.RoundedCornerShape(6.dp) else androidx.compose.foundation.shape.CircleShape,
-                    border = androidx.compose.foundation.BorderStroke(2.dp, Color(0xFF8D6E63))
-                ) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            painter = painterResource(iconRes),
-                            contentDescription = trait,
-                            tint = color,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
+                Icon(
+                    painter = painterResource(
+                        if (hasObservation) Res.drawable.circle_filled else Res.drawable.circle_outline
+                    ),
+                    contentDescription = trait.name,
+                    tint = if (isCurrent) Color.White else Color.Gray,
+                    modifier = Modifier.size(24.dp)
+                )
             }
         }
     }
