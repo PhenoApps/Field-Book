@@ -1,14 +1,22 @@
 package com.fieldbook.shared.screens.collect
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.fieldbook.shared.generated.resources.Res
-import com.fieldbook.shared.database.models.TraitObject
 import com.fieldbook.shared.generated.resources.chevron_left
 import com.fieldbook.shared.generated.resources.chevron_right
 import org.jetbrains.compose.resources.painterResource
@@ -18,15 +26,9 @@ fun TraitBox(
     viewModel: CollectViewModel,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(Modifier.height(24.dp))
+    Column(modifier = modifier.fillMaxWidth().padding(16.dp)) {
         Row(
-            Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -39,20 +41,15 @@ fun TraitBox(
                     painter = painterResource(Res.drawable.chevron_left),
                     contentDescription = "Previous Trait",
                     modifier = Modifier.size(56.dp),
-                    tint = Color(0xFF4CAF50)
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Trait", style = MaterialTheme.typography.titleLarge)
-                val trait = viewModel.traits.getOrNull(viewModel.currentTraitIndex)
-                trait?.let {
-                    Text("ID: ${it.id}", style = MaterialTheme.typography.bodyLarge)
-                    Text("Name: ${it.name}", style = MaterialTheme.typography.bodyMedium)
-                    Text("Format: ${it.format}", style = MaterialTheme.typography.bodySmall)
-                    it.minimum?.let { min -> Text("Min: $min", style = MaterialTheme.typography.bodySmall) }
-                    it.maximum?.let { max -> Text("Max: $max", style = MaterialTheme.typography.bodySmall) }
-                }
-            }
+            val trait = viewModel.traits.getOrNull(viewModel.currentTraitIndex)
+            Text(
+                trait?.name ?: "-",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.align(Alignment.CenterVertically)
+            )
             IconButton(
                 onClick = { viewModel.updateCurrentTraitIndex(viewModel.currentTraitIndex + 1) },
                 enabled = viewModel.currentTraitIndex < viewModel.traits.size - 1,
@@ -62,14 +59,17 @@ fun TraitBox(
                     painter = painterResource(Res.drawable.chevron_right),
                     contentDescription = "Next Trait",
                     modifier = Modifier.size(56.dp),
-                    tint = Color(0xFF4CAF50)
+                    tint = MaterialTheme.colorScheme.primary
+
                 )
             }
         }
         Spacer(Modifier.height(16.dp))
-        StatusBar(
-            viewModel = viewModel,
-            modifier = Modifier.fillMaxWidth()
-        )
+        Row(modifier = Modifier.fillMaxWidth()) {
+            StatusBar(
+                viewModel = viewModel,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }
