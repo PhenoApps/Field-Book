@@ -480,7 +480,8 @@ class NewTraitDialog(
             traitObject.resourceFile,
             traitObject.synonyms,
             traitObject.maxDecimalPlaces,
-            traitObject.mathSymbolsEnabled
+            traitObject.mathSymbolsEnabled,
+            traitObject.allowMulticat
         )
     }
 

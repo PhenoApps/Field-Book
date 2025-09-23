@@ -48,7 +48,7 @@ object TraitAttributes {
     val CATEGORY_DISPLAY_VALUE = AttributeDefinition(
         key = ObservationVariableAttributeDetailsView.CATEGORY_DISPLAY_VALUE,
         valueType = ValueType.BOOLEAN,
-        defaultValue = "false" // todo default to using PreferenceKeys.LABELVAL_CUSTOMIZE when empty string??
+        defaultValue = "false"
     )
 
     val RESOURCE_FILE = AttributeDefinition(
@@ -69,20 +69,26 @@ object TraitAttributes {
 
     val MATH_SYMBOLS_ENABLED = AttributeDefinition(
         key = ObservationVariableAttributeDetailsView.MATH_SYMBOLS_ENABLED,
-        valueType = ValueType.STRING,
+        valueType = ValueType.BOOLEAN,
         defaultValue = "true"
+    )
+
+    val ALLOW_MULTICAT = AttributeDefinition(
+        key = ObservationVariableAttributeDetailsView.ALLOW_MULTICAT,
+        valueType = ValueType.BOOLEAN,
+        defaultValue = "false"
     )
 
     val ALL = listOf(MIN_VALUE, MAX_VALUE, CATEGORIES, CLOSE_KEYBOARD, CROP_IMAGE, SAVE_IMAGE,
         USE_DAY_OF_YEAR, CATEGORY_DISPLAY_VALUE, RESOURCE_FILE, VARIABLE_SYNONYMS,
-        DECIMAL_PLACES_REQUIRED, MATH_SYMBOLS_ENABLED
+        DECIMAL_PLACES_REQUIRED, MATH_SYMBOLS_ENABLED, ALLOW_MULTICAT
     )
 
     fun byKey(key: String): AttributeDefinition? = ALL.find { it.key == key }
 }
 
 enum class ValueType {
-    STRING, BOOLEAN, INT
+    STRING, BOOLEAN
 }
 
 data class AttributeDefinition(

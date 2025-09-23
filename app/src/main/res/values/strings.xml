@@ -430,6 +430,7 @@
     <string name="trait_brapi_label_example">Label: %s</string>
     <string name="trait_brapi_value_example">Value: %s</string> -->
 
+    <string name="trait_parameter_allow_multicat">Multiple Category Selection</string>
     <string name="trait_parameter_display_value">Display Value</string>
     <string name="trait_parameter_resource_file">Resource File</string>
     <string name="trait_parameter_use_day_of_year">Use Day of Year</string>
@@ -1534,6 +1535,7 @@
     <string name="failed_to_save_study">Failed to save study</string>
     <string name="no_suitable_file_manager_was_found">No suitable File Manager was found.</string>
     <string name="trait_error_invalid_multicat_value">Invalid categorical data was entered.</string>
+    <string name="trait_error_multicat_disabled">Multiple categories found but multicat is disabled for this trait</string>
     <string name="dialog_crash_report_title">Failed to load data</string>
     <string name="dialog_crash_report_message">Press OK to send an anonymous diagnostic report to help improve the app.</string>
     <string name="dialog_quick_goto_title">Quick GoTo</string>

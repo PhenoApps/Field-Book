@@ -80,6 +80,10 @@ class TraitObject {
         get() = attributeValues.getBoolean(TraitAttributes.MATH_SYMBOLS_ENABLED)
         set(value) = attributeValues.setValue(TraitAttributes.MATH_SYMBOLS_ENABLED, value.toString())
 
+    var allowMulticat: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.ALLOW_MULTICAT)
+        set(value) = attributeValues.setValue(TraitAttributes.ALLOW_MULTICAT, value.toString())
+
     fun loadAttributeAndValues() {
         attributeValues.traitId = id
         attributeValues.load()
@@ -119,7 +123,8 @@ class TraitObject {
                 resourceFile == that.resourceFile &&
                 synonyms == that.synonyms &&
                 maxDecimalPlaces == that.maxDecimalPlaces &&
-                mathSymbolsEnabled == that.mathSymbolsEnabled
+                mathSymbolsEnabled == that.mathSymbolsEnabled &&
+                allowMulticat == that.allowMulticat
     }
 
     override fun hashCode(): Int {
@@ -128,7 +133,7 @@ class TraitObject {
             realPosition, id, visible, externalDbId, traitDataSource,
             additionalInfo, observationLevelNames, closeKeyboardOnOpen, cropImage,
             saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms,
-            maxDecimalPlaces, mathSymbolsEnabled
+            maxDecimalPlaces, mathSymbolsEnabled, allowMulticat
         )
     }
 
@@ -158,6 +163,7 @@ class TraitObject {
         t.synonyms = this.synonyms
         t.maxDecimalPlaces = this.maxDecimalPlaces
         t.mathSymbolsEnabled = this.mathSymbolsEnabled
+        t.allowMulticat = this.allowMulticat
 
         return t
     }

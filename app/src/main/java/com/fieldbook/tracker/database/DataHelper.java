@@ -909,13 +909,15 @@ public class DataHelper {
                            Boolean closeKeyboardOnOpen,
                            Boolean saveImage,
                            Boolean cropImage, Boolean useDayOfYear, Boolean categoryDisplayValue, String resourceFile,
-                           List<String> synonyms, String decimalPlacesRequired, Boolean mathSymbolsEnabled) {
+                           List<String> synonyms, String decimalPlacesRequired, Boolean mathSymbolsEnabled,
+                           Boolean allowMulticat) {
 
         open();
 
         return ObservationVariableDao.Companion.editTraits(traitDbId, trait, traitAlias, format, defaultValue,
                 minimum, maximum, details, categories, closeKeyboardOnOpen, cropImage,
-                saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms, decimalPlacesRequired, mathSymbolsEnabled);
+                saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms, decimalPlacesRequired,
+                mathSymbolsEnabled, allowMulticat);
 //        try {
 //            ContentValues c = new ContentValues();
 //            c.put("trait", trait);
@@ -978,7 +980,7 @@ public class DataHelper {
                 trait.getDetails(), trait.getCategories(), trait.getCloseKeyboardOnOpen(), trait.getCropImage(),
                 trait.getSaveImage(),
                 trait.getUseDayOfYear(), trait.getCategoryDisplayValue(), trait.getResourceFile(), trait.getSynonyms(),
-                trait.getMaxDecimalPlaces(), trait.getMathSymbolsEnabled());
+                trait.getMaxDecimalPlaces(), trait.getMathSymbolsEnabled(), trait.getAllowMulticat());
     }
 
     public boolean checkUnique(HashMap<String, String> values) {
