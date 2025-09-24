@@ -278,7 +278,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
 
                                 if (index > -1) {
                                     val value = rowData[index] ?: ""
-                                    val t = traits.find { it.format in setOf("categorical", "multicat", "qualitative") }
+                                    val t = traits.find { it.format in setOf("categorical", "qualitative") }
                                     val repeatedValues = database.getRepeatedValues(studyId.toString(), id, variable.id)
                                     var cellValue = value
 
@@ -558,7 +558,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
     private fun showRepeatedValuesNavigatorDialog(repeatedValues: Array<ObservationModel>) {
 
         for (m in repeatedValues) {
-            if (m.observation_variable_field_book_format in setOf("categorical", "multicat", "qualitative")) {
+            if (m.observation_variable_field_book_format in setOf("categorical", "qualitative")) {
                 if (m.value.isNotEmpty()) {
                     m.value = decodeValue(m.value)
                 }

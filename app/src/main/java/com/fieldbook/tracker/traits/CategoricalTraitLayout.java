@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -125,7 +124,6 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
         //read the json object stored in additional info of the trait object (only in BrAPI imported traits)
         if (isMulticatEnabled()) {
-            // Initialize from saved value(s)
             categoryList = new ArrayList<>();
             loadMulticatScale();
             if (value != null && value.equals("NA")) getCollectInputView().setText("NA");
@@ -253,11 +251,43 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
         ArrayList<BrAPIScaleValidValuesCategories> categories = getCategories();
 
-        if (isMulticatEnabled()) {
-            setMulticatAdapter(categories);
-        } else {
-            setCategoryAdapter(categories);
-        }
+        gridMultiCat.setAdapter(new CategoryTraitAdapter(getContext()) {
+            @Override
+            public void onBindViewHolder(CategoryTraitViewHolder holder, int position) {
+
+                BrAPIScaleValidValuesCategories category = categories.get(position);
+
+                holder.bindTo(category);
+
+                holder.mButton.setText(getDisplayText(category));
+
+                if (isMulticatEnabled()) {
+                    holder.mButton.setOnClickListener(createMultiCatClickListener(holder.mButton));
+
+                    if (hasCategory(category)) {
+                        pressOnButton(holder.mButton);
+                    } else {
+                        pressOffButton(holder.mButton);
+                    }
+                } else {
+                    holder.mButton.setOnClickListener(createCategoryClickListener(holder.mButton));
+                    String currentText = getCollectInputView().getText();
+
+                    boolean isSelected = currentText.equals(getDisplayText(category));
+
+                    if (isSelected) {
+                        pressOnButton(holder.mButton);
+                    } else {
+                        pressOffButton(holder.mButton);
+                    }
+                }
+            }
+
+            @Override
+            public int getItemCount() {
+                return categories.size();
+            }
+        });
 
         gridMultiCat.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -267,64 +297,6 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 //                View lastChild = gridMultiCat.getChildAt(gridMultiCat.getChildCount() - 1);
 //                gridMultiCat.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, lastChild.getBottom()));
                 gridMultiCat.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-            }
-        });
-    }
-
-    private void setCategoryAdapter(ArrayList<BrAPIScaleValidValuesCategories> categories) {
-        gridMultiCat.setAdapter(new CategoryTraitAdapter(getContext()) {
-
-            @Override
-            public void onBindViewHolder(CategoryTraitViewHolder holder, int position) {
-                holder.bindTo();
-
-                //get the label for this position
-                BrAPIScaleValidValuesCategories category = categories.get(position);
-
-                //update button with the preference based text
-                holder.mButton.setText(getDisplayText(category));
-
-                //set the buttons tag to the json, when clicked this is updated in db
-                holder.mButton.setTag(category);
-                holder.mButton.setOnClickListener(createCategoryClickListener(holder.mButton));
-
-                //update the button's state if this category is selected
-                String currentText = getCollectInputView().getText();
-
-                boolean isSelected = currentText.equals(getDisplayText(category));
-                if (isSelected) pressOnButton(holder.mButton); else pressOffButton(holder.mButton);
-            }
-
-            @Override
-            public int getItemCount() {
-                return categories.size();
-            }
-        });
-    }
-
-    private void setMulticatAdapter(ArrayList<BrAPIScaleValidValuesCategories> categories) {
-        BrAPIScaleValidValuesCategories[] categoriesArray = categories.toArray(new BrAPIScaleValidValuesCategories[0]);
-        gridMultiCat.setAdapter(new MultiCatTraitAdapter(getContext()) {
-
-            @Override
-            public void onBindViewHolder(MultiCatTraitViewHolder holder, int position) {
-                BrAPIScaleValidValuesCategories category = categoriesArray[position];
-
-                holder.bindTo(category);
-                holder.mButton.setOnClickListener(createMultiCatClickListener(holder.mButton));
-                holder.mButton.setText(getDisplayText(category));
-
-                //has category checks the loaded categoryList to see if this button has been selected
-                if (hasCategory(category)) {
-                    pressOnButton(holder.mButton);
-                } else {
-                    pressOffButton(holder.mButton);
-                }
-            }
-
-            @Override
-            public int getItemCount() {
-                return categoriesArray.length;
             }
         });
     }

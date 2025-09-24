@@ -270,9 +270,7 @@ class TraitDetailFragment : Fragment() {
         // Show/hide BrAPI label/value chip based on trait source and format
         // A trait is from BrAPI if it has an external ID or the data source contains "brapi"
         
-        traitHasBrapiCategories = isBrapiTrait && 
-                                (trait.format == "categorical" || trait.format == "multicat") &&
-                                trait.categories.isNotEmpty()
+        traitHasBrapiCategories = isBrapiTrait && trait.format == "categorical" && trait.categories.isNotEmpty()
         
         // For BrAPI label/value toggle
         if (traitHasBrapiCategories) {
@@ -458,7 +456,7 @@ class TraitDetailFragment : Fragment() {
         }
         
         try {
-            if (trait.format == "categorical" || trait.format == "multicat" || trait.format == "boolean") {
+            if (trait.format == "categorical" || trait.format == "boolean") {
                 throw NumberFormatException("Categorical traits must use bar chart")
             }
             

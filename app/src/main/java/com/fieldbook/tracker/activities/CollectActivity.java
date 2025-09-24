@@ -1430,8 +1430,7 @@ public class CollectActivity extends ThemedActivity
             //don't update the database if the value is blank or undesirable
             boolean pass = false;
 
-            if (trait.getFormat().equals("multicat")
-                || CategoricalTraitLayout.isTraitCategorical(trait.getFormat())) {
+            if (CategoricalTraitLayout.isTraitCategorical(trait.getFormat())) {
 
                 if (value.equals("[]")) {
 

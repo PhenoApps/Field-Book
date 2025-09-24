@@ -30,6 +30,7 @@ import com.fieldbook.tracker.database.dao.spectral.SpectralDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.spectral.UriDao;
 import com.fieldbook.tracker.database.migrators.DateFormatVersion19;
+import com.fieldbook.tracker.database.migrators.MulticatToCategoricalVersion20;
 import com.fieldbook.tracker.database.views.ObservationVariableAttributeDetailViewCreator;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
@@ -76,7 +77,7 @@ import dagger.hilt.android.qualifiers.ActivityContext;
  */
 public class DataHelper {
 
-    public static final int DATABASE_VERSION = DateFormatVersion19.VERSION;
+    public static final int DATABASE_VERSION = MulticatToCategoricalVersion20.VERSION;
     private static final String DATABASE_NAME = "fieldbook.db";
     public static SQLiteDatabase db;
     private static final String TAG = "Field Book";
@@ -1718,6 +1719,11 @@ public class DataHelper {
             if (oldVersion <= 18 && newVersion >= 19) {
 
                 Migrator.Companion.migrateToVersion19(db);
+            }
+
+            if (oldVersion <= 19 && newVersion >= 20) {
+
+                Migrator.Companion.migrateToVersion20(db);
             }
         }
     }

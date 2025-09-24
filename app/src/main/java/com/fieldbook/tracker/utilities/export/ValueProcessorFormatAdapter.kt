@@ -31,7 +31,7 @@ class ValueProcessorFormatAdapter @Inject constructor(
                 return (Formats.DATE.getTraitFormatDefinition() as ValuePresenter).represent(context, dateValue, trait)
             }
 
-            in CategoricalTraitLayout.POSSIBLE_VALUES + setOf("multicat") -> return CategoryJsonUtil.processValue(
+            in CategoricalTraitLayout.POSSIBLE_VALUES -> return CategoryJsonUtil.processValue(
                 buildMap {
                     put("value", value)
                     put("observation_variable_field_book_format", trait.format)

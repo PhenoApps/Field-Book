@@ -13,7 +13,7 @@ class DataTypes {
          */
         fun convertBrAPIDataType(dataType: String): String {
             return when (dataType.lowercase(Locale.getDefault())) {
-                "nominal", "ordinal", "categorical", "qualitative" ->                 // All Field Book categories are ordered, so this works
+                "nominal", "ordinal", "categorical", "qualitative", "multicat" ->                 // All Field Book categories are ordered, so this works
                     "categorical"
 
                 "date" -> "date"
@@ -24,7 +24,6 @@ class DataTypes {
                 "photo" -> "photo"
                 "audio" -> "audio"
                 "counter" -> "counter"
-                "multicat" -> "multicat"
                 "location" -> "location"
                 "barcode" -> "barcode"
                 "gnss" -> "gnss"

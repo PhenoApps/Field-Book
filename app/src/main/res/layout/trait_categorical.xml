@@ -16,7 +16,7 @@
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
         app:spanCount="4"
         tools:itemCount="8"
-        tools:listitem="@layout/trait_multicat_button"
+        tools:listitem="@layout/trait_category_button"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
 </com.fieldbook.tracker.traits.CategoricalTraitLayout>

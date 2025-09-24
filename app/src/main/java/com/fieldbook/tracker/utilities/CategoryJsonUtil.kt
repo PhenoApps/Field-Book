@@ -79,15 +79,11 @@ class CategoryJsonUtil {
             return when(row["observation_variable_field_book_format"]) {
                 in CategoricalTraitLayout.POSSIBLE_VALUES -> {
                     try {
-                        decode(rawValue ?: "")[0].value
-                    } catch (ignore: Exception) {
-                        rawValue
-                    }
-                }
-                in setOf("multicat") -> {
-                    try {
-                        decode(rawValue ?: "").joinToString(":") {
-                            it.value
+                        val decoded = decode(rawValue ?: "")
+                        if (decoded.size > 1) { // trait has multicat enabled
+                            decoded.joinToString(":") { it.value }
+                        } else {
+                            decoded[0].value
                         }
                     } catch (ignore: Exception) {
                         rawValue
