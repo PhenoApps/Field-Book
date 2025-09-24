@@ -86,6 +86,7 @@ class ObservationVariableDao {
             it.externalDbId = this["external_db_id"] as? String ?: ""
             it.traitDataSource = this["trait_data_source"] as? String ?: ""
 
+            it.loadAttributeAndValues()
         }
         }
 
