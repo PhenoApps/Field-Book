@@ -99,4 +99,14 @@ class CollectViewModel(driverFactory: DriverFactory) {
             lastUnitId = plotId
         }
     }
+
+    // TODO save to DB
+    fun updateCurrentTraitValue(newValue: String) {
+        val trait = traits.getOrNull(currentTraitIndex)
+        if (trait != null) {
+            traitValues = traitValues.toMutableMap().apply {
+                put(trait.id!!, newValue)
+            }
+        }
+    }
 }

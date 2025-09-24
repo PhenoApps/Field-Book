@@ -42,7 +42,7 @@ fun RangeBox(viewModel: CollectViewModel, modifier: Modifier = Modifier) {
             total = viewModel.units.size,
             visible = true // Optionally, make this conditional on a preference
         )
-        Spacer(Modifier.size(8.dp))
+        Spacer(Modifier.size(16.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,

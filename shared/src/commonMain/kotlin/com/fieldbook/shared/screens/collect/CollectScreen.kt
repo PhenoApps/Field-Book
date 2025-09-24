@@ -80,10 +80,11 @@ fun CollectScreen(
                         )
                         Spacer(Modifier.height(8.dp))
                         RangeBox(viewModel = viewModel)
-                        // ...existing search fields and other UI if needed...
+                        CollectInput(viewModel = viewModel)
                     }
                 }
             }
         }
     }
 }
+
