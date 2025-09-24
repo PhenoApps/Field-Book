@@ -5,15 +5,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.fieldbook.shared.database.models.ObservationUnitModel
 import com.fieldbook.shared.database.models.TraitObject
+import com.fieldbook.shared.database.repository.ObservationRepository
 import com.fieldbook.shared.database.repository.ObservationUnitRepository
 import com.fieldbook.shared.database.repository.TraitRepository
-import com.fieldbook.shared.database.repository.ObservationRepository
+import com.fieldbook.shared.preferences.GeneralKeys
 import com.fieldbook.shared.sqldelight.DriverFactory
 import com.fieldbook.shared.sqldelight.FieldbookDatabase
 import com.russhwolf.settings.Settings
-import com.fieldbook.shared.preferences.GeneralKeys
 
 
+// TODO refactor to use actual ViewModel() ?
 class CollectViewModel(driverFactory: DriverFactory) {
     private val db = FieldbookDatabase(driverFactory.createDriver())
     private val observationUnitRepository = ObservationUnitRepository(db)

@@ -3,8 +3,8 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
     id("com.android.kotlin.multiplatform.library")
-    id("org.jetbrains.kotlin.plugin.compose") version "2.1.10" // same as main app build.gradle
-    id("org.jetbrains.compose") version "1.7.3" // compatible with compileSdk = 34
+    alias(libs.plugins.kotlin.plugin.compose)
+    alias(libs.plugins.compose)
     alias(libs.plugins.app.cash.sqldelight)
 }
 
@@ -78,6 +78,7 @@ kotlin {
                 // commonMain by default and will correctly pull the Android artifacts of any KMP
                 // dependencies declared in commonMain.
                 implementation("app.cash.sqldelight:android-driver:2.1.0")
+                implementation(libs.lifecycle.viewmodel.compose)
             }
         }
 
