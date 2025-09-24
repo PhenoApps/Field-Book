@@ -100,13 +100,39 @@ class CollectViewModel(driverFactory: DriverFactory) {
         }
     }
 
-    // TODO save to DB
-    fun updateCurrentTraitValue(newValue: String) {
+    /**
+     * Update the observation for the current trait and unit, and persist to DB.
+     */
+    fun updateCurrentTraitValue(value: String) {
         val trait = traits.getOrNull(currentTraitIndex)
-        if (trait != null) {
+        val unit = units.getOrNull(currentUnitIndex)
+        val plotId = unit?.observation_unit_db_id
+
+        if (plotId != null && trait?.id != null) {
+            // Fetch existing observation to get lastSyncedTime if present
+            val existingObs = observationRepository.getObservation(studyId.toLong(), plotId, trait.id!!)
+            val lastSyncedTime = existingObs?.lastSyncedTime
+            observationRepository.insertObservation(
+                studyId.toLong(),
+                plotId,
+                trait.id!!,
+                value,
+                notes = "",
+                lastSyncedTime = lastSyncedTime
+            )
+            println("Saved observation: studyId=$studyId, plotId=$plotId, traitId=${trait.id}, value=$value")
             traitValues = traitValues.toMutableMap().apply {
-                put(trait.id!!, newValue)
+                put(trait.id!!, value)
             }
+            setCurrentValueAsEdited()
         }
+    }
+
+    /**
+     * Mark the current value as edited (placeholder implementation).
+     */
+    fun setCurrentValueAsEdited() {
+        // Placeholder: could set a flag, log, or trigger UI update
+        println("Current value marked as edited.")
     }
 }

@@ -1,14 +1,36 @@
 CREATE TABLE observations (
-  id INTEGER NOT NULL PRIMARY KEY,
+  internal_id_observation INTEGER NOT NULL PRIMARY KEY,
   study_id INTEGER NOT NULL REFERENCES studies(internal_id_study),
   observation_variable_name TEXT,
-  observation_variable_db_id INTEGER NOT NULL,
+  observation_variable_db_id INTEGER NOT NULL REFERENCES observation_variables(internal_id_observation_variable),
   observation_unit_id TEXT NOT NULL,
-  value TEXT
+  value TEXT,
+  UNIQUE (study_id, observation_unit_id, observation_variable_db_id)
 );
 
--- Get user detail for a given studyId and plotId (observation_unit_id)
 getUserDetail:
 SELECT observation_variable_db_id, value
 FROM observations
 WHERE study_id = ? AND observation_unit_id = ?;
+
+deleteTrait:
+DELETE FROM observations
+WHERE study_id = ? AND observation_variable_db_id = ? AND observation_unit_id = ?;
+
+insertObservation:
+INSERT INTO observations (
+  study_id,
+  observation_unit_id,
+  observation_variable_db_id,
+  value
+) VALUES (?, ?, ?, ?);
+
+countObservations:
+SELECT COUNT(*)
+FROM observations
+WHERE study_id = ? AND observation_unit_id = ? AND observation_variable_db_id = ?;
+
+getObservation:
+SELECT * FROM observations
+WHERE study_id = ? AND observation_unit_id = ? AND observation_variable_db_id = ?
+LIMIT 1;
