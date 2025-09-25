@@ -23,7 +23,7 @@ import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun TraitBox(
-    viewModel: CollectViewModel,
+    viewModel: CollectScreenController,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth().padding(16.dp)) {

@@ -21,7 +21,7 @@ import androidx.compose.material3.MaterialTheme
 
 @Composable
 fun StatusBar(
-    viewModel: CollectViewModel,
+    viewModel: CollectScreenController,
     modifier: Modifier = Modifier,
 ) {
     if (viewModel.traitValuesLoading) {

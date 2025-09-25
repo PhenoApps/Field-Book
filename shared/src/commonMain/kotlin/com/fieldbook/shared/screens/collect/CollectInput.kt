@@ -15,33 +15,63 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.fieldbook.shared.theme.AppColors
 import com.fieldbook.shared.theme.numericButtonDefaults
 
 
 @Composable
-fun CollectInput(viewModel: CollectViewModel) {
-    val trait = viewModel.traits.getOrNull(viewModel.currentTraitIndex)
-    val value = trait?.let { viewModel.traitValues[it.id] } ?: ""
+fun CollectInput(
+    controller: CollectScreenController,
+) {
+    val trait = controller.traits.getOrNull(controller.currentTraitIndex)
+    val value = trait?.let { controller.traitValues[it.id] } ?: ""
+
+    var isEdited by remember(
+        controller.currentTraitIndex,
+        controller.currentUnitIndex
+    ) { mutableStateOf(false) }
+
+    val fontWeight = if (!isEdited) FontWeight.Bold else FontWeight.Normal
+    val fontStyle = if (isEdited) FontStyle.Normal else FontStyle.Italic
+    val fontColor =
+        if (isEdited) AppColors.fb_color_text_dark.color else controller.getDisplayColor()
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth().fillMaxHeight(),
     ) {
         Spacer(Modifier.height(16.dp))
-        Text(text = "Value: $value", style = MaterialTheme.typography.titleLarge)
+        Text(
+            text = "Value: $value",
+            style = MaterialTheme.typography.titleLarge.copy(
+                fontWeight = fontWeight,
+                fontStyle = fontStyle,
+                color = fontColor,
+            )
+        )
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(18.dp)
-                .padding( 8.dp)
+                .padding(8.dp)
                 .background(MaterialTheme.colorScheme.primary)
         )
         NumericTrait(
             value = value,
-            onValueChange = { viewModel.updateCurrentTraitValue(it) },
+            onValueChange = {
+                controller.updateCurrentTraitValue(it)
+                isEdited = true
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(250.dp)
@@ -64,7 +94,7 @@ fun NumericTrait(
     )
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier // Let parent control size
+        modifier = modifier
     ) {
         buttons.forEach { row ->
             Row(

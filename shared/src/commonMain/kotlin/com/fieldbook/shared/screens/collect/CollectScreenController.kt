@@ -3,6 +3,7 @@ package com.fieldbook.shared.screens.collect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import com.fieldbook.shared.database.models.ObservationUnitModel
 import com.fieldbook.shared.database.models.TraitObject
 import com.fieldbook.shared.database.repository.ObservationRepository
@@ -11,11 +12,12 @@ import com.fieldbook.shared.database.repository.TraitRepository
 import com.fieldbook.shared.preferences.GeneralKeys
 import com.fieldbook.shared.sqldelight.DriverFactory
 import com.fieldbook.shared.sqldelight.FieldbookDatabase
+import com.fieldbook.shared.theme.AppColors
 import com.russhwolf.settings.Settings
 
 
 // TODO refactor to use actual ViewModel() ?
-class CollectViewModel(driverFactory: DriverFactory) {
+class CollectScreenController(driverFactory: DriverFactory) {
     private val db = FieldbookDatabase(driverFactory.createDriver())
     private val observationUnitRepository = ObservationUnitRepository(db)
     private val traitRepository = TraitRepository(db)
@@ -118,15 +120,17 @@ class CollectViewModel(driverFactory: DriverFactory) {
             traitValues = traitValues.toMutableMap().apply {
                 put(trait.id!!, value)
             }
-            setCurrentValueAsEdited()
         }
     }
 
-    /**
-     * Mark the current value as edited (placeholder implementation).
-     */
-    fun setCurrentValueAsEdited() {
-        // Placeholder: could set a flag, log, or trigger UI update
-        println("Current value marked as edited.")
+    // TODO simplify?
+    fun getDisplayColor(): Color {
+        val defaultArgb = AppColors.fb_value_saved_color.argb
+        val stored = settings.getInt(GeneralKeys.SAVED_DATA_COLOR, defaultArgb)
+
+        val rgb = stored and 0xFFFFFF
+        val argb = rgb or 0xFF000000.toInt()
+
+        return Color(argb.toLong())
     }
 }

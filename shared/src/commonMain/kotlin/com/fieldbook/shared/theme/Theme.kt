@@ -10,6 +10,7 @@ import androidx.compose.material3.Shapes
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 
 private val MainLightColors = lightColorScheme(
     primary = Color(0xFF8BC34A),
@@ -44,3 +45,19 @@ fun MainTheme(content: @Composable () -> Unit) {
         content = content
     )
 }
+
+// TODO simplify?
+fun Color.toArgbInt(): Int {
+    fun ch(x: Float) = (x * 255f).roundToInt().coerceIn(0, 255)
+    return (ch(alpha) shl 24) or (ch(red) shl 16) or (ch(green) shl 8) or ch(blue)
+}
+
+fun argbIntToColor(argb: Int): Color = Color(argb.toLong())
+
+enum class AppColors(val argb: Int) {
+    fb_color_text_dark(0xFF000000.toInt()),
+    fb_value_saved_color(0xFFD50000.toInt());
+
+    val color: Color get() = argbIntToColor(argb)
+}
+

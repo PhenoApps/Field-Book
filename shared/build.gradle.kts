@@ -64,6 +64,7 @@ kotlin {
                 implementation("io.github.kashif-mehmood-km:qr_scanner_plugin:0.0.6")
                 implementation(libs.multiplatform.settings)
                 implementation(libs.kotlinx.datetime)
+                implementation(libs.lifecycle.viewmodel.compose)
             }
         }
 

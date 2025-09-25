@@ -22,7 +22,12 @@ import com.fieldbook.shared.generated.resources.chevron_right
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
-fun PlotsProgressBar(currentIndex: Int, total: Int, visible: Boolean = true, modifier: Modifier = Modifier) {
+fun PlotsProgressBar(
+    currentIndex: Int,
+    total: Int,
+    visible: Boolean = true,
+    modifier: Modifier = Modifier
+) {
     if (visible && total > 0) {
         val progress = (currentIndex + 1).toFloat() / total
         LinearProgressIndicator(
@@ -35,7 +40,7 @@ fun PlotsProgressBar(currentIndex: Int, total: Int, visible: Boolean = true, mod
 }
 
 @Composable
-fun RangeBox(viewModel: CollectViewModel, modifier: Modifier = Modifier) {
+fun RangeBox(viewModel: CollectScreenController, modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxWidth()) {
         PlotsProgressBar(
             currentIndex = viewModel.currentUnitIndex,
@@ -61,8 +66,14 @@ fun RangeBox(viewModel: CollectViewModel, modifier: Modifier = Modifier) {
             }
             val unit = viewModel.units.getOrNull(viewModel.currentUnitIndex)
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("row: ${unit?.position_coordinate_x ?: "-"}", style = MaterialTheme.typography.titleLarge)
-                Text("plo: ${unit?.observation_unit_db_id ?: "-"}", style = MaterialTheme.typography.titleLarge)
+                Text(
+                    "row: ${unit?.position_coordinate_x ?: "-"}",
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Text(
+                    "plo: ${unit?.observation_unit_db_id ?: "-"}",
+                    style = MaterialTheme.typography.titleLarge
+                )
             }
             IconButton(
                 onClick = { viewModel.updateCurrentUnitIndex(viewModel.currentUnitIndex + 1) },
