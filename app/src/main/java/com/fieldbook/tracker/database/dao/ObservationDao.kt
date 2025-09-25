@@ -379,7 +379,7 @@ class ObservationDao {
                 traitObj.id
             }
 
-            val ts = timestamp ?: try {
+            val ts = timestamp?.format(internalTimeFormatter) ?: try {
                 OffsetDateTime.now().format(internalTimeFormatter)
             } catch (_: Exception) { //ZoneRulesException
                 String()
