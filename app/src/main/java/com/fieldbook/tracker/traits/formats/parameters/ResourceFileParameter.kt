@@ -86,7 +86,7 @@ class ResourceFileParameter @Inject constructor(
 
     companion object {
         // Use the same request code as defined in TraitEditorActivity
-        private val REQUEST_FILE_EXPLORER_CODE = TraitEditorActivity.REQUEST_RESOURCE_FILE_CODE
+        private val REQUEST_FILE_EXPLORER_CODE = 6
         private var currentViewHolder: ResourceFileViewHolder? = null
         
         // Method to be called from activity's onActivityResult

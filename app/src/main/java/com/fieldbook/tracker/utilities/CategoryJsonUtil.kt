@@ -79,11 +79,13 @@ class CategoryJsonUtil {
             return when(row["observation_variable_field_book_format"]) {
                 in CategoricalTraitLayout.POSSIBLE_VALUES -> {
                     try {
+                        // TODO: decide if this attribute needs to be passed from other functions
+                        val showValue = row["categoryDisplayValue"] as? Boolean == true
                         val decoded = decode(rawValue ?: "")
                         if (decoded.size > 1) { // trait has multicat enabled
-                            decoded.joinToString(":") { it.value }
+                            decoded.joinToString(":") { if (showValue) it.value else it.label }
                         } else {
-                            decoded[0].value
+                            if (showValue) decoded[0].value else decoded[0].label
                         }
                     } catch (ignore: Exception) {
                         rawValue

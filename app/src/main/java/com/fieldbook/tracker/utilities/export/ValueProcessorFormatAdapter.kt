@@ -35,6 +35,7 @@ class ValueProcessorFormatAdapter @Inject constructor(
                 buildMap {
                     put("value", value)
                     put("observation_variable_field_book_format", trait.format)
+                    put("categoryDisplayValue", trait.categoryDisplayValue)
                 })
 
             in Formats.getSpectralFormats().map { it.getDatabaseName() } -> {

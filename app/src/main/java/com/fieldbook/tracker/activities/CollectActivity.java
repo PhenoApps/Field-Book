@@ -2720,15 +2720,10 @@ public class CollectActivity extends ThemedActivity
 
             try {
 
-                String labelValPref = getPreferences().getString(PreferenceKeys.LABELVAL_CUSTOMIZE, "value");
                 StringJoiner joiner = new StringJoiner(":");
                 ArrayList<BrAPIScaleValidValuesCategories> scale = CategoryJsonUtil.Companion.decode(value);
                 for (BrAPIScaleValidValuesCategories s : scale) {
-                    if ("label".equals(labelValPref)) {
-                        joiner.add(s.getLabel());
-                    } else {
-                        joiner.add(s.getValue());
-                    }
+                    joiner.add(attribute.getTrait().getCategoryDisplayValue() ? s.getValue() : s.getLabel());
                 }
 
                 return joiner.toString();

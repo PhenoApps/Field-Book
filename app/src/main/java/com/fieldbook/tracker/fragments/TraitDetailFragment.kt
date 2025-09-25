@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.activities
+package com.fieldbook.tracker.fragments
 
 import android.app.AlertDialog
 import android.content.Intent
@@ -17,31 +17,34 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.core.view.isGone
+import androidx.core.view.size
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.CollectActivity
+import com.fieldbook.tracker.activities.FileExploreActivity
+import com.fieldbook.tracker.activities.TraitEditorActivity
 import com.fieldbook.tracker.charts.HistogramChartHelper
 import com.fieldbook.tracker.charts.HorizontalBarChartHelper
 import com.fieldbook.tracker.charts.PieChartHelper
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.databinding.FragmentTraitDetailBinding
 import com.fieldbook.tracker.objects.FieldFileObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
-import dagger.hilt.android.AndroidEntryPoint
-import org.phenoapps.utils.BaseDocumentTreeUtil
-import java.math.BigDecimal
-import java.util.Calendar
-import javax.inject.Inject
-import androidx.core.view.size
-import androidx.fragment.app.viewModels
-import com.fieldbook.tracker.databinding.FragmentTraitDetailBinding
-import com.fieldbook.tracker.utilities.TraitNameValidator.validateTraitAlias
+import com.fieldbook.tracker.utilities.TraitNameValidator
 import com.fieldbook.tracker.utilities.Utils
 import com.fieldbook.tracker.viewmodels.CopyTraitStatus
 import com.fieldbook.tracker.viewmodels.TraitDetailUiState
 import com.fieldbook.tracker.viewmodels.TraitDetailViewModel
 import com.fieldbook.tracker.viewmodels.factory.TraitDetailViewModelFactory
+import dagger.hilt.android.AndroidEntryPoint
+import org.phenoapps.utils.BaseDocumentTreeUtil
+import java.math.BigDecimal
+import java.util.Calendar
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class TraitDetailFragment : Fragment() {
@@ -205,7 +208,7 @@ class TraitDetailFragment : Fragment() {
         val isCollapsed = preferences.getBoolean(prefKey, false)
         content.visibility = if (isCollapsed) View.GONE else View.VISIBLE
         icon.setImageResource(if (isCollapsed) R.drawable.ic_chevron_down else R.drawable.ic_chevron_up)
-        
+
         header.setOnClickListener {
             if (content.isGone) {
                 content.visibility = View.VISIBLE
@@ -269,9 +272,9 @@ class TraitDetailFragment : Fragment() {
 
         // Show/hide BrAPI label/value chip based on trait source and format
         // A trait is from BrAPI if it has an external ID or the data source contains "brapi"
-        
+
         traitHasBrapiCategories = isBrapiTrait && trait.format == "categorical" && trait.categories.isNotEmpty()
-        
+
         // For BrAPI label/value toggle
         if (traitHasBrapiCategories) {
             binding.brapiLabelValueChip.visibility = View.VISIBLE
@@ -295,7 +298,7 @@ class TraitDetailFragment : Fragment() {
             }
             .setPositiveButton(getString(R.string.trait_swap_name_set_alias)) { _, _ ->
                 selectedSynonym?.let { newAlias ->
-                    val errorRes = validateTraitAlias(newAlias, database, trait)
+                    val errorRes = TraitNameValidator.validateTraitAlias(newAlias, database, trait)
                     if (errorRes != null) {
                         Utils.makeToast(context, getString(errorRes))
                         return@setPositiveButton
@@ -309,23 +312,23 @@ class TraitDetailFragment : Fragment() {
 
     private fun showDateFormatDialog(trait: TraitObject) {
         val calendar = Calendar.getInstance()
-        
+
         // Format as standard date (YYYY-MM-DD)
         val year = calendar.get(Calendar.YEAR)
         val month = calendar.get(Calendar.MONTH) + 1 // Calendar months are 0-based
         val day = calendar.get(Calendar.DAY_OF_MONTH)
         val formattedDate = String.format("%04d-%02d-%02d", year, month, day)
-        
+
         // Format as day of year
         val dayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
-        
+
         val options = arrayOf(
             getString(R.string.trait_date_format_display, formattedDate),
             getString(R.string.trait_day_format_display, dayOfYear)
         )
-        
+
         val currentSelection = if (trait.useDayOfYear) 1 else 0
-        
+
         AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
             .setTitle(getString(R.string.trait_date_format_dialog_title))
             .setSingleChoiceItems(options, currentSelection) { dialog, which ->
@@ -346,7 +349,7 @@ class TraitDetailFragment : Fragment() {
 
         val categories = trait.categories
         val firstCategory = parseCategoryExample(categories)
-        
+
         val options = arrayOf(
             getString(R.string.trait_brapi_label_display, firstCategory.first),
             getString(R.string.trait_brapi_value_display, firstCategory.second)
@@ -372,13 +375,13 @@ class TraitDetailFragment : Fragment() {
         return try {
             if (categories.startsWith("[")) {
                 // JSON format
-                val parsedCategories = CategoryJsonUtil.decode(categories)
+                val parsedCategories = CategoryJsonUtil.Companion.decode(categories)
                 if (parsedCategories.isNotEmpty()) {
                     val firstItem = parsedCategories[0]
                     val labelField = firstItem.javaClass.getDeclaredField("label")
                     labelField.isAccessible = true
                     val label = labelField.get(firstItem)?.toString() ?: "Label"
-                    
+
                     Pair(label, firstItem.value)
                 } else {
                     Pair("Example", "Value")
@@ -400,16 +403,16 @@ class TraitDetailFragment : Fragment() {
 
     private fun updateDateFormatChip(useDayOfYear: Boolean) {
         val calendar = Calendar.getInstance()
-        
+
         // Format as standard date (YYYY-MM-DD)
         val year = calendar.get(Calendar.YEAR)
         val month = calendar.get(Calendar.MONTH) + 1 // Calendar months are 0-based
         val day = calendar.get(Calendar.DAY_OF_MONTH)
         val formattedDate = String.format("%04d-%02d-%02d", year, month, day)
-        
+
         // Format as day of year
         val dayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
-        
+
         // Set the chip text based on the selected format
         if (useDayOfYear) {
             binding.dateFormatChip.text = getString(R.string.trait_day_format_display, dayOfYear)
@@ -434,7 +437,8 @@ class TraitDetailFragment : Fragment() {
     }
 
     private fun updateVisibilityChip(trait: TraitObject) {
-        binding.visibilityChip.text = if (trait.visible) getString(R.string.trait_visible) else getString(R.string.trait_hidden)
+        binding.visibilityChip.text = if (trait.visible) getString(R.string.trait_visible) else getString(
+            R.string.trait_hidden)
 
         binding.visibilityChip.chipIcon = ContextCompat.getDrawable(requireContext(),
             if (trait.visible) R.drawable.ic_eye else R.drawable.ic_eye_off)
@@ -449,17 +453,17 @@ class TraitDetailFragment : Fragment() {
         }
 
         val filteredObservations = observations.filter { it.isNotEmpty() && it != "NA" }
-        
+
         if (filteredObservations.isEmpty()) {
             showNoChartMessage(getString(R.string.field_trait_chart_no_data))
             return
         }
-        
+
         try {
             if (trait.format == "categorical" || trait.format == "boolean") {
                 throw NumberFormatException("Categorical traits must use bar chart")
             }
-            
+
             val numericObservations = filteredObservations.map { BigDecimal(it) }
             binding.barChart.visibility = View.GONE
             binding.histogram.visibility = View.VISIBLE
@@ -476,9 +480,9 @@ class TraitDetailFragment : Fragment() {
             binding.barChart.visibility = View.VISIBLE
             binding.histogram.visibility = View.GONE
             binding.noChartAvailableTextView.visibility = View.GONE
-            
+
             val parsedCategories = parseCategories(trait.categories)
-            
+
             HorizontalBarChartHelper.setupHorizontalBarChart(
                 requireContext(),
                 binding.barChart,
@@ -499,7 +503,7 @@ class TraitDetailFragment : Fragment() {
     private fun parseCategories(categories: String): List<String> {
         return try {
             if (categories.startsWith("[")) {
-                val parsedCategories = CategoryJsonUtil.decode(categories)
+                val parsedCategories = CategoryJsonUtil.Companion.decode(categories)
                 parsedCategories.map { it.value }
             } else {
                 categories.split("/").map { it.trim() }

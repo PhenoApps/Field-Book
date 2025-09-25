@@ -37,7 +37,6 @@ import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
-import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.fieldbook.tracker.utilities.Utils
 import dagger.hilt.android.AndroidEntryPoint
@@ -211,7 +210,6 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
     private fun loadGridData() {
         isLoading = true
         val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
-        val showLabel = preferences.getString(PreferenceKeys.LABELVAL_CUSTOMIZE, "value") == "value"
         val uniqueHeader = preferences.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
         val rowHeader = getCurrentRowHeader()
         val rowHeaderIndex = database.getAllObservationUnitAttributeNames(studyId)
@@ -278,15 +276,15 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
 
                                 if (index > -1) {
                                     val value = rowData[index] ?: ""
-                                    val t = traits.find { it.format in setOf("categorical", "qualitative") }
+                                    val isCategorical = variable.format in setOf("categorical", "qualitative")
                                     val repeatedValues = database.getRepeatedValues(studyId.toString(), id, variable.id)
                                     var cellValue = value
 
-                                    if (t != null) {
+                                    if (isCategorical) {
                                         try {
                                             cellValue = CategoryJsonUtil.flattenMultiCategoryValue(
                                                 CategoryJsonUtil.decode(value),
-                                                showLabel
+                                                !variable.categoryDisplayValue
                                             )
                                         } catch (e: Exception) {
                                             e.printStackTrace()
@@ -523,7 +521,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
                 navigateFromValueClicked(plotId, col)
             } else {
                 //show alert dialog with repeated values
-                showRepeatedValuesNavigatorDialog(repeatedValues)
+                showRepeatedValuesNavigatorDialog(trait, repeatedValues)
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error occurred while trying to navigate: " + e.printStackTrace())
@@ -546,21 +544,20 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
         finish()
     }
 
-    private fun decodeValue(value: String): String {
-        val labelValPref = preferences.getString(PreferenceKeys.LABELVAL_CUSTOMIZE, "value") ?: "value"
+    private fun decodeValue(showValue: Boolean, value: String): String {
         val scale = CategoryJsonUtil.decode(value)
 
         return if (scale.isNotEmpty()) {
-            if (labelValPref == "value") scale[0].value else scale[0].label
+            if (showValue) scale[0].value else scale[0].label
         } else ""
     }
 
-    private fun showRepeatedValuesNavigatorDialog(repeatedValues: Array<ObservationModel>) {
+    private fun showRepeatedValuesNavigatorDialog(trait: TraitObject, repeatedValues: Array<ObservationModel>) {
 
         for (m in repeatedValues) {
             if (m.observation_variable_field_book_format in setOf("categorical", "qualitative")) {
                 if (m.value.isNotEmpty()) {
-                    m.value = decodeValue(m.value)
+                    m.value = decodeValue(trait.categoryDisplayValue, m.value)
                 }
             }
         }

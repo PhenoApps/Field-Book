@@ -50,6 +50,7 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.dialogs.ListAddDialog;
 import com.fieldbook.tracker.dialogs.ListSortDialog;
 import com.fieldbook.tracker.dialogs.NewTraitDialog;
+import com.fieldbook.tracker.fragments.TraitDetailFragment;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.ImportFormat;
