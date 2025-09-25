@@ -348,11 +348,11 @@ public class DataHelper {
      * this function as well
      * v1.6 - Amended to consider both trait and user data
      */
-    public long insertObservation(String plotId, String traitDbId, String value, String person, String location, String notes, String studyId, String observationDbId, OffsetDateTime lastSyncedTime, String rep) {
+    public long insertObservation(String plotId, String traitDbId, String value, String person, String location, String notes, String studyId, String observationDbId, OffsetDateTime timestamp, OffsetDateTime lastSyncedTime, String rep) {
 
         open();
 
-        return ObservationDao.Companion.insertObservation(plotId, traitDbId, value, person, location, notes, studyId, observationDbId, lastSyncedTime, rep);
+        return ObservationDao.Companion.insertObservation(plotId, traitDbId, value, person, location, notes, studyId, observationDbId, timestamp, lastSyncedTime, rep);
     }
 
     /**
@@ -395,10 +395,6 @@ public class DataHelper {
         open();
 
         return ObservationDao.Companion.isBrapiSynced(studyId, plotId, traitDbId, rep);
-    }
-
-    public void setTraitObservations(Integer studyId, Observation observation) {
-        ObservationDao.Companion.insertObservation(studyId, observation);
     }
 
     /**

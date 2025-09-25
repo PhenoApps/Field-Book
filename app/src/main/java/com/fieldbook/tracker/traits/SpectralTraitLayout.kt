@@ -785,6 +785,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
             collectActivity.studyId,
             null,
             null,
+            null,
             "1"
         )
 

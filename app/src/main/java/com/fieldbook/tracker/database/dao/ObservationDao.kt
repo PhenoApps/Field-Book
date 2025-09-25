@@ -367,6 +367,7 @@ class ObservationDao {
             plotId: String, traitDbId: String,
             value: String, person: String, location: String,
             notes: String, studyId: String, observationDbId: String?,
+            timestamp: OffsetDateTime?,
             lastSyncedTime: OffsetDateTime?,
             rep: String? = (getRep(studyId, plotId, traitDbId) + 1).toString()
         ): Long = withDatabase { db ->
@@ -378,7 +379,7 @@ class ObservationDao {
                 traitObj.id
             }
 
-            val timestamp = try {
+            val ts = timestamp ?: try {
                 OffsetDateTime.now().format(internalTimeFormatter)
             } catch (_: Exception) { //ZoneRulesException
                 String()
@@ -391,7 +392,7 @@ class ObservationDao {
             db.insert(Observation.tableName, null, contentValuesOf(
                 "observation_db_id" to observationDbId,
                 "value" to removeNullCharacters,
-                "observation_time_stamp" to timestamp,
+                "observation_time_stamp" to ts,
                 "collector" to person,
                 "geo_coordinates" to location,
                 "last_synced_time" to lastSyncedTime?.format(internalTimeFormatter),
@@ -403,43 +404,6 @@ class ObservationDao {
             ))
 
         } ?: -1L
-
-        fun insertObservation(studyId: Int, model: BrapiObservation): Int = withDatabase { db ->
-
-            if (getObservation("$studyId", model.unitDbId, model.variableDbId, model.rep ?: "1")?.dbId != null) {
-                println(
-                    "DbId: ${
-                        getObservation(
-                            "$studyId",
-                            model.unitDbId,
-                            model.variableDbId,
-                            model.rep ?: "1"
-                        )?.dbId
-                    }"
-                )
-                -1
-            }
-            else {
-                //get observationVariableFieldbookformat based on the variableName
-                val varRowId =  db.insert(Observation.tableName, null, contentValuesOf(
-                    "value" to model.value,
-                    "observation_time_stamp" to model.timestamp?.format(internalTimeFormatter),
-                    "collector" to model.collector,
-//                "geoCoordinates" to model.geo_coordinates,
-                    "geo_coordinates" to null,
-                    "last_synced_time" to model.lastSyncedTime?.format(internalTimeFormatter),
-//                "additional_info" to model.additional_info,
-                    "additional_info" to null,
-                    "observation_db_id" to model.dbId,
-                    "rep" to model.rep,
-                    Study.FK to studyId,
-                    ObservationUnit.FK to model.unitDbId,
-                    ObservationVariable.FK to model.variableDbId
-                )).toInt()
-                varRowId
-            }
-
-        } ?: -1
 
         fun getUserDetail(studyId: String, plotId: String): HashMap<String, String> =
             withDatabase { db ->
