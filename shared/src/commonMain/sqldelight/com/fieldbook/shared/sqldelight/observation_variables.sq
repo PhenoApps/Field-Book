@@ -4,7 +4,13 @@
 CREATE TABLE observation_variables (
   internal_id_observation_variable INTEGER NOT NULL PRIMARY KEY,
   observation_variable_name TEXT,
+  observation_variable_field_book_format TEXT,
   position INTEGER
 );
+
 getAllTraits:
 SELECT * FROM observation_variables;
+
+getTraitById:
+SELECT * FROM observation_variables
+WHERE internal_id_observation_variable = ?;

@@ -109,18 +109,12 @@ class CollectViewModel(driverFactory: DriverFactory) {
         val plotId = unit?.observation_unit_db_id
 
         if (plotId != null && trait?.id != null) {
-            // Fetch existing observation to get lastSyncedTime if present
-            val existingObs = observationRepository.getObservation(studyId.toLong(), plotId, trait.id!!)
-            val lastSyncedTime = existingObs?.lastSyncedTime
             observationRepository.insertObservation(
-                studyId.toLong(),
-                plotId,
-                trait.id!!,
-                value,
-                notes = "",
-                lastSyncedTime = lastSyncedTime
+                plotId = plotId,
+                traitDbId = trait.id!!,
+                value = value,
+                studyId = studyId.toLong()
             )
-            println("Saved observation: studyId=$studyId, plotId=$plotId, traitId=${trait.id}, value=$value")
             traitValues = traitValues.toMutableMap().apply {
                 put(trait.id!!, value)
             }

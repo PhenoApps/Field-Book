@@ -13,6 +13,6 @@ data class ObservationObject(
     val observationUnitId: String,
     val value: String?,
     val lastSyncedTime: Instant?,
-    val rep: Int?
+    val rep: String?
 )
 

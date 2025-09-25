@@ -1,8 +1,12 @@
 package com.fieldbook.shared.database.repository
 
 import com.fieldbook.shared.database.models.ObservationObject
+import com.fieldbook.shared.database.utils.internalTimeFormatter
 import com.fieldbook.shared.sqldelight.FieldbookDatabase
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.datetime.format
+import kotlinx.datetime.format.FormatStringsInDatetimeFormats
 
 class ObservationRepository(private val db: FieldbookDatabase) {
     /**
@@ -11,8 +15,8 @@ class ObservationRepository(private val db: FieldbookDatabase) {
     fun getUserDetail(studyId: Long, plotId: String): Map<Long, String> {
         return db.observationsQueries.getUserDetail(studyId, plotId)
             .executeAsList()
-            .filter { it.value_ != null }
-            .associate { it.observation_variable_db_id to it.value_!! }
+            .filter { it.value_ != null && it.observation_variable_db_id != null }
+            .associate { it.observation_variable_db_id!! to it.value_!! }
     }
 
     fun getRep(studyId: Long, plotId: String, traitId: Long): Int {
@@ -23,27 +27,52 @@ class ObservationRepository(private val db: FieldbookDatabase) {
         ).executeAsOne().toInt()
     }
 
+    @OptIn(FormatStringsInDatetimeFormats::class)
     fun insertObservation(
         studyId: Long,
         plotId: String,
-        traitId: Long,
+        traitDbId: Long,
         value: String,
-        notes: String,
-        lastSyncedTime: Instant?,
-        rep: String? = (getRep(studyId, plotId, traitId) + 1).toString()
+        traitFormat: String? = null,
+        person: String? = null,
+        location: String? = null,
+        notes: String? = null,
+        lastSyncedTime: Instant? = null,
+        rep: String? = (getRep(studyId, plotId, traitDbId) + 1).toString(),
     ) {
+        val trait = db.observation_variablesQueries.getTraitById(traitDbId).executeAsOneOrNull()
+            ?: throw IllegalArgumentException("Trait with id $traitDbId not found")
+
+        val observation = db.observationsQueries.getObservation(
+            study_id = studyId,
+            observation_unit_id = plotId,
+            observation_variable_db_id = traitDbId
+        ).executeAsOneOrNull()
+
+        val timestamp = Clock.System.now().format(internalTimeFormatter)
+
         // Always remove existing trait before inserting again
         // Based on plot_id, prevent duplicates
         db.observationsQueries.deleteTrait(
             study_id = studyId,
             observation_unit_id = plotId,
-            observation_variable_db_id = traitId
+            observation_variable_db_id = traitDbId
         )
         db.observationsQueries.insertObservation(
             study_id = studyId,
             observation_unit_id = plotId,
-            observation_variable_db_id = traitId,
-            value_ = value
+            observation_variable_db_id = traitDbId,
+            observation_variable_name = trait.observation_variable_name,
+            observation_variable_field_book_format = traitFormat
+                ?: trait.observation_variable_field_book_format,
+            value_ = value,
+            observation_time_stamp = timestamp,
+            last_synced_time = lastSyncedTime?.format(internalTimeFormatter)
+                ?: observation?.last_synced_time,
+            collector = person ?: observation?.collector,
+            geoCoordinates = location ?: observation?.geoCoordinates,
+            rep = rep,
+            notes = notes ?: observation?.notes,
         )
     }
 
@@ -60,8 +89,14 @@ class ObservationRepository(private val db: FieldbookDatabase) {
             observationVariableDbId = row.observation_variable_db_id,
             observationUnitId = row.observation_unit_id,
             value = row.value_,
-            lastSyncedTime = null, // Placeholder: update if/when lastSyncedTime is added to schema
-            rep = null // Placeholder: can be calculated if needed
+            lastSyncedTime = row.last_synced_time?.let {
+                try {
+                    Instant.parse(it)
+                } catch (e: Exception) {
+                    null
+                }
+            },
+            rep = row.rep
         )
     }
 }
