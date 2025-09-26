@@ -75,4 +75,5 @@ object ObservationVariableAttributeDetailsView {
     const val DECIMAL_PLACES_REQUIRED = "decimalPlacesRequired"
     const val MATH_SYMBOLS_ENABLED = "mathSymbolsEnabled"
     const val ALLOW_MULTICAT = "allowMulticat"
+    const val REPEATED_MEASURES = "repeatedMeasure"
 }

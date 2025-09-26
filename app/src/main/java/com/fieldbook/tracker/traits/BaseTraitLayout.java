@@ -294,16 +294,11 @@ public abstract class BaseTraitLayout extends LinearLayout {
 
         inputView.setVisibility(visibility);
 
-        RepeatedValuesView repeatView = inputView.getRepeatView();
-        EditText editText = inputView.getEditText();
+        inputView.updateInputViewVisibility(visibility);
 
         // Clear hint for NA since a focus change doesn't happen for the numeric trait layout
-        if (inputView.isRepeatEnabled()) {
-            repeatView.setVisibility(visibility);
-        } else {
-            editText.setVisibility(visibility);
-            editText.setHint("");
-
+        if (!inputView.isRepeatEnabled()) {
+            EditText editText = inputView.getEditText();
             if (isTraitType(TextTraitLayout.type)
                     || isTraitType(AudioTraitLayout.type)
                     || isTraitType(PhotoTraitLayout.type)) {

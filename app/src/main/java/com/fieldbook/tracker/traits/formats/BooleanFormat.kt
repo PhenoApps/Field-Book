@@ -4,6 +4,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.traits.formats.parameters.DefaultRadioValueParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
+import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 
 class BooleanFormat : TraitFormat(
@@ -17,5 +18,6 @@ class BooleanFormat : TraitFormat(
     NameParameter(),
     DefaultRadioValueParameter(),
     DetailsParameter(),
+    RepeatedMeasureParameter(),
     ResourceFileParameter()
 ), Scannable

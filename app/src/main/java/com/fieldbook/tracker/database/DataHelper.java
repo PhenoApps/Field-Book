@@ -29,7 +29,6 @@ import com.fieldbook.tracker.database.dao.spectral.ProtocolDao;
 import com.fieldbook.tracker.database.dao.spectral.SpectralDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.spectral.UriDao;
-import com.fieldbook.tracker.database.migrators.DateFormatVersion19;
 import com.fieldbook.tracker.database.migrators.MulticatToCategoricalVersion20;
 import com.fieldbook.tracker.database.views.ObservationVariableAttributeDetailViewCreator;
 import com.fieldbook.tracker.database.models.ObservationModel;
@@ -911,14 +910,14 @@ public class DataHelper {
                            Boolean saveImage,
                            Boolean cropImage, Boolean useDayOfYear, Boolean categoryDisplayValue, String resourceFile,
                            List<String> synonyms, String decimalPlacesRequired, Boolean mathSymbolsEnabled,
-                           Boolean allowMulticat) {
+                           Boolean allowMulticat, Boolean repeatMeasure) {
 
         open();
 
         return ObservationVariableDao.Companion.editTraits(traitDbId, trait, traitAlias, format, defaultValue,
                 minimum, maximum, details, categories, closeKeyboardOnOpen, cropImage,
                 saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms, decimalPlacesRequired,
-                mathSymbolsEnabled, allowMulticat);
+                mathSymbolsEnabled, allowMulticat, repeatMeasure);
 //        try {
 //            ContentValues c = new ContentValues();
 //            c.put("trait", trait);
@@ -981,7 +980,8 @@ public class DataHelper {
                 trait.getDetails(), trait.getCategories(), trait.getCloseKeyboardOnOpen(), trait.getCropImage(),
                 trait.getSaveImage(),
                 trait.getUseDayOfYear(), trait.getCategoryDisplayValue(), trait.getResourceFile(), trait.getSynonyms(),
-                trait.getMaxDecimalPlaces(), trait.getMathSymbolsEnabled(), trait.getAllowMulticat());
+                trait.getMaxDecimalPlaces(), trait.getMathSymbolsEnabled(), trait.getAllowMulticat(),
+                trait.getRepeatedMeasures());
     }
 
     public boolean checkUnique(HashMap<String, String> values) {

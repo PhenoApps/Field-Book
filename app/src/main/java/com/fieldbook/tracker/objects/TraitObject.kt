@@ -84,6 +84,10 @@ class TraitObject {
         get() = attributeValues.getBoolean(TraitAttributes.ALLOW_MULTICAT)
         set(value) = attributeValues.setValue(TraitAttributes.ALLOW_MULTICAT, value.toString())
 
+    var repeatedMeasures: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.REPEATED_MEASURES)
+        set(value) = attributeValues.setValue(TraitAttributes.REPEATED_MEASURES, value.toString())
+
     fun loadAttributeAndValues() {
         attributeValues.traitId = id
         attributeValues.load()
@@ -124,7 +128,8 @@ class TraitObject {
                 synonyms == that.synonyms &&
                 maxDecimalPlaces == that.maxDecimalPlaces &&
                 mathSymbolsEnabled == that.mathSymbolsEnabled &&
-                allowMulticat == that.allowMulticat
+                allowMulticat == that.allowMulticat &&
+                repeatedMeasures == that.repeatedMeasures
     }
 
     override fun hashCode(): Int {
@@ -133,7 +138,7 @@ class TraitObject {
             realPosition, id, visible, externalDbId, traitDataSource,
             additionalInfo, observationLevelNames, closeKeyboardOnOpen, cropImage,
             saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms,
-            maxDecimalPlaces, mathSymbolsEnabled, allowMulticat
+            maxDecimalPlaces, mathSymbolsEnabled, allowMulticat, repeatedMeasures
         )
     }
 
@@ -164,6 +169,7 @@ class TraitObject {
         t.maxDecimalPlaces = this.maxDecimalPlaces
         t.mathSymbolsEnabled = this.mathSymbolsEnabled
         t.allowMulticat = this.allowMulticat
+        t.repeatedMeasures = this.repeatedMeasures
 
         return t
     }

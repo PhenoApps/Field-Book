@@ -50,6 +50,7 @@ class TraitAttributeValuesHelper(var traitId: String? = null) {
                         attributes[DECIMAL_PLACES_REQUIRED]?.let { trait.maxDecimalPlaces = it }
                         attributes[MATH_SYMBOLS_ENABLED]?.let { trait.mathSymbolsEnabled = it.toBoolean() }
                         attributes[ALLOW_MULTICAT]?.let { trait.allowMulticat = it.toBoolean() }
+                        attributes[REPEATED_MEASURES]?.let { trait.repeatedMeasures = it.toBoolean() }
                     }
                 }
             }

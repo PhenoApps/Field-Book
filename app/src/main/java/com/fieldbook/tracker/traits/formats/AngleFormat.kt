@@ -5,6 +5,7 @@ import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.traits.formats.TraitFormat
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
+import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 
 class AngleFormat : TraitFormat(
@@ -17,5 +18,6 @@ class AngleFormat : TraitFormat(
     stringNameAux = null,
     NameParameter(),
     DetailsParameter(),
+    RepeatedMeasureParameter(),
     ResourceFileParameter()
 )

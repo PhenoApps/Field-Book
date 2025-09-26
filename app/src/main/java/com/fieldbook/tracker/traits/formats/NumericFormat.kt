@@ -11,6 +11,7 @@ import com.fieldbook.tracker.traits.formats.parameters.MathSymbolsParameter
 import com.fieldbook.tracker.traits.formats.parameters.MaximumParameter
 import com.fieldbook.tracker.traits.formats.parameters.MinimumParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
+import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 import com.fieldbook.tracker.utilities.SnackbarUtils
 
@@ -31,6 +32,7 @@ open class NumericFormat(
             DecimalPlacesParameter(),
             MathSymbolsParameter(),
             DetailsParameter(),
+            RepeatedMeasureParameter(),
             ResourceFileParameter()
         )
 ) : TraitFormat(

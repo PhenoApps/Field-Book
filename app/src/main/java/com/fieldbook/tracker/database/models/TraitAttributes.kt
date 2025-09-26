@@ -79,9 +79,15 @@ object TraitAttributes {
         defaultValue = "false"
     )
 
+    val REPEATED_MEASURES = AttributeDefinition(
+        key = ObservationVariableAttributeDetailsView.REPEATED_MEASURES,
+        valueType = ValueType.BOOLEAN,
+        defaultValue = "false"
+    )
+
     val ALL = listOf(MIN_VALUE, MAX_VALUE, CATEGORIES, CLOSE_KEYBOARD, CROP_IMAGE, SAVE_IMAGE,
         USE_DAY_OF_YEAR, CATEGORY_DISPLAY_VALUE, RESOURCE_FILE, VARIABLE_SYNONYMS,
-        DECIMAL_PLACES_REQUIRED, MATH_SYMBOLS_ENABLED, ALLOW_MULTICAT
+        DECIMAL_PLACES_REQUIRED, MATH_SYMBOLS_ENABLED, ALLOW_MULTICAT, REPEATED_MEASURES
     )
 
     fun byKey(key: String): AttributeDefinition? = ALL.find { it.key == key }

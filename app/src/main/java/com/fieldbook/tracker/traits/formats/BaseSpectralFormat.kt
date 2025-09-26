@@ -4,6 +4,8 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.traits.formats.parameters.DefaultValueParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
+import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
+import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 
 open class BaseSpectralFormat(
     format: Formats = Formats.BASE_SPECTRAL,
@@ -23,4 +25,6 @@ open class BaseSpectralFormat(
     stringNameAux = stringNameAux,
     NameParameter(),
     DetailsParameter(),
+    RepeatedMeasureParameter(),
+    ResourceFileParameter()
 )

@@ -318,7 +318,8 @@ class ObservationVariableDao {
                        synonyms: List<String>,
                        decimalPlacesRequired: String,
                        mathSymbolsEnabled: Boolean,
-                       allowMulticat: Boolean): Long = withDatabase { db ->
+                       allowMulticat: Boolean,
+                       repeatMeasure: Boolean): Long = withDatabase { db ->
 
            val contentValues = ContentValues().apply {
                put("observation_variable_name", trait)
@@ -352,6 +353,7 @@ class ObservationVariableDao {
                     this.maxDecimalPlaces = decimalPlacesRequired
                     this.mathSymbolsEnabled = mathSymbolsEnabled
                     this.allowMulticat = allowMulticat
+                    this.repeatedMeasures = repeatMeasure
                 }
 
                 traitObj.saveAttributeValues()

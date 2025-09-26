@@ -5,6 +5,7 @@ import com.fieldbook.tracker.traits.formats.parameters.CloseKeyboardParameter
 import com.fieldbook.tracker.traits.formats.parameters.DefaultValueParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
+import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 
 class TextFormat : TraitFormat(
@@ -19,5 +20,6 @@ class TextFormat : TraitFormat(
     DefaultValueParameter(),
     DetailsParameter(),
     CloseKeyboardParameter(false),
+    RepeatedMeasureParameter(),
     ResourceFileParameter()
 ), Scannable
