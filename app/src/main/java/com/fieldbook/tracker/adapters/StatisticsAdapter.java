@@ -24,6 +24,7 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.StatisticObject;
+import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.traits.formats.Formats;
 import com.fieldbook.tracker.traits.formats.TraitFormat;
 import com.fieldbook.tracker.traits.formats.coders.StringCoder;
@@ -112,6 +113,7 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
         int imageCount = 0;
 
         for (ObservationModel observation : observations) {
+            TraitObject trait = database.getTraitById(String.valueOf(observation.getObservation_variable_db_id()));
 
             fields.add(observation.getStudy_id());
 
@@ -140,10 +142,8 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
             }
             dateObjects.add(dateObject);
 
-            if (observation.getObservation_variable_field_book_format() != null) {
-                if (Formats.Companion.isCameraTrait(observation.getObservation_variable_field_book_format())) {
-                    imageCount++;
-                }
+            if (Formats.Companion.isCameraTrait(trait.getFormat())) {
+                imageCount++;
             }
 
             String date = new SimpleDateFormat(DATE_FORMAT_PATTERN, Locale.getDefault()).format(dateObject);
@@ -209,31 +209,28 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
         List<String> unitWithMostObservationsList = new ArrayList<>();
         for (ObservationModel observation : observations) {
             if (observation.getObservation_unit_id().equals(unitWithMostObservations)) {
-                final String traitFormat = observation.getObservation_variable_field_book_format();
+                TraitObject trait = database.getTraitById(String.valueOf(observation.getObservation_variable_db_id()));
+                String traitFormat = trait.getFormat();
+                TraitFormat formats = Formats.Companion.findTrait(traitFormat);
 
-                if (traitFormat != null) {
+                Object valueModel = observation.getValue();
 
-                    TraitFormat formats = Formats.Companion.findTrait(traitFormat);
+                if (formats instanceof StringCoder) {
 
-                    Object valueModel = observation.getValue();
-
-                    if (formats instanceof StringCoder) {
-
-                        valueModel = ((StringCoder) formats).decode(valueModel.toString());
-
-                    }
-
-                    if (formats instanceof ValuePresenter) {
-
-                        unitWithMostObservationsList.add(observation.getObservation_variable_name() + ": " + ((ValuePresenter) formats).represent(originActivity, valueModel));
-
-                    } else {
-
-                        unitWithMostObservationsList.add(observation.getObservation_variable_name() + ": " + observation.getValue());
-
-                    }
+                    valueModel = ((StringCoder) formats).decode(valueModel.toString());
 
                 }
+
+                if (formats instanceof ValuePresenter) {
+
+                    unitWithMostObservationsList.add(trait.getAlias() + ": " + ((ValuePresenter) formats).represent(originActivity, valueModel, trait));
+
+                } else {
+
+                    unitWithMostObservationsList.add(trait.getAlias() + ": " + observation.getValue());
+
+                }
+
             }
         }
 

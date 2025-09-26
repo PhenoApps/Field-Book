@@ -148,9 +148,12 @@ class ObservationUnitPropertyDao {
                         when (it) {
                             "trait" -> row["observation_variable_name"]
                             "userValue" -> {
+                                val name = row["observation_variable_name"]
+                                val trait = traits.find { t -> t.name == name }
                                 val value = row["value"]
-                                val format = row["observation_variable_field_book_format"]
-                                processor.processValue(value.toString(), format.toString())
+                                if (trait == null) {
+                                    value
+                                } else processor.processValue(value.toString(), trait)
                             }
                             "timeTaken" -> row["observation_time_stamp"]
                             "person" -> row["collector"]
@@ -281,7 +284,7 @@ class ObservationUnitPropertyDao {
                                 row.add(value)
                                 continue
                             }
-                            row.add(processor.processValue(value, trait.format))
+                            row.add(processor.processValue(value, trait))
                         } else {
                             row.add(value)
                         }

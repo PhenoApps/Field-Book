@@ -16,7 +16,6 @@ import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.activities.TraitEditorActivity
 import com.fieldbook.tracker.adapters.TraitFormatAdapter
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.TraitObject
@@ -302,10 +301,16 @@ class NewTraitDialog(
     private fun onSave(format: Formats) {
 
         var pass = true
+        val paramValidation = validateParameters()
+        android.util.Log.e("NewTraitDialog", "Parameter validation result: ${paramValidation.result}, message: ${paramValidation.error}")
+
 
         if (validateParameters().result != true) pass = false
 
         if (pass && initialTraitObject == null) {
+            val formatValidation = validateFormat()
+            android.util.Log.e("NewTraitDialog", "Format validation result: ${formatValidation.result}, message: ${formatValidation.error}")
+
 
             if (validateFormat().result != true) {
 
@@ -327,6 +332,8 @@ class NewTraitDialog(
         } else if (pass) {
 
             initialTraitObject?.let { traitObject ->
+                val formatValidation = validateFormat()
+                android.util.Log.e("NewTraitDialog", "Format validation (edit) result: ${formatValidation.result}, message: ${formatValidation.error}")
 
                 if (validateFormat().result != true && !isBrapiTraitImport) {
 
@@ -358,6 +365,7 @@ class NewTraitDialog(
 
         if (!pass) {
 
+            android.util.Log.e("NewTraitDialog", "Validation failed!")
             vibrator.vibrate()
 
             soundHelperImpl.playError()
@@ -466,6 +474,7 @@ class NewTraitDialog(
         database.editTraits(
             traitObject.id,
             traitObject.name,
+            traitObject.alias,
             traitObject.format,
             traitObject.defaultValue,
             traitObject.minimum,
@@ -473,7 +482,17 @@ class NewTraitDialog(
             traitObject.details,
             traitObject.categories,
             traitObject.closeKeyboardOnOpen,
-            traitObject.cropImage
+            traitObject.cropImage,
+            traitObject.saveImage,
+            traitObject.useDayOfYear,
+            traitObject.categoryDisplayValue,
+            traitObject.resourceFile,
+            traitObject.synonyms,
+            traitObject.maxDecimalPlaces,
+            traitObject.mathSymbolsEnabled,
+            traitObject.allowMulticat,
+            traitObject.repeatedMeasures,
+            traitObject.autoSwitchPlot
         )
     }
 

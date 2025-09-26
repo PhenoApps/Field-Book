@@ -68,4 +68,13 @@ object ObservationVariableAttributeDetailsView {
     const val CLOSE_KEYBOARD_ON_OPEN = "closeKeyboardOnOpen"
     const val CROP_IMAGE = "cropImage"
     const val SAVE_IMAGE = "saveImage"
+    const val USE_DAY_OF_YEAR = "useDayOfYear"
+    const val CATEGORY_DISPLAY_VALUE = "categoryDisplayValue"
+    const val RESOURCE_FILE = "resourceFile"
+    const val VARIABLE_SYNONYMS = "synonyms"
+    const val DECIMAL_PLACES_REQUIRED = "decimalPlacesRequired"
+    const val MATH_SYMBOLS_ENABLED = "mathSymbolsEnabled"
+    const val ALLOW_MULTICAT = "allowMulticat"
+    const val REPEATED_MEASURES = "repeatedMeasure"
+    const val AUTO_SWITCH_PLOT = "autoSwitchPlot"
 }

@@ -15,10 +15,11 @@ import org.brapi.v2.model.pheno.BrAPIObservationVariable
 
 fun BrAPIObservationVariable.toTraitObject(context: Context) = TraitObject().also {
 
-    val synonym = synonyms?.firstOrNull()
-
     it.defaultValue = defaultValue ?: ""
-    it.name = synonym ?: observationVariableName
+    it.name = observationVariableName
+    it.alias = observationVariableName
+    it.synonyms = synonyms ?: emptyList()
+
     it.details = trait.traitDescription ?: ""
     it.externalDbId = observationVariableDbId
 
