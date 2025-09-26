@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -319,6 +320,13 @@ public abstract class BaseTraitLayout extends LinearLayout {
         ((CollectActivity) getContext()).updateObservation(trait, value, null);
 
         setCurrentValueAsEdited();
+        handleAutoSwitchToNextPlot(trait);
+    }
+
+    protected void handleAutoSwitchToNextPlot(TraitObject trait) {
+        if (trait.getAutoSwitchPlot()) {
+            controller.getRangeBox().moveEntryRight();
+        }
     }
 
     public void removeTrait(TraitObject trait) {

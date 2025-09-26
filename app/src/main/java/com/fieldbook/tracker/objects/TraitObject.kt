@@ -88,6 +88,10 @@ class TraitObject {
         get() = attributeValues.getBoolean(TraitAttributes.REPEATED_MEASURES)
         set(value) = attributeValues.setValue(TraitAttributes.REPEATED_MEASURES, value.toString())
 
+    var autoSwitchPlot: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.AUTO_SWITCH_PLOT)
+        set(value) = attributeValues.setValue(TraitAttributes.AUTO_SWITCH_PLOT, value.toString())
+
     fun loadAttributeAndValues() {
         attributeValues.traitId = id
         attributeValues.load()
@@ -129,7 +133,8 @@ class TraitObject {
                 maxDecimalPlaces == that.maxDecimalPlaces &&
                 mathSymbolsEnabled == that.mathSymbolsEnabled &&
                 allowMulticat == that.allowMulticat &&
-                repeatedMeasures == that.repeatedMeasures
+                repeatedMeasures == that.repeatedMeasures &&
+                autoSwitchPlot == that.autoSwitchPlot
     }
 
     override fun hashCode(): Int {
@@ -138,7 +143,8 @@ class TraitObject {
             realPosition, id, visible, externalDbId, traitDataSource,
             additionalInfo, observationLevelNames, closeKeyboardOnOpen, cropImage,
             saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms,
-            maxDecimalPlaces, mathSymbolsEnabled, allowMulticat, repeatedMeasures
+            maxDecimalPlaces, mathSymbolsEnabled, allowMulticat, repeatedMeasures,
+            autoSwitchPlot
         )
     }
 
@@ -170,6 +176,7 @@ class TraitObject {
         t.mathSymbolsEnabled = this.mathSymbolsEnabled
         t.allowMulticat = this.allowMulticat
         t.repeatedMeasures = this.repeatedMeasures
+        t.autoSwitchPlot = this.autoSwitchPlot
 
         return t
     }

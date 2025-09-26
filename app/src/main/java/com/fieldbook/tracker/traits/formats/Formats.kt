@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.traits.formats
 
 import android.content.Context
-import com.fieldbook.tracker.offbeat.traits.formats.contracts.AngleFormat
 
 enum class Formats(val type: Types = Types.SYSTEM, val isCamera: Boolean = false) {
 

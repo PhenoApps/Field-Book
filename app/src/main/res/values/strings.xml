@@ -387,6 +387,7 @@
     <string name="traits_create_warning_math_symbols_conflict">Mathematical symbols and decimal place restrictions cannot be applied simultaneously</string>
 
     <string name="trait_parameter_repeated_measures">Repeated Measures</string>
+    <string name="trait_parameter_auto_switch_plot">Automatically Switch To Next Plot</string>
 
     <string name="select_trait">Select Trait</string>
     <string name="edit_traits">Edit</string>

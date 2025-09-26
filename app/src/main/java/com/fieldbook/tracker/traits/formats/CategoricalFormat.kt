@@ -3,6 +3,7 @@ package com.fieldbook.tracker.traits.formats
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.traits.formats.coders.CategoricalJsonCoder
 import com.fieldbook.tracker.traits.formats.coders.StringCoder
+import com.fieldbook.tracker.traits.formats.parameters.AutoSwitchPlotParameter
 import com.fieldbook.tracker.traits.formats.parameters.CategoriesParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
@@ -29,6 +30,7 @@ class CategoricalFormat : TraitFormat(
     CategoriesParameter(),
     MultipleCategoriesParameter(),
     DisplayValueParameter(),
+    AutoSwitchPlotParameter(),
     RepeatedMeasureParameter(),
     ResourceFileParameter()
 ),

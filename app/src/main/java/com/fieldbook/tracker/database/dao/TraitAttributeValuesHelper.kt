@@ -51,6 +51,7 @@ class TraitAttributeValuesHelper(var traitId: String? = null) {
                         attributes[MATH_SYMBOLS_ENABLED]?.let { trait.mathSymbolsEnabled = it.toBoolean() }
                         attributes[ALLOW_MULTICAT]?.let { trait.allowMulticat = it.toBoolean() }
                         attributes[REPEATED_MEASURES]?.let { trait.repeatedMeasures = it.toBoolean() }
+                        attributes[AUTO_SWITCH_PLOT]?.let { trait.autoSwitchPlot = it.toBoolean() }
                     }
                 }
             }

@@ -3,6 +3,7 @@ package com.fieldbook.tracker.traits.formats
 import android.content.Context
 import android.view.View
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.traits.formats.parameters.AutoSwitchPlotParameter
 import com.fieldbook.tracker.traits.formats.parameters.CropImageParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
@@ -29,5 +30,6 @@ open class BasePhotoFormat(
     NameParameter(),
     DetailsParameter(),
     CropImageParameter(),
+    AutoSwitchPlotParameter(),
     ResourceFileParameter()
 ), ValuePresenter by UriPresenter()

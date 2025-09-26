@@ -1,8 +1,7 @@
-package com.fieldbook.tracker.offbeat.traits.formats.contracts
+package com.fieldbook.tracker.traits.formats
 
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.traits.formats.Formats
-import com.fieldbook.tracker.traits.formats.TraitFormat
+import com.fieldbook.tracker.traits.formats.parameters.AutoSwitchPlotParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
 import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
@@ -18,6 +17,7 @@ class AngleFormat : TraitFormat(
     stringNameAux = null,
     NameParameter(),
     DetailsParameter(),
+    AutoSwitchPlotParameter(),
     RepeatedMeasureParameter(),
     ResourceFileParameter()
 )

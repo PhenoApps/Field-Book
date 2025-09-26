@@ -76,4 +76,5 @@ object ObservationVariableAttributeDetailsView {
     const val MATH_SYMBOLS_ENABLED = "mathSymbolsEnabled"
     const val ALLOW_MULTICAT = "allowMulticat"
     const val REPEATED_MEASURES = "repeatedMeasure"
+    const val AUTO_SWITCH_PLOT = "autoSwitchPlot"
 }

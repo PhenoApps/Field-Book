@@ -7,7 +7,8 @@ enum class Parameters {
     DECIMAL_PLACES,
     MATHEMATICAL_SYMBOLS,
     MULTIPLE_CATEGORIES,
-    REPEATED_MEASURES;
+    REPEATED_MEASURES,
+    AUTO_SWITCH_PLOT;
 
     companion object {
 
