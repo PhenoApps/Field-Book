@@ -1,18 +1,13 @@
 package com.fieldbook.shared.screens.collect
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,13 +16,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.fieldbook.shared.screens.collect.traits.AngleTrait
+import com.fieldbook.shared.screens.collect.traits.BarcodeTrait
+import com.fieldbook.shared.screens.collect.traits.BooleanTrait
+import com.fieldbook.shared.screens.collect.traits.CategoricalTrait
+import com.fieldbook.shared.screens.collect.traits.CounterTrait
+import com.fieldbook.shared.screens.collect.traits.DateTrait
+import com.fieldbook.shared.screens.collect.traits.DiseaseRatingTrait
+import com.fieldbook.shared.screens.collect.traits.GnsSTrait
+import com.fieldbook.shared.screens.collect.traits.LabelPrintTrait
+import com.fieldbook.shared.screens.collect.traits.LocationTrait
+import com.fieldbook.shared.screens.collect.traits.MultiCatTrait
+import com.fieldbook.shared.screens.collect.traits.NumericTrait
+import com.fieldbook.shared.screens.collect.traits.PercentTrait
+import com.fieldbook.shared.screens.collect.traits.TextTrait
 import com.fieldbook.shared.theme.AppColors
-import com.fieldbook.shared.theme.numericButtonDefaults
-
+import com.fieldbook.shared.traits.Formats
 
 @Composable
 fun CollectInput(
@@ -53,7 +60,7 @@ fun CollectInput(
         Spacer(Modifier.height(16.dp))
         Text(
             text = "Value: $value",
-            style = MaterialTheme.typography.titleLarge.copy(
+            style = androidx.compose.material3.MaterialTheme.typography.titleLarge.copy(
                 fontWeight = fontWeight,
                 fontStyle = fontStyle,
                 color = fontColor,
@@ -64,58 +71,184 @@ fun CollectInput(
                 .fillMaxWidth()
                 .height(18.dp)
                 .padding(8.dp)
-                .background(MaterialTheme.colorScheme.primary)
+                .background(androidx.compose.material3.MaterialTheme.colorScheme.primary)
         )
-        NumericTrait(
+
+        // Host composable that renders different inputs depending on trait format.
+        TraitInputHost(
+            controller = controller,
+            trait = trait,
             value = value,
-            onValueChange = {
-                controller.updateCurrentTraitValue(it)
-                isEdited = true
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(250.dp)
-                .padding(8.dp)
+            onEdited = { isEdited = true }
         )
     }
 }
 
 @Composable
-fun NumericTrait(
+fun TraitInputHost(
+    controller: CollectScreenController,
+    trait: com.fieldbook.shared.database.models.TraitObject?,
     value: String,
-    onValueChange: (String) -> Unit,
+    onEdited: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val buttons = listOf(
-        listOf("1", "2", "3"),
-        listOf("4", "5", "6"),
-        listOf("7", "8", "9"),
-        listOf(".", "0", "⌫")
-    )
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
-    ) {
-        buttons.forEach { row ->
-            Row(
-                modifier = Modifier.fillMaxWidth().weight(1f),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                row.forEach { label ->
-                    Button(
-                        onClick = {
-                            when (label) {
-                                "⌫" -> onValueChange(value.dropLast(1))
-                                else -> onValueChange(value + label)
-                            }
-                        },
-                        modifier = Modifier.numericButtonDefaults().weight(1f),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD9D9D9)),
-                        shape = MaterialTheme.shapes.small // Use theme shape
-                    ) {
-                        Text(label, color = Color.Black)
-                    }
-                }
+    val formatEnum = trait?.format?.let { formatStr ->
+        Formats.entries.find { it.databaseName.equals(formatStr, ignoreCase = true) }
+    }
+
+    when (formatEnum) {
+        Formats.NUMERIC -> NumericTrait(
+            value = value,
+            onValueChange = {
+                controller.updateCurrentTraitValue(it)
+                onEdited()
+            },
+            modifier = modifier
+                .fillMaxWidth()
+                .height(250.dp)
+                .padding(8.dp)
+        )
+
+        Formats.TEXT -> TextTrait(
+            value = value,
+            onValueChange = {
+                controller.updateCurrentTraitValue(it)
+                onEdited()
+            },
+            modifier = modifier.fillMaxWidth().padding(8.dp)
+        )
+
+        Formats.ANGLE -> AngleTrait(
+            value = value,
+            onValueChange = {
+                controller.updateCurrentTraitValue(it)
+                onEdited()
+            },
+            modifier = modifier.fillMaxWidth().padding(8.dp)
+        )
+
+        Formats.CATEGORICAL -> CategoricalTrait(
+            trait = trait,
+            value = value,
+            onValueChange = {
+                controller.updateCurrentTraitValue(it)
+                onEdited()
+            },
+            modifier = modifier.fillMaxWidth().padding(8.dp)
+        )
+
+        Formats.BOOLEAN -> BooleanTrait(
+            value = value,
+            onValueChange = {
+                controller.updateCurrentTraitValue(it)
+                onEdited()
+            },
+            modifier = modifier.fillMaxWidth().padding(8.dp)
+        )
+
+        Formats.COUNTER -> CounterTrait(
+            value = value,
+            onValueChange = {
+                controller.updateCurrentTraitValue(it)
+                onEdited()
+            },
+            modifier = modifier.fillMaxWidth().padding(8.dp)
+        )
+
+        Formats.PERCENT -> PercentTrait(
+            value = value,
+            onValueChange = {
+                controller.updateCurrentTraitValue(it)
+                onEdited()
+            },
+            modifier = modifier.fillMaxWidth().padding(8.dp)
+        )
+
+        Formats.DATE -> DateTrait(
+            value = value,
+            onValueChange = {
+                controller.updateCurrentTraitValue(it)
+                onEdited()
+            },
+            modifier = modifier.fillMaxWidth().padding(8.dp)
+        )
+
+        Formats.MULTI_CATEGORICAL -> MultiCatTrait(
+            trait = trait,
+            value = value,
+            onValueChange = {
+                controller.updateCurrentTraitValue(it)
+                onEdited()
+            },
+            modifier = modifier.fillMaxWidth().padding(8.dp)
+        )
+
+        Formats.LOCATION -> LocationTrait(
+            value = value,
+            onValueChange = {
+                controller.updateCurrentTraitValue(it)
+                onEdited()
+            },
+            modifier = modifier.fillMaxWidth().padding(8.dp)
+        )
+        // Add more as needed, or use legacy string fallback for custom/unknown
+        else -> when (trait?.format) {
+            "barcode" -> BarcodeTrait(
+                value = value,
+                onValueChange = {
+                    controller.updateCurrentTraitValue(it)
+                    onEdited()
+                },
+                modifier = modifier.fillMaxWidth().padding(8.dp)
+            )
+
+            "disease", "disease_rating" -> DiseaseRatingTrait(
+                value = value,
+                onValueChange = {
+                    controller.updateCurrentTraitValue(it)
+                    onEdited()
+                },
+                modifier = modifier.fillMaxWidth().padding(8.dp)
+            )
+
+            "gnss", "gps" -> GnsSTrait(
+                value = value,
+                onValueChange = {
+                    controller.updateCurrentTraitValue(it)
+                    onEdited()
+                },
+                modifier = modifier.fillMaxWidth().padding(8.dp)
+            )
+
+            "labelprint", "label_print" -> LabelPrintTrait(
+                value = value,
+                onValueChange = {
+                    controller.updateCurrentTraitValue(it)
+                    onEdited()
+                },
+                modifier = modifier.fillMaxWidth().padding(8.dp)
+            )
+            // photo, audio, camera and other complex types are out-of-scope for now
+            "photo", "audio", "camera", "usb_camera", "gopro", "canon" -> {
+                TextTrait(
+                    value = value,
+                    onValueChange = {
+                        controller.updateCurrentTraitValue(it)
+                        onEdited()
+                    },
+                    modifier = modifier.fillMaxWidth().padding(8.dp)
+                )
+            }
+
+            else -> {
+                TextTrait(
+                    value = value,
+                    onValueChange = {
+                        controller.updateCurrentTraitValue(it)
+                        onEdited()
+                    },
+                    modifier = modifier.fillMaxWidth().padding(8.dp)
+                )
             }
         }
     }
