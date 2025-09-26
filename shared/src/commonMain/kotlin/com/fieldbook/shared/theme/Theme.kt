@@ -46,12 +46,6 @@ fun MainTheme(content: @Composable () -> Unit) {
     )
 }
 
-// TODO simplify?
-fun Color.toArgbInt(): Int {
-    fun ch(x: Float) = (x * 255f).roundToInt().coerceIn(0, 255)
-    return (ch(alpha) shl 24) or (ch(red) shl 16) or (ch(green) shl 8) or ch(blue)
-}
-
 fun argbIntToColor(argb: Int): Color = Color(argb.toLong())
 
 enum class AppColors(val argb: Int) {

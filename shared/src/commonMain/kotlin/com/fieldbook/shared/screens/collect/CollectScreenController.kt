@@ -123,14 +123,17 @@ class CollectScreenController(driverFactory: DriverFactory) {
         }
     }
 
-    // TODO simplify?
     fun getDisplayColor(): Color {
         val defaultArgb = AppColors.fb_value_saved_color.argb
-        val stored = settings.getInt(GeneralKeys.SAVED_DATA_COLOR, defaultArgb)
+        var storedArgb = settings.getInt(GeneralKeys.SAVED_DATA_COLOR, defaultArgb)
 
-        val rgb = stored and 0xFFFFFF
-        val argb = rgb or 0xFF000000.toInt()
+        // Check if the alpha channel is 0 (fully transparent).
+        // The 'ushr 24' operation isolates the alpha byte.
+        if ((storedArgb ushr 24) == 0) {
+            // If alpha is 0, assume it's an RGB value and make it fully opaque.
+            storedArgb = storedArgb or 0xFF000000.toInt()
+        }
 
-        return Color(argb.toLong())
+        return Color(storedArgb)
     }
 }
