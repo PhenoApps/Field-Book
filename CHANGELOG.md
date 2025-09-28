@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fields can now be grouped and archived
 
 ### Changed
+- Field Creator updated with new workflow and UI
 - Trait arrows are now hidden if only one trait is active
 - Boolean traits now have a visual unset state
 
