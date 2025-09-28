@@ -135,6 +135,8 @@
     <string name="act_field_editor_load_file_failed">Si è verificato un errore durante il caricamento del file.</string>
     <string name="act_field_editor_file_open_failed">Impossibile aprire il file.</string>
     <!-- Field Creator  -->
+    <string name="field_creator_size_rows_hint">File</string>
+    <string name="field_creator_size_columns_hint">Colonne</string>
     <string name="dialog_field_creator_ask_name_hint">Nome</string>
     <string name="dialog_field_creator_ask_row_hint">File</string>
     <string name="dialog_field_creator_ask_columns_hint">Colonne</string>
