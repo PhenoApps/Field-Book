@@ -1,0 +1,41 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="16dp"
+    android:layout_marginEnd="16dp"
+    android:background="@drawable/cell"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/list_item_trait_parameter_title"
+        style="@style/TextViewStyle.Bold.Title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|center_vertical"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="@string/trait_parameter_resource_file" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/list_item_trait_parameter_til"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:endIconMode="custom"
+        app:endIconDrawable="@drawable/ic_tb_folder"
+        app:errorEnabled="false">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/list_item_trait_parameter_resource_file_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/list_item_trait_parameter_resource_file_hint"
+            android:imeOptions="actionNext"
+            android:inputType="text"
+            android:focusable="false"
+            android:clickable="true" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+</LinearLayout>

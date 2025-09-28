@@ -4,7 +4,8 @@ import android.database.Cursor
 import com.fieldbook.tracker.database.Migrator.ObservationVariable
 import com.fieldbook.tracker.database.dao.TraitAttributeValuesHelper
 import com.fieldbook.tracker.database.models.TraitAttributes
-import com.fieldbook.tracker.utilities.CategoryJsonUtil
+import com.fieldbook.tracker.utilities.SynonymsUtil.deserializeSynonyms
+import com.fieldbook.tracker.utilities.SynonymsUtil.serializeSynonyms
 import java.util.*
 
 /**
@@ -12,6 +13,7 @@ import java.util.*
  */
 class TraitObject {
     var name: String = ""
+    var alias: String = ""
     var format: String = ""
     var defaultValue: String = ""
     var details: String = ""
@@ -54,6 +56,46 @@ class TraitObject {
         get() = attributeValues.getBoolean(TraitAttributes.SAVE_IMAGE)
         set(value) = attributeValues.setValue(TraitAttributes.SAVE_IMAGE, value.toString())
 
+    var useDayOfYear: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.USE_DAY_OF_YEAR)
+        set(value) = attributeValues.setValue(TraitAttributes.USE_DAY_OF_YEAR, value.toString())
+
+    var categoryDisplayValue: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.CATEGORY_DISPLAY_VALUE)
+        set(value) = attributeValues.setValue(TraitAttributes.CATEGORY_DISPLAY_VALUE, value.toString())
+
+    var resourceFile: String
+        get() = attributeValues.getString(TraitAttributes.RESOURCE_FILE)
+        set(value) = attributeValues.setValue(TraitAttributes.RESOURCE_FILE, value)
+
+    var synonyms: List<String>
+        get() = deserializeSynonyms(attributeValues.getString(TraitAttributes.VARIABLE_SYNONYMS))
+        set(value) = attributeValues.setValue(TraitAttributes.VARIABLE_SYNONYMS, serializeSynonyms(value))
+
+    var maxDecimalPlaces: String
+        get() = attributeValues.getString(TraitAttributes.DECIMAL_PLACES_REQUIRED)
+        set(value) = attributeValues.setValue(TraitAttributes.DECIMAL_PLACES_REQUIRED, value)
+
+    var mathSymbolsEnabled: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.MATH_SYMBOLS_ENABLED)
+        set(value) = attributeValues.setValue(TraitAttributes.MATH_SYMBOLS_ENABLED, value.toString())
+
+    var allowMulticat: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.ALLOW_MULTICAT)
+        set(value) = attributeValues.setValue(TraitAttributes.ALLOW_MULTICAT, value.toString())
+
+    var repeatedMeasures: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.REPEATED_MEASURES)
+        set(value) = attributeValues.setValue(TraitAttributes.REPEATED_MEASURES, value.toString())
+
+    var autoSwitchPlot: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.AUTO_SWITCH_PLOT)
+        set(value) = attributeValues.setValue(TraitAttributes.AUTO_SWITCH_PLOT, value.toString())
+
+    var unit: String
+        get() = attributeValues.getString(TraitAttributes.UNIT)
+        set(value) = attributeValues.setValue(TraitAttributes.UNIT, value)
+
     fun loadAttributeAndValues() {
         attributeValues.traitId = id
         attributeValues.load()
@@ -72,6 +114,7 @@ class TraitObject {
 
         return realPosition == that.realPosition &&
                 name == that.name &&
+                alias == that.alias &&
                 format == that.format &&
                 defaultValue == that.defaultValue &&
                 minimum == that.minimum &&
@@ -85,20 +128,35 @@ class TraitObject {
                 additionalInfo == that.additionalInfo &&
                 observationLevelNames == that.observationLevelNames &&
                 closeKeyboardOnOpen == that.closeKeyboardOnOpen &&
-                cropImage == that.cropImage
+                cropImage == that.cropImage &&
+                saveImage == that.saveImage &&
+                useDayOfYear == that.useDayOfYear &&
+                categoryDisplayValue == that.categoryDisplayValue &&
+                resourceFile == that.resourceFile &&
+                synonyms == that.synonyms &&
+                maxDecimalPlaces == that.maxDecimalPlaces &&
+                mathSymbolsEnabled == that.mathSymbolsEnabled &&
+                allowMulticat == that.allowMulticat &&
+                repeatedMeasures == that.repeatedMeasures &&
+                autoSwitchPlot == that.autoSwitchPlot &&
+                unit == that.unit
     }
 
     override fun hashCode(): Int {
         return Objects.hash(
-            name, format, defaultValue, minimum, maximum, details, categories,
+            name, alias, format, defaultValue, minimum, maximum, details, categories,
             realPosition, id, visible, externalDbId, traitDataSource,
-            additionalInfo, observationLevelNames, closeKeyboardOnOpen, cropImage
+            additionalInfo, observationLevelNames, closeKeyboardOnOpen, cropImage,
+            saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms,
+            maxDecimalPlaces, mathSymbolsEnabled, allowMulticat, repeatedMeasures,
+            autoSwitchPlot, unit
         )
     }
 
     fun clone(): TraitObject {
         val t = TraitObject()
         t.name = this.name
+        t.alias = this.alias
         t.format = this.format
         t.defaultValue = this.defaultValue
         t.minimum = this.minimum
@@ -114,6 +172,17 @@ class TraitObject {
         t.observationLevelNames = this.observationLevelNames
         t.closeKeyboardOnOpen = this.closeKeyboardOnOpen
         t.cropImage = this.cropImage
+        t.saveImage = this.saveImage
+        t.useDayOfYear = this.useDayOfYear
+        t.categoryDisplayValue = this.categoryDisplayValue
+        t.resourceFile = this.resourceFile
+        t.synonyms = this.synonyms
+        t.maxDecimalPlaces = this.maxDecimalPlaces
+        t.mathSymbolsEnabled = this.mathSymbolsEnabled
+        t.allowMulticat = this.allowMulticat
+        t.repeatedMeasures = this.repeatedMeasures
+        t.autoSwitchPlot = this.autoSwitchPlot
+        t.unit = this.unit
 
         return t
     }
@@ -121,6 +190,7 @@ class TraitObject {
     fun loadFromCursor(cursor: Cursor) {
 
         val nameIndex = cursor.getColumnIndex("observation_variable_name")
+        val aliasIndex = cursor.getColumnIndex("observation_variable_alias")
         val formatIndex = cursor.getColumnIndex("observation_variable_field_book_format")
         val defaultValueIndex = cursor.getColumnIndex("default_value")
         val detailsIndex = cursor.getColumnIndex("observation_variable_details")
@@ -131,7 +201,7 @@ class TraitObject {
         val additionalInfoIndex = cursor.getColumnIndex("additional_info")
         val traitDataSourceIndex = cursor.getColumnIndex("trait_data_source")
 
-        if (nameIndex == -1 || formatIndex == -1 || defaultValueIndex == -1 ||
+        if (nameIndex == -1 || aliasIndex == -1 || formatIndex == -1 || defaultValueIndex == -1 ||
             detailsIndex == -1 || idIndex == -1 || externalDbIdIndex == -1 ||
             realPositionIndex == -1 || visibleIndex == -1 || additionalInfoIndex == -1 ||
             traitDataSourceIndex == -1) {
@@ -139,6 +209,7 @@ class TraitObject {
         }
 
         name = cursor.getString(nameIndex) ?: ""
+        alias = cursor.getString(aliasIndex) ?: ""
         format = cursor.getString(formatIndex) ?: ""
         defaultValue = cursor.getString(defaultValueIndex) ?: ""
         details = cursor.getString(detailsIndex) ?: ""

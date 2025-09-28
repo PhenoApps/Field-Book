@@ -5,7 +5,6 @@ import static com.fieldbook.tracker.traits.NumericTraitLayout.isUnder;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
 import android.util.AttributeSet;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -17,9 +16,6 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.objects.TraitObject;
-import com.fieldbook.tracker.traits.formats.Formats;
-import com.fieldbook.tracker.traits.formats.Scannable;
-import com.fieldbook.tracker.traits.formats.TraitFormat;
 
 public class PercentTraitLayout extends BaseTraitLayout {
     private SeekBar seekBar;
