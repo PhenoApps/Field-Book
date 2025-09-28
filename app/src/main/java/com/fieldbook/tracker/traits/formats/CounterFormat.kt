@@ -6,6 +6,7 @@ import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
 import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
+import com.fieldbook.tracker.traits.formats.parameters.UnitParameter
 
 class CounterFormat : TraitFormat(
     format = Formats.COUNTER,
@@ -17,6 +18,7 @@ class CounterFormat : TraitFormat(
     stringNameAux = null,
     NameParameter(),
     DetailsParameter(),
+    UnitParameter(),
     AutoSwitchPlotParameter(),
     RepeatedMeasureParameter(),
     ResourceFileParameter()

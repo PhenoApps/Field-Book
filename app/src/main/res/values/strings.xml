@@ -330,6 +330,7 @@
     <string name="traits_create_value_minimum">Minimum</string>
     <string name="traits_create_value_maximum">Maximum</string>
     <string name="traits_create_details">Details</string>
+    <string name="traits_create_unit">Unit</string>
     <string name="traits_create_optional">Optional</string>
     <string name="traits_create_categories_title">Categories</string>
     <string name="traits_create_photo_maximum">Maximum number of photos</string>

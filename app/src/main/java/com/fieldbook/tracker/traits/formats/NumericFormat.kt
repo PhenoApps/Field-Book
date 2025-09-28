@@ -13,6 +13,7 @@ import com.fieldbook.tracker.traits.formats.parameters.MinimumParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
 import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
+import com.fieldbook.tracker.traits.formats.parameters.UnitParameter
 import com.fieldbook.tracker.utilities.SnackbarUtils
 
 open class NumericFormat(
@@ -32,6 +33,7 @@ open class NumericFormat(
             DecimalPlacesParameter(),
             MathSymbolsParameter(),
             DetailsParameter(),
+            UnitParameter(),
             RepeatedMeasureParameter(),
             ResourceFileParameter()
         )

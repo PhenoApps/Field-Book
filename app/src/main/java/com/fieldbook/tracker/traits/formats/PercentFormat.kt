@@ -11,6 +11,7 @@ import com.fieldbook.tracker.traits.formats.parameters.MinimumParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
 import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
+import com.fieldbook.tracker.traits.formats.parameters.UnitParameter
 import com.fieldbook.tracker.utilities.SnackbarUtils
 
 /**
@@ -35,6 +36,7 @@ class PercentFormat : NumericFormat(
     ),
     DetailsParameter(),
     AutoSwitchPlotParameter(),
+    UnitParameter(),
     RepeatedMeasureParameter(),
     ResourceFileParameter()
 ), Scannable by PercentageScannable() {

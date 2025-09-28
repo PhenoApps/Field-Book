@@ -92,6 +92,10 @@ class TraitObject {
         get() = attributeValues.getBoolean(TraitAttributes.AUTO_SWITCH_PLOT)
         set(value) = attributeValues.setValue(TraitAttributes.AUTO_SWITCH_PLOT, value.toString())
 
+    var unit: String
+        get() = attributeValues.getString(TraitAttributes.UNIT)
+        set(value) = attributeValues.setValue(TraitAttributes.UNIT, value)
+
     fun loadAttributeAndValues() {
         attributeValues.traitId = id
         attributeValues.load()
@@ -134,7 +138,8 @@ class TraitObject {
                 mathSymbolsEnabled == that.mathSymbolsEnabled &&
                 allowMulticat == that.allowMulticat &&
                 repeatedMeasures == that.repeatedMeasures &&
-                autoSwitchPlot == that.autoSwitchPlot
+                autoSwitchPlot == that.autoSwitchPlot &&
+                unit == that.unit
     }
 
     override fun hashCode(): Int {
@@ -144,7 +149,7 @@ class TraitObject {
             additionalInfo, observationLevelNames, closeKeyboardOnOpen, cropImage,
             saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms,
             maxDecimalPlaces, mathSymbolsEnabled, allowMulticat, repeatedMeasures,
-            autoSwitchPlot
+            autoSwitchPlot, unit
         )
     }
 
@@ -177,6 +182,7 @@ class TraitObject {
         t.allowMulticat = this.allowMulticat
         t.repeatedMeasures = this.repeatedMeasures
         t.autoSwitchPlot = this.autoSwitchPlot
+        t.unit = this.unit
 
         return t
     }

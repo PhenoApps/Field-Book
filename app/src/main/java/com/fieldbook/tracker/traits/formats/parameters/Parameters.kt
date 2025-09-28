@@ -8,7 +8,8 @@ enum class Parameters {
     MATHEMATICAL_SYMBOLS,
     MULTIPLE_CATEGORIES,
     REPEATED_MEASURES,
-    AUTO_SWITCH_PLOT;
+    AUTO_SWITCH_PLOT,
+    UNIT;
 
     companion object {
 
