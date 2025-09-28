@@ -138,11 +138,19 @@
         <item name="activeCellColor">@color/main_primary_dark</item>
         <item name="activeCellTextColor">@color/WHITE</item>
         <item name="cellTextColor">@color/main_color_text_dark</item>
+        <item name="tableBorderColor">@color/BLACK</item>
 
         <item name="fb_graph_item_selected_color">?attr/fb_color_primary</item>
         <item name="fb_graph_item_unselected_color">?attr/fb_color_background</item>
         <item name="fb_graph_item_text_color">?attr/fb_button_text_color</item>
 
+        <!-- Stepper UI -->
+        <item name="stepper_icon_color">@color/main_primary</item>
+        <item name="stepper_icon_bg_color">@color/light_gray</item>
+        <item name="stepper_icon_on_done_color">@color/WHITE</item>
+        <item name="stepper_icon_on_done_bg_color">@color/main_primary</item>
+        <item name="stepper_line_color">@color/GRAY</item>
+        <item name="stepper_line_on_done_color">@color/main_primary</item>
     </style>
 
     <!-- Blue Theme -->
@@ -194,6 +202,14 @@
         <!-- DataGrid -->
         <item name="dataFilledColor">@color/blue_primary_transparent</item>
         <item name="activeCellColor">@color/blue_primary_dark</item>
+
+        <!-- Stepper UI -->
+        <item name="stepper_icon_color">@color/blue_primary</item>
+        <item name="stepper_icon_bg_color">@color/light_gray</item>
+        <item name="stepper_icon_on_done_color">@color/WHITE</item>
+        <item name="stepper_icon_on_done_bg_color">@color/blue_primary</item>
+        <item name="stepper_line_color">@color/GRAY</item>
+        <item name="stepper_line_on_done_color">@color/blue_primary</item>
     </style>
 
     <!-- High Contrast Theme -->
@@ -333,6 +349,14 @@
         <item name="dataFilledColor">@color/high_contrast_data_filled_color</item>
         <item name="emptyCellColor">@color/high_contrast_empty_cell_color</item>
         <item name="activeCellColor">@color/high_contrast_active_cell_color</item>
+
+        <!-- Stepper UI -->
+        <item name="stepper_icon_color">@color/BLACK</item>
+        <item name="stepper_icon_bg_color">@color/WHITE</item>
+        <item name="stepper_icon_on_done_color">@color/WHITE</item>
+        <item name="stepper_icon_on_done_bg_color">@color/BLACK</item>
+        <item name="stepper_line_color">@color/BLACK</item>
+        <item name="stepper_line_on_done_color">@color/BLACK</item>
     </style>
 
     <!-- need to define a theme for each type of material component until we can use the new themes -->
