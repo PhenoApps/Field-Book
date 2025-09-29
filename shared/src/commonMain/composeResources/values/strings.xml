@@ -1,0 +1,1485 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- GENERAL -->
+    <!-- App -->
+    <string name="field_book">Field Book</string>
+
+    <!-- Dialog -->
+    <string name="dialog_cancel">Cancel</string>
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_yes">Yes</string>
+    <string name="dialog_no">No</string>
+    <string name="dialog_clear">Clear</string>
+    <string name="dialog_close">Close</string>
+    <string name="dialog_confirm">Are you sure?</string>
+    <string name="dialog_import">Import</string>
+    <string name="dialog_warning">Warning</string>
+    <string name="dialog_save">Save</string>
+    <string name="dialog_go">Go</string>
+    <string name="dialog_save_error_title">Save Error</string>
+    <string name="dialog_back">Back</string>
+    <string name="dialog_scan">Scan</string>
+    <string name="dialog_sort_by">Sort By</string>
+    <string name="dialog_enable">Enable</string>
+    <string name="dialog_delete">Delete</string>
+    <string name="dialog_accept">Accept</string>
+
+    <string name="barcode_scanner_text">Scan a barcode</string>
+
+    <!-- Startup  -->
+    <string name="startup_sample_data_title">Sample data</string>
+    <string name="startup_sample_data_message">Load sample data?</string>
+
+    <!-- App Intro -->
+    <string name="app_intro_intro_title_slide1">Welcome to Field Book!</string>
+    <string name="app_intro_intro_summary_slide1">Collecting data in the field has traditionally required writing and transcribing from paper notebooks. Field Book was created as a digital solution for data capture that enables increased collection speed with greater data integrity.</string>
+    <string name="app_intro_intro_title_slide2">Features and Customization</string>
+    <string name="app_intro_intro_summary_slide2">Data is entered into Field Book with custom trait layouts that are designed to simplify data input and minimize mistakes.\n\n By default, collected data is stored locally, but Field Book supports the Breeding API which allows it to send data to BrAPI-compatible systems.</string>
+    <string name="app_intro_required_setup_title">Required Setup</string>
+    <string name="app_intro_required_setup_summary">To get started using Field Book, grant the necessary permissions for the app and then define a folder where your data will be stored.</string>
+    <string name="app_intro_permissions_title">Permissions</string>
+    <string name="app_intro_permissions_warning">Please grant the necessary permissions</string>
+    <string name="app_intro_storage_title">Define Storage</string>
+    <string name="app_intro_storage_summary">Define a folder where your data will be stored.</string>
+    <string name="app_intro_storage_warning">Please set the storage location</string>
+    <string name="app_intro_required_optional_title">Optional Setup</string>
+    <string name="app_intro_required_optional_summary">These optional settings customize Field Book and can be adjusted in the Field Book Settings.</string>
+    <string name="app_intro_load_sample_data_title">Load Sample Data</string>
+    <string name="app_intro_load_sample_data_summary">Import a sample database that includes example fields and traits.</string>
+    <string name="app_intro_tutorial_title">Tutorial</string>
+    <string name="app_intro_tutorial_summary">Add a help icon to the top toolbar that describes features throughout the app.</string>
+    <string name="app_intro_high_contrast_title">High Contrast Theme</string>
+    <string name="app_intro_high_contrast_summary">Enable a high contrast theme for better visibility on eInk devices.</string>
+
+    <!-- Storage Definer -->
+    <string name="storage_definer_title">Storage Location</string>
+    <string name="storage_definer_summary">Please select or create a folder that Field Book can use to store app data.</string>
+    <string name="define_button_text">Choose Folder</string>
+
+    <!-- Permissions  -->
+    <string name="permission_rationale_storage_import">Importing files requires access to the device\'s files.</string>
+    <string name="permission_rationale_storage_export">Exporting data requires access to the device\'s files.</string>
+    <string name="permission_rationale_trait_features">Collecting data requires access to the device\'s files, microphone, and camera.</string>
+    <string name="permission_ask_bluetooth">Please accept bluetooth permissions.</string>
+
+    <!-- Config Activity  -->
+    <string name="settings_fields">Fields</string>
+    <string name="settings_traits">Traits</string>
+    <string name="settings_collect">Collect</string>
+    <string name="settings_export">Export</string>
+    <string name="settings_advanced">Settings</string>
+    <string name="settings_profile">Profile</string>
+    <string name="settings_statistics">Statistics</string>
+    <string name="settings_kmp">Open KMP</string>
+
+    <!-- Config Activity Fuzzy Search  -->
+    <string name="act_config_fuzzy_search_failed">Database could not retrieve a field or plot with code: %s</string>
+    <string name="act_config_fuzzy_search_error">Something went wrong when searching for %s</string>
+    <string name="act_config_search_fab_content_description">Search all plots and fields to load/navigate to the barcoded item.</string>
+
+    <!-- File manager  -->
+    <string name="import_source_local">Local storage</string>
+    <string name="import_source_cloud">Cloud storage</string>
+    <string name="import_source_brapi" translatable="false">BrAPI</string>
+    <string name="import_source_ask">Always ask</string>
+    <string name="import_dialog_importing">Please wait…</string>
+    <string name="import_error_general">Error importing</string>
+    <string name="act_file_explorer_no_file_error">No field book directories could be found.</string>
+
+    <!-- Warnings/Catches -->
+    <string name="warning_field_missing">No field is currently loaded. Please load a field before collecting data.</string>
+    <string name="warning_traits_missing">No traits exist. Please create traits before collecting data.</string>
+
+    <!-- Changelog -->
+    <string name="changelog_title">Changelog</string>
+
+
+
+
+
+    <!-- FIELDS -->
+    <!-- General -->
+    <string name="menu_fields_sort_list">Sort Fields List</string>
+    <string name="fields_sort_reset">Reset</string>
+    <string name="fields_sort_by_name">Name</string>
+    <string name="fields_sort_by_import_format">Import Format</string>
+    <string name="fields_sort_by_import_date">Import Date</string>
+    <string name="fields_sort_by_edit_date">Edit Date</string>
+    <string name="fields_sort_by_sync_date">Sync Date</string>
+    <string name="fields_sort_by_export_date">Export Date</string>
+    <string name="list_item_field_popup_menu_content_description">Opens a menu for the selected field.</string>
+    <string name="selected_count">%1$d selected</string>
+    <string name="fields_select_all">Select All</string>
+    <string name="field_generic_observation_level">entries</string>
+    <string name="field_observation_count_format">%1$s %2$s</string>
+
+    <!-- Sort -->
+    <string name="field_sort_entries">Sort</string>
+    <string name="sort_dialog_saved">Sorting updated</string>
+    <string name="sort_dialog_error_saving">Error updating sorting</string>
+    <string name="list_item_field_sort_delete_content_description">Delete the sort attribute.</string>
+    <string name="dialog_field_sort_title">Sort Entries</string>
+    <string name="list_item_field_sort_drag_content_description">Drag to move item.</string>
+    <string name="dialog_field_sort_no_attributes_found">No attributes found.</string>
+    <string name="dialog_field_sort_no_more_attributes_found">All attributes have been used.</string>
+    <string name="dialog_field_sort_delete_all_content_description">Deletes all sort entries.</string>
+    <string name="dialog_field_sort_toggle_order_content_description">Reverses sort order.</string>
+    <string name="dialog_field_sort_add_content_description">Opens a dialog to add a new attribute to sort by.</string>
+
+    <!-- Modify -->
+    <string name="fields_rename_study">Rename</string>
+    <string name="fields_export">Export</string>
+    <string name="fields_archive">Archive</string>
+
+    <!-- Delete -->
+    <string name="fields_delete">Delete</string>
+    <string name="fields_delete_study">Delete field</string>
+    <string name="fields_delete_study_confirmation">Are you sure you want to delete this field? This will delete all data from this field.</string>
+
+    <plurals name="fields_delete_confirmation">
+        <item quantity="one">Are you sure you want to delete the field "%s"?</item>
+        <item quantity="other">Are you sure you want to delete these fields: %s?</item>
+    </plurals>
+
+    <!-- Import -->
+    <string name="fields_new_button_content_description">Add a new field.</string>
+    <string name="fields_new_dialog_title">New field</string>
+    <string name="fields_new_create_field">Create new</string>
+    <string name="import_dialog_unique">Unique identifier</string>
+    <string name="import_dialog_primary">Primary identifier</string>
+    <string name="import_dialog_secondary">Secondary identifier</string>
+    <string name="import_dialog_sort">Sort Order</string>
+    <string name="import_error_unsupported">This file type is not currently supported</string>
+    <string name="import_error_columns_replaced">Column names contain illegal characters that will be replaced during import.</string>
+    <string name="import_error_column_name">Column name in imported file cannot be: </string>
+    <string name="import_error_unique_characters_illegal">Selected column contains characters which cannot be used in the unique identifier</string>
+    <string name="import_error_column_choice">Columns cannot be used for the same assignment</string>
+    <string name="import_error_unique">Unique identifier column contains duplicates or has already been used in a different file</string>
+    <string name="import_error_format_field">Only CSV and XLS files can be imported as a field</string>
+    <string name="act_field_editor_no_suitable_columns_error">Import file has no suitable columns to choose from.</string>
+    <string name="import_runnable_db_failed_to_switch">Database failed to switch fields.</string>
+    <string name="import_runnable_create_field_data_failed">Failed to create field data for line %d in file.</string>
+    <string name="import_runnable_duplicates_skipped">Duplicate columns found, only first instance will be used.</string>
+    <string name="fields_study_exists_message">This field already exists.</string>
+    <string name="fields_study_and_obs_exists_message">This field is already imported at this observation level.</string>
+    <string name="act_field_editor_failed_to_read_columns">Field Book could not load the file.</string>
+    <string name="act_field_editor_load_file_failed">An error occurred during file load.</string>
+    <string name="act_field_editor_file_open_failed">File failed to open.</string>
+
+    <!-- Field Creator  -->
+    <string name="dialog_field_creator_ask_size">Please choose a field name and size.</string>
+    <string name="dialog_field_creator_ask_start_point">Please choose a field starting point.</string>
+    <string name="dialog_field_creator_ask_pattern">Please choose a field pattern.</string>
+    <string name="dialog_field_creator_ask_name_hint">Name</string>
+    <string name="dialog_field_creator_ask_row_hint">Rows</string>
+    <string name="dialog_field_creator_ask_columns_hint">Columns</string>
+    <string name="dialog_field_creator_top_left">Top Left</string>
+    <string name="dialog_field_creator_bottom_left">Bottom Left</string>
+    <string name="dialog_field_creator_top_right">Top Right</string>
+    <string name="dialog_field_creator_bottom_right">Bottom Right</string>
+    <string name="dialog_field_creator_insert_field">Creating field rows: %1$s by cols: %2$s</string>
+    <string name="dialog_field_creator_insert_field_complete">Creating field rows: %1$s by cols: %2$s …complete.</string>
+    <string name="dialog_field_creator_insert_plot">Inserting plot %1$s at row %2$s column %3$s</string>
+    <string name="dialog_field_creator_review_title">Review</string>
+    <string name="dialog_field_creator_size_group_error">Please enter a valid name and format.</string>
+    <string name="dialog_field_creator_field_name_not_unique">Field name already in use.</string>
+    <string name="dialog_field_creator_large_field">Large Field Detected, transaction might take a long time.</string>
+    <string name="dialog_field_creator_linear_button_content_desc">Button to choose linear plot pattern.</string>
+    <string name="dialog_field_creator_zig_button_content_desc">Button to choose zig zag plot pattern.</string>
+    <string name="dialog_field_creator_review_image_content_desc">Image showing orientation and plot pattern.</string>
+
+    <!-- Geo-Navigate to Field -->
+    <string name="menu_fields_plot_by_distance_title">Select nearest field</string>
+    <string name="activity_field_editor_no_field_found">No coordinates could be found.</string>
+    <string name="activity_field_editor_switch_field">"Switch to field %s"</string>
+    <string name="activity_field_editor_switch_field_action">Switch</string>
+    <string name="activity_field_editor_no_location_yet">No location found yet.</string>
+    <string name="activity_field_editor_switch_field_same">Closest field already selected.</string>
+
+    <!-- Field Details -->
+    <string name="field_detail_title">Field Detail</string>
+    <string name="field_edit_display_name">Edit Field Display Name</string>
+    <string name="name_cannot_be_empty">Name cannot be empty.</string>
+    <string name="illegal_characters_message">Illegal characters found: %1$s</string>
+    <string name="name_conflict_message">"%1$s" is already used as a %2$s for another field.</string>
+    <string name="name_conflict_import_name">import name</string>
+    <string name="name_conflict_display_name">display name</string>
+
+    <string name="dialog_att_chooser_title_default">Choose an attribute</string>
+    <string name="search_attribute_dialog_title">Set Search ID</string>
+    <string name="dialog_att_chooser_unique_attributes">Unique Attributes</string>
+    <string name="search_attribute_apply_to_all">Apply choice to all eligible fields</string>
+    <string name="search_attribute_updated">Search attribute updated</string>
+    <string name="search_attribute_updated_all">Search attribute updated for %1$d field(s)</string>
+    <string name="search_multiple_matches_found">Found %1$d matching plots. Showing the first one.</string>
+
+<!--    <string name="field_default_sort_order">import order</string>-->
+
+    <string name="field_data_title">Data</string>
+    <string name="field_trait_observation_total">"%d" observations</string>
+
+    <!-- Field Detail Charts -->
+    <string name="field_trait_chart_no_data">No data to chart</string>
+    <string name="field_trait_chart_incompatible_format">This trait format cannot be charted</string>
+    <string name="field_trait_chart_excess_data">Too many distinct values to chart</string>
+
+    <!-- Semantic dates -->
+    <string name="today">Today</string>
+    <string name="yesterday">Yesterday</string>
+    <plurals name="years_ago">
+        <item quantity="one">%d year ago</item>
+        <item quantity="other">%d years ago</item>
+    </plurals>
+    <string name="no_activity">No activity</string>
+    <string name="invalid_date">Invalid date</string>
+
+
+    <!-- TRAITS -->
+    <!-- Sort -->
+    <string name="traits_toolbar_sort">Sort Traits</string>
+    <string name="traits_sort_name">Name</string>
+    <string name="traits_sort_import_order">Import Order</string>
+    <string name="traits_sort_visibility">Visibility</string>
+    <string name="traits_sort_format">Format</string>
+    <string name="warning_traits_missing_modify">Create traits before modifying them.</string>
+
+    <!-- Trait import/export -->
+    <string name="traits_new_dialog_title">New Trait(s)</string>
+    <string name="traits_dialog_create">Create new trait</string>
+    <string name="traits_dialog_import_from_file">Import from file</string>
+    <string name="traits_dialog_import">Import</string>
+    <string name="import_error_format_trait">Only TRT files can be imported as a trait list</string>
+
+    <string name="traits_export_check">Export current trait list?</string>
+    <string name="traits_dialog_export">Export</string>
+    <string name="dialog_delete_traits_message">Would you like to delete all current traits?</string>
+
+    <string name="traits_toolbar_delete_all">Delete all traits</string>
+    <string name="act_trait_editor_no_traits_exist">No traits exist.</string>
+
+    <!-- Trait item menu -->
+    <string name="list_item_trait_popup_content_description">Open a menu specific to this trait.</string>
+    <string name="traits_options_copy">Copy</string>
+    <string name="traits_options_edit">Edit</string>
+    <string name="traits_options_delete">Delete</string>
+    <string name="traits_options_delete_title">Delete trait</string>
+    <string name="traits_warning_delete">Deleting a trait also deletes data that has been collected for that trait. Are you sure you want to delete this trait?</string>
+
+    <!-- Trait formats -->
+    <string name="traits_format_numeric">Numeric</string>
+    <string name="traits_format_categorical">Categorical</string>
+    <string name="traits_format_date">Date</string>
+    <string name="traits_format_percent">Percent</string>
+    <string name="traits_format_counter">Counter</string>
+    <string name="traits_format_disease_rating">Disease Rating</string>
+    <string name="traits_format_boolean">Boolean</string>
+    <string name="traits_format_text">Text</string>
+    <string name="traits_format_photo">Photo</string>
+    <string name="traits_format_audio">Audio</string>
+    <string name="traits_format_multicategorical">Multicat</string>
+    <string name="traits_format_location">Location</string>
+    <string name="traits_format_gnss">GNSS</string>
+    <string name="traits_format_barcode">Barcode</string>
+    <string name="traits_format_labelprint">Zebra Label Print</string>
+    <string name="traits_format_usb_camera">Usb Camera</string>
+    <string name="traits_format_go_pro_camera">GoPro</string>
+    <string name="traits_format_angle">Angle</string>
+
+    <!-- Trait Creation Dialog -->
+    <string name="traits_toolbar_add_trait">Trait Format</string>
+    <string name="trait_creator_title_layout">Trait Layout</string>
+    <string name="trait_creator_parameters_title">%s Parameters</string>
+
+    <string name="activity_traits_new_button_content_description">Add a new trait.</string>
+
+    <string name="traits_create_name">Name</string>
+    <string name="traits_create_format">Format</string>
+    <string name="traits_create_value_default">Default</string>
+    <string name="traits_create_value_minimum">Minimum</string>
+    <string name="traits_create_value_maximum">Maximum</string>
+    <string name="traits_create_details">Details</string>
+    <string name="traits_create_optional">Optional</string>
+    <string name="traits_create_categories_title">Categories</string>
+    <string name="traits_create_photo_maximum">Maximum number of photos</string>
+    <string name="traits_create_true">True</string>
+    <string name="traits_create_false">False</string>
+    <string name="traits_create_categories_text">Use / to separate categories</string>
+    <string name="traits_create_camera">Camera</string>
+    <string name="traits_create_close_keyboard">Close Keyboard</string>
+
+    <string name="traits_create_warning_name_blank">Trait name cannot be blank</string>
+    <string name="traits_create_warning_duplicate">Trait already exists</string>
+    <string name="traits_create_warning_numeric_required">Default, minimum, and maximum are required and must be numeric</string>
+
+    <string name="dialog_new_trait_add_cat_button_text">Add</string>
+    <string name="traits_create_categories_value_text">Enter category value here</string>
+    <string name="list_item_category_delete_content_description">Delete the category.</string>
+    <string name="dialog_new_trait_add_category_content_description">Add new category.</string>
+
+    <string name="list_item_traits_grid_content_description">Toggle selection</string>
+    <string name="dialog_trait_parameters_title">Trait Parameters</string>
+    <string name="traits_create_warning_percent_magnitude_relation">Magnitude relation error</string>
+    <string name="trait_parameter_default_value_number_format_error">Must be a number</string>
+    <string name="traits_create_unknown_error">Unknown error occurred: %s</string>
+    <string name="trait_creator_parameter_warning_infinite">Number cannot be infinite</string>
+    <string name="trait_creator_parameter_warning_nan">Number cannot be NaN</string>
+    <string name="trait_creator_parameter_warning_negative">Number must not be negative</string>
+    <string name="trait_creator_parameter_warning_too_big">Number is too big</string>
+    <string name="trait_creator_parameter_warning_too_small">Number is too small</string>
+    <string name="list_item_trait_parameter_categories_value_hint">Type a category name to add</string>
+    <string name="list_item_trait_parameter_name_hint">Enter trait name</string>
+    <string name="dialog_new_trait_observations_exist_error">Observations already exist for this trait. Only the following parameters can be edited.</string>
+    <string name="dialog_new_trait_error_must_select_a_layout">You must select a layout.</string>
+    <string name="trait_creator_parameter_warning_integer_required">Integer required.</string>
+    <string name="dialog_new_trait_error_cannot_update_to_brapi_trait">Traits cannot be updated to BrAPI traits.</string>
+    <string name="required">Required</string>
+    <string name="traits_create_warning_percent_value_required">Value required</string>
+
+    <string name="select_trait">Select Trait</string>
+    <string name="edit_traits">Edit</string>
+
+
+    <!-- COLLECT -->
+
+    <!-- Validation -->
+    <string name="trait_error_minimum_value">Value is less than allowed minimum</string>
+    <string name="trait_error_maximum_value">Value is larger than allowed maximum</string>
+    <string name="trait_error_disease_severity">Severity already stored</string>
+    <string name="act_collect_study_names_empty">The selected study has empty unique, primary, or secondary names.</string>
+
+    <!-- Toolbar -->
+    <string name="main_toolbar_resources">Resources</string>
+    <string name="main_trait_details">Trait details</string>
+    <string name="main_infobar_data_missing">No data</string>
+    <string name="main_toolbar_next_entry_no_data">Next entry with no data</string>
+
+    <!-- InfoBars -->
+    <string name="dialog_att_chooser_attributes">Attributes</string>
+    <string name="dialog_att_chooser_traits">Traits</string>
+    <string name="dialog_att_chooser_other">Other</string>
+    <string name="dialog_att_chooser_customize">Customize</string>
+    <string name="dialog_infobar_att_chooser_title">Infobar %d</string>
+    <string name="infobars_attribute_placeholder">Select</string>
+    <string name="field_name_attribute">field_name</string>
+    <string name="infobar_word_wrap_enabled">Word wrap enabled for Infobar %s</string>
+    <string name="infobar_word_wrap_disabled">Word wrap disabled for Infobar %s</string>
+
+    <!-- ID/Barcode Search -->
+    <string name="act_collect_barcode_search_exists_in_other_field">This ID is in %s</string>
+    <string name="main_toolbar_moveto_no_match">No matching value</string>
+    <string name="main_toolbar_moveto">Go to ID</string>
+    <string name="main_toolbar_barcode_scan">Scan barcode</string>
+    <string name="main_toolbar_moveto_scan">Scan</string>
+    <string name="act_collect_plot_with_code_not_found">Barcode not found.\n</string>
+
+    <!-- Search  -->
+    <string name="main_toolbar_search">Search</string>
+    <string name="search_dialog_add">Add</string>
+    <string name="search_dialog_clear">Clear</string>
+    <string name="search_dialog_search">Search</string>
+    <string name="search_dialog_operator_dialog_title">Select an operator</string>
+    <string name="search_dialog_query_is_equal_to">is equal to</string>
+    <string name="search_dialog_query_is_not_equal_to">is not equal to</string>
+    <string name="search_dialog_query_contains">contains</string>
+    <string name="search_dialog_query_does_not_contain">does not contain</string>
+    <string name="search_dialog_query_is_more_than">is more than</string>
+    <string name="search_dialog_query_is_less_than">is less than</string>
+    <string name="search_results_dialog_title">Search results</string>
+    <string name="search_results_dialog_range">Range</string>
+    <string name="search_results_dialog_plot">Plot</string>
+    <string name="search_results_missing">No results</string>
+
+    <!--- Profile -->
+    <string name="activity_collect_dialog_verify_collector">Is this still</string>
+    <string name="activity_collect_dialog_verify_no_button">No</string>
+    <string name="activity_collect_dialog_verify_yes_button">Yes</string>
+    <string name="activity_collect_dialog_neutral_button">Modify settings</string>
+    <string name="activity_collect_dialog_new_collector">Do you want to save the name of the person collecting data?</string>
+
+    <!--- Datagrid -->
+    <string name="act_data_grid_cursor_failed">Data grid failed to load your data.</string>
+    <string name="dialog_data_grid_header_picker_title">Choose Row Headers</string>
+    <string name="dialog_data_grid_repeated_measures_title">Choose Observation</string>
+    <string name="menu_action_header_view_data_grid_title">Update Row Headers</string>
+
+    <!--- Lock -->
+    <string name="activity_collect_locked_state">Locked - data entry, modification and deletion are disabled</string>
+    <string name="activity_collect_frozen_state">Frozen - once data is saved it cannot be modified or deleted</string>
+    <string name="activity_collect_unlocked_state">Unlocked - no restrictions on data entry, modification, or deletion</string>
+
+    <!-- Trait Layout: Photo -->
+    <string name="trait_error_hardware_missing">Your device does not have a camera that can be used to take a photo.</string>
+    <string name="trait_delete_warning_photo">Are you sure you want to delete this photo?</string>
+    <string name="trait_photo_capture_button_content_description">Press to open a camera view for capturing.</string>
+    <string name="photo_failed_to_delete">Failed to delete file.</string>
+
+    <!-- Trait Layout: GNSS -->
+    <string name="trait_gnss_geo_coord_update_dialog_title">Coordinate Update Warning</string>
+    <string name="trait_gnss_geo_coord_update_dialog_message">You have a saved coordinate for this unit, are you sure you want to update it?</string>
+    <string name="trait_gnss_chip_manual_text">Manual</string>
+    <string name="trait_gnss_chip_10s_text">10s</string>
+    <string name="trait_gnss_chip_5s_text">5s</string>
+    <string name="gnss_trait_averaging_dialog_title">Collecting coordinates</string>
+    <string name="gnss_trait_averaging_dialog_message">Please wait while the incoming locations are being averaged…</string>
+    <string name="trait_gnss_collect_button_content_description">Collects the current location.</string>
+    <string name="trait_gnss_disconnect_button_content_description">Disconnects from the current GPS device.</string>
+    <string name="trait_gnss_connect_button_content_description">Opens a dialog with possible GPS devices to connect to.</string>
+    <string name="gnss_trait_averaging_switch_text">Average</string>
+
+    <string name="trait_gnss_precision_header">Required Fix:</string>
+    <string name="trait_gnss_accuracy_header">Acc.:</string>
+    <string name="trait_gnss_hdop_header">HDOP:</string>
+    <string name="trait_gnss_latitude_header">Lat.:</string>
+    <string name="trait_gnss_longitude_header">Long.:</string>
+    <string name="trait_gnss_altitude_header">Alt.:</string>
+    <string name="trait_gnss_time_header">UTC:</string>
+
+    <!-- Trait Layout: Date -->
+    <string name="trait_date_calendar_picker_content_description">Button that opens a calendar picker.</string>
+    <string name="trait_date_save_button_content_description">This will save the current selected date.</string>
+    <string name="dialog_date_picker_neutral_button">Today</string>
+
+    <!-- Trait Layout: Boolean -->
+    <string name="trait_boolean_on">On</string>
+    <string name="trait_boolean_off">Off</string>
+
+    <!-- Trait Layout: GoPro -->
+    <string name="trait_go_pro_capture_button_text">Capture\n</string>
+    <string name="trait_go_pro_await_device_title">Scanning for GoPros</string>
+    <string name="trait_go_pro_await_ble_title">Awaiting GoPro BLE Connection</string>
+    <string name="trait_go_pro_await_ble_message">Communicating with GoPro BLE, this may take a minute.</string>
+    <string name="trait_go_pro_await_ap_title">Awaiting GoPro AP</string>
+    <string name="trait_go_pro_await_ap_message">Connecting to network, this may take a minute. \n SSID: %s \n Pass: %s</string>
+    <string name="trait_go_pro_await_ap_neutral">Manual Connect</string>
+    <string name="trait_go_pro_camera_delete_photo_title">Delete Photo</string>
+    <string name="go_pro_layout_black_11_not_detected">This trait was made for a GoPro Black 11, please contact developers to implement your GoPro model.\n</string>
+    <string name="go_pro_frag_connect_btn_content_description">Connect to a GoPro camera.\n</string>
+    <string name="trait_go_pro_capture_content_description">Capture a picture from a connected GoPro device.\n</string>
+
+    <!-- Trait Layout: USB Camera -->
+    <string name="trait_usb_camera_zoom_in_button_text">Zoom in</string>
+    <string name="trait_usb_camera_zoom_out_button_text">Zoom out</string>
+    <string name="trait_usb_camera_zoom_out_content_description">Zoom out</string>
+    <string name="trait_usb_camera_zoom_in_content_description">Zoom in</string>
+    <string name="trait_usb_camera_delete_photo">Delete USB Photo</string>
+    <string name="trait_usb_camera_capture_content_description">Capture a photo.</string>
+    <string name="trait_usb_camera_capture_button_text">Capture</string>
+
+    <!--- Trait Layout: Zebra label print -->
+    <string name="trait_layout_data_stored">Saved</string>
+    <string name="trait_layout_print_label_size_title">Size:</string>
+    <string name="trait_layout_print_text_field_title">Text:</string>
+    <string name="trait_layout_print_text_field_title_2">Text2:</string>
+    <string name="trait_layout_print_text_field_title_3">Text3:</string>
+    <string name="trait_layout_print_text_field_title_4">Text4:</string>
+    <string name="trait_layout_print_barcode_field_title">Barcode:</string>
+    <string name="trait_layout_print_label_copies_title">Copies:</string>
+    <string name="trait_layout_print_label_simple_text">simple</string>
+    <string name="trait_layout_print_label_detailed_text">detailed</string>
+    <string name="trait_layout_print_label_date_option">date</string>
+    <string name="trait_layout_print_label_blank_option">blank</string>
+
+    <string name="printer_open">Printer is open</string>
+    <string name="printer_paused">Printer is paused</string>
+    <string name="printer_empty">Printer is empty</string>
+    <string name="printer_not_connected">Printer not connected</string>
+    <string name="no_device_paired">No device paired</string>
+
+    <string name="trait_labelprint_connect_button_description">Button which connects a printer.</string>
+    <string name="trait_labelprint_preview_description">Label preview.</string>
+    <string name="trait_labelprint_print_button_description">Button which prints labels configured in this dialog.</string>
+
+    <string name="printer_success">Print success</string>
+    <string name="bluetooth_printer_choose_device_title">Choose bluetooth device to print from.</string>
+
+    <!--- Trait Layout: Counter -->
+    <string name="trait_counter_layout_failed">Counter failed to save, please recreate this trait.</string>
+
+    <!--- Trait Layout: Location -->
+    <string name="trait_location_save_content_description">Save the current location.</string>
+
+    <!--- Text to Speech Strings -->
+    <string name="trait_photo_tts_success">Picture taken successfully.</string>
+    <string name="trait_photo_tts_fail">Picture trait failed.</string>
+    <string name="trait_print_label_success">Printing label.</string>
+    <string name="trait_gnss_internal_tts">Internal GPS</string>
+    <string name="trait_gnss_external_device_tts">External device %s chosen.</string>
+    <string name="act_collect_na_btn_tts">Not applicable</string>
+    <string name="act_collect_barcode_btn_tts">Opening barcode scanner</string>
+    <string name="act_collect_delete_btn_tts">Value has been deleted.</string>
+    <string name="trait_numeric_backspace_tts">Backspace</string>
+    <string name="trait_date_minus_day_tts">Back one day</string>
+    <string name="trait_date_next_day_tts">Next day</string>
+    <string name="trait_date_open_calendar_tts">Opening calendar.</string>
+    <string name="trait_location_saved_tts">Location saved.</string>
+
+    <!--- Summary -->
+    <string name="fragment_summary_toolbar_title">Summary</string>
+    <string name="menu_fragment_summary_filter_title">Filter</string>
+    <string name="fragment_summary_filter_title">Select summary labels</string>
+    <string name="dialog_fragment_summary_neutral_button">Toggle All</string>
+    <string name="fragment_summary_prev_button_text">Previous</string>
+    <string name="fragment_summary_next_button_text">Next</string>
+    <string name="fragment_summary_prev_button_content_description">Navigates to previous entry.</string>
+    <string name="fragment_summary_next_button_content_description">Navigates to next entry.</string>
+    <string name="list_item_summary_nav_button_content_description">Navigates to the selected entry.</string>
+
+    <!--- Repeated measures -->
+    <string name="view_repeated_values_add_button_content_description">Adds a new observation.</string>
+    <string name="view_repeated_values_add_button_fail">You must enter a value before creating a new observation.</string>
+    <string name="menu_collect_repeated_values_indicator">Displays the number of repeated values.</string>
+    <string name="dialog_multi_measure_delete_no_observations">No observations exist.</string>
+    <string name="dialog_multi_measure_delete_title">Observations</string>
+    <string name="dialog_multi_measure_confirm_delete_title">All observations for this trait will be permanently deleted.</string>
+    <string name="dialog_multi_measure_delete">Delete</string>
+    <string name="dialog_multi_measure_select_all">Select all</string>
+
+    <!--- GeoNav -->
+    <string name="menu_collect_start_geo_nav_title">Start GeoNav</string>
+    <string name="activity_collect_found_plot">Navigated to plot in vicinity</string>
+    <string name="act_collect_geonav_first_location_found">Rover communications established.</string>
+    <string name="act_collect_geonav_snack_nav_button_content_description">This will navigate you to the closest plot.</string>
+    <string name="activity_collect_sensor_manager_failed">Failed to start sensor manager</string>
+    <string name="activity_collect_geomagnetic_noise_detected">Interference detected, the compass might not be accurate</string>
+    <string name="dialog_geonav_collect_neutral_reconnect">Reconnect</string>
+
+    <string name="dialog_geonav_collect_title">GeoNav Configuration</string>
+    <string name="dialog_geonav_collect_auto_navigate">Auto Navigate</string>
+    <string name="dialog_geonav_collect_notify_on_precision_loss">Audio on precision drop</string>
+    <string name="dialog_geonav_collect_precision_threshold_title">Degree of precision</string>
+    <string name="dialog_geonav_collect_geonav_popup_type">GeoNav Popup Type</string>
+    <string name="dialog_geonav_collect_reconnect">Reconnect</string>
+    <string name="dialog_geonav_collect_reset_start_toast_message">Resetting connection…</string>
+    <string name="dialog_geonav_collect_reset_end_toast_message">Connection reset</string>
+
+    <string name="dialog_geonav_precision_loss_title">Location Precision Loss</string>
+    <string name="dialog_geonav_precision_loss_msg">Your preferred precision has been lost.</string>
+
+    <!--- Content Descriptions -->
+    <string name="view_trait_box_right_content_description">Go to next trait.</string>
+    <string name="view_trait_box_left_content_description">Go to previous trait.</string>
+    <string name="view_range_box_left_button_content_description">Navigates to previous entry.</string>
+    <string name="view_range_box_right_button_content_description">Navigates to the next entry.</string>
+    <string name="act_collect_delete_value_button_content_description">Deletes the current value.</string>
+    <string name="act_collect_barcode_button_content_description">Start a barcode scanner.</string>
+    <string name="act_collect_na_value_button_content_description">Fill value with not available.</string>
+
+    <!-- Observation Info -->
+    <string name="observation_metadata_title">Observation Metadata</string>
+    <string name="observation_info_study_name">Study Name</string>
+    <string name="observation_info_entry_id">Entry Id</string>
+    <string name="observation_info_trait_format">Trait Format</string>
+    <string name="observation_info_trait_name">Trait Name</string>
+    <string name="observation_info_value">Value</string>
+    <string name="observation_info_timestamp">Observation Timestamp</string>
+    <string name="observation_info_collector">Collector</string>
+    <string name="observations_info_geo_coordinates">Geo Coordinates</string>
+    <string name="observation_info_last_synced_time">Last Synced Time</string>
+    <string name="observation_info_additional_info">Additional Info</string>
+    <string name="observation_info_rep">Rep</string>
+    <string name="observation_info_other">Other</string>
+
+    <!-- Skip Entries -->
+    <string name="collect_sole_entry_without_data">This is the only entry without data</string>
+    <string name="collect_all_entries_complete_for_current_trait">All entries have data for the current trait</string>
+    <string name="collect_all_entries_complete_for_all_traits">All entries have data for all traits</string>
+
+    <!-- EXPORT -->
+    <!-- Export dialog -->
+    <string name="export_source_local">Local</string>
+    <string name="export_source_brapi">BrAPI</string>
+    <string name="export_dialog_title">Export Data</string>
+    <string name="export_format_database">Database</string>
+    <string name="export_format_table">Table</string>
+    <string name="export_file_name">Filename</string>
+    <string name="export_content_columns_title">Field columns</string>
+    <string name="export_content_columns_all">All imported columns</string>
+    <string name="export_content_columns_unique">Only unique identifier</string>
+    <string name="export_content_traits_all">All traits</string>
+    <string name="export_content_traits_active">Only active traits</string>
+    <string name="export_error_general">Error during export</string>
+    <string name="error_storage_directory">Storage directory is missing or corrupted.</string>
+    <string name="export_error_data_missing">No data exists to export</string>
+    <string name="export_complete">Export complete</string>
+    <string name="export_progress">Exporting…</string>
+    <string name="export_error_missing_format">Export type must be selected</string>
+    <string name="export_error_missing_column">Field column type must be selected</string>
+    <string name="export_error_missing_trait">Trait type must be selected</string>
+    <string name="export_overwrite">Overwrite previous export</string>
+    <string name="dialog_export_bundle_data_cb_text">Bundle media data with export file.</string>
+    <string name="export_multiple_fields_name">multiple_fields</string>
+    <string name="export_multiple_fields_message">Note: Multiple field exports are bundled in a ZIP file</string>
+
+    <!-- Citation -->
+    <string name="citation_card_title">Cite Field Book</string>
+    <string name="citation_title">Citation</string>
+    <string name="citation_string">If you utilize Field Book for research, please cite the following journal article:</string>
+    <string name="citation_text" translatable="false">Rife, T.W., and J.A. Poland. 2014. Field Book: An Open-Source Application for Field Data Collection on Android. Crop Sci. 54(4): 1624–1627.</string>
+
+    <!-- SETTINGS -->
+    <!-- General -->
+    <string name="preferences_system_title">System</string>
+
+    <string name="preferences_system_defaults_title">Defaults</string>
+
+    <string name="preferences_source_default_import">Import Source</string>
+    <string name="preferences_source_default_export">Export Source</string>
+
+    <string name="brapi_disabled_alert_title">BrAPI Disabled</string>
+    <string name="brapi_disabled_alert_message">BrAPI must be enabled first in the BrAPI settings.</string>
+
+    <string name="preferences_general_share_enable">Enable File Sharing</string>
+    <string name="preferences_general_share_enable_description">When files are exported, a share dialog will be displayed</string>
+
+    <!-- Profile -->
+    <string name="preferences_profile_title">Profile</string>
+    <string name="preferences_profile_person_title">Person</string>
+    <string name="preferences_profile_require_person">Require Person</string>
+    <string name="preferences_profile_require_person_summary">Track name of the person collecting data</string>
+
+    <string name="preferences_profile_set_person">Person Name</string>
+    <string name="preferences_profile_person_dialog_title">Set Person</string>
+    <string name="dialog_previous_names">Previous Used Names</string>
+    <string name="preferences_profile_previous_names">Previous Names</string>
+    <string name="preferences_profile_new_person">New Person</string>
+    <string name="preferences_profile_previous_names_warning">All saved person names would be deleted, and this cannot be reversed. Are you sure you want to continue?</string>
+    <string name="preferences_profile_name_first">First Name</string>
+    <string name="preferences_profile_name_last">Last Name</string>
+    <string name="preferences_profile_name_error">Both fields cannot be blank</string>
+
+    <string name="preferences_profile_require_interval_title">Verification Interval</string>
+    <string name="verification_interval_every_open">Every time app opens</string>
+    <string name="verification_interval_every_12">Every 12 hours</string>
+    <string name="verification_interval_every_24">Every 24 hours</string>
+    <string name="verification_interval_never">Never</string>
+
+    <string name="preferences_profile_device_title">Device</string>
+    <string name="preferences_profile_set_device_name">Device Name</string>
+    <string name="preferences_profile_device_name_dialog_title">Set Device Name</string>
+    <string name="preferences_profile_device_name_error">This field cannot be blank</string>
+    <string name="preferences_profile_device_name_default_format">Default: %s</string>
+
+    <string name="preferences_profile_crashlytics" translatable="false">Crashlytics</string>
+    <string name="pref_profile_crashlytics_user_id_enabled">Unique ID</string>
+    <string name="pref_profile_crashlytics_user_id_enabled_summary">Include an anonymous, unique ID in crash logs to help the development team fix bugs</string>
+    <string name="pref_profile_crashlytics_refresh_title">Refresh ID</string>
+    <string name="pref_profile_crashlytics_refresh_summary">This will assign a new unique ID</string>
+
+    <!-- Features -->
+    <string name="preferences_features_title">Features</string>
+
+    <!-- Appearance -->
+    <string name="preferences_appearance_title">Appearance</string>
+    <string name="preferences_appearance_application_title">Application</string>
+
+    <string name="preferences_appearance_theme_title">Theme</string>
+    <string name="preferences_appearance_theme_summary">Modify specific colors or the entire theme of Field Book</string>
+
+    <string name="preferences_theme_theme_title">App Theme</string>
+    <string name="theme_default">Default</string>
+    <string name="theme_high_contrast">High Contrast</string>
+    <string name="theme_blue">Blue</string>
+
+    <string name="preferences_theme_text_size_title">Text Size</string>
+    <string name="text_size_s">Small</string>
+    <string name="text_size_m">Medium (Default)</string>
+    <string name="text_size_l">Large</string>
+    <string name="text_size_xl">Extra Large</string>
+
+    <string name="preferences_theme_data_saved_title">Saved data color</string>
+    <string name="preferences_theme_data_saved_description">Change how saved data is displayed</string>
+
+    <string name="preferences_theme_reset_title">Restore default theme</string>
+    <string name="preferences_theme_reset_description">Reset all settings to the system default values</string>
+
+    <string name="preferences_appearance_language">Language</string>
+    <string name="preferences_appearance_language_description">Language set by system</string>
+    <string name="preference_language_default">System Language</string>
+    <string name="preference_language_warning" translatable="false">Translations are crowd-sourced and may not be entirely accurate or complete</string>
+    <string name="language_en" translatable="false">English</string>
+    <string name="language_am" translatable="false">አማርኛ</string>
+    <string name="language_ar" translatable="false">اَلْعَرَبِيَّةُ</string>
+    <string name="language_bn" translatable="false">বাংলা</string>
+    <string name="language_de" translatable="false">Deutsche</string>
+    <string name="language_es" translatable="false">Español</string>
+    <string name="language_fr" translatable="false">Français</string>
+    <string name="language_hi" translatable="false">हिन्दी</string>
+    <string name="language_it" translatable="false">Italiana</string>
+    <string name="language_ja" translatable="false">日本語</string>
+    <string name="language_om_rET" translatable="false">Afaan Oromoo</string>
+    <string name="language_pt_rBR" translatable="false">Português</string>
+    <string name="language_ru" translatable="false">Русский</string>
+    <string name="language_sv_rSE" translatable="false">Svenska</string>
+    <string name="language_vi_vRN" translatable="false">Tiếng Việt</string>
+    <string name="language_zh_rCN" translatable="false">简体字</string>
+
+    <string name="preferences_appearance_collect_toolbar_title">Collect Toolbar</string>
+
+    <string name="preferences_appearance_tutorial_description">Add a toolbar button throughout the app that opens the tutorial</string>
+
+    <string name="preferences_appearance_toolbar_customize">Toolbar Actions</string>
+    <string name="preferences_appearance_toolbar_customize_description">Toggle the visibility of default features</string>
+    <string name="preferences_appearance_toolbar_customize_search">Search</string>
+    <string name="preferences_appearance_toolbar_customize_resources">Resources</string>
+    <string name="preferences_appearance_toolbar_customize_summary">Summary</string>
+    <string name="preferences_appearance_toolbar_customize_lock">Lock</string>
+
+    <string name="preferences_general_feature_datagrid">Datagrid</string>
+    <string name="preferences_general_feature_datagrid_description">Add a button to display a grid of collected data</string>
+
+    <string name="preferences_general_feature_next_missing">Next Entry With No Data</string>
+    <string name="preferences_general_skip_entries_disabled">Disabled</string>
+    <string name="preferences_general_skip_entries_with_data">Button skips entries that already have values for the current trait</string>
+    <string name="preferences_general_skip_entries_across_all_traits">Button skips entries that already have values for all traits</string>
+
+    <string name="preferences_general_feature_barcode_text">Move To Unique ID</string>
+    <string name="move_to_unique_id_disabled">Disabled</string>
+    <string name="move_to_unique_id_text_or_scan">Button uses text entry with optional camera scan</string>
+    <string name="move_to_unique_id_direct_camera_scan">Button uses direct camera scan</string>
+
+    <string name="preferences_appearance_collect_screen_title">Collect Screen</string>
+
+    <string name="preferences_appearance_infobar_number">Number Of InfoBars</string>
+    <string name="preferences_appearance_infobar_number_description">Adjust the number of Infobars displayed on the main screen</string>
+
+    <string name="preferences_appearance_infobar_hide_prefix">Hide Infobar prefix</string>
+    <string name="preferences_appearance_infobar_hide_prefix_description">Infobar prefix will be replaced by a generic icon</string>
+
+    <string name="preferences_appearance_quickgoto">Quick GoTo</string>
+    <string name="preferences_appearance_quickgoto_description">Change the middle section of main screen to the legacy Quick GoTo</string>
+
+    <string name="preferences_appearance_range_progress_bar">Entries progress bar</string>
+    <string name="preferences_appearance_range_progress_bar_description">Shows your current position in the field</string>
+
+    <string name="preferences_appearance_traits_progress_bar">Traits progress bar</string>
+    <string name="preferences_appearance_traits_progress_bar_description">Shows whether the active traits have data and highlights the current trait</string>
+
+    <!-- Behavior -->
+    <string name="preferences_behavior_title">Behavior</string>
+    <string name="preferences_behavior_movement_title">Movement</string>
+    <string name="preferences_behavior_hardware_title">Hardware</string>
+    <string name="preferences_behavior_data_title">Data</string>
+
+    <string name="preferences_behavior_cycle_traits">Auto-Advance Entry</string>
+    <string name="preferences_behavior_cycle_traits_description">Cycling through the trait list automatically advances entry</string>
+    <string name="preferences_behavior_cycle_sound_title">Enable sound effect?</string>
+    <string name="preferences_behavior_cycle_sound_description">A sound effect will be played when traits are cycled (recommended)</string>
+
+    <string name="preferences_behavior_return_to_first_trait">Auto-Reset Traits</string>
+    <string name="preferences_behavior_return_to_first_trait_description">Advancing the entry automatically resets to the first trait</string>
+
+    <string name="preferences_behavior_disable_entry_arrow">Require Data To Move Entry</string>
+    <string name="preferences_behavior_disable_entry_arrow_neither">Disabled</string>
+    <string name="preferences_behavior_disable_entry_arrow_left">Require data to move left</string>
+    <string name="preferences_behavior_disable_entry_arrow_right">Require data to move right</string>
+    <string name="preferences_behavior_disable_entry_arrow_both">Require data to move either direction</string>
+
+    <string name="preferences_behavior_skip_entries_title">Skip Entries</string>
+    <string name="preferences_behavior_skip_entries_disabled">Disabled</string>
+    <string name="preferences_behavior_skip_entries_with_data">Arrows skip entries that already have values for the current trait</string>
+    <string name="preferences_behavior_skip_entries_across_all_traits">Arrows skip entries that already have values for all traits</string>
+
+    <string name="preferences_general_swap_navigation">Swap Navigation</string>
+    <string name="preferences_general_swap_navigation_description">Swap the location of the entry and trait arrows</string>
+
+    <string name="preferences_behavior_volume_buttons_navigate">Navigate With Volume Keys</string>
+    <string name="preferences_behavior_volume_buttons_navigate_disabled">Disabled</string>
+    <string name="preferences_behavior_volume_buttons_navigate_traits">Volume keys navigate traits</string>
+    <string name="preferences_behavior_volume_buttons_navigate_entries">Volume keys navigate entries</string>
+
+    <string name="preferences_behavior_return_character">Carriage Return Action</string>
+    <string name="preferences_behavior_return_character_do_nothing">Do nothing</string>
+    <string name="preferences_behavior_return_character_next_plot">Carriage return advances plot</string>
+    <string name="preferences_behavior_return_character_next_trait">Carriage return advances trait</string>
+
+    <string name="preferences_general_use_day_number">Use Day Of Year</string>
+    <string name="preferences_general_use_day_number_description">Use day of year when collecting data instead of the date</string>
+
+    <!-- Location -->
+    <string name="preferences_location_title">Location</string>
+    <string name="preferences_location_defaults_title">GeoCoordinates</string>
+
+    <string name="pref_general_location_collection_title">Collection Level</string>
+    <string name="location_level_off">Off</string>
+    <string name="location_level_study">Field</string>
+    <string name="location_level_observation_unit">Entry</string>
+    <string name="location_level_observation">Observation (higher battery use)</string>
+
+    <string name="pref_coordinate_format_title">Collection Format</string>
+    <string name="location_format_iso">ISO 6709</string>
+    <string name="location_format_geojson">GeoJSON</string>
+
+    <string name="pref_geonav_category_title">GeoNav</string>
+    <string name="pref_geonav_enable_title">Enable GeoNav</string>
+    <string name="pref_geonav_enable_summary">Navigate fields using device location</string>
+
+    <string name="pref_geonav_search_method_title">Search Method</string>
+    <string name="pref_geonav_search_method_summary">The %s method used to search for plots in GeoNav</string>
+    <string name="pref_geonav_method_distance">Distance</string>
+    <string name="pref_geonav_method_trapezoid">Trapezoidal</string>
+
+    <string name="pref_behavior_geonav_parameters_category_title">Parameters</string>
+    <string name="pref_geonav_search_trapezoid_d1_title">Trapezoid Base (km)</string>
+    <string name="pref_geonav_search_trapezoid_d1_summary">The shorter base of the trapezoid is %s km</string>
+    <string name="pref_geonav_search_trapezoid_d2_title">Trapezoid Distance (km)</string>
+    <string name="pref_geonav_search_trapezoid_d2_summary">The distance from the user to the opposite end of the trapezoid is %s km</string>
+    <string name="pref_geonav_search_angle_summary">GeoNav creates a trapezoid in front of the user, the angle closest to the user is defined as %s°</string>
+    <string name="pref_geonav_search_angle_title">GeoNav Search Angle (degrees)</string>
+
+    <string name="pref_geonav_log">GeoNav Log</string>
+    <string name="pref_geonav_log_off">Off</string>
+    <string name="pref_geonav_log_off_description">Off: No logs being recorded</string>
+    <string name="pref_geonav_log_limited">Limited</string>
+    <string name="pref_geonav_log_limited_description">Limited: Logging closest entry to storage/geonav/limited_log.txt</string>
+    <string name="pref_geonav_log_full">Full</string>
+    <string name="pref_geonav_log_full_description">Full: Logging all location updates and algorithm steps to storage/geonav/log.txt</string>
+    <string name="pref_geonav_log_both">Both</string>
+    <string name="pref_geonav_log_both_description">Both: Logging all location updates and algorithm steps to storage/geonav/log.txt, closest entry to storage/geonav/limited_log.txt</string>
+
+    <string name="pref_geonav_update_interval_title">Update Interval (s)</string>
+    <string name="pref_geonav_update_interval_summary">The time between location updates is %ss</string>
+
+    <string name="pref_geonav_pair">Location Provider</string>
+    <string name="pref_behavior_geonav_internal_gps_choice">Internal GPS</string>
+    <string name="choose_paired_bluetooth_devices_title">Choose your paired bluetooth device</string>
+
+    <!-- Sounds -->
+    <string name="preferences_sounds">Sounds</string>
+    <string name="preferences_sound_primary_order_title">Change Primary Order</string>
+    <string name="preferences_sound_primary_order_description">Play plonk sound when the primary order changes</string>
+
+    <string name="preferences_sound_entry_title">Change Entry</string>
+    <string name="preferences_sound_entry_description">Play advance sound when moving between entries</string>
+
+    <string name="preferences_sound_cycle_traits_title">Cycle Traits</string>
+    <string name="preferences_sound_cycle_traits_description">Play cycle sound when traits are completely cycled through</string>
+
+    <string name="preferences_sound_delete_obs_title">Delete Observation</string>
+    <string name="preferences_sound_delete_obs_description">Play delete sound when observation is deleted</string>
+
+    <string name="preferences_category_audio_tts_title">Text to Speech</string>
+    <string name="preferences_general_tts_title">Text to Speech</string>
+    <string name="preferences_general_tts_description">Enable TTS when data is entered in the Collect activity</string>
+    <string name="preferences_general_tts_language_title">Choose Language</string>
+    <string name="preferences_general_tts_language_description">Choose a compatible TTS language</string>
+
+    <!-- BrAPI preferences are in the BrAPI section below -->
+
+    <!-- Storage -->
+    <string name="preferences_storage_title">Storage</string>
+
+    <string name="preferences_storage_storage_title">Storage</string>
+    <string name="preferences_storage_files_base_directory_title">Define Storage Location</string>
+    <string name="preferences_storage_files_base_directory_description">Migrate or define a new root directory structure. Export files will be saved here automatically.</string>
+
+    <string name="preferences_storage_database_title">Database</string>
+    <string name="database_dialog_title">Database</string>
+    <string name="database_import">Import Database</string>
+    <string name="database_export">Export Database</string>
+    <string name="database_reset">Delete Database</string>
+    <string name="database_reset_warning1">All data will be deleted. Are you sure you want to reset the database?</string>
+    <string name="database_reset_warning2">A database reset cannot be reversed. The app will quit after clearing the database. Are you really sure you want to continue?</string>
+    <string name="database_reset_message">Database has been deleted</string>
+    <string name="share_file_title">Sending file…</string>
+
+
+    <string name="preferences_storage_settings_title">Settings</string>
+    <string name="preferences_system_defaults_reset">Reset Settings</string>
+    <string name="reset_preferences_title">Reset Settings to Default</string>
+    <string name="reset_preferences_message">Warning: this will reset all of Field Book\'s preferences.</string>
+
+    <!-- Experimental -->
+    <string name="preferences_experimental_title">Experimental</string>
+    <string name="preferences_experimental_stable_title">Stable</string>
+    <string name="preferences_experimental_beta_title">Beta</string>
+    <string name="preferences_experimental_alpha_title">Alpha</string>
+    <string name="pref_experimental_repeated_values_title">Repeated Measures</string>
+    <string name="pref_experimental_repeated_values_summary">Enables multiple values to be collected for each entry/trait</string>
+    <string name="pref_experimental_repeated_values_disabled_title">Repeated Measures Disabled</string>
+    <string name="pref_experimental_repeated_values_disabled_message">Any repeated values that have been collected will be hidden until this feature is enabled again</string>
+
+    <string name="pref_experimental_enable_field_audio_title">Enable Field Audio</string>
+    <string name="pref_experimental_enable_field_audio_summary">Enable audio recording feature for the entire field</string>
+    <string name="menu_collect_start_field_audio">Start Recorder</string>
+    <string name="menu_collect_stop_field_audio">Stop Recorder</string>
+    <string name="field_audio_recording_start">Recording field level audio</string>
+    <string name="field_audio_recording_stop">A new field level audio file was saved</string>
+    <string name="field_audio_recording_warning">Field level audio is already recording. Stop that first.</string>
+    <string name="trait_audio_recording_warning">Trait level audio is already recording. Stop that first.</string>
+    <string name="trait_audio_playing_warning">Trait level audio is playing. Stop that first.</string>
+    <string name="field_audio_zip_error">Error creating zip file</string>
+    <string name="trait_audio_placeholder_filename">Recorded Audio File</string>
+    <string name="trait_audio_timestamp">Timestamp: </string>
+    <string name="trait_audio_duration">Duration: </string>
+    <string name="trait_audio_file_size">File Size: </string>
+
+    <string name="pref_beta_enable_individual_field_page_title">Enable Individual Field Pages</string>
+    <string name="pref_beta_enable_individual_field_page_summary">Selecting a field in the fields list opens a detail page</string>
+    <string name="pref_beta_mlkit_title">MLKit Library</string>
+    <string name="pref_beta_mlkit_summary">This option uses the MLKit library instead of the ZXing library for scanning barcodes</string>
+    <string name="pref_beta_mlkit_enabled_title">Barcode Scanning using MLKit enabled</string>
+    <string name="pref_beta_mlkit_enabled_message">Enabling this feature will switch the barcode scanning library from ZXing to MLKit</string>
+
+    <string name="pref_alpha_use_kmp_title">Use KMP</string>
+    <string name="pref_alpha_use_kmp_summary">Use Kotlin Multiplatform Compose screens when available</string>
+
+
+    <!-- STATISTICS -->
+
+    <string name="warning_no_observations">No observations have been collected</string>
+    <string name="warning_no_data">No data to display</string>
+    <string name="warning_invalid_date_range">Select a valid date range</string>
+    <string name="stats_heatmap_title">Heatmap</string>
+    <string name="stats_heatmap">View a heatmap of the collected observations</string>
+    <string name="stats_loading">Loading…</string>
+    <string name="stats_first_day">Scroll to the first day with a collected observation</string>
+    <string name="stats_last_day">Scroll to the last day with a collected observation</string>
+    <string name="stats_calendar_range">Select a date range to filter the displayed dates</string>
+    <string name="stats_counter">Swap the date with the number of observations collected that day</string>
+    <string name="stats_date_range_picker_title">Select a date range</string>
+
+    <string name="stats_tab_layout_total">Total</string>
+    <string name="stats_tab_layout_year">Year</string>
+    <string name="stats_tab_layout_month">Month</string>
+
+    <string name="stat_card_export_title_total">Total Field Book Stats</string>
+    <string name="stat_card_export_title">Field Book Stats for</string>
+
+    <string name="stat_title_fields">Fields</string>
+    <string name="stat_title_entries">Entries</string>
+    <string name="stat_title_data">Data</string>
+    <string name="stat_title_hours">Hours</string>
+    <string name="stat_title_people">People</string>
+    <string name="stat_title_photos">Photos</string>
+    <string name="stat_title_busiest">Busiest</string>
+    <string name="stat_title_most">Most</string>
+
+    <string name="stat_fields_dialog_title">Fields imported in</string>
+    <string name="stat_people_dialog_title">List of People</string>
+    <string name="stat_most_dialog_title">List of Observations</string>
+
+    <string name="stat_entries_toast_message">entries have been phenotyped</string>
+    <string name="stat_data_toast_message">observations have been collected</string>
+    <string name="stat_hours_toast_message">hours spent phenotyping</string>
+    <string name="stat_photos_toast_message">photos have been captured</string>
+    <string name="stat_busiest_toast_message">observations were collected on </string>
+
+
+    <!-- ABOUT -->
+    <!-- App  -->
+    <string name="about_title">About</string>
+    <string name="about_version_title">Version</string>
+    <string name="about_manual_title">Manual</string>
+    <string name="about_rate">Rate Field Book</string>
+
+    <!-- Lead  -->
+    <string name="about_project_lead_title">Project Lead</string>
+    <string name="about_developer_trife" translatable="false">Trevor Rife</string>
+    <string name="about_developer_trife_location" translatable="false">Clemson University</string>
+    <string name="about_email_title">Email</string>
+    <string name="about_developer_trife_email" translatable="false">twrife@clemson.edu</string>
+
+    <!-- Support  -->
+    <string name="about_support_title">Support</string>
+    <string name="about_contributors_title">Contributors</string>
+    <string name="about_contributors_funding_title">Funding</string>
+
+    <!-- PhenoApps  -->
+    <string name="about_title_other_apps" translatable="false">PhenoApps</string>
+
+    <!-- Technical  -->
+    <string name="about_technical_title">Technical</string>
+    <string name="about_libraries_title">Libraries</string>
+    <string name="about_github_title" translatable="false">GitHub</string>
+
+    <!-- Update -->
+    <string name="check_updates_title">Checking for Updates…</string>
+    <string name="found_updates_title">Download Latest Version</string>
+    <string name="no_updates_title">Running Latest Version</string>
+
+
+
+
+
+    <!-- BRAPI -->
+
+    <!-- BrAPI preferences -->
+    <string name="preferences_brapi" translatable="false">BrAPI</string>
+    <string name="brapi_info_title">Breeding API</string>
+
+    <string name="preferences_brapi_enable_title">Enable BrAPI</string>
+    <string name="preferences_brapi_enable_summary">The Breeding API allows simple data transfer to compatible databases.</string>
+    <string name="preferences_brapi_server_title">Server</string>
+    <string name="preferences_brapi_barcode_config_title">Auto-configure</string>
+    <string name="preferences_brapi_barcode_config_summary">Manage settings with QR codes</string>
+    <string name="preferences_brapi_barcode_config_scan">Import new settings</string>
+    <string name="preferences_brapi_barcode_config_share">Share current settings</string>
+    <string name="preferences_brapi_barcode_config_dialog_title">Scannable BrAPI Configuration</string>
+    <string name="qr_code_share_choose_action_title">Choose Action</string>
+
+    <string name="menu_action_brapi_pref_title">Authorize BrAPI</string>
+    <string name="act_brapi_auth_http_warning_title">HTTP Warning</string>
+    <string name="act_brapi_auth_http_warning_message">You have entered an http url. There is no guarantee that this connection is secure.</string>
+
+    <string name="brapi_base_url">Base URL</string>
+    <string name="brapi_base_url_desc">The base URL for the connected BrAPI server</string>
+    <string name="brapi_base_url_default" translatable="false">https://test-server.brapi.org</string>
+
+    <string name="brapi_choice_to_make_default_dialog_title">Make this BrAPI server the default:</string>
+    <string name="brapi_choice_to_make_default_import">Import Source</string>
+    <string name="brapi_choice_to_make_default_export">Export Source</string>
+    <string name="brapi_choice_to_make_default_negative">Cancel</string>
+    <string name="brapi_choice_to_make_default_positive">Save</string>
+
+    <string name="brapi_edit_display_name">Edit Display Name</string>
+    <string name="brapi_edit_display_name_server">Server Name</string>
+    <string name="brapi_edit_display_name_default">BrAPI Test Server</string>
+
+    <string name="preferences_brapi_version">BrAPI Version</string>
+    <string name="preferences_brapi_version_v1" translatable="false">V1</string>
+    <string name="preferences_brapi_version_v2" translatable="false">V2</string>
+
+    <string name="brapi_pagination">Page Size</string>
+    <string name="brapi_timeout">Server Timeout</string>
+    <string name="brapi_chunk_size">Chunk Size</string>
+
+    <string name="preferences_brapi_authorization_title">Authorization</string>
+    <string name="preferences_brapi_advanced_title">Advanced</string>
+
+    <string name="preferences_brapi_oidc_flow" translatable="false">OIDC Flow</string>
+    <string name="preferences_brapi_oidc_flow_oauth_code">OAuth2 Authorization Code</string>
+    <string name="preferences_brapi_oidc_flow_oauth_implicit">OAuth2 Implicit Grant</string>
+    <string name="preferences_brapi_oidc_flow_old_custom">Original Field Book Custom</string>
+
+    <string name="brapi_oidc_url">OIDC Discovery URL</string>
+    <string name="brapi_oidc_url_desc">The location of the OIDC Discovery JSON document</string>
+    <string name="brapi_oidc_url_default" translatable="false">https://test-server.brapi.org/.well-known/openid-configuration</string>
+
+    <string name="brapi_oidc_clientid">OIDC Client ID</string>
+    <string name="brapi_oidc_clientid_desc">The Client Id to be used in the authentication provider</string>
+    <string name="brapi_oidc_clientid_default" translatable="false">fieldbook</string>
+
+    <string name="brapi_oidc_scope">OIDC Scope</string>
+    <string name="brapi_oidc_scope_desc">The Scope to be used in the authentication provider</string>
+    <string name="brapi_oidc_scope_default" translatable="false" />
+
+    <string name="preferences_brapi_traits_title">Preferences</string>
+    <string name="preferences_appearance_collect_labelval_customize">Value vs Label Display</string>
+    <string name="preferences_appearance_collect_labelval_customize_description">Display values or labels on the collect screen</string>
+    <string name="preferences_appearance_collect_labelval_customize_value">Value</string>
+    <string name="preferences_appearance_collect_labelval_customize_label">Label</string>
+
+    <string name="preferences_brapi_servers_title">Community Servers</string>
+    <string name="preferences_brapi_server_barcode">Scan a server barcode</string>
+    <string name="preferences_brapi_server_scan_error">Scan Error</string>
+    <string name="preferences_brapi_server_add">Submit a server</string>
+
+    <!-- Community Servers -->
+    <string-array name="community_servers_names">
+        <item>CassavaBase</item>
+        <item>T3/Wheat</item>
+        <item>T3/Oat</item>
+        <item>T3/Barley</item>
+        <item>Default Test Server</item>
+    </string-array>
+    <string-array name="community_servers_urls">
+        <item>https://www.cassavabase.org</item>
+        <item>https://wheat-sandbox.triticeaetoolbox.org</item>
+        <item>https://oat-sandbox.triticeaetoolbox.org</item>
+        <item>https://barley-sandbox.triticeaetoolbox.org</item>
+        <item>https://test-server.brapi.org</item>
+    </string-array>
+    <string-array name="community_servers_oidc_urls">
+        <item>https://www.cassavabase.org/.well-known/openid-configuration</item>
+        <item>https://wheat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
+        <item>https://oat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
+        <item>https://barley-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
+        <item>https://test-server.brapi.org/.well-known/openid-configuration</item>
+    </string-array>
+    <string-array name="community_servers_grant_types">
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
+    </string-array>
+
+    <!-- Authorization -->
+    <string name="brapi_save_authorize">Authorize</string>
+    <string name="brapi_display_name">Display Name</string>
+    <string name="brapi_revoke_auth">Log Out</string>
+    <string name="brapi_auth_btn">Log In to Site</string>
+    <string name="brapi_auth_success">BrAPI Authorization Successful</string>
+    <string name="brapi_auth_deny">BrAPI Authorization Denied</string>
+    <string name="brapi_auth_error_starting">Error Starting BrAPI Auth</string>
+    <string name="brapi_auth_permission_deny">ERROR: You do not have the permissions necessary to perform this action</string>
+    <string name="brapi_auth_needed_title">Login Needed</string>
+    <string name="brapi_auth_needed">You need to be logged into the system you are attempting to sync data with in order to sync your data.\n\nWould you like to authenticate now?</string>
+
+    <!-- BrAPI Import -->
+    <string name="import_dialog_title_brapi_fields">BrAPI Field Import</string>
+    <string name="brapi_load_data_button">Load Fields</string>
+    <string name="brapi_load_traits_button">Load Traits</string>
+    <string name="brapi_save_data_button">Preview Field</string>
+    <string name="brapi_study_name">Name</string>
+    <string name="brapi_study_description">Description</string>
+    <string name="brapi_study_location">Location</string>
+    <string name="brapi_observation_level">Observation Level</string>
+    <string name="brapi_study_num_traits"> Traits</string>
+    <string name="brapi_not_found">ERROR: Target system does not support this operation via BrAPI.</string>
+    <string name="brapi_studies_error">Error when loading studies.</string>
+    <string name="brapi_study_detail_error">Error when loading study details for study. Study not saved.</string>
+    <string name="brapi_plot_detail_error">Error when loading plots for study. Study not saved.</string>
+    <string name="brapi_study_traits_error">Error when loading traits for study. Study not saved.</string>
+    <string name="brapi_ontology_error">Error loadings traits from BrAPI.</string>
+    <string name="brapi_save_field_error">Error Saving Field</string>
+    <string name="brapi_field_not_selected">Selected Field Must Be Imported From BrAPI.</string>
+    <string name="brapi_fields_filter_by_program">Filter by program</string>
+    <string name="brapi_fields_filter_by_trial">Filter by trial</string>
+    <string name="brapi_programs_load">Load programs</string>
+    <string name="brapi_programs_select">Select program</string>
+    <string name="brapi_programs_error">Error when loading programs.</string>
+    <string name="brapi_trials_load">Load trials</string>
+    <string name="brapi_trials_select">Select trial</string>
+    <string name="brapi_trials_error">Error when loading trials.</string>
+    <string name="brapi_save_trait">Save Traits</string>
+    <string name="brapi_must_configure_url">Must configure a valid BrAPI URL in settings before proceeding</string>
+    <string name="brapi_warning_select_program">Please select a program</string>
+    <string name="brapi_warning_select_trial">Please select a trial</string>
+    <string name="brapi_warning_select_study">Please select a field</string>
+    <string name="brapi_export_failed">BrAPI Export Failed</string>
+    <string name="brapi_export_permission_deny">ERROR: You do not have the permissions to send data to the specified system.</string>
+    <string name="brapi_export_not_supported">ERROR: Target system does not support sending observations via BrAPI.</string>
+    <string name="brapi_export_wrong_num_obs">ERROR: Response number of observations different from request</string>
+    <string name="brapi_export_missing_obs">ERROR: Missing observation in response</string>
+    <string name="brapi_export_multiple_obs">ERROR: Multiple observations per variable</string>
+    <string name="brapi_export_unknown_error">ERROR: Unknown Error</string>
+    <string name="brapi_export_successful">BrAPI Export Successful</string>
+    <string name="brapi_saving_indicator">Saving Observations…</string>
+    <string name="brapi_field_non_matching_sources_title">Sources Do Not Match</string>
+    <string name="brapi_field_non_matching_sources">Unable to sync data. Field data originates from, %1$s, BrAPI url currently set to %2$s. Sources must match.</string>
+    <string name="brapi_enable_before_sync">BRAPI is disabled. Please enable it in settings before using sync.</string>
+    <string name="brapi_trait_already_exists">Trait already exists: %1$s. Not saving.</string>
+    <string name="brapi_error_saving_all_traits">Error saving traits. No traits were saved.</string>
+    <string name="brapi_error_saving_some_traits">Error saving some traits. Some traits were not saved</string>
+    <string name="brapi_traits_saved_success">Selected traits saved successfully.</string>
+    <string name="brapi_obs_sync_menu_name">Sync</string>
+    <string name="brapi_obs_header_name">Downloading Observations for Study:</string>
+    <string name="number_traits_label">Number of Traits:</string>
+    <string name="number_observation_label">Number of Observations:</string>
+    <string name="no_observations_warning">No Observations Found For Study.  Please Tap Cancel.</string>
+    <string name="brapi_skipped_traits">Successfully fetched traits. %1$d traits ignored because of missing brapi \'trait\' field</string>
+    <string name="brapi_study_incompatible">This BrAPI study is currently incompatible with Field Book. Studies must include row and column in the header.</string>
+    <string name="act_collect_no_plots">This study has no plots saved.</string>
+
+    <!-- BrAPI Export -->
+    <string name="act_brapi_export_title">BrAPI Export</string>
+    <string name="brapi_export_button">Export</string>
+    <string name="brapi_next_field_button">Next Field</string>
+    <string name="brapi_close_button">Close</string>
+    <string name="brapi_export_title">BrAPI Export Statistics</string>
+    <string name="brapi_export_observations">Observations</string>
+    <string name="brapi_export_num_new_obs"> New Observations</string>
+    <string name="brapi_export_num_synced_obs"> Synced Observations</string>
+    <string name="brapi_export_num_ed_obs"> Edited Observations</string>
+    <string name="brapi_export_skipped_observations"> Skipped Observations</string>
+    <string name="brapi_export_skipped_user_created"> User Created Trait Observations</string>
+    <string name="brapi_export_skipped_wrong_source"> Different Data Source</string>
+    <string name="brapi_export_num_new_imgs">New Images</string>
+    <string name="brapi_export_num_synced_imgs">Synced Images</string>
+    <string name="brapi_export_num_ed_imgs">Edited Images</string>
+    <string name="brapi_export_num_incomplete_imgs">Incomplete Synced Images</string>
+    <string name="brapi_export_skipped_images">Skipped Images</string>
+    <string name="brapi_export_skipped_user_created_images">User Created Trait Images</string>
+    <string name="brapi_export_images">Images</string>
+    <string name="brapi_delete_message">Cannot delete synced BrAPI observation, using NA instead</string>
+    <string name="act_brapi_export_image_load_failed">Image load failed.</string>
+
+    <!-- Pagination -->
+    <string name="next">Next</string>
+    <string name="prev">Prev</string>
+    <string name="page_one_of_one">Page 1 of 1</string>
+
+    <!-- General -->
+    <string name="device_offline_warning">Device Offline: Please connect to a network and try again</string>
+    <string name="brapi_info_message">
+        Traits and fields imported via BrAPI will be able to export their observations via the BrAPI export.
+        Traits and fields created manually or imported via CSV will need to be exported via CSV format.
+    </string>
+    <string name="brapi_na">NA</string>
+
+
+    <!-- APP INTRO  -->
+    <string name="intro_tutorial_title">Would you like to enable the tutorial?</string>
+    <string name="intro_tutorial_description">This setting can be changed in the Settings</string>
+    <string name="intro_tutorial_radio_item_yes">Yes</string>
+    <string name="intro_tutorial_radio_item_no">No</string>
+    <string name="intro_tutorial_warning">Please make a choice</string>
+
+
+    <!-- TUTORIAL -->
+    <string name="tutorial_dialog_title">Tutorial</string>
+    <string name="tutorial_dialog_description">Would you like to enable the tutorial? This setting can be changed in the Settings.</string>
+
+    <string name="tutorial_main_infobars_title">InfoBars</string>
+    <string name="tutorial_main_infobars_description">InfoBars show extra data for each entry and can be changed using the dropdown menus.</string>
+    <string name="tutorial_main_traits_title">Traits</string>
+    <string name="tutorial_main_traits_description">The small, green arrows move between traits.</string>
+    <string name="tutorial_main_traitlist_title">Traits</string>
+    <string name="tutorial_main_traitlist_description">The current trait being collected. A list of active traits is displayed when the current trait is pressed.</string>
+    <string name="tutorial_main_entries_title">Entries</string>
+    <string name="tutorial_main_entries_description">The large, black arrows move between entries.</string>
+    <string name="tutorial_main_navinfo_title">Order columns</string>
+    <string name="tutorial_main_navinfo_description">This is where the primary and secondary order are displayed.</string>
+    <string name="tutorial_main_datacollect_title">Data input</string>
+    <string name="tutorial_main_datacollect_description">Data is entered in the bottom area of the screen. Different trait types have different layouts.</string>
+    <string name="tutorial_main_na_title">Missing data</string>
+    <string name="tutorial_main_na_description">The NA button is used to mark values as missing.</string>
+    <string name="tutorial_main_delete_title">Delete data</string>
+    <string name="tutorial_main_delete_description">Data is deleted using this button.</string>
+    <string name="tutorial_main_search_title">Search</string>
+    <string name="tutorial_main_search_description">The search icon allows database queries.</string>
+    <string name="tutorial_main_resources_title">Resources</string>
+
+    <string name="tutorial_fields_add_title">Add Field</string>
+    <string name="tutorial_fields_add_description">Import a field file.</string>
+    <string name="tutorial_main_resources_description">This displays a list of files in the Resources folder.</string>
+    <string name="tutorial_main_summary_title">Summary</string>
+    <string name="tutorial_main_summary_description">This displays a summary of all data for the current entry.</string>
+    <string name="tutorial_main_lockdata_title">Lock data</string>
+    <string name="tutorial_main_lockdata_description">This locks current data input</string>
+
+    <string name="tutorial_settings_fields_title">Fields</string>
+    <string name="tutorial_settings_fields_description">allows you to import and manage fields.</string>
+    <string name="tutorial_settings_fields_import">To start using Field Book, first import a field file.</string>
+    <string name="tutorial_settings_traits_title">Traits</string>
+    <string name="tutorial_settings_traits_description">allows you to add, import, and manage traits.</string>
+    <string name="tutorial_settings_collect_title">Collect data</string>
+    <string name="tutorial_settings_collect_description">allows you to collect phenotypic data.</string>
+    <string name="tutorial_settings_settings_title">Settings</string>
+    <string name="tutorial_settings_settings_description">allows additional configuration for data collection.</string>
+    <string name="tutorial_settings_export_title">Export</string>
+    <string name="tutorial_settings_export_description">Data can be exported in two formats: database or table.</string>
+    <string name="tutorial_fields_file_description">Files must contain three columns: a unique identifier, a primary order, and a secondary order. The primary/secondary order are used for navigation in the field.</string>
+    <string name="tutorial_fields_select_title">Active Field</string>
+    <string name="tutorial_fields_select_description">A field is selected for data collection after being imported.</string>
+    <string name="tutorial_fields_delete_title">Delete Field</string>
+    <string name="tutorial_fields_delete_description">To delete a field, open the menu on the left side of a field name and select Delete.</string>
+
+    <string name="tutorial_traits_add_title">Add Trait</string>
+    <string name="tutorial_traits_add_description">Add Trait creates a new trait. Different trait formats have different collection layouts.</string>
+    <string name="tutorial_traits_format_title">Trait Formats</string>
+    <string name="tutorial_traits_format_description">Different trait formats are indicated with different icons.</string>
+    <string name="tutorial_traits_visibility_title">Trait Visibility</string>
+    <string name="tutorial_traits_visibility_description">Traits can be disabled from collection by toggling the checkbox.</string>
+    <string name="shutter_capture_content_description">Shutter button for snapping a picture.</string>
+    <string name="dialog_geonav_prefs_sensor_missing_title">Required sensor missing</string>
+    <string name="dialog_geonav_prefs_sensor_missing_message">The trapezoidal method requires an accelerometer and gyroscope to use compass input.</string>
+    <string name="trait_audio_button_content_description">Controls recording audio.</string>
+    <string name="trait_counter_minus_content_description">Subtract count by one</string>
+    <string name="trait_counter_plus_content_description">Add to total count by one</string>
+    <string name="trait_date_minus_content_description">Subtracts one day from the current date</string>
+    <string name="trait_date_add_content_description">Adds one day to the current date</string>
+    <string name="trait_percent_ui_min_max_error">Something went wrong showing the min/max of this trait format</string>
+    <string name="tutorial_main_datagrid_title">Datagrid</string>
+    <string name="tutorial_main_field_audio_mic_title">Field Audio</string>
+    <string name="tutorial_main_datagrid_description">This opens a 2D phenotyping grid of the currently selected field.</string>
+    <string name="tutorial_main_field_audio_mic_description">This will start a field-level audio recording.</string>
+    <string name="tutorial_main_repeated_values_title">Repeated Values</string>
+    <string name="tutorial_main_repeated_values_description">This will open a dialog to manage the repeated values for the current observation unit.</string>
+    <string name="tutorial_main_geonav_title">GeoNav</string>
+    <string name="tutorial_main_geonav_description">This will open a configuration dialog to help with field navigation.</string>
+    <string name="oauth_configured_incorrectly">Authorization request failed, please check your BrAPI settings.</string>
+    <string name="brapi_programs_activity_title">Choose your Program</string>
+    <string name="import_brapi_title">BrAPI Import</string>
+    <string name="import_brapi_field_title">BrAPI Field Import</string>
+    <string name="import_brapi_trait_title">BrAPI Trait Import</string>
+    <string name="menu_action_brapi_filter">Filter</string>
+
+    <string name="act_brapi_filter_apply">Filter</string>
+    <string name="act_brapi_filter_import">Import</string>
+    <string name="act_brapi_filter_clear">Clear</string>
+    <string name="repeated_values_pager_content_description">repeated values</string>
+    <string name="repeated_values_right_button_content_description">right</string>
+    <string name="repeated_values_left_button_content_description">left</string>
+    <string name="export_util_repeated_measures_table_warning_title">Repeated Measures Table</string>
+    <string name="export_util_repeated_measures_table_warning_message">Only the latest repeated measures value will be exported in table format.</string>
+    <string name="activity_file_explorer_up_directory_name">Up</string>
+
+    <!-- base camera strings -->
+    <string name="trait_camera_connect_content_description">Starts a device connection.</string>
+    <string name="trait_camera_preview_content_description">This previews the camera\'s display.</string>
+    <string name="trait_camera_capture_content_description">Capture a photo</string>
+    <string name="delete_local_photo">Delete Photo</string>
+    <string name="trait_system_photo_settings_title">System Photo Settings</string>
+    <string name="trait_photos_no_settings">This trait has no settings.</string>
+    <string name="view_trait_photo_settings_preview_title">Preview</string>
+    <string name="view_trait_photo_settings_resolution_title">Target Resolution</string>
+    <string name="view_trait_photo_settings_system_title">System Camera</string>
+    <string name="trait_name_alt_photo_system">System</string>
+    <string name="trait_name_alt_usb">USB</string>
+    <string name="view_trait_photo_settings_camera_custom">Default</string>
+    <string name="view_trait_photo_settings_camera_system">Android</string>
+    <string name="view_trait_photo_settings_camera_choice_description">Choose between the default Field Book camera and the Android camera app.</string>
+
+    <!-- usb camera trait -->
+    <string name="usb_camera_resolution_options_title">Supported Resolutions</string>
+    <string name="usb_camera_plug_in_camera">Please plug in a UVC compatible web cam.</string>
+    <string name="view_trait_photo_settings_white_balance_title">Auto White Balance</string>
+    <string name="view_trait_photo_settings_auto_focus_title">Auto Focus</string>
+
+    <!-- gopro -->
+    <string name="dialog_go_pro_wait_stream_title">Waiting for live preview</string>
+    <string name="dialog_go_pro_wait_stream_message">This may take a minute.</string>
+
+    <!-- canon camera strings -->
+    <string name="canon_frag_connect_btn_content_description">shutter button</string>
+    <string name="traits_format_canon">Canon</string>
+    <string name="pref_canon_ip_title">Canon IP Address</string>
+    <string name="pref_canon_port_title">Canon Port</string>
+    <string name="preferences_canon_title">Canon</string>
+    <string name="pref_canon_ssid_summary">This name is used to find your device\'s AP. This name must be contained within the actual SSID.</string>
+    <string name="pref_canon_title">SSID Name</string>
+    <string name="pref_canon_ip_summary">This is the ip displayed on your camera when setting up the AP.</string>
+    <string name="pref_canon_port_summary">This is the port displayed on your camera when setting up the AP.</string>
+    <string name="pref_canon_help_title">Help</string>
+    <string name="pref_canon_help_summary">This will open a URL to the FieldBook Canon manual.</string>
+    <string name="pref_canon_debug_title">Debug</string>
+    <string name="pref_canon_debug_summary">A preferences for developers to monitor device output.</string>
+    <string name="trait_usb_photo_settings_title">USB Photo Settings</string>
+    <string name="canon_trait_settings_title">Canon Settings</string>
+    <string name="dialog_brapi_filter_title">Filters</string>
+    <string name="dialog_brapi_filter_active">Active</string>
+    <string name="dialog_brapi_filter_choices_title">Filter By</string>
+
+    <string name="brapi_studies_filter_title">Studies</string>
+    <string name="brapi_trials_filter_title">Trials</string>
+    <string name="brapi_filter_dialog_title">Filter By</string>
+    <string name="brapi_filter_type_program">Program</string>
+    <string name="brapi_filter_type_season">Season</string>
+    <string name="brapi_filter_type_trial">Trial</string>
+    <string name="brapi_filter_type_crop">Crop</string>
+    <string name="brapi_importer_search_hint">Search Text</string>
+    <string name="act_brapi_filter_by_title">Filter By: %s</string>
+    <string name="check_all">Check All Filters</string>
+    <string name="menu_action_brapi_filter_clear_all">Clear all filters</string>
+    <string name="brapi_filter_error">Something went wrong querying for %s</string>
+    <string name="brapi_importer_fetch_data">Fetching data, the first run may take a minute.</string>
+    <string name="menu_filter_brapi_reset_cache_title">Reset Cache</string>
+    <string name="brapi_filter_bottom_sheet_delete_all_description">clear all filters</string>
+    <string name="act_brapi_study_import_fetch_levels">Fetching observation levels...</string>
+    <string name="act_brapi_study_import_fetch_variables">Fetching variables for %s...</string>
+    <string name="act_brapi_study_import_fetch_units">Fetching observation units for %s...</string>
+    <string name="act_brapi_study_import_fetch_germplasm">Fetching germplasm for %s...</string>
+    <string name="act_brapi_list_filter_loading_trials">Loading trials, please wait.</string>
+    <string name="act_brapi_list_filter_loading_studies">Loading studies, please wait.</string>
+    <string name="act_brapi_list_filter_loading_variables">Loading variables, please wait.</string>
+    <string name="act_brapi_list_filter_loading_complete">Complete</string>
+    <string name="act_brapi_list_filter_error_multiple_programs">Please select studies from the same program.</string>
+    <string name="act_brapi_study_import_saving">Saving...</string>
+    <string name="act_brapi_study_import_title">Study Import</string>
+    <string name="select">Select</string>
+    <string name="results">results</string>
+    <string name="failed_to_fetch_observation_units">Failed to fetch observation units</string>
+    <string name="preferences_brapi_cache_invalidate_dialog_title">Invalidate Cache Interval Choices</string>
+    <string name="preferences_brapi_cache_invalidate_summary">%s</string>
+    <string name="preferences_brapi_cache_invalidate_title">Cache Invalidation</string>
+    <string name="brapi_v1_is_not_compatible">BrAPI V1 is not compatible.</string>
+    <string name="no_programdbid_provided">No programDbId provided</string>
+    <string name="no_studydbids_provided">No studyDbIds provided</string>
+    <string name="act_brapi_list_api_exception">Unknown error. Please check BrAPI preferences or contact developers.</string>
+    <string name="act_brapi_list_filter_reset_cache_title">Confirm Reset</string>
+    <string name="act_brapi_list_filter_reset_cache_message">This will delete local BrAPI data used for searching and importing.</string>
+    <string name="search_bar_hint">Searching… %s</string>
+    <string name="menu_filter_brapi_clear_filters">Clear Filters</string>
+    <string name="menu_filter_brapi_clear_selection">Clear Selection</string>
+    <string name="level">Level</string>
+    <string name="primary">Primary</string>
+    <string name="secondary">Secondary</string>
+    <string name="sort">Sort</string>
+    <string name="brapi_traits_filter_title">Traits</string>
+    <string name="brapi_filter_type_study">Study</string>
+    <string name="act_brapi_study_filter">Filter</string>
+    <string name="act_brapi_trait_preprocess_title">Field Book Format Chooser</string>
+    <string name="act_brapi_trait_import_title">Choose Formats</string>
+    <plurals name="act_brapi_list_filter">
+        <item quantity="one">%s result</item>
+        <item quantity="other">%s results</item>
+    </plurals>
+
+    <string name="brapi_filter_type_program_count">Program (%s)</string>
+    <string name="brapi_filter_type_season_count">Season (%s)</string>
+    <string name="brapi_filter_type_trial_count">Trial (%s)</string>
+    <string name="brapi_filter_type_crop_count">Crop (%s)</string>
+    <string name="brapi_filter_type_study_count">Study (%s)</string>
+    <string name="pref_alpha_enhanced_brapi_import_summary">When enabled, a new BrAPI import UI will be used for studies and traits.</string>
+    <string name="pref_alpha_brapi_import_title">New BrAPI Import UI</string>
+    <string name="opening_brapi_no_network_error">Networking must be enabled to use BrAPI features.</string>
+    <string name="act_brapi_list_filter_reset_selection_message">This will clear the running list of selected items.</string>
+    <string name="pref_alpha_media_keycode_events_summary">Enable to use media commands for app interactions</string>
+    <string name="pref_alpha_media_keycode_events_title">Enable Media Commands</string>
+    <string name="pref_geonav_distance_threshold_summary">GeoNav automatically stops when distance from all plots exceeds this value in kilometers.</string>
+    <string name="pref_geonav_distance_threshold_title">Proximity Check</string>
+    <string name="activity_collect_proximity_warning">GeoNav Stopping, outside proximity of coordinates</string>
+    <string name="failed_to_save_study">Failed to save study</string>
+    <string name="no_suitable_file_manager_was_found">No suitable File Manager was found.</string>
+    <string name="trait_error_invalid_multicat_value">Invalid categorical data was entered.</string>
+    <string name="dialog_crash_report_title">Failed to load data</string>
+    <string name="dialog_crash_report_message">Press OK to send an anonymous diagnostic report to help improve the app.</string>
+    <string name="dialog_quick_goto_title">Quick GoTo</string>
+    <string name="dialog_quick_goto_go">Go</string>
+    <string name="quick_goto_primary_hint">Primary ID</string>
+    <string name="quick_goto_secondary_hint">Secondary ID</string>
+    <string name="quick_goto_dialog_icon_description">running person</string>
+    <string name="failed_to_fetch_observation_levels">Failed fetching observation levels</string>
+    <string name="traits_sort_default">Default</string>
+    <string name="traits_crop_image_parameter">Crop</string>
+    <string name="dialog_crop_title">Setup Crop Region</string>
+    <string name="dialog_crop_message">Define a crop region that will be applied to all future pictures for this trait.</string>
+    <string name="view_trait_photo_settings_crop">Set Crop Region</string>
+    <string name="crop_image_clip_data_label">Field Book crop region data</string>
+    <string name="quick_goto_swap_content_description">toggle input type</string>
+
+    <!--  NearbyShare  -->
+    <string name="nearby_share_title">Nearby Share</string>
+    <string name="nearby_share_preferences_title">Share Preferences</string>
+    <string name="nearby_share_connection_established">Connection Established</string>
+    <string name="nearby_share_connection_rejected">Connection Rejected</string>
+    <string name="nearby_share_connection_error">Connection Error</string>
+    <string name="nearby_share_connection_cancelled">Connection cancelled</string>
+    <string name="nearby_share_transfer_complete">Transfer completed</string>
+    <string name="nearby_share_transfer_in_progress">Transfer in progress</string>
+    <string name="nearby_share_transfer_failed">Transfer failed</string>
+    <string name="nearby_share_transfer_cancelled">Transfer cancelled</string>
+    <string name="nearby_share_devices_disconnected">Devices Disconnected</string>
+    <string name="nearby_share_receiving_file">Receiving file…</string>
+    <string name="nearby_share_starting_transfer">Transferring File %s…</string>
+    <string name="nearby_share_waiting_for_receivers">Waiting for receivers to connect…</string>
+    <string name="nearby_share_searching_for_senders">Searching for nearby devices…</string>
+    <string name="nearby_share_already_waiting_for_receivers">Already waiting for receivers to connect…</string>
+    <string name="nearby_share_already_searching_for_sender">Already searching for sender…</string>
+    <string name="nearby_share_no_devices_found">No devices found yet</string>
+    <string name="nearby_share_permissions_required">Nearby Devices Permissions Required</string>
+    <string name="nearby_share_failed_discovery">Failed to start discovery: %s</string>
+    <string name="nearby_share_failed_advertising">Error while waiting for devices: %s</string>
+    <string name="nearby_share_failed_transfer">Failed to start transfer: %s</string>
+    <string name="nearby_share_failed_payload">Failed to create file payload</string>
+    <string name="nearby_share_failed_request">Failed to request connection: %s</string>
+    <string name="nearby_share_failed_handle_file">Failed to handle file: %s</string>
+    <string name="nearby_share_generating_file">Getting the file ready for transfer</string>
+    <string name="nearby_share_failed_import">Failed to import file: %s</string>
+    <string name="nearby_share_failed_export_generation_message">Error generating file for sharing: %s</string>
+    <string name="nearby_share_failed_export_generation">Error generating file for sharing</string>
+    <string name="nearby_share_file_imported_successfully">%s imported successfully</string>
+
+    <string name="nearby_share_authenticating_connection">Authenticating connection with %s…</string>
+
+    <string name="dialog_device_selection_title">Select a device</string>
+    <string name="dialog_nearby_authentication_title">Accept Connection to %s</string>
+    <string name="dialog_nearby_authentication_summary">Confirm the code matches on both devices: %s</string>
+
+    <string name="preferences_preferences_title">Preferences</string>
+    <string name="nearby_share_export_preferences">Export Preferences</string>
+    <string name="nearby_share_import_preferences">Import Preferences</string>
+</resources>

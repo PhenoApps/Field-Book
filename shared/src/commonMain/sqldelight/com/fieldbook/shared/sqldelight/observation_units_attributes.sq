@@ -1,0 +1,5 @@
+
+CREATE TABLE observation_units_attributes (
+  id INTEGER NOT NULL PRIMARY KEY,
+  study_id INTEGER NOT NULL REFERENCES studies(internal_id_study)
+);

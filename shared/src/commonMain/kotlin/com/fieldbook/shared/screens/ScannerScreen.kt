@@ -1,4 +1,4 @@
-package com.fieldbook.shared
+package com.fieldbook.shared.screens
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable

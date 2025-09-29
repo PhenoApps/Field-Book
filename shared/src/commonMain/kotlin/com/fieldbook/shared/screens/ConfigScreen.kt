@@ -1,6 +1,7 @@
-package com.fieldbook.shared
+package com.fieldbook.shared.screens
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,10 +19,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.fieldbook.shared.KmpHostScreenType
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.ic_nav_drawer_collect_data
 import com.fieldbook.shared.generated.resources.ic_nav_drawer_fields
@@ -60,7 +63,7 @@ fun ConfigScreen(
             Res.drawable.ic_tb_info
         )
         Surface(modifier = Modifier.fillMaxSize()) {
-            androidx.compose.foundation.layout.Column(modifier = Modifier.fillMaxSize()) {
+            Column(modifier = Modifier.fillMaxSize()) {
                 TopAppBar(
                     title = { Text(text = "KMP Module") },
                     navigationIcon = {
@@ -73,22 +76,34 @@ fun ConfigScreen(
                             }
                         }
                     },
-                    colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
+                    colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         titleContentColor = MaterialTheme.colorScheme.onPrimary,
                         navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 )
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    itemsIndexed(configItems ) { index, item ->
+                    itemsIndexed(configItems) { index, item ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(16.dp)
                                 .let { mod ->
-                                    if (item == "Fields" && onNavigate != null) {
-                                        mod.clickable { onNavigate(KmpHostScreenType.FIELD_EDITOR) }
-                                    } else mod
+                                    when {
+                                        item == "Fields" && onNavigate != null -> mod.clickable {
+                                            onNavigate(
+                                                KmpHostScreenType.FIELD_EDITOR
+                                            )
+                                        }
+
+                                        item == "Collect" && onNavigate != null -> mod.clickable {
+                                            onNavigate(
+                                                KmpHostScreenType.COLLECT
+                                            )
+                                        }
+
+                                        else -> mod
+                                    }
                                 },
                             verticalAlignment = Alignment.CenterVertically
                         ) {

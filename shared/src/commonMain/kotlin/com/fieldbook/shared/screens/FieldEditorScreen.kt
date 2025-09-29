@@ -1,4 +1,4 @@
-package com.fieldbook.shared.activities
+package com.fieldbook.shared.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -29,7 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.fieldbook.shared.database.models.FieldObject
-import com.fieldbook.shared.database.repository.StudiesRepo
+import com.fieldbook.shared.database.repository.StudiesRepository
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.ic_file_csv
 import com.fieldbook.shared.sqldelight.DriverFactory
@@ -57,7 +57,7 @@ fun FieldEditorScreen(
             loadingState.value = true
             errorState.value = null
             try {
-                val repo = StudiesRepo(db)
+                val repo = StudiesRepository(db)
                 fieldsState.value = repo.getAllFields()
                 println("Fields loaded: ${fieldsState.value}")
             } catch (e: Exception) {
