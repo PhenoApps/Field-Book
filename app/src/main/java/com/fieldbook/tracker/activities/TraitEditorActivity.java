@@ -795,7 +795,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
             String fileName = data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY);
 
             // First, handle the ResourceFileParameter case (for trait creation/editing)
-            ResourceFileParameter.Companion.handleActivityResult(requestCode, resultCode, data);
+            // ResourceFileParameter.Companion.handleActivityResult(requestCode, resultCode, data);
 
             // Then, check if we're in the TraitDetailFragment and update it
             TraitDetailFragment fragment = (TraitDetailFragment) getSupportFragmentManager()

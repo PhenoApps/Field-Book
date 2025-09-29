@@ -23,16 +23,18 @@ import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.traits.formats.TraitFormatParametersAdapter
 import com.fieldbook.tracker.traits.formats.ValidationResult
+import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 import com.fieldbook.tracker.traits.formats.ui.ParameterScrollView
 import com.fieldbook.tracker.utilities.SoundHelperImpl
 import com.fieldbook.tracker.utilities.VibrateUtil
 import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.utils.SoftKeyboardUtil
 import javax.inject.Inject
+import androidx.core.content.edit
 
 @AndroidEntryPoint
 class NewTraitDialog(
-    private val activity: Activity
+    private val activity: Activity,
 ) :
     DialogFragment(),
     TraitFormatAdapter.FormatSelectionListener,
@@ -274,6 +276,12 @@ class NewTraitDialog(
 
         format.getTraitFormatDefinition().parameters.forEach { parameter ->
 
+            if (parameter is ResourceFileParameter) {
+
+                parameter.setActivity(activity)
+
+            }
+
             parameter.createViewHolder(parametersSv)?.let { holder ->
 
                 holder.bind(parameter, initialTraitObject)
@@ -367,9 +375,7 @@ class NewTraitDialog(
 
         if (!isSelectingFormat && !isBrapiTraitImport) {
 
-            val ed = this.prefs.edit()
-            ed.putBoolean(GeneralKeys.TRAITS_EXPORTED, false)
-            ed.apply()
+            prefs.edit { putBoolean(GeneralKeys.TRAITS_EXPORTED, false) }
 
             CollectActivity.reloadData = true
 
