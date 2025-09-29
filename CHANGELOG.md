@@ -8,11 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Greenseeker and scale integrations
-- New Stopwatch trait format
-- Trait name wrapping in Collect can now be toggled with a long-press
-- Nix hardware sensors now supported as a new Spectral trait type
 - Fields can now be grouped and archived
+- New trait formats: Stopwatch, Nix, Greenseeker, Scales
+- Trait name wrapping in Collect can now be toggled with a long-press
 
 ### Changed
 - Field Creator updated with new workflow and UI
@@ -736,6 +734,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v6.1.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.1.0
 [v6.1.1]: https://github.com/PhenoApps/Field-Book/releases/tag/6.1.1
 [v6.1.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.1.2
+
 
 [v6.2.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.0
 [v6.2.1]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.1
