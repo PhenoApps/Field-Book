@@ -1,5 +1,6 @@
 package com.fieldbook.shared
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -7,7 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -25,7 +26,10 @@ import com.fieldbook.shared.theme.MainTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ConfigScreen(onBack: (() -> Unit)? = null) {
+fun ConfigScreen(
+    onBack: (() -> Unit)? = null,
+    onNavigate: ((KmpHostScreenType) -> Unit)? = null
+) {
     MainTheme {
         val configItems = listOf(
             "Fields",
@@ -36,15 +40,6 @@ fun ConfigScreen(onBack: (() -> Unit)? = null) {
             "Statistics",
             "About"
         )
-        /*val configIcons = listOf(
-            Res.drawable.ic_nav_drawer_fields,
-            Res.drawable.ic_nav_drawer_traits,
-            Res.drawable.ic_nav_drawer_collect_data,
-            Res.drawable.trait_date_save,
-            Res.drawable.ic_nav_drawer_settings,
-            Res.drawable.ic_nav_drawer_statistics,
-            Res.drawable.ic_tb_info
-        )*/
         Surface(modifier = Modifier.fillMaxSize()) {
             androidx.compose.foundation.layout.Column(modifier = Modifier.fillMaxSize()) {
                 TopAppBar(
@@ -53,7 +48,7 @@ fun ConfigScreen(onBack: (() -> Unit)? = null) {
                         if (onBack != null) {
                             IconButton(onClick = onBack) {
                                 Icon(
-                                    imageVector = Icons.Filled.ArrowBack,
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                     contentDescription = "Back"
                                 )
                             }
@@ -70,14 +65,14 @@ fun ConfigScreen(onBack: (() -> Unit)? = null) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
+                                .padding(16.dp)
+                                .let { mod ->
+                                    if (item == "Fields" && onNavigate != null) {
+                                        mod.clickable { onNavigate(KmpHostScreenType.FIELD_EDITOR) }
+                                    } else mod
+                                },
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            /*Icon(
-                                painter = painterResource(configIcons[index]),
-                                contentDescription = item,
-                                modifier = Modifier.padding(end = 16.dp).size(24.dp)
-                            )*/
                             Text(
                                 text = item,
                                 style = MaterialTheme.typography.bodyLarge
