@@ -3,7 +3,8 @@ package com.fieldbook.shared
 enum class KmpHostScreenType(val value: String) {
     CONFIG("config"),
     SCANNER("scanner"),
-    FIELD_EDITOR("field_editor");
+    FIELD_EDITOR("field_editor"),
+    COLLECT("collect");
 
     companion object {
         fun fromValue(value: String): KmpHostScreenType {
@@ -11,4 +12,3 @@ enum class KmpHostScreenType(val value: String) {
         }
     }
 }
-

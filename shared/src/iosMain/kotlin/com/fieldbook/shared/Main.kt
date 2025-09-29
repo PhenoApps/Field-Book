@@ -21,6 +21,11 @@ fun MainViewController(driverFactory: DriverFactory) = ComposeUIViewController {
             onBack = { currentScreen = KmpHostScreenType.CONFIG }
         )
 
+        KmpHostScreenType.COLLECT -> com.fieldbook.shared.screens.collect.CollectScreen(
+            driverFactory = driverFactory,
+            onBack = { currentScreen = KmpHostScreenType.CONFIG }
+        )
+
         KmpHostScreenType.SCANNER -> {
             // TODO: Implement scanner screen or fallback UI
         }

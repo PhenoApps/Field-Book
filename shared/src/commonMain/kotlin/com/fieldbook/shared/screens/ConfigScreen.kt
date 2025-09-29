@@ -89,9 +89,21 @@ fun ConfigScreen(
                                 .fillMaxWidth()
                                 .padding(16.dp)
                                 .let { mod ->
-                                    if (item == "Fields" && onNavigate != null) {
-                                        mod.clickable { onNavigate(KmpHostScreenType.FIELD_EDITOR) }
-                                    } else mod
+                                    when {
+                                        item == "Fields" && onNavigate != null -> mod.clickable {
+                                            onNavigate(
+                                                KmpHostScreenType.FIELD_EDITOR
+                                            )
+                                        }
+
+                                        item == "Collect" && onNavigate != null -> mod.clickable {
+                                            onNavigate(
+                                                KmpHostScreenType.COLLECT
+                                            )
+                                        }
+
+                                        else -> mod
+                                    }
                                 },
                             verticalAlignment = Alignment.CenterVertically
                         ) {

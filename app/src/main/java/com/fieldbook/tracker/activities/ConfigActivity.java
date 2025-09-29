@@ -26,6 +26,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.preference.PreferenceManager;
 
+import com.fieldbook.shared.KmpHostScreenType;
 import com.fieldbook.tracker.BuildConfig;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.ImageListAdapter;
@@ -93,7 +94,7 @@ public class ConfigActivity extends ThemedActivity {
     private final static String TAG = ConfigActivity.class.getSimpleName();
     private final int PERMISSIONS_REQUEST_TRAIT_DATA = 9950;
     private final int REQUEST_APP_INTRO_CODE = 120;
-//    private final Runnable exportData = () -> new ExportDataTask().execute(0);
+    //    private final Runnable exportData = () -> new ExportDataTask().execute(0);
     @Inject
     public DataHelper database;
     @Inject
@@ -444,6 +445,7 @@ public class ConfigActivity extends ThemedActivity {
 
     /**
      * Checks if any observations are collected.
+     *
      * @return -1 if there are no observations, else 1
      */
     private int checkObservationsExist() {
