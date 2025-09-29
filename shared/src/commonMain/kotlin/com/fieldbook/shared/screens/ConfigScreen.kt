@@ -1,5 +1,6 @@
 package com.fieldbook.shared.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,21 +9,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.fieldbook.shared.KmpHostScreenType
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.ic_nav_drawer_collect_data
 import com.fieldbook.shared.generated.resources.ic_nav_drawer_fields
@@ -37,7 +39,10 @@ import org.jetbrains.compose.resources.painterResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ConfigScreen(onBack: (() -> Unit)? = null) {
+fun ConfigScreen(
+    onBack: (() -> Unit)? = null,
+    onNavigate: ((KmpHostScreenType) -> Unit)? = null
+) {
     MainTheme {
         val configItems = listOf(
             "Fields",
@@ -65,7 +70,7 @@ fun ConfigScreen(onBack: (() -> Unit)? = null) {
                         if (onBack != null) {
                             IconButton(onClick = onBack) {
                                 Icon(
-                                    imageVector = Icons.Filled.ArrowBack,
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                     contentDescription = "Back"
                                 )
                             }
@@ -78,11 +83,16 @@ fun ConfigScreen(onBack: (() -> Unit)? = null) {
                     )
                 )
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    itemsIndexed(configItems ) { index, item ->
+                    itemsIndexed(configItems) { index, item ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
+                                .padding(16.dp)
+                                .let { mod ->
+                                    if (item == "Fields" && onNavigate != null) {
+                                        mod.clickable { onNavigate(KmpHostScreenType.FIELD_EDITOR) }
+                                    } else mod
+                                },
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
