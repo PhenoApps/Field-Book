@@ -366,6 +366,8 @@
     <string name="traits_format_spectral">Spectral</string>
     <string name="traits_format_nix">Nix</string>
     <string name="traits_format_inno_spectra">InnoSpectra</string>
+    <string name="traits_format_green_seeker">GreenSeeker</string>
+    <string name="traits_format_scale">Scale</string>
     <string name="traits_format_stop_watch">Stopwatch</string>
 
     <!-- Trait Creation Dialog -->
@@ -1575,7 +1577,7 @@
     <string name="nearby_share_export_preferences">Export Preferences</string>
     <string name="nearby_share_import_preferences">Import Preferences</string>
     <string name="all_fields_processed">All fields processed</string>
-  
+
     <string name="spectral_trait_insert_note">Note</string>
     <string name="spectral_trait_insert_note_message">Write a note for the chosen entry.</string>
     <string name="trait_spectral_na_content_description">not applicable value placeholder</string>
@@ -1623,4 +1625,9 @@
     <string name="play">Play</string>
     <string name="pause">Pause</string>
     <string name="save">Save</string>
+    <string name="device_settings_dialog_name">Name: %s</string>
+    <string name="device_settings_dialog_address">Address: %s</string>
+    <string name="device_settings_dialog_unknown_name">Unknown Bluetooth Device</string>
+    <string name="device_settings_dialog_title">Bluetooth Device Settings</string>
+    <string name="no_data_captured">No data captured.</string>
 </resources>

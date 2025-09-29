@@ -235,6 +235,12 @@ public class GeneralKeys {
     @NonNull
     public static final String SPECTRAL_MODE = "com.fieldbook.tracker.traits.spectral.MODE";
 
+    @NonNull
+    public static final String SCALE_ADDRESS = "com.fieldbook.tracker.traits.scale.ADDRESS";
+
+    @NonNull
+    public static final String GREEN_SEEKER_ADDRESS = "com.fieldbook.tracker.traits.greenseeker.ADDRESS";
+
     @NotNull
     private static String getDropDownAttributeKey(int index) {
         return "DROP" + index;
