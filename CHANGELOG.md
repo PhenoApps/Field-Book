@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Greenseeker and scale integrations
 - New Stopwatch trait format
 - Trait name wrapping in Collect can now be toggled with a long-press
 - Nix hardware sensors now supported as a new Spectral trait type
