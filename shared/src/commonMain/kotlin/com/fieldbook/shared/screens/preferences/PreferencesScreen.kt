@@ -1,5 +1,6 @@
-package com.fieldbook.shared.screens
+package com.fieldbook.shared.screens.preferences
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,27 +23,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.fieldbook.shared.KmpHostScreenType
 import com.fieldbook.shared.generated.resources.Res
-import com.fieldbook.shared.generated.resources.ic_pref_profile_person
-import com.fieldbook.shared.generated.resources.ic_star_circle_outline
-import com.fieldbook.shared.generated.resources.ic_pref_appearance
-import com.fieldbook.shared.generated.resources.ic_pref_navigation
-import com.fieldbook.shared.generated.resources.ic_map_search
-import com.fieldbook.shared.generated.resources.ic_pref_sounds
 import com.fieldbook.shared.generated.resources.ic_adv_brapi
-import com.fieldbook.shared.generated.resources.ic_pref_system
 import com.fieldbook.shared.generated.resources.ic_database_cog
 import com.fieldbook.shared.generated.resources.ic_experimental
-import com.fieldbook.shared.generated.resources.settings_profile
-import com.fieldbook.shared.generated.resources.preferences_features_title
+import com.fieldbook.shared.generated.resources.ic_map_search
+import com.fieldbook.shared.generated.resources.ic_pref_appearance
+import com.fieldbook.shared.generated.resources.ic_pref_navigation
+import com.fieldbook.shared.generated.resources.ic_pref_profile_person
+import com.fieldbook.shared.generated.resources.ic_pref_sounds
+import com.fieldbook.shared.generated.resources.ic_pref_system
+import com.fieldbook.shared.generated.resources.ic_star_circle_outline
 import com.fieldbook.shared.generated.resources.preferences_appearance_title
 import com.fieldbook.shared.generated.resources.preferences_behavior_title
+import com.fieldbook.shared.generated.resources.preferences_brapi
+import com.fieldbook.shared.generated.resources.preferences_experimental_title
+import com.fieldbook.shared.generated.resources.preferences_features_title
 import com.fieldbook.shared.generated.resources.preferences_location_title
 import com.fieldbook.shared.generated.resources.preferences_sounds
-import com.fieldbook.shared.generated.resources.preferences_brapi
-import com.fieldbook.shared.generated.resources.preferences_system_title
 import com.fieldbook.shared.generated.resources.preferences_storage_title
-import com.fieldbook.shared.generated.resources.preferences_experimental_title
+import com.fieldbook.shared.generated.resources.preferences_system_title
+import com.fieldbook.shared.generated.resources.settings_profile
 import com.fieldbook.shared.theme.MainTheme
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
@@ -57,7 +59,10 @@ private data class PreferenceItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PreferencesScreen(onBack: (() -> Unit)? = null) {
+fun PreferencesScreen(
+    onBack: (() -> Unit)? = null,
+    onNavigate: ((KmpHostScreenType) -> Unit)? = null
+) {
     MainTheme {
         val preferenceItems = listOf(
             PreferenceItem(
@@ -132,10 +137,16 @@ fun PreferencesScreen(onBack: (() -> Unit)? = null) {
                 )
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     items(preferenceItems) { item ->
+                        val isStorage = item.key == "pref_key_storage_settings"
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
+                                .padding(16.dp)
+                                .let { mod ->
+                                    if (isStorage && onNavigate != null) {
+                                        mod.clickable { onNavigate(KmpHostScreenType.STORAGE_PREFERENCES) }
+                                    } else mod
+                                },
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
@@ -155,3 +166,4 @@ fun PreferencesScreen(onBack: (() -> Unit)? = null) {
         }
     }
 }
+

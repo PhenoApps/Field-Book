@@ -6,7 +6,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.window.ComposeUIViewController
 import com.fieldbook.shared.screens.ConfigScreen
 import com.fieldbook.shared.screens.FieldEditorScreen
-import com.fieldbook.shared.screens.PreferencesScreen
+import com.fieldbook.shared.screens.preferences.PreferencesScreen
+import com.fieldbook.shared.screens.preferences.StoragePreferencesScreen
 import com.fieldbook.shared.sqldelight.DriverFactory
 
 fun MainViewController(driverFactory: DriverFactory) = ComposeUIViewController {
@@ -27,16 +28,18 @@ fun MainViewController(driverFactory: DriverFactory) = ComposeUIViewController {
             onBack = { currentScreen = KmpHostScreenType.CONFIG }
         )
 
-        KmpHostScreenType.PREFERENCES -> PreferencesScreen(onBack = {
-            currentScreen = KmpHostScreenType.CONFIG
-        })
+        KmpHostScreenType.PREFERENCES -> PreferencesScreen(
+            onBack = { currentScreen = KmpHostScreenType.CONFIG },
+            onNavigate = { target -> currentScreen = target }
+        )
+
+        KmpHostScreenType.STORAGE_PREFERENCES -> StoragePreferencesScreen(
+            onBack = { currentScreen = KmpHostScreenType.PREFERENCES }
+        )
 
         KmpHostScreenType.SCANNER -> {
             // TODO: Implement scanner screen or fallback UI
         }
 
-        else -> {
-            // Fallback UI or error
-        }
     }
 }

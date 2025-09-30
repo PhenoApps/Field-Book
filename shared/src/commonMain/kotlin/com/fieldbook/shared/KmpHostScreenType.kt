@@ -5,7 +5,8 @@ enum class KmpHostScreenType(val value: String) {
     SCANNER("scanner"),
     FIELD_EDITOR("field_editor"),
     COLLECT("collect"),
-    PREFERENCES("preferences");
+    PREFERENCES("preferences"),
+    STORAGE_PREFERENCES("storage_preferences");
 
     companion object {
         fun fromValue(value: String): KmpHostScreenType {

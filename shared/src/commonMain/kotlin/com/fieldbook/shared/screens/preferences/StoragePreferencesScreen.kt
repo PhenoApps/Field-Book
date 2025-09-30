@@ -1,0 +1,167 @@
+package com.fieldbook.shared.screens.preferences
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.fieldbook.shared.generated.resources.Res
+import com.fieldbook.shared.generated.resources.ic_pref_general_root_directory
+import com.fieldbook.shared.generated.resources.ic_pref_database_import
+import com.fieldbook.shared.generated.resources.ic_pref_database_export
+import com.fieldbook.shared.generated.resources.ic_pref_database_delete
+import com.fieldbook.shared.generated.resources.preferences_storage_storage_title
+import com.fieldbook.shared.generated.resources.preferences_storage_files_base_directory_title
+import com.fieldbook.shared.generated.resources.preferences_storage_files_base_directory_description
+import com.fieldbook.shared.generated.resources.preferences_storage_database_title
+import com.fieldbook.shared.generated.resources.database_import
+import com.fieldbook.shared.generated.resources.database_export
+import com.fieldbook.shared.generated.resources.database_reset
+import com.fieldbook.shared.generated.resources.preferences_storage_title
+import com.fieldbook.shared.theme.MainTheme
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+
+private data class StoragePreferenceItem(
+    val icon: DrawableResource,
+    val title: StringResource,
+    val summary: StringResource? = null,
+    val key: String
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun StoragePreferencesScreen(onBack: (() -> Unit)? = null) {
+    MainTheme {
+        val storageItems = listOf(
+            StoragePreferenceItem(
+                icon = Res.drawable.ic_pref_general_root_directory,
+                title = Res.string.preferences_storage_files_base_directory_title,
+                summary = Res.string.preferences_storage_files_base_directory_description,
+                key = "DEFAULT_STORAGE_LOCATION_PREFERENCE"
+            )
+        )
+        val databaseItems = listOf(
+            StoragePreferenceItem(
+                icon = Res.drawable.ic_pref_database_import,
+                title = Res.string.database_import,
+                key = "pref_database_import"
+            ),
+            StoragePreferenceItem(
+                icon = Res.drawable.ic_pref_database_export,
+                title = Res.string.database_export,
+                key = "pref_database_export"
+            ),
+            StoragePreferenceItem(
+                icon = Res.drawable.ic_pref_database_delete,
+                title = Res.string.database_reset,
+                key = "pref_database_delete"
+            )
+        )
+        Surface(modifier = Modifier.fillMaxSize()) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                TopAppBar(
+                    title = { Text(text = stringResource(Res.string.preferences_storage_title)) },
+                    navigationIcon = {
+                        if (onBack != null) {
+                            IconButton(onClick = onBack) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Back"
+                                )
+                            }
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                )
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    item {
+                        Text(
+                            text = stringResource(Res.string.preferences_storage_storage_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                    items(storageItems) { item ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                painter = painterResource(item.icon),
+                                contentDescription = item.key,
+                                modifier = Modifier.padding(end = 16.dp).size(24.dp)
+                            )
+                            Column {
+                                Text(
+                                    text = stringResource(item.title),
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
+                                item.summary?.let { summaryRes ->
+                                    Text(
+                                        text = stringResource(summaryRes),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                        Divider()
+                    }
+                    item {
+                        Text(
+                            text = stringResource(Res.string.preferences_storage_database_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                    items(databaseItems) { item ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                painter = painterResource(item.icon),
+                                contentDescription = item.key,
+                                modifier = Modifier.padding(end = 16.dp).size(24.dp)
+                            )
+                            Text(
+                                text = stringResource(item.title),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                        Divider()
+                    }
+                }
+            }
+        }
+    }
+}
+
