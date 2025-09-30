@@ -16,10 +16,16 @@ targets:
     bundleId: com.fieldbook.iosApp
     info:
       path: Info.plist
+      properties:
+        CADisableMinimumFrameDurationOnPhone: true
     sources:
       - path: Sources
         glob: "**/*.swift"
-    resources: []
+      - path: ../shared/build/xcode/compose-resources
+        type: folder
+        buildPhase: resources
+        name: compose-resources
+        optional: true
     dependencies:
       - framework: ../shared/build/XCFrameworks/debug/sharedKit.xcframework
         embed: true
