@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -32,9 +30,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.fieldbook.shared.database.models.FieldObject
 import com.fieldbook.shared.database.repository.StudiesRepo
+import com.fieldbook.shared.generated.resources.Res
+import com.fieldbook.shared.generated.resources.ic_file_csv
 import com.fieldbook.shared.sqldelight.DriverFactory
 import com.fieldbook.shared.sqldelight.FieldbookDatabase
 import com.fieldbook.shared.theme.MainTheme
+import org.jetbrains.compose.resources.painterResource
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -141,12 +144,12 @@ private fun FieldListItem(field: FieldObject) {
                 .padding(6.dp),
             contentAlignment = Alignment.Center
         ) {
-            /*Icon(
+            Icon(
                 painter = painterResource(Res.drawable.ic_file_csv),
                 contentDescription = "Field Icon",
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier.size(24.dp)
-            )*/
+            )
         }
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
