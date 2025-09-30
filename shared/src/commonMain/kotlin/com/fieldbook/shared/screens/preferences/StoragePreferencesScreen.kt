@@ -1,5 +1,6 @@
 package com.fieldbook.shared.screens.preferences
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,6 +11,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -20,21 +23,25 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.fieldbook.shared.generated.resources.Res
-import com.fieldbook.shared.generated.resources.ic_pref_general_root_directory
-import com.fieldbook.shared.generated.resources.ic_pref_database_import
-import com.fieldbook.shared.generated.resources.ic_pref_database_export
-import com.fieldbook.shared.generated.resources.ic_pref_database_delete
-import com.fieldbook.shared.generated.resources.preferences_storage_storage_title
-import com.fieldbook.shared.generated.resources.preferences_storage_files_base_directory_title
-import com.fieldbook.shared.generated.resources.preferences_storage_files_base_directory_description
-import com.fieldbook.shared.generated.resources.preferences_storage_database_title
-import com.fieldbook.shared.generated.resources.database_import
 import com.fieldbook.shared.generated.resources.database_export
+import com.fieldbook.shared.generated.resources.database_import
 import com.fieldbook.shared.generated.resources.database_reset
+import com.fieldbook.shared.generated.resources.ic_pref_database_delete
+import com.fieldbook.shared.generated.resources.ic_pref_database_export
+import com.fieldbook.shared.generated.resources.ic_pref_database_import
+import com.fieldbook.shared.generated.resources.ic_pref_general_root_directory
+import com.fieldbook.shared.generated.resources.preferences_storage_database_title
+import com.fieldbook.shared.generated.resources.preferences_storage_files_base_directory_description
+import com.fieldbook.shared.generated.resources.preferences_storage_files_base_directory_title
+import com.fieldbook.shared.generated.resources.preferences_storage_storage_title
 import com.fieldbook.shared.generated.resources.preferences_storage_title
 import com.fieldbook.shared.theme.MainTheme
 import org.jetbrains.compose.resources.DrawableResource
@@ -53,6 +60,8 @@ private data class StoragePreferenceItem(
 @Composable
 fun StoragePreferencesScreen(onBack: (() -> Unit)? = null) {
     MainTheme {
+        var showImportDialog by remember { mutableStateOf(false) }
+
         val storageItems = listOf(
             StoragePreferenceItem(
                 icon = Res.drawable.ic_pref_general_root_directory,
@@ -141,10 +150,14 @@ fun StoragePreferencesScreen(onBack: (() -> Unit)? = null) {
                         )
                     }
                     items(databaseItems) { item ->
+                        val isImport = item.key == "pref_database_import"
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
+                                .padding(16.dp)
+                                .let { mod ->
+                                    if (isImport) mod.clickable { showImportDialog = true } else mod
+                                },
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
@@ -160,8 +173,19 @@ fun StoragePreferencesScreen(onBack: (() -> Unit)? = null) {
                         Divider()
                     }
                 }
+                if (showImportDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showImportDialog = false },
+                        title = { Text(text = stringResource(Res.string.database_import)) },
+                        text = { Text("Import Database dialog (not implemented)") },
+                        confirmButton = {
+                            Button(onClick = { showImportDialog = false }) {
+                                Text("OK")
+                            }
+                        }
+                    )
+                }
             }
         }
     }
 }
-
