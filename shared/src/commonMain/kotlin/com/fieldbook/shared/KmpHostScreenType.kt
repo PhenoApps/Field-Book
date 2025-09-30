@@ -4,11 +4,13 @@ enum class KmpHostScreenType(val value: String) {
     CONFIG("config"),
     SCANNER("scanner"),
     FIELD_EDITOR("field_editor"),
-    COLLECT("collect");
+    COLLECT("collect"),
+    PREFERENCES("preferences");
 
     companion object {
         fun fromValue(value: String): KmpHostScreenType {
-            return values().find { it.value.equals(value, ignoreCase = true) } ?: CONFIG
+            return KmpHostScreenType.entries.find { it.value.equals(value, ignoreCase = true) }
+                ?: CONFIG
         }
     }
 }

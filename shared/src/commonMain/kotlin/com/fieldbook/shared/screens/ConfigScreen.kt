@@ -49,9 +49,9 @@ fun ConfigScreen(
             "Traits",
             "Collect",
             "Export",
-            "Advanced",
+            "Settings",
             "Statistics",
-            "About"
+            "About",
         )
         val configIcons = listOf(
             Res.drawable.ic_nav_drawer_fields,
@@ -60,7 +60,7 @@ fun ConfigScreen(
             Res.drawable.trait_date_save,
             Res.drawable.ic_nav_drawer_settings,
             Res.drawable.ic_nav_drawer_statistics,
-            Res.drawable.ic_tb_info
+            Res.drawable.ic_tb_info,
         )
         Surface(modifier = Modifier.fillMaxSize()) {
             Column(modifier = Modifier.fillMaxSize()) {
@@ -99,6 +99,12 @@ fun ConfigScreen(
                                         item == "Collect" && onNavigate != null -> mod.clickable {
                                             onNavigate(
                                                 KmpHostScreenType.COLLECT
+                                            )
+                                        }
+
+                                        item == "Settings" && onNavigate != null -> mod.clickable {
+                                            onNavigate(
+                                                KmpHostScreenType.PREFERENCES
                                             )
                                         }
 

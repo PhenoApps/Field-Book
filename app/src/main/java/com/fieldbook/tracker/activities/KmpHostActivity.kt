@@ -11,6 +11,7 @@ import com.fieldbook.shared.screens.collect.CollectScreen
 import com.fieldbook.shared.screens.ConfigScreen
 import com.fieldbook.shared.screens.ScannerScreen
 import com.fieldbook.shared.screens.FieldEditorScreen
+import com.fieldbook.shared.screens.PreferencesScreen
 import com.fieldbook.shared.sqldelight.DriverFactory
 
 class KmpHostActivity : ComponentActivity() {
@@ -51,6 +52,10 @@ class KmpHostActivity : ComponentActivity() {
                         driverFactory = DriverFactory(context = this),
                         onBack = { currentScreen.value = KmpHostScreenType.CONFIG }
                     )
+                }
+
+                KmpHostScreenType.PREFERENCES -> {
+                    PreferencesScreen(onBack = { currentScreen.value = KmpHostScreenType.CONFIG })
                 }
             }
         }
