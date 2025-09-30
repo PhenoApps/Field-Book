@@ -15,6 +15,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
@@ -80,7 +81,7 @@ fun ConfigScreen(
                     )
                 )
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    itemsIndexed(configItems ) { index, item ->
+                    itemsIndexed(configItems) { index, item ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
