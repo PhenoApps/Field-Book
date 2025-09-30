@@ -222,6 +222,9 @@ class StudyDao {
             it.searchAttribute = this["observation_unit_search_attribute"]?.toString()
             it.groupId = this["group_id"]?.toString()?.toIntOrNull()
             it.archived = this["is_archived"].toString() == "true"
+            it.startCorner = this["start_corner"]?.toString()
+            it.walkingDirection = this["walking_direction"]?.toString()
+            it.walkingPattern = this["walking_pattern"]?.toString()
         }
 
         fun getAllFieldObjects(sortOrder: String): ArrayList<FieldObject> = withDatabase { db ->
@@ -280,6 +283,9 @@ class StudyDao {
                     observation_unit_search_attribute,
                     is_archived,
                     group_id,
+                    start_corner,
+                    walking_direction,
+                    walking_pattern,
                     (SELECT COUNT(DISTINCT observation_unit_attribute_name) FROM observation_units_attributes AS A
                         JOIN observation_units_values AS V 
                             ON V.observation_unit_attribute_db_id = A.internal_id_observation_unit_attribute
@@ -413,6 +419,9 @@ class StudyDao {
                     put("count", field.entryCount)
                     put("observation_levels", field.observationLevel)
                     put("trial_name", field.trialName)
+                    put("start_corner", field.startCorner)
+                    put("walking_direction", field.walkingDirection)
+                    put("walking_pattern", field.walkingPattern)
                 }).toInt()
 
                 try {
