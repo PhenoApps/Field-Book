@@ -167,9 +167,9 @@
     <string name="act_field_editor_load_file_failed">Ocurrió un error durante la carga del archivo.</string>
     <string name="act_field_editor_file_open_failed">Error al abrir el archivo.</string>
     <!-- Field Creator  -->
-    <string name="dialog_field_creator_ask_size">Por favor, eligir un nombre y tamaño de Campo.</string>
-    <string name="dialog_field_creator_ask_start_point">Por favor, eligir un punto de partida del Campo.</string>
-    <string name="dialog_field_creator_ask_pattern">Por favor, eligir un patrón de Campo.</string>
+    <string name="field_creator_preview_title">Revisar</string>
+    <string name="field_creator_size_rows_hint">Filas</string>
+    <string name="field_creator_size_columns_hint">Columnas</string>
     <string name="dialog_field_creator_ask_name_hint">Nombre</string>
     <string name="dialog_field_creator_ask_row_hint">Filas</string>
     <string name="dialog_field_creator_ask_columns_hint">Columnas</string>
@@ -184,9 +184,8 @@
     <string name="dialog_field_creator_size_group_error">Por favor, ingrese un nombre y formato válidos.</string>
     <string name="dialog_field_creator_field_name_not_unique">El nombre del Campo ya está en uso.</string>
     <string name="dialog_field_creator_large_field">Se detecta un Campo grande, la transacción puede tardar mucho.</string>
-    <string name="dialog_field_creator_linear_button_content_desc">Botón para elegir el patrón de parcelas lineal.</string>
-    <string name="dialog_field_creator_zig_button_content_desc">Botón para elegir el patrón de parcelas en zig-zag.</string>
     <string name="dialog_field_creator_review_image_content_desc">Imagen mostrando la orientación y el patrón de las parcelas.</string>
+    <string name="field_creator_stepper_preview">Vista Previa</string>
     <!-- Geo-Navigate to Field -->
     <string name="menu_fields_plot_by_distance_title">Seleccionar Campo más cercano</string>
     <string name="activity_field_editor_no_field_found">No se encontraron coordenadas.</string>
@@ -241,7 +240,7 @@
     <string name="import_error_format_trait">Solo se pueden importar archivos TRT como lista de variables</string>
     <string name="traits_export_check">¿Exportar lista de variables actual?</string>
     <string name="traits_dialog_export">Exportar</string>
-    <string name="dialog_delete_traits_message">¿Desea eliminar todas las variables actuales?</string>
+    <string name="dialog_delete_traits_message">¿Quieres eliminar todas las variables actuales? Eliminar una variable también elimina los datos que se han recopilado para esa variable.</string>
     <string name="traits_toolbar_delete_all">Eliminar todas las variables</string>
     <string name="act_trait_editor_no_traits_exist">No existen variables.</string>
     <!-- Trait item menu -->
@@ -273,6 +272,7 @@
     <string name="traits_format_spectral">Espectral</string>
     <string name="traits_format_nix">Nix</string>
     <string name="traits_format_inno_spectra">InnoSpectra</string>
+    <string name="traits_format_stop_watch">Cronómetro</string>
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Formato de Variable</string>
     <string name="trait_creator_title_layout">Diseño de Variable</string>
@@ -1325,5 +1325,7 @@
     <string name="disabled">desactivado</string>
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="reset">Restablecer</string>
+    <string name="play">Reproducir</string>
+    <string name="pause">Pausar</string>
     <string name="save">Guardar</string>
 </resources>

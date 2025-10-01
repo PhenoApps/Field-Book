@@ -136,6 +136,9 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
 
 dependencies {
 
+    //seven segment display compose ui
+    implementation 'com.github.rabross:SegmentedDisplay:0.4.0'
+
     //add zebra jar file to dependencies
     implementation fileTree(include: ['*.jar', '*.aar'], dir: 'libs')
 
@@ -151,6 +154,7 @@ dependencies {
 
     //live data
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.8.7'
+    implementation "androidx.compose.runtime:runtime-livedata:1.7.8"
 
     implementation 'androidx.appcompat:appcompat:1.7.0-alpha02'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
@@ -271,6 +275,9 @@ dependencies {
 
     // DataGrid
     implementation "io.github.oleksandrbalan:lazytable:1.10.0"
+
+    // Stepper UI
+    implementation 'com.github.binayshaw7777:KotStep:3.0.1'
 
     // Add Compose related plugins
     implementation platform('androidx.compose:compose-bom:2025.03.00')

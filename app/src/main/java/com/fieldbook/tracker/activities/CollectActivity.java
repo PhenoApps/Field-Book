@@ -115,6 +115,9 @@ import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.VerifyPersonHelper;
 import com.fieldbook.tracker.utilities.VibrateUtil;
 import com.fieldbook.tracker.utilities.WifiHelper;
+import com.fieldbook.tracker.utilities.connectivity.BLEScanner;
+import com.fieldbook.tracker.utilities.connectivity.GreenSeekerGattManager;
+import com.fieldbook.tracker.utilities.connectivity.ScaleGattManager;
 import com.fieldbook.tracker.views.CollectInputView;
 import com.fieldbook.tracker.views.RangeBoxView;
 import com.fieldbook.tracker.views.TraitBoxView;
@@ -237,6 +240,15 @@ public class CollectActivity extends ThemedActivity
 
     @Inject
     NixSensorHelper nixSensorHelper;
+
+    @Inject
+    BLEScanner bleScanner;
+
+    @Inject
+    GreenSeekerGattManager greenSeekerGattManager;
+
+    @Inject
+    ScaleGattManager scaleGattManager;
 
     private SpectralViewModel spectralViewModel;
 
@@ -1227,6 +1239,12 @@ public class CollectActivity extends ThemedActivity
         traitLayoutRefresh();
 
         //nixSensorHelper.disconnect();
+
+        bleScanner.stopScanning();
+
+        greenSeekerGattManager.disconnect();
+
+        scaleGattManager.disconnect();
 
         usbCameraApi.onDestroy();
 
@@ -3123,6 +3141,21 @@ public class CollectActivity extends ThemedActivity
     @Override
     public SpectralViewModel getSpectralViewModel() {
         return spectralViewModel;
+    }
+
+    @NonNull
+    public BLEScanner getBleScanner() {
+        return bleScanner;
+    }
+
+    @NonNull
+    public GreenSeekerGattManager getGreenSeekerGattManager() {
+        return greenSeekerGattManager;
+    }
+
+    @NonNull
+    public ScaleGattManager getScaleGattManager() {
+        return scaleGattManager;
     }
 
     @Override
