@@ -17,7 +17,7 @@ struct ContentView: View {
 
 struct ComposeView: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIViewController {
-        let driverFactory = SharedKitDriverFactory()
+        let driverFactory = DriverFactory()
         let controller = MainKt.MainViewController(driverFactory: driverFactory)
         return controller
     }
