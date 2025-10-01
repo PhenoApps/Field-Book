@@ -209,4 +209,6 @@
     <string name="brapi_traits_filter_title">Merkmale</string>
     <string name="traits_sort_default">Vorgegeben</string>
     <!--  NearbyShare  -->
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="save">Speichern</string>
 </resources>

@@ -134,7 +134,9 @@ public class SearchDialog extends DialogFragment implements AttributeChooserDial
     }
 
     public void createAttributeChooserDialog() {
-        AttributeChooserDialog attributeChooserDialog = new AttributeChooserDialog();
+        AttributeChooserDialog attributeChooserDialog = new AttributeChooserDialog(
+                true, true, false
+        );
         attributeChooserDialog.setOnAttributeSelectedListener(this);
         attributeChooserDialog.show(originActivity.getSupportFragmentManager(), "attributeChooserDialog");
     }

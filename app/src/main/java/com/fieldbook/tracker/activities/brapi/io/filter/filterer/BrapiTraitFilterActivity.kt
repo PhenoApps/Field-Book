@@ -34,6 +34,7 @@ import org.brapi.client.v2.model.queryParams.phenotype.VariableQueryParams
 import org.brapi.v2.model.core.BrAPIStudy
 import org.brapi.v2.model.pheno.BrAPIObservationVariable
 import javax.inject.Inject
+import androidx.core.content.edit
 
 @AndroidEntryPoint
 class BrapiTraitFilterActivity(
@@ -85,11 +86,14 @@ class BrapiTraitFilterActivity(
 
     override fun List<CheckboxListAdapter.Model>.filterBySearchTextPreferences(): List<CheckboxListAdapter.Model> {
 
-        val searchTexts = prefs.getStringSet("${filterName}${GeneralKeys.LIST_FILTER_TEXTS}", emptySet())
+        val searchTexts =
+            prefs.getStringSet("${filterName}${GeneralKeys.LIST_FILTER_TEXTS}", emptySet())
 
         return if (searchTexts?.isEmpty() != false) this else filter { model ->
             searchTexts.map { it.lowercase() }.all { tokens ->
-                tokens in model.label.lowercase() || tokens in model.subLabel.lowercase() || tokens in model.id.lowercase()
+                tokens in model.label.lowercase() || tokens in model.subLabel.lowercase() || tokens in model.id.lowercase() || model.searchableTexts.any {
+                    it.lowercase().contains(tokens)
+                }
             }
         }
     }
@@ -102,10 +106,12 @@ class BrapiTraitFilterActivity(
     override fun onSearchTextComplete(searchText: String) {
 
         prefs.getStringSet("${filterName}${GeneralKeys.LIST_FILTER_TEXTS}", setOf())?.let { texts ->
-            prefs.edit().putStringSet(
-                "${filterName}${GeneralKeys.LIST_FILTER_TEXTS}",
-                texts.plus(searchText)
-            ).apply()
+            prefs.edit {
+                putStringSet(
+                    "${filterName}${GeneralKeys.LIST_FILTER_TEXTS}",
+                    texts.plus(searchText)
+                )
+            }
         }
 
         restoreModels()
@@ -134,7 +140,8 @@ class BrapiTraitFilterActivity(
                     checked = false,
                     id = model.observationVariableDbId,
                     label = model.synonyms?.firstOrNull() ?: model.observationVariableName ?: model.observationVariableDbId,
-                    subLabel = "${model.commonCropName ?: ""} ${model.observationVariableDbId ?: ""}"
+                    subLabel = "${model.commonCropName ?: ""} ${model.observationVariableDbId ?: ""}",
+                    searchableTexts = model.observationVariableName?.let { listOf(it) } ?: emptyList()
                 ).also {
                     model.scale?.dataType?.name?.let { dataType ->
                         Formats.findTrait(DataTypes.convertBrAPIDataType(dataType))?.iconDrawableResourceId?.let { icon ->

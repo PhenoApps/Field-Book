@@ -54,6 +54,7 @@ import org.brapi.v2.model.pheno.BrAPIPositionCoordinateTypeEnum
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.collections.set
+import kotlin.math.max
 
 /**
  * receive study information including trial
@@ -631,6 +632,8 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         sortId: String
     ) {
 
+        var maxVariableIndex = db.maxPositionFromTraits + 1
+
         attributesTable?.get(study.studyDbId)?.let { studyAttributes ->
 
             observationUnits[study.studyDbId]?.filter {
@@ -647,7 +650,9 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                     details.trialName = study.trialName
 
                     details.traits = observationVariables[study.studyDbId]?.toList()
-                        ?.map { it.toTraitObject(this@BrapiStudyImportActivity) } ?: listOf()
+                        ?.map { it.toTraitObject(this@BrapiStudyImportActivity).also {
+                            it.realPosition = maxVariableIndex++
+                        } } ?: listOf()
 
                     val geoCoordinateColumnName = "geo_coordinates"
 

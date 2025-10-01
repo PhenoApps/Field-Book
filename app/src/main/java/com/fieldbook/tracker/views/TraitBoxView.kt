@@ -22,8 +22,9 @@ import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.traits.BaseTraitLayout
 import com.fieldbook.tracker.traits.LayoutCollections
-import androidx.core.content.edit
 import com.fieldbook.tracker.activities.CollectActivity
+import androidx.core.content.edit
+import com.fieldbook.tracker.utilities.Utils
 
 
 class TraitBoxView : ConstraintLayout {
@@ -117,6 +118,36 @@ class TraitBoxView : ConstraintLayout {
         } else {
             traitsStatusBarRv?.visibility = GONE
         }
+
+        updateTraitBoxArrows()
+    }
+
+    fun handleTraitTypeWrapping() {
+        val isWordWrapEnabled = controller.getPreferences().getBoolean(GeneralKeys.TRAIT_TYPE_WORD_WRAP, false)
+        applyWordWrapState(traitTypeTv, isWordWrapEnabled)
+        traitTypeTv.setOnLongClickListener { view ->
+            val newState = traitTypeTv.maxLines == 1
+            applyWordWrapState(traitTypeTv, newState)
+
+            val message = controller.getContext().getString(R.string.trait_box_word_wrap_toast,
+                context.getString(if (newState) R.string.enabled else R.string.disabled))
+
+            Utils.makeToast(controller.getContext(), message)
+
+            controller.getPreferences().edit { putBoolean(GeneralKeys.TRAIT_TYPE_WORD_WRAP, newState) }
+
+            true
+        }
+    }
+
+    private fun applyWordWrapState(textView: TextView, isWordWrapEnabled: Boolean) {
+        if (isWordWrapEnabled) {
+            textView.maxLines = 10
+            textView.ellipsize = null
+        } else {
+            textView.maxLines = 1
+            textView.ellipsize = android.text.TextUtils.TruncateAt.END
+        }
     }
 
     fun initTraitDetails() {
@@ -157,7 +188,14 @@ class TraitBoxView : ConstraintLayout {
         }
 
         updateTraitsStatusBar()
+        updateTraitBoxArrows()
+    }
 
+    private fun updateTraitBoxArrows() { // hide arrows if only one trait is active
+        val shouldShowArrows = visibleTraitsList.size > 1
+
+        traitLeft.visibility = if (shouldShowArrows) VISIBLE else GONE
+        traitRight.visibility = if (shouldShowArrows) VISIBLE else GONE
     }
 
     fun getRecyclerView(): RecyclerView? {
@@ -187,6 +225,8 @@ class TraitBoxView : ConstraintLayout {
 
         traitTypeTv.text = currentTrait?.name
         traitDetails.text = currentTrait?.details ?: ""
+
+        handleTraitTypeWrapping()
 
         //Get current layout object and make it visible
         val layoutCollections: LayoutCollections = controller.getTraitLayouts()

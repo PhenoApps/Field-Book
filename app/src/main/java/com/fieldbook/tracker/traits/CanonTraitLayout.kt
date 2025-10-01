@@ -216,7 +216,7 @@ class CanonTraitLayout :
 
         uiScope.launch(Dispatchers.Main) {
 
-            saveJpegToStorage(type(), data, obsUnit, saveTime, saveState, offset)
+            saveJpegToStorage(data, obsUnit, currentTrait, saveTime, saveState, offset)
 
         }
     }

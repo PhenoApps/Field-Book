@@ -110,7 +110,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         settingsButton = act.findViewById(R.id.settings_btn)
 
         recycler?.adapter = LineGraphSelectableAdapter(this)
-        colorRecycler?.adapter = ColorAdapter(this)
+        colorRecycler?.adapter = ColorAdapter(context, this)
     }
 
     override fun afterLoadNotExists(act: CollectActivity?) {
@@ -554,19 +554,12 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
                     val ws = frame.wavelengths.split(" ").map { it.toFloat() }
                     val vs = frame.values.split(" ").map { it.toFloat() }
 
-                    //val (waves, values) = interpolate(ws, vs, 400, 700, ::linearInterpolation)
-//                    val (waves, values) = interpolate(
-//                        ws,
-//                        vs,
-//                        400,
-//                        700,
-//                        step = 10,
-//                        ::linearInterpolation
-//                    )
-
-                    FrameEntry(ws.mapIndexed { i, l ->
-                        Entry(l.toFloat(), vs[i])
-                    }, color)
+                    Triple(ws, vs, color)
+                }
+                .filter { (ws, vs, _) -> ws.size == vs.size }
+                .map { (ws, vs, color) ->
+                    FrameEntry(ws.mapIndexed { i, w ->
+                        Entry(w, vs[i]) }, color)
                 })
         )
 
@@ -785,6 +778,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
             collectActivity.studyId,
             null,
             null,
+            null,
             "1"
         )
 
@@ -925,6 +919,15 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
             }.onFailure {
                 Log.e(TAG, "Failed to delete color", it)
             }
+        }
+    }
+
+    override fun onColorLongClicked(position: Int) {
+        try {
+            val obsId = spectralDataList[position]?.observationId
+            (context as? CollectActivity)?.showObservationMetadataDialog(obsId)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }

@@ -116,6 +116,9 @@ import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.VerifyPersonHelper;
 import com.fieldbook.tracker.utilities.VibrateUtil;
 import com.fieldbook.tracker.utilities.WifiHelper;
+import com.fieldbook.tracker.utilities.connectivity.BLEScanner;
+import com.fieldbook.tracker.utilities.connectivity.GreenSeekerGattManager;
+import com.fieldbook.tracker.utilities.connectivity.ScaleGattManager;
 import com.fieldbook.tracker.views.CollectInputView;
 import com.fieldbook.tracker.views.RangeBoxView;
 import com.fieldbook.tracker.views.TraitBoxView;
@@ -237,6 +240,15 @@ public class CollectActivity extends ThemedActivity
 
     @Inject
     NixSensorHelper nixSensorHelper;
+
+    @Inject
+    BLEScanner bleScanner;
+
+    @Inject
+    GreenSeekerGattManager greenSeekerGattManager;
+
+    @Inject
+    ScaleGattManager scaleGattManager;
 
     private SpectralViewModel spectralViewModel;
 
@@ -1228,6 +1240,12 @@ public class CollectActivity extends ThemedActivity
 
         //nixSensorHelper.disconnect();
 
+        bleScanner.stopScanning();
+
+        greenSeekerGattManager.disconnect();
+
+        scaleGattManager.disconnect();
+
         usbCameraApi.onDestroy();
 
         gnssThreadHelper.stop();
@@ -1442,9 +1460,9 @@ public class CollectActivity extends ThemedActivity
             if (!pass) {
                 database.insertObservation(obsUnit, trait.getId(), value, person,
                         getLocationByPreferences(), "", studyId, observationDbId,
-                        lastSyncedTime, rep);
+                        null, lastSyncedTime, rep);
 
-                updateCurrentTraitStatus(true);
+                runOnUiThread(() -> updateCurrentTraitStatus(true));
             }
         }
 
@@ -1461,7 +1479,7 @@ public class CollectActivity extends ThemedActivity
         String traitDbId = getTraitDbId();
 
         database.insertObservation(obsUnit, traitDbId, value, person,
-                getLocationByPreferences(), "", studyId, null, null, rep);
+                getLocationByPreferences(), "", studyId, null, null, null, rep);
     }
 
     public void deleteRep(String rep) {
@@ -2225,6 +2243,7 @@ public class CollectActivity extends ThemedActivity
                                     getStudyId(),
                                     "",
                                     null,
+                                    null,
                                     getRep());
                         }
 
@@ -2532,7 +2551,7 @@ public class CollectActivity extends ThemedActivity
         database.insertObservation(plotID, traitID, labelNumber,
                 getPerson(),
                 getLocationByPreferences(), "", studyId, "",
-                null, null);
+                null, null, null);
     }
 
     @NonNull
@@ -2798,22 +2817,35 @@ public class CollectActivity extends ThemedActivity
         return gps.getLocation(0, 0);
     }
 
-    public void showObservationMetadataDialog(){
-        ObservationModel currentObservationObject = getCurrentObservation();
-        if (currentObservationObject != null){
-            DialogFragment dialogFragment = new ObservationMetadataFragment().newInstance(currentObservationObject);
+    private void showObservationMetadataDialog(@Nullable ObservationModel model) {
+
+        if (model != null){
+            DialogFragment dialogFragment = new ObservationMetadataFragment().newInstance(model);
             dialogFragment.show(this.getSupportFragmentManager(), "observationMetadata");
         }
     }
 
+    public void showObservationMetadataDialog(Integer observationId){
+        ObservationModel currentObservationObject = getDatabase().getObservationById(String.valueOf(observationId));
+        showObservationMetadataDialog(currentObservationObject);
+    }
+
+    public void showObservationMetadataDialog() {
+        ObservationModel currentObservationObject = getCurrentObservation();
+        showObservationMetadataDialog(currentObservationObject);
+    }
+
     public ObservationModel getCurrentObservation() {
         String rep = getCollectInputView().getRep();
-        List<ObservationModel> models = Arrays.asList(getDatabase().getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId()));
-            for (ObservationModel m : models) {
+
+        ObservationModel[] models = getDatabase().getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId());
+
+        for (ObservationModel m : models) {
             if (rep.equals(m.getRep())) {
                 return m;
             }
         }
+
         return null;
     }
 
@@ -3090,6 +3122,21 @@ public class CollectActivity extends ThemedActivity
     @Override
     public SpectralViewModel getSpectralViewModel() {
         return spectralViewModel;
+    }
+
+    @NonNull
+    public BLEScanner getBleScanner() {
+        return bleScanner;
+    }
+
+    @NonNull
+    public GreenSeekerGattManager getGreenSeekerGattManager() {
+        return greenSeekerGattManager;
+    }
+
+    @NonNull
+    public ScaleGattManager getScaleGattManager() {
+        return scaleGattManager;
     }
 
     @Override

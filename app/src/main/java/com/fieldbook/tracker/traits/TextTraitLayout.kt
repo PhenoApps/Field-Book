@@ -103,11 +103,20 @@ class TextTraitLayout : BaseTraitLayout {
 
             if (event.action == KeyEvent.ACTION_DOWN) {
 
+                val cursor = inputEditText?.selectionStart ?: 0
+
+                var deletePressed = false
+
                 scan = if (code != KeyEvent.KEYCODE_ENTER && event.unicodeChar != 10) {
 
                     val newScan = if (code == KeyEvent.KEYCODE_DEL) {
 
-                        scan.dropLast(1)
+                        deletePressed = true
+
+                        //delete character at cursor
+                        if (scan.isNotEmpty() && cursor > 0) scan.removeRange(cursor - 1, cursor)
+                        else scan
+
 
                     } else {
 
@@ -118,10 +127,19 @@ class TextTraitLayout : BaseTraitLayout {
                     //set text for current trait/plot
                     inputEditText?.setText(newScan)
 
-                    inputEditText?.text?.toString()?.let { x ->
+                    //set selection
+                    if (deletePressed) {
+                        inputEditText?.text?.toString()?.let { x ->
+                            val newCursor = if (cursor > 0) cursor - 1 else 0
+                            inputEditText?.setSelection(newCursor)
+                        }
+                    }
+                    else {
+                        inputEditText?.text?.toString()?.let { x ->
 
-                        inputEditText?.setSelection(x.length)
+                            inputEditText?.setSelection(x.length)
 
+                        }
                     }
 
                     newScan
@@ -132,11 +150,11 @@ class TextTraitLayout : BaseTraitLayout {
                     val actionOnScanLineFeed =
                         prefs.getString(PreferenceKeys.RETURN_CHARACTER, "0") ?: "0"
 
-                    if (actionOnScanLineFeed == "0") {
+                    if (actionOnScanLineFeed == "1") {
                         controller.getRangeBox().moveEntryRight()
                     }
 
-                    if (actionOnScanLineFeed == "1") {
+                    if (actionOnScanLineFeed == "2") {
                         controller.getTraitBox().moveTrait(TraitBoxView.MoveDirection.RIGHT)
                     }
 

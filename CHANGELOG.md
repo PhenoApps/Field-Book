@@ -8,12 +8,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Nix hardware sensors now supported as a new Spectral trait type
 - Fields can now be grouped and archived
+- New trait formats: Stopwatch, Nix, Greenseeker, Scales
+- Trait name wrapping in Collect can now be toggled with a long-press
 
 ### Changed
+- Field Creator updated with new workflow and UI
+- Trait arrows are now hidden if only one trait is active
+- Boolean traits now have a visual unset state
 
 ### Fixed
+- Settings are no longer reset on restart
+- New traits from BrAPI now appear at the end of the trait list
+- Long pressing image and spectral thumbnails now displays metadata dialog
+- Importing traits from BrAPI without trait details no longer leads to a crash
+- Repeated measures no longer ignore trait limits
+- Keyboard backspace no longer moves cursor to the end of the current value in text traits
+- Field name is no longer an option in the Collect Search dialog
+- Exif user comment tag no longer populated by incorrect data
+- Return character setting is now interpreted correctly
+- Observation Variable Name is now searchable in the BrAPI trait importer
 - Image file name sanitation now removes or replaces more characters
 
 ## [v6.2.5] - 2025-06-23
@@ -720,6 +734,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v6.1.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.1.0
 [v6.1.1]: https://github.com/PhenoApps/Field-Book/releases/tag/6.1.1
 [v6.1.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.1.2
+
 
 [v6.2.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.0
 [v6.2.1]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.1

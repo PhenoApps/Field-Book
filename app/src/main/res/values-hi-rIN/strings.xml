@@ -219,4 +219,6 @@
     <string name="brapi_traits_filter_title">विशेषताएँ</string>
     <string name="traits_sort_default">पूर्व निर्धारित</string>
     <!--  NearbyShare  -->
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="save">सुरक्षित करें</string>
 </resources>
