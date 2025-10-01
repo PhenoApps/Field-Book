@@ -338,15 +338,9 @@ public class ConfigActivity extends ThemedActivity {
             Intent intent = new Intent();
             switch (position) {
                 case 0:
-                    if (useKmp) {
-                        Intent kmpIntent = new Intent(ConfigActivity.this, KmpHostActivity.class);
-                        kmpIntent.putExtra(KmpHostActivity.EXTRA_SCREEN, KmpHostScreenType.FIELD_EDITOR.getValue());
-                        startActivity(kmpIntent);
-                    } else {
-                        intent.setClassName(ConfigActivity.this,
-                                FieldEditorActivity.class.getName());
-                        startActivity(intent);
-                    }
+                    intent.setClassName(ConfigActivity.this,
+                            FieldEditorActivity.class.getName());
+                    startActivity(intent);
                     break;
                 case 1:
                     intent.setClassName(ConfigActivity.this,
@@ -493,20 +487,12 @@ public class ConfigActivity extends ThemedActivity {
     }
 
     private void startCollectActivity() {
-        boolean useKmp = PreferenceManager.getDefaultSharedPreferences(this)
-                .getBoolean(PreferenceKeys.USE_KMP, false);
-
         int selectedField = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
         FieldObject field = database.getFieldObject(selectedField);
 
         if (field != null && field.getDate_import() != null && !field.getDate_import().isEmpty()) {
             Intent intent;
-            if (useKmp) {
-                intent = new Intent(this, KmpHostActivity.class);
-                intent.putExtra(KmpHostActivity.EXTRA_SCREEN, KmpHostScreenType.COLLECT.getValue());
-            } else {
-                intent = new Intent(this, CollectActivity.class);
-            }
+            intent = new Intent(this, CollectActivity.class);
             startActivity(intent);
         }
     }
@@ -589,9 +575,6 @@ public class ConfigActivity extends ThemedActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        boolean useKmp = PreferenceManager.getDefaultSharedPreferences(this)
-                .getBoolean(PreferenceKeys.USE_KMP, false);
-
         if (requestCode == REQUEST_APP_INTRO_CODE) {
             if (resultCode != Activity.RESULT_OK) finish();
             else {
@@ -630,7 +613,7 @@ public class ConfigActivity extends ThemedActivity {
 
                 // get barcode from scan result
                 String scannedBarcode;
-                if (mlkitEnabled || useKmp) {
+                if (mlkitEnabled) {
                     scannedBarcode = data.getStringExtra(ScannerActivity.EXTRA_BARCODE);
                 } else {
                     IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
