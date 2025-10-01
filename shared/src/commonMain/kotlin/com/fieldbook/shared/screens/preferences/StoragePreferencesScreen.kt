@@ -52,6 +52,7 @@ import com.fieldbook.shared.generated.resources.preferences_storage_storage_titl
 import com.fieldbook.shared.generated.resources.preferences_storage_title
 import com.fieldbook.shared.sqldelight.DriverFactory
 import com.fieldbook.shared.theme.MainTheme
+import com.fieldbook.shared.utilities.selectFirstField
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
@@ -211,6 +212,7 @@ fun StoragePreferencesScreen(
                                                         driverFactory,
                                                         DATABASE_NAME
                                                     )
+                                                    selectFirstField(driverFactory)
                                                     showImportDialog = false
                                                     showSuccessSnackbar = true
                                                 } catch (e: Exception) {

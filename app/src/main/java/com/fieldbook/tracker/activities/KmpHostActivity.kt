@@ -24,6 +24,7 @@ class KmpHostActivity : ComponentActivity() {
             var currentScreen = remember { mutableStateOf(hostScreenType) }
             when (currentScreen.value) {
                 KmpHostScreenType.CONFIG -> ConfigScreen(
+                    driverFactory = DriverFactory(context = this),
                     onBack = { finish() },
                     onNavigate = { target -> currentScreen.value = target }
                 )
