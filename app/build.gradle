@@ -301,7 +301,7 @@ dependencies {
 
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
 
-    implementation(project(":shared"))
+    implementation(project ":shared")
 }
 
 repositories {
@@ -311,4 +311,4 @@ repositories {
 
 task prepareKotlinBuildScriptModel {}
 
-android.defaultConfig.manifestPlaceholders = ['appAuthRedirectScheme': 'fieldbook' ]
+android.defaultConfig.manifestPlaceholders = ['appAuthRedirectScheme': 'fieldbook']
