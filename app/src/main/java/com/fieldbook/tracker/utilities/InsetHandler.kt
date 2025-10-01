@@ -1,5 +1,9 @@
 package com.fieldbook.tracker.utilities
 
+import android.app.Activity
+import android.content.Context
+import android.content.res.Configuration
+import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +14,7 @@ import androidx.core.view.updatePadding
 import android.widget.ImageButton
 import androidx.core.graphics.Insets
 import androidx.core.view.updateLayoutParams
+import com.fieldbook.tracker.R
 import com.google.android.material.appbar.AppBarLayout
 
 object InsetHandler {
@@ -138,11 +143,11 @@ object InsetHandler {
         bottomToolbar: Toolbar,
         bottomContent: View
     ) {
-        val tv = TypedValue()
-        rootView.context.theme.resolveAttribute(android.R.attr.actionBarSize, tv, true)
+        val typedValue = TypedValue()
+        rootView.context.theme.resolveAttribute(android.R.attr.actionBarSize, typedValue, true)
         
         val actionBarPx = TypedValue.complexToDimensionPixelSize(
-            tv.data,
+            typedValue.data,
             rootView.resources.displayMetrics
         )
 
@@ -160,9 +165,22 @@ object InsetHandler {
             // update bottom toolbar content padding
             bottomContent.updatePadding(bottom = systemBars.bottom)
 
+            if (rootView.context.isLightThemeOn()) { // if light theme is on
+                (rootView.context as? Activity)?.window?.let {
+
+                    rootView.context.theme.resolveAttribute(R.attr.fb_color_primary, typedValue, true)
+
+                    it.navigationBarColor = typedValue.data // color the nav bar
+                }
+            }
+
             insets
         }
 
         ViewCompat.requestApplyInsets(rootView)
+    }
+
+    fun Context.isLightThemeOn(): Boolean {
+        return resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == UI_MODE_NIGHT_NO
     }
 }
