@@ -266,6 +266,8 @@
                 android:resource="@xml/provider_paths" />
         </provider>
 
+        <!--TODO: Temporarily opt out of forced layout changes in sdk 36. Needs to be addressed before updating to sdk 37 -->
+        <property android:name="android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY" android:value="true" />
     </application>
 
     <queries>

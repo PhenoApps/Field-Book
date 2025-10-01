@@ -19,7 +19,6 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fitsSystemWindows="true"
             android:minHeight="?attr/actionBarSize"
             app:popupTheme="@style/PopupMenuStyle" />
 
@@ -28,6 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/toolbar"
             android:orientation="vertical"
+            android:clipToPadding="false"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             tools:listitem="@layout/list_item_trait"
             android:id="@+id/myList"/>

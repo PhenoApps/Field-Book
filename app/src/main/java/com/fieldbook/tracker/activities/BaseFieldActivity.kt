@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import androidx.preference.PreferenceManager
@@ -23,6 +24,7 @@ import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.FieldGroupControllerImpl
 import com.fieldbook.tracker.utilities.FieldSwitchImpl
+import com.fieldbook.tracker.utilities.InsetHandler
 import com.fieldbook.tracker.utilities.export.ExportUtil
 import com.fieldbook.tracker.views.SearchBar
 import dagger.hilt.android.AndroidEntryPoint
@@ -94,10 +96,13 @@ abstract class BaseFieldActivity : ThemedActivity(), FieldAdapterController, Fie
         initializeAdapter()
 
         setupViews()
+        setupFieldsWindowInsets()
 
         searchBar = findViewById(getSearchBarId())
 
         queryAndLoadFields()
+
+        setupBackCallback()
     }
 
     override fun onResume() {
@@ -295,15 +300,22 @@ abstract class BaseFieldActivity : ThemedActivity(), FieldAdapterController, Fie
             .commit()
     }
 
-    override fun onBackPressed() {
-        if (supportFragmentManager.backStackEntryCount > 0) {
-            // Return to Fields screen if pressed in detail fragment
-            mAdapter.notifyDataSetChanged()
-            supportFragmentManager.popBackStack()
-            recyclerView.isEnabled = true // Re-enable touch events
-        } else {
-            super.onBackPressed()
+
+
+    private fun setupBackCallback() {
+        val backCallback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (supportFragmentManager.backStackEntryCount > 0) {
+                    // Return to Fields screen if pressed in detail fragment
+                    mAdapter.notifyDataSetChanged()
+                    supportFragmentManager.popBackStack()
+                    recyclerView.isEnabled = true // Re-enable touch events
+                } else {
+                    finish()
+                }
+            }
         }
+        onBackPressedDispatcher.addCallback(this, backCallback)
     }
 
     fun setActiveField(studyId: Int) {
@@ -322,6 +334,13 @@ abstract class BaseFieldActivity : ThemedActivity(), FieldAdapterController, Fie
         //     val brapiInfo = BrapiInfoDialog(this, getResources().getString(R.string.brapi_info_message));
         //     brapiInfo.show();
         // }
+    }
+
+    protected fun setupFieldsWindowInsets() {
+        val rootView = findViewById<View>(android.R.id.content)
+        val toolbar = findViewById<Toolbar>(getToolbarId())
+
+        InsetHandler.setupStandardInsets(rootView, toolbar)
     }
 
     override fun getDatabase(): DataHelper = db

@@ -52,6 +52,7 @@ import pub.devrel.easypermissions.EasyPermissions
 import javax.inject.Inject
 import androidx.core.view.isGone
 import androidx.core.content.edit
+import com.fieldbook.tracker.utilities.InsetHandler
 
 @AndroidEntryPoint
 class FieldDetailFragment : Fragment(), FieldSyncController {
@@ -210,7 +211,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
 
         disableDataChipRipples()
 
-        Log.d("FieldDetailFragment", "onCreateView End")
+        InsetHandler.setupFragmentWithTopInsetsOnly(rootView, toolbar)
         return rootView
     }
 
@@ -633,5 +634,4 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             }, 100)
         }
     }
-
 }
