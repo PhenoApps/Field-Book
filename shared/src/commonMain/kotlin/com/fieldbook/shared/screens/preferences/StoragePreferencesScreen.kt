@@ -19,17 +19,24 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.fieldbook.shared.database.utils.DATABASE_NAME
+import com.fieldbook.shared.database.utils.importDatabaseFromBundled
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.database_export
 import com.fieldbook.shared.generated.resources.database_import
@@ -43,7 +50,9 @@ import com.fieldbook.shared.generated.resources.preferences_storage_files_base_d
 import com.fieldbook.shared.generated.resources.preferences_storage_files_base_directory_title
 import com.fieldbook.shared.generated.resources.preferences_storage_storage_title
 import com.fieldbook.shared.generated.resources.preferences_storage_title
+import com.fieldbook.shared.sqldelight.DriverFactory
 import com.fieldbook.shared.theme.MainTheme
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
@@ -58,9 +67,17 @@ private data class StoragePreferenceItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StoragePreferencesScreen(onBack: (() -> Unit)? = null) {
+fun StoragePreferencesScreen(
+    driverFactory: DriverFactory,
+    onBack: (() -> Unit)? = null
+) {
     MainTheme {
         var showImportDialog by remember { mutableStateOf(false) }
+        var isImporting by remember { mutableStateOf(false) }
+        var importResult by remember { mutableStateOf<String?>(null) }
+        var showSuccessSnackbar by remember { mutableStateOf(false) }
+        val coroutineScope = rememberCoroutineScope()
+        val snackbarHostState = remember { SnackbarHostState() }
 
         val storageItems = listOf(
             StoragePreferenceItem(
@@ -175,16 +192,62 @@ fun StoragePreferencesScreen(onBack: (() -> Unit)? = null) {
                 }
                 if (showImportDialog) {
                     AlertDialog(
-                        onDismissRequest = { showImportDialog = false },
+                        onDismissRequest = {
+                            showImportDialog = false
+                            isImporting = false
+                            importResult = null
+                        },
                         title = { Text(text = stringResource(Res.string.database_import)) },
-                        text = { Text("Import Database dialog (not implemented)") },
+                        text = {
+                            Column {
+                                if (!isImporting && importResult == null) {
+                                    TextButton(
+                                        onClick = {
+                                            coroutineScope.launch {
+                                                isImporting = true
+                                                importResult = null
+                                                try {
+                                                    importDatabaseFromBundled(
+                                                        driverFactory,
+                                                        DATABASE_NAME
+                                                    )
+                                                    showImportDialog = false
+                                                    showSuccessSnackbar = true
+                                                } catch (e: Exception) {
+                                                    importResult =
+                                                        "Failed to import sample database: ${'$'}{e.message}"
+                                                } finally {
+                                                    isImporting = false
+                                                }
+                                            }
+                                        },
+                                        enabled = !isImporting
+                                    ) {
+                                        Text("sample_db")
+                                    }
+                                }
+                            }
+                        },
                         confirmButton = {
-                            Button(onClick = { showImportDialog = false }) {
-                                Text("OK")
+                            Button(
+                                onClick = {
+                                    showImportDialog = false
+                                    isImporting = false
+                                    importResult = null
+                                }
+                            ) {
+                                Text("Cancel")
                             }
                         }
                     )
                 }
+                if (showSuccessSnackbar) {
+                    LaunchedEffect(showSuccessSnackbar) {
+                        snackbarHostState.showSnackbar("Sample database imported successfully.")
+                        showSuccessSnackbar = false
+                    }
+                }
+                SnackbarHost(hostState = snackbarHostState)
             }
         }
     }

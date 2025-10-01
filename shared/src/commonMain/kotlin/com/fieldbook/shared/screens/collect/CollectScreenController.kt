@@ -16,7 +16,7 @@ import com.fieldbook.shared.theme.AppColors
 import com.russhwolf.settings.Settings
 
 
-// TODO refactor to use actual ViewModel() ?
+// TODO refactor to use ViewModel() ?
 class CollectScreenController(driverFactory: DriverFactory) {
     private val db = FieldbookDatabase(driverFactory.createDriver())
     private val observationUnitRepository = ObservationUnitRepository(db)

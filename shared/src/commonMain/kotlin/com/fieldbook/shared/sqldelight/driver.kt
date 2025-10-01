@@ -11,3 +11,7 @@ fun createDatabase(driverFactory: DriverFactory): FieldbookDatabase {
     val database = FieldbookDatabase(driver)
     return database
 }
+
+fun closeDatabase(driverFactory: DriverFactory) {
+    driverFactory.createDriver().close()
+}

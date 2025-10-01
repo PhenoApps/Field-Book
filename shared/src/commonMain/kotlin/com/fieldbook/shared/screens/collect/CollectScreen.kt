@@ -23,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fieldbook.shared.sqldelight.DriverFactory
 import com.fieldbook.shared.theme.MainTheme
 
@@ -39,7 +38,8 @@ fun CollectScreen(
     onBack: (() -> Unit)? = null,
 ) {
     MainTheme {
-        val viewModel = remember { CollectScreenController(driverFactory) }
+        val controller = remember { CollectScreenController(driverFactory) }
+
         Surface(modifier = modifier.fillMaxSize()) {
             Column(modifier = Modifier.fillMaxSize()) {
                 TopAppBar(
@@ -57,15 +57,15 @@ fun CollectScreen(
                         navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 )
-                if (viewModel.unitLoading || viewModel.traitLoading) {
+                if (controller.unitLoading || controller.traitLoading) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
                     }
-                } else if (viewModel.unitError != null || viewModel.traitError != null) {
+                } else if (controller.unitError != null || controller.traitError != null) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("Error: ${viewModel.unitError ?: viewModel.traitError}")
+                        Text("Error: ${controller.unitError ?: controller.traitError}")
                     }
-                } else if (viewModel.units.isNotEmpty() && viewModel.traits.isNotEmpty()) {
+                } else if (controller.units.isNotEmpty() && controller.traits.isNotEmpty()) {
                     Column(
                         Modifier
                             .fillMaxWidth()
@@ -73,15 +73,15 @@ fun CollectScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Spacer(Modifier.height(8.dp))
-                        InfoBar(viewModel = viewModel)
+                        InfoBar(viewModel = controller)
                         Spacer(Modifier.height(8.dp))
                         TraitBox(
-                            viewModel = viewModel,
+                            viewModel = controller,
                             modifier = Modifier.fillMaxWidth()
                         )
                         Spacer(Modifier.height(8.dp))
-                        RangeBox(viewModel = viewModel)
-                        CollectInput(controller = viewModel)
+                        RangeBox(viewModel = controller)
+                        CollectInput(controller = controller)
                     }
                 }
             }

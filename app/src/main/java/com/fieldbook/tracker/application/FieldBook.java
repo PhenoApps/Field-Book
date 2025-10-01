@@ -3,6 +3,7 @@ package com.fieldbook.tracker.application;
 import androidx.multidex.MultiDexApplication;
 
 import com.fieldbook.tracker.BuildConfig;
+import com.fieldbook.shared.AndroidAppContextHolder;
 
 import dagger.hilt.android.HiltAndroidApp;
 
@@ -14,5 +15,11 @@ public class FieldBook extends MultiDexApplication {
             //StrictMode.enableDefaults();
             //un-comment to enable strict warnings in logcat
         }
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        AndroidAppContextHolder.initialize(this);
     }
 }

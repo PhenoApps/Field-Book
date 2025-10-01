@@ -63,9 +63,12 @@ class KmpHostActivity : ComponentActivity() {
                 }
 
                 KmpHostScreenType.STORAGE_PREFERENCES -> {
-                    StoragePreferencesScreen(onBack = {
-                        currentScreen.value = KmpHostScreenType.PREFERENCES
-                    })
+                    StoragePreferencesScreen(
+                        driverFactory = DriverFactory(context = this),
+                        onBack = {
+                            currentScreen.value = KmpHostScreenType.PREFERENCES
+
+                        })
                 }
             }
         }
