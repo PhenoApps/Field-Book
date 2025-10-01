@@ -154,7 +154,7 @@ private fun FieldListItem(field: FieldObject) {
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = if (field.expAlias.isNotEmpty()) field.expAlias else field.expName,
+                text = if (field.exp_alias.isNotEmpty()) field.exp_alias else field.exp_name,
                 style = MaterialTheme.typography.bodyLarge
             )
         }
