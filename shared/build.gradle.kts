@@ -121,8 +121,8 @@ tasks.register("prepareComposeResourcesForXcode") {
     )
 }
 
-// ❷ Preparación: arma el diseño EXACTO que espera iOS en el paquete
-// Resultado: shared/build/xcode/compose-resources/composeResources/&lt;paquete&gt;/...
+// ❷ Preparation: build the EXACT design that iOS expects in the package
+// Result: shared/build/xcode/compose-resources/composeResources/&lt;paquete&gt;/...
 tasks.register<Sync>("stageComposeResourcesForXcode") {
     dependsOn("prepareComposeResourcesForXcode")
     from(layout.buildDirectory.dir("generated/compose/resourceGenerator/preparedResources/commonMain/composeResources"))
