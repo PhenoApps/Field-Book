@@ -1,5 +1,5 @@
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
-
+import org.gradle.api.tasks.Sync
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
     id("com.android.kotlin.multiplatform.library")
@@ -108,6 +108,29 @@ kotlin {
 
 compose.resources {
     packageOfResClass = "com.fieldbook.shared.generated.resources"
+}
+
+// Package used by Compose resources (must match the one above)
+val resPackage = "com.fieldbook.shared.generated.resources"
+
+// ❶ Aggregator: generates Res class + prepares resources for common and iOS
+tasks.register("prepareComposeResourcesForXcode") {
+    dependsOn(
+        "generateComposeResClass",
+        "prepareComposeResourcesTaskForCommonMain",
+        "prepareComposeResourcesTaskForAppleMain",
+        "prepareComposeResourcesTaskForIosMain",
+        "prepareComposeResourcesTaskForIosSimulatorArm64Main",
+        "prepareComposeResourcesTaskForIosArm64Main"
+    )
+}
+
+// ❷ Preparation: build the EXACT design that iOS expects in the package
+// Result: shared/build/xcode/compose-resources/composeResources/&lt;paquete&gt;/...
+tasks.register<Sync>("stageComposeResourcesForXcode") {
+    dependsOn("prepareComposeResourcesForXcode")
+    from(layout.buildDirectory.dir("generated/compose/resourceGenerator/preparedResources/commonMain/composeResources"))
+    into(layout.buildDirectory.dir("xcode/compose-resources/composeResources/$resPackage"))
 }
 
 sqldelight {
