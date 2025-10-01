@@ -39,7 +39,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -555,9 +554,9 @@ public class CollectActivity extends ThemedActivity
 
     private void loadScreen() {
         setContentView(R.layout.activity_collect);
-        setupCollectInsets();
 
         initToolbars();
+        setupCollectInsets();
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(null);
@@ -3100,8 +3099,9 @@ public class CollectActivity extends ThemedActivity
 
     private void setupCollectInsets() {
         View rootView = findViewById(android.R.id.content);
-        Toolbar topToolbar = findViewById(R.id.toolbar);
+        Toolbar bottomToolbar = findViewById(R.id.toolbarBottom);
+        LinearLayout bottomContent = bottomToolbar.findViewById(R.id.toolbarBottomContent);
 
-        InsetHandler.INSTANCE.setupStandardInsets(rootView, topToolbar);
+        InsetHandler.INSTANCE.setupInsetsWithBottomBar(rootView, toolbar, bottomToolbar, bottomContent);
     }
 }
