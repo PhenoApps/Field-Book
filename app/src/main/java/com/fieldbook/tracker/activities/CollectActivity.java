@@ -1460,7 +1460,7 @@ public class CollectActivity extends ThemedActivity
             if (!pass) {
                 database.insertObservation(obsUnit, trait.getId(), value, person,
                         getLocationByPreferences(), "", studyId, observationDbId,
-                        lastSyncedTime, rep);
+                        null, lastSyncedTime, rep);
 
                 runOnUiThread(() -> updateCurrentTraitStatus(true));
             }
@@ -1479,7 +1479,7 @@ public class CollectActivity extends ThemedActivity
         String traitDbId = getTraitDbId();
 
         database.insertObservation(obsUnit, traitDbId, value, person,
-                getLocationByPreferences(), "", studyId, null, null, rep);
+                getLocationByPreferences(), "", studyId, null, null, null, rep);
     }
 
     public void deleteRep(String rep) {
@@ -2244,6 +2244,7 @@ public class CollectActivity extends ThemedActivity
                                     getStudyId(),
                                     "",
                                     null,
+                                    null,
                                     getRep());
                         }
 
@@ -2564,7 +2565,7 @@ public class CollectActivity extends ThemedActivity
         database.insertObservation(plotID, traitID, labelNumber,
                 getPerson(),
                 getLocationByPreferences(), "", studyId, "",
-                null, null);
+                null, null, null);
     }
 
     @Override

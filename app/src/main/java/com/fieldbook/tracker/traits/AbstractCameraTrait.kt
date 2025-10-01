@@ -324,6 +324,7 @@ abstract class AbstractCameraTrait :
                                 location, "", studyId,
                                 null,
                                 null,
+                                null,
                                 rep
                             )
 
@@ -629,6 +630,7 @@ abstract class AbstractCameraTrait :
             (activity as? CollectActivity)?.locationByPreferences,
             "",
             (activity as? CollectActivity)?.studyId,
+            null,
             null,
             null,
             (activity as? CollectActivity)?.rep
