@@ -837,6 +837,7 @@ class GreenSeekerTraitLayout : BaseTraitLayout, LineGraphSelectableAdapter.Liste
             collectActivity.studyId,
             null,
             null,
+            null,
             "1"
         )
 
