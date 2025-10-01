@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Trait name wrapping in Collect can now be toggled with a long-press
 
 ### Changed
+- Field Book now targets the Android SDK 36
 - Field Creator updated with new workflow and UI
 - Trait arrows are now hidden if only one trait is active
 - Boolean traits now have a visual unset state
