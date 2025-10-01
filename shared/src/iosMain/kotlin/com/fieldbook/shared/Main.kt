@@ -3,9 +3,9 @@ package com.fieldbook.shared
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.window.ComposeUIViewController
-import com.fieldbook.shared.activities.FieldEditorScreen
+import com.fieldbook.shared.screens.ConfigScreen
+import com.fieldbook.shared.screens.FieldEditorScreen
 import com.fieldbook.shared.sqldelight.DriverFactory
 
 fun MainViewController(driverFactory: DriverFactory) = ComposeUIViewController {
@@ -17,6 +17,11 @@ fun MainViewController(driverFactory: DriverFactory) = ComposeUIViewController {
         )
 
         KmpHostScreenType.FIELD_EDITOR -> FieldEditorScreen(
+            driverFactory = driverFactory,
+            onBack = { currentScreen = KmpHostScreenType.CONFIG }
+        )
+
+        KmpHostScreenType.COLLECT -> com.fieldbook.shared.screens.collect.CollectScreen(
             driverFactory = driverFactory,
             onBack = { currentScreen = KmpHostScreenType.CONFIG }
         )

@@ -1,11 +1,16 @@
 package com.fieldbook.tracker.activities
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.fieldbook.shared.ConfigScreen
-import com.fieldbook.shared.ScannerScreen
-import com.fieldbook.shared.activities.FieldEditorScreen
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import com.fieldbook.shared.KmpHostScreenType
+import com.fieldbook.shared.screens.collect.CollectScreen
+import com.fieldbook.shared.screens.ConfigScreen
+import com.fieldbook.shared.screens.ScannerScreen
+import com.fieldbook.shared.screens.FieldEditorScreen
 import com.fieldbook.shared.sqldelight.DriverFactory
 
 class KmpHostActivity : ComponentActivity() {
@@ -14,13 +19,18 @@ class KmpHostActivity : ComponentActivity() {
         val screen = intent.getStringExtra(EXTRA_SCREEN)
         val hostScreenType = KmpHostScreenType.fromValue(screen ?: KmpHostScreenType.CONFIG.value)
         setContent {
-            when (hostScreenType) {
-                KmpHostScreenType.CONFIG -> ConfigScreen(onBack = { finish() })
+            var currentScreen = remember { mutableStateOf(hostScreenType) }
+            when (currentScreen.value) {
+                KmpHostScreenType.CONFIG -> ConfigScreen(
+                    onBack = { finish() },
+                    onNavigate = { target -> currentScreen.value = target }
+                )
+
                 KmpHostScreenType.SCANNER -> {
                     ScannerScreen(
                         onBack = { finish() },
                         onResult = { qrCode ->
-                            val resultIntent = android.content.Intent().apply {
+                            val resultIntent = Intent().apply {
                                 putExtra(ScannerActivity.EXTRA_BARCODE, qrCode)
                             }
                             setResult(RESULT_OK, resultIntent)
@@ -28,10 +38,18 @@ class KmpHostActivity : ComponentActivity() {
                         }
                     )
                 }
+
                 KmpHostScreenType.FIELD_EDITOR -> {
                     FieldEditorScreen(
                         driverFactory = DriverFactory(context = this),
-                        onBack = { finish() }
+                        onBack = { currentScreen.value = KmpHostScreenType.CONFIG }
+                    )
+                }
+
+                KmpHostScreenType.COLLECT -> {
+                    CollectScreen(
+                        driverFactory = DriverFactory(context = this),
+                        onBack = { currentScreen.value = KmpHostScreenType.CONFIG }
                     )
                 }
             }

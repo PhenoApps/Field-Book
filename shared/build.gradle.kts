@@ -3,8 +3,8 @@ import org.gradle.api.tasks.Sync
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
     id("com.android.kotlin.multiplatform.library")
-    id("org.jetbrains.kotlin.plugin.compose") version "2.1.10" // same as main app build.gradle
-    id("org.jetbrains.compose") version "1.7.3" // compatible with compileSdk = 34
+    alias(libs.plugins.kotlin.plugin.compose)
+    alias(libs.plugins.compose)
     alias(libs.plugins.app.cash.sqldelight)
 }
 
@@ -62,6 +62,9 @@ kotlin {
                 implementation(compose.components.resources)
                 implementation("io.github.kashif-mehmood-km:camerak:0.0.6")
                 implementation("io.github.kashif-mehmood-km:qr_scanner_plugin:0.0.6")
+                implementation(libs.multiplatform.settings)
+                implementation(libs.kotlinx.datetime)
+                implementation(libs.lifecycle.viewmodel.compose)
             }
         }
 
@@ -77,6 +80,7 @@ kotlin {
                 // commonMain by default and will correctly pull the Android artifacts of any KMP
                 // dependencies declared in commonMain.
                 implementation("app.cash.sqldelight:android-driver:2.1.0")
+                implementation(libs.lifecycle.viewmodel.compose)
             }
         }
 

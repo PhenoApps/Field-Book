@@ -1,0 +1,26 @@
+CREATE TABLE observation_units (
+    internal_id_observation_unit INTEGER PRIMARY KEY AUTOINCREMENT,
+    study_id INTEGER REFERENCES studies(internal_id_study) ON DELETE CASCADE,
+    observation_unit_db_id TEXT,
+    primary_id TEXT,
+    secondary_id TEXT,
+    geo_coordinates TEXT,
+    additional_info TEXT,
+    germplasm_db_id TEXT,
+    germplasm_name TEXT,
+    observation_level TEXT,
+    position_coordinate_x TEXT,
+    position_coordinate_x_type TEXT,
+    position_coordinate_y TEXT,
+    position_coordinate_y_type TEXT
+);
+
+-- Select all observation units
+selectAll:
+SELECT * FROM observation_units
+WHERE study_id = ?;
+
+-- Select observation unit by observation_unit_db_id
+selectById:
+SELECT * FROM observation_units WHERE observation_unit_db_id = ?
+AND study_id = ?;

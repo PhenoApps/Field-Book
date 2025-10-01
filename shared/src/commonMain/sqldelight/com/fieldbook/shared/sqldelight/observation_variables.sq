@@ -1,0 +1,27 @@
+-- observation_variables.sq
+
+CREATE TABLE observation_variables (
+  internal_id_observation_variable INTEGER PRIMARY KEY AUTOINCREMENT,
+  observation_variable_name TEXT,
+  observation_variable_field_book_format TEXT,
+  default_value TEXT,
+  visible TEXT,
+  position INTEGER,
+  external_db_id TEXT,
+  trait_data_source TEXT,
+  additional_info TEXT,
+  common_crop_name TEXT,
+  language TEXT,
+  data_type TEXT,
+  observation_variable_db_id TEXT,
+  ontology_db_id TEXT,
+  ontology_name TEXT,
+  observation_variable_details TEXT
+);
+
+getAllTraits:
+SELECT * FROM observation_variables;
+
+getTraitById:
+SELECT * FROM observation_variables
+WHERE internal_id_observation_variable = ?;
