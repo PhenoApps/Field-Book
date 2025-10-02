@@ -25,6 +25,7 @@ import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.adapters.ImageAdapter
 import com.fieldbook.tracker.database.internalTimeFormatter
 import com.fieldbook.tracker.database.models.ObservationModel
+import com.fieldbook.tracker.devices.camera.GoProApi
 import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -47,6 +48,7 @@ import java.io.File
 import java.io.IOException
 import java.io.RandomAccessFile
 import javax.inject.Inject
+import androidx.core.net.toUri
 
 @AndroidEntryPoint
 abstract class AbstractCameraTrait :
@@ -166,7 +168,7 @@ abstract class AbstractCameraTrait :
         }
     }
 
-    protected fun isCropRequired() = (currentTrait?.cropImage ?: false)
+    protected fun isCropRequired() = (currentTrait?.saveImage ?: true) && (currentTrait?.cropImage ?: false)
 
     protected fun isCropExist() = (preferences.getString(GeneralKeys.getCropCoordinatesKey(currentTrait?.id?.toInt() ?: -1), "") ?: "").isNotEmpty()
 
@@ -182,10 +184,11 @@ abstract class AbstractCameraTrait :
         traitObj: TraitObject,
         saveTime: String,
         saveState: SaveState,
-        offset: Int? = null
+        offset: Int? = null,
+        goProImage: GoProApi.GoProImage? = null,
     ) {
 
-        saveToStorage(obsUnit, traitObj, saveTime, saveState) { uri ->
+        saveToStorage(obsUnit, traitObj, saveTime, saveState, data.isEmpty()) { uri ->
 
             if (saveState != SaveState.SINGLE_SHOT) {
 
@@ -206,8 +209,24 @@ abstract class AbstractCameraTrait :
 
             } else {
 
-                saveSingleShot(uri, data)
+                if (uri == Uri.EMPTY && goProImage != null) {
 
+                    val studyId = collectActivity.studyId
+
+                    val rep = database.getNextRep(studyId, obsUnit.uniqueId, currentTrait.id)
+
+                    (context as? CollectActivity)?.updateObservation(traitObj, goProImage.fileName, rep)
+
+                    ui.launch {
+
+                        notifyItemInserted(goProImage.fileName.toUri())
+
+                        (context as CollectActivity).refreshRepeatedValuesToolbarIndicator()
+
+                    }
+                } else {
+                    saveSingleShot(uri, data)
+                }
             }
         }
     }
@@ -287,8 +306,14 @@ abstract class AbstractCameraTrait :
         traitObj: TraitObject,
         saveTime: String,
         saveState: SaveState,
+        isEmpty: Boolean = false,
         saver: (Uri) -> Unit
     ) {
+
+        if (isEmpty) {
+            saver.invoke(Uri.EMPTY)
+            return
+        }
 
         val plot = obsUnit.uniqueId
         val traitId = traitObj.id.toString()
@@ -458,7 +483,7 @@ abstract class AbstractCameraTrait :
 
             val imageView = ImageView(context)
 
-            if (model.uri == "NA") {
+            if (model.uri == "NA" || model.uri?.contains("content://") != true) {
                 val data = context.resources.assets.open("na_placeholder.jpg").readBytes()
                 BitmapFactory.decodeByteArray(data, 0, data.size).also { bmp ->
                     imageView.setImageBitmap(bmp)
@@ -652,29 +677,18 @@ abstract class AbstractCameraTrait :
 
         val traitDbId = currentTrait.id
 
-        val result = image.delete()
-
-        if (result) {
-
-            database.deleteTraitByValue(
-                studyId,
-                plot,
-                traitDbId,
-                image.uri.toString()
-            )
-
-        } else {
-
-            collectActivity.runOnUiThread {
-
-                Toast.makeText(
-                    context,
-                    R.string.photo_failed_to_delete,
-                    Toast.LENGTH_SHORT
-                ).show()
-
-            }
+        try {
+            image.delete()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
+
+        database.deleteTraitByValue(
+            studyId,
+            plot,
+            traitDbId,
+            image.uri.toString()
+        )
     }
 
     private fun deleteItem(model: ImageAdapter.Model, setNa: Boolean) {

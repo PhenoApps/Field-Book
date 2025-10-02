@@ -899,12 +899,13 @@ public class DataHelper {
     public long editTraits(String traitDbId, String trait, String format, String defaultValue,
                            String minimum, String maximum, String details, String categories,
                            Boolean closeKeyboardOnOpen,
-                           Boolean cropImage) {
+                           Boolean cropImage,
+                           Boolean saveImage) {
 
         open();
 
         return ObservationVariableDao.Companion.editTraits(traitDbId, trait, format, defaultValue,
-                minimum, maximum, details, categories, closeKeyboardOnOpen, cropImage);
+                minimum, maximum, details, categories, closeKeyboardOnOpen, cropImage, saveImage);
     }
 
     /**
@@ -942,7 +943,8 @@ public class DataHelper {
 
         return ObservationVariableDao.Companion.editTraits(trait.getId(), trait.getName(),
                 trait.getFormat(), trait.getDefaultValue(), trait.getMinimum(), trait.getMaximum(),
-                trait.getDetails(), trait.getCategories(), trait.getCloseKeyboardOnOpen(), trait.getCropImage());
+                trait.getDetails(), trait.getCategories(), trait.getCloseKeyboardOnOpen(), trait.getCropImage(),
+                trait.getSaveImage());
     }
 
     public boolean checkUnique(HashMap<String, String> values) {
