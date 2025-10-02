@@ -30,7 +30,7 @@ import com.fieldbook.tracker.database.dao.spectral.SpectralDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.spectral.UriDao;
 import com.fieldbook.tracker.database.views.ObservationVariableAttributeDetailViewCreator;
-import com.fieldbook.tracker.database.migrators.SpectralMigratorVersion16;
+import com.fieldbook.tracker.database.migrators.StudyConfigurationVersion17;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.database.models.ObservationVariableModel;
@@ -76,7 +76,7 @@ import dagger.hilt.android.qualifiers.ActivityContext;
  */
 public class DataHelper {
 
-    public static final int DATABASE_VERSION = SpectralMigratorVersion16.VERSION;
+    public static final int DATABASE_VERSION = StudyConfigurationVersion17.VERSION;
     private static final String DATABASE_NAME = "fieldbook.db";
     public static SQLiteDatabase db;
     private static final String TAG = "Field Book";
@@ -95,7 +95,7 @@ public class DataHelper {
     private final UriDao uriDao = new UriDao(this);
     private final DeviceDao deviceDao = new DeviceDao(this);
     private final SpectralRepository proto = new SpectralRepository(spectralDao, protocolDao, deviceDao, uriDao);
-    private final SpectralFileProcessor spectralFileProcessor = new SpectralFileProcessor(proto);
+    private final SpectralFileProcessor spectralFileProcessor = new SpectralFileProcessor(this, proto);
 
     private SearchQueryBuilder queryBuilder;
 
@@ -348,11 +348,11 @@ public class DataHelper {
      * this function as well
      * v1.6 - Amended to consider both trait and user data
      */
-    public long insertObservation(String plotId, String traitDbId, String value, String person, String location, String notes, String studyId, String observationDbId, OffsetDateTime lastSyncedTime, String rep) {
+    public long insertObservation(String plotId, String traitDbId, String value, String person, String location, String notes, String studyId, String observationDbId, OffsetDateTime timestamp, OffsetDateTime lastSyncedTime, String rep) {
 
         open();
 
-        return ObservationDao.Companion.insertObservation(plotId, traitDbId, value, person, location, notes, studyId, observationDbId, lastSyncedTime, rep);
+        return ObservationDao.Companion.insertObservation(plotId, traitDbId, value, person, location, notes, studyId, observationDbId, timestamp, lastSyncedTime, rep);
     }
 
     /**
@@ -395,10 +395,6 @@ public class DataHelper {
         open();
 
         return ObservationDao.Companion.isBrapiSynced(studyId, plotId, traitDbId, rep);
-    }
-
-    public void setTraitObservations(Integer studyId, Observation observation) {
-        ObservationDao.Companion.insertObservation(studyId, observation);
     }
 
     /**
@@ -1667,6 +1663,11 @@ public class DataHelper {
             if (oldVersion <= 15 && newVersion >= 16) {
                 //spectral data migration
                 Migrator.Companion.migrateToVersion16(db);
+            }
+
+            if (oldVersion <= 16 && newVersion >= 17) {
+                // add field creator configuration columns to studies table (start corner, walking directiop/pattern)
+                Migrator.Companion.migrateToVersion17(db);
             }
         }
     }

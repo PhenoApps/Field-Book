@@ -554,19 +554,12 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
                     val ws = frame.wavelengths.split(" ").map { it.toFloat() }
                     val vs = frame.values.split(" ").map { it.toFloat() }
 
-                    //val (waves, values) = interpolate(ws, vs, 400, 700, ::linearInterpolation)
-//                    val (waves, values) = interpolate(
-//                        ws,
-//                        vs,
-//                        400,
-//                        700,
-//                        step = 10,
-//                        ::linearInterpolation
-//                    )
-
-                    FrameEntry(ws.mapIndexed { i, l ->
-                        Entry(l.toFloat(), vs[i])
-                    }, color)
+                    Triple(ws, vs, color)
+                }
+                .filter { (ws, vs, _) -> ws.size == vs.size }
+                .map { (ws, vs, color) ->
+                    FrameEntry(ws.mapIndexed { i, w ->
+                        Entry(w, vs[i]) }, color)
                 })
         )
 
@@ -783,6 +776,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
             (context as? CollectActivity)?.locationByPreferences,
             "",
             collectActivity.studyId,
+            null,
             null,
             null,
             "1"

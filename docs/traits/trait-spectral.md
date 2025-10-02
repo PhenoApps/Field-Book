@@ -53,6 +53,7 @@ When capturing the data, a loading icon is displayed.
 
 Spectral scans are visually displayed on a graph.
 Selecting an individual scan will highlight the corresponding line on the graph.
+Long-press the scan number to save a text comment.
 
 <figure class="image">
       <img class="screenshot" src="../_static/images/traits/formats/spectral/trait_spectral_capturing_line_graph.png" width="256"  alt=""/>
@@ -70,7 +71,7 @@ Only one sensor model may be used for each trait:entry combination.
 ## Export
 
 
-| plot_id    | trait                      | trait |
+| plot_id    | value                      | trait |
 |------------|----------------------------|-------|
 | 13RPN00001 | #432D28                    | nix   |
 | 13RPN00001 | #432D28                    | nix   |

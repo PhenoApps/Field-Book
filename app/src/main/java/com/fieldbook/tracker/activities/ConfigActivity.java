@@ -2,16 +2,12 @@ package com.fieldbook.tracker.activities;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Rect;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,6 +16,7 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -32,12 +29,13 @@ import com.fieldbook.tracker.adapters.ImageListAdapter;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
-import com.fieldbook.tracker.fragments.ImportDBFragment;
+import com.fieldbook.tracker.fragments.ImportDatabaseFragment;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.AppLanguageUtil;
+import com.fieldbook.tracker.utilities.InsetHandler;
 import com.fieldbook.tracker.utilities.export.ExportUtil;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.OldPhotosMigrator;
@@ -62,7 +60,6 @@ import org.phenoapps.utils.BaseDocumentTreeUtil;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -114,13 +111,6 @@ public class ConfigActivity extends ThemedActivity {
     //barcode search fab
     private FloatingActionButton barcodeSearchFab;
     private boolean mlkitEnabled;
-
-    private void invokeDatabaseImport(DocumentFile doc) {
-        database.open();
-        mHandler.post(() -> {
-            new ImportDBTask(doc).execute(0);
-        });
-    }
 
     @Override
     public void onResume() {
@@ -174,6 +164,8 @@ public class ConfigActivity extends ThemedActivity {
 
         // save the current person name
         nameManager.migrateExistingPersonName();
+
+        setupBackCallback();
     }
 
     private void versionBasedSetup() {
@@ -266,6 +258,7 @@ public class ConfigActivity extends ThemedActivity {
     private void loadScreen() {
         setContentView(R.layout.activity_config);
         initToolbar();
+        setupConfigWindowInsets();
 
         settingsList = findViewById(R.id.myList);
 
@@ -378,15 +371,6 @@ public class ConfigActivity extends ThemedActivity {
             return -1;
         }
         return 1;
-    }
-
-    // Helper function to merge arrays
-    String[] concat(String[] a1, String[] a2) {
-        String[] n = new String[a1.length + a2.length];
-        System.arraycopy(a1, 0, n, 0, a1.length);
-        System.arraycopy(a2, 0, n, a1.length, a2.length);
-
-        return n;
     }
 
     private void resolveFuzzySearchResult(FieldObject f, @Nullable String plotId) {
@@ -511,12 +495,31 @@ public class ConfigActivity extends ThemedActivity {
                 boolean highContrastThemeEnabled = preferences.getBoolean(GeneralKeys.HIGH_CONTRAST_THEME_ENABLED, false);
 
                 if (loadSampleData) {
-                    ImportDBFragment importDBFragment = new ImportDBFragment();
+
+                    DocumentFile sampleDatabase = BaseDocumentTreeUtil.Companion.getFile(this,
+                            R.string.dir_database,
+                            "sample_db.zip");
+
+                    Bundle sampleData = new Bundle();
+
+                    if (sampleDatabase != null) {
+                        sampleData.putString(
+                                ImportDatabaseFragment.FILE_EXTRA,
+                                sampleDatabase.getUri().toString()
+                        );
+                    }
+
+                    ImportDatabaseFragment importDatabaseFragment = new ImportDatabaseFragment();
+                    importDatabaseFragment.setArguments(sampleData);
 
                     getSupportFragmentManager().beginTransaction()
-                            .add(importDBFragment, "com.fieldbook.tracker.fragments.ImportDBFragment")
+                            .add(importDatabaseFragment, "com.fieldbook.tracker.fragments.ImportDBFragment")
                             .addToBackStack(null)
                             .commit();
+
+                    preferences.edit()
+                            .putBoolean(GeneralKeys.LOAD_SAMPLE_DATA, false)
+                            .apply();
                 }
 
                 if (highContrastThemeEnabled) {
@@ -657,38 +660,24 @@ public class ConfigActivity extends ThemedActivity {
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
 
-    @Override
-    public void onBackPressed() {
-        if (doubleBackToExitPressedOnce) {
-            super.onBackPressed();
-            return;
-        }
+    private void setupBackCallback() {
+        OnBackPressedCallback doubleBackCallback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (doubleBackToExitPressedOnce) { // exits the app
+                    setEnabled(false); // stop intercepting back presses
+                    getOnBackPressedDispatcher().onBackPressed(); // call system's back handler toe exit
+                    return;
+                }
 
-        this.doubleBackToExitPressedOnce = true;
-        Toast.makeText(this, "Press back again to exit", Toast.LENGTH_SHORT).show();
+                doubleBackToExitPressedOnce = true;
+                Toast.makeText(ConfigActivity.this, "Press back again to exit", Toast.LENGTH_SHORT).show();
 
-        new Handler().postDelayed(() -> doubleBackToExitPressedOnce = false, 2000);
-    }
-
-    /**
-     * Queries the database for saved studies and calls switch field for the first one.
-     */
-    public void selectFirstField() {
-
-        try {
-
-            FieldObject[] fs = database.getAllFieldObjects().toArray(new FieldObject[0]);
-
-            if (fs.length > 0) {
-
-                switchField(fs[0].getStudyId());
+                new Handler().postDelayed(() -> doubleBackToExitPressedOnce = false, 2000);
             }
+        };
 
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-        }
+        getOnBackPressedDispatcher().addCallback(this, doubleBackCallback);
     }
 
     /**
@@ -706,66 +695,10 @@ public class ConfigActivity extends ThemedActivity {
 
     }
 
-    private class ImportDBTask extends AsyncTask<Integer, Integer, Integer> {
-        boolean fail;
-        ProgressDialog dialog;
-        DocumentFile file = null;
+    private void setupConfigWindowInsets() {
+        View rootView = findViewById(android.R.id.content);
+        Toolbar toolbar = findViewById(R.id.toolbar);
 
-        public ImportDBTask(DocumentFile file) {
-            this.file = file;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            fail = false;
-
-            dialog = new ProgressDialog(ConfigActivity.this, R.style.AppAlertDialog);
-            dialog.setIndeterminate(true);
-            dialog.setCancelable(false);
-            dialog.setMessage(Html
-                    .fromHtml(getString(R.string.import_dialog_importing)));
-            dialog.show();
-        }
-
-        @Override
-        protected Integer doInBackground(Integer... params) {
-            try {
-                if (this.file != null) {
-                    database.importDatabase(this.file);
-                }
-            } catch (Exception e) {
-                Log.d("Database", e.toString());
-                e.printStackTrace();
-                fail = true;
-            }
-            return 0;
-        }
-
-        @Override
-        protected void onPostExecute(Integer result) {
-            if (dialog.isShowing())
-                dialog.dismiss();
-
-            if (fail) {
-                Utils.makeToast(getApplicationContext(), getString(R.string.import_error_general));
-            }
-
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.apply();
-
-            //if sample db is imported, automatically select the first study
-            try {
-
-                selectFirstField();
-
-            } catch (Exception e) {
-
-                e.printStackTrace();
-
-            }
-
-            CollectActivity.reloadData = true;
-        }
+        InsetHandler.INSTANCE.setupStandardInsets(rootView, toolbar);
     }
 }
