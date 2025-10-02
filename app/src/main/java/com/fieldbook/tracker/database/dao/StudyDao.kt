@@ -336,10 +336,7 @@ class StudyDao {
 
                 val cursor = db.rawQuery("""
                     SELECT ov.observation_variable_name, ov.observation_variable_field_book_format, COUNT(*) as count, GROUP_CONCAT(o.value, '|') as observations,
-                    (SELECT COUNT(DISTINCT observation_unit_id) 
-                        FROM observations 
-                        JOIN observation_variables AS ov ON ov.${ObservationVariable.PK} = observations.${ObservationVariable.FK}
-                        WHERE study_id = ?) AS distinct_obs_units,
+                    COUNT(DISTINCT observation_unit_id) AS distinct_obs_units,
                     (SELECT COUNT(*) FROM observation_units WHERE study_id = ?) AS total_obs_units,
                     (SELECT v.observation_variable_attribute_value 
                      FROM observation_variable_values v
@@ -350,7 +347,7 @@ class StudyDao {
                     WHERE o.study_id = ? AND o.observation_variable_db_id > 0
                     GROUP BY ov.observation_variable_name, ov.observation_variable_field_book_format
                     ORDER BY ov.${if (sortOrder == "visible") "position" else sortOrder} COLLATE NOCASE ASC
-                """, arrayOf(studyId.toString(), studyId.toString(), studyId.toString()))
+                """, arrayOf(studyId.toString(), studyId.toString()))
 
                 if (cursor.moveToFirst()) {
                     do {
