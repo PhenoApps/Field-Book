@@ -6,10 +6,12 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.ThemedActivity
 import com.fieldbook.tracker.adapters.CheckboxListAdapter
+import com.fieldbook.tracker.utilities.InsetHandler
 import com.fieldbook.tracker.views.SearchBar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -73,6 +75,7 @@ abstract class ListFilterActivity : ThemedActivity(),
 
         initUi()
 
+        onBackPressedDispatcher.addCallback(this, standardBackCallback())
     }
 
     override fun onDestroy() {
@@ -94,12 +97,16 @@ abstract class ListFilterActivity : ThemedActivity(),
 
     private fun setupToolbar() {
 
-        setSupportActionBar(findViewById(R.id.act_list_filter_tb))
+        val toolbar = findViewById<Toolbar>(R.id.act_list_filter_tb)
+        setSupportActionBar(toolbar)
 
         supportActionBar?.title =
             getString(R.string.act_brapi_filter_by_title, getString(titleResId))
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+
+        val rootView = findViewById<View>(android.R.id.content);
+        InsetHandler.setupStandardInsets(rootView, toolbar)
     }
 
     private fun initUi() {

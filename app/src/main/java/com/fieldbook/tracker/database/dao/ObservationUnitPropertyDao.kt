@@ -114,7 +114,7 @@ class ObservationUnitPropertyDao {
             val requiredFields = fieldList + traitRequiredFields
             MatrixCursor(requiredFields).also { cursor ->
                 val placeholders = traits.joinToString(", ") { "?" }
-                val traitNames = traits.map { DataHelper.replaceIdentifiers(it.name) }.toTypedArray()
+                val traitIds = traits.map { it.id }.toTypedArray()
 
                 val unitSelectAttributes = fieldList.joinToString(", ") { attributeName ->
                     "MAX(CASE WHEN attr.observation_unit_attribute_name = '$attributeName' THEN vals.observation_unit_value_name ELSE NULL END) AS \"$attributeName\""
@@ -135,13 +135,13 @@ class ObservationUnitPropertyDao {
                     LEFT JOIN observation_units_attributes AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
                     LEFT JOIN observation_variables AS vars ON vars.${ObservationVariable.PK} = obs.${ObservationVariable.FK}
                     WHERE obs.study_id = ?
-                      AND vars.observation_variable_name IN ($placeholders)
+                      AND vars.internal_id_observation_variable IN ($placeholders)
                     GROUP BY obs.internal_id_observation
                     $sortOrderClause
                 """.trimIndent()
 
                 Log.d("getExportDbData", "Final Query: $query")
-                val table = db.rawQuery(query, arrayOf(studyId.toString()) + traitNames).toTable()
+                val table = db.rawQuery(query, arrayOf(studyId.toString()) + traitIds).toTable()
 
                 table.forEach { row ->
                     cursor.addRow(fieldList.map { row[it] } + traitRequiredFields.map {

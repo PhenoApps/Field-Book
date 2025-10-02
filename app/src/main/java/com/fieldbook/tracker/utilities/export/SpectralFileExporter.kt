@@ -7,6 +7,7 @@ import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.database.models.spectral.SpectralFact
 import com.fieldbook.tracker.database.repository.SpectralRepository
+import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.utilities.StringUtil.escape
 import dagger.hilt.android.qualifiers.ActivityContext
@@ -28,11 +29,8 @@ class SpectralFileExporter @Inject constructor(
         studyId: Int
     ): Result<Unit> = runCatching {
         val observations = databaseHelper.getAllObservations(studyId.toString())
-        val spectralTraitIds = (databaseHelper.allTraitObjects
-            ?.filter { it.format in Formats.Companion.getSpectralFormats()
-            .map { it.getDatabaseName() } }
-            ?: emptyList())
-            .map { it.id }
+        val spectralTraits = databaseHelper.allTraitObjects?.filter { it.format in Formats.getSpectralFormats().map { it.getDatabaseName() } }
+        val spectralTraitIds = (spectralTraits ?: emptyList()).map { it.id }
 
         val spectralFactObservations = observations.filter { observation ->
             observation.observation_variable_db_id.toString() in spectralTraitIds && observation.study_id == studyId.toString()
@@ -40,11 +38,12 @@ class SpectralFileExporter @Inject constructor(
 
         spectralFactObservations.groupBy { it.observation_variable_db_id }
             .forEach { (traitId, observationsForTrait) ->
-                exportSpectralDataForTrait(traitId, observationsForTrait)
+                exportSpectralDataForTrait(spectralTraits, traitId, observationsForTrait)
             }
     }
 
     private fun exportSpectralDataForTrait(
+        spectralTraits: List<TraitObject?>?,
         traitId: Int,
         observationsForTrait: List<ObservationModel>
     ) {
@@ -59,6 +58,11 @@ class SpectralFileExporter @Inject constructor(
             pair.first
         }
 
+        val deviceSpecificHeader = when (spectralTraits?.firstOrNull { it?.id == traitId.toString() }?.format) {
+            Formats.GREEN_SEEKER.getDatabaseName() -> "average"
+            else -> "color"
+        }
+
         frames.keys.forEach { uri ->
 
             frames[uri]?.let { framesForUri ->
@@ -67,7 +71,7 @@ class SpectralFileExporter @Inject constructor(
 
                     val frameList = framesForUri.map { it.second }
 
-                    writeSpectralFile(traitId, uri, frameList)
+                    writeSpectralFile(deviceSpecificHeader, uri, frameList)
 
                 }
             }
@@ -75,7 +79,7 @@ class SpectralFileExporter @Inject constructor(
     }
 
     private fun writeSpectralFile(
-        traitId: Int,
+        deviceSpecificHeader: String,
         uri: Uri,
         spectralFacts: List<SpectralFact>,
     ) {
@@ -85,9 +89,12 @@ class SpectralFileExporter @Inject constructor(
             return
         }
 
-        val metadataHeader = "sample_name, device_id, device_name, comments, created_at, color"
+        val metadataHeader = "sample_name,device_id,device_name,comments,created_at,$deviceSpecificHeader"
 
-        val firstFact = spectralFacts.first()
+        val firstFact = spectralFacts.maxBy {
+            it.data.size
+        }
+
         val observation = databaseHelper.getObservationById(firstFact.observationId.toString())
             ?: throw IOException("Observation not found for spectral fact: ${firstFact.id}")
         val frameReference = firstFact.toSpectralFrame(
@@ -95,7 +102,7 @@ class SpectralFileExporter @Inject constructor(
             traitId = observation.observation_variable_db_id.toString()
         )
 
-        val header = "$metadataHeader, ${frameReference.wavelengths.replace(" ", ", ")}\n"
+        val header = "$metadataHeader,${frameReference.wavelengths.replace(" ", ",")}\n"
 
         try {
             context.contentResolver.openOutputStream(uri, "wt")?.bufferedWriter()?.use { writer ->
@@ -118,12 +125,12 @@ class SpectralFileExporter @Inject constructor(
                         entryId,
                         currentObservation.observation_variable_db_id.toString()
                     )
-                    val values = frame.values.replace(" ", ", ")
+                    val values = frame.values.replace(" ", ",")
 
                     if (values.isEmpty())
                         continue
 
-                    writer.write("\"${entryId.escape()}\", $deviceAddress, \"${deviceName.escape()}\", \"${comment.escape()}\", $createdAt, $color, $values\n")
+                    writer.write("\"${entryId.escape()}\",$deviceAddress,\"${deviceName.escape()}\",\"${comment.escape()}\",$createdAt,$color,$values\n")
                 }
             }
         } catch (e: IOException) {

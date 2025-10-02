@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import androidx.activity.OnBackPressedDispatcher
 import androidx.appcompat.app.AlertDialog
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.brapi.io.BrapiCacheModel
@@ -161,6 +162,7 @@ class BrapiTraitFilterActivity(
 
         fetchDescriptionTv.text = getString(R.string.act_brapi_list_filter_loading_variables)
 
+        onBackPressedDispatcher.addCallback(this, standardBackCallback())
     }
 
     override fun onFinishButtonClicked() {
@@ -263,7 +265,7 @@ class BrapiTraitFilterActivity(
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
             return true
         } else if (item.itemId == R.id.action_brapi_filter) {
             showFilterChoiceDialog()

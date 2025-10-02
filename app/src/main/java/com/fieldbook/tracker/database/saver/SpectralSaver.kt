@@ -1,17 +1,15 @@
 package com.fieldbook.tracker.database.saver
 
 import com.fieldbook.tracker.database.DataHelper
-import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.database.models.spectral.Device
 import com.fieldbook.tracker.database.models.spectral.Protocol
 import com.fieldbook.tracker.database.models.spectral.SpectralFact
-import com.fieldbook.tracker.database.saver.NixSpectralSaver.RequiredData
+import com.fieldbook.tracker.database.saver.SpectralSaver.RequiredData
 import com.fieldbook.tracker.database.viewmodels.SpectralViewModel
 import com.fieldbook.tracker.devices.spectrometers.SpectralFrame
-import com.fieldbook.tracker.traits.formats.Formats
 import javax.inject.Inject
 
-class NixSpectralSaver @Inject constructor(private val database: DataHelper) : DatabaseSaver<RequiredData, SpectralFact> {
+class SpectralSaver @Inject constructor(private val database: DataHelper) : DatabaseSaver<RequiredData, SpectralFact> {
 
     override fun saveData(requiredData: RequiredData): Result<SpectralFact> = runCatching {
 
@@ -172,6 +170,7 @@ class NixSpectralSaver @Inject constructor(private val database: DataHelper) : D
             location,
             "",
             studyId,
+            null,
             null,
             null,
             rep

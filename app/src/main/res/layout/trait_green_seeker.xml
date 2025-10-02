@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        style="@style/FloatingActionButtonStyle.TraitButtons"
+        android:contentDescription="@string/trait_camera_connect_content_description"
+        android:src="@drawable/ic_connection"
+        android:id="@+id/connect_btn"
+        android:layout_width="@dimen/fb_trait_fab_size"
+        android:layout_height="@dimen/fb_trait_fab_size"
+        android:layout_margin="8dp"
+        android:visibility="visible"
+        tools:visibility="visible"
+        tools:elevation="2dp"
+        app:layout_constraintTop_toBottomOf="@id/line_chart"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        style="@style/FloatingActionButtonStyle.SmallTraitButtons"
+        android:id="@+id/settings_btn"
+        android:layout_width="@dimen/fb_trait_fab_size_small"
+        android:layout_height="@dimen/fb_trait_fab_size_small"
+        android:layout_margin="8dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:src="@drawable/ic_nav_drawer_settings"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/line_chart"
+        app:layout_constraintStart_toStartOf="parent"
+        android:contentDescription="@string/trait_camera_capture_content_description"/>
+
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/line_chart"
+        android:layout_width="0dp"
+        android:layout_height="300dp"
+        android:layout_margin="4dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/recycler_view"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_weight="5"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="5dp"
+        app:layout_constraintStart_toEndOf="@id/line_chart"
+        app:layout_constraintTop_toTopOf="@id/line_chart"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/settings_btn"
+        android:id="@+id/recycler_view"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        android:orientation="vertical"
+        app:layout_constraintHorizontal_weight="1"
+        tools:listitem="@layout/list_item_graph_line_selector"
+        tools:itemCount="5"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
