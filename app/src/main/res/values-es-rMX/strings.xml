@@ -1328,4 +1328,7 @@
     <string name="play">Reproducir</string>
     <string name="pause">Pausar</string>
     <string name="save">Guardar</string>
+    <string name="device_settings_dialog_unknown_name">Dispositivo Bluetooth desconocido</string>
+    <string name="device_settings_dialog_title">Ajustes del dispositivo Bluetooth</string>
+    <string name="no_data_captured">No hay datos capturados.</string>
 </resources>
