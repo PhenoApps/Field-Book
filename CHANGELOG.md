@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- GoPro cameras can now optionally send just the image name instead of transferring the entire image
 - Fields can now be grouped and archived
 - New trait formats: Stopwatch, Nix, Greenseeker, Scales
 - Trait name wrapping in Collect can now be toggled with a long-press
