@@ -388,4 +388,6 @@ Phenotypes et essais créés manuellement ou importés via CSV devront être exp
     <string name="dialog_quick_goto_title">Raccourci rapide</string>
     <string name="traits_sort_default">défaut</string>
     <!--  NearbyShare  -->
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="save">enregistrer</string>
 </resources>

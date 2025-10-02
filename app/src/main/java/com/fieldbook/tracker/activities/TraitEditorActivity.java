@@ -33,6 +33,7 @@ import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -60,6 +61,7 @@ import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.FileUtil;
+import com.fieldbook.tracker.utilities.InsetHandler;
 import com.fieldbook.tracker.utilities.SharedPreferenceUtils;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
@@ -75,7 +77,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -317,6 +318,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_traits);
+        setupTraitEditorInsets();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
 
@@ -346,6 +348,8 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         FloatingActionButton fab = findViewById(R.id.newTrait);
         fab.setOnClickListener(v -> showImportDialog());
+
+        setupBackCallback();
     }
 
     @Override
@@ -734,7 +738,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         builder.setTitle(getString(R.string.traits_toolbar_delete_all));
         builder.setMessage(getString(R.string.dialog_delete_traits_message));
 
-        builder.setPositiveButton(getString(android.R.string.yes), onPositive);
+        builder.setPositiveButton(getString(R.string.dialog_delete), onPositive);
         builder.setNegativeButton(getString(R.string.dialog_no), onNegative);
         builder.setOnDismissListener(onDismiss);
 
@@ -742,10 +746,15 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         alert.show();
     }
 
-    public void onBackPressed() {
-        super.onBackPressed();
-        CollectActivity.reloadData = true;
-        finish();
+    private void setupBackCallback() {
+        OnBackPressedCallback backCallback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                CollectActivity.reloadData = true;
+                finish();
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, backCallback);
     }
 
     @Override
@@ -975,7 +984,16 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         for (int i = 0; i < allTraits.size(); i++) {
             newTraitName = traitName + "-Copy-(" + i + ")";
-            if (!Arrays.asList(allTraits).contains(newTraitName)) {
+
+            boolean nameExists = false;
+            for (TraitObject trait : allTraits) {
+                if (trait.getName().equals(newTraitName)) {
+                    nameExists = true;
+                    break;
+                }
+            }
+
+            if (!nameExists) {
                 return newTraitName;
             }
         }
@@ -1005,5 +1023,13 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
             brapiDialogShown = displayBrapiInfo(TraitEditorActivity.this, null, true);
         }
         queryAndLoadTraits();
+    }
+
+    private void setupTraitEditorInsets() {
+        View rootView = findViewById(android.R.id.content);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        FloatingActionButton fab = findViewById(R.id.newTrait);
+
+        InsetHandler.INSTANCE.setupStandardInsets(rootView, toolbar);
     }
 }

@@ -22,6 +22,7 @@
     <string name="dialog_enable">Habilitar</string>
     <string name="dialog_delete">Excluir</string>
     <string name="dialog_accept">Aceitar</string>
+    <string name="dialog_exit">Sair</string>
     <string name="barcode_scanner_text">Escanear código de barras</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Dados de amostra</string>
@@ -76,7 +77,7 @@
     <string name="act_file_explorer_no_file_error">Não foram encontrados diretórios de Field Book.</string>
     <!-- Warnings/Catches -->
     <string name="warning_field_missing">Nenhum campo está atualmente carregado. Por favor, coloque um campo antes de coletar dados.</string>
-    <string name="warning_traits_missing">Não existem caracteres. Por favor, crie caracteres antes de coletar dados.</string>
+    <string name="warning_traits_missing">Não existem características. Por favor, crie características antes de coletar dados.</string>
     <!-- Changelog -->
     <string name="changelog_title">Registro de alterações</string>
     <!--  Field Grouping  -->
@@ -167,9 +168,25 @@
     <string name="act_field_editor_load_file_failed">Ocorreu um erro durante o carregamento do arquivo.</string>
     <string name="act_field_editor_file_open_failed">Arquivo falhou ao abrir.</string>
     <!-- Field Creator  -->
-    <string name="dialog_field_creator_ask_size">Por favor, escolha o nome e tamanho do campo.</string>
-    <string name="dialog_field_creator_ask_start_point">Por favor, escolha um ponto de partida de campo.</string>
-    <string name="dialog_field_creator_ask_pattern">Por favor, escolha um padrão de campo.</string>
+    <string name="field_creator_activity_toolbar_title">Criar Novo Campo</string>
+    <string name="field_creator_size_title">Detalhes do Campo</string>
+    <string name="field_creator_start_corner_title">Canto de começo</string>
+    <string name="field_creator_pattern_title">Padrão de Caminho</string>
+    <string name="field_creator_preview_title">Revisar</string>
+    <string name="field_creator_exit_dialog_message">Você tem certeza que quer sair? Seu progresso será perdido.</string>
+    <string name="field_creator_creation_in_progress">Criação do campo em progresso. Por favor, espere...</string>
+    <string name="field_creator_size_field_name_hint">Nome do Campo</string>
+    <string name="field_creator_size_rows_hint">Linhas</string>
+    <string name="field_creator_size_columns_hint">Colunas</string>
+    <string name="field_name_required_error">Nome do campo é obrigatório</string>
+    <string name="field_name_exists_error">Nome do campo já existe</string>
+    <string name="field_creator_positive_number_error">Deve ser um número positivo</string>
+    <string name="field_creator_rows_exceeded_error">Não pode exceder %s</string>
+    <string name="field_creator_cols_exceeded_error">Não pode exceder %s</string>
+    <string name="field_creation_failed_error">Falha ao criar campo</string>
+    <string name="field_creator_direction_horizontal">Horizontal</string>
+    <string name="field_creator_direction_vertical">Vertical</string>
+    <string name="field_creator_preview_create_button">CRIAR</string>
     <string name="dialog_field_creator_ask_name_hint">Nome</string>
     <string name="dialog_field_creator_ask_row_hint">Linhas</string>
     <string name="dialog_field_creator_ask_columns_hint">Colunas</string>
@@ -184,9 +201,12 @@
     <string name="dialog_field_creator_size_group_error">Por favor, insira um nome e formato válidos.</string>
     <string name="dialog_field_creator_field_name_not_unique">Nome do campo já está em uso.</string>
     <string name="dialog_field_creator_large_field">Campo grande detectado, a transação pode levar muito tempo.</string>
-    <string name="dialog_field_creator_linear_button_content_desc">Botão para escolher o padrão linear as parcelas.</string>
-    <string name="dialog_field_creator_zig_button_content_desc">Botão para escolher o padrão em zigue-zague as parcelas.</string>
     <string name="dialog_field_creator_review_image_content_desc">Imagem mostrando orientação e padrão de parcelas.</string>
+    <string name="field_creator_stepper_size">Tamanho</string>
+    <string name="field_creator_stepper_start">Ponto de Início</string>
+    <string name="field_creator_stepper_pattern">Padrão de Caminho</string>
+    <string name="field_creator_stepper_direction"></string>
+    <string name="field_creator_stepper_preview">Pré-visualizar</string>
     <!-- Geo-Navigate to Field -->
     <string name="menu_fields_plot_by_distance_title">Selecione campo mais próximo</string>
     <string name="activity_field_editor_no_field_found">Coordenadas não podem ser encontrada.</string>
@@ -241,7 +261,7 @@
     <string name="import_error_format_trait">Somente arquivos TRT podem ser importados como uma lista de características</string>
     <string name="traits_export_check">Exportar lista de características atual?</string>
     <string name="traits_dialog_export">Exportar</string>
-    <string name="dialog_delete_traits_message">Gostaria de excluir todas as características atuais?</string>
+    <string name="dialog_delete_traits_message">Você gostaria de excluir todas as características atuais? Excluir uma característica também exclui dados que foram coletados para esta característica.</string>
     <string name="traits_toolbar_delete_all">Excluir todas as características</string>
     <string name="act_trait_editor_no_traits_exist">Não existem características.</string>
     <!-- Trait item menu -->
@@ -273,6 +293,7 @@
     <string name="traits_format_spectral">Espectral</string>
     <string name="traits_format_nix">Nix</string>
     <string name="traits_format_inno_spectra">InnoSpectra</string>
+    <string name="traits_format_stop_watch">Cronômetro</string>
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Formato de Característica</string>
     <string name="trait_creator_title_layout">Disposição de Característica</string>
@@ -548,7 +569,7 @@
     <string name="export_content_columns_title">Colunas de campo</string>
     <string name="export_content_columns_all">Todas las columnas importadas</string>
     <string name="export_content_columns_unique">Somente identificador único</string>
-    <string name="export_content_traits_all">Todos os caracteres</string>
+    <string name="export_content_traits_all">Todas as características</string>
     <string name="export_content_traits_active">Somente características ativas</string>
     <string name="export_error_general">Erro durante a exportação</string>
     <string name="error_storage_directory">Diretório de armazenamento não encontrado ou corrompido.</string>
@@ -1323,4 +1344,9 @@
     <string name="import_runnable_field_name_exists">Nome do campo já existe.</string>
     <string name="enabled">habilitado</string>
     <string name="disabled">desabilitado</string>
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="reset">Restabelecer</string>
+    <string name="play">Reproduzir</string>
+    <string name="pause">Pausar</string>
+    <string name="save">Salvar</string>
 </resources>

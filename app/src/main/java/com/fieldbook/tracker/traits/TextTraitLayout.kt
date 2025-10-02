@@ -101,13 +101,6 @@ class TextTraitLayout : BaseTraitLayout {
                 scan = inputEditText?.text?.toString() ?: ""
             }
 
-            if (event.keyCode == KeyEvent.KEYCODE_BACK) {
-
-                (context as CollectActivity).onBackPressed()
-
-                return@setOnKeyListener true
-            }
-
             if (event.action == KeyEvent.ACTION_DOWN) {
 
                 val cursor = inputEditText?.selectionStart ?: 0

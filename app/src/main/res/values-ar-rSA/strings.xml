@@ -399,4 +399,6 @@
     <string name="dialog_quick_goto_title">إنتقل مباشرة إلى</string>
     <string name="traits_sort_default">افتراضي</string>
     <!--  NearbyShare  -->
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="save">حفظ</string>
 </resources>

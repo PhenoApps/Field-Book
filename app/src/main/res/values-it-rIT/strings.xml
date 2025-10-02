@@ -114,10 +114,6 @@
     <string name="fields_delete">Cancella</string>
     <string name="fields_delete_study">Cancella campo</string>
     <string name="fields_delete_study_confirmation">Sei sicuro di voler cancellare questo campo? Verranno cancellati anche tutti i dati associati a questo campo.</string>
-    <plurals name="fields_delete_confirmation">
-        <item quantity="one">Sei sicuro di voler cancellare il campo \"%s\"?</item>
-        <item quantity="other">Sei sicuro di voler cancellare questo campo: \"%s\"?</item>
-    </plurals>
     <!-- Import -->
     <string name="fields_new_button_content_description">Aggiungi un nuovo campo.</string>
     <string name="fields_new_dialog_title">Nuovo campo</string>
@@ -133,11 +129,14 @@
     <string name="import_error_column_choice">Le colonne non possono essere utilizzate per la stessa assegnazione</string>
     <string name="import_error_unique">La colonna identificatore unico contiene duplicati o è già stata utilizzata in un altro file</string>
     <string name="import_error_format_field">Solo i file CSV e XLS possono essere importati come campo</string>
+    <string name="act_field_editor_no_suitable_columns_error">Il file d\'importazione non ha colonne adatte da cui scegliere.</string>
     <string name="fields_study_exists_message">Un campo con questo nome esiste già. Vuoi sovrascrivere?</string>
     <string name="act_field_editor_failed_to_read_columns">Field Book non può caricare il file.</string>
     <string name="act_field_editor_load_file_failed">Si è verificato un errore durante il caricamento del file.</string>
     <string name="act_field_editor_file_open_failed">Impossibile aprire il file.</string>
     <!-- Field Creator  -->
+    <string name="field_creator_size_rows_hint">File</string>
+    <string name="field_creator_size_columns_hint">Colonne</string>
     <string name="dialog_field_creator_ask_name_hint">Nome</string>
     <string name="dialog_field_creator_ask_row_hint">File</string>
     <string name="dialog_field_creator_ask_columns_hint">Colonne</string>
@@ -520,4 +519,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="dialog_quick_goto_go">Vai</string>
     <string name="traits_sort_default">Impostazioni predefinite</string>
     <!--  NearbyShare  -->
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="reset">Ripristina</string>
+    <string name="save">Salva</string>
 </resources>

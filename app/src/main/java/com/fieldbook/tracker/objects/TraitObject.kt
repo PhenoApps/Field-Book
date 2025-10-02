@@ -50,6 +50,9 @@ class TraitObject {
         get() = attributeValues.getBoolean(TraitAttributes.CROP_IMAGE)
         set(value) = attributeValues.setValue(TraitAttributes.CROP_IMAGE, value.toString())
 
+    var saveImage: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.SAVE_IMAGE)
+        set(value) = attributeValues.setValue(TraitAttributes.SAVE_IMAGE, value.toString())
 
     fun loadAttributeAndValues() {
         attributeValues.traitId = id
@@ -82,14 +85,15 @@ class TraitObject {
                 additionalInfo == that.additionalInfo &&
                 observationLevelNames == that.observationLevelNames &&
                 closeKeyboardOnOpen == that.closeKeyboardOnOpen &&
-                cropImage == that.cropImage
+                cropImage == that.cropImage &&
+                saveImage == that.saveImage
     }
 
     override fun hashCode(): Int {
         return Objects.hash(
             name, format, defaultValue, minimum, maximum, details, categories,
             realPosition, id, visible, externalDbId, traitDataSource,
-            additionalInfo, observationLevelNames, closeKeyboardOnOpen, cropImage
+            additionalInfo, observationLevelNames, closeKeyboardOnOpen, cropImage, saveImage
         )
     }
 
@@ -111,6 +115,7 @@ class TraitObject {
         t.observationLevelNames = this.observationLevelNames
         t.closeKeyboardOnOpen = this.closeKeyboardOnOpen
         t.cropImage = this.cropImage
+        t.saveImage = this.saveImage
 
         return t
     }

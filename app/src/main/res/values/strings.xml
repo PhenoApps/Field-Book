@@ -24,6 +24,7 @@
     <string name="dialog_enable">Enable</string>
     <string name="dialog_delete">Delete</string>
     <string name="dialog_accept">Accept</string>
+    <string name="dialog_exit">Exit</string>
 
     <string name="barcode_scanner_text">Scan a barcode</string>
 
@@ -194,9 +195,52 @@
     <string name="act_field_editor_file_open_failed">File failed to open.</string>
 
     <!-- Field Creator  -->
-    <string name="dialog_field_creator_ask_size">Please choose a field name and size.</string>
-    <string name="dialog_field_creator_ask_start_point">Please choose a field starting point.</string>
-    <string name="dialog_field_creator_ask_pattern">Please choose a field pattern.</string>
+    <string name="field_creator_activity_toolbar_title">Create New Field</string>
+    <string name="field_creator_size_title">Field Details</string>
+    <string name="field_creator_start_corner_title">Starting Corner</string>
+    <string name="field_creator_pattern_title">Walking Pattern</string>
+    <string name="field_creator_direction_title">Walking Direction</string>
+    <string name="field_creator_preview_title">Review</string>
+
+    <string name="field_creator_exit_dialog_title">Exit Field Creator</string>
+    <string name="field_creator_exit_dialog_message">Are you sure you want to exit? Your progress will be lost.</string>
+
+    <string name="field_creator_creation_in_progress">Field creation is in progress. Please wait…</string>s
+
+    <string name="field_creator_size_field_name_hint">Field Name</string>
+    <string name="field_creator_size_rows_hint">Rows</string>
+    <string name="field_creator_size_columns_hint">Columns</string>
+
+    <string name="field_name_required_error">Field name is required</string>
+    <string name="field_name_exists_error">Field name already exists</string>
+    <string name="field_creator_positive_number_error">Must be a positive number</string>
+    <string name="field_creator_rows_exceeded_error">Cannot exceed %s</string>
+    <string name="field_creator_cols_exceeded_error">Cannot exceed %s</string>
+    <string name="field_creator_total_plots_exceeded_error">Total plots cannot exceed %1$s. Current total: %2$s</string>
+    <string name="field_creation_failed_error">Failed to create field</string>
+
+    <string name="field_creator_start_point_instruction">Tap a corner to select starting point</string>
+    <string name="field_dimensions_format">Field: %d × %d</string>
+
+    <string name="field_creator_pattern_linear">Linear</string>
+    <string name="field_creator_pattern_linear_summary">Follow same direction after each row/column</string>
+    <string name="field_creator_pattern_zigzag">Serpentine/Zigzag</string>
+    <string name="field_creator_pattern_zigzag_summary">Alternate direction after each row/column</string>
+
+    <string name="field_creator_direction_horizontal">Horizontal</string>
+    <string name="field_creator_direction_horizontal_summary">Walk across rows</string>
+    <string name="field_creator_direction_vertical">Vertical</string>
+    <string name="field_creator_direction_vertical_summary">Walk up/down columns</string>
+
+    <string name="field_creator_preview_summary">Field: %s (%d x %d)</string>
+    <string name="field_creator_preview_large_field_warning">Large field detected. Creating many plots may take some time.</string>
+    <string name="field_creator_preview_creating_field">Creating field…</string>
+    <string name="field_creator_preview_create_button">CREATE</string>
+    <string name="field_creator_preview_expand_button">Expand Grid</string>
+    <string name="field_creator_preview_collapse_button">Collapse Grid</string>
+
+    <string name="field_creator_expanded_preview_title">Full Field Preview</string>
+
     <string name="dialog_field_creator_ask_name_hint">Name</string>
     <string name="dialog_field_creator_ask_row_hint">Rows</string>
     <string name="dialog_field_creator_ask_columns_hint">Columns</string>
@@ -211,9 +255,17 @@
     <string name="dialog_field_creator_size_group_error">Please enter a valid name and format.</string>
     <string name="dialog_field_creator_field_name_not_unique">Field name already in use.</string>
     <string name="dialog_field_creator_large_field">Large Field Detected, transaction might take a long time.</string>
-    <string name="dialog_field_creator_linear_button_content_desc">Button to choose linear plot pattern.</string>
-    <string name="dialog_field_creator_zig_button_content_desc">Button to choose zig zag plot pattern.</string>
+    <string name="dialog_field_creator_horizontal_linear_button_content_desc">Button to choose horizontal linear plot pattern.</string>
+    <string name="dialog_field_creator_horizontal_zig_button_content_desc">Button to choose horizontal zig zag plot pattern.</string>
+    <string name="dialog_field_creator_vertical_linear_button_content_desc">Button to choose vertical linear plot pattern.</string>
+    <string name="dialog_field_creator_vertical_zig_button_content_desc">Button to choose vertical zig zag plot pattern.</string>
     <string name="dialog_field_creator_review_image_content_desc">Image showing orientation and plot pattern.</string>
+
+    <string name="field_creator_stepper_size">Size</string>
+    <string name="field_creator_stepper_start">Start Point</string>
+    <string name="field_creator_stepper_pattern">Walking Pattern</string>
+    <string name="field_creator_stepper_direction">Walking Direction</string>
+    <string name="field_creator_stepper_preview">Preview</string>
 
     <!-- Geo-Navigate to Field -->
     <string name="menu_fields_plot_by_distance_title">Select nearest field</string>
@@ -279,7 +331,7 @@
 
     <string name="traits_export_check">Export current trait list?</string>
     <string name="traits_dialog_export">Export</string>
-    <string name="dialog_delete_traits_message">Would you like to delete all current traits?</string>
+    <string name="dialog_delete_traits_message">Would you like to delete all current traits? Deleting a trait also deletes data that has been collected for that trait.</string>
 
     <string name="traits_toolbar_delete_all">Delete all traits</string>
     <string name="act_trait_editor_no_traits_exist">No traits exist.</string>
@@ -314,6 +366,9 @@
     <string name="traits_format_spectral">Spectral</string>
     <string name="traits_format_nix">Nix</string>
     <string name="traits_format_inno_spectra">InnoSpectra</string>
+    <string name="traits_format_green_seeker">GreenSeeker</string>
+    <string name="traits_format_scale">Scale</string>
+    <string name="traits_format_stop_watch">Stopwatch</string>
 
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Trait Format</string>
@@ -1362,6 +1417,8 @@
     <!-- gopro -->
     <string name="dialog_go_pro_wait_stream_title">Waiting for live preview</string>
     <string name="dialog_go_pro_wait_stream_message">This may take a minute.</string>
+    <string name="view_trait_photo_settings_save_image_title">Copy image to Field Book</string>
+    <string name="go_pro_trait_settings_title">GoPro Settings</string>
 
     <!-- canon camera strings -->
     <string name="canon_frag_connect_btn_content_description">shutter button</string>
@@ -1561,7 +1618,23 @@
     <string name="nix_error_no_network">Nix may require internet to work properly.</string>
 
     <string name="import_runnable_field_name_exists">Field name already exists.</string>
+
     <string name="enabled">enabled</string>
     <string name="disabled">disabled</string>
     <string name="logging_out_please_wait">Logging out, please wait.</string>
+
+    <string name="traits_save_image_parameter">Copy image to Field Book</string>
+
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="reset">Reset</string>
+    <string name="play">Play</string>
+    <string name="pause">Pause</string>
+    <string name="save">Save</string>
+      
+    <string name="database_export_invalid_filename">Invalid export file name.</string>
+    <string name="device_settings_dialog_name">Name: %s</string>
+    <string name="device_settings_dialog_address">Address: %s</string>
+    <string name="device_settings_dialog_unknown_name">Unknown Bluetooth Device</string>
+    <string name="device_settings_dialog_title">Bluetooth Device Settings</string>
+    <string name="no_data_captured">No data captured.</string>
 </resources>
