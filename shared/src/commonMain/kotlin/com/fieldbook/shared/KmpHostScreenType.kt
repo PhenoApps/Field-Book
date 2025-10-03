@@ -6,7 +6,8 @@ enum class KmpHostScreenType(val value: String) {
     FIELD_EDITOR("field_editor"),
     COLLECT("collect"),
     PREFERENCES("preferences"),
-    STORAGE_PREFERENCES("storage_preferences");
+    STORAGE_PREFERENCES("storage_preferences"),
+    STORAGE_DEFINER("storage_definer");
 
     companion object {
         fun fromValue(value: String): KmpHostScreenType {
@@ -15,4 +16,3 @@ enum class KmpHostScreenType(val value: String) {
         }
     }
 }
-

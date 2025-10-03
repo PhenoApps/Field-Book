@@ -1,5 +1,6 @@
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 import org.gradle.api.tasks.Sync
+
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
     id("com.android.kotlin.multiplatform.library")
@@ -66,6 +67,9 @@ kotlin {
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.lifecycle.viewmodel.compose)
                 implementation(libs.okio)
+                implementation(libs.permissions)
+                implementation(libs.filekit.core)
+                implementation(libs.filekit.compose)
             }
         }
 

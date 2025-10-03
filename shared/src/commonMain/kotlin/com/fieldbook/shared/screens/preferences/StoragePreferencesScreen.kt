@@ -70,7 +70,8 @@ private data class StoragePreferenceItem(
 @Composable
 fun StoragePreferencesScreen(
     driverFactory: DriverFactory,
-    onBack: (() -> Unit)? = null
+    onBack: (() -> Unit)? = null,
+    onNavigate: ((com.fieldbook.shared.KmpHostScreenType) -> Unit)? = null
 ) {
     MainTheme {
         var showImportDialog by remember { mutableStateOf(false) }
@@ -136,7 +137,12 @@ fun StoragePreferencesScreen(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
+                                .padding(16.dp)
+                                .clickable {
+                                    if (item.key == "DEFAULT_STORAGE_LOCATION_PREFERENCE") {
+                                        onNavigate?.invoke(com.fieldbook.shared.KmpHostScreenType.STORAGE_DEFINER)
+                                    }
+                                },
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(

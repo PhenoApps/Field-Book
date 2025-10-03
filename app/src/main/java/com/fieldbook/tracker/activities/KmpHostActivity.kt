@@ -13,6 +13,7 @@ import com.fieldbook.shared.screens.ScannerScreen
 import com.fieldbook.shared.screens.FieldEditorScreen
 import com.fieldbook.shared.screens.preferences.PreferencesScreen
 import com.fieldbook.shared.screens.preferences.StoragePreferencesScreen
+import com.fieldbook.shared.screens.preferences.StorageDefinerScreen
 import com.fieldbook.shared.sqldelight.DriverFactory
 
 class KmpHostActivity : ComponentActivity() {
@@ -66,10 +67,17 @@ class KmpHostActivity : ComponentActivity() {
                 KmpHostScreenType.STORAGE_PREFERENCES -> {
                     StoragePreferencesScreen(
                         driverFactory = DriverFactory(context = this),
+                        onNavigate = { target -> currentScreen.value = target },
                         onBack = {
                             currentScreen.value = KmpHostScreenType.PREFERENCES
 
                         })
+                }
+
+                KmpHostScreenType.STORAGE_DEFINER -> {
+                    StorageDefinerScreen(
+                        onBack = { currentScreen.value = KmpHostScreenType.PREFERENCES }
+                    )
                 }
             }
         }

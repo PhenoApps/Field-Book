@@ -24,7 +24,7 @@ class CollectScreenController(driverFactory: DriverFactory) {
     private val observationRepository = ObservationRepository(db)
     private val settings: Settings = Settings()
 
-    private val studyId: Int = settings.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+    private val studyId: Int = settings.getInt(GeneralKeys.SELECTED_FIELD_ID.key, 0)
 
     var units by mutableStateOf<List<ObservationUnitModel>>(emptyList())
         private set
@@ -125,7 +125,7 @@ class CollectScreenController(driverFactory: DriverFactory) {
 
     fun getDisplayColor(): Color {
         val defaultArgb = AppColors.fb_value_saved_color.argb
-        var storedArgb = settings.getInt(GeneralKeys.SAVED_DATA_COLOR, defaultArgb)
+        var storedArgb = settings.getInt(GeneralKeys.SAVED_DATA_COLOR.key, defaultArgb)
 
         // Check if the alpha channel is 0 (fully transparent).
         // The 'ushr 24' operation isolates the alpha byte.
