@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.window.ComposeUIViewController
 import com.fieldbook.shared.screens.ConfigScreen
 import com.fieldbook.shared.screens.FieldEditorScreen
+import com.fieldbook.shared.screens.collect.CollectScreen
 import com.fieldbook.shared.screens.preferences.PreferencesScreen
 import com.fieldbook.shared.screens.preferences.StoragePreferencesScreen
 import com.fieldbook.shared.sqldelight.DriverFactory
@@ -16,7 +17,9 @@ fun MainViewController(driverFactory: DriverFactory) = ComposeUIViewController {
 
     when (currentScreen) {
         KmpHostScreenType.CONFIG -> ConfigScreen(
-            onNavigate = { target -> currentScreen = target }
+            onNavigate = { target -> currentScreen = target },
+            driverFactory = driverFactory,
+            onBack = { currentScreen = KmpHostScreenType.CONFIG }
         )
 
         KmpHostScreenType.FIELD_EDITOR -> FieldEditorScreen(
@@ -24,7 +27,7 @@ fun MainViewController(driverFactory: DriverFactory) = ComposeUIViewController {
             onBack = { currentScreen = KmpHostScreenType.CONFIG }
         )
 
-        KmpHostScreenType.COLLECT -> com.fieldbook.shared.screens.collect.CollectScreen(
+        KmpHostScreenType.COLLECT -> CollectScreen(
             driverFactory = driverFactory,
             onBack = { currentScreen = KmpHostScreenType.CONFIG }
         )
