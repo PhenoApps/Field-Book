@@ -345,7 +345,7 @@ class BrapiSyncObsDialog(private val context: Context, private val syncControlle
 
                     dataHelper.insertObservation(obs.unitDbId, obs.variableDbId, obs.value,
                         obs.collector ?: "", "", "", studyObservations.fieldBookStudyDbId.toString(),
-                        null, obs.timestamp, obs.lastSyncedTime, obs.rep)
+                        obs.dbId, obs.timestamp, obs.lastSyncedTime, obs.rep)
                 }
 
                 observationRepBaseMap[key] = nextRep
