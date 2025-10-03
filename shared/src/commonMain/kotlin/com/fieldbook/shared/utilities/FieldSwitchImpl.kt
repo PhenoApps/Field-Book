@@ -25,15 +25,15 @@ class FieldSwitchImpl() {
             val primary = field.primary_id
             val secondary = field.secondary_id
 
-            preferences.putInt(GeneralKeys.SELECTED_FIELD_ID, field.exp_id)
-            preferences.putString(GeneralKeys.FIELD_FILE, field.exp_name)
-            preferences.putString(GeneralKeys.FIELD_ALIAS, field.exp_alias)
-            preferences.putString(GeneralKeys.FIELD_OBS_LEVEL, field.observation_level ?: "")
-            preferences.putString(GeneralKeys.UNIQUE_NAME, uniqueId)
-            preferences.putString(GeneralKeys.PRIMARY_NAME, primary)
-            preferences.putString(GeneralKeys.SECONDARY_NAME, secondary)
-            preferences.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, true)
-            preferences.putString(GeneralKeys.LAST_PLOT, "")
+            preferences.putInt(GeneralKeys.SELECTED_FIELD_ID.key, field.exp_id)
+            preferences.putString(GeneralKeys.FIELD_FILE.key, field.exp_name)
+            preferences.putString(GeneralKeys.FIELD_ALIAS.key, field.exp_alias)
+            preferences.putString(GeneralKeys.FIELD_OBS_LEVEL.key, field.observation_level ?: "")
+            preferences.putString(GeneralKeys.UNIQUE_NAME.key, uniqueId)
+            preferences.putString(GeneralKeys.PRIMARY_NAME.key, primary)
+            preferences.putString(GeneralKeys.SECONDARY_NAME.key, secondary)
+            preferences.putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED.key, true)
+            preferences.putString(GeneralKeys.LAST_PLOT.key, "")
         }
     }
 }
