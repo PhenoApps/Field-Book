@@ -68,6 +68,8 @@ kotlin {
                 implementation(libs.lifecycle.viewmodel.compose)
                 implementation(libs.okio)
                 implementation(libs.permissions)
+                implementation(libs.filekit.core)
+                implementation(libs.filekit.compose)
             }
         }
 

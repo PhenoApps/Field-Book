@@ -9,6 +9,7 @@ import com.fieldbook.shared.screens.ConfigScreen
 import com.fieldbook.shared.screens.FieldEditorScreen
 import com.fieldbook.shared.screens.collect.CollectScreen
 import com.fieldbook.shared.screens.preferences.PreferencesScreen
+import com.fieldbook.shared.screens.preferences.StorageDefinerScreen
 import com.fieldbook.shared.screens.preferences.StoragePreferencesScreen
 import com.fieldbook.shared.sqldelight.DriverFactory
 
@@ -39,6 +40,10 @@ fun MainViewController(driverFactory: DriverFactory) = ComposeUIViewController {
 
         KmpHostScreenType.STORAGE_PREFERENCES -> StoragePreferencesScreen(
             driverFactory,
+            onBack = { currentScreen = KmpHostScreenType.PREFERENCES }
+        )
+
+        KmpHostScreenType.STORAGE_DEFINER -> StorageDefinerScreen(
             onBack = { currentScreen = KmpHostScreenType.PREFERENCES }
         )
 
