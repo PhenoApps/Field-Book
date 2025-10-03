@@ -205,7 +205,7 @@
     <string name="field_creator_stepper_size">Tamanho</string>
     <string name="field_creator_stepper_start">Ponto de Início</string>
     <string name="field_creator_stepper_pattern">Padrão de Caminho</string>
-    <string name="field_creator_stepper_direction"></string>
+    <string name="field_creator_stepper_direction">Direção de Caminhada</string>
     <string name="field_creator_stepper_preview">Pré-visualizar</string>
     <!-- Geo-Navigate to Field -->
     <string name="menu_fields_plot_by_distance_title">Selecione campo mais próximo</string>
