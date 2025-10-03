@@ -201,6 +201,9 @@
     <string name="field_creator_preview_large_field_warning">Campo grande detectado. Crear muchas parcelas puede tomar algún tiempo.</string>
     <string name="field_creator_preview_creating_field">Creando campo…</string>
     <string name="field_creator_preview_create_button">CREAR</string>
+    <string name="field_creator_preview_expand_button">Expandir Grilla</string>
+    <string name="field_creator_preview_collapse_button">Contraer Grilla</string>
+    <string name="field_creator_expanded_preview_title">Vista Previa Campo Completo</string>
     <string name="dialog_field_creator_ask_name_hint">Nombre</string>
     <string name="dialog_field_creator_ask_row_hint">Filas</string>
     <string name="dialog_field_creator_ask_columns_hint">Columnas</string>
@@ -215,6 +218,10 @@
     <string name="dialog_field_creator_size_group_error">Por favor, ingrese un nombre y formato válidos.</string>
     <string name="dialog_field_creator_field_name_not_unique">El nombre del Campo ya está en uso.</string>
     <string name="dialog_field_creator_large_field">Se detecta un Campo grande, la transacción puede tardar mucho.</string>
+    <string name="dialog_field_creator_horizontal_linear_button_content_desc">Botón para elegir el patrón de parcelas lineal horizontal.</string>
+    <string name="dialog_field_creator_horizontal_zig_button_content_desc">Botón para elegir el patrón de parcelas en zig-zag horizontal.</string>
+    <string name="dialog_field_creator_vertical_linear_button_content_desc">Botón para elegir el patrón de parcelas lineal vertical.</string>
+    <string name="dialog_field_creator_vertical_zig_button_content_desc">Botón para elegir el patrón de parcelas en zig-zag vertical.</string>
     <string name="dialog_field_creator_review_image_content_desc">Imagen mostrando la orientación y el patrón de las parcelas.</string>
     <string name="field_creator_stepper_size">Tamaño</string>
     <string name="field_creator_stepper_start">Punto Inicial</string>
