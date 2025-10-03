@@ -32,7 +32,7 @@
     <string name="app_intro_intro_summary_slide1">A coleta de dados no campo exige, tradicionalmente, a escrita e a transcrição de notas em papel. O Field Book foi criado como uma solução digital para captura de dados que permite aumentar a velocidade de coleta com maior integridade de dados.</string>
     <string name="app_intro_intro_title_slide2">Funcionalidades e Personalização</string>
     <string name="app_intro_intro_summary_slide2">Os dados são inseridos no Field Book com disposição de características personalizadas que são projetados para simplificar dados de entrada e minimizar erros.\n\n Por padrão, os dados coletados são armazenados localmente, mas o Field Book suporta a API que lhe permite enviar dados para sistemas compatíveis com BrAPI.</string>
-    <string name="app_intro_required_setup_title">Configuração Requerida</string>
+    <string name="app_intro_required_setup_title">Configuração Obrigatória</string>
     <string name="app_intro_required_setup_summary">Para começar a usar o Field Book, conceda as permissões necessárias para o aplicativo e defina uma pasta onde seus dados serão armazenados.</string>
     <string name="app_intro_permissions_title">Permissões</string>
     <string name="app_intro_permissions_warning">Por favor, conceda as permissões necessárias</string>
@@ -174,7 +174,7 @@
     <string name="field_creator_pattern_title">Padrão de Caminho</string>
     <string name="field_creator_preview_title">Revisar</string>
     <string name="field_creator_exit_dialog_message">Você tem certeza que quer sair? Seu progresso será perdido.</string>
-    <string name="field_creator_creation_in_progress">Criação do campo em progresso. Por favor, espere...</string>
+    <string name="field_creator_creation_in_progress">Criação do campo em progresso. Por favor, espere…</string>
     <string name="field_creator_size_field_name_hint">Nome do Campo</string>
     <string name="field_creator_size_rows_hint">Linhas</string>
     <string name="field_creator_size_columns_hint">Colunas</string>
@@ -186,6 +186,8 @@
     <string name="field_creation_failed_error">Falha ao criar campo</string>
     <string name="field_creator_direction_horizontal">Horizontal</string>
     <string name="field_creator_direction_vertical">Vertical</string>
+    <string name="field_creator_preview_large_field_warning">Campo grande detectado. Criar muitos lotes pode levar algum tempo.</string>
+    <string name="field_creator_preview_creating_field">Criando campo…</string>
     <string name="field_creator_preview_create_button">CRIAR</string>
     <string name="dialog_field_creator_ask_name_hint">Nome</string>
     <string name="dialog_field_creator_ask_row_hint">Linhas</string>
@@ -324,11 +326,11 @@
     <string name="list_item_traits_grid_content_description">Inverter seleção</string>
     <string name="dialog_trait_parameters_title">Parâmetros de Característica</string>
     <string name="traits_create_warning_percent_magnitude_relation">Erro de relação de magnitude</string>
-    <string name="trait_parameter_default_value_number_format_error">Tem que ser um número</string>
+    <string name="trait_parameter_default_value_number_format_error">Deve ser um número</string>
     <string name="traits_create_unknown_error">Ocorreu um erro desconhecido: %s</string>
     <string name="trait_creator_parameter_warning_infinite">O número não pode ser infinito</string>
     <string name="trait_creator_parameter_warning_nan">O número não pode ser NaN</string>
-    <string name="trait_creator_parameter_warning_negative">O número não pode ser negativo</string>
+    <string name="trait_creator_parameter_warning_negative">O número não deve ser negativo</string>
     <string name="trait_creator_parameter_warning_too_big">O número é muito grande</string>
     <string name="trait_creator_parameter_warning_too_small">O número é muito pequeno</string>
     <string name="list_item_trait_parameter_categories_value_hint">Digite um nome de categoria para adicionar</string>
@@ -337,8 +339,8 @@
     <string name="dialog_new_trait_error_must_select_a_layout">Você deve selecionar uma disposição.</string>
     <string name="trait_creator_parameter_warning_integer_required">Inteiro obrigatório.</string>
     <string name="dialog_new_trait_error_cannot_update_to_brapi_trait">As características não podem ser atualizados para características BrAPI.</string>
-    <string name="required">Requerido</string>
-    <string name="traits_create_warning_percent_value_required">Valor necessário</string>
+    <string name="required">Obrigatório</string>
+    <string name="traits_create_warning_percent_value_required">Valor obrigatório</string>
     <string name="select_trait">Selecionar Característica</string>
     <string name="edit_traits">Editar</string>
     <!-- COLLECT -->
@@ -578,7 +580,7 @@
     <string name="export_progress">Exportando...</string>
     <string name="export_error_missing_format">Tipo de exportação precisa ser selecionado</string>
     <string name="export_error_missing_column">Tipo de coluna de campo deve ser selecionado</string>
-    <string name="export_error_missing_trait">Tipo de Característica deve ser selecionado</string>
+    <string name="export_error_missing_trait">Tipo de característica deve ser selecionado</string>
     <string name="export_overwrite">Sobrescrever exportação anterior</string>
     <string name="dialog_export_bundle_data_cb_text">Dados de mídia agrupados com arquivo de exportação.</string>
     <string name="export_multiple_fields_name">múltiplos_campos</string>
@@ -1099,7 +1101,7 @@
     <string name="tutorial_traits_visibility_title">Visibilidade da Característica</string>
     <string name="tutorial_traits_visibility_description">As características podem ser desabilitadas da coleção marcando a caixa de seleção.</string>
     <string name="shutter_capture_content_description">Botão de disparo para tirar uma foto.</string>
-    <string name="dialog_geonav_prefs_sensor_missing_title">Falta o sensor necessário</string>
+    <string name="dialog_geonav_prefs_sensor_missing_title">Falta o sensor requerido</string>
     <string name="dialog_geonav_prefs_sensor_missing_message">O método trapezoidal requer um acelerômetro e giroscópio para usar entrada da bússola.</string>
     <string name="trait_audio_button_content_description">Controla gravação do áudio.</string>
     <string name="trait_counter_minus_content_description">Subtraia a contagem em um</string>
