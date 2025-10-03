@@ -174,6 +174,7 @@
     <string name="field_creator_pattern_title">Padrão de Caminhada</string>
     <string name="field_creator_direction_title">Direção de Caminhada</string>
     <string name="field_creator_preview_title">Revisar</string>
+    <string name="field_creator_exit_dialog_title">Sair do Criador de Campo</string>
     <string name="field_creator_exit_dialog_message">Você tem certeza que quer sair? Seu progresso será perdido.</string>
     <string name="field_creator_creation_in_progress">Criação do campo em progresso. Por favor, espere…</string>
     <string name="field_creator_size_field_name_hint">Nome do Campo</string>
@@ -187,11 +188,22 @@
     <string name="field_creator_total_plots_exceeded_error">Total de parcelas não pode exceder %1$s. Total atual: %2$s</string>
     <string name="field_creation_failed_error">Falha ao criar campo</string>
     <string name="field_creator_start_point_instruction">Toque em um canto para selecionar o ponto inicial</string>
+    <string name="field_dimensions_format">Campo: %d × %d</string>
+    <string name="field_creator_pattern_linear">Linear</string>
+    <string name="field_creator_pattern_linear_summary">Seguir a mesma direção após cada linha/coluna</string>
+    <string name="field_creator_pattern_zigzag">Serpentina/Zigue-Zague</string>
+    <string name="field_creator_pattern_zigzag_summary">Alternar direção após cada linha/coluna</string>
     <string name="field_creator_direction_horizontal">Horizontal</string>
+    <string name="field_creator_direction_horizontal_summary">Caminhe pelas linhas</string>
     <string name="field_creator_direction_vertical">Vertical</string>
+    <string name="field_creator_direction_vertical_summary">Caminhe colunas acima/baixo</string>
+    <string name="field_creator_preview_summary">Campo: %s (%d x %d)</string>
     <string name="field_creator_preview_large_field_warning">Campo grande detectado. Criar muitos lotes pode levar algum tempo.</string>
     <string name="field_creator_preview_creating_field">Criando campo…</string>
     <string name="field_creator_preview_create_button">CRIAR</string>
+    <string name="field_creator_preview_expand_button">Expandir Grade</string>
+    <string name="field_creator_preview_collapse_button">Recolher Grade</string>
+    <string name="field_creator_expanded_preview_title">Pré-visualização do Campo Completo</string>
     <string name="dialog_field_creator_ask_name_hint">Nome</string>
     <string name="dialog_field_creator_ask_row_hint">Linhas</string>
     <string name="dialog_field_creator_ask_columns_hint">Colunas</string>
@@ -206,6 +218,10 @@
     <string name="dialog_field_creator_size_group_error">Por favor, insira um nome e formato válidos.</string>
     <string name="dialog_field_creator_field_name_not_unique">Nome do campo já está em uso.</string>
     <string name="dialog_field_creator_large_field">Campo grande detectado, a transação pode levar muito tempo.</string>
+    <string name="dialog_field_creator_horizontal_linear_button_content_desc">Botão para escolher o padrão de parcelas linear horizontal.</string>
+    <string name="dialog_field_creator_horizontal_zig_button_content_desc">Botão para escolher o padrão de parcelas zigue-zague horizontal.</string>
+    <string name="dialog_field_creator_vertical_linear_button_content_desc">Botão para escolher o padrão de plotagem linear vertical.</string>
+    <string name="dialog_field_creator_vertical_zig_button_content_desc">Botão para escolher o padrão de parcelas zigue-zague vertical.</string>
     <string name="dialog_field_creator_review_image_content_desc">Imagem mostrando orientação e padrão de parcelas.</string>
     <string name="field_creator_stepper_size">Tamanho</string>
     <string name="field_creator_stepper_start">Ponto de Início</string>
@@ -299,6 +315,7 @@
     <string name="traits_format_nix">Nix</string>
     <string name="traits_format_inno_spectra">InnoSpectra</string>
     <string name="traits_format_green_seeker">GreenSeeker</string>
+    <string name="traits_format_scale">Escala</string>
     <string name="traits_format_stop_watch">Cronômetro</string>
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Formato de Característica</string>
@@ -1159,6 +1176,8 @@
     <!-- gopro -->
     <string name="dialog_go_pro_wait_stream_title">Aguardando pré-visualização ao vivo</string>
     <string name="dialog_go_pro_wait_stream_message">Isso pode demorar um minuto.</string>
+    <string name="view_trait_photo_settings_save_image_title">Copiar imagem para Field Book</string>
+    <string name="go_pro_trait_settings_title">Configurações do GoPro</string>
     <!-- canon camera strings -->
     <string name="canon_frag_connect_btn_content_description">botão obturador</string>
     <string name="traits_format_canon">Canon</string>
@@ -1350,9 +1369,16 @@
     <string name="import_runnable_field_name_exists">Nome do campo já existe.</string>
     <string name="enabled">habilitado</string>
     <string name="disabled">desabilitado</string>
+    <string name="traits_save_image_parameter">Copiar imagem para Field Book</string>
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="reset">Restabelecer</string>
     <string name="play">Reproduzir</string>
     <string name="pause">Pausar</string>
     <string name="save">Salvar</string>
+    <string name="database_export_invalid_filename">Nome de arquivo de exportação inválido.</string>
+    <string name="device_settings_dialog_name">Nome: %s</string>
+    <string name="device_settings_dialog_address">Endereço: %s</string>
+    <string name="device_settings_dialog_unknown_name">Dispositivo Bluetooth Desconhecido</string>
+    <string name="device_settings_dialog_title">Configurações de Dispositivo Bluetooth</string>
+    <string name="no_data_captured">Nenhum dado capturado.</string>
 </resources>
