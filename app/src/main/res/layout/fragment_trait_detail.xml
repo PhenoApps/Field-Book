@@ -213,64 +213,13 @@
                     android:paddingLeft="12dp"
                     android:paddingRight="12dp">
 
-                    <!-- Trait Options Chips -->
                     <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/optionsChipGroup"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:singleLine="false"
-                        app:chipSpacingHorizontal="8dp"
-                        app:chipSpacingVertical="8dp">
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/resourceChip"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            app:chipIcon="@drawable/ic_tb_folder"
-                            app:chipIconSize="24dp"
-                            app:ensureMinTouchTargetSize="false"
-                            app:closeIconVisible="false"
-                            app:chipBackgroundColor="?attr/selectableChipBackground"
-                            app:chipStartPadding="6dp"
-                            app:chipStrokeColor="?attr/selectableChipStroke"
-                            app:chipStrokeWidth="2dp" />
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/brapi_swap_name_chip"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            app:chipIcon="@drawable/ic_swap_horizontal"
-                            app:ensureMinTouchTargetSize="false"
-                            app:closeIconVisible="false"
-                            app:chipBackgroundColor="?attr/selectableChipBackground"
-                            app:chipStartPadding="6dp"
-                            app:chipStrokeColor="?attr/selectableChipStroke"
-                            app:chipStrokeWidth="2dp" />
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/dateFormatChip"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            app:chipIcon="@drawable/ic_calendar_edit"
-                            app:ensureMinTouchTargetSize="false"
-                            app:closeIconVisible="false"
-                            app:chipBackgroundColor="?attr/selectableChipBackground"
-                            app:chipStartPadding="6dp"
-                            app:chipStrokeColor="?attr/selectableChipStroke"
-                            app:chipStrokeWidth="2dp" />
-
-                        <com.google.android.material.chip.Chip
-                            android:id="@+id/brapiLabelValueChip"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            app:chipIcon="@drawable/ic_tag_edit"
-                            app:ensureMinTouchTargetSize="false"
-                            app:closeIconVisible="false"
-                            app:chipBackgroundColor="?attr/selectableChipBackground"
-                            app:chipStartPadding="6dp"
-                            app:chipStrokeColor="?attr/selectableChipStroke"
-                            app:chipStrokeWidth="2dp" />
-
-                    </com.google.android.material.chip.ChipGroup>
+                        app:chipSpacingHorizontal="4dp"
+                        app:chipSpacingVertical="0dp" />
 
                 </LinearLayout>
 

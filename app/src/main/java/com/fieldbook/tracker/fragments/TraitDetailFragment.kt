@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.fragments
 
 import android.app.AlertDialog
-import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
@@ -22,24 +21,41 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.activities.FileExploreActivity
 import com.fieldbook.tracker.activities.TraitEditorActivity
 import com.fieldbook.tracker.charts.HistogramChartHelper
 import com.fieldbook.tracker.charts.HorizontalBarChartHelper
 import com.fieldbook.tracker.charts.PieChartHelper
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.databinding.FragmentTraitDetailBinding
+import com.fieldbook.tracker.dialogs.FileExploreDialogFragment
 import com.fieldbook.tracker.objects.FieldFileObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.traits.formats.Formats
+import com.fieldbook.tracker.traits.formats.NumericFormat
+import com.fieldbook.tracker.traits.formats.TraitFormat
+import com.fieldbook.tracker.traits.formats.parameters.AutoSwitchPlotParameter
+import com.fieldbook.tracker.traits.formats.parameters.BaseFormatParameter
+import com.fieldbook.tracker.traits.formats.parameters.CategoriesParameter
+import com.fieldbook.tracker.traits.formats.parameters.CloseKeyboardParameter
+import com.fieldbook.tracker.traits.formats.parameters.CropImageParameter
+import com.fieldbook.tracker.traits.formats.parameters.DecimalPlacesParameter
+import com.fieldbook.tracker.traits.formats.parameters.MathSymbolsParameter
+import com.fieldbook.tracker.traits.formats.parameters.Parameters
+import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
+import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
+import com.fieldbook.tracker.traits.formats.parameters.UnitParameter
+import com.fieldbook.tracker.traits.formats.parameters.UseDayOfYearParameter
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
+import com.fieldbook.tracker.utilities.SoundHelperImpl
 import com.fieldbook.tracker.utilities.TraitNameValidator
 import com.fieldbook.tracker.utilities.Utils
+import com.fieldbook.tracker.utilities.VibrateUtil
 import com.fieldbook.tracker.viewmodels.CopyTraitStatus
 import com.fieldbook.tracker.viewmodels.TraitDetailUiState
 import com.fieldbook.tracker.viewmodels.TraitDetailViewModel
 import com.fieldbook.tracker.viewmodels.factory.TraitDetailViewModelFactory
+import com.google.android.material.chip.Chip
 import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.utils.BaseDocumentTreeUtil
 import java.math.BigDecimal
@@ -58,6 +74,12 @@ class TraitDetailFragment : Fragment() {
 
     @Inject
     lateinit var preferences: SharedPreferences
+
+    @Inject
+    lateinit var soundHelperImpl: SoundHelperImpl
+
+    @Inject
+    lateinit var vibrator: VibrateUtil
 
     private lateinit var binding: FragmentTraitDetailBinding
 
@@ -112,8 +134,6 @@ class TraitDetailFragment : Fragment() {
                     if (binding.toolbar.menu?.size == 0) { // setup toolbar menu
                         setupToolbar()
                     }
-
-                    setupClickListeners(state.trait)
 
                     state.observationData?.let { renderObservationData(it) }
                 }
@@ -173,37 +193,6 @@ class TraitDetailFragment : Fragment() {
         )
     }
 
-    private fun setupClickListeners(trait: TraitObject) {
-        binding.resourceChip.setOnClickListener {
-            val dir = BaseDocumentTreeUtil.Companion.getDirectory(requireContext(), R.string.dir_resources)
-            if (dir != null && dir.exists()) {
-                val intent = Intent(requireContext(), FileExploreActivity::class.java)
-                intent.putExtra("path", dir.uri.toString())
-                intent.putExtra("title", requireContext().getString(R.string.main_toolbar_resources))
-
-                // Use the same request code as defined in TraitEditorActivity
-                (activity as? TraitEditorActivity)?.startActivityForResult(
-                    intent,
-                    TraitEditorActivity.REQUEST_RESOURCE_FILE_CODE
-                )
-            } else {
-                Toast.makeText(requireContext(), R.string.error_storage_directory, Toast.LENGTH_LONG).show()
-            }
-        }
-
-        binding.brapiSwapNameChip.setOnClickListener {
-            showSwapNameDialog(trait)
-        }
-
-        binding.dateFormatChip.setOnClickListener {
-            showDateFormatDialog(trait)
-        }
-
-        binding.brapiLabelValueChip.setOnClickListener {
-            showBrapiLabelValueDialog(trait)
-        }
-    }
-
     private fun setupCollapsibleSection(header: LinearLayout, content: LinearLayout, icon: ImageView, prefKey: String) {
         val isCollapsed = preferences.getBoolean(prefKey, false)
         content.visibility = if (isCollapsed) View.GONE else View.VISIBLE
@@ -222,17 +211,6 @@ class TraitDetailFragment : Fragment() {
         }
     }
 
-    fun updateResourceFile(fileUri: String) {
-        traitId?.let { id ->
-            viewModel.updateResourceFile(id, fileUri)
-            val fileObject = FieldFileObject.create(requireContext(), fileUri.toUri(), null, null)
-            binding.resourceChip.text = fileObject.fileStem
-            Toast.makeText(requireContext(),
-                getString(R.string.trait_resource_file_updated),
-                Toast.LENGTH_SHORT).show()
-        }
-    }
-
     private fun updateTraitData(trait: TraitObject) {
         binding.traitDisplayName.text = trait.alias
 
@@ -245,43 +223,247 @@ class TraitDetailFragment : Fragment() {
 
         updateVisibilityChip(trait)
 
-        binding.resourceChip.text = if (trait.resourceFile.isNotEmpty()) {
+        setupOptionChips(trait)
+    }
+
+    private fun setupOptionChips(trait: TraitObject) {
+        binding.optionsChipGroup.removeAllViews()
+
+        addResourceFileChip(trait)
+
+        addFormatSpecificOptionChips(trait)
+
+        addParameterChips(trait)
+    }
+
+    private fun addResourceFileChip(trait: TraitObject) {
+        val chipLabel = if (trait.resourceFile.isNotEmpty()) {
             val fileObject = FieldFileObject.create(requireContext(), trait.resourceFile.toUri(), null, null)
             fileObject.fileStem
         } else {
-            getString(R.string.trait_resource_chip_title) // default text
+            getString(R.string.trait_resource_chip_title)
+        }
+
+        addChip(chipLabel, R.drawable.ic_tb_folder) { chip ->
+            val dir = BaseDocumentTreeUtil.Companion.getDirectory(requireContext(), R.string.dir_resources)
+            if (dir != null && dir.exists()) {
+                val dialog = FileExploreDialogFragment().apply {
+
+                    arguments = Bundle().apply {
+                        putString("path", dir.uri.toString())
+                        putString("dialogTitle", this@TraitDetailFragment.getString(R.string.main_toolbar_resources))
+                        putStringArray("include", arrayOf("jpg", "jpeg", "png", "bmp"))
+                    }
+
+                    setOnFileSelectedListener { selectedUri ->
+                        viewModel.updateResourceFile(trait.id, selectedUri.toString())
+                        chip.text = selectedUri.lastPathSegment?.substringAfterLast('/') ?: selectedUri.toString()
+                    }
+                }
+
+                dialog.show(parentFragmentManager, "FileExploreDialog")
+            } else {
+                Toast.makeText(requireContext(), R.string.error_storage_directory, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun addFormatSpecificOptionChips(trait: TraitObject) {
+        val isBrapiTrait = trait.externalDbId != null && (trait.externalDbId?.isNotEmpty() == true)
+                || trait.traitDataSource.contains("brapi", ignoreCase = true) == true
+
+        if (isBrapiTrait && trait.synonyms.isNotEmpty()) {
+            addChip(getString(R.string.trait_brapi_swap_name), R.drawable.ic_swap_horizontal) { showSwapNameDialog(trait) }
         }
 
         if (trait.format == "date") {
-            binding.dateFormatChip.visibility = View.VISIBLE
-            val isUseDayOfYear = trait.useDayOfYear
-            updateDateFormatChip(isUseDayOfYear)
-        } else {
-            binding.dateFormatChip.visibility = View.GONE
+            val chipLabel = if (trait.useDayOfYear) getTodayDayOfYear() else getTodayFormattedDate()
+            addChip(chipLabel, R.drawable.ic_calendar_edit) { showDateFormatDialog(trait) }
         }
-
-        // Only show the BrAPI label chip for BrAPI traits
-        val isBrapiTrait =
-            trait.externalDbId != null && (trait.externalDbId?.isNotEmpty() == true)
-                    || trait.traitDataSource.contains("brapi", ignoreCase = true) == true
-
-        val hasSynonyms = trait.synonyms.isNotEmpty()
-
-        binding.brapiSwapNameChip.visibility = if (isBrapiTrait && hasSynonyms) View.VISIBLE else View.GONE
-        binding.brapiSwapNameChip.text = getString(R.string.trait_brapi_swap_name)
-
-        // Show/hide BrAPI label/value chip based on trait source and format
-        // A trait is from BrAPI if it has an external ID or the data source contains "brapi"
 
         traitHasBrapiCategories = isBrapiTrait && trait.format == "categorical" && trait.categories.isNotEmpty()
-
-        // For BrAPI label/value toggle
         if (traitHasBrapiCategories) {
-            binding.brapiLabelValueChip.visibility = View.VISIBLE
-            updateBrapiLabelValueChip(trait)
-        } else {
-            binding.brapiLabelValueChip.visibility = View.GONE
+            val firstCategory = parseCategoryExample(trait.categories)
+            val chipLabel = if (trait.categoryDisplayValue) {
+                getString(R.string.trait_brapi_value_display, firstCategory.second)
+            } else {
+                getString(R.string.trait_brapi_label_display, firstCategory.first)
+            }
+
+            addChip(chipLabel, R.drawable.ic_tag_edit) {
+                showBrapiLabelValueDialog(trait)
+            }
         }
+    }
+
+    private fun addParameterChips(trait: TraitObject) {
+        val format = Formats.entries.find { it.getDatabaseName() == trait.format } ?: return
+        val formatDefinition = format.getTraitFormatDefinition()
+
+        val excludedParams = setOf(
+            Parameters.NAME,
+            Parameters.DEFAULT_VALUE,
+            Parameters.MAXIMUM,
+            Parameters.MINIMUM,
+            Parameters.DETAILS,
+            Parameters.RESOURCE_FILE,
+            Parameters.USE_DAY_OF_YEAR,
+            Parameters.DISPLAY_VALUE,
+        )
+
+        val displayableParams = formatDefinition.parameters.filter {
+            it.parameter !in excludedParams
+        }
+
+        displayableParams.forEach { param ->
+            addParameterChip(param, trait)
+        }
+    }
+
+    private fun addParameterChip(parameter: BaseFormatParameter, trait: TraitObject) {
+        val iconRes: Int = when (parameter) {
+            is AutoSwitchPlotParameter -> R.drawable.ic_page_next_outline
+            is CategoriesParameter -> R.drawable.ic_trait_categorical
+            is CloseKeyboardParameter -> R.drawable.ic_keyboard_close
+            is CropImageParameter -> R.drawable.ic_crop_image
+            is DecimalPlacesParameter -> R.drawable.ic_decimal
+            is MathSymbolsParameter -> R.drawable.ic_symbol
+            is ResourceFileParameter -> R.drawable.ic_tb_folder
+            is RepeatedMeasureParameter -> R.drawable.ic_repeated_measures
+            is UnitParameter -> R.drawable.ic_tag_edit
+            is UseDayOfYearParameter -> R.drawable.ic_calendar_edit
+            else -> R.drawable.ic_tag_edit
+        }
+        val chipLabel = parameter.getName(requireContext())
+
+        addChip(chipLabel, iconRes) {
+            showParameterEditDialog(parameter, trait)
+        }
+    }
+
+    private fun addChip(label: String, iconRes: Int, onClick: (Chip) -> Unit) {
+        val chip = Chip(requireContext()).apply {
+            text = label
+            chipIcon = ContextCompat.getDrawable(requireContext(), iconRes)
+
+            val typedValue = TypedValue()
+            requireContext().theme.resolveAttribute(
+                R.attr.selectableChipBackground,
+                typedValue,
+                true
+            )
+            setChipBackgroundColorResource(typedValue.resourceId)
+            requireContext().theme.resolveAttribute(R.attr.selectableChipStroke, typedValue, true)
+            setChipStrokeColorResource(typedValue.resourceId)
+            chipStartPadding = resources.getDimension(R.dimen.chip_start_padding)
+            chipStrokeWidth = resources.getDimension(R.dimen.chip_stroke_width)
+            chipIconSize = resources.getDimension(R.dimen.chip_icon_size)
+            isCloseIconVisible = false
+
+            setOnClickListener {
+                onClick.invoke(this)
+            }
+        }
+        binding.optionsChipGroup.addView(chip)
+    }
+
+    private fun showParameterEditDialog(parameter: BaseFormatParameter, trait: TraitObject) {
+        val dialogView = LayoutInflater.from(requireContext())
+            .inflate(R.layout.dialog_trait_parameter_edit, null)
+        val format = Formats.entries.find { it.getDatabaseName() == trait.format }
+        val formatDefinition = format?.getTraitFormatDefinition()
+
+        val parameterContainer = dialogView.findViewById<LinearLayout>(R.id.parameter_container)
+
+        parameter.createViewHolder(parameterContainer)?.let { holder ->
+            holder.bind(parameter, trait)
+            parameterContainer.addView(holder.itemView)
+
+            val dialog = AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
+                .setView(dialogView)
+                .setPositiveButton(R.string.dialog_save, null)
+                .setNegativeButton(R.string.dialog_cancel, null)
+                .create()
+
+            dialog.setOnShowListener {
+                val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                positiveButton.setOnClickListener {
+                    holder.textInputLayout.error = null
+
+                    // parameter specific validation
+                    val paramValidationResult = holder.validate(database, trait)
+
+                    if (paramValidationResult.result != true) {
+                        val errorMessage = paramValidationResult.error
+                            ?: getString(R.string.error_loading_trait_detail)
+                        holder.textInputLayout.error = errorMessage
+                        soundHelperImpl.playError()
+                        vibrator.vibrate()
+                        return@setOnClickListener
+                    }
+
+                    val updatedTrait = holder.merge(trait.clone())
+
+                    // inter-parameter validation if needed
+                    if (formatDefinition != null && paramHasValidationDependency(formatDefinition, parameter)) {
+
+                        val errorMessage = validateInterParameterValidation(formatDefinition, updatedTrait)
+
+                        if (errorMessage != null) {
+                            holder.textInputLayout.error = errorMessage
+                            soundHelperImpl.playError()
+                            vibrator.vibrate()
+                            return@setOnClickListener
+                        }
+                    }
+
+                    viewModel.updateTraitOptions(database.valueFormatter, updatedTrait)
+                    Utils.makeToast(context, getString(R.string.edit_traits))
+                    CollectActivity.reloadData = true
+
+                    dialog.dismiss()
+                }
+            }
+
+            dialog.show()
+        }
+    }
+
+    /**
+     * Returns whether a specific parameter of a trait has validation dependency on another parameter
+     * eg. for numeric trait, decimalPlaces restriction and mathSymbols cannot both be enabled
+     */
+    private fun paramHasValidationDependency(formatDefinition: TraitFormat, parameter: BaseFormatParameter): Boolean {
+        return when (formatDefinition) {
+            is NumericFormat -> {
+                parameter is DecimalPlacesParameter || parameter is MathSymbolsParameter
+            }
+            else -> false
+        }
+    }
+
+    /**
+     * Validates inter-parameter dependencies and returns error message if validation fails
+     */
+    private fun validateInterParameterValidation(formatDefinition: TraitFormat, trait: TraitObject): String? {
+        return when (formatDefinition) {
+            is NumericFormat -> validateNumericInterParameters(trait)
+            else -> null
+        }
+    }
+
+    /**
+     * Validates numeric trait inter-parameter dependencies (decimal places vs math symbols)
+     */
+    private fun validateNumericInterParameters(trait: TraitObject): String? {
+        val mathSymbolsEnabled = trait.mathSymbolsEnabled
+        val decimalPlaces = trait.maxDecimalPlaces.toIntOrNull() ?: -1
+
+        if (mathSymbolsEnabled && decimalPlaces >= 0) {
+            return getString(R.string.traits_create_warning_math_symbols_conflict)
+        }
+
+        return null
     }
 
     private fun showSwapNameDialog(trait: TraitObject) {
@@ -311,20 +493,9 @@ class TraitDetailFragment : Fragment() {
     }
 
     private fun showDateFormatDialog(trait: TraitObject) {
-        val calendar = Calendar.getInstance()
-
-        // Format as standard date (YYYY-MM-DD)
-        val year = calendar.get(Calendar.YEAR)
-        val month = calendar.get(Calendar.MONTH) + 1 // Calendar months are 0-based
-        val day = calendar.get(Calendar.DAY_OF_MONTH)
-        val formattedDate = String.format("%04d-%02d-%02d", year, month, day)
-
-        // Format as day of year
-        val dayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
-
         val options = arrayOf(
-            getString(R.string.trait_date_format_display, formattedDate),
-            getString(R.string.trait_day_format_display, dayOfYear)
+            getString(R.string.trait_date_format_display, getTodayFormattedDate()),
+            getString(R.string.trait_day_format_display, getTodayDayOfYear())
         )
 
         val currentSelection = if (trait.useDayOfYear) 1 else 0
@@ -336,13 +507,22 @@ class TraitDetailFragment : Fragment() {
                 viewModel.updateTraitOptions(database.valueFormatter, trait.also {
                     it.useDayOfYear = useDayOfYear
                 })
-                // Update the chip text
-                updateDateFormatChip(useDayOfYear)
                 dialog.dismiss()
             }
             .setNegativeButton(R.string.dialog_cancel, null)
             .show()
     }
+
+    private fun getTodayFormattedDate(): String {
+        val calendar = Calendar.getInstance()
+
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH) + 1 // Calendar months are 0-based
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
+       return String.format("%04d-%02d-%02d", year, month, day)
+    }
+
+    private fun getTodayDayOfYear(): String = Calendar.getInstance().get(Calendar.DAY_OF_YEAR).toString()
 
     private fun showBrapiLabelValueDialog(trait: TraitObject) {
         if (!traitHasBrapiCategories) return
@@ -363,7 +543,6 @@ class TraitDetailFragment : Fragment() {
                 val useValues = which == 1
                 trait.categoryDisplayValue = useValues
                 viewModel.updateTraitOptions(database.valueFormatter, trait)
-                updateBrapiLabelValueChip(trait)
                 dialog.dismiss()
             }
             .setNegativeButton(R.string.dialog_cancel, null)
@@ -398,41 +577,6 @@ class TraitDetailFragment : Fragment() {
         } catch (e: Exception) {
             Log.e(TAG, "Failed to parse categories: $categories", e)
             Pair("Example", "Value")
-        }
-    }
-
-    private fun updateDateFormatChip(useDayOfYear: Boolean) {
-        val calendar = Calendar.getInstance()
-
-        // Format as standard date (YYYY-MM-DD)
-        val year = calendar.get(Calendar.YEAR)
-        val month = calendar.get(Calendar.MONTH) + 1 // Calendar months are 0-based
-        val day = calendar.get(Calendar.DAY_OF_MONTH)
-        val formattedDate = String.format("%04d-%02d-%02d", year, month, day)
-
-        // Format as day of year
-        val dayOfYear = calendar.get(Calendar.DAY_OF_YEAR)
-
-        // Set the chip text based on the selected format
-        if (useDayOfYear) {
-            binding.dateFormatChip.text = getString(R.string.trait_day_format_display, dayOfYear)
-        } else {
-            binding.dateFormatChip.text = getString(R.string.trait_date_format_display, formattedDate)
-        }
-    }
-
-    // Update the updateBrapiLabelValueChip method
-    private fun updateBrapiLabelValueChip(trait: TraitObject) {
-        if (!traitHasBrapiCategories) return
-
-        // Get the first category from the trait to use as an example
-        val firstCategory = parseCategoryExample(trait.categories)
-
-        // Set the chip text based on the selected format
-        if (trait.categoryDisplayValue) {
-            binding.brapiLabelValueChip.text = getString(R.string.trait_brapi_value_display, firstCategory.second)
-        } else {
-            binding.brapiLabelValueChip.text = getString(R.string.trait_brapi_label_display, firstCategory.first)
         }
     }
 

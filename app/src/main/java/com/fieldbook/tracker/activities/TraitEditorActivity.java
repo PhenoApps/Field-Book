@@ -57,7 +57,6 @@ import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
-import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter;
 import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.FileUtil;
 import com.fieldbook.tracker.utilities.SharedPreferenceUtils;
@@ -109,7 +108,6 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     public static int REQUEST_CLOUD_FILE_CODE = 5;
     public static int REQUEST_FILE_EXPLORER_CODE = 1;
     public static int REQUEST_CODE_BRAPI_TRAIT_ACTIVITY = 2;
-    public static int REQUEST_RESOURCE_FILE_CODE = 6;
     private RecyclerView traitList;
     public TraitAdapter traitAdapter;
     public static boolean brapiDialogShown = false;
@@ -791,19 +789,6 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         // if (requestCode == REQUEST_RESOURCE_FILE_CODE) {
         //     com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter.Companion.handleActivityResult(requestCode, resultCode, data);
         // }
-        if (requestCode == REQUEST_RESOURCE_FILE_CODE && resultCode == RESULT_OK && data != null) {
-            String fileName = data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY);
-
-            // First, handle the ResourceFileParameter case (for trait creation/editing)
-            // ResourceFileParameter.Companion.handleActivityResult(requestCode, resultCode, data);
-
-            // Then, check if we're in the TraitDetailFragment and update it
-            TraitDetailFragment fragment = (TraitDetailFragment) getSupportFragmentManager()
-                    .findFragmentByTag("TraitDetailFragmentTag");
-            if (fragment != null && fileName != null) {
-                fragment.updateResourceFile(fileName);
-            }
-        }
 
         if (requestCode == REQUEST_CODE_BRAPI_TRAIT_ACTIVITY) {
 

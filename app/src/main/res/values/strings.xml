@@ -416,7 +416,7 @@
     <string name="trait_copied_success">Trait copied to %1$s</string>
     <string name="trait_date_format_dialog_title">Select Date Format</string>
     <string name="trait_date_format_display">Date (%s)</string>
-    <string name="trait_day_format_display">Day of Year (%d)</string>
+    <string name="trait_day_format_display">Day of Year (%s)</string>
     <string name="trait_brapi_display_dialog_title">Select Button Text</string>
     <string name="trait_brapi_label_display">Show Labels (e.g. %s)</string>
     <string name="trait_brapi_value_display">Show Values (e.g. %s)</string>
