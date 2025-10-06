@@ -142,6 +142,7 @@
     <string name="field_creator_exit_dialog_message">Sei sicuro di voler uscire? I tuoi progressi andranno persi.</string>
     <string name="field_creator_size_rows_hint">File</string>
     <string name="field_creator_size_columns_hint">Colonne</string>
+    <string name="field_creator_start_point_instruction">Tocca un angolo per selezionare il punto di partenza</string>
     <string name="dialog_field_creator_ask_name_hint">Nome</string>
     <string name="dialog_field_creator_ask_row_hint">File</string>
     <string name="dialog_field_creator_ask_columns_hint">Colonne</string>
@@ -224,6 +225,7 @@
     <string name="trait_error_minimum_value">Il valore è minore rispetto al minimo impostato</string>
     <string name="trait_error_maximum_value">Il valore è maggiore del massimo impostato</string>
     <string name="trait_error_disease_severity">Severità già registrata</string>
+    <string name="act_collect_study_names_empty">Lo studio selezionato ha nomi univoci, primari o secondari vuoti.</string>
     <!-- Toolbar -->
     <string name="main_toolbar_resources">Risorse</string>
     <string name="main_trait_details">Dettagli carattere</string>
@@ -247,6 +249,7 @@
     <string name="search_dialog_add">Aggiungi</string>
     <string name="search_dialog_clear">Cancellare</string>
     <string name="search_dialog_search">Cerca</string>
+    <string name="search_dialog_operator_dialog_title">Seleziona un operatore</string>
     <string name="search_dialog_query_is_equal_to">è uguale a</string>
     <string name="search_dialog_query_is_not_equal_to">non è uguale a</string>
     <string name="search_dialog_query_contains">contiene</string>
@@ -268,6 +271,7 @@
     <string name="trait_delete_warning_photo">Sei sicuro di voler cancellare questa foto?</string>
     <!-- Trait Layout: GNSS -->
     <!-- Trait Layout: Date -->
+    <string name="trait_date_save_button_content_description">Questo salverà la data corrente selezionata.</string>
     <!-- Trait Layout: Boolean -->
     <!-- Trait Layout: GoPro -->
     <!-- Trait Layout: USB Camera -->
@@ -284,8 +288,11 @@
     <!--- Trait Layout: Location -->
     <!--- Text to Speech Strings -->
     <!--- Summary -->
+    <string name="fragment_summary_filter_title">Seleziona etichette di riepilogo</string>
+    <string name="list_item_summary_nav_button_content_description">Naviga alla voce selezionata.</string>
     <!--- Repeated measures -->
     <string name="dialog_multi_measure_delete">Cancella</string>
+    <string name="dialog_multi_measure_select_all">Seleziona tutti</string>
     <!--- GeoNav -->
     <string name="dialog_geonav_collect_reset_start_toast_message">Reimpostazione connessione…</string>
     <!--- Content Descriptions -->
@@ -370,7 +377,11 @@
     <string name="reset_preferences_title">Ripristina Impostazioni a Predefinite</string>
     <!-- Experimental -->
     <string name="pref_experimental_enable_field_audio_title">Abilita Audio di Campo</string>
+    <string name="pref_beta_enable_individual_field_page_summary">Selezionando un campo nell\'elenco dei campi si apre una pagina di dettaglio</string>
     <!-- STATISTICS -->
+    <string name="warning_invalid_date_range">Seleziona un intervallo di date valido</string>
+    <string name="stats_calendar_range">Seleziona un intervallo di date per filtrare le date visualizzate</string>
+    <string name="stats_date_range_picker_title">Seleziona un intervallo di date</string>
     <string name="stat_title_fields">Campi</string>
     <string name="stat_title_entries">Voci</string>
     <!-- ABOUT -->
@@ -450,9 +461,11 @@
     <string name="brapi_save_field_error">Errore durante il salvataggio del campo</string>
     <string name="brapi_field_not_selected">Il campo selezionato deve essere importato da BrAPI.</string>
     <string name="brapi_programs_select">Seleziona il programma</string>
+    <string name="brapi_trials_select">Seleziona prova</string>
     <string name="brapi_save_trait">Salva caratteri</string>
     <string name="brapi_must_configure_url">È necessario configurare un URL BrAPI valido nelle impostazioni prima di procedere</string>
     <string name="brapi_warning_select_program">Per favore seleziona un programma</string>
+    <string name="brapi_warning_select_trial">Per favore seleziona una prova</string>
     <string name="brapi_warning_select_study">Per favore seleziona un campo</string>
     <string name="brapi_export_failed">Esportazione BrAPI non riuscita</string>
     <string name="brapi_export_permission_deny">ERRORE: non si dispone delle autorizzazioni per inviare i dati al sistema specificato.</string>
@@ -511,7 +524,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="tutorial_main_traits_title">Caratteri</string>
     <string name="tutorial_main_traits_description">Le piccole frecce verdi si spostano tra i caratteri.</string>
     <string name="tutorial_main_traitlist_title">Caratteri</string>
-    <string name="tutorial_main_traitlist_description">Il tratto corrente viene raccolto. Un elenco di caratteri attivi viene visualizzato quando viene premuto il carattere corrente.</string>
+    <string name="tutorial_main_traitlist_description">Il carattere corrente che si sta raccogliendo. Un elenco di caratteri attivi viene visualizzato quando viene premuto il carattere corrente.</string>
     <string name="tutorial_main_entries_title">Voci</string>
     <string name="tutorial_main_entries_description">Le grandi frecce nere si spostano tra le voci.</string>
     <string name="tutorial_main_navinfo_title">Ordinare le colonne</string>
@@ -555,6 +568,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="tutorial_traits_visibility_title">Visibilità del carettere</string>
     <string name="tutorial_traits_visibility_description">I caretteri possono essere disabilitati dalla raccolta selezionando la casella di controllo.</string>
     <string name="tutorial_main_datagrid_title">Griglia di dati</string>
+    <string name="tutorial_main_datagrid_description">Questo apre una griglia di fenotipizzazione 2D del campo attualmente selezionato.</string>
     <string name="tutorial_main_geonav_title">GeoNav</string>
     <string name="act_brapi_filter_import">Importa</string>
     <string name="act_brapi_filter_clear">Cancellare</string>
@@ -564,21 +578,43 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="view_trait_photo_settings_camera_custom">Impostazioni predefinite</string>
     <string name="view_trait_photo_settings_camera_system">Android</string>
     <!-- usb camera trait -->
+    <string name="view_trait_photo_settings_auto_focus_title">Focus Automatico</string>
     <!-- gopro -->
+    <string name="view_trait_photo_settings_save_image_title">Copia l\'immagine nel Field Book</string>
+    <string name="go_pro_trait_settings_title">Impostazioni GoPro</string>
     <!-- canon camera strings -->
+    <string name="trait_usb_photo_settings_title">Impostazioni Foto USB</string>
+    <string name="canon_trait_settings_title">Impostazioni Canon</string>
     <!-- spectral trait strings -->
     <string name="select_device">Seleziona Dispositivo</string>
-    <string name="select">Selezionare</string>
+    <string name="act_brapi_list_filter_error_multiple_programs">Seleziona studi dallo stesso programma.</string>
+    <string name="select">Seleziona</string>
     <string name="sort">Ordina</string>
     <string name="brapi_traits_filter_title">Caratteri</string>
+    <string name="act_brapi_list_filter_reset_selection_message">Questo cancellerà l\'elenco in esecuzione degli elementi selezionati.</string>
     <string name="pref_alpha_media_keycode_events_title">Abilita Comandi Media</string>
     <string name="dialog_quick_goto_title">Tasto Rapido</string>
     <string name="dialog_quick_goto_go">Vai</string>
     <string name="traits_sort_default">Impostazioni predefinite</string>
+    <string name="view_trait_photo_settings_crop">Imposta Regione Ritaglio</string>
     <!--  NearbyShare  -->
     <string name="dialog_device_selection_title">Seleziona un dispositivo</string>
+    <string name="nix_trait_settings_title">Impostazioni %s</string>
+    <string name="view_trait_nix_settings_battery_level">Livello Batteria: %s</string>
+    <string name="view_trait_nix_settings_rssi">RSSI: %s</string>
+    <string name="view_trait_nix_settings_type">Tipo: %s</string>
+    <string name="view_trait_nix_settings_factory_note">Nota Di Fabbrica: %s</string>
+    <string name="view_trait_nix_settings_serial_number">Numero Seriale: %s</string>
+    <string name="view_trait_nix_settings_firmware_version">Versione Firmware: %s</string>
+    <string name="view_trait_nix_settings_software_version">Versione Software: %s</string>
+    <string name="view_trait_nix_settings_external_power_state">Stato Dell\'Energia Esterna: %s</string>
     <string name="enabled">abilitato</string>
+    <string name="traits_save_image_parameter">Copia l\'immagine nel Field Book</string>
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="reset">Ripristina</string>
     <string name="save">Salva</string>
+    <string name="device_settings_dialog_name">Nome: %s</string>
+    <string name="device_settings_dialog_address">Indirizzo: %s</string>
+    <string name="device_settings_dialog_unknown_name">Dispositivo Bluetooth Sconosciuto</string>
+    <string name="device_settings_dialog_title">Impostazioni Dispositivo Bluetooth</string>
 </resources>
