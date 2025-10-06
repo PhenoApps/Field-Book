@@ -117,8 +117,7 @@ public class DateTraitLayout extends BaseTraitLayout {
 
                 String rep = ((CollectActivity) getContext()).getRep();
 
-                //save date to db
-                updateObservation(getCurrentTrait(), dateFormat.format(calendar.getTime()));
+                saveDateToDatabase(calendar);
 
                 triggerTts(getTtsFromCalendar(calendar));
 
@@ -190,17 +189,7 @@ public class DateTraitLayout extends BaseTraitLayout {
                 e.printStackTrace();
             }
 
-            String previewText = datePreviewText.getText().toString();
-            getCollectInputView().setText(previewText);
-
-            DateJsonCoder.DateJson encodedDate = new DateJsonCoder.DateJson(
-                    dateFormat.format(calendar.getTime()),
-                    String.valueOf(calendar.get(Calendar.DAY_OF_YEAR))
-            );
-
-            String dateString = ((StringCoder) Formats.DATE.getTraitFormatDefinition()).encode(encodedDate);
-
-            updateObservation(getCurrentTrait(), dateString);
+            saveDateToDatabase(calendar);
 
             isBlocked = false;
         });
@@ -316,7 +305,9 @@ public class DateTraitLayout extends BaseTraitLayout {
             if (dateVal instanceof DateJsonCoder.DateJson) {
 
                 DateJsonCoder.DateJson dateJson = (DateJsonCoder.DateJson) dateVal;
-                date = dateJson.getFormattedDate();
+                // updating the date object will lead to add/minus buttons
+                // use the saved observation instead of preview date
+                // date = dateJson.getFormattedDate();
 
                 log();
 
@@ -466,6 +457,21 @@ public class DateTraitLayout extends BaseTraitLayout {
 
     private void setDateText(String month, String day) {
         getCollectInputView().setText(month + " " + day);
+    }
+
+    private void saveDateToDatabase(Calendar calendar) {
+        DateJsonCoder.DateJson encodedDate = new DateJsonCoder.DateJson(
+                dateFormat.format(calendar.getTime()),
+                String.valueOf(calendar.get(Calendar.DAY_OF_YEAR))
+        );
+
+        String dateString = ((StringCoder) Formats.DATE.getTraitFormatDefinition()).encode(encodedDate);
+
+        updateObservation(getCurrentTrait(), dateString);
+
+        updatePreviewDate(calendar);
+
+        updateDateText(calendar);
     }
 
     @Override
