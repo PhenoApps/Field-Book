@@ -46,7 +46,7 @@
     <string name="app_intro_tutorial_title">Tutorial</string>
     <string name="app_intro_tutorial_summary">Adicione um ícone de ajuda ao topo da barra de ferramentas que descreve recursos em todo o aplicativo.</string>
     <string name="app_intro_high_contrast_title">Tema de Alto Contraste</string>
-    <string name="app_intro_high_contrast_summary">Habilitar um tema de alto contraste para melhor visibilidade em dispositivos.</string>
+    <string name="app_intro_high_contrast_summary">Habilitar um tema de alto contraste para melhor visibilidade em dispositivos E Lnk.</string>
     <!-- Storage Definer -->
     <string name="storage_definer_title">Local de Armazenamento</string>
     <string name="storage_definer_summary">Por favor, selecione ou crie uma pasta que o Field Book pode usar para armazenar os dados do aplicativo.</string>
