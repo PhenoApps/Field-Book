@@ -50,7 +50,7 @@ fun FieldEditorScreen(
         val errorState = remember { mutableStateOf<String?>(null) }
         val loadingState = remember { mutableStateOf(true) }
         val db = remember(driverFactory) {
-            FieldbookDatabase(driverFactory.createDriver())
+            FieldbookDatabase(driverFactory.getDriver())
         }
 
         LaunchedEffect(Unit) {

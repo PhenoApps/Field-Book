@@ -5,7 +5,7 @@ import com.fieldbook.shared.sqldelight.FieldbookDatabase
 import com.fieldbook.shared.database.repository.StudiesRepository
 
 fun selectFirstField(driverFactory: DriverFactory) {
-    val db = FieldbookDatabase(driverFactory.createDriver())
+    val db = FieldbookDatabase(driverFactory.getDriver())
     val studiesRepository = StudiesRepository(db)
     val fs = studiesRepository.getAllFields()
     FieldSwitchImpl().switchField(fs.firstOrNull())

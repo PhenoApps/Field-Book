@@ -18,7 +18,7 @@ import com.russhwolf.settings.Settings
 
 // TODO refactor to use ViewModel() ?
 class CollectScreenController(driverFactory: DriverFactory) {
-    private val db = FieldbookDatabase(driverFactory.createDriver())
+    private val db = FieldbookDatabase(driverFactory.getDriver())
     private val observationUnitRepository = ObservationUnitRepository(db)
     private val traitRepository = TraitRepository(db)
     private val observationRepository = ObservationRepository(db)

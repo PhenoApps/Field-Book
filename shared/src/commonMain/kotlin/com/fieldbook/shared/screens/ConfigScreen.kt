@@ -143,7 +143,7 @@ fun ConfigScreen(
 class ConfigScreenViewModel(
     driverFactory: DriverFactory
 ) : ViewModel() {
-    private val db = FieldbookDatabase(driverFactory.createDriver())
+    private val db = FieldbookDatabase(driverFactory.getDriver())
     private val studiesRepository: StudiesRepository = StudiesRepository(db)
 
     init {
