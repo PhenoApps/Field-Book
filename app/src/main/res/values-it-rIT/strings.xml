@@ -40,10 +40,10 @@
     <string name="app_intro_storage_summary">Definisci una cartella in cui verranno archiviati i tuoi dati.</string>
     <string name="app_intro_storage_warning">Imposta la posizione di archiviazione</string>
     <string name="app_intro_required_optional_title">Configurazione Facoltativa</string>
-    <string name="app_intro_required_optional_summary">Queste configurazioni facoltative personalizzano Field Book e possono essere regolate nelle impostazioni.</string>
+    <string name="app_intro_required_optional_summary">Queste configurazioni facoltative personalizzano Field Book e possono essere regolate nelle Field Book Impostazioni.</string>
     <string name="app_intro_load_sample_data_title">Carica Dati Di Esempio</string>
     <string name="app_intro_load_sample_data_summary">Importa un database campione che comprenda campi e caratteri d\'esempio.</string>
-    <string name="app_intro_tutorial_title">Guida</string>
+    <string name="app_intro_tutorial_title">Tutorial</string>
     <string name="app_intro_tutorial_summary">Aggiungi un\'icona d\'aiuto alla barra degli strumenti in cima, che descriva le varie funzionalità dell\'applicazione.</string>
     <string name="app_intro_high_contrast_title">Modalità a contrasto elevato</string>
     <string name="app_intro_high_contrast_summary">Abilita il tema ad alto contrasto per una migliore visibilità sui dispositivi elnk.</string>
@@ -82,6 +82,7 @@
     <!--  Field Grouping  -->
     <string name="group_archive">Archivio</string>
     <string name="menu_archive">Archivio</string>
+    <string name="archive_active_field_message">Hai selezionato il campo attivo da archiviare. Se continui, non ci sarà alcun campo attivo. Vuoi continuare?</string>
     <!-- FIELDS -->
     <!-- General -->
     <string name="menu_fields_sort_list">Ordina per elenco di campi</string>
@@ -147,6 +148,7 @@
     <!-- Geo-Navigate to Field -->
     <string name="menu_fields_plot_by_distance_title">Seleziona il campo più vicino</string>
     <string name="activity_field_editor_no_field_found">Nessuna coordinata trovata.</string>
+    <string name="activity_field_editor_switch_field_same">Campo più vicino già selezionato.</string>
     <!-- Field Details -->
     <string name="name_cannot_be_empty">Il nome non può essere vuoto.</string>
     <string name="name_conflict_import_name">importa nome</string>
@@ -213,6 +215,9 @@
     <string name="traits_create_warning_name_blank">Il nome del carattere non può essere vuoto</string>
     <string name="traits_create_warning_duplicate">Il carattere esiste già</string>
     <string name="traits_create_warning_numeric_required">Default, minimo e massimo devono essere numerici</string>
+    <string name="list_item_traits_grid_content_description">Inverti selezione</string>
+    <string name="dialog_new_trait_error_must_select_a_layout">Devi selezionare una disposizione.</string>
+    <string name="select_trait">Seleziona Carattere</string>
     <string name="edit_traits">Modifica</string>
     <!-- COLLECT -->
     <!-- Validation -->
@@ -223,9 +228,15 @@
     <string name="main_toolbar_resources">Risorse</string>
     <string name="main_trait_details">Dettagli carattere</string>
     <string name="main_infobar_data_missing">Nessun dato</string>
+    <string name="main_infobar_select_data">Selezionare</string>
     <string name="main_toolbar_next_entry_no_data">Prossima voce senza dati</string>
     <!-- InfoBars -->
+    <string name="dialog_att_chooser_attributes">Attributi</string>
     <string name="dialog_att_chooser_traits">Caratteri</string>
+    <string name="dialog_infobar_att_chooser_title">Barre Informativa %d</string>
+    <string name="infobars_attribute_placeholder">Selezionare</string>
+    <string name="infobar_word_wrap_enabled">A capo automatico abilitato per la Barra Informative %s</string>
+    <string name="infobar_word_wrap_disabled">A capo automatico disabilitato per Barre Informative %s</string>
     <!-- ID/Barcode Search -->
     <string name="main_toolbar_moveto_no_match">Nessun valore corrispondente</string>
     <string name="main_toolbar_moveto">Vai a ID</string>
@@ -249,6 +260,7 @@
     <!--- Profile -->
     <string name="activity_collect_dialog_verify_no_button">No</string>
     <string name="activity_collect_dialog_verify_yes_button">Sì</string>
+    <string name="activity_collect_dialog_neutral_button">Modifica impostazioni</string>
     <!--- Datagrid -->
     <!--- Lock -->
     <!-- Trait Layout: Photo -->
@@ -275,6 +287,7 @@
     <!--- Repeated measures -->
     <string name="dialog_multi_measure_delete">Cancella</string>
     <!--- GeoNav -->
+    <string name="dialog_geonav_collect_reset_start_toast_message">Reimpostazione connessione…</string>
     <!--- Content Descriptions -->
     <!-- Observation Info -->
     <!-- Skip Entries -->
@@ -303,6 +316,8 @@
     <string name="citation_string">Se si utilizza Field Book per la ricerca, si prega di citare il seguente articolo di giornale:</string>
     <!-- SETTINGS -->
     <!-- General -->
+    <string name="preferences_system_title">Sistema</string>
+    <string name="brapi_disabled_alert_message">BrAPI deve essere attivato prima nelle impostazioni di BrAPI.</string>
     <!-- Profile -->
     <string name="preferences_profile_title">Profilo</string>
     <!-- Features -->
@@ -310,14 +325,19 @@
     <string name="preferences_appearance_title">Aspetto</string>
     <string name="preferences_appearance_theme_title">Tema</string>
     <string name="theme_default">Impostazioni predefinite</string>
+    <string name="preferences_theme_reset_description">Reimposta tutte le impostazioni ai valori predefiniti del sistema</string>
     <string name="preferences_appearance_language">Lingua</string>
     <string name="preferences_appearance_language_description">Lingua impostata dal sistema</string>
+    <string name="preferences_appearance_tutorial_description">Aggiungi un pulsante nella barra degli strumenti nell\'app che apre il tutorial</string>
     <string name="preferences_appearance_toolbar_customize_search">Cerca</string>
     <string name="preferences_appearance_toolbar_customize_resources">Risorse</string>
     <string name="preferences_appearance_toolbar_customize_summary">Riassunto</string>
     <string name="preferences_appearance_toolbar_customize_lock">Bloccare</string>
     <string name="preferences_general_feature_datagrid">Griglia di dati</string>
-    <string name="preferences_appearance_infobar_number_description">Regola il numero di Infobars visualizzate nella schermata principale</string>
+    <string name="preferences_appearance_infobar_number">Numero di Barre Informative</string>
+    <string name="preferences_appearance_infobar_number_description">Regola il numero di Barre Informative visualizzate nella schermata principale</string>
+    <string name="preferences_appearance_infobar_hide_prefix">Nascondi prefisso Barre Informative</string>
+    <string name="preferences_appearance_infobar_hide_prefix_description">Il prefisso Barra Informativa sarà sostituito da un\'icona generica</string>
     <string name="preferences_appearance_quickgoto">Tasto Rapido</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamento</string>
@@ -328,6 +348,7 @@
     <string name="location_format_iso">ISO 6709</string>
     <string name="location_format_geojson">GeoJSON</string>
     <string name="pref_geonav_category_title">GeoNav</string>
+    <string name="pref_geonav_enable_title">Abilita GeoNav</string>
     <string name="pref_geonav_log_limited_description">Limitato: Registrazione della voce più vicina a storage/geonav/limited_log.txt</string>
     <string name="pref_geonav_log_full_description">Completo: registrando tutti gli aggiornamenti della posizione e i passaggi dell\'algoritmo per storage/geonav/log.txt</string>
     <string name="pref_geonav_log_both">Ambo</string>
@@ -345,7 +366,10 @@
     <string name="database_reset_warning2">Un database cancellato non potrà essere ripristinato. L\'applicazione si chiuderà subito dopo. Sei sicuro di voler continuare?</string>
     <string name="database_reset_message">Il database è stato cancellato</string>
     <string name="preferences_storage_settings_title">Impostazioni</string>
+    <string name="preferences_system_defaults_reset">Reimposta Impostazioni</string>
+    <string name="reset_preferences_title">Ripristina Impostazioni a Predefinite</string>
     <!-- Experimental -->
+    <string name="pref_experimental_enable_field_audio_title">Abilita Audio di Campo</string>
     <!-- STATISTICS -->
     <string name="stat_title_fields">Campi</string>
     <string name="stat_title_entries">Voci</string>
@@ -366,6 +390,10 @@
     <!-- BRAPI -->
     <!-- BrAPI preferences -->
     <string name="brapi_info_title">Informazioni sulla sincronizzazione BrAPI</string>
+    <string name="preferences_brapi_enable_title">Abilita BrAPI</string>
+    <string name="preferences_brapi_barcode_config_summary">Gestione impostazioni con codici QR</string>
+    <string name="preferences_brapi_barcode_config_scan">Importa nuove impostazioni</string>
+    <string name="preferences_brapi_barcode_config_share">Condividi le impostazioni correnti</string>
     <string name="brapi_base_url">URL di base</string>
     <string name="brapi_base_url_desc">L\'URL di base per il server BrAPI collegato</string>
     <string name="brapi_choice_to_make_default_negative">Cancella</string>
@@ -421,8 +449,11 @@
     <string name="brapi_ontology_error">Errore durante il caricamento dei caratteri da BrAPI.</string>
     <string name="brapi_save_field_error">Errore durante il salvataggio del campo</string>
     <string name="brapi_field_not_selected">Il campo selezionato deve essere importato da BrAPI.</string>
+    <string name="brapi_programs_select">Seleziona il programma</string>
     <string name="brapi_save_trait">Salva caratteri</string>
     <string name="brapi_must_configure_url">È necessario configurare un URL BrAPI valido nelle impostazioni prima di procedere</string>
+    <string name="brapi_warning_select_program">Per favore seleziona un programma</string>
+    <string name="brapi_warning_select_study">Per favore seleziona un campo</string>
     <string name="brapi_export_failed">Esportazione BrAPI non riuscita</string>
     <string name="brapi_export_permission_deny">ERRORE: non si dispone delle autorizzazioni per inviare i dati al sistema specificato.</string>
     <string name="brapi_export_not_supported">ERRORE: il sistema di destinazione non supporta l\'invio di osservazioni tramite BrAPI.</string>
@@ -433,10 +464,12 @@
     <string name="brapi_export_successful">Esportazione BrAPI riuscita</string>
     <string name="brapi_saving_indicator">Salvando osservazioni...</string>
     <string name="brapi_field_non_matching_sources">Impossibile sincronizzare i dati. I dati del campo provengono da, %1$s, l\'URL BrAPI è attualmente impostato su %2$s. Le fonti devono corrispondere.</string>
+    <string name="brapi_enable_before_sync">BRAPI è disabilitato. Si prega di abilitarlo nelle impostazioni prima di utilizzare la sincronizzazione.</string>
     <string name="brapi_trait_already_exists">Il carattere esiste già: %1$s. Non si salva.</string>
     <string name="brapi_error_saving_all_traits">Errore durante il salvataggio dei caratteri. Nessun carattere è stato salvato.</string>
     <string name="brapi_error_saving_some_traits">Errore durante il salvataggio di alcuni caratteri. Alcuni caratteri non sono stati salvati</string>
     <string name="brapi_traits_saved_success">Caratteri selezionati salvati correttamente.</string>
+    <string name="brapi_study_incompatible">Questo studio BrAPI è attualmente incompatibile con Field Book. Gli studi devono includere riga e colonna nell\'intestazione.</string>
     <!-- BrAPI Export -->
     <string name="brapi_export_button">Esporta</string>
     <string name="brapi_close_button">Chiudi</string>
@@ -465,11 +498,16 @@
     <string name="brapi_info_message">Caratteri e campi importati tramite BrAPI saranno in grado di esportare le loro osservazioni tramite l\'esportazione BrAPI.
 Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esportati tramite formato CSV.</string>
     <!-- APP INTRO  -->
+    <string name="intro_tutorial_title">Vuoi abilitare il tutorial?</string>
+    <string name="intro_tutorial_description">Questa impostazione può essere modificata nelle Impostazioni</string>
     <string name="intro_tutorial_radio_item_yes">Sì</string>
     <string name="intro_tutorial_radio_item_no">No</string>
+    <string name="intro_tutorial_warning">Per favore, fai una scelta</string>
     <!-- TUTORIAL -->
-    <string name="tutorial_dialog_description">Vuoi attivare il tutorial? Questa impostazione può essere cambiata in Impostazioni Avanzate</string>
-    <string name="tutorial_main_infobars_description">Le InfoBars mostrano dati aggiuntivi per ciascuna voce e possono essere modificate utilizzando i menu a discesa.</string>
+    <string name="tutorial_dialog_title">Tutorial</string>
+    <string name="tutorial_dialog_description">Vuoi abilitare il tutorial? Questa impostazione può essere modificata nelle Impostazioni.</string>
+    <string name="tutorial_main_infobars_title">Barre Informative</string>
+    <string name="tutorial_main_infobars_description">Le Barre Informative mostrano dati aggiuntivi per ogni voce e possono essere modificate tramite i menu a discesa.</string>
     <string name="tutorial_main_traits_title">Caratteri</string>
     <string name="tutorial_main_traits_description">Le piccole frecce verdi si spostano tra i caratteri.</string>
     <string name="tutorial_main_traitlist_title">Caratteri</string>
@@ -521,17 +559,25 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="act_brapi_filter_import">Importa</string>
     <string name="act_brapi_filter_clear">Cancellare</string>
     <!-- base camera strings -->
+    <string name="trait_system_photo_settings_title">Impostazioni delle Foto di Sistema</string>
+    <string name="trait_name_alt_photo_system">Sistema</string>
     <string name="view_trait_photo_settings_camera_custom">Impostazioni predefinite</string>
+    <string name="view_trait_photo_settings_camera_system">Android</string>
     <!-- usb camera trait -->
     <!-- gopro -->
     <!-- canon camera strings -->
     <!-- spectral trait strings -->
+    <string name="select_device">Seleziona Dispositivo</string>
+    <string name="select">Selezionare</string>
     <string name="sort">Ordina</string>
     <string name="brapi_traits_filter_title">Caratteri</string>
+    <string name="pref_alpha_media_keycode_events_title">Abilita Comandi Media</string>
     <string name="dialog_quick_goto_title">Tasto Rapido</string>
     <string name="dialog_quick_goto_go">Vai</string>
     <string name="traits_sort_default">Impostazioni predefinite</string>
     <!--  NearbyShare  -->
+    <string name="dialog_device_selection_title">Seleziona un dispositivo</string>
+    <string name="enabled">abilitato</string>
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="reset">Ripristina</string>
     <string name="save">Salva</string>
