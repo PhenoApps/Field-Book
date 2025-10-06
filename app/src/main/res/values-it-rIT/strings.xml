@@ -280,12 +280,15 @@
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">Il tuo dispositivo non contiene l\'hardware necessario per questa funzione</string>
     <string name="trait_delete_warning_photo">Sei sicuro di voler eliminare questa foto?</string>
+    <string name="photo_failed_to_delete">Impossibile eliminare il file.</string>
     <!-- Trait Layout: GNSS -->
     <!-- Trait Layout: Date -->
     <string name="trait_date_save_button_content_description">Questo salverà la data corrente selezionata.</string>
     <!-- Trait Layout: Boolean -->
     <!-- Trait Layout: GoPro -->
+    <string name="trait_go_pro_camera_delete_photo_title">Elimina Foto</string>
     <!-- Trait Layout: USB Camera -->
+    <string name="trait_usb_camera_delete_photo">Elimina Foto USB</string>
     <!--- Trait Layout: Zebra label print -->
     <string name="trait_layout_data_stored">I dati sono stati salvati</string>
     <string name="trait_layout_print_label_size_title">Dimensione:</string>
@@ -298,15 +301,20 @@
     <!--- Trait Layout: Counter -->
     <!--- Trait Layout: Location -->
     <!--- Text to Speech Strings -->
+    <string name="act_collect_delete_btn_tts">Valore è stato eliminato.</string>
     <!--- Summary -->
     <string name="fragment_summary_filter_title">Seleziona etichette di riepilogo</string>
     <string name="list_item_summary_nav_button_content_description">Naviga alla voce selezionata.</string>
     <!--- Repeated measures -->
+    <string name="dialog_multi_measure_delete_no_observations">Nessuna osservazione esistente.</string>
+    <string name="dialog_multi_measure_delete_title">Osservazioni</string>
+    <string name="dialog_multi_measure_confirm_delete_title">Tutte le osservazioni per questo carattere verranno eliminate definitivamente.</string>
     <string name="dialog_multi_measure_delete">Elimina</string>
     <string name="dialog_multi_measure_select_all">Seleziona tutti</string>
     <!--- GeoNav -->
     <string name="dialog_geonav_collect_reset_start_toast_message">Reimpostazione connessione…</string>
     <!--- Content Descriptions -->
+    <string name="act_collect_delete_value_button_content_description">Elimina il valore corrente.</string>
     <!-- Observation Info -->
     <!-- Skip Entries -->
     <!-- EXPORT -->
@@ -339,6 +347,7 @@
     <string name="brapi_disabled_alert_message">BrAPI deve essere attivato prima nelle impostazioni di BrAPI.</string>
     <!-- Profile -->
     <string name="preferences_profile_title">Profilo</string>
+    <string name="preferences_profile_previous_names_warning">Tutti i nomi delle persone salvate saranno eliminati, e questo non può essere invertito. Sei sicuro di voler continuare?</string>
     <!-- Features -->
     <!-- Appearance -->
     <string name="preferences_appearance_title">Aspetto</string>
@@ -374,6 +383,8 @@
     <string name="pref_geonav_log_both_description">Entrambi: registrando tutti gli aggiornamenti della posizione e i passaggi dell\'algoritmo per storage/geonav/log.txt, voce più vicina a storage/geonav/limited_log.txt</string>
     <!-- Sounds -->
     <string name="preferences_sounds">Suoni</string>
+    <string name="preferences_sound_delete_obs_title">Elimina Osservazione</string>
+    <string name="preferences_sound_delete_obs_description">Riproduci eliminare suono quando l\'osservazione viene eliminata</string>
     <!-- BrAPI preferences are in the BrAPI section below -->
     <!-- Storage -->
     <string name="preferences_storage_title">Archiviazione</string>
@@ -591,6 +602,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="act_brapi_filter_import">Importa</string>
     <string name="act_brapi_filter_clear">Cancella</string>
     <!-- base camera strings -->
+    <string name="delete_local_photo">Elimina Foto</string>
     <string name="trait_system_photo_settings_title">Impostazioni delle Foto di Sistema</string>
     <string name="trait_name_alt_photo_system">Sistema</string>
     <string name="view_trait_photo_settings_camera_custom">Impostazioni predefinite</string>
@@ -605,10 +617,14 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="canon_trait_settings_title">Impostazioni Canon</string>
     <!-- spectral trait strings -->
     <string name="select_device">Seleziona Dispositivo</string>
+    <string name="list_item_color_close_content_description">Elimina questo colore</string>
+    <string name="delete_color">Elimina Osservazione Del Colore</string>
+    <string name="delete_color_message">Questo eliminerà definitivamente l\'osservazione</string>
     <string name="menu_action_brapi_filter_clear_all">Cancella tutti i filtri</string>
     <string name="brapi_filter_bottom_sheet_delete_all_description">cancella tutti i filtri</string>
     <string name="act_brapi_list_filter_error_multiple_programs">Seleziona studi dallo stesso programma.</string>
     <string name="select">Seleziona</string>
+    <string name="act_brapi_list_filter_reset_cache_message">Questo eliminerà i dati BrAPI locali utilizzati per la ricerca e l\'importazione.</string>
     <string name="menu_filter_brapi_clear_filters">Cancella Filtri</string>
     <string name="menu_filter_brapi_clear_selection">Cancella selezione</string>
     <string name="sort">Ordina</string>
@@ -623,6 +639,8 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="nearby_share_connection_cancelled">Connessione annullata</string>
     <string name="nearby_share_transfer_cancelled">Trasferimento annullato</string>
     <string name="dialog_device_selection_title">Seleziona un dispositivo</string>
+    <string name="replace_observations">Elimina e Sostituisci</string>
+    <string name="replace_observations_message">Le osservazioni esistono già, vuoi eliminare queste ed inserire un valore NA?</string>
     <string name="nix_trait_settings_title">Impostazioni %s</string>
     <string name="view_trait_nix_settings_battery_level">Livello Batteria: %s</string>
     <string name="view_trait_nix_settings_rssi">RSSI: %s</string>
