@@ -4,7 +4,7 @@ compose = "1.7.3" # compatible with compileSdk = 34
 multiplatform-settings = "1.3.0"
 lifecycle-viewmodel-compose = "2.8.4" # compatible with compose
 kotlinx-datetime = "0.6.2" # When upgrading, see https://github.com/Kotlin/kotlinx-datetime?tab=readme-ov-file#deprecation-of-instant
-okio = "'2.2.0"
+okio = "2.2.0"
 filekit = "0.8.8" # compatible with compileSdk = 34
 
 [libraries]
