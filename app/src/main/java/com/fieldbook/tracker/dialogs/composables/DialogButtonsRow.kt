@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -37,4 +38,17 @@ fun DialogButtonsRow(
             onPositive?.let { DialogButton(text, it) }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun DialogButtonRowPreview() {
+    DialogButtonsRow(
+        positiveButtonText = "Positive",
+        onPositive = {},
+        negativeButtonText = "Negative",
+        onNegative = {},
+        neutralButtonText = "Neutral",
+        onNeutral = {}
+    )
 }

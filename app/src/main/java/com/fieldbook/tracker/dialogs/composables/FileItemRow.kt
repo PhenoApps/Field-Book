@@ -14,7 +14,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.fieldbook.tracker.R
 import com.fieldbook.tracker.dialogs.FileExploreDialogFragment.FileItem
 
 @Composable
@@ -42,4 +44,17 @@ fun FileItemRow(
             style = MaterialTheme.typography.bodyLarge,
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun FileItemRowPreview() {
+    FileItemRow(
+        item = FileItem(
+            name = "File Name",
+            isDirectory = false,
+            documentFile = null,
+            icon = R.drawable.ic_file_generic
+        )
+    ) { }
 }

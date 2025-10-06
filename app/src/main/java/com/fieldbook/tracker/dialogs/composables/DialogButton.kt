@@ -6,6 +6,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun DialogButton(
@@ -24,4 +25,10 @@ fun DialogButton(
             style = MaterialTheme.typography.titleLarge
         )
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun DialogButtonPreview() {
+    DialogButton("Text") { }
 }
