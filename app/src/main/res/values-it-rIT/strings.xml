@@ -22,6 +22,7 @@
     <string name="dialog_enable">Abilita</string>
     <string name="dialog_delete">Cancella</string>
     <string name="dialog_accept">Accetta</string>
+    <string name="dialog_exit">Esci</string>
     <string name="barcode_scanner_text">Scansiona un codice a barre</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Dati di prova</string>
@@ -36,7 +37,7 @@
     <string name="app_intro_permissions_title">Permessi</string>
     <string name="app_intro_permissions_warning">Si prega di concedere le autorizzazioni necessarie</string>
     <string name="app_intro_storage_title">Scegli lo spazio di archiviazione</string>
-    <string name="app_intro_storage_summary">Scegli una cartella dove memorizzare i tuoi dati.</string>
+    <string name="app_intro_storage_summary">Definisci una cartella in cui verranno archiviati i tuoi dati.</string>
     <string name="app_intro_storage_warning">Imposta la posizione di archiviazione</string>
     <string name="app_intro_required_optional_title">Configurazione Facoltativa</string>
     <string name="app_intro_required_optional_summary">Queste configurazioni facoltative personalizzano Field Book e possono essere regolate nelle impostazioni.</string>
@@ -135,6 +136,8 @@
     <string name="act_field_editor_load_file_failed">Si è verificato un errore durante il caricamento del file.</string>
     <string name="act_field_editor_file_open_failed">Impossibile aprire il file.</string>
     <!-- Field Creator  -->
+    <string name="field_creator_exit_dialog_title">Esci Dal Creatore Di Campo</string>
+    <string name="field_creator_exit_dialog_message">Sei sicuro di voler uscire? I tuoi progressi andranno persi.</string>
     <string name="field_creator_size_rows_hint">File</string>
     <string name="field_creator_size_columns_hint">Colonne</string>
     <string name="dialog_field_creator_ask_name_hint">Nome</string>
