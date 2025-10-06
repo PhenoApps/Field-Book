@@ -31,6 +31,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.utils.SoftKeyboardUtil
 import javax.inject.Inject
 import androidx.core.content.edit
+import com.fieldbook.tracker.traits.formats.parameters.DisplayValueParameter
 
 @AndroidEntryPoint
 class NewTraitDialog(
@@ -275,6 +276,15 @@ class NewTraitDialog(
         parametersSv.clear()
 
         format.getTraitFormatDefinition().parameters.forEach { parameter ->
+
+            val isBrapiTrait = initialTraitObject?.traitDataSource?.let {
+                it.isNotEmpty() && it != "local"
+            } == true
+
+            // show the DisplayValueParameter only for brapi traits
+            if (parameter is DisplayValueParameter && !isBrapiTrait) {
+                return@forEach
+            }
 
             if (parameter is ResourceFileParameter) {
 
