@@ -25,7 +25,7 @@
     <string name="dialog_exit">Esci</string>
     <string name="barcode_scanner_text">Scansiona un codice a barre</string>
     <!-- Startup  -->
-    <string name="startup_sample_data_title">Dati di prova</string>
+    <string name="startup_sample_data_title">Dati di Esempio</string>
     <string name="startup_sample_data_message">Vuoi caricare i dati di prova forniti?</string>
     <!-- App Intro -->
     <string name="app_intro_intro_title_slide1">Benvenuto su Field Book!</string>
@@ -36,12 +36,12 @@
     <string name="app_intro_required_setup_summary">Per iniziare a usare Field Book, concedi i permessi necessari all\'applicazione e scegli una cartella in cui salvare i tuoi dati.</string>
     <string name="app_intro_permissions_title">Permessi</string>
     <string name="app_intro_permissions_warning">Si prega di concedere le autorizzazioni necessarie</string>
-    <string name="app_intro_storage_title">Scegli lo spazio di archiviazione</string>
+    <string name="app_intro_storage_title">Definisci Archiviazione</string>
     <string name="app_intro_storage_summary">Definisci una cartella in cui verranno archiviati i tuoi dati.</string>
     <string name="app_intro_storage_warning">Imposta la posizione di archiviazione</string>
     <string name="app_intro_required_optional_title">Configurazione Facoltativa</string>
     <string name="app_intro_required_optional_summary">Queste configurazioni facoltative personalizzano Field Book e possono essere regolate nelle impostazioni.</string>
-    <string name="app_intro_load_sample_data_title">Carica dati campione</string>
+    <string name="app_intro_load_sample_data_title">Carica Dati Di Esempio</string>
     <string name="app_intro_load_sample_data_summary">Importa un database campione che comprenda campi e caratteri d\'esempio.</string>
     <string name="app_intro_tutorial_title">Guida</string>
     <string name="app_intro_tutorial_summary">Aggiungi un\'icona d\'aiuto alla barra degli strumenti in cima, che descriva le varie funzionalità dell\'applicazione.</string>
@@ -49,10 +49,11 @@
     <string name="app_intro_high_contrast_summary">Abilita il tema ad alto contrasto per una migliore visibilità sui dispositivi elnk.</string>
     <!-- Storage Definer -->
     <string name="storage_definer_title">Posizione di archiviazione</string>
-    <string name="define_button_text">Scegli la Cartella</string>
+    <string name="storage_definer_summary">Seleziona o crea una cartella che Field Book può utilizzare per archiviare i dati dell\'app.</string>
+    <string name="define_button_text">Scegli Cartella</string>
     <!-- Permissions  -->
-    <string name="permission_rationale_storage_import">L\'importazione di file richiede l\'accesso ai file del dispositivo.</string>
-    <string name="permission_rationale_storage_export">L\'esportazione dei dati richiede l\'accesso ai file del dispositivo.</string>
+    <string name="permission_rationale_storage_import">Per importare i file è necessario accedere ai file del dispositivo.</string>
+    <string name="permission_rationale_storage_export">Per esportare i dati è necessario accedere ai file del dispositivo.</string>
     <string name="permission_rationale_trait_features">La raccolta dei dati richiede l\'accesso ai file, al microfono e alla camera del dispositivo.</string>
     <string name="permission_ask_bluetooth">Accetta i permessi bluetooth.</string>
     <!-- Config Activity  -->
@@ -67,7 +68,7 @@
     <string name="act_config_fuzzy_search_failed">Impossibile recuperare un campo o un appezzamento con codice %s</string>
     <string name="act_config_fuzzy_search_error">Qualcosa è andato storto cercando %s</string>
     <!-- File manager  -->
-    <string name="import_source_local">Memoria locale</string>
+    <string name="import_source_local">Archiviazione locale</string>
     <string name="import_source_cloud">Cloud storage</string>
     <string name="import_source_ask">Chiedi sempre</string>
     <string name="import_dialog_importing">Attendere prego...</string>
@@ -289,6 +290,7 @@
     <string name="export_content_traits_all">Tutti i caratteri</string>
     <string name="export_content_traits_active">Solo caratteri attivi</string>
     <string name="export_error_general">Errore durante l\'esportazione</string>
+    <string name="error_storage_directory">Directory di archiviazione mancante o danneggiata.</string>
     <string name="export_error_data_missing">Nessun dato da esportare</string>
     <string name="export_complete">Esportazione completata</string>
     <string name="export_progress">Esportazione...</string>
@@ -326,11 +328,19 @@
     <string name="location_format_iso">ISO 6709</string>
     <string name="location_format_geojson">GeoJSON</string>
     <string name="pref_geonav_category_title">GeoNav</string>
+    <string name="pref_geonav_log_limited_description">Limitato: Registrazione della voce più vicina a storage/geonav/limited_log.txt</string>
+    <string name="pref_geonav_log_full_description">Completo: registrando tutti gli aggiornamenti della posizione e i passaggi dell\'algoritmo per storage/geonav/log.txt</string>
     <string name="pref_geonav_log_both">Ambo</string>
+    <string name="pref_geonav_log_both_description">Entrambi: registrando tutti gli aggiornamenti della posizione e i passaggi dell\'algoritmo per storage/geonav/log.txt, voce più vicina a storage/geonav/limited_log.txt</string>
     <!-- Sounds -->
     <string name="preferences_sounds">Suoni</string>
     <!-- BrAPI preferences are in the BrAPI section below -->
     <!-- Storage -->
+    <string name="preferences_storage_title">Archiviazione</string>
+    <string name="preferences_storage_storage_title">Archiviazione</string>
+    <string name="preferences_storage_files_base_directory_title">Definisci Posizione Di Archiviazione</string>
+    <string name="preferences_storage_files_base_directory_description">Migrare o definire una nuova struttura di directory radice. I file di esportazione verranno salvati automaticamente qui.</string>
+    <string name="preferences_storage_database_title">Banca Dati</string>
     <string name="database_reset_warning1">Tutti i dati saranno cancellati. Sei sicuro di voler ripristinare il database?</string>
     <string name="database_reset_warning2">Un database cancellato non potrà essere ripristinato. L\'applicazione si chiuderà subito dopo. Sei sicuro di voler continuare?</string>
     <string name="database_reset_message">Il database è stato cancellato</string>
