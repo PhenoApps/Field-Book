@@ -45,8 +45,8 @@
     <string name="app_intro_load_sample_data_summary">Importa un database che include campi e caratteri di esempio.</string>
     <string name="app_intro_tutorial_title">Tutorial</string>
     <string name="app_intro_tutorial_summary">Aggiungi un\'icona d\'aiuto alla barra degli strumenti in cima, che descriva le varie funzionalità dell\'applicazione.</string>
-    <string name="app_intro_high_contrast_title">Modalità a contrasto elevato</string>
-    <string name="app_intro_high_contrast_summary">Abilita il tema ad alto contrasto per una migliore visibilità sui dispositivi elnk.</string>
+    <string name="app_intro_high_contrast_title">Modalità a Contrasto Elevato</string>
+    <string name="app_intro_high_contrast_summary">Abilita la Modalità a contrasto elevato per una migliore visibilità sui dispositivi E Lnk.</string>
     <!-- Storage Definer -->
     <string name="storage_definer_title">Posizione di archiviazione</string>
     <string name="storage_definer_summary">Seleziona o crea una cartella che Field Book può utilizzare per archiviare i dati dell\'app.</string>
@@ -65,7 +65,7 @@
     <string name="settings_profile">Profilo</string>
     <string name="settings_statistics">Statistiche</string>
     <!-- Config Activity Fuzzy Search  -->
-    <string name="act_config_fuzzy_search_failed">Impossibile recuperare un campo o una parcella con codice %s</string>
+    <string name="act_config_fuzzy_search_failed">Il database non può recuperare un campo o una parcella con codice: %s</string>
     <string name="act_config_fuzzy_search_error">Qualcosa è andato storto cercando %s</string>
     <!-- File manager  -->
     <string name="import_source_local">Archiviazione locale</string>
@@ -73,7 +73,7 @@
     <string name="import_source_ask">Chiedi sempre</string>
     <string name="import_dialog_importing">Attendere prego...</string>
     <string name="import_error_general">Errore di importazione</string>
-    <string name="act_file_explorer_no_file_error">Non è stato possibile trovare cartelle per field book.</string>
+    <string name="act_file_explorer_no_file_error">Non è stato possibile trovare alcuna directory del Field Book,</string>
     <!-- Warnings/Catches -->
     <string name="warning_field_missing">Nessun campo è stato caricato. Carica un campo prima di rilevare il dato</string>
     <string name="warning_traits_missing">Il carattere non esiste. Crea un carattere prima di rilevare il dato</string>
@@ -87,14 +87,14 @@
     <string name="archive_active_field_message">Hai selezionato il campo attivo da archiviare. Se continui, non ci sarà alcun campo attivo. Vuoi continuare?</string>
     <!-- FIELDS -->
     <!-- General -->
-    <string name="menu_fields_sort_list">Ordina per elenco di campi</string>
+    <string name="menu_fields_sort_list">Ordina Elenco Campi</string>
     <string name="fields_sort_reset">Ripristina</string>
     <string name="fields_sort_by_name">Nome</string>
     <string name="fields_sort_by_import_format">Formato Di Importazione</string>
     <string name="fields_sort_by_import_date">Data Di Importazione</string>
-    <string name="fields_sort_by_edit_date">Modifica date</string>
-    <string name="fields_sort_by_sync_date">Sincronizza date</string>
-    <string name="fields_sort_by_export_date">Esporta date</string>
+    <string name="fields_sort_by_edit_date">Modifica Date</string>
+    <string name="fields_sort_by_sync_date">Data Di Sincronizzazione</string>
+    <string name="fields_sort_by_export_date">Data Di Esportazione</string>
     <string name="list_item_field_popup_menu_content_description">Apre un menù per il campo selezionato.</string>
     <string name="selected_count">%1$d selezionato</string>
     <string name="fields_select_all">Seleziona Tutto</string>
@@ -103,15 +103,15 @@
     <!-- Sort -->
     <string name="field_sort_entries">Ordina</string>
     <string name="sort_dialog_saved">Ordinamento aggiornato</string>
-    <string name="sort_dialog_error_saving">Errore durante il riordino</string>
+    <string name="sort_dialog_error_saving">Errore durante l\'aggiornamento dell\'ordinamento</string>
     <string name="list_item_field_sort_delete_content_description">Elimina l\'attributo di ordinamento.</string>
-    <string name="dialog_field_sort_title">Ordina le voci</string>
-    <string name="list_item_field_sort_drag_content_description">Trascina per spostare l\'oggetto.</string>
-    <string name="dialog_field_sort_no_attributes_found">Nessun criterio trovato.</string>
-    <string name="dialog_field_sort_no_more_attributes_found">Tutti i criteri sono stati utilizzati.</string>
+    <string name="dialog_field_sort_title">Ordina Voci</string>
+    <string name="list_item_field_sort_drag_content_description">Trascina per spostare l\'elemento.</string>
+    <string name="dialog_field_sort_no_attributes_found">Nessun attributo trovato.</string>
+    <string name="dialog_field_sort_no_more_attributes_found">Tutti gli attributi sono stati utilizzati.</string>
     <string name="dialog_field_sort_delete_all_content_description">Elimina tutte le voci di ordinamento.</string>
-    <string name="dialog_field_sort_toggle_order_content_description">Inverti l\'ordine.</string>
-    <string name="dialog_field_sort_add_content_description">Apre una finestra di dialogo per aggiungere un nuovo criterio di ordinamento.</string>
+    <string name="dialog_field_sort_toggle_order_content_description">Inverte l\'ordine di ordinamento.</string>
+    <string name="dialog_field_sort_add_content_description">Apre una finestra di dialogo per aggiungere un nuovo attributo di ordinamento.</string>
     <!-- Modify -->
     <string name="fields_rename_study">Rinomina</string>
     <string name="fields_export">Esporta</string>
@@ -143,7 +143,7 @@
     <string name="import_runnable_db_failed_to_switch">Database non riuscito a cambiare campi.</string>
     <string name="fields_study_exists_message">Un campo con questo nome esiste già. Vuoi sovrascrivere?</string>
     <string name="act_field_editor_failed_to_read_columns">Field Book non può caricare il file.</string>
-    <string name="act_field_editor_load_file_failed">Si è verificato un errore durante il caricamento del file.</string>
+    <string name="act_field_editor_load_file_failed">Errore durante il caricamento del file.</string>
     <string name="act_field_editor_file_open_failed">Impossibile aprire il file.</string>
     <!-- Field Creator  -->
     <string name="field_creator_exit_dialog_title">Esci Dal Creatore Di Campo</string>
