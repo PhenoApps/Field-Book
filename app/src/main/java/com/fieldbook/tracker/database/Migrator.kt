@@ -13,7 +13,7 @@ import com.fieldbook.tracker.database.migrators.RefactorMigratorVersion13
 import com.fieldbook.tracker.database.migrators.GroupMigratorVersion14
 import com.fieldbook.tracker.database.migrators.MulticatToCategoricalVersion20
 import com.fieldbook.tracker.database.migrators.SpectralMigratorVersion16
-import com.fieldbook.tracker.database.migrators.TraitAliasVersion18
+import com.fieldbook.tracker.database.migrators.TraitAliasSynonymVersion18
 import com.fieldbook.tracker.objects.TraitObject
 
 /**
@@ -419,7 +419,7 @@ class Migrator {
 
         fun migrateToVersion18(db: SQLiteDatabase) {
 
-            TraitAliasVersion18().migrate(db)
+            TraitAliasSynonymVersion18().migrate(db)
                 .onFailure {
                     Log.e(TAG, "Failed to migrate to version 18", it)
                 }

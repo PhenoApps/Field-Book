@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.fragments
 
 import android.app.AlertDialog
+import android.app.Dialog
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
@@ -12,6 +13,8 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.core.net.toUri
@@ -19,6 +22,8 @@ import androidx.core.view.isGone
 import androidx.core.view.size
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.activities.TraitEditorActivity
@@ -28,6 +33,8 @@ import com.fieldbook.tracker.charts.PieChartHelper
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.databinding.FragmentTraitDetailBinding
 import com.fieldbook.tracker.dialogs.FileExploreDialogFragment
+import com.fieldbook.tracker.dialogs.composables.DialogTheme
+import com.fieldbook.tracker.dialogs.composables.TextInputDialog
 import com.fieldbook.tracker.objects.FieldFileObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -41,6 +48,7 @@ import com.fieldbook.tracker.traits.formats.parameters.CloseKeyboardParameter
 import com.fieldbook.tracker.traits.formats.parameters.CropImageParameter
 import com.fieldbook.tracker.traits.formats.parameters.DecimalPlacesParameter
 import com.fieldbook.tracker.traits.formats.parameters.MathSymbolsParameter
+import com.fieldbook.tracker.traits.formats.parameters.MultipleCategoriesParameter
 import com.fieldbook.tracker.traits.formats.parameters.Parameters
 import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
@@ -87,7 +95,6 @@ class TraitDetailFragment : Fragment() {
 
     private var traitId: String? = null
     private var traitObject: TraitObject? = null
-    private var traitHasBrapiCategories = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
@@ -269,11 +276,9 @@ class TraitDetailFragment : Fragment() {
     }
 
     private fun addFormatSpecificOptionChips(trait: TraitObject) {
-        val isBrapiTrait = trait.externalDbId != null && (trait.externalDbId?.isNotEmpty() == true)
-                || trait.traitDataSource.contains("brapi", ignoreCase = true) == true
-
-        if (isBrapiTrait && trait.synonyms.isNotEmpty()) {
-            addChip(getString(R.string.trait_brapi_swap_name), R.drawable.ic_swap_horizontal) { showSwapNameDialog(trait) }
+        print(trait.synonyms.isEmpty())
+        if (trait.synonyms.isNotEmpty()) {
+            addChip(getString(R.string.trait_swap_name), R.drawable.ic_swap_horizontal) { showSwapNameDialog(trait) }
         }
 
         if (trait.format == "date") {
@@ -281,7 +286,10 @@ class TraitDetailFragment : Fragment() {
             addChip(chipLabel, R.drawable.ic_calendar_edit) { showDateFormatDialog(trait) }
         }
 
-        traitHasBrapiCategories = isBrapiTrait && trait.format == "categorical" && trait.categories.isNotEmpty()
+        val isBrapiTrait = trait.externalDbId != null && (trait.externalDbId?.isNotEmpty() == true)
+                || trait.traitDataSource.contains("brapi", ignoreCase = true) == true
+        val traitHasBrapiCategories = isBrapiTrait && trait.format == "categorical" && trait.categories.isNotEmpty()
+
         if (traitHasBrapiCategories) {
             val firstCategory = parseCategoryExample(trait.categories)
             val chipLabel = if (trait.categoryDisplayValue) {
@@ -328,6 +336,7 @@ class TraitDetailFragment : Fragment() {
             is CropImageParameter -> R.drawable.ic_crop_image
             is DecimalPlacesParameter -> R.drawable.ic_decimal
             is MathSymbolsParameter -> R.drawable.ic_symbol
+            is MultipleCategoriesParameter -> R.drawable.ic_trait_multicat
             is ResourceFileParameter -> R.drawable.ic_tb_folder
             is RepeatedMeasureParameter -> R.drawable.ic_repeated_measures
             is UnitParameter -> R.drawable.ic_tag_edit
@@ -489,7 +498,57 @@ class TraitDetailFragment : Fragment() {
                 }
             }
             .setNegativeButton(getString(R.string.dialog_cancel), null)
+            .setNeutralButton(getString(R.string.trait_add_synonym_new)) { _, _ ->
+                showAddSynonymDialog(trait)
+            }
             .show()
+    }
+
+    private fun showAddSynonymDialog(trait: TraitObject) {
+
+        val dialog = Dialog(requireContext(), R.style.AppAlertDialog)
+
+        val composeView = ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setViewTreeLifecycleOwner(viewLifecycleOwner)
+            setViewTreeSavedStateRegistryOwner(this@TraitDetailFragment)
+
+            setContent {
+                DialogTheme {
+                    TextInputDialog(
+                        title = getString(R.string.trait_add_synonym_new_dialog),
+                        hint = getString(R.string.trait_synonym),
+                        positiveButtonText = getString(R.string.trait_swap_name_set_alias),
+                        onPositive = { newSynonym ->
+                            when {
+                                newSynonym.isEmpty() -> getString(R.string.trait_add_synonym_new_dialog_blank)
+
+                                trait.synonyms.contains(newSynonym) -> getString(R.string.trait_add_synonym_already_exists)
+
+                                else -> {
+                                    val validationError = TraitNameValidator.validateTraitAlias(newSynonym, database, trait)
+                                    if (validationError != null) {
+                                        getString(validationError)
+                                    } else {
+                                        viewModel.updateTraitAlias(trait, newSynonym)
+                                        dialog.dismiss()
+                                        null // no error
+                                    }
+                                }
+                            }
+                        },
+                        negativeButtonText = getString(R.string.dialog_cancel),
+                        onNegative = { dialog.dismiss() },
+                        neutralButtonText = getString(R.string.dialog_clear),
+                        onNeutral = { }
+                    )
+                }
+            }
+        }
+
+        dialog.setContentView(composeView)
+
+        dialog.show()
     }
 
     private fun showDateFormatDialog(trait: TraitObject) {
@@ -525,8 +584,6 @@ class TraitDetailFragment : Fragment() {
     private fun getTodayDayOfYear(): String = Calendar.getInstance().get(Calendar.DAY_OF_YEAR).toString()
 
     private fun showBrapiLabelValueDialog(trait: TraitObject) {
-        if (!traitHasBrapiCategories) return
-
         val categories = trait.categories
         val firstCategory = parseCategoryExample(categories)
 

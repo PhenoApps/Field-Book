@@ -27,4 +27,13 @@ object SynonymsUtil {
     fun serializeSynonyms(synonyms: List<String>): String {
         return gson.toJson(synonyms)
     }
+
+    fun addAliasToSynonyms(alias: String, synonyms: List<String>): List<String> {
+        if (alias.isEmpty()) return synonyms
+
+        return synonyms.toMutableList().apply {
+            if (none { it == alias }) add(0, alias)
+        }
+    }
+
 }

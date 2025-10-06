@@ -8,6 +8,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.ValidationResult
+import com.fieldbook.tracker.utilities.SynonymsUtil
 import com.fieldbook.tracker.utilities.TraitNameValidator.validateTraitAlias
 import com.google.android.material.textfield.TextInputEditText
 
@@ -68,8 +69,10 @@ class NameParameter : BaseFormatParameter(
             if (id.isEmpty()) { // new trait - assign to both name and alias
                 name = inputText
                 alias = inputText
+                synonyms = listOf(inputText)
             } else { // edit trait - assign only to alias
                 alias = inputText
+                synonyms = SynonymsUtil.addAliasToSynonyms(inputText, synonyms)
             }
         }
 

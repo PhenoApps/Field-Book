@@ -56,11 +56,6 @@ object TraitAttributes {
         valueType = ValueType.STRING,
     )
 
-    val VARIABLE_SYNONYMS = AttributeDefinition(
-        key = ObservationVariableAttributeDetailsView.VARIABLE_SYNONYMS,
-        valueType = ValueType.STRING,
-    )
-
     val DECIMAL_PLACES_REQUIRED = AttributeDefinition(
         key = ObservationVariableAttributeDetailsView.DECIMAL_PLACES_REQUIRED,
         valueType = ValueType.STRING,
@@ -97,7 +92,7 @@ object TraitAttributes {
     )
 
     val ALL = listOf(MIN_VALUE, MAX_VALUE, CATEGORIES, CLOSE_KEYBOARD, CROP_IMAGE, SAVE_IMAGE,
-        USE_DAY_OF_YEAR, CATEGORY_DISPLAY_VALUE, RESOURCE_FILE, VARIABLE_SYNONYMS,
+        USE_DAY_OF_YEAR, CATEGORY_DISPLAY_VALUE, RESOURCE_FILE,
         DECIMAL_PLACES_REQUIRED, MATH_SYMBOLS_ENABLED, ALLOW_MULTICAT, REPEATED_MEASURES,
         AUTO_SWITCH_PLOT, UNIT
     )

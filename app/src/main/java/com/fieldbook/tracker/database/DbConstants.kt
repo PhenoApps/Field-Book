@@ -71,7 +71,6 @@ object ObservationVariableAttributeDetailsView {
     const val USE_DAY_OF_YEAR = "useDayOfYear"
     const val CATEGORY_DISPLAY_VALUE = "categoryDisplayValue"
     const val RESOURCE_FILE = "resourceFile"
-    const val VARIABLE_SYNONYMS = "synonyms"
     const val DECIMAL_PLACES_REQUIRED = "decimalPlacesRequired"
     const val MATH_SYMBOLS_ENABLED = "mathSymbolsEnabled"
     const val ALLOW_MULTICAT = "allowMulticat"

@@ -406,7 +406,7 @@
     <string name="trait_hidden">Hidden</string>
     <string name="trait_options_title">Options</string>
     <string name="trait_resource_chip_title">Set resource file</string>
-    <string name="trait_brapi_swap_name">Swap name field</string>
+    <string name="trait_swap_name">Swap name field</string>
     <string name="trait_observation_data">Data</string>
     <string name="trait_observation_count">%d observations</string>
     <string name="trait_not_chartable">This trait format cannot be visualized in a chart</string>
@@ -428,6 +428,11 @@
     <string name="trait_swap_name_set_alias">Set Alias</string>
     <string name="error_updating_trait_alias">Error updating trait alias</string>
     <string name="error_updating_trait_options">Error updating trait options</string>
+    <string name="trait_add_synonym_new">Add New</string>
+    <string name="trait_add_synonym_new_dialog">Add New Synonym</string>
+    <string name="trait_synonym">Synonym</string>
+    <string name="trait_add_synonym_new_dialog_blank">Synonym cannot be blank</string>
+    <string name="trait_add_synonym_already_exists">This synonym already exists</string>
 
     <!-- <string name="trait_date_format_example">Date: %s</string>
     <string name="trait_day_format_example">Day of Year: %d</string>

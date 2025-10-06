@@ -9,6 +9,8 @@ import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.Migrator.ObservationVariable
 import com.fieldbook.tracker.database.models.ObservationVariableModel
 import com.fieldbook.tracker.objects.TraitObject
+import com.fieldbook.tracker.utilities.SynonymsUtil.deserializeSynonyms
+import com.fieldbook.tracker.utilities.SynonymsUtil.serializeSynonyms
 
 class ObservationVariableDao {
 
@@ -68,6 +70,7 @@ class ObservationVariableDao {
             it.id = this[ObservationVariable.PK].toString()
             it.name = this["observation_variable_name"] as? String ?: ""
             it.alias = this["observation_variable_alias"] as? String ?: ""
+            it.synonyms = deserializeSynonyms(this["variable_synonyms"] as? String ?: "")
             it.format = this["observation_variable_field_book_format"] as? String ?: ""
             it.defaultValue = this["default_value"].toString()
             it.details = this["observation_variable_details"].toString()
@@ -248,6 +251,7 @@ class ObservationVariableDao {
                     put("trait_data_source", t.traitDataSource)
                     put("observation_variable_name", t.name)
                     put("observation_variable_alias", t.alias)
+                    put("variable_synonyms", serializeSynonyms(t.synonyms))
                     put("observation_variable_details", t.details)
                     put("observation_variable_field_book_format", t.format)
                     put("default_value", t.defaultValue)
@@ -326,6 +330,7 @@ class ObservationVariableDao {
            val contentValues = ContentValues().apply {
                put("observation_variable_name", trait)
                put("observation_variable_alias", traitAlias)
+               put("variable_synonyms", serializeSynonyms(synonyms))
                put("observation_variable_field_book_format", format)
                put("default_value", defaultValue)
                put("observation_variable_details", details)
@@ -351,7 +356,6 @@ class ObservationVariableDao {
                     this.useDayOfYear = useDayOfYear
                     this.categoryDisplayValue = categoryDisplayValue
                     this.resourceFile = resourceFile
-                    this.synonyms = synonyms
                     this.maxDecimalPlaces = decimalPlacesRequired
                     this.mathSymbolsEnabled = mathSymbolsEnabled
                     this.allowMulticat = allowMulticat

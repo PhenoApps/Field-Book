@@ -46,7 +46,6 @@ class TraitAttributeValuesHelper(var traitId: String? = null) {
                         attributes[USE_DAY_OF_YEAR]?.let { trait.useDayOfYear = it.toBoolean() }
                         attributes[CATEGORY_DISPLAY_VALUE]?.let { trait.categoryDisplayValue = it.toBoolean() }
                         attributes[RESOURCE_FILE]?.let { trait.resourceFile = it }
-                        attributes[VARIABLE_SYNONYMS]?.let { trait.synonyms = deserializeSynonyms(it) }
                         attributes[DECIMAL_PLACES_REQUIRED]?.let { trait.maxDecimalPlaces = it }
                         attributes[MATH_SYMBOLS_ENABLED]?.let { trait.mathSymbolsEnabled = it.toBoolean() }
                         attributes[ALLOW_MULTICAT]?.let { trait.allowMulticat = it.toBoolean() }

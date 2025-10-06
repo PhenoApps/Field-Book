@@ -37,6 +37,7 @@ import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.FailureFunction;
 import com.fieldbook.tracker.utilities.SuccessFunction;
+import com.fieldbook.tracker.utilities.SynonymsUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
@@ -1352,7 +1353,8 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             trait.setName(name);
             trait.setAlias(name);
 
-            trait.setSynonyms(var.getSynonyms() != null ? var.getSynonyms() : new ArrayList<>());
+            List<String> brapiSynonyms = var.getSynonyms() != null ? var.getSynonyms() : new ArrayList<>();
+            trait.setSynonyms(SynonymsUtil.INSTANCE.addAliasToSynonyms(name, brapiSynonyms));
 
             //v5.1.0 bugfix branch update, getPrioritizedValue can return null, trait name should never be null
             // Skip the trait if there brapi trait field isn't present

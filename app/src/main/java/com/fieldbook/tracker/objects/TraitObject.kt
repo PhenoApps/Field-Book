@@ -26,6 +26,11 @@ class TraitObject {
 
     var observationLevelNames: List<String>? = null
 
+    private var _synonyms: String = ""
+    var synonyms: List<String>
+        get() = deserializeSynonyms(_synonyms)
+        set(value) { _synonyms = serializeSynonyms(value) }
+
     // do not bind this map tightly with a traitId
     // traitId is null until the trait object inserted into the database
     // but binding the UI inputs to attributes (minimum, maximum, etc) happens in
@@ -67,10 +72,6 @@ class TraitObject {
     var resourceFile: String
         get() = attributeValues.getString(TraitAttributes.RESOURCE_FILE)
         set(value) = attributeValues.setValue(TraitAttributes.RESOURCE_FILE, value)
-
-    var synonyms: List<String>
-        get() = deserializeSynonyms(attributeValues.getString(TraitAttributes.VARIABLE_SYNONYMS))
-        set(value) = attributeValues.setValue(TraitAttributes.VARIABLE_SYNONYMS, serializeSynonyms(value))
 
     var maxDecimalPlaces: String
         get() = attributeValues.getString(TraitAttributes.DECIMAL_PLACES_REQUIRED)
@@ -200,11 +201,12 @@ class TraitObject {
         val visibleIndex = cursor.getColumnIndex("visible")
         val additionalInfoIndex = cursor.getColumnIndex("additional_info")
         val traitDataSourceIndex = cursor.getColumnIndex("trait_data_source")
+        val synonymsIndex = cursor.getColumnIndex("variable_synonyms")
 
         if (nameIndex == -1 || aliasIndex == -1 || formatIndex == -1 || defaultValueIndex == -1 ||
             detailsIndex == -1 || idIndex == -1 || externalDbIdIndex == -1 ||
             realPositionIndex == -1 || visibleIndex == -1 || additionalInfoIndex == -1 ||
-            traitDataSourceIndex == -1) {
+            traitDataSourceIndex == -1 || synonymsIndex == -1) {
             return
         }
 
@@ -219,6 +221,7 @@ class TraitObject {
         visible = cursor.getString(visibleIndex) == "true"
         additionalInfo = cursor.getString(additionalInfoIndex) ?: ""
         traitDataSource = cursor.getString(traitDataSourceIndex) ?: ""
+        _synonyms = cursor.getString(synonymsIndex) ?: ""
 
         // loadAttributeAndValues()
     }

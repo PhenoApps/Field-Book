@@ -122,7 +122,16 @@ class TraitDetailViewModel(
             try {
                 val updatedTrait = withContext(ioDispatcher) {
                     trait.alias = newAlias
+
+                    val currentSynonyms = trait.synonyms.toMutableList()
+                    if (!currentSynonyms.any { it == newAlias }) {
+                        // add to synonyms
+                        currentSynonyms.add(newAlias)
+                        trait.synonyms = currentSynonyms
+                    }
+
                     database.updateTrait(trait)
+
                     trait
                 }
 
