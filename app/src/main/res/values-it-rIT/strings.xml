@@ -31,7 +31,7 @@
     <string name="app_intro_intro_title_slide1">Benvenuto su Field Book!</string>
     <string name="app_intro_intro_summary_slide1">Tradizionalmente la raccolta dei dati in campo si basa sull\'utilizzo e sulla trascrizione da carta e matita. Field Book è stato creato come soluzione digitale per la raccolta dei dati, permettendo una maggiore velocità e una migliore integrità dei dati.</string>
     <string name="app_intro_intro_title_slide2">Funzionalità e Personalizzazione</string>
-    <string name="app_intro_intro_summary_slide2">I dati vengono inseriti su Field Book con impaginazioni dei tratti che sono progettate per semplificare l\'inserimento dei dati e minimizzare gli errori. \n\n Per impostazione predefinita, i dati raccolti vengono archiviati localmente, ma Field Book supporta la Breeding-API che permette l\'invio di dati a sistemi compatibili con BrAPI.</string>
+    <string name="app_intro_intro_summary_slide2">I dati vengono inseriti su Field Book con disposizione dei caratteri che sono progettate per semplificare l\'inserimento dei dati e minimizzare gli errori. \n\n Per impostazione predefinita, i dati raccolti vengono archiviati localmente, ma Field Book supporta la Breeding-API che permette l\'invio di dati a sistemi compatibili con BrAPI.</string>
     <string name="app_intro_required_setup_title">Impostazione Richiesta</string>
     <string name="app_intro_required_setup_summary">Per iniziare a usare Field Book, concedi i permessi necessari all\'applicazione e scegli una cartella in cui salvare i tuoi dati.</string>
     <string name="app_intro_permissions_title">Permessi</string>
@@ -151,10 +151,15 @@
     <string name="field_creator_exit_dialog_message">Sei sicuro di voler uscire? I tuoi progressi andranno persi.</string>
     <string name="field_creator_size_rows_hint">File</string>
     <string name="field_creator_size_columns_hint">Colonne</string>
+    <string name="field_creator_total_plots_exceeded_error">Il totale di parcelle non può superare %1$s. Totale attuale: %2$s</string>
     <string name="field_creator_start_point_instruction">Tocca un angolo per selezionare il punto di partenza</string>
+    <string name="field_creator_preview_large_field_warning">Rilevato campo di grandi dimensioni. La creazione di molte parcelle potrebbe richiedere del tempo.</string>
+    <string name="field_creator_preview_expand_button">Espandi Griglia</string>
+    <string name="field_creator_preview_collapse_button">Comprimi Griglia</string>
     <string name="dialog_field_creator_ask_name_hint">Nome</string>
     <string name="dialog_field_creator_ask_row_hint">File</string>
     <string name="dialog_field_creator_ask_columns_hint">Colonne</string>
+    <string name="dialog_field_creator_size_group_error">Inserisci un nome e un formato validi.</string>
     <!-- Geo-Navigate to Field -->
     <string name="menu_fields_plot_by_distance_title">Seleziona il campo più vicino</string>
     <string name="activity_field_editor_no_field_found">Nessuna coordinata trovata.</string>
@@ -179,6 +184,7 @@
     <string name="today">Oggi</string>
     <string name="yesterday">Ieri</string>
     <string name="no_activity">Nessuna attività</string>
+    <string name="invalid_date">Data non valida</string>
     <!-- TRAITS -->
     <!-- Sort -->
     <string name="traits_sort_name">Nome del carattere</string>
@@ -213,6 +219,7 @@
     <string name="traits_format_barcode">Codice a barre</string>
     <string name="traits_format_labelprint">Stampa etichetta Zebra</string>
     <!-- Trait Creation Dialog -->
+    <string name="trait_creator_title_layout">Disposizione dei Caratteri</string>
     <string name="traits_create_name">Nome</string>
     <string name="traits_create_format">Formato</string>
     <string name="traits_create_value_default">Impostazioni predefinite</string>
@@ -280,6 +287,10 @@
     <string name="activity_collect_dialog_verify_yes_button">Sì</string>
     <string name="activity_collect_dialog_neutral_button">Modifica impostazioni</string>
     <!--- Datagrid -->
+    <string name="act_data_grid_cursor_failed">La griglia di dati non è riuscita a caricare i dati.</string>
+    <string name="dialog_data_grid_header_picker_title">Scegli Intestazioni di Riga</string>
+    <string name="dialog_data_grid_repeated_measures_title">Scegli Osservazione</string>
+    <string name="menu_action_header_view_data_grid_title">Aggiorna Intestazioni di Riga</string>
     <!--- Lock -->
     <string name="activity_collect_frozen_state">Congelato - una volta salvati i dati non possono essere modificati o eliminati</string>
     <!-- Trait Layout: Photo -->
@@ -287,15 +298,23 @@
     <string name="trait_delete_warning_photo">Sei sicuro di voler eliminare questa foto?</string>
     <string name="photo_failed_to_delete">Impossibile eliminare il file.</string>
     <!-- Trait Layout: GNSS -->
+    <string name="trait_gnss_geo_coord_update_dialog_title">Avviso Aggiornamento Coordinata</string>
     <!-- Trait Layout: Date -->
+    <string name="trait_date_calendar_picker_content_description">Pulsante che apre un selettore di calendario.</string>
     <string name="trait_date_save_button_content_description">Questo salverà la data corrente selezionata.</string>
     <!-- Trait Layout: Boolean -->
+    <string name="trait_boolean_on">Attivo</string>
     <!-- Trait Layout: GoPro -->
+    <string name="trait_go_pro_capture_button_text">Cattura\n</string>
+    <string name="trait_go_pro_await_ap_message">Connessione alla rete, questo potrebbe richiedere un minuto. \n SSID: %s \n Pass: %s</string>
     <string name="trait_go_pro_camera_delete_photo_title">Elimina Foto</string>
+    <string name="go_pro_layout_black_11_not_detected">Questo carattere è stato fatto per un GoPro Black 11, si prega di contattare gli sviluppatori per implementare il tuo modello GoPro.\n</string>
     <!-- Trait Layout: USB Camera -->
+    <string name="trait_usb_camera_zoom_in_button_text">Aumenta Zoom</string>
+    <string name="trait_usb_camera_zoom_in_content_description">Aumenta Zoom</string>
     <string name="trait_usb_camera_delete_photo">Elimina Foto USB</string>
     <!--- Trait Layout: Zebra label print -->
-    <string name="trait_layout_data_stored">I dati sono stati salvati</string>
+    <string name="trait_layout_data_stored">Salvato</string>
     <string name="trait_layout_print_label_size_title">Dimensione:</string>
     <string name="trait_layout_print_text_field_title">Testo:</string>
     <string name="trait_layout_print_text_field_title_2">Testo2:</string>
@@ -303,8 +322,14 @@
     <string name="trait_layout_print_text_field_title_4">Testo4:</string>
     <string name="trait_layout_print_barcode_field_title">Codice a barre:</string>
     <string name="trait_layout_print_label_copies_title">Copie:</string>
+    <string name="trait_layout_print_label_simple_text">semplice</string>
+    <string name="trait_layout_print_label_detailed_text">dettagliato</string>
+    <string name="trait_layout_print_label_date_option">data</string>
+    <string name="trait_layout_print_label_blank_option">vuoto</string>
     <!--- Trait Layout: Counter -->
+    <string name="trait_counter_layout_failed">Il contatore non è riuscito a salvare, si prega di ricreare questo carattere.</string>
     <!--- Trait Layout: Location -->
+    <string name="trait_location_save_content_description">Salva la posizione corrente.</string>
     <!--- Text to Speech Strings -->
     <string name="act_collect_barcode_btn_tts">Apertura scanner di codici a barre</string>
     <string name="act_collect_delete_btn_tts">Valore è stato eliminato.</string>
@@ -323,6 +348,7 @@
     <string name="act_collect_delete_value_button_content_description">Elimina il valore corrente.</string>
     <string name="act_collect_barcode_button_content_description">Avvia uno scanner di codici a barre.</string>
     <!-- Observation Info -->
+    <string name="observation_info_entry_id">ID Entrata</string>
     <!-- Skip Entries -->
     <!-- EXPORT -->
     <!-- Export dialog -->
@@ -355,6 +381,10 @@
     <!-- Profile -->
     <string name="preferences_profile_title">Profilo</string>
     <string name="preferences_profile_previous_names_warning">Tutti i nomi delle persone salvate saranno eliminati, e questo non può essere invertito. Sei sicuro di voler continuare?</string>
+    <string name="pref_profile_crashlytics_user_id_enabled">ID Univoco</string>
+    <string name="pref_profile_crashlytics_user_id_enabled_summary">Includi un ID anonimo, univoco nei crash log per aiutare il team di sviluppo a correggere i bug</string>
+    <string name="pref_profile_crashlytics_refresh_title">Aggiorna ID</string>
+    <string name="pref_profile_crashlytics_refresh_summary">Questo assegnerà un nuovo ID univoco</string>
     <!-- Features -->
     <!-- Appearance -->
     <string name="preferences_appearance_title">Aspetto</string>
@@ -369,7 +399,11 @@
     <string name="preferences_appearance_toolbar_customize_summary">Riassunto</string>
     <string name="preferences_appearance_toolbar_customize_lock">Bloccare</string>
     <string name="preferences_general_feature_datagrid">Griglia di dati</string>
+    <string name="preferences_general_feature_datagrid_description">Aggiungi un pulsante per visualizzare una griglia di dati raccolti</string>
     <string name="preferences_general_feature_barcode_text">Sposta All\'ID Univoco</string>
+    <string name="move_to_unique_id_disabled">Disabilitato</string>
+    <string name="move_to_unique_id_text_or_scan">Il pulsante utilizza l\'immissione di testo con scansione della fotocamera opzionale</string>
+    <string name="move_to_unique_id_direct_camera_scan">Il pulsante usa la scansione diretta della fotocamera</string>
     <string name="preferences_appearance_infobar_number">Numero di Barre Informative</string>
     <string name="preferences_appearance_infobar_number_description">Regola il numero di Barre Informative visualizzate nella schermata principale</string>
     <string name="preferences_appearance_infobar_hide_prefix">Nascondi prefisso Barre Informative</string>
@@ -425,7 +459,7 @@
     <string name="pref_experimental_repeated_values_disabled_message">Tutti i valori ripetuti che sono stati raccolti saranno nascosti fino a quando questa funzione non sarà nuovamente abilitata</string>
     <string name="pref_experimental_enable_field_audio_title">Abilita Audio di Campo</string>
     <string name="pref_beta_enable_individual_field_page_title">Abilita Le Pagine Di Campo Individuali</string>
-    <string name="pref_beta_enable_individual_field_page_summary">Selezionando un campo nell\'elenco dei campi si apre una pagina di dettaglio</string>
+    <string name="pref_beta_enable_individual_field_page_summary">Selezionando un campo nella lista campi si apre una pagina di dettaglio</string>
     <string name="pref_beta_mlkit_summary">Questa opzione utilizza la libreria MLKit invece della libreria ZXing per la scansione dei codici a barre</string>
     <string name="pref_beta_mlkit_enabled_title">Scansione codice a barre utilizzando MLKit abilitato</string>
     <string name="pref_beta_mlkit_enabled_message">Abilitando questa funzionalità, la libreria di scansione di codici a barre da ZXing a MLKit</string>
@@ -433,6 +467,9 @@
     <string name="warning_invalid_date_range">Seleziona un intervallo di date valido</string>
     <string name="stats_calendar_range">Seleziona un intervallo di date per filtrare le date visualizzate</string>
     <string name="stats_date_range_picker_title">Seleziona un intervallo di date</string>
+    <string name="stats_tab_layout_total">Totale</string>
+    <string name="stats_tab_layout_year">Anno</string>
+    <string name="stats_tab_layout_month">Mese</string>
     <string name="stat_title_fields">Campi</string>
     <string name="stat_title_entries">Voci</string>
     <!-- ABOUT -->
@@ -463,6 +500,15 @@
     <string name="brapi_base_url_desc">L\'URL di base per il server BrAPI collegato</string>
     <string name="brapi_choice_to_make_default_negative">Annulla</string>
     <string name="brapi_choice_to_make_default_positive">Salva</string>
+    <string name="preferences_brapi_oidc_flow_oauth_code">OAuth2 Authorization Code</string>
+    <string name="preferences_brapi_oidc_flow_oauth_implicit">OAuth2 Implicit Grant</string>
+    <string name="preferences_brapi_oidc_flow_old_custom">Original Field Book Custom</string>
+    <string name="brapi_oidc_url">OIDC Discovery URL</string>
+    <string name="brapi_oidc_url_desc">The location of the OIDC Discovery JSON document</string>
+    <string name="brapi_oidc_clientid">OIDC Client ID</string>
+    <string name="brapi_oidc_clientid_desc">Il Client ID da utilizzare nel provider di autenticazione</string>
+    <string name="brapi_oidc_scope">OIDC Scope</string>
+    <string name="brapi_oidc_scope_desc">The Scope to be used in the authentication provider</string>
     <string name="preferences_brapi_server_barcode">Scansiona un codice a barre del server</string>
     <!-- Community Servers -->
     <string-array name="community_servers_names">
@@ -623,6 +669,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="tutorial_traits_format_description">Diversi formati di caratteri sono indicati con icone diverse.</string>
     <string name="tutorial_traits_visibility_title">Visibilità del carettere</string>
     <string name="tutorial_traits_visibility_description">I caretteri possono essere disabilitati dalla raccolta selezionando la casella di controllo.</string>
+    <string name="dialog_geonav_prefs_sensor_missing_message">Il metodo trapezoidale richiede un accelerometro e un giroscopio per utilizzare l\'input della bussola.</string>
     <string name="tutorial_main_datagrid_title">Griglia di dati</string>
     <string name="tutorial_main_datagrid_description">Questo apre una griglia di fenotipizzazione 2D del campo attualmente selezionato.</string>
     <string name="tutorial_main_geonav_title">GeoNav</string>
@@ -634,12 +681,15 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="trait_name_alt_photo_system">Sistema</string>
     <string name="view_trait_photo_settings_camera_custom">Impostazioni predefinite</string>
     <string name="view_trait_photo_settings_camera_system">Android</string>
+    <string name="view_trait_photo_settings_camera_choice_description">Scegli tra la fotocamera predefinita del Field Book e l\'app della fotocamera Android.</string>
     <!-- usb camera trait -->
     <string name="view_trait_photo_settings_auto_focus_title">Focus Automatico</string>
     <!-- gopro -->
     <string name="view_trait_photo_settings_save_image_title">Copia l\'immagine nel Field Book</string>
     <string name="go_pro_trait_settings_title">Impostazioni GoPro</string>
     <!-- canon camera strings -->
+    <string name="pref_canon_ssid_summary">Questo nome è usato per trovare l\'AP del tuo dispositivo. Questo nome deve essere contenuto all\'interno del SSID attuale.</string>
+    <string name="pref_canon_title">Nome SSID</string>
     <string name="trait_usb_photo_settings_title">Impostazioni Foto USB</string>
     <string name="canon_trait_settings_title">Impostazioni Canon</string>
     <!-- spectral trait strings -->
@@ -652,6 +702,11 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="brapi_filter_bottom_sheet_delete_all_description">cancella tutti i filtri</string>
     <string name="act_brapi_list_filter_error_multiple_programs">Seleziona studi dallo stesso programma.</string>
     <string name="select">Seleziona</string>
+    <string name="preferences_brapi_cache_invalidate_dialog_title">Invalida le Scelte dell\'Intervallo della Cache</string>
+    <string name="preferences_brapi_cache_invalidate_summary">%s</string>
+    <string name="preferences_brapi_cache_invalidate_title">Invalidazione Cache</string>
+    <string name="no_programdbid_provided">Nessun programDbId fornito</string>
+    <string name="no_studydbids_provided">Nessun studyDbIds fornito</string>
     <string name="act_brapi_list_filter_reset_cache_message">Questo eliminerà i dati BrAPI locali utilizzati per la ricerca e l\'importazione.</string>
     <string name="search_bar_hint">Ricercando… %s</string>
     <string name="menu_filter_brapi_clear_filters">Cancella Filtri</string>
@@ -660,8 +715,12 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="brapi_traits_filter_title">Caratteri</string>
     <string name="act_brapi_list_filter_reset_selection_message">Questo cancellerà l\'elenco in esecuzione degli elementi selezionati.</string>
     <string name="pref_alpha_media_keycode_events_title">Abilita Comandi Media</string>
+    <string name="activity_collect_proximity_warning">GeoNav Fermo, al di fuori delle coordinate</string>
+    <string name="trait_error_invalid_multicat_value">Dati categorici inseriti non validi.</string>
     <string name="dialog_quick_goto_title">Tasto Rapido</string>
     <string name="dialog_quick_goto_go">Vai</string>
+    <string name="quick_goto_primary_hint">ID Principale</string>
+    <string name="quick_goto_secondary_hint">ID Secondario</string>
     <string name="traits_sort_default">Impostazioni predefinite</string>
     <string name="view_trait_photo_settings_crop">Imposta Regione Ritaglio</string>
     <!--  NearbyShare  -->
@@ -682,6 +741,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="view_trait_nix_settings_firmware_version">Versione Firmware: %s</string>
     <string name="view_trait_nix_settings_software_version">Versione Software: %s</string>
     <string name="view_trait_nix_settings_external_power_state">Stato Dell\'Energia Esterna: %s</string>
+    <string name="nix_error_invalid_hardware_id">Invalid hardware ID</string>
     <string name="enabled">abilitato</string>
     <string name="traits_save_image_parameter">Copia l\'immagine nel Field Book</string>
     <!-- Stop Watch Trait Button content descriptions-->
