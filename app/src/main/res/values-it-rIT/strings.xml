@@ -66,7 +66,8 @@
     <string name="settings_statistics">Statistiche</string>
     <!-- Config Activity Fuzzy Search  -->
     <string name="act_config_fuzzy_search_failed">Il database non può recuperare un campo o una parcella con codice: %s</string>
-    <string name="act_config_fuzzy_search_error">Qualcosa è andato storto cercando %s</string>
+    <string name="act_config_fuzzy_search_error">Qualcosa è andato storto nella ricerca di %s</string>
+    <string name="act_config_search_fab_content_description">Cerca tutti le parcelle e i campi per caricare/navigare all\'elemento con codice a barre.</string>
     <!-- File manager  -->
     <string name="import_source_local">Archiviazione locale</string>
     <string name="import_source_cloud">Cloud storage</string>
@@ -163,8 +164,10 @@
     <string name="name_conflict_import_name">importa nome</string>
     <string name="name_conflict_display_name">visualizza nome</string>
     <string name="dialog_att_chooser_title_default">Seleziona attributo</string>
-    <string name="search_attribute_dialog_title">Imposta ID di ricerca</string>
+    <string name="search_attribute_dialog_title">Imposta ID di Ricerca</string>
     <string name="search_attribute_apply_to_all">Applica la scelta a tutti i campi idonei</string>
+    <string name="search_attribute_updated">Attributo di ricerca aggiornato</string>
+    <string name="search_attribute_updated_all">Attributo di ricerca aggiornato per i campi %1$d</string>
     <string name="search_multiple_matches_found">Trovati %1$d appezzamenti corrispondenti. Visualizzazione del primo.</string>
     <!--    <string name="field_default_sort_order">import order</string>-->
     <string name="field_trait_observation_total">\"%d\" osservazioni</string>
@@ -250,10 +253,12 @@
     <string name="infobar_word_wrap_enabled">A capo automatico abilitato per la Barra Informative %s</string>
     <string name="infobar_word_wrap_disabled">A capo automatico disabilitato per Barre Informative %s</string>
     <!-- ID/Barcode Search -->
+    <string name="act_collect_barcode_search_exists_in_other_field">Questo ID è in %s</string>
     <string name="main_toolbar_moveto_no_match">Nessun valore corrispondente</string>
     <string name="main_toolbar_moveto">Vai a ID</string>
     <string name="main_toolbar_barcode_scan">Scansione codice a barre</string>
     <string name="main_toolbar_moveto_scan">Scansiona</string>
+    <string name="act_collect_plot_with_code_not_found">Codice a barre non trovato.\n</string>
     <!-- Search  -->
     <string name="main_toolbar_search">Cerca</string>
     <string name="search_dialog_add">Aggiungi</string>
@@ -266,7 +271,7 @@
     <string name="search_dialog_query_does_not_contain">non contiene</string>
     <string name="search_dialog_query_is_more_than">è più di</string>
     <string name="search_dialog_query_is_less_than">è meno di</string>
-    <string name="search_results_dialog_title">Cerca risultati</string>
+    <string name="search_results_dialog_title">Risultati della ricerca</string>
     <string name="search_results_dialog_range">Fila</string>
     <string name="search_results_dialog_plot">Parcella</string>
     <string name="search_results_missing">Nessun risultato</string>
@@ -301,6 +306,7 @@
     <!--- Trait Layout: Counter -->
     <!--- Trait Layout: Location -->
     <!--- Text to Speech Strings -->
+    <string name="act_collect_barcode_btn_tts">Apertura scanner di codici a barre</string>
     <string name="act_collect_delete_btn_tts">Valore è stato eliminato.</string>
     <!--- Summary -->
     <string name="fragment_summary_filter_title">Seleziona etichette di riepilogo</string>
@@ -315,6 +321,7 @@
     <string name="dialog_geonav_collect_reset_start_toast_message">Reimpostazione connessione…</string>
     <!--- Content Descriptions -->
     <string name="act_collect_delete_value_button_content_description">Elimina il valore corrente.</string>
+    <string name="act_collect_barcode_button_content_description">Avvia uno scanner di codici a barre.</string>
     <!-- Observation Info -->
     <!-- Skip Entries -->
     <!-- EXPORT -->
@@ -362,11 +369,13 @@
     <string name="preferences_appearance_toolbar_customize_summary">Riassunto</string>
     <string name="preferences_appearance_toolbar_customize_lock">Bloccare</string>
     <string name="preferences_general_feature_datagrid">Griglia di dati</string>
+    <string name="preferences_general_feature_barcode_text">Sposta All\'ID Univoco</string>
     <string name="preferences_appearance_infobar_number">Numero di Barre Informative</string>
     <string name="preferences_appearance_infobar_number_description">Regola il numero di Barre Informative visualizzate nella schermata principale</string>
     <string name="preferences_appearance_infobar_hide_prefix">Nascondi prefisso Barre Informative</string>
     <string name="preferences_appearance_infobar_hide_prefix_description">Il prefisso Barra Informativa sarà sostituito da un\'icona generica</string>
     <string name="preferences_appearance_quickgoto">Tasto Rapido</string>
+    <string name="preferences_appearance_quickgoto_description">Cambia la sezione centrale della schermata principale in quella precedente Quick GoTo</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamento</string>
     <string name="preferences_behavior_return_character_do_nothing">Fare niente</string>
@@ -377,10 +386,20 @@
     <string name="location_format_geojson">GeoJSON</string>
     <string name="pref_geonav_category_title">GeoNav</string>
     <string name="pref_geonav_enable_title">Abilita GeoNav</string>
+    <string name="pref_geonav_search_method_title">Metodo di Ricerca</string>
+    <string name="pref_geonav_search_method_summary">Il metodo %s utilizzato per cercare le parcelle in GeoNav</string>
+    <string name="pref_geonav_method_trapezoid">Trapezoidale</string>
+    <string name="pref_geonav_search_trapezoid_d1_title">Base Trapezoidale (km)</string>
+    <string name="pref_geonav_search_trapezoid_d1_summary">La base più corta del trapezoide è %s km</string>
+    <string name="pref_geonav_search_trapezoid_d2_title">Distanza Trapezoide (km)</string>
+    <string name="pref_geonav_search_trapezoid_d2_summary">La distanza dall\'utente all\'estremità opposta del trapezoide è %s km</string>
+    <string name="pref_geonav_search_angle_summary">GeoNav crea un trapezoide davanti all\'utente, l\'angolo più vicino all\'utente è definito come %s°</string>
+    <string name="pref_geonav_search_angle_title">GeoNav Cerca un Angolo (gradi)</string>
     <string name="pref_geonav_log_limited_description">Limitato: Registrazione della voce più vicina a storage/geonav/limited_log.txt</string>
     <string name="pref_geonav_log_full_description">Completo: registrando tutti gli aggiornamenti della posizione e i passaggi dell\'algoritmo per storage/geonav/log.txt</string>
     <string name="pref_geonav_log_both">Ambo</string>
     <string name="pref_geonav_log_both_description">Entrambi: registrando tutti gli aggiornamenti della posizione e i passaggi dell\'algoritmo per storage/geonav/log.txt, voce più vicina a storage/geonav/limited_log.txt</string>
+    <string name="pref_geonav_pair">Provider di Geolocalizzazione</string>
     <!-- Sounds -->
     <string name="preferences_sounds">Suoni</string>
     <string name="preferences_sound_delete_obs_title">Elimina Osservazione</string>
@@ -403,8 +422,13 @@
     <string name="preferences_system_defaults_reset">Reimposta Impostazioni</string>
     <string name="reset_preferences_title">Ripristina Impostazioni a Predefinite</string>
     <!-- Experimental -->
+    <string name="pref_experimental_repeated_values_disabled_message">Tutti i valori ripetuti che sono stati raccolti saranno nascosti fino a quando questa funzione non sarà nuovamente abilitata</string>
     <string name="pref_experimental_enable_field_audio_title">Abilita Audio di Campo</string>
+    <string name="pref_beta_enable_individual_field_page_title">Abilita Le Pagine Di Campo Individuali</string>
     <string name="pref_beta_enable_individual_field_page_summary">Selezionando un campo nell\'elenco dei campi si apre una pagina di dettaglio</string>
+    <string name="pref_beta_mlkit_summary">Questa opzione utilizza la libreria MLKit invece della libreria ZXing per la scansione dei codici a barre</string>
+    <string name="pref_beta_mlkit_enabled_title">Scansione codice a barre utilizzando MLKit abilitato</string>
+    <string name="pref_beta_mlkit_enabled_message">Abilitando questa funzionalità, la libreria di scansione di codici a barre da ZXing a MLKit</string>
     <!-- STATISTICS -->
     <string name="warning_invalid_date_range">Seleziona un intervallo di date valido</string>
     <string name="stats_calendar_range">Seleziona un intervallo di date per filtrare le date visualizzate</string>
@@ -430,13 +454,16 @@
     <string name="brapi_info_title">Informazioni sulla sincronizzazione BrAPI</string>
     <string name="preferences_brapi_enable_title">Abilita BrAPI</string>
     <string name="preferences_brapi_enable_summary">L\'Breeding API consente un semplice trasferimento di dati a database compatibili.</string>
+    <string name="preferences_brapi_barcode_config_title">Auto-configura</string>
     <string name="preferences_brapi_barcode_config_summary">Gestione impostazioni con codici QR</string>
     <string name="preferences_brapi_barcode_config_scan">Importa nuove impostazioni</string>
     <string name="preferences_brapi_barcode_config_share">Condividi le impostazioni correnti</string>
+    <string name="preferences_brapi_barcode_config_dialog_title">Configurazione BrAPI Scansionabile</string>
     <string name="brapi_base_url">URL di base</string>
     <string name="brapi_base_url_desc">L\'URL di base per il server BrAPI collegato</string>
     <string name="brapi_choice_to_make_default_negative">Annulla</string>
     <string name="brapi_choice_to_make_default_positive">Salva</string>
+    <string name="preferences_brapi_server_barcode">Scansiona un codice a barre del server</string>
     <!-- Community Servers -->
     <string-array name="community_servers_names">
         <item>CassavaBase</item>
@@ -626,7 +653,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="act_brapi_list_filter_error_multiple_programs">Seleziona studi dallo stesso programma.</string>
     <string name="select">Seleziona</string>
     <string name="act_brapi_list_filter_reset_cache_message">Questo eliminerà i dati BrAPI locali utilizzati per la ricerca e l\'importazione.</string>
-    <string name="search_bar_hint">Cercando… %s</string>
+    <string name="search_bar_hint">Ricercando… %s</string>
     <string name="menu_filter_brapi_clear_filters">Cancella Filtri</string>
     <string name="menu_filter_brapi_clear_selection">Cancella selezione</string>
     <string name="sort">Ordina</string>
@@ -640,7 +667,10 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <!--  NearbyShare  -->
     <string name="nearby_share_connection_cancelled">Connessione annullata</string>
     <string name="nearby_share_transfer_cancelled">Trasferimento annullato</string>
+    <string name="nearby_share_searching_for_senders">Ricerca dispositivi nelle vicinanze…</string>
+    <string name="nearby_share_already_searching_for_sender">Già alla ricerca del mittente…</string>
     <string name="dialog_device_selection_title">Seleziona un dispositivo</string>
+    <string name="act_collect_barcode_spectral">La raccolta di dati spettrali tramite input di codici a barre non è attualmente supportata.</string>
     <string name="replace_observations">Elimina e Sostituisci</string>
     <string name="replace_observations_message">Le osservazioni esistono già, vuoi eliminare queste ed inserire un valore NA?</string>
     <string name="nix_trait_settings_title">Impostazioni %s</string>
