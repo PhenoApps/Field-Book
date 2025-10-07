@@ -40,6 +40,7 @@ import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity;
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache;
 import com.fieldbook.tracker.objects.BrAPIConfig;
 import com.fieldbook.tracker.utilities.JsonUtil;
+import com.fieldbook.tracker.utilities.OpenAuthConfigurationUtil;
 import com.google.gson.Gson;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
@@ -47,6 +48,9 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+
+import net.openid.appauth.AuthorizationService;
+import net.openid.appauth.EndSessionRequest;
 
 import org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialog;
 import org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialogFragmentCompat;
@@ -74,6 +78,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
     @Inject
     SharedPreferences preferences;
+
+    @Inject
+    OpenAuthConfigurationUtil authUtil;
 
     private static final String TAG = BrapiPreferencesFragment.class.getSimpleName();
     private static final int REQUEST_BARCODE_SCAN_BASE_URL = 99;
@@ -188,13 +195,36 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         if (brapiLogoutButton != null) {
             brapiLogoutButton.setOnPreferenceClickListener(preference -> {
 
-                // Clear our brapi token
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putString(PreferenceKeys.BRAPI_TOKEN, null);
-                editor.apply();
+                String idToken = preferences.getString(PreferenceKeys.BRAPI_ID_TOKEN, null);
 
-                // Set our button visibility and text
-                setButtonView();
+                if (idToken != null) {
+
+                    Toast.makeText(context, R.string.logging_out_please_wait, Toast.LENGTH_SHORT).show();
+
+                    authUtil.getAuthServiceConfiguration((config, ex) -> {
+
+                        EndSessionRequest endSessionRequest =
+                                new EndSessionRequest.Builder(config)
+                                        .setIdTokenHint(idToken)
+                                        .setPostLogoutRedirectUri(Uri.parse(BrapiAuthActivity.REDIRECT_URI))
+                                        .build();
+
+                        AuthorizationService authService = new AuthorizationService(context);
+                        Intent endSessionIntent = authService.getEndSessionRequestIntent(endSessionRequest);
+                        startActivityForResult(endSessionIntent, BrapiAuthActivity.END_SESSION_REQUEST_CODE);
+
+                        return null;
+
+                    });
+
+                } else {
+
+                    preferences.edit().remove(PreferenceKeys.BRAPI_TOKEN).apply();
+
+                    setButtonView();
+
+                }
+
 
                 return true;
             });
@@ -787,6 +817,10 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                     IntentResult result = IntentIntegrator.parseActivityResult(resultCode, data);
                     scannedData = result.getContents();
                 }
+            } else if (requestCode == BrapiAuthActivity.END_SESSION_REQUEST_CODE) {
+                preferences.edit().remove(PreferenceKeys.BRAPI_ID_TOKEN).apply();
+                preferences.edit().remove(PreferenceKeys.BRAPI_TOKEN).apply();
+                setButtonView();
             }
 
             switch (requestCode) {

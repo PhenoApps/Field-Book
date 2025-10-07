@@ -1621,6 +1621,7 @@
 
     <string name="enabled">enabled</string>
     <string name="disabled">disabled</string>
+    <string name="logging_out_please_wait">Logging out, please wait.</string>
 
     <string name="traits_save_image_parameter">Copy image to Field Book</string>
 
