@@ -4,11 +4,11 @@
     <!-- App -->
     <string name="field_book">Field Book</string>
     <!-- Dialog -->
-    <string name="dialog_cancel">Cancella</string>
+    <string name="dialog_cancel">Annulla</string>
     <string name="dialog_ok">OK</string>
     <string name="dialog_yes">Sì</string>
     <string name="dialog_no">No</string>
-    <string name="dialog_clear">Cancellare</string>
+    <string name="dialog_clear">Cancella</string>
     <string name="dialog_close">Chiudi</string>
     <string name="dialog_confirm">Sei sicuro?</string>
     <string name="dialog_import">Importa</string>
@@ -20,11 +20,12 @@
     <string name="dialog_scan">Scansiona</string>
     <string name="dialog_sort_by">Ordina Per</string>
     <string name="dialog_enable">Abilita</string>
-    <string name="dialog_delete">Cancella</string>
+    <string name="dialog_delete">Elimina</string>
     <string name="dialog_accept">Accetta</string>
+    <string name="dialog_exit">Esci</string>
     <string name="barcode_scanner_text">Scansiona un codice a barre</string>
     <!-- Startup  -->
-    <string name="startup_sample_data_title">Dati di prova</string>
+    <string name="startup_sample_data_title">Dati di Esempio</string>
     <string name="startup_sample_data_message">Vuoi caricare i dati di prova forniti?</string>
     <!-- App Intro -->
     <string name="app_intro_intro_title_slide1">Benvenuto su Field Book!</string>
@@ -35,23 +36,24 @@
     <string name="app_intro_required_setup_summary">Per iniziare a usare Field Book, concedi i permessi necessari all\'applicazione e scegli una cartella in cui salvare i tuoi dati.</string>
     <string name="app_intro_permissions_title">Permessi</string>
     <string name="app_intro_permissions_warning">Si prega di concedere le autorizzazioni necessarie</string>
-    <string name="app_intro_storage_title">Scegli lo spazio di archiviazione</string>
-    <string name="app_intro_storage_summary">Scegli una cartella dove memorizzare i tuoi dati.</string>
+    <string name="app_intro_storage_title">Definisci Archiviazione</string>
+    <string name="app_intro_storage_summary">Definisci una cartella in cui verranno archiviati i tuoi dati.</string>
     <string name="app_intro_storage_warning">Imposta la posizione di archiviazione</string>
     <string name="app_intro_required_optional_title">Configurazione Facoltativa</string>
-    <string name="app_intro_required_optional_summary">Queste configurazioni facoltative personalizzano Field Book e possono essere regolate nelle impostazioni.</string>
-    <string name="app_intro_load_sample_data_title">Carica dati campione</string>
-    <string name="app_intro_load_sample_data_summary">Importa un database campione che comprenda campi e caratteri d\'esempio.</string>
-    <string name="app_intro_tutorial_title">Guida</string>
+    <string name="app_intro_required_optional_summary">Queste configurazioni facoltative personalizzano Field Book e possono essere regolate nelle Field Book Impostazioni.</string>
+    <string name="app_intro_load_sample_data_title">Carica Dati Di Esempio</string>
+    <string name="app_intro_load_sample_data_summary">Importa un database che include campi e caratteri di esempio.</string>
+    <string name="app_intro_tutorial_title">Tutorial</string>
     <string name="app_intro_tutorial_summary">Aggiungi un\'icona d\'aiuto alla barra degli strumenti in cima, che descriva le varie funzionalità dell\'applicazione.</string>
-    <string name="app_intro_high_contrast_title">Modalità a contrasto elevato</string>
-    <string name="app_intro_high_contrast_summary">Abilita il tema ad alto contrasto per una migliore visibilità sui dispositivi elnk.</string>
+    <string name="app_intro_high_contrast_title">Modalità a Contrasto Elevato</string>
+    <string name="app_intro_high_contrast_summary">Abilita la Modalità a contrasto elevato per una migliore visibilità sui dispositivi E Lnk.</string>
     <!-- Storage Definer -->
     <string name="storage_definer_title">Posizione di archiviazione</string>
-    <string name="define_button_text">Scegli la Cartella</string>
+    <string name="storage_definer_summary">Seleziona o crea una cartella che Field Book può utilizzare per archiviare i dati dell\'app.</string>
+    <string name="define_button_text">Scegli Cartella</string>
     <!-- Permissions  -->
-    <string name="permission_rationale_storage_import">L\'importazione di file richiede l\'accesso ai file del dispositivo.</string>
-    <string name="permission_rationale_storage_export">L\'esportazione dei dati richiede l\'accesso ai file del dispositivo.</string>
+    <string name="permission_rationale_storage_import">Per importare i file è necessario accedere ai file del dispositivo.</string>
+    <string name="permission_rationale_storage_export">Per esportare i dati è necessario accedere ai file del dispositivo.</string>
     <string name="permission_rationale_trait_features">La raccolta dei dati richiede l\'accesso ai file, al microfono e alla camera del dispositivo.</string>
     <string name="permission_ask_bluetooth">Accetta i permessi bluetooth.</string>
     <!-- Config Activity  -->
@@ -63,15 +65,15 @@
     <string name="settings_profile">Profilo</string>
     <string name="settings_statistics">Statistiche</string>
     <!-- Config Activity Fuzzy Search  -->
-    <string name="act_config_fuzzy_search_failed">Impossibile recuperare un campo o un appezzamento con codice %s</string>
+    <string name="act_config_fuzzy_search_failed">Il database non può recuperare un campo o una parcella con codice: %s</string>
     <string name="act_config_fuzzy_search_error">Qualcosa è andato storto cercando %s</string>
     <!-- File manager  -->
-    <string name="import_source_local">Memoria locale</string>
+    <string name="import_source_local">Archiviazione locale</string>
     <string name="import_source_cloud">Cloud storage</string>
     <string name="import_source_ask">Chiedi sempre</string>
     <string name="import_dialog_importing">Attendere prego...</string>
     <string name="import_error_general">Errore di importazione</string>
-    <string name="act_file_explorer_no_file_error">Non è stato possibile trovare cartelle per field book.</string>
+    <string name="act_file_explorer_no_file_error">Non è stato possibile trovare alcuna directory del Field Book,</string>
     <!-- Warnings/Catches -->
     <string name="warning_field_missing">Nessun campo è stato caricato. Carica un campo prima di rilevare il dato</string>
     <string name="warning_traits_missing">Il carattere non esiste. Crea un carattere prima di rilevare il dato</string>
@@ -79,17 +81,20 @@
     <string name="changelog_title">Diario di modifiche</string>
     <!--  Field Grouping  -->
     <string name="group_archive">Archivio</string>
+    <string name="group_remove">Rimuovi dal gruppo</string>
     <string name="menu_archive">Archivio</string>
+    <string name="menu_unarchive">Rimuovi dall\'archivio</string>
+    <string name="archive_active_field_message">Hai selezionato il campo attivo da archiviare. Se continui, non ci sarà alcun campo attivo. Vuoi continuare?</string>
     <!-- FIELDS -->
     <!-- General -->
-    <string name="menu_fields_sort_list">Ordina per elenco di campi</string>
+    <string name="menu_fields_sort_list">Ordina Elenco Campi</string>
     <string name="fields_sort_reset">Ripristina</string>
     <string name="fields_sort_by_name">Nome</string>
     <string name="fields_sort_by_import_format">Formato Di Importazione</string>
     <string name="fields_sort_by_import_date">Data Di Importazione</string>
-    <string name="fields_sort_by_edit_date">Modifica date</string>
-    <string name="fields_sort_by_sync_date">Sincronizza date</string>
-    <string name="fields_sort_by_export_date">Esporta date</string>
+    <string name="fields_sort_by_edit_date">Modifica Date</string>
+    <string name="fields_sort_by_sync_date">Data Di Sincronizzazione</string>
+    <string name="fields_sort_by_export_date">Data Di Esportazione</string>
     <string name="list_item_field_popup_menu_content_description">Apre un menù per il campo selezionato.</string>
     <string name="selected_count">%1$d selezionato</string>
     <string name="fields_select_all">Seleziona Tutto</string>
@@ -98,22 +103,27 @@
     <!-- Sort -->
     <string name="field_sort_entries">Ordina</string>
     <string name="sort_dialog_saved">Ordinamento aggiornato</string>
-    <string name="sort_dialog_error_saving">Errore durante il riordino</string>
-    <string name="list_item_field_sort_delete_content_description">Cancella il filtro.</string>
-    <string name="dialog_field_sort_title">Ordina le voci</string>
-    <string name="list_item_field_sort_drag_content_description">Trascina per spostare l\'oggetto.</string>
-    <string name="dialog_field_sort_no_attributes_found">Nessun criterio trovato.</string>
-    <string name="dialog_field_sort_no_more_attributes_found">Tutti i criteri sono stati utilizzati.</string>
-    <string name="dialog_field_sort_toggle_order_content_description">Inverti l\'ordine.</string>
-    <string name="dialog_field_sort_add_content_description">Apre una finestra di dialogo per aggiungere un nuovo criterio di ordinamento.</string>
+    <string name="sort_dialog_error_saving">Errore durante l\'aggiornamento dell\'ordinamento</string>
+    <string name="list_item_field_sort_delete_content_description">Elimina l\'attributo di ordinamento.</string>
+    <string name="dialog_field_sort_title">Ordina Voci</string>
+    <string name="list_item_field_sort_drag_content_description">Trascina per spostare l\'elemento.</string>
+    <string name="dialog_field_sort_no_attributes_found">Nessun attributo trovato.</string>
+    <string name="dialog_field_sort_no_more_attributes_found">Tutti gli attributi sono stati utilizzati.</string>
+    <string name="dialog_field_sort_delete_all_content_description">Elimina tutte le voci di ordinamento.</string>
+    <string name="dialog_field_sort_toggle_order_content_description">Inverte l\'ordine di ordinamento.</string>
+    <string name="dialog_field_sort_add_content_description">Apre una finestra di dialogo per aggiungere un nuovo attributo di ordinamento.</string>
     <!-- Modify -->
     <string name="fields_rename_study">Rinomina</string>
     <string name="fields_export">Esporta</string>
     <string name="fields_archive">Archivio</string>
     <!-- Delete -->
-    <string name="fields_delete">Cancella</string>
-    <string name="fields_delete_study">Cancella campo</string>
-    <string name="fields_delete_study_confirmation">Sei sicuro di voler cancellare questo campo? Verranno cancellati anche tutti i dati associati a questo campo.</string>
+    <string name="fields_delete">Elimina</string>
+    <string name="fields_delete_study">Elimina campo</string>
+    <string name="fields_delete_study_confirmation">Sei sicuro di voler eliminare questo campo? Questo eliminerà tutti i dati da questo campo.</string>
+    <plurals name="fields_delete_confirmation">
+        <item quantity="one">Sei sicuro di voler eliminare il campo \"%s\"?</item>
+        <item quantity="other">Sei sicuro di voler eliminare questi campi: %s?</item>
+    </plurals>
     <!-- Import -->
     <string name="fields_new_button_content_description">Aggiungi un nuovo campo.</string>
     <string name="fields_new_dialog_title">Nuovo campo</string>
@@ -130,19 +140,24 @@
     <string name="import_error_unique">La colonna identificatore unico contiene duplicati o è già stata utilizzata in un altro file</string>
     <string name="import_error_format_field">Solo i file CSV e XLS possono essere importati come campo</string>
     <string name="act_field_editor_no_suitable_columns_error">Il file d\'importazione non ha colonne adatte da cui scegliere.</string>
+    <string name="import_runnable_db_failed_to_switch">Database non riuscito a cambiare campi.</string>
     <string name="fields_study_exists_message">Un campo con questo nome esiste già. Vuoi sovrascrivere?</string>
     <string name="act_field_editor_failed_to_read_columns">Field Book non può caricare il file.</string>
-    <string name="act_field_editor_load_file_failed">Si è verificato un errore durante il caricamento del file.</string>
+    <string name="act_field_editor_load_file_failed">Errore durante il caricamento del file.</string>
     <string name="act_field_editor_file_open_failed">Impossibile aprire il file.</string>
     <!-- Field Creator  -->
+    <string name="field_creator_exit_dialog_title">Esci Dal Creatore Di Campo</string>
+    <string name="field_creator_exit_dialog_message">Sei sicuro di voler uscire? I tuoi progressi andranno persi.</string>
     <string name="field_creator_size_rows_hint">File</string>
     <string name="field_creator_size_columns_hint">Colonne</string>
+    <string name="field_creator_start_point_instruction">Tocca un angolo per selezionare il punto di partenza</string>
     <string name="dialog_field_creator_ask_name_hint">Nome</string>
     <string name="dialog_field_creator_ask_row_hint">File</string>
     <string name="dialog_field_creator_ask_columns_hint">Colonne</string>
     <!-- Geo-Navigate to Field -->
     <string name="menu_fields_plot_by_distance_title">Seleziona il campo più vicino</string>
     <string name="activity_field_editor_no_field_found">Nessuna coordinata trovata.</string>
+    <string name="activity_field_editor_switch_field_same">Campo più vicino già selezionato.</string>
     <!-- Field Details -->
     <string name="name_cannot_be_empty">Il nome non può essere vuoto.</string>
     <string name="name_conflict_import_name">importa nome</string>
@@ -172,13 +187,14 @@
     <string name="import_error_format_trait">Solo i file TRT possono essere importati come un elenco di caratteri</string>
     <string name="traits_export_check">Esporta l\'elenco caratteri corrente?</string>
     <string name="traits_dialog_export">Esporta</string>
-    <string name="traits_toolbar_delete_all">Cancella tutti i caratteri</string>
+    <string name="dialog_delete_traits_message">Vuoi eliminare tutti i caratteri correnti? Eliminare un carattere elimina anche i dati che sono stati raccolti per quel carattere.</string>
+    <string name="traits_toolbar_delete_all">Elimina tutti i caratteri</string>
     <!-- Trait item menu -->
     <string name="traits_options_copy">Copia</string>
     <string name="traits_options_edit">Modifica</string>
-    <string name="traits_options_delete">Cancella</string>
-    <string name="traits_options_delete_title">Cancella carattere</string>
-    <string name="traits_warning_delete">L\'eliminazione di un carattere elimina anche i dati raccolti per quel carattere. Sei sicuro di voler cancellare questo carattere?</string>
+    <string name="traits_options_delete">Elimina</string>
+    <string name="traits_options_delete_title">Elimina carattere</string>
+    <string name="traits_warning_delete">L\'eliminazione di un carattere elimina anche i dati raccolti per quel carattere. Sei sicuro di voler eliminare questo carattere?</string>
     <!-- Trait formats -->
     <string name="traits_format_numeric">Numerico</string>
     <string name="traits_format_categorical">Categorico</string>
@@ -209,19 +225,30 @@
     <string name="traits_create_warning_name_blank">Il nome del carattere non può essere vuoto</string>
     <string name="traits_create_warning_duplicate">Il carattere esiste già</string>
     <string name="traits_create_warning_numeric_required">Default, minimo e massimo devono essere numerici</string>
+    <string name="list_item_category_delete_content_description">Elimina la categoria.</string>
+    <string name="list_item_traits_grid_content_description">Inverti selezione</string>
+    <string name="dialog_new_trait_error_must_select_a_layout">Devi selezionare una disposizione.</string>
+    <string name="select_trait">Seleziona Carattere</string>
     <string name="edit_traits">Modifica</string>
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">Il valore è minore rispetto al minimo impostato</string>
     <string name="trait_error_maximum_value">Il valore è maggiore del massimo impostato</string>
     <string name="trait_error_disease_severity">Severità già registrata</string>
+    <string name="act_collect_study_names_empty">Lo studio selezionato ha nomi univoci, primari o secondari vuoti.</string>
     <!-- Toolbar -->
     <string name="main_toolbar_resources">Risorse</string>
     <string name="main_trait_details">Dettagli carattere</string>
     <string name="main_infobar_data_missing">Nessun dato</string>
+    <string name="main_infobar_select_data">Selezionare</string>
     <string name="main_toolbar_next_entry_no_data">Prossima voce senza dati</string>
     <!-- InfoBars -->
+    <string name="dialog_att_chooser_attributes">Attributi</string>
     <string name="dialog_att_chooser_traits">Caratteri</string>
+    <string name="dialog_infobar_att_chooser_title">Barre Informativa %d</string>
+    <string name="infobars_attribute_placeholder">Selezionare</string>
+    <string name="infobar_word_wrap_enabled">A capo automatico abilitato per la Barra Informative %s</string>
+    <string name="infobar_word_wrap_disabled">A capo automatico disabilitato per Barre Informative %s</string>
     <!-- ID/Barcode Search -->
     <string name="main_toolbar_moveto_no_match">Nessun valore corrispondente</string>
     <string name="main_toolbar_moveto">Vai a ID</string>
@@ -230,8 +257,9 @@
     <!-- Search  -->
     <string name="main_toolbar_search">Cerca</string>
     <string name="search_dialog_add">Aggiungi</string>
-    <string name="search_dialog_clear">Cancellare</string>
+    <string name="search_dialog_clear">Cancella</string>
     <string name="search_dialog_search">Cerca</string>
+    <string name="search_dialog_operator_dialog_title">Seleziona un operatore</string>
     <string name="search_dialog_query_is_equal_to">è uguale a</string>
     <string name="search_dialog_query_is_not_equal_to">non è uguale a</string>
     <string name="search_dialog_query_contains">contiene</string>
@@ -245,16 +273,22 @@
     <!--- Profile -->
     <string name="activity_collect_dialog_verify_no_button">No</string>
     <string name="activity_collect_dialog_verify_yes_button">Sì</string>
+    <string name="activity_collect_dialog_neutral_button">Modifica impostazioni</string>
     <!--- Datagrid -->
     <!--- Lock -->
+    <string name="activity_collect_frozen_state">Congelato - una volta salvati i dati non possono essere modificati o eliminati</string>
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">Il tuo dispositivo non contiene l\'hardware necessario per questa funzione</string>
-    <string name="trait_delete_warning_photo">Sei sicuro di voler cancellare questa foto?</string>
+    <string name="trait_delete_warning_photo">Sei sicuro di voler eliminare questa foto?</string>
+    <string name="photo_failed_to_delete">Impossibile eliminare il file.</string>
     <!-- Trait Layout: GNSS -->
     <!-- Trait Layout: Date -->
+    <string name="trait_date_save_button_content_description">Questo salverà la data corrente selezionata.</string>
     <!-- Trait Layout: Boolean -->
     <!-- Trait Layout: GoPro -->
+    <string name="trait_go_pro_camera_delete_photo_title">Elimina Foto</string>
     <!-- Trait Layout: USB Camera -->
+    <string name="trait_usb_camera_delete_photo">Elimina Foto USB</string>
     <!--- Trait Layout: Zebra label print -->
     <string name="trait_layout_data_stored">I dati sono stati salvati</string>
     <string name="trait_layout_print_label_size_title">Dimensione:</string>
@@ -267,17 +301,27 @@
     <!--- Trait Layout: Counter -->
     <!--- Trait Layout: Location -->
     <!--- Text to Speech Strings -->
+    <string name="act_collect_delete_btn_tts">Valore è stato eliminato.</string>
     <!--- Summary -->
+    <string name="fragment_summary_filter_title">Seleziona etichette di riepilogo</string>
+    <string name="list_item_summary_nav_button_content_description">Naviga alla voce selezionata.</string>
     <!--- Repeated measures -->
-    <string name="dialog_multi_measure_delete">Cancella</string>
+    <string name="dialog_multi_measure_delete_no_observations">Nessuna osservazione esistente.</string>
+    <string name="dialog_multi_measure_delete_title">Osservazioni</string>
+    <string name="dialog_multi_measure_confirm_delete_title">Tutte le osservazioni per questo carattere verranno eliminate definitivamente.</string>
+    <string name="dialog_multi_measure_delete">Elimina</string>
+    <string name="dialog_multi_measure_select_all">Seleziona tutti</string>
     <!--- GeoNav -->
+    <string name="dialog_geonav_collect_reset_start_toast_message">Reimpostazione connessione…</string>
     <!--- Content Descriptions -->
+    <string name="act_collect_delete_value_button_content_description">Elimina il valore corrente.</string>
     <!-- Observation Info -->
     <!-- Skip Entries -->
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_source_local">Locale</string>
     <string name="export_dialog_title">Esporta dati</string>
+    <string name="export_format_database">Database</string>
     <string name="export_format_table">Tabella</string>
     <string name="export_file_name">Nome file</string>
     <string name="export_content_columns_title">Colonne campo</string>
@@ -286,6 +330,7 @@
     <string name="export_content_traits_all">Tutti i caratteri</string>
     <string name="export_content_traits_active">Solo caratteri attivi</string>
     <string name="export_error_general">Errore durante l\'esportazione</string>
+    <string name="error_storage_directory">Directory di archiviazione mancante o danneggiata.</string>
     <string name="export_error_data_missing">Nessun dato da esportare</string>
     <string name="export_complete">Esportazione completata</string>
     <string name="export_progress">Esportazione...</string>
@@ -298,21 +343,29 @@
     <string name="citation_string">Se si utilizza Field Book per la ricerca, si prega di citare il seguente articolo di giornale:</string>
     <!-- SETTINGS -->
     <!-- General -->
+    <string name="preferences_system_title">Sistema</string>
+    <string name="brapi_disabled_alert_message">BrAPI deve essere attivato prima nelle impostazioni di BrAPI.</string>
     <!-- Profile -->
     <string name="preferences_profile_title">Profilo</string>
+    <string name="preferences_profile_previous_names_warning">Tutti i nomi delle persone salvate saranno eliminati, e questo non può essere invertito. Sei sicuro di voler continuare?</string>
     <!-- Features -->
     <!-- Appearance -->
     <string name="preferences_appearance_title">Aspetto</string>
     <string name="preferences_appearance_theme_title">Tema</string>
     <string name="theme_default">Impostazioni predefinite</string>
+    <string name="preferences_theme_reset_description">Reimposta tutte le impostazioni ai valori predefiniti del sistema</string>
     <string name="preferences_appearance_language">Lingua</string>
     <string name="preferences_appearance_language_description">Lingua impostata dal sistema</string>
+    <string name="preferences_appearance_tutorial_description">Aggiungi un pulsante nella barra degli strumenti nell\'app che apre il tutorial</string>
     <string name="preferences_appearance_toolbar_customize_search">Cerca</string>
     <string name="preferences_appearance_toolbar_customize_resources">Risorse</string>
     <string name="preferences_appearance_toolbar_customize_summary">Riassunto</string>
     <string name="preferences_appearance_toolbar_customize_lock">Bloccare</string>
     <string name="preferences_general_feature_datagrid">Griglia di dati</string>
-    <string name="preferences_appearance_infobar_number_description">Regola il numero di Infobars visualizzate nella schermata principale</string>
+    <string name="preferences_appearance_infobar_number">Numero di Barre Informative</string>
+    <string name="preferences_appearance_infobar_number_description">Regola il numero di Barre Informative visualizzate nella schermata principale</string>
+    <string name="preferences_appearance_infobar_hide_prefix">Nascondi prefisso Barre Informative</string>
+    <string name="preferences_appearance_infobar_hide_prefix_description">Il prefisso Barra Informativa sarà sostituito da un\'icona generica</string>
     <string name="preferences_appearance_quickgoto">Tasto Rapido</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamento</string>
@@ -323,17 +376,39 @@
     <string name="location_format_iso">ISO 6709</string>
     <string name="location_format_geojson">GeoJSON</string>
     <string name="pref_geonav_category_title">GeoNav</string>
+    <string name="pref_geonav_enable_title">Abilita GeoNav</string>
+    <string name="pref_geonav_log_limited_description">Limitato: Registrazione della voce più vicina a storage/geonav/limited_log.txt</string>
+    <string name="pref_geonav_log_full_description">Completo: registrando tutti gli aggiornamenti della posizione e i passaggi dell\'algoritmo per storage/geonav/log.txt</string>
     <string name="pref_geonav_log_both">Ambo</string>
+    <string name="pref_geonav_log_both_description">Entrambi: registrando tutti gli aggiornamenti della posizione e i passaggi dell\'algoritmo per storage/geonav/log.txt, voce più vicina a storage/geonav/limited_log.txt</string>
     <!-- Sounds -->
     <string name="preferences_sounds">Suoni</string>
+    <string name="preferences_sound_delete_obs_title">Elimina Osservazione</string>
+    <string name="preferences_sound_delete_obs_description">Riproduci eliminare suono quando l\'osservazione viene eliminata</string>
     <!-- BrAPI preferences are in the BrAPI section below -->
     <!-- Storage -->
-    <string name="database_reset_warning1">Tutti i dati saranno cancellati. Sei sicuro di voler ripristinare il database?</string>
-    <string name="database_reset_warning2">Un database cancellato non potrà essere ripristinato. L\'applicazione si chiuderà subito dopo. Sei sicuro di voler continuare?</string>
-    <string name="database_reset_message">Il database è stato cancellato</string>
+    <string name="preferences_storage_title">Archiviazione</string>
+    <string name="preferences_storage_storage_title">Archiviazione</string>
+    <string name="preferences_storage_files_base_directory_title">Definisci Posizione Di Archiviazione</string>
+    <string name="preferences_storage_files_base_directory_description">Migrare o definire una nuova struttura di directory radice. I file di esportazione verranno salvati automaticamente qui.</string>
+    <string name="preferences_storage_database_title">Database</string>
+    <string name="database_dialog_title">Database</string>
+    <string name="database_import">Importa Database</string>
+    <string name="database_export">Esporta Database</string>
+    <string name="database_reset">Elimina Database</string>
+    <string name="database_reset_warning1">Tutti i dati verranno eliminati. Sei sicuro di voler resettare il database?</string>
+    <string name="database_reset_warning2">Un ripristino del database non può essere annullato. L\'app si chiuderà dopo aver cancellato il database. Sei sicuro di voler continuare?</string>
+    <string name="database_reset_message">Il database è stato eliminato</string>
     <string name="preferences_storage_settings_title">Impostazioni</string>
+    <string name="preferences_system_defaults_reset">Reimposta Impostazioni</string>
+    <string name="reset_preferences_title">Ripristina Impostazioni a Predefinite</string>
     <!-- Experimental -->
+    <string name="pref_experimental_enable_field_audio_title">Abilita Audio di Campo</string>
+    <string name="pref_beta_enable_individual_field_page_summary">Selezionando un campo nell\'elenco dei campi si apre una pagina di dettaglio</string>
     <!-- STATISTICS -->
+    <string name="warning_invalid_date_range">Seleziona un intervallo di date valido</string>
+    <string name="stats_calendar_range">Seleziona un intervallo di date per filtrare le date visualizzate</string>
+    <string name="stats_date_range_picker_title">Seleziona un intervallo di date</string>
     <string name="stat_title_fields">Campi</string>
     <string name="stat_title_entries">Voci</string>
     <!-- ABOUT -->
@@ -353,9 +428,14 @@
     <!-- BRAPI -->
     <!-- BrAPI preferences -->
     <string name="brapi_info_title">Informazioni sulla sincronizzazione BrAPI</string>
+    <string name="preferences_brapi_enable_title">Abilita BrAPI</string>
+    <string name="preferences_brapi_enable_summary">L\'Breeding API consente un semplice trasferimento di dati a database compatibili.</string>
+    <string name="preferences_brapi_barcode_config_summary">Gestione impostazioni con codici QR</string>
+    <string name="preferences_brapi_barcode_config_scan">Importa nuove impostazioni</string>
+    <string name="preferences_brapi_barcode_config_share">Condividi le impostazioni correnti</string>
     <string name="brapi_base_url">URL di base</string>
     <string name="brapi_base_url_desc">L\'URL di base per il server BrAPI collegato</string>
-    <string name="brapi_choice_to_make_default_negative">Cancella</string>
+    <string name="brapi_choice_to_make_default_negative">Annulla</string>
     <string name="brapi_choice_to_make_default_positive">Salva</string>
     <!-- Community Servers -->
     <string-array name="community_servers_names">
@@ -408,8 +488,13 @@
     <string name="brapi_ontology_error">Errore durante il caricamento dei caratteri da BrAPI.</string>
     <string name="brapi_save_field_error">Errore durante il salvataggio del campo</string>
     <string name="brapi_field_not_selected">Il campo selezionato deve essere importato da BrAPI.</string>
+    <string name="brapi_programs_select">Seleziona il programma</string>
+    <string name="brapi_trials_select">Seleziona prova</string>
     <string name="brapi_save_trait">Salva caratteri</string>
     <string name="brapi_must_configure_url">È necessario configurare un URL BrAPI valido nelle impostazioni prima di procedere</string>
+    <string name="brapi_warning_select_program">Per favore seleziona un programma</string>
+    <string name="brapi_warning_select_trial">Per favore seleziona una prova</string>
+    <string name="brapi_warning_select_study">Per favore seleziona un campo</string>
     <string name="brapi_export_failed">Esportazione BrAPI non riuscita</string>
     <string name="brapi_export_permission_deny">ERRORE: non si dispone delle autorizzazioni per inviare i dati al sistema specificato.</string>
     <string name="brapi_export_not_supported">ERRORE: il sistema di destinazione non supporta l\'invio di osservazioni tramite BrAPI.</string>
@@ -420,10 +505,13 @@
     <string name="brapi_export_successful">Esportazione BrAPI riuscita</string>
     <string name="brapi_saving_indicator">Salvando osservazioni...</string>
     <string name="brapi_field_non_matching_sources">Impossibile sincronizzare i dati. I dati del campo provengono da, %1$s, l\'URL BrAPI è attualmente impostato su %2$s. Le fonti devono corrispondere.</string>
+    <string name="brapi_enable_before_sync">BRAPI è disabilitato. Si prega di abilitarlo nelle impostazioni prima di utilizzare la sincronizzazione.</string>
     <string name="brapi_trait_already_exists">Il carattere esiste già: %1$s. Non si salva.</string>
     <string name="brapi_error_saving_all_traits">Errore durante il salvataggio dei caratteri. Nessun carattere è stato salvato.</string>
     <string name="brapi_error_saving_some_traits">Errore durante il salvataggio di alcuni caratteri. Alcuni caratteri non sono stati salvati</string>
     <string name="brapi_traits_saved_success">Caratteri selezionati salvati correttamente.</string>
+    <string name="no_observations_warning">Nessuna Osservazione Trovata Per Lo Studio. Toccare Annulla.</string>
+    <string name="brapi_study_incompatible">Questo studio BrAPI è attualmente incompatibile con Field Book. Gli studi devono includere riga e colonna nell\'intestazione.</string>
     <!-- BrAPI Export -->
     <string name="brapi_export_button">Esporta</string>
     <string name="brapi_close_button">Chiudi</string>
@@ -452,15 +540,20 @@
     <string name="brapi_info_message">Caratteri e campi importati tramite BrAPI saranno in grado di esportare le loro osservazioni tramite l\'esportazione BrAPI.
 Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esportati tramite formato CSV.</string>
     <!-- APP INTRO  -->
+    <string name="intro_tutorial_title">Vuoi abilitare il tutorial?</string>
+    <string name="intro_tutorial_description">Questa impostazione può essere modificata nelle Impostazioni</string>
     <string name="intro_tutorial_radio_item_yes">Sì</string>
     <string name="intro_tutorial_radio_item_no">No</string>
+    <string name="intro_tutorial_warning">Per favore, fai una scelta</string>
     <!-- TUTORIAL -->
-    <string name="tutorial_dialog_description">Vuoi attivare il tutorial? Questa impostazione può essere cambiata in Impostazioni Avanzate</string>
-    <string name="tutorial_main_infobars_description">Le InfoBars mostrano dati aggiuntivi per ciascuna voce e possono essere modificate utilizzando i menu a discesa.</string>
+    <string name="tutorial_dialog_title">Tutorial</string>
+    <string name="tutorial_dialog_description">Vuoi abilitare il tutorial? Questa impostazione può essere modificata nelle Impostazioni.</string>
+    <string name="tutorial_main_infobars_title">Barre Informative</string>
+    <string name="tutorial_main_infobars_description">Le Barre Informative mostrano dati aggiuntivi per ogni voce e possono essere modificate tramite i menu a discesa.</string>
     <string name="tutorial_main_traits_title">Caratteri</string>
     <string name="tutorial_main_traits_description">Le piccole frecce verdi si spostano tra i caratteri.</string>
     <string name="tutorial_main_traitlist_title">Caratteri</string>
-    <string name="tutorial_main_traitlist_description">Il tratto corrente viene raccolto. Un elenco di caratteri attivi viene visualizzato quando viene premuto il carattere corrente.</string>
+    <string name="tutorial_main_traitlist_description">Il carattere corrente che si sta raccogliendo. Un elenco di caratteri attivi viene visualizzato quando viene premuto il carattere corrente.</string>
     <string name="tutorial_main_entries_title">Voci</string>
     <string name="tutorial_main_entries_description">Le grandi frecce nere si spostano tra le voci.</string>
     <string name="tutorial_main_navinfo_title">Ordinare le colonne</string>
@@ -469,8 +562,8 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="tutorial_main_datacollect_description">I dati vengono immessi nell\'area inferiore dello schermo. Diversi tipi di carattere hanno disposizione diversi.</string>
     <string name="tutorial_main_na_title">Dati mancanti</string>
     <string name="tutorial_main_na_description">Il pulsante NA viene utilizzato per contrassegnare i valori come mancanti.</string>
-    <string name="tutorial_main_delete_title">Cancella dati</string>
-    <string name="tutorial_main_delete_description">I dati vengono cancellati usando questo pulsante.</string>
+    <string name="tutorial_main_delete_title">Elimina dati</string>
+    <string name="tutorial_main_delete_description">I dati vengono eliminati utilizzando questo pulsante.</string>
     <string name="tutorial_main_search_title">Cerca</string>
     <string name="tutorial_main_search_description">L\'icona di ricerca consente le domanda del database.</string>
     <string name="tutorial_main_resources_title">Risorse</string>
@@ -495,8 +588,8 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="tutorial_fields_file_description">I file devono contenere tre colonne: un identificatore unico, un ordine primario e un ordine secondario. L\'ordine primario/secondario viene utilizzato per la navigazione nel campo.</string>
     <string name="tutorial_fields_select_title">Campo attivo</string>
     <string name="tutorial_fields_select_description">Un campo viene selezionato per la raccolta dei dati dopo l\'importazione.</string>
-    <string name="tutorial_fields_delete_title">Cancella campo</string>
-    <string name="tutorial_fields_delete_description">Per cancellare un campo, apri il menu sul lato sinistro del nome di un campo e seleziona Cancella.</string>
+    <string name="tutorial_fields_delete_title">Elimina Campo</string>
+    <string name="tutorial_fields_delete_description">Per eliminare un campo, aprire il menu sul lato sinistro di un nome di campo e selezionare Elimina.</string>
     <string name="tutorial_traits_add_title">Aggiungi Carattere</string>
     <string name="tutorial_traits_add_description">Aggiungi Carattere crea un nuovo carattere. Diversi formati di caratteri hanno disposizione di raccolta diversi.</string>
     <string name="tutorial_traits_format_title">Formati di Caratteri</string>
@@ -504,22 +597,67 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="tutorial_traits_visibility_title">Visibilità del carettere</string>
     <string name="tutorial_traits_visibility_description">I caretteri possono essere disabilitati dalla raccolta selezionando la casella di controllo.</string>
     <string name="tutorial_main_datagrid_title">Griglia di dati</string>
+    <string name="tutorial_main_datagrid_description">Questo apre una griglia di fenotipizzazione 2D del campo attualmente selezionato.</string>
     <string name="tutorial_main_geonav_title">GeoNav</string>
     <string name="act_brapi_filter_import">Importa</string>
-    <string name="act_brapi_filter_clear">Cancellare</string>
+    <string name="act_brapi_filter_clear">Cancella</string>
     <!-- base camera strings -->
+    <string name="delete_local_photo">Elimina Foto</string>
+    <string name="trait_system_photo_settings_title">Impostazioni delle Foto di Sistema</string>
+    <string name="trait_name_alt_photo_system">Sistema</string>
     <string name="view_trait_photo_settings_camera_custom">Impostazioni predefinite</string>
+    <string name="view_trait_photo_settings_camera_system">Android</string>
     <!-- usb camera trait -->
+    <string name="view_trait_photo_settings_auto_focus_title">Focus Automatico</string>
     <!-- gopro -->
+    <string name="view_trait_photo_settings_save_image_title">Copia l\'immagine nel Field Book</string>
+    <string name="go_pro_trait_settings_title">Impostazioni GoPro</string>
     <!-- canon camera strings -->
+    <string name="trait_usb_photo_settings_title">Impostazioni Foto USB</string>
+    <string name="canon_trait_settings_title">Impostazioni Canon</string>
     <!-- spectral trait strings -->
+    <string name="select_device">Seleziona Dispositivo</string>
+    <string name="list_item_color_close_content_description">Elimina questo colore</string>
+    <string name="delete_color">Elimina Osservazione Del Colore</string>
+    <string name="delete_color_message">Questo eliminerà definitivamente l\'osservazione</string>
+    <string name="menu_action_brapi_filter_clear_all">Cancella tutti i filtri</string>
+    <string name="brapi_filter_bottom_sheet_delete_all_description">cancella tutti i filtri</string>
+    <string name="act_brapi_list_filter_error_multiple_programs">Seleziona studi dallo stesso programma.</string>
+    <string name="select">Seleziona</string>
+    <string name="act_brapi_list_filter_reset_cache_message">Questo eliminerà i dati BrAPI locali utilizzati per la ricerca e l\'importazione.</string>
+    <string name="menu_filter_brapi_clear_filters">Cancella Filtri</string>
+    <string name="menu_filter_brapi_clear_selection">Cancella selezione</string>
     <string name="sort">Ordina</string>
     <string name="brapi_traits_filter_title">Caratteri</string>
+    <string name="act_brapi_list_filter_reset_selection_message">Questo cancellerà l\'elenco in esecuzione degli elementi selezionati.</string>
+    <string name="pref_alpha_media_keycode_events_title">Abilita Comandi Media</string>
     <string name="dialog_quick_goto_title">Tasto Rapido</string>
     <string name="dialog_quick_goto_go">Vai</string>
     <string name="traits_sort_default">Impostazioni predefinite</string>
+    <string name="view_trait_photo_settings_crop">Imposta Regione Ritaglio</string>
     <!--  NearbyShare  -->
+    <string name="nearby_share_connection_cancelled">Connessione annullata</string>
+    <string name="nearby_share_transfer_cancelled">Trasferimento annullato</string>
+    <string name="dialog_device_selection_title">Seleziona un dispositivo</string>
+    <string name="replace_observations">Elimina e Sostituisci</string>
+    <string name="replace_observations_message">Le osservazioni esistono già, vuoi eliminare queste ed inserire un valore NA?</string>
+    <string name="nix_trait_settings_title">Impostazioni %s</string>
+    <string name="view_trait_nix_settings_battery_level">Livello Batteria: %s</string>
+    <string name="view_trait_nix_settings_rssi">RSSI: %s</string>
+    <string name="view_trait_nix_settings_type">Tipo: %s</string>
+    <string name="view_trait_nix_settings_factory_note">Nota Di Fabbrica: %s</string>
+    <string name="view_trait_nix_settings_serial_number">Numero Seriale: %s</string>
+    <string name="view_trait_nix_settings_firmware_version">Versione Firmware: %s</string>
+    <string name="view_trait_nix_settings_software_version">Versione Software: %s</string>
+    <string name="view_trait_nix_settings_external_power_state">Stato Dell\'Energia Esterna: %s</string>
+    <string name="enabled">abilitato</string>
+    <string name="traits_save_image_parameter">Copia l\'immagine nel Field Book</string>
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="reset">Ripristina</string>
     <string name="save">Salva</string>
+    <string name="database_export_invalid_filename">Nome file di esportazione non valido.</string>
+    <string name="device_settings_dialog_name">Nome: %s</string>
+    <string name="device_settings_dialog_address">Indirizzo: %s</string>
+    <string name="device_settings_dialog_unknown_name">Dispositivo Bluetooth Sconosciuto</string>
+    <string name="device_settings_dialog_title">Impostazioni Dispositivo Bluetooth</string>
 </resources>

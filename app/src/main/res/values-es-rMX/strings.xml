@@ -22,6 +22,7 @@
     <string name="dialog_enable">Activar</string>
     <string name="dialog_delete">Eliminar</string>
     <string name="dialog_accept">Aceptar</string>
+    <string name="dialog_exit">Salir</string>
     <string name="barcode_scanner_text">Escanear un código de barras</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Datos de ejemplo</string>
@@ -45,7 +46,7 @@
     <string name="app_intro_tutorial_title">Tutorial</string>
     <string name="app_intro_tutorial_summary">Agrega un icono de ayuda a la barra de herramientas superior que describe las funcionalidades de la aplicación.</string>
     <string name="app_intro_high_contrast_title">Tema de Alto Contraste</string>
-    <string name="app_intro_high_contrast_summary">Activa un tema de alto contraste para una mejor visibilidad en los dispositivos.</string>
+    <string name="app_intro_high_contrast_summary">Activa un tema de alto contraste para una mejor visibilidad en los dispositivos E Lnk.</string>
     <!-- Storage Definer -->
     <string name="storage_definer_title">Ubicación de Almacenamiento</string>
     <string name="storage_definer_summary">Por favor, seleccione o cree una carpeta que Field Book pueda usar para almacenar datos.</string>
@@ -167,9 +168,42 @@
     <string name="act_field_editor_load_file_failed">Ocurrió un error durante la carga del archivo.</string>
     <string name="act_field_editor_file_open_failed">Error al abrir el archivo.</string>
     <!-- Field Creator  -->
+    <string name="field_creator_activity_toolbar_title">Crear Nuevo Campo</string>
+    <string name="field_creator_size_title">Detalle del Campo</string>
+    <string name="field_creator_start_corner_title">Esquina Inicial</string>
+    <string name="field_creator_pattern_title">Patrón de Caminar</string>
+    <string name="field_creator_direction_title">Dirección de Caminata</string>
     <string name="field_creator_preview_title">Revisar</string>
+    <string name="field_creator_exit_dialog_title">Salir del Creador de Campo</string>
+    <string name="field_creator_exit_dialog_message">¿Está seguro de que desea salir? Se perderá el progreso.</string>
+    <string name="field_creator_creation_in_progress">La creación del campo está en curso. Por favor espere…</string>
+    <string name="field_creator_size_field_name_hint">Nombre del Campo</string>
     <string name="field_creator_size_rows_hint">Filas</string>
     <string name="field_creator_size_columns_hint">Columnas</string>
+    <string name="field_name_required_error">Nombre del campo es obligatorio</string>
+    <string name="field_name_exists_error">El nombre del Campo ya existe</string>
+    <string name="field_creator_positive_number_error">Debe ser un número positivo</string>
+    <string name="field_creator_rows_exceeded_error">No puede exceder %s</string>
+    <string name="field_creator_cols_exceeded_error">No puede exceder %s</string>
+    <string name="field_creator_total_plots_exceeded_error">Total de parcelas no pueden exceder %1$s. Total actual: %2$s</string>
+    <string name="field_creation_failed_error">Error al crear el campo</string>
+    <string name="field_creator_start_point_instruction">Pulsa una esquina para seleccionar el punto de inicio</string>
+    <string name="field_dimensions_format">Campo: %d × %d</string>
+    <string name="field_creator_pattern_linear">Lineal</string>
+    <string name="field_creator_pattern_linear_summary">Seguir la misma dirección después de cada fila/columna</string>
+    <string name="field_creator_pattern_zigzag">Serpentina/Zigzag</string>
+    <string name="field_creator_pattern_zigzag_summary">Alternar dirección después de cada fila/columna</string>
+    <string name="field_creator_direction_horizontal">Horizontal</string>
+    <string name="field_creator_direction_horizontal_summary">Caminar a través de fila</string>
+    <string name="field_creator_direction_vertical">Vertical</string>
+    <string name="field_creator_direction_vertical_summary">Caminar columnas arriba/abajo</string>
+    <string name="field_creator_preview_summary">Campo: %s (%d x %d)</string>
+    <string name="field_creator_preview_large_field_warning">Campo grande detectado. Crear muchas parcelas puede tomar algún tiempo.</string>
+    <string name="field_creator_preview_creating_field">Creando campo…</string>
+    <string name="field_creator_preview_create_button">CREAR</string>
+    <string name="field_creator_preview_expand_button">Expandir Grilla</string>
+    <string name="field_creator_preview_collapse_button">Contraer Grilla</string>
+    <string name="field_creator_expanded_preview_title">Vista Previa Campo Completo</string>
     <string name="dialog_field_creator_ask_name_hint">Nombre</string>
     <string name="dialog_field_creator_ask_row_hint">Filas</string>
     <string name="dialog_field_creator_ask_columns_hint">Columnas</string>
@@ -184,7 +218,15 @@
     <string name="dialog_field_creator_size_group_error">Por favor, ingrese un nombre y formato válidos.</string>
     <string name="dialog_field_creator_field_name_not_unique">El nombre del Campo ya está en uso.</string>
     <string name="dialog_field_creator_large_field">Se detecta un Campo grande, la transacción puede tardar mucho.</string>
+    <string name="dialog_field_creator_horizontal_linear_button_content_desc">Botón para elegir el patrón de parcelas lineal horizontal.</string>
+    <string name="dialog_field_creator_horizontal_zig_button_content_desc">Botón para elegir el patrón de parcelas en zig-zag horizontal.</string>
+    <string name="dialog_field_creator_vertical_linear_button_content_desc">Botón para elegir el patrón de parcelas lineal vertical.</string>
+    <string name="dialog_field_creator_vertical_zig_button_content_desc">Botón para elegir el patrón de parcelas en zig-zag vertical.</string>
     <string name="dialog_field_creator_review_image_content_desc">Imagen mostrando la orientación y el patrón de las parcelas.</string>
+    <string name="field_creator_stepper_size">Tamaño</string>
+    <string name="field_creator_stepper_start">Punto Inicial</string>
+    <string name="field_creator_stepper_pattern">Patrón de Caminar</string>
+    <string name="field_creator_stepper_direction">Dirección de Caminata</string>
     <string name="field_creator_stepper_preview">Vista Previa</string>
     <!-- Geo-Navigate to Field -->
     <string name="menu_fields_plot_by_distance_title">Seleccionar Campo más cercano</string>
@@ -272,6 +314,8 @@
     <string name="traits_format_spectral">Espectral</string>
     <string name="traits_format_nix">Nix</string>
     <string name="traits_format_inno_spectra">InnoSpectra</string>
+    <string name="traits_format_green_seeker">GreenSeeker</string>
+    <string name="traits_format_scale">Escala</string>
     <string name="traits_format_stop_watch">Cronómetro</string>
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Formato de Variable</string>
@@ -1132,6 +1176,8 @@
     <!-- gopro -->
     <string name="dialog_go_pro_wait_stream_title">Esperando vista previa en vivo</string>
     <string name="dialog_go_pro_wait_stream_message">Esto puede tardar un minuto.</string>
+    <string name="view_trait_photo_settings_save_image_title">Copiar imagen a Field Book</string>
+    <string name="go_pro_trait_settings_title">Ajustes de GoPro</string>
     <!-- canon camera strings -->
     <string name="canon_frag_connect_btn_content_description">botón de disparo</string>
     <string name="traits_format_canon">Canon</string>
@@ -1323,9 +1369,16 @@
     <string name="import_runnable_field_name_exists">El nombre del Campo ya existe.</string>
     <string name="enabled">activado</string>
     <string name="disabled">desactivado</string>
+    <string name="traits_save_image_parameter">Copiar imagen a Field Book</string>
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="reset">Restablecer</string>
     <string name="play">Reproducir</string>
     <string name="pause">Pausar</string>
     <string name="save">Guardar</string>
+    <string name="database_export_invalid_filename">Nombre de archivo de exportación inválido.</string>
+    <string name="device_settings_dialog_name">Nombre: %s</string>
+    <string name="device_settings_dialog_address">Dirección: %s</string>
+    <string name="device_settings_dialog_unknown_name">Dispositivo Bluetooth desconocido</string>
+    <string name="device_settings_dialog_title">Ajustes del dispositivo Bluetooth</string>
+    <string name="no_data_captured">No hay datos capturados.</string>
 </resources>

@@ -32,7 +32,7 @@
     <string name="app_intro_intro_summary_slide1">A coleta de dados no campo exige, tradicionalmente, a escrita e a transcrição de notas em papel. O Field Book foi criado como uma solução digital para captura de dados que permite aumentar a velocidade de coleta com maior integridade de dados.</string>
     <string name="app_intro_intro_title_slide2">Funcionalidades e Personalização</string>
     <string name="app_intro_intro_summary_slide2">Os dados são inseridos no Field Book com disposição de características personalizadas que são projetados para simplificar dados de entrada e minimizar erros.\n\n Por padrão, os dados coletados são armazenados localmente, mas o Field Book suporta a API que lhe permite enviar dados para sistemas compatíveis com BrAPI.</string>
-    <string name="app_intro_required_setup_title">Configuração Requerida</string>
+    <string name="app_intro_required_setup_title">Configuração Obrigatória</string>
     <string name="app_intro_required_setup_summary">Para começar a usar o Field Book, conceda as permissões necessárias para o aplicativo e defina uma pasta onde seus dados serão armazenados.</string>
     <string name="app_intro_permissions_title">Permissões</string>
     <string name="app_intro_permissions_warning">Por favor, conceda as permissões necessárias</string>
@@ -46,7 +46,7 @@
     <string name="app_intro_tutorial_title">Tutorial</string>
     <string name="app_intro_tutorial_summary">Adicione um ícone de ajuda ao topo da barra de ferramentas que descreve recursos em todo o aplicativo.</string>
     <string name="app_intro_high_contrast_title">Tema de Alto Contraste</string>
-    <string name="app_intro_high_contrast_summary">Habilitar um tema de alto contraste para melhor visibilidade em dispositivos.</string>
+    <string name="app_intro_high_contrast_summary">Habilitar um tema de alto contraste para melhor visibilidade em dispositivos E Lnk.</string>
     <!-- Storage Definer -->
     <string name="storage_definer_title">Local de Armazenamento</string>
     <string name="storage_definer_summary">Por favor, selecione ou crie uma pasta que o Field Book pode usar para armazenar os dados do aplicativo.</string>
@@ -170,11 +170,13 @@
     <!-- Field Creator  -->
     <string name="field_creator_activity_toolbar_title">Criar Novo Campo</string>
     <string name="field_creator_size_title">Detalhes do Campo</string>
-    <string name="field_creator_start_corner_title">Canto de começo</string>
-    <string name="field_creator_pattern_title">Padrão de Caminho</string>
+    <string name="field_creator_start_corner_title">Canto Inicial</string>
+    <string name="field_creator_pattern_title">Padrão de Caminhada</string>
+    <string name="field_creator_direction_title">Direção de Caminhada</string>
     <string name="field_creator_preview_title">Revisar</string>
+    <string name="field_creator_exit_dialog_title">Sair do Criador de Campo</string>
     <string name="field_creator_exit_dialog_message">Você tem certeza que quer sair? Seu progresso será perdido.</string>
-    <string name="field_creator_creation_in_progress">Criação do campo em progresso. Por favor, espere...</string>
+    <string name="field_creator_creation_in_progress">Criação do campo em progresso. Por favor, espere…</string>
     <string name="field_creator_size_field_name_hint">Nome do Campo</string>
     <string name="field_creator_size_rows_hint">Linhas</string>
     <string name="field_creator_size_columns_hint">Colunas</string>
@@ -183,10 +185,25 @@
     <string name="field_creator_positive_number_error">Deve ser um número positivo</string>
     <string name="field_creator_rows_exceeded_error">Não pode exceder %s</string>
     <string name="field_creator_cols_exceeded_error">Não pode exceder %s</string>
+    <string name="field_creator_total_plots_exceeded_error">Total de parcelas não pode exceder %1$s. Total atual: %2$s</string>
     <string name="field_creation_failed_error">Falha ao criar campo</string>
+    <string name="field_creator_start_point_instruction">Toque em um canto para selecionar o ponto inicial</string>
+    <string name="field_dimensions_format">Campo: %d × %d</string>
+    <string name="field_creator_pattern_linear">Linear</string>
+    <string name="field_creator_pattern_linear_summary">Seguir a mesma direção após cada linha/coluna</string>
+    <string name="field_creator_pattern_zigzag">Serpentina/Zigue-Zague</string>
+    <string name="field_creator_pattern_zigzag_summary">Alternar direção após cada linha/coluna</string>
     <string name="field_creator_direction_horizontal">Horizontal</string>
+    <string name="field_creator_direction_horizontal_summary">Caminhe pelas linhas</string>
     <string name="field_creator_direction_vertical">Vertical</string>
+    <string name="field_creator_direction_vertical_summary">Caminhe colunas acima/baixo</string>
+    <string name="field_creator_preview_summary">Campo: %s (%d x %d)</string>
+    <string name="field_creator_preview_large_field_warning">Campo grande detectado. Criar muitos lotes pode levar algum tempo.</string>
+    <string name="field_creator_preview_creating_field">Criando campo…</string>
     <string name="field_creator_preview_create_button">CRIAR</string>
+    <string name="field_creator_preview_expand_button">Expandir Grade</string>
+    <string name="field_creator_preview_collapse_button">Recolher Grade</string>
+    <string name="field_creator_expanded_preview_title">Pré-visualização do Campo Completo</string>
     <string name="dialog_field_creator_ask_name_hint">Nome</string>
     <string name="dialog_field_creator_ask_row_hint">Linhas</string>
     <string name="dialog_field_creator_ask_columns_hint">Colunas</string>
@@ -201,11 +218,15 @@
     <string name="dialog_field_creator_size_group_error">Por favor, insira um nome e formato válidos.</string>
     <string name="dialog_field_creator_field_name_not_unique">Nome do campo já está em uso.</string>
     <string name="dialog_field_creator_large_field">Campo grande detectado, a transação pode levar muito tempo.</string>
+    <string name="dialog_field_creator_horizontal_linear_button_content_desc">Botão para escolher o padrão de parcelas linear horizontal.</string>
+    <string name="dialog_field_creator_horizontal_zig_button_content_desc">Botão para escolher o padrão de parcelas zigue-zague horizontal.</string>
+    <string name="dialog_field_creator_vertical_linear_button_content_desc">Botão para escolher o padrão de plotagem linear vertical.</string>
+    <string name="dialog_field_creator_vertical_zig_button_content_desc">Botão para escolher o padrão de parcelas zigue-zague vertical.</string>
     <string name="dialog_field_creator_review_image_content_desc">Imagem mostrando orientação e padrão de parcelas.</string>
     <string name="field_creator_stepper_size">Tamanho</string>
     <string name="field_creator_stepper_start">Ponto de Início</string>
-    <string name="field_creator_stepper_pattern">Padrão de Caminho</string>
-    <string name="field_creator_stepper_direction"></string>
+    <string name="field_creator_stepper_pattern">Padrão de Caminhada</string>
+    <string name="field_creator_stepper_direction">Direção de Caminhada</string>
     <string name="field_creator_stepper_preview">Pré-visualizar</string>
     <!-- Geo-Navigate to Field -->
     <string name="menu_fields_plot_by_distance_title">Selecione campo mais próximo</string>
@@ -293,6 +314,8 @@
     <string name="traits_format_spectral">Espectral</string>
     <string name="traits_format_nix">Nix</string>
     <string name="traits_format_inno_spectra">InnoSpectra</string>
+    <string name="traits_format_green_seeker">GreenSeeker</string>
+    <string name="traits_format_scale">Escala</string>
     <string name="traits_format_stop_watch">Cronômetro</string>
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Formato de Característica</string>
@@ -324,11 +347,11 @@
     <string name="list_item_traits_grid_content_description">Inverter seleção</string>
     <string name="dialog_trait_parameters_title">Parâmetros de Característica</string>
     <string name="traits_create_warning_percent_magnitude_relation">Erro de relação de magnitude</string>
-    <string name="trait_parameter_default_value_number_format_error">Tem que ser um número</string>
+    <string name="trait_parameter_default_value_number_format_error">Deve ser um número</string>
     <string name="traits_create_unknown_error">Ocorreu um erro desconhecido: %s</string>
     <string name="trait_creator_parameter_warning_infinite">O número não pode ser infinito</string>
     <string name="trait_creator_parameter_warning_nan">O número não pode ser NaN</string>
-    <string name="trait_creator_parameter_warning_negative">O número não pode ser negativo</string>
+    <string name="trait_creator_parameter_warning_negative">O número não deve ser negativo</string>
     <string name="trait_creator_parameter_warning_too_big">O número é muito grande</string>
     <string name="trait_creator_parameter_warning_too_small">O número é muito pequeno</string>
     <string name="list_item_trait_parameter_categories_value_hint">Digite um nome de categoria para adicionar</string>
@@ -337,8 +360,8 @@
     <string name="dialog_new_trait_error_must_select_a_layout">Você deve selecionar uma disposição.</string>
     <string name="trait_creator_parameter_warning_integer_required">Inteiro obrigatório.</string>
     <string name="dialog_new_trait_error_cannot_update_to_brapi_trait">As características não podem ser atualizados para características BrAPI.</string>
-    <string name="required">Requerido</string>
-    <string name="traits_create_warning_percent_value_required">Valor necessário</string>
+    <string name="required">Obrigatório</string>
+    <string name="traits_create_warning_percent_value_required">Valor obrigatório</string>
     <string name="select_trait">Selecionar Característica</string>
     <string name="edit_traits">Editar</string>
     <!-- COLLECT -->
@@ -578,7 +601,7 @@
     <string name="export_progress">Exportando...</string>
     <string name="export_error_missing_format">Tipo de exportação precisa ser selecionado</string>
     <string name="export_error_missing_column">Tipo de coluna de campo deve ser selecionado</string>
-    <string name="export_error_missing_trait">Tipo de Característica deve ser selecionado</string>
+    <string name="export_error_missing_trait">Tipo de característica deve ser selecionado</string>
     <string name="export_overwrite">Sobrescrever exportação anterior</string>
     <string name="dialog_export_bundle_data_cb_text">Dados de mídia agrupados com arquivo de exportação.</string>
     <string name="export_multiple_fields_name">múltiplos_campos</string>
@@ -656,7 +679,7 @@
     <string name="preferences_appearance_toolbar_customize_resources">Recursos</string>
     <string name="preferences_appearance_toolbar_customize_summary">Resumo</string>
     <string name="preferences_appearance_toolbar_customize_lock">Bloquear</string>
-    <string name="preferences_general_feature_datagrid">Grilla de datos</string>
+    <string name="preferences_general_feature_datagrid">Grade de dados</string>
     <string name="preferences_general_feature_datagrid_description">Adicione um botão para exibir uma grade de dados coletados</string>
     <string name="preferences_general_feature_next_missing">Próximo Entrada Sem Dados</string>
     <string name="preferences_general_skip_entries_disabled">Desabilitado</string>
@@ -1099,7 +1122,7 @@
     <string name="tutorial_traits_visibility_title">Visibilidade da Característica</string>
     <string name="tutorial_traits_visibility_description">As características podem ser desabilitadas da coleção marcando a caixa de seleção.</string>
     <string name="shutter_capture_content_description">Botão de disparo para tirar uma foto.</string>
-    <string name="dialog_geonav_prefs_sensor_missing_title">Falta o sensor necessário</string>
+    <string name="dialog_geonav_prefs_sensor_missing_title">Falta o sensor requerido</string>
     <string name="dialog_geonav_prefs_sensor_missing_message">O método trapezoidal requer um acelerômetro e giroscópio para usar entrada da bússola.</string>
     <string name="trait_audio_button_content_description">Controla gravação do áudio.</string>
     <string name="trait_counter_minus_content_description">Subtraia a contagem em um</string>
@@ -1153,6 +1176,8 @@
     <!-- gopro -->
     <string name="dialog_go_pro_wait_stream_title">Aguardando pré-visualização ao vivo</string>
     <string name="dialog_go_pro_wait_stream_message">Isso pode demorar um minuto.</string>
+    <string name="view_trait_photo_settings_save_image_title">Copiar imagem para Field Book</string>
+    <string name="go_pro_trait_settings_title">Configurações do GoPro</string>
     <!-- canon camera strings -->
     <string name="canon_frag_connect_btn_content_description">botão obturador</string>
     <string name="traits_format_canon">Canon</string>
@@ -1344,9 +1369,16 @@
     <string name="import_runnable_field_name_exists">Nome do campo já existe.</string>
     <string name="enabled">habilitado</string>
     <string name="disabled">desabilitado</string>
+    <string name="traits_save_image_parameter">Copiar imagem para Field Book</string>
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="reset">Restabelecer</string>
     <string name="play">Reproduzir</string>
     <string name="pause">Pausar</string>
     <string name="save">Salvar</string>
+    <string name="database_export_invalid_filename">Nome de arquivo de exportação inválido.</string>
+    <string name="device_settings_dialog_name">Nome: %s</string>
+    <string name="device_settings_dialog_address">Endereço: %s</string>
+    <string name="device_settings_dialog_unknown_name">Dispositivo Bluetooth Desconhecido</string>
+    <string name="device_settings_dialog_title">Configurações de Dispositivo Bluetooth</string>
+    <string name="no_data_captured">Nenhum dado capturado.</string>
 </resources>
