@@ -91,7 +91,7 @@
     <string name="create_new_group">Crear Nuevo Grupo</string>
     <string name="dialog_group_name">Nombre del Grupo</string>
     <string name="dialog_group_name_warning">Este campo no puede estar en blanco</string>
-    <string name="menu_group">Grupo</string>
+    <string name="menu_group">Agrupar</string>
     <string name="menu_archive">Archivar</string>
     <string name="menu_groups_toggle">Alternar Visibilidad de Grupos</string>
     <string name="group_toggle_icon">Alternar Grupo</string>
@@ -211,8 +211,8 @@
     <string name="dialog_field_creator_bottom_left">Abajo a la izquierda</string>
     <string name="dialog_field_creator_top_right">Arriba a la derecha</string>
     <string name="dialog_field_creator_bottom_right">Abajo a la derecha</string>
-    <string name="dialog_field_creator_insert_field">Creando filas de Campo: %1$s por columnas: %2$s</string>
-    <string name="dialog_field_creator_insert_field_complete">Creando filas de Campo: %1$s por columnas: %2$s …completo.</string>
+    <string name="dialog_field_creator_insert_field">Creando Campo de %1$s filas por %2$s columnas</string>
+    <string name="dialog_field_creator_insert_field_complete">Creando Campo de %1$s filas por %2$s columnas …completo.</string>
     <string name="dialog_field_creator_insert_plot">Insertando parcela %1$s en la fila %2$s columna %3$s</string>
     <string name="dialog_field_creator_review_title">Revisar</string>
     <string name="dialog_field_creator_size_group_error">Por favor, ingrese un nombre y formato válidos.</string>
@@ -981,7 +981,7 @@
     <string name="import_dialog_title_brapi_fields">Importar Campo con BrAPI</string>
     <string name="brapi_load_data_button">Cargar Campos</string>
     <string name="brapi_load_traits_button">Cargar Variables</string>
-    <string name="brapi_save_data_button">Vista previa Campo</string>
+    <string name="brapi_save_data_button">Vista Previa Campo</string>
     <string name="brapi_study_name">Nombre</string>
     <string name="brapi_study_description">Descripción</string>
     <string name="brapi_study_location">Ubicación</string>
