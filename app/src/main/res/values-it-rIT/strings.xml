@@ -620,11 +620,13 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="list_item_color_close_content_description">Elimina questo colore</string>
     <string name="delete_color">Elimina Osservazione Del Colore</string>
     <string name="delete_color_message">Questo eliminerà definitivamente l\'osservazione</string>
+    <string name="brapi_importer_search_hint">Cerca Testo</string>
     <string name="menu_action_brapi_filter_clear_all">Cancella tutti i filtri</string>
     <string name="brapi_filter_bottom_sheet_delete_all_description">cancella tutti i filtri</string>
     <string name="act_brapi_list_filter_error_multiple_programs">Seleziona studi dallo stesso programma.</string>
     <string name="select">Seleziona</string>
     <string name="act_brapi_list_filter_reset_cache_message">Questo eliminerà i dati BrAPI locali utilizzati per la ricerca e l\'importazione.</string>
+    <string name="search_bar_hint">Cercando… %s</string>
     <string name="menu_filter_brapi_clear_filters">Cancella Filtri</string>
     <string name="menu_filter_brapi_clear_selection">Cancella selezione</string>
     <string name="sort">Ordina</string>
