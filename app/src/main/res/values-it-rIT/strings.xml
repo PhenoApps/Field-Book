@@ -26,7 +26,7 @@
     <string name="barcode_scanner_text">Scansiona un codice a barre</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Dati di Esempio</string>
-    <string name="startup_sample_data_message">Vuoi caricare i dati di prova forniti?</string>
+    <string name="startup_sample_data_message">Caricare i dati di esempio?</string>
     <!-- App Intro -->
     <string name="app_intro_intro_title_slide1">Benvenuto su Field Book!</string>
     <string name="app_intro_intro_summary_slide1">Tradizionalmente la raccolta dei dati in campo si basa sull\'utilizzo e sulla trascrizione da carta e matita. Field Book è stato creato come soluzione digitale per la raccolta dei dati, permettendo una maggiore velocità e una migliore integrità dei dati.</string>
@@ -169,6 +169,7 @@
     <!-- Field Creator  -->
     <string name="field_creator_activity_toolbar_title">Crea Nuovo Campo</string>
     <string name="field_creator_size_title">Dettagli del Campo</string>
+    <string name="field_creator_start_corner_title">Angolo di Inizio</string>
     <string name="field_creator_pattern_title">Tracciato di camminata</string>
     <string name="field_creator_direction_title">Direzione Camminata</string>
     <string name="field_creator_preview_title">Revisiona</string>
@@ -214,6 +215,7 @@
     <string name="dialog_field_creator_vertical_zig_button_content_desc">Pulsante per scegliere il tracciato di parcelle zig zag verticale.</string>
     <string name="dialog_field_creator_review_image_content_desc">Immagine che mostra l\'orientamento e il tracciato dell parcelle.</string>
     <string name="field_creator_stepper_size">Dimensione</string>
+    <string name="field_creator_stepper_start">Punto Iniziale</string>
     <string name="field_creator_stepper_pattern">Tracciato di camminata</string>
     <string name="field_creator_stepper_direction">Direzione Camminata</string>
     <string name="field_creator_stepper_preview">Anteprima</string>
@@ -448,6 +450,8 @@
     <!-- Profile -->
     <string name="preferences_profile_title">Profilo</string>
     <string name="preferences_profile_previous_names_warning">Tutti i nomi delle persone salvate saranno eliminati, e questo non può essere invertito. Sei sicuro di voler continuare?</string>
+    <string name="preferences_profile_name_error">Entrambi i campi non possono essere vuoti</string>
+    <string name="preferences_profile_device_name_error">Questo campo non può essere vuoto</string>
     <string name="pref_profile_crashlytics_user_id_enabled">ID Univoco</string>
     <string name="pref_profile_crashlytics_user_id_enabled_summary">Includi un ID anonimo, univoco nei crash log per aiutare il team di sviluppo a correggere i bug</string>
     <string name="pref_profile_crashlytics_refresh_title">Aggiorna ID</string>
@@ -747,6 +751,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="act_brapi_filter_import">Importa</string>
     <string name="act_brapi_filter_clear">Cancella</string>
     <!-- base camera strings -->
+    <string name="trait_camera_connect_content_description">Avvia una connessione del dispositivo.</string>
     <string name="delete_local_photo">Elimina Foto</string>
     <string name="trait_system_photo_settings_title">Impostazioni delle Foto di Sistema</string>
     <string name="trait_name_alt_photo_system">Sistema</string>
@@ -764,6 +769,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="trait_usb_photo_settings_title">Impostazioni Foto USB</string>
     <string name="canon_trait_settings_title">Impostazioni Canon</string>
     <!-- spectral trait strings -->
+    <string name="trait_spectral_connect_content_description">Avvia una connessione del dispositivo.</string>
     <string name="select_device">Seleziona Dispositivo</string>
     <string name="list_item_color_close_content_description">Elimina questo colore</string>
     <string name="delete_color">Elimina Osservazione Del Colore</string>
@@ -798,6 +804,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <!--  NearbyShare  -->
     <string name="nearby_share_connection_cancelled">Connessione annullata</string>
     <string name="nearby_share_transfer_cancelled">Trasferimento annullato</string>
+    <string name="nearby_share_starting_transfer">Trasferimento Del File %s…</string>
     <string name="nearby_share_searching_for_senders">Ricerca dispositivi nelle vicinanze…</string>
     <string name="nearby_share_already_searching_for_sender">Già alla ricerca del mittente…</string>
     <string name="dialog_device_selection_title">Seleziona un dispositivo</string>
@@ -814,6 +821,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="view_trait_nix_settings_software_version">Versione Software: %s</string>
     <string name="view_trait_nix_settings_external_power_state">Stato Dell\'Energia Esterna: %s</string>
     <string name="nix_error_invalid_hardware_id">Invalid hardware ID</string>
+    <string name="nix_error_bluetooth_permissions">Devi accettare i permessi bluetooth o provare a riavviare l\'app.</string>
     <string name="import_runnable_field_name_exists">Nome del campo già esistente.</string>
     <string name="enabled">abilitato</string>
     <string name="traits_save_image_parameter">Copia l\'immagine nel Field Book</string>
