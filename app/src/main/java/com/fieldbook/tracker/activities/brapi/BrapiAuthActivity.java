@@ -199,10 +199,14 @@ public class BrapiAuthActivity extends ThemedActivity {
                         redirectURI); // the redirect URI to which the auth response is sent
 
         if (!scope.trim().isEmpty()){
+
             authRequestBuilder.setScope(scope + " openid");
-            //authRequestBuilder.setScopes(scope, "openid");
+
+        } else {
+
+            authRequestBuilder.setScopes("openid");
+
         }
-        authRequestBuilder.setScopes("openid");
 
         AuthorizationRequest authRequest = authRequestBuilder.setPrompt("login").build();
 
