@@ -81,11 +81,28 @@
     <!-- Changelog -->
     <string name="changelog_title">Diario di modifiche</string>
     <!--  Field Grouping  -->
+    <string name="group_archived_value">Archiviato</string>
+    <string name="fields_ungrouped">Non Raggruppati</string>
+    <string name="dialog_group_options">Opzioni Di Raggruppamento</string>
+    <string name="group_existing">Gruppo esistente</string>
     <string name="group_archive">Archivio</string>
+    <string name="group_new">Nuovo gruppo</string>
     <string name="group_remove">Rimuovi dal gruppo</string>
+    <string name="create_new_group">Creare Nuovo Gruppo</string>
+    <string name="dialog_group_name">Nome Gruppo</string>
+    <string name="dialog_group_name_warning">Campo non può essere vuoto</string>
     <string name="menu_archive">Archivio</string>
+    <string name="menu_groups_toggle">Commuta Visibilità Gruppi</string>
+    <string name="group_toggle_icon">Commuta Gruppo</string>
+    <string name="archived_fields">Campi Archiviati</string>
     <string name="menu_unarchive">Rimuovi dall\'archivio</string>
+    <string name="menu_collapse_all">Comprimi Tutto</string>
+    <string name="menu_expand_all">Espandi Tutto</string>
+    <string name="archive_active_field_title">Archiviare Il Campo Attivo?</string>
     <string name="archive_active_field_message">Hai selezionato il campo attivo da archiviare. Se continui, non ci sarà alcun campo attivo. Vuoi continuare?</string>
+    <string name="archive_others">Archivia Altri</string>
+    <string name="dialog_unarchive_field_title">De-archiviare Campo?</string>
+    <string name="dialog_unarchive_field_message">Questo campo è attualmente archiviato. Se continui, questo campo non sarà archiviato e diventerà il campo attivo. Continuare?</string>
     <!-- FIELDS -->
     <!-- General -->
     <string name="menu_fields_sort_list">Ordina Elenco Campi</string>
@@ -142,36 +159,75 @@
     <string name="import_error_format_field">Solo i file CSV e XLS possono essere importati come campo</string>
     <string name="act_field_editor_no_suitable_columns_error">Il file d\'importazione non ha colonne adatte da cui scegliere.</string>
     <string name="import_runnable_db_failed_to_switch">Database non riuscito a cambiare campi.</string>
+    <string name="import_runnable_create_field_data_failed">Impossibile creare i dati del campo per la riga %d nel file.</string>
+    <string name="import_runnable_duplicates_skipped">Trovate colonne duplicate, verrà usata solo la prima istanza.</string>
     <string name="fields_study_exists_message">Un campo con questo nome esiste già. Vuoi sovrascrivere?</string>
+    <string name="fields_study_and_obs_exists_message">Questo campo è già importato a questo livello di osservazione.</string>
     <string name="act_field_editor_failed_to_read_columns">Field Book non può caricare il file.</string>
     <string name="act_field_editor_load_file_failed">Errore durante il caricamento del file.</string>
     <string name="act_field_editor_file_open_failed">Impossibile aprire il file.</string>
     <!-- Field Creator  -->
+    <string name="field_creator_activity_toolbar_title">Crea Nuovo Campo</string>
+    <string name="field_creator_size_title">Dettagli del Campo</string>
+    <string name="field_creator_pattern_title">Tracciato di camminata</string>
+    <string name="field_creator_direction_title">Direzione Camminata</string>
+    <string name="field_creator_preview_title">Revisiona</string>
     <string name="field_creator_exit_dialog_title">Esci Dal Creatore Di Campo</string>
     <string name="field_creator_exit_dialog_message">Sei sicuro di voler uscire? I tuoi progressi andranno persi.</string>
+    <string name="field_creator_creation_in_progress">La creazione del campo è in corso. Attendere…</string>
+    <string name="field_creator_size_field_name_hint">Nome del Campo</string>
     <string name="field_creator_size_rows_hint">File</string>
     <string name="field_creator_size_columns_hint">Colonne</string>
+    <string name="field_name_required_error">Nome del campo obbligatorio</string>
+    <string name="field_name_exists_error">Nome del campo già esistente</string>
+    <string name="field_creator_positive_number_error">Deve essere un numero positivo</string>
+    <string name="field_creator_rows_exceeded_error">Impossibile superare %s</string>
+    <string name="field_creator_cols_exceeded_error">Impossibile superare %s</string>
     <string name="field_creator_total_plots_exceeded_error">Il totale di parcelle non può superare %1$s. Totale attuale: %2$s</string>
+    <string name="field_creation_failed_error">Impossibile creare il campo</string>
     <string name="field_creator_start_point_instruction">Tocca un angolo per selezionare il punto di partenza</string>
+    <string name="field_dimensions_format">Campo: %d × %d</string>
+    <string name="field_creator_pattern_linear">Lineare</string>
+    <string name="field_creator_pattern_linear_summary">Segui la stessa direzione dopo ogni riga/colonna</string>
+    <string name="field_creator_pattern_zigzag">Serpentina/Zigzag</string>
+    <string name="field_creator_pattern_zigzag_summary">Direzione alternata dopo ogni riga/colonna</string>
+    <string name="field_creator_direction_horizontal">Orizontale</string>
+    <string name="field_creator_direction_vertical">Verticale</string>
+    <string name="field_creator_preview_summary">Campo: %s (%d x %d)</string>
     <string name="field_creator_preview_large_field_warning">Rilevato campo di grandi dimensioni. La creazione di molte parcelle potrebbe richiedere del tempo.</string>
+    <string name="field_creator_preview_creating_field">Creando il campo…</string>
+    <string name="field_creator_preview_create_button">CREA</string>
     <string name="field_creator_preview_expand_button">Espandi Griglia</string>
     <string name="field_creator_preview_collapse_button">Comprimi Griglia</string>
+    <string name="field_creator_expanded_preview_title">Anteprima del Campo Completo</string>
     <string name="dialog_field_creator_ask_name_hint">Nome</string>
     <string name="dialog_field_creator_ask_row_hint">File</string>
     <string name="dialog_field_creator_ask_columns_hint">Colonne</string>
     <string name="dialog_field_creator_insert_plot">Inserimento della parcella %1$s nella riga %2$s colonna %3$s</string>
+    <string name="dialog_field_creator_review_title">Revisiona</string>
     <string name="dialog_field_creator_size_group_error">Inserisci un nome e un formato validi.</string>
+    <string name="dialog_field_creator_field_name_not_unique">Nome del campo già in uso.</string>
+    <string name="dialog_field_creator_large_field">Rilevato campo di grandi dimensioni, la transazione potrebbe richiedere molto tempo.</string>
     <string name="dialog_field_creator_horizontal_linear_button_content_desc">Pulsante per scegliere il tracciato di parcelle lineare orizzontale.</string>
     <string name="dialog_field_creator_horizontal_zig_button_content_desc">Pulsante per scegliere il tracciato di parcelle zig zag orizzontale.</string>
     <string name="dialog_field_creator_vertical_linear_button_content_desc">Pulsante per scegliere il tracciato di parcelle lineare verticale.</string>
     <string name="dialog_field_creator_vertical_zig_button_content_desc">Pulsante per scegliere il tracciato di parcelle zig zag verticale.</string>
     <string name="dialog_field_creator_review_image_content_desc">Immagine che mostra l\'orientamento e il tracciato dell parcelle.</string>
+    <string name="field_creator_stepper_size">Dimensione</string>
+    <string name="field_creator_stepper_pattern">Tracciato di camminata</string>
+    <string name="field_creator_stepper_direction">Direzione Camminata</string>
+    <string name="field_creator_stepper_preview">Anteprima</string>
     <!-- Geo-Navigate to Field -->
     <string name="menu_fields_plot_by_distance_title">Seleziona il campo più vicino</string>
     <string name="activity_field_editor_no_field_found">Nessuna coordinata trovata.</string>
+    <string name="activity_field_editor_switch_field">"Passa al campo %s"</string>
+    <string name="activity_field_editor_switch_field_action">Cambia</string>
+    <string name="activity_field_editor_no_location_yet">Nessuna posizione trovata ancora.</string>
     <string name="activity_field_editor_switch_field_same">Campo più vicino già selezionato.</string>
     <!-- Field Details -->
+    <string name="field_edit_display_name">Modifica Visualizzazione Nome Del Campo</string>
     <string name="name_cannot_be_empty">Il nome non può essere vuoto.</string>
+    <string name="name_conflict_message">\"%1$s\" è già utilizzato come %2$s per un altro campo.</string>
     <string name="name_conflict_import_name">importa nome</string>
     <string name="name_conflict_display_name">visualizza nome</string>
     <string name="dialog_att_chooser_title_default">Seleziona attributo</string>
@@ -181,6 +237,7 @@
     <string name="search_attribute_updated_all">Attributo di ricerca aggiornato per i campi %1$d</string>
     <string name="search_multiple_matches_found">Trovati %1$d appezzamenti corrispondenti. Visualizzazione del primo.</string>
     <!--    <string name="field_default_sort_order">import order</string>-->
+    <string name="field_data_title">Dato</string>
     <string name="field_trait_observation_total">\"%d\" osservazioni</string>
     <!-- Field Detail Charts -->
     <string name="field_trait_chart_no_data">Nessun dato da visualizzare</string>
@@ -263,6 +320,7 @@
     <string name="dialog_att_chooser_traits">Caratteri</string>
     <string name="dialog_infobar_att_chooser_title">Barre Informativa %d</string>
     <string name="infobars_attribute_placeholder">Selezionare</string>
+    <string name="field_name_attribute">field_name</string>
     <string name="infobar_word_wrap_enabled">A capo automatico abilitato per la Barra Informative %s</string>
     <string name="infobar_word_wrap_disabled">A capo automatico disabilitato per Barre Informative %s</string>
     <!-- ID/Barcode Search -->
@@ -379,6 +437,7 @@
     <string name="export_error_missing_column">Il campo tipo di colonna deve essere selezionato</string>
     <string name="export_error_missing_trait">Il tipo di carattere deve essere selezionato</string>
     <string name="export_overwrite">Sovrascrivi l\'esportazione precedente</string>
+    <string name="export_multiple_fields_name">multiple_fields</string>
     <!-- Citation -->
     <string name="citation_title">Citazione</string>
     <string name="citation_string">Se si utilizza Field Book per la ricerca, si prega di citare il seguente articolo di giornale:</string>
@@ -420,6 +479,7 @@
     <string name="preferences_appearance_quickgoto_description">Cambia la sezione centrale della schermata principale in quella precedente Quick GoTo</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamento</string>
+    <string name="preferences_behavior_data_title">Dato</string>
     <string name="preferences_behavior_return_character_do_nothing">Fare niente</string>
     <string name="preferences_behavior_return_character_next_plot">Il tasto di ritorno fa avanzare la parcella</string>
     <string name="preferences_general_use_day_number_description">Usa il giorno dell\'anno per la raccolta dei dati anziché la data</string>
@@ -481,6 +541,7 @@
     <string name="stats_tab_layout_month">Mese</string>
     <string name="stat_title_fields">Campi</string>
     <string name="stat_title_entries">Voci</string>
+    <string name="stat_title_data">Dato</string>
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">A proposito</string>
@@ -725,6 +786,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="brapi_traits_filter_title">Caratteri</string>
     <string name="act_brapi_list_filter_reset_selection_message">Questo cancellerà l\'elenco in esecuzione degli elementi selezionati.</string>
     <string name="pref_alpha_media_keycode_events_title">Abilita Comandi Media</string>
+    <string name="pref_geonav_distance_threshold_summary">GeoNav si ferma automaticamente quando la distanza da tutti le parcelle supera questo valore in chilometri.</string>
     <string name="activity_collect_proximity_warning">GeoNav Fermo, al di fuori delle coordinate</string>
     <string name="trait_error_invalid_multicat_value">Dati categorici inseriti non validi.</string>
     <string name="dialog_quick_goto_title">Tasto Rapido</string>
@@ -752,6 +814,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="view_trait_nix_settings_software_version">Versione Software: %s</string>
     <string name="view_trait_nix_settings_external_power_state">Stato Dell\'Energia Esterna: %s</string>
     <string name="nix_error_invalid_hardware_id">Invalid hardware ID</string>
+    <string name="import_runnable_field_name_exists">Nome del campo già esistente.</string>
     <string name="enabled">abilitato</string>
     <string name="traits_save_image_parameter">Copia l\'immagine nel Field Book</string>
     <!-- Stop Watch Trait Button content descriptions-->
