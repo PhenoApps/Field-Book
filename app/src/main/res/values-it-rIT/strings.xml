@@ -159,7 +159,13 @@
     <string name="dialog_field_creator_ask_name_hint">Nome</string>
     <string name="dialog_field_creator_ask_row_hint">File</string>
     <string name="dialog_field_creator_ask_columns_hint">Colonne</string>
+    <string name="dialog_field_creator_insert_plot">Inserimento della parcella %1$s nella riga %2$s colonna %3$s</string>
     <string name="dialog_field_creator_size_group_error">Inserisci un nome e un formato validi.</string>
+    <string name="dialog_field_creator_horizontal_linear_button_content_desc">Pulsante per scegliere il tracciato di parcelle lineare orizzontale.</string>
+    <string name="dialog_field_creator_horizontal_zig_button_content_desc">Pulsante per scegliere il tracciato di parcelle zig zag orizzontale.</string>
+    <string name="dialog_field_creator_vertical_linear_button_content_desc">Pulsante per scegliere il tracciato di parcelle lineare verticale.</string>
+    <string name="dialog_field_creator_vertical_zig_button_content_desc">Pulsante per scegliere il tracciato di parcelle zig zag verticale.</string>
+    <string name="dialog_field_creator_review_image_content_desc">Immagine che mostra l\'orientamento e il tracciato dell parcelle.</string>
     <!-- Geo-Navigate to Field -->
     <string name="menu_fields_plot_by_distance_title">Seleziona il campo più vicino</string>
     <string name="activity_field_editor_no_field_found">Nessuna coordinata trovata.</string>
@@ -343,6 +349,8 @@
     <string name="dialog_multi_measure_delete">Elimina</string>
     <string name="dialog_multi_measure_select_all">Seleziona tutti</string>
     <!--- GeoNav -->
+    <string name="activity_collect_found_plot">Navigato verso la parcella in prossimità</string>
+    <string name="act_collect_geonav_snack_nav_button_content_description">Questo ti porterà alla parcella più vicina.</string>
     <string name="dialog_geonav_collect_reset_start_toast_message">Reimpostazione connessione…</string>
     <!--- Content Descriptions -->
     <string name="act_collect_delete_value_button_content_description">Elimina il valore corrente.</string>
@@ -413,6 +421,7 @@
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamento</string>
     <string name="preferences_behavior_return_character_do_nothing">Fare niente</string>
+    <string name="preferences_behavior_return_character_next_plot">Il tasto di ritorno fa avanzare la parcella</string>
     <string name="preferences_general_use_day_number_description">Usa il giorno dell\'anno per la raccolta dei dati anziché la data</string>
     <!-- Location -->
     <string name="preferences_location_title">Posizione</string>
@@ -556,7 +565,7 @@
     <string name="brapi_study_location">Posizione</string>
     <string name="brapi_study_num_traits">Caratteri</string>
     <string name="brapi_study_detail_error">Errore durante il caricamento dei dettagli dello studio per lo studio. Studio non salvato.</string>
-    <string name="brapi_plot_detail_error">Errore durante il caricamento dei parcelle per lo studio. Studio non salvato.</string>
+    <string name="brapi_plot_detail_error">Errore durante il caricamento delle parcelle per lo studio. Studio non salvato.</string>
     <string name="brapi_study_traits_error">Errore durante il caricamento dei caratteri per lo studio. Studio non salvato.</string>
     <string name="brapi_ontology_error">Errore durante il caricamento dei caratteri da BrAPI.</string>
     <string name="brapi_save_field_error">Errore durante il salvataggio del campo</string>
@@ -585,6 +594,7 @@
     <string name="brapi_traits_saved_success">Caratteri selezionati salvati correttamente.</string>
     <string name="no_observations_warning">Nessuna Osservazione Trovata Per Lo Studio. Toccare Annulla.</string>
     <string name="brapi_study_incompatible">Questo studio BrAPI è attualmente incompatibile con Field Book. Gli studi devono includere riga e colonna nell\'intestazione.</string>
+    <string name="act_collect_no_plots">Questo studio non ha parcelle salvate.</string>
     <!-- BrAPI Export -->
     <string name="brapi_export_button">Esporta</string>
     <string name="brapi_close_button">Chiudi</string>
