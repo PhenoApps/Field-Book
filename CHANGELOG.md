@@ -14,10 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GoPro cameras can now optionally send just the image name instead of transferring the entire image
 
 ### Changed
-- Field Book now targets the Android SDK 36
+- Field Book now targets Android SDK 36
 - Field Creator updated with new workflow and UI
 - Trait arrows are now hidden if only one trait is active
-- Boolean traits now have a visual unset state
+- Boolean traits now have an unset state
 
 ### Fixed
 - Improved workflow for logging out of BrAPI
@@ -745,4 +745,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v6.2.3]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.3
 [v6.2.4]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.4
 [v6.2.5]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.5
+
 
