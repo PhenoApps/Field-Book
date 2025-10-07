@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Boolean traits now have a visual unset state
 
 ### Fixed
+- Improved workflow for logging out of BrAPI
 - Settings are no longer reset on restart
 - New traits from BrAPI now appear at the end of the trait list
 - Long pressing image and spectral thumbnails now displays metadata dialog
