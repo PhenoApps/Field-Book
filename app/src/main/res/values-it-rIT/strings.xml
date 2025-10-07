@@ -409,8 +409,10 @@
     <string name="dialog_multi_measure_delete">Elimina</string>
     <string name="dialog_multi_measure_select_all">Seleziona tutti</string>
     <!--- GeoNav -->
+    <string name="menu_collect_start_geo_nav_title">Avvia GeoNav</string>
     <string name="activity_collect_found_plot">Navigato verso la parcella in prossimità</string>
     <string name="act_collect_geonav_snack_nav_button_content_description">Questo ti porterà alla parcella più vicina.</string>
+    <string name="activity_collect_sensor_manager_failed">Impossibile avviare il gestore sensori</string>
     <string name="dialog_geonav_collect_reset_start_toast_message">Reimpostazione connessione…</string>
     <!--- Content Descriptions -->
     <string name="act_collect_delete_value_button_content_description">Elimina il valore corrente.</string>
@@ -531,6 +533,8 @@
     <!-- Experimental -->
     <string name="pref_experimental_repeated_values_disabled_message">Tutti i valori ripetuti che sono stati raccolti saranno nascosti fino a quando questa funzione non sarà nuovamente abilitata</string>
     <string name="pref_experimental_enable_field_audio_title">Abilita Audio di Campo</string>
+    <string name="menu_collect_start_field_audio">Avvia Registratore</string>
+    <string name="field_audio_recording_start">Registrazione audio a livello campo</string>
     <string name="pref_beta_enable_individual_field_page_title">Abilita Le Pagine Di Campo Individuali</string>
     <string name="pref_beta_enable_individual_field_page_summary">Selezionando un campo nella lista campi si apre una pagina di dettaglio</string>
     <string name="pref_beta_mlkit_summary">Questa opzione utilizza la libreria MLKit invece della libreria ZXing per la scansione dei codici a barre</string>
@@ -724,7 +728,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="tutorial_main_lockdata_description">Questo blocca l\'input di dati corrente</string>
     <string name="tutorial_settings_fields_title">Campi</string>
     <string name="tutorial_settings_fields_description">ti permette di importare e gestire i campi.</string>
-    <string name="tutorial_settings_fields_import">Per iniziare a utilizzare Field Book, importare innanzitutto un file di campo.</string>
+    <string name="tutorial_settings_fields_import">Per iniziare a usare Field Book, prima importare un file di campo.</string>
     <string name="tutorial_settings_traits_title">Caratteri</string>
     <string name="tutorial_settings_traits_description">ti consente di aggiungere, importare e gestire i caratteri.</string>
     <string name="tutorial_settings_collect_title">Raccogliere dati</string>
@@ -747,6 +751,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="dialog_geonav_prefs_sensor_missing_message">Il metodo trapezoidale richiede un accelerometro e un giroscopio per utilizzare l\'input della bussola.</string>
     <string name="tutorial_main_datagrid_title">Griglia di dati</string>
     <string name="tutorial_main_datagrid_description">Questo apre una griglia di fenotipizzazione 2D del campo attualmente selezionato.</string>
+    <string name="tutorial_main_field_audio_mic_description">Questo avvierà una registrazione audio a livello di campo.</string>
     <string name="tutorial_main_geonav_title">GeoNav</string>
     <string name="act_brapi_filter_import">Importa</string>
     <string name="act_brapi_filter_clear">Cancella</string>
