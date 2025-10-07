@@ -83,14 +83,15 @@
     <!--  Field Grouping  -->
     <string name="group_archived_value">Archiviato</string>
     <string name="fields_ungrouped">Non Raggruppati</string>
-    <string name="dialog_group_options">Opzioni Di Raggruppamento</string>
+    <string name="dialog_group_options">Opzioni di Raggruppamento</string>
     <string name="group_existing">Gruppo esistente</string>
     <string name="group_archive">Archivio</string>
     <string name="group_new">Nuovo gruppo</string>
     <string name="group_remove">Rimuovi dal gruppo</string>
     <string name="create_new_group">Creare Nuovo Gruppo</string>
-    <string name="dialog_group_name">Nome Gruppo</string>
+    <string name="dialog_group_name">Nome del Gruppo</string>
     <string name="dialog_group_name_warning">Campo non può essere vuoto</string>
+    <string name="menu_group">Raggruppa</string>
     <string name="menu_archive">Archivio</string>
     <string name="menu_groups_toggle">Commuta Visibilità Gruppi</string>
     <string name="group_toggle_icon">Commuta Gruppo</string>
@@ -172,7 +173,7 @@
     <string name="field_creator_start_corner_title">Angolo di Inizio</string>
     <string name="field_creator_pattern_title">Tracciato di camminata</string>
     <string name="field_creator_direction_title">Direzione Camminata</string>
-    <string name="field_creator_preview_title">Revisiona</string>
+    <string name="field_creator_preview_title">Rivedere</string>
     <string name="field_creator_exit_dialog_title">Esci Dal Creatore Di Campo</string>
     <string name="field_creator_exit_dialog_message">Sei sicuro di voler uscire? I tuoi progressi andranno persi.</string>
     <string name="field_creator_creation_in_progress">La creazione del campo è in corso. Attendere…</string>
@@ -193,7 +194,9 @@
     <string name="field_creator_pattern_zigzag">Serpentina/Zigzag</string>
     <string name="field_creator_pattern_zigzag_summary">Direzione alternata dopo ogni riga/colonna</string>
     <string name="field_creator_direction_horizontal">Orizontale</string>
+    <string name="field_creator_direction_horizontal_summary">Cammina attraverso le righe</string>
     <string name="field_creator_direction_vertical">Verticale</string>
+    <string name="field_creator_direction_vertical_summary">Cammina su/giù le colonne</string>
     <string name="field_creator_preview_summary">Campo: %s (%d x %d)</string>
     <string name="field_creator_preview_large_field_warning">Rilevato campo di grandi dimensioni. La creazione di molte parcelle potrebbe richiedere del tempo.</string>
     <string name="field_creator_preview_creating_field">Creando il campo…</string>
@@ -204,8 +207,14 @@
     <string name="dialog_field_creator_ask_name_hint">Nome</string>
     <string name="dialog_field_creator_ask_row_hint">File</string>
     <string name="dialog_field_creator_ask_columns_hint">Colonne</string>
+    <string name="dialog_field_creator_top_left">In Alto a Sinistra</string>
+    <string name="dialog_field_creator_bottom_left">In Basso a Sinistra</string>
+    <string name="dialog_field_creator_top_right">In Alto a Destra</string>
+    <string name="dialog_field_creator_bottom_right">In Basso a Destra</string>
+    <string name="dialog_field_creator_insert_field">Creazione di campo, righe: %1$s per colonne: %2$s</string>
+    <string name="dialog_field_creator_insert_field_complete">Creazione di campo, righe: %1$s per colonne: %2$s …completa.</string>
     <string name="dialog_field_creator_insert_plot">Inserimento della parcella %1$s nella riga %2$s colonna %3$s</string>
-    <string name="dialog_field_creator_review_title">Revisiona</string>
+    <string name="dialog_field_creator_review_title">Rivedere</string>
     <string name="dialog_field_creator_size_group_error">Inserisci un nome e un formato validi.</string>
     <string name="dialog_field_creator_field_name_not_unique">Nome del campo già in uso.</string>
     <string name="dialog_field_creator_large_field">Rilevato campo di grandi dimensioni, la transazione potrebbe richiedere molto tempo.</string>
@@ -227,6 +236,7 @@
     <string name="activity_field_editor_no_location_yet">Nessuna posizione trovata ancora.</string>
     <string name="activity_field_editor_switch_field_same">Campo più vicino già selezionato.</string>
     <!-- Field Details -->
+    <string name="field_detail_title">Dettagli del Campo</string>
     <string name="field_edit_display_name">Modifica Visualizzazione Nome Del Campo</string>
     <string name="name_cannot_be_empty">Il nome non può essere vuoto.</string>
     <string name="name_conflict_message">\"%1$s\" è già utilizzato come %2$s per un altro campo.</string>
@@ -234,9 +244,10 @@
     <string name="name_conflict_display_name">visualizza nome</string>
     <string name="dialog_att_chooser_title_default">Seleziona attributo</string>
     <string name="search_attribute_dialog_title">Imposta ID di Ricerca</string>
+    <string name="dialog_att_chooser_unique_attributes">Attributi Univoco</string>
     <string name="search_attribute_apply_to_all">Applica la scelta a tutti i campi idonei</string>
     <string name="search_attribute_updated">Attributo di ricerca aggiornato</string>
-    <string name="search_attribute_updated_all">Attributo di ricerca aggiornato per i campi %1$d</string>
+    <string name="search_attribute_updated_all">Attributo di ricerca aggiornato per campo %1$d</string>
     <string name="search_multiple_matches_found">Trovati %1$d appezzamenti corrispondenti. Visualizzazione del primo.</string>
     <!--    <string name="field_default_sort_order">import order</string>-->
     <string name="field_data_title">Dato</string>
@@ -279,10 +290,13 @@
     <string name="traits_format_boolean">booleano</string>
     <string name="traits_format_text">Testo</string>
     <string name="traits_format_photo">Foto</string>
+    <string name="traits_format_audio">Audio</string>
     <string name="traits_format_multicategorical">Multi cat</string>
     <string name="traits_format_location">Posizione</string>
     <string name="traits_format_barcode">Codice a barre</string>
     <string name="traits_format_labelprint">Stampa etichetta Zebra</string>
+    <string name="traits_format_inno_spectra">InnoSpectra</string>
+    <string name="traits_format_green_seeker">GreenSeeker</string>
     <!-- Trait Creation Dialog -->
     <string name="trait_creator_title_layout">Disposizione dei Caratteri</string>
     <string name="traits_create_name">Nome</string>
@@ -315,13 +329,13 @@
     <string name="main_toolbar_resources">Risorse</string>
     <string name="main_trait_details">Dettagli carattere</string>
     <string name="main_infobar_data_missing">Nessun dato</string>
-    <string name="main_infobar_select_data">Selezionare</string>
+    <string name="main_infobar_select_data">Seleziona</string>
     <string name="main_toolbar_next_entry_no_data">Prossima voce senza dati</string>
     <!-- InfoBars -->
     <string name="dialog_att_chooser_attributes">Attributi</string>
     <string name="dialog_att_chooser_traits">Caratteri</string>
     <string name="dialog_infobar_att_chooser_title">Barre Informativa %d</string>
-    <string name="infobars_attribute_placeholder">Selezionare</string>
+    <string name="infobars_attribute_placeholder">Seleziona</string>
     <string name="field_name_attribute">field_name</string>
     <string name="infobar_word_wrap_enabled">A capo automatico abilitato per la Barra Informative %s</string>
     <string name="infobar_word_wrap_disabled">A capo automatico disabilitato per Barre Informative %s</string>
@@ -360,7 +374,7 @@
     <!--- Lock -->
     <string name="activity_collect_frozen_state">Congelato - una volta salvati i dati non possono essere modificati o eliminati</string>
     <!-- Trait Layout: Photo -->
-    <string name="trait_error_hardware_missing">Il tuo dispositivo non contiene l\'hardware necessario per questa funzione</string>
+    <string name="trait_error_hardware_missing">Il dispositivo non dispone una fotocamera che può essere utilizzata per scattare una foto.</string>
     <string name="trait_delete_warning_photo">Sei sicuro di voler eliminare questa foto?</string>
     <string name="photo_failed_to_delete">Impossibile eliminare il file.</string>
     <!-- Trait Layout: GNSS -->
@@ -392,6 +406,7 @@
     <string name="trait_layout_print_label_detailed_text">dettagliato</string>
     <string name="trait_layout_print_label_date_option">data</string>
     <string name="trait_layout_print_label_blank_option">vuoto</string>
+    <string name="trait_labelprint_preview_description">Anteprima dell\'etichetta.</string>
     <!--- Trait Layout: Counter -->
     <string name="trait_counter_layout_failed">Il contatore non è riuscito a salvare, si prega di ricreare questo carattere.</string>
     <!--- Trait Layout: Location -->
@@ -480,7 +495,7 @@
     <string name="preferences_appearance_infobar_number">Numero di Barre Informative</string>
     <string name="preferences_appearance_infobar_number_description">Regola il numero di Barre Informative visualizzate nella schermata principale</string>
     <string name="preferences_appearance_infobar_hide_prefix">Nascondi prefisso Barre Informative</string>
-    <string name="preferences_appearance_infobar_hide_prefix_description">Il prefisso Barra Informativa sarà sostituito da un\'icona generica</string>
+    <string name="preferences_appearance_infobar_hide_prefix_description">Il prefisso Barra Informative sarà sostituito da un\'icona generica</string>
     <string name="preferences_appearance_quickgoto">Tasto Rapido</string>
     <string name="preferences_appearance_quickgoto_description">Cambia la sezione centrale della schermata principale in quella precedente Quick GoTo</string>
     <!-- Behavior -->
@@ -628,7 +643,7 @@
     <!-- BrAPI Import -->
     <string name="brapi_load_data_button">Carica Campi</string>
     <string name="brapi_load_traits_button">Carica Caratteri</string>
-    <string name="brapi_save_data_button">Salva Campo</string>
+    <string name="brapi_save_data_button">Anteprima de Campo</string>
     <string name="brapi_study_name">Nome</string>
     <string name="brapi_study_description">Descrizione</string>
     <string name="brapi_study_location">Posizione</string>
@@ -757,8 +772,10 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="act_brapi_filter_clear">Cancella</string>
     <!-- base camera strings -->
     <string name="trait_camera_connect_content_description">Avvia una connessione del dispositivo.</string>
+    <string name="trait_camera_preview_content_description">Questo visualizza l\'anteprima del display della fotocamera.</string>
     <string name="delete_local_photo">Elimina Foto</string>
     <string name="trait_system_photo_settings_title">Impostazioni delle Foto di Sistema</string>
+    <string name="view_trait_photo_settings_preview_title">Anteprima</string>
     <string name="trait_name_alt_photo_system">Sistema</string>
     <string name="view_trait_photo_settings_camera_custom">Impostazioni predefinite</string>
     <string name="view_trait_photo_settings_camera_system">Android</string>
@@ -766,6 +783,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <!-- usb camera trait -->
     <string name="view_trait_photo_settings_auto_focus_title">Focus Automatico</string>
     <!-- gopro -->
+    <string name="dialog_go_pro_wait_stream_title">In attesa di anteprima in diretta</string>
     <string name="view_trait_photo_settings_save_image_title">Copia l\'immagine nel Field Book</string>
     <string name="go_pro_trait_settings_title">Impostazioni GoPro</string>
     <!-- canon camera strings -->
@@ -795,6 +813,10 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="menu_filter_brapi_clear_selection">Cancella selezione</string>
     <string name="sort">Ordina</string>
     <string name="brapi_traits_filter_title">Caratteri</string>
+    <plurals name="act_brapi_list_filter">
+        <item quantity="one">%s risultato</item>
+        <item quantity="other">%s risultati</item>
+    </plurals>
     <string name="act_brapi_list_filter_reset_selection_message">Questo cancellerà l\'elenco in esecuzione degli elementi selezionati.</string>
     <string name="pref_alpha_media_keycode_events_title">Abilita Comandi Media</string>
     <string name="pref_geonav_distance_threshold_summary">GeoNav si ferma automaticamente quando la distanza da tutti le parcelle supera questo valore in chilometri.</string>
