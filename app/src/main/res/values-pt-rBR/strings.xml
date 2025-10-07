@@ -211,8 +211,8 @@
     <string name="dialog_field_creator_bottom_left">Inferior Esquerdo</string>
     <string name="dialog_field_creator_top_right">Superior Direito</string>
     <string name="dialog_field_creator_bottom_right">Inferior Direito</string>
-    <string name="dialog_field_creator_insert_field">Criando linhas no campo: %1$s por colunas: %2$s</string>
-    <string name="dialog_field_creator_insert_field_complete">Criando linhas no campo: %1$s por colunas: %2$s …completo.</string>
+    <string name="dialog_field_creator_insert_field">Criando campo no %1$s linhas por %2$s colunas</string>
+    <string name="dialog_field_creator_insert_field_complete">Criando campo de %1$s linhas por %2$s colunas …completo.</string>
     <string name="dialog_field_creator_insert_plot">Inserindo parcela %1$s na linha %2$s coluna %3$s</string>
     <string name="dialog_field_creator_review_title">Revisar</string>
     <string name="dialog_field_creator_size_group_error">Por favor, insira um nome e formato válidos.</string>
