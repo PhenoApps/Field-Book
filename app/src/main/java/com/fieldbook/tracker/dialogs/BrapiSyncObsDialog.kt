@@ -338,7 +338,7 @@ class BrapiSyncObsDialog(private val context: Context, private val syncControlle
                 val nextRep = baseRep + 1
                 obs.rep = nextRep.toString()
 
-                val existingObs = dataHelper.getObservation(obs.studyId, obs.unitDbId, obs.variableDbId, obs.rep)
+                val existingObs = dataHelper.getObservation(studyObservations.fieldBookStudyDbId.toString(), obs.unitDbId, obs.variableDbId, obs.rep)
 
                 // Save observation to the database and update highest rep # for the pair
                 if (existingObs.dbId == null) {
