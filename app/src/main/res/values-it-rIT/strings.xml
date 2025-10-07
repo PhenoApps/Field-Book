@@ -107,7 +107,7 @@
     <!-- FIELDS -->
     <!-- General -->
     <string name="menu_fields_sort_list">Ordina Elenco Campi</string>
-    <string name="fields_sort_reset">Ripristina</string>
+    <string name="fields_sort_reset">Reimposta</string>
     <string name="fields_sort_by_name">Nome</string>
     <string name="fields_sort_by_import_format">Formato Di Importazione</string>
     <string name="fields_sort_by_import_date">Data Di Importazione</string>
@@ -428,7 +428,8 @@
     <string name="activity_collect_found_plot">Navigato verso la parcella in prossimità</string>
     <string name="act_collect_geonav_snack_nav_button_content_description">Questo ti porterà alla parcella più vicina.</string>
     <string name="activity_collect_sensor_manager_failed">Impossibile avviare il gestore sensori</string>
-    <string name="dialog_geonav_collect_reset_start_toast_message">Reimpostazione connessione…</string>
+    <string name="dialog_geonav_collect_reset_start_toast_message">Reimpostando connessione…</string>
+    <string name="dialog_geonav_collect_reset_end_toast_message">Connessione reimpostazioni</string>
     <!--- Content Descriptions -->
     <string name="act_collect_delete_value_button_content_description">Elimina il valore corrente.</string>
     <string name="act_collect_barcode_button_content_description">Avvia uno scanner di codici a barre.</string>
@@ -478,6 +479,7 @@
     <string name="preferences_appearance_title">Aspetto</string>
     <string name="preferences_appearance_theme_title">Tema</string>
     <string name="theme_default">Impostazioni predefinite</string>
+    <string name="preferences_theme_reset_title">Ripristina il tema predefinito</string>
     <string name="preferences_theme_reset_description">Reimposta tutte le impostazioni ai valori predefiniti del sistema</string>
     <string name="preferences_appearance_language">Lingua</string>
     <string name="preferences_appearance_language_description">Lingua impostata dal sistema</string>
@@ -501,6 +503,8 @@
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamento</string>
     <string name="preferences_behavior_data_title">Dato</string>
+    <string name="preferences_behavior_return_to_first_trait">Ripristino Automatico delle Carattere</string>
+    <string name="preferences_behavior_return_to_first_trait_description">L\'avanzamento della entrata si reimposta automaticamente al primo carattere</string>
     <string name="preferences_behavior_return_character_do_nothing">Fare niente</string>
     <string name="preferences_behavior_return_character_next_plot">Il tasto di ritorno fa avanzare la parcella</string>
     <string name="preferences_general_use_day_number_description">Usa il giorno dell\'anno per la raccolta dei dati anziché la data</string>
@@ -539,12 +543,13 @@
     <string name="database_import">Importa Database</string>
     <string name="database_export">Esporta Database</string>
     <string name="database_reset">Elimina Database</string>
-    <string name="database_reset_warning1">Tutti i dati verranno eliminati. Sei sicuro di voler resettare il database?</string>
-    <string name="database_reset_warning2">Un ripristino del database non può essere annullato. L\'app si chiuderà dopo aver cancellato il database. Sei sicuro di voler continuare?</string>
+    <string name="database_reset_warning1">Tutti i dati verranno eliminati. Sei sicuro di voler reimpostare il database?</string>
+    <string name="database_reset_warning2">Una reimposta del database non può essere annullato. L\'app si chiuderà dopo aver cancellato il database. Sei sicuro di voler continuare?</string>
     <string name="database_reset_message">Il database è stato eliminato</string>
     <string name="preferences_storage_settings_title">Impostazioni</string>
     <string name="preferences_system_defaults_reset">Reimposta Impostazioni</string>
-    <string name="reset_preferences_title">Ripristina Impostazioni a Predefinite</string>
+    <string name="reset_preferences_title">Reimposta le Impostazioni a Predefinite</string>
+    <string name="reset_preferences_message">Attenzione: questo reimposta tutte le preferenze del Field Book.</string>
     <!-- Experimental -->
     <string name="pref_experimental_repeated_values_disabled_message">Tutti i valori ripetuti che sono stati raccolti saranno nascosti fino a quando questa funzione non sarà nuovamente abilitata</string>
     <string name="pref_experimental_enable_field_audio_title">Abilita Audio di Campo</string>
@@ -799,6 +804,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="delete_color_message">Questo eliminerà definitivamente l\'osservazione</string>
     <string name="brapi_importer_search_hint">Cerca Testo</string>
     <string name="menu_action_brapi_filter_clear_all">Cancella tutti i filtri</string>
+    <string name="menu_filter_brapi_reset_cache_title">Reimposta Cache</string>
     <string name="brapi_filter_bottom_sheet_delete_all_description">cancella tutti i filtri</string>
     <string name="act_brapi_list_filter_error_multiple_programs">Seleziona studi dallo stesso programma.</string>
     <string name="select">Seleziona</string>
@@ -807,6 +813,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="preferences_brapi_cache_invalidate_title">Invalidazione Cache</string>
     <string name="no_programdbid_provided">Nessun programDbId fornito</string>
     <string name="no_studydbids_provided">Nessun studyDbIds fornito</string>
+    <string name="act_brapi_list_filter_reset_cache_title">Conferma Reimpostazione</string>
     <string name="act_brapi_list_filter_reset_cache_message">Questo eliminerà i dati BrAPI locali utilizzati per la ricerca e l\'importazione.</string>
     <string name="search_bar_hint">Ricercando… %s</string>
     <string name="menu_filter_brapi_clear_filters">Cancella Filtri</string>
@@ -817,7 +824,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
         <item quantity="one">%s risultato</item>
         <item quantity="other">%s risultati</item>
     </plurals>
-    <string name="act_brapi_list_filter_reset_selection_message">Questo cancellerà l\'elenco in esecuzione degli elementi selezionati.</string>
+    <string name="act_brapi_list_filter_reset_selection_message">Questo cancellerà la lista in esecuzione degli elementi selezionati.</string>
     <string name="pref_alpha_media_keycode_events_title">Abilita Comandi Media</string>
     <string name="pref_geonav_distance_threshold_summary">GeoNav si ferma automaticamente quando la distanza da tutti le parcelle supera questo valore in chilometri.</string>
     <string name="activity_collect_proximity_warning">GeoNav Fermo, al di fuori delle coordinate</string>
@@ -853,7 +860,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="enabled">abilitato</string>
     <string name="traits_save_image_parameter">Copia l\'immagine nel Field Book</string>
     <!-- Stop Watch Trait Button content descriptions-->
-    <string name="reset">Ripristina</string>
+    <string name="reset">Reimposta</string>
     <string name="save">Salva</string>
     <string name="database_export_invalid_filename">Nome file di esportazione non valido.</string>
     <string name="device_settings_dialog_name">Nome: %s</string>
