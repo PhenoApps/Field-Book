@@ -148,8 +148,8 @@
     <string name="fields_new_dialog_title">Nuovo campo</string>
     <string name="fields_new_create_field">Crea nuovo</string>
     <string name="import_dialog_unique">Identificatore univoco</string>
-    <string name="import_dialog_primary">Ordine primario</string>
-    <string name="import_dialog_secondary">Ordine secondario</string>
+    <string name="import_dialog_primary">Identificatore primario</string>
+    <string name="import_dialog_secondary">Identificatore secondario</string>
     <string name="import_dialog_sort">Ordina</string>
     <string name="import_error_unsupported">Questo tipo di file non è attualmente supportato</string>
     <string name="import_error_columns_replaced">I nomi delle colonne contengono caratteri non ammessi che saranno rimpiazzati durante l\'importazione.</string>
@@ -245,7 +245,7 @@
     <string name="name_conflict_display_name">visualizza nome</string>
     <string name="dialog_att_chooser_title_default">Scegliere un attributo</string>
     <string name="search_attribute_dialog_title">Imposta ID di Ricerca</string>
-    <string name="dialog_att_chooser_unique_attributes">Attributi Univoco</string>
+    <string name="dialog_att_chooser_unique_attributes">Attributi Unici</string>
     <string name="search_attribute_apply_to_all">Applica la scelta a tutti i campi idonei</string>
     <string name="search_attribute_updated">Attributo di ricerca aggiornato</string>
     <string name="search_attribute_updated_all">Criterio di ricerca aggiornato per campo/i %1$d</string>
@@ -359,7 +359,7 @@
     <string name="trait_error_minimum_value">Il valore è minore rispetto al minimo impostato</string>
     <string name="trait_error_maximum_value">Il valore è maggiore del massimo impostato</string>
     <string name="trait_error_disease_severity">Severità già registrata</string>
-    <string name="act_collect_study_names_empty">Lo studio selezionato ha nomi univoci, primari o secondari vuoti.</string>
+    <string name="act_collect_study_names_empty">Lo studio selezionato ha nomi univoco, primario o secondario vuoti.</string>
     <!-- Toolbar -->
     <string name="main_toolbar_resources">Risorse</string>
     <string name="main_trait_details">Dettagli carattere</string>
@@ -371,11 +371,11 @@
     <string name="dialog_att_chooser_traits">Caratteri</string>
     <string name="dialog_att_chooser_other">Altro</string>
     <string name="dialog_att_chooser_customize">Personalizza</string>
-    <string name="dialog_infobar_att_chooser_title">Barre Informativa %d</string>
+    <string name="dialog_infobar_att_chooser_title">InfoBar %d</string>
     <string name="infobars_attribute_placeholder">Seleziona</string>
     <string name="field_name_attribute">field_name</string>
-    <string name="infobar_word_wrap_enabled">A capo automatico abilitato per la Barra Informative %s</string>
-    <string name="infobar_word_wrap_disabled">A capo automatico disabilitato per Barre Informative %s</string>
+    <string name="infobar_word_wrap_enabled">A capo automatico abilitato per InfoBar %s</string>
+    <string name="infobar_word_wrap_disabled">A capo automatico disabilitato per InfoBar %s</string>
     <!-- ID/Barcode Search -->
     <string name="act_collect_barcode_search_exists_in_other_field">Questo ID è in %s</string>
     <string name="main_toolbar_moveto_no_match">Nessun valore corrispondente</string>
@@ -493,7 +493,7 @@
     <string name="export_file_name">Nome file</string>
     <string name="export_content_columns_title">Colonne campo</string>
     <string name="export_content_columns_all">Tutte le colonne importate</string>
-    <string name="export_content_columns_unique">Solo identificatore unico</string>
+    <string name="export_content_columns_unique">Solo identificatore univoco</string>
     <string name="export_content_traits_all">Tutti i caratteri</string>
     <string name="export_content_traits_active">Solo caratteri attivi</string>
     <string name="export_error_general">Errore durante l\'esportazione</string>
@@ -519,7 +519,7 @@
     <string name="preferences_profile_name_error">Entrambi i campi non possono essere vuoti</string>
     <string name="preferences_profile_device_name_error">Questo campo non può essere vuoto</string>
     <string name="pref_profile_crashlytics_user_id_enabled">ID Univoco</string>
-    <string name="pref_profile_crashlytics_user_id_enabled_summary">Includi un ID anonimo, univoco nei crash log per aiutare il team di sviluppo a correggere i bug</string>
+    <string name="pref_profile_crashlytics_user_id_enabled_summary">Includi un ID anonimo e univoco nei crash log per aiutare il team di sviluppo a correggere i bug</string>
     <string name="pref_profile_crashlytics_refresh_title">Aggiorna ID</string>
     <string name="pref_profile_crashlytics_refresh_summary">Questo assegnerà un nuovo ID univoco</string>
     <!-- Features -->
@@ -542,10 +542,10 @@
     <string name="move_to_unique_id_disabled">Disabilitato</string>
     <string name="move_to_unique_id_text_or_scan">Il pulsante utilizza l\'immissione di testo con scansione della fotocamera opzionale</string>
     <string name="move_to_unique_id_direct_camera_scan">Il pulsante usa la scansione diretta della fotocamera</string>
-    <string name="preferences_appearance_infobar_number">Numero di Barre Informative</string>
-    <string name="preferences_appearance_infobar_number_description">Regola il numero di Barre Informative visualizzate nella schermata principale</string>
-    <string name="preferences_appearance_infobar_hide_prefix">Nascondi prefisso Barre Informative</string>
-    <string name="preferences_appearance_infobar_hide_prefix_description">Il prefisso Barra Informative sarà sostituito da un\'icona generica</string>
+    <string name="preferences_appearance_infobar_number">Numero Di InfoBars</string>
+    <string name="preferences_appearance_infobar_number_description">Regola il numero di InfoBars visualizzate nella schermata principale</string>
+    <string name="preferences_appearance_infobar_hide_prefix">Nascondi prefisso InfoBar</string>
+    <string name="preferences_appearance_infobar_hide_prefix_description">Il prefisso InfoBar sarà sostituito da un\'icona generica</string>
     <string name="preferences_appearance_quickgoto">Tasto Rapido</string>
     <string name="preferences_appearance_quickgoto_description">Cambia la sezione centrale della schermata principale in quella precedente Quick GoTo</string>
     <!-- Behavior -->
@@ -582,6 +582,8 @@
     <string name="choose_paired_bluetooth_devices_title">Scegli il tuo dispositivo bluetooth associato</string>
     <!-- Sounds -->
     <string name="preferences_sounds">Suoni</string>
+    <string name="preferences_sound_primary_order_title">Cambia Ordine Primario</string>
+    <string name="preferences_sound_primary_order_description">Riproduci il suono plonk quando l\'ordine primario cambia</string>
     <string name="preferences_sound_delete_obs_title">Elimina Osservazione</string>
     <string name="preferences_sound_delete_obs_description">Riproduci eliminare suono quando l\'osservazione viene eliminata</string>
     <string name="preferences_general_tts_language_title">Scegli la Lingua</string>
@@ -780,8 +782,8 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <!-- TUTORIAL -->
     <string name="tutorial_dialog_title">Tutorial</string>
     <string name="tutorial_dialog_description">Vuoi abilitare il tutorial? Questa impostazione può essere modificata nelle Impostazioni.</string>
-    <string name="tutorial_main_infobars_title">Barre Informative</string>
-    <string name="tutorial_main_infobars_description">Le Barre Informative mostrano dati aggiuntivi per ogni voce e possono essere modificate tramite i menu a discesa.</string>
+    <string name="tutorial_main_infobars_title">InfoBars</string>
+    <string name="tutorial_main_infobars_description">InfoBars mostrano dati aggiuntivi per ogni voce e possono essere modificate tramite i menu a discesa.</string>
     <string name="tutorial_main_traits_title">Caratteri</string>
     <string name="tutorial_main_traits_description">Le piccole frecce verdi si spostano tra i caratteri.</string>
     <string name="tutorial_main_traitlist_title">Caratteri</string>
@@ -817,7 +819,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="tutorial_settings_settings_description">consente una configurazione aggiuntiva per la raccolta dei dati.</string>
     <string name="tutorial_settings_export_title">Esporta</string>
     <string name="tutorial_settings_export_description">I dati possono essere esportati in due formati: database o tabella.</string>
-    <string name="tutorial_fields_file_description">I file devono contenere tre colonne: un identificatore unico, un ordine primario e un ordine secondario. L\'ordine primario/secondario viene utilizzato per la navigazione nel campo.</string>
+    <string name="tutorial_fields_file_description">I file devono contenere tre colonne: un identificatore univoco, un ordine primario e un ordine secondario. L\'ordine primario/secondario viene utilizzato per la navigazione nel campo.</string>
     <string name="tutorial_fields_select_title">Campo attivo</string>
     <string name="tutorial_fields_select_description">Un campo viene selezionato per la raccolta dei dati dopo l\'importazione.</string>
     <string name="tutorial_fields_delete_title">Elimina Campo</string>
@@ -894,6 +896,8 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="search_bar_hint">Ricercando… %s</string>
     <string name="menu_filter_brapi_clear_filters">Cancella Filtri</string>
     <string name="menu_filter_brapi_clear_selection">Cancella selezione</string>
+    <string name="primary">Primario</string>
+    <string name="secondary">Secondario</string>
     <string name="sort">Ordina</string>
     <string name="brapi_traits_filter_title">Caratteri</string>
     <string name="brapi_filter_type_study">Studio</string>
@@ -914,8 +918,8 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="trait_error_invalid_multicat_value">Dati categorici inseriti non validi.</string>
     <string name="dialog_quick_goto_title">Tasto Rapido</string>
     <string name="dialog_quick_goto_go">Vai</string>
-    <string name="quick_goto_primary_hint">ID Principale</string>
-    <string name="quick_goto_secondary_hint">ID Secondario</string>
+    <string name="quick_goto_primary_hint">ID Primario</string>
+    <string name="quick_goto_secondary_hint">ID secondario</string>
     <string name="traits_sort_default">Impostazioni predefinite</string>
     <string name="view_trait_photo_settings_crop">Imposta Regione Ritaglio</string>
     <!--  NearbyShare  -->
