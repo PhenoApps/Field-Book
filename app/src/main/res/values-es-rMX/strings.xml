@@ -369,7 +369,7 @@
     <string name="trait_error_minimum_value">Valor menor al mínimo permitido</string>
     <string name="trait_error_maximum_value">Valor mayor al máximo permitido</string>
     <string name="trait_error_disease_severity">Severidad ya almacenada</string>
-    <string name="act_collect_study_names_empty">El estudio seleccionado tiene vacíos los nombres únicos, primarios, o secundarios.</string>
+    <string name="act_collect_study_names_empty">El estudio seleccionado tiene vacíos los nombres único, primario, o secundario.</string>
     <!-- Toolbar -->
     <string name="main_toolbar_resources">Recursos</string>
     <string name="main_trait_details">Detalles de la variable</string>
@@ -384,8 +384,8 @@
     <string name="dialog_infobar_att_chooser_title">InfoBar %d</string>
     <string name="infobars_attribute_placeholder">Seleccionar</string>
     <string name="field_name_attribute">campo_nombre</string>
-    <string name="infobar_word_wrap_enabled">Ajuste de texto habilitado en Infobar %s</string>
-    <string name="infobar_word_wrap_disabled">Ajuste de texto deshabilitado en Infobar %s</string>
+    <string name="infobar_word_wrap_enabled">Ajuste de texto habilitado en InfoBar %s</string>
+    <string name="infobar_word_wrap_disabled">Ajuste de texto deshabilitado en InfoBar %s</string>
     <!-- ID/Barcode Search -->
     <string name="act_collect_barcode_search_exists_in_other_field">Este ID está en %s</string>
     <string name="main_toolbar_moveto_no_match">Sin valor coincidente</string>
@@ -692,8 +692,8 @@
     <string name="preferences_appearance_collect_screen_title">Pantalla de Captura</string>
     <string name="preferences_appearance_infobar_number">Número de InfoBars</string>
     <string name="preferences_appearance_infobar_number_description">Ajuste la cantidad de InfoBars que se muestran en la pantalla principal</string>
-    <string name="preferences_appearance_infobar_hide_prefix">Ocultar prefijo Infobar</string>
-    <string name="preferences_appearance_infobar_hide_prefix_description">El prefijo de infobar será reemplazado por un icono genérico</string>
+    <string name="preferences_appearance_infobar_hide_prefix">Ocultar prefijo InfoBar</string>
+    <string name="preferences_appearance_infobar_hide_prefix_description">El prefijo de InfoBar será reemplazado por un icono genérico</string>
     <string name="preferences_appearance_quickgoto">Rápido Ir a</string>
     <string name="preferences_appearance_quickgoto_description">Cambia la sección central de la pantalla principal al legado \"Rapido Ir a\"</string>
     <string name="preferences_appearance_range_progress_bar">Barra de progreso de entradas</string>
@@ -774,7 +774,7 @@
     <!-- Sounds -->
     <string name="preferences_sounds">Sonido</string>
     <string name="preferences_sound_primary_order_title">Cambiar Orden Primario</string>
-    <string name="preferences_sound_primary_order_description">Sonido de \'plonk\' cuando cambia el orden primario</string>
+    <string name="preferences_sound_primary_order_description">Reproducir sonido plonk cuando el orden principal cambia</string>
     <string name="preferences_sound_entry_title">Cambiar Entrada</string>
     <string name="preferences_sound_entry_description">Reproducir sonido al moverse entre entradas</string>
     <string name="preferences_sound_cycle_traits_title">Rotar Variables</string>
@@ -1281,7 +1281,7 @@
     <string name="dialog_quick_goto_title">Rápido Ir a</string>
     <string name="dialog_quick_goto_go">Ir</string>
     <string name="quick_goto_primary_hint">ID Primario</string>
-    <string name="quick_goto_secondary_hint">ID Secundario</string>
+    <string name="quick_goto_secondary_hint">ID secundario</string>
     <string name="quick_goto_dialog_icon_description">persona en funciones</string>
     <string name="failed_to_fetch_observation_levels">Fallo obteniendo el nivel de las observaciónes</string>
     <string name="traits_sort_default">Predeterminado</string>
