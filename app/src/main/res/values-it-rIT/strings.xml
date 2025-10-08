@@ -150,7 +150,7 @@
     <string name="import_dialog_unique">Identificatore univoco</string>
     <string name="import_dialog_primary">Identificatore primario</string>
     <string name="import_dialog_secondary">Identificatore secondario</string>
-    <string name="import_dialog_sort">Ordina</string>
+    <string name="import_dialog_sort">Ordine di Ordinamento</string>
     <string name="import_error_unsupported">Questo tipo di file non è attualmente supportato</string>
     <string name="import_error_columns_replaced">I nomi delle colonne contengono caratteri non ammessi che saranno rimpiazzati durante l\'importazione.</string>
     <string name="import_error_column_name">Il nome della colonna nel file importato non può essere:</string>
@@ -365,7 +365,7 @@
     <string name="main_trait_details">Dettagli carattere</string>
     <string name="main_infobar_data_missing">Nessun dato</string>
     <string name="main_infobar_select_data">Seleziona</string>
-    <string name="main_toolbar_next_entry_no_data">Prossima voce senza dati</string>
+    <string name="main_toolbar_next_entry_no_data">Prossima entrata senza dati</string>
     <!-- InfoBars -->
     <string name="dialog_att_chooser_attributes">Attributi</string>
     <string name="dialog_att_chooser_traits">Caratteri</string>
@@ -411,7 +411,9 @@
     <string name="dialog_data_grid_repeated_measures_title">Scegli Osservazione</string>
     <string name="menu_action_header_view_data_grid_title">Aggiorna Intestazioni di Riga</string>
     <!--- Lock -->
+    <string name="activity_collect_locked_state">Bloccato - inserimento, modifica o eliminazione dei dati sono disabilitati</string>
     <string name="activity_collect_frozen_state">Congelato - una volta salvati i dati non possono essere modificati o eliminati</string>
+    <string name="activity_collect_unlocked_state">Sbloccato - nessuna restrizione all\'inserimento, modifica o cancellazione dei dati</string>
     <string name="trait_box_word_wrap_toast">A capo automatico %s per i caratteri</string>
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">Il dispositivo non dispone una fotocamera che può essere utilizzata per scattare una foto.</string>
@@ -459,7 +461,9 @@
     <!--- Summary -->
     <string name="fragment_summary_filter_title">Seleziona etichette di riepilogo</string>
     <string name="dialog_fragment_summary_neutral_button">Commuta Tutto</string>
-    <string name="list_item_summary_nav_button_content_description">Naviga alla voce selezionata.</string>
+    <string name="fragment_summary_prev_button_content_description">Naviga alla entrata precedente.</string>
+    <string name="fragment_summary_next_button_content_description">Naviga alla entrata successiva.</string>
+    <string name="list_item_summary_nav_button_content_description">Naviga alla entrata selezionata.</string>
     <!--- Repeated measures -->
     <string name="view_repeated_values_add_button_content_description">Aggiunge una nuova osservazione.</string>
     <string name="view_repeated_values_add_button_fail">Devi inserire un valore prima di creare una nuova osservazione.</string>
@@ -476,6 +480,8 @@
     <string name="dialog_geonav_collect_reset_start_toast_message">Reimpostando connessione…</string>
     <string name="dialog_geonav_collect_reset_end_toast_message">Connessione reimpostazioni</string>
     <!--- Content Descriptions -->
+    <string name="view_range_box_left_button_content_description">Naviga alla entrata precedente.</string>
+    <string name="view_range_box_right_button_content_description">Naviga alla entrata successiva.</string>
     <string name="act_collect_delete_value_button_content_description">Elimina il valore corrente.</string>
     <string name="act_collect_barcode_button_content_description">Avvia uno scanner di codici a barre.</string>
     <!-- Observation Info -->
@@ -543,8 +549,10 @@
     <string name="preferences_appearance_toolbar_customize_lock">Bloccare</string>
     <string name="preferences_general_feature_datagrid">Griglia di dati</string>
     <string name="preferences_general_feature_datagrid_description">Aggiungi un pulsante per visualizzare una griglia di dati raccolti</string>
+    <string name="preferences_general_feature_next_missing">Prossima Entrata Senza Dati</string>
     <string name="preferences_general_skip_entries_disabled">Disabilitato</string>
     <string name="preferences_general_skip_entries_with_data">Pulsante salta le entrate che hanno già valori per il carattere corrente</string>
+    <string name="preferences_general_skip_entries_across_all_traits">Pulsante salta le entrate che hanno già valori per tutti i caratteri</string>
     <string name="preferences_general_feature_barcode_text">Sposta All\'ID Univoco</string>
     <string name="move_to_unique_id_disabled">Disabilitato</string>
     <string name="move_to_unique_id_text_or_scan">Il pulsante utilizza l\'immissione di testo con scansione della fotocamera opzionale</string>
@@ -559,14 +567,20 @@
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamento</string>
     <string name="preferences_behavior_data_title">Dato</string>
+    <string name="preferences_behavior_cycle_traits">Auto-Avanza della Entrata</string>
     <string name="preferences_behavior_cycle_traits_description">Ruotando la lista di caratteri si avanza automaticamente la entrata</string>
     <string name="preferences_behavior_return_to_first_trait">Ripristino Automatico delle Carattere</string>
     <string name="preferences_behavior_return_to_first_trait_description">L\'avanzamento della entrata si reimposta automaticamente al primo carattere</string>
+    <string name="preferences_behavior_disable_entry_arrow">Richiedi Dati Per Spostare La Entrata</string>
     <string name="preferences_behavior_disable_entry_arrow_neither">Disabilitato</string>
+    <string name="preferences_behavior_disable_entry_arrow_left">Richiedi dato per spostare a sinistra</string>
+    <string name="preferences_behavior_disable_entry_arrow_right">Richiedi dato per spostare a destra</string>
+    <string name="preferences_behavior_disable_entry_arrow_both">Richiede dato per spostare entrambe le direzioni</string>
     <string name="preferences_behavior_skip_entries_title">Salta le Entrate</string>
     <string name="preferences_behavior_skip_entries_disabled">Disabilitato</string>
     <string name="preferences_behavior_skip_entries_with_data">Frecce saltano le entrate che hanno già valori per il carattere corrente</string>
     <string name="preferences_behavior_skip_entries_across_all_traits">Frecce saltare le entrate che hanno già valori per tutte gli caratteri</string>
+    <string name="preferences_general_swap_navigation_description">Scambia la posizione delle frecce di entrata e di carattere</string>
     <string name="preferences_behavior_volume_buttons_navigate_disabled">Disabilitato</string>
     <string name="preferences_behavior_volume_buttons_navigate_entries">I tasti del volume navigano delle entrate</string>
     <string name="preferences_behavior_return_character_do_nothing">Fare niente</string>
@@ -575,6 +589,7 @@
     <!-- Location -->
     <string name="preferences_location_title">Posizione</string>
     <string name="location_level_study">Campo</string>
+    <string name="location_level_observation_unit">Entrata</string>
     <string name="location_format_iso">ISO 6709</string>
     <string name="location_format_geojson">GeoJSON</string>
     <string name="pref_geonav_category_title">GeoNav</string>
@@ -599,6 +614,7 @@
     <string name="preferences_sounds">Suoni</string>
     <string name="preferences_sound_primary_order_title">Cambia Ordine Primario</string>
     <string name="preferences_sound_primary_order_description">Riproduci il suono plonk quando l\'ordine primario cambia</string>
+    <string name="preferences_sound_entry_title">Cambia Entrata</string>
     <string name="preferences_sound_entry_description">Emette un suono di avanzamento quando si sposta tra le entrate</string>
     <string name="preferences_sound_delete_obs_title">Elimina Osservazione</string>
     <string name="preferences_sound_delete_obs_description">Riproduci eliminare suono quando l\'osservazione viene eliminata</string>
@@ -623,10 +639,16 @@
     <string name="reset_preferences_title">Reimposta le Impostazioni a Predefinite</string>
     <string name="reset_preferences_message">Attenzione: questo reimposta tutte le preferenze del Field Book.</string>
     <!-- Experimental -->
+    <string name="pref_experimental_repeated_values_summary">Abilita la raccolta di valori multipli per ogni entrata/carattere</string>
     <string name="pref_experimental_repeated_values_disabled_message">Tutti i valori ripetuti che sono stati raccolti saranno nascosti fino a quando questa funzione non sarà nuovamente abilitata</string>
     <string name="pref_experimental_enable_field_audio_title">Abilita Audio di Campo</string>
     <string name="menu_collect_start_field_audio">Avvia Registratore</string>
+    <string name="menu_collect_stop_field_audio">Ferma Registratore</string>
     <string name="field_audio_recording_start">Registrazione audio a livello campo</string>
+    <string name="field_audio_recording_stop">Un nuovo file audio di livello campo è stato salvato</string>
+    <string name="field_audio_recording_warning">L\'audio a livello di campo è già in fase di registrazione. Ferma prima.</string>
+    <string name="trait_audio_recording_warning">L\'audio di livello di carattere è già in fase di registrazione. Ferma prima.</string>
+    <string name="trait_audio_playing_warning">L\'audio di livello di carattere è in riproduzione. Ferma prima.</string>
     <string name="pref_beta_enable_individual_field_page_title">Abilita Le Pagine Di Campo Individuali</string>
     <string name="pref_beta_enable_individual_field_page_summary">Selezionando un campo nella lista campi si apre una pagina di dettaglio</string>
     <string name="pref_beta_mlkit_summary">Questa opzione utilizza la libreria MLKit invece della libreria ZXing per la scansione dei codici a barre</string>
@@ -722,6 +744,7 @@
     <string name="brapi_auth_deny">Autorizzazione BrAPI negata</string>
     <string name="brapi_auth_error_starting">Errore durante l\'avvio dell\'autenticazione BrAPI</string>
     <string name="brapi_auth_needed_title">Accesso necessario</string>
+    <string name="brapi_auth_needed">Devi aver effettuato l\'accesso al sistema con cui stai tentando di sincronizzare i dati in per sincronizzare i tuoi dati.\n\nVuoi autenticarti ora?</string>
     <!-- BrAPI Import -->
     <string name="brapi_load_data_button">Carica Campi</string>
     <string name="brapi_load_traits_button">Carica Caratteri</string>
@@ -800,7 +823,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="tutorial_dialog_title">Tutorial</string>
     <string name="tutorial_dialog_description">Vuoi abilitare il tutorial? Questa impostazione può essere modificata nelle Impostazioni.</string>
     <string name="tutorial_main_infobars_title">InfoBars</string>
-    <string name="tutorial_main_infobars_description">InfoBars mostrano dati aggiuntivi per ogni voce e possono essere modificate tramite i menu a discesa.</string>
+    <string name="tutorial_main_infobars_description">InfoBars mostrano dati aggiuntivi per ogni entrata e possono essere modificate tramite i menu a discesa.</string>
     <string name="tutorial_main_traits_title">Caratteri</string>
     <string name="tutorial_main_traits_description">Le piccole frecce verdi si spostano tra i caratteri.</string>
     <string name="tutorial_main_traitlist_title">Caratteri</string>
@@ -822,7 +845,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="tutorial_fields_add_description">Importa un file di campo.</string>
     <string name="tutorial_main_resources_description">Questo visualizza una lista di file nella cartella Risorse.</string>
     <string name="tutorial_main_summary_title">Riassunto</string>
-    <string name="tutorial_main_summary_description">Questo visualizza un riassunto di tutti i dati per la voce corrente.</string>
+    <string name="tutorial_main_summary_description">Questo visualizza un riassunto di tutti i dati per la entrata corrente.</string>
     <string name="tutorial_main_lockdata_title">Blocca dati</string>
     <string name="tutorial_main_lockdata_description">Questo blocca l\'input di dati corrente</string>
     <string name="tutorial_settings_fields_title">Campi</string>
@@ -948,6 +971,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="nearby_share_searching_for_senders">Ricerca dispositivi nelle vicinanze…</string>
     <string name="nearby_share_already_searching_for_sender">Già alla ricerca del mittente…</string>
     <string name="dialog_device_selection_title">Seleziona un dispositivo</string>
+    <string name="spectral_trait_insert_note_message">Scrivi una nota per la entrata scelta.</string>
     <string name="act_collect_barcode_spectral">La raccolta di dati spettrali tramite input di codici a barre non è attualmente supportata.</string>
     <string name="replace_observations">Elimina e Sostituisci</string>
     <string name="replace_observations_message">Le osservazioni esistono già, vuoi eliminare queste ed inserire un valore NA?</string>
