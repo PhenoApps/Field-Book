@@ -31,6 +31,8 @@ public class LayoutCollections {
         traitLayouts.add(new NixTraitLayout(_activity));
         traitLayouts.add(new InnoSpectraTraitLayout(_activity));
         traitLayouts.add(new StopWatchTraitLayout(_activity));
+        traitLayouts.add(new GreenSeekerTraitLayout(_activity));
+        traitLayouts.add(new ScaleTraitLayout(_activity));
     }
 
     /**

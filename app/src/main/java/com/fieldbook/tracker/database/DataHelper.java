@@ -95,7 +95,7 @@ public class DataHelper {
     private final UriDao uriDao = new UriDao(this);
     private final DeviceDao deviceDao = new DeviceDao(this);
     private final SpectralRepository proto = new SpectralRepository(spectralDao, protocolDao, deviceDao, uriDao);
-    private final SpectralFileProcessor spectralFileProcessor = new SpectralFileProcessor(proto);
+    private final SpectralFileProcessor spectralFileProcessor = new SpectralFileProcessor(this, proto);
 
     private SearchQueryBuilder queryBuilder;
 
@@ -348,11 +348,11 @@ public class DataHelper {
      * this function as well
      * v1.6 - Amended to consider both trait and user data
      */
-    public long insertObservation(String plotId, String traitDbId, String value, String person, String location, String notes, String studyId, String observationDbId, OffsetDateTime lastSyncedTime, String rep) {
+    public long insertObservation(String plotId, String traitDbId, String value, String person, String location, String notes, String studyId, String observationDbId, OffsetDateTime timestamp, OffsetDateTime lastSyncedTime, String rep) {
 
         open();
 
-        return ObservationDao.Companion.insertObservation(plotId, traitDbId, value, person, location, notes, studyId, observationDbId, lastSyncedTime, rep);
+        return ObservationDao.Companion.insertObservation(plotId, traitDbId, value, person, location, notes, studyId, observationDbId, timestamp, lastSyncedTime, rep);
     }
 
     /**
@@ -395,10 +395,6 @@ public class DataHelper {
         open();
 
         return ObservationDao.Companion.isBrapiSynced(studyId, plotId, traitDbId, rep);
-    }
-
-    public void setTraitObservations(Integer studyId, Observation observation) {
-        ObservationDao.Companion.insertObservation(studyId, observation);
     }
 
     /**
@@ -919,21 +915,6 @@ public class DataHelper {
                 minimum, maximum, details, categories, closeKeyboardOnOpen, cropImage,
                 saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms, decimalPlacesRequired,
                 mathSymbolsEnabled, allowMulticat, repeatMeasure, autoSwitchPlot, unit, invalidValues);
-//        try {
-//            ContentValues c = new ContentValues();
-//            c.put("trait", trait);
-//            c.put("format", format);
-//            c.put("defaultValue", defaultValue);
-//            c.put("minimum", minimum);
-//            c.put("maximum", maximum);
-//            c.put("details", details);
-//            c.put("categories", categories);
-//
-//            return db.update(TRAITS, c, "id = ?", new String[]{id});
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return -1;
-//        }
     }
 
     /**
@@ -1712,8 +1693,13 @@ public class DataHelper {
                 Migrator.Companion.migrateToVersion16(db);
             }
 
+            if (oldVersion <= 16 && newVersion >= 17) {
+                // add field creator configuration columns to studies table (start corner, walking directiop/pattern)
+                Migrator.Companion.migrateToVersion17(db);
+            }
+
             if (oldVersion <= 17 && newVersion >= 18) {
-                // add trait alias column migration
+                // add trait alias and synonyms column migration
                 Migrator.Companion.migrateToVersion18(db);
             }
 

@@ -1,17 +1,11 @@
 package com.fieldbook.tracker.utilities
 
-import android.app.AlertDialog
-import android.content.Context
-import android.content.DialogInterface
-import android.content.SharedPreferences
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Environment
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.activities.ThemedActivity
-import com.fieldbook.tracker.preferences.GeneralKeys
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream

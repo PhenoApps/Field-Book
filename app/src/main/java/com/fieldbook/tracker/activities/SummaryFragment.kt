@@ -21,6 +21,7 @@ import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
+import com.fieldbook.tracker.utilities.InsetHandler
 import com.google.gson.JsonParseException
 import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.utils.SoftKeyboardUtil
@@ -34,25 +35,9 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
     private var prevButton: ImageView? = null
     private var toolbar: Toolbar? = null
     private var filterDialog: AlertDialog? = null
-    private var listener: SummaryOpenListener? = null
 
     @Inject
     lateinit var database: DataHelper
-
-    fun interface SummaryOpenListener {
-        fun onSummaryDestroy()
-    }
-
-    fun setListener(listener: SummaryOpenListener) {
-
-        this.listener = listener
-
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        listener?.onSummaryDestroy()
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -71,6 +56,8 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
         recyclerView?.adapter = SummaryAdapter(this)
 
         setup()
+
+        InsetHandler.setupFragmentWithTopInsetsOnly(view, toolbar)
 
         return view
 
@@ -260,7 +247,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
                                     }
                                 }
 
-                            } catch (ignore: JsonParseException) {
+                            } catch (_: JsonParseException) {
                             }
 
                         }

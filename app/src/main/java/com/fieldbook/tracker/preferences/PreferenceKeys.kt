@@ -103,6 +103,7 @@ class PreferenceKeys {
         const val BRAPI_OIDC_SCOPE = "BRAPI_OIDC_SCOPE"
         const val BRAPI_EXPLICIT_OIDC_URL = "BRAPI_EXPLICIT_OIDC_URL"
         const val BRAPI_TOKEN = "BRAPI_TOKEN"
+        const val BRAPI_ID_TOKEN = "BRAPI_ID_TOKEN"
         const val BRAPI_VERSION = "BRAPI_VERSION"
         const val BRAPI_PAGE_SIZE = "BRAPI_PAGE_SIZE"
         const val BRAPI_TIMEOUT = "BRAPI_TIMEOUT"

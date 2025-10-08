@@ -8,15 +8,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- New Stopwatch trait format
-- Trait name wrapping in Collect can now be toggled with a long-press
-- Nix hardware sensors now supported as a new Spectral trait type
-- Fields can now be grouped and archived
 
 ### Changed
-- Boolean traits now have a visual unset state
 
 ### Fixed
+
+## [v6.3.0] - 2025-10-08
+
+### Added
+- Fields can now be grouped and archived
+- New trait formats: Stopwatch, Nix, Greenseeker, Scales
+- Trait name wrapping in Collect can now be toggled with a long-press
+- GoPro cameras can now optionally send just the image name instead of transferring the entire image
+
+### Changed
+- Field Book now targets Android SDK 36
+- Field Creator updated with new workflow and UI
+- Trait arrows are now hidden if only one trait is active
+- Boolean traits now have an unset state
+
+### Fixed
+- Improved workflow for logging out of BrAPI
 - Settings are no longer reset on restart
 - New traits from BrAPI now appear at the end of the trait list
 - Long pressing image and spectral thumbnails now displays metadata dialog
@@ -734,9 +746,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v6.1.1]: https://github.com/PhenoApps/Field-Book/releases/tag/6.1.1
 [v6.1.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.1.2
 
+
 [v6.2.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.0
 [v6.2.1]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.1
 [v6.2.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.2
 [v6.2.3]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.3
 [v6.2.4]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.4
 [v6.2.5]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.5
+
+
+
+[v6.3.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.0

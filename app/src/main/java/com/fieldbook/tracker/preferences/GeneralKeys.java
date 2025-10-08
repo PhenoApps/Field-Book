@@ -142,6 +142,7 @@ public class GeneralKeys {
     // Field and trait detail
     public static final String FIELD_DETAIL_OVERVIEW_COLLAPSED = "FIELD_DETAIL_OVERVIEW_COLLAPSED";
     public static final String FIELD_DETAIL_DATA_COLLAPSED = "FIELD_DETAIL_DATA_COLLAPSED";
+    public static final String FIELD_DETAIL_FIELD_ID = "FIELD_DETAIL_FIELD_ID";
     public static final String TRAIT_DETAIL_OVERVIEW_COLLAPSED = "TRAIT_DETAIL_OVERVIEW_COLLAPSED";
     public static final String TRAIT_DETAIL_OPTIONS_COLLAPSED = "TRAIT_DETAIL_OPTIONS_COLLAPSED";
     public static final String TRAIT_DETAIL_DATA_COLLAPSED = "TRAIT_DETAIL_DATA_COLLAPSED";
@@ -236,6 +237,12 @@ public class GeneralKeys {
 
     @NonNull
     public static final String SPECTRAL_MODE = "com.fieldbook.tracker.traits.spectral.MODE";
+
+    @NonNull
+    public static final String SCALE_ADDRESS = "com.fieldbook.tracker.traits.scale.ADDRESS";
+
+    @NonNull
+    public static final String GREEN_SEEKER_ADDRESS = "com.fieldbook.tracker.traits.greenseeker.ADDRESS";
 
     @NotNull
     private static String getDropDownAttributeKey(int index) {

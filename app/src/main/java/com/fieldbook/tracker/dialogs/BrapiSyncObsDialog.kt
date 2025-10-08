@@ -25,9 +25,18 @@ import com.fieldbook.tracker.interfaces.FieldSyncController
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.PreferenceKeys
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
-class BrapiSyncObsDialog(private val context: Context, private val syncController: FieldSyncController, private val fieldObject: FieldObject) : Dialog(context) {
+class BrapiSyncObsDialog(private val context: Context, private val syncController: FieldSyncController, private val fieldObject: FieldObject) : Dialog(context), CoroutineScope by MainScope() {
+
+    companion object {
+        const val TAG = "BrapiSyncObsDialog"
+    }
 
     data class StudyObservations(var fieldBookStudyDbId:Int=0, val traitList: MutableList<TraitObject> = mutableListOf(), val observationList: MutableList<Observation> = mutableListOf()) {
         fun merge(newStudy: StudyObservations) {
@@ -39,6 +48,7 @@ class BrapiSyncObsDialog(private val context: Context, private val syncControlle
 
     private val database = (context as FieldEditorActivity).getDatabase()
 
+    private var dialog: ProgressDialog? = null
     private var saveBtn: Button? = null
     private var noObsLabel: TextView? = null
     private var brAPIService: BrAPIService? = null
@@ -50,10 +60,6 @@ class BrapiSyncObsDialog(private val context: Context, private val syncControlle
     lateinit var paginationManager: BrapiPaginationManager
 
     private var fieldNameLbl: TextView? = null
-
-    // Creates a new thread to do importing
-    private val importRunnable =
-        Runnable { ImportRunnableTask(context, studyObservations, syncController).execute(0) }
 
     override fun show() {
         showDialog()
@@ -68,7 +74,7 @@ class BrapiSyncObsDialog(private val context: Context, private val syncControlle
                 d.dismiss()
             }
             .setPositiveButton(R.string.dialog_save) { _, _ ->
-                saveObservations()
+                saveObservations(context, studyObservations, syncController)
             }
 
         val view = layoutInflater.inflate(R.layout.dialog_brapi_sync_observations, null)
@@ -216,123 +222,142 @@ class BrapiSyncObsDialog(private val context: Context, private val syncControlle
         dialogBrAPISyncObs?.findViewById<View>(R.id.loadingPanel)?.visibility = View.GONE
     }
 
-    private fun saveObservations() {
+    private fun saveObservations(context: Context, studyObservations: StudyObservations, syncController: FieldSyncController) {
+
         // Dismiss this dialog
         dismiss()
 
-        // Run saving task in the background so we can showing progress dialog
-        val mHandler = Handler()
-        mHandler.post(importRunnable)
+        launch {
+
+            withContext(Dispatchers.Main) {
+                showProgressDialog()
+            }
+
+            withContext(Dispatchers.IO) {
+
+                val result = saveObservationsAsync(context, studyObservations)
+
+                withContext(Dispatchers.Main) {
+
+                    showFinalDialog(result, syncController)
+                }
+            }
+        }
     }
 
-    // Mimics the class used in the csv field importer to run the saving
-    // task in a different thread from the UI thread so the app doesn't freeze up.
-    internal class ImportRunnableTask(
-        val context: Context, private val studyObservations: StudyObservations,
-        private val syncController: FieldSyncController) : AsyncTask<Int, Int, Int>() {
 
-        var dialog: ProgressDialog? = null
-        var fail = false
-        private var failMessage = ""
+    private fun showProgressDialog() {
+        dialog = ProgressDialog(context)
+        dialog?.isIndeterminate = true
+        dialog?.setCancelable(false)
+        dialog?.setMessage(Html.fromHtml(context.resources.getString(R.string.import_dialog_importing)))
+        dialog?.show()
+    }
 
-        override fun onPreExecute() {
-            super.onPreExecute()
-            dialog = ProgressDialog(context)
-            dialog?.isIndeterminate = true
-            dialog?.setCancelable(false)
-            dialog?.setMessage(Html.fromHtml(context.resources.getString(R.string.import_dialog_importing)))
-            dialog?.show()
+    private fun showFinalDialog(result: Result?, syncController: FieldSyncController) {
+
+        if (dialog?.isShowing == true) dialog?.dismiss()
+
+        if (result == null || result.failed) {
+            val alertDialogBuilder = AlertDialog.Builder(context, R.style.AppAlertDialog)
+            alertDialogBuilder.setTitle(R.string.dialog_save_error_title)
+                .setPositiveButton(R.string.dialog_ok) { _, _ ->
+                    // Finish our BrAPI import activity
+                    (context as Activity).finish()
+                }
+            alertDialogBuilder.setMessage(result?.message)
+            val alertDialog = alertDialogBuilder.create()
+            alertDialog.show()
+        } else {
+            syncController.onSyncComplete()
+        }
+    }
+
+    data class Result(var failed: Boolean = false, var message: String = "")
+
+    private fun saveObservationsAsync(context: Context, studyObservations: StudyObservations): Result {
+
+        val result = Result()
+
+        Log.d(TAG, "numObs: ${studyObservations.observationList.size}")
+
+        Log.d(TAG, "dbId: ${studyObservations.fieldBookStudyDbId}")
+
+        val dataHelper = DataHelper(context)
+
+        var maxPosition = dataHelper.maxPositionFromTraits + 1
+        val traitIdToType = mutableMapOf<String,String>()
+        try {
+            //Sync the traits first and update date
+            for (trait in studyObservations.traitList) {
+                dataHelper.insertTraits(trait.also {
+                    it.realPosition = maxPosition++
+                })
+            }
+            //link up the ids to the type for when we add in the observations
+            for (trait in studyObservations.traitList) {
+                val currentId = ObservationVariableDao.getTraitByName(trait.name)!!.id
+                traitIdToType[currentId] = trait.format
+            }
+            dataHelper.updateSyncDate(studyObservations.fieldBookStudyDbId)
+        } catch (exc: Exception) {
+            result.failed = true
+            result.message = exc.message ?: "ERROR"
+            return result
         }
 
-        override fun doInBackground(vararg params: Int?): Int? {
+        try {
+            // Calculate rep numbers for new observations based on existing observations
+            val hostURL = BrAPIService.getHostUrl(context)
+            val existingObservations = dataHelper.getBrapiObservations(studyObservations.fieldBookStudyDbId, hostURL)
 
-            println("numObs: ${studyObservations.observationList.size}")
-            println("dbId: ${studyObservations.fieldBookStudyDbId}")
-            val dataHelper = DataHelper(context)
+            val existingDbIds = existingObservations.map { it.dbId }
 
-            var maxPosition = dataHelper.maxPositionFromTraits + 1
-            val traitIdToType = mutableMapOf<String,String>()
-            try {
-                //Sync the traits first and update date
-                for (trait in studyObservations.traitList) {
-                    dataHelper.insertTraits(trait.also {
-                        it.realPosition = maxPosition++
-                    })
-                }
-                //link up the ids to the type for when we add in the observations
-                for (trait in studyObservations.traitList) {
-                    val currentId = ObservationVariableDao.getTraitByName(trait.name)!!.id
-                    traitIdToType[currentId] = trait.format
-                }
-                dataHelper.updateSyncDate(studyObservations.fieldBookStudyDbId)
-            }
-            catch (exc: Exception) {
-                fail = true
-                failMessage = exc.message ?: "ERROR"
-                return null
+            // Track the count of existing observations for each unit-variable pair
+            val observationRepBaseMap = mutableMapOf<Pair<String?, String?>, Int>()
+            for (obs in existingObservations) {
+                val key = Pair(obs.unitDbId, obs.internalVariableDbId)
+                observationRepBaseMap[key] = observationRepBaseMap.getOrDefault(key, 0) + 1
             }
 
-            try {
-                // Calculate rep numbers for new observations based on existing observations
-                val hostURL = BrAPIService.getHostUrl(context)
-                val existingObservations = dataHelper.getBrapiObservations(studyObservations.fieldBookStudyDbId, hostURL)
+            // Sort new observations by timestamp so rep # will ascend in order with time
+            val observationList = studyObservations.observationList.sortedBy { it.timestamp }
 
-                val existingDbIds = existingObservations.map { it.dbId }
+            for (obs in observationList) {
 
-                // Track the count of existing observations for each unit-variable pair
-                val observationRepBaseMap = mutableMapOf<Pair<String?, String?>, Int>()
-                for (obs in existingObservations) {
-                    val key = Pair(obs.unitDbId, obs.internalVariableDbId)
-                    observationRepBaseMap[key] = observationRepBaseMap.getOrDefault(key, 0) + 1
-                }
-
-                // Sort new observations by timestamp so rep # will ascend in order with time
-                val observationList = studyObservations.observationList.sortedBy { it.timestamp }
-
-                for (obs in observationList) {
-
-                    if (obs.dbId in existingDbIds) {
-                        val existingObs = existingObservations.first { it.dbId == obs.dbId }
-                        if (existingObs.timestamp.isEqual(obs.timestamp) || existingObs.timestamp.isBefore(obs.timestamp)) {
-                            // Skip saving this observation if it is older than the existing one
-                            continue
-                        }
+                if (obs.dbId in existingDbIds) {
+                    val existingObs = existingObservations.first { it.dbId == obs.dbId }
+                    if (existingObs.timestamp.isEqual(obs.timestamp) || existingObs.timestamp.isBefore(obs.timestamp)) {
+                        // Skip saving this observation if it is older than the existing one
+                        continue
                     }
-
-                    val key = Pair(obs.unitDbId, obs.variableDbId)
-                    val baseRep = observationRepBaseMap.getOrDefault(key, 0)
-                    val nextRep = baseRep + 1
-                    obs.rep = nextRep.toString()
-
-                    // Save observation to the database and update highest rep # for the pair
-                    dataHelper.setTraitObservations(studyObservations.fieldBookStudyDbId, obs)
-                    observationRepBaseMap[key] = nextRep
                 }
-                return 0
-            } catch (exc: Exception) {
-                fail = true
-                failMessage = exc.message ?: "ERROR"
-                Log.e("ImportRunnableTask", "Exception occurred: ${exc.message}", exc)
-                return null
-            }
-        }
 
+                val key = Pair(obs.unitDbId, obs.variableDbId)
+                val baseRep = observationRepBaseMap.getOrDefault(key, 0)
+                val nextRep = baseRep + 1
+                obs.rep = nextRep.toString()
 
-        override fun onPostExecute(result: Int?) {
-            if (dialog?.isShowing == true) dialog?.dismiss()
-            if (result == null || fail) {
-                val alertDialogBuilder = AlertDialog.Builder(context, R.style.AppAlertDialog)
-                alertDialogBuilder.setTitle(R.string.dialog_save_error_title)
-                    .setPositiveButton(R.string.dialog_ok) { _, _ ->
-                        // Finish our BrAPI import activity
-                        (context as Activity).finish()
-                    }
-                alertDialogBuilder.setMessage(failMessage)
-                val alertDialog = alertDialogBuilder.create()
-                alertDialog.show()
-            } else {
-                syncController.onSyncComplete()
+                val existingObs = dataHelper.getObservation(studyObservations.fieldBookStudyDbId.toString(), obs.unitDbId, obs.variableDbId, obs.rep)
+
+                // Save observation to the database and update highest rep # for the pair
+                if (existingObs.dbId == null) {
+
+                    dataHelper.insertObservation(obs.unitDbId, obs.variableDbId, obs.value,
+                        obs.collector ?: "", "", "", studyObservations.fieldBookStudyDbId.toString(),
+                        obs.dbId, obs.timestamp, obs.lastSyncedTime, obs.rep)
+                }
+
+                observationRepBaseMap[key] = nextRep
             }
+
+            return result
+
+        } catch (exc: Exception) {
+            result.failed = true
+            result.message = exc.message ?: "ERROR"
+            Log.e(TAG, "Exception occurred: ${exc.message}", exc)
+            return result
         }
     }
 }
