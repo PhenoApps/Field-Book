@@ -695,7 +695,7 @@
     <string name="preferences_appearance_infobar_hide_prefix">Ocultar prefixo do InfoBar</string>
     <string name="preferences_appearance_infobar_hide_prefix_description">Prefixo do InfoBar será substituído por um ícone genérico</string>
     <string name="preferences_appearance_quickgoto">Ir Rápido Para</string>
-    <string name="preferences_appearance_quickgoto_description">Altere a seção do meio da tela principal para o legado \"Ir Rápido para\"</string>
+    <string name="preferences_appearance_quickgoto_description">Altere a seção do meio da tela principal para o legado \"Ir Rápido Para\"</string>
     <string name="preferences_appearance_range_progress_bar">Barra de progresso de entradas</string>
     <string name="preferences_appearance_range_progress_bar_description">Mostra sua posição atual no campo</string>
     <string name="preferences_appearance_traits_progress_bar">Barra de progresso de características</string>
@@ -1369,6 +1369,7 @@
     <string name="import_runnable_field_name_exists">Nome do campo já existe.</string>
     <string name="enabled">habilitado</string>
     <string name="disabled">desabilitado</string>
+    <string name="logging_out_please_wait">Saindo, por favor aguarde.</string>
     <string name="traits_save_image_parameter">Copiar imagem para Field Book</string>
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="reset">Restabelecer</string>
