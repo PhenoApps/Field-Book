@@ -129,7 +129,7 @@
     <string name="dialog_field_sort_no_attributes_found">No se encontraron atributos.</string>
     <string name="dialog_field_sort_no_more_attributes_found">Se han usado todos los atributos.</string>
     <string name="dialog_field_sort_delete_all_content_description">Elimina todas las entradas ordenadas.</string>
-    <string name="dialog_field_sort_toggle_order_content_description">Invierte el orden.</string>
+    <string name="dialog_field_sort_toggle_order_content_description">Invierte orden de ordenación.</string>
     <string name="dialog_field_sort_add_content_description">Abre un diálogo para agregar un nuevo atributo para ordenar por.</string>
     <!-- Modify -->
     <string name="fields_rename_study">Renombrar</string>
@@ -1290,7 +1290,7 @@
     <string name="dialog_crop_message">Definir una región de recorte que se aplicará a todas las fotos futuras de esta variable.</string>
     <string name="view_trait_photo_settings_crop">Fijar Región de Recorte</string>
     <string name="crop_image_clip_data_label">Datos de región de recorte en Field Book</string>
-    <string name="quick_goto_swap_content_description">alternar tipo de entrada</string>
+    <string name="quick_goto_swap_content_description">alternar tipo de teclado de entrada</string>
     <!--  NearbyShare  -->
     <string name="nearby_share_title">Compartir Cerca</string>
     <string name="nearby_share_preferences_title">Compartir Preferencias</string>
@@ -1369,6 +1369,7 @@
     <string name="import_runnable_field_name_exists">El nombre del Campo ya existe.</string>
     <string name="enabled">activado</string>
     <string name="disabled">desactivado</string>
+    <string name="logging_out_please_wait">Cerrando sesión, por favor espere.</string>
     <string name="traits_save_image_parameter">Copiar imagen a Field Book</string>
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="reset">Restablecer</string>
