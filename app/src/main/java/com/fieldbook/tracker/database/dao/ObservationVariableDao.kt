@@ -325,7 +325,8 @@ class ObservationVariableDao {
                        allowMulticat: Boolean,
                        repeatMeasure: Boolean,
                        autoSwitchPlot: Boolean,
-                       unit: String): Long = withDatabase { db ->
+                       unit: String,
+                       invalidValues: Boolean): Long = withDatabase { db ->
 
            val contentValues = ContentValues().apply {
                put("observation_variable_name", trait)
@@ -362,6 +363,7 @@ class ObservationVariableDao {
                     this.repeatedMeasures = repeatMeasure
                     this.autoSwitchPlot = autoSwitchPlot
                     this.unit = unit
+                    this.invalidValues = invalidValues
                 }
 
                 traitObj.saveAttributeValues()

@@ -52,6 +52,7 @@ class TraitAttributeValuesHelper(var traitId: String? = null) {
                         attributes[REPEATED_MEASURES]?.let { trait.repeatedMeasures = it.toBoolean() }
                         attributes[AUTO_SWITCH_PLOT]?.let { trait.autoSwitchPlot = it.toBoolean() }
                         attributes[UNIT]?.let { trait.unit = it }
+                        attributes[INVALID_VALUES]?.let { trait.invalidValues = it.toBoolean() }
                     }
                 }
             }

@@ -500,7 +500,8 @@ class NewTraitDialog(
             traitObject.allowMulticat,
             traitObject.repeatedMeasures,
             traitObject.autoSwitchPlot,
-            traitObject.unit
+            traitObject.unit,
+            traitObject.invalidValues,
         )
     }
 

@@ -77,4 +77,5 @@ object ObservationVariableAttributeDetailsView {
     const val REPEATED_MEASURES = "repeatedMeasure"
     const val AUTO_SWITCH_PLOT = "autoSwitchPlot"
     const val UNIT = "unit"
+    const val INVALID_VALUES = "allowInvalidValues"
 }

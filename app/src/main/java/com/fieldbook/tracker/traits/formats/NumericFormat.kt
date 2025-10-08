@@ -7,6 +7,7 @@ import com.fieldbook.tracker.traits.formats.parameters.BaseFormatParameter
 import com.fieldbook.tracker.traits.formats.parameters.DecimalPlacesParameter
 import com.fieldbook.tracker.traits.formats.parameters.DefaultNumericParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
+import com.fieldbook.tracker.traits.formats.parameters.InvalidValueParameter
 import com.fieldbook.tracker.traits.formats.parameters.MathSymbolsParameter
 import com.fieldbook.tracker.traits.formats.parameters.MaximumParameter
 import com.fieldbook.tracker.traits.formats.parameters.MinimumParameter
@@ -32,6 +33,7 @@ open class NumericFormat(
             MaximumParameter<Double>(),
             DecimalPlacesParameter(),
             MathSymbolsParameter(),
+            InvalidValueParameter(),
             DetailsParameter(),
             UnitParameter(),
             RepeatedMeasureParameter(),

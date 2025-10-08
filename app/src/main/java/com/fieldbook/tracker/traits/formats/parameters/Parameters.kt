@@ -9,7 +9,8 @@ enum class Parameters {
     MULTIPLE_CATEGORIES,
     REPEATED_MEASURES,
     AUTO_SWITCH_PLOT,
-    UNIT;
+    UNIT,
+    INVALID_VALUE;
 
     companion object {
 

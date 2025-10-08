@@ -389,6 +389,7 @@
 
     <string name="trait_parameter_repeated_measures">Repeated Measures</string>
     <string name="trait_parameter_auto_switch_plot">Automatically Switch To Next Plot</string>
+    <string name="trait_parameter_invalid_value">Allow Invalid Value</string>
 
     <string name="select_trait">Select Trait</string>
     <string name="edit_traits">Edit</string>
@@ -454,6 +455,8 @@
     <string name="trait_error_decimal_places">Value cannot have more than %d decimal places</string>
     <string name="trait_error_mathematical_symbols_disabled">Mathematical symbols are not allowed</string>
     <string name="trait_error_integers_only">Only integer values are allowed</string>
+    <string name="dialog_invalid_value_title">Invalid Value</string>
+    <string name="dialog_save_invalid_value_message">Do you want to save this value anyway?</string>
 
     <string name="trait_error_disease_severity">Severity already stored</string>
     <string name="act_collect_study_names_empty">The selected study has empty unique, primary, or secondary names.</string>

@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
+import com.fieldbook.tracker.dialogs.InvalidValueDialog;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.utilities.Utils;
 
@@ -71,7 +72,7 @@ public class NumericTraitLayout extends BaseTraitLayout {
             numButton.setOnClickListener(new NumberButtonOnClickListener());
         }
 
-        numberButtons.get(R.id.k16).setOnLongClickListener(new View.OnLongClickListener() {
+        numberButtons.get(R.id.k16).setOnLongClickListener(new OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 getCollectInputView().setText("");
@@ -133,52 +134,71 @@ public class NumericTraitLayout extends BaseTraitLayout {
 
         if (isUnder(trait, data) || isOver(trait, data)) {
 
-            getCollectActivity().runOnUiThread(() -> {
+            String message;
+            if (isOver(trait, data)) {
+                message = controller.getContext().getString(R.string.trait_error_maximum_value)
+                        + ": " + getCurrentTrait().getMaximum();
+            } else {
+                message = controller.getContext().getString(R.string.trait_error_minimum_value)
+                        + ": " + getCurrentTrait().getMinimum();
+            }
 
-                if (isOver(trait, data)) {
-                    Utils.makeToast(controller.getContext(),
-                            controller.getContext().getString(R.string.trait_error_maximum_value)
-                                    + ": " + getCurrentTrait().getMaximum());
-                } else if (isUnder(trait, data)) {
-                    Utils.makeToast(controller.getContext(),
-                            controller.getContext().getString(R.string.trait_error_minimum_value)
-                                    + ": " + getCurrentTrait().getMinimum());
-                }
-            });
-
-            return false;
+            if (trait.getInvalidValues()) {
+                showInvalidDialog(message);
+                return true;
+            } else {
+                getCollectActivity().runOnUiThread(() -> Utils.makeToast(controller.getContext(), message));
+                return false;
+            }
         }
 
         int maxDecimalPlaces = Integer.parseInt(trait.getMaxDecimalPlaces());
 
         if (!trait.getMathSymbolsEnabled() && containsMathematicalSymbols(data)) {
 
-            getCollectActivity().runOnUiThread(() -> {
-                Utils.makeToast(controller.getContext(),
-                        controller.getContext().getString(R.string.trait_error_mathematical_symbols_disabled));
-            });
+            String message = controller.getContext().getString(R.string.trait_error_mathematical_symbols_disabled);
 
-            return false;
+            if (trait.getInvalidValues()) {
+                showInvalidDialog(message);
+                return true;
+            } else {
+                getCollectActivity().runOnUiThread(() -> Utils.makeToast(controller.getContext(), message));
+                return false;
+            }
 
         } else if (maxDecimalPlaces >= 0) { // validate decimal places
             if (!isValidDecimalPlaces(data, maxDecimalPlaces)) {
 
-                getCollectActivity().runOnUiThread(() -> {
+                String message;
+                if (maxDecimalPlaces == 0) {
+                    message = controller.getContext().getString(R.string.trait_error_integers_only);
+                } else {
+                    message = controller.getContext().getString(R.string.trait_error_decimal_places, maxDecimalPlaces);
+                }
 
-                    if (maxDecimalPlaces == 0) {
-                        Utils.makeToast(controller.getContext(),
-                                controller.getContext().getString(R.string.trait_error_integers_only));
-                    } else {
-                        Utils.makeToast(controller.getContext(),
-                                controller.getContext().getString(R.string.trait_error_decimal_places, maxDecimalPlaces));
-                    }
-
-                });
-                return false;
+                if (trait.getInvalidValues()) {
+                    showInvalidDialog(message);
+                    return true;
+                } else {
+                    getCollectActivity().runOnUiThread(() -> Utils.makeToast(controller.getContext(), message));
+                    return false;
+                }
             }
         }
 
         return true;
+    }
+
+    private void showInvalidDialog(String message) {
+        final CollectActivity activity = getCollectActivity();
+        final String studyId = getCurrentObservation().getStudy_id();
+        final String plotId = controller.getRangeBox().getPlotID();
+        final String traitId = getCurrentTrait().getId();
+        final String rep = getCurrentObservation().getRep();
+
+        if (plotId != null) {
+            InvalidValueDialog.show(activity, message, studyId, plotId, traitId, rep);
+        }
     }
 
     public static boolean isUnder(TraitObject trait, final String s) {

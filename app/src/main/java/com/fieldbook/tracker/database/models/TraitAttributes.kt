@@ -91,10 +91,16 @@ object TraitAttributes {
         valueType = ValueType.STRING,
     )
 
+    val INVALID_VALUES = AttributeDefinition(
+        key = ObservationVariableAttributeDetailsView.INVALID_VALUES,
+        valueType = ValueType.BOOLEAN,
+        defaultValue = "false"
+    )
+
     val ALL = listOf(MIN_VALUE, MAX_VALUE, CATEGORIES, CLOSE_KEYBOARD, CROP_IMAGE, SAVE_IMAGE,
         USE_DAY_OF_YEAR, CATEGORY_DISPLAY_VALUE, RESOURCE_FILE,
         DECIMAL_PLACES_REQUIRED, MATH_SYMBOLS_ENABLED, ALLOW_MULTICAT, REPEATED_MEASURES,
-        AUTO_SWITCH_PLOT, UNIT
+        AUTO_SWITCH_PLOT, UNIT, INVALID_VALUES
     )
 
     fun byKey(key: String): AttributeDefinition? = ALL.find { it.key == key }
