@@ -1256,7 +1256,7 @@
     <string name="act_brapi_trait_preprocess_title">Selector de Formato de Field Book</string>
     <string name="act_brapi_trait_import_title">Elegir Formatos</string>
     <plurals name="act_brapi_list_filter">
-        <item quantity="one">%s resultado</item>
+        <item quantity="one">Resultado %s</item>
         <item quantity="other">%s resultados</item>
     </plurals>
     <string name="brapi_filter_type_program_count">Programa (%s)</string>
