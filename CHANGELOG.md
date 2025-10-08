@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Fixed
+
+## [v6.3.0] - 2025-10-08
+
+### Added
 - Fields can now be grouped and archived
 - New trait formats: Stopwatch, Nix, Greenseeker, Scales
 - Trait name wrapping in Collect can now be toggled with a long-press
@@ -747,3 +755,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v6.2.5]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.5
 
 
+
+[v6.3.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.0
