@@ -130,7 +130,7 @@
     <string name="dialog_field_sort_no_more_attributes_found">Tutti gli attributi sono stati utilizzati.</string>
     <string name="dialog_field_sort_delete_all_content_description">Elimina tutte le voci di ordinamento.</string>
     <string name="dialog_field_sort_toggle_order_content_description">Inverte l\'ordine di ordinamento.</string>
-    <string name="dialog_field_sort_add_content_description">Apre una finestra di dialogo per aggiungere un nuovo attributo di ordinamento.</string>
+    <string name="dialog_field_sort_add_content_description">Apre una finestra di dialogo per aggiungere un nuovo criterio di ordinamento.</string>
     <!-- Modify -->
     <string name="fields_rename_study">Rinomina</string>
     <string name="fields_export">Esporta</string>
@@ -239,6 +239,7 @@
     <string name="field_detail_title">Dettagli del Campo</string>
     <string name="field_edit_display_name">Modifica Visualizzazione Nome Del Campo</string>
     <string name="name_cannot_be_empty">Il nome non può essere vuoto.</string>
+    <string name="illegal_characters_message">Trovati caratteri di testo non validi: %1$s</string>
     <string name="name_conflict_message">\"%1$s\" è già utilizzato come %2$s per un altro campo.</string>
     <string name="name_conflict_import_name">importa nome</string>
     <string name="name_conflict_display_name">visualizza nome</string>
@@ -259,22 +260,33 @@
     <!-- Semantic dates -->
     <string name="today">Oggi</string>
     <string name="yesterday">Ieri</string>
+    <plurals name="years_ago">
+        <item quantity="one">%d anno fà</item>
+        <item quantity="other">%d anni fa</item>
+    </plurals>
     <string name="no_activity">Nessuna attività</string>
     <string name="invalid_date">Data non valida</string>
     <!-- TRAITS -->
     <!-- Sort -->
+    <string name="traits_toolbar_sort">Ordina Caratteri</string>
     <string name="traits_sort_name">Nome del carattere</string>
+    <string name="traits_sort_import_order">Ordine d\'importazione</string>
     <string name="traits_sort_visibility">Visibilità</string>
     <string name="traits_sort_format">Formato</string>
     <string name="warning_traits_missing_modify">Crea un carattere prima di poterlo modificare</string>
     <!-- Trait import/export -->
+    <string name="traits_new_dialog_title">Nuovo/i Carraterie/i</string>
+    <string name="traits_dialog_create">Crea un nuovo carattere</string>
+    <string name="traits_dialog_import_from_file">Importa da file</string>
     <string name="traits_dialog_import">Importa</string>
     <string name="import_error_format_trait">Solo i file TRT possono essere importati come un elenco di caratteri</string>
     <string name="traits_export_check">Esporta l\'elenco caratteri corrente?</string>
     <string name="traits_dialog_export">Esporta</string>
     <string name="dialog_delete_traits_message">Vuoi eliminare tutti i caratteri correnti? Eliminare un carattere elimina anche i dati che sono stati raccolti per quel carattere.</string>
     <string name="traits_toolbar_delete_all">Elimina tutti i caratteri</string>
+    <string name="act_trait_editor_no_traits_exist">Non esistono caratteri.</string>
     <!-- Trait item menu -->
+    <string name="list_item_trait_popup_content_description">Apri un menu specifico per questo carattere.</string>
     <string name="traits_options_copy">Copia</string>
     <string name="traits_options_edit">Modifica</string>
     <string name="traits_options_delete">Elimina</string>
@@ -293,12 +305,23 @@
     <string name="traits_format_audio">Audio</string>
     <string name="traits_format_multicategorical">Multi cat</string>
     <string name="traits_format_location">Posizione</string>
+    <string name="traits_format_gnss">GNSS</string>
     <string name="traits_format_barcode">Codice a barre</string>
     <string name="traits_format_labelprint">Stampa etichetta Zebra</string>
+    <string name="traits_format_usb_camera">Fotocamera USB</string>
+    <string name="traits_format_go_pro_camera">GoPro</string>
+    <string name="traits_format_angle">Angolo</string>
+    <string name="traits_format_spectral">Spettrale</string>
+    <string name="traits_format_nix">Nix</string>
     <string name="traits_format_inno_spectra">InnoSpectra</string>
     <string name="traits_format_green_seeker">GreenSeeker</string>
+    <string name="traits_format_scale">Scala</string>
+    <string name="traits_format_stop_watch">Cronometro</string>
     <!-- Trait Creation Dialog -->
+    <string name="traits_toolbar_add_trait">Formati del Carattere</string>
     <string name="trait_creator_title_layout">Disposizione dei Caratteri</string>
+    <string name="trait_creator_parameters_title">Parametri %s</string>
+    <string name="activity_traits_new_button_content_description">Aggiungi un nuovo carattere.</string>
     <string name="traits_create_name">Nome</string>
     <string name="traits_create_format">Formato</string>
     <string name="traits_create_value_default">Impostazioni predefinite</string>
@@ -311,14 +334,19 @@
     <string name="traits_create_true">Vero</string>
     <string name="traits_create_false">Falso</string>
     <string name="traits_create_categories_text">Separa categorie con /</string>
+    <string name="traits_create_camera">Fotocamera</string>
     <string name="traits_create_warning_name_blank">Il nome del carattere non può essere vuoto</string>
     <string name="traits_create_warning_duplicate">Il carattere esiste già</string>
     <string name="traits_create_warning_numeric_required">Default, minimo e massimo devono essere numerici</string>
+    <string name="dialog_new_trait_add_cat_button_text">Aggiungi</string>
     <string name="list_item_category_delete_content_description">Elimina la categoria.</string>
+    <string name="dialog_new_trait_add_category_content_description">Aggiungi una nuova categoria.</string>
     <string name="list_item_traits_grid_content_description">Inverti selezione</string>
     <string name="trait_creator_parameter_warning_too_big">Numero è troppo grande</string>
     <string name="trait_creator_parameter_warning_too_small">Numero è troppo piccolo</string>
+    <string name="list_item_trait_parameter_categories_value_hint">Digita un nome di categoria da aggiungere</string>
     <string name="list_item_trait_parameter_name_hint">Inserisci nome dell carattere</string>
+    <string name="dialog_new_trait_observations_exist_error">Per questo carattere esistono già osservazioni. Possono essere modificati solo i seguenti parametri.</string>
     <string name="dialog_new_trait_error_must_select_a_layout">Devi selezionare una disposizione.</string>
     <string name="trait_creator_parameter_warning_integer_required">Intero richiesto.</string>
     <string name="dialog_new_trait_error_cannot_update_to_brapi_trait">I caratteri non possono essere aggiornati ai caratteri BrAPI.</string>
@@ -376,6 +404,7 @@
     <string name="activity_collect_dialog_verify_no_button">No</string>
     <string name="activity_collect_dialog_verify_yes_button">Sì</string>
     <string name="activity_collect_dialog_neutral_button">Modifica impostazioni</string>
+    <string name="activity_collect_dialog_new_collector">Vuoi salvare il nome della persona che raccoglie i dati?</string>
     <!--- Datagrid -->
     <string name="act_data_grid_cursor_failed">La griglia di dati non è riuscita a caricare i dati.</string>
     <string name="dialog_data_grid_header_picker_title">Scegli Intestazioni di Riga</string>
@@ -383,9 +412,11 @@
     <string name="menu_action_header_view_data_grid_title">Aggiorna Intestazioni di Riga</string>
     <!--- Lock -->
     <string name="activity_collect_frozen_state">Congelato - una volta salvati i dati non possono essere modificati o eliminati</string>
+    <string name="trait_box_word_wrap_toast">A capo automatico %s per i caratteri</string>
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">Il dispositivo non dispone una fotocamera che può essere utilizzata per scattare una foto.</string>
     <string name="trait_delete_warning_photo">Sei sicuro di voler eliminare questa foto?</string>
+    <string name="trait_photo_capture_button_content_description">Premere per aprire una vista della fotocamera per catturare.</string>
     <string name="photo_failed_to_delete">Impossibile eliminare il file.</string>
     <!-- Trait Layout: GNSS -->
     <string name="trait_gnss_geo_coord_update_dialog_title">Avviso Aggiornamento Coordinata</string>
@@ -428,6 +459,8 @@
     <string name="fragment_summary_filter_title">Seleziona etichette di riepilogo</string>
     <string name="list_item_summary_nav_button_content_description">Naviga alla voce selezionata.</string>
     <!--- Repeated measures -->
+    <string name="view_repeated_values_add_button_content_description">Aggiunge una nuova osservazione.</string>
+    <string name="view_repeated_values_add_button_fail">Devi inserire un valore prima di creare una nuova osservazione.</string>
     <string name="dialog_multi_measure_delete_no_observations">Nessuna osservazione esistente.</string>
     <string name="dialog_multi_measure_delete_title">Osservazioni</string>
     <string name="dialog_multi_measure_confirm_delete_title">Tutte le osservazioni per questo carattere verranno eliminate definitivamente.</string>
@@ -445,6 +478,8 @@
     <string name="act_collect_barcode_button_content_description">Avvia uno scanner di codici a barre.</string>
     <!-- Observation Info -->
     <string name="observation_info_entry_id">ID Entrata</string>
+    <string name="observation_info_trait_format">Formati del Carattere</string>
+    <string name="observation_info_additional_info">Informazioni Aggiuntive</string>
     <string name="observation_info_other">Altro</string>
     <!-- Skip Entries -->
     <!-- EXPORT -->
@@ -619,6 +654,7 @@
     <string name="brapi_oidc_scope">OIDC Scope</string>
     <string name="brapi_oidc_scope_desc">The Scope to be used in the authentication provider</string>
     <string name="preferences_brapi_server_barcode">Scansiona un codice a barre del server</string>
+    <string name="preferences_brapi_server_add">Invia un server</string>
     <!-- Community Servers -->
     <string-array name="community_servers_names">
         <item>CassavaBase</item>
@@ -780,6 +816,8 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="tutorial_traits_visibility_title">Visibilità del carettere</string>
     <string name="tutorial_traits_visibility_description">I caretteri possono essere disabilitati dalla raccolta selezionando la casella di controllo.</string>
     <string name="dialog_geonav_prefs_sensor_missing_message">Il metodo trapezoidale richiede un accelerometro e un giroscopio per utilizzare l\'input della bussola.</string>
+    <string name="trait_counter_plus_content_description">Aggiungi al conteggio totale di uno</string>
+    <string name="trait_date_add_content_description">Aggiunge un giorno alla data corrente</string>
     <string name="tutorial_main_datagrid_title">Griglia di dati</string>
     <string name="tutorial_main_datagrid_description">Questo apre una griglia di fenotipizzazione 2D del campo attualmente selezionato.</string>
     <string name="tutorial_main_field_audio_mic_description">Questo avvierà una registrazione audio a livello di campo.</string>
@@ -803,6 +841,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="view_trait_photo_settings_save_image_title">Copia l\'immagine nel Field Book</string>
     <string name="go_pro_trait_settings_title">Impostazioni GoPro</string>
     <!-- canon camera strings -->
+    <string name="pref_canon_ip_title">Indirizzo IP Canon</string>
     <string name="pref_canon_ssid_summary">Questo nome è usato per trovare l\'AP del tuo dispositivo. Questo nome deve essere contenuto all\'interno del SSID attuale.</string>
     <string name="pref_canon_title">Nome SSID</string>
     <string name="trait_usb_photo_settings_title">Impostazioni Foto USB</string>
@@ -856,6 +895,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="act_collect_barcode_spectral">La raccolta di dati spettrali tramite input di codici a barre non è attualmente supportata.</string>
     <string name="replace_observations">Elimina e Sostituisci</string>
     <string name="replace_observations_message">Le osservazioni esistono già, vuoi eliminare queste ed inserire un valore NA?</string>
+    <string name="view_trait_nix_spectral_option">Spettrale</string>
     <string name="nix_trait_settings_title">Impostazioni %s</string>
     <string name="view_trait_nix_settings_battery_level">Livello Batteria: %s</string>
     <string name="view_trait_nix_settings_rssi">RSSI: %s</string>
