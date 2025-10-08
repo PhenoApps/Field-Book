@@ -320,7 +320,7 @@
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Formato de Característica</string>
     <string name="trait_creator_title_layout">Disposição de Característica</string>
-    <string name="trait_creator_parameters_title">%s Parâmetros</string>
+    <string name="trait_creator_parameters_title">Parâmetros %s</string>
     <string name="activity_traits_new_button_content_description">Adicionar uma nova característica.</string>
     <string name="traits_create_name">Nome</string>
     <string name="traits_create_format">Formato</string>
