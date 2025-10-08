@@ -917,9 +917,10 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="failed_to_save_study">Impossibile salvare lo studio</string>
     <string name="trait_error_invalid_multicat_value">Dati categorici inseriti non validi.</string>
     <string name="dialog_quick_goto_title">Tasto Rapido</string>
-    <string name="dialog_quick_goto_go">Vai</string>
+    <string name="dialog_quick_goto_go">Andare</string>
     <string name="quick_goto_primary_hint">ID Primario</string>
     <string name="quick_goto_secondary_hint">ID secondario</string>
+    <string name="quick_goto_dialog_icon_description">persona in gestione</string>
     <string name="traits_sort_default">Impostazioni predefinite</string>
     <string name="view_trait_photo_settings_crop">Imposta Regione Ritaglio</string>
     <!--  NearbyShare  -->
