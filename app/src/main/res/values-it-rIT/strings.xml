@@ -117,18 +117,18 @@
     <string name="list_item_field_popup_menu_content_description">Apre un menù per il campo selezionato.</string>
     <string name="selected_count">%1$d selezionato</string>
     <string name="fields_select_all">Seleziona Tutto</string>
-    <string name="field_generic_observation_level">voci</string>
+    <string name="field_generic_observation_level">entrate</string>
     <string name="field_observation_count_format">%1$s %2$s</string>
     <!-- Sort -->
     <string name="field_sort_entries">Ordina</string>
     <string name="sort_dialog_saved">Ordinamento aggiornato</string>
     <string name="sort_dialog_error_saving">Errore durante l\'aggiornamento dell\'ordinamento</string>
     <string name="list_item_field_sort_delete_content_description">Cancella criterio di ordinamento.</string>
-    <string name="dialog_field_sort_title">Ordina Voci</string>
+    <string name="dialog_field_sort_title">Ordina le Entrate</string>
     <string name="list_item_field_sort_drag_content_description">Trascina per spostare l\'elemento.</string>
     <string name="dialog_field_sort_no_attributes_found">Nessun attributo trovato.</string>
     <string name="dialog_field_sort_no_more_attributes_found">Tutti gli attributi sono stati utilizzati.</string>
-    <string name="dialog_field_sort_delete_all_content_description">Elimina tutte le voci di ordinamento.</string>
+    <string name="dialog_field_sort_delete_all_content_description">Elimina tutte le entrate di ordinamento.</string>
     <string name="dialog_field_sort_toggle_order_content_description">Inverte l\'ordine di ordinamento.</string>
     <string name="dialog_field_sort_add_content_description">Apre una finestra di dialogo per aggiungere un nuovo attributo di ordinamento.</string>
     <!-- Modify -->
@@ -458,6 +458,7 @@
     <string name="act_collect_delete_btn_tts">Valore è stato eliminato.</string>
     <!--- Summary -->
     <string name="fragment_summary_filter_title">Seleziona etichette di riepilogo</string>
+    <string name="dialog_fragment_summary_neutral_button">Commuta Tutto</string>
     <string name="list_item_summary_nav_button_content_description">Naviga alla voce selezionata.</string>
     <!--- Repeated measures -->
     <string name="view_repeated_values_add_button_content_description">Aggiunge una nuova osservazione.</string>
@@ -484,6 +485,9 @@
     <string name="observation_info_additional_info">Informazioni Aggiuntive</string>
     <string name="observation_info_other">Altro</string>
     <!-- Skip Entries -->
+    <string name="collect_sole_entry_without_data">Questa è l\'unica entrata senza dati</string>
+    <string name="collect_all_entries_complete_for_current_trait">Tutte le entrate hanno dati per il carattere corrente</string>
+    <string name="collect_all_entries_complete_for_all_traits">Tutte le entrate hanno dati per tutti i caratteri</string>
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_source_local">Locale</string>
@@ -532,12 +536,15 @@
     <string name="preferences_appearance_language">Lingua</string>
     <string name="preferences_appearance_language_description">Lingua impostata dal sistema</string>
     <string name="preferences_appearance_tutorial_description">Aggiungi un pulsante nella barra degli strumenti nell\'app che apre il tutorial</string>
+    <string name="preferences_appearance_toolbar_customize_description">Commuta la visibilità delle funzioni predefinite</string>
     <string name="preferences_appearance_toolbar_customize_search">Cerca</string>
     <string name="preferences_appearance_toolbar_customize_resources">Risorse</string>
     <string name="preferences_appearance_toolbar_customize_summary">Riassunto</string>
     <string name="preferences_appearance_toolbar_customize_lock">Bloccare</string>
     <string name="preferences_general_feature_datagrid">Griglia di dati</string>
     <string name="preferences_general_feature_datagrid_description">Aggiungi un pulsante per visualizzare una griglia di dati raccolti</string>
+    <string name="preferences_general_skip_entries_disabled">Disabilitato</string>
+    <string name="preferences_general_skip_entries_with_data">Pulsante salta le entrate che hanno già valori per il carattere corrente</string>
     <string name="preferences_general_feature_barcode_text">Sposta All\'ID Univoco</string>
     <string name="move_to_unique_id_disabled">Disabilitato</string>
     <string name="move_to_unique_id_text_or_scan">Il pulsante utilizza l\'immissione di testo con scansione della fotocamera opzionale</string>
@@ -546,14 +553,22 @@
     <string name="preferences_appearance_infobar_number_description">Regola il numero di InfoBars visualizzate nella schermata principale</string>
     <string name="preferences_appearance_infobar_hide_prefix">Nascondi prefisso InfoBar</string>
     <string name="preferences_appearance_infobar_hide_prefix_description">Il prefisso InfoBar sarà sostituito da un\'icona generica</string>
-    <string name="preferences_appearance_quickgoto">Tasto Rapido</string>
-    <string name="preferences_appearance_quickgoto_description">Cambia la sezione centrale della schermata principale in quella precedente Quick GoTo</string>
+    <string name="preferences_appearance_quickgoto">Vai Rapido a</string>
+    <string name="preferences_appearance_quickgoto_description">Cambia la sezione centrale della schermata principale in quella precedente \'Vai Rapido a\"</string>
+    <string name="preferences_appearance_range_progress_bar">Barra di progresso delle entrate</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamento</string>
     <string name="preferences_behavior_data_title">Dato</string>
     <string name="preferences_behavior_cycle_traits_description">Ruotando la lista di caratteri si avanza automaticamente la entrata</string>
     <string name="preferences_behavior_return_to_first_trait">Ripristino Automatico delle Carattere</string>
     <string name="preferences_behavior_return_to_first_trait_description">L\'avanzamento della entrata si reimposta automaticamente al primo carattere</string>
+    <string name="preferences_behavior_disable_entry_arrow_neither">Disabilitato</string>
+    <string name="preferences_behavior_skip_entries_title">Salta le Entrate</string>
+    <string name="preferences_behavior_skip_entries_disabled">Disabilitato</string>
+    <string name="preferences_behavior_skip_entries_with_data">Frecce saltano le entrate che hanno già valori per il carattere corrente</string>
+    <string name="preferences_behavior_skip_entries_across_all_traits">Frecce saltare le entrate che hanno già valori per tutte gli caratteri</string>
+    <string name="preferences_behavior_volume_buttons_navigate_disabled">Disabilitato</string>
+    <string name="preferences_behavior_volume_buttons_navigate_entries">I tasti del volume navigano delle entrate</string>
     <string name="preferences_behavior_return_character_do_nothing">Fare niente</string>
     <string name="preferences_behavior_return_character_next_plot">Il tasto di ritorno fa avanzare la parcella</string>
     <string name="preferences_general_use_day_number_description">Usa il giorno dell\'anno per la raccolta dei dati anziché la data</string>
@@ -584,6 +599,7 @@
     <string name="preferences_sounds">Suoni</string>
     <string name="preferences_sound_primary_order_title">Cambia Ordine Primario</string>
     <string name="preferences_sound_primary_order_description">Riproduci il suono plonk quando l\'ordine primario cambia</string>
+    <string name="preferences_sound_entry_description">Emette un suono di avanzamento quando si sposta tra le entrate</string>
     <string name="preferences_sound_delete_obs_title">Elimina Osservazione</string>
     <string name="preferences_sound_delete_obs_description">Riproduci eliminare suono quando l\'osservazione viene eliminata</string>
     <string name="preferences_general_tts_language_title">Scegli la Lingua</string>
@@ -624,10 +640,11 @@
     <string name="stats_tab_layout_year">Anno</string>
     <string name="stats_tab_layout_month">Mese</string>
     <string name="stat_title_fields">Campi</string>
-    <string name="stat_title_entries">Voci</string>
+    <string name="stat_title_entries">Entrate</string>
     <string name="stat_title_data">Dato</string>
     <string name="stat_people_dialog_title">Lista di Persone</string>
     <string name="stat_most_dialog_title">Lista delle osservazioni</string>
+    <string name="stat_entries_toast_message">entrate sono statie fertilizzati</string>
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">A proposito</string>
@@ -788,8 +805,8 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="tutorial_main_traits_description">Le piccole frecce verdi si spostano tra i caratteri.</string>
     <string name="tutorial_main_traitlist_title">Caratteri</string>
     <string name="tutorial_main_traitlist_description">Il carattere corrente che si sta raccogliendo. Una lista di caratteri attivi viene visualizzato quando viene premuto il carattere corrente.</string>
-    <string name="tutorial_main_entries_title">Voci</string>
-    <string name="tutorial_main_entries_description">Le grandi frecce nere si spostano tra le voci.</string>
+    <string name="tutorial_main_entries_title">Entrate</string>
+    <string name="tutorial_main_entries_description">Le grandi frecce nere si spostano tra le entrate.</string>
     <string name="tutorial_main_navinfo_title">Ordinare le colonne</string>
     <string name="tutorial_main_navinfo_description">Qui è dove vengono visualizzati l\'ordine primario e secondario.</string>
     <string name="tutorial_main_datacollect_title">Input di dati</string>
@@ -916,13 +933,14 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="activity_collect_proximity_warning">GeoNav Fermo, al di fuori delle coordinate</string>
     <string name="failed_to_save_study">Impossibile salvare lo studio</string>
     <string name="trait_error_invalid_multicat_value">Dati categorici inseriti non validi.</string>
-    <string name="dialog_quick_goto_title">Tasto Rapido</string>
-    <string name="dialog_quick_goto_go">Andare</string>
+    <string name="dialog_quick_goto_title">Vai Rapido a</string>
+    <string name="dialog_quick_goto_go">Vai</string>
     <string name="quick_goto_primary_hint">ID Primario</string>
     <string name="quick_goto_secondary_hint">ID secondario</string>
     <string name="quick_goto_dialog_icon_description">persona in gestione</string>
     <string name="traits_sort_default">Impostazioni predefinite</string>
     <string name="view_trait_photo_settings_crop">Imposta Regione Ritaglio</string>
+    <string name="quick_goto_swap_content_description">commuta tipo d\'ingresso</string>
     <!--  NearbyShare  -->
     <string name="nearby_share_connection_cancelled">Connessione annullata</string>
     <string name="nearby_share_transfer_cancelled">Trasferimento annullato</string>
