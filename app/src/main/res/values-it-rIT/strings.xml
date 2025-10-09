@@ -549,11 +549,15 @@
     <string name="dialog_geonav_precision_loss_title">Perdita Di Precisione Localizzazione</string>
     <string name="dialog_geonav_precision_loss_msg">La tua precisione preferita è stata persa.</string>
     <!--- Content Descriptions -->
+    <string name="view_trait_box_right_content_description">Vai al carattere successivo.</string>
+    <string name="view_trait_box_left_content_description">Vai al carattere precedente.</string>
     <string name="view_range_box_left_button_content_description">Naviga alla entrata precedente.</string>
     <string name="view_range_box_right_button_content_description">Naviga alla entrata successiva.</string>
     <string name="act_collect_delete_value_button_content_description">Elimina il valore corrente.</string>
     <string name="act_collect_barcode_button_content_description">Avvia uno scanner di codici a barre.</string>
+    <string name="act_collect_na_value_button_content_description">Inserisci il valore NA.</string>
     <!-- Observation Info -->
+    <string name="observation_metadata_title">Metadati Dell\'Osservazione</string>
     <string name="observation_info_study_name">Nome dello Studio</string>
     <string name="observation_info_entry_id">ID Entrata</string>
     <string name="observation_info_trait_format">Formati del Carattere</string>
@@ -561,6 +565,7 @@
     <string name="observation_info_value">Valore</string>
     <string name="observation_info_timestamp">Timestamp Dell\'Osservazione</string>
     <string name="observation_info_collector">Collettore</string>
+    <string name="observations_info_geo_coordinates">Coordinate Geo</string>
     <string name="observation_info_last_synced_time">Ultima Tempo Di Sincronizzazione</string>
     <string name="observation_info_additional_info">Informazioni Aggiuntive</string>
     <string name="observation_info_rep">Rep</string>
@@ -659,7 +664,9 @@
     <string name="preferences_appearance_language">Lingua</string>
     <string name="preferences_appearance_language_description">Lingua impostata dal sistema</string>
     <string name="preference_language_default">Lingua del Sistema</string>
+    <string name="preferences_appearance_collect_toolbar_title">Barra Degli Strumenti Di Raccolta</string>
     <string name="preferences_appearance_tutorial_description">Aggiungi un pulsante nella barra degli strumenti nell\'app che apre il tutorial</string>
+    <string name="preferences_appearance_toolbar_customize">Barra Degli Strumenti Di Azioni</string>
     <string name="preferences_appearance_toolbar_customize_description">Commuta la visibilità delle funzioni predefinite</string>
     <string name="preferences_appearance_toolbar_customize_search">Cerca</string>
     <string name="preferences_appearance_toolbar_customize_resources">Risorse</string>
@@ -675,6 +682,7 @@
     <string name="move_to_unique_id_disabled">Disabilitato</string>
     <string name="move_to_unique_id_text_or_scan">Il pulsante utilizza l\'immissione di testo con scansione della fotocamera opzionale</string>
     <string name="move_to_unique_id_direct_camera_scan">Il pulsante usa la scansione diretta della fotocamera</string>
+    <string name="preferences_appearance_collect_screen_title">Schermata Di Raccolta</string>
     <string name="preferences_appearance_infobar_number">Numero Di InfoBars</string>
     <string name="preferences_appearance_infobar_number_description">Regola il numero di InfoBars visualizzate nella schermata principale</string>
     <string name="preferences_appearance_infobar_hide_prefix">Nascondi prefisso InfoBar</string>
@@ -1092,8 +1100,10 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="trait_counter_plus_content_description">Aggiungi al conteggio totale di uno</string>
     <string name="trait_date_add_content_description">Aggiunge un giorno alla data corrente</string>
     <string name="tutorial_main_datagrid_title">Griglia di dati</string>
+    <string name="tutorial_main_field_audio_mic_title">Audio Di Campo</string>
     <string name="tutorial_main_datagrid_description">Questo apre una griglia di fenotipizzazione 2D del campo attualmente selezionato.</string>
     <string name="tutorial_main_field_audio_mic_description">Questo avvierà una registrazione audio a livello di campo.</string>
+    <string name="tutorial_main_repeated_values_title">Valori Ripetuti</string>
     <string name="tutorial_main_geonav_title">GeoNav</string>
     <string name="brapi_programs_activity_title">Scegli il tuo programma</string>
     <string name="import_brapi_title">Importazione BrAPI</string>
