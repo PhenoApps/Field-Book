@@ -342,6 +342,13 @@
     <string name="list_item_category_delete_content_description">Elimina la categoria.</string>
     <string name="dialog_new_trait_add_category_content_description">Aggiungi una nuova categoria.</string>
     <string name="list_item_traits_grid_content_description">Commuta selezione</string>
+    <string name="dialog_trait_parameters_title">Parametri di Caratteri</string>
+    <string name="traits_create_warning_percent_magnitude_relation">Errore di relazione di magnitudine</string>
+    <string name="trait_parameter_default_value_number_format_error">Deve essere un numero</string>
+    <string name="traits_create_unknown_error">Errore sconosciuto: %s</string>
+    <string name="trait_creator_parameter_warning_infinite">Numero non può essere infinito</string>
+    <string name="trait_creator_parameter_warning_nan">Numero non può essere NaN</string>
+    <string name="trait_creator_parameter_warning_negative">Numero non deve essere negativo</string>
     <string name="trait_creator_parameter_warning_too_big">Numero è troppo grande</string>
     <string name="trait_creator_parameter_warning_too_small">Numero è troppo piccolo</string>
     <string name="list_item_trait_parameter_categories_value_hint">Digita un nome di categoria da aggiungere</string>
@@ -784,6 +791,7 @@
     <string name="brapi_traits_saved_success">Caratteri selezionati salvati correttamente.</string>
     <string name="brapi_obs_header_name">Scaricamento Osservazioni per lo Studio:</string>
     <string name="no_observations_warning">Nessuna Osservazione Trovata Per Lo Studio. Toccare Annulla.</string>
+    <string name="brapi_skipped_traits">Caratteri recuperati con successo. Caratteri %1$d ignorati a causa del campo \'trait\' brapi mancante</string>
     <string name="brapi_study_incompatible">Questo studio BrAPI è attualmente incompatibile con Field Book. Gli studi devono includere riga e colonna nell\'intestazione.</string>
     <string name="act_collect_no_plots">Questo studio non ha parcelle salvate.</string>
     <!-- BrAPI Export -->
@@ -794,9 +802,9 @@
     <string name="brapi_export_num_new_obs">Nuove osservazioni</string>
     <string name="brapi_export_num_synced_obs">Osservazioni sincronizzate</string>
     <string name="brapi_export_num_ed_obs">Osservazioni modificate</string>
-    <string name="brapi_export_skipped_observations">Osservazioni saltate</string>
+    <string name="brapi_export_skipped_observations"> Osservazioni Saltate</string>
     <string name="brapi_export_skipped_user_created">Osservazioni dei caratteri create dall\'utente</string>
-    <string name="brapi_export_skipped_wrong_source">Origine dati diversa</string>
+    <string name="brapi_export_skipped_wrong_source"> Origine Dati Diversa</string>
     <string name="brapi_export_num_new_imgs">Nuove immagini</string>
     <string name="brapi_export_num_synced_imgs">Immagini sincronizzate</string>
     <string name="brapi_export_num_ed_imgs">Immagini modificate</string>
