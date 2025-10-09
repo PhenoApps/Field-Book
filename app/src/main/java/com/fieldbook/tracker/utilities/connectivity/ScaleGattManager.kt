@@ -13,6 +13,7 @@ import dagger.hilt.android.qualifiers.ActivityContext
 import org.phenoapps.utils.GattUtil.Companion.isIndicatable
 import org.phenoapps.utils.GattUtil.Companion.isNotifiable
 import javax.inject.Inject
+import kotlin.text.indexOf
 
 /***
  * Crane Scale OCS-L weight custom CCCD = 0000ffb2-0000-1000-8000-00805f9b34fb
@@ -130,30 +131,54 @@ class ScaleGattManager @Inject constructor(
             }
         }
 
+        private val lastBytes = mutableListOf<Byte>()
+
         private fun handleSj6000WeightCharacteristic(characteristic: BluetoothGattCharacteristic) {
             val value = characteristic.value
 
-//          Log.d("GATT", "$value")
-            byteBuffer.addAll(value.toList())
-            //if byteBuffer ends with CRLF (0x0D, 0x0A), then log the buffer and clear it
-            if (byteBuffer.size >= 2 && byteBuffer[byteBuffer.size - 2] == 0x0D.toByte()
-                && byteBuffer[byteBuffer.size - 1] == 0x0A.toByte()) {
-//              val byteHexes = byteBuffer.joinToString(", ") { String.format("0x%02X", it) }
-//              Log.d("GATT", "Received complete message: ${byteHexes}")
-                //convert bytes to char and log
-                val charValues = byteBuffer.map { it.toChar() }
-//              Log.d("GATT", "Received complete message as chars: ${charValues.joinToString("")}")
-                val weightString = charValues.joinToString("").dropLast(2) // Drop the last CRLF characters
-                val pattern = Regex(
-                    """
-                    ^(US|ST|OG),([+-][0-9.]{8})([\sA-Za-z]{3})$
-                    """.trimIndent()
-                )
-                pattern.matchEntire(weightString)?.destructured?.let { (prefix, value, unit) ->
-                    listener?.onDataReceived(value, unit, prefix == "ST")
+            synchronized(byteBuffer) {
+
+                if (value.toList() != lastBytes.toList()) {
+                    lastBytes.clear()
+                    lastBytes.addAll(value.toList())
+                } else {
+                    //duplicate bytes, ignore
+                    return
                 }
 
-                byteBuffer.clear()
+                //Log.d("GATT", "${value.toList().map { it.toChar() }}")
+
+                byteBuffer.addAll(value.toList())
+
+                //if byteBuffer ends with CRLF (0x0D, 0x0A), then log the buffer and clear it
+                if (byteBuffer.size >= 2 && byteBuffer[byteBuffer.size - 2] == 0x0D.toByte()
+                    && byteBuffer[byteBuffer.size - 1] == 0x0A.toByte()) {
+//              val byteHexes = byteBuffer.joinToString(", ") { String.format("0x%02X", it) }
+//              Log.d("GATT", "Received complete message: ${byteHexes}")
+                    //convert bytes to char and log
+                    val charValues = byteBuffer.map { it.toChar() }
+//              Log.d("GATT", "Received complete message as chars: ${charValues.joinToString("")}")
+                    val weightString = charValues.joinToString("").dropLast(2) // Drop the last CRLF characters
+                    val pattern = Regex(
+                        """
+                    ^(US|ST|OG),([+-])([0-9.]{8})([\sA-Za-z]{3})$
+                    """.trimIndent()
+                    )
+                    pattern.matchEntire(weightString)?.destructured?.let { (prefix, sign, value, unit) ->
+                        //Log.d(TAG, "Value: ${if (sign == "-") sign else ""}${value.trim()} ${unit.trim()}")
+                        val removeLeadingZeroes = value.dropWhile { it == '0' }
+                            .let {
+                                if (it.startsWith('.')) {
+                                    "0$it"
+                                } else it.ifEmpty {
+                                    "0"
+                                }
+                            }
+                        listener?.onDataReceived("${if (sign == "-") sign else ""}${removeLeadingZeroes.trim()}", unit.trim(), prefix == "ST")
+                    }
+
+                    byteBuffer.clear()
+                }
             }
         }
 
