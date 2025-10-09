@@ -333,6 +333,7 @@
     <string name="traits_create_photo_maximum">Numero massimo di foto</string>
     <string name="traits_create_true">Vero</string>
     <string name="traits_create_false">Falso</string>
+    <string name="traits_create_unset">Non Settato</string>
     <string name="traits_create_categories_text">Separa categorie con /</string>
     <string name="traits_create_camera">Fotocamera</string>
     <string name="traits_create_close_keyboard">Chiudi la Tastiera</string>
@@ -455,6 +456,7 @@
     <!-- Trait Layout: Boolean -->
     <string name="trait_boolean_on">Attivo</string>
     <string name="trait_boolean_off">Off</string>
+    <string name="trait_boolean_unset">Rimuovi</string>
     <!-- Trait Layout: GoPro -->
     <string name="trait_go_pro_capture_button_text">Cattura\n</string>
     <string name="trait_go_pro_await_device_title">Scansione per GoPro</string>
@@ -875,6 +877,13 @@
     <string name="brapi_choice_to_make_default_export">Esporta Origine</string>
     <string name="brapi_choice_to_make_default_negative">Annulla</string>
     <string name="brapi_choice_to_make_default_positive">Salva</string>
+    <string name="brapi_edit_display_name_default">Server Di Test BrAPI</string>
+    <string name="preferences_brapi_version">Versione BrAPI</string>
+    <string name="brapi_pagination">Dimensione Della Pagina</string>
+    <string name="brapi_timeout">Timeout del server</string>
+    <string name="brapi_chunk_size">Dimensione Chunk</string>
+    <string name="preferences_brapi_authorization_title">Authorization</string>
+    <string name="preferences_brapi_advanced_title">Avanzato</string>
     <string name="preferences_brapi_oidc_flow_oauth_code">OAuth2 Authorization Code</string>
     <string name="preferences_brapi_oidc_flow_oauth_implicit">OAuth2 Implicit Grant</string>
     <string name="preferences_brapi_oidc_flow_old_custom">Original Field Book Custom</string>
@@ -884,6 +893,12 @@
     <string name="brapi_oidc_clientid_desc">Il Client ID da utilizzare nel provider di autenticazione</string>
     <string name="brapi_oidc_scope">OIDC Scope</string>
     <string name="brapi_oidc_scope_desc">The Scope to be used in the authentication provider</string>
+    <string name="preferences_brapi_traits_title">Preferenze</string>
+    <string name="preferences_appearance_collect_labelval_customize">Valore vs Descrizione per Visualizzare</string>
+    <string name="preferences_appearance_collect_labelval_customize_description">Visualizza i valori o le descrizione sullo schermo di raccolta</string>
+    <string name="preferences_appearance_collect_labelval_customize_value">Valore</string>
+    <string name="preferences_appearance_collect_labelval_customize_label">Descrizione</string>
+    <string name="preferences_brapi_servers_title">Server Della Community</string>
     <string name="preferences_brapi_server_barcode">Scansiona un codice a barre del server</string>
     <string name="preferences_brapi_server_scan_error">Errore Di Scansione</string>
     <string name="preferences_brapi_server_add">Invia un server</string>
@@ -974,13 +989,18 @@
     <string name="brapi_error_saving_all_traits">Errore durante il salvataggio dei caratteri. Nessun carattere è stato salvato.</string>
     <string name="brapi_error_saving_some_traits">Errore durante il salvataggio di alcuni caratteri. Alcuni caratteri non sono stati salvati</string>
     <string name="brapi_traits_saved_success">Caratteri selezionati salvati correttamente.</string>
+    <string name="brapi_obs_sync_menu_name">Sincronizza</string>
     <string name="brapi_obs_header_name">Scaricamento Osservazioni per lo Studio:</string>
+    <string name="number_traits_label">Numero di Caratteri:</string>
+    <string name="number_observation_label">Numero di Osservazioni:</string>
     <string name="no_observations_warning">Nessuna Osservazione Trovata Per Lo Studio. Toccare Annulla.</string>
     <string name="brapi_skipped_traits">Caratteri recuperati con successo. Caratteri %1$d ignorati a causa del campo \'trait\' brapi mancante</string>
     <string name="brapi_study_incompatible">Questo studio BrAPI è attualmente incompatibile con Field Book. Gli studi devono includere riga e colonna nell\'intestazione.</string>
     <string name="act_collect_no_plots">Questo studio non ha parcelle salvate.</string>
     <!-- BrAPI Export -->
+    <string name="act_brapi_export_title">Esportazione BrAPI</string>
     <string name="brapi_export_button">Esporta</string>
+    <string name="brapi_next_field_button">Campo successivo</string>
     <string name="brapi_close_button">Chiudi</string>
     <string name="brapi_export_title">Statistiche di esportazione BrAPI</string>
     <string name="brapi_export_observations">Osservazioni</string>
@@ -998,6 +1018,7 @@
     <string name="brapi_export_skipped_user_created_images">Immagini dei caratteri create dall\'utente</string>
     <string name="brapi_export_images">Immagini</string>
     <string name="brapi_delete_message">Impossibile eliminare l\'osservazione BrAPI sincronizzata, utilizzando invece NA</string>
+    <string name="act_brapi_export_image_load_failed">Caricamento immagine fallito.</string>
     <!-- Pagination -->
     <string name="next">Successivo</string>
     <string name="prev">Precedente</string>
@@ -1006,6 +1027,7 @@
     <string name="device_offline_warning">Dispositivo offline: connettersi a una rete e riprovare</string>
     <string name="brapi_info_message">Caratteri e campi importati tramite BrAPI saranno in grado di esportare le loro osservazioni tramite l\'esportazione BrAPI.
 Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esportati tramite formato CSV.</string>
+    <string name="brapi_na">NA</string>
     <!-- APP INTRO  -->
     <string name="intro_tutorial_title">Vuoi abilitare il tutorial?</string>
     <string name="intro_tutorial_description">Questa impostazione può essere modificata nelle Impostazioni</string>
@@ -1076,17 +1098,27 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="act_brapi_filter_apply">Filtro</string>
     <string name="act_brapi_filter_import">Importa</string>
     <string name="act_brapi_filter_clear">Cancella</string>
+    <string name="repeated_values_left_button_content_description">sinistra</string>
+    <string name="export_util_repeated_measures_table_warning_title">Tabella Misure Ripetute</string>
+    <string name="export_util_repeated_measures_table_warning_message">Solo il valore delle ultime misure ripetute sarà esportato in formato tabella.</string>
+    <string name="activity_file_explorer_up_directory_name">Su</string>
     <!-- base camera strings -->
     <string name="trait_camera_connect_content_description">Avvia una connessione del dispositivo.</string>
     <string name="trait_camera_preview_content_description">Questo visualizza l\'anteprima del display della fotocamera.</string>
+    <string name="trait_camera_capture_content_description">Cattura una foto</string>
     <string name="delete_local_photo">Elimina Foto</string>
     <string name="trait_system_photo_settings_title">Impostazioni delle Foto di Sistema</string>
+    <string name="trait_photos_no_settings">Questo carattere non ha impostazioni.</string>
     <string name="view_trait_photo_settings_preview_title">Anteprima</string>
+    <string name="view_trait_photo_settings_resolution_title">Risoluzione Obiettivo</string>
+    <string name="view_trait_photo_settings_system_title">Fotocamera Di Sistema</string>
     <string name="trait_name_alt_photo_system">Sistema</string>
+    <string name="trait_name_alt_usb">USB</string>
     <string name="view_trait_photo_settings_camera_custom">Impostazioni predefinite</string>
     <string name="view_trait_photo_settings_camera_system">Android</string>
     <string name="view_trait_photo_settings_camera_choice_description">Scegli tra la fotocamera predefinita del Field Book e l\'app della fotocamera Android.</string>
     <!-- usb camera trait -->
+    <string name="usb_camera_resolution_options_title">Risoluzioni Supportate</string>
     <string name="view_trait_photo_settings_auto_focus_title">Focus Automatico</string>
     <!-- gopro -->
     <string name="dialog_go_pro_wait_stream_title">In attesa di anteprima in diretta</string>
@@ -1187,10 +1219,12 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="nearby_share_searching_for_senders">Ricerca dispositivi nelle vicinanze…</string>
     <string name="nearby_share_already_searching_for_sender">Già alla ricerca del mittente…</string>
     <string name="dialog_device_selection_title">Seleziona un dispositivo</string>
+    <string name="preferences_preferences_title">Preferenze</string>
     <string name="spectral_trait_insert_note_message">Scrivi una nota per la entrata scelta.</string>
     <string name="act_collect_barcode_spectral">La raccolta di dati spettrali tramite input di codici a barre non è attualmente supportata.</string>
     <string name="replace_observations">Elimina e Sostituisci</string>
     <string name="replace_observations_message">Le osservazioni esistono già, vuoi eliminare queste ed inserire un valore NA?</string>
+    <string name="usb_device_description">USB</string>
     <string name="view_trait_nix_spectral_option">Spettrale</string>
     <string name="nix_trait_settings_title">Impostazioni %s</string>
     <string name="view_trait_nix_settings_battery_level">Livello Batteria: %s</string>
