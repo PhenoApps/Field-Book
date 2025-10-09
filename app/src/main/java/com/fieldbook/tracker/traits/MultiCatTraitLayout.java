@@ -181,7 +181,7 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
 
         categoryList.clear();
 
-        String value = (getCurrentObservation() != null) ? getCurrentObservation().getValue() : "";
+        String value = (getCurrentObservation() != null) ? getCurrentObservation().getValue() : getCollectInputView().getText();
 
         ArrayList<BrAPIScaleValidValuesCategories> scale = new ArrayList<>();
 
@@ -370,9 +370,11 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
 
         try {
 
-            if (JsonUtil.Companion.isJsonValid(data)) {
+            String value = (getCurrentObservation() != null) ? getCurrentObservation().getValue() : getCollectInputView().getText();
 
-                userChosenCats.addAll(CategoryJsonUtil.Companion.decode(data));
+            if (JsonUtil.Companion.isJsonValid(value)) {
+
+                userChosenCats.addAll(CategoryJsonUtil.Companion.decode(value));
 
             } else throw new RuntimeException();
 
