@@ -181,7 +181,7 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
 
         categoryList.clear();
 
-        String value = getCollectInputView().getText();
+        String value = (getCurrentObservation() != null) ? getCurrentObservation().getValue() : "";
 
         ArrayList<BrAPIScaleValidValuesCategories> scale = new ArrayList<>();
 
