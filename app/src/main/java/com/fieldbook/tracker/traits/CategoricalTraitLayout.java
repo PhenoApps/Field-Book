@@ -193,7 +193,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
         if (categoryList == null) categoryList = new ArrayList<>();
         categoryList.clear();
 
-        String value = getCollectInputView().getText();
+        String value = (getCurrentObservation() != null) ? getCurrentObservation().getValue() : getCollectInputView().getText();
 
         ArrayList<BrAPIScaleValidValuesCategories> scale = new ArrayList<>();
 
@@ -308,6 +308,11 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
     @Override
     public void refreshLayout(Boolean onNew) {
         super.refreshLayout(onNew);
+
+        if (isMulticatEnabled()) {
+            refreshMultiCatList();
+        }
+
         RecyclerView.Adapter<?> adapter = gridMultiCat.getAdapter();
         if (adapter != null) {
             adapter.notifyItemRangeChanged(0, adapter.getItemCount());
@@ -453,14 +458,15 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
         ArrayList<BrAPIScaleValidValuesCategories> cats = getCategories();
         ArrayList<BrAPIScaleValidValuesCategories> userChosenCats = new ArrayList<>();
 
+        String value = (getCurrentObservation() != null) ? getCurrentObservation().getValue() : data;
         try {
-            if (JsonUtil.Companion.isJsonValid(data)) {
-                userChosenCats.addAll(CategoryJsonUtil.Companion.decode(data));
+            if (JsonUtil.Companion.isJsonValid(value)) {
+                userChosenCats.addAll(CategoryJsonUtil.Companion.decode(value));
             } else throw new RuntimeException();
 
         } catch (Exception e) {
 
-            String[] classTokens = data.split(CATEGORY_SEPARATOR);
+            String[] classTokens = value.split(CATEGORY_SEPARATOR);
 
             for (String token : classTokens) {
 
