@@ -1358,7 +1358,12 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 continue;
             }
 
-            trait.setDetails(var.getTrait().getTraitDescription());
+            if (var.getTrait() != null && var.getTrait().getTraitDescription() != null) {
+                trait.setDetails(var.getTrait().getTraitDescription());
+            } else {
+                trait.setDetails("");
+            }
+
             // Get database id of external system to sync to enabled pushing through brAPI
             trait.setExternalDbId(var.getObservationVariableDbId());
 

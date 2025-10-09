@@ -648,10 +648,21 @@ public class DataHelper {
 
         open();
 
+        List<FieldObject.TraitDetail> traitDetails = getTraitDetailsForStudy(studyId);
+
         return StudyDao.Companion.getFieldObject(
                 studyId,
-                preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position")
+                traitDetails
         );
+    }
+
+    public List<FieldObject.TraitDetail> getTraitDetailsForStudy(Integer studyId) {
+
+        open();
+
+        String sortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
+
+        return StudyDao.Companion.getTraitDetailsForStudy(studyId, sortOrder);
     }
 
     /**

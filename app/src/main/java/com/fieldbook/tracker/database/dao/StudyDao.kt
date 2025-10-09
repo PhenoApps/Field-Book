@@ -260,7 +260,7 @@ class StudyDao {
         } ?: ArrayList()
 
 
-        fun getFieldObject(studyId: Int, sortOrder: String = "position"): FieldObject? = withDatabase { db ->
+        fun getFieldObject(studyId: Int, traitDetails: List<FieldObject.TraitDetail>): FieldObject? = withDatabase { db ->
             val query = """
                 SELECT 
                     ${Study.PK},
@@ -308,7 +308,7 @@ class StudyDao {
                     }
                     map.toFieldObject().apply {
                         // Set the trait details
-                        this.traitDetails = getTraitDetailsForStudy(studyId, sortOrder)
+                        this.traitDetails = traitDetails
                     }
                 } else {
                     null
