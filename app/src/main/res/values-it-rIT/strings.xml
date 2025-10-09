@@ -335,10 +335,12 @@
     <string name="traits_create_false">Falso</string>
     <string name="traits_create_categories_text">Separa categorie con /</string>
     <string name="traits_create_camera">Fotocamera</string>
+    <string name="traits_create_close_keyboard">Chiudi la Tastiera</string>
     <string name="traits_create_warning_name_blank">Il nome del carattere non può essere vuoto</string>
     <string name="traits_create_warning_duplicate">Il carattere esiste già</string>
     <string name="traits_create_warning_numeric_required">Default, minimo e massimo devono essere numerici</string>
     <string name="dialog_new_trait_add_cat_button_text">Aggiungi</string>
+    <string name="traits_create_categories_value_text">Inserisci il valore della categoria qui</string>
     <string name="list_item_category_delete_content_description">Elimina la categoria.</string>
     <string name="dialog_new_trait_add_category_content_description">Aggiungi una nuova categoria.</string>
     <string name="list_item_traits_grid_content_description">Commuta selezione</string>
@@ -411,7 +413,7 @@
     <string name="activity_collect_dialog_verify_no_button">No</string>
     <string name="activity_collect_dialog_verify_yes_button">Sì</string>
     <string name="activity_collect_dialog_neutral_button">Modifica impostazioni</string>
-    <string name="activity_collect_dialog_new_collector">Vuoi salvare il nome della persona che raccoglie i dati?</string>
+    <string name="activity_collect_dialog_new_collector">Vuoi salvare il nome di utente che raccoglie i dati?</string>
     <!--- Datagrid -->
     <string name="act_data_grid_cursor_failed">La griglia di dati non è riuscita a caricare i dati.</string>
     <string name="dialog_data_grid_header_picker_title">Scegli Intestazioni di Riga</string>
@@ -429,20 +431,50 @@
     <string name="photo_failed_to_delete">Impossibile eliminare il file.</string>
     <!-- Trait Layout: GNSS -->
     <string name="trait_gnss_geo_coord_update_dialog_title">Avviso Aggiornamento Coordinata</string>
+    <string name="trait_gnss_geo_coord_update_dialog_message">Hai una coordinata salvata per questa unità, sei sicuro di volerla aggiornare?</string>
+    <string name="trait_gnss_chip_manual_text">Manuale</string>
+    <string name="trait_gnss_chip_10s_text">10s</string>
+    <string name="trait_gnss_chip_5s_text">5s</string>
+    <string name="gnss_trait_averaging_dialog_title">Raccogliendo le coordinate</string>
+    <string name="gnss_trait_averaging_dialog_message">Attendi mentre viene calcolata la media delle posizioni ottenute…</string>
+    <string name="trait_gnss_collect_button_content_description">Raccoglie la posizione corrente.</string>
+    <string name="trait_gnss_disconnect_button_content_description">Disconnette dal dispositivo GPS corrente.</string>
+    <string name="trait_gnss_connect_button_content_description">Apre una finestra di dialogo con possibili dispositivi GPS a cui connettersi.</string>
+    <string name="gnss_trait_averaging_switch_text">Media</string>
+    <string name="trait_gnss_precision_header">Correzione Richiesta:</string>
+    <string name="trait_gnss_accuracy_header">Acc.:</string>
+    <string name="trait_gnss_hdop_header">HDOP:</string>
+    <string name="trait_gnss_latitude_header">Lat.:</string>
+    <string name="trait_gnss_longitude_header">Long.:</string>
+    <string name="trait_gnss_altitude_header">Alt.:</string>
+    <string name="trait_gnss_time_header">UTC:</string>
     <!-- Trait Layout: Date -->
     <string name="trait_date_calendar_picker_content_description">Pulsante che apre un selettore di calendario.</string>
     <string name="trait_date_save_button_content_description">Questo salverà la data corrente selezionata.</string>
+    <string name="dialog_date_picker_neutral_button">Oggi</string>
     <!-- Trait Layout: Boolean -->
     <string name="trait_boolean_on">Attivo</string>
+    <string name="trait_boolean_off">Off</string>
     <!-- Trait Layout: GoPro -->
     <string name="trait_go_pro_capture_button_text">Cattura\n</string>
+    <string name="trait_go_pro_await_device_title">Scansione per GoPro</string>
+    <string name="trait_go_pro_await_ble_title">In Attesa Della Connessione GoPro BLE</string>
+    <string name="trait_go_pro_await_ble_message">Comunicando con GoPro BLE, questo potrebbe richiedere un minuto.</string>
+    <string name="trait_go_pro_await_ap_title">Aspettando GoPro AP</string>
     <string name="trait_go_pro_await_ap_message">Connessione alla rete, questo potrebbe richiedere un minuto. \n SSID: %s \n Pass: %s</string>
+    <string name="trait_go_pro_await_ap_neutral">Connessione Manuale</string>
     <string name="trait_go_pro_camera_delete_photo_title">Elimina Foto</string>
     <string name="go_pro_layout_black_11_not_detected">Questo carattere è stato fatto per un GoPro Black 11, si prega di contattare gli sviluppatori per implementare il tuo modello GoPro.\n</string>
+    <string name="go_pro_frag_connect_btn_content_description">Connettiti a una fotocamera GoPro.\n</string>
+    <string name="trait_go_pro_capture_content_description">Cattura un\'immagine da un dispositivo GoPro connesso.\n</string>
     <!-- Trait Layout: USB Camera -->
     <string name="trait_usb_camera_zoom_in_button_text">Aumenta Zoom</string>
+    <string name="trait_usb_camera_zoom_out_button_text">Diminuisci Zoom</string>
+    <string name="trait_usb_camera_zoom_out_content_description">Diminuisci Zoom</string>
     <string name="trait_usb_camera_zoom_in_content_description">Aumenta Zoom</string>
     <string name="trait_usb_camera_delete_photo">Elimina Foto USB</string>
+    <string name="trait_usb_camera_capture_content_description">Cattura una foto.</string>
+    <string name="trait_usb_camera_capture_button_text">Cattura</string>
     <!--- Trait Layout: Zebra label print -->
     <string name="trait_layout_data_stored">Salvato</string>
     <string name="trait_layout_print_label_size_title">Dimensione:</string>
@@ -456,18 +488,40 @@
     <string name="trait_layout_print_label_detailed_text">dettagliato</string>
     <string name="trait_layout_print_label_date_option">data</string>
     <string name="trait_layout_print_label_blank_option">vuoto</string>
+    <string name="printer_open">Stampante aperta</string>
+    <string name="printer_paused">Stampante in pausa</string>
+    <string name="printer_empty">Stampante vuota</string>
+    <string name="printer_not_connected">Stampante non connesso</string>
+    <string name="no_device_paired">Nessun dispositivo associato</string>
+    <string name="trait_labelprint_connect_button_description">Pulsante che collega una stampante.</string>
     <string name="trait_labelprint_preview_description">Anteprima dell\'etichetta.</string>
+    <string name="trait_labelprint_print_button_description">Pulsante che stampa le etichette configurate in questa finestra di dialogo.</string>
+    <string name="printer_success">Stampa con successo</string>
     <string name="bluetooth_printer_choose_device_title">Scegli il dispositivo bluetooth da cui stampare.</string>
     <!--- Trait Layout: Counter -->
     <string name="trait_counter_layout_failed">Il contatore non è riuscito a salvare, si prega di ricreare questo carattere.</string>
     <!--- Trait Layout: Location -->
     <string name="trait_location_save_content_description">Salva la posizione corrente.</string>
     <!--- Text to Speech Strings -->
+    <string name="trait_photo_tts_success">Immagine scattata con successo.</string>
+    <string name="trait_print_label_success">Stampando l\'etichetta.</string>
+    <string name="trait_gnss_internal_tts">GPS Interno</string>
+    <string name="trait_gnss_external_device_tts">Dispositivo esterno %s scelto.</string>
+    <string name="act_collect_na_btn_tts">Non applicabile</string>
     <string name="act_collect_barcode_btn_tts">Apertura scanner di codici a barre</string>
     <string name="act_collect_delete_btn_tts">Valore è stato eliminato.</string>
+    <string name="trait_numeric_backspace_tts">Tasto Backspace</string>
+    <string name="trait_date_minus_day_tts">Ritorno un giorno</string>
+    <string name="trait_date_next_day_tts">Giorno successivo</string>
+    <string name="trait_date_open_calendar_tts">Apertura calendario.</string>
+    <string name="trait_location_saved_tts">Ubicazione salvata.</string>
     <!--- Summary -->
+    <string name="fragment_summary_toolbar_title">Riepilogo</string>
+    <string name="menu_fragment_summary_filter_title">Filtro</string>
     <string name="fragment_summary_filter_title">Seleziona etichette di riepilogo</string>
     <string name="dialog_fragment_summary_neutral_button">Commuta Tutto</string>
+    <string name="fragment_summary_prev_button_text">Precedente</string>
+    <string name="fragment_summary_next_button_text">Successivo</string>
     <string name="fragment_summary_prev_button_content_description">Naviga alla entrata precedente.</string>
     <string name="fragment_summary_next_button_content_description">Naviga alla entrata successiva.</string>
     <string name="list_item_summary_nav_button_content_description">Naviga alla entrata selezionata.</string>
@@ -484,8 +538,13 @@
     <string name="activity_collect_found_plot">Navigato verso la parcella in prossimità</string>
     <string name="act_collect_geonav_snack_nav_button_content_description">Questo ti porterà alla parcella più vicina.</string>
     <string name="activity_collect_sensor_manager_failed">Impossibile avviare il gestore sensori</string>
+    <string name="dialog_geonav_collect_neutral_reconnect">Riconetti</string>
+    <string name="dialog_geonav_collect_precision_threshold_title">Grado di precisione</string>
+    <string name="dialog_geonav_collect_reconnect">Riconetti</string>
     <string name="dialog_geonav_collect_reset_start_toast_message">Reimpostando connessione…</string>
     <string name="dialog_geonav_collect_reset_end_toast_message">Connessione reimpostazioni</string>
+    <string name="dialog_geonav_precision_loss_title">Perdita Di Precisione Localizzazione</string>
+    <string name="dialog_geonav_precision_loss_msg">La tua precisione preferita è stata persa.</string>
     <!--- Content Descriptions -->
     <string name="view_range_box_left_button_content_description">Naviga alla entrata precedente.</string>
     <string name="view_range_box_right_button_content_description">Naviga alla entrata successiva.</string>
@@ -495,7 +554,13 @@
     <string name="observation_info_study_name">Nome dello Studio</string>
     <string name="observation_info_entry_id">ID Entrata</string>
     <string name="observation_info_trait_format">Formati del Carattere</string>
+    <string name="observation_info_trait_name">Nome del Carattere</string>
+    <string name="observation_info_value">Valore</string>
+    <string name="observation_info_timestamp">Timestamp Dell\'Osservazione</string>
+    <string name="observation_info_collector">Collettore</string>
+    <string name="observation_info_last_synced_time">Ultima Tempo Di Sincronizzazione</string>
     <string name="observation_info_additional_info">Informazioni Aggiuntive</string>
+    <string name="observation_info_rep">Rep</string>
     <string name="observation_info_other">Altro</string>
     <!-- Skip Entries -->
     <string name="collect_sole_entry_without_data">Questa è l\'unica entrata senza dati</string>
@@ -504,6 +569,7 @@
     <!-- EXPORT -->
     <!-- Export dialog -->
     <string name="export_source_local">Locale</string>
+    <string name="export_source_brapi">BrAPI</string>
     <string name="export_dialog_title">Esporta dati</string>
     <string name="export_format_database">Database</string>
     <string name="export_format_table">Tabella</string>
@@ -522,32 +588,74 @@
     <string name="export_error_missing_column">Il campo tipo di colonna deve essere selezionato</string>
     <string name="export_error_missing_trait">Il tipo di carattere deve essere selezionato</string>
     <string name="export_overwrite">Sovrascrivi l\'esportazione precedente</string>
+    <string name="dialog_export_bundle_data_cb_text">Raggruppa i dati multimediali con file di esportazione.</string>
     <string name="export_multiple_fields_name">multiple_fields</string>
+    <string name="export_multiple_fields_message">Nota: Le esportazioni di campi multipli sono raggruppate in un file ZIP</string>
     <!-- Citation -->
+    <string name="citation_card_title">Citazione di Field Book</string>
     <string name="citation_title">Citazione</string>
     <string name="citation_string">Se si utilizza Field Book per la ricerca, si prega di citare il seguente articolo di giornale:</string>
     <!-- SETTINGS -->
     <!-- General -->
     <string name="preferences_system_title">Sistema</string>
+    <string name="preferences_system_defaults_title">Predefiniti</string>
+    <string name="preferences_source_default_import">Importa Origine</string>
+    <string name="preferences_source_default_export">Esporta Origine</string>
+    <string name="brapi_disabled_alert_title">BrAPI Disabilitato</string>
     <string name="brapi_disabled_alert_message">BrAPI deve essere attivato prima nelle impostazioni di BrAPI.</string>
+    <string name="preferences_general_share_enable">Abilita Condivisione File</string>
+    <string name="preferences_general_share_enable_description">Quando i file vengono esportati, verrà visualizzata una finestra di condivisione</string>
     <!-- Profile -->
     <string name="preferences_profile_title">Profilo</string>
-    <string name="preferences_profile_previous_names_warning">Tutti i nomi delle persone salvate saranno eliminati, e questo non può essere invertito. Sei sicuro di voler continuare?</string>
+    <string name="preferences_profile_person_title">Utente</string>
+    <string name="preferences_profile_require_person">Richiedi Utente</string>
+    <string name="preferences_profile_require_person_summary">Traccia il nome di utente che raccoglie i dati</string>
+    <string name="preferences_profile_set_person">Nome di Utente</string>
+    <string name="preferences_profile_person_dialog_title">Imposta Utente</string>
+    <string name="dialog_previous_names">Nomi Usati Precedenti</string>
+    <string name="preferences_profile_previous_names">Nomi Precedenti</string>
+    <string name="preferences_profile_new_person">Nuovo Utente</string>
+    <string name="preferences_profile_previous_names_warning">Tutti i nomi utente salvati verranno eliminati e questa azione non potrà essere annullata. Vuoi continuare?</string>
+    <string name="preferences_profile_name_first">Nome</string>
+    <string name="preferences_profile_name_last">Cognome</string>
     <string name="preferences_profile_name_error">Entrambi i campi non possono essere vuoti</string>
+    <string name="preferences_profile_require_interval_title">Intervallo Di Verificazione</string>
+    <string name="verification_interval_every_open">Ogni volta che l\'app si apre</string>
+    <string name="verification_interval_every_12">Ogni 12 ore</string>
+    <string name="verification_interval_every_24">Ogni 24 ore</string>
+    <string name="verification_interval_never">Mai</string>
+    <string name="preferences_profile_device_title">Dispositivo</string>
+    <string name="preferences_profile_set_device_name">Nome del dispositivo</string>
+    <string name="preferences_profile_device_name_dialog_title">Imposta Nome Del Dispositivo</string>
     <string name="preferences_profile_device_name_error">Questo campo non può essere vuoto</string>
+    <string name="preferences_profile_device_name_default_format">Predefinito: %s</string>
     <string name="pref_profile_crashlytics_user_id_enabled">ID Univoco</string>
     <string name="pref_profile_crashlytics_user_id_enabled_summary">Includi un ID anonimo e univoco nei crash log per aiutare il team di sviluppo a correggere i bug</string>
     <string name="pref_profile_crashlytics_refresh_title">Aggiorna ID</string>
     <string name="pref_profile_crashlytics_refresh_summary">Questo assegnerà un nuovo ID univoco</string>
     <!-- Features -->
+    <string name="preferences_features_title">Funzionalità</string>
     <!-- Appearance -->
     <string name="preferences_appearance_title">Aspetto</string>
+    <string name="preferences_appearance_application_title">Applicazione</string>
     <string name="preferences_appearance_theme_title">Tema</string>
+    <string name="preferences_appearance_theme_summary">Modifica colori specifici o l\'intero tema del Field Book</string>
+    <string name="preferences_theme_theme_title">Tema dell\'Applicazione</string>
     <string name="theme_default">Impostazioni predefinite</string>
+    <string name="theme_high_contrast">Contrasto Elevato</string>
+    <string name="theme_blue">Blu</string>
+    <string name="preferences_theme_text_size_title">Dimensione del Testo</string>
+    <string name="text_size_s">Piccolo</string>
+    <string name="text_size_m">Medio (predefinito)</string>
+    <string name="text_size_l">Grande</string>
+    <string name="text_size_xl">Molto Grande</string>
+    <string name="preferences_theme_data_saved_title">Colore dei dati salvato</string>
+    <string name="preferences_theme_data_saved_description">Modifica come vengono visualizzati i dati salvati</string>
     <string name="preferences_theme_reset_title">Ripristina il tema predefinito</string>
     <string name="preferences_theme_reset_description">Reimposta tutte le impostazioni ai valori predefiniti del sistema</string>
     <string name="preferences_appearance_language">Lingua</string>
     <string name="preferences_appearance_language_description">Lingua impostata dal sistema</string>
+    <string name="preference_language_default">Lingua del Sistema</string>
     <string name="preferences_appearance_tutorial_description">Aggiungi un pulsante nella barra degli strumenti nell\'app che apre il tutorial</string>
     <string name="preferences_appearance_toolbar_customize_description">Commuta la visibilità delle funzioni predefinite</string>
     <string name="preferences_appearance_toolbar_customize_search">Cerca</string>
@@ -573,9 +681,12 @@
     <string name="preferences_appearance_range_progress_bar">Barra di progresso delle entrate</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamento</string>
+    <string name="preferences_behavior_movement_title">Movimento</string>
+    <string name="preferences_behavior_hardware_title">Hardware</string>
     <string name="preferences_behavior_data_title">Dato</string>
     <string name="preferences_behavior_cycle_traits">Auto-Avanza della Entrata</string>
     <string name="preferences_behavior_cycle_traits_description">Ruotando la lista di caratteri si avanza automaticamente la entrata</string>
+    <string name="preferences_behavior_cycle_sound_title">Abilitare l\'effetto sonoro?</string>
     <string name="preferences_behavior_return_to_first_trait">Ripristino Automatico delle Carattere</string>
     <string name="preferences_behavior_return_to_first_trait_description">L\'avanzamento della entrata si reimposta automaticamente al primo carattere</string>
     <string name="preferences_behavior_disable_entry_arrow">Richiedi Dati Per Spostare La Entrata</string>
@@ -595,27 +706,37 @@
     <string name="preferences_general_use_day_number_description">Usa il giorno dell\'anno per la raccolta dei dati anziché la data</string>
     <!-- Location -->
     <string name="preferences_location_title">Posizione</string>
+    <string name="location_level_off">Off</string>
     <string name="location_level_study">Campo</string>
     <string name="location_level_observation_unit">Entrata</string>
+    <string name="pref_coordinate_format_title">Formato Della Raccolta</string>
     <string name="location_format_iso">ISO 6709</string>
     <string name="location_format_geojson">GeoJSON</string>
     <string name="pref_geonav_category_title">GeoNav</string>
     <string name="pref_geonav_enable_title">Abilita GeoNav</string>
+    <string name="pref_geonav_enable_summary">Naviga i campi usando la posizione del dispositivo</string>
     <string name="pref_geonav_search_method_title">Metodo di Ricerca</string>
     <string name="pref_geonav_search_method_summary">Il metodo %s utilizzato per cercare le parcelle in GeoNav</string>
+    <string name="pref_geonav_method_distance">Distanza</string>
     <string name="pref_geonav_method_trapezoid">Trapezoidale</string>
+    <string name="pref_behavior_geonav_parameters_category_title">Parametri</string>
     <string name="pref_geonav_search_trapezoid_d1_title">Base Trapezoidale (km)</string>
     <string name="pref_geonav_search_trapezoid_d1_summary">La base più corta del trapezoide è %s km</string>
     <string name="pref_geonav_search_trapezoid_d2_title">Distanza Trapezoide (km)</string>
     <string name="pref_geonav_search_trapezoid_d2_summary">La distanza dall\'utente all\'estremità opposta del trapezoide è %s km</string>
     <string name="pref_geonav_search_angle_summary">GeoNav crea un trapezoide davanti all\'utente, l\'angolo più vicino all\'utente è definito come %s°</string>
     <string name="pref_geonav_search_angle_title">GeoNav Cerca un Angolo (gradi)</string>
+    <string name="pref_geonav_log_off">Off</string>
+    <string name="pref_geonav_log_limited">Limitato</string>
     <string name="pref_geonav_log_limited_description">Limitato: Registrazione della voce più vicina a storage/geonav/limited_log.txt</string>
+    <string name="pref_geonav_log_full">Al massimo</string>
     <string name="pref_geonav_log_full_description">Completo: registrando tutti gli aggiornamenti della posizione e i passaggi dell\'algoritmo per storage/geonav/log.txt</string>
     <string name="pref_geonav_log_both">Ambo</string>
     <string name="pref_geonav_log_both_description">Entrambi: registrando tutti gli aggiornamenti della posizione e i passaggi dell\'algoritmo per storage/geonav/log.txt, voce più vicina a storage/geonav/limited_log.txt</string>
     <string name="pref_geonav_update_interval_title">Intervallo di Aggiornamento (s)</string>
+    <string name="pref_geonav_update_interval_summary">Il tempo tra gli aggiornamenti della posizione è %ss</string>
     <string name="pref_geonav_pair">Provider di Geolocalizzazione</string>
+    <string name="pref_behavior_geonav_internal_gps_choice">GPS Interno</string>
     <string name="choose_paired_bluetooth_devices_title">Scegli il tuo dispositivo bluetooth associato</string>
     <!-- Sounds -->
     <string name="preferences_sounds">Suoni</string>
@@ -671,13 +792,14 @@
     <string name="stat_title_fields">Campi</string>
     <string name="stat_title_entries">Entrate</string>
     <string name="stat_title_data">Dato</string>
-    <string name="stat_people_dialog_title">Lista di Persone</string>
+    <string name="stat_people_dialog_title">Lista degli Utenti</string>
     <string name="stat_most_dialog_title">Lista delle osservazioni</string>
     <string name="stat_entries_toast_message">entrate sono statie fertilizzati</string>
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">A proposito</string>
     <string name="about_version_title">Versione</string>
+    <string name="about_manual_title">Manuale</string>
     <!-- Lead  -->
     <string name="about_project_lead_title">Responsabile del progetto</string>
     <!-- Support  -->
@@ -886,6 +1008,8 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="tutorial_main_field_audio_mic_description">Questo avvierà una registrazione audio a livello di campo.</string>
     <string name="tutorial_main_geonav_title">GeoNav</string>
     <string name="brapi_programs_activity_title">Scegli il tuo programma</string>
+    <string name="menu_action_brapi_filter">Filtro</string>
+    <string name="act_brapi_filter_apply">Filtro</string>
     <string name="act_brapi_filter_import">Importa</string>
     <string name="act_brapi_filter_clear">Cancella</string>
     <!-- base camera strings -->
@@ -968,7 +1092,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="dialog_quick_goto_go">Vai</string>
     <string name="quick_goto_primary_hint">ID Primario</string>
     <string name="quick_goto_secondary_hint">ID secondario</string>
-    <string name="quick_goto_dialog_icon_description">persona in gestione</string>
+    <string name="quick_goto_dialog_icon_description">utente in gestione</string>
     <string name="traits_sort_default">Impostazioni predefinite</string>
     <string name="view_trait_photo_settings_crop">Imposta Regione Ritaglio</string>
     <string name="quick_goto_swap_content_description">commuta tipo d\'ingresso</string>
