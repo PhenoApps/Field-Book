@@ -541,6 +541,7 @@
     <string name="act_collect_geonav_snack_nav_button_content_description">Questo ti porterà alla parcella più vicina.</string>
     <string name="activity_collect_sensor_manager_failed">Impossibile avviare il gestore sensori</string>
     <string name="dialog_geonav_collect_neutral_reconnect">Riconetti</string>
+    <string name="dialog_geonav_collect_auto_navigate">Auto Navigate</string>
     <string name="dialog_geonav_collect_precision_threshold_title">Grado di precisione</string>
     <string name="dialog_geonav_collect_reconnect">Riconetti</string>
     <string name="dialog_geonav_collect_reset_start_toast_message">Reimpostando connessione…</string>
@@ -877,6 +878,8 @@
     <string name="brapi_choice_to_make_default_export">Esporta Origine</string>
     <string name="brapi_choice_to_make_default_negative">Annulla</string>
     <string name="brapi_choice_to_make_default_positive">Salva</string>
+    <string name="brapi_edit_display_name">Modifica Nome Visualizzato</string>
+    <string name="brapi_edit_display_name_server">Nome Del Server</string>
     <string name="brapi_edit_display_name_default">Server Di Test BrAPI</string>
     <string name="preferences_brapi_version">Versione BrAPI</string>
     <string name="brapi_pagination">Dimensione Della Pagina</string>
@@ -1093,11 +1096,15 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="tutorial_main_field_audio_mic_description">Questo avvierà una registrazione audio a livello di campo.</string>
     <string name="tutorial_main_geonav_title">GeoNav</string>
     <string name="brapi_programs_activity_title">Scegli il tuo programma</string>
+    <string name="import_brapi_title">Importazione BrAPI</string>
     <string name="import_brapi_field_title">Importazione Campo BrAPI</string>
+    <string name="import_brapi_trait_title">Importazione Caratteri BrAPI</string>
     <string name="menu_action_brapi_filter">Filtro</string>
     <string name="act_brapi_filter_apply">Filtro</string>
     <string name="act_brapi_filter_import">Importa</string>
     <string name="act_brapi_filter_clear">Cancella</string>
+    <string name="repeated_values_pager_content_description">valori ripetiti</string>
+    <string name="repeated_values_right_button_content_description">destra</string>
     <string name="repeated_values_left_button_content_description">sinistra</string>
     <string name="export_util_repeated_measures_table_warning_title">Tabella Misure Ripetute</string>
     <string name="export_util_repeated_measures_table_warning_message">Solo il valore delle ultime misure ripetute sarà esportato in formato tabella.</string>
@@ -1119,15 +1126,25 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="view_trait_photo_settings_camera_choice_description">Scegli tra la fotocamera predefinita del Field Book e l\'app della fotocamera Android.</string>
     <!-- usb camera trait -->
     <string name="usb_camera_resolution_options_title">Risoluzioni Supportate</string>
+    <string name="usb_camera_plug_in_camera">Collega una web cam compatibile con UVC.</string>
+    <string name="view_trait_photo_settings_white_balance_title">Bilancio Automatico Del Bianco</string>
     <string name="view_trait_photo_settings_auto_focus_title">Focus Automatico</string>
     <!-- gopro -->
     <string name="dialog_go_pro_wait_stream_title">In attesa di anteprima in diretta</string>
+    <string name="dialog_go_pro_wait_stream_message">Questo può richiedere un minuto.</string>
     <string name="view_trait_photo_settings_save_image_title">Copia l\'immagine nel Field Book</string>
     <string name="go_pro_trait_settings_title">Impostazioni GoPro</string>
     <!-- canon camera strings -->
+    <string name="canon_frag_connect_btn_content_description">pulsante dell\'otturatore</string>
+    <string name="traits_format_canon">Canon</string>
     <string name="pref_canon_ip_title">Indirizzo IP Canon</string>
+    <string name="pref_canon_port_title">Porta Canon</string>
+    <string name="preferences_canon_title">Canon</string>
     <string name="pref_canon_ssid_summary">Questo nome è usato per trovare l\'AP del tuo dispositivo. Questo nome deve essere contenuto all\'interno del SSID attuale.</string>
     <string name="pref_canon_title">Nome SSID</string>
+    <string name="pref_canon_ip_summary">Questo è il ip visualizzato sulla fotocamera durante la configurazione dell\'AP.</string>
+    <string name="pref_canon_port_summary">Questa è la porta visualizzata sulla fotocamera durante la configurazione dell\'AP.</string>
+    <string name="pref_canon_help_title">Assistenza</string>
     <string name="trait_usb_photo_settings_title">Impostazioni Foto USB</string>
     <string name="canon_trait_settings_title">Impostazioni Canon</string>
     <string name="dialog_brapi_filter_title">Filtri</string>
