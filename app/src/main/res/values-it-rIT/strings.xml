@@ -746,6 +746,9 @@
     <string name="preferences_sound_entry_description">Emette un suono di avanzamento quando si sposta tra le entrate</string>
     <string name="preferences_sound_delete_obs_title">Elimina Osservazione</string>
     <string name="preferences_sound_delete_obs_description">Riproduci eliminare suono quando l\'osservazione viene eliminata</string>
+    <string name="preferences_category_audio_tts_title">Testo a Sintesi Vocale</string>
+    <string name="preferences_general_tts_title">Testo a Sintesi Vocale</string>
+    <string name="preferences_general_tts_description">Abilita Testo a Sintesi Vocale quando i dati vengono inseriti nell\'attività di raccolta</string>
     <string name="preferences_general_tts_language_title">Scegli la Lingua</string>
     <string name="preferences_general_tts_language_description">Scegli una lingua TTS compatibile</string>
     <!-- BrAPI preferences are in the BrAPI section below -->
@@ -762,14 +765,22 @@
     <string name="database_reset_warning1">Tutti i dati verranno eliminati. Sei sicuro di voler reimpostare il database?</string>
     <string name="database_reset_warning2">Una reimposta del database non può essere annullato. L\'app si chiuderà dopo aver cancellato il database. Sei sicuro di voler continuare?</string>
     <string name="database_reset_message">Il database è stato eliminato</string>
+    <string name="share_file_title">Inviando il file…</string>
     <string name="preferences_storage_settings_title">Impostazioni</string>
     <string name="preferences_system_defaults_reset">Reimposta Impostazioni</string>
     <string name="reset_preferences_title">Reimposta le Impostazioni a Predefinite</string>
     <string name="reset_preferences_message">Attenzione: questo reimposta tutte le preferenze del Field Book.</string>
     <!-- Experimental -->
+    <string name="preferences_experimental_title">Sperimentale</string>
+    <string name="preferences_experimental_stable_title">Stabile</string>
+    <string name="preferences_experimental_beta_title">Beta</string>
+    <string name="preferences_experimental_alpha_title">Alfa</string>
+    <string name="pref_experimental_repeated_values_title">Misure Ripetute</string>
     <string name="pref_experimental_repeated_values_summary">Abilita la raccolta di valori multipli per ogni entrata/carattere</string>
+    <string name="pref_experimental_repeated_values_disabled_title">Misure Ripetute Disabilitate</string>
     <string name="pref_experimental_repeated_values_disabled_message">Tutti i valori ripetuti che sono stati raccolti saranno nascosti fino a quando questa funzione non sarà nuovamente abilitata</string>
     <string name="pref_experimental_enable_field_audio_title">Abilita Audio di Campo</string>
+    <string name="pref_experimental_enable_field_audio_summary">Abilita la funzione di registrazione audio per l\'intero campo</string>
     <string name="menu_collect_start_field_audio">Avvia Registratore</string>
     <string name="menu_collect_stop_field_audio">Ferma Registratore</string>
     <string name="field_audio_recording_start">Registrazione audio a livello campo</string>
@@ -777,32 +788,61 @@
     <string name="field_audio_recording_warning">L\'audio a livello di campo è già in fase di registrazione. Ferma prima.</string>
     <string name="trait_audio_recording_warning">L\'audio di livello di carattere è già in fase di registrazione. Ferma prima.</string>
     <string name="trait_audio_playing_warning">L\'audio di livello di carattere è in riproduzione. Ferma prima.</string>
+    <string name="field_audio_zip_error">Errore nella creazione del file zip</string>
+    <string name="trait_audio_placeholder_filename">File Audio Registrata</string>
+    <string name="trait_audio_timestamp">Timestamp: </string>
+    <string name="trait_audio_duration">Durata: </string>
+    <string name="trait_audio_file_size">Dimensione Del File: </string>
     <string name="pref_beta_enable_individual_field_page_title">Abilita Le Pagine Di Campo Individuali</string>
     <string name="pref_beta_enable_individual_field_page_summary">Selezionando un campo nella lista campi si apre una pagina di dettaglio</string>
+    <string name="pref_beta_mlkit_title">Libreria MLKit</string>
     <string name="pref_beta_mlkit_summary">Questa opzione utilizza la libreria MLKit invece della libreria ZXing per la scansione dei codici a barre</string>
     <string name="pref_beta_mlkit_enabled_title">Scansione codice a barre utilizzando MLKit abilitato</string>
     <string name="pref_beta_mlkit_enabled_message">Abilitando questa funzionalità, la libreria di scansione di codici a barre da ZXing a MLKit</string>
     <!-- STATISTICS -->
+    <string name="warning_no_observations">Nessuna osservazione è stata raccolta</string>
+    <string name="warning_no_data">Nessun dato da visualizzare</string>
     <string name="warning_invalid_date_range">Seleziona un intervallo di date valido</string>
+    <string name="stats_heatmap_title">Mappa Calore</string>
+    <string name="stats_heatmap">Visualizza una mappa di calore delle osservazioni raccolte</string>
+    <string name="stats_loading">Caricando…</string>
+    <string name="stats_first_day">Scorri fino al primo giorno con un\'osservazione raccolta</string>
+    <string name="stats_last_day">Scorri fino all\'ultimo giorno con un\'osservazione raccolta</string>
     <string name="stats_calendar_range">Seleziona un intervallo di date per filtrare le date visualizzate</string>
+    <string name="stats_counter">Scambia la data con il numero di osservazioni raccolte quel giorno</string>
     <string name="stats_date_range_picker_title">Seleziona un intervallo di date</string>
     <string name="stats_tab_layout_total">Totale</string>
     <string name="stats_tab_layout_year">Anno</string>
     <string name="stats_tab_layout_month">Mese</string>
+    <string name="stat_card_export_title_total">Statistiche Totali di Field Book</string>
+    <string name="stat_card_export_title">Statistiche del Field Book per</string>
     <string name="stat_title_fields">Campi</string>
     <string name="stat_title_entries">Entrate</string>
     <string name="stat_title_data">Dato</string>
+    <string name="stat_title_hours">Ore</string>
+    <string name="stat_title_people">Utenti</string>
+    <string name="stat_title_photos">Foto</string>
+    <string name="stat_title_busiest">Più Impegnato</string>
+    <string name="stat_title_most">Più</string>
+    <string name="stat_fields_dialog_title">Campi importati in</string>
     <string name="stat_people_dialog_title">Lista degli Utenti</string>
     <string name="stat_most_dialog_title">Lista delle osservazioni</string>
     <string name="stat_entries_toast_message">entrate sono statie fertilizzati</string>
+    <string name="stat_data_toast_message">osservazioni sono state raccolte</string>
+    <string name="stat_hours_toast_message">ore trascorse la fenotipizzazione</string>
+    <string name="stat_photos_toast_message">foto sono state catturate</string>
+    <string name="stat_busiest_toast_message">osservazioni sono state raccolte il </string>
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">A proposito</string>
     <string name="about_version_title">Versione</string>
     <string name="about_manual_title">Manuale</string>
+    <string name="about_rate">Valuta Field Book</string>
     <!-- Lead  -->
     <string name="about_project_lead_title">Responsabile del progetto</string>
+    <string name="about_email_title">Email</string>
     <!-- Support  -->
+    <string name="about_support_title">Assistenza</string>
     <string name="about_contributors_title">Contributori</string>
     <string name="about_contributors_funding_title">Finanziamenti</string>
     <!-- PhenoApps  -->
@@ -810,19 +850,29 @@
     <string name="about_technical_title">Dettagli Tecnici</string>
     <string name="about_libraries_title">Biblioteche</string>
     <!-- Update -->
+    <string name="check_updates_title">Verifica Aggiornamenti…</string>
+    <string name="found_updates_title">Scarica L\'Ultima Versione</string>
+    <string name="no_updates_title">Ultima Versione In Esecuzione</string>
     <!-- BRAPI -->
     <!-- BrAPI preferences -->
     <string name="brapi_info_title">Informazioni sulla sincronizzazione BrAPI</string>
     <string name="preferences_brapi_enable_title">Abilita BrAPI</string>
     <string name="preferences_brapi_enable_summary">L\'Breeding API consente un semplice trasferimento di dati a database compatibili.</string>
+    <string name="preferences_brapi_server_title">Server</string>
     <string name="preferences_brapi_barcode_config_title">Auto-configura</string>
     <string name="preferences_brapi_barcode_config_summary">Gestione impostazioni con codici QR</string>
     <string name="preferences_brapi_barcode_config_scan">Importa nuove impostazioni</string>
     <string name="preferences_brapi_barcode_config_share">Condividi le impostazioni correnti</string>
     <string name="preferences_brapi_barcode_config_dialog_title">Configurazione BrAPI Scansionabile</string>
     <string name="qr_code_share_choose_action_title">Scegli L\'Azione</string>
+    <string name="menu_action_brapi_pref_title">Autorizza BrAPI</string>
+    <string name="act_brapi_auth_http_warning_title">Avviso HTTP</string>
+    <string name="act_brapi_auth_http_warning_message">Hai inserito un url http. Non c\'è garanzia che questa connessione sia sicura.</string>
     <string name="brapi_base_url">URL di base</string>
     <string name="brapi_base_url_desc">L\'URL di base per il server BrAPI collegato</string>
+    <string name="brapi_choice_to_make_default_dialog_title">Rendi questo server BrAPI il predefinito:</string>
+    <string name="brapi_choice_to_make_default_import">Importa Origine</string>
+    <string name="brapi_choice_to_make_default_export">Esporta Origine</string>
     <string name="brapi_choice_to_make_default_negative">Annulla</string>
     <string name="brapi_choice_to_make_default_positive">Salva</string>
     <string name="preferences_brapi_oidc_flow_oauth_code">OAuth2 Authorization Code</string>
@@ -835,6 +885,7 @@
     <string name="brapi_oidc_scope">OIDC Scope</string>
     <string name="brapi_oidc_scope_desc">The Scope to be used in the authentication provider</string>
     <string name="preferences_brapi_server_barcode">Scansiona un codice a barre del server</string>
+    <string name="preferences_brapi_server_scan_error">Errore Di Scansione</string>
     <string name="preferences_brapi_server_add">Invia un server</string>
     <!-- Community Servers -->
     <string-array name="community_servers_names">
@@ -867,21 +918,26 @@
     </string-array>
     <!-- Authorization -->
     <string name="brapi_save_authorize">Salva e autorizza</string>
+    <string name="brapi_display_name">Visualizza Nome</string>
     <string name="brapi_revoke_auth">Disconnettersi</string>
     <string name="brapi_auth_btn">Accedi al sito</string>
     <string name="brapi_auth_success">Autorizzazione BrAPI riuscita</string>
     <string name="brapi_auth_deny">Autorizzazione BrAPI negata</string>
     <string name="brapi_auth_error_starting">Errore durante l\'avvio dell\'autenticazione BrAPI</string>
+    <string name="brapi_auth_permission_deny">ERRORE: Non hai i permessi necessari per eseguire questa azione</string>
     <string name="brapi_auth_needed_title">Accesso necessario</string>
     <string name="brapi_auth_needed">Devi aver effettuato l\'accesso al sistema con cui stai tentando di sincronizzare i dati in per sincronizzare i tuoi dati.\n\nVuoi autenticarti ora?</string>
     <!-- BrAPI Import -->
+    <string name="import_dialog_title_brapi_fields">Importazione Campo BrAPI</string>
     <string name="brapi_load_data_button">Carica Campi</string>
     <string name="brapi_load_traits_button">Carica Caratteri</string>
     <string name="brapi_save_data_button">Anteprima de Campo</string>
     <string name="brapi_study_name">Nome</string>
     <string name="brapi_study_description">Descrizione</string>
     <string name="brapi_study_location">Posizione</string>
+    <string name="brapi_observation_level">Livello Di Osservazione</string>
     <string name="brapi_study_num_traits">Caratteri</string>
+    <string name="brapi_not_found">ERRORE: il sistema di destinazione non supporta questa operazione tramite BrAPI.</string>
     <string name="brapi_studies_error">Errore nel caricamento degli studi.</string>
     <string name="brapi_study_detail_error">Errore durante il caricamento dei dettagli dello studio per lo studio. Studio non salvato.</string>
     <string name="brapi_plot_detail_error">Errore durante il caricamento delle parcelle per lo studio. Studio non salvato.</string>
@@ -889,8 +945,14 @@
     <string name="brapi_ontology_error">Errore durante il caricamento dei caratteri da BrAPI.</string>
     <string name="brapi_save_field_error">Errore durante il salvataggio del campo</string>
     <string name="brapi_field_not_selected">Il campo selezionato deve essere importato da BrAPI.</string>
+    <string name="brapi_fields_filter_by_program">Filtra per programma</string>
+    <string name="brapi_fields_filter_by_trial">Filtra per prova</string>
+    <string name="brapi_programs_load">Carica programmi</string>
     <string name="brapi_programs_select">Seleziona il programma</string>
+    <string name="brapi_programs_error">Errore durante il caricamento dei programmi.</string>
+    <string name="brapi_trials_load">Caricare le prove</string>
     <string name="brapi_trials_select">Seleziona prova</string>
+    <string name="brapi_trials_error">Errore durante il caricamento delle prove.</string>
     <string name="brapi_save_trait">Salva caratteri</string>
     <string name="brapi_must_configure_url">È necessario configurare un URL BrAPI valido nelle impostazioni prima di procedere</string>
     <string name="brapi_warning_select_program">Per favore seleziona un programma</string>
@@ -905,6 +967,7 @@
     <string name="brapi_export_unknown_error">ERRORE: errore sconosciuto</string>
     <string name="brapi_export_successful">Esportazione BrAPI riuscita</string>
     <string name="brapi_saving_indicator">Salvando osservazioni...</string>
+    <string name="brapi_field_non_matching_sources_title">Sorgenti Non Corrispondenti</string>
     <string name="brapi_field_non_matching_sources">Impossibile sincronizzare i dati. I dati del campo provengono da, %1$s, l\'URL BrAPI è attualmente impostato su %2$s. Le fonti devono corrispondere.</string>
     <string name="brapi_enable_before_sync">BRAPI è disabilitato. Si prega di abilitarlo nelle impostazioni prima di utilizzare la sincronizzazione.</string>
     <string name="brapi_trait_already_exists">Il carattere esiste già: %1$s. Non si salva.</string>
@@ -1008,6 +1071,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="tutorial_main_field_audio_mic_description">Questo avvierà una registrazione audio a livello di campo.</string>
     <string name="tutorial_main_geonav_title">GeoNav</string>
     <string name="brapi_programs_activity_title">Scegli il tuo programma</string>
+    <string name="import_brapi_field_title">Importazione Campo BrAPI</string>
     <string name="menu_action_brapi_filter">Filtro</string>
     <string name="act_brapi_filter_apply">Filtro</string>
     <string name="act_brapi_filter_import">Importa</string>
@@ -1034,6 +1098,9 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="pref_canon_title">Nome SSID</string>
     <string name="trait_usb_photo_settings_title">Impostazioni Foto USB</string>
     <string name="canon_trait_settings_title">Impostazioni Canon</string>
+    <string name="dialog_brapi_filter_title">Filtri</string>
+    <string name="dialog_brapi_filter_active">Attivo</string>
+    <string name="dialog_brapi_filter_choices_title">Filtra per</string>
     <!-- spectral trait strings -->
     <string name="trait_spectral_connect_content_description">Avvia una connessione del dispositivo.</string>
     <string name="select_device">Seleziona Dispositivo</string>
@@ -1041,8 +1108,17 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="delete_color">Elimina Osservazione Del Colore</string>
     <string name="delete_color_message">Questo eliminerà definitivamente l\'osservazione</string>
     <string name="brapi_studies_filter_title">Studi</string>
+    <string name="brapi_trials_filter_title">Prove</string>
+    <string name="brapi_filter_dialog_title">Filtra per</string>
+    <string name="brapi_filter_type_program">Programma</string>
+    <string name="brapi_filter_type_season">Stagione</string>
+    <string name="brapi_filter_type_trial">Prova</string>
+    <string name="brapi_filter_type_crop">Coltura</string>
     <string name="brapi_importer_search_hint">Cerca Testo</string>
+    <string name="act_brapi_filter_by_title">Filtra Per: %s</string>
+    <string name="check_all">Verifica Tutti I Filtri</string>
     <string name="menu_action_brapi_filter_clear_all">Cancella tutti i filtri</string>
+    <string name="brapi_filter_error">Qualcosa è andato storto interrogando per %s</string>
     <string name="menu_filter_brapi_reset_cache_title">Reimposta Cache</string>
     <string name="brapi_filter_bottom_sheet_delete_all_description">cancella tutti i filtri</string>
     <string name="act_brapi_study_import_fetch_levels">Recupero livelli d\'osservazione...</string>
@@ -1080,6 +1156,10 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
         <item quantity="one">Risultato %s</item>
         <item quantity="other">%s risultati</item>
     </plurals>
+    <string name="brapi_filter_type_program_count">Programma (%s)</string>
+    <string name="brapi_filter_type_season_count">Stagione (%s)</string>
+    <string name="brapi_filter_type_trial_count">Prova (%s)</string>
+    <string name="brapi_filter_type_crop_count">Coltura (%s)</string>
     <string name="brapi_filter_type_study_count">Studio (%s)</string>
     <string name="pref_alpha_enhanced_brapi_import_summary">Se abilitata, verrà utilizzata una nuova interfaccia utente di importazione BrAPI per studi e caratteri.</string>
     <string name="act_brapi_list_filter_reset_selection_message">Questo cancellerà la lista in esecuzione degli elementi selezionati.</string>
@@ -1094,7 +1174,11 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="quick_goto_secondary_hint">ID secondario</string>
     <string name="quick_goto_dialog_icon_description">utente in gestione</string>
     <string name="traits_sort_default">Impostazioni predefinite</string>
+    <string name="traits_crop_image_parameter">Ritaglia</string>
+    <string name="dialog_crop_title">Imposta Regione Di Ritaglio</string>
+    <string name="dialog_crop_message">Definire una regione di ritaglio che sarà applicata a tutte le immagini future per questo carattere.</string>
     <string name="view_trait_photo_settings_crop">Imposta Regione Ritaglio</string>
+    <string name="crop_image_clip_data_label">Dati della regione di retaglio del Field Book</string>
     <string name="quick_goto_swap_content_description">commuta tipo d\'ingresso</string>
     <!--  NearbyShare  -->
     <string name="nearby_share_connection_cancelled">Connessione annullata</string>
