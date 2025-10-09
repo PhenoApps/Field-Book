@@ -273,7 +273,7 @@
     <string name="traits_sort_import_order">Ordine d\'importazione</string>
     <string name="traits_sort_visibility">Visibilità</string>
     <string name="traits_sort_format">Formato</string>
-    <string name="warning_traits_missing_modify">Crea un carattere prima di poterlo modificare</string>
+    <string name="warning_traits_missing_modify">Crea un carattere prima di poterlo modificare.</string>
     <!-- Trait import/export -->
     <string name="traits_new_dialog_title">Nuovo/i Carraterie/i</string>
     <string name="traits_dialog_create">Crea un nuovo carattere</string>
@@ -506,6 +506,7 @@
     <string name="trait_location_save_content_description">Salva la posizione corrente.</string>
     <!--- Text to Speech Strings -->
     <string name="trait_photo_tts_success">Immagine scattata con successo.</string>
+    <string name="trait_photo_tts_fail">Carattere di immagine fallita.</string>
     <string name="trait_print_label_success">Stampando l\'etichetta.</string>
     <string name="trait_gnss_internal_tts">GPS Interno</string>
     <string name="trait_gnss_external_device_tts">Dispositivo esterno %s scelto.</string>
@@ -530,6 +531,7 @@
     <!--- Repeated measures -->
     <string name="view_repeated_values_add_button_content_description">Aggiunge una nuova osservazione.</string>
     <string name="view_repeated_values_add_button_fail">Devi inserire un valore prima di creare una nuova osservazione.</string>
+    <string name="menu_collect_repeated_values_indicator">Visualizza il numero di valori ripetuti.</string>
     <string name="dialog_multi_measure_delete_no_observations">Nessuna osservazione esistente.</string>
     <string name="dialog_multi_measure_delete_title">Osservazioni</string>
     <string name="dialog_multi_measure_confirm_delete_title">Tutte le osservazioni per questo carattere verranno eliminate definitivamente.</string>
@@ -538,11 +540,16 @@
     <!--- GeoNav -->
     <string name="menu_collect_start_geo_nav_title">Avvia GeoNav</string>
     <string name="activity_collect_found_plot">Navigato verso la parcella in prossimità</string>
+    <string name="act_collect_geonav_first_location_found">Comunicazioni Rover stabilite.</string>
     <string name="act_collect_geonav_snack_nav_button_content_description">Questo ti porterà alla parcella più vicina.</string>
     <string name="activity_collect_sensor_manager_failed">Impossibile avviare il gestore sensori</string>
+    <string name="activity_collect_geomagnetic_noise_detected">Interferenza rilevata, la bussola potrebbe non essere accurata</string>
     <string name="dialog_geonav_collect_neutral_reconnect">Riconetti</string>
-    <string name="dialog_geonav_collect_auto_navigate">Auto Navigate</string>
+    <string name="dialog_geonav_collect_title">Configurazione GeoNav</string>
+    <string name="dialog_geonav_collect_auto_navigate">Navigazione Automatica</string>
+    <string name="dialog_geonav_collect_notify_on_precision_loss">Audio per caduta di precisione</string>
     <string name="dialog_geonav_collect_precision_threshold_title">Grado di precisione</string>
+    <string name="dialog_geonav_collect_geonav_popup_type">Tipo di Popup di GeoNav</string>
     <string name="dialog_geonav_collect_reconnect">Riconetti</string>
     <string name="dialog_geonav_collect_reset_start_toast_message">Reimpostando connessione…</string>
     <string name="dialog_geonav_collect_reset_end_toast_message">Connessione reimpostazioni</string>
@@ -690,14 +697,18 @@
     <string name="preferences_appearance_quickgoto">Vai Rapido a</string>
     <string name="preferences_appearance_quickgoto_description">Cambia la sezione centrale della schermata principale in quella precedente \'Vai Rapido a\"</string>
     <string name="preferences_appearance_range_progress_bar">Barra di progresso delle entrate</string>
+    <string name="preferences_appearance_range_progress_bar_description">Mostra la tua posizione corrente nel campo</string>
+    <string name="preferences_appearance_traits_progress_bar">Barra di progresso dei caratteri</string>
+    <string name="preferences_appearance_traits_progress_bar_description">Mostra se i caratteri attive hanno dati ed evidenzia il carattere corrente</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamento</string>
     <string name="preferences_behavior_movement_title">Movimento</string>
     <string name="preferences_behavior_hardware_title">Hardware</string>
     <string name="preferences_behavior_data_title">Dato</string>
     <string name="preferences_behavior_cycle_traits">Auto-Avanza della Entrata</string>
-    <string name="preferences_behavior_cycle_traits_description">Ruotando la lista di caratteri si avanza automaticamente la entrata</string>
+    <string name="preferences_behavior_cycle_traits_description">Ruotando attraverso la lista di caratteri si avanza automaticamente la entrata</string>
     <string name="preferences_behavior_cycle_sound_title">Abilitare l\'effetto sonoro?</string>
+    <string name="preferences_behavior_cycle_sound_description">Un effetto sonoro verrà riprodotto quando i caratteri sono ruotati (raccomandato)</string>
     <string name="preferences_behavior_return_to_first_trait">Ripristino Automatico delle Carattere</string>
     <string name="preferences_behavior_return_to_first_trait_description">L\'avanzamento della entrata si reimposta automaticamente al primo carattere</string>
     <string name="preferences_behavior_disable_entry_arrow">Richiedi Dati Per Spostare La Entrata</string>
@@ -714,12 +725,16 @@
     <string name="preferences_behavior_volume_buttons_navigate_entries">I tasti del volume navigano delle entrate</string>
     <string name="preferences_behavior_return_character_do_nothing">Fare niente</string>
     <string name="preferences_behavior_return_character_next_plot">Il tasto di ritorno fa avanzare la parcella</string>
+    <string name="preferences_general_use_day_number">Usa Giorno Dell\'Anno</string>
     <string name="preferences_general_use_day_number_description">Usa il giorno dell\'anno per la raccolta dei dati anziché la data</string>
     <!-- Location -->
     <string name="preferences_location_title">Posizione</string>
+    <string name="preferences_location_defaults_title">GeoCoordinates</string>
+    <string name="pref_general_location_collection_title">Livello Di Raccolta</string>
     <string name="location_level_off">Off</string>
     <string name="location_level_study">Campo</string>
     <string name="location_level_observation_unit">Entrata</string>
+    <string name="location_level_observation">Osservazione (maggiore uso della batteria)</string>
     <string name="pref_coordinate_format_title">Formato Della Raccolta</string>
     <string name="location_format_iso">ISO 6709</string>
     <string name="location_format_geojson">GeoJSON</string>
@@ -737,7 +752,9 @@
     <string name="pref_geonav_search_trapezoid_d2_summary">La distanza dall\'utente all\'estremità opposta del trapezoide è %s km</string>
     <string name="pref_geonav_search_angle_summary">GeoNav crea un trapezoide davanti all\'utente, l\'angolo più vicino all\'utente è definito come %s°</string>
     <string name="pref_geonav_search_angle_title">GeoNav Cerca un Angolo (gradi)</string>
+    <string name="pref_geonav_log">Registro GeoNav</string>
     <string name="pref_geonav_log_off">Off</string>
+    <string name="pref_geonav_log_off_description">Disattivo: nessun registro in corso</string>
     <string name="pref_geonav_log_limited">Limitato</string>
     <string name="pref_geonav_log_limited_description">Limitato: Registrazione della voce più vicina a storage/geonav/limited_log.txt</string>
     <string name="pref_geonav_log_full">Al massimo</string>
@@ -755,6 +772,8 @@
     <string name="preferences_sound_primary_order_description">Riproduci il suono plonk quando l\'ordine primario cambia</string>
     <string name="preferences_sound_entry_title">Cambia Entrata</string>
     <string name="preferences_sound_entry_description">Emette un suono di avanzamento quando si sposta tra le entrate</string>
+    <string name="preferences_sound_cycle_traits_title">Ruotare i Caratteri</string>
+    <string name="preferences_sound_cycle_traits_description">Riproduci un suono quando i caratteri sono completamente ruotate</string>
     <string name="preferences_sound_delete_obs_title">Elimina Osservazione</string>
     <string name="preferences_sound_delete_obs_description">Riproduci eliminare suono quando l\'osservazione viene eliminata</string>
     <string name="preferences_category_audio_tts_title">Testo a Sintesi Vocale</string>
@@ -786,7 +805,7 @@
     <string name="preferences_experimental_stable_title">Stabile</string>
     <string name="preferences_experimental_beta_title">Beta</string>
     <string name="preferences_experimental_alpha_title">Alfa</string>
-    <string name="pref_experimental_repeated_values_title">Misure Ripetute</string>
+    <string name="pref_experimental_repeated_values_title">Misure Ripeti</string>
     <string name="pref_experimental_repeated_values_summary">Abilita la raccolta di valori multipli per ogni entrata/carattere</string>
     <string name="pref_experimental_repeated_values_disabled_title">Misure Ripetute Disabilitate</string>
     <string name="pref_experimental_repeated_values_disabled_message">Tutti i valori ripetuti che sono stati raccolti saranno nascosti fino a quando questa funzione non sarà nuovamente abilitata</string>
@@ -1096,15 +1115,24 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="tutorial_traits_format_description">Diversi formati di caratteri sono indicati con icone diverse.</string>
     <string name="tutorial_traits_visibility_title">Visibilità del carettere</string>
     <string name="tutorial_traits_visibility_description">I caretteri possono essere disabilitati dalla raccolta selezionando la casella di controllo.</string>
+    <string name="shutter_capture_content_description">Pulsante otturatore per scattare una foto.</string>
+    <string name="dialog_geonav_prefs_sensor_missing_title">Sensore richiesto mancante</string>
     <string name="dialog_geonav_prefs_sensor_missing_message">Il metodo trapezoidale richiede un accelerometro e un giroscopio per utilizzare l\'input della bussola.</string>
+    <string name="trait_audio_button_content_description">Controlli della registrazione audio.</string>
+    <string name="trait_counter_minus_content_description">Sottrai il conteggio di uno</string>
     <string name="trait_counter_plus_content_description">Aggiungi al conteggio totale di uno</string>
+    <string name="trait_date_minus_content_description">Sottrae un giorno dalla data corrente</string>
     <string name="trait_date_add_content_description">Aggiunge un giorno alla data corrente</string>
+    <string name="trait_percent_ui_min_max_error">Qualcosa è andato storto mostrando il formato minimo/massimo di questo carattere</string>
     <string name="tutorial_main_datagrid_title">Griglia di dati</string>
     <string name="tutorial_main_field_audio_mic_title">Audio Di Campo</string>
     <string name="tutorial_main_datagrid_description">Questo apre una griglia di fenotipizzazione 2D del campo attualmente selezionato.</string>
     <string name="tutorial_main_field_audio_mic_description">Questo avvierà una registrazione audio a livello di campo.</string>
     <string name="tutorial_main_repeated_values_title">Valori Ripetuti</string>
+    <string name="tutorial_main_repeated_values_description">Questo aprirà una finestra di dialogo per gestire i valori ripetuti per l\'unità di osservazione corrente.</string>
     <string name="tutorial_main_geonav_title">GeoNav</string>
+    <string name="tutorial_main_geonav_description">Questo aprirà una finestra di configurazione per aiutare con la navigazione sul campo.</string>
+    <string name="oauth_configured_incorrectly">Richiesta di autorizzazione non riuscita, controlla le impostazioni di BrAPI.</string>
     <string name="brapi_programs_activity_title">Scegli il tuo programma</string>
     <string name="import_brapi_title">Importazione BrAPI</string>
     <string name="import_brapi_field_title">Importazione Campo BrAPI</string>
@@ -1116,12 +1144,12 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="repeated_values_pager_content_description">valori ripetiti</string>
     <string name="repeated_values_right_button_content_description">destra</string>
     <string name="repeated_values_left_button_content_description">sinistra</string>
-    <string name="export_util_repeated_measures_table_warning_title">Tabella Misure Ripetute</string>
+    <string name="export_util_repeated_measures_table_warning_title">Tabella Delle Misure Ripetute</string>
     <string name="export_util_repeated_measures_table_warning_message">Solo il valore delle ultime misure ripetute sarà esportato in formato tabella.</string>
     <string name="activity_file_explorer_up_directory_name">Su</string>
     <!-- base camera strings -->
     <string name="trait_camera_connect_content_description">Avvia una connessione del dispositivo.</string>
-    <string name="trait_camera_preview_content_description">Questo visualizza l\'anteprima del display della fotocamera.</string>
+    <string name="trait_camera_preview_content_description">Questo visualizza l\'anteprima del scherno della fotocamera.</string>
     <string name="trait_camera_capture_content_description">Cattura una foto</string>
     <string name="delete_local_photo">Elimina Foto</string>
     <string name="trait_system_photo_settings_title">Impostazioni delle Foto di Sistema</string>
@@ -1155,6 +1183,9 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="pref_canon_ip_summary">Questo è il ip visualizzato sulla fotocamera durante la configurazione dell\'AP.</string>
     <string name="pref_canon_port_summary">Questa è la porta visualizzata sulla fotocamera durante la configurazione dell\'AP.</string>
     <string name="pref_canon_help_title">Assistenza</string>
+    <string name="pref_canon_help_summary">Questo aprirà un URL al manuale di FieldBook Canon.</string>
+    <string name="pref_canon_debug_title">Debug</string>
+    <string name="pref_canon_debug_summary">Preferenze per gli sviluppatori per monitorare l\'output del dispositivo.</string>
     <string name="trait_usb_photo_settings_title">Impostazioni Foto USB</string>
     <string name="canon_trait_settings_title">Impostazioni Canon</string>
     <string name="dialog_brapi_filter_title">Filtri</string>
@@ -1163,9 +1194,11 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <!-- spectral trait strings -->
     <string name="trait_spectral_connect_content_description">Avvia una connessione del dispositivo.</string>
     <string name="select_device">Seleziona Dispositivo</string>
+    <string name="no_devices_found">Nessun dispositivo trovato</string>
     <string name="list_item_color_close_content_description">Elimina questo colore</string>
     <string name="delete_color">Elimina Osservazione Del Colore</string>
     <string name="delete_color_message">Questo eliminerà definitivamente l\'osservazione</string>
+    <string name="nix_device_connecting">Il dispositivo si sta connettendo.</string>
     <string name="brapi_studies_filter_title">Studi</string>
     <string name="brapi_trials_filter_title">Prove</string>
     <string name="brapi_filter_dialog_title">Filtra per</string>
@@ -1178,6 +1211,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="check_all">Verifica Tutti I Filtri</string>
     <string name="menu_action_brapi_filter_clear_all">Cancella tutti i filtri</string>
     <string name="brapi_filter_error">Qualcosa è andato storto interrogando per %s</string>
+    <string name="brapi_importer_fetch_data">Recupero dei dati, la prima esecuzione potrebbe richiedere un minuto.</string>
     <string name="menu_filter_brapi_reset_cache_title">Reimposta Cache</string>
     <string name="brapi_filter_bottom_sheet_delete_all_description">cancella tutti i filtri</string>
     <string name="act_brapi_study_import_fetch_levels">Recupero livelli d\'osservazione...</string>
@@ -1192,6 +1226,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="act_brapi_study_import_saving">Salvando...</string>
     <string name="act_brapi_study_import_title">Importazione Studio</string>
     <string name="select">Seleziona</string>
+    <string name="results">risultati</string>
     <string name="preferences_brapi_cache_invalidate_dialog_title">Invalida le Scelte dell\'Intervallo della Cache</string>
     <string name="preferences_brapi_cache_invalidate_summary">%s</string>
     <string name="preferences_brapi_cache_invalidate_title">Invalidazione Cache</string>
@@ -1245,6 +1280,11 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="nearby_share_starting_transfer">Trasferimento Del File %s…</string>
     <string name="nearby_share_searching_for_senders">Ricerca dispositivi nelle vicinanze…</string>
     <string name="nearby_share_already_searching_for_sender">Già alla ricerca del mittente…</string>
+    <string name="nearby_share_no_devices_found">Nessun dispositivo trovato ancora</string>
+    <string name="nearby_share_permissions_required">Autorizzazioni Per Dispositivi Nelle Vicinanze Richieste</string>
+    <string name="nearby_share_failed_discovery">Avvio della scoperta non riuscito: %s</string>
+    <string name="nearby_share_failed_advertising">Errore durante l\'attesa dei dispositivi: %s</string>
+    <string name="nearby_share_failed_transfer">Avvio del trasferimento non riuscito: %s</string>
     <string name="dialog_device_selection_title">Seleziona un dispositivo</string>
     <string name="preferences_preferences_title">Preferenze</string>
     <string name="spectral_trait_insert_note_message">Scrivi una nota per la entrata scelta.</string>
