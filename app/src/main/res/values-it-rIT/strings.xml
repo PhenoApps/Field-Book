@@ -39,8 +39,8 @@
     <string name="app_intro_storage_title">Definisci Archiviazione</string>
     <string name="app_intro_storage_summary">Definisci una cartella in cui verranno archiviati i tuoi dati.</string>
     <string name="app_intro_storage_warning">Imposta la posizione di archiviazione</string>
-    <string name="app_intro_required_optional_title">Configurazione Facoltativa</string>
-    <string name="app_intro_required_optional_summary">Queste configurazioni facoltative personalizzano Field Book e possono essere regolate nelle Field Book Impostazioni.</string>
+    <string name="app_intro_required_optional_title">Impostazione Opzionale</string>
+    <string name="app_intro_required_optional_summary">Queste configurazioni opzionali personalizzano Field Book e possono essere regolate nelle Field Book Impostazioni.</string>
     <string name="app_intro_load_sample_data_title">Carica Dati Di Esempio</string>
     <string name="app_intro_load_sample_data_summary">Importa un database che include campi e caratteri di esempio.</string>
     <string name="app_intro_tutorial_title">Tutorial</string>
@@ -154,7 +154,7 @@
     <string name="import_error_unsupported">Questo tipo di file non è attualmente supportato</string>
     <string name="import_error_columns_replaced">I nomi delle colonne contengono caratteri di testo non ammessi che saranno rimpiazzati durante l\'importazione.</string>
     <string name="import_error_column_name">Il nome della colonna nel file importato non può essere:</string>
-    <string name="import_error_unique_characters_illegal">La colonna selezionata contiene caratteri che non possono essere utilizzati nell\'identificatore univoco</string>
+    <string name="import_error_unique_characters_illegal">La colonna selezionata contiene caratteri di testo che non possono essere utilizzati nell\'identificatore univoco</string>
     <string name="import_error_column_choice">Le colonne non possono essere utilizzate per la stessa assegnazione</string>
     <string name="import_error_unique">La colonna identificatore unico contiene duplicati o è già stata utilizzata in un altro file</string>
     <string name="import_error_format_field">Solo i file CSV e XLS possono essere importati come campo</string>
@@ -241,7 +241,7 @@
     <string name="name_cannot_be_empty">Il nome non può essere vuoto.</string>
     <string name="illegal_characters_message">Trovati caratteri di testo non validi: %1$s</string>
     <string name="name_conflict_message">\"%1$s\" è già utilizzato come %2$s per un altro campo.</string>
-    <string name="name_conflict_import_name">importa nome</string>
+    <string name="name_conflict_import_name">nome di importazione</string>
     <string name="name_conflict_display_name">visualizza nome</string>
     <string name="dialog_att_chooser_title_default">Scegliere un attributo</string>
     <string name="search_attribute_dialog_title">Imposta ID di Ricerca</string>
@@ -255,7 +255,7 @@
     <string name="field_trait_observation_total">\"%d\" osservazioni</string>
     <!-- Field Detail Charts -->
     <string name="field_trait_chart_no_data">Nessun dato da visualizzare</string>
-    <string name="field_trait_chart_incompatible_format">Il formato di questo tratto non può essere tracciato nel grafico</string>
+    <string name="field_trait_chart_incompatible_format">Il formato di questo carattere non può essere tracciato nel grafico</string>
     <string name="field_trait_chart_excess_data">Troppi valori diversi da tracciare nel grafico</string>
     <!-- Semantic dates -->
     <string name="today">Oggi</string>
@@ -614,8 +614,8 @@
     <!-- General -->
     <string name="preferences_system_title">Sistema</string>
     <string name="preferences_system_defaults_title">Predefiniti</string>
-    <string name="preferences_source_default_import">Importa Origine</string>
-    <string name="preferences_source_default_export">Esporta Origine</string>
+    <string name="preferences_source_default_import">Origine D\'Importazione</string>
+    <string name="preferences_source_default_export">Origine D\'Esportazione</string>
     <string name="brapi_disabled_alert_title">BrAPI Disabilitato</string>
     <string name="brapi_disabled_alert_message">BrAPI deve essere attivato prima nelle impostazioni di BrAPI.</string>
     <string name="preferences_general_share_enable">Abilita Condivisione File</string>
@@ -768,7 +768,7 @@
     <string name="pref_geonav_log_both_description">Entrambi: registrando tutti gli aggiornamenti della posizione e i passaggi dell\'algoritmo per storage/geonav/log.txt, voce più vicina a storage/geonav/limited_log.txt</string>
     <string name="pref_geonav_update_interval_title">Intervallo di Aggiornamento (s)</string>
     <string name="pref_geonav_update_interval_summary">Il tempo tra gli aggiornamenti della posizione è %ss</string>
-    <string name="pref_geonav_pair">Provider di Geolocalizzazione</string>
+    <string name="pref_geonav_pair">Provider Di Posizione</string>
     <string name="pref_behavior_geonav_internal_gps_choice">GPS Interno</string>
     <string name="choose_paired_bluetooth_devices_title">Scegli il tuo dispositivo bluetooth associato</string>
     <!-- Sounds -->
@@ -906,8 +906,8 @@
     <string name="brapi_base_url">URL di base</string>
     <string name="brapi_base_url_desc">L\'URL di base per il server BrAPI collegato</string>
     <string name="brapi_choice_to_make_default_dialog_title">Rendi questo server BrAPI il predefinito:</string>
-    <string name="brapi_choice_to_make_default_import">Importa Origine</string>
-    <string name="brapi_choice_to_make_default_export">Esporta Origine</string>
+    <string name="brapi_choice_to_make_default_import">Origine D\'Importazione</string>
+    <string name="brapi_choice_to_make_default_export">Origine D\'Esportazione</string>
     <string name="brapi_choice_to_make_default_negative">Annulla</string>
     <string name="brapi_choice_to_make_default_positive">Salva</string>
     <string name="brapi_edit_display_name">Modifica Nome Visualizzato</string>
@@ -1017,7 +1017,7 @@
     <string name="brapi_export_unknown_error">ERRORE: errore sconosciuto</string>
     <string name="brapi_export_successful">Esportazione BrAPI riuscita</string>
     <string name="brapi_saving_indicator">Salvando osservazioni...</string>
-    <string name="brapi_field_non_matching_sources_title">Sorgenti Non Corrispondenti</string>
+    <string name="brapi_field_non_matching_sources_title">Origini Non Corrispondenti</string>
     <string name="brapi_field_non_matching_sources">Impossibile sincronizzare i dati. I dati del campo provengono da, %1$s, l\'URL BrAPI è attualmente impostato su %2$s. Le fonti devono corrispondere.</string>
     <string name="brapi_enable_before_sync">BRAPI è disabilitato. Si prega di abilitarlo nelle impostazioni prima di utilizzare la sincronizzazione.</string>
     <string name="brapi_trait_already_exists">Il carattere esiste già: %1$s. Non si salva.</string>
