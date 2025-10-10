@@ -275,7 +275,7 @@
     <string name="traits_sort_format">Formato</string>
     <string name="warning_traits_missing_modify">Crea un carattere prima di poterlo modificare.</string>
     <!-- Trait import/export -->
-    <string name="traits_new_dialog_title">Nuovo/i Carraterie/i</string>
+    <string name="traits_new_dialog_title">Nuovo/i Carattere/i</string>
     <string name="traits_dialog_create">Crea un nuovo carattere</string>
     <string name="traits_dialog_import_from_file">Importa da file</string>
     <string name="traits_dialog_import">Importa</string>
@@ -720,11 +720,16 @@
     <string name="preferences_behavior_skip_entries_disabled">Disabilitato</string>
     <string name="preferences_behavior_skip_entries_with_data">Frecce saltano le entrate che hanno già valori per il carattere corrente</string>
     <string name="preferences_behavior_skip_entries_across_all_traits">Frecce saltare le entrate che hanno già valori per tutte gli caratteri</string>
+    <string name="preferences_general_swap_navigation">Scambia Navigazione</string>
     <string name="preferences_general_swap_navigation_description">Scambia la posizione delle frecce di entrata e di carattere</string>
+    <string name="preferences_behavior_volume_buttons_navigate">Naviga Con Tasti Del Volume</string>
     <string name="preferences_behavior_volume_buttons_navigate_disabled">Disabilitato</string>
+    <string name="preferences_behavior_volume_buttons_navigate_traits">I tasti volume navigano i caratteri</string>
     <string name="preferences_behavior_volume_buttons_navigate_entries">I tasti del volume navigano delle entrate</string>
+    <string name="preferences_behavior_return_character">Azione del Tasto di Ritorno</string>
     <string name="preferences_behavior_return_character_do_nothing">Fare niente</string>
     <string name="preferences_behavior_return_character_next_plot">Il tasto di ritorno fa avanzare la parcella</string>
+    <string name="preferences_behavior_return_character_next_trait">Il tasto di ritorno fa avanzare il carattere</string>
     <string name="preferences_general_use_day_number">Usa Giorno Dell\'Anno</string>
     <string name="preferences_general_use_day_number_description">Usa il giorno dell\'anno per la raccolta dei dati anziché la data</string>
     <!-- Location -->
@@ -1227,9 +1232,11 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="act_brapi_study_import_title">Importazione Studio</string>
     <string name="select">Seleziona</string>
     <string name="results">risultati</string>
+    <string name="failed_to_fetch_observation_units">Recupero delle unità di osservazione non riuscito</string>
     <string name="preferences_brapi_cache_invalidate_dialog_title">Invalida le Scelte dell\'Intervallo della Cache</string>
     <string name="preferences_brapi_cache_invalidate_summary">%s</string>
     <string name="preferences_brapi_cache_invalidate_title">Invalidazione Cache</string>
+    <string name="brapi_v1_is_not_compatible">BrAPI V1 non è compatibile.</string>
     <string name="no_programdbid_provided">Nessun programDbId fornito</string>
     <string name="no_studydbids_provided">Nessun studyDbIds fornito</string>
     <string name="act_brapi_list_api_exception">Errore sconosciuto. Controlla le preferenze BrAPI o contatta gli sviluppatori.</string>
@@ -1238,6 +1245,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="search_bar_hint">Ricercando… %s</string>
     <string name="menu_filter_brapi_clear_filters">Cancella Filtri</string>
     <string name="menu_filter_brapi_clear_selection">Cancella selezione</string>
+    <string name="level">Livello</string>
     <string name="primary">Primario</string>
     <string name="secondary">Secondario</string>
     <string name="sort">Ordina</string>
@@ -1256,17 +1264,25 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="brapi_filter_type_crop_count">Coltura (%s)</string>
     <string name="brapi_filter_type_study_count">Studio (%s)</string>
     <string name="pref_alpha_enhanced_brapi_import_summary">Se abilitata, verrà utilizzata una nuova interfaccia utente di importazione BrAPI per studi e caratteri.</string>
+    <string name="pref_alpha_brapi_import_title">Nuova UI Di Importazione BrAPI</string>
+    <string name="opening_brapi_no_network_error">La rete deve essere abilitata per utilizzare le funzionalità BrAPI.</string>
     <string name="act_brapi_list_filter_reset_selection_message">Questo cancellerà la lista in esecuzione degli elementi selezionati.</string>
+    <string name="pref_alpha_media_keycode_events_summary">Abilita per utilizzare i comandi multimediali per interazioni app</string>
     <string name="pref_alpha_media_keycode_events_title">Abilita Comandi Media</string>
     <string name="pref_geonav_distance_threshold_summary">GeoNav si ferma automaticamente quando la distanza da tutti le parcelle supera questo valore in chilometri.</string>
+    <string name="pref_geonav_distance_threshold_title">Controllo Di Prossimità</string>
     <string name="activity_collect_proximity_warning">GeoNav Fermo, al di fuori delle coordinate</string>
     <string name="failed_to_save_study">Impossibile salvare lo studio</string>
+    <string name="no_suitable_file_manager_was_found">Nessun gestore file adatto è stato trovato.</string>
     <string name="trait_error_invalid_multicat_value">Dati categorici inseriti non validi.</string>
+    <string name="dialog_crash_report_title">Impossibile caricare i dati</string>
+    <string name="dialog_crash_report_message">Premi OK per inviare un report diagnostico anonimo per aiutarti a migliorare l\'app.</string>
     <string name="dialog_quick_goto_title">Vai Rapido a</string>
     <string name="dialog_quick_goto_go">Vai</string>
     <string name="quick_goto_primary_hint">ID Primario</string>
     <string name="quick_goto_secondary_hint">ID secondario</string>
     <string name="quick_goto_dialog_icon_description">utente in gestione</string>
+    <string name="failed_to_fetch_observation_levels">Recupero dei livelli di osservazione fallito</string>
     <string name="traits_sort_default">Impostazioni predefinite</string>
     <string name="traits_crop_image_parameter">Ritaglia</string>
     <string name="dialog_crop_title">Imposta Regione Di Ritaglio</string>
@@ -1275,8 +1291,18 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="crop_image_clip_data_label">Dati della regione di retaglio del Field Book</string>
     <string name="quick_goto_swap_content_description">commuta tipo d\'ingresso</string>
     <!--  NearbyShare  -->
+    <string name="nearby_share_title">Condividi Nelle Vicinanze</string>
+    <string name="nearby_share_preferences_title">Preferenze Di Condividi</string>
+    <string name="nearby_share_connection_established">Connessione Stabilita</string>
+    <string name="nearby_share_connection_rejected">Connessione Rifiutata</string>
+    <string name="nearby_share_connection_error">Errore Di Connessione</string>
     <string name="nearby_share_connection_cancelled">Connessione annullata</string>
+    <string name="nearby_share_transfer_complete">Trasferimento completato</string>
+    <string name="nearby_share_transfer_in_progress">Trasferimento in corso</string>
+    <string name="nearby_share_transfer_failed">Trasferimento fallito</string>
     <string name="nearby_share_transfer_cancelled">Trasferimento annullato</string>
+    <string name="nearby_share_devices_disconnected">Dispositivi Disconnessi</string>
+    <string name="nearby_share_receiving_file">Ricezione file…</string>
     <string name="nearby_share_starting_transfer">Trasferimento Del File %s…</string>
     <string name="nearby_share_searching_for_senders">Ricerca dispositivi nelle vicinanze…</string>
     <string name="nearby_share_already_searching_for_sender">Già alla ricerca del mittente…</string>
@@ -1287,13 +1313,17 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="nearby_share_failed_transfer">Avvio del trasferimento non riuscito: %s</string>
     <string name="dialog_device_selection_title">Seleziona un dispositivo</string>
     <string name="preferences_preferences_title">Preferenze</string>
+    <string name="spectral_trait_insert_note">Nota</string>
     <string name="spectral_trait_insert_note_message">Scrivi una nota per la entrata scelta.</string>
     <string name="act_collect_barcode_spectral">La raccolta di dati spettrali tramite input di codici a barre non è attualmente supportata.</string>
     <string name="replace_observations">Elimina e Sostituisci</string>
     <string name="replace_observations_message">Le osservazioni esistono già, vuoi eliminare queste ed inserire un valore NA?</string>
     <string name="usb_device_description">USB</string>
+    <string name="view_trait_nix_color_option">Colore</string>
     <string name="view_trait_nix_spectral_option">Spettrale</string>
     <string name="nix_trait_settings_title">Impostazioni %s</string>
+    <string name="disconnect">Disconnetti</string>
+    <string name="nix_error_not_ready">Il dispositivo non è pronto.</string>
     <string name="view_trait_nix_settings_battery_level">Livello Batteria: %s</string>
     <string name="view_trait_nix_settings_rssi">RSSI: %s</string>
     <string name="view_trait_nix_settings_type">Tipo: %s</string>
@@ -1307,13 +1337,17 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="list_item_color_placeholder_content_description">Segnaposto per nuova scansione</string>
     <string name="import_runnable_field_name_exists">Nome del campo già esistente.</string>
     <string name="enabled">abilitato</string>
+    <string name="disabled">disabilitato</string>
     <string name="traits_save_image_parameter">Copia l\'immagine nel Field Book</string>
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="reset">Reimposta</string>
+    <string name="play">Riproduci</string>
+    <string name="pause">Pausa</string>
     <string name="save">Salva</string>
     <string name="database_export_invalid_filename">Nome file di esportazione non valido.</string>
     <string name="device_settings_dialog_name">Nome: %s</string>
     <string name="device_settings_dialog_address">Indirizzo: %s</string>
     <string name="device_settings_dialog_unknown_name">Dispositivo Bluetooth Sconosciuto</string>
     <string name="device_settings_dialog_title">Impostazioni Dispositivo Bluetooth</string>
+    <string name="no_data_captured">Nessun dato catturato.</string>
 </resources>
