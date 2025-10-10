@@ -320,7 +320,7 @@
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Formato de Característica</string>
     <string name="trait_creator_title_layout">Disposição de Característica</string>
-    <string name="trait_creator_parameters_title">%s Parâmetros</string>
+    <string name="trait_creator_parameters_title">Parâmetros %s</string>
     <string name="activity_traits_new_button_content_description">Adicionar uma nova característica.</string>
     <string name="traits_create_name">Nome</string>
     <string name="traits_create_format">Formato</string>
@@ -369,7 +369,7 @@
     <string name="trait_error_minimum_value">O valor é menor do que o conjunto mínimo</string>
     <string name="trait_error_maximum_value">O valor é maior do que o conjunto mínimo</string>
     <string name="trait_error_disease_severity">Severidade já armazenada</string>
-    <string name="act_collect_study_names_empty">O estudo selecionado tem nomes únicos, primários ou secundários vazios.</string>
+    <string name="act_collect_study_names_empty">O estudo selecionado tem nomes único, primário ou secundário vazios.</string>
     <!-- Toolbar -->
     <string name="main_toolbar_resources">Recursos</string>
     <string name="main_trait_details">Detalhes do caractere</string>
@@ -381,11 +381,11 @@
     <string name="dialog_att_chooser_traits">Características</string>
     <string name="dialog_att_chooser_other">Outros</string>
     <string name="dialog_att_chooser_customize">Personalizar</string>
-    <string name="dialog_infobar_att_chooser_title">Infobar %d</string>
+    <string name="dialog_infobar_att_chooser_title">InfoBar %d</string>
     <string name="infobars_attribute_placeholder">Selecionar</string>
     <string name="field_name_attribute">nome_campo</string>
-    <string name="infobar_word_wrap_enabled">Quebra de linha habilitada para Infobar %s</string>
-    <string name="infobar_word_wrap_disabled">Quebra de linha desabilitada para Infobar %s</string>
+    <string name="infobar_word_wrap_enabled">Quebra de linha habilitada para InfoBar %s</string>
+    <string name="infobar_word_wrap_disabled">Quebra de linha desabilitada para InfoBar %s</string>
     <!-- ID/Barcode Search -->
     <string name="act_collect_barcode_search_exists_in_other_field">Este ID está em %s</string>
     <string name="main_toolbar_moveto_no_match">Nenhum valor correspondente</string>
@@ -692,10 +692,10 @@
     <string name="preferences_appearance_collect_screen_title">Tela de Coleta</string>
     <string name="preferences_appearance_infobar_number">Número de InfoBars</string>
     <string name="preferences_appearance_infobar_number_description">Ajustar o número de Infobars exibidas na tela principal</string>
-    <string name="preferences_appearance_infobar_hide_prefix">Ocultar prefixo do Infobar</string>
-    <string name="preferences_appearance_infobar_hide_prefix_description">Prefixo do Infobar será substituído por um ícone genérico</string>
+    <string name="preferences_appearance_infobar_hide_prefix">Ocultar prefixo do InfoBar</string>
+    <string name="preferences_appearance_infobar_hide_prefix_description">Prefixo do InfoBar será substituído por um ícone genérico</string>
     <string name="preferences_appearance_quickgoto">Ir Rápido Para</string>
-    <string name="preferences_appearance_quickgoto_description">Altere a seção do meio da tela principal para o legado \"Ir Rápido para\"</string>
+    <string name="preferences_appearance_quickgoto_description">Altere a seção do meio da tela principal para o legado \"Ir Rápido Para\"</string>
     <string name="preferences_appearance_range_progress_bar">Barra de progresso de entradas</string>
     <string name="preferences_appearance_range_progress_bar_description">Mostra sua posição atual no campo</string>
     <string name="preferences_appearance_traits_progress_bar">Barra de progresso de características</string>
@@ -1073,7 +1073,7 @@
     <!-- TUTORIAL -->
     <string name="tutorial_dialog_title">Tutorial</string>
     <string name="tutorial_dialog_description">Gostaria de habilitar o tutorial? Esta configuração pode ser alterada nas Configurações.</string>
-    <string name="tutorial_main_infobars_title">Infobars</string>
+    <string name="tutorial_main_infobars_title">InfoBars</string>
     <string name="tutorial_main_infobars_description">InfoBars mostram dados extras para cada entrada e podem ser alterados usando os menus suspensos.</string>
     <string name="tutorial_main_traits_title">Características</string>
     <string name="tutorial_main_traits_description">As pequenas flechas verdes se movem entre características.</string>
@@ -1369,6 +1369,7 @@
     <string name="import_runnable_field_name_exists">Nome do campo já existe.</string>
     <string name="enabled">habilitado</string>
     <string name="disabled">desabilitado</string>
+    <string name="logging_out_please_wait">Saindo, por favor aguarde.</string>
     <string name="traits_save_image_parameter">Copiar imagem para Field Book</string>
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="reset">Restabelecer</string>
