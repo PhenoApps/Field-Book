@@ -245,6 +245,9 @@ class ObservationVariableDao {
             if (getTraitByName(t.name) != null) {
                 Log.d("ObservationVariableDao", "Trait ${t.name} already exists, skipping insertion.")
                 -1
+            } else if (getTraitByAlias(t.alias) != null) {
+                Log.d("ObservationVariableDao", "Trait with alias ${t.alias} already exists with id ${t.id}, skipping insertion.")
+                -1
             } else {
                 val contentValues = ContentValues().apply {
                     put("external_db_id", t.externalDbId)

@@ -329,6 +329,9 @@
     <string name="traits_dialog_import_from_file">Import from file</string>
     <string name="traits_dialog_import">Import</string>
     <string name="import_error_format_trait">Only TRT files can be imported as a trait list</string>
+    <string name="import_error_format_trait_json">Invalid JSON format: %s</string>
+    <string name="import_error_no_traits">No traits found</string>
+    <string name="trait_import_successful">Successfully imported traits</string>
 
     <string name="traits_export_check">Export current trait list?</string>
     <string name="traits_dialog_export">Export</string>

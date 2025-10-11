@@ -36,6 +36,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.lifecycle.LifecycleOwnerKt;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -46,11 +47,13 @@ import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiTraitFilte
 import com.fieldbook.tracker.adapters.TraitAdapter;
 import com.fieldbook.tracker.adapters.TraitAdapterController;
 import com.fieldbook.tracker.async.ImportCSVTask;
+import com.fieldbook.tracker.async.ImportJsonTraitTask;
 import com.fieldbook.tracker.brapi.BrapiInfoDialogFragment;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.dialogs.ListAddDialog;
 import com.fieldbook.tracker.dialogs.ListSortDialog;
 import com.fieldbook.tracker.dialogs.NewTraitDialog;
+import com.fieldbook.tracker.enums.FileFormat;
 import com.fieldbook.tracker.fragments.TraitDetailFragment;
 import com.fieldbook.tracker.objects.FieldFileObject;
 import com.fieldbook.tracker.objects.FieldObject;
@@ -70,8 +73,10 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
@@ -368,21 +373,6 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
             .replace(android.R.id.content, fragment, "TraitDetailFragmentTag")
             .addToBackStack(null)
             .commit();
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            // Return to Traits screen if pressed in detail fragment
-            if (traitAdapter != null) {
-                traitAdapter.notifyDataSetChanged();
-            }
-            getSupportFragmentManager().popBackStack();
-            traitList.setEnabled(true); // Re-enable touch events
-        } else {
-            CollectActivity.reloadData = true;
-            super.onBackPressed();
-        }
     }
 
     @Override
@@ -783,8 +773,17 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         OnBackPressedCallback backCallback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                CollectActivity.reloadData = true;
-                finish();
+                if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+                    // if pressed in detail fragment
+                    if (traitAdapter != null) {
+                        traitAdapter.notifyDataSetChanged();
+                    }
+                    getSupportFragmentManager().popBackStack();
+                    traitList.setEnabled(true); // Re-enable touch events
+                } else {
+                    CollectActivity.reloadData = true;
+                    finish();
+                }
             }
         };
         getOnBackPressedDispatcher().addCallback(this, backCallback);
@@ -796,15 +795,11 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         if (requestCode == REQUEST_FILE_EXPLORER_CODE) {
             if (resultCode == RESULT_OK) {
-                startImportCsv(Uri.parse(data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY)));
+                startTraitImport(Uri.parse(data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY)));
             } else {
                 Toast.makeText(this, R.string.act_file_explorer_no_file_error, Toast.LENGTH_SHORT).show();
             }
         }
-
-        // if (requestCode == REQUEST_RESOURCE_FILE_CODE) {
-        //     com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter.Companion.handleActivityResult(requestCode, resultCode, data);
-        // }
 
         if (requestCode == REQUEST_CODE_BRAPI_TRAIT_ACTIVITY) {
 
@@ -868,7 +863,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                         return;
                     }
 
-                    startImportCsv(traitExportFile.getUri());
+                    startTraitImport(traitExportFile.getUri());
                 }
             }
         }
@@ -977,5 +972,82 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         FloatingActionButton fab = findViewById(R.id.newTrait);
 
         InsetHandler.INSTANCE.setupStandardInsets(rootView, toolbar);
+    }
+
+    private FileFormat detectTraitFileFormat(Uri fileUri) {
+        try {
+            InputStream inputStream = BaseDocumentTreeUtil.Companion.getUriInputStream(this, fileUri);
+            if (inputStream == null) {
+                return FileFormat.UNKNOWN;
+            }
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            String firstLine = reader.readLine();
+            if (firstLine != null) {
+                firstLine = firstLine.trim();
+            } else {
+                firstLine = "";
+            }
+            reader.close();
+            inputStream.close();
+
+            if (firstLine.startsWith("{") || firstLine.startsWith("[")) {
+                return FileFormat.JSON;
+            } else if (firstLine.contains("\"trait\"")) {
+                return FileFormat.CSV;
+            } else {
+                return FileFormat.UNKNOWN;
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error detecting trait file format", e);
+            return FileFormat.UNKNOWN;
+        }
+    }
+
+    private void startTraitImport(Uri fileUri) {
+        String fileName = new FileUtil().getFileName(this, fileUri);
+        String extension = FieldFileObject.getExtension(fileName);
+
+        if (!extension.equals("trt")) {
+            Utils.makeToast(getApplicationContext(), getString(R.string.import_error_format_trait));
+            return;
+        }
+
+        new Thread(() -> {
+            FileFormat format = detectTraitFileFormat(fileUri);
+
+            runOnUiThread(() -> {
+                switch (format) {
+                    case JSON:
+                        startImportJson(fileUri);
+                        break;
+                    case CSV:
+                        startImportCsv(fileUri);
+                        break;
+                    case UNKNOWN:
+                        Utils.makeToast(getApplicationContext(), getString(R.string.import_error_format_trait));
+                        break;
+                }
+            });
+        }).start();
+    }
+    private void startImportJson(Uri file) {
+        ImportJsonTraitTask task = new ImportJsonTraitTask(
+                this,
+                database,
+                file,
+                LifecycleOwnerKt.getLifecycleScope(this),
+                (success, errorMessage) -> {
+                    if (success) {
+                        queryAndLoadTraits();
+                        CollectActivity.reloadData = true;
+                        Utils.makeToast(getApplicationContext(), getString(R.string.trait_import_successful));
+                    } else {
+                        String message = errorMessage != null ? errorMessage : getString(R.string.import_error_general);
+                        Utils.makeToast(getApplicationContext(), message);
+                    }
+                }
+        );
+        task.start();
     }
 }

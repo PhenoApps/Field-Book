@@ -1,15 +1,176 @@
-"trait","format","defaultValue","minimum","maximum","details","categories","isVisible","realPosition"
-"height","numeric","","","","cM","","true","1"
-"color","categorical","","","","Color","Red/Orange/Yellow/Green/Blue/Purple/White/Black/Brown/Cyan/Magenta/Gray","true","2"
-"lodging","percent","","0","100","","","true","3"
-"flowering","date","","","","","","true","4"
-"insect damage","boolean","FALSE","","","","","true","5"
-"notes","text","","","","","","true","6"
-"picture","photo","","","","","","true","7"
-"plants","counter","","","","","","true","8"
-"rust score","disease rating","","","","","","true","10"
-"audio","audio","","","","","","true","11"
-"location","location","","","","","","true","12"
-"gnss","gnss","","","","","","true","13"
-"GoPro","gopro","","","","","","true","14"
-"angle","angle","","","","degrees","","true","15"
+{
+  "traits": [
+    {
+      "name": "height",
+      "alias": "height",
+      "synonyms": ["height"],
+      "format": "numeric",
+      "defaultValue": "",
+      "details": "cM",
+      "isVisible": true,
+      "realPosition": 1
+    },
+    {
+      "name": "color",
+      "alias": "color",
+      "synonyms": ["color"],
+      "format": "categorical",
+      "defaultValue": "",
+      "details": "Color",
+      "isVisible": true,
+      "realPosition": 2,
+      "attributes": {
+        "category": "Red/Orange/Yellow/Green/Blue/Purple/White/Black/Brown/Cyan/Magenta/Gray",
+        "allowMulticat": false
+      }
+    },
+    {
+      "name": "lodging",
+      "alias": "lodging",
+      "synonyms": ["lodging"],
+      "format": "percent",
+      "defaultValue": "",
+      "details": "",
+      "isVisible": true,
+      "realPosition": 3,
+      "attributes": {
+        "validValuesMin": "0",
+        "validValuesMax": "100"
+      }
+    },
+    {
+      "name": "flowering",
+      "alias": "flowering",
+      "synonyms": ["flowering"],
+      "format": "date",
+      "defaultValue": "",
+      "details": "",
+      "isVisible": true,
+      "realPosition": 4,
+      "attributes": {
+        "useDayOfYear": false
+      }
+    },
+    {
+      "name": "insect damage",
+      "alias": "insect damage",
+      "synonyms": ["insect damage"],
+      "format": "boolean",
+      "defaultValue": "FALSE",
+      "details": "",
+      "isVisible": true,
+      "realPosition": 5
+    },
+    {
+      "name": "notes",
+      "alias": "notes",
+      "synonyms": ["notes"],
+      "format": "text",
+      "defaultValue": "",
+      "details": "",
+      "isVisible": true,
+      "realPosition": 6,
+      "attributes": {
+        "closeKeyboardOnOpen": false
+      }
+    },
+    {
+      "name": "picture",
+      "alias": "picture",
+      "synonyms": ["picture"],
+      "format": "photo",
+      "defaultValue": "",
+      "details": "",
+      "isVisible": true,
+      "realPosition": 7,
+      "attributes": {
+        "cropImage": false,
+        "saveImage": true
+      }
+    },
+    {
+      "name": "plants",
+      "alias": "plants",
+      "synonyms": ["plants"],
+      "format": "counter",
+      "defaultValue": "",
+      "details": "",
+      "isVisible": true,
+      "realPosition": 8
+    },
+    {
+      "name": "type",
+      "alias": "type",
+      "synonyms": ["type"],
+      "format": "categorical",
+      "defaultValue": "",
+      "details": "",
+      "isVisible": true,
+      "realPosition": 9,
+      "attributes": {
+        "category": "Yellow/Purple/Axil/Terminal/Long/Short/Round/Wrinkled/Green",
+        "allowMulticat": true
+      }
+    },
+    {
+      "name": "rust score",
+      "alias": "rust score",
+      "synonyms": ["rust score"],
+      "format": "disease rating",
+      "defaultValue": "",
+      "details": "",
+      "isVisible": true,
+      "realPosition": 10
+    },
+    {
+      "name": "audio",
+      "alias": "audio",
+      "synonyms": ["audio"],
+      "format": "audio",
+      "defaultValue": "",
+      "details": "",
+      "isVisible": true,
+      "realPosition": 11
+    },
+    {
+      "name": "location",
+      "alias": "location",
+      "synonyms": ["location"],
+      "format": "location",
+      "defaultValue": "",
+      "details": "",
+      "isVisible": true,
+      "realPosition": 12
+    },
+    {
+      "name": "gnss",
+      "alias": "gnss",
+      "synonyms": ["gnss"],
+      "format": "gnss",
+      "defaultValue": "",
+      "details": "",
+      "isVisible": true,
+      "realPosition": 13
+    },
+    {
+      "name": "GoPro",
+      "alias": "GoPro",
+      "synonyms": ["GoPro"],
+      "format": "gopro",
+      "defaultValue": "",
+      "details": "",
+      "isVisible": true,
+      "realPosition": 14
+    },
+    {
+      "name": "angle",
+      "alias": "angle",
+      "synonyms": ["angle"],
+      "format": "angle",
+      "defaultValue": "",
+      "details": "degrees",
+      "isVisible": true,
+      "realPosition": 15
+    }
+  ]
+}

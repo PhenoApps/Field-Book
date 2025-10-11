@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.ref.WeakReference;
 import java.util.Comparator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -40,7 +41,7 @@ public class ImportCSVTask extends AsyncTask<Integer, Integer, Integer> {
         }
 
         public ImportCSVTask(Context ctx, DataHelper database, Uri file, OnPostExecuteCsv onPostExecute) {
-            this.ctx = new WeakReference<Context>(ctx);
+            this.ctx = new WeakReference<>(ctx);
             this.file = file;
             this.database = database;
             this.onPostExecuteFunction = onPostExecute;
@@ -106,7 +107,10 @@ public class ImportCSVTask extends AsyncTask<Integer, Integer, Integer> {
                     if (data != null && data.length > 1
                             && data[0] != null && data[1] != null) {
                         TraitObject t = new TraitObject();
-                        t.setName(data[0]);
+                        String traitName = data[0];
+                        t.setName(traitName);
+                        t.setAlias(traitName);
+                        t.setSynonyms(List.of(traitName));
                         t.setFormat(data[1]);
                         t.setDefaultValue(data[2]);
                         t.setMinimum(data[3]);
@@ -117,6 +121,11 @@ public class ImportCSVTask extends AsyncTask<Integer, Integer, Integer> {
                         t.setRealPosition(positionOffset + Integer.parseInt(data[8]));
                         t.setVisible(data[7].equalsIgnoreCase("true"));
                         t.setTraitDataSource(sourceString);
+
+                        if (t.getFormat().equals("multicat")) {
+                            t.setFormat("categorical");
+                            t.setAllowMulticat(true);
+                        }
                         database.insertTraits(t);
                     }
                 }
