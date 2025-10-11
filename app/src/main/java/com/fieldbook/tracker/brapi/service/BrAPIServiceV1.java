@@ -1090,6 +1090,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
             case "Ordinal":
             case "categorical":
             case "qualitative":
+            case "multicat":
                 // All Field Book categories are ordered, so this works
                 return "categorical";
             case "date":
@@ -1112,8 +1113,6 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
                 return "audio";
             case "counter":
                 return "counter";
-            case "multicat":
-                return "multicat";
             case "location":
                 return "location";
             case "barcode":

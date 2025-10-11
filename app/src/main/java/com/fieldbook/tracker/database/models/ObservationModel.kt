@@ -66,10 +66,9 @@ data class ObservationModel(val map: Row) {
                                                 (value.toString().trim().isNotEmpty())
                                         ) {
                                                 // if the trait is categorical, the "value" field should be decoded
-                                                val isTraitCategoricalOrMulticategorical = currentTrait.format == "multicat" || CategoricalTraitLayout.isTraitCategorical(
-                                                currentTrait.format
-                                                )
-                                                if ( isTraitCategoricalOrMulticategorical && key == "value"){
+                                                val isCategoricalTrait =
+                                                        CategoricalTraitLayout.isTraitCategorical(currentTrait.format)
+                                                if ( isCategoricalTrait && key == "value"){
                                                         val decodedValue : String = decodeCategorical(value.toString())
                                                         nonNullAttributes[getKeyDisplayName(context, key)] = decodedValue
                                                 }else{

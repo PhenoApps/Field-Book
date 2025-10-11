@@ -1,12 +1,11 @@
 package com.fieldbook.tracker.traits.formats
 
 import android.content.Context
-import com.fieldbook.tracker.offbeat.traits.formats.contracts.AngleFormat
 
 enum class Formats(val type: Types = Types.SYSTEM, val isCamera: Boolean = false) {
 
     //SYSTEM formats
-    AUDIO, BOOLEAN, CAMERA(isCamera = true), CATEGORICAL, MULTI_CATEGORICAL, COUNTER, DATE, LOCATION, NUMERIC, PERCENT, TEXT, ANGLE, BASE_SPECTRAL,
+    AUDIO, BOOLEAN, CAMERA(isCamera = true), CATEGORICAL, COUNTER, DATE, LOCATION, NUMERIC, PERCENT, TEXT, ANGLE, BASE_SPECTRAL,
 
     //CUSTOM formats
     DISEASE_RATING(Types.CUSTOM), GNSS(Types.CUSTOM), STOP_WATCH(Types.CUSTOM),
@@ -41,7 +40,6 @@ enum class Formats(val type: Types = Types.SYSTEM, val isCamera: Boolean = false
         GO_PRO -> GoProFormat()
         CANON -> CanonFormat()
         CATEGORICAL -> CategoricalFormat()
-        MULTI_CATEGORICAL -> MultiCategoricalFormat()
         COUNTER -> CounterFormat()
         DATE -> DateFormat()
         LOCATION -> LocationFormat()

@@ -1448,8 +1448,7 @@ public class CollectActivity extends ThemedActivity
             //don't update the database if the value is blank or undesirable
             boolean pass = false;
 
-            if (trait.getFormat().equals("multicat")
-                || CategoricalTraitLayout.isTraitCategorical(trait.getFormat())) {
+            if (CategoricalTraitLayout.isTraitCategorical(trait.getFormat())) {
 
                 if (value.equals("[]")) {
 
@@ -1593,8 +1592,14 @@ public class CollectActivity extends ThemedActivity
         }
     }
 
-    private void openSavedResourceFile() {
-        String fileString = preferences.getString(GeneralKeys.LAST_USED_RESOURCE_FILE, "");
+    /**
+     * Opens a saved resource file or a specific resource file if provided
+     * @param resourceFileName Optional resource file name to open
+     */
+    private void openSavedResourceFile(String resourceFileName) {
+        String fileString = resourceFileName != null ? resourceFileName : 
+                            preferences.getString(GeneralKeys.LAST_USED_RESOURCE_FILE, "");
+        Log.d(TAG, "fileString after selection: " + fileString);
         if (!fileString.isEmpty()) {
             try {
                 Uri resultUri = Uri.parse(fileString);
@@ -1611,6 +1616,11 @@ public class CollectActivity extends ThemedActivity
         } else {
             Utils.makeToast(this, "No file preference saved, select a file with a short press");
         }
+    }
+
+    // Overload for backward compatibility
+    private void openSavedResourceFile() {
+        openSavedResourceFile(null);
     }
 
     @Override
@@ -1684,12 +1694,23 @@ public class CollectActivity extends ThemedActivity
             SearchDialog searchdialog = new SearchDialog(this, this);
             searchdialog.show(getSupportFragmentManager(), "DialogTag");
         } else if (itemId == resourcesId) {
-            DocumentFile dir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_resources);
-            if (dir != null && dir.exists()) {
-                intent.setClassName(CollectActivity.this, FileExploreActivity.class.getName());
-                intent.putExtra("path", dir.getUri().toString());
-                intent.putExtra("title", getString(R.string.main_toolbar_resources));
-                startActivityForResult(intent, REQUEST_FILE_EXPLORER_CODE);
+            TraitObject currentTrait = getCurrentTrait();
+            if (currentTrait != null) {
+                Log.d(TAG, "Current trait: " + currentTrait.getName() + ", Resource file: " + currentTrait.getResourceFile());
+            } else {
+                Log.d(TAG, "Current trait is null");
+            }
+            if (currentTrait != null && currentTrait.getResourceFile() != null && !currentTrait.getResourceFile().isEmpty()) {
+                // Trait has a resource file defined, try to open it directly
+                openSavedResourceFile(currentTrait.getResourceFile());
+            } else {
+                DocumentFile dir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_resources);
+                if (dir != null && dir.exists()) {
+                    intent.setClassName(CollectActivity.this, FileExploreActivity.class.getName());
+                    intent.putExtra("path", dir.getUri().toString());
+                    intent.putExtra("title", getString(R.string.main_toolbar_resources));
+                    startActivityForResult(intent, REQUEST_FILE_EXPLORER_CODE);
+                }
             }
         } else if (itemId == nextEmptyPlotId) {
             rangeBox.setPaging(rangeBox.movePaging(rangeBox.getPaging(), 1, true));
@@ -1815,10 +1836,11 @@ public class CollectActivity extends ThemedActivity
 
         for (ObservationModel m: values) {
             if (!m.getValue().isEmpty()) {
+                TraitObject trait = database.getTraitById(String.valueOf(m.getObservation_variable_db_id()));
                 String format = m.getObservation_variable_field_book_format();
                 if (format != null) {
 
-                    TraitFormat traitFormat = Formats.Companion.findTrait( format);
+                    TraitFormat traitFormat = Formats.Companion.findTrait(format);
 
                     Object valueModel = m.getValue();
 
@@ -1830,7 +1852,7 @@ public class CollectActivity extends ThemedActivity
 
                     if (traitFormat instanceof ValuePresenter) {
 
-                        is.add(((ValuePresenter) traitFormat).represent(this, valueModel));
+                        is.add(((ValuePresenter) traitFormat).represent(this, valueModel, trait));
                         observations.add(m);
 
                     } else {
@@ -2698,15 +2720,10 @@ public class CollectActivity extends ThemedActivity
 
             try {
 
-                String labelValPref = getPreferences().getString(PreferenceKeys.LABELVAL_CUSTOMIZE, "value");
                 StringJoiner joiner = new StringJoiner(":");
                 ArrayList<BrAPIScaleValidValuesCategories> scale = CategoryJsonUtil.Companion.decode(value);
                 for (BrAPIScaleValidValuesCategories s : scale) {
-                    if ("label".equals(labelValPref)) {
-                        joiner.add(s.getLabel());
-                    } else {
-                        joiner.add(s.getValue());
-                    }
+                    joiner.add(attribute.getTrait().getCategoryDisplayValue() ? s.getValue() : s.getLabel());
                 }
 
                 return joiner.toString();
@@ -2735,7 +2752,7 @@ public class CollectActivity extends ThemedActivity
             //add all visible traits
             TraitObject[] traits = getDatabase().getVisibleTraits().toArray(new TraitObject[0]);
             for (TraitObject traitObject : traits) {
-                items.add(new AttributeAdapter.AttributeModel(traitObject.getName(), null, traitObject));
+                items.add(new AttributeAdapter.AttributeModel(traitObject.getAlias(), null, traitObject));
             }
 
             return items;

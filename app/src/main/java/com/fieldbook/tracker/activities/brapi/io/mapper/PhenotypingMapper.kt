@@ -5,6 +5,7 @@ import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV2.ADDITIONAL_INFO_OBSERVATION_LEVEL_NAMES
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
+import com.fieldbook.tracker.utilities.SynonymsUtil
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import org.brapi.v2.model.pheno.BrAPIObservationVariable
@@ -15,10 +16,12 @@ import org.brapi.v2.model.pheno.BrAPIObservationVariable
 
 fun BrAPIObservationVariable.toTraitObject(context: Context) = TraitObject().also {
 
-    val synonym = synonyms?.firstOrNull()
-
     it.defaultValue = defaultValue ?: ""
-    it.name = synonym ?: observationVariableName
+    it.name = observationVariableName
+    it.alias = observationVariableName
+
+    it.synonyms = SynonymsUtil.addAliasToSynonyms(observationVariableName, synonyms ?: emptyList())
+
     it.details = trait.traitDescription ?: ""
     it.externalDbId = observationVariableDbId
 
