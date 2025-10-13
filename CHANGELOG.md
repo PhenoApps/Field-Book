@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+
+### Fixed
+
+## [v6.3.1] - 2025-10-13
+
+### Added
+
+### Changed
 - Field Book now supports 16 KB page sizes
 
 ### Fixed
@@ -759,3 +767,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 [v6.3.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.0
+[v6.3.1]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.1
