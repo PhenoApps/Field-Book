@@ -291,7 +291,11 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
                     if (modelCache.size == totalCount || totalCount < pageSize) {
                         progressBar.visibility = View.GONE
                         fetchDescriptionTv.visibility = View.GONE
-                        saveCacheToFile(modelCache as List<BrAPIStudy>, trialModels)
+
+                        withContext(Dispatchers.IO) {
+                            saveCacheToFile(modelCache as List<BrAPIStudy>, trialModels)
+                        }
+
                         queryStudiesJob?.cancel()
                     }
                 }
