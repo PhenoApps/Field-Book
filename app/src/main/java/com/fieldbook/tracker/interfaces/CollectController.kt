@@ -10,7 +10,6 @@ import com.fieldbook.tracker.devices.camera.CanonApi
 import com.fieldbook.tracker.location.GPSTracker
 import com.fieldbook.tracker.traits.SpectralController
 import com.fieldbook.tracker.utilities.CameraXFacade
-import com.fieldbook.tracker.utilities.BluetoothHelper
 import com.fieldbook.tracker.utilities.FfmpegHelper
 import com.fieldbook.tracker.utilities.GeoNavHelper
 import com.fieldbook.tracker.utilities.GnssThreadHelper
@@ -52,7 +51,6 @@ interface CollectController: FieldController, SpectralController, RepeatedValues
     fun getUvcView(): UVCCameraTextureView
     fun getCameraXFacade(): CameraXFacade
     fun getWifiHelper(): WifiHelper
-    fun getBluetoothHelper(): BluetoothHelper
     fun getGoProApi(): GoProApi
     fun advisor(): SecureBluetooth
     fun getFfmpegHelper(): FfmpegHelper

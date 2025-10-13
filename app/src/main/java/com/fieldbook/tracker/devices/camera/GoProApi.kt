@@ -87,7 +87,7 @@ class GoProApi @Inject constructor(
     private var loadControl: androidx.media3.exoplayer.DefaultLoadControl =
         androidx.media3.exoplayer.DefaultLoadControl.Builder()
             .setPrioritizeTimeOverSizeThresholds(true)
-            .setBufferDurationsMs(500, 1000, 500, 500)
+            .setBufferDurationsMs(2500, 5000, 1500, 2000)
             .build()
 
     private val mediaSource: androidx.media3.exoplayer.source.MediaSource =
@@ -358,12 +358,10 @@ class GoProApi @Inject constructor(
         player?.release()
         player = null
 
-        trackSelector.release()
         trackSelector = androidx.media3.exoplayer.trackselection.DefaultTrackSelector(context)
-
         loadControl = androidx.media3.exoplayer.DefaultLoadControl.Builder()
             .setPrioritizeTimeOverSizeThresholds(true)
-            .setBufferDurationsMs(500, 1000, 500, 500)
+            .setBufferDurationsMs(2500, 5000, 1500, 2000)
             .build()
 
         player = ExoPlayer.Builder(context)
@@ -432,15 +430,17 @@ class GoProApi @Inject constructor(
                 }
             }
 
-            val latest = images.maxBy { it.fileName.split(".")[0].split(FILE_SYSTEM_PREFIX)[1].toInt() }
+            val latest = images.maxByOrNull { it.fileName.split(".")[0].split(FILE_SYSTEM_PREFIX)[1].toInt() }
 
-            if (latest.url !in requestedUrls) {
-                requestedUrls.add(latest.url)
+            if (latest != null) {
+                if (latest.url !in requestedUrls) {
+                    requestedUrls.add(latest.url)
 
-                if (requestAndSaveImage) {
-                    requestFileUrl(latest.url, model)
-                } else {
-                    saveImageName(latest, model)
+                    if (requestAndSaveImage) {
+                        requestFileUrl(latest.url, model)
+                    } else {
+                        saveImageName(latest, model)
+                    }
                 }
             }
 
