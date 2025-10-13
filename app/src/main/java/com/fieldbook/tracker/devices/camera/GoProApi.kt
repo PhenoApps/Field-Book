@@ -2,12 +2,13 @@ package com.fieldbook.tracker.devices.camera
 
 import android.bluetooth.BluetoothDevice
 import android.content.Context
-import android.net.Uri
+import android.net.Network
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
-import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.interfaces.CollectController
 import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.objects.TraitObject
@@ -25,8 +26,9 @@ import org.phenoapps.fragments.gopro.GoProGattInterface
 import org.phenoapps.interfaces.gatt.GattCallbackInterface
 import java.net.URI
 import javax.inject.Inject
+import androidx.core.net.toUri
 
-
+@RequiresApi(Build.VERSION_CODES.Q)
 @UnstableApi
 class GoProApi @Inject constructor(
     @ActivityContext private val context: Context
@@ -79,27 +81,16 @@ class GoProApi @Inject constructor(
         context as CollectController
     }
 
-    private val httpClient by lazy {
-        OkHttpClient()
-    }
-
-    private var loadControl: androidx.media3.exoplayer.DefaultLoadControl =
-        androidx.media3.exoplayer.DefaultLoadControl.Builder()
-            .setPrioritizeTimeOverSizeThresholds(true)
-            .setBufferDurationsMs(2500, 5000, 1500, 2000)
-            .build()
+    private var httpClient: OkHttpClient? = OkHttpClient()
 
     private val mediaSource: androidx.media3.exoplayer.source.MediaSource =
         androidx.media3.exoplayer.source.ProgressiveMediaSource.Factory(
             androidx.media3.datasource.DefaultDataSource.Factory(context)
         ).createMediaSource(
             androidx.media3.common.MediaItem.fromUri(
-                Uri.parse(ffmpegOutputUri)
+                ffmpegOutputUri.toUri()
             )
         )
-
-    private var trackSelector: androidx.media3.exoplayer.trackselection.DefaultTrackSelector =
-        androidx.media3.exoplayer.trackselection.DefaultTrackSelector(context)
 
     private val playerListener: Player.Listener = object : Player.Listener {
         override fun onPlaybackStateChanged(playbackState: Int) {
@@ -142,7 +133,7 @@ class GoProApi @Inject constructor(
             .url(URI.create("http://10.5.5.9:8080/gopro/camera/state").toHttpUrlOrNull()!!)
             .build()
 
-        httpClient.newCall(getState).enqueue(object : Callback {
+        httpClient?.newCall(getState)?.enqueue(object : Callback {
 
             override fun onFailure(call: okhttp3.Call, e: okio.IOException) {
                 Log.e(TAG, "Request state failed.")
@@ -186,7 +177,7 @@ class GoProApi @Inject constructor(
             .url(URI.create("http://10.5.5.9:8080/gopro/camera/stream/stop").toHttpUrlOrNull()!!)
             .build()
 
-        httpClient.newCall(stopPreview).enqueue(object : Callback {
+        httpClient?.newCall(stopPreview)?.enqueue(object : Callback {
 
             override fun onFailure(call: okhttp3.Call, e: okio.IOException) {
                 Log.e(TAG, "Request stop failed.")
@@ -218,7 +209,7 @@ class GoProApi @Inject constructor(
             .url(URI.create("http://10.5.5.9:8080/gopro/camera/stream/start").toHttpUrlOrNull()!!)
             .build()
 
-        httpClient.newCall(startPreview).enqueue(object : Callback {
+        httpClient?.newCall(startPreview)?.enqueue(object : Callback {
 
             override fun onFailure(call: okhttp3.Call, e: okio.IOException) {
                 Log.e(TAG, "Failed to make network request to GoPro AP")
@@ -254,7 +245,7 @@ class GoProApi @Inject constructor(
             .url(URI.create("http://10.5.5.9:8080/gopro/media/list").toHttpUrlOrNull()!!)
             .build()
 
-        httpClient.newCall(mediaQuery).enqueue(object : Callback {
+        httpClient?.newCall(mediaQuery)?.enqueue(object : Callback {
 
             override fun onFailure(call: okhttp3.Call, e: okio.IOException) {
 
@@ -293,7 +284,7 @@ class GoProApi @Inject constructor(
             .url(URI.create("http://10.5.5.9:8080/gopro/camera/stream/stop").toHttpUrlOrNull()!!)
             .build()
 
-        httpClient.newCall(stopPreview).enqueue(object : Callback {
+        httpClient?.newCall(stopPreview)?.enqueue(object : Callback {
 
             override fun onFailure(call: okhttp3.Call, e: okio.IOException) {
                 Log.e(TAG, "Request stop failed.")
@@ -357,8 +348,8 @@ class GoProApi @Inject constructor(
         player?.release()
         player = null
 
-        trackSelector = androidx.media3.exoplayer.trackselection.DefaultTrackSelector(context)
-        loadControl = androidx.media3.exoplayer.DefaultLoadControl.Builder()
+        val trackSelector = androidx.media3.exoplayer.trackselection.DefaultTrackSelector(context)
+        val loadControl = androidx.media3.exoplayer.DefaultLoadControl.Builder()
             .setPrioritizeTimeOverSizeThresholds(true)
             .setBufferDurationsMs(2500, 5000, 1500, 2000)
             .build()
@@ -450,6 +441,8 @@ class GoProApi @Inject constructor(
 
             e.printStackTrace()
 
+        } catch (e: NoSuchElementException) {
+            e.printStackTrace()
         }
     }
 
@@ -474,7 +467,7 @@ class GoProApi @Inject constructor(
             .url(URI.create(url).toHttpUrlOrNull()!!)
             .build()
 
-        httpClient.newCall(requestImage).enqueue(object : Callback {
+        httpClient?.newCall(requestImage)?.enqueue(object : Callback {
 
             override fun onFailure(call: okhttp3.Call, e: okio.IOException) {
 
@@ -570,7 +563,11 @@ class GoProApi @Inject constructor(
         gatt.shutterOn()
     }
 
-    override fun onNetworkBound() {
+    override fun onNetworkBound(network: Network) {
+
+        httpClient = OkHttpClient.Builder()
+            .socketFactory(network.socketFactory)
+            .build()
 
         callbacks?.onConnected()
 
