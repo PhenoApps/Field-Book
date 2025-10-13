@@ -454,7 +454,9 @@ open class GoProHelper(val context: Context, val onReady: OnGoProStreamReady) : 
             override fun onAvailable(network: Network) {
                 super.onAvailable(network)
                 Log.i(TAG, "Network binding...")
-                connectivityManager.bindProcessToNetwork(network)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    connectivityManager.bindProcessToNetwork(network)
+                }
                 dialog.dismiss()
                 onConnected(network)
             }
@@ -805,7 +807,9 @@ open class GoProHelper(val context: Context, val onReady: OnGoProStreamReady) : 
         }
 
         networkCallback = null
-        connectivityManager.bindProcessToNetwork(null)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            connectivityManager.bindProcessToNetwork(null)
+        }
 
         networkSearchJob?.cancel()
         keepAliveJob?.cancel()
