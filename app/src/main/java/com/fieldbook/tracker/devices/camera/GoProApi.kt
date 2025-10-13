@@ -68,7 +68,6 @@ class GoProApi @Inject constructor(
 
     companion object {
         const val TAG = "GoProApi"
-        const val FILE_SYSTEM_PREFIX = "GOPR"
         private const val ffmpegOutputUri = "udp://@localhost:8555"
     }
 
@@ -415,22 +414,25 @@ class GoProApi @Inject constructor(
 
                     val fileName = file.getString("n")
 
-                    if (fileName.startsWith(FILE_SYSTEM_PREFIX)) {
-
-                        images.add(
-                            GoProImage(
-                                dir,
-                                fileName,
-                                file.getString("mod").toLong(),
-                                file.getString("s").toLong(),
-                                "http://10.5.5.9:8080/videos/DCIM/$dir/$fileName"
-                            )
+                    images.add(
+                        GoProImage(
+                            dir,
+                            fileName,
+                            file.getString("mod").toLong(),
+                            file.getString("s").toLong(),
+                            "http://10.5.5.9:8080/videos/DCIM/$dir/$fileName"
                         )
-                    }
+                    )
                 }
             }
 
-            val latest = images.maxByOrNull { it.fileName.split(".")[0].split(FILE_SYSTEM_PREFIX)[1].toInt() }
+            val pattern = Regex("^([a-zA-Z]*)([0-9]*).([a-zA-Z]*)$")
+
+            val latest = images.maxByOrNull {
+                pattern.matchEntire(it.fileName)?.destructured?.let { (prefix, number, suffix) ->
+                    number.toInt()
+                } ?: -1
+            }
 
             if (latest != null) {
                 if (latest.url !in requestedUrls) {
