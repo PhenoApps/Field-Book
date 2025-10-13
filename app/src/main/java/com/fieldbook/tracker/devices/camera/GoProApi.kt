@@ -84,7 +84,7 @@ class GoProApi @Inject constructor(
         OkHttpClient()
     }
 
-    private val loadControl: androidx.media3.exoplayer.DefaultLoadControl =
+    private var loadControl: androidx.media3.exoplayer.DefaultLoadControl =
         androidx.media3.exoplayer.DefaultLoadControl.Builder()
             .setPrioritizeTimeOverSizeThresholds(true)
             .setBufferDurationsMs(500, 1000, 500, 500)
@@ -99,7 +99,7 @@ class GoProApi @Inject constructor(
             )
         )
 
-    private val trackSelector: androidx.media3.exoplayer.trackselection.DefaultTrackSelector =
+    private var trackSelector: androidx.media3.exoplayer.trackselection.DefaultTrackSelector =
         androidx.media3.exoplayer.trackselection.DefaultTrackSelector(context)
 
     private val playerListener: Player.Listener = object : Player.Listener {
@@ -357,6 +357,14 @@ class GoProApi @Inject constructor(
         player?.stop()
         player?.release()
         player = null
+
+        trackSelector.release()
+        trackSelector = androidx.media3.exoplayer.trackselection.DefaultTrackSelector(context)
+
+        loadControl = androidx.media3.exoplayer.DefaultLoadControl.Builder()
+            .setPrioritizeTimeOverSizeThresholds(true)
+            .setBufferDurationsMs(500, 1000, 500, 500)
+            .build()
 
         player = ExoPlayer.Builder(context)
             .setTrackSelector(trackSelector)
