@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+- Field Book now supports 16 KB page sizes
 
 ### Fixed
 - Bug fixes and enhancements
