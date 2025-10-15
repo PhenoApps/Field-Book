@@ -15,7 +15,7 @@
     <string name="dialog_warning">Attenzione</string>
     <string name="dialog_save">Salva</string>
     <string name="dialog_go">Vai</string>
-    <string name="dialog_save_error_title">Errore durante il salvataggio</string>
+    <string name="dialog_save_error_title">Errore Di Salvataggio</string>
     <string name="dialog_back">Indietro</string>
     <string name="dialog_scan">Scansiona</string>
     <string name="dialog_sort_by">Ordina Per</string>
@@ -178,7 +178,7 @@
     <string name="field_creator_exit_dialog_message">Sei sicuro di voler uscire? I tuoi progressi andranno persi.</string>
     <string name="field_creator_creation_in_progress">La creazione del campo è in corso. Attendere…</string>
     <string name="field_creator_size_field_name_hint">Nome del Campo</string>
-    <string name="field_creator_size_rows_hint">File</string>
+    <string name="field_creator_size_rows_hint">Righe</string>
     <string name="field_creator_size_columns_hint">Colonne</string>
     <string name="field_name_required_error">Nome del campo obbligatorio</string>
     <string name="field_name_exists_error">Nome del campo già esistente</string>
@@ -205,7 +205,7 @@
     <string name="field_creator_preview_collapse_button">Comprimi Griglia</string>
     <string name="field_creator_expanded_preview_title">Anteprima del Campo Completo</string>
     <string name="dialog_field_creator_ask_name_hint">Nome</string>
-    <string name="dialog_field_creator_ask_row_hint">File</string>
+    <string name="dialog_field_creator_ask_row_hint">Righe</string>
     <string name="dialog_field_creator_ask_columns_hint">Colonne</string>
     <string name="dialog_field_creator_top_left">In Alto a Sinistra</string>
     <string name="dialog_field_creator_bottom_left">In Basso a Sinistra</string>
@@ -417,7 +417,7 @@
     <string name="activity_collect_dialog_new_collector">Vuoi salvare il nome di utente che raccoglie i dati?</string>
     <!--- Datagrid -->
     <string name="act_data_grid_cursor_failed">La griglia di dati non è riuscita a caricare i dati.</string>
-    <string name="dialog_data_grid_header_picker_title">Scegli Intestazioni di Riga</string>
+    <string name="dialog_data_grid_header_picker_title">Scegli Le Intestazioni Di Riga</string>
     <string name="dialog_data_grid_repeated_measures_title">Scegli Osservazione</string>
     <string name="menu_action_header_view_data_grid_title">Aggiorna Intestazioni di Riga</string>
     <!--- Lock -->
@@ -640,7 +640,7 @@
     <string name="verification_interval_every_24">Ogni 24 ore</string>
     <string name="verification_interval_never">Mai</string>
     <string name="preferences_profile_device_title">Dispositivo</string>
-    <string name="preferences_profile_set_device_name">Nome del dispositivo</string>
+    <string name="preferences_profile_set_device_name">Nome Del Dispositivo</string>
     <string name="preferences_profile_device_name_dialog_title">Imposta Nome Del Dispositivo</string>
     <string name="preferences_profile_device_name_error">Questo campo non può essere vuoto</string>
     <string name="preferences_profile_device_name_default_format">Predefinito: %s</string>
@@ -1273,7 +1273,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="pref_geonav_distance_threshold_title">Controllo Di Prossimità</string>
     <string name="activity_collect_proximity_warning">GeoNav Fermo, al di fuori delle coordinate</string>
     <string name="failed_to_save_study">Impossibile salvare lo studio</string>
-    <string name="no_suitable_file_manager_was_found">Nessun gestore file adatto è stato trovato.</string>
+    <string name="no_suitable_file_manager_was_found">Non è stato trovato alcun Gestore File adatto.</string>
     <string name="trait_error_invalid_multicat_value">Dati categorici inseriti non validi.</string>
     <string name="dialog_crash_report_title">Impossibile caricare i dati</string>
     <string name="dialog_crash_report_message">Premi OK per inviare un report diagnostico anonimo per aiutarti a migliorare l\'app.</string>
@@ -1375,7 +1375,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="play">Riproduci</string>
     <string name="pause">Pausa</string>
     <string name="save">Salva</string>
-    <string name="database_export_invalid_filename">Nome file di esportazione non valido.</string>
+    <string name="database_export_invalid_filename">Nome del file di esportazione non valido.</string>
     <string name="device_settings_dialog_name">Nome: %s</string>
     <string name="device_settings_dialog_address">Indirizzo: %s</string>
     <string name="device_settings_dialog_unknown_name">Dispositivo Bluetooth Sconosciuto</string>
