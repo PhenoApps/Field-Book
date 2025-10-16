@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - GoPro Hero 13 no longer causes a crash
+- Reduced installer size by using a different ffmpeg library
 
 ## [v6.3.1] - 2025-10-13
 
@@ -764,6 +765,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v6.2.3]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.3
 [v6.2.4]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.4
 [v6.2.5]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.5
+
 
 
 
