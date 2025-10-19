@@ -41,6 +41,12 @@
             android:icon="@drawable/ic_pref_brapi_logout"
             android:key="revokeBrapiAuth"
             android:title="@string/brapi_revoke_auth" />
+
+        <Preference
+            android:key="brapi_server_info"
+            android:title="@string/brapi_server_info_pref"
+            android:summary="@string/brapi_server_info_pref_summary"
+            android:icon="@drawable/ic_server_compare" />
     </PreferenceCategory>
 
     <PreferenceCategory

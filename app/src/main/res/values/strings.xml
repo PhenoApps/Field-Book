@@ -1160,6 +1160,22 @@
     <string name="preferences_brapi_server_scan_error">Scan Error</string>
     <string name="preferences_brapi_server_add">Submit a server</string>
 
+    <!-- Brapi Server Info -->
+    <string name="brapi_server_info_pref">Check Server Capabilities</string>
+    <string name="brapi_server_info_pref_summary">View supported BrAPI calls and server information</string>
+    <string name="brapi_server_info_title">BrAPI Server Information</string>
+    <string name="brapi_server_name_label">Server Name: %1$s</string>
+    <string name="brapi_organization_name_label">Organization Name: %1$s</string>
+    <string name="brapi_server_description_label">Description: %1$s</string>
+    <string name="brapi_supported_calls_title">Supported BrAPI Calls</string>
+    <string name="brapi_server_calls_implemented">%1$d/%2$d calls implemented (%3$d%%)</string>
+    <string name="brapi_server_returned_empty_response">Server returned empty response</string>
+    <string name="brapi_server_expand_content_description">Expand</string>
+    <string name="brapi_server_collapse_content_description">Collapse</string>
+    <string name="brapi_server_info_call">Call</string>
+    <string name="brapi_server_info_server">Server</string>
+    <string name="brapi_server_info_field_book">Field Book</string>
+
     <!-- Community Servers -->
     <string-array name="community_servers_names">
         <item>CassavaBase</item>

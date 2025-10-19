@@ -21,6 +21,7 @@ import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.brapi.service.core.CropService;
 import com.fieldbook.tracker.brapi.service.core.ProgramService;
 import com.fieldbook.tracker.brapi.service.core.SeasonService;
+import com.fieldbook.tracker.brapi.service.core.ServerInfoService;
 import com.fieldbook.tracker.brapi.service.core.StudyService;
 import com.fieldbook.tracker.brapi.service.core.TrialService;
 import com.fieldbook.tracker.brapi.service.germ.GermplasmService;
@@ -53,6 +54,7 @@ import org.brapi.client.v2.model.queryParams.phenotype.VariableQueryParams;
 import org.brapi.client.v2.modules.core.CommonCropNamesApi;
 import org.brapi.client.v2.modules.core.ProgramsApi;
 import org.brapi.client.v2.modules.core.SeasonsApi;
+import org.brapi.client.v2.modules.core.ServerInfoApi;
 import org.brapi.client.v2.modules.core.StudiesApi;
 import org.brapi.client.v2.modules.core.TrialsApi;
 import org.brapi.client.v2.modules.germplasm.GermplasmApi;
@@ -131,6 +133,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     private final ObservationVariablesApi traitsApi;
     private final SeasonsApi seasonsApi;
     private final CommonCropNamesApi cropsApi;
+    private final ServerInfoApi serverInfoApi;
 
     public final ProgramService programService;
     public final SeasonService seasonService;
@@ -140,6 +143,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     public final ObservationVariableService observationVariableService;
     public final ObservationUnitService observationUnitService;
     public final GermplasmService germplasmService;
+    public final ServerInfoService serverInfoService;
 
     public BrAPIServiceV2(Context context) {
         this.context = context;
@@ -156,6 +160,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         this.germplasmApi = new GermplasmApi(apiClient);
         this.seasonsApi = new SeasonsApi(apiClient);
         this.cropsApi = new CommonCropNamesApi(apiClient);
+        this.serverInfoApi = new ServerInfoApi(apiClient);
 
         this.programService = new ProgramService.Default(this.programsApi);
         this.studyService = new StudyService.Default(this.studiesApi);
@@ -165,6 +170,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         this.observationVariableService = new ObservationVariableService.Default(this.traitsApi);
         this.observationUnitService = new ObservationUnitService.Default(this.observationUnitsApi);
         this.germplasmService = new GermplasmService.Default(this.germplasmApi);
+        this.serverInfoService = new ServerInfoService.Default(this.serverInfoApi);
     }
 
     @Override
