@@ -9,7 +9,7 @@ name: process-pr-merge
 on:
   push:
     branches:
-      - main
+      - develop
 
 env:
   GH_TOKEN: ${{ secrets.ACTIONS_PAT }}
