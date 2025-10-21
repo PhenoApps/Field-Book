@@ -6,7 +6,8 @@
     android:id="@+id/list_item_study_cv"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="4dp">
+    android:layout_margin="4dp"
+    android:backgroundTint="@color/WHITE">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/list_item_brapi_filter_cl"
@@ -19,6 +20,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintVertical_bias="0"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"/>
@@ -27,9 +30,10 @@
             android:id="@+id/list_item_study_title_tv"
             style="@style/TextViewStyle.Bold.Title"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             android:layout_margin="16dp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:gravity="center_vertical"
+            app:layout_constraintBottom_toTopOf="@id/list_item_study_units_chip"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toStartOf="@id/list_item_study_pb"
@@ -44,9 +48,12 @@
             android:layout_margin="16dp"
             app:chipIcon="@drawable/ic_dots_grid"
             android:checkable="false"
+            android:textColor="@color/BLACK"
             app:layout_constraintHorizontal_bias="0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/list_item_study_title_tv"
+            app:layout_constraintTop_toBottomOf="@id/list_item_study_pb"
+            app:chipIconTint="@color/BLACK"
+            app:chipBackgroundColor="@color/light_gray"
             tools:text="108"/>
 
         <com.google.android.material.chip.Chip
@@ -57,9 +64,12 @@
             android:layout_margin="16dp"
             app:chipIcon="@drawable/ic_ruler"
             android:checkable="false"
+            android:textColor="@color/BLACK"
             app:layout_constraintHorizontal_bias="0"
             app:layout_constraintStart_toEndOf="@id/list_item_study_units_chip"
-            app:layout_constraintTop_toBottomOf="@id/list_item_study_title_tv"
+            app:layout_constraintTop_toBottomOf="@id/list_item_study_pb"
+            app:chipIconTint="@color/BLACK"
+            app:chipBackgroundColor="@color/light_gray"
             tools:text="2" />
 
         <com.google.android.material.chip.Chip
@@ -70,9 +80,12 @@
             android:layout_margin="16dp"
             app:chipIcon="@drawable/map_marker_outline"
             android:checkable="false"
+            android:textColor="@color/BLACK"
             app:layout_constraintHorizontal_bias="0"
             app:layout_constraintStart_toEndOf="@id/list_item_study_traits_chip"
-            app:layout_constraintTop_toBottomOf="@id/list_item_study_title_tv"
+            app:layout_constraintTop_toBottomOf="@id/list_item_study_pb"
+            app:chipIconTint="@color/BLACK"
+            app:chipBackgroundColor="@color/light_gray"
             tools:text="Manhattan, KS" />
 
         <com.google.android.material.chip.Chip
@@ -82,11 +95,14 @@
             android:layout_marginStart="16dp"
             app:chipIcon="@drawable/ic_trial"
             android:checkable="false"
+            android:textColor="@color/BLACK"
             android:ellipsize="end"
             app:layout_constraintHorizontal_bias="0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/list_item_study_units_chip"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:chipIconTint="@color/BLACK"
+            app:chipBackgroundColor="@color/light_gray"
             tools:text="PeeDee Otter Trial"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

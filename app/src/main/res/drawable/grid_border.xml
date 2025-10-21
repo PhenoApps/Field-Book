@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This file should be saved as: app/src/main/res/drawable/grid_border.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <stroke
+        android:width="2dp"
+        android:color="@android:color/darker_gray" />
+    <solid android:color="@android:color/transparent" />
+</shape>

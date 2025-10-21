@@ -21,6 +21,8 @@
     <string name="dialog_sort_by">Organizar por</string>
     <string name="dialog_enable">Habilitar</string>
     <string name="dialog_delete">Excluir</string>
+    <string name="dialog_accept">Aceitar</string>
+    <string name="dialog_exit">Sair</string>
     <string name="barcode_scanner_text">Escanear código de barras</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Dados de amostra</string>
@@ -30,7 +32,7 @@
     <string name="app_intro_intro_summary_slide1">A coleta de dados no campo exige, tradicionalmente, a escrita e a transcrição de notas em papel. O Field Book foi criado como uma solução digital para captura de dados que permite aumentar a velocidade de coleta com maior integridade de dados.</string>
     <string name="app_intro_intro_title_slide2">Funcionalidades e Personalização</string>
     <string name="app_intro_intro_summary_slide2">Os dados são inseridos no Field Book com disposição de características personalizadas que são projetados para simplificar dados de entrada e minimizar erros.\n\n Por padrão, os dados coletados são armazenados localmente, mas o Field Book suporta a API que lhe permite enviar dados para sistemas compatíveis com BrAPI.</string>
-    <string name="app_intro_required_setup_title">Configuração Requerida</string>
+    <string name="app_intro_required_setup_title">Configuração Obrigatória</string>
     <string name="app_intro_required_setup_summary">Para começar a usar o Field Book, conceda as permissões necessárias para o aplicativo e defina uma pasta onde seus dados serão armazenados.</string>
     <string name="app_intro_permissions_title">Permissões</string>
     <string name="app_intro_permissions_warning">Por favor, conceda as permissões necessárias</string>
@@ -44,7 +46,7 @@
     <string name="app_intro_tutorial_title">Tutorial</string>
     <string name="app_intro_tutorial_summary">Adicione um ícone de ajuda ao topo da barra de ferramentas que descreve recursos em todo o aplicativo.</string>
     <string name="app_intro_high_contrast_title">Tema de Alto Contraste</string>
-    <string name="app_intro_high_contrast_summary">Habilitar um tema de alto contraste para melhor visibilidade em dispositivos.</string>
+    <string name="app_intro_high_contrast_summary">Habilitar um tema de alto contraste para melhor visibilidade em dispositivos E Lnk.</string>
     <!-- Storage Definer -->
     <string name="storage_definer_title">Local de Armazenamento</string>
     <string name="storage_definer_summary">Por favor, selecione ou crie uma pasta que o Field Book pode usar para armazenar os dados do aplicativo.</string>
@@ -75,9 +77,33 @@
     <string name="act_file_explorer_no_file_error">Não foram encontrados diretórios de Field Book.</string>
     <!-- Warnings/Catches -->
     <string name="warning_field_missing">Nenhum campo está atualmente carregado. Por favor, coloque um campo antes de coletar dados.</string>
-    <string name="warning_traits_missing">Não existem caracteres. Por favor, crie caracteres antes de coletar dados.</string>
+    <string name="warning_traits_missing">Não existem características. Por favor, crie características antes de coletar dados.</string>
     <!-- Changelog -->
     <string name="changelog_title">Registro de alterações</string>
+    <!--  Field Grouping  -->
+    <string name="group_archived_value">Arquivado</string>
+    <string name="fields_ungrouped">Desagrupados</string>
+    <string name="dialog_group_options">Opções de Agrupamento</string>
+    <string name="group_existing">Grupo existente</string>
+    <string name="group_archive">Arquivar</string>
+    <string name="group_new">Novo grupo</string>
+    <string name="group_remove">Remover do grupo</string>
+    <string name="create_new_group">Criar Novo Grupo</string>
+    <string name="dialog_group_name">Nome do Grupo</string>
+    <string name="dialog_group_name_warning">Campo não pode ficar em branco</string>
+    <string name="menu_group">Grupo</string>
+    <string name="menu_archive">Arquivar</string>
+    <string name="menu_groups_toggle">Alternar Visibilidade de Grupos</string>
+    <string name="group_toggle_icon">Alternar Grupo</string>
+    <string name="archived_fields">Campos Arquivados</string>
+    <string name="menu_unarchive">Remover do arquivo</string>
+    <string name="menu_collapse_all">Recolher Tudo</string>
+    <string name="menu_expand_all">Expandir Tudo</string>
+    <string name="archive_active_field_title">Arquivar Campo Ativo?</string>
+    <string name="archive_active_field_message">Você selecionou o campo ativo para arquivar. Se continuar, não haverá nenhum campo ativo. Você deseja continuar?</string>
+    <string name="archive_others">Arquivar Outros</string>
+    <string name="dialog_unarchive_field_title">Desarquivar Campo?</string>
+    <string name="dialog_unarchive_field_message">Este campo está arquivado atualmente. Se continuar, este campo será desarquivado e se tornará o campo ativo. Deseja continuar?</string>
     <!-- FIELDS -->
     <!-- General -->
     <string name="menu_fields_sort_list">Organizar Lista de Campos</string>
@@ -142,9 +168,42 @@
     <string name="act_field_editor_load_file_failed">Ocorreu um erro durante o carregamento do arquivo.</string>
     <string name="act_field_editor_file_open_failed">Arquivo falhou ao abrir.</string>
     <!-- Field Creator  -->
-    <string name="dialog_field_creator_ask_size">Por favor, escolha o nome e tamanho do campo.</string>
-    <string name="dialog_field_creator_ask_start_point">Por favor, escolha um ponto de partida de campo.</string>
-    <string name="dialog_field_creator_ask_pattern">Por favor, escolha um padrão de campo.</string>
+    <string name="field_creator_activity_toolbar_title">Criar Novo Campo</string>
+    <string name="field_creator_size_title">Detalhes do Campo</string>
+    <string name="field_creator_start_corner_title">Canto Inicial</string>
+    <string name="field_creator_pattern_title">Padrão de Caminhada</string>
+    <string name="field_creator_direction_title">Direção de Caminhada</string>
+    <string name="field_creator_preview_title">Revisar</string>
+    <string name="field_creator_exit_dialog_title">Sair do Criador de Campo</string>
+    <string name="field_creator_exit_dialog_message">Você tem certeza que quer sair? Seu progresso será perdido.</string>
+    <string name="field_creator_creation_in_progress">Criação do campo em progresso. Por favor, espere…</string>
+    <string name="field_creator_size_field_name_hint">Nome do Campo</string>
+    <string name="field_creator_size_rows_hint">Linhas</string>
+    <string name="field_creator_size_columns_hint">Colunas</string>
+    <string name="field_name_required_error">Nome do campo é obrigatório</string>
+    <string name="field_name_exists_error">Nome do campo já existe</string>
+    <string name="field_creator_positive_number_error">Deve ser um número positivo</string>
+    <string name="field_creator_rows_exceeded_error">Não pode exceder %s</string>
+    <string name="field_creator_cols_exceeded_error">Não pode exceder %s</string>
+    <string name="field_creator_total_plots_exceeded_error">Total de parcelas não pode exceder %1$s. Total atual: %2$s</string>
+    <string name="field_creation_failed_error">Falha ao criar campo</string>
+    <string name="field_creator_start_point_instruction">Toque em um canto para selecionar o ponto inicial</string>
+    <string name="field_dimensions_format">Campo: %d × %d</string>
+    <string name="field_creator_pattern_linear">Linear</string>
+    <string name="field_creator_pattern_linear_summary">Seguir a mesma direção após cada linha/coluna</string>
+    <string name="field_creator_pattern_zigzag">Serpentina/Zigue-Zague</string>
+    <string name="field_creator_pattern_zigzag_summary">Alternar direção após cada linha/coluna</string>
+    <string name="field_creator_direction_horizontal">Horizontal</string>
+    <string name="field_creator_direction_horizontal_summary">Caminhe pelas linhas</string>
+    <string name="field_creator_direction_vertical">Vertical</string>
+    <string name="field_creator_direction_vertical_summary">Caminhe colunas acima/baixo</string>
+    <string name="field_creator_preview_summary">Campo: %s (%d x %d)</string>
+    <string name="field_creator_preview_large_field_warning">Campo grande detectado. Criar muitos lotes pode levar algum tempo.</string>
+    <string name="field_creator_preview_creating_field">Criando campo…</string>
+    <string name="field_creator_preview_create_button">CRIAR</string>
+    <string name="field_creator_preview_expand_button">Expandir Grade</string>
+    <string name="field_creator_preview_collapse_button">Recolher Grade</string>
+    <string name="field_creator_expanded_preview_title">Pré-visualização do Campo Completo</string>
     <string name="dialog_field_creator_ask_name_hint">Nome</string>
     <string name="dialog_field_creator_ask_row_hint">Linhas</string>
     <string name="dialog_field_creator_ask_columns_hint">Colunas</string>
@@ -152,16 +211,23 @@
     <string name="dialog_field_creator_bottom_left">Inferior Esquerdo</string>
     <string name="dialog_field_creator_top_right">Superior Direito</string>
     <string name="dialog_field_creator_bottom_right">Inferior Direito</string>
-    <string name="dialog_field_creator_insert_field">Criando linhas no campo: %1$s por colunas: %2$s</string>
-    <string name="dialog_field_creator_insert_field_complete">Criando linhas no campo: %1$s por colunas: %2$s …completo.</string>
+    <string name="dialog_field_creator_insert_field">Criando campo no %1$s linhas por %2$s colunas</string>
+    <string name="dialog_field_creator_insert_field_complete">Criando campo de %1$s linhas por %2$s colunas …completo.</string>
     <string name="dialog_field_creator_insert_plot">Inserindo parcela %1$s na linha %2$s coluna %3$s</string>
     <string name="dialog_field_creator_review_title">Revisar</string>
     <string name="dialog_field_creator_size_group_error">Por favor, insira um nome e formato válidos.</string>
     <string name="dialog_field_creator_field_name_not_unique">Nome do campo já está em uso.</string>
     <string name="dialog_field_creator_large_field">Campo grande detectado, a transação pode levar muito tempo.</string>
-    <string name="dialog_field_creator_linear_button_content_desc">Botão para escolher o padrão linear as parcelas.</string>
-    <string name="dialog_field_creator_zig_button_content_desc">Botão para escolher o padrão em zigue-zague as parcelas.</string>
+    <string name="dialog_field_creator_horizontal_linear_button_content_desc">Botão para escolher o padrão de parcelas linear horizontal.</string>
+    <string name="dialog_field_creator_horizontal_zig_button_content_desc">Botão para escolher o padrão de parcelas zigue-zague horizontal.</string>
+    <string name="dialog_field_creator_vertical_linear_button_content_desc">Botão para escolher o padrão de plotagem linear vertical.</string>
+    <string name="dialog_field_creator_vertical_zig_button_content_desc">Botão para escolher o padrão de parcelas zigue-zague vertical.</string>
     <string name="dialog_field_creator_review_image_content_desc">Imagem mostrando orientação e padrão de parcelas.</string>
+    <string name="field_creator_stepper_size">Tamanho</string>
+    <string name="field_creator_stepper_start">Ponto de Início</string>
+    <string name="field_creator_stepper_pattern">Padrão de Caminhada</string>
+    <string name="field_creator_stepper_direction">Direção de Caminhada</string>
+    <string name="field_creator_stepper_preview">Pré-visualizar</string>
     <!-- Geo-Navigate to Field -->
     <string name="menu_fields_plot_by_distance_title">Selecione campo mais próximo</string>
     <string name="activity_field_editor_no_field_found">Coordenadas não podem ser encontrada.</string>
@@ -177,6 +243,13 @@
     <string name="name_conflict_message">\"%1$s\" já está sendo usado como um %2$s para outro campo.</string>
     <string name="name_conflict_import_name">nome da importação</string>
     <string name="name_conflict_display_name">nome de exibição</string>
+    <string name="dialog_att_chooser_title_default">Escolha um atributo</string>
+    <string name="search_attribute_dialog_title">Definir ID de Procura</string>
+    <string name="dialog_att_chooser_unique_attributes">Atributos Únicos</string>
+    <string name="search_attribute_apply_to_all">Aplicar escolha para todos os campos elegíveis</string>
+    <string name="search_attribute_updated">Procurar atributo atualizado</string>
+    <string name="search_attribute_updated_all">Procurar atributo atualizado no(s) campo(s) %1$d</string>
+    <string name="search_multiple_matches_found">Encontrados %1$d parcelas correspondentes. Mostrando a primeira.</string>
     <!--    <string name="field_default_sort_order">import order</string>-->
     <string name="field_data_title">Dados</string>
     <string name="field_trait_observation_total">\"%d\"observações</string>
@@ -202,13 +275,14 @@
     <string name="traits_sort_format">Formato</string>
     <string name="warning_traits_missing_modify">Crie características antes de modificá-las.</string>
     <!-- Trait import/export -->
-    <string name="traits_toolbar_import_export">Importar/Exportar</string>
+    <string name="traits_new_dialog_title">Novo(s) Característica(s)</string>
+    <string name="traits_dialog_create">Criar nova característica</string>
+    <string name="traits_dialog_import_from_file">Importar de um arquivo</string>
     <string name="traits_dialog_import">Importar</string>
+    <string name="import_error_format_trait">Somente arquivos TRT podem ser importados como uma lista de características</string>
     <string name="traits_export_check">Exportar lista de características atual?</string>
     <string name="traits_dialog_export">Exportar</string>
-    <string name="dialog_delete_traits_message">Gostaria de excluir todas as características atuais?</string>
-    <string name="import_error_format_trait">Somente arquivos TRT podem ser importados como uma lista de características</string>
-    <string name="import_dialog_title_traits">Importar características</string>
+    <string name="dialog_delete_traits_message">Você gostaria de excluir todas as características atuais? Excluir uma característica também exclui dados que foram coletados para esta característica.</string>
     <string name="traits_toolbar_delete_all">Excluir todas as características</string>
     <string name="act_trait_editor_no_traits_exist">Não existem características.</string>
     <!-- Trait item menu -->
@@ -236,10 +310,17 @@
     <string name="traits_format_labelprint">Impressão nas etiquetas Zebra</string>
     <string name="traits_format_usb_camera">Câmera USB</string>
     <string name="traits_format_go_pro_camera">GoPro</string>
+    <string name="traits_format_angle">Ângulo</string>
+    <string name="traits_format_spectral">Espectral</string>
+    <string name="traits_format_nix">Nix</string>
+    <string name="traits_format_inno_spectra">InnoSpectra</string>
+    <string name="traits_format_green_seeker">GreenSeeker</string>
+    <string name="traits_format_scale">Escala</string>
+    <string name="traits_format_stop_watch">Cronômetro</string>
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Formato de Característica</string>
     <string name="trait_creator_title_layout">Disposição de Característica</string>
-    <string name="trait_creator_parameters_title">%s Parâmetros</string>
+    <string name="trait_creator_parameters_title">Parâmetros %s</string>
     <string name="activity_traits_new_button_content_description">Adicionar uma nova característica.</string>
     <string name="traits_create_name">Nome</string>
     <string name="traits_create_format">Formato</string>
@@ -252,6 +333,7 @@
     <string name="traits_create_photo_maximum">Número máximo de fotos</string>
     <string name="traits_create_true">Verdadeiro</string>
     <string name="traits_create_false">Falso</string>
+    <string name="traits_create_unset">Desmarcar</string>
     <string name="traits_create_categories_text">Separar items com uma /</string>
     <string name="traits_create_camera">Câmera</string>
     <string name="traits_create_close_keyboard">Fechar o teclado</string>
@@ -265,11 +347,11 @@
     <string name="list_item_traits_grid_content_description">Inverter seleção</string>
     <string name="dialog_trait_parameters_title">Parâmetros de Característica</string>
     <string name="traits_create_warning_percent_magnitude_relation">Erro de relação de magnitude</string>
-    <string name="trait_parameter_default_value_number_format_error">Tem que ser um número</string>
+    <string name="trait_parameter_default_value_number_format_error">Deve ser um número</string>
     <string name="traits_create_unknown_error">Ocorreu um erro desconhecido: %s</string>
     <string name="trait_creator_parameter_warning_infinite">O número não pode ser infinito</string>
     <string name="trait_creator_parameter_warning_nan">O número não pode ser NaN</string>
-    <string name="trait_creator_parameter_warning_negative">O número não pode ser negativo</string>
+    <string name="trait_creator_parameter_warning_negative">O número não deve ser negativo</string>
     <string name="trait_creator_parameter_warning_too_big">O número é muito grande</string>
     <string name="trait_creator_parameter_warning_too_small">O número é muito pequeno</string>
     <string name="list_item_trait_parameter_categories_value_hint">Digite um nome de categoria para adicionar</string>
@@ -278,8 +360,8 @@
     <string name="dialog_new_trait_error_must_select_a_layout">Você deve selecionar uma disposição.</string>
     <string name="trait_creator_parameter_warning_integer_required">Inteiro obrigatório.</string>
     <string name="dialog_new_trait_error_cannot_update_to_brapi_trait">As características não podem ser atualizados para características BrAPI.</string>
-    <string name="required">Requerido</string>
-    <string name="traits_create_warning_percent_value_required">Valor necessário</string>
+    <string name="required">Obrigatório</string>
+    <string name="traits_create_warning_percent_value_required">Valor obrigatório</string>
     <string name="select_trait">Selecionar Característica</string>
     <string name="edit_traits">Editar</string>
     <!-- COLLECT -->
@@ -287,22 +369,23 @@
     <string name="trait_error_minimum_value">O valor é menor do que o conjunto mínimo</string>
     <string name="trait_error_maximum_value">O valor é maior do que o conjunto mínimo</string>
     <string name="trait_error_disease_severity">Severidade já armazenada</string>
-    <string name="act_collect_study_names_empty">O estudo selecionado tem nomes únicos, primários ou secundários vazios.</string>
+    <string name="act_collect_study_names_empty">O estudo selecionado tem nomes único, primário ou secundário vazios.</string>
     <!-- Toolbar -->
     <string name="main_toolbar_resources">Recursos</string>
     <string name="main_trait_details">Detalhes do caractere</string>
     <string name="main_infobar_data_missing">Não há dados</string>
+    <string name="main_infobar_select_data">Selecionar</string>
     <string name="main_toolbar_next_entry_no_data">Nova entrada de dados</string>
     <!-- InfoBars -->
     <string name="dialog_att_chooser_attributes">Atributos</string>
     <string name="dialog_att_chooser_traits">Características</string>
     <string name="dialog_att_chooser_other">Outros</string>
     <string name="dialog_att_chooser_customize">Personalizar</string>
-    <string name="dialog_infobar_att_chooser_title">Infobar %d</string>
+    <string name="dialog_infobar_att_chooser_title">InfoBar %d</string>
     <string name="infobars_attribute_placeholder">Selecionar</string>
     <string name="field_name_attribute">nome_campo</string>
-    <string name="infobar_word_wrap_enabled">Quebra de linha habilitada para Infobar %s</string>
-    <string name="infobar_word_wrap_disabled">Quebra de linha desabilitada para Infobar %s</string>
+    <string name="infobar_word_wrap_enabled">Quebra de linha habilitada para InfoBar %s</string>
+    <string name="infobar_word_wrap_disabled">Quebra de linha desabilitada para InfoBar %s</string>
     <!-- ID/Barcode Search -->
     <string name="act_collect_barcode_search_exists_in_other_field">Este ID está em %s</string>
     <string name="main_toolbar_moveto_no_match">Nenhum valor correspondente</string>
@@ -341,6 +424,7 @@
     <string name="activity_collect_locked_state">Bloqueado - entrada de dados, modificação e exclusão estão desabilitados</string>
     <string name="activity_collect_frozen_state">Congelado - uma vez que os dados são salvos, eles não podem ser modificados ou excluídos</string>
     <string name="activity_collect_unlocked_state">Desbloqueado - sem restrições na entrada de dados, modificação ou exclusão de dados</string>
+    <string name="trait_box_word_wrap_toast">Quebrar palavras %s para Características</string>
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">Seu dispositivo não tem uma câmera que possa ser usada para tirar uma foto.</string>
     <string name="trait_delete_warning_photo">Você tem certeza que deseja excluir esta foto?</string>
@@ -372,6 +456,7 @@
     <!-- Trait Layout: Boolean -->
     <string name="trait_boolean_on">Ativado</string>
     <string name="trait_boolean_off">Desativado</string>
+    <string name="trait_boolean_unset">Desmarcar</string>
     <!-- Trait Layout: GoPro -->
     <string name="trait_go_pro_capture_button_text">Capturar\n</string>
     <string name="trait_go_pro_await_device_title">Procurando um GoPros</string>
@@ -507,7 +592,7 @@
     <string name="export_content_columns_title">Colunas de campo</string>
     <string name="export_content_columns_all">Todas las columnas importadas</string>
     <string name="export_content_columns_unique">Somente identificador único</string>
-    <string name="export_content_traits_all">Todos os caracteres</string>
+    <string name="export_content_traits_all">Todas as características</string>
     <string name="export_content_traits_active">Somente características ativas</string>
     <string name="export_error_general">Erro durante a exportação</string>
     <string name="error_storage_directory">Diretório de armazenamento não encontrado ou corrompido.</string>
@@ -516,7 +601,7 @@
     <string name="export_progress">Exportando...</string>
     <string name="export_error_missing_format">Tipo de exportação precisa ser selecionado</string>
     <string name="export_error_missing_column">Tipo de coluna de campo deve ser selecionado</string>
-    <string name="export_error_missing_trait">Tipo de Característica deve ser selecionado</string>
+    <string name="export_error_missing_trait">Tipo de característica deve ser selecionado</string>
     <string name="export_overwrite">Sobrescrever exportação anterior</string>
     <string name="dialog_export_bundle_data_cb_text">Dados de mídia agrupados com arquivo de exportação.</string>
     <string name="export_multiple_fields_name">múltiplos_campos</string>
@@ -542,6 +627,10 @@
     <string name="preferences_profile_require_person_summary">Rastreie o nome da pessoa que está coletando os dados</string>
     <string name="preferences_profile_set_person">Nome da Pessoa</string>
     <string name="preferences_profile_person_dialog_title">Definir Pessoa</string>
+    <string name="dialog_previous_names">Nomes Usados Anteriormente</string>
+    <string name="preferences_profile_previous_names">Nomes Anteriores</string>
+    <string name="preferences_profile_new_person">Nova Pessoa</string>
+    <string name="preferences_profile_previous_names_warning">Todos os nomes de pessoas salvas seriam excluídos, e isso não pode ser revertido. Tem certeza que deseja continuar?</string>
     <string name="preferences_profile_name_first">Nome</string>
     <string name="preferences_profile_name_last">Sobrenome</string>
     <string name="preferences_profile_name_error">Ambos os campos não podem estar em branco</string>
@@ -550,6 +639,11 @@
     <string name="verification_interval_every_12">A cada 12 horas</string>
     <string name="verification_interval_every_24">A cada 24 horas</string>
     <string name="verification_interval_never">Nunca</string>
+    <string name="preferences_profile_device_title">Dispositivo</string>
+    <string name="preferences_profile_set_device_name">Nome do Dispositivo</string>
+    <string name="preferences_profile_device_name_dialog_title">Definir Nome do Dispositivo</string>
+    <string name="preferences_profile_device_name_error">Este campo não pode ficar em branco</string>
+    <string name="preferences_profile_device_name_default_format">Padrão: %s</string>
     <string name="pref_profile_crashlytics_user_id_enabled">ID Único</string>
     <string name="pref_profile_crashlytics_user_id_enabled_summary">Incluir uma ID anônima e única nos logs de erro para ajudar a equipe de desenvolvimento a corrigir bugs</string>
     <string name="pref_profile_crashlytics_refresh_title">Atualizar ID</string>
@@ -585,7 +679,7 @@
     <string name="preferences_appearance_toolbar_customize_resources">Recursos</string>
     <string name="preferences_appearance_toolbar_customize_summary">Resumo</string>
     <string name="preferences_appearance_toolbar_customize_lock">Bloquear</string>
-    <string name="preferences_general_feature_datagrid">Grilla de datos</string>
+    <string name="preferences_general_feature_datagrid">Grade de dados</string>
     <string name="preferences_general_feature_datagrid_description">Adicione um botão para exibir uma grade de dados coletados</string>
     <string name="preferences_general_feature_next_missing">Próximo Entrada Sem Dados</string>
     <string name="preferences_general_skip_entries_disabled">Desabilitado</string>
@@ -598,10 +692,14 @@
     <string name="preferences_appearance_collect_screen_title">Tela de Coleta</string>
     <string name="preferences_appearance_infobar_number">Número de InfoBars</string>
     <string name="preferences_appearance_infobar_number_description">Ajustar o número de Infobars exibidas na tela principal</string>
-    <string name="preferences_appearance_infobar_hide_prefix">Ocultar prefixo do Infobar</string>
-    <string name="preferences_appearance_infobar_hide_prefix_description">Prefixo do Infobar será substituído por um ícone genérico</string>
+    <string name="preferences_appearance_infobar_hide_prefix">Ocultar prefixo do InfoBar</string>
+    <string name="preferences_appearance_infobar_hide_prefix_description">Prefixo do InfoBar será substituído por um ícone genérico</string>
     <string name="preferences_appearance_quickgoto">Ir Rápido Para</string>
-    <string name="preferences_appearance_quickgoto_description">Altere a seção do meio da tela principal para o legado \"Ir Rápido para\"</string>
+    <string name="preferences_appearance_quickgoto_description">Altere a seção do meio da tela principal para o legado \"Ir Rápido Para\"</string>
+    <string name="preferences_appearance_range_progress_bar">Barra de progresso de entradas</string>
+    <string name="preferences_appearance_range_progress_bar_description">Mostra sua posição atual no campo</string>
+    <string name="preferences_appearance_traits_progress_bar">Barra de progresso de características</string>
+    <string name="preferences_appearance_traits_progress_bar_description">Mostra se as características ativas têm dados e destacam a característica atual</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamento</string>
     <string name="preferences_behavior_movement_title">Movimento</string>
@@ -726,6 +824,10 @@
     <string name="trait_audio_recording_warning">Áudio ao nível de característica já está gravando. Para isso primeiro.</string>
     <string name="trait_audio_playing_warning">Áudio está sendo reproduzido. Pare isso primeiro.</string>
     <string name="field_audio_zip_error">Erro ao criar arquivo zip</string>
+    <string name="trait_audio_placeholder_filename">Arquivo de Áudio Gravado</string>
+    <string name="trait_audio_timestamp">Timestamp: </string>
+    <string name="trait_audio_duration">Duração: </string>
+    <string name="trait_audio_file_size">Tamanho do Arquivo </string>
     <string name="pref_beta_enable_individual_field_page_title">Habilitar Páginas de Campo Individuais</string>
     <string name="pref_beta_enable_individual_field_page_summary">Selecionar um campo na lista de campos abre uma página de detalhes</string>
     <string name="pref_beta_mlkit_title">Biblioteca MLKit</string>
@@ -927,7 +1029,7 @@
     <string name="number_traits_label">Número de Características:</string>
     <string name="number_observation_label">Número de Observações:</string>
     <string name="no_observations_warning">Nenhuma observação encontrada para o estudo. Por favor, toque em Cancelar.</string>
-    <string name="brapi_skipped_traits">Características obtidas com sucesso. %1$d características ignoradas devido à ausência do campo brapi \'trait\'</string>
+    <string name="brapi_skipped_traits">Características obtidas com sucesso. %1$d características ignoradas devido à ausência do \'característica\' brapi</string>
     <string name="brapi_study_incompatible">Este estudo BrAPI atualmente é incompatível com Field Book. Estudos devem incluir linha e coluna no cabeçalho.</string>
     <string name="act_collect_no_plots">Este estudo não tem nenhuma parcela salva.</string>
     <!-- BrAPI Export -->
@@ -971,7 +1073,7 @@
     <!-- TUTORIAL -->
     <string name="tutorial_dialog_title">Tutorial</string>
     <string name="tutorial_dialog_description">Gostaria de habilitar o tutorial? Esta configuração pode ser alterada nas Configurações.</string>
-    <string name="tutorial_main_infobars_title">Infobars</string>
+    <string name="tutorial_main_infobars_title">InfoBars</string>
     <string name="tutorial_main_infobars_description">InfoBars mostram dados extras para cada entrada e podem ser alterados usando os menus suspensos.</string>
     <string name="tutorial_main_traits_title">Características</string>
     <string name="tutorial_main_traits_description">As pequenas flechas verdes se movem entre características.</string>
@@ -1020,7 +1122,7 @@
     <string name="tutorial_traits_visibility_title">Visibilidade da Característica</string>
     <string name="tutorial_traits_visibility_description">As características podem ser desabilitadas da coleção marcando a caixa de seleção.</string>
     <string name="shutter_capture_content_description">Botão de disparo para tirar uma foto.</string>
-    <string name="dialog_geonav_prefs_sensor_missing_title">Falta o sensor necessário</string>
+    <string name="dialog_geonav_prefs_sensor_missing_title">Falta o sensor requerido</string>
     <string name="dialog_geonav_prefs_sensor_missing_message">O método trapezoidal requer um acelerômetro e giroscópio para usar entrada da bússola.</string>
     <string name="trait_audio_button_content_description">Controla gravação do áudio.</string>
     <string name="trait_counter_minus_content_description">Subtraia a contagem em um</string>
@@ -1074,6 +1176,8 @@
     <!-- gopro -->
     <string name="dialog_go_pro_wait_stream_title">Aguardando pré-visualização ao vivo</string>
     <string name="dialog_go_pro_wait_stream_message">Isso pode demorar um minuto.</string>
+    <string name="view_trait_photo_settings_save_image_title">Copiar imagem para Field Book</string>
+    <string name="go_pro_trait_settings_title">Configurações do GoPro</string>
     <!-- canon camera strings -->
     <string name="canon_frag_connect_btn_content_description">botão obturador</string>
     <string name="traits_format_canon">Canon</string>
@@ -1093,6 +1197,14 @@
     <string name="dialog_brapi_filter_title">Filtros</string>
     <string name="dialog_brapi_filter_active">Ativo</string>
     <string name="dialog_brapi_filter_choices_title">Filtrar Por</string>
+    <!-- spectral trait strings -->
+    <string name="trait_spectral_connect_content_description">Inicia uma conexão do dispositivo.</string>
+    <string name="select_device">Selecionar Dispositivo</string>
+    <string name="no_devices_found">Não foram encontrados dispositivos</string>
+    <string name="list_item_color_close_content_description">Excluir esta cor</string>
+    <string name="delete_color">Excluir Observação de Cor</string>
+    <string name="delete_color_message">Isto irá excluir permanentemente a observação</string>
+    <string name="nix_device_connecting">Dispositivo está conectando.</string>
     <string name="brapi_studies_filter_title">Estudos</string>
     <string name="brapi_trials_filter_title">Estudos</string>
     <string name="brapi_filter_dialog_title">Filtrar Por</string>
@@ -1166,4 +1278,108 @@
     <string name="trait_error_invalid_multicat_value">Dados categóricos inválidos.</string>
     <string name="dialog_crash_report_title">Falha ao carregar dados</string>
     <string name="dialog_crash_report_message">Pressione OK para enviar um relatório de diagnóstico anônimo para ajudar a melhorar o aplicativo.</string>
+    <string name="dialog_quick_goto_title">Ir Rápido Para</string>
+    <string name="dialog_quick_goto_go">Ir</string>
+    <string name="quick_goto_primary_hint">ID Primário</string>
+    <string name="quick_goto_secondary_hint">ID Secundário</string>
+    <string name="quick_goto_dialog_icon_description">pessoa executando</string>
+    <string name="failed_to_fetch_observation_levels">Falha ao buscar nível de observações</string>
+    <string name="traits_sort_default">Padrão</string>
+    <string name="traits_crop_image_parameter">Recortar</string>
+    <string name="dialog_crop_title">Configuração Região de Recorte</string>
+    <string name="dialog_crop_message">Defina uma região de recorte que será aplicada a todas as imagens futuras para esta característica.</string>
+    <string name="view_trait_photo_settings_crop">Definir Região de Recorte</string>
+    <string name="crop_image_clip_data_label">Dados da região de recorte de Field Book</string>
+    <string name="quick_goto_swap_content_description">alternar tipo de entrada</string>
+    <!--  NearbyShare  -->
+    <string name="nearby_share_title">Compartilhar Próximo</string>
+    <string name="nearby_share_preferences_title">Compartilhar Preferências</string>
+    <string name="nearby_share_connection_established">Conexão Estabelecida</string>
+    <string name="nearby_share_connection_rejected">Conexão Recusada</string>
+    <string name="nearby_share_connection_error">Erro de Conexão</string>
+    <string name="nearby_share_connection_cancelled">Conexão cancelada</string>
+    <string name="nearby_share_transfer_complete">Transferência concluída</string>
+    <string name="nearby_share_transfer_in_progress">Transferência em andamento</string>
+    <string name="nearby_share_transfer_failed">Transferência falhou</string>
+    <string name="nearby_share_transfer_cancelled">Transferência cancelada</string>
+    <string name="nearby_share_devices_disconnected">Dispositivos Desconectados</string>
+    <string name="nearby_share_receiving_file">Recebendo arquivo…</string>
+    <string name="nearby_share_starting_transfer">Transferindo Arquivo %s…</string>
+    <string name="nearby_share_waiting_for_receivers">Aguardando os receptores conectarem…</string>
+    <string name="nearby_share_searching_for_senders">Procurando por dispositivos próximos…</string>
+    <string name="nearby_share_already_waiting_for_receivers">Já esperando que os receptores conectem…</string>
+    <string name="nearby_share_already_searching_for_sender">Já procurando o remetente…</string>
+    <string name="nearby_share_no_devices_found">Nenhum dispositivo encontrado ainda</string>
+    <string name="nearby_share_permissions_required">Permissões de Dispositivos Próximos Requeridas</string>
+    <string name="nearby_share_failed_discovery">Falha ao iniciar a descoberta: %s</string>
+    <string name="nearby_share_failed_advertising">Erro ao esperar dispositivos: %s</string>
+    <string name="nearby_share_failed_transfer">Falha ao iniciar a transferência: %s</string>
+    <string name="nearby_share_failed_payload">Falha ao criar o arquivo payload</string>
+    <string name="nearby_share_failed_request">Falha ao solicitar a conexão: %s</string>
+    <string name="nearby_share_failed_handle_file">Falha ao manipular arquivo: %s</string>
+    <string name="nearby_share_generating_file">Preparando o arquivo para transferência</string>
+    <string name="nearby_share_failed_import">Falha ao importar arquivo: %s</string>
+    <string name="nearby_share_failed_export_generation_message">Erro ao gerar arquivo para compartilhar: %s</string>
+    <string name="nearby_share_failed_export_generation">Erro ao gerar arquivo para compartilhar</string>
+    <string name="nearby_share_file_imported_successfully">%s importado com sucesso</string>
+    <string name="nearby_share_authenticating_connection">Autenticando conexão com %s…</string>
+    <string name="dialog_device_selection_title">Selecione um dispositivo</string>
+    <string name="dialog_nearby_authentication_title">Aceitar Conexão com %s</string>
+    <string name="dialog_nearby_authentication_summary">Confirme que o código corresponde a ambos os dispositivos: %s</string>
+    <string name="preferences_preferences_title">Preferências</string>
+    <string name="nearby_share_export_preferences">Exportar Preferências</string>
+    <string name="nearby_share_import_preferences">Importar Preferências</string>
+    <string name="all_fields_processed">Todos os campos processados</string>
+    <string name="spectral_trait_insert_note">Nota</string>
+    <string name="spectral_trait_insert_note_message">Escrever uma nota para a entrada selecionada.</string>
+    <string name="trait_spectral_na_content_description">valor espaço reservado não aplicável</string>
+    <string name="act_collect_barcode_spectral">Neste momento, não é possível coletar dados spectrais via entrada de código de barras.</string>
+    <string name="replace_observations">Apagar e Substituir</string>
+    <string name="replace_observations_message">Observações já existem, você gostaria de excluí-las e inserir um valor de NA?</string>
+    <string name="usb_device_description">USB</string>
+    <string name="not_yet_implemented">Este recurso ainda não está implementado.</string>
+    <string name="view_trait_nix_color_option">Cor</string>
+    <string name="view_trait_nix_spectral_option">Espectral</string>
+    <string name="nix_trait_settings_title">Configurações de %s</string>
+    <string name="disconnect">Desconectar</string>
+    <string name="nix_device_incompatible">Este dispositivo é incompatível, um tipo de dispositivo anterior já salvo dados.</string>
+    <string name="nix_error_unknown">"Ocorreu um erro desconhecido de Nix. "</string>
+    <string name="nix_error_license">Houve um problema com sua licença Nix ou conexão com a internet.</string>
+    <string name="nix_error_ambient_light">Foi detectada muita luz ambiente.</string>
+    <string name="nix_error_timeout">Ocorreu um erro de tempo limite.</string>
+    <string name="nix_error_low_power">As baterias são muito baixas para escanear.</string>
+    <string name="nix_error_scan_not_supported">Esta escaneada não é suportada pelo dispositivo.</string>
+    <string name="nix_error_not_ready">O dispositivo não está pronto.</string>
+    <string name="view_trait_nix_settings_battery_level">Nível de Bateria: %s</string>
+    <string name="view_trait_nix_settings_rssi">RSSI: %s</string>
+    <string name="view_trait_nix_settings_type">Tipo: %s</string>
+    <string name="view_trait_nix_settings_factory_note">Nota de Fábrica: %s</string>
+    <string name="view_trait_nix_settings_serial_number">Número de Série: %s</string>
+    <string name="view_trait_nix_settings_firmware_version">Versão de Firmware: %s</string>
+    <string name="view_trait_nix_settings_software_version">Versão do Software: %s</string>
+    <string name="view_trait_nix_settings_external_power_state">Estado de Energia Externa: %s</string>
+    <string name="nix_error_internal">Erro Interno Nix</string>
+    <string name="nix_error_invalid_hardware_id">ID de hardware inválido</string>
+    <string name="nix_error_bluetooth_permissions">Você deve aceitar permissões Bluetooth ou tentar reiniciar o aplicativo.</string>
+    <string name="nix_error_bluetooth_unavailable">Bluetooth indisponível.</string>
+    <string name="nix_error_bluetooth_disabled">Bluetooth está desativado no dispositivo.</string>
+    <string name="list_item_color_placeholder_content_description">Espaço reservado para uma nova escaneada</string>
+    <string name="loading">Carregando</string>
+    <string name="nix_error_no_network">Nix pode exigir que a internet funcione corretamente.</string>
+    <string name="import_runnable_field_name_exists">Nome do campo já existe.</string>
+    <string name="enabled">habilitado</string>
+    <string name="disabled">desabilitado</string>
+    <string name="logging_out_please_wait">Saindo, por favor aguarde.</string>
+    <string name="traits_save_image_parameter">Copiar imagem para Field Book</string>
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="reset">Restabelecer</string>
+    <string name="play">Reproduzir</string>
+    <string name="pause">Pausar</string>
+    <string name="save">Salvar</string>
+    <string name="database_export_invalid_filename">Nome de arquivo de exportação inválido.</string>
+    <string name="device_settings_dialog_name">Nome: %s</string>
+    <string name="device_settings_dialog_address">Endereço: %s</string>
+    <string name="device_settings_dialog_unknown_name">Dispositivo Bluetooth Desconhecido</string>
+    <string name="device_settings_dialog_title">Configurações de Dispositivo Bluetooth</string>
+    <string name="no_data_captured">Nenhum dado capturado.</string>
 </resources>

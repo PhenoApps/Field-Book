@@ -48,9 +48,9 @@ public class SoundsPreferencesFragment extends PreferenceFragmentCompat implemen
 
     private void setupTtsPreference() {
 
-        CheckBoxPreference ttsEnabled = findPreference(GeneralKeys.TTS_LANGUAGE_ENABLED);
+        CheckBoxPreference ttsEnabled = findPreference(PreferenceKeys.TTS_LANGUAGE_ENABLED);
         if (ttsEnabled != null) {
-            Preference ttsLanguage = findPreference(GeneralKeys.TTS_LANGUAGE);
+            Preference ttsLanguage = findPreference(PreferenceKeys.TTS_LANGUAGE);
             if (ttsLanguage != null) {
                 ttsLanguage.setVisible(ttsEnabled.isChecked());
 
@@ -72,10 +72,10 @@ public class SoundsPreferencesFragment extends PreferenceFragmentCompat implemen
 
     private void updateTtsSummary() {
 
-        Preference ttsLanguage = findPreference(GeneralKeys.TTS_LANGUAGE);
+        Preference ttsLanguage = findPreference(PreferenceKeys.TTS_LANGUAGE);
 
         String summary = PreferenceManager.getDefaultSharedPreferences(context)
-                .getString(GeneralKeys.TTS_LANGUAGE_SUMMARY, "");
+                .getString(PreferenceKeys.TTS_LANGUAGE_SUMMARY, "");
 
         if (ttsLanguage != null) {
 

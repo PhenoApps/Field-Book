@@ -24,7 +24,7 @@ import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV1;
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV2;
 import com.fieldbook.tracker.brapi.service.BrapiPaginationManager;
-import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.PreferenceKeys;
 
 import org.brapi.client.v2.ApiResponse;
 import org.brapi.client.v2.BrAPIClient;
@@ -98,10 +98,10 @@ public class BrapiServiceTest {
         Context context = mock(Context.class);
         SharedPreferences settings = mock(SharedPreferences.class);
         when(context.getSharedPreferences(eq("Settings"), anyInt())).thenReturn(settings);
-        when(settings.getString(eq(GeneralKeys.BRAPI_BASE_URL), anyString())).thenReturn(BRAPI_URL);
-        when(settings.getString(eq(GeneralKeys.BRAPI_VERSION), anyString())).thenReturn(brapiVersion);
-        when(settings.getString(eq(GeneralKeys.BRAPI_TOKEN), anyString())).thenReturn(brapiToken);
-        when(settings.getString(eq(GeneralKeys.BRAPI_PAGE_SIZE), anyString())).thenReturn("1000");
+        when(settings.getString(eq(PreferenceKeys.BRAPI_BASE_URL), anyString())).thenReturn(BRAPI_URL);
+        when(settings.getString(eq(PreferenceKeys.BRAPI_VERSION), anyString())).thenReturn(brapiVersion);
+        when(settings.getString(eq(PreferenceKeys.BRAPI_TOKEN), anyString())).thenReturn(brapiToken);
+        when(settings.getString(eq(PreferenceKeys.BRAPI_PAGE_SIZE), anyString())).thenReturn("1000");
 
         // Instantiate our brapi service class
         if(brapiVersion.equals("V2")) {

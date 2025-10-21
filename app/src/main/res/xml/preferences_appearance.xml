@@ -56,11 +56,18 @@
             android:title="@string/preferences_appearance_infobar_hide_prefix" />
 
         <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_adv_quick_goto"
-            android:key="QuickGoTo"
-            android:summary="@string/preferences_appearance_quickgoto_description"
-            android:title="@string/preferences_appearance_quickgoto" />
+            android:defaultValue="true"
+            android:icon="@drawable/ic_range_progress"
+            android:key="RANGE_PROGRESS_BAR"
+            android:summary="@string/preferences_appearance_range_progress_bar_description"
+            android:title="@string/preferences_appearance_range_progress_bar" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:icon="@drawable/ic_traits_progress"
+            android:key="TRAITS_PROGRESS_BAR"
+            android:summary="@string/preferences_appearance_traits_progress_bar_description"
+            android:title="@string/preferences_appearance_traits_progress_bar" />
 
     </PreferenceCategory>
 </PreferenceScreen>

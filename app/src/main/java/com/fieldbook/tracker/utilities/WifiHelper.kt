@@ -8,112 +8,79 @@ import android.net.NetworkRequest
 import android.net.wifi.WifiNetworkSpecifier
 import android.os.Build
 import android.os.PatternMatcher
-import dagger.hilt.android.qualifiers.ApplicationContext
+import android.util.Log
+import androidx.annotation.RequiresApi
+import dagger.hilt.android.qualifiers.ActivityContext
 import javax.inject.Inject
 
-class WifiHelper @Inject constructor(@ApplicationContext private val context: Context) {
+@RequiresApi(Build.VERSION_CODES.Q)
+class WifiHelper @Inject constructor(
+    @ActivityContext private val context: Context,
+) {
+
+    interface WifiRequester {
+        fun onApRequested()
+        fun onNetworkBound(network: Network)
+    }
 
     companion object {
         const val TAG = "WifiHelper"
     }
 
-    interface WifiRequester {
-        fun onNetworkBound()
-    }
-
-    private var requester: WifiRequester? = null
-
     private val connectivityManager by lazy {
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     }
 
-    private val networkCallback = object : ConnectivityManager.NetworkCallback() {
+    private var networkCallback: ConnectivityManager.NetworkCallback? = null
 
-        override fun onAvailable(network: Network) {
-            super.onAvailable(network)
+    fun startWifiSearch(ssid: String, pass: String, requester: WifiRequester) {
 
-            val bound = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                connectivityManager.bindProcessToNetwork(network)
-                requester?.onNetworkBound()
-            } else {
-                TODO("VERSION.SDK_INT < M")
-            }
-        }
+        requester.onApRequested()
 
-        override fun onLost(network: Network) {
-            super.onLost(network)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                connectivityManager.bindProcessToNetwork(null)
-            }
-        }
-    }
-
-    fun disconnect() {
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-
-            try {
-
-                connectivityManager.bindProcessToNetwork(null)
-
-                connectivityManager.unregisterNetworkCallback(networkCallback)
-
-            } catch (e: Exception) {
-
-                e.printStackTrace()
-
-            }
-        }
-    }
-
-    fun startWifiSearch(ssid: String, password: String, requester: WifiRequester) {
-
-        this.requester = requester
-
-        val specifier =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                WifiNetworkSpecifier.Builder()
-                    .setSsid(ssid)
-                    .setWpa2Passphrase(password)
-                    .build()
-            } else {
-                TODO("VERSION.SDK_INT < Q")
-            }
-
-        val request = NetworkRequest.Builder()
-            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-            .removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            .setNetworkSpecifier(specifier)
+        val wifiNetworkSpecifier = WifiNetworkSpecifier.Builder()
+            .setSsid(ssid)
+            .setWpa2Passphrase(pass)
             .build()
 
-        //connectivityManager.registerNetworkCallback(request, networkCallback)
+        val networkRequest = NetworkRequest.Builder()
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .setNetworkSpecifier(wifiNetworkSpecifier)
+            .build()
 
-        connectivityManager.requestNetwork(
-            request,
-            networkCallback
-        )
+        networkCallback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                super.onAvailable(network)
+
+                Log.d(TAG, "Network Available")
+
+                connectivityManager.bindProcessToNetwork(network)
+
+                requester.onNetworkBound(network)
+            }
+        }
+
+        networkCallback?.let {
+            connectivityManager.requestNetwork(networkRequest, it)
+        }
     }
 
     fun startWifiSearch(format: String, requester: WifiRequester) {
 
-        this.requester = requester
+        requester.onApRequested()
 
         val specifier =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                WifiNetworkSpecifier.Builder()
-                    .setSsidPattern(
-                        PatternMatcher(
-                            ".*$format.*",
-                            PatternMatcher.PATTERN_SIMPLE_GLOB
-                        )
+            WifiNetworkSpecifier.Builder()
+                .setSsidPattern(
+                    PatternMatcher(
+                        ".*$format.*",
+                        PatternMatcher.PATTERN_SIMPLE_GLOB
                     )
-                    //.setSsid(ssid!!)
-                    //adding BSSID will remove the need for the "connect" dialog
-                    //.setBssid(MacAddress.fromString(bssid!!))
-                    .build()
-            } else {
-                TODO("VERSION.SDK_INT < Q")
-            }
+                )
+                //.setSsid(ssid!!)
+                //adding BSSID will remove the need for the "connect" dialog
+                //.setBssid(MacAddress.fromString(bssid!!))
+                .build()
 
         val request = NetworkRequest.Builder()
             .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
@@ -121,12 +88,32 @@ class WifiHelper @Inject constructor(@ApplicationContext private val context: Co
             .setNetworkSpecifier(specifier)
             .build()
 
-        //connectivityManager.registerNetworkCallback(request, networkCallback)
+        networkCallback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                super.onAvailable(network)
 
-        connectivityManager.requestNetwork(
-            request,
-            networkCallback
-        )
+                Log.d(TAG, "Network Available")
 
+                connectivityManager.bindProcessToNetwork(network)
+
+                requester.onNetworkBound(network)
+            }
+        }
+
+        networkCallback?.let {
+            connectivityManager.requestNetwork(request, it)
+        }
+
+    }
+
+    fun disconnect() {
+        networkCallback?.let {
+            try {
+                connectivityManager.unregisterNetworkCallback(it)
+                connectivityManager.bindProcessToNetwork(null)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 }

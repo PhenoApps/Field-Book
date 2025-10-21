@@ -1,12 +1,8 @@
 package com.fieldbook.tracker.preferences
 
 import android.app.AlertDialog
-import android.content.res.Resources
-import android.os.Build
 import android.os.Bundle
-import android.os.LocaleList
 import android.util.Log
-import androidx.core.os.ConfigurationCompat
 import androidx.core.os.LocaleListCompat
 import androidx.fragment.app.FragmentManager
 import androidx.preference.Preference
@@ -15,7 +11,6 @@ import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.PreferencesActivity
 import com.fieldbook.tracker.utilities.AppLanguageUtil
-import java.util.Locale
 
 class LanguagePreferenceFragment : PreferenceFragmentCompat(), Preference.OnPreferenceClickListener {
 
@@ -42,7 +37,7 @@ class LanguagePreferenceFragment : PreferenceFragmentCompat(), Preference.OnPref
         try {
             context?.let { ctx ->
                 val currentPrefTag = PreferenceManager.getDefaultSharedPreferences(ctx)
-                    .getString(GeneralKeys.LANGUAGE_LOCALE_ID, "en-US")
+                    .getString(PreferenceKeys.LANGUAGE_LOCALE_ID, "en-US")
 
                 var id = preference.key
                 var languageSummary = preference.title.toString()
@@ -53,19 +48,19 @@ class LanguagePreferenceFragment : PreferenceFragmentCompat(), Preference.OnPref
                     //multiple languages defined, this will pick their first one as the default.
                     val defaultLocales = LocaleListCompat.getAdjustedDefault()
                     val defaultLocale = defaultLocales[0]
-                    id = if (defaultLocales.size() > 1 && defaultLocale?.toLanguageTag() == currentPrefTag) {
+                    id = if (defaultLocales.size() > 1 && defaultLocale?.let { normalizeLanguageTag(it.toLanguageTag()) } == currentPrefTag) {
                         val secondDefault = defaultLocales[1]
                         languageSummary = secondDefault?.getDisplayLanguage(secondDefault) ?: "English"
                         secondDefault
                     } else {
                         languageSummary = defaultLocale?.getDisplayLanguage(defaultLocale) ?: "English"
                         defaultLocale
-                    }?.toLanguageTag() ?: currentPrefTag
+                    }?.let { normalizeLanguageTag(it.toLanguageTag()) } ?: currentPrefTag
                 }
                 Log.d("LanguagePrefFragment", "Switching language to: $id")
                 with (PreferenceManager.getDefaultSharedPreferences(ctx)) {
-                    edit().putString(GeneralKeys.LANGUAGE_LOCALE_ID, id).apply()
-                    edit().putString(GeneralKeys.LANGUAGE_LOCALE_SUMMARY, languageSummary).apply()
+                    edit().putString(PreferenceKeys.LANGUAGE_LOCALE_ID, id).apply()
+                    edit().putString(PreferenceKeys.LANGUAGE_LOCALE_SUMMARY, languageSummary).apply()
                 }
 
                 AlertDialog.Builder(ctx, R.style.AppAlertDialog).apply {
@@ -86,5 +81,17 @@ class LanguagePreferenceFragment : PreferenceFragmentCompat(), Preference.OnPref
         }
 
         return true
+    }
+
+    /**
+     * Use ISO 639-1 codes for Android 15 compatibility
+     */
+    private fun normalizeLanguageTag(languageTag: String): String {
+        return when {
+            languageTag.startsWith("iw") -> languageTag.replace("iw", "he") // hebrew: iw -> he
+            languageTag.startsWith("ji") -> languageTag.replace("ji", "yi") // yiddish: ji -> yi
+            languageTag.startsWith("in") -> languageTag.replace("in", "id") // indonesian: in -> id
+            else -> languageTag
+        }
     }
 }

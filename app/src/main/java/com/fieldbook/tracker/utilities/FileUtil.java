@@ -17,6 +17,7 @@ import androidx.documentfile.provider.DocumentFile;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.PreferenceKeys;
 
 import java.io.File;
 import java.lang.reflect.Array;
@@ -32,7 +33,9 @@ public final class FileUtil {
 
     //https://stackoverflow.com/questions/2679699/what-characters-allowed-in-file-names-on-android
     public static String sanitizeFileName(String name) {
-        return name.replaceAll("[|\\?\\*<\"\\\\:>'\";]", "_");
+        //erase all C0 set characters (0x00-0x1F) and replace some other illegal characters with '_'
+        return name.replaceAll("[\\x00-\\x1f]", "")
+                .replaceAll("[|\\?\\*<\"\\\\:>'\";]", "_");
     }
 
     /**
@@ -65,7 +68,7 @@ public final class FileUtil {
      */
     public static void shareFile(Context context, SharedPreferences preferences, DocumentFile docFile) {
         if (docFile != null && docFile.exists()) {
-            if (preferences.getBoolean(GeneralKeys.ENABLE_SHARE, true)) {
+            if (preferences.getBoolean(PreferenceKeys.ENABLE_SHARE, true)) {
                 Intent intent = new Intent();
                 intent.setAction(android.content.Intent.ACTION_SEND);
                 intent.setType("text/plain");

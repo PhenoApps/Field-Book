@@ -8,6 +8,8 @@ import android.graphics.Point
 import android.net.Uri
 import android.provider.DocumentsContract
 import com.fieldbook.tracker.R
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Uses functions from android documentation:
@@ -89,6 +91,45 @@ class BitmapLoader {
                     BitmapFactory.decodeStream(inputStream, null, this)
                 } ?: Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
             }
+        }
+
+        fun cropBitmap(context: Context?, imageUri: Uri, rectCoordinates: String): Bitmap {
+
+            val (tlx, tly, blx, bly) = rectCoordinates.split(",").map { it.toFloat() }
+
+            //load bmp from uri
+            var bmp = BitmapFactory.decodeStream(context?.contentResolver?.openInputStream(imageUri))
+
+            val (h, w) = if (bmp.width > bmp.height) (bmp.width to bmp.height) else (bmp.height to bmp.width)
+
+            if (h != bmp.height) {
+                //rotate the bitmap 90
+                val matrix = android.graphics.Matrix()
+                matrix.postRotate(90f)
+                bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.width, bmp.height, matrix, true)
+            }
+
+            //convert normalized coordinates to relative image coordinates
+            val rtlx = min(max((tlx * w).toInt(), 0), w)
+            val rtly = min(max((tly * h).toInt(), 0), h)
+            val rblx = min(max((blx * w).toInt(), 0), w)
+            val rbly = min(max((bly * h).toInt(), 0), h)
+
+            var iw = max(0, min(w, rblx - rtlx))
+            var ih = max(0, min(h, rbly - rtly))
+
+            if (iw + rtlx > w) {
+                iw = w
+            }
+
+            if (ih + rtly > h) {
+                ih = h
+            }
+
+            //crop bmp
+            val croppedBmp = Bitmap.createBitmap(bmp, rtlx, rtly, iw, ih)
+
+            return croppedBmp
         }
     }
 }

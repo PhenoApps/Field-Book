@@ -27,38 +27,30 @@ class ObservationVariableValueDao {
 
         }
 
-        fun insertCloseKeyboard(closeKeyboardOnOpen: String, id: String) = withDatabase { db ->
-
-            val attrId = ObservationVariableAttributeDao.getAttributeIdByName("closeKeyboardOnOpen")
+        fun insertAttributeValue(attrId: String, value: String, id: String) = withDatabase { db ->
 
             db.insert(ObservationVariableValue.tableName, null, contentValuesOf(
 
                 ObservationVariable.FK to id,
                 Migrator.ObservationVariableAttribute.FK to attrId,
-                "observation_variable_attribute_value" to closeKeyboardOnOpen
+                "observation_variable_attribute_value" to value
 
             ))
         }
 
-        fun insert(min: String, max: String, categories: String, closeKeyboardOnOpen: String, id: String) = withDatabase { db ->
+        fun insert(min: String, max: String, categories: String, closeKeyboardOnOpen: String, cropImage: String, id: String) = withDatabase { db ->
 
             //iterate through mapping of the old columns that are now attr/vals
             mapOf(
                     "validValuesMin" to min,
                     "validValuesMax" to max,
                     "category" to categories,
-                    "closeKeyboardOnOpen" to closeKeyboardOnOpen
+                    "closeKeyboardOnOpen" to closeKeyboardOnOpen,
+                    "cropImage" to cropImage
             ).asSequence().forEach { attrValue ->
 
-                val attrId = ObservationVariableAttributeDao.getAttributeIdByName(attrValue.key)
+                insertAttributeValue(attrValue.key, attrValue.value, id)
 
-                db.insert(ObservationVariableValue.tableName, null, contentValuesOf(
-
-                        ObservationVariable.FK to id,
-                        Migrator.ObservationVariableAttribute.FK to attrId,
-                        "observation_variable_attribute_value" to attrValue.value
-
-                ))
             }
         }
     }

@@ -44,6 +44,7 @@
     <string name="warning_traits_missing">لا توجد سمات، الرجاء أنشئ سمات قبل جمع البيانات.</string>
     <!-- Changelog -->
     <string name="changelog_title">سجل التغييرات</string>
+    <!--  Field Grouping  -->
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
@@ -77,12 +78,10 @@
     <string name="traits_sort_format">تنسيق</string>
     <string name="warning_traits_missing_modify">أنشئ الصفات قبل أن تقوم بتعديلهم.</string>
     <!-- Trait import/export -->
-    <string name="traits_toolbar_import_export">استيراد/تصدير</string>
     <string name="traits_dialog_import">استيراد</string>
+    <string name="import_error_format_trait">يمكن استيراد ملفات TRT فقط كقائمة سمات</string>
     <string name="traits_export_check">هل تريد تصدير قائمة السمات الحالية؟</string>
     <string name="traits_dialog_export">تصدير</string>
-    <string name="import_error_format_trait">يمكن استيراد ملفات TRT فقط كقائمة سمات</string>
-    <string name="import_dialog_title_traits">استيراد السمات</string>
     <string name="traits_toolbar_delete_all">حذف كل السمات</string>
     <!-- Trait item menu -->
     <string name="traits_options_copy">نسخ</string>
@@ -395,5 +394,11 @@
     <!-- usb camera trait -->
     <!-- gopro -->
     <!-- canon camera strings -->
+    <!-- spectral trait strings -->
     <string name="brapi_traits_filter_title">السمات</string>
+    <string name="dialog_quick_goto_title">إنتقل مباشرة إلى</string>
+    <string name="traits_sort_default">افتراضي</string>
+    <!--  NearbyShare  -->
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="save">حفظ</string>
 </resources>

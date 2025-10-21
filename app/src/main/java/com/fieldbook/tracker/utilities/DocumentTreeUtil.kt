@@ -2,12 +2,17 @@ package com.fieldbook.tracker.utilities
 
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.documentfile.provider.DocumentFile
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import org.phenoapps.utils.BaseDocumentTreeUtil
+import java.io.IOException
+import java.io.ObjectOutputStream
+import kotlin.jvm.Throws
 
 @RequiresApi(Build.VERSION_CODES.KITKAT)
 class DocumentTreeUtil: BaseDocumentTreeUtil() {
@@ -32,6 +37,8 @@ class DocumentTreeUtil: BaseDocumentTreeUtil() {
 
             if (context != null) {
 
+                val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
+
                 val prefs = PreferenceManager.getDefaultSharedPreferences(context)
                 val field = prefs.getString(GeneralKeys.FIELD_FILE, "") ?: ""
 
@@ -39,11 +46,11 @@ class DocumentTreeUtil: BaseDocumentTreeUtil() {
                     val plotDataDirName = context.getString(R.string.dir_plot_data)
                     val fieldDir = createDir(context, plotDataDirName, field)
                     if (fieldDir != null) {
-                        var traitDir = fieldDir.findFile(traitName)
+                        var traitDir = fieldDir.findFile(sanitizedTraitName)
                         if (traitDir == null || !traitDir.exists()) {
-                            fieldDir.createDirectory(traitName)
+                            fieldDir.createDirectory(sanitizedTraitName)
                         }
-                        traitDir = fieldDir.findFile(traitName)
+                        traitDir = fieldDir.findFile(sanitizedTraitName)
                         if (traitDir != null && traitDir.findFile(".nomedia")?.exists() != true) {
                             traitDir.createFile("*/*", ".nomedia")
                         }
@@ -123,6 +130,66 @@ class DocumentTreeUtil: BaseDocumentTreeUtil() {
 
 
             return mediaList
+        }
+
+        /**
+         * Export preferences by encoding in a file in the preferences directory
+         *
+         * @param context Context
+         * @param filename Name of the preferences file to create
+         * @return DocumentFile
+         * @throws IOException If file operations fail
+         */
+        @Throws(IOException::class)
+        fun exportPreferences(context: Context?, filename: String, exportOnlySettingsKeys: Boolean): DocumentFile? {
+            try {
+                context?.let { ctx ->
+                    val preferencesDir = getDirectory(ctx, R.string.dir_preferences)
+                    val prefs = PreferenceManager.getDefaultSharedPreferences(ctx)
+
+                    if (preferencesDir != null) {
+                        val prefDoc = preferencesDir.findFile(filename)
+                        if (prefDoc != null && prefDoc.exists()) {
+                            prefDoc.delete()
+                        }
+
+                        val preferenceFile = preferencesDir.createFile("*/*", filename)
+
+                        if (preferenceFile != null) {
+                            val tempStream = getFileOutputStream(ctx, R.string.dir_preferences,filename)
+                            val objectStream = ObjectOutputStream(tempStream)
+                            objectStream.writeObject(if (exportOnlySettingsKeys) getSettingsPreferences(prefs.all) else prefs.all)
+
+                            objectStream.close()
+                            tempStream?.close()
+                            return preferenceFile
+                        }
+                    }
+                }
+                return null
+            } catch (e: Exception) {
+                e.message?.let { Log.e(TAG, it) }
+                throw IOException("Failed to export preferences", e)
+            }
+        }
+
+        /**
+         * Helper method to extract only the preferences defined in PreferenceKeys class
+         * @return Map containing only preferences that belong to settings
+         */
+        private fun getSettingsPreferences(allPrefs: MutableMap<String, *>): Map<String, Any?> {
+            val settingsPrefs: MutableMap<String, Any?> = HashMap()
+            val preferenceKeys: Set<String> = PreferenceKeys.SETTINGS_KEYS
+
+            Log.d(TAG, "Found " + preferenceKeys.size + " settings keys")
+
+            for (key in preferenceKeys) {
+                if (allPrefs.containsKey(key)) {
+                    settingsPrefs[key] = allPrefs[key]
+                }
+            }
+
+            return settingsPrefs
         }
     }
 }

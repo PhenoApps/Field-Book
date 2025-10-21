@@ -33,6 +33,7 @@ import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver.Companion.ACTION_BROADCAST_GNSS_TRAIT
 import com.fieldbook.tracker.location.gnss.NmeaParser
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.GeoJsonUtil
 import com.fieldbook.tracker.utilities.GeodeticUtils
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.truncateFixQuality
@@ -239,7 +240,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             val studyDbId = (context as CollectActivity).studyId
 
             val units = database.getAllObservationUnits(studyDbId.toInt())
-                .filter { it.observation_unit_db_id == currentRange.plot_id }
+                .filter { it.observation_unit_db_id == currentRange.uniqueId }
 
             if (units.isNotEmpty()) {
 
@@ -267,11 +268,11 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
      */
     private fun setupAveragingUi() {
 
-        val checked = prefs.getBoolean(GeneralKeys.GEONAV_AVERAGING, false)
+        val checked = prefs.getBoolean(PreferenceKeys.GEONAV_AVERAGING, false)
 
         averageSwitch.setOnCheckedChangeListener { _, isChecked ->
 
-            prefs.edit().putBoolean(GeneralKeys.GEONAV_AVERAGING, isChecked).apply()
+            prefs.edit().putBoolean(PreferenceKeys.GEONAV_AVERAGING, isChecked).apply()
 
             chipGroup.visibility = if (isChecked) View.VISIBLE else View.INVISIBLE
         }
@@ -280,11 +281,11 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         chipGroup.visibility = if (checked) View.VISIBLE else View.INVISIBLE
 
-        val chipId = prefs.getInt(GeneralKeys.GEONAV_AVERAGING_INTERVAL, R.id.gnss_trait_5s_chip)
+        val chipId = prefs.getInt(PreferenceKeys.GEONAV_AVERAGING_INTERVAL, R.id.gnss_trait_5s_chip)
         chipGroup.check(chipId)
 
         chipGroup.setOnCheckedChangeListener { _, checkedId ->
-            prefs.edit().putInt(GeneralKeys.GEONAV_AVERAGING_INTERVAL, checkedId).apply()
+            prefs.edit().putInt(PreferenceKeys.GEONAV_AVERAGING_INTERVAL, checkedId).apply()
         }
     }
 
@@ -374,7 +375,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             val newLng = longitude.toDouble()
 
             val units = database.getAllObservationUnits(studyDbId.toInt())
-                .filter { it.observation_unit_db_id == currentRange.plot_id }
+                .filter { it.observation_unit_db_id == currentRange.uniqueId }
 
             if (units.isNotEmpty()) {
 
@@ -650,9 +651,9 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
             var startNewCommThread = true
 
-            if (prefs.getBoolean(GeneralKeys.ENABLE_GEONAV, false)) {
+            if (prefs.getBoolean(PreferenceKeys.ENABLE_GEONAV, false)) {
 
-                val geoNavAddress = prefs.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, null)
+                val geoNavAddress = prefs.getString(PreferenceKeys.PAIRED_DEVICE_ADDRESS, null)
 
                 if (geoNavAddress == value.address) {
 
@@ -682,16 +683,18 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
                     getThreadHelper().start(value, mHandler)
 
-                    val filter = IntentFilter()
-                    filter.addAction(ACTION_BROADCAST_GNSS_TRAIT)
 
-                    /**
-                     * When a BROADCAST_BT_OUTPUT is received and parsed, this interface is called.
-                     * The parser parameter is a model for the parsed message, and is used to populate the
-                     * trait layout UI.
-                     */
-                    mLocalBroadcastManager.registerReceiver(receiver, filter)
                 }
+
+                val filter = IntentFilter()
+                filter.addAction(ACTION_BROADCAST_GNSS_TRAIT)
+
+                /**
+                 * When a BROADCAST_BT_OUTPUT is received and parsed, this interface is called.
+                 * The parser parameter is a model for the parsed message, and is used to populate the
+                 * trait layout UI.
+                 */
+                mLocalBroadcastManager.registerReceiver(receiver, filter)
             }
         }
 
@@ -892,14 +895,14 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
         val studyDbId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
         val observation =
-            database.getObservation(studyDbId, currentRange.plot_id, currentTrait.id, rep)
+            database.getObservation(studyDbId, currentRange.uniqueId, currentTrait.id, rep)
 
         if (observation != null) {
 
-            database.deleteTrait(studyDbId, currentRange.plot_id, currentTrait.id, rep)
+            database.deleteTrait(studyDbId, currentRange.uniqueId, currentTrait.id, rep)
 
             val units = controller.getDatabase().getAllObservationUnits(studyDbId.toInt())
-                .filter { it.observation_unit_db_id == currentRange.plot_id }
+                .filter { it.observation_unit_db_id == currentRange.uniqueId }
             if (units.isNotEmpty()) {
                 units.first().let { unit ->
                     controller.getDatabase().updateObservationUnit(unit, "")

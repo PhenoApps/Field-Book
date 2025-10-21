@@ -45,6 +45,7 @@
     <string name="warning_traits_missing">調査形質のデータがありません。調査を開始する前に形質データを作成してください。</string>
     <!-- Changelog -->
     <string name="changelog_title">変更履歴</string>
+    <!--  Field Grouping  -->
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
@@ -78,12 +79,10 @@
     <string name="traits_sort_format">フォーマット</string>
     <string name="warning_traits_missing_modify">修正する前に形質を作成してください。</string>
     <!-- Trait import/export -->
-    <string name="traits_toolbar_import_export">インポート/エクスポート</string>
     <string name="traits_dialog_import">インポート</string>
+    <string name="import_error_format_trait">形質一覧としてインポートできるのはTRTファイルのみです</string>
     <string name="traits_export_check">現在の形質一覧をエクスポートしますか？</string>
     <string name="traits_dialog_export">エクスポート</string>
-    <string name="import_error_format_trait">形質一覧としてインポートできるのはTRTファイルのみです</string>
-    <string name="import_dialog_title_traits">形質のインポート</string>
     <string name="traits_toolbar_delete_all">全ての形質の削除</string>
     <!-- Trait item menu -->
     <string name="traits_options_copy">コピー</string>
@@ -398,5 +397,11 @@
     <!-- usb camera trait -->
     <!-- gopro -->
     <!-- canon camera strings -->
+    <!-- spectral trait strings -->
     <string name="brapi_traits_filter_title">形質</string>
+    <string name="dialog_quick_goto_title">Quick GoTo機能</string>
+    <string name="traits_sort_default">初期値</string>
+    <!--  NearbyShare  -->
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="save">保存</string>
 </resources>

@@ -7,7 +7,7 @@
     <style name="AppTheme" parent="BaseAppTheme"/>
 
     <!-- all other themes inherit from the default one, but overwrite the colors -->
-    <style name="BaseAppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar.Bridge">
+    <style name="BaseAppTheme" parent="Theme.MaterialComponents.Light.NoActionBar.Bridge">
 
         <item name="android:windowActivityTransitions">false</item>
         <item name="windowNoTitle">true</item>
@@ -31,7 +31,7 @@
         <item name="fb_trait_boolean_true_color">@color/main_trait_boolean_true_color</item>
         <item name="fb_bluetooth_connected_color">@color/main_bluetooth_connected_color</item>
         <item name="fb_color_hint_text">@color/main_color_hint_text</item>
-        <item name="fb_color_indeterminate_progress_bar">@color/main_primary_dark</item>
+        <item name="fb_color_indeterminate_progress_bar">?attr/fb_color_primary_dark</item>
         <item name="fb_spinner_focused">@color/main_color_accent</item>
         <item name="fb_spinner_selected">@color/main_primary_transparent</item>
         <item name="fb_trait_percent_background_center_color">
@@ -129,6 +129,28 @@
         <item name="fb_heatmap_color_max">@color/main_heatmap_color_max</item>
 
         <item name="selected_date_circle_color">?fb_heatmap_color_medium</item>
+
+        <item name="fb_inverse_crop_region_color">@color/main_inverse_crop_region_color</item>
+
+        <!-- DataGrid -->
+        <item name="emptyCellColor">@color/datagrid_empty_cell_color</item>
+        <item name="dataFilledColor">@color/main_primary_transparent</item>
+        <item name="activeCellColor">@color/main_primary_dark</item>
+        <item name="activeCellTextColor">@color/WHITE</item>
+        <item name="cellTextColor">@color/main_color_text_dark</item>
+        <item name="tableBorderColor">@color/BLACK</item>
+
+        <item name="fb_graph_item_selected_color">?attr/fb_color_primary</item>
+        <item name="fb_graph_item_unselected_color">?attr/fb_color_background</item>
+        <item name="fb_graph_item_text_color">?attr/fb_button_text_color</item>
+
+        <!-- Stepper UI -->
+        <item name="stepper_icon_color">@color/main_primary</item>
+        <item name="stepper_icon_bg_color">@color/light_gray</item>
+        <item name="stepper_icon_on_done_color">@color/WHITE</item>
+        <item name="stepper_icon_on_done_bg_color">@color/main_primary</item>
+        <item name="stepper_line_color">@color/GRAY</item>
+        <item name="stepper_line_on_done_color">@color/main_primary</item>
     </style>
 
     <!-- Blue Theme -->
@@ -146,7 +168,6 @@
         <item name="fb_color_text_light">@color/WHITE</item>
         <item name="fb_color_hint_text">@color/BLACK</item>
         <item name="fb_color_text_dark">@color/BLACK</item>
-        <item name="fb_color_indeterminate_progress_bar">@color/main_primary_dark</item>
         <item name="fb_spinner_focused">@color/blue_color_accent</item>
         <item name="fb_spinner_selected">@color/blue_primary_transparent</item>
         <item name="fb_trait_percent_background_center_color">@color/blue_trait_percent_background_center_color</item>
@@ -177,6 +198,18 @@
         <item name="fb_heatmap_color_max">@color/blue_heatmap_color_max</item>
 
         <item name="selected_date_circle_color">?fb_heatmap_color_medium</item>
+
+        <!-- DataGrid -->
+        <item name="dataFilledColor">@color/blue_primary_transparent</item>
+        <item name="activeCellColor">@color/blue_primary_dark</item>
+
+        <!-- Stepper UI -->
+        <item name="stepper_icon_color">@color/blue_primary</item>
+        <item name="stepper_icon_bg_color">@color/light_gray</item>
+        <item name="stepper_icon_on_done_color">@color/WHITE</item>
+        <item name="stepper_icon_on_done_bg_color">@color/blue_primary</item>
+        <item name="stepper_line_color">@color/GRAY</item>
+        <item name="stepper_line_on_done_color">@color/blue_primary</item>
     </style>
 
     <!-- High Contrast Theme -->
@@ -195,7 +228,6 @@
         <item name="fb_color_hint_text">@color/high_contrast_color_hint_text</item>
         <item name="fb_color_background">@color/high_contrast_color_background</item>
         <item name="fb_color_text_button_background">?attr/fb_color_primary</item>
-        <item name="fb_color_indeterminate_progress_bar">?attr/fb_color_primary_dark</item>
         <item name="fb_spinner_focused">@color/high_contrast_color_accent</item>
         <item name="fb_spinner_selected">@color/high_contrast_primary_transparent</item>
         <item name="fb_trait_percent_background_center_color">
@@ -308,8 +340,23 @@
         <item name="fb_first_chip_color">@color/high_contrast_chip_first_color</item>
         <item name="fb_second_chip_color">@color/high_contrast_chip_second_color</item>
         <item name="fb_third_chip_color">@color/high_contrast_chip_third_color</item>
-        <item name="fb_fourth_chip_color">@color/high_contrast_chip_third_color</item>
 
+        <item name="fb_graph_item_selected_color">?attr/fb_color_accent</item>
+        <item name="fb_graph_item_unselected_color">@color/GRAY</item>
+        <item name="fb_graph_item_text_color">?attr/fb_color_primary</item>
+
+        <!-- DataGrid -->
+        <item name="dataFilledColor">@color/high_contrast_data_filled_color</item>
+        <item name="emptyCellColor">@color/high_contrast_empty_cell_color</item>
+        <item name="activeCellColor">@color/high_contrast_active_cell_color</item>
+
+        <!-- Stepper UI -->
+        <item name="stepper_icon_color">@color/BLACK</item>
+        <item name="stepper_icon_bg_color">@color/WHITE</item>
+        <item name="stepper_icon_on_done_color">@color/WHITE</item>
+        <item name="stepper_icon_on_done_bg_color">@color/BLACK</item>
+        <item name="stepper_line_color">@color/BLACK</item>
+        <item name="stepper_line_on_done_color">@color/BLACK</item>
     </style>
 
     <!-- need to define a theme for each type of material component until we can use the new themes -->

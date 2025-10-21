@@ -44,6 +44,7 @@
     <string name="warning_traits_missing">Không có tính trạng nào tồn tại. Xin vui lòng tạo tính trạng trước khi thu thập số liệu.</string>
     <!-- Changelog -->
     <string name="changelog_title">Nhật ký thay đổi</string>
+    <!--  Field Grouping  -->
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
@@ -77,12 +78,10 @@
     <string name="traits_sort_format">Định dạng</string>
     <string name="warning_traits_missing_modify">Tạo tính trạng trước khi chỉnh sửa chúng.</string>
     <!-- Trait import/export -->
-    <string name="traits_toolbar_import_export">Nhập/Xuất</string>
     <string name="traits_dialog_import">Nhập</string>
+    <string name="import_error_format_trait">Chỉ tập tin TRT mới có thể được nhập dưới dạng một danh sách tính trạng</string>
     <string name="traits_export_check">Xuất danh sách tính trạng hiện tại?</string>
     <string name="traits_dialog_export">Xuất</string>
-    <string name="import_error_format_trait">Chỉ tập tin TRT mới có thể được nhập dưới dạng một danh sách tính trạng</string>
-    <string name="import_dialog_title_traits">Nhập tính trạng</string>
     <string name="traits_toolbar_delete_all">Xóa tất cả tính trạng</string>
     <!-- Trait item menu -->
     <string name="traits_options_copy">Sao chép</string>
@@ -395,5 +394,11 @@ Các tính trạng và ruộng được tạo thủ công hoặc được nhập
     <!-- usb camera trait -->
     <!-- gopro -->
     <!-- canon camera strings -->
+    <!-- spectral trait strings -->
     <string name="brapi_traits_filter_title">(Các) Tính trạng</string>
+    <string name="dialog_quick_goto_title">Đi đến (nghiệm thức) nhanh</string>
+    <string name="traits_sort_default">Mặc định</string>
+    <!--  NearbyShare  -->
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="save">Lưu</string>
 </resources>

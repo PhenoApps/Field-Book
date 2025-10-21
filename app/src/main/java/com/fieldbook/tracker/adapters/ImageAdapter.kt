@@ -8,13 +8,18 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.camera.view.PreviewView
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.CollectActivity
+import com.fieldbook.tracker.database.models.ObservationModel
+import com.fieldbook.tracker.dialogs.ObservationMetadataFragment
 import com.fieldbook.tracker.utilities.BitmapLoader
 import java.io.FileNotFoundException
 
@@ -51,6 +56,8 @@ class ImageAdapter(private val context: Context, private val listener: ImageItem
 
         fun onItemDeleted(model: Model)
 
+        fun onItemLongClicked(model: Model)
+
     }
 
     abstract inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -62,11 +69,17 @@ class ImageAdapter(private val context: Context, private val listener: ImageItem
         val cardView: CardView = view.findViewById(R.id.list_item_image_cv)
         val imageView: ImageView = view.findViewById(R.id.list_item_image_iv)
         val closeButton: ImageButton = view.findViewById(R.id.list_item_image_close_btn)
+        val labelView: TextView = view.findViewById<TextView>(R.id.list_item_image_label_tv)
 
         init {
             // Define click listener for the ViewHolder's View.
             view.setOnClickListener {
                 listener.onItemClicked(view.tag as Model)
+            }
+
+            view.setOnLongClickListener {
+                listener.onItemLongClicked(view.tag as Model)
+                true
             }
 
             closeButton.setOnClickListener {
@@ -77,6 +90,8 @@ class ImageAdapter(private val context: Context, private val listener: ImageItem
         override fun bind(model: Model) {
 
             itemView.tag = model
+
+            labelView.visibility = View.GONE
 
             try {
 
@@ -92,10 +107,16 @@ class ImageAdapter(private val context: Context, private val listener: ImageItem
                     height = actualHeight
                 }
 
-                val preview = if (model.uri == "NA") {
+                val preview = if (model.uri?.contains("content://") != true) {
+                    if (model.uri != "NA") {
+                        labelView.text = model.uri
+                        labelView.visibility = View.VISIBLE
+                    }
                     val data = context.resources.assets.open("na_placeholder.jpg").readBytes()
                     BitmapFactory.decodeByteArray(data, 0, data.size)
-                } else BitmapLoader.getPreview(view.context, model.uri, model.orientation)
+                } else {
+                    BitmapLoader.getPreview(view.context, model.uri, model.orientation)
+                }
 
                 imageView.setImageBitmap(preview)
 

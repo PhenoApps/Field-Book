@@ -4,10 +4,12 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.widget.LinearLayout
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.PreferencesActivity
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import dagger.hilt.android.qualifiers.ActivityContext
 import javax.inject.Inject
 
@@ -28,7 +30,7 @@ class VerifyPersonHelper @Inject constructor(@ActivityContext private val contex
         val systemTime = System.nanoTime()
 
         //number of hours to wait before asking for user, pref found in profile
-        val interval = when (preferences.getString(GeneralKeys.VERIFICATION_INTERVAL, "2")) {
+        val interval = when (preferences.getString(PreferenceKeys.VERIFICATION_INTERVAL, "2")) {
             "0" -> 0
             "1" -> 12
             "2" -> 24
@@ -68,24 +70,41 @@ class VerifyPersonHelper @Inject constructor(@ActivityContext private val contex
         neutral: String,
         negative: String
     ) {
-        AlertDialog.Builder(context, R.style.AppAlertDialog)
-            .setTitle(message) //yes button
-            .setPositiveButton(
-                positive
-            ) { dialog: DialogInterface, _: Int -> dialog.dismiss() } //yes, don't ask again button
-            .setNeutralButton(neutral) { dialog: DialogInterface, _: Int -> //modify settings (navigates to profile preferences)
+        val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
+            .setTitle(message)
+            .setPositiveButton(positive, null)
+            .setNeutralButton(neutral, null)
+            .setNegativeButton(negative, null)
+
+        val dialog = builder.create()
+
+        dialog.setOnShowListener { dialogInterface ->
+            val alertDialog = dialogInterface as AlertDialog
+
+            alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                dialog.dismiss()
+            }
+
+            alertDialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
                 dialog.dismiss()
                 val preferenceIntent = Intent(context, PreferencesActivity::class.java)
                 preferenceIntent.putExtra("ModifyProfileSettings", true)
                 context.startActivity(preferenceIntent)
-            } //no (navigates to the person preference)
-            .setNegativeButton(negative) { dialog: DialogInterface, _: Int ->
+            }
+
+            alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener {
                 dialog.dismiss()
                 val preferenceIntent = Intent(context, PreferencesActivity::class.java)
                 preferenceIntent.putExtra("PersonUpdate", true)
                 context.startActivity(preferenceIntent)
             }
-            .show()
+        }
+
+        dialog.show()
+
+        val params = dialog.window?.attributes
+        params?.width = LinearLayout.LayoutParams.MATCH_PARENT
+        dialog.window?.attributes = params
     }
 
     fun updateLastOpenedTime() {

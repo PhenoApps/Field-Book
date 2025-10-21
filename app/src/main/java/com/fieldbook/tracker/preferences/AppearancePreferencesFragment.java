@@ -29,7 +29,7 @@ public class AppearancePreferencesFragment extends PreferenceFragmentCompat {
         boolean flag = prefs.getBoolean(GeneralKeys.THEME_FLAG, false);
         if (flag) {
             getParentFragmentManager().beginTransaction()
-                    .replace(android.R.id.content, new ThemePreferencesFragment())
+                    .replace(R.id.prefs_container, new ThemePreferencesFragment())
                     .addToBackStack("AppearanceFrag").commit();
             prefs.edit().putBoolean(GeneralKeys.THEME_FLAG, false).apply();
         }
@@ -111,10 +111,10 @@ public class AppearancePreferencesFragment extends PreferenceFragmentCompat {
     }
 
     private void updateLanguageSummary() {
-        Preference langPref = findPreference(GeneralKeys.LANGUAGE_PREF);
+        Preference langPref = findPreference(PreferenceKeys.LANGUAGE_PREF);
         if (langPref != null) {
             String summary = PreferenceManager.getDefaultSharedPreferences(context)
-                    .getString(GeneralKeys.LANGUAGE_LOCALE_SUMMARY, getString(R.string.preference_language_default));
+                    .getString(PreferenceKeys.LANGUAGE_LOCALE_SUMMARY, getString(R.string.preference_language_default));
             langPref.setSummary(summary);
         }
     }

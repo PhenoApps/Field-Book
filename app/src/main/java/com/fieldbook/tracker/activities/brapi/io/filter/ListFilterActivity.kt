@@ -6,10 +6,12 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.ThemedActivity
 import com.fieldbook.tracker.adapters.CheckboxListAdapter
+import com.fieldbook.tracker.utilities.InsetHandler
 import com.fieldbook.tracker.views.SearchBar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -73,6 +75,7 @@ abstract class ListFilterActivity : ThemedActivity(),
 
         initUi()
 
+        onBackPressedDispatcher.addCallback(this, standardBackCallback())
     }
 
     override fun onDestroy() {
@@ -87,18 +90,23 @@ abstract class ListFilterActivity : ThemedActivity(),
         return if (searchText.isNotBlank()) filter { model ->
             model.id.contains(searchText, ignoreCase = true) ||
                     model.label.contains(searchText, ignoreCase = true) ||
-                    model.subLabel.contains(searchText, ignoreCase = true)
+                    model.subLabel.contains(searchText, ignoreCase = true) ||
+                    model.searchableTexts.any { it.contains(searchText, ignoreCase = true) }
         } else this
     }
 
     private fun setupToolbar() {
 
-        setSupportActionBar(findViewById(R.id.act_list_filter_tb))
+        val toolbar = findViewById<Toolbar>(R.id.act_list_filter_tb)
+        setSupportActionBar(toolbar)
 
         supportActionBar?.title =
             getString(R.string.act_brapi_filter_by_title, getString(titleResId))
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+
+        val rootView = findViewById<View>(android.R.id.content);
+        InsetHandler.setupStandardInsets(rootView, toolbar)
     }
 
     private fun initUi() {
@@ -108,6 +116,8 @@ abstract class ListFilterActivity : ThemedActivity(),
         importTextView = findViewById(R.id.act_list_filter_import_btn)
         progressBar = findViewById(R.id.act_list_filter_pb)
         searchBar = findViewById(R.id.act_list_filter_sb)
+
+        searchBar.editText.setDropDownBackgroundResource(org.phenoapps.androidlibrary.R.color.WHITE)
 
         importTextView.text = getString(R.string.act_brapi_filter_apply)
 

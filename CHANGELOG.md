@@ -13,11 +13,161 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-## [v6.0.8] - 2025-02-24
+## [v6.3.2] - 2025-10-20
 
 ### Added
 
 ### Changed
+
+### Fixed
+- GoPro Hero 13 no longer causes a crash
+- Reduced installer size by using a different ffmpeg library
+
+## [v6.3.1] - 2025-10-13
+
+### Added
+
+### Changed
+- Field Book now supports 16 KB page sizes
+
+### Fixed
+- Bug fixes and enhancements
+
+## [v6.3.0] - 2025-10-08
+
+### Added
+- Fields can now be grouped and archived
+- New trait formats: Stopwatch, Nix, Greenseeker, Scales
+- Trait name wrapping in Collect can now be toggled with a long-press
+- GoPro cameras can now optionally send just the image name instead of transferring the entire image
+
+### Changed
+- Field Book now targets Android SDK 36
+- Field Creator updated with new workflow and UI
+- Trait arrows are now hidden if only one trait is active
+- Boolean traits now have an unset state
+
+### Fixed
+- Improved workflow for logging out of BrAPI
+- Settings are no longer reset on restart
+- New traits from BrAPI now appear at the end of the trait list
+- Long pressing image and spectral thumbnails now displays metadata dialog
+- Importing traits from BrAPI without trait details no longer leads to a crash
+- Repeated measures no longer ignore trait limits
+- Keyboard backspace no longer moves cursor to the end of the current value in text traits
+- Field name is no longer an option in the Collect Search dialog
+- Exif user comment tag no longer populated by incorrect data
+- Return character setting is now interpreted correctly
+- Observation Variable Name is now searchable in the BrAPI trait importer
+- Image file name sanitation now removes or replaces more characters
+
+## [v6.2.5] - 2025-06-23
+
+### Added
+
+### Changed
+
+### Fixed
+- BrAPI Sync improved to avoid observation miscounts and other failures
+- 0x00 character now removed from pasted text values
+
+## [v6.2.4] - 2025-06-09
+
+### Added
+
+### Changed
+
+### Fixed
+
+## [v6.2.3] - 2025-06-02
+
+### Added
+- New option to disable progress bars in Collect
+
+### Changed
+
+### Fixed
+- BrAPI min/max values are now imported correctly
+- MLKit library no longer causes crashes on certain devices
+
+## [v6.2.2] - 2025-04-16
+
+### Added
+
+### Changed
+
+### Fixed
+- Trait indicator icons in Collect now resize as expected
+- Device dark mode no longer affects Field Book UI
+- Traits with quotes now export correctly in table format
+
+## [v6.2.1] - 2025-04-09
+
+### Added
+
+### Changed
+
+### Fixed
+- Date traits using day of year now correctly saves
+- Fixed an issue with Settings search
+
+## [v6.2.0] - 2025-04-03
+
+### Added
+- Data grid updated with new interface
+- Device name can now be customized in Profile Settings
+- User names are now saved in a list for rapid switching
+
+### Changed
+
+### Fixed
+- Improvements for the GoPro Hero 9
+
+## [v6.1.2] - 2025-03-31
+
+### Added
+- Additional attributes are now included when importing fields using BrAPI
+
+### Changed
+- Improvements to the trait import and creation process
+- Angle trait animation has been reversed
+
+### Fixed
+- Nearest field snackbar no longer overlaps add field button
+- BrAPI Import background color is now white
+- Bundled media is now exported as expected for active and existing traits
+- Exporting with 'Only unique identifier' no longer shifts data
+
+## [v6.1.1] - 2025-03-24
+
+### Added
+
+### Changed
+
+### Fixed
+- Field imports from BrAPI now include the correct metadata
+
+## [v6.1.0] - 2025-03-17
+
+### Added
+- Primary/Secondar Order are no longer required when importing files (https://github.com/PhenoApps/Field-Book/pull/1169)
+- Labels between entry arrows can be swapped in Collect via new dialog (https://github.com/PhenoApps/Field-Book/pull/1169)
+- New or edited data values are now italicized (https://github.com/PhenoApps/Field-Book/pull/1169)
+- Settings can be shared between devices using Nearby Share (https://github.com/PhenoApps/Field-Book/pull/1162)
+- New Angle trait that uses device accelerometer (https://github.com/PhenoApps/Field-Book/pull/1140)
+- Barcode attribute can now be selected on a per field basis (https://github.com/PhenoApps/Field-Book/pull/1165)
+- Incoming photos can now be cropped (enable when creating new photo traits) (https://github.com/PhenoApps/Field-Book/pull/1169)
+
+### Changed
+- Date trait layout modified to match other formats (https://github.com/PhenoApps/Field-Book/pull/1169)
+- Audio trait layout modified to display more information (https://github.com/PhenoApps/Field-Book/pull/1169)
+- Quick GoTo setting removed and functionality moved to separate dialog that's enabled by default (https://github.com/PhenoApps/Field-Book/pull/1169)
+
+### Fixed
+- GNSS trait no longer resets connection when moving between entries (https://github.com/PhenoApps/Field-Book/pull/1179)
+- Manual trait order no longer reset when leaving screen (https://github.com/PhenoApps/Field-Book/pull/1169)
+
+## [v6.0.8] - 2025-02-24
 
 ### Fixed
 - Preferences are now correctly imported from database zip files
@@ -52,8 +202,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Numerous bug fixes and enhancements (https://github.com/PhenoApps/Field-Book/pull/1135)
 
 ## [v6.0.3] - 2025-01-06
-
-### Added
 
 ### Changed
 - Swap navigation now changes position of entry/trait navigation instead of only behavior (https://github.com/PhenoApps/Field-Book/pull/1123)
@@ -613,3 +761,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v6.0.7]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.7
 
 [v6.0.8]: https://github.com/PhenoApps/Field-Book/releases/tag/6.0.8
+
+[v6.1.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.1.0
+[v6.1.1]: https://github.com/PhenoApps/Field-Book/releases/tag/6.1.1
+[v6.1.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.1.2
+
+
+[v6.2.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.0
+[v6.2.1]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.1
+[v6.2.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.2
+[v6.2.3]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.3
+[v6.2.4]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.4
+[v6.2.5]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.5
+
+
+
+
+[v6.3.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.0
+[v6.3.1]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.1
+
+[v6.3.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.2

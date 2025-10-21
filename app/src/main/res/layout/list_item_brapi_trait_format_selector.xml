@@ -6,7 +6,8 @@
     android:id="@+id/list_item_study_cv"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="4dp">
+    android:layout_margin="4dp"
+    android:backgroundTint="@color/WHITE">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/list_item_brapi_filter_cl"

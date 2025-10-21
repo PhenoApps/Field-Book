@@ -22,6 +22,7 @@ import android.os.Message
 import android.util.Log
 import android.util.TypedValue
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -32,7 +33,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.models.ObservationUnitModel
 import com.fieldbook.tracker.interfaces.CollectController
 import com.fieldbook.tracker.location.GPSTracker
@@ -40,23 +40,27 @@ import com.fieldbook.tracker.location.gnss.ConnectThread
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver
 import com.fieldbook.tracker.location.gnss.NmeaParser
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.impactZoneSearch
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.lowPassFilter
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.truncateFixQuality
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.writeGeoNavLog
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.snackbar.Snackbar.SnackbarLayout
 import org.phenoapps.utils.BaseDocumentTreeUtil.Companion.getDirectory
 import java.io.IOException
 import java.io.OutputStreamWriter
-import java.util.Arrays
 import java.util.Calendar
 import javax.inject.Inject
 import kotlin.math.pow
 import kotlin.math.sqrt
+import androidx.core.content.edit
+import com.fieldbook.tracker.adapters.AttributeAdapter.AttributeModel
+import com.fieldbook.tracker.interfaces.GeoNavController
+import com.fieldbook.tracker.objects.InfoBarModel
+import com.fieldbook.tracker.preferences.DropDownKeyModel
 
 
-class GeoNavHelper @Inject constructor(private val controller: CollectController):
+class GeoNavHelper @Inject constructor(private val controller: CollectController, private val geoNavController: GeoNavController):
     SensorEventListener, GPSTracker.GPSTrackerListener {
 
     //simple data class used to track columns in each line of the geonav log
@@ -113,7 +117,6 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
     /**
      * GeoNav sensors and variables
      */
-    var mGeoNavActivated = false
     private var mGravity: FloatArray = floatArrayOf()
     private var mGeomagneticField = floatArrayOf()
     private var mDeclination: Float? = null
@@ -130,7 +133,6 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
             mGeoNavSnackbar?.dismiss()
             lastPlotIdNav = null
         }
-
     }
 
     fun getGeoNavLogLimitedUri(): Uri? {
@@ -148,7 +150,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
 
             nmea?.let { message ->
 
-                controller.logNmeaMessage(message)
+                geoNavController.logNmeaMessage(message)
 
             }
         }
@@ -326,7 +328,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
     }
 
     private fun currentLoggingMode() : String {
-        return preferences.getString(GeneralKeys.GEONAV_LOGGING_MODE, "0") ?: "0"
+        return preferences.getString(PreferenceKeys.GEONAV_LOGGING_MODE, "0") ?: "0"
     }
 
     /**
@@ -354,7 +356,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
             )
 
             //set update interval from the preferences can be 1s, 5s or 10s
-            val interval = preferences.getString(GeneralKeys.UPDATE_INTERVAL, "1") ?: "1"
+            val interval = preferences.getString(PreferenceKeys.UPDATE_INTERVAL, "1") ?: "1"
             var period = 1000L
             when (interval) {
                 "1" -> {}
@@ -367,7 +369,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
             }
 
             //find the mac address of the device, if not found then start the internal GPS
-            val address: String = preferences.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "") ?: ""
+            val address: String = preferences.getString(PreferenceKeys.PAIRED_DEVICE_ADDRESS, "") ?: ""
             val internalGps: String =
                 controller.getContext().getString(R.string.pref_behavior_geonav_internal_gps_choice)
             var internal = true
@@ -484,7 +486,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
     private fun runImpactZoneAlgorithm(internal: Boolean) {
 
         //the angle of the IZ algorithm to use, see Geodetic util class for more details
-        val thetaPref: String = preferences.getString(GeneralKeys.SEARCH_ANGLE, "0") ?: "0"
+        val thetaPref: String = preferences.getString(PreferenceKeys.SEARCH_ANGLE, "0") ?: "0"
         var theta = 22.5
         when (thetaPref) {
             "22.5" -> {
@@ -501,11 +503,11 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
             }
         }
         val geoNavMethod: String =
-            preferences.getString(GeneralKeys.GEONAV_SEARCH_METHOD, "0") ?: "0"
+            preferences.getString(PreferenceKeys.GEONAV_SEARCH_METHOD, "0") ?: "0"
         val d1: Double =
-            preferences.getString(GeneralKeys.GEONAV_PARAMETER_D1, "0.001")?.toDouble() ?: 0.001
+            preferences.getString(PreferenceKeys.GEONAV_PARAMETER_D1, "0.001")?.toDouble() ?: 0.001
         val d2: Double =
-            preferences.getString(GeneralKeys.GEONAV_PARAMETER_D2, "0.01")?.toDouble() ?: 0.01
+            preferences.getString(PreferenceKeys.GEONAV_PARAMETER_D2, "0.01")?.toDouble() ?: 0.01
         //user must have a valid pointing direction before attempting the IZ
         //initialize the start position and fill with external or internal GPS coordinates
         val start: Location? = if (internal) {
@@ -526,7 +528,17 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
         //add all units that have non null coordinates.
         for (model in units) {
             if (model.geo_coordinates != null && model.geo_coordinates!!.isNotEmpty()) {
-                coordinates.add(model)
+                val entryKeys = controller.getDatabase().getRange(
+                    preferences.getString(GeneralKeys.PRIMARY_NAME, null),
+                    preferences.getString(GeneralKeys.SECONDARY_NAME, null),
+                    model.observation_unit_db_id,
+                    model.internal_id_observation_unit,
+                )
+                //set currently chosen primary/secondary ids to model
+                coordinates.add(model.also {
+                    it.primary_id = entryKeys.primaryId
+                    it.secondary_id = entryKeys.secondaryId
+                })
             }
         }
 
@@ -534,7 +546,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
         if (start != null && currentFixQuality) {
 
             val distanceThreshKm = try {
-                (preferences.getString(GeneralKeys.GEONAV_DISTANCE_THRESHOLD, "10.0") ?: "10.0").toDouble()
+                (preferences.getString(PreferenceKeys.GEONAV_DISTANCE_THRESHOLD, "10.0") ?: "10.0").toDouble()
             } catch (e: NumberFormatException) {
                 10.0
             }
@@ -556,12 +568,17 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
 
                 val id = first.observation_unit_db_id
                 with((controller.getContext() as CollectActivity)) {
-                    if (id != getRangeBox().cRange.plot_id && id != lastPlotIdNav) {
+
+                    val preferences = getPreferences()
+                    val database = getDatabase()
+                    val rangeBox = getRangeBox()
+
+                    if (id != getRangeBox().cRange.uniqueId && id != lastPlotIdNav) {
                         lastPlotIdNav = id
                         runOnUiThread {
                             if (preferences.getBoolean(GeneralKeys.GEONAV_AUTO, false)) {
                                 lastPlotIdNav = null
-                                moveToSearch("id", getRangeBox().getRangeID(), null, null, id, -1)
+                                moveToSearch("id", rangeBox.getRangeID(), null, null, id, -1)
                                 Toast.makeText(
                                     this,
                                     R.string.activity_collect_found_plot,
@@ -572,7 +589,6 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                                     findViewById(R.id.toolbarBottom),
                                     id, Snackbar.LENGTH_INDEFINITE
                                 )
-                                val snackLayout = mGeoNavSnackbar?.view as SnackbarLayout
                                 val snackView: View =
                                     layoutInflater.inflate(
                                         R.layout.geonav_snackbar_layout,
@@ -589,7 +605,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
 
                                     //read the minimum action bar size based on theme
                                     val typedValue = TypedValue()
-                                    if (controller.getContext().theme.resolveAttribute(
+                                    if (theme.resolveAttribute(
                                             android.R.attr.actionBarSize,
                                             typedValue,
                                             true
@@ -609,14 +625,27 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
 
                                 params.bottomToTop = R.id.toolbarBottom
                                 snackView.layoutParams = params
-                                snackLayout.addView(snackView)
-                                snackLayout.setPadding(0, 0, 0, 0)
+                                (mGeoNavSnackbar?.view as? FrameLayout)?.addView(snackView)
+                                (mGeoNavSnackbar?.view as? FrameLayout)?.setPadding(0, 0, 0, 0)
+
                                 val tv =
                                     snackView.findViewById<TextView>(R.id.geonav_snackbar_tv)
 
                                 var popupHeader =
-                                    preferences.getString(GeneralKeys.GEONAV_POPUP_DISPLAY, "plot_id")
-                                tv.text = getPopupInfo(id, popupHeader ?: "plot_id")
+                                    preferences.getString(GeneralKeys.GEONAV_POPUP_DISPLAY,
+                                        DropDownKeyModel.DEFAULT_ATTRIBUTE_LABEL) ?: DropDownKeyModel.DEFAULT_ATTRIBUTE_LABEL
+
+                                var popupTrait =
+                                    preferences.getString(GeneralKeys.GEONAV_POPUP_TRAIT, null)?.let {
+                                        database.getTraitById(it)
+                                    }
+
+                                if (popupHeader.isEmpty()) {
+                                   popupHeader = DropDownKeyModel.DEFAULT_ATTRIBUTE_LABEL
+                                   popupTrait = null
+                                }
+
+                                tv.text = getPopupInfo(id, AttributeModel(popupHeader, trait = popupTrait))
 
                                 // if the value saved in GEONAV_POPUP_DISPLAY was disabled in traits
                                 // GEONAV_POPUP_DISPLAY will default back to plot_id
@@ -627,17 +656,12 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                                     preferenceChangeListener
                                 )
 
-//                                    if (tv != null) {
-//                                        tv.text = id
-//                                    }
-
                                 val btn =
                                     snackView.findViewById<ImageButton>(R.id.geonav_snackbar_btn)
                                 btn?.setOnClickListener { v: View? ->
                                     mGeoNavSnackbar?.dismiss()
                                     lastPlotIdNav = null
 
-                                    println(snackView.height)
                                     //when navigate button is pressed use rangeBox to go to the plot id
                                     moveToSearch(
                                         "id",
@@ -659,31 +683,36 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
         }
     }
 
-    private fun getPopupInfo(id: String, popupHeader: String): String {
+    private fun getPopupInfo(id: String, popupHeader: AttributeModel): String {
         
         var newPopupHeader = popupHeader
 
         // handle the case where trait has been disabled by the user
         val popupItems = (controller.getContext() as CollectActivity).getGeoNavPopupSpinnerItems()
-        val index = popupItems.indexOf(newPopupHeader)
-        // if the attribute/trait cannot be found
-        // then default to 'plot_id'
-        if (index == -1){
-            preferences.edit().putString(GeneralKeys.GEONAV_POPUP_DISPLAY, "plot_id").apply()
-            newPopupHeader = "plot_id"
+        var index = -1
+        for (item in popupItems) {
+            if (item == popupHeader) {
+                newPopupHeader = item
+                preferences.edit {
+                    putString(GeneralKeys.GEONAV_POPUP_DISPLAY, newPopupHeader.label)
+                    putString(GeneralKeys.GEONAV_POPUP_TRAIT, newPopupHeader.trait?.id ?: DropDownKeyModel.DEFAULT_TRAIT_ID)
+                }
+                break
+            }
+            index++
         }
 
-        var database : DataHelper = controller.getDatabase()
+        // if the attribute/trait cannot be found
+        // then default to 'plot_id'
+        if (index == -1) {
+            preferences.edit {
+                putString(GeneralKeys.GEONAV_POPUP_DISPLAY, DropDownKeyModel.DEFAULT_ATTRIBUTE_LABEL)
+                putString(GeneralKeys.GEONAV_POPUP_TRAIT, DropDownKeyModel.DEFAULT_TRAIT_ID)
+            }
+            newPopupHeader = AttributeModel(DropDownKeyModel.DEFAULT_ATTRIBUTE_LABEL, null)
+        }
 
-        //ensure that the initialLabel is actually a plot attribute
-
-        //get all plot attribute names for the study
-        val attributes: List<String> = ArrayList(Arrays.asList(*database.rangeColumnNames))
-
-        //check if the label is an attribute or a trait
-        val isAttribute = attributes.contains(newPopupHeader)
-
-        return controller.queryForLabelValue(id, newPopupHeader, isAttribute)
+        return geoNavController.queryForLabelValue(id, newPopupHeader)
     }
 
     /**
@@ -736,12 +765,12 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                 val resolver: ContentResolver = controller.getContext().contentResolver
                 val geoNavFolder = getDirectory(controller.getContext(), R.string.dir_geonav)
                 if (geoNavFolder != null && geoNavFolder.exists()) {
-                    val interval = preferences.getString(GeneralKeys.UPDATE_INTERVAL, "1")
+                    val interval = preferences.getString(PreferenceKeys.UPDATE_INTERVAL, "1")
                     val address =
-                        (preferences.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "") ?: "")
+                        (preferences.getString(PreferenceKeys.PAIRED_DEVICE_ADDRESS, "") ?: "")
                             .replace(":".toRegex(), "-")
                             .replace("\\s".toRegex(), "_")
-                    val thetaPref = preferences.getString(GeneralKeys.SEARCH_ANGLE, "22.5")
+                    val thetaPref = preferences.getString(PreferenceKeys.SEARCH_ANGLE, "22.5")
                     // if the currentLoggingMode is for limited logging, use "limited_" as the prefix for filename
 //                    val prefixOfFile = if (currentLoggingMode() == "1") {
 //                        "limited_"
@@ -849,7 +878,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
             if ((mTeslas < 25 || mTeslas > 65) && mNotWarnedInterference) {
                 mNotWarnedInterference = false
                 val geoNavMethod: String =
-                    preferences.getString(GeneralKeys.GEONAV_SEARCH_METHOD, "0") ?: "0"
+                    preferences.getString(PreferenceKeys.GEONAV_SEARCH_METHOD, "0") ?: "0"
                 if (geoNavMethod != "0") {
                     Toast.makeText(
                         controller.getContext(), R.string.activity_collect_geomagnetic_noise_detected,

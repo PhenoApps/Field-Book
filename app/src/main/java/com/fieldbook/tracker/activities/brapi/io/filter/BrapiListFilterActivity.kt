@@ -4,19 +4,16 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.OptIn
 import androidx.appcompat.content.res.AppCompatResources
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.brapi.io.BrapiCacheModel
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterTypeAdapter
-import com.fieldbook.tracker.activities.brapi.io.BrapiStudyImportActivity
 import com.fieldbook.tracker.activities.brapi.io.TrialStudyModel
 import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiStudyFilterActivity
 import com.fieldbook.tracker.adapters.CheckboxListAdapter
@@ -26,8 +23,8 @@ import com.fieldbook.tracker.brapi.service.BrAPIServiceV1
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV2
 import com.fieldbook.tracker.brapi.service.BrapiPaginationManager
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.badge.ExperimentalBadgeUtils
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import kotlinx.coroutines.Dispatchers
@@ -35,13 +32,15 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.brapi.client.v2.model.queryParams.core.StudyQueryParams
 import org.brapi.client.v2.model.queryParams.core.TrialQueryParams
 import org.brapi.v2.model.core.BrAPIStudy
 import org.brapi.v2.model.core.BrAPITrial
+import androidx.core.content.edit
+import androidx.core.view.isNotEmpty
+import androidx.core.content.edit
 
 /**
  * List Filter activity base class for BrAPI filter activities
@@ -163,7 +162,12 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
                 chip.setOnCloseIconClickListener {
                     val currentTexts = prefs.getStringSet("${filterName}${GeneralKeys.LIST_FILTER_TEXTS}", setOf())?.toMutableSet()
                     currentTexts?.remove(text)
-                    prefs.edit().putStringSet("${filterName}${GeneralKeys.LIST_FILTER_TEXTS}", currentTexts).apply()
+                    prefs.edit {
+                        putStringSet(
+                            "${filterName}${GeneralKeys.LIST_FILTER_TEXTS}",
+                            currentTexts
+                        )
+                    }
                     chipGroup.removeView(chip)
                     restoreModels()
                 }
@@ -263,7 +267,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
         val modelCache = arrayListOf<BrAPIStudy>()
 
-        val pageSize = prefs.getString(GeneralKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
+        val pageSize = prefs.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
 
         (brapiService as BrAPIServiceV2).studyService.fetchAll(
             StudyQueryParams().also {
@@ -287,7 +291,11 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
                     if (modelCache.size == totalCount || totalCount < pageSize) {
                         progressBar.visibility = View.GONE
                         fetchDescriptionTv.visibility = View.GONE
-                        saveCacheToFile(modelCache as List<BrAPIStudy>, trialModels)
+
+                        withContext(Dispatchers.IO) {
+                            saveCacheToFile(modelCache as List<BrAPIStudy>, trialModels)
+                        }
+
                         queryStudiesJob?.cancel()
                     }
                 }
@@ -307,7 +315,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
     private suspend fun queryTrials() = async(Dispatchers.IO) {
 
-        val pageSize = prefs.getString(GeneralKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
+        val pageSize = prefs.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
 
         (brapiService as BrAPIServiceV2).trialService.fetchAll(
             TrialQueryParams().also {
@@ -400,7 +408,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
         findViewById<MaterialToolbar>(R.id.act_list_filter_tb)
             .menu?.findItem(R.id.action_clear_filters)
-            ?.setVisible(chipGroup.childCount > 0)
+            ?.isVisible = chipGroup.isNotEmpty()
     }
 
     private fun List<CheckboxListAdapter.Model>.persistCheckBoxes(): List<CheckboxListAdapter.Model> {
@@ -474,7 +482,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             }
 
             R.id.action_reset_cache -> {
-                AlertDialog.Builder(this)
+                AlertDialog.Builder(this, R.style.AppAlertDialog)
                     .setTitle(R.string.act_brapi_list_filter_reset_cache_title)
                     .setMessage(getString(R.string.act_brapi_list_filter_reset_cache_message))
                     .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss() }
@@ -485,7 +493,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             }
 
             R.id.action_clear_selection -> {
-                AlertDialog.Builder(this)
+                AlertDialog.Builder(this, R.style.AppAlertDialog)
                     .setTitle(R.string.act_brapi_list_filter_reset_cache_title)
                     .setMessage(getString(R.string.act_brapi_list_filter_reset_selection_message))
                     .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss() }

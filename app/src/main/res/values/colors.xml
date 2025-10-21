@@ -37,6 +37,8 @@
     <color name="main_chip_first_color">#47b65d</color>
     <color name="main_chip_second_color">#00a771</color>
     <color name="main_chip_third_color">#009683</color>
+    <color name="main_inverse_crop_region_color">#80101010</color>
+    <color name="datagrid_empty_cell_color">#B6BABA</color>
 
     <!-- blue theme colors -->
     <color name="blue_border">@color/BLACK</color>
@@ -103,6 +105,9 @@
     <color name="high_contrast_chip_first_color">#c6c6c6</color>
     <color name="high_contrast_chip_second_color">#919191</color>
     <color name="high_contrast_chip_third_color">#5e5e5e</color>
+    <color name="high_contrast_active_cell_color">#373737</color>
+    <color name="high_contrast_data_filled_color">#878585</color>
+    <color name="high_contrast_empty_cell_color">@color/WHITE</color>
 
     <color name="circleBackgroundMiddleColor">#80FEFEFE</color>
     <color name="circleBackgroundMiddleColorPressed">#20FEFEFE</color>

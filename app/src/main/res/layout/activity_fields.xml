@@ -36,25 +36,25 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/fieldRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="5dp"
-            tools:listitem="@layout/list_item_field_recycler"
-            tools:itemCount="3"/>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/fieldRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="5dp"
+                android:clipToPadding="false"
+                tools:listitem="@layout/list_item_field_recycler"
+                tools:itemCount="3"/>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/newField"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:layout_gravity="bottom|end"
+                android:src="@drawable/ic_add_white"
+                android:contentDescription="@string/fields_new_button_content_description" />
 
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
     </LinearLayout>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-    android:id="@+id/newField"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    android:src="@drawable/ic_add_white"
-    android:contentDescription="@string/fields_new_button_content_description"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

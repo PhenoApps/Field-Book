@@ -7,6 +7,7 @@
 DataGrid is accessed by pressing the <img class="icon" src="_static/icons/settings/features/grid.png"> icon in the Collect top toolbar.
 DataGrid displays a matrix of entries and traits in the active field.
 This view allows rapid identification of missing values.
+Swipe left and right to view additional columns of trait data and swipe up and down to view additional rows of entry data.
 Pressing an individual cell navigates directly to the corresponding entry and trait.
 
 <figure class="image">

@@ -11,6 +11,7 @@ import com.fieldbook.tracker.database.Migrator.Companion.sObservationUnitPropert
 import com.fieldbook.tracker.database.Migrator.ObservationUnit
 import com.fieldbook.tracker.database.Migrator.ObservationUnitAttribute
 import com.fieldbook.tracker.database.Migrator.ObservationUnitValue
+import com.fieldbook.tracker.database.Migrator.ObservationVariable
 import com.fieldbook.tracker.database.Migrator.Study
 import com.fieldbook.tracker.database.query
 import com.fieldbook.tracker.database.toFirst
@@ -20,23 +21,18 @@ import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
+import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter
 
 class ObservationUnitPropertyDao {
 
     companion object {
-
-//        internal fun selectAllRange(): Array<Map<String, Any?>>? = withDatabase { db ->
-//            db.query(sObservationUnitPropertyViewName).toTable().toTypedArray()
-//        }
 
         fun getObservationUnitPropertyByUniqueId(uniqueName: String, column: String, uniqueId: String): String = withDatabase { db ->
             db.query(sObservationUnitPropertyViewName, select = arrayOf(column), where = "`${uniqueName}` = ?", whereArgs = arrayOf(uniqueId))
                     .toFirst()[column].toString()
         }?: ""
 
-        fun getAllRangeId(context: Context): Array<Int> {
-            val studyId = PreferenceManager.getDefaultSharedPreferences(context)
-                .getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+        fun getAllRangeId(context: Context, studyId: Int): Array<Int> {
 
             getSortedObservationUnitData(context, studyId)?.use { cursor ->
                 val ids = mutableListOf<Int>()
@@ -52,98 +48,48 @@ class ObservationUnitPropertyDao {
             return emptyArray()
         }
 
-
         fun getRangeFromId(firstName: String, secondName: String, uniqueName: String, id: Int): RangeObject = withDatabase { db ->
-//            data.range = cursor.getString(0);
-//                data.plot = cursor.getString(1);
-//                data.plot_id = cursor.getString(2);
+
             RangeObject().apply {
 
                 val model = db.query(sObservationUnitPropertyViewName,
-                    select = arrayOf(firstName, secondName, uniqueName, "id"),
                     where = "id = ?",
                     whereArgs = arrayOf(id.toString())).toFirst()
 
-                range = model[firstName].toString()
+                primaryId = model[firstName].toString()
 
-                plot = model[secondName].toString()
+                secondaryId = model[secondName].toString()
 
-                plot_id = model[uniqueName].toString()
+                uniqueId = model[uniqueName].toString()
             }
 
         } ?: RangeObject().apply {
-            range = ""
-            plot = ""
-            plot_id = ""
+            primaryId = ""
+            secondaryId = ""
+            uniqueId = ""
         }
 
         /**
-         * This function's parameter trait is not always a trait and can be an observation unit property column.
-         * For example this is used when selecting the top-left drop down in the collect activity.
+         * Returns all string values for a given column in the observation unit property table.
          */
-        fun getDropDownRange(uniqueName: String, trait: String, plotId: String): Array<String>? = withDatabase { db ->
+        fun getObservationUnitPropertyValues(uniqueName: String, column: String, plotId: String): String = withDatabase { db ->
 
-            //added sanitation to the uniqueName in case it has a space
-            val unique = if ("`" in uniqueName) uniqueName else "`$uniqueName`"
-            db.query(sObservationUnitPropertyViewName,
-                    select = arrayOf(trait),
-                    where = "$unique LIKE ?",
-                    whereArgs = arrayOf(plotId)).toTable().map {
-                it[trait].toString()
-            }.toTypedArray()
-
-        }
-
-        fun getRangeColumnNames(): Array<String?> = withDatabase { db ->
-
-            val cursor = db.rawQuery("SELECT * FROM $sObservationUnitPropertyViewName limit 1", null)
-            //Cursor cursor = db.rawQuery("SELECT * from range limit 1", null);
-            //Cursor cursor = db.rawQuery("SELECT * from range limit 1", null);
-            var data: Array<String?>? = null
-
-            if (cursor.moveToFirst()) {
-                data = arrayOfNulls(cursor.columnCount - 1)
-                var k = 0
-                for (j in 0 until cursor.columnCount) {
-                    if (cursor.getColumnName(j) != "id") {
-                        data[k++] = cursor.getColumnName(j).replace("//", "/")
-                    }
-                }
+            val sanitizedUniqueName = "`${DataHelper.replaceIdentifiers(uniqueName)}`"
+            val sanitizedColumn = "`${DataHelper.replaceIdentifiers(column)}`"
+            db.rawQuery(
+                """
+                    SELECT $sanitizedColumn 
+                    FROM $sObservationUnitPropertyViewName 
+                    WHERE $sanitizedUniqueName = ? 
+                    LIMIT 1
+                """.trimIndent(),
+                arrayOf(plotId)
+            ).use { cursor ->
+                if (cursor.moveToFirst()) {
+                    cursor.getString(0)
+                } else String()
             }
-
-            if (!cursor.isClosed) {
-                cursor.close()
-            }
-
-            data
-
-        } ?: emptyArray()
-
-        fun getRangeColumns(): Array<String?> = withDatabase { db ->
-
-            val cursor = db.rawQuery("SELECT * from $sObservationUnitPropertyViewName limit 1", null)
-
-            var data: Array<String?>? = null
-
-            if (cursor.moveToFirst()) {
-                data = arrayOfNulls(cursor.columnCount - 1)
-                var k = 0
-                for (j in 0 until cursor.columnCount) {
-                    if (cursor.getColumnName(j) != "id") {
-                        data[k++] = cursor.getColumnName(j)
-                    }
-                }
-            }
-
-            if (!cursor.isClosed) {
-                cursor.close()
-            }
-
-            data
-//    db.query(sObservationUnitPropertyViewName).toFirst().keys
-//            .filter { it != "id" }.toTypedArray()
-
-        } ?: emptyArray<String?>()
+        } ?: String()
 
         /**
          * This function is used when database is checked on export.
@@ -159,7 +105,8 @@ class ObservationUnitPropertyDao {
             context: Context,
             studyId: Int,
             fieldList: Array<String?>,
-            traits: ArrayList<TraitObject>
+            traits: ArrayList<TraitObject>,
+            processor: ValueProcessorFormatAdapter
         ): Cursor? = withDatabase { db ->
 
             val traitRequiredFields =
@@ -167,39 +114,47 @@ class ObservationUnitPropertyDao {
             val requiredFields = fieldList + traitRequiredFields
             MatrixCursor(requiredFields).also { cursor ->
                 val placeholders = traits.joinToString(", ") { "?" }
-                val traitNames = traits.map { DataHelper.replaceIdentifiers(it.name) }.toTypedArray()
+                val traitIds = traits.map { it.id }.toTypedArray()
 
-                val unitSelectAttributes = fieldList.map { attributeName ->
+                val unitSelectAttributes = fieldList.joinToString(", ") { attributeName ->
                     "MAX(CASE WHEN attr.observation_unit_attribute_name = '$attributeName' THEN vals.observation_unit_value_name ELSE NULL END) AS \"$attributeName\""
-                }.joinToString(", ")
+                }
 
                 val obsSelectAttributes =
-                    arrayOf("observation_variable_name", "observation_variable_field_book_format", "value", "observation_time_stamp", "collector", "geoCoordinates", "rep")
+                    arrayOf("value", "observation_time_stamp", "collector", "geo_coordinates", "rep")
+
+                val varSelectAttributes =
+                    arrayOf("observation_variable_name", "observation_variable_field_book_format")
 
                 val sortOrderClause = getSortOrderClause(context, studyId.toString())
                 val query = """
-                    SELECT $unitSelectAttributes, ${obsSelectAttributes.joinToString { "obs.`$it` AS `$it`" }}
+                    SELECT $unitSelectAttributes, ${obsSelectAttributes.joinToString { "obs.`$it` AS `$it`" }}, ${varSelectAttributes.joinToString { "vars.`$it` AS `$it`" }}
                     FROM observations AS obs
                     LEFT JOIN observation_units AS units ON units.observation_unit_db_id = obs.observation_unit_id
                     LEFT JOIN observation_units_values AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
                     LEFT JOIN observation_units_attributes AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
+                    LEFT JOIN observation_variables AS vars ON vars.${ObservationVariable.PK} = obs.${ObservationVariable.FK}
                     WHERE obs.study_id = ?
-                      AND obs.observation_variable_name IN ($placeholders)
+                      AND vars.internal_id_observation_variable IN ($placeholders)
                     GROUP BY obs.internal_id_observation
                     $sortOrderClause
                 """.trimIndent()
 
                 Log.d("getExportDbData", "Final Query: $query")
-                val table = db.rawQuery(query, arrayOf(studyId.toString()) + traitNames).toTable()
+                val table = db.rawQuery(query, arrayOf(studyId.toString()) + traitIds).toTable()
 
                 table.forEach { row ->
                     cursor.addRow(fieldList.map { row[it] } + traitRequiredFields.map {
                         when (it) {
                             "trait" -> row["observation_variable_name"]
-                            "userValue" -> CategoryJsonUtil.processValue(row)
+                            "userValue" -> {
+                                val value = row["value"]
+                                val format = row["observation_variable_field_book_format"]
+                                processor.processValue(value.toString(), format.toString())
+                            }
                             "timeTaken" -> row["observation_time_stamp"]
                             "person" -> row["collector"]
-                            "location" -> row["geoCoordinates"]
+                            "location" -> row["geo_coordinates"]
                             "rep" -> row["rep"]
                             else -> String()
                         }
@@ -218,10 +173,11 @@ class ObservationUnitPropertyDao {
             studyId: Int,
             fieldList: Array<String?>,
             uniqueName: String,
-            traits: ArrayList<TraitObject>
+            traits: ArrayList<TraitObject>,
+            processor: ValueProcessorFormatAdapter
         ): Cursor? {
             // Get the full data set
-            getExportDbData(context, studyId, fieldList, traits)?.use { fullCursor ->
+            getExportDbData(context, studyId, fieldList, traits, processor)?.use { fullCursor ->
                 val traitRequiredFields = arrayOf("trait", "userValue", "timeTaken", "person", "location", "rep")
                 val requiredColumns = mutableListOf(uniqueName).apply {
                     addAll(traitRequiredFields)
@@ -234,11 +190,15 @@ class ObservationUnitPropertyDao {
 
                     val row = arrayListOf<String?>()
 
-                    requiredColumns.forEachIndexed { index, s ->
+                    fullCursor.columnNames.forEachIndexed { index, col ->
 
                         try {
 
-                            row.add(fullCursor.getStringOrNull(index))
+                            if (col in requiredColumns) {
+
+                                row.add(fullCursor.getStringOrNull(index))
+
+                            }
 
                         } catch (e: Exception) {
 
@@ -264,44 +224,74 @@ class ObservationUnitPropertyDao {
          * Where the column observation_variable_name value will be the observation value.
          * All observation_units are captured, even if they did not make an observation.
          * Inputs:
-         * @param expId the field/study id
+         * @param studyId the field/study id
          * @param traits the list of traits to print, either all traits or just the active ones
          * @return a cursor that is used in CSVWriter and closed elsewhere
          */
-
         fun getExportTableData(
             context: Context,
-            expId: Int,
-            traits: ArrayList<TraitObject>
+            studyId: Int,
+            traits: ArrayList<TraitObject>,
+            processor: ValueProcessorFormatAdapter
         ): Cursor? = withDatabase { db ->
-            val headers = ObservationUnitAttributeDao.getAllNames(expId)
+            val headers = ObservationUnitAttributeDao.getAllNames(studyId)
 
-            val selectAttributes = headers.map { attributeName ->
+            val selectAttributes = headers.joinToString(", ") { attributeName ->
                 "MAX(CASE WHEN attr.observation_unit_attribute_name = '$attributeName' THEN vals.observation_unit_value_name ELSE NULL END) AS \"$attributeName\""
-            }.joinToString(", ")
+            }
 
-            val selectObservations = traits.map { trait ->
+            val traitNames = traits.map { DataHelper.replaceIdentifiers(it.name) }
+
+            val selectObservations = traits.joinToString(", ") { trait ->
                 val traitName = DataHelper.replaceIdentifiers(trait.name)
-                "MAX(CASE WHEN obs.observation_variable_name='$traitName' THEN obs.value ELSE NULL END) AS \"$traitName\""
-            }.joinToString(", ")
+                "MAX(CASE WHEN vars.internal_id_observation_variable='${trait.id}' THEN obs.value ELSE NULL END) AS \"$traitName\""
+            }
 
             val combinedSelection = listOf(selectAttributes, selectObservations).filter { it.isNotEmpty() }.joinToString(", ")
 
-            val orderByClause = getSortOrderClause(context, expId.toString())
+            val orderByClause = getSortOrderClause(context, studyId.toString())
             //                SELECT units.internal_id_observation_unit AS id, $combinedSelection
             val query = """
-                SELECT $combinedSelection
+                SELECT $combinedSelection, observation_variable_field_book_format
                 FROM observation_units AS units
                 LEFT JOIN observation_units_values AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
                 LEFT JOIN observation_units_attributes AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
-                LEFT JOIN observations AS obs ON units.observation_unit_db_id = obs.observation_unit_id AND obs.study_id = $expId
-                WHERE units.study_id = $expId
+                LEFT JOIN observations AS obs ON units.observation_unit_db_id = obs.observation_unit_id AND obs.study_id = $studyId
+                LEFT JOIN observation_variables AS vars ON vars.${ObservationVariable.PK} = obs.${ObservationVariable.FK}
+                WHERE units.study_id = $studyId
                 GROUP BY units.internal_id_observation_unit
                 $orderByClause
             """.trimIndent()
 
             Log.d("getExportTableData", "Executing query: $query")
-            db.rawQuery(query, null)
+            val cursor = db.rawQuery(query, null)
+
+            val matrixCursor = MatrixCursor(cursor.columnNames).also {
+                while (cursor.moveToNext()) {
+                    val row = mutableListOf<String?>()
+                    for (i in 0 until cursor.columnCount) {
+                        val columnName = cursor.getColumnName(i)
+                        val value = cursor.getStringOrNull(i)
+                        if (value != null && columnName in traitNames) {
+                            // Process trait values using the processor
+                            // must get obs trait by name here since the table query has multiple traits per row
+                            val trait = ObservationVariableDao.getTraitByName(columnName)
+                            if (trait == null) {
+                                Log.w("getExportTableData", "Trait not found for column: $columnName")
+                                row.add(value)
+                                continue
+                            }
+                            row.add(processor.processValue(value, trait.format))
+                        } else {
+                            row.add(value)
+                        }
+                    }
+                    it.addRow(row.toTypedArray())
+                }
+            }
+
+            cursor.close()
+            matrixCursor
         }
 
         /**
@@ -311,33 +301,38 @@ class ObservationUnitPropertyDao {
 
         fun getExportTableDataShort(
             context: Context,
-            expId: Int,
+            studyId: Int,
             uniqueName: String,
-            traits: ArrayList<TraitObject>
+            traits: ArrayList<TraitObject>,
+            processor: ValueProcessorFormatAdapter
         ): Cursor? {
 
-            getExportTableData(context, expId, traits)?.use { cursor ->
+            getExportTableData(context, studyId, traits, processor)?.use { cursor ->
 
                 val requiredTraits = traits.map { it.name }.toTypedArray()
                 val requiredColumns = arrayOf(uniqueName) + requiredTraits
                 val matrixCursor = MatrixCursor(requiredColumns)
-                val traitStartIndex = cursor.columnCount - requiredTraits.size
+
+                //subtract one for the additional field book format for the value processor
+                val traitStartIndex = cursor.columnCount - requiredTraits.size - 1
 
                 while (cursor.moveToNext()) {
 
                     val rowData = mutableListOf<String?>()
 
+                    val uniqueIndex = cursor.getColumnIndex(uniqueName)
+
                     //add the unique id
-                    rowData.add(cursor.getStringOrNull(0))
+                    rowData.add(cursor.getString(uniqueIndex))
 
                     //skip ahead to the traits and add all trait values
                     requiredTraits.forEachIndexed { index, s ->
 
                         try {
 
-                            rowData.add(
-                                cursor.getStringOrNull(index + traitStartIndex)
-                            )
+                            val obsValue = cursor.getStringOrNull(index + traitStartIndex)
+
+                            rowData.add(obsValue)
 
                         } catch (e: Exception) {
 
@@ -357,12 +352,11 @@ class ObservationUnitPropertyDao {
             return null
         }
 
-
         /**
-         * Same as above but filters by obs unit and trait format
+         * Same as above but filters by obs unit
          */
         fun convertDatabaseToTable(
-            expId: Int,
+            studyId: Int,
             uniqueName: String,
             unit: String,
             col: Array<String?>,
@@ -370,25 +364,29 @@ class ObservationUnitPropertyDao {
         ): Cursor? = withDatabase { db ->
 
             val sanitizeTraits = traits.map { DataHelper.replaceIdentifiers(it.name) }
-            val sanitizeFormats = traits.map { DataHelper.replaceIdentifiers(it.format) }
 
             val select = col.joinToString(",") { "props.'${DataHelper.replaceIdentifiers(it)}'" }
 
             val maxStatements = arrayListOf<String>()
             sanitizeTraits.forEachIndexed { index, it ->
                 maxStatements.add(
-                    "MAX (CASE WHEN o.observation_variable_name='$it' AND o.observation_variable_field_book_format='${sanitizeFormats[index]}' THEN o.value ELSE NULL END) AS '$it'"
+                    "MAX (CASE WHEN vars.internal_id_observation_variable = ${traits[index].id} THEN o.value ELSE NULL END) AS '$it'"
                 )
             }
 
+            if (select.isEmpty() && maxStatements.isEmpty()) return@withDatabase null
+
             val query = """
-                SELECT $select,
-                ${maxStatements.joinToString(",\n")}
+                SELECT ${if (select.isNotEmpty()) select else "props.id"}
+                ${if (maxStatements.isNotEmpty()) maxStatements.joinToString(",\n", ",") else String()}
                 FROM ObservationUnitProperty as props
-                LEFT JOIN observations o ON props.`${uniqueName}` = o.observation_unit_id AND o.${Study.FK} = $expId
+                LEFT JOIN observations o ON props.`${uniqueName}` = o.observation_unit_id AND o.${Study.FK} = $studyId
+                LEFT JOIN ${ObservationVariable.tableName} AS vars ON vars.${ObservationVariable.PK} = o.${ObservationVariable.FK}
                 WHERE props.`${uniqueName}` = "$unit"
                 GROUP BY props.id
             """.trimIndent()
+
+            Log.d("convertDatabaseToTable", "Executing query: $query")
 
             db.rawQuery(query, null)
         }
@@ -396,9 +394,9 @@ class ObservationUnitPropertyDao {
         fun getSortedObservationUnitData(context: Context, studyId: Int): Cursor? = withDatabase { db ->
             val headers = ObservationUnitAttributeDao.getAllNames(studyId).filter { it != "geo_coordinates" }
 
-            val selectStatement = headers.map { col ->
+            val selectStatement = headers.joinToString(", ") { col ->
                 "MAX(CASE WHEN attr.observation_unit_attribute_name = \"$col\" THEN vals.observation_unit_value_name ELSE NULL END) AS \"$col\""
-            }.joinToString(", ")
+            }
 
             val orderByClause = getSortOrderClause(context, studyId.toString())
 
@@ -412,34 +410,9 @@ class ObservationUnitPropertyDao {
                 $orderByClause
             """.trimIndent()
 
-            Log.d("getSortedObsUnitData", "Executing dynamic query: $query")
+//            Log.d("getSortedObsUnitData", "Executing dynamic query: $query")
             db.rawQuery(query, null)
         }
-
-
-//        private fun getSortOrderClause(context: Context, studyId: String): String = withDatabase { db ->
-//            val sortOrder = if (PreferenceManager.getDefaultSharedPreferences(context)
-//                    .getBoolean("${GeneralKeys.SORT_ORDER}.$studyId", true)) "ASC" else "DESC"
-//
-//            var sortCols = "internal_id_observation_unit" // Default sort column
-//            try {
-//                val sortName = db.query(
-//                    Study.tableName,
-//                    select = arrayOf("study_sort_name"),
-//                    where = "${Study.PK} = ?",
-//                    whereArgs = arrayOf(studyId)
-//                ).toFirst()["study_sort_name"]?.toString()
-//
-//                if (!sortName.isNullOrEmpty() && sortName != "null") {
-//                    sortCols = sortName.split(',')
-//                        .joinToString(",") { col -> "cast(`$col` as integer), `$col`" } + ", internal_id_observation_unit"
-//                }
-//            } catch (e: Exception) {
-//                Log.e("ObsUnitPropertyDao", "Error fetching sort order for study: $e")
-//            }
-//
-//            "$sortCols $sortOrder"
-//        } ?: "internal_id_observation_unit ASC" // Provide a default non-null value
 
         private fun getSortOrderClause(context: Context, studyId: String): String? = withDatabase { db ->
             val sortOrder = if (PreferenceManager.getDefaultSharedPreferences(context)
@@ -460,8 +433,5 @@ class ObservationUnitPropertyDao {
 
             if (sortCols.isNotEmpty()) "ORDER BY $sortCols COLLATE NOCASE $sortOrder" else ""
         }
-
-
-
     }
 }

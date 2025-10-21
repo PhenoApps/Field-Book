@@ -22,7 +22,6 @@
         <item name="android:textViewStyle">@style/DropDownTextViewStyle</item>
         <item name="android:popupBackground">@drawable/cell</item>
         <item name="android:backgroundTint">?attr/fb_color_primary_dark</item>
-        <item name="android:fitsSystemWindows">true</item>
         <item name="android:textColor">?attr/fb_color_text_dark</item>
     </style>
 
@@ -43,6 +42,12 @@
 
     <!-- edit text styling s.a etCurVal in collect -->
     <style name="EditTextStyle" parent="Widget.AppCompat.EditText">
+        <item name="editTextColor">?attr/fb_color_text_dark</item>
+        <item name="backgroundTint">?attr/fb_color_primary_dark</item>
+        <item name="android:textSize">?attr/fb_body_text_size</item>
+    </style>
+
+    <style name="CropEditTextStyle" parent="EditTextStyle">
         <item name="editTextColor">?attr/fb_color_text_dark</item>
         <item name="backgroundTint">?attr/fb_color_primary_dark</item>
         <item name="android:textSize">?attr/fb_body_text_size</item>
@@ -122,6 +127,15 @@
     <style name="FloatingActionButtonStyle.SmallTraitButtons">
         <item name="fabCustomSize">@dimen/fb_trait_fab_size_small</item>
         <item name="maxImageSize">@dimen/fb_trait_fab_image_size_small</item>
+        <item name="android:backgroundTint">?fb_trait_button_background_tint</item>
+    </style>
+
+    <style name="MaterialCardViewStyle" parent="Widget.MaterialComponents.CardView">
+        <item name="cardElevation">2dp</item>
+        <item name="cardCornerRadius">8dp</item>
+    </style>
+
+    <style name="MaterialCardViewStyle.TraitInfo">
         <item name="android:backgroundTint">?fb_trait_button_background_tint</item>
     </style>
 

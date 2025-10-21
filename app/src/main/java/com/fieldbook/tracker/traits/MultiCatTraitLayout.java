@@ -2,7 +2,6 @@ package com.fieldbook.tracker.traits;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
@@ -15,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.Utils;
@@ -108,7 +108,7 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
     public void afterLoadExists(CollectActivity act, @Nullable String value) {
         super.afterLoadExists(act, value);
 
-        String labelValPref = getPrefs().getString(GeneralKeys.LABELVAL_CUSTOMIZE,"value");
+        String labelValPref = getPrefs().getString(PreferenceKeys.LABELVAL_CUSTOMIZE,"value");
         showLabel = !labelValPref.equals("value");
 
         categoryList = new ArrayList<>();
@@ -181,7 +181,7 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
 
         categoryList.clear();
 
-        String value = getCollectInputView().getText();
+        String value = (getCurrentObservation() != null) ? getCurrentObservation().getValue() : getCollectInputView().getText();
 
         ArrayList<BrAPIScaleValidValuesCategories> scale = new ArrayList<>();
 
@@ -214,7 +214,6 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
 
         refreshList();
         refreshCategoryText();
-        getCollectInputView().setTextColor(Color.parseColor(getDisplayColor()));
 
     }
 
@@ -371,9 +370,11 @@ public class MultiCatTraitLayout extends BaseTraitLayout {
 
         try {
 
-            if (JsonUtil.Companion.isJsonValid(data)) {
+            String value = (getCurrentObservation() != null) ? getCurrentObservation().getValue() : getCollectInputView().getText();
 
-                userChosenCats.addAll(CategoryJsonUtil.Companion.decode(data));
+            if (JsonUtil.Companion.isJsonValid(value)) {
+
+                userChosenCats.addAll(CategoryJsonUtil.Companion.decode(value));
 
             } else throw new RuntimeException();
 

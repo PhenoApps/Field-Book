@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import java.util.Locale
 
 class AppLanguageUtil {
@@ -19,7 +20,7 @@ class AppLanguageUtil {
             context?.let { ctx ->
 
                 PreferenceManager.getDefaultSharedPreferences(ctx).edit()
-                    .putString(GeneralKeys.LANGUAGE_LOCALE_DEFAULT_ID, Locale.getDefault().language)
+                    .putString(PreferenceKeys.LANGUAGE_LOCALE_DEFAULT_ID, Locale.getDefault().language)
                     .apply()
             }
         }
@@ -35,7 +36,7 @@ class AppLanguageUtil {
                 context?.let { ctx ->
 
                     val id = PreferenceManager.getDefaultSharedPreferences(ctx)
-                        .getString(GeneralKeys.LANGUAGE_LOCALE_ID, "") ?: ""
+                        .getString(PreferenceKeys.LANGUAGE_LOCALE_ID, "") ?: ""
 
                     if (id.isNotEmpty()) {
 

@@ -32,6 +32,7 @@
     <string name="warning_field_missing">Yeroo kana direen hingalle. Odoo ragaa hin funaanin dura, dirree galchi</string>
     <string name="warning_traits_missing">Amaloonni hinjiran. Odoo ragaa funaanuu hinjalqabni, amaloota uumi</string>
     <!-- Changelog -->
+    <!--  Field Grouping  -->
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
@@ -210,5 +211,10 @@
     <!-- usb camera trait -->
     <!-- gopro -->
     <!-- canon camera strings -->
+    <!-- spectral trait strings -->
     <string name="brapi_traits_filter_title">Wanta ideefanonn guuramuuf</string>
+    <string name="traits_sort_default">Akkuma jirutti</string>
+    <!--  NearbyShare  -->
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="save">Olkaa\'i</string>
 </resources>

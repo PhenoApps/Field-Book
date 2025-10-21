@@ -1,25 +1,32 @@
 package com.fieldbook.tracker.traits.formats
 
 import android.content.Context
+import com.fieldbook.tracker.offbeat.traits.formats.contracts.AngleFormat
 
 enum class Formats(val type: Types = Types.SYSTEM, val isCamera: Boolean = false) {
 
     //SYSTEM formats
-    AUDIO, BOOLEAN, CAMERA(isCamera = true), CATEGORICAL, MULTI_CATEGORICAL, COUNTER, DATE, LOCATION, NUMERIC, PERCENT, TEXT,
+    AUDIO, BOOLEAN, CAMERA(isCamera = true), CATEGORICAL, MULTI_CATEGORICAL, COUNTER, DATE, LOCATION, NUMERIC, PERCENT, TEXT, ANGLE, BASE_SPECTRAL,
 
     //CUSTOM formats
-    DISEASE_RATING(Types.CUSTOM), GNSS(Types.CUSTOM),
+    DISEASE_RATING(Types.CUSTOM), GNSS(Types.CUSTOM), STOP_WATCH(Types.CUSTOM),
     BASE_PHOTO(Types.CUSTOM), USB_CAMERA(Types.CUSTOM, isCamera = true), GO_PRO(Types.CUSTOM, isCamera = true), CANON(Types.CUSTOM, isCamera = true),
-    LABEL_PRINT(Types.CUSTOM), BRAPI(Types.CUSTOM);
+    NIX(Types.CUSTOM), GREEN_SEEKER(Types.CUSTOM), SCALE(Types.CUSTOM),
+    LABEL_PRINT(Types.CUSTOM);
 
     companion object {
+
+        fun isSpectralFormat(format: String) = format in setOf("inno_spectra", "nix")
+
         fun isCameraTrait(format: String) = format in setOf("photo", "usb camera", "gopro", "canon")
 
         fun isExternalCameraTrait(format: String) = format in setOf("usb camera", "gopro", "canon")
 
+        fun getSpectralFormats() = entries.filter { it in setOf(NIX, GREEN_SEEKER) }
+
         fun getCameraFormats() = entries.filter { it.isCamera }
 
-        fun getMainFormats() = entries - listOf(CAMERA, USB_CAMERA, GO_PRO, CANON)
+        fun getMainFormats() = entries - getCameraFormats().toSet() - getSpectralFormats().toSet()
 
         fun findTrait(format: String) = entries.find { it.getDatabaseName() == format }?.getTraitFormatDefinition()
 
@@ -38,12 +45,17 @@ enum class Formats(val type: Types = Types.SYSTEM, val isCamera: Boolean = false
         COUNTER -> CounterFormat()
         DATE -> DateFormat()
         LOCATION -> LocationFormat()
+        ANGLE -> AngleFormat()
         GNSS -> GnssFormat()
         NUMERIC -> NumericFormat()
         PERCENT -> PercentFormat()
         DISEASE_RATING -> DiseaseRatingFormat()
         LABEL_PRINT -> ZebraLabelPrintFormat()
-        BRAPI -> BrapiFormat()
+        BASE_SPECTRAL -> BaseSpectralFormat()
+        NIX -> NixSensorFormat()
+        STOP_WATCH -> StopWatchFormat()
+        GREEN_SEEKER -> GreenSeekerFormat()
+        SCALE -> ScaleFormat()
         else -> TextFormat()
     }
 

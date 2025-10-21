@@ -36,6 +36,7 @@
     <string name="warning_traits_missing">কোন বৈশিষ্ট্যই উপাস্থিত নেই। উপাত্ত সংগ্রহের পূর্বে অনুগ্রহপূর্বক বৈশিষ্ট্য সৃষ্টি করুন।</string>
     <!-- Changelog -->
     <string name="changelog_title">লগ পরিবর্তন</string>
+    <!--  Field Grouping  -->
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
@@ -64,7 +65,6 @@
     <string name="traits_sort_visibility">দৃশ্যমান</string>
     <string name="warning_traits_missing_modify">বৈশিষ্ট্য তৈরি করুন তাদেরকে পরিবর্তনের পূর্বেই।</string>
     <!-- Trait import/export -->
-    <string name="traits_toolbar_import_export">ভীতারে নিয়ে আসা/ বাহিরে পাঠানো</string>
     <string name="traits_dialog_import">উত্তোলন</string>
     <string name="traits_dialog_export">দিয়ে দেয়া</string>
     <string name="traits_toolbar_delete_all">সকল বৈশিষ্ট্যই মুছে ফেলুন</string>
@@ -246,5 +246,11 @@
     <!-- usb camera trait -->
     <!-- gopro -->
     <!-- canon camera strings -->
+    <!-- spectral trait strings -->
     <string name="brapi_traits_filter_title">বৈশিষ্ট্য</string>
+    <string name="dialog_quick_goto_title">দ্রুত গমন করুন</string>
+    <string name="traits_sort_default">নির্দিষ্ট</string>
+    <!--  NearbyShare  -->
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="save">সঞ্চিত করা</string>
 </resources>

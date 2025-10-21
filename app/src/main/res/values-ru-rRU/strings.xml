@@ -33,6 +33,7 @@
     <string name="warning_traits_missing">Показатели не введены. Введите показатели перед тем как начать сбор данных</string>
     <!-- Changelog -->
     <string name="changelog_title">Внесенные изменения</string>
+    <!--  Field Grouping  -->
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
@@ -214,5 +215,10 @@
     <!-- usb camera trait -->
     <!-- gopro -->
     <!-- canon camera strings -->
+    <!-- spectral trait strings -->
     <string name="brapi_traits_filter_title">Показатели</string>
+    <string name="traits_sort_default">значение по умолчанию</string>
+    <!--  NearbyShare  -->
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="save">Сохранить</string>
 </resources>

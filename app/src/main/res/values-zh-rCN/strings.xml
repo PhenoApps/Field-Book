@@ -47,6 +47,7 @@
     <string name="warning_traits_missing">无性状存在。请先创建性状，再采集数据。</string>
     <!-- Changelog -->
     <string name="changelog_title">更改记录</string>
+    <!--  Field Grouping  -->
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
@@ -81,12 +82,10 @@
     <string name="traits_sort_format">格式</string>
     <string name="warning_traits_missing_modify">先创建性状，才能修改。</string>
     <!-- Trait import/export -->
-    <string name="traits_toolbar_import_export">导入/导出</string>
     <string name="traits_dialog_import">导入</string>
+    <string name="import_error_format_trait">只有TRT文件可作为性状列表导入</string>
     <string name="traits_export_check">导出当前性状列表？</string>
     <string name="traits_dialog_export">导出</string>
-    <string name="import_error_format_trait">只有TRT文件可作为性状列表导入</string>
-    <string name="import_dialog_title_traits">导入性状</string>
     <string name="traits_toolbar_delete_all">删除全部性状</string>
     <!-- Trait item menu -->
     <string name="traits_options_copy">复制</string>
@@ -402,5 +401,11 @@
     <!-- usb camera trait -->
     <!-- gopro -->
     <!-- canon camera strings -->
+    <!-- spectral trait strings -->
     <string name="brapi_traits_filter_title">性状</string>
+    <string name="dialog_quick_goto_title">快速转移</string>
+    <string name="traits_sort_default">默认值</string>
+    <!--  NearbyShare  -->
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="save">保存</string>
 </resources>

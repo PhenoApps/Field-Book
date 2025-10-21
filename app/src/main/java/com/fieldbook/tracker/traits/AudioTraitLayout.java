@@ -2,16 +2,20 @@ package com.fieldbook.tracker.traits;
 
 import android.app.Activity;
 import android.content.Context;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
-import android.media.MediaRecorder;
 import android.net.Uri;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.cardview.widget.CardView;
 import androidx.documentfile.provider.DocumentFile;
 
 import com.fieldbook.tracker.R;
@@ -20,16 +24,24 @@ import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.utilities.FieldAudioHelper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class AudioTraitLayout extends BaseTraitLayout {
 
     static public String type = "audio";
-
-    private MediaRecorder mediaRecorder;
     private MediaPlayer mediaPlayer;
     private Uri recordingLocation;
     private FloatingActionButton controlButton;
     private ButtonState buttonState;
-    private TextView audioRecordingText;
+
+    private CardView audioInfoCard;
+    private LinearLayout fileMetadataLayout;
+    private TextView fileNameText;
+    private TextView fileTimestamp;
+    private TextView fileDuration;
+    private TextView fileSize;
 
     public AudioTraitLayout(Context context) {
         super(context);
@@ -45,7 +57,13 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
     @Override
     public void setNaTraitsText() {
-        audioRecordingText.setText("NA");
+        // delete previously saved audio if it exists
+        deleteRecording();
+        recordingLocation = null;
+        mediaPlayer = null;
+        refreshButtonState();
+
+        setNAAudioInfoCard();
     }
 
     @Override
@@ -60,17 +78,24 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
     @Override
     public void init(Activity act) {
-        audioRecordingText = act.findViewById(R.id.audioRecordingText);
+        audioInfoCard = act.findViewById(R.id.audio_info_card);
+        fileMetadataLayout = act.findViewById(R.id.file_metadata_layout);
+        fileNameText = act.findViewById(R.id.file_name_text);
+        fileTimestamp = act.findViewById(R.id.file_timestamp);
+        fileDuration = act.findViewById(R.id.file_duration);
+        fileSize = act.findViewById(R.id.file_size);
+
         buttonState = ButtonState.WAITING_FOR_RECORDING;
         controlButton = act.findViewById(R.id.record);
         controlButton.setOnClickListener(new AudioTraitOnClickListener());
         controlButton.requestFocus();
 
-        audioRecordingText.setOnLongClickListener( view -> {
+        audioInfoCard.setOnLongClickListener( view -> {
+            ((CollectActivity) getContext()).showObservationMetadataDialog();
             // handle the long click when some audio was saved
-            if(audioRecordingText.getText().toString().equals(getContext().getString(R.string.trait_layout_data_stored))){
-                ((CollectActivity) getContext()).showObservationMetadataDialog();
-            }
+//            if(fileNameText.getText().toString().equals(getContext().getString(R.string.trait_layout_data_stored))){
+//                ((CollectActivity) getContext()).showObservationMetadataDialog();
+//            }
             return true;
         });
     }
@@ -81,14 +106,14 @@ public class AudioTraitLayout extends BaseTraitLayout {
         if (value != null && value.equals("NA")) {
             buttonState = ButtonState.WAITING_FOR_RECORDING;
             controlButton.setImageResource(buttonState.getImageId());
-            audioRecordingText.setText("NA");
+            setNAAudioInfoCard();
         } else {
             DocumentFile file = DocumentFile.fromSingleUri(getContext(), Uri.parse(value));
             if (file != null && file.exists()) {
                 this.recordingLocation = file.getUri();
                 buttonState = ButtonState.WAITING_FOR_PLAYBACK;
                 controlButton.setImageResource(buttonState.getImageId());
-                audioRecordingText.setText(getContext().getString(R.string.trait_layout_data_stored));
+                setAudioInfoCard(file);
             } else {
                 deleteTraitListener();
             }
@@ -100,7 +125,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
         super.afterLoadNotExists(act);
         buttonState = ButtonState.WAITING_FOR_RECORDING;
         controlButton.setImageResource(buttonState.getImageId());
-        audioRecordingText.setText("");
+        hideAudioInfoCard();
     }
 
     @Override
@@ -122,13 +147,13 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
     private void refreshButtonState() {
         ObservationModel model = getCurrentObservation();
-        if (model != null && !model.getValue().isEmpty()) {
+        if (model != null && !model.getValue().isEmpty() && !model.getValue().equals("NA")) {
             buttonState = ButtonState.WAITING_FOR_PLAYBACK;
             controlButton.setImageResource(buttonState.getImageId());
-        } else {
+        } else { // for NA, change the button state to WAITING_FOR_RECORDING
             buttonState = ButtonState.WAITING_FOR_RECORDING;
             controlButton.setImageResource(buttonState.getImageId());
-            audioRecordingText.setText("");
+            fileNameText.setText("");
             getCollectInputView().setText("");
         }
     }
@@ -140,8 +165,8 @@ public class AudioTraitLayout extends BaseTraitLayout {
         super.deleteTraitListener();
         recordingLocation = null;
         mediaPlayer = null;
-        mediaRecorder = null;
         refreshButtonState();
+        hideAudioInfoCard();
     }
 
     // Delete recording
@@ -153,6 +178,67 @@ public class AudioTraitLayout extends BaseTraitLayout {
                 file.delete();
             }
         }
+    }
+
+    private void setNAAudioInfoCard() {
+        audioInfoCard.setVisibility(View.VISIBLE);
+        fileMetadataLayout.setVisibility(View.GONE);
+
+        fileNameText.setText("NA");
+        fileNameText.setGravity(Gravity.CENTER);
+    }
+
+    private void setAudioInfoCard(DocumentFile file) {
+        audioInfoCard.setVisibility(View.VISIBLE);
+        fileMetadataLayout.setVisibility(View.VISIBLE);
+
+        fileNameText.setGravity(Gravity.START);
+        fileNameText.setText(getContext().getString(R.string.trait_audio_placeholder_filename));
+
+        fileTimestamp.setText(formatDateTime(file.lastModified()));
+        fileSize.setText(getFileSize(file.length()));
+        fileDuration.setText(getAudioDuration(file.getUri()));
+    }
+
+    private void hideAudioInfoCard() {
+        audioInfoCard.setVisibility(View.GONE);
+    }
+
+    private String getAudioDuration(Uri uri) {
+        try (MediaMetadataRetriever retriever = new MediaMetadataRetriever()) {
+            retriever.setDataSource(getContext(), uri);
+            String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+
+            if (time == null) {
+                Log.w("AudioTraitLayout", "Could not extract file duration");
+                return "00:00";
+            }
+
+
+            long timeInMillis = Long.parseLong(time);
+
+            // ceil any fraction of a second to the next second
+            long totalSeconds = (long) Math.ceil(timeInMillis / 1000.0);
+            long minutes = totalSeconds / 60;
+            long seconds = totalSeconds % 60;
+
+            return String.format("%02d:%02d", minutes, seconds);
+        } catch (Exception e) {
+            Log.e("AudioTraitLayout", "Error getting file duration", e);
+            return "00:00";
+        }
+    }
+
+    private String getFileSize(long bytes) {
+        if (bytes < 1024) return bytes + " B";
+        int exponent = (int) (Math.log(bytes) / Math.log(1024));
+        String prefix = "KMGTPE".charAt(exponent-1) + "";
+        // bytes / 1024^(exponent)
+        return String.format("%.2f %sB", bytes / Math.pow(1024, exponent), prefix);
+    }
+
+    private String formatDateTime(long timestamp) {
+        return new SimpleDateFormat("MMM d, yyyy | h:mm a", Locale.getDefault()).format(new Date(timestamp));
     }
 
     public boolean isAudioRecording(){
@@ -188,7 +274,6 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
         @Override
         public void onClick(View view) {
-            ((CollectActivity) getContext()).setNewTraits(getDatabase().getUserDetail(getCurrentRange().plot_id));
 
             boolean enableNavigation = true;
             switch (buttonState) {
@@ -264,7 +349,7 @@ public class AudioTraitLayout extends BaseTraitLayout {
         private void startRecording() {
             try {
                 removeTrait(getCurrentTrait());
-                audioRecordingText.setText("");
+                hideAudioInfoCard();
                 fieldAudioHelper.startRecording(false);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -274,9 +359,18 @@ public class AudioTraitLayout extends BaseTraitLayout {
         private void stopRecording() {
             try {
                 fieldAudioHelper.stopRecording();
-                updateObservation(getCurrentTrait(), fieldAudioHelper.getRecordingLocation().toString());
-                audioRecordingText.setText(getContext().getString(R.string.trait_layout_data_stored));
-                getCollectInputView().setText(fieldAudioHelper.getRecordingLocation().toString());
+                Uri audioUri = fieldAudioHelper.getRecordingLocation();
+                if (audioUri != null) {
+                    updateObservation(getCurrentTrait(), audioUri.toString());
+                    getCollectInputView().setText(audioUri.toString());
+
+                    // update recordingLocation
+                    DocumentFile file = DocumentFile.fromSingleUri(getContext(), audioUri);
+                    if (file != null && file.exists()) {
+                        AudioTraitLayout.this.recordingLocation = file.getUri();
+                        setAudioInfoCard(file);
+                    }
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -2,16 +2,12 @@ package com.fieldbook.tracker.activities;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Rect;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,6 +16,7 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -32,13 +29,17 @@ import com.fieldbook.tracker.adapters.ImageListAdapter;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
-import com.fieldbook.tracker.fragments.ImportDBFragment;
+import com.fieldbook.tracker.fragments.ImportDatabaseFragment;
 import com.fieldbook.tracker.objects.FieldObject;
+import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.AppLanguageUtil;
-import com.fieldbook.tracker.utilities.ExportUtil;
+import com.fieldbook.tracker.utilities.InsetHandler;
+import com.fieldbook.tracker.utilities.export.ExportUtil;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.OldPhotosMigrator;
+import com.fieldbook.tracker.utilities.PersonNameManager;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
@@ -59,7 +60,6 @@ import org.phenoapps.utils.BaseDocumentTreeUtil;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -101,6 +101,8 @@ public class ConfigActivity extends ThemedActivity {
     @Inject
     SharedPreferences preferences;
     @Inject
+    PersonNameManager nameManager;
+    @Inject
     public ExportUtil exportUtil;
     Handler mHandler = new Handler();
     boolean doubleBackToExitPressedOnce = false;
@@ -110,19 +112,12 @@ public class ConfigActivity extends ThemedActivity {
     private FloatingActionButton barcodeSearchFab;
     private boolean mlkitEnabled;
 
-    private void invokeDatabaseImport(DocumentFile doc) {
-        database.open();
-        mHandler.post(() -> {
-            new ImportDBTask(doc).execute(0);
-        });
-    }
-
     @Override
     public void onResume() {
         super.onResume();
 
         if (systemMenu != null) {
-            systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
+            systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(PreferenceKeys.TIPS, false));
         }
 
         invalidateOptionsMenu();
@@ -141,9 +136,9 @@ public class ConfigActivity extends ThemedActivity {
      *
      */
     private void checkBrapiToken() {
-        String token = preferences.getString(GeneralKeys.BRAPI_TOKEN, "");
+        String token = preferences.getString(PreferenceKeys.BRAPI_TOKEN, "");
         if (!token.isEmpty()) {
-            preferences.edit().putBoolean(GeneralKeys.BRAPI_ENABLED, true).apply();
+            preferences.edit().putBoolean(PreferenceKeys.BRAPI_ENABLED, true).apply();
         }
     }
 
@@ -166,6 +161,11 @@ public class ConfigActivity extends ThemedActivity {
         preferencesSetup();
 
         verifyPersonHelper.updateLastOpenedTime();
+
+        // save the current person name
+        nameManager.migrateExistingPersonName();
+
+        setupBackCallback();
     }
 
     private void versionBasedSetup() {
@@ -201,13 +201,13 @@ public class ConfigActivity extends ThemedActivity {
 
             SharedPreferences.Editor ed = preferences.edit();
 
-            Set<String> entries = preferences.getStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, new HashSet<>());
+            Set<String> entries = preferences.getStringSet(PreferenceKeys.TOOLBAR_CUSTOMIZE, new HashSet<>());
             entries.add("search");
             entries.add("resources");
             entries.add("summary");
             entries.add("lockData");
 
-            ed.putStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, entries);
+            ed.putStringSet(PreferenceKeys.TOOLBAR_CUSTOMIZE, entries);
             ed.apply();
 
             // to disable App Intro for debug mode
@@ -229,39 +229,6 @@ public class ConfigActivity extends ThemedActivity {
         Log.d(TAG, "preferencesSetup: " + BuildConfig.DEBUG);
 
         firstRunSetup();
-
-        migratePreferencesToDefault();
-    }
-
-    /**
-     * Transfer "Settings" preference file map values to default preferences map
-     */
-    private void migratePreferencesToDefault() {
-
-        SharedPreferences oldPreferences = getSharedPreferences(GeneralKeys.SHARED_PREF_FILE_NAME, Context.MODE_PRIVATE);
-        Set<? extends Map.Entry<String, ?>> entries = oldPreferences.getAll().entrySet();
-
-        SharedPreferences.Editor edit = preferences.edit();
-        for (Map.Entry<String, ?> entry : entries) {
-            Object value = entry.getValue();
-            String key = entry.getKey();
-
-            if (value instanceof Boolean) {
-                edit.putBoolean(key, ((Boolean) value));
-            } else if (value instanceof String) {
-                edit.putString(key, ((String) value));
-            } else if (value instanceof Float) {
-                edit.putFloat(key, ((Float) value));
-            } else if (value instanceof Integer) {
-                edit.putInt(key, ((Integer) value));
-            } else if (value instanceof Long) {
-                edit.putLong(key, ((Long) value));
-            } else if (value instanceof HashSet) {
-                edit.putStringSet(key, ((HashSet<String>) value));
-            }
-        }
-
-        edit.apply();
     }
 
     private void showChangelog(Boolean managedShow, Boolean rateButton) {
@@ -291,6 +258,7 @@ public class ConfigActivity extends ThemedActivity {
     private void loadScreen() {
         setContentView(R.layout.activity_config);
         initToolbar();
+        setupConfigWindowInsets();
 
         settingsList = findViewById(R.id.myList);
 
@@ -350,7 +318,7 @@ public class ConfigActivity extends ThemedActivity {
         ImageListAdapter adapterImg = new ImageListAdapter(this, image_id, configList);
         settingsList.setAdapter(adapterImg);
 
-        mlkitEnabled = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(GeneralKeys.MLKIT_PREFERENCE_KEY, false);
+        mlkitEnabled = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferenceKeys.MLKIT_PREFERENCE_KEY, false);
 
         barcodeSearchFab = findViewById(R.id.act_config_search_fab);
         barcodeSearchFab.setOnClickListener(v -> {
@@ -378,13 +346,13 @@ public class ConfigActivity extends ThemedActivity {
      */
     private int checkTraitsExist() {
 
-        String[] traits = database.getVisibleTrait();
+        ArrayList<TraitObject> traits = database.getVisibleTraits();
 
         if (!preferences.getBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)
                 || preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1) == -1) {
             Utils.makeToast(getApplicationContext(), getString(R.string.warning_field_missing));
             return -1;
-        } else if (traits.length == 0) {
+        } else if (traits.isEmpty()) {
             Utils.makeToast(getApplicationContext(), getString(R.string.warning_traits_missing));
             return -1;
         }
@@ -405,22 +373,13 @@ public class ConfigActivity extends ThemedActivity {
         return 1;
     }
 
-    // Helper function to merge arrays
-    String[] concat(String[] a1, String[] a2) {
-        String[] n = new String[a1.length + a2.length];
-        System.arraycopy(a1, 0, n, 0, a1.length);
-        System.arraycopy(a2, 0, n, a1.length, a2.length);
-
-        return n;
-    }
-
     private void resolveFuzzySearchResult(FieldObject f, @Nullable String plotId) {
 
         soundHelper.playCelebrate();
 
         int studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
 
-        int newStudyId = f.getExp_id();
+        int newStudyId = f.getStudyId();
 
         if (studyId != newStudyId) {
 
@@ -445,7 +404,7 @@ public class ConfigActivity extends ThemedActivity {
         int selectedField = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
         FieldObject field = database.getFieldObject(selectedField);
 
-        if (field != null && field.getDate_import() != null && !field.getDate_import().isEmpty()) {
+        if (field != null && field.getDateImport() != null && !field.getDateImport().isEmpty()) {
             Intent intent = new Intent(this, CollectActivity.class);
             startActivity(intent);
         }
@@ -459,7 +418,7 @@ public class ConfigActivity extends ThemedActivity {
         // first, search to try and match study alias
         for (FieldObject f : fields) {
 
-            if (f != null && f.getExp_alias() != null && f.getExp_alias().equals(barcode)) {
+            if (f != null && f.getAlias() != null && f.getAlias().equals(barcode)) {
 
                 return f;
 
@@ -469,7 +428,7 @@ public class ConfigActivity extends ThemedActivity {
         // second, if field is not found search for study name
         for (FieldObject f : fields) {
 
-            if (f != null && f.getExp_name() != null && f.getExp_name().equals(barcode)) {
+            if (f != null && f.getName() != null && f.getName().equals(barcode)) {
 
                 return f;
 
@@ -536,23 +495,42 @@ public class ConfigActivity extends ThemedActivity {
                 boolean highContrastThemeEnabled = preferences.getBoolean(GeneralKeys.HIGH_CONTRAST_THEME_ENABLED, false);
 
                 if (loadSampleData) {
-                    ImportDBFragment importDBFragment = new ImportDBFragment();
+
+                    DocumentFile sampleDatabase = BaseDocumentTreeUtil.Companion.getFile(this,
+                            R.string.dir_database,
+                            "sample_db.zip");
+
+                    Bundle sampleData = new Bundle();
+
+                    if (sampleDatabase != null) {
+                        sampleData.putString(
+                                ImportDatabaseFragment.FILE_EXTRA,
+                                sampleDatabase.getUri().toString()
+                        );
+                    }
+
+                    ImportDatabaseFragment importDatabaseFragment = new ImportDatabaseFragment();
+                    importDatabaseFragment.setArguments(sampleData);
 
                     getSupportFragmentManager().beginTransaction()
-                            .add(importDBFragment, "com.fieldbook.tracker.fragments.ImportDBFragment")
+                            .add(importDatabaseFragment, "com.fieldbook.tracker.fragments.ImportDBFragment")
                             .addToBackStack(null)
                             .commit();
+
+                    preferences.edit()
+                            .putBoolean(GeneralKeys.LOAD_SAMPLE_DATA, false)
+                            .apply();
                 }
 
                 if (highContrastThemeEnabled) {
                     preferences.edit()
-                            .putString(GeneralKeys.THEME, String.valueOf(ThemedActivity.HIGH_CONTRAST))
-                            .putString(GeneralKeys.TEXT_THEME, String.valueOf(ThemedActivity.MEDIUM))
+                            .putString(PreferenceKeys.THEME, String.valueOf(ThemedActivity.HIGH_CONTRAST))
+                            .putString(PreferenceKeys.TEXT_THEME, String.valueOf(ThemedActivity.MEDIUM))
                             .apply();
                 } else {
                     preferences.edit()
-                            .putString(GeneralKeys.THEME, String.valueOf(ThemedActivity.DEFAULT))
-                            .putString(GeneralKeys.TEXT_THEME, String.valueOf(ThemedActivity.MEDIUM))
+                            .putString(PreferenceKeys.THEME, String.valueOf(ThemedActivity.DEFAULT))
+                            .putString(PreferenceKeys.TEXT_THEME, String.valueOf(ThemedActivity.MEDIUM))
                             .apply();
                 }
 
@@ -612,7 +590,7 @@ public class ConfigActivity extends ThemedActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         new MenuInflater(ConfigActivity.this).inflate(R.menu.menu_settings, menu);
         systemMenu = menu;
-        systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
+        systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(PreferenceKeys.TIPS, false));
         return true;
     }
 
@@ -682,38 +660,24 @@ public class ConfigActivity extends ThemedActivity {
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
 
-    @Override
-    public void onBackPressed() {
-        if (doubleBackToExitPressedOnce) {
-            super.onBackPressed();
-            return;
-        }
+    private void setupBackCallback() {
+        OnBackPressedCallback doubleBackCallback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (doubleBackToExitPressedOnce) { // exits the app
+                    setEnabled(false); // stop intercepting back presses
+                    getOnBackPressedDispatcher().onBackPressed(); // call system's back handler toe exit
+                    return;
+                }
 
-        this.doubleBackToExitPressedOnce = true;
-        Toast.makeText(this, "Press back again to exit", Toast.LENGTH_SHORT).show();
+                doubleBackToExitPressedOnce = true;
+                Toast.makeText(ConfigActivity.this, "Press back again to exit", Toast.LENGTH_SHORT).show();
 
-        new Handler().postDelayed(() -> doubleBackToExitPressedOnce = false, 2000);
-    }
-
-    /**
-     * Queries the database for saved studies and calls switch field for the first one.
-     */
-    public void selectFirstField() {
-
-        try {
-
-            FieldObject[] fs = database.getAllFieldObjects().toArray(new FieldObject[0]);
-
-            if (fs.length > 0) {
-
-                switchField(fs[0].getExp_id());
+                new Handler().postDelayed(() -> doubleBackToExitPressedOnce = false, 2000);
             }
+        };
 
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-        }
+        getOnBackPressedDispatcher().addCallback(this, doubleBackCallback);
     }
 
     /**
@@ -731,66 +695,10 @@ public class ConfigActivity extends ThemedActivity {
 
     }
 
-    private class ImportDBTask extends AsyncTask<Integer, Integer, Integer> {
-        boolean fail;
-        ProgressDialog dialog;
-        DocumentFile file = null;
+    private void setupConfigWindowInsets() {
+        View rootView = findViewById(android.R.id.content);
+        Toolbar toolbar = findViewById(R.id.toolbar);
 
-        public ImportDBTask(DocumentFile file) {
-            this.file = file;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            fail = false;
-
-            dialog = new ProgressDialog(ConfigActivity.this, R.style.AppAlertDialog);
-            dialog.setIndeterminate(true);
-            dialog.setCancelable(false);
-            dialog.setMessage(Html
-                    .fromHtml(getString(R.string.import_dialog_importing)));
-            dialog.show();
-        }
-
-        @Override
-        protected Integer doInBackground(Integer... params) {
-            try {
-                if (this.file != null) {
-                    database.importDatabase(this.file);
-                }
-            } catch (Exception e) {
-                Log.d("Database", e.toString());
-                e.printStackTrace();
-                fail = true;
-            }
-            return 0;
-        }
-
-        @Override
-        protected void onPostExecute(Integer result) {
-            if (dialog.isShowing())
-                dialog.dismiss();
-
-            if (fail) {
-                Utils.makeToast(getApplicationContext(), getString(R.string.import_error_general));
-            }
-
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.apply();
-
-            //if sample db is imported, automatically select the first study
-            try {
-
-                selectFirstField();
-
-            } catch (Exception e) {
-
-                e.printStackTrace();
-
-            }
-
-            CollectActivity.reloadData = true;
-        }
+        InsetHandler.INSTANCE.setupStandardInsets(rootView, toolbar);
     }
 }

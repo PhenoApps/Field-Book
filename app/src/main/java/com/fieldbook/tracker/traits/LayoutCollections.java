@@ -1,9 +1,6 @@
 package com.fieldbook.tracker.traits;
 
 import android.app.Activity;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
 import java.util.ArrayList;
 
@@ -31,10 +28,15 @@ public class LayoutCollections {
         traitLayouts.add(new UsbCameraTraitLayout(_activity));
         traitLayouts.add(new GoProTraitLayout(_activity));
         traitLayouts.add(new CanonTraitLayout(_activity));
+        traitLayouts.add(new SpectralTraitLayout(_activity));
+        traitLayouts.add(new NixTraitLayout(_activity));
+        traitLayouts.add(new InnoSpectraTraitLayout(_activity));
+        traitLayouts.add(new StopWatchTraitLayout(_activity));
+        traitLayouts.add(new GreenSeekerTraitLayout(_activity));
+        traitLayouts.add(new ScaleTraitLayout(_activity));
     }
 
     /**
-     * Todo update this with trait name/dbid
      * @param traitFormat the trait layout's format
      * @return the trait layout corresponding to the format
      */
@@ -61,6 +63,7 @@ public class LayoutCollections {
 
     public void setNaTraitsText(String format) {
         getTraitLayout(format).setNaTraitsText();
+        getTraitLayout(format).setCurrentValueAsEdited();
     }
 
 //    Deprecated - simpler to disable/enable data collection using lockOverlay instead

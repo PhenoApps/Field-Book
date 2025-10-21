@@ -5,7 +5,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_margin="4dp"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="@drawable/cell">
+
+    <TextView
+        android:id="@+id/list_item_image_label_tv"
+        android:singleLine="true"
+        android:ellipsize="marquee"
+        android:gravity="center"
+        android:visibility="gone"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <androidx.cardview.widget.CardView
         android:layout_width="@dimen/camera_preview_portrait_width"
@@ -15,12 +28,12 @@
         app:cardElevation="0dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/list_item_image_label_tv"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <ImageView
             android:adjustViewBounds="true"
-            android:scaleType="centerCrop"
+            android:scaleType="fitCenter"
             tools:src="@raw/chip"
             android:id="@+id/list_item_image_iv"
             android:layout_width="match_parent"
@@ -41,6 +54,7 @@
         app:layout_constraintBottom_toBottomOf="parent"/>
 
     <ImageButton
+        android:layout_margin="8dp"
         android:background="@drawable/circle_background_simple"
         android:padding="8dp"
         android:layout_width="wrap_content"

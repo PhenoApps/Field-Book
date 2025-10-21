@@ -1,7 +1,11 @@
 package com.fieldbook.tracker.activities
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.util.Size
+import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.annotation.OptIn
@@ -14,6 +18,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.traits.AbstractCameraTrait
 import com.fieldbook.tracker.utilities.CameraXFacade
+import com.fieldbook.tracker.utilities.InsetHandler
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import java.util.concurrent.ExecutorService
@@ -31,15 +36,20 @@ class CameraActivity : ThemedActivity() {
 
     private var supportedResolutions: List<Size> = listOf()
 
+    private var traitId: String? = null
+
     companion object {
 
         val TAG = CameraActivity::class.simpleName
         const val EXTRA_TITLE = "title"
-
+        const val EXTRA_TRAIT_ID = "trait_id"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        //get trait id from extras
+        traitId = intent.getStringExtra(EXTRA_TRAIT_ID)
 
         setContentView(R.layout.activity_camera)
 
@@ -55,6 +65,10 @@ class CameraActivity : ThemedActivity() {
         }
 
         setupCameraTitleView()
+
+        setupCameraInsets()
+
+        onBackPressedDispatcher.addCallback(this, standardBackCallback())
     }
 
     private fun onSettingsChanged() {
@@ -117,7 +131,9 @@ class CameraActivity : ThemedActivity() {
             val resolution = getSupportedResolutionByPreferences()
 
             cameraXFacade.bindPreview(
-                previewView, resolution
+                previewView, resolution,
+                traitId,
+                Handler(Looper.getMainLooper())
             ) { camera, executor, capture ->
 
                 setupCaptureUi(camera, executor, capture)
@@ -141,8 +157,10 @@ class CameraActivity : ThemedActivity() {
                     object : ImageCapture.OnImageSavedCallback {
                         override fun onError(error: ImageCaptureException) {}
                         override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                            setResult(RESULT_OK)
-                            finish()
+                            runOnUiThread {
+                                setResult(RESULT_OK)
+                                finish()
+                            }
                         }
                     })
             }
@@ -152,5 +170,11 @@ class CameraActivity : ThemedActivity() {
             finishActivity(RESULT_CANCELED)
 
         }
+    }
+
+    private fun setupCameraInsets() {
+        val rootView = findViewById<View>(android.R.id.content)
+
+        InsetHandler.setupCameraInsets(rootView, titleTextView, shutterButton)
     }
 }

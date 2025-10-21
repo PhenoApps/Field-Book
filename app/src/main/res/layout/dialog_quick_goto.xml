@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <EditText style="@style/EditTextStyle"
+        android:layout_margin="16dp"
+        android:id="@+id/quick_goto_primary_et"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:inputType="number"
+        android:hint="@string/quick_goto_primary_hint"
+        android:gravity="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <EditText style="@style/EditTextStyle"
+        android:layout_margin="16dp"
+        android:id="@+id/quick_goto_secondary_et"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:inputType="number"
+        android:hint="@string/quick_goto_secondary_hint"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/quick_goto_primary_et"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageButton
+        android:layout_margin="16dp"
+        android:background="@drawable/cell"
+        android:id="@+id/quick_goto_swap_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/quick_goto_swap_content_description"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/quick_goto_secondary_et"
+        android:src="@drawable/ic_trait_text"/>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

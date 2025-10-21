@@ -5,6 +5,8 @@ import android.location.Location
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.models.ObservationUnitModel
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
+import com.fieldbook.tracker.utilities.StringUtil.escape
 import com.google.gson.Gson
 import math.geom2d.Point2D
 import math.geom2d.line.Line2D
@@ -77,21 +79,21 @@ class GeodeticUtils {
                 if (!isHeader) {
                     //update the geonav log line with the shared preference parameters
                     //set update interval from the preferences can be 1s, 5s or 10s
-                    val interval = preferences.getString(GeneralKeys.UPDATE_INTERVAL, "1") ?: "1"
+                    val interval = preferences.getString(PreferenceKeys.UPDATE_INTERVAL, "1") ?: "1"
                     //find the mac address of the device, if not found then start the internal GPS
                     val address: String =
-                        (preferences.getString(GeneralKeys.PAIRED_DEVICE_ADDRESS, "internal") ?: "")
+                        (preferences.getString(PreferenceKeys.PAIRED_DEVICE_ADDRESS, "internal") ?: "")
                             .replace(":".toRegex(), "-")
                             .replace("\\s".toRegex(), "_")
                     //the angle of the IZ algorithm to use, see Geodetic util class for more details
-                    val theta: String = preferences.getString(GeneralKeys.SEARCH_ANGLE, "0") ?: "0"
+                    val theta: String = preferences.getString(PreferenceKeys.SEARCH_ANGLE, "0") ?: "0"
                     val geoNavMethod: String =
-                        preferences.getString(GeneralKeys.GEONAV_SEARCH_METHOD, "0") ?: "0"
+                        preferences.getString(PreferenceKeys.GEONAV_SEARCH_METHOD, "0") ?: "0"
                     val d1: Double =
-                        preferences.getString(GeneralKeys.GEONAV_PARAMETER_D1, "0.001")?.toDouble()
+                        preferences.getString(PreferenceKeys.GEONAV_PARAMETER_D1, "0.001")?.toDouble()
                             ?: 0.001
                     val d2: Double =
-                        preferences.getString(GeneralKeys.GEONAV_PARAMETER_D2, "0.01")?.toDouble()
+                        preferences.getString(PreferenceKeys.GEONAV_PARAMETER_D2, "0.01")?.toDouble()
                             ?: 0.01
 
                     geoNavLine.address = address
@@ -124,8 +126,6 @@ class GeodeticUtils {
                 } catch (io: IOException) { }
             }
         }
-
-        private fun String?.escape() = this?.replace("\"", "\"\"")
 
         private const val NOT_CLOSEST = 0
         private const val CLOSEST_UPDATE = 1

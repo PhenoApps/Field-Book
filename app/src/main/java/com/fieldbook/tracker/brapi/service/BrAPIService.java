@@ -23,7 +23,7 @@ import com.fieldbook.tracker.brapi.model.BrapiTrial;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.objects.TraitObject;
-import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.Constants;
 import com.fieldbook.tracker.utilities.FailureFunction;
 import com.fieldbook.tracker.utilities.SuccessFunction;
@@ -48,7 +48,7 @@ public interface BrAPIService {
     // Helper functions for brapi configurations
     static Boolean isLoggedIn(Context context) {
 
-        String token = getPreferences(context).getString(GeneralKeys.BRAPI_TOKEN, "");
+        String token = getPreferences(context).getString(PreferenceKeys.BRAPI_TOKEN, "");
 
         return token != null && token != "";
     }
@@ -85,8 +85,8 @@ public interface BrAPIService {
     }
 
     static String getBrapiUrl(Context context) {
-        String baseURL = getPreferences(context).getString(GeneralKeys.BRAPI_BASE_URL, "");
-        String version = getPreferences(context).getString(GeneralKeys.BRAPI_VERSION, "");
+        String baseURL = getPreferences(context).getString(PreferenceKeys.BRAPI_BASE_URL, "");
+        String version = getPreferences(context).getString(PreferenceKeys.BRAPI_VERSION, "");
         String path;
         if (version.equals("V2"))
             path = Constants.BRAPI_PATH_V2;
@@ -118,11 +118,11 @@ public interface BrAPIService {
     }
 
     static Integer getTimeoutValue(Context context) {
-        return checkPreference(context, GeneralKeys.BRAPI_TIMEOUT, "120");
+        return checkPreference(context, PreferenceKeys.BRAPI_TIMEOUT, "120");
     }
 
     static int getChunkSize(Context context) {
-        return checkPreference(context, GeneralKeys.BRAPI_CHUNK_SIZE, "500");
+        return checkPreference(context, PreferenceKeys.BRAPI_CHUNK_SIZE, "500");
     }
 
     static boolean isConnectionError(int code) {

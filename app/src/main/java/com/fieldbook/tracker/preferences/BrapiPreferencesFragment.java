@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -17,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowMetrics;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -38,6 +40,7 @@ import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity;
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache;
 import com.fieldbook.tracker.objects.BrAPIConfig;
 import com.fieldbook.tracker.utilities.JsonUtil;
+import com.fieldbook.tracker.utilities.OpenAuthConfigurationUtil;
 import com.google.gson.Gson;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
@@ -45,6 +48,9 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+
+import net.openid.appauth.AuthorizationService;
+import net.openid.appauth.EndSessionRequest;
 
 import org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialog;
 import org.phenoapps.sharedpreferences.dialogs.NeutralButtonEditTextDialogFragmentCompat;
@@ -72,6 +78,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
     @Inject
     SharedPreferences preferences;
+
+    @Inject
+    OpenAuthConfigurationUtil authUtil;
 
     private static final String TAG = BrapiPreferencesFragment.class.getSimpleName();
     private static final int REQUEST_BARCODE_SCAN_BASE_URL = 99;
@@ -118,31 +127,31 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                 }).create();
 
         //remove old custom fb auth if it is being used
-        if (preferences.getString(GeneralKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))
+        if (preferences.getString(PreferenceKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))
                 .equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
 
-            preferences.edit().putString(GeneralKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)).apply();
+            preferences.edit().putString(PreferenceKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)).apply();
 
         }
 
         setPreferencesFromResource(R.xml.preferences_brapi, rootKey);
 
         // Show/hide preferences and category titles based on the BRAPI_ENABLED value
-        CheckBoxPreference brapiEnabledPref = findPreference(GeneralKeys.BRAPI_ENABLED);
+        CheckBoxPreference brapiEnabledPref = findPreference(PreferenceKeys.BRAPI_ENABLED);
         if (brapiEnabledPref != null) {
             brapiEnabledPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     boolean isChecked = (Boolean) newValue;
                     if (!isChecked) { // on disable, reset default sources if they were set to brapi
-                        if (preferences.getString(GeneralKeys.IMPORT_SOURCE_DEFAULT, "").equals("brapi")) {
-                            preferences.edit().putString(GeneralKeys.IMPORT_SOURCE_DEFAULT, "ask").apply();
+                        if (preferences.getString(PreferenceKeys.IMPORT_SOURCE_DEFAULT, "").equals("brapi")) {
+                            preferences.edit().putString(PreferenceKeys.IMPORT_SOURCE_DEFAULT, "ask").apply();
                         }
-                        if (preferences.getString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "").equals("brapi")) {
-                            preferences.edit().putString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "ask").apply();
+                        if (preferences.getString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, "").equals("brapi")) {
+                            preferences.edit().putString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, "ask").apply();
                         }
                         // remove brapi auth token when brapi is disabled
-                        preferences.edit().remove(GeneralKeys.BRAPI_TOKEN).apply();
+                        preferences.edit().remove(PreferenceKeys.BRAPI_TOKEN).apply();
                     }
                     updatePreferencesVisibility(isChecked);
                     return true;
@@ -157,9 +166,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         brapiServerPrefCategory = findPreference("brapi_server");
         brapiLogoutButton = findPreference("revokeBrapiAuth");
 
-        brapiClientIdPreference = findPreference(GeneralKeys.BRAPI_OIDC_CLIENT_ID);
-        brapiURLPreference = findPreference(GeneralKeys.BRAPI_BASE_URL);
-        brapiDisplayName = findPreference(GeneralKeys.BRAPI_DISPLAY_NAME);
+        brapiClientIdPreference = findPreference(PreferenceKeys.BRAPI_OIDC_CLIENT_ID);
+        brapiURLPreference = findPreference(PreferenceKeys.BRAPI_BASE_URL);
+        brapiDisplayName = findPreference(PreferenceKeys.BRAPI_DISPLAY_NAME);
         if (brapiURLPreference != null) {
             brapiURLPreference.setOnPreferenceChangeListener(this);
         }
@@ -167,16 +176,16 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             brapiDisplayName.setOnPreferenceChangeListener(this);
         }
 
-        brapiOIDCURLPreference = findPreference(GeneralKeys.BRAPI_OIDC_URL);
-        brapiOIDCFlow = findPreference(GeneralKeys.BRAPI_OIDC_FLOW);
+        brapiOIDCURLPreference = findPreference(PreferenceKeys.BRAPI_OIDC_URL);
+        brapiOIDCFlow = findPreference(PreferenceKeys.BRAPI_OIDC_FLOW);
         if (brapiOIDCFlow != null) {
             brapiOIDCFlow.setOnPreferenceChangeListener(this);
         }
 
         //set saved urls, default to the test server
-        String url = preferences.getString(GeneralKeys.BRAPI_BASE_URL, getString(R.string.brapi_base_url_default));
-        String displayName = preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.brapi_edit_display_name_default));
-        String oidcUrl = preferences.getString(GeneralKeys.BRAPI_OIDC_URL, getString(R.string.brapi_oidc_url_default));
+        String url = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, getString(R.string.brapi_base_url_default));
+        String displayName = preferences.getString(PreferenceKeys.BRAPI_DISPLAY_NAME, getString(R.string.brapi_edit_display_name_default));
+        String oidcUrl = preferences.getString(PreferenceKeys.BRAPI_OIDC_URL, getString(R.string.brapi_oidc_url_default));
         oldBaseUrl = url;
         brapiURLPreference.setText(url);
         brapiDisplayName.setText(displayName);
@@ -186,20 +195,43 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         if (brapiLogoutButton != null) {
             brapiLogoutButton.setOnPreferenceClickListener(preference -> {
 
-                // Clear our brapi token
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putString(GeneralKeys.BRAPI_TOKEN, null);
-                editor.apply();
+                String idToken = preferences.getString(PreferenceKeys.BRAPI_ID_TOKEN, null);
 
-                // Set our button visibility and text
-                setButtonView();
+                if (idToken != null) {
+
+                    Toast.makeText(context, R.string.logging_out_please_wait, Toast.LENGTH_SHORT).show();
+
+                    authUtil.getAuthServiceConfiguration((config, ex) -> {
+
+                        EndSessionRequest endSessionRequest =
+                                new EndSessionRequest.Builder(config)
+                                        .setIdTokenHint(idToken)
+                                        .setPostLogoutRedirectUri(Uri.parse(BrapiAuthActivity.REDIRECT_URI))
+                                        .build();
+
+                        AuthorizationService authService = new AuthorizationService(context);
+                        Intent endSessionIntent = authService.getEndSessionRequestIntent(endSessionRequest);
+                        startActivityForResult(endSessionIntent, BrapiAuthActivity.END_SESSION_REQUEST_CODE);
+
+                        return null;
+
+                    });
+
+                } else {
+
+                    preferences.edit().remove(PreferenceKeys.BRAPI_TOKEN).apply();
+
+                    setButtonView();
+
+                }
+
 
                 return true;
             });
         }
 
         //set barcode click listener to start zxing intent
-        mlkitEnabled = PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean(GeneralKeys.MLKIT_PREFERENCE_KEY, false);
+        mlkitEnabled = PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean(PreferenceKeys.MLKIT_PREFERENCE_KEY, false);
         Preference brapiServerBarcode = findPreference("brapi_server_barcode");
         if (brapiServerBarcode != null) {
             brapiServerBarcode.setOnPreferenceClickListener(preference -> {
@@ -257,7 +289,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         PreferenceScreen preferenceScreen = getPreferenceScreen();
         for (int i = 0; i < preferenceScreen.getPreferenceCount(); i++) {
             Preference preferenceItem = preferenceScreen.getPreference(i);
-            if (preferenceItem.getKey().equals(GeneralKeys.BRAPI_ENABLED)) { // Skip the checkbox preference itself
+            if (preferenceItem.getKey().equals(PreferenceKeys.BRAPI_ENABLED)) { // Skip the checkbox preference itself
                 continue;
             }
             preferenceItem.setVisible(isChecked);
@@ -293,24 +325,30 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     private void generateQRCodeFromPreferences(Activity act) {
         try {
             BrAPIConfig config = new BrAPIConfig();
-            config.setUrl(preferences.getString(GeneralKeys.BRAPI_BASE_URL, getString(R.string.brapi_base_url_default)));
-            config.setName(preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.brapi_edit_display_name_default)));
-            config.setVersion(preferences.getString(GeneralKeys.BRAPI_VERSION, "V2"));
-            config.setPageSize(preferences.getString(GeneralKeys.BRAPI_PAGE_SIZE, "50"));
-            config.setChunkSize(preferences.getString(GeneralKeys.BRAPI_CHUNK_SIZE, "500"));
-            config.setServerTimeoutMilli(preferences.getString(GeneralKeys.BRAPI_TIMEOUT, "120"));
-            config.setAuthFlow(preferences.getString(GeneralKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)));
-            config.setOidcUrl(preferences.getString(GeneralKeys.BRAPI_OIDC_URL, getString(R.string.brapi_oidc_url_default)));
-            config.setCatDisplay(preferences.getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value"));
-            config.setClientId(preferences.getString(GeneralKeys.BRAPI_OIDC_CLIENT_ID, getString(R.string.brapi_oidc_clientid_default)));
-            config.setScope(preferences.getString(GeneralKeys.BRAPI_OIDC_SCOPE, getString(R.string.brapi_oidc_scope_default)));
+            config.setUrl(preferences.getString(PreferenceKeys.BRAPI_BASE_URL, getString(R.string.brapi_base_url_default)));
+            config.setName(preferences.getString(PreferenceKeys.BRAPI_DISPLAY_NAME, getString(R.string.brapi_edit_display_name_default)));
+            config.setVersion(preferences.getString(PreferenceKeys.BRAPI_VERSION, "V2"));
+            config.setPageSize(preferences.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50"));
+            config.setChunkSize(preferences.getString(PreferenceKeys.BRAPI_CHUNK_SIZE, "500"));
+            config.setServerTimeoutMilli(preferences.getString(PreferenceKeys.BRAPI_TIMEOUT, "120"));
+            config.setAuthFlow(preferences.getString(PreferenceKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)));
+            config.setOidcUrl(preferences.getString(PreferenceKeys.BRAPI_OIDC_URL, getString(R.string.brapi_oidc_url_default)));
+            config.setCatDisplay(preferences.getString(PreferenceKeys.LABELVAL_CUSTOMIZE, "value"));
+            config.setClientId(preferences.getString(PreferenceKeys.BRAPI_OIDC_CLIENT_ID, getString(R.string.brapi_oidc_clientid_default)));
+            config.setScope(preferences.getString(PreferenceKeys.BRAPI_OIDC_SCOPE, getString(R.string.brapi_oidc_scope_default)));
 
             Gson gson = new Gson();
             String jsonConfig = gson.toJson(config);
 
-            DisplayMetrics displayMetrics = new DisplayMetrics();
-            act.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-            int screenWidth = displayMetrics.widthPixels;
+            int screenWidth;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                WindowMetrics windowMetrics = act.getWindowManager().getCurrentWindowMetrics();
+                screenWidth = windowMetrics.getBounds().width();
+            } else {
+                DisplayMetrics displayMetrics = new DisplayMetrics();
+                act.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+                screenWidth = displayMetrics.widthPixels;
+            }
 
             // Set the QR Code size to be 80% of the screen width
             int qrCodeSize = (int) (screenWidth * 0.8);
@@ -347,7 +385,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         menu.clear();
         inflater.inflate(R.menu.menu_brapi_pref, menu);
         mMenu = menu; // Store a reference to the menu
-        CheckBoxPreference brapiEnabledPref = findPreference(GeneralKeys.BRAPI_ENABLED);
+        CheckBoxPreference brapiEnabledPref = findPreference(PreferenceKeys.BRAPI_ENABLED);
         updatePreferencesVisibility(brapiEnabledPref.isChecked());
         super.onCreateOptionsMenu(menu, inflater);
     }
@@ -480,7 +518,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                     brapiDisplayName.setText(text);
                     onPreferenceChange(brapiDisplayName, text);
                 } else {
-                    preferences.edit().putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, true).apply();
+                    preferences.edit().putBoolean(PreferenceKeys.BRAPI_EXPLICIT_OIDC_URL, true).apply();
                     startBarcodeScan(REQUEST_BARCODE_SCAN_OIDC_URL);
                 }
 
@@ -505,7 +543,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                 } else if (preference.getKey().equals(brapiClientIdPreference.getKey())) {
                     //pass to ensure oidc isn't updated as well, client id is automatically handled by xml definition
                 } else {
-                    preferences.edit().putBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, true).apply();
+                    preferences.edit().putBoolean(PreferenceKeys.BRAPI_EXPLICIT_OIDC_URL, true).apply();
                     brapiOIDCURLPreference.setText(text);
                 }
 
@@ -545,15 +583,15 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     }
 
     private void setBaseURLSummary() {
-        String url = preferences.getString(GeneralKeys.BRAPI_BASE_URL, "https://test-server.brapi.org");
-        String displayName = preferences.getString(GeneralKeys.BRAPI_DISPLAY_NAME, getString(R.string.brapi_edit_display_name_default));
+        String url = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "https://test-server.brapi.org");
+        String displayName = preferences.getString(PreferenceKeys.BRAPI_DISPLAY_NAME, getString(R.string.brapi_edit_display_name_default));
         brapiURLPreference.setSummary(url);
         brapiDisplayName.setSummary(displayName);
     }
 
     //should only be called from brapi auth or the warning dialog
     private void startAuth() {
-        String brapiHost = preferences.getString(GeneralKeys.BRAPI_BASE_URL, null);
+        String brapiHost = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, null);
         if (brapiHost != null) {
             Intent intent = new Intent();
             intent.setClassName(context, BrapiAuthActivity.class.getName());
@@ -601,9 +639,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             for (int i = 0; i < checkedOptions.length; i++) {
                 if (checkedOptions[i]) {
                     if (selectedItems.get(i).equals(getString(R.string.brapi_choice_to_make_default_import))) {
-                        preferences.edit().putString(GeneralKeys.IMPORT_SOURCE_DEFAULT, "brapi").apply();
+                        preferences.edit().putString(PreferenceKeys.IMPORT_SOURCE_DEFAULT, "brapi").apply();
                     } else if (selectedItems.get(i).equals(getString(R.string.brapi_choice_to_make_default_export))) {
-                        preferences.edit().putString(GeneralKeys.EXPORT_SOURCE_DEFAULT, "brapi").apply();
+                        preferences.edit().putString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, "brapi").apply();
                     }
                 }
             }
@@ -617,7 +655,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         brapiURLPreference.setText(url);
         brapiDisplayName.setText(displayName);
         brapiOIDCURLPreference.setText(oidcUrl);
-        preferences.edit().putString(GeneralKeys.BRAPI_OIDC_URL, oidcUrl).apply();
+        preferences.edit().putString(PreferenceKeys.BRAPI_OIDC_URL, oidcUrl).apply();
         if(oidcFlow != null)
             brapiOIDCFlow.setValue(oidcFlow);
 
@@ -630,14 +668,14 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
      * @param newValue the newly changed url
      */
     private void updateUrls(String newValue) {
-        String oldOidcUrl = preferences.getString(GeneralKeys.BRAPI_OIDC_URL, "");
+        String oldOidcUrl = preferences.getString(PreferenceKeys.BRAPI_OIDC_URL, "");
 
         // remove scheme and subdomain for initial display name
         String displayName = newValue.replaceAll("https?://(?:www\\.)?(.*?)(?:/.*)?$", "$1");
 
         Log.d(TAG, oldBaseUrl + " to " + oldOidcUrl);
 
-        if (!preferences.getBoolean(GeneralKeys.BRAPI_EXPLICIT_OIDC_URL, false)) {
+        if (!preferences.getBoolean(PreferenceKeys.BRAPI_EXPLICIT_OIDC_URL, false)) {
 
             //regex replace old base within oidc to new value
             //this might lead to invalid urls if the user forgets a '/' and other cases
@@ -659,8 +697,8 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
      */
     public void setButtonView() {
 
-        String brapiToken = preferences.getString(GeneralKeys.BRAPI_TOKEN, null);
-        String brapiHost = preferences.getString(GeneralKeys.BRAPI_BASE_URL, null);
+        String brapiToken = preferences.getString(PreferenceKeys.BRAPI_TOKEN, null);
+        String brapiHost = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, null);
 
         if (brapiHost != null) {  // && !brapiHost.equals(getString(R.string.brapi_base_url_default))) {
 
@@ -682,7 +720,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
         if (preferenceCategory != null) {
 
-            if (!preferences.getString(GeneralKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))
+            if (!preferences.getString(PreferenceKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))
                     .equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))
             ) {
 
@@ -722,21 +760,21 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             if("v1".equalsIgnoreCase(brAPIConfig.getVersion())) {
                 brapiVersion = getString(R.string.preferences_brapi_version_v1);
             }
-            ((ListPreference)findPreference(GeneralKeys.BRAPI_VERSION)).setValue(brapiVersion);
-            ((BetterEditTextPreference)findPreference(GeneralKeys.BRAPI_PAGE_SIZE)).setText(brAPIConfig.getPageSize());
-            ((BetterEditTextPreference)findPreference(GeneralKeys.BRAPI_CHUNK_SIZE)).setText(brAPIConfig.getChunkSize());
-            ((BetterEditTextPreference)findPreference(GeneralKeys.BRAPI_TIMEOUT)).setText(brAPIConfig.getServerTimeoutMilli());
-            ((ListPreference)findPreference(GeneralKeys.LABELVAL_CUSTOMIZE)).setValue(brAPIConfig.getCatDisplay());
+            ((ListPreference)findPreference(PreferenceKeys.BRAPI_VERSION)).setValue(brapiVersion);
+            ((BetterEditTextPreference)findPreference(PreferenceKeys.BRAPI_PAGE_SIZE)).setText(brAPIConfig.getPageSize());
+            ((BetterEditTextPreference)findPreference(PreferenceKeys.BRAPI_CHUNK_SIZE)).setText(brAPIConfig.getChunkSize());
+            ((BetterEditTextPreference)findPreference(PreferenceKeys.BRAPI_TIMEOUT)).setText(brAPIConfig.getServerTimeoutMilli());
+            ((ListPreference)findPreference(PreferenceKeys.LABELVAL_CUSTOMIZE)).setValue(brAPIConfig.getCatDisplay());
 
             String clientId = brAPIConfig.getClientId();
             String scope = brAPIConfig.getScope();
 
             if (clientId != null) {
-                ((NeutralButtonEditTextDialog)findPreference(GeneralKeys.BRAPI_OIDC_CLIENT_ID)).setText(clientId);
+                ((NeutralButtonEditTextDialog)findPreference(PreferenceKeys.BRAPI_OIDC_CLIENT_ID)).setText(clientId);
             }
 
             if (scope != null) {
-                ((NeutralButtonEditTextDialog)findPreference(GeneralKeys.BRAPI_OIDC_SCOPE)).setText(scope);
+                ((NeutralButtonEditTextDialog)findPreference(PreferenceKeys.BRAPI_OIDC_SCOPE)).setText(scope);
             }
             String oidcFlow = getString(R.string.preferences_brapi_oidc_flow_oauth_implicit);
             String codeFlow = getString(R.string.preferences_brapi_oidc_flow_oauth_code);
@@ -779,6 +817,10 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                     IntentResult result = IntentIntegrator.parseActivityResult(resultCode, data);
                     scannedData = result.getContents();
                 }
+            } else if (requestCode == BrapiAuthActivity.END_SESSION_REQUEST_CODE) {
+                preferences.edit().remove(PreferenceKeys.BRAPI_ID_TOKEN).apply();
+                preferences.edit().remove(PreferenceKeys.BRAPI_TOKEN).apply();
+                setButtonView();
             }
 
             switch (requestCode) {

@@ -21,6 +21,18 @@
             android:summary="%s"
             android:title="@string/preferences_profile_require_interval_title" />
 
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="settings_device"
+        android:title="@string/preferences_profile_device_title"
+        app:iconSpaceReserved="false">
+        <Preference
+            android:icon="@drawable/ic_device_pref"
+            android:key="pref_profile_device_name"
+            android:title="@string/preferences_profile_set_device_name" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

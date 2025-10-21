@@ -28,7 +28,6 @@ import com.fieldbook.tracker.traits.formats.ui.ParameterScrollView
 import com.fieldbook.tracker.utilities.SoundHelperImpl
 import com.fieldbook.tracker.utilities.VibrateUtil
 import dagger.hilt.android.AndroidEntryPoint
-import io.swagger.client.model.Trait
 import org.phenoapps.utils.SoftKeyboardUtil
 import javax.inject.Inject
 
@@ -86,13 +85,6 @@ class NewTraitDialog(
     private var originalInitialTraitObject: TraitObject? = null
 
     //private var createVisible: Boolean
-    private var brapiDialogShown = false
-
-    init {
-        (activity as? TraitEditorActivity)?.brAPIDialogShown?.let {
-            setBrAPIDialogShown(it)
-        }
-    }
 
     fun setTraitObject(traitObject: TraitObject?) {
 
@@ -141,6 +133,7 @@ class NewTraitDialog(
             neutralBtn?.setText(R.string.dialog_back)
             neutralBtn?.setOnClickListener {
                 isShowingCameraOptions = false
+                isShowingSpectralOptions = false
                 traitFormatsRv.adapter = null
                 showFormatLayouts(Formats.getMainFormats())
             }
@@ -302,9 +295,7 @@ class NewTraitDialog(
 
             traitFormatsRv.adapter = formatsAdapter
 
-            if (isSelectingFormat) { //remove brapi format
-                formatsAdapter.submitList(formats.filter { it != Formats.BRAPI })
-            } else formatsAdapter.submitList(formats)
+            formatsAdapter.submitList(formats)
         }
     }
 
@@ -380,18 +371,6 @@ class NewTraitDialog(
             val ed = this.prefs.edit()
             ed.putBoolean(GeneralKeys.TRAITS_EXPORTED, false)
             ed.apply()
-
-            // Display our BrAPI dialog if it has not been show already
-            // Get our dialog state from our adapter to see if a trait has been selected
-            (activity as? TraitEditorActivity)?.adapter?.infoDialogShown?.let {
-                setBrAPIDialogShown(it)
-
-                if (!brapiDialogShown) {
-                    setBrAPIDialogShown(
-                        activity.displayBrapiInfo(activity, null, true)
-                    )
-                }
-            }
 
             CollectActivity.reloadData = true
 
@@ -493,7 +472,9 @@ class NewTraitDialog(
             traitObject.maximum,
             traitObject.details,
             traitObject.categories,
-            traitObject.closeKeyboardOnOpen
+            traitObject.closeKeyboardOnOpen,
+            traitObject.cropImage,
+            traitObject.saveImage,
         )
     }
 
@@ -516,15 +497,6 @@ class NewTraitDialog(
         )
     }
 
-    // when this value changes in this class,
-    // the value in TraitEditorActivity must change
-    private fun setBrAPIDialogShown(b: Boolean) {
-        if (!isSelectingFormat) {
-            brapiDialogShown = b
-            (activity as? TraitEditorActivity)?.brAPIDialogShown = b
-        }
-    }
-
     private fun showFormatParameters() {
 
         val adapter = traitFormatsRv.adapter as? TraitFormatAdapter
@@ -533,7 +505,7 @@ class NewTraitDialog(
 
             context?.let {
 
-                initialTraitObject?.format = adapter.selectedFormat?.getDatabaseName()
+                initialTraitObject?.format = adapter.selectedFormat?.getDatabaseName().toString()
 
                 showFormatParameters(adapter.selectedFormat ?: Formats.TEXT)
 
@@ -542,32 +514,25 @@ class NewTraitDialog(
     }
 
     private var isShowingCameraOptions = false
+    private var isShowingSpectralOptions = false
+
     override fun onSelected(format: Formats) {
 
-        if (format == Formats.BRAPI) {
-
-            if (initialTraitObject != null) {
-
-                Toast.makeText(
-                    context,
-                    R.string.dialog_new_trait_error_cannot_update_to_brapi_trait,
-                    Toast.LENGTH_SHORT
-                ).show()
-
-            } else {
-
-                dismiss()
-
-                (activity as? TraitEditorActivity)?.startBrapiTraitActivity(true)
-            }
-
-        } else if (format == Formats.BASE_PHOTO && !isShowingCameraOptions) {
+        if (format == Formats.BASE_PHOTO && !isShowingCameraOptions) {
 
             isShowingCameraOptions = true
 
             traitFormatsRv.adapter = null
 
             showFormatLayouts(Formats.getCameraFormats(), showBack = true)
+
+        } else if (format == Formats.BASE_SPECTRAL && !isShowingSpectralOptions) {
+
+            isShowingSpectralOptions = true
+
+            traitFormatsRv.adapter = null
+
+            showFormatLayouts(Formats.getSpectralFormats(), showBack = true)
 
         } else {
 

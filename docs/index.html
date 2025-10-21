@@ -7,7 +7,7 @@
   <meta name="description" content="Field Book Documentation">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify/lib/themes/vue.css">
-</head>
+</head>https://github.com/PhenoApps/Field-Book.git
 <body>
   <div id="app"></div>
   <script>
@@ -26,6 +26,10 @@
         crossChapter: true,
         crossChapterText: true,
       },
+      // maintains sidebar state in nested pages
+      alias: {
+        '/.*/_sidebar.md': '/_sidebar.md'
+      }
     }
   </script>
   <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>

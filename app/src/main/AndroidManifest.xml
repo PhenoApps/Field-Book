@@ -47,6 +47,23 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
+        <activity
+            android:name=".activities.FieldArchivedActivity"
+            android:alwaysRetainTaskState="false"
+            android:configChanges="keyboardHidden|orientation"
+            android:finishOnTaskLaunch="true"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".activities.FieldCreatorActivity"
+            android:alwaysRetainTaskState="false"
+            android:configChanges="keyboardHidden|orientation"
+            android:finishOnTaskLaunch="true"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+
         <!-- Trait manager, for importing .trt files -->
         <activity
             android:name=".activities.TraitEditorActivity"
@@ -75,11 +92,9 @@
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop" /> <!-- available within the collect activity, user can search by building sql statements -->
         <activity
-            android:name=".activities.SearchActivity"
+            android:name=".activities.OldDataGridActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
-            android:launchMode="singleTop"
-            android:theme="@style/ActivityDialog"
-            android:windowSoftInputMode="adjustResize" /> <!-- this must be set here even though it uses ThemedActivity -->
+            android:launchMode="singleTop" /> <!-- available within the collect activity, user can search by building sql statements -->
         <!-- The settings page, each category has its own fragment class -->
         <activity
             android:name=".activities.PreferencesActivity"
@@ -206,6 +221,10 @@
                     android:scheme="fieldbook" />
             </intent-filter>
         </activity>
+        <activity android:name=".activities.CropImageActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activities.brapi.BrapiExportActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
@@ -247,6 +266,8 @@
                 android:resource="@xml/provider_paths" />
         </provider>
 
+        <!--TODO: Temporarily opt out of forced layout changes in sdk 36. Needs to be addressed before updating to sdk 37 -->
+        <property android:name="android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY" android:value="true" />
     </application>
 
     <queries>
@@ -289,10 +310,11 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" tools:remove="android:maxSdkVersion" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -306,6 +328,6 @@
     <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES"/>
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"/>
 
-    <uses-sdk tools:overrideLibrary="com.google.zxing.client.android" />
+    <uses-sdk tools:overrideLibrary="com.google.zxing.client.android,com.binayshaw7777.kotstep" />
 
 </manifest>

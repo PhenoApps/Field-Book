@@ -17,20 +17,20 @@ fun BrAPIObservationVariable.toTraitObject(context: Context) = TraitObject().als
 
     val synonym = synonyms?.firstOrNull()
 
-    it.defaultValue = defaultValue
+    it.defaultValue = defaultValue ?: ""
     it.name = synonym ?: observationVariableName
-    it.details = trait.traitDescription
+    it.details = trait.traitDescription ?: ""
     it.externalDbId = observationVariableDbId
 
     BrAPIService.getHostUrl(context)?.let { url ->
         it.traitDataSource = url
     }
 
-    scale?.validValues?.min?.let { min ->
+    scale?.validValues?.minimumValue?.let { min ->
         it.minimum = min.toString()
     }
 
-    scale?.validValues?.max?.let { max ->
+    scale?.validValues?.maximumValue?.let { max ->
         it.maximum = max.toString()
     }
 

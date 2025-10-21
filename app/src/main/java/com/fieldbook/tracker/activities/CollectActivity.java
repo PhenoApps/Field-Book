@@ -29,7 +29,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
+import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -37,31 +39,45 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.adapters.AttributeAdapter;
 import com.fieldbook.tracker.adapters.InfoBarAdapter;
 import com.fieldbook.tracker.adapters.TraitsStatusAdapter;
 import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.database.dao.spectral.DeviceDao;
+import com.fieldbook.tracker.database.dao.spectral.ProtocolDao;
+import com.fieldbook.tracker.database.dao.spectral.SpectralDao;
+import com.fieldbook.tracker.database.dao.spectral.UriDao;
+import com.fieldbook.tracker.database.factory.SpectralViewModelFactory;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
+import com.fieldbook.tracker.database.repository.SpectralRepository;
+import com.fieldbook.tracker.database.viewmodels.SpectralViewModel;
 import com.fieldbook.tracker.devices.camera.UsbCameraApi;
 import com.fieldbook.tracker.devices.camera.GoProApi;
 import com.fieldbook.tracker.devices.camera.CanonApi;
 import com.fieldbook.tracker.dialogs.GeoNavCollectDialog;
 import com.fieldbook.tracker.dialogs.ObservationMetadataFragment;
 import com.fieldbook.tracker.dialogs.SearchDialog;
+import com.fieldbook.tracker.fragments.CropImageFragment;
+import com.fieldbook.tracker.interfaces.CollectController;
+import com.fieldbook.tracker.interfaces.CollectRangeController;
+import com.fieldbook.tracker.interfaces.CollectTraitController;
 import com.fieldbook.tracker.interfaces.FieldSwitcher;
+import com.fieldbook.tracker.interfaces.GeoNavController;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.InfoBarModel;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
+import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.traits.AbstractCameraTrait;
+import com.fieldbook.tracker.traits.SpectralTraitLayout;
 import com.fieldbook.tracker.traits.formats.Formats;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.traits.AudioTraitLayout;
@@ -76,7 +92,6 @@ import com.fieldbook.tracker.traits.formats.coders.StringCoder;
 import com.fieldbook.tracker.traits.formats.Scannable;
 import com.fieldbook.tracker.traits.formats.presenters.ValuePresenter;
 import com.fieldbook.tracker.utilities.CameraXFacade;
-import com.fieldbook.tracker.utilities.BluetoothHelper;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.fieldbook.tracker.utilities.FfmpegHelper;
@@ -86,10 +101,12 @@ import com.fieldbook.tracker.utilities.GeoJsonUtil;
 import com.fieldbook.tracker.utilities.GeoNavHelper;
 import com.fieldbook.tracker.utilities.GnssThreadHelper;
 import com.fieldbook.tracker.utilities.InfoBarHelper;
+import com.fieldbook.tracker.utilities.InsetHandler;
 import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.KeyboardListenerHelper;
 import com.fieldbook.tracker.utilities.LocationCollectorUtil;
 import com.fieldbook.tracker.utilities.MediaKeyCodeActionHelper;
+import com.fieldbook.tracker.utilities.NixSensorHelper;
 import com.fieldbook.tracker.utilities.SensorHelper;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
@@ -98,6 +115,9 @@ import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.VerifyPersonHelper;
 import com.fieldbook.tracker.utilities.VibrateUtil;
 import com.fieldbook.tracker.utilities.WifiHelper;
+import com.fieldbook.tracker.utilities.connectivity.BLEScanner;
+import com.fieldbook.tracker.utilities.connectivity.GreenSeekerGattManager;
+import com.fieldbook.tracker.utilities.connectivity.ScaleGattManager;
 import com.fieldbook.tracker.views.CollectInputView;
 import com.fieldbook.tracker.views.RangeBoxView;
 import com.fieldbook.tracker.views.TraitBoxView;
@@ -117,6 +137,7 @@ import org.phenoapps.utils.SoftKeyboardUtil;
 import org.phenoapps.utils.TextToSpeechHelper;
 import org.threeten.bp.OffsetDateTime;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -125,7 +146,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -143,16 +163,18 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 @SuppressLint("ClickableViewAccessibility")
 public class CollectActivity extends ThemedActivity
-        implements SummaryFragment.SummaryOpenListener,
-        com.fieldbook.tracker.interfaces.CollectController,
-        com.fieldbook.tracker.interfaces.CollectRangeController,
-        com.fieldbook.tracker.interfaces.CollectTraitController,
+        implements CollectController,
+        CollectRangeController,
+        CollectTraitController,
+        GeoNavController,
         InfoBarAdapter.InfoBarController,
         GPSTracker.GPSTrackerListener,
         SearchDialog.onSearchResultsClickedListener,
-        SensorHelper.RelativeRotationListener {
+        SensorHelper.RelativeRotationListener,
+        SensorHelper.GravityRotationListener {
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
+    public static final int REQUEST_CROP_IMAGE_CODE = 101;
     public static final int BARCODE_COLLECT_CODE = 99;
     public static final int BARCODE_SEARCH_CODE = 98;
 
@@ -177,9 +199,6 @@ public class CollectActivity extends ThemedActivity
 
     @Inject
     WifiHelper wifiHelper;
-
-    @Inject
-    BluetoothHelper bluetoothHelper;
 
     @Inject
     CanonApi canonApi;
@@ -215,8 +234,23 @@ public class CollectActivity extends ThemedActivity
     @Inject
     CameraXFacade cameraXFacade;
 
+    @Inject
+    NixSensorHelper nixSensorHelper;
+
+    @Inject
+    BLEScanner bleScanner;
+
+    @Inject
+    GreenSeekerGattManager greenSeekerGattManager;
+
+    @Inject
+    ScaleGattManager scaleGattManager;
+
+    private SpectralViewModel spectralViewModel;
+
     //used to track rotation relative to device
     private SensorHelper.RotationModel rotationModel = null;
+    private SensorHelper.RotationModel gravityRotationModel = null;
 
     private GPSTracker gps;
 
@@ -262,6 +296,8 @@ public class CollectActivity extends ThemedActivity
 
     public Handler myGuiHandler;
 
+    public int numNixInternetWarnings = 0;
+
     private SharedPreferences mPrefs;
 
     /**
@@ -282,9 +318,6 @@ public class CollectActivity extends ThemedActivity
 
     private SecureBluetoothActivityImpl secureBluetooth;
 
-    //summary fragment listener
-    private boolean isNavigatingFromSummary = false;
-
     /**
      * Multi Measure delete dialogs
      */
@@ -304,6 +337,8 @@ public class CollectActivity extends ThemedActivity
         super.onCreate(savedInstanceState);
 
         gps = new GPSTracker(this, this, 0, 10000);
+        
+        setupBackCallback();
 
         guiThread.start();
         myGuiHandler = new Handler(guiThread.getLooper()) {
@@ -333,10 +368,10 @@ public class CollectActivity extends ThemedActivity
         secureBluetooth.initialize();
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        geoNavHelper = new GeoNavHelper(this);
+        geoNavHelper = new GeoNavHelper(this, this);
 
         ttsHelper = new TextToSpeechHelper(this, () -> {
-            String lang = mPrefs.getString(GeneralKeys.TTS_LANGUAGE, "-1");
+            String lang = mPrefs.getString(PreferenceKeys.TTS_LANGUAGE, "-1");
             if (!lang.equals("-1")) {
                 Set<Locale> locales = TextToSpeechHelper.Companion.getAvailableLocales();
                 for (Locale l : locales) {
@@ -351,7 +386,7 @@ public class CollectActivity extends ThemedActivity
 
         sensorHelper.register();
 
-        mlkitEnabled = mPrefs.getBoolean(GeneralKeys.MLKIT_PREFERENCE_KEY, false);
+        mlkitEnabled = mPrefs.getBoolean(PreferenceKeys.MLKIT_PREFERENCE_KEY, false);
 
         loadScreen();
 
@@ -359,6 +394,13 @@ public class CollectActivity extends ThemedActivity
 
         verifyPersonHelper.checkLastOpened();
 
+        SpectralDao spectralDao = new SpectralDao(database);
+        ProtocolDao protocolDao = new ProtocolDao(database);
+        DeviceDao deviceDao = new DeviceDao(database);
+        UriDao uriDao = new UriDao(database);
+
+        spectralViewModel = new SpectralViewModelFactory(new SpectralRepository(spectralDao, protocolDao, deviceDao, uriDao))
+                .create(SpectralViewModel.class);
     }
 
     @Override
@@ -374,7 +416,7 @@ public class CollectActivity extends ThemedActivity
     }
 
     public void triggerTts(String text) {
-        if (preferences.getBoolean(GeneralKeys.TTS_LANGUAGE_ENABLED, false)) {
+        if (preferences.getBoolean(PreferenceKeys.TTS_LANGUAGE_ENABLED, false)) {
             ttsHelper.speak(text);
         }
     }
@@ -443,7 +485,7 @@ public class CollectActivity extends ThemedActivity
 
                                 FieldObject fo = database.getFieldObject(model.getStudy_id());
 
-                                if (fo != null && fo.getExp_name() != null) {
+                                if (fo != null && fo.getName() != null) {
 
                                     switchField(model.getStudy_id(), barcode);
 
@@ -483,7 +525,7 @@ public class CollectActivity extends ThemedActivity
     }
 
     public String getObservationUnit() {
-        return getCRange().plot_id;
+        return getCRange().uniqueId;
     }
 
     public String getPerson() {
@@ -522,6 +564,7 @@ public class CollectActivity extends ThemedActivity
         setContentView(R.layout.activity_collect);
 
         initToolbars();
+        setupCollectInsets();
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(null);
@@ -538,7 +581,7 @@ public class CollectActivity extends ThemedActivity
         traitLayouts = new LayoutCollections(this);
         rangeBox = findViewById(R.id.act_collect_range_box);
         traitBox = findViewById(R.id.act_collect_trait_box);
-        traitBox.connectRangeBox(rangeBox);
+        traitBox.connectRangeBox();
         rangeBox.connectTraitBox(traitBox);
 
         //setup infobar recycler view ui
@@ -576,7 +619,7 @@ public class CollectActivity extends ThemedActivity
         ConstraintSet constraintSet = new ConstraintSet();
         constraintSet.clone(layout);
 
-        if (preferences.getBoolean(GeneralKeys.FLIP_FLOP_ARROWS, false)) {
+        if (preferences.getBoolean(PreferenceKeys.FLIP_FLOP_ARROWS, false)) {
             constraintSet.connect(R.id.act_collect_range_box, ConstraintSet.TOP,
                     R.id.act_collect_infobar_rv, ConstraintSet.BOTTOM, 0);
             constraintSet.connect(R.id.act_collect_range_box, ConstraintSet.BOTTOM,
@@ -658,9 +701,8 @@ public class CollectActivity extends ThemedActivity
 
     @Override
     public void refreshMain() {
-        rangeBox.saveLastPlot();
+        rangeBox.saveLastPlotAndTrait();
         rangeBox.refresh();
-        traitBox.setNewTraits(rangeBox.getPlotID());
 
         Log.d(TAG, "Refresh main.");
 
@@ -742,6 +784,8 @@ public class CollectActivity extends ThemedActivity
                 String format = currentTrait.getFormat();
                 if (format != null && Formats.Companion.isCameraTrait(format)) {
                     ((AbstractCameraTrait) traitLayouts.getTraitLayout(format)).setImageNa();
+                } else if (format != null && Formats.Companion.isSpectralFormat(format)) {
+                    ((SpectralTraitLayout) traitLayouts.getTraitLayout(format)).setNa();
                 } else {
                     updateObservation(currentTrait, "NA", null);
                     setNaText();
@@ -758,11 +802,21 @@ public class CollectActivity extends ThemedActivity
                         getCurrentTrait().getId(), getObservationUnit(), getRep());
             }
             else {
-                new IntentIntegrator(CollectActivity.this)
-                        .setPrompt(getString(R.string.barcode_scanner_text))
-                        .setBeepEnabled(false)
-                        .setRequestCode(BARCODE_COLLECT_CODE)
-                        .initiateScan();
+                TraitObject trait = getCurrentTrait();
+                if (trait != null) {
+
+                    if (Objects.equals(trait.getFormat(), Formats.BASE_SPECTRAL.getDatabaseName())) {
+
+                        Toast.makeText(this, getString(R.string.act_collect_barcode_spectral), Toast.LENGTH_SHORT).show();
+
+                    } else {
+                        new IntentIntegrator(CollectActivity.this)
+                                .setPrompt(getString(R.string.barcode_scanner_text))
+                                .setBeepEnabled(false)
+                                .setRequestCode(BARCODE_COLLECT_CODE)
+                                .initiateScan();
+                    }
+                }
             }
 
         });
@@ -816,38 +870,26 @@ public class CollectActivity extends ThemedActivity
         //gets the minimum default index
     }
 
-    // This update should only be called after repeating keypress ends
-    private void repeatUpdate() {
-        if (rangeBox.getRangeID() == null)
-            return;
-
-        traitBox.setNewTraits(rangeBox.getPlotID());
-
-        initWidgets(true);
-    }
-
     // This is central to the application
     // Calling this function resets all the controls for traits, and picks one
     // to show based on the current trait data
     @Override
     public void initWidgets(final boolean rangeSuppress) {
+
         // Reset dropdowns
-
-        if (!database.isRangeTableEmpty()) {
-
-            Log.d(TAG, "init widgets refreshing info bar");
-
-            refreshInfoBarAdapter();
-        }
+        refreshInfoBarAdapter();
 
         traitBox.initTraitDetails();
 
-        // trait is unique, format is not
-        String[] traits = database.getVisibleTrait();
-        if (traits != null) {
-            traitBox.initTraitType(traits, rangeSuppress);
+        TraitObject[] visibleTraits = database.getVisibleTraits().toArray(new TraitObject[] {});
 
+        if (visibleTraits.length == 0) {
+            Utils.makeToast(this, getString(R.string.act_trait_editor_no_traits_exist));
+            setResult(RESULT_CANCELED);
+            finish();
         }
+
+        traitBox.initialize(visibleTraits);
     }
 
     /**
@@ -881,7 +923,7 @@ public class CollectActivity extends ThemedActivity
                 RangeObject ro = rangeBox.getCRange();
 
                 //issue #634 fix for now to check the search query by plot_id which should be the unique id
-                if (Objects.equals(ro.plot_id, searchUnique)) {
+                if (Objects.equals(ro.uniqueId, searchUnique)) {
                     moveToResultCore(j);
                     return true;
                 }
@@ -893,7 +935,7 @@ public class CollectActivity extends ThemedActivity
             for (int j = 1; j <= plotIndices.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
 
-                if (rangeBox.getCRange().range.equals(range) & rangeBox.getCRange().plot.equals(plot)) {
+                if (rangeBox.getCRange().primaryId.equals(range) & rangeBox.getCRange().secondaryId.equals(plot)) {
                     moveToResultCore(j);
                     return true;
                 }
@@ -905,7 +947,7 @@ public class CollectActivity extends ThemedActivity
             for (int j = 1; j <= plotIndices.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
 
-                if (rangeBox.getCRange().plot.equals(data)) {
+                if (rangeBox.getCRange().secondaryId.equals(data)) {
                     moveToResultCore(j);
                     return true;
                 }
@@ -917,7 +959,7 @@ public class CollectActivity extends ThemedActivity
             for (int j = 1; j <= plotIndices.length; j++) {
                 rangeBox.setRangeByIndex(j - 1);
 
-                if (rangeBox.getCRange().range.equals(data)) {
+                if (rangeBox.getCRange().primaryId.equals(data)) {
                     moveToResultCore(j);
                     return true;
                 }
@@ -925,12 +967,12 @@ public class CollectActivity extends ThemedActivity
         }
 
         //move to plot id
-        if (command.equals("id") || command.equals("barcode")) {
+        if (command.equals("id")) {
             int rangeSize = plotIndices.length;
             for (int j = 1; j <= rangeSize; j++) {
                 rangeBox.setRangeByIndex(j - 1);
 
-                if (rangeBox.getCRange().plot_id.equals(data)) {
+                if (rangeBox.getCRange().uniqueId.equals(data)) {
 
                     if (trait == -1) {
                         moveToResultCore(j);
@@ -941,10 +983,146 @@ public class CollectActivity extends ThemedActivity
             }
         }
 
+        if (command.equals("barcode")) {
+            int currentFieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+            Log.d("Field Book", "Barcode search in current field: " + currentFieldId + ", searching for: " + data);
+
+            ObservationUnitModel[] matchingUnits = database.getObservationUnitsBySearchAttribute(
+                    currentFieldId, data);
+            Log.d("Field Book", "Search attribute results: " + matchingUnits.length + " units found");
+
+            if (matchingUnits.length > 0) {
+                // If found by search attribute, move to that observation unit
+                String matchingObsUnitId = matchingUnits[0].getObservation_unit_db_id();
+                Log.d("Field Book", "Found match by search attribute. Unit ID: " + matchingObsUnitId);
+
+                // If multiple matches found, show notification
+                if (matchingUnits.length > 1) {
+                    Utils.makeToast(this, getString(R.string.search_multiple_matches_found, matchingUnits.length));
+                }
+
+                for (int j = 1; j <= plotIndices.length; j++) {
+                    rangeBox.setRangeByIndex(j - 1);
+                    RangeObject ro = rangeBox.getCRange();
+
+                    if (ro.uniqueId.equals(matchingObsUnitId)) {
+                        moveToResultCore(j);
+                        return true;
+                    }
+                }
+            }
+
+            // Fallback: check if the barcode directly matches a plot_id
+            Log.d("Field Book", "Falling back to direct plot_id matching");
+            for (int j = 1; j <= plotIndices.length; j++) {
+                rangeBox.setRangeByIndex(j - 1);
+                RangeObject ro = rangeBox.getCRange();
+
+                if (ro.uniqueId.equals(data)) {
+                    Log.d("Field Book", "Direct match found at index: " + j);
+                    moveToResultCore(j);
+                    return true;
+                }
+            }
+
+            // Check other fields if we didn't find it in the current field
+            Log.d("Field Book", "Not found in current field, trying other fields");
+            return searchAcrossAllFields(data);
+        }
+
         if (!command.equals("quickgoto") && !command.equals("barcode"))
             Utils.makeToast(this, getString(R.string.main_toolbar_moveto_no_match));
 
         return false;
+    }
+
+    /**
+     * Searches for a barcode across all fields when not found in the current field.
+     * @param searchValue The barcode or search value to find
+     * @return true if found in another field, false otherwise
+     */
+    private boolean searchAcrossAllFields(String searchValue) {
+        Log.d("Field Book", "Searching across all fields for: " + searchValue);
+
+        boolean found = false;
+        FieldObject studyObj = null;
+
+        // Store search value in inputPlotId for use in the fallback
+        inputPlotId = searchValue;
+
+        int currentFieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
+        Log.d("Field Book", "Current field ID: " + currentFieldId);
+
+        // Check all other fields by search attribute
+        ArrayList<FieldObject> allFields = database.getAllFieldObjects();
+        Log.d("Field Book", "Searching across " + allFields.size() + " fields");
+
+        for (FieldObject field : allFields) {
+            // Skip the current field
+            if (field.getStudyId() == currentFieldId) {
+                continue;
+            }
+
+            Log.d("Field Book", "Checking field: " + field.getStudyId() + " (" + field.getName() + ")");
+
+            ObservationUnitModel[] matchingUnits = database.getObservationUnitsBySearchAttribute(
+                    field.getStudyId(), searchValue);
+
+            Log.d("Field Book", "Found " + matchingUnits.length + " matches in field " + field.getStudyId());
+
+            if (matchingUnits.length > 0) {
+                studyObj = field;
+                String oldPlotId = inputPlotId;
+                inputPlotId = matchingUnits[0].getObservation_unit_db_id();
+                Log.d("Field Book", "Match found! Field: " + field.getName() +
+                        ", unit ID updated from " + oldPlotId + " to " + inputPlotId);
+                found = true;
+                break;
+            }
+        }
+
+        // If not found by search attribute in any field, try direct plot_id matching
+        if (!found) {
+            Log.d("Field Book", "No matches by search attribute, trying direct ID match");
+
+            ObservationUnitModel[] models = database.getAllObservationUnits();
+
+            for (ObservationUnitModel m : models) {
+                if (m.getObservation_unit_db_id().equals(searchValue)) {
+                    FieldObject study = database.getFieldObject(m.getStudy_id());
+                    if (study != null && study.getName() != null) {
+                        studyObj = study;
+                        found = true;
+                        Log.d("Field Book", "Direct match found in study: " + study.getName());
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Handle the result of the search
+        if (found && studyObj != null && studyObj.getName() != null && studyObj.getStudyId() != -1) {
+            int studyId = studyObj.getStudyId();
+            String fieldName = studyObj.getAlias();
+            
+            // Save the matching observation unit ID from the matched unit, not the search value
+            final String matchedObsUnitId = inputPlotId; // This should be the one set earlier from matchingUnits[0]
+            
+            Log.d("Field Book", "Showing navigation prompt to field: " + fieldName + " and plot ID: " + matchedObsUnitId);
+            
+            String msg = getString(R.string.act_collect_barcode_search_exists_in_other_field, fieldName);
+            
+            SnackbarUtils.showNavigateSnack(getLayoutInflater(), findViewById(R.id.traitHolder), 
+                msg, R.id.toolbarBottom, 8000, null,
+                (v) -> switchField(studyId, matchedObsUnitId));
+                
+            return true;
+        } else {
+            Log.d("Field Book", "No match found in any field");
+            soundHelper.playError();
+            Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
+            return false;
+        }
     }
 
     private void moveToResultCore(int j) {
@@ -952,10 +1130,6 @@ public class CollectActivity extends ThemedActivity
 
         // Reload traits based on selected plot
         rangeBox.display();
-
-        String pid = rangeBox.getPlotID();
-
-        traitBox.setNewTraits(pid);
 
         Log.d(TAG, "Move to result core: " + j);
 
@@ -975,15 +1149,20 @@ public class CollectActivity extends ThemedActivity
         // Reload traits based on selected plot
         rangeBox.display();
 
-        traitBox.setNewTraits(rangeBox.getPlotID());
-
         traitBox.setSelection(traitIndex);
-        if (traitBox.getCurrentTrait() != null)
-            preferences.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.getCurrentTrait().getName()).apply();
+
+        saveLastTrait();
 
         Log.d(TAG, "Move to result core: " + j + "with trait index "+ traitIndex);
 
         initWidgets(false);
+    }
+
+    private void saveLastTrait() {
+        TraitObject lastTrait = traitBox.getCurrentTrait();
+        if (lastTrait != null) {
+            preferences.edit().putString(GeneralKeys.LAST_USED_TRAIT, lastTrait.getId()).apply();
+        }
     }
 
     @Override
@@ -1026,9 +1205,7 @@ public class CollectActivity extends ThemedActivity
 
         gnssThreadHelper.stop();
 
-        //save the last used trait
-        if (traitBox.getCurrentTrait() != null)
-            preferences.edit().putString(GeneralKeys.LAST_USED_TRAIT, traitBox.getCurrentTrait().getName()).apply();
+        saveLastTrait();
 
         preferences.edit().putInt(GeneralKeys.DATA_LOCK_STATE, dataLocked).apply();
 
@@ -1044,7 +1221,7 @@ public class CollectActivity extends ThemedActivity
 
         //save last plot id
         if (preferences.getBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)) {
-            rangeBox.saveLastPlot();
+            rangeBox.saveLastPlotAndTrait();
         }
 
         try {
@@ -1057,13 +1234,19 @@ public class CollectActivity extends ThemedActivity
 
         traitLayoutRefresh();
 
+        //nixSensorHelper.disconnect();
+
+        bleScanner.stopScanning();
+
+        greenSeekerGattManager.disconnect();
+
+        scaleGattManager.disconnect();
+
         usbCameraApi.onDestroy();
 
         gnssThreadHelper.stop();
 
         goProApi.onDestroy();
-
-        bluetoothHelper.onDestroy();
 
         sensorHelper.unregister();
 
@@ -1085,10 +1268,10 @@ public class CollectActivity extends ThemedActivity
 
         // Update menu item visibility
         if (systemMenu != null) {
-            systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
-            systemMenu.findItem(R.id.nextEmptyPlot).setVisible(!preferences.getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "0").equals("0"));
-            systemMenu.findItem(R.id.jumpToPlot).setVisible(!preferences.getString(GeneralKeys.MOVE_TO_UNIQUE_ID, "0").equals("0"));
-            systemMenu.findItem(R.id.datagrid).setVisible(preferences.getBoolean(GeneralKeys.DATAGRID_SETTING, false));
+            systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(PreferenceKeys.TIPS, false));
+            systemMenu.findItem(R.id.nextEmptyPlot).setVisible(!preferences.getString(PreferenceKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "0").equals("0"));
+            systemMenu.findItem(R.id.jumpToPlot).setVisible(!preferences.getString(PreferenceKeys.MOVE_TO_UNIQUE_ID, "0").equals("0"));
+            systemMenu.findItem(R.id.datagrid).setVisible(preferences.getBoolean(PreferenceKeys.DATAGRID_SETTING, false));
         }
 
         refreshInfoBarAdapter();
@@ -1135,7 +1318,7 @@ public class CollectActivity extends ThemedActivity
 
         mPrefs.edit().putBoolean(GeneralKeys.GEONAV_AUTO, false).apply(); //turn off auto nav
 
-        if (mPrefs.getBoolean(GeneralKeys.ENABLE_GEONAV, false)) {
+        if (mPrefs.getBoolean(PreferenceKeys.ENABLE_GEONAV, false)) {
 
             //setup logger whenever activity resumes
             geoNavHelper.setupGeoNavLogger();
@@ -1156,6 +1339,8 @@ public class CollectActivity extends ThemedActivity
         traitLayouts.registerAllReceivers();
 
         refreshLock();
+
+        traitBox.recalculateTraitStatusBarSizes();
     }
 
     private void startGeoNav() {
@@ -1171,31 +1356,38 @@ public class CollectActivity extends ThemedActivity
 
     /**
      * LAST_USED_TRAIT is a preference saved in CollectActivity.onPause
-     *
      * This function is called to use that preference and navigate to the corresponding trait.
      */
     private void navigateToLastOpenedTrait() {
 
         //navigate to the last used trait using preferences
-        String trait = preferences.getString(GeneralKeys.LAST_USED_TRAIT, null);
+        String traitId = preferences.getString(GeneralKeys.LAST_USED_TRAIT, "-1");
 
-        navigateToTrait(trait);
+        navigateToTrait(traitId);
     }
 
-    public void navigateToTrait(String trait) {
+    public void navigateToTrait(String traitId) {
 
-        if (trait != null) {
+        if (!traitId.equals("-1")) {
 
-            //get all traits, filter the preference trait and check it's visibility
-            String[] traits = database.getVisibleTrait();
+            ArrayList<TraitObject> traits = database.getVisibleTraits();
 
             try {
 
-                traitBox.setSelection(Arrays.asList(traits).indexOf(trait));
+                //find trait position of the traitId param
+                int index = 0;
+                for (int i = 0; i < traits.size(); i++) {
+                    if (traits.get(i).getId().equals(traitId)) {
+                        index = i;
+                        break;
+                    }
+                }
+
+                traitBox.setSelection(index);
 
             } catch (NullPointerException e) {
 
-                e.printStackTrace();
+                Log.e(TAG, "Error while navigating to trait: " + traitId);
 
             }
         }
@@ -1224,8 +1416,6 @@ public class CollectActivity extends ThemedActivity
         if (rangeBox.isEmpty()) {
             return;
         }
-
-        traitBox.update(trait.getName(), value);
 
         String studyId = getStudyId();
         String obsUnit = getObservationUnit();
@@ -1262,11 +1452,11 @@ public class CollectActivity extends ThemedActivity
             }
 
             if (!pass) {
-                database.insertObservation(obsUnit, trait.getId(), trait.getFormat(), value, person,
+                database.insertObservation(obsUnit, trait.getId(), value, person,
                         getLocationByPreferences(), "", studyId, observationDbId,
-                        lastSyncedTime, rep);
+                        null, lastSyncedTime, rep);
 
-                updateCurrentTraitStatus(true);
+                runOnUiThread(() -> updateCurrentTraitStatus(true));
             }
         }
 
@@ -1277,31 +1467,31 @@ public class CollectActivity extends ThemedActivity
 
     public void insertRep(String value, String rep) {
 
-        String expId = getStudyId();
+        String studyId = getStudyId();
         String obsUnit = getObservationUnit();
         String person = getPerson();
         String traitDbId = getTraitDbId();
 
-        database.insertObservation(obsUnit, traitDbId, getTraitFormat(), value, person,
-                getLocationByPreferences(), "", expId, null, null, rep);
+        database.insertObservation(obsUnit, traitDbId, value, person,
+                getLocationByPreferences(), "", studyId, null, null, null, rep);
     }
 
     public void deleteRep(String rep) {
 
-        String expId = getStudyId();
+        String studyId = getStudyId();
         String obsUnit = getObservationUnit();
         String traitDbId = getTraitDbId();
 
-        database.deleteTrait(expId, obsUnit, traitDbId, rep);
+        database.deleteTrait(studyId, obsUnit, traitDbId, rep);
     }
 
     public String getLocationByPreferences() {
 
-        String expId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+        String studyId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
         String obsUnit = rangeBox.getPlotID();
 
         return LocationCollectorUtil.Companion
-                .getLocationByCollectMode(this, preferences, expId, obsUnit, geoNavHelper.getMInternalLocation(), geoNavHelper.getMExternalLocation(), database);
+                .getLocationByCollectMode(this, preferences, studyId, obsUnit, geoNavHelper.getMInternalLocation(), geoNavHelper.getMExternalLocation(), database);
     }
 
     private void brapiDelete(TraitObject trait, Boolean hint) {
@@ -1339,7 +1529,7 @@ public class CollectActivity extends ThemedActivity
     }
 
     private void customizeToolbarIcons() {
-        Set<String> entries = preferences.getStringSet(GeneralKeys.TOOLBAR_CUSTOMIZE, new HashSet<>());
+        Set<String> entries = preferences.getStringSet(PreferenceKeys.TOOLBAR_CUSTOMIZE, new HashSet<>());
 
         if (systemMenu != null) {
             systemMenu.findItem(R.id.search).setVisible(entries.contains("search"));
@@ -1355,22 +1545,22 @@ public class CollectActivity extends ThemedActivity
 
         systemMenu = menu;
 
-        systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
-        systemMenu.findItem(R.id.nextEmptyPlot).setVisible(!preferences.getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "0").equals("0"));
-        systemMenu.findItem(R.id.jumpToPlot).setVisible(!preferences.getString(GeneralKeys.MOVE_TO_UNIQUE_ID, "0").equals("0"));
-        systemMenu.findItem(R.id.datagrid).setVisible(preferences.getBoolean(GeneralKeys.DATAGRID_SETTING, false));
+        systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(PreferenceKeys.TIPS, false));
+        systemMenu.findItem(R.id.nextEmptyPlot).setVisible(!preferences.getString(PreferenceKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "0").equals("0"));
+        systemMenu.findItem(R.id.jumpToPlot).setVisible(!preferences.getString(PreferenceKeys.MOVE_TO_UNIQUE_ID, "0").equals("0"));
+        systemMenu.findItem(R.id.datagrid).setVisible(preferences.getBoolean(PreferenceKeys.DATAGRID_SETTING, false));
 
         //toggle repeated values indicator
         systemMenu.findItem(R.id.action_act_collect_repeated_values_indicator).setVisible(collectInputView.isRepeatEnabled());
 
         //added in geonav 310 only make goenav switch visible if preference is set
         MenuItem geoNavEnable = systemMenu.findItem(R.id.action_act_collect_geonav_sw);
-        geoNavEnable.setVisible(mPrefs.getBoolean(GeneralKeys.ENABLE_GEONAV, false));
+        geoNavEnable.setVisible(mPrefs.getBoolean(PreferenceKeys.ENABLE_GEONAV, false));
 //        View actionView = MenuItemCompat.getActionView(geoNavEnable);
 //        actionView.setOnClickListener((View) -> onOptionsItemSelected(geoNavEnable));
 
         MenuItem fieldAudioMic = systemMenu.findItem(R.id.field_audio_mic);
-        fieldAudioMic.setVisible(mPrefs.getBoolean(GeneralKeys.ENABLE_FIELD_AUDIO, false));
+        fieldAudioMic.setVisible(mPrefs.getBoolean(PreferenceKeys.ENABLE_FIELD_AUDIO, false));
 
         customizeToolbarIcons();
 
@@ -1453,7 +1643,7 @@ public class CollectActivity extends ThemedActivity
                             collectDataTapTargetView(R.id.traitLeft, getString(R.string.tutorial_main_traits_title), getString(R.string.tutorial_main_traits_description), 60),
                             collectDataTapTargetView(R.id.traitTypeTv, getString(R.string.tutorial_main_traitlist_title), getString(R.string.tutorial_main_traitlist_description), 80),
                             collectDataTapTargetView(R.id.rangeLeft, getString(R.string.tutorial_main_entries_title), getString(R.string.tutorial_main_entries_description), 60),
-                            collectDataTapTargetView(R.id.valuesPlotRangeHolder, getString(R.string.tutorial_main_navinfo_title), getString(R.string.tutorial_main_navinfo_description), 60),
+                            collectDataTapTargetView(R.id.namesHolderLayout, getString(R.string.tutorial_main_navinfo_title), getString(R.string.tutorial_main_navinfo_description), 60),
                             collectDataTapTargetView(R.id.traitHolder, getString(R.string.tutorial_main_datacollect_title), getString(R.string.tutorial_main_datacollect_description), 200),
                             collectDataTapTargetView(R.id.missingValue, getString(R.string.tutorial_main_na_title), getString(R.string.tutorial_main_na_description), 60),
                             collectDataTapTargetView(R.id.deleteValue, getString(R.string.tutorial_main_delete_title), getString(R.string.tutorial_main_delete_description), 60)
@@ -1499,7 +1689,7 @@ public class CollectActivity extends ThemedActivity
             rangeBox.setPaging(rangeBox.movePaging(rangeBox.getPaging(), 1, true));
             refreshMain();
         } else if (itemId == jumpToPlotId) {
-            String moveToUniqueIdValue = preferences.getString(GeneralKeys.MOVE_TO_UNIQUE_ID, "");
+            String moveToUniqueIdValue = preferences.getString(PreferenceKeys.MOVE_TO_UNIQUE_ID, "");
             if (moveToUniqueIdValue.equals("1")) {
                 moveToPlotID();
             } else if (moveToUniqueIdValue.equals("2")) {
@@ -1734,9 +1924,17 @@ public class CollectActivity extends ThemedActivity
      */
     public void deleteMultiMeasures(@NonNull List<ObservationModel> models) {
 
+        String studyId = getStudyId();
+        String obsUnitId = getObservationUnit();
+        String traitDbId = getTraitDbId();
+
         for (ObservationModel model : models) {
 
             deleteRep(model.getRep());
+
+            if (model.getObservation_variable_field_book_format() != null && Formats.Companion.isSpectralFormat(model.getObservation_variable_field_book_format())) {
+                database.deleteSpectralFact(model.getValue());
+            }
 
             ObservationModel[] currentModels = database.getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId());
 
@@ -1790,7 +1988,7 @@ public class CollectActivity extends ThemedActivity
         }
 
         TraitObject trait = getCurrentTrait();
-        if (trait != null && trait.getName() != null) {
+        if (trait != null) {
             traitLayouts.refreshLock(trait.getFormat());
         }
     }
@@ -1846,7 +2044,7 @@ public class CollectActivity extends ThemedActivity
                 inputPlotId = barcodeId.getText().toString();
                 rangeBox.setAllRangeID();
                 int[] rangeID = rangeBox.getRangeID();
-                moveToSearch("id", rangeID, null, null, inputPlotId, -1);
+                moveToSearch("barcode", rangeID, null, null, inputPlotId, -1);
                 goToId.dismiss();
             }
         });
@@ -1893,23 +2091,9 @@ public class CollectActivity extends ThemedActivity
         goToId.getWindow().setAttributes(langParams);
     }
 
-    public void nextEmptyPlot() {
-        try {
-            final int id = rangeBox.nextEmptyPlot();
-            rangeBox.setRange(id);
-            rangeBox.display();
-            rangeBox.setLastRange();
-            traitBox.setNewTraits(rangeBox.getPlotID());
-            initWidgets(true);
-        } catch (Exception e) {
-
-        }
-    }
-
     private void showSummary() {
 
         SummaryFragment fragment = new SummaryFragment();
-        fragment.setListener(this);
 
         getSupportFragmentManager().beginTransaction()
                 .add(android.R.id.content, fragment)
@@ -1992,57 +2176,42 @@ public class CollectActivity extends ThemedActivity
                 }
                 break;
             case BARCODE_SEARCH_CODE:
-                if(resultCode == RESULT_OK) {
+                if (resultCode == RESULT_OK) {
+                    Log.d("Field Book", "Barcode scan successful");
 
-                    if (geoNavHelper.getSnackbar() != null) geoNavHelper.getSnackbar().dismiss();
-                    if(mlkitEnabled) {
-                        inputPlotId = data.getStringExtra("barcode");
+                    if (geoNavHelper.getSnackbar() != null) {
+                        geoNavHelper.getSnackbar().dismiss();
                     }
-                    else {
-                        IntentResult plotSearchResult = IntentIntegrator.parseActivityResult(resultCode, data);
-                        inputPlotId = plotSearchResult.getContents();
-                    }
-                    rangeBox.setAllRangeID();
-                    int[] rangeID = rangeBox.getRangeID();
-                    boolean success = moveToSearch("barcode", rangeID, null, null, inputPlotId, -1);
 
-                    //play success or error sound if the plotId was not found
-                    if (success) {
-                        soundHelper.playCelebrate();
+                    String barcodeValue;
+                    if (mlkitEnabled) {
+                        barcodeValue = data.getStringExtra("barcode");
                     } else {
-                        boolean found = false;
-                        FieldObject studyObj = null;
-                        ObservationUnitModel[] models = database.getAllObservationUnits();
-                        for (ObservationUnitModel m : models) {
-                            if (m.getObservation_unit_db_id().equals(inputPlotId)) {
-
-                                FieldObject study = database.getFieldObject(m.getStudy_id());
-                                if (study != null && study.getExp_name() != null) {
-                                    studyObj = study;
-                                    found = true;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (found && studyObj.getExp_name() != null && studyObj.getExp_id() != -1) {
-
-                            int studyId = studyObj.getExp_id();
-                            String fieldName = studyObj.getExp_alias();
-
-                            String msg = getString(R.string.act_collect_barcode_search_exists_in_other_field, fieldName);
-
-                            SnackbarUtils.showNavigateSnack(getLayoutInflater(), findViewById(R.id.traitHolder), msg, R.id.toolbarBottom,8000, null,
-                                (v) -> switchField(studyId, null));
-
-                        } else {
-
-                            soundHelper.playError();
-
-                            Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
-
-                        }
+                        IntentResult plotSearchResult = IntentIntegrator.parseActivityResult(resultCode, data);
+                        barcodeValue = plotSearchResult.getContents();
                     }
+
+                    if (barcodeValue != null && !barcodeValue.isEmpty()) {
+                        Log.d("Field Book", "Scanned barcode: " + barcodeValue);
+
+                        // Set inputPlotId globally to ensure it's available everywhere
+                        inputPlotId = barcodeValue;
+
+                        rangeBox.setAllRangeID();
+                        int[] rangeID = rangeBox.getRangeID();
+
+                        boolean success = moveToSearch("barcode", rangeID, null, null, barcodeValue, -1);
+
+                        // If success is true, moveToSearch found the barcode, either in current field
+                        // or via the fallback in another field. Success sound happens in moveToSearch
+                        // if needed. No additional action required here.
+                    } else {
+                        Log.d("Field Book", "Barcode scan returned empty result");
+                        soundHelper.playError();
+                        Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
+                    }
+                } else {
+                    Log.d("Field Book", "Barcode scan cancelled or failed");
                 }
                 break;
             case BARCODE_COLLECT_CODE:
@@ -2061,13 +2230,13 @@ public class CollectActivity extends ThemedActivity
                             String uri = data.getStringExtra(ScannerActivity.EXTRA_PHOTO_URI);
                             database.insertObservation(getObservationUnit(),
                                     getCurrentTrait().getId(),
-                                    getCurrentTrait().getFormat(),
                                     uri,
                                     getPerson(),
                                     getLocationByPreferences(),
                                     "",
                                     getStudyId(),
                                     "",
+                                    null,
                                     null,
                                     getRep());
                         }
@@ -2114,6 +2283,13 @@ public class CollectActivity extends ThemedActivity
                     }
 
                 } else triggerTts(fail);
+                break;
+            case REQUEST_CROP_IMAGE_CODE:
+                if (resultCode == RESULT_OK) {
+                    File f = new File(getContext().getCacheDir(), AbstractCameraTrait.TEMPORARY_IMAGE_NAME);
+                    Uri uri = Uri.fromFile(f);
+                    startCropActivity(getCurrentTrait().getId(), uri);
+                }
                 break;
         }
     }
@@ -2218,44 +2394,31 @@ public class CollectActivity extends ThemedActivity
         }
     }
 
-    @Override
-    public void onBackPressed() {
+    private void setupBackCallback() {
+        OnBackPressedCallback backPressedCallback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                int count = getSupportFragmentManager().getBackStackEntryCount();
 
-        super.onBackPressed();
-        FragmentManager m = getSupportFragmentManager();
-        int count = getSupportFragmentManager().getBackStackEntryCount();
-
-        String format = traitBox.getCurrentFormat();
-
-        if (count == 0) {
-
-            if (isNavigatingFromSummary) {
-
-                isNavigatingFromSummary = false;
-
-            } else if (format.equals(CanonTraitLayout.type)) {
-
-                canonApi.stopSession();
-
-                wifiHelper.disconnect();
-
-            }else {
-
-                finish();
-
+                if (count == 0) {
+                        String format = traitBox.getCurrentFormat();
+                        if (format.equals(CanonTraitLayout.type)) {
+                            canonApi.stopSession();
+                            wifiHelper.disconnect();
+                        }
+                        finish();
+                } else {
+                    getSupportFragmentManager().popBackStack();
+                }
             }
+        };
 
-
-        } else {
-
-            getSupportFragmentManager().popBackStack();
-
-        }
+        getOnBackPressedDispatcher().addCallback(this, backPressedCallback);
     }
 
     @Override
     public boolean onSupportNavigateUp() {
-        onBackPressed();
+        getOnBackPressedDispatcher().onBackPressed();
         return true;
     }
 
@@ -2281,7 +2444,7 @@ public class CollectActivity extends ThemedActivity
      */
     @Override
     public int existsAllTraits(final int traitIndex, final int plotId) {
-        final ArrayList<TraitObject> traits = database.getVisibleTraitObjects();
+        final ArrayList<TraitObject> traits = database.getVisibleTraits();
         for (int i = 0; i < traits.size(); i++) {
             if (i != traitIndex
                     && !database.getTraitExists(plotId, traits.get(i).getId())) return i;
@@ -2292,21 +2455,13 @@ public class CollectActivity extends ThemedActivity
     @NonNull
     @Override
     public List<Integer> getNonExistingTraits(final int plotId) {
-        final ArrayList<TraitObject> traits = database.getVisibleTraitObjects();
+        final ArrayList<TraitObject> traits = database.getVisibleTraits();
         final ArrayList<Integer> indices = new ArrayList<>();
         for (int i = 0; i < traits.size(); i++) {
             if (!database.getTraitExists(plotId, traits.get(i).getId()))
                 indices.add(i);
         }
         return indices;
-    }
-
-    public Map<String, String> getNewTraits() {
-        return traitBox.getNewTraits();
-    }
-
-    public void setNewTraits(Map<String, String> newTraits) {
-        traitBox.setNewTraits(newTraits);
     }
 
     public TraitObject getCurrentTrait() {
@@ -2370,11 +2525,11 @@ public class CollectActivity extends ThemedActivity
 
     @Override
     public boolean isCyclingTraitsAdvances() {
-        return preferences.getBoolean(GeneralKeys.CYCLING_TRAITS_ADVANCES, false);
+        return preferences.getBoolean(PreferenceKeys.CYCLING_TRAITS_ADVANCES, false);
     }
 
     public boolean isReturnFirstTrait() {
-        return preferences.getBoolean(GeneralKeys.RETURN_FIRST_TRAIT, false);
+        return preferences.getBoolean(PreferenceKeys.RETURN_FIRST_TRAIT, false);
     }
 
     /**
@@ -2387,15 +2542,10 @@ public class CollectActivity extends ThemedActivity
     public void insertPrintObservation(String plotID, String traitID, String traitFormat, String labelNumber) {
         String studyId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
-        database.insertObservation(plotID, traitID, traitFormat, labelNumber,
+        database.insertObservation(plotID, traitID, labelNumber,
                 getPerson(),
                 getLocationByPreferences(), "", studyId, "",
-                null, null);
-    }
-
-    @Override
-    public void onSummaryDestroy() {
-        isNavigatingFromSummary = true;
+                null, null, null);
     }
 
     @NonNull
@@ -2492,51 +2642,57 @@ public class CollectActivity extends ThemedActivity
         return secureBluetooth;
     }
 
+    @NonNull
     @Override
-    public String queryForLabelValue(
-            String plotId, String label, Boolean isAttribute
-    ) {
-        Context context = this;
+    public String queryForLabelValue(@NonNull String plotId, @NonNull AttributeAdapter.AttributeModel attribute) {
 
-        String dataMissingString = context.getString(R.string.main_infobar_data_missing);
+        String dataMissingString = getString(R.string.main_infobar_data_missing);
 
-        if (isAttribute) {
+        String label = attribute.getLabel();
 
-            if (label.equals(context.getString(R.string.field_name_attribute))) {
-                String fieldName = ((CollectActivity) context).getPreferences().getString(GeneralKeys.FIELD_ALIAS, "");
-                return (fieldName == null || fieldName.isEmpty()) ? dataMissingString : fieldName;
+        String studyId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+
+        if (attribute.getTrait() == null) {
+
+            if (label.equals(getString(R.string.field_name_attribute))) {
+                String fieldName = getPreferences().getString(GeneralKeys.FIELD_ALIAS, "");
+                return fieldName.isEmpty() ? dataMissingString : fieldName;
             }
 
-            String[] values = database.getDropDownRange(label, plotId);
-            if (values == null || values.length == 0) {
-                return dataMissingString;
-            } else {
-                if (label.equals("geo_coordinates") && JsonUtil.Companion.isJsonValid(values[0])) {
+            String value = database.getObservationUnitPropertyValues(label, plotId);
 
-                    return GeoJsonUtil.Companion.decode(values[0]).toCoordinateString(";");
+            if (value.isEmpty()) {
+
+                return dataMissingString;
+
+            } else {
+
+                if (label.equals("geo_coordinates") && JsonUtil.Companion.isJsonValid(value)) {
+
+                    return GeoJsonUtil.Companion.decode(value).toCoordinateString(";");
 
                 } else {
 
-                    return values[0];
+                    return value;
 
                 }
             }
 
         } else {
 
-            String value = database.getUserDetail(plotId).get(label);
-            if (value == null) {
-                value = dataMissingString;
+            ObservationModel[] observations = database.getAllObservations(studyId, plotId, attribute.getTrait().getId());
+
+            int size = observations.length;
+
+            if (size == 0) {
+                return dataMissingString;
             }
+
+            String value = observations[size-1].getValue();
 
             try {
 
-                String labelValPref = ((CollectActivity) context).getPreferences()
-                        .getString(GeneralKeys.LABELVAL_CUSTOMIZE, "value");
-                if (labelValPref == null) {
-                    labelValPref = "value";
-                }
-
+                String labelValPref = getPreferences().getString(PreferenceKeys.LABELVAL_CUSTOMIZE, "value");
                 StringJoiner joiner = new StringJoiner(":");
                 ArrayList<BrAPIScaleValidValuesCategories> scale = CategoryJsonUtil.Companion.decode(value);
                 for (BrAPIScaleValidValuesCategories s : scale) {
@@ -2555,35 +2711,35 @@ public class CollectActivity extends ThemedActivity
         }
     }
 
+    @NonNull
     @Override
-    public ArrayList<String> getGeoNavPopupSpinnerItems () {
+    public List<AttributeAdapter.AttributeModel> getGeoNavPopupSpinnerItems () {
+
+        ArrayList<AttributeAdapter.AttributeModel> items = new ArrayList<>();
+
         //query database for attributes/traits to use
         try {
-            List<String> attributes = Arrays.asList(getDatabase().getAllObservationUnitAttributeNames(Integer.parseInt(getStudyId())));
-            TraitObject[] traits = getDatabase().getAllTraitObjects().toArray(new TraitObject[0]);
 
-            ArrayList<TraitObject> visibleTraits = new ArrayList<>();
+            //add all obs unit attribute metadata
+            String[] attributes = getDatabase().getAllObservationUnitAttributeNames(Integer.parseInt(getStudyId()));
+            for (String attribute : attributes) {
+                items.add(new AttributeAdapter.AttributeModel(attribute, null, null));
+            }
+
+            //add all visible traits
+            TraitObject[] traits = getDatabase().getVisibleTraits().toArray(new TraitObject[0]);
             for (TraitObject traitObject : traits) {
-                if (traitObject.getVisible()) {
-                    visibleTraits.add(traitObject);
-                }
+                items.add(new AttributeAdapter.AttributeModel(traitObject.getName(), null, traitObject));
             }
 
-            // Map traits to their names
-            List<String> traitNames = new ArrayList<>();
-            for (TraitObject traitObject : visibleTraits) {
-                traitNames.add(traitObject.getName());
-            }
+            return items;
 
-            // Combine attributes and trait names
-            ArrayList<String> result = new ArrayList<>(attributes);
-            result.addAll(traitNames);
-
-            return result;
         } catch (Exception e) {
-            Log.d(TAG, "Error occurred when querying for attributes in GeoNavCollectDialog.");
-            e.printStackTrace();
+
+            Log.e(TAG, "Error occurred when querying for attributes in GeoNavCollectDialog.", e);
+
         }
+
         return new ArrayList<>();
     }
     
@@ -2655,22 +2811,35 @@ public class CollectActivity extends ThemedActivity
         return gps.getLocation(0, 0);
     }
 
-    public void showObservationMetadataDialog(){
-        ObservationModel currentObservationObject = getCurrentObservation();
-        if (currentObservationObject != null){
-            DialogFragment dialogFragment = new ObservationMetadataFragment().newInstance(currentObservationObject);
+    private void showObservationMetadataDialog(@Nullable ObservationModel model) {
+
+        if (model != null){
+            DialogFragment dialogFragment = new ObservationMetadataFragment().newInstance(model);
             dialogFragment.show(this.getSupportFragmentManager(), "observationMetadata");
         }
     }
 
+    public void showObservationMetadataDialog(Integer observationId){
+        ObservationModel currentObservationObject = getDatabase().getObservationById(String.valueOf(observationId));
+        showObservationMetadataDialog(currentObservationObject);
+    }
+
+    public void showObservationMetadataDialog() {
+        ObservationModel currentObservationObject = getCurrentObservation();
+        showObservationMetadataDialog(currentObservationObject);
+    }
+
     public ObservationModel getCurrentObservation() {
         String rep = getCollectInputView().getRep();
-        List<ObservationModel> models = Arrays.asList(getDatabase().getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId()));
-            for (ObservationModel m : models) {
+
+        ObservationModel[] models = getDatabase().getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId());
+
+        for (ObservationModel m : models) {
             if (rep.equals(m.getRep())) {
                 return m;
             }
         }
+
         return null;
     }
 
@@ -2766,10 +2935,6 @@ public class CollectActivity extends ThemedActivity
 
     @NonNull
     @Override
-    public BluetoothHelper getBluetoothHelper() { return bluetoothHelper; }
-
-    @NonNull
-    @Override
     public GoProApi getGoProApi() {
         return goProApi;
     }
@@ -2791,6 +2956,10 @@ public class CollectActivity extends ThemedActivity
         return canonApi;
     }
 
+    @NonNull
+    @Override
+    public NixSensorHelper getNixSensorHelper() { return nixSensorHelper; }
+
     @Override
     public void onSearchResultsClicked(String unique, String range, String plot, boolean reload) {
         searchUnique = unique;
@@ -2808,6 +2977,16 @@ public class CollectActivity extends ThemedActivity
     @Override
     public SensorHelper.RotationModel getRotationRelativeToDevice() {
         return rotationModel;
+    }
+
+    @Override
+    public void onGravityRotationChanged(@NonNull SensorHelper.RotationModel rotationModel) {
+        this.gravityRotationModel = rotationModel;
+    }
+
+    @Nullable
+    public SensorHelper.RotationModel getDeviceTilt() {
+        return gravityRotationModel;
     }
 
     @Override
@@ -2855,15 +3034,15 @@ public class CollectActivity extends ThemedActivity
             int count = 0;
             FieldObject[] fieldObjects = database.getAllFieldObjects().toArray(new FieldObject[0]);
             for (FieldObject fo : fieldObjects) {
-                Log.e(TAG, "Field ID: " + count + " " + fo.getExp_id());
-                Log.e(TAG, "Field Name: " + count + " " + fo.getExp_name());
-                Log.e(TAG, "Field Unique ID: " + count + " " + fo.getUnique_id());
+                Log.e(TAG, "Field ID: " + count + " " + fo.getStudyId());
+                Log.e(TAG, "Field Name: " + count + " " + fo.getName());
+                Log.e(TAG, "Field Unique ID: " + count + " " + fo.getUniqueId());
 
-                builder.putString("Field ID " + count, Integer.toString(fo.getExp_id()));
-                builder.putString("Field Name " + count, fo.getExp_name());
-                builder.putString("Field Unique ID " + count, fo.getUnique_id());
+                builder.putString("Field ID " + count, Integer.toString(fo.getStudyId()));
+                builder.putString("Field Name " + count, fo.getName());
+                builder.putString("Field Unique ID " + count, fo.getUniqueId());
 
-                List<String> attributes = Arrays.asList(database.getAllObservationUnitAttributeNames(fo.getExp_id()));
+                List<String> attributes = Arrays.asList(database.getAllObservationUnitAttributeNames(fo.getStudyId()));
                 Log.e(TAG, attributes.toString());
                 builder.putString("Observation Unit Attributes " + count, attributes.toString());
 
@@ -2881,5 +3060,85 @@ public class CollectActivity extends ThemedActivity
             Log.e(TAG, "Error logging study entry attributes: " + ex);
 
         }
+    }
+
+    /**
+     * a function that starts the crop activity and sends it required intent data
+     */
+    public void startCropActivity(String traitId, Uri uri) {
+        try {
+            Intent intent = new Intent(this, CropImageActivity.class);
+            intent.putExtra(CropImageFragment.EXTRA_TRAIT_ID, Integer.parseInt(traitId));
+            intent.putExtra(CropImageFragment.EXTRA_IMAGE_URI, uri.toString());
+            cameraXFacade.unbind();
+            startActivity(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void requestAndCropImage() {
+        try {
+            Intent intent = new Intent(this, CameraActivity.class);
+            intent.putExtra(CropImageFragment.EXTRA_TRAIT_ID, Integer.parseInt(getCurrentTrait().getId()));
+            cameraXFacade.unbind();
+            startActivityForResult(intent, REQUEST_CROP_IMAGE_CODE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * shows an alert dialog that asks user to define a crop region
+     */
+    public void showCropDialog(String traitId, Uri uri) {
+        try {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+            builder.setTitle(R.string.dialog_crop_title);
+            builder.setMessage(R.string.dialog_crop_message);
+            builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                startCropActivity(traitId, uri);
+            });
+            builder.setNegativeButton(android.R.string.no, (dialog, which) -> {
+                dialog.dismiss();
+            });
+            builder.create().show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @NonNull
+    @Override
+    public SpectralViewModel getSpectralViewModel() {
+        return spectralViewModel;
+    }
+
+    @NonNull
+    public BLEScanner getBleScanner() {
+        return bleScanner;
+    }
+
+    @NonNull
+    public GreenSeekerGattManager getGreenSeekerGattManager() {
+        return greenSeekerGattManager;
+    }
+
+    @NonNull
+    public ScaleGattManager getScaleGattManager() {
+        return scaleGattManager;
+    }
+
+    @Override
+    public void updateNumberOfObservations() {
+        refreshRepeatedValuesToolbarIndicator();
+    }
+
+    private void setupCollectInsets() {
+        View rootView = findViewById(android.R.id.content);
+        Toolbar bottomToolbar = findViewById(R.id.toolbarBottom);
+        LinearLayout bottomContent = bottomToolbar.findViewById(R.id.toolbarBottomContent);
+
+        InsetHandler.INSTANCE.setupInsetsWithBottomBar(rootView, toolbar, bottomToolbar, bottomContent);
     }
 }

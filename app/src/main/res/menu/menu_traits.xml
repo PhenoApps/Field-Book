@@ -26,9 +26,9 @@
         android:showAsAction="ifRoom"
         android:title="@string/traits_toolbar_delete_all" />
     <item
-        android:id="@+id/importexport"
-        android:icon="@drawable/ic_tb_import_export"
+        android:id="@+id/export"
+        android:icon="@drawable/ic_file_export_outline"
         android:showAsAction="ifRoom"
-        android:title="@string/traits_toolbar_import_export" />
+        android:title="@string/traits_dialog_export" />
 </menu>
 

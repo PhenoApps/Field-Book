@@ -32,6 +32,7 @@
     <string name="warning_traits_missing">Es existieren keine Merkmale. Bitte erstellen Sie Merkmale bevor Sie mit der Datenerfassung beginnen.</string>
     <!-- Changelog -->
     <string name="changelog_title">Änderungsprotokoll</string>
+    <!--  Field Grouping  -->
     <!-- FIELDS -->
     <!-- General -->
     <!-- Sort -->
@@ -204,5 +205,10 @@
     <!-- usb camera trait -->
     <!-- gopro -->
     <!-- canon camera strings -->
+    <!-- spectral trait strings -->
     <string name="brapi_traits_filter_title">Merkmale</string>
+    <string name="traits_sort_default">Vorgegeben</string>
+    <!--  NearbyShare  -->
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="save">Speichern</string>
 </resources>

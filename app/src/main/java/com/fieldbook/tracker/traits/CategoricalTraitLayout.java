@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.google.android.flexbox.AlignItems;
@@ -99,7 +100,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
         super.afterLoadExists(act, value);
 
         //read the preferences, default to displaying values instead of labels
-        String labelValPref = getPrefs().getString(GeneralKeys.LABELVAL_CUSTOMIZE,"value");
+        String labelValPref = getPrefs().getString(PreferenceKeys.LABELVAL_CUSTOMIZE,"value");
 
         //read the json object stored in additional info of the trait object (only in BrAPI imported traits)
         ArrayList<BrAPIScaleValidValuesCategories> cats = getCategories();
@@ -130,8 +131,6 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                             getCollectInputView().setText(labelVal.getLabel());
 
                         }
-
-                        getCollectInputView().setTextColor(Color.parseColor(getDisplayColor()));
 
                     }
                 }
@@ -178,7 +177,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
     private void setAdapter(ArrayList<BrAPIScaleValidValuesCategories> cats) {
 
-        String labelValPref = getPrefs().getString(GeneralKeys.LABELVAL_CUSTOMIZE,"value");
+        String labelValPref = getPrefs().getString(PreferenceKeys.LABELVAL_CUSTOMIZE,"value");
 
         FlexboxLayoutManager layoutManager = new FlexboxLayoutManager(getContext());
         layoutManager.setFlexWrap(FlexWrap.WRAP);
@@ -311,7 +310,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
     @Override
     public String decodeValue(String value) {
-        String labelValPref = getPrefs().getString(GeneralKeys.LABELVAL_CUSTOMIZE,"value");
+        String labelValPref = getPrefs().getString(PreferenceKeys.LABELVAL_CUSTOMIZE,"value");
         ArrayList<BrAPIScaleValidValuesCategories> scale = CategoryJsonUtil.Companion.decode(value);
         if (!scale.isEmpty()) {
             if (labelValPref.equals("value")) {

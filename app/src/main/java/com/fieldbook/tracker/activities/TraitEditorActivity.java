@@ -26,13 +26,14 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -49,6 +50,7 @@ import com.fieldbook.tracker.adapters.TraitAdapterController;
 import com.fieldbook.tracker.async.ImportCSVTask;
 import com.fieldbook.tracker.brapi.BrapiInfoDialogFragment;
 import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.dialogs.ListAddDialog;
 import com.fieldbook.tracker.dialogs.ListSortDialog;
 import com.fieldbook.tracker.dialogs.NewTraitDialog;
 import com.fieldbook.tracker.objects.FieldFileObject;
@@ -56,8 +58,10 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.FileUtil;
+import com.fieldbook.tracker.utilities.InsetHandler;
 import com.fieldbook.tracker.utilities.SharedPreferenceUtils;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
@@ -73,7 +77,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -89,6 +92,20 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 @AndroidEntryPoint
 public class TraitEditorActivity extends ThemedActivity implements TraitAdapterController, TraitAdapter.TraitSorter, NewTraitDialog.TraitDialogDismissListener {
+
+    private enum ImportOptions {
+        CREATE_NEW(R.drawable.ic_ruler, R.string.traits_dialog_create),
+        IMPORT_FROM_FILE(R.drawable.ic_file_generic, R.string.traits_dialog_import_from_file),
+        IMPORT_FROM_BRAPI(R.drawable.ic_adv_brapi, 0); // 0 as placeholder, uses PreferenceKeys.BRAPI_DISPLAY_NAME
+
+        final int iconResource;
+        final int stringResource;
+
+        ImportOptions(int iconResource, int stringResource) {
+            this.iconResource = iconResource;
+            this.stringResource = stringResource;
+        }
+    }
 
     public static final String TAG = "TraitEditor";
     public static int REQUEST_CLOUD_FILE_CODE = 5;
@@ -120,6 +137,8 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                 int to = target.getBindingAdapterPosition();
 
                 try {
+                    preferences.edit().putString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position").apply();
+                    queryAndLoadTraits();
                     adapter.moveItem(from, to);
                 } catch (IndexOutOfBoundsException iobe) {
                     iobe.printStackTrace();
@@ -203,7 +222,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
             FieldObject field = database.getFieldObject(studyId);
 
-            if (!field.getExp_name().equals("") && field.getImport_format() == ImportFormat.BRAPI) {
+            if (!field.getName().equals("") && field.getDataSourceFormat() == ImportFormat.BRAPI) {
 
                 // noCheckTrait is used when the trait should not be checked, but the dialog
                 // should be shown.
@@ -215,28 +234,28 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                 }
 
                 // Check if this is a BrAPI trait
-                if (traitName != null) {
-
-                    // Just returns an empty trait object in the case the trait isn't found
-                    TraitObject trait = database.getDetail(traitName);
-                    if (trait.getName() == null) {
-                        return false;
-                    }
-
-                    if (trait.getExternalDbId() == null || trait.getExternalDbId().equals("local") || trait.getExternalDbId().equals("")) {
-
-                        // Show info dialog if a BrAPI field is selected.
-                        BrapiInfoDialogFragment dialogFragment = new BrapiInfoDialogFragment().newInstance(getResources().getString(R.string.brapi_info_message));
-                        dialogFragment.show(this.getSupportFragmentManager(), "brapiInfoDialogFragment");
-
-                        // Only show the info dialog on the first non-BrAPI trait selected.
-                        return true;
-
-                    } else {
-                        // Dialog was not shown
-                        return false;
-                    }
-                }
+//                if (traitName != null) {
+//
+//                    // Just returns an empty trait object in the case the trait isn't found
+//                    TraitObject trait = database.getDetail(traitName);
+//                    if (trait.getName() == null) {
+//                        return false;
+//                    }
+//
+//                    if (trait.getExternalDbId() == null || trait.getExternalDbId().equals("local") || trait.getExternalDbId().equals("")) {
+//
+//                        // Show info dialog if a BrAPI field is selected.
+//                        BrapiInfoDialogFragment dialogFragment = new BrapiInfoDialogFragment().newInstance(getResources().getString(R.string.brapi_info_message));
+//                        dialogFragment.show(this.getSupportFragmentManager(), "brapiInfoDialogFragment");
+//
+//                        // Only show the info dialog on the first non-BrAPI trait selected.
+//                        return true;
+//
+//                    } else {
+//                        // Dialog was not shown
+//                        return false;
+//                    }
+//                }
             }
         } catch (Exception e) {
             Log.e("error", e.toString());
@@ -287,7 +306,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         super.onResume();
 
         if (systemMenu != null) {
-            systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
+            systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(PreferenceKeys.TIPS, false));
         }
 
         queryAndLoadTraits();
@@ -299,6 +318,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_traits);
+        setupTraitEditorInsets();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
 
@@ -327,7 +347,9 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         itemTouchHelper.attachToRecyclerView(traitList);
 
         FloatingActionButton fab = findViewById(R.id.newTrait);
-        fab.setOnClickListener(v -> showTraitDialog(null));
+        fab.setOnClickListener(v -> showImportDialog());
+
+        setupBackCallback();
     }
 
     @Override
@@ -335,7 +357,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         new MenuInflater(TraitEditorActivity.this).inflate(R.menu.menu_traits, menu);
 
         systemMenu = menu;
-        systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(GeneralKeys.TIPS, false));
+        systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(PreferenceKeys.TIPS, false));
 
         return true;
     }
@@ -365,7 +387,8 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                             //Todo add overflow menu action
                     );
 
-            if (database.getTraitColumnData("trait") != null) {
+            ArrayList<TraitObject> traits = database.getAllTraitObjects();
+            if (traits != null && !traits.isEmpty()) {
                 sequence.target(traitsTapTargetRect(traitsListItemLocation(0, 4), getString(R.string.tutorial_traits_visibility_title), getString(R.string.tutorial_traits_visibility_description)));
                 sequence.target(traitsTapTargetRect(traitsListItemLocation(0, 2), getString(R.string.tutorial_traits_format_title), getString(R.string.tutorial_traits_format_description)));
             }
@@ -375,11 +398,11 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
             checkShowDeleteDialog();
         } else if (itemId == R.id.sortTrait) {
             showTraitSortDialog();
-        } else if (itemId == R.id.importexport) {
+        } else if (itemId == R.id.export) {
             if (BaseDocumentTreeUtil.Companion.getRoot(this) != null
                     && BaseDocumentTreeUtil.Companion.isEnabled(this)
                     && BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_trait) != null) {
-                importExportDialog();
+                exportTraitFilePermission();
             } else {
                 Toast.makeText(this, R.string.error_storage_directory, Toast.LENGTH_LONG).show();
             }
@@ -399,6 +422,9 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
             Toast.makeText(this, R.string.act_trait_editor_no_traits_exist, Toast.LENGTH_SHORT).show();
         } else {
             showDeleteTraitDialog((dialog, which) -> {
+                for (TraitObject t : traits) {
+                    preferences.edit().remove(GeneralKeys.getCropCoordinatesKey(Integer.parseInt(t.getId()))).apply();
+                }
                 database.deleteTraitsTable();
                 queryAndLoadTraits();
                 dialog.dismiss();
@@ -429,50 +455,6 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         ed.putBoolean(GeneralKeys.ALL_TRAITS_VISIBLE, globalVis);
         ed.apply();
         queryAndLoadTraits();
-    }
-
-    private void importExportDialog() {
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_list_buttonless, null);
-
-        ListView myList = layout.findViewById(R.id.myList);
-        String[] sortOptions = new String[2];
-        sortOptions[0] = getString(R.string.dialog_import);
-        sortOptions[1] = getString(R.string.traits_dialog_export);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_dialog_list, sortOptions);
-        myList.setAdapter(adapter);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-        builder.setTitle(R.string.settings_traits)
-                .setCancelable(true)
-                .setView(layout);
-
-        builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-
-        final AlertDialog importExport = builder.create();
-        importExport.show();
-
-        android.view.WindowManager.LayoutParams params = importExport.getWindow().getAttributes();
-        params.width = LayoutParams.WRAP_CONTENT;
-        params.height = LayoutParams.WRAP_CONTENT;
-        importExport.getWindow().setAttributes(params);
-
-        myList.setOnItemClickListener((av, arg1, which, arg3) -> {
-            switch (which) {
-                case 0:
-                    loadTraitFilePermission();
-                    break;
-                case 1:
-                    exportTraitFilePermission();
-                    break;
-            }
-            importExport.dismiss();
-        });
-
     }
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_STORAGE_IMPORT)
@@ -514,59 +496,99 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
     }
 
     private void showImportDialog() {
+        boolean brapiEnabled = preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false);
+        int optionCount = brapiEnabled ? ImportOptions.values().length : ImportOptions.values().length - 1;
 
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_list_buttonless, null);
+        String[] importArray = new String[optionCount];
+        int[] icons = new int[optionCount];
+        
+        importArray[ImportOptions.CREATE_NEW.ordinal()] = getString(ImportOptions.CREATE_NEW.stringResource);
+        importArray[ImportOptions.IMPORT_FROM_FILE.ordinal()] = getString(ImportOptions.IMPORT_FROM_FILE.stringResource);
+        icons[ImportOptions.CREATE_NEW.ordinal()] = ImportOptions.CREATE_NEW.iconResource;
+        icons[ImportOptions.IMPORT_FROM_FILE.ordinal()] = ImportOptions.IMPORT_FROM_FILE.iconResource;
+        
+        // Add BrAPI option if enabled
+        if (brapiEnabled) {
+            String displayName = preferences.getString(PreferenceKeys.BRAPI_DISPLAY_NAME,
+                    getString(R.string.brapi_edit_display_name_default));
+            importArray[ImportOptions.IMPORT_FROM_BRAPI.ordinal()] = displayName;
+            icons[ImportOptions.IMPORT_FROM_BRAPI.ordinal()] = ImportOptions.IMPORT_FROM_BRAPI.iconResource;
+        }
 
-        ListView myList = layout.findViewById(R.id.myList);
+        AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
+                    case 0: // Create new trait
+                        showTraitDialog(null);
+                        break;
+                    case 1: // Import from file
+                        showFileImportDialog();
+                        break;
+                    case 2: // BrAPI
+                        startBrapiTraitActivity(false);
+                        break;
+                }
+            }
+        };
+        
+        ListAddDialog dialog = new ListAddDialog(
+            this,
+            getString(R.string.traits_new_dialog_title),
+            importArray, 
+            icons, 
+            onItemClickListener
+        );
+        dialog.show(getSupportFragmentManager(), "ListAddDialog");
+    }
+
+    private void showFileImportDialog() {
+        
         String[] importArray = new String[2];
+        int[] icons = new int[2];
+        
         importArray[0] = getString(R.string.import_source_local);
         importArray[1] = getString(R.string.import_source_cloud);
+        
+        icons[0] = R.drawable.ic_file_generic;
+        icons[1] = R.drawable.ic_file_cloud;
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.list_item_dialog_list, importArray);
-        myList.setAdapter(adapter);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
-        builder.setTitle(R.string.import_dialog_title_traits)
-                .setCancelable(true)
-                .setView(layout);
-
-        builder.setNegativeButton(getString(R.string.dialog_cancel), (dialog, which) -> dialog.dismiss());
-
-        final AlertDialog importDialog = builder.create();
-
-        importDialog.show();
-
-        android.view.WindowManager.LayoutParams params = importDialog.getWindow().getAttributes();
-        params.width = LayoutParams.MATCH_PARENT;
-        params.height = LayoutParams.WRAP_CONTENT;
-        importDialog.getWindow().setAttributes(params);
-
-        myList.setOnItemClickListener((av, arg1, which, arg3) -> {
-            Intent intent = new Intent();
-            switch (which) {
-                case 0:
-                    DocumentFile traitDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_trait);
-                    if (traitDir != null && traitDir.exists()) {
-                        intent.setClassName(this, FileExploreActivity.class.getName());
-                        intent.putExtra("path", traitDir.getUri().toString());
-                        intent.putExtra("include", new String[]{"trt"});
-                        intent.putExtra("title", getString(R.string.traits_dialog_import));
-                        startActivityForResult(intent, REQUEST_FILE_EXPLORER_CODE);
-                    }
-                    break;
-                case 1:
-                    loadCloud();
-                    break;
+        AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
+                    case 0: // Local
+                        DocumentFile traitDir = BaseDocumentTreeUtil.Companion.getDirectory(TraitEditorActivity.this, R.string.dir_trait);
+                        if (traitDir != null && traitDir.exists()) {
+                            Intent intent = new Intent();
+                            intent.setClassName(TraitEditorActivity.this, FileExploreActivity.class.getName());
+                            intent.putExtra("path", traitDir.getUri().toString());
+                            intent.putExtra("include", new String[]{"trt"});
+                            intent.putExtra("title", getString(R.string.traits_dialog_import));
+                            startActivityForResult(intent, REQUEST_FILE_EXPLORER_CODE);
+                        }
+                        break;
+                    case 1: // Cloud
+                        loadCloud();
+                        break;
+                }
             }
-            importDialog.dismiss();
-        });
+        };
+        
+        ListAddDialog dialog = new ListAddDialog(
+            this,
+            getString(R.string.traits_dialog_import_from_file),
+            importArray, 
+            icons, 
+            onItemClickListener
+        );
+        dialog.show(getSupportFragmentManager(), "ListAddDialog");
     }
 
     public void startBrapiTraitActivity(boolean fromTraitCreator) {
 
         if (Utils.isConnected(this)) {
-            if (prefs.getBoolean(GeneralKeys.EXPERIMENTAL_NEW_BRAPI_UI, true)) {
+            if (prefs.getBoolean(PreferenceKeys.EXPERIMENTAL_NEW_BRAPI_UI, true)) {
                 Intent intent = new Intent(this, BrapiTraitFilterActivity.class);
                 BrapiFilterCache.Companion.checkClearCache(this);
                 startActivity(intent);
@@ -585,6 +607,10 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         ArrayList<TraitObject> traits = database.getAllTraitObjects();
 
         if (!traits.isEmpty()) {
+
+            for (TraitObject t : traits) {
+                preferences.edit().remove(GeneralKeys.getCropCoordinatesKey(Integer.parseInt(t.getId()))).apply();
+            }
 
             showDeleteTraitDialog((dialog, which) -> {
 
@@ -643,9 +669,10 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
     private void showTraitSortDialog() {
         Map<String, String> sortOptions = new LinkedHashMap<>();
-        final String defaultSortOrder = "internal_id_observation_variable";
+        final String defaultSortOrder = "position";
         String currentSortOrder = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, defaultSortOrder);
 
+        sortOptions.put(getString(R.string.traits_sort_default), "position");
         sortOptions.put(getString(R.string.traits_sort_name), "observation_variable_name");
         sortOptions.put(getString(R.string.traits_sort_format), "observation_variable_field_book_format");
         sortOptions.put(getString(R.string.traits_sort_import_order), "internal_id_observation_variable");
@@ -700,9 +727,9 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                                        @Nullable DialogInterface.OnClickListener onNegative,
                                        @Nullable DialogInterface.OnDismissListener onDismiss) {
 
-        String[] allTraits = database.getTraitColumnData("trait");
+        ArrayList<TraitObject> traits = database.getAllTraitObjects();
 
-        if (allTraits == null) {
+        if (traits == null || traits.isEmpty()) {
             Utils.makeToast(getApplicationContext(), getString(R.string.warning_traits_missing_modify));
             return;
         }
@@ -711,7 +738,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         builder.setTitle(getString(R.string.traits_toolbar_delete_all));
         builder.setMessage(getString(R.string.dialog_delete_traits_message));
 
-        builder.setPositiveButton(getString(android.R.string.yes), onPositive);
+        builder.setPositiveButton(getString(R.string.dialog_delete), onPositive);
         builder.setNegativeButton(getString(R.string.dialog_no), onNegative);
         builder.setOnDismissListener(onDismiss);
 
@@ -719,10 +746,15 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         alert.show();
     }
 
-    public void onBackPressed() {
-        super.onBackPressed();
-        CollectActivity.reloadData = true;
-        finish();
+    private void setupBackCallback() {
+        OnBackPressedCallback backCallback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                CollectActivity.reloadData = true;
+                finish();
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, backCallback);
     }
 
     @Override
@@ -924,6 +956,8 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         builder.setPositiveButton(getString(R.string.dialog_yes), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
 
+                preferences.edit().remove(GeneralKeys.getCropCoordinatesKey(Integer.parseInt(trait.getId()))).apply();
+
                 getDatabase().deleteTrait(trait.getId());
 
                 queryAndLoadTraits();
@@ -946,11 +980,20 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         String newTraitName = "";
 
-        String[] allTraits = getDatabase().getAllTraitNames();
+        ArrayList<TraitObject> allTraits = getDatabase().getAllTraitObjects();
 
-        for (int i = 0; i < allTraits.length; i++) {
+        for (int i = 0; i < allTraits.size(); i++) {
             newTraitName = traitName + "-Copy-(" + i + ")";
-            if (!Arrays.asList(allTraits).contains(newTraitName)) {
+
+            boolean nameExists = false;
+            for (TraitObject trait : allTraits) {
+                if (trait.getName().equals(newTraitName)) {
+                    nameExists = true;
+                    break;
+                }
+            }
+
+            if (!nameExists) {
                 return newTraitName;
             }
         }
@@ -976,6 +1019,17 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
     @Override
     public void onNewTraitDialogDismiss() {
+        if (!brapiDialogShown) {
+            brapiDialogShown = displayBrapiInfo(TraitEditorActivity.this, null, true);
+        }
         queryAndLoadTraits();
+    }
+
+    private void setupTraitEditorInsets() {
+        View rootView = findViewById(android.R.id.content);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        FloatingActionButton fab = findViewById(R.id.newTrait);
+
+        InsetHandler.INSTANCE.setupStandardInsets(rootView, toolbar);
     }
 }

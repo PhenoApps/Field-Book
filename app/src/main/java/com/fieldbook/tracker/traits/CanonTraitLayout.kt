@@ -3,6 +3,7 @@ package com.fieldbook.tracker.traits
 import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Bitmap
+import android.net.Network
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -216,18 +217,16 @@ class CanonTraitLayout :
 
         uiScope.launch(Dispatchers.Main) {
 
-            saveJpegToStorage(type(), data, obsUnit, saveTime, saveState, offset)
+            saveJpegToStorage(data, obsUnit, currentTrait, saveTime, saveState, offset)
 
         }
     }
 
-//    override fun getSsidName() =
-//        preferences.getString(GeneralKeys.CANON_SSID_NAME, "Canon") ?: "Canon"
+    override fun onApRequested() {
+    }
 
-    override fun onNetworkBound() {
-
+    override fun onNetworkBound(network: Network) {
         startCanonSession(currentRange)
-
     }
 }
 

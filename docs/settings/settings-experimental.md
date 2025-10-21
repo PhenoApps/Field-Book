@@ -29,7 +29,7 @@ If exporting in **Table** format, only the most recent measurement will be inclu
 
 #### <img class="icon" src="_static/icons/settings/experimental/microphone-message.png"> Enable Field Audio
 
-Adds icon to collect toolbar for recording audio at the field level.
+Adds an icon to collect toolbar for recording audio at the field level.
 
 #### <img class="icon" src="_static/icons/settings/experimental/qrcode-scan.png"> MLKit Library
 

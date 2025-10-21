@@ -8,13 +8,18 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.ThemedActivity;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.PreferenceKeys;
+import com.fieldbook.tracker.utilities.OpenAuthConfigurationUtil;
+import com.fieldbook.tracker.utilities.InsetHandler;
 
 import net.openid.appauth.AppAuthConfiguration;
 import net.openid.appauth.AuthorizationException;
@@ -33,39 +38,56 @@ import java.net.URL;
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function2;
 
 @AndroidEntryPoint
 public class BrapiAuthActivity extends ThemedActivity {
 
+    //first number that came to Pete's head --IRRI hackathon '25
+    public static int END_SESSION_REQUEST_CODE = 456;
+
+    public static String REDIRECT_URI = "fieldbook://app/auth";
+
     @Inject
     SharedPreferences preferences;
+
+    @Inject
+    OpenAuthConfigurationUtil authUtil;
 
     private boolean activityStarting = false;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_brapi_auth);
 
-        setSupportActionBar(findViewById(R.id.toolbar));
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(null);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setHomeButtonEnabled(true);
         }
 
+        View rootView = findViewById(android.R.id.content);
+        InsetHandler.INSTANCE.setupStandardInsets(rootView, toolbar);
+
         activityStarting = true;
 
         // Start our login process
         //when coming back from deep link this check keeps app from auto-re-authenticating
         if (getIntent() != null && getIntent().getData() == null) {
-            String flow = preferences.getString(GeneralKeys.BRAPI_OIDC_FLOW, "");
+            String flow = preferences.getString(PreferenceKeys.BRAPI_OIDC_FLOW, "");
             if (flow.equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
                 authorizeBrAPI_OLD(preferences, this);
             } else {
                 authorizeBrAPI(preferences, this);
             }
         }
+
+        getOnBackPressedDispatcher().addCallback(this, standardBackCallback());
     }
 
     @Override
@@ -88,13 +110,12 @@ public class BrapiAuthActivity extends ThemedActivity {
 
             if (data != null) {
                 // authorization completed
-                String flow = preferences.getString(GeneralKeys.BRAPI_OIDC_FLOW, "");
+                String flow = preferences.getString(PreferenceKeys.BRAPI_OIDC_FLOW, "");
                 if (flow.equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
                     checkBrapiAuth_OLD(data);
                 } else {
                     checkBrapiAuth(data);
                 }
-
 
             } else if (ex != null) {
 
@@ -112,90 +133,48 @@ public class BrapiAuthActivity extends ThemedActivity {
         }
     }
 
-    private static final String HTTP = "http";
-    private static final String HTTPS = "https";
-
-    private ConnectionBuilder getConnectionBuilder() {
-        return uri -> {
-            Log.d("ConnectionBuilder", "DOING CUSTOM URL");
-            Preconditions.checkNotNull(uri, "url must not be null");
-            Preconditions.checkArgument(HTTP.equals(uri.getScheme()) || HTTPS.equals(uri.getScheme()),
-                    "scheme or uri must be http or https");
-            HttpURLConnection conn = (HttpURLConnection) new URL(uri.toString()).openConnection();
-//                    conn.setConnectTimeout(CONNECTION_TIMEOUT_MS);
-//                    conn.setReadTimeout(READ_TIMEOUT_MS);
-            conn.setInstanceFollowRedirects(true);
-
-            // normally, 3xx is redirect
-            int status = conn.getResponseCode();
-            if (status == HttpURLConnection.HTTP_MOVED_TEMP
-                    || status == HttpURLConnection.HTTP_MOVED_PERM
-                    || status == HttpURLConnection.HTTP_SEE_OTHER) {
-                // get redirect url from "location" header field
-                String newUrl = conn.getHeaderField("Location");
-                // get the cookie if need, for login
-                String cookies = conn.getHeaderField("Set-Cookie");
-                conn.disconnect();
-                // open the new connection again
-                conn = (HttpURLConnection) new URL(newUrl).openConnection();
-                conn.setRequestProperty("Cookie", cookies);
-            } else {
-                conn = (HttpURLConnection) new URL(uri.toString()).openConnection();
-            }
-
-            return conn;
-        };
-    }
-
     public void authorizeBrAPI(SharedPreferences sharedPreferences, Context context) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(GeneralKeys.BRAPI_TOKEN, null);
+        editor.putString(PreferenceKeys.BRAPI_TOKEN, null);
         editor.apply();
 
-        String flow = sharedPreferences.getString(GeneralKeys.BRAPI_OIDC_FLOW, "");
+        String flow = sharedPreferences.getString(PreferenceKeys.BRAPI_OIDC_FLOW, "");
         final String responseType = flow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)) ?
                 ResponseTypeValues.TOKEN : ResponseTypeValues.CODE;
 
         try {
-            String clientId = sharedPreferences.getString(GeneralKeys.BRAPI_OIDC_CLIENT_ID, "fieldbook");
-            String scope = sharedPreferences.getString(GeneralKeys.BRAPI_OIDC_SCOPE, "");
+            String clientId = sharedPreferences.getString(PreferenceKeys.BRAPI_OIDC_CLIENT_ID, "fieldbook");
+            String scope = sharedPreferences.getString(PreferenceKeys.BRAPI_OIDC_SCOPE, "");
 
             // Authorization code flow works better with custom URL scheme fieldbook://app/auth
             // https://github.com/openid/AppAuth-Android/issues?q=is%3Aissue+intent+null
             Uri redirectURI = flow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)) ?
                     Uri.parse("https://phenoapps.org/field-book") : Uri.parse("fieldbook://app/auth");
-            Uri oidcConfigURI = Uri.parse(sharedPreferences.getString(GeneralKeys.BRAPI_OIDC_URL, ""));
 
-            ConnectionBuilder builder = getConnectionBuilder();
+            authUtil.getAuthServiceConfiguration((authorizationServiceConfiguration, ex) -> {
 
-            AuthorizationServiceConfiguration.fetchFromUrl(oidcConfigURI,
-                    new AuthorizationServiceConfiguration.RetrieveConfigurationCallback() {
-                        public void onFetchConfigurationCompleted(
-                                @Nullable AuthorizationServiceConfiguration serviceConfig,
-                                @Nullable AuthorizationException ex) {
+                if (ex != null) {
+                    Log.e("BrAPIService", "failed to fetch configuration", ex);
+                    authError(ex);
+                    finish();
+                    return null;
+                }
 
-                            if (ex != null) {
-                                Log.e("BrAPIService", "failed to fetch configuration", ex);
-                                authError(ex);
-                                finish();
-                                return;
-                            }
+                try {
 
-                            try {
+                    requestAuthorization(authorizationServiceConfiguration, clientId, responseType, redirectURI, scope, context);
 
-                                requestAuthorization(serviceConfig, clientId, responseType, redirectURI, scope, context);
+                } catch (IllegalArgumentException e) {
 
-                            } catch (IllegalArgumentException e) {
+                    e.printStackTrace();
 
-                                e.printStackTrace();
+                    Toast.makeText(context, R.string.oauth_configured_incorrectly, Toast.LENGTH_LONG).show();
 
-                                Toast.makeText(context, R.string.oauth_configured_incorrectly, Toast.LENGTH_LONG).show();
+                    finish();
+                }
 
-                                finish();
-                            }
-                        }
-
-                    }, builder);
+                return null;
+            });
 
         } catch (Exception ex) {
 
@@ -220,7 +199,13 @@ public class BrapiAuthActivity extends ThemedActivity {
                         redirectURI); // the redirect URI to which the auth response is sent
 
         if (!scope.trim().isEmpty()){
-            authRequestBuilder.setScope(scope);
+
+            authRequestBuilder.setScope(scope + " openid");
+
+        } else {
+
+            authRequestBuilder.setScopes("openid");
+
         }
 
         AuthorizationRequest authRequest = authRequestBuilder.setPrompt("login").build();
@@ -237,11 +222,11 @@ public class BrapiAuthActivity extends ThemedActivity {
 
     public void authorizeBrAPI_OLD(SharedPreferences sharedPreferences, Context context) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(GeneralKeys.BRAPI_TOKEN, null);
+        editor.putString(PreferenceKeys.BRAPI_TOKEN, null);
         editor.apply();
 
         try {
-            String url = sharedPreferences.getString(GeneralKeys.BRAPI_BASE_URL, "") + "/brapi/authorize?display_name=Field Book&return_url=fieldbook://";
+            String url = sharedPreferences.getString(PreferenceKeys.BRAPI_BASE_URL, "") + "/brapi/authorize?display_name=Field Book&return_url=fieldbook://";
             try {
                 // Go to url with the default browser
                 Uri uri = Uri.parse(url);
@@ -271,10 +256,11 @@ public class BrapiAuthActivity extends ThemedActivity {
         finish();
     }
 
-    private void authSuccess(String accessToken) {
+    private void authSuccess(String accessToken, @Nullable String idToken) {
 
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putString(GeneralKeys.BRAPI_TOKEN, accessToken);
+        editor.putString(PreferenceKeys.BRAPI_TOKEN, accessToken);
+        editor.putString(PreferenceKeys.BRAPI_ID_TOKEN, idToken).apply();
         editor.apply();
 
         // Clear our data from our deep link so the app doesn't think it is
@@ -305,7 +291,7 @@ public class BrapiAuthActivity extends ThemedActivity {
                 authError(null);
                 return;
             }
-            authSuccess(token);
+            authSuccess(token, null);
 
         } else {
             authError(null);
@@ -318,7 +304,7 @@ public class BrapiAuthActivity extends ThemedActivity {
      */
     private AuthorizationService getAuthorizationService() {
         AppAuthConfiguration.Builder builder = new AppAuthConfiguration.Builder();
-        builder.setConnectionBuilder(getConnectionBuilder());
+        builder.setConnectionBuilder(authUtil.getConnectionBuilder());
         return new AuthorizationService(this, builder.build());
     }
 
@@ -339,7 +325,7 @@ public class BrapiAuthActivity extends ThemedActivity {
                         @Override
                         public void onTokenRequestCompleted(@Nullable TokenResponse response, @Nullable AuthorizationException ex) {
                             if (response != null && response.accessToken != null) {
-                                authSuccess(response.accessToken);
+                                authSuccess(response.accessToken, response.idToken);
                             } else {
                                 authError(null);
                             }
@@ -349,7 +335,7 @@ public class BrapiAuthActivity extends ThemedActivity {
         }
 
         if (response != null && response.accessToken != null) {
-            authSuccess(response.accessToken);
+            authSuccess(response.accessToken, null);
             return;
         }
 
@@ -366,6 +352,6 @@ public class BrapiAuthActivity extends ThemedActivity {
             token = token.replaceFirst("Bearer ", "");
         }
 
-        authSuccess(token);
+        authSuccess(token, null);
     }
 }

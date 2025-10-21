@@ -31,7 +31,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
     WeakReference<Context> mContext;
     FieldAdapterController controller;
     FieldFileObject.FieldFileBase mFieldFile;
-    String unique, primary, secondary;
+    String unique;
     int idColPosition;
     SharedPreferences preferences;
 
@@ -40,10 +40,11 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
     private CharSequence failMessage;
     boolean uniqueFail;
     boolean containsDuplicates = false;
+    boolean fieldNameExists = false;
     private static final String TAG = "ImportRunnableTask";
 
     public ImportRunnableTask(Context context, FieldFileObject.FieldFileBase fieldFile,
-                              int idColPosition, String unique, String primary, String secondary) {
+                              int idColPosition, String unique) {
 
         mFieldFile = fieldFile;
 
@@ -57,8 +58,6 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
         this.idColPosition = idColPosition;
         this.unique = unique;
-        this.primary = primary;
-        this.secondary = secondary;
     }
 
     @Override
@@ -124,26 +123,26 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
                         if (columns[i].equals(unique)) {
                             uniqueIndex = i;
-                        } else if (columns[i].equals(primary)) {
-                            primaryIndex = i;
-                        } else if (columns[i].equals(secondary)) {
-                            secondaryIndex = i;
                         }
+
                     } else containsDuplicates = true;
                 }
             }
 
             FieldObject f = mFieldFile.createFieldObject();
-            f.setUnique_id(unique);
-            f.setPrimary_id(primary);
-            f.setSecondary_id(secondary);
+            f.setUniqueId(unique);
 
             controller.getDatabase().beginTransaction();
 
             studyId = controller.getDatabase().createField(f, nonEmptyColumns, false);
 
+            if (studyId == -1) {
+                fieldNameExists = true;
+                throw new RuntimeException();
+            }
+
             //start iterating over all the rows of the csv file only if we found the u/p/s indices
-            if (uniqueIndex > -1 && primaryIndex > -1 && secondaryIndex > -1) {
+            if (uniqueIndex > -1) {
                 int line = 0;
                 try {
                     while (true) {
@@ -155,11 +154,10 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
                         int rowSize = data.length;
 
                         //ensure next check won't cause an AIOB
-                        if (rowSize > uniqueIndex && rowSize > primaryIndex && rowSize > secondaryIndex) {
+                        if (rowSize > uniqueIndex) {
 
                             //check that all u/p/s strings are not empty
-                            if (!data[uniqueIndex].isEmpty() && !data[primaryIndex].isEmpty()
-                                    && !data[secondaryIndex].isEmpty()) {
+                            if (!data[uniqueIndex].isEmpty()) {
 
                                 ArrayList<String> nonEmptyData = new ArrayList<>();
                                 for (int j = 0; j < data.length; j++) {

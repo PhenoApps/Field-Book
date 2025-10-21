@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import androidx.activity.OnBackPressedDispatcher
 import androidx.appcompat.app.AlertDialog
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.brapi.io.BrapiCacheModel
@@ -20,6 +21,7 @@ import com.fieldbook.tracker.adapters.CheckboxListAdapter
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV2
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.traits.formats.Formats
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -32,6 +34,7 @@ import org.brapi.client.v2.model.queryParams.phenotype.VariableQueryParams
 import org.brapi.v2.model.core.BrAPIStudy
 import org.brapi.v2.model.pheno.BrAPIObservationVariable
 import javax.inject.Inject
+import androidx.core.content.edit
 
 @AndroidEntryPoint
 class BrapiTraitFilterActivity(
@@ -83,11 +86,14 @@ class BrapiTraitFilterActivity(
 
     override fun List<CheckboxListAdapter.Model>.filterBySearchTextPreferences(): List<CheckboxListAdapter.Model> {
 
-        val searchTexts = prefs.getStringSet("${filterName}${GeneralKeys.LIST_FILTER_TEXTS}", emptySet())
+        val searchTexts =
+            prefs.getStringSet("${filterName}${GeneralKeys.LIST_FILTER_TEXTS}", emptySet())
 
         return if (searchTexts?.isEmpty() != false) this else filter { model ->
             searchTexts.map { it.lowercase() }.all { tokens ->
-                tokens in model.label.lowercase() || tokens in model.subLabel.lowercase() || tokens in model.id.lowercase()
+                tokens in model.label.lowercase() || tokens in model.subLabel.lowercase() || tokens in model.id.lowercase() || model.searchableTexts.any {
+                    it.lowercase().contains(tokens)
+                }
             }
         }
     }
@@ -100,10 +106,12 @@ class BrapiTraitFilterActivity(
     override fun onSearchTextComplete(searchText: String) {
 
         prefs.getStringSet("${filterName}${GeneralKeys.LIST_FILTER_TEXTS}", setOf())?.let { texts ->
-            prefs.edit().putStringSet(
-                "${filterName}${GeneralKeys.LIST_FILTER_TEXTS}",
-                texts.plus(searchText)
-            ).apply()
+            prefs.edit {
+                putStringSet(
+                    "${filterName}${GeneralKeys.LIST_FILTER_TEXTS}",
+                    texts.plus(searchText)
+                )
+            }
         }
 
         restoreModels()
@@ -132,7 +140,8 @@ class BrapiTraitFilterActivity(
                     checked = false,
                     id = model.observationVariableDbId,
                     label = model.synonyms?.firstOrNull() ?: model.observationVariableName ?: model.observationVariableDbId,
-                    subLabel = "${model.commonCropName ?: ""} ${model.observationVariableDbId ?: ""}"
+                    subLabel = "${model.commonCropName ?: ""} ${model.observationVariableDbId ?: ""}",
+                    searchableTexts = model.observationVariableName?.let { listOf(it) } ?: emptyList()
                 ).also {
                     model.scale?.dataType?.name?.let { dataType ->
                         Formats.findTrait(DataTypes.convertBrAPIDataType(dataType))?.iconDrawableResourceId?.let { icon ->
@@ -153,6 +162,7 @@ class BrapiTraitFilterActivity(
 
         fetchDescriptionTv.text = getString(R.string.act_brapi_list_filter_loading_variables)
 
+        onBackPressedDispatcher.addCallback(this, standardBackCallback())
     }
 
     override fun onFinishButtonClicked() {
@@ -184,7 +194,7 @@ class BrapiTraitFilterActivity(
 
     private suspend fun queryVariables() = launch(Dispatchers.IO) {
 
-        val pageSize = prefs.getString(GeneralKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
+        val pageSize = prefs.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
 
         val variables = arrayListOf<BrAPIObservationVariable>()
 
@@ -255,7 +265,7 @@ class BrapiTraitFilterActivity(
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
             return true
         } else if (item.itemId == R.id.action_brapi_filter) {
             showFilterChoiceDialog()

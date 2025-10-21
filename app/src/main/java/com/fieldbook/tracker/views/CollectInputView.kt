@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.views
 
 import android.content.Context
+import android.graphics.Typeface
 import android.util.AttributeSet
 import android.widget.EditText
 import android.widget.TextView
@@ -10,6 +11,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 
 /**
  * View that contains the default fb edit text and the repeated values view feature.
@@ -22,13 +24,15 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
 
     var hasData: Boolean = false
 
+    private var isObservationSaved: Boolean = false
+
     private val originalEditText: EditText
 
     val repeatView: RepeatedValuesView
 
     //get the current mode from settings
     private val repeatModeFlag = PreferenceManager.getDefaultSharedPreferences(context)
-        .getBoolean(GeneralKeys.REPEATED_VALUES_PREFERENCE_KEY, false)
+        .getBoolean(PreferenceKeys.REPEATED_VALUES_PREFERENCE_KEY, false)
 
     init {
 
@@ -51,6 +55,7 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
         } else {
 
             text = ""
+            markObservationEdited()
         }
     }
 
@@ -59,6 +64,8 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
         initialize(models)
 
         repeatView.prepareModeNonEmpty()
+
+        markObservationSaved()
     }
 
     fun initialize(models: List<ObservationModel>) {
@@ -70,6 +77,7 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
         } else {
 
             text = models.minByOrNull { it.rep.toInt() }?.value ?: ""
+            markObservationEdited()
         }
     }
 
@@ -123,7 +131,7 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
      */
     fun clear() {
         if (isRepeatEnabled()) {
-            repeatView.clear()
+            repeatView.text = ""
         } else editText.text.clear()
     }
 
@@ -138,4 +146,26 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
     fun resetInitialIndex() {
         forceInitialRep = -1
     }
+
+    fun markObservationEdited() {
+        isObservationSaved = false
+        updateCurrentValueETStyle()
+    }
+
+    /**
+     * Mark current input as saved and update styling
+     */
+    fun markObservationSaved() {
+        isObservationSaved = true
+        updateCurrentValueETStyle()
+    }
+
+    /**
+     * Updates the text style based on saved/edited state
+     */
+    private fun updateCurrentValueETStyle() {
+        val style = if (isObservationSaved) Typeface.BOLD else Typeface.ITALIC
+        editText.setTypeface(null, style)
+    }
+
 }

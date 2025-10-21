@@ -1,18 +1,19 @@
 package com.fieldbook.tracker.activities
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.WindowManager
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.SharedPreferenceUtils
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -42,8 +43,8 @@ open class ThemedActivity: AppCompatActivity() {
             //set the theme
             val (themeIndex, textIndex) = with(prefs) {
 
-                (getString(GeneralKeys.THEME, "0")?.toInt()
-                    ?: 0) to (getString(GeneralKeys.TEXT_THEME, "1")?.toInt() ?: 1)
+                (getString(PreferenceKeys.THEME, "0")?.toInt()
+                    ?: 0) to (getString(PreferenceKeys.TEXT_THEME, "1")?.toInt() ?: 1)
 
             }
 
@@ -167,7 +168,7 @@ open class ThemedActivity: AppCompatActivity() {
                 }
 
                 //TODO this doesn't seem to be doing its job (must be set in manifest)
-                if ((activity is SearchActivity) || (activity is FileExploreActivity)) {
+                if (activity is FileExploreActivity) {
 
                     when (themeIndex) {
                         0 -> {
@@ -203,6 +204,7 @@ open class ThemedActivity: AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         applyTheme(this)
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
     }
 
     override fun onResume() {
@@ -215,9 +217,31 @@ open class ThemedActivity: AppCompatActivity() {
         disableTransitionAnimations()
     }
 
-    override fun onBackPressed() {
-        super.onBackPressed()
-        disableTransitionAnimations()
+    /**
+     * Register this callback in activities where you would have called super.onBackPressed()
+     * Do not register in activities which already have custom OnBackPressedCallback eg. Config, CollectActivity
+     */
+    protected fun standardBackCallback(): OnBackPressedCallback {
+        return object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                finish()
+            }
+        }
+    }
+
+    /**
+     * Use this for activities which have fragments and don't require special handling eg. Statistics, Preferences activities
+     */
+    protected fun fragmentBasedBackCallback(): OnBackPressedCallback {
+        return object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (supportFragmentManager.backStackEntryCount > 0) {
+                    supportFragmentManager.popBackStack()
+                } else {
+                    finish()
+                }
+            }
+        }
     }
 
     override fun finish() {

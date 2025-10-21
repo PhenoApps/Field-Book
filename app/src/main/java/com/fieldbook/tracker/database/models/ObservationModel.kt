@@ -15,11 +15,13 @@ data class ObservationModel(val map: Row) {
         val observation_variable_field_book_format: String? by map
         val observation_variable_name: String? by map
         var value: String = if ("value" in map) (map["value"] ?: "NA").toString()
-                        else if ("observation_variable_db_id" in map.keys) ObservationVariableDao.getTraitById(observation_variable_db_id)?.defaultValue ?: "NA"
+                        else if ("observation_variable_db_id" in map.keys) ObservationVariableDao.getTraitById(
+            observation_variable_db_id.toString()
+        )?.defaultValue ?: "NA"
                         else "NA"
         val observation_time_stamp: String? by map
         val collector: String? by map
-        val geo_coordinates: String? = if (map.containsKey("geoCoordinates")) map["geoCoordinates"]?.toString() else null
+        val geo_coordinates: String? = if (map.containsKey("geo_coordinates")) map["geo_coordinates"]?.toString() else null
         val study_id: String = (map["study_id"] ?: -1).toString()
         val last_synced_time: String by map
         val additional_info: String? by map

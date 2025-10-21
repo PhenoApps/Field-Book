@@ -1,5 +1,99 @@
 <changelog>
 
+    <release date="2025-10-20" versionCode="60302" versionName="v6.3.2">
+        <bugfix>GoPro Hero 13 no longer causes a crash</bugfix>
+        <bugfix>Reduced installer size by using a different ffmpeg library</bugfix>
+    </release>
+
+    <release date="2025-10-13" versionCode="60301" versionName="v6.3.1">
+        <info>Field Book now supports 16 KB page sizes</info>
+        <bugfix>Bug fixes and enhancements</bugfix>
+    </release>
+
+    <release date="2025-10-08" versionCode="60300" versionName="v6.3.0">
+        <new>Fields can now be grouped and archived</new>
+        <new>New trait formats: Stopwatch, Nix, Greenseeker, Scales</new>
+        <new>Trait name wrapping in Collect can now be toggled with a long-press</new>
+        <new>GoPro cameras can now optionally send just the image name instead of transferring the entire image</new>
+        <info>Field Book now targets Android SDK 36</info>
+        <info>Field Creator updated with new workflow and UI</info>
+        <info>Trait arrows are now hidden if only one trait is active</info>
+        <info>Boolean traits now have an unset state</info>
+        <bugfix>Improved workflow for logging out of BrAPI</bugfix>
+        <bugfix>Settings are no longer reset on restart</bugfix>
+        <bugfix>New traits from BrAPI now appear at the end of the trait list</bugfix>
+        <bugfix>Long pressing image and spectral thumbnails now displays metadata dialog</bugfix>
+        <bugfix>Importing traits from BrAPI without trait details no longer leads to a crash</bugfix>
+        <bugfix>Repeated measures no longer ignore trait limits</bugfix>
+        <bugfix>Keyboard backspace no longer moves cursor to the end of the current value in text traits</bugfix>
+        <bugfix>Field name is no longer an option in the Collect Search dialog</bugfix>
+        <bugfix>Exif user comment tag no longer populated by incorrect data</bugfix>
+        <bugfix>Return character setting is now interpreted correctly</bugfix>
+        <bugfix>Observation Variable Name is now searchable in the BrAPI trait importer</bugfix>
+        <bugfix>Image file name sanitation now removes or replaces more characters</bugfix>
+    </release>
+
+    <release date="2025-06-23" versionCode="60205" versionName="v6.2.5">
+        <bugfix>BrAPI Sync improved to avoid observation miscounts and other failures</bugfix>
+        <bugfix>0x00 character now removed from pasted text values</bugfix>
+    </release>
+
+    <release date="2025-06-09" versionCode="60204" versionName="v6.2.4">
+    </release>
+
+    <release date="2025-06-02" versionCode="60203" versionName="v6.2.3">
+        <new>New option to disable progress bars in Collect</new>
+        <bugfix>BrAPI min/max values are now imported correctly</bugfix>
+        <bugfix>MLKit library no longer causes crashes on certain devices</bugfix>
+    </release>
+
+    <release date="2025-04-16" versionCode="60202" versionName="v6.2.2">
+        <bugfix>Trait indicator icons in Collect now resize as expected</bugfix>
+        <bugfix>Device dark mode no longer affects Field Book UI</bugfix>
+        <bugfix>Traits with quotes now export correctly in table format</bugfix>
+    </release>
+
+    <release date="2025-04-09" versionCode="60201" versionName="v6.2.1">
+        <bugfix>Date traits using day of year now correctly saves</bugfix>
+        <bugfix>Fixed an issue with Settings search</bugfix>
+    </release>
+
+    <release date="2025-04-03" versionCode="60200" versionName="v6.2.0">
+        <new>Data grid updated with new interface</new>
+        <new>Device name can now be customized in Profile Settings</new>
+        <new>User names are now saved in a list for rapid switching</new>
+        <bugfix>Improvements for the GoPro Hero 9</bugfix>
+    </release>
+
+    <release date="2025-03-31" versionCode="60102" versionName="v6.1.2">
+        <new>Additional attributes are now included when importing fields using BrAPI</new>
+        <info>Improvements to the trait import and creation process</info>
+        <info>Angle trait animation has been reversed</info>
+        <bugfix>Nearest field snackbar no longer overlaps add field button</bugfix>
+        <bugfix>BrAPI Import background color is now white</bugfix>
+        <bugfix>Bundled media is now exported as expected for active and existing traits</bugfix>
+        <bugfix>Exporting with 'Only unique identifier' no longer shifts data</bugfix>
+    </release>
+
+    <release date="2025-03-24" versionCode="60101" versionName="v6.1.1">
+        <bugfix>Field imports from BrAPI now include the correct metadata</bugfix>
+    </release>
+
+    <release date="2025-03-17" versionCode="60100" versionName="v6.1.0">
+        <new>Primary/Secondar Order are no longer required when importing files</new>
+        <new>Labels between entry arrows can be swapped in Collect via new dialog</new>
+        <new>New or edited data values are now italicized</new>
+        <new>Settings can be shared between devices using Nearby Share</new>
+        <new>New Angle trait that uses device accelerometer</new>
+        <new>Barcode attribute can now be selected on a per field basis</new>
+        <new>Incoming photos can now be cropped</new>
+        <info>Date trait layout modified to match other formats</info>
+        <info>Audio trait layout modified to display more information</info>
+        <info>Quick GoTo setting removed and functionality moved to separate dialog that's enabled by default</info>
+        <bugfix>GNSS trait no longer resets connection when moving between entries</bugfix>
+        <bugfix>Manual trait order no longer reset when leaving screen</bugfix>
+    </release>
+
     <release date="2025-02-24" versionCode="60008" versionName="v6.0.8">
         <bugfix>Preferences are now correctly imported from database zip files</bugfix>
         <bugfix>BrAPI authorization fix for specific devices</bugfix>

@@ -61,7 +61,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/view_trait_photo_settings_resolution_tv"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/view_trait_photo_settings_crop_btn"
         app:layout_constraintVertical_bias="0">
 
         <ScrollView
@@ -80,6 +80,17 @@
 
         </ScrollView>
     </FrameLayout>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/view_trait_photo_settings_crop_btn"
+        android:text="@string/view_trait_photo_settings_crop"
+        android:layout_margin="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/view_trait_photo_settings_resolution_fl" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

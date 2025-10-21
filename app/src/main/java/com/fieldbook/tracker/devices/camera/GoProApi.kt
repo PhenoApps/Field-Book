@@ -2,10 +2,10 @@ package com.fieldbook.tracker.devices.camera
 
 import android.bluetooth.BluetoothDevice
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.net.Uri
+import android.net.Network
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
@@ -26,8 +26,9 @@ import org.phenoapps.fragments.gopro.GoProGattInterface
 import org.phenoapps.interfaces.gatt.GattCallbackInterface
 import java.net.URI
 import javax.inject.Inject
+import androidx.core.net.toUri
 
-
+@RequiresApi(Build.VERSION_CODES.Q)
 @UnstableApi
 class GoProApi @Inject constructor(
     @ActivityContext private val context: Context
@@ -57,22 +58,18 @@ class GoProApi @Inject constructor(
         fun onInitializeGatt()
         fun onStreamReady()
         fun onStreamRequested()
-        fun onImageRequestReady(bytes: ByteArray, data: ImageRequestData)
-        fun onBusyStateChanged(state: Int)
+        fun onImageRequestReady(bytes: ByteArray, data: ImageRequestData, model: GoProImage? = null)
+        fun onBusyStateChanged(isBusy: Int, isEncoding: Int)
     }
 
-    enum class GoProBusyState(value: Int) {
-        BUSY(1),
-        NOT_BUSY(0)
-    }
-
+    //state id refers to https://gopro.github.io/OpenGoPro/http#tag/Query/operation/OGP_GET_STATE
     enum class GoProStateKeys(val key: String) {
-        BUSY("8")
+        BUSY("8"),
+        IS_ENCODING("10")
     }
 
     companion object {
         const val TAG = "GoProApi"
-        const val FILE_SYSTEM_PREFIX = "GOPR"
         private const val ffmpegOutputUri = "udp://@localhost:8555"
     }
 
@@ -84,27 +81,16 @@ class GoProApi @Inject constructor(
         context as CollectController
     }
 
-    private val httpClient by lazy {
-        OkHttpClient()
-    }
-
-    private val loadControl: androidx.media3.exoplayer.DefaultLoadControl =
-        androidx.media3.exoplayer.DefaultLoadControl.Builder()
-            .setPrioritizeTimeOverSizeThresholds(true)
-            .setBufferDurationsMs(500, 1000, 500, 500)
-            .build()
+    private var httpClient: OkHttpClient? = OkHttpClient()
 
     private val mediaSource: androidx.media3.exoplayer.source.MediaSource =
         androidx.media3.exoplayer.source.ProgressiveMediaSource.Factory(
             androidx.media3.datasource.DefaultDataSource.Factory(context)
         ).createMediaSource(
             androidx.media3.common.MediaItem.fromUri(
-                Uri.parse(ffmpegOutputUri)
+                ffmpegOutputUri.toUri()
             )
         )
-
-    private val trackSelector: androidx.media3.exoplayer.trackselection.DefaultTrackSelector =
-        androidx.media3.exoplayer.trackselection.DefaultTrackSelector(context)
 
     private val playerListener: Player.Listener = object : Player.Listener {
         override fun onPlaybackStateChanged(playbackState: Int) {
@@ -124,7 +110,7 @@ class GoProApi @Inject constructor(
                 }
 
                 Player.STATE_READY -> {
-                    Log.d(TAG, "Player Ready ${if (range.isNotEmpty()) range[0].range.plot_id else ""}")
+                    Log.d(TAG, "Player Ready ${if (range.isNotEmpty()) range[0].range.uniqueId else ""}")
 
                     callbacks?.onStreamReady()
                 }
@@ -132,6 +118,7 @@ class GoProApi @Inject constructor(
         }
     }
 
+    private var requestedUrls = arrayListOf<String>()
     private var player: ExoPlayer? = null
     private var callbacks: Callbacks? = null
 
@@ -146,7 +133,7 @@ class GoProApi @Inject constructor(
             .url(URI.create("http://10.5.5.9:8080/gopro/camera/state").toHttpUrlOrNull()!!)
             .build()
 
-        httpClient.newCall(getState).enqueue(object : Callback {
+        httpClient?.newCall(getState)?.enqueue(object : Callback {
 
             override fun onFailure(call: okhttp3.Call, e: okio.IOException) {
                 Log.e(TAG, "Request state failed.")
@@ -171,10 +158,12 @@ class GoProApi @Inject constructor(
             //Log.d(TAG, json.toString(1))
             val state = json.getJSONObject("status")
             //Log.d(TAG, "GoPro state: $state")
-            val busy = state.getInt("8")
-            Log.d(TAG, "Camera is busy: ${busy == 1}")
+            val busy = state.getInt(GoProStateKeys.BUSY.key)
+            val isEncoding = state.getInt(GoProStateKeys.IS_ENCODING.key)
+            //Log.d(TAG, "Camera is busy: ${busy == 1}")
+            //Log.d(TAG, "Camera is encoding: ${isEncoding == 1}")
 
-            callbacks?.onBusyStateChanged(busy)
+            callbacks?.onBusyStateChanged(busy, isEncoding)
 
         } catch (e: JSONException) {
             e.printStackTrace()
@@ -188,7 +177,7 @@ class GoProApi @Inject constructor(
             .url(URI.create("http://10.5.5.9:8080/gopro/camera/stream/stop").toHttpUrlOrNull()!!)
             .build()
 
-        httpClient.newCall(stopPreview).enqueue(object : Callback {
+        httpClient?.newCall(stopPreview)?.enqueue(object : Callback {
 
             override fun onFailure(call: okhttp3.Call, e: okio.IOException) {
                 Log.e(TAG, "Request stop failed.")
@@ -220,7 +209,7 @@ class GoProApi @Inject constructor(
             .url(URI.create("http://10.5.5.9:8080/gopro/camera/stream/start").toHttpUrlOrNull()!!)
             .build()
 
-        httpClient.newCall(startPreview).enqueue(object : Callback {
+        httpClient?.newCall(startPreview)?.enqueue(object : Callback {
 
             override fun onFailure(call: okhttp3.Call, e: okio.IOException) {
                 Log.e(TAG, "Failed to make network request to GoPro AP")
@@ -245,7 +234,7 @@ class GoProApi @Inject constructor(
     /**
      * http request to read media list (files on gopro device)
      */
-    fun queryMedia() {
+    fun queryMedia(requestAndSaveImage: Boolean = true) {
 
         val model = if (range.isNotEmpty()) range.removeAt(0) else lastMoved
 
@@ -256,7 +245,7 @@ class GoProApi @Inject constructor(
             .url(URI.create("http://10.5.5.9:8080/gopro/media/list").toHttpUrlOrNull()!!)
             .build()
 
-        httpClient.newCall(mediaQuery).enqueue(object : Callback {
+        httpClient?.newCall(mediaQuery)?.enqueue(object : Callback {
 
             override fun onFailure(call: okhttp3.Call, e: okio.IOException) {
 
@@ -273,7 +262,7 @@ class GoProApi @Inject constructor(
 
                 } else {
 
-                    parseMediaQueryResponse(response.body?.string() ?: "{}", model!!)
+                    parseMediaQueryResponse(response.body?.string() ?: "{}", model!!, requestAndSaveImage)
 
                     Log.i(TAG, "Media query success.")
 
@@ -295,7 +284,7 @@ class GoProApi @Inject constructor(
             .url(URI.create("http://10.5.5.9:8080/gopro/camera/stream/stop").toHttpUrlOrNull()!!)
             .build()
 
-        httpClient.newCall(stopPreview).enqueue(object : Callback {
+        httpClient?.newCall(stopPreview)?.enqueue(object : Callback {
 
             override fun onFailure(call: okhttp3.Call, e: okio.IOException) {
                 Log.e(TAG, "Request stop failed.")
@@ -359,6 +348,12 @@ class GoProApi @Inject constructor(
         player?.release()
         player = null
 
+        val trackSelector = androidx.media3.exoplayer.trackselection.DefaultTrackSelector(context)
+        val loadControl = androidx.media3.exoplayer.DefaultLoadControl.Builder()
+            .setPrioritizeTimeOverSizeThresholds(true)
+            .setBufferDurationsMs(2500, 5000, 1500, 2000)
+            .build()
+
         player = ExoPlayer.Builder(context)
             .setTrackSelector(trackSelector)
             .setLoadControl(loadControl)
@@ -378,7 +373,8 @@ class GoProApi @Inject constructor(
      */
     private fun parseMediaQueryResponse(
         responseBody: String,
-        model: ImageRequestData
+        model: ImageRequestData,
+        requestAndSaveImage: Boolean = true
     ) {
 
         try {
@@ -409,30 +405,54 @@ class GoProApi @Inject constructor(
 
                     val fileName = file.getString("n")
 
-                    if (fileName.startsWith(FILE_SYSTEM_PREFIX)) {
-
-                        images.add(
-                            GoProImage(
-                                dir,
-                                fileName,
-                                file.getString("mod").toLong(),
-                                file.getString("s").toLong(),
-                                "http://10.5.5.9:8080/videos/DCIM/$dir/$fileName"
-                            )
+                    images.add(
+                        GoProImage(
+                            dir,
+                            fileName,
+                            file.getString("mod").toLong(),
+                            file.getString("s").toLong(),
+                            "http://10.5.5.9:8080/videos/DCIM/$dir/$fileName"
                         )
-                    }
+                    )
                 }
             }
 
-            val latest = images.maxBy { it.fileName.split(".")[0].split(FILE_SYSTEM_PREFIX)[1].toInt() }.url
+            val pattern = Regex("^([a-zA-Z]*)([0-9]*).([a-zA-Z]*)$")
 
-            requestFileUrl(latest, model)
+            val latest = images.maxByOrNull {
+                pattern.matchEntire(it.fileName)?.destructured?.let { (prefix, number, suffix) ->
+                    number.toInt()
+                } ?: -1
+            }
+
+            if (latest != null) {
+                if (latest.url !in requestedUrls) {
+                    requestedUrls.add(latest.url)
+
+                    if (requestAndSaveImage) {
+                        requestFileUrl(latest.url, model)
+                    } else {
+                        saveImageName(latest, model)
+                    }
+                }
+            }
 
         } catch (e: JSONException) {
 
             e.printStackTrace()
 
+        } catch (e: NoSuchElementException) {
+            e.printStackTrace()
         }
+    }
+
+    private fun saveImageName(latest: GoProImage, model: ImageRequestData) {
+
+        callbacks?.onImageRequestReady(
+            byteArrayOf(),
+            model,
+            latest
+        )
     }
 
     /**
@@ -440,14 +460,14 @@ class GoProApi @Inject constructor(
      */
     private fun requestFileUrl(url: String, model: ImageRequestData) {
 
-        Log.d(TAG, "Image request: $url for model: ${model.range.plot_id}")
+        Log.d(TAG, "Image request: $url for model: ${model.range.uniqueId}")
 
         //stop stream first, on fail or success start stream again:
         val requestImage: Request = Request.Builder()
             .url(URI.create(url).toHttpUrlOrNull()!!)
             .build()
 
-        httpClient.newCall(requestImage).enqueue(object : Callback {
+        httpClient?.newCall(requestImage)?.enqueue(object : Callback {
 
             override fun onFailure(call: okhttp3.Call, e: okio.IOException) {
 
@@ -543,7 +563,11 @@ class GoProApi @Inject constructor(
         gatt.shutterOn()
     }
 
-    override fun onNetworkBound() {
+    override fun onNetworkBound(network: Network) {
+
+        httpClient = OkHttpClient.Builder()
+            .socketFactory(network.socketFactory)
+            .build()
 
         callbacks?.onConnected()
 

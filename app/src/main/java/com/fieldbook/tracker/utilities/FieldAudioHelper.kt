@@ -12,6 +12,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.interfaces.TraitCsvWriter
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getFieldDataDirectory
 import com.fieldbook.tracker.utilities.DocumentTreeUtil.Companion.getFieldMediaDirectory
 import com.fieldbook.tracker.utilities.ZipUtil.Companion.zip
@@ -129,7 +130,7 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
                 paths.add(fullGeoNavFile)
             paths.add(traitsDocumentFile)
 
-            val mGeneratedName = "field_audio_log" + context.cRange.plot_id + "_" + fieldAlias + " " + timeStamp.format(c.time)    + ".zip"
+            val mGeneratedName = "field_audio_log" + context.cRange.uniqueId + "_" + fieldAlias + " " + timeStamp.format(c.time)    + ".zip"
 
             val exportDir = getDirectory(context, R.string.dir_field_export)
             val zipFile = exportDir?.createFile("*/*", mGeneratedName)
@@ -152,7 +153,7 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
             buttonState = ButtonState.WAITING_FOR_RECORDING
             releaseRecorder()
             // zip the field audio and log file only if logging is enabled
-            val isLoggingEnabled = mPrefs.getString(GeneralKeys.GEONAV_LOGGING_MODE, "0")
+            val isLoggingEnabled = mPrefs.getString(PreferenceKeys.GEONAV_LOGGING_MODE, "0")
             if(isLoggingEnabled != "0"){
                 zipAudioLogAndTraits()
             }
@@ -207,10 +208,10 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
         val mGeneratedName: String
         val fieldAlias = preferences.getString(GeneralKeys.FIELD_FILE, "")
         mGeneratedName = try {
-            if (isFieldAudio) "field_audio_" + (context as CollectActivity).cRange.plot_id + "_" + fieldAlias + " " + timeStamp.format(
+            if (isFieldAudio) "field_audio_" + (context as CollectActivity).cRange.uniqueId + "_" + fieldAlias + " " + timeStamp.format(
                 c.time
             )
-            else (context as CollectActivity).cRange.plot_id + " " + timeStamp.format(c.time)
+            else (context as CollectActivity).cRange.uniqueId + " " + timeStamp.format(c.time)
         } catch (e: Exception) {
             "error " + timeStamp.format(c.time)
         }

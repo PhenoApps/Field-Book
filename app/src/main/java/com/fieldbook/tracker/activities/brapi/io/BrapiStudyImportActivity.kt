@@ -1,6 +1,5 @@
 package com.fieldbook.tracker.activities.brapi.io
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -12,6 +11,8 @@ import android.widget.ListView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedDispatcher
+import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
@@ -24,10 +25,13 @@ import com.fieldbook.tracker.brapi.model.BrapiStudyDetails
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV1
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV2
-import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.preferences.PreferenceKeys
+import com.fieldbook.tracker.utilities.InsetHandler
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -48,7 +52,9 @@ import org.brapi.v2.model.pheno.BrAPIObservationUnit
 import org.brapi.v2.model.pheno.BrAPIObservationVariable
 import org.brapi.v2.model.pheno.BrAPIPositionCoordinateTypeEnum
 import java.util.Locale
+import javax.inject.Inject
 import kotlin.collections.set
+import kotlin.math.max
 
 /**
  * receive study information including trial
@@ -56,6 +62,7 @@ import kotlin.collections.set
  * get obs. levels
  * get observation units, and traits, germplasm
  */
+@AndroidEntryPoint
 class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope() {
 
     companion object {
@@ -80,7 +87,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                         getString(R.string.brapi_v1_is_not_compatible),
                         Toast.LENGTH_SHORT
                     ).show()
-                    setResult(Activity.RESULT_CANCELED)
+                    setResult(RESULT_CANCELED)
                     finish()
                 }
             }
@@ -105,10 +112,11 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
     private var selectedLevel: Int = -1
     private var selectedSort: Int = -1
-    private var selectedPrimary: Int = -1
-    private var selectedSecondary: Int = -1
 
     private var attributesTable: HashMap<String, Map<String, Map<String, String>>>? = null
+
+    @Inject
+    lateinit var db: DataHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -122,20 +130,25 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         studyList = findViewById(R.id.act_list_filter_rv)
         importButton = findViewById(R.id.act_study_importer_import_button)
 
-        setSupportActionBar(findViewById(R.id.act_list_filter_tb))
+        val toolbar = findViewById<Toolbar>(R.id.act_list_filter_tb)
+        setSupportActionBar(toolbar)
 
         supportActionBar?.setTitle(R.string.act_brapi_study_import_title)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
+        val rootView = findViewById<View>(android.R.id.content)
+        InsetHandler.setupStandardInsets(rootView, toolbar)
+
         parseIntentExtras()
 
+        OnBackPressedDispatcher().addCallback(this, standardBackCallback())
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
         when (item.itemId) {
             android.R.id.home -> {
-                setResult(Activity.RESULT_CANCELED)
+                setResult(RESULT_CANCELED)
                 finish()
                 return true
             }
@@ -152,7 +165,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         if (studyDbIds.isEmpty()) {
             // fetch study info
             Toast.makeText(this, getString(R.string.no_studydbids_provided), Toast.LENGTH_SHORT).show()
-            setResult(Activity.RESULT_CANCELED)
+            setResult(RESULT_CANCELED)
             finish()
         } else {
 
@@ -189,7 +202,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
                     Toast.makeText(this@BrapiStudyImportActivity, getString(R.string.failed_to_fetch_observation_levels), Toast.LENGTH_SHORT).show()
 
-                    setResult(Activity.RESULT_CANCELED)
+                    setResult(RESULT_CANCELED)
 
                     finish()
                 }
@@ -208,7 +221,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     }
 
     enum class Tab {
-        LEVELS, PRIMARY_ORDER, SECONDARY_ORDER, SORT
+        LEVELS, SORT
     }
 
     private fun loadTabLayout(studyDbIds: List<String>) {
@@ -220,8 +233,6 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 when (tab?.position) {
                     Tab.LEVELS.ordinal -> setLevelListOptions()
                     Tab.SORT.ordinal -> setSortListOptions()
-                    Tab.PRIMARY_ORDER.ordinal -> setPrimaryOrderListOptions()
-                    Tab.SECONDARY_ORDER.ordinal -> setSecondaryOrderListOptions()
                 }
 
                 listView.visibility = View.VISIBLE
@@ -314,91 +325,13 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         }
     }
 
-    private fun setPrimaryOrderListOptions() {
-
-        listView.visibility = View.VISIBLE
-
-        val attributes = getAttributeKeys()
-
-        listView.adapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_list_item_single_choice,
-            attributes
-        )
-
-        listView.setItemChecked(selectedPrimary, true)
-
-        listView.smoothScrollToPosition(selectedPrimary)
-
-        listView.setOnItemClickListener { _, _, position, _ ->
-
-            selectedPrimary = if (selectedPrimary == position) {
-
-                listView.setItemChecked(selectedPrimary, false)
-
-                -1
-
-            } else position
-        }
-    }
-
-    private fun setSecondaryOrderListOptions() {
-
-        listView.visibility = View.VISIBLE
-
-        val attributes = getAttributeKeys()
-
-        listView.adapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_list_item_single_choice,
-            attributes
-        )
-
-        listView.setItemChecked(selectedSecondary, true)
-
-        listView.smoothScrollToPosition(selectedSecondary)
-
-        listView.setOnItemClickListener { _, _, position, _ ->
-
-            selectedSecondary = if (selectedSecondary == position) {
-
-                listView.setItemChecked(selectedSecondary, false)
-
-                -1
-
-            } else position
-        }
-    }
-
     private fun setDefaultAttributeIdentifiers() {
-
-        val attributes = getAttributeKeys()
 
         val levels = existingLevels()
 
         if (selectedLevel == -1) {
             selectedLevel = if (levels.contains("plot")) {
                 levels.indexOf("plot")
-            } else {
-                0
-            }
-        }
-
-        if (selectedPrimary == -1) {
-            selectedPrimary = if (attributes.contains("Row")) {
-                attributes.indexOf("Row")
-            } else if (attributes.contains("Block")) {
-                attributes.indexOf("Block")
-            } else {
-                0
-            }
-        }
-
-        if (selectedSecondary == -1) {
-            selectedSecondary = if (attributes.contains("Column")) {
-                attributes.indexOf("Column")
-            } else if (attributes.contains("Rep")) {
-                attributes.indexOf("Rep")
             } else {
                 0
             }
@@ -416,6 +349,16 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
             if (unit.germplasmName != null) {
                 attributes["Germplasm"] = unit.germplasmName
+            }
+
+            unit.locationName?.takeIf { it.isNotEmpty() }?.let {
+                attributes["Location"] = it
+            }
+
+            unit.additionalInfo?.entrySet()?.forEach { entry ->
+                entry.value?.asString?.takeIf { it.isNotEmpty() }?.let {
+                    attributes[entry.key] = it
+                }
             }
 
             val position = unit.observationUnitPosition
@@ -607,7 +550,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 Toast.makeText(this@BrapiStudyImportActivity,
                     getString(R.string.failed_to_fetch_observation_units), Toast.LENGTH_SHORT).show()
 
-                onBackPressed()
+                onBackPressedDispatcher.onBackPressed()
 
             }
 
@@ -627,6 +570,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
             importButton.isEnabled = false
 
             launch(Dispatchers.IO) {
+                val successfullyImportedStudies = mutableListOf<String>()
 
                 val level = BrapiObservationLevel().also {
                     it.observationLevelName = try {
@@ -643,20 +587,39 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 }
 
                 val allAttributes = getAttributeKeys()
-                val primaryId = allAttributes[selectedPrimary]
-                val secondaryId = allAttributes[selectedSecondary]
                 val sortOrder = if (selectedSort == -1) "" else allAttributes[selectedSort]
 
                 studyDbIds.forEach { id ->
 
-                    studies.firstOrNull { it.studyDbId == id }?.let {
+                    try {
 
-                        saveStudy(it, level, primaryId, secondaryId, sortOrder)
+                        studies.firstOrNull { it.studyDbId == id }?.let {
 
+                            saveStudy(it, level, sortOrder)
+
+                            successfullyImportedStudies.add(id) // track the successfully imported fields
+
+                        }
+
+                    } catch (e: Exception) {
+
+                        Log.e(TAG, "Failed to save study", e)
+
+                        runOnUiThread {
+
+                            Toast.makeText(this@BrapiStudyImportActivity, getString(R.string.failed_to_save_study), Toast.LENGTH_SHORT).show()
+
+                        }
                     }
                 }
 
-                setResult(Activity.RESULT_OK)
+                val resultIntent = Intent()
+                if (successfullyImportedStudies.size == 1) { // switch active field if only one study was imported
+                    val studyModel = db.getStudyByDbId(successfullyImportedStudies.first())
+                    val fieldId = studyModel?.internal_id_study
+                    resultIntent.putExtra("fieldId", fieldId ?: -1)
+                }
+                setResult(RESULT_OK, resultIntent)
                 finish()
 
             }
@@ -666,10 +629,10 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     private fun saveStudy(
         study: BrAPIStudy,
         level: BrapiObservationLevel,
-        primaryId: String,
-        secondaryId: String,
         sortId: String
     ) {
+
+        var maxVariableIndex = db.maxPositionFromTraits + 1
 
         attributesTable?.get(study.studyDbId)?.let { studyAttributes ->
 
@@ -687,64 +650,55 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                     details.trialName = study.trialName
 
                     details.traits = observationVariables[study.studyDbId]?.toList()
-                        ?.map { it.toTraitObject(this@BrapiStudyImportActivity) } ?: listOf()
+                        ?.map { it.toTraitObject(this@BrapiStudyImportActivity).also {
+                            it.realPosition = maxVariableIndex++
+                        } } ?: listOf()
 
                     val geoCoordinateColumnName = "geo_coordinates"
 
                     val attributes = (studyAttributes.values.flatMap { it.keys } + geoCoordinateColumnName).distinct()
 
-                    if (listOf(primaryId, secondaryId, sortId).filter { it.isNotEmpty() }.all { it in attributes }) {
+                    details.attributes = attributes
 
-                        details.attributes = attributes
+                    val unitAttributes = ArrayList<List<String>>()
+                    units.forEach { unit ->
 
-                        val unitAttributes = ArrayList<List<String>>()
-                        units.forEach { unit ->
+                        val row = ArrayList<String>()
 
-                            val row = ArrayList<String>()
-
-                            attributes.forEach { attr ->
-                                if (attr != geoCoordinateColumnName) {
-                                    row.add(studyAttributes[unit.observationUnitDbId]?.get(attr) ?: "")
-                                }
+                        attributes.forEach { attr ->
+                            if (attr != geoCoordinateColumnName) {
+                                row.add(studyAttributes[unit.observationUnitDbId]?.get(attr) ?: "")
                             }
-
-                            //add geo json as json string
-                            if (geoCoordinateColumnName in attributes) {
-                                unit.observationUnitPosition?.geoCoordinates?.let { coordString ->
-                                    try {
-                                        row.add(JSON().serialize(coordString))
-                                    } catch (e: Exception) {
-                                        Log.e(TAG, "Failed to serialize geo coordinates", e)
-                                    }
-                                }
-                            }
-
-                            unitAttributes.add(row)
-
                         }
 
-                        details.values = mutableListOf()
-                        details.values.addAll(unitAttributes)
-
-                        brapiService.saveStudyDetails(
-                            details,
-                            level,
-                            primaryId,
-                            secondaryId,
-                            sortId,
-                        )
-                    } else {
-
-                        runOnUiThread {
-
-                            Toast.makeText(this, getString(R.string.failed_to_save_study), Toast.LENGTH_SHORT).show()
-                            setResult(Activity.RESULT_CANCELED)
-                            finish()
+                        //add geo json as json string
+                        if (geoCoordinateColumnName in attributes) {
+                            unit.observationUnitPosition?.geoCoordinates?.let { coordString ->
+                                try {
+                                    row.add(JSON().serialize(coordString))
+                                } catch (e: Exception) {
+                                    Log.e(TAG, "Failed to serialize geo coordinates", e)
+                                }
+                            }
                         }
+
+                        unitAttributes.add(row)
+
                     }
+
+                    details.values = mutableListOf()
+                    details.values.addAll(unitAttributes)
+
+                    //primary/secondary no longer required
+                    brapiService.saveStudyDetails(
+                        details,
+                        level,
+                        "",
+                        "",
+                        sortId,
+                    )
                 }
         }
-
     }
 
     private suspend fun fetchObservationLevels(programDbId: String) = coroutineScope {
@@ -789,7 +743,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
         val germs = arrayListOf<BrAPIGermplasm>()
 
-        val pageSize = prefs.getString(GeneralKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
+        val pageSize = prefs.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
 
         Log.d(TAG, "Fetching germplasm for $studyDbId")
 
@@ -835,7 +789,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
             val models = arrayListOf<BrAPIObservationVariable>()
 
-            val pageSize = prefs.getString(GeneralKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
+            val pageSize = prefs.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
 
             launch(Dispatchers.IO) {
                 (brapiService as BrAPIServiceV2).observationVariableService.fetchAll(
@@ -881,7 +835,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
         val units = arrayListOf<BrAPIObservationUnit>()
 
-        val pageSize = prefs.getString(GeneralKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
+        val pageSize = prefs.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
 
         launch(Dispatchers.IO) {
 
