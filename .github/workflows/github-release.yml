@@ -121,8 +121,8 @@ jobs:
               CURRENT_TYPE="info"
             elif [[ "$note" == "### Fixed"* ]]; then
               CURRENT_TYPE="bugfix"
-            elif [[ "$note" =~ ^- ]]; then
-              clean_note=$(echo "$note" | sed -E 's/^- //; s/ *\(.*\)//')
+            elif [[ "$note" =~ ^- ]] && [[ -n "$CURRENT_TYPE" ]]; then
+              clean_note=$(echo "$note" | sed -E 's/^- //')
               RELEASE_CONTENT+="        <${CURRENT_TYPE}>${clean_note}</${CURRENT_TYPE}>\n"
               #pr_number=$(echo "$note" | grep -oP 'pull/\K[0-9]+' || echo "N/A")
               #RELEASE_CONTENT+="        <${CURRENT_TYPE}>${clean_note} (#${pr_number})</${CURRENT_TYPE}>\n"
@@ -154,7 +154,21 @@ jobs:
 
           today=$(date +'%Y-%m-%d')
           sed -i "s/## \[Unreleased\]/## [v$VERSION] - $today/" CHANGELOG.md
-          sed -i '/## \[v'$VERSION'\]/i ## [Unreleased]\n\n### Added\n\n### Changed\n\n### Fixed\n' CHANGELOG.md
+          # Create new Unreleased section, only including sections that have content
+          new_unreleased="## [Unreleased]\n"
+          if echo "$unreleased_section" | grep -q "^### Added" && echo "$unreleased_section" | sed -n '/^### Added$/,/^### /p' | grep -q "^- "; then
+            new_unreleased+="\n### Added\n"
+          fi
+          if echo "$unreleased_section" | grep -q "^### Changed" && echo "$unreleased_section" | sed -n '/^### Changed$/,/^### /p' | grep -q "^- "; then
+            new_unreleased+="\n### Changed\n" 
+          fi
+          if echo "$unreleased_section" | grep -q "^### Fixed" && echo "$unreleased_section" | sed -n '/^### Fixed$/,/^### /p' | grep -q "^- "; then
+            new_unreleased+="\n### Fixed\n"
+          fi
+          if [[ "$new_unreleased" == "## [Unreleased]\n" ]]; then
+            new_unreleased+="\n### Added\n\n### Changed\n\n### Fixed\n"
+          fi
+          sed -i '/## \[v'$VERSION'\]/i '"$new_unreleased"'' CHANGELOG.md
 
           REPO_URL="https://github.com/${{ github.repository }}/releases/tag"
           printf "\n[v$VERSION]: $REPO_URL/$VERSION" >> CHANGELOG.md
@@ -177,30 +191,30 @@ jobs:
       - name: Get local.properties from secrets
         run: echo "${{secrets.LOCAL_PROPERTIES }}" > $GITHUB_WORKSPACE/local.properties
   
-      - name: Build APK
-        run: ./gradlew app:assembleRelease
+      # - name: Build APK
+      #   run: ./gradlew app:assembleRelease
 
-      - name: Sign APK
-        uses: r0adkll/sign-android-release@v1
-        with:
-          releaseDirectory: app/build/outputs/apk/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          alias: ${{ secrets.ALIAS }}
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
+      # - name: Sign APK
+      #   uses: r0adkll/sign-android-release@v1
+      #   with:
+      #     releaseDirectory: app/build/outputs/apk/release
+      #     signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+      #     alias: ${{ secrets.ALIAS }}
+      #     keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+      #     keyPassword: ${{ secrets.KEY_PASSWORD }}
 
-      - name: Upload Built APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: Signed APK
-          path: app/build/outputs/
+      # - name: Upload Built APK
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: Signed APK
+      #     path: app/build/outputs/
 
       - name: Commit Version and Changelog Changes
         if: ${{ success() }}
         uses: EndBug/add-and-commit@v7
         with:
           add: "version.properties CHANGELOG.md app/src/main/res/raw/changelog.xml"
-          message: "Bump ${{ env.BUMP_TYPE }} and update changelog for v${{ env.VERSION }}"
+          message: "Bump ${{ needs.check-changes.outputs.bump_type }} and update changelog for v${{ env.VERSION }}"
           token: ${{ secrets.ACTIONS_PAT }}
 
       - name: Push Changes
@@ -209,15 +223,15 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref }}
 
-      - name: Make GitHub Release
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          release_name: "v${{ env.VERSION }}"
-          tag: "${{ env.VERSION }}"
-          file: app/build/outputs/apk/release/app-release-unsigned-signed.apk
-          asset_name: "Field-Book-v${{ env.VERSION }}.apk"
-          body: ${{ steps.process-changelog.outputs.changelog_additions }}
+      # - name: Make GitHub Release
+      #   uses: svenstaro/upload-release-action@v2
+      #   with:
+      #     repo_token: ${{ secrets.GITHUB_TOKEN }}
+      #     release_name: "v${{ env.VERSION }}"
+      #     tag: "${{ env.VERSION }}"
+      #     file: app/build/outputs/apk/release/app-release-unsigned-signed.apk
+      #     asset_name: "Field-Book-v${{ env.VERSION }}.apk"
+      #     body: ${{ steps.process-changelog.outputs.changelog_additions }}
       
       - name: Check date for Google Play upload
         id: date_check
@@ -229,12 +243,19 @@ jobs:
           else
             echo "UPLOAD_TO_PLAY_STORE=true" >> $GITHUB_ENV
           fi
+
+      - name: Test Build (Dry Run)
+        run: |
+          echo "Would build APK with version: $VERSION"
+          echo "Would create release with tag: $VERSION"
+          echo "Changelog content: ${{ steps.process-changelog.outputs.changelog_additions }}"
+
     
-      - name: Release APK to Play Store
-        if: env.UPLOAD_TO_PLAY_STORE == 'true'
-        uses: r0adkll/upload-google-play@v1
-        with:
-          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
-          packageName: com.fieldbook.tracker
-          releaseFiles: app/build/outputs/apk/release/app-release-unsigned-signed.apk
-          track: alpha
+      # - name: Release APK to Play Store
+      #   if: env.UPLOAD_TO_PLAY_STORE == 'true'
+      #   uses: r0adkll/upload-google-play@v1
+      #   with:
+      #     serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+      #     packageName: com.fieldbook.tracker
+      #     releaseFiles: app/build/outputs/apk/release/app-release-unsigned-signed.apk
+      #     track: alpha

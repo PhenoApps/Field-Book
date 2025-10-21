@@ -70,8 +70,10 @@ jobs:
           release_note=$(echo "$pr_body" | awk 'BEGIN { found=0 } /```release-note/ { found=1; next } /```/ { found=0 } found { print }' | sed '/^\s*$/d')
           echo "Release Note: $release_note"
           if [ -z "$release_note" ]; then
-            echo "No release note found."
-            exit 1
+            echo "No release note found. Skipping changelog update."
+            echo "release_note=" >> $GITHUB_OUTPUT
+            echo "section=" >> $GITHUB_OUTPUT
+            exit 0
           fi
           echo "release_note=${release_note}" >> $GITHUB_OUTPUT
 
@@ -118,12 +120,14 @@ jobs:
           fi
 
       - name: Update changelog
+        if: steps.extract-details.outputs.release_note != ''
         run: |
           echo "Updating changelog under section: ${{ steps.extract-details.outputs.section }}"
-          sed -i "0,/${{ steps.extract-details.outputs.section }}/s@${{ steps.extract-details.outputs.section }}@${{ steps.extract-details.outputs.section }}\n- ${{ steps.extract-details.outputs.release_note }}@" CHANGELOG.md
+          sed -i "0,/${{ steps.extract-details.outputs.section }}/s@${{ steps.extract-details.outputs.section }}@${{ steps.extract-details.outputs.section }}\n- ${{ steps.extract-details.outputs.release_note }} (https://github.com/${{ github.repository }}/pull/${{ needs.determine-pr.outputs.pr_number }})@" CHANGELOG.md
           cat CHANGELOG.md
 
       - name: Commit and push changelog update
+        if: steps.extract-details.outputs.release_note != ''
         uses: EndBug/add-and-commit@v7
         with:
           add: 'CHANGELOG.md'
@@ -138,10 +142,7 @@ jobs:
     needs: update-changelog
     if: needs.update-changelog.outputs.bump_type != ''
     steps:
-      - name: Dispatch GitHub Release Action
+      - name: Test Dispatch (Dry Run)
         run: |
-          echo "Dispatching release action with bump type: ${{ needs.update-changelog.outputs.bump_type }}"
-          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          -H "Accept: application/vnd.github.everest-preview+json" \
-          https://api.github.com/repos/${{ github.repository }}/dispatches \
-          -d '{"event_type": "trigger-release", "client_payload": {"bump_type": "${{ needs.update-changelog.outputs.bump_type }}"}}'
+          echo "Would dispatch release with bump type: ${{ needs.update-changelog.outputs.bump_type }}"
+          echo "Event payload: {\"event_type\": \"trigger-release\", \"client_payload\": {\"bump_type\": \"${{ needs.update-changelog.outputs.bump_type }}\"}}"
