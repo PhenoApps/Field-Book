@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- GENERAL -->
+    <!-- App -->
+    <!-- Dialog -->
+    <!-- Startup  -->
+    <!-- App Intro -->
+    <!-- Storage Definer -->
+    <!-- Permissions  -->
+    <!-- Config Activity  -->
+    <!-- Config Activity Fuzzy Search  -->
+    <!-- File manager  -->
+    <!-- Warnings/Catches -->
+    <!-- Changelog -->
+    <!--  Field Grouping  -->
+    <!-- FIELDS -->
+    <!-- General -->
+    <!-- Sort -->
+    <!-- Modify -->
+    <!-- Delete -->
+    <!-- Import -->
+    <!-- Field Creator  -->
+    <!-- Geo-Navigate to Field -->
+    <!-- Field Details -->
+    <!--    <string name="field_default_sort_order">import order</string>-->
+    <!-- Field Detail Charts -->
+    <!-- Semantic dates -->
+    <!-- TRAITS -->
+    <!-- Sort -->
+    <!-- Trait import/export -->
+    <!-- Trait item menu -->
+    <!-- Trait formats -->
+    <!-- Trait Creation Dialog -->
+    <!-- COLLECT -->
+    <!-- Validation -->
+    <!-- Toolbar -->
+    <!-- InfoBars -->
+    <!-- ID/Barcode Search -->
+    <!-- Search  -->
+    <!--- Profile -->
+    <!--- Datagrid -->
+    <!--- Lock -->
+    <!-- Trait Layout: Photo -->
+    <!-- Trait Layout: GNSS -->
+    <!-- Trait Layout: Date -->
+    <!-- Trait Layout: Boolean -->
+    <!-- Trait Layout: GoPro -->
+    <!-- Trait Layout: USB Camera -->
+    <!--- Trait Layout: Zebra label print -->
+    <!--- Trait Layout: Counter -->
+    <!--- Trait Layout: Location -->
+    <!--- Text to Speech Strings -->
+    <!--- Summary -->
+    <!--- Repeated measures -->
+    <!--- GeoNav -->
+    <!--- Content Descriptions -->
+    <!-- Observation Info -->
+    <!-- Skip Entries -->
+    <!-- EXPORT -->
+    <!-- Export dialog -->
+    <!-- Citation -->
+    <!-- SETTINGS -->
+    <!-- General -->
+    <!-- Profile -->
+    <!-- Features -->
+    <!-- Appearance -->
+    <!-- Behavior -->
+    <!-- Location -->
+    <!-- Sounds -->
+    <!-- BrAPI preferences are in the BrAPI section below -->
+    <!-- Storage -->
+    <!-- Experimental -->
+    <!-- STATISTICS -->
+    <!-- ABOUT -->
+    <!-- App  -->
+    <!-- Lead  -->
+    <!-- Support  -->
+    <!-- PhenoApps  -->
+    <!-- Technical  -->
+    <!-- Update -->
+    <!-- BRAPI -->
+    <!-- BrAPI preferences -->
+    <!-- Community Servers -->
+    <!-- Authorization -->
+    <!-- BrAPI Import -->
+    <!-- BrAPI Export -->
+    <!-- Pagination -->
+    <!-- General -->
+    <!-- APP INTRO  -->
+    <!-- TUTORIAL -->
+    <!-- base camera strings -->
+    <!-- usb camera trait -->
+    <!-- gopro -->
+    <!-- canon camera strings -->
+    <!-- spectral trait strings -->
+    <!--  NearbyShare  -->
+    <!-- Stop Watch Trait Button content descriptions-->
+</resources>
