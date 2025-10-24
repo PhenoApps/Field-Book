@@ -8,7 +8,6 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.fieldbook.tracker.devices.camera.gopro.GoProHelper
 import java.lang.Exception
 import java.net.DatagramPacket
 import java.net.DatagramSocket
@@ -17,6 +16,13 @@ import java.net.InetSocketAddress
 import javax.inject.Inject
 
 class FfmpegHelper @Inject constructor() {
+
+    companion object {
+        const val TAG = "FFMPEG"
+
+        const val KEEP_ALIVE_MESSAGE_PACKET_DELAY = 5000L
+        const val UDP_SOCKET_TIMEOUT = 60000L
+    }
 
     private val scope = MainScope()
 
@@ -58,7 +64,7 @@ class FfmpegHelper @Inject constructor() {
                 if (udpSocket == null) {
                     udpSocket = DatagramSocket().also {
                         it.reuseAddress = true
-                        it.soTimeout = GoProHelper.UDP_SOCKET_TIMEOUT.toInt()
+                        it.soTimeout = UDP_SOCKET_TIMEOUT.toInt()
                     }
                 }
 
@@ -86,7 +92,7 @@ class FfmpegHelper @Inject constructor() {
 
                             udpSocket?.send(keepStreamAlivePacket)
 
-                            Log.i(GoProHelper.TAG, "Keep Alive sent")
+                            Log.i(TAG, "Keep Alive sent")
 
                         } catch (e: Exception) {
 
@@ -94,12 +100,12 @@ class FfmpegHelper @Inject constructor() {
 
                         }
 
-                        delay(GoProHelper.KEEP_ALIVE_MESSAGE_PACKET_DELAY)
+                        delay(KEEP_ALIVE_MESSAGE_PACKET_DELAY)
                     }
                 }
             }
 
-            Log.i(GoProHelper.TAG, "requestTimer init successfully")
+            Log.i(TAG, "requestTimer init successfully")
 
         } catch (e: Exception) {
 
@@ -131,7 +137,7 @@ class FfmpegHelper @Inject constructor() {
                 val command =
                     "-fflags nobuffer -flags low_delay -f:v mpegts -an -probesize 100000 -i $streamInputUri -f mpegts -vcodec copy udp://localhost:8555?pkt_size=1316" // -probesize 100000 is minimum for Hero 10
 
-                Log.d(GoProHelper.TAG, "Executing FFMPEG Kit: $command")
+                Log.d(TAG, "Executing FFMPEG Kit: $command")
 
                 FFmpegKit.execute(command)
 

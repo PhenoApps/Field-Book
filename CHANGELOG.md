@@ -13,6 +13,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [v6.3.2] - 2025-10-20
+
+### Added
+
+### Changed
+
+### Fixed
+- GoPro Hero 13 no longer causes a crash
+- Reduced installer size by using a different ffmpeg library
+
+## [v6.3.1] - 2025-10-13
+
+### Added
+
+### Changed
+- Field Book now supports 16 KB page sizes
+
+### Fixed
+- Bug fixes and enhancements
+
 ## [v6.3.0] - 2025-10-08
 
 ### Added
@@ -756,4 +776,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 
+
 [v6.3.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.0
+[v6.3.1]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.1
+
+[v6.3.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.2
