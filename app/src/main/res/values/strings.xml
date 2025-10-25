@@ -463,7 +463,6 @@
     <string name="trait_visible">Visible</string>
     <string name="trait_hidden">Hidden</string>
     <string name="trait_options_title">Options</string>
-    <string name="trait_resource_chip_title">Set resource file</string>
     <string name="trait_swap_name">Swap name field</string>
     <string name="trait_observation_data">Data</string>
     <string name="trait_observation_count">%d observations</string>
@@ -480,6 +479,7 @@
     <string name="trait_brapi_value_display">Show Values (e.g. %s)</string>
     <string name="error_loading_trait_detail">Error loading trait info</string>
     <string name="error_updating_trait_resource_file">Error updating trait resource file</string>
+    <string name="error_updating_trait_visibility">Error updating trait visibility</string>
     <string name="error_empty_trait_name">Trait name cannot be empty</string>
     <string name="error_copy_trait">Error while copying trait</string>
     <string name="trait_swap_name_dialog_title">Select synonym as trait alias</string>
@@ -491,6 +491,14 @@
     <string name="trait_synonym">Synonym</string>
     <string name="trait_add_synonym_new_dialog_blank">Synonym cannot be blank</string>
     <string name="trait_add_synonym_already_exists">This synonym already exists</string>
+
+    <string name="trait_detail_chip_rename">Rename</string>
+    <string name="trait_detail_chip_math_symbols">Math symbols</string>
+    <string name="trait_detail_chip_multiple_categories">Multiple categories</string>
+    <string name="trait_detail_chip_automatic_switch">Automatic advance</string>
+    <string name="trait_detail_chip_format_date">Format: %s</string>
+    <string name="trait_detail_chip_transfer_images">Transfer images</string>
+    <string name="trait_detail_chip_invalid_value">Outlier values</string>
 
     <!-- <string name="trait_date_format_example">Date: %s</string>
     <string name="trait_day_format_example">Day of Year: %d</string>

@@ -8,7 +8,7 @@
         android:title="@string/traits_options_copy" />
     <item
         android:id="@+id/edit"
-        android:icon="@drawable/ic_rename"
+        android:icon="@drawable/ic_configure"
         app:showAsAction="always"
         android:title="@string/traits_options_edit" />
     <item

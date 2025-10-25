@@ -47,14 +47,17 @@ import com.fieldbook.tracker.traits.formats.parameters.CategoriesParameter
 import com.fieldbook.tracker.traits.formats.parameters.CloseKeyboardParameter
 import com.fieldbook.tracker.traits.formats.parameters.CropImageParameter
 import com.fieldbook.tracker.traits.formats.parameters.DecimalPlacesParameter
+import com.fieldbook.tracker.traits.formats.parameters.InvalidValueParameter
 import com.fieldbook.tracker.traits.formats.parameters.MathSymbolsParameter
 import com.fieldbook.tracker.traits.formats.parameters.MultipleCategoriesParameter
 import com.fieldbook.tracker.traits.formats.parameters.Parameters
 import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
+import com.fieldbook.tracker.traits.formats.parameters.SaveImageParameter
 import com.fieldbook.tracker.traits.formats.parameters.UnitParameter
 import com.fieldbook.tracker.traits.formats.parameters.UseDayOfYearParameter
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
+import com.fieldbook.tracker.utilities.InsetHandler
 import com.fieldbook.tracker.utilities.SoundHelperImpl
 import com.fieldbook.tracker.utilities.TraitNameValidator
 import com.fieldbook.tracker.utilities.Utils
@@ -64,6 +67,7 @@ import com.fieldbook.tracker.viewmodels.TraitDetailUiState
 import com.fieldbook.tracker.viewmodels.TraitDetailViewModel
 import com.fieldbook.tracker.viewmodels.factory.TraitDetailViewModelFactory
 import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.utils.BaseDocumentTreeUtil
 import java.math.BigDecimal
@@ -109,6 +113,8 @@ class TraitDetailFragment : Fragment() {
 
         setupAllCollapsibleSections()
 
+        InsetHandler.setupFragmentWithTopInsetsOnly(binding.root, binding.toolbar)
+
         return binding.root
     }
 
@@ -118,6 +124,8 @@ class TraitDetailFragment : Fragment() {
             // Consume touch event to prevent propagation to TraitEditor RecyclerView
             true
         }
+
+        setupVisibilityChipClickListener()
     }
 
     fun refresh() {
@@ -248,7 +256,7 @@ class TraitDetailFragment : Fragment() {
             val fileObject = FieldFileObject.create(requireContext(), trait.resourceFile.toUri(), null, null)
             fileObject.fileStem
         } else {
-            getString(R.string.trait_resource_chip_title)
+            getString(R.string.trait_parameter_resource_file)
         }
 
         addChip(chipLabel, R.drawable.ic_tb_folder) { chip ->
@@ -278,11 +286,12 @@ class TraitDetailFragment : Fragment() {
     private fun addFormatSpecificOptionChips(trait: TraitObject) {
         print(trait.synonyms.isEmpty())
         if (trait.synonyms.isNotEmpty()) {
-            addChip(getString(R.string.trait_swap_name), R.drawable.ic_swap_horizontal) { showSwapNameDialog(trait) }
+            addChip(getString(R.string.trait_detail_chip_rename), R.drawable.ic_rename) { showSwapNameDialog(trait) }
         }
 
         if (trait.format == "date") {
-            val chipLabel = if (trait.useDayOfYear) getTodayDayOfYear() else getTodayFormattedDate()
+            val formatString = if (trait.useDayOfYear) getTodayDayOfYear() else getTodayFormattedDate()
+            val chipLabel = getString(R.string.trait_detail_chip_format_date, formatString)
             addChip(chipLabel, R.drawable.ic_calendar_edit) { showDateFormatDialog(trait) }
         }
 
@@ -329,25 +338,40 @@ class TraitDetailFragment : Fragment() {
     }
 
     private fun addParameterChip(parameter: BaseFormatParameter, trait: TraitObject) {
-        val iconRes: Int = when (parameter) {
-            is AutoSwitchPlotParameter -> R.drawable.ic_page_next_outline
+        val iconRes = when (parameter) {
+            is AutoSwitchPlotParameter -> R.drawable.ic_auto_switch
             is CategoriesParameter -> R.drawable.ic_trait_categorical
             is CloseKeyboardParameter -> R.drawable.ic_keyboard_close
             is CropImageParameter -> R.drawable.ic_crop_image
             is DecimalPlacesParameter -> R.drawable.ic_decimal
+            is InvalidValueParameter -> R.drawable.ic_invalid_values
             is MathSymbolsParameter -> R.drawable.ic_symbol
             is MultipleCategoriesParameter -> R.drawable.ic_trait_multicat
             is ResourceFileParameter -> R.drawable.ic_tb_folder
             is RepeatedMeasureParameter -> R.drawable.ic_repeated_measures
+            is SaveImageParameter -> R.drawable.ic_transfer
             is UnitParameter -> R.drawable.ic_tag_edit
-            is UseDayOfYearParameter -> R.drawable.ic_calendar_edit
             else -> R.drawable.ic_tag_edit
         }
-        val chipLabel = parameter.getName(requireContext())
 
-        addChip(chipLabel, iconRes) {
-            showParameterEditDialog(parameter, trait)
+        val chipLabel = when (parameter) {
+            is AutoSwitchPlotParameter -> getString(R.string.trait_detail_chip_automatic_switch)
+            is InvalidValueParameter -> getString(R.string.trait_detail_chip_invalid_value)
+            is MathSymbolsParameter -> getString(R.string.trait_detail_chip_math_symbols)
+            is MultipleCategoriesParameter -> getString(R.string.trait_detail_chip_multiple_categories)
+            is SaveImageParameter -> getString(R.string.trait_detail_chip_transfer_images)
+            else -> context?.let { parameter.getName(it).capitalizeFirstLetter() }
         }
+
+        chipLabel?.let {
+            addChip(it, iconRes) {
+                showParameterEditDialog(parameter, trait)
+            }
+        }
+    }
+
+    private fun String.capitalizeFirstLetter(): String {
+        return if (isEmpty()) this else this.replaceFirstChar { it.uppercaseChar() }
     }
 
     private fun addChip(label: String, iconRes: Int, onClick: (Chip) -> Unit) {
@@ -368,6 +392,12 @@ class TraitDetailFragment : Fragment() {
             chipStrokeWidth = resources.getDimension(R.dimen.chip_stroke_width)
             chipIconSize = resources.getDimension(R.dimen.chip_icon_size)
             isCloseIconVisible = false
+
+            setEnsureMinTouchTargetSize(false)
+            layoutParams = ChipGroup.LayoutParams(
+                ChipGroup.LayoutParams.WRAP_CONTENT,
+                ChipGroup.LayoutParams.WRAP_CONTENT
+            )
 
             setOnClickListener {
                 onClick.invoke(this)
@@ -638,11 +668,24 @@ class TraitDetailFragment : Fragment() {
     }
 
     private fun updateVisibilityChip(trait: TraitObject) {
-        binding.visibilityChip.text = if (trait.visible) getString(R.string.trait_visible) else getString(
-            R.string.trait_hidden)
+        binding.visibilityChip.text =
+            if (trait.visible) getString(R.string.trait_visible)
+            else getString(R.string.trait_hidden)
 
         binding.visibilityChip.chipIcon = ContextCompat.getDrawable(requireContext(),
             if (trait.visible) R.drawable.ic_eye else R.drawable.ic_eye_off)
+    }
+
+    private fun setupVisibilityChipClickListener() {
+        binding.visibilityChip.setOnClickListener {
+            traitObject?.let { trait ->
+                val newVisibility = !trait.visible
+                viewModel.updateTraitVisibility(trait, newVisibility)
+
+                (activity as? TraitEditorActivity)?.queryAndLoadTraits()
+                CollectActivity.reloadData = true
+            }
+        }
     }
 
     private fun setupObservationChart(trait: TraitObject, observations: List<String>, textSize: Float) {

@@ -80,6 +80,23 @@ class TraitDetailViewModel(
             )
         }
 
+    fun updateTraitVisibility(trait: TraitObject, newVisibility: Boolean) {
+        viewModelScope.launch {
+            try {
+                withContext(ioDispatcher) {
+                    trait.visible = newVisibility
+                    database.updateTraitVisibility(trait.id, newVisibility)
+                }
+
+                val obsData = (_uiState.value as? TraitDetailUiState.Success)?.observationData
+                _uiState.value = TraitDetailUiState.Success(trait, obsData)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error updating trait visibility: ", e)
+                _uiState.value = TraitDetailUiState.Error(R.string.error_updating_trait_visibility)
+            }
+        }
+    }
+
     fun updateResourceFile(traitId: String, fileUri: String) {
         viewModelScope.launch {
             try {
