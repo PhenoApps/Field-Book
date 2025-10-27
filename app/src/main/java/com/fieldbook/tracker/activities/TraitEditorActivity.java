@@ -538,20 +538,17 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
             icons[ImportOptions.IMPORT_FROM_BRAPI.ordinal()] = ImportOptions.IMPORT_FROM_BRAPI.iconResource;
         }
 
-        AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                switch (position) {
-                    case 0: // Create new trait
-                        showTraitDialog(null);
-                        break;
-                    case 1: // Import from file
-                        showFileImportDialog();
-                        break;
-                    case 2: // BrAPI
-                        startBrapiTraitActivity(false);
-                        break;
-                }
+        AdapterView.OnItemClickListener onItemClickListener = (parent, view, position, id) -> {
+            switch (position) {
+                case 0: // Create new trait
+                    showTraitDialog(null);
+                    break;
+                case 1: // Import from file
+                    showFileImportDialog();
+                    break;
+                case 2: // BrAPI
+                    startBrapiTraitActivity(false);
+                    break;
             }
         };
         
@@ -576,25 +573,22 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         icons[0] = R.drawable.ic_file_generic;
         icons[1] = R.drawable.ic_file_cloud;
 
-        AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                switch (position) {
-                    case 0: // Local
-                        DocumentFile traitDir = BaseDocumentTreeUtil.Companion.getDirectory(TraitEditorActivity.this, R.string.dir_trait);
-                        if (traitDir != null && traitDir.exists()) {
-                            Intent intent = new Intent();
-                            intent.setClassName(TraitEditorActivity.this, FileExploreActivity.class.getName());
-                            intent.putExtra("path", traitDir.getUri().toString());
-                            intent.putExtra("include", new String[]{"trt"});
-                            intent.putExtra("title", getString(R.string.traits_dialog_import));
-                            startActivityForResult(intent, REQUEST_FILE_EXPLORER_CODE);
-                        }
-                        break;
-                    case 1: // Cloud
-                        loadCloud();
-                        break;
-                }
+        AdapterView.OnItemClickListener onItemClickListener = (parent, view, position, id) -> {
+            switch (position) {
+                case 0: // Local
+                    DocumentFile traitDir = BaseDocumentTreeUtil.Companion.getDirectory(TraitEditorActivity.this, R.string.dir_trait);
+                    if (traitDir != null && traitDir.exists()) {
+                        Intent intent = new Intent();
+                        intent.setClassName(TraitEditorActivity.this, FileExploreActivity.class.getName());
+                        intent.putExtra("path", traitDir.getUri().toString());
+                        intent.putExtra("include", new String[]{"trt"});
+                        intent.putExtra("title", getString(R.string.traits_dialog_import));
+                        startActivityForResult(intent, REQUEST_FILE_EXPLORER_CODE);
+                    }
+                    break;
+                case 1: // Cloud
+                    loadCloud();
+                    break;
             }
         };
         
@@ -635,15 +629,10 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                 preferences.edit().remove(GeneralKeys.getCropCoordinatesKey(Integer.parseInt(t.getId()))).apply();
             }
 
-            showDeleteTraitDialog((dialog, which) -> {
-
-                database.deleteTraitsTable();
-
-            }, null, (dialog) -> {
-
-                showImportDialog();
-
-            });
+            showDeleteTraitDialog(
+                    (dialog, which) -> database.deleteTraitsTable(),
+                    null, (dialog) -> showImportDialog()
+            );
 
         } else showImportDialog();
 
@@ -723,20 +712,14 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                 .setCancelable(true)
                 .setView(layout);
 
-        builder.setPositiveButton(getString(R.string.dialog_save), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                exportTraitsAsJson(exportFile.getText().toString());
-                Editor ed = preferences.edit();
-                ed.putBoolean(GeneralKeys.TRAITS_EXPORTED, true);
-                ed.apply();
-            }
+        builder.setPositiveButton(getString(R.string.dialog_save), (dialog, which) -> {
+            exportTraitsAsJson(exportFile.getText().toString());
+            Editor ed = preferences.edit();
+            ed.putBoolean(GeneralKeys.TRAITS_EXPORTED, true);
+            ed.apply();
         });
 
-        builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
+        builder.setNegativeButton(getString(R.string.dialog_cancel), (dialog, which) -> dialog.dismiss());
 
         final AlertDialog exportDialog = builder.create();
         exportDialog.show();
