@@ -1410,7 +1410,13 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
                 }
                 if (var.getScale().getDataType() != null) {
-                    trait.setFormat(convertBrAPIDataType(var.getScale().getDataType().getBrapiValue()));
+                    String convertedFormat = convertBrAPIDataType(var.getScale().getDataType().getBrapiValue());
+                    trait.setFormat(convertedFormat);
+
+                    if (convertedFormat.equals("multicat")) {
+                        trait.setFormat("categorical");
+                        trait.setAllowMulticat(true);
+                    }
                 } else {
                     trait.setFormat("text");
                 }
@@ -1521,7 +1527,6 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             case "ordinal":
             case "categorical":
             case "qualitative":
-            case "multicat":
                 // All Field Book categories are ordered, so this works
                 return "categorical";
             case "date":
@@ -1543,6 +1548,8 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 return "audio";
             case "counter":
                 return "counter";
+            case "multicat":
+                return "multicat";
             case "location":
                 return "location";
             case "barcode":

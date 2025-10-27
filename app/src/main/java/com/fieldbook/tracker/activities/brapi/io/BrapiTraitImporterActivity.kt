@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.widget.ProgressBar
-import androidx.activity.OnBackPressedDispatcher
 import androidx.appcompat.widget.Toolbar
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.ThemedActivity
@@ -93,7 +92,10 @@ class BrapiTraitImporterActivity : BrapiTraitImportAdapter.TraitLoader, ThemedAc
                     subLabel = "${model.commonCropName ?: ""} ${model.observationVariableDbId ?: ""}"
                 ).also {
                     model.scale?.dataType?.name?.let { dataType ->
-                        Formats.findTrait(DataTypes.convertBrAPIDataType(dataType))?.iconDrawableResourceId?.let { icon ->
+                        val convertedType = DataTypes.convertBrAPIDataType(dataType)
+                        val finalTraitFormat = if (convertedType == "multicat") "categorical" else convertedType
+
+                        Formats.findTrait(finalTraitFormat)?.iconDrawableResourceId?.let { icon ->
                             it.iconResId = icon
                         }
                     }

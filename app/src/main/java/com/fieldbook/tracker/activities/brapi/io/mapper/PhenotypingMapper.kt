@@ -44,6 +44,11 @@ fun BrAPIObservationVariable.toTraitObject(context: Context) = TraitObject().als
         "text"
     }
 
+    if (it.format == "multicat") { // convert brapi multicat to field book categorical
+        it.format = "categorical"
+        it.allowMulticat = true
+    }
+
     scale?.validValues?.categories?.let { categories ->
         if (categories.isNotEmpty()) {
             it.categories = CategoryJsonUtil.buildCategoryList(categories)
