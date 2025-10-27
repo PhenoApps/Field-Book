@@ -50,6 +50,7 @@ import com.fieldbook.tracker.async.ExportJsonTraitTask;
 import com.fieldbook.tracker.async.ExportJsonTraitTask.ExportResult;
 import com.fieldbook.tracker.async.ImportCSVTask;
 import com.fieldbook.tracker.async.ImportJsonTraitTask;
+import com.fieldbook.tracker.async.ImportJsonTraitTask.ImportResult;
 import com.fieldbook.tracker.brapi.BrapiInfoDialogFragment;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.dialogs.ListAddDialog;
@@ -1015,14 +1016,14 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                 database,
                 file,
                 LifecycleOwnerKt.getLifecycleScope(this),
-                (success, errorMessage) -> {
-                    if (success) {
+                result -> {
+                    if (result instanceof ImportResult.Success) {
                         queryAndLoadTraits();
                         CollectActivity.reloadData = true;
                         Utils.makeToast(getApplicationContext(), getString(R.string.trait_import_successful));
-                    } else {
-                        String message = errorMessage != null ? errorMessage : getString(R.string.import_error_general);
-                        Utils.makeToast(getApplicationContext(), message);
+                    } else if (result instanceof ImportResult.Error) {
+                        ImportResult.Error error = (ImportResult.Error) result;
+                        Utils.makeToast(getApplicationContext(), error.getMessage());
                     }
                 }
         );

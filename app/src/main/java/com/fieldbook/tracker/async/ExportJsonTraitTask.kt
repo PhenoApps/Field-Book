@@ -3,10 +3,8 @@ package com.fieldbook.tracker.async
 import android.content.Context
 import android.net.Uri
 import android.util.Log
-import android.view.LayoutInflater
-import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.dialogs.LoadingDialog
 import com.fieldbook.tracker.objects.TraitAttributesJson
 import com.fieldbook.tracker.objects.TraitImportFile
 import com.fieldbook.tracker.objects.TraitJson
@@ -29,7 +27,7 @@ class ExportJsonTraitTask(
     private val traits: List<TraitObject>,
     private val fileName: String,
     private val scope: CoroutineScope,
-    private val onPostExecute: OnPostExecute
+    private val onExportComplete: OnExportComplete
 ) {
 
     sealed class ExportResult {
@@ -47,41 +45,30 @@ class ExportJsonTraitTask(
         }
     }
 
-    private var loadingDialog: AlertDialog? = null
+    private var loadingDialog = LoadingDialog(context)
 
-    interface OnPostExecute {
+    interface OnExportComplete {
         fun execute(result: ExportResult)
     }
 
     fun start() {
+
         scope.launch {
-            showLoadingDialog()
+
+            loadingDialog.show(R.string.export_dialog_traits_exporting)
 
             val result = withContext(Dispatchers.IO) {
+
                 exportJsonTraits()
+
             }
 
-            dismissLoadingDialog()
+            loadingDialog.dismiss()
 
-            onPostExecute.execute(result)
+            onExportComplete.execute(result)
+
         }
-    }
 
-    private fun showLoadingDialog() {
-        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_loading, null)
-        val messageTv = dialogView.findViewById<TextView>(R.id.loading_message)
-        messageTv.text = context.getString(R.string.export_dialog_traits_exporting)
-
-        loadingDialog = AlertDialog.Builder(context, R.style.AppAlertDialog)
-            .setView(dialogView)
-            .create()
-
-        loadingDialog?.show()
-    }
-
-    private fun dismissLoadingDialog() {
-        loadingDialog?.dismiss()
-        loadingDialog = null
     }
 
     private suspend fun exportJsonTraits(): ExportResult {

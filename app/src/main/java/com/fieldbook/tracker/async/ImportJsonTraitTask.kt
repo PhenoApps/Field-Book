@@ -3,11 +3,9 @@ package com.fieldbook.tracker.async
 import android.content.Context
 import android.net.Uri
 import android.util.Log
-import android.view.LayoutInflater
-import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.dialogs.LoadingDialog
 import com.fieldbook.tracker.objects.FieldFileObject
 import com.fieldbook.tracker.objects.TraitAttributesJson
 import com.fieldbook.tracker.objects.TraitImportFile
@@ -27,65 +25,49 @@ class ImportJsonTraitTask(
     private val db: DataHelper,
     private val fileUri: Uri,
     private val scope: CoroutineScope,
-    private val onPostExecute: OnPostExecute
+    private val onImportComplete: OnImportComplete
 ) {
+
+    sealed class ImportResult {
+        data class Success(val importedCount: Int) : ImportResult()
+        data class Error(val message: String, val error: Throwable? = null) : ImportResult()
+    }
 
     companion object {
         private const val TAG = "ImportJsonTraitTask"
     }
 
-    private var loadingDialog: AlertDialog? = null
+    private val loadingDialog = LoadingDialog(context)
 
-    interface OnPostExecute {
-        fun execute(success: Boolean, errorMessage: String?)
+    interface OnImportComplete {
+        fun execute(result: ImportResult)
     }
 
     fun start() {
 
         scope.launch {
 
-            showLoadingDialog()
+            loadingDialog.show(R.string.import_dialog_importing)
 
             val result = withContext(Dispatchers.IO) {
                 importJsonTraits()
             }
 
-            dismissLoadingDialog()
+            loadingDialog.dismiss()
 
-            onPostExecute.execute(result.first, result.second)
+            onImportComplete.execute(result)
 
         }
 
     }
 
-    private fun showLoadingDialog() {
-        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_loading, null)
-        val messageTv = dialogView.findViewById<TextView>(R.id.loading_message)
-        messageTv.text = context.getString(R.string.import_dialog_importing)
-
-        loadingDialog = AlertDialog.Builder(context, R.style.AppAlertDialog)
-            .setView(dialogView)
-            .create()
-
-        loadingDialog?.show()
-
-    }
-
-    private fun dismissLoadingDialog() {
-
-        loadingDialog?.dismiss()
-
-        loadingDialog = null
-
-    }
-
-    private suspend fun importJsonTraits(): Pair<Boolean, String?> {
+    private suspend fun importJsonTraits(): ImportResult {
 
         return try {
 
             val inputStream =
                 BaseDocumentTreeUtil.getUriInputStream(context, fileUri)
-                    ?: return Pair(false, context.getString(R.string.act_field_editor_file_open_failed))
+                    ?: return ImportResult.Error(context.getString(R.string.act_field_editor_file_open_failed))
 
             val jsonContent = BufferedReader(InputStreamReader(inputStream)).use { reader -> reader.readText() }
 
@@ -93,11 +75,11 @@ class ImportJsonTraitTask(
                 Json.decodeFromString<TraitImportFile>(jsonContent)
             } catch (e: Exception) {
                 Log.e(TAG, "JSON parsing error", e)
-                return Pair(false, context.getString(R.string.import_error_format_trait_json, e.message))
+                return ImportResult.Error(context.getString(R.string.import_error_format_trait_json, e.message), e)
             }
 
             if (importFile.traits.isEmpty()) {
-                return Pair(false, context.getString(R.string.import_error_no_traits))
+                return ImportResult.Error(context.getString(R.string.import_error_no_traits))
             }
 
             val fileObject = FieldFileObject.create(context, fileUri, null, null)
@@ -118,11 +100,14 @@ class ImportJsonTraitTask(
             }
 
             Log.d(TAG, "Finished importing $successCount traits")
-            Pair(true, null)
+            ImportResult.Success(successCount)
 
         } catch (e: Exception) {
             Log.e(TAG, "Error importing JSON traits", e)
-            Pair(false, e.message ?: context.getString(R.string.traits_create_unknown_error, e.message))
+            ImportResult.Error(
+                message = e.message ?: context.getString(R.string.traits_create_unknown_error, e.message),
+                error = e
+            )
         }
     }
 
