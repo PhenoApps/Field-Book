@@ -46,6 +46,8 @@ import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache;
 import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiTraitFilterActivity;
 import com.fieldbook.tracker.adapters.TraitAdapter;
 import com.fieldbook.tracker.adapters.TraitAdapterController;
+import com.fieldbook.tracker.async.ExportJsonTraitTask;
+import com.fieldbook.tracker.async.ExportJsonTraitTask.ExportResult;
 import com.fieldbook.tracker.async.ImportCSVTask;
 import com.fieldbook.tracker.async.ImportJsonTraitTask;
 import com.fieldbook.tracker.brapi.BrapiInfoDialogFragment;
@@ -61,7 +63,6 @@ import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
-import com.fieldbook.tracker.utilities.CSVWriter;
 import com.fieldbook.tracker.utilities.FileUtil;
 import com.fieldbook.tracker.utilities.InsetHandler;
 import com.fieldbook.tracker.utilities.SharedPreferenceUtils;
@@ -78,7 +79,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -725,7 +725,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         builder.setPositiveButton(getString(R.string.dialog_save), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                exportTable(exportFile.getText().toString());
+                exportTraitsAsJson(exportFile.getText().toString());
                 Editor ed = preferences.edit();
                 ed.putBoolean(GeneralKeys.TRAITS_EXPORTED, true);
                 ed.apply();
@@ -869,41 +869,36 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
         }
     }
 
-    // Helper function export data as CSV
-    private void exportTable(String exportName) {
+    private void exportTraitsAsJson(String fileName) {
+        List<TraitObject> allTraits = traitAdapter.getCurrentList();
 
-        try {
+        ExportJsonTraitTask task = new ExportJsonTraitTask(
+                this,
+                allTraits,
+                fileName,
+                LifecycleOwnerKt.getLifecycleScope(this),
+                result -> {
+                    if (result instanceof ExportResult.Success) {
+                        ExportResult.Success success = (ExportResult.Success) result;
+                        try {
+                            DocumentFile exportDoc = DocumentFile.fromSingleUri(this, success.getUri());
 
-            DocumentFile traitDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_trait);
+                            FileUtil.shareFile(this, preferences, exportDoc);
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error sharing exported file", e);
+                        }
+                    } else if (result instanceof ExportJsonTraitTask.ExportResult.Error) {
+                        ExportResult.Error error = (ExportResult.Error) result;
+                        String message = error.getMessage();
+                        Utils.makeToast(getApplicationContext(), message);
 
-            if (traitDir != null && traitDir.exists()) {
-
-                DocumentFile exportDoc = traitDir.createFile("*/*", exportName);
-
-                if (exportDoc != null && exportDoc.exists()) {
-
-                    OutputStream output = BaseDocumentTreeUtil.Companion.getFileOutputStream(this, R.string.dir_trait, exportName);
-
-                    if (output != null) {
-
-                        OutputStreamWriter osw = new OutputStreamWriter(output);
-                        CSVWriter csvWriter = new CSVWriter(osw, database.getAllTraitsForExport());
-                        csvWriter.writeTraitFile(database.getAllTraitsForExport().getColumnNames());
-
-                        csvWriter.close();
-                        osw.close();
-                        output.close();
-
-                        FileUtil.shareFile(this, preferences, exportDoc);
+                        if(error.getError() != null) {
+                            Log.e(TAG, "Error exporting traits", error.getError());
+                        }
                     }
                 }
-            }
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-        }
+        );
+        task.start();
     }
 
     @Override

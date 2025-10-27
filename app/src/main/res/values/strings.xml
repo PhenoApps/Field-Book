@@ -340,6 +340,13 @@
     <string name="traits_toolbar_delete_all">Delete all traits</string>
     <string name="act_trait_editor_no_traits_exist">No traits exist.</string>
 
+    <string name="export_dialog_traits_exporting">Exporting traits…</string>
+    <string name="export_error_unknown">Unknown export error occurred</string>
+    <string name="export_error_directory_access">Failed to access export directory</string>
+    <string name="export_error_directory_not_found">Export directory not found</string>
+    <string name="export_error_file_creation">Failed to create export file</string>
+    <string name="export_error_file_stream">Failed to open file stream</string>
+
     <!-- Trait item menu -->
     <string name="list_item_trait_popup_content_description">Open a menu specific to this trait.</string>
     <string name="traits_options_copy">Copy</string>
