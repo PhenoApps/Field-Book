@@ -138,7 +138,7 @@ class TraitDetailFragment : Fragment() {
             true
         }
 
-        setupVisibilityChipClickListener()
+        setupClickListeners()
     }
 
     fun refresh() {
@@ -297,11 +297,6 @@ class TraitDetailFragment : Fragment() {
     }
 
     private fun addFormatSpecificOptionChips(trait: TraitObject) {
-        print(trait.synonyms.isEmpty())
-        if (trait.synonyms.isNotEmpty()) {
-            addChip(getString(R.string.trait_detail_chip_rename), R.drawable.ic_rename) { showSwapNameDialog(trait) }
-        }
-
         if (trait.format == "date") {
             val formatString = if (trait.useDayOfYear) getTodayDayOfYear() else getTodayFormattedDate()
             val chipLabel = getString(R.string.trait_detail_chip_format_date, formatString)
@@ -685,6 +680,20 @@ class TraitDetailFragment : Fragment() {
 
         binding.visibilityChip.chipIcon = ContextCompat.getDrawable(requireContext(),
             if (trait.visible) R.drawable.ic_eye else R.drawable.ic_eye_off)
+    }
+
+    private fun setupClickListeners() {
+        setupRenameChipClickListener()
+        setupVisibilityChipClickListener()
+    }
+
+    private fun setupRenameChipClickListener() {
+        binding.renameTrait.setOnClickListener {
+            traitObject?.let { trait ->
+                if (trait.synonyms.isNotEmpty()) showSwapNameDialog(trait)
+                else showAddSynonymDialog(trait)
+            }
+        }
     }
 
     private fun setupVisibilityChipClickListener() {
