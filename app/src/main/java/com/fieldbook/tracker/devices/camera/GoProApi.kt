@@ -27,6 +27,9 @@ import org.phenoapps.interfaces.gatt.GattCallbackInterface
 import java.net.URI
 import javax.inject.Inject
 import androidx.core.net.toUri
+import androidx.media3.common.MimeTypes
+import androidx.media3.exoplayer.DefaultRenderersFactory
+import androidx.media3.exoplayer.mediacodec.MediaCodecUtil
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @UnstableApi
@@ -354,9 +357,16 @@ class GoProApi @Inject constructor(
             .setBufferDurationsMs(2500, 5000, 1500, 2000)
             .build()
 
+        val renderersFactory = DefaultRenderersFactory(context)
+            .setEnableDecoderFallback(true)
+            .setMediaCodecSelector { mimeType, requiresSecureDecoder, requiresTunnelingDecoder ->
+                if (mimeType == MimeTypes.VIDEO_MV_HEVC) emptyList() else MediaCodecUtil.getDecoderInfos(mimeType, requiresSecureDecoder, requiresTunnelingDecoder)
+            }
+
         player = ExoPlayer.Builder(context)
             .setTrackSelector(trackSelector)
             .setLoadControl(loadControl)
+            .setRenderersFactory(renderersFactory)
             .build()
 
         player?.addListener(playerListener)
