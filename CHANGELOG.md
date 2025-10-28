@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- GoPro preview is no longer blank on certain devices
 
 ## [v6.3.2] - 2025-10-20
 
