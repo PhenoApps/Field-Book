@@ -189,6 +189,7 @@
     <string name="import_runnable_create_field_data_failed">Failed to create field data for line %d in file.</string>
     <string name="import_runnable_duplicates_skipped">Duplicate columns found, only first instance will be used.</string>
 
+    <string name="import_error_unique_exists_db">Unique identifier column contains value(s) that already exist in the database</string>
     <string name="import_runnable_create_field_duplicate_unique_identifier">Unique identifier value %s in column %s is duplicated on row %d.</string>
     <string name="import_runnable_create_field_special_character_error">Unique identifier value %s in column %s on row %d contains special character "%s" which is not allowed.</string>
     <string name="import_runnable_create_field_missing_identifier">Missing value for %s %s on row %d.</string>

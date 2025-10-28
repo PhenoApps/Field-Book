@@ -3,7 +3,6 @@ package com.fieldbook.tracker.async;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.text.Html;
@@ -99,8 +98,6 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
             ArrayList<Integer> nonEmptyIndices = new ArrayList<>();
 
             int uniqueIndex = -1;
-            int primaryIndex = -1;
-            int secondaryIndex = -1;
 
             //match and delete special characters from header line
             for (int i = 0; i < columns.length; i++) {
@@ -113,8 +110,8 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
                 //populate an array of indices that have a non empty column
                 //later we will only add data rows with the non empty columns
-                //also find the unique/primary/secondary indices
-                //later we will return an error if these are not present
+                //also find the unique index
+                //later we will return an error if it is not present
                 if (!columns[i].isEmpty()) {
 
                     if (!nonEmptyColumns.contains(columns[i])) {
@@ -141,7 +138,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
                 throw new RuntimeException();
             }
 
-            //start iterating over all the rows of the csv file only if we found the u/p/s indices
+            //start iterating over all the rows of the csv file only if we found the unique index
             if (uniqueIndex > -1) {
                 int line = 0;
                 try {
@@ -150,13 +147,13 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
                         if (data == null)
                             break;
 
-                        //only load the row if it contains u/p/s data
+                        //only load the row if it contains unique data
                         int rowSize = data.length;
 
                         //ensure next check won't cause an AIOB
                         if (rowSize > uniqueIndex) {
 
-                            //check that all u/p/s strings are not empty
+                            //check that all unique string is not empty
                             if (!data[uniqueIndex].isEmpty()) {
 
                                 ArrayList<String> nonEmptyData = new ArrayList<>();
@@ -174,28 +171,14 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
                                 String fixFileMessage = mContext.get().getString(R.string.import_runnable_create_field_fix_file);
                                 String missingIdMessageTemplate = mContext.get().getString(R.string.import_runnable_create_field_missing_identifier);
 
-                                String missingField = null;
-                                String fieldValue = null;
+                                String missingField = mContext.get().getString(R.string.import_dialog_unique).toLowerCase();
 
-                                if (data[uniqueIndex].isEmpty()) {
-                                    missingField = mContext.get().getString(R.string.import_dialog_unique).toLowerCase();
-                                    fieldValue = unique;
-                                } else if (data[primaryIndex].isEmpty()) {
-                                    missingField = mContext.get().getString(R.string.import_dialog_primary).toLowerCase();
-                                    fieldValue = primary;
-                                } else if (data[secondaryIndex].isEmpty()) {
-                                    missingField = mContext.get().getString(R.string.import_dialog_secondary).toLowerCase();
-                                    fieldValue = secondary;
-                                }
-
-                                if (missingField != null) {
-                                    String missingIdMessage = String.format(missingIdMessageTemplate, missingField, fieldValue, line + 1);
-                                    failMessage = StringUtil.INSTANCE.applyBoldStyleToString(
-                                            String.format("%s\n\n%s", missingIdMessage, fixFileMessage),
-                                            fieldValue,
-                                            String.valueOf(line + 1)
-                                    );
-                                }
+                                String missingIdMessage = String.format(missingIdMessageTemplate, missingField, unique, line + 1);
+                                failMessage = StringUtil.INSTANCE.applyBoldStyleToString(
+                                        String.format("%s\n\n%s", missingIdMessage, fixFileMessage),
+                                        unique,
+                                        String.valueOf(line + 1)
+                                );
                             }
                         }
 
@@ -220,7 +203,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
 
                 }
             } else {
-                Log.d(TAG, "doInBackground: Required indices not found. UniqueIndex: " + uniqueIndex + ", PrimaryIndex: " + primaryIndex + ", SecondaryIndex: " + secondaryIndex);
+                Log.d(TAG, "doInBackground: Required indices not found. UniqueIndex: " + uniqueIndex);
             }
 
 
@@ -252,16 +235,23 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
             dialog.dismiss();
 
         // Display user feedback in an alert dialog
-        if (context != null && (uniqueFail || mFieldFile.hasSpecialCharacters())) {
-            CharSequence errorMessage = mFieldFile.getLastError();
-            showAlertDialog(context, "Unable to Import", errorMessage);
-        } else if (context != null && fail ) {
-            showAlertDialog(context, "Unable to Import", failMessage);
-        } else if (containsDuplicates) {
-            showAlertDialog(context, "Import Warning", context.getString(R.string.import_runnable_duplicates_skipped));
+        if (context != null){
+            if (fieldNameExists) {
+                showAlertDialog(context, "Unable to Import", context.getString(R.string.import_runnable_field_name_exists));
+            } else if (uniqueFail || mFieldFile.hasSpecialCharacters()) {
+                CharSequence errorMessage = mFieldFile.getLastError();
+                if (errorMessage.length() == 0) { // import failed in verifyUniqueColumn
+                    errorMessage = context.getString(R.string.import_error_unique_exists_db);
+                }
+                showAlertDialog(context, "Unable to Import", errorMessage);
+            } else if (fail) {
+                showAlertDialog(context, "Unable to Import", failMessage);
+            } else if (containsDuplicates) {
+                showAlertDialog(context, "Import Warning", context.getString(R.string.import_runnable_duplicates_skipped));
+            }
         }
 
-        if (fail || uniqueFail || mFieldFile.hasSpecialCharacters()) {
+        if (fail || uniqueFail || mFieldFile.hasSpecialCharacters() || fieldNameExists) {
             controller.getDatabase().deleteField(result);
             SharedPreferences.Editor ed = preferences.edit();
             ed.putString(GeneralKeys.FIELD_FILE, null);
@@ -309,12 +299,7 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
         new AlertDialog.Builder(context, R.style.AppAlertDialog)
                 .setTitle(title)
                 .setMessage(message)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> dialog.dismiss())
                 .setCancelable(false)
                 .show();
     }

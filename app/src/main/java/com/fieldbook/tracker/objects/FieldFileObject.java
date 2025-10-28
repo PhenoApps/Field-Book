@@ -4,9 +4,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
-import android.os.Build;
-import android.text.Html;
-import android.text.Spanned;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -295,7 +292,9 @@ public class FieldFileObject {
                 setLastError("Failed to process file: " + e.getMessage());
                 return null;
             } finally {
-                close();
+                if (cr != null) {
+                    close();
+                }
             }
             return check;
         }
