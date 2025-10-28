@@ -55,7 +55,6 @@ import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 import com.fieldbook.tracker.traits.formats.parameters.SaveImageParameter
 import com.fieldbook.tracker.traits.formats.parameters.UnitParameter
-import com.fieldbook.tracker.traits.formats.parameters.UseDayOfYearParameter
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.fieldbook.tracker.utilities.InsetHandler
 import com.fieldbook.tracker.utilities.SoundHelperImpl
@@ -99,6 +98,20 @@ class TraitDetailFragment : Fragment() {
 
     private var traitId: String? = null
     private var traitObject: TraitObject? = null
+
+    // excludes certain parameters from being shown in chips
+    val excludedParams = setOf(
+        Parameters.NAME,
+        Parameters.DEFAULT_VALUE,
+        Parameters.MAXIMUM,
+        Parameters.MINIMUM,
+        Parameters.DETAILS,
+
+        // below params are handled separately, exclude these as well
+        Parameters.RESOURCE_FILE,
+        Parameters.USE_DAY_OF_YEAR,
+        Parameters.DISPLAY_VALUE,
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?,
@@ -317,17 +330,6 @@ class TraitDetailFragment : Fragment() {
         val format = Formats.entries.find { it.getDatabaseName() == trait.format } ?: return
         val formatDefinition = format.getTraitFormatDefinition()
 
-        val excludedParams = setOf(
-            Parameters.NAME,
-            Parameters.DEFAULT_VALUE,
-            Parameters.MAXIMUM,
-            Parameters.MINIMUM,
-            Parameters.DETAILS,
-            Parameters.RESOURCE_FILE,
-            Parameters.USE_DAY_OF_YEAR,
-            Parameters.DISPLAY_VALUE,
-        )
-
         val displayableParams = formatDefinition.parameters.filter {
             it.parameter !in excludedParams
         }
@@ -365,7 +367,16 @@ class TraitDetailFragment : Fragment() {
 
         chipLabel?.let {
             addChip(it, iconRes) {
-                showParameterEditDialog(parameter, trait)
+                parameter.toggleValue(trait)?.let { newValue -> // toggle parameter
+                    viewModel.updateTraitOptions(database.valueFormatter, trait)
+                    val toastMessage = getString(
+                        if (newValue) R.string.trait_parameter_enabled else R.string.trait_parameter_disabled,
+                        getString(parameter.nameStringResourceId)
+                    )
+                    Toast.makeText(requireContext(), toastMessage, Toast.LENGTH_SHORT).show()
+                } ?: run { // not a toggle parameter, show dialog
+                    showParameterEditDialog(parameter, trait)
+                }
             }
         }
     }

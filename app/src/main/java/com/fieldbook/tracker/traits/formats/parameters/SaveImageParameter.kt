@@ -26,7 +26,7 @@ class SaveImageParameter(private val initialDefaultValue: Boolean? = null) :
 
     inner class ViewHolder(itemView: View) : BaseFormatParameter.ViewHolder(itemView) {
 
-        val defaultValueToggle =
+        val defaultValueToggle: ToggleButton =
             itemView.findViewById<ToggleButton>(R.id.dialog_new_trait_default_toggle_btn).also {
                 initialDefaultValue?.let { value ->
                     it.isChecked = value
@@ -51,5 +51,10 @@ class SaveImageParameter(private val initialDefaultValue: Boolean? = null) :
             database: DataHelper,
             initialTraitObject: TraitObject?
         ) = ValidationResult()
+    }
+
+    override fun toggleValue(trait: TraitObject): Boolean {
+        trait.saveImage = !trait.saveImage
+        return trait.saveImage
     }
 }

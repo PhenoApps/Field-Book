@@ -49,4 +49,9 @@ class MultipleCategoriesParameter() : BaseFormatParameter(
             initialTraitObject: TraitObject?
         ) = ValidationResult()
     }
+
+    override fun toggleValue(trait: TraitObject): Boolean {
+        trait.allowMulticat = !trait.allowMulticat
+        return trait.allowMulticat
+    }
 }

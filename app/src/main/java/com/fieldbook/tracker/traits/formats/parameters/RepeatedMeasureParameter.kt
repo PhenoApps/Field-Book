@@ -49,4 +49,9 @@ class RepeatedMeasureParameter() : BaseFormatParameter(
             initialTraitObject: TraitObject?
         ) = ValidationResult()
     }
+
+    override fun toggleValue(trait: TraitObject): Boolean {
+        trait.repeatedMeasures = !trait.repeatedMeasures
+        return trait.repeatedMeasures
+    }
 }

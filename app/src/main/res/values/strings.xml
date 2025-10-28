@@ -498,6 +498,8 @@
     <string name="trait_synonym">Synonym</string>
     <string name="trait_add_synonym_new_dialog_blank">Synonym cannot be blank</string>
     <string name="trait_add_synonym_already_exists">This synonym already exists</string>
+    <string name="trait_parameter_enabled">%s enabled</string>
+    <string name="trait_parameter_disabled">%s disabled</string>
 
     <string name="trait_detail_chip_rename">Rename</string>
     <string name="trait_detail_chip_math_symbols">Math symbols</string>

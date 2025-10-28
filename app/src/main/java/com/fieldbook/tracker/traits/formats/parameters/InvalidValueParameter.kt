@@ -49,4 +49,9 @@ class InvalidValueParameter() : BaseFormatParameter(
             initialTraitObject: TraitObject?
         ) = ValidationResult()
     }
+
+    override fun toggleValue(trait: TraitObject): Boolean {
+        trait.invalidValues = !trait.invalidValues
+        return trait.invalidValues
+    }
 }

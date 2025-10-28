@@ -49,4 +49,9 @@ class AutoSwitchPlotParameter() : BaseFormatParameter(
             initialTraitObject: TraitObject?
         ) = ValidationResult()
     }
+
+    override fun toggleValue(trait: TraitObject): Boolean {
+        trait.autoSwitchPlot = !trait.autoSwitchPlot
+        return trait.autoSwitchPlot
+    }
 }

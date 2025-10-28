@@ -57,4 +57,9 @@ class DisplayValueParameter @Inject constructor(
             initialTraitObject: TraitObject?
         ) = ValidationResult()
     }
+
+    override fun toggleValue(trait: TraitObject): Boolean {
+        trait.categoryDisplayValue = !trait.categoryDisplayValue
+        return trait.categoryDisplayValue
+    }
 }

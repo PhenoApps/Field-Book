@@ -52,4 +52,9 @@ class CropImageParameter(private val initialDefaultValue: Boolean? = null) :
             initialTraitObject: TraitObject?
         ) = ValidationResult()
     }
+
+    override fun toggleValue(trait: TraitObject): Boolean {
+        trait.cropImage = !trait.cropImage
+        return trait.cropImage
+    }
 }
