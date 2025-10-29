@@ -2,10 +2,12 @@ package com.fieldbook.tracker.traits.formats
 
 import android.content.Context
 import android.view.View
+import android.widget.TextView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.traits.formats.parameters.BaseFormatParameter
 import com.fieldbook.tracker.traits.formats.parameters.DecimalPlacesParameter
 import com.fieldbook.tracker.traits.formats.parameters.DefaultNumericParameter
+import com.fieldbook.tracker.traits.formats.parameters.DefaultToggleParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.traits.formats.parameters.InvalidValueParameter
 import com.fieldbook.tracker.traits.formats.parameters.MathSymbolsParameter
@@ -166,8 +168,10 @@ open class NumericFormat(
 
         val decimalPlacesParameter =
             parameterViewHolders.find { it is DecimalPlacesParameter.ViewHolder } as? DecimalPlacesParameter.ViewHolder
-        val mathSymbolsParameter =
-            parameterViewHolders.find { it is MathSymbolsParameter.ViewHolder } as? MathSymbolsParameter.ViewHolder
+        val mathSymbolsParameter = parameterViewHolders.find { viewHolder ->
+            val titleView = viewHolder.itemView.findViewById<TextView>(R.id.list_item_trait_parameter_title)
+            titleView?.text == context.getString(R.string.trait_parameter_mathematical_symbols)
+        } as? DefaultToggleParameter.ViewHolder
 
 
         if (decimalPlacesParameter == null || mathSymbolsParameter == null) {

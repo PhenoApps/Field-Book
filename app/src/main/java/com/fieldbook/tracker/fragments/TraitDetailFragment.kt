@@ -339,16 +339,16 @@ class TraitDetailFragment : Fragment() {
 
         val iconRes = when (parameter) {
             is DefaultToggleParameter -> {
-                val currentValue = parameter.getToggleValue(trait)
+                val isEnabled = parameter.getToggleValue(trait)
                 when (parameter) {
-                    is AutoSwitchPlotParameter -> if (currentValue) R.drawable.ic_auto_switch else R.drawable.ic_auto_switch_off
-                    is CloseKeyboardParameter -> if (currentValue) R.drawable.ic_keyboard_close else R.drawable.ic_keyboard_close_off
-                    is CropImageParameter -> if (currentValue) R.drawable.ic_crop_image else R.drawable.ic_crop_image_off
-                    is InvalidValueParameter -> if (currentValue) R.drawable.ic_outlier else R.drawable.ic_outlier_off
-                    is MathSymbolsParameter -> if (currentValue) R.drawable.ic_symbol else R.drawable.ic_symbol_off
-                    is MultipleCategoriesParameter -> if (currentValue) R.drawable.ic_trait_multicat else R.drawable.ic_trait_multicat_off
-                    is RepeatedMeasureParameter -> if (currentValue) R.drawable.ic_repeated_measures else R.drawable.ic_repeated_measures_off
-                    is SaveImageParameter -> if (currentValue) R.drawable.ic_transfer else R.drawable.ic_transfer_off
+                    is AutoSwitchPlotParameter -> if (isEnabled) R.drawable.ic_auto_switch else R.drawable.ic_auto_switch_off
+                    is CloseKeyboardParameter -> if (isEnabled) R.drawable.ic_keyboard_close else R.drawable.ic_keyboard_close_off
+                    is CropImageParameter -> if (isEnabled) R.drawable.ic_crop_image else R.drawable.ic_crop_image_off
+                    is InvalidValueParameter -> if (isEnabled) R.drawable.ic_outlier else R.drawable.ic_outlier_off
+                    is MathSymbolsParameter -> if (isEnabled) R.drawable.ic_symbol else R.drawable.ic_symbol_off
+                    is MultipleCategoriesParameter -> if (isEnabled) R.drawable.ic_multicat else R.drawable.ic_single_cat
+                    is RepeatedMeasureParameter -> if (isEnabled) R.drawable.ic_repeated_measures else R.drawable.ic_repeated_measures_off
+                    is SaveImageParameter -> if (isEnabled) R.drawable.ic_transfer else R.drawable.ic_transfer_off
                     else -> R.drawable.ic_tag_edit
                 }
             }
@@ -365,7 +365,11 @@ class TraitDetailFragment : Fragment() {
             is AutoSwitchPlotParameter -> getString(R.string.trait_detail_chip_automatic_switch)
             is InvalidValueParameter -> getString(R.string.trait_detail_chip_invalid_value)
             is MathSymbolsParameter -> getString(R.string.trait_detail_chip_math_symbols)
-            is MultipleCategoriesParameter -> getString(R.string.trait_detail_chip_multiple_categories)
+            is MultipleCategoriesParameter -> {
+                val isEnabled = parameter.getToggleValue(trait)
+                if (isEnabled) getString(R.string.trait_detail_chip_multiple_categories)
+                else getString(R.string.trait_detail_chip_single_category)
+            }
             is SaveImageParameter -> getString(R.string.trait_detail_chip_transfer_images)
             else -> context?.let { parameter.getName(it).capitalizeFirstLetter() }
         }
@@ -482,11 +486,13 @@ class TraitDetailFragment : Fragment() {
     /**
      * Returns whether a specific parameter of a trait has validation dependency on another parameter
      * eg. for numeric trait, decimalPlaces restriction and mathSymbols cannot both be enabled
+     * since mathSymbols is like a boolean switch, it will automatically reset decimalPlaces to default
+     * but we need to handle decimalPlaces
      */
     private fun paramHasValidationDependency(formatDefinition: TraitFormat, parameter: BaseFormatParameter): Boolean {
         return when (formatDefinition) {
             is NumericFormat -> {
-                parameter is DecimalPlacesParameter || parameter is MathSymbolsParameter
+                parameter is DecimalPlacesParameter
             }
             else -> false
         }

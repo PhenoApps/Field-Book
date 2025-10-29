@@ -504,6 +504,7 @@
     <string name="trait_detail_chip_rename">Rename</string>
     <string name="trait_detail_chip_math_symbols">Math symbols</string>
     <string name="trait_detail_chip_multiple_categories">Multiple categories</string>
+    <string name="trait_detail_chip_single_category">Single category</string>
     <string name="trait_detail_chip_automatic_switch">Automatic advance</string>
     <string name="trait_detail_chip_format_date">Format: %s</string>
     <string name="trait_detail_chip_transfer_images">Transfer images</string>
