@@ -489,7 +489,7 @@
     <string name="error_updating_trait_visibility">Error updating trait visibility</string>
     <string name="error_empty_trait_name">Trait name cannot be empty</string>
     <string name="error_copy_trait">Error while copying trait</string>
-    <string name="trait_swap_name_dialog_title">Select synonym as trait alias</string>
+    <string name="trait_swap_synonym_dialog_title">Synonyms</string>
     <string name="trait_swap_name_set_alias">Set Alias</string>
     <string name="error_updating_trait_alias">Error updating trait alias</string>
     <string name="error_updating_trait_options">Error updating trait options</string>

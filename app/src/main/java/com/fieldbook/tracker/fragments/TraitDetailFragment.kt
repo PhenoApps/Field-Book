@@ -522,7 +522,7 @@ class TraitDetailFragment : Fragment() {
         return null
     }
 
-    private fun showSwapNameDialog(trait: TraitObject) {
+    private fun showSwapSynonymDialog(trait: TraitObject) {
         val synonyms = trait.synonyms.toTypedArray()
 
         // check if current alias is present in synonyms array
@@ -530,7 +530,7 @@ class TraitDetailFragment : Fragment() {
 
         var selectedSynonym: String? = null
         AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
-            .setTitle(getString(R.string.trait_swap_name_dialog_title))
+            .setTitle(getString(R.string.trait_swap_synonym_dialog_title))
             .setSingleChoiceItems(synonyms, currentSelection) { _, which ->
                 selectedSynonym = synonyms[which]
             }
@@ -701,7 +701,7 @@ class TraitDetailFragment : Fragment() {
     private fun setupRenameChipClickListener() {
         binding.renameTrait.setOnClickListener {
             traitObject?.let { trait ->
-                if (trait.synonyms.isNotEmpty()) showSwapNameDialog(trait)
+                if (trait.synonyms.isNotEmpty()) showSwapSynonymDialog(trait)
                 else showAddSynonymDialog(trait)
             }
         }
