@@ -47,6 +47,7 @@ import com.fieldbook.tracker.traits.formats.parameters.CategoriesParameter
 import com.fieldbook.tracker.traits.formats.parameters.CloseKeyboardParameter
 import com.fieldbook.tracker.traits.formats.parameters.CropImageParameter
 import com.fieldbook.tracker.traits.formats.parameters.DecimalPlacesParameter
+import com.fieldbook.tracker.traits.formats.parameters.DefaultToggleParameter
 import com.fieldbook.tracker.traits.formats.parameters.InvalidValueParameter
 import com.fieldbook.tracker.traits.formats.parameters.MathSymbolsParameter
 import com.fieldbook.tracker.traits.formats.parameters.MultipleCategoriesParameter
@@ -269,7 +270,7 @@ class TraitDetailFragment : Fragment() {
             val fileObject = FieldFileObject.create(requireContext(), trait.resourceFile.toUri(), null, null)
             fileObject.fileStem
         } else {
-            getString(R.string.trait_parameter_resource_file)
+            getString(R.string.trait_parameter_resource_file).capitalizeFirstLetter()
         }
 
         addChip(chipLabel, R.drawable.ic_tb_folder) { chip ->
@@ -335,19 +336,28 @@ class TraitDetailFragment : Fragment() {
     }
 
     private fun addParameterChip(parameter: BaseFormatParameter, trait: TraitObject) {
+
         val iconRes = when (parameter) {
-            is AutoSwitchPlotParameter -> R.drawable.ic_auto_switch
+            is DefaultToggleParameter -> {
+                val currentValue = parameter.getToggleValue(trait)
+                when (parameter) {
+                    is AutoSwitchPlotParameter -> if (currentValue) R.drawable.ic_auto_switch else R.drawable.ic_auto_switch_off
+                    is CloseKeyboardParameter -> if (currentValue) R.drawable.ic_keyboard_close else R.drawable.ic_keyboard_close_off
+                    is CropImageParameter -> if (currentValue) R.drawable.ic_crop_image else R.drawable.ic_crop_image_off
+                    is InvalidValueParameter -> if (currentValue) R.drawable.ic_outlier else R.drawable.ic_outlier_off
+                    is MathSymbolsParameter -> if (currentValue) R.drawable.ic_symbol else R.drawable.ic_symbol_off
+                    is MultipleCategoriesParameter -> if (currentValue) R.drawable.ic_trait_multicat else R.drawable.ic_trait_multicat_off
+                    is RepeatedMeasureParameter -> if (currentValue) R.drawable.ic_repeated_measures else R.drawable.ic_repeated_measures_off
+                    is SaveImageParameter -> if (currentValue) R.drawable.ic_transfer else R.drawable.ic_transfer_off
+                    else -> R.drawable.ic_tag_edit
+                }
+            }
+
+            // non-toggle based parameters
             is CategoriesParameter -> R.drawable.ic_trait_categorical
-            is CloseKeyboardParameter -> R.drawable.ic_keyboard_close
-            is CropImageParameter -> R.drawable.ic_crop_image
             is DecimalPlacesParameter -> R.drawable.ic_decimal
-            is InvalidValueParameter -> R.drawable.ic_invalid_values
-            is MathSymbolsParameter -> R.drawable.ic_symbol
-            is MultipleCategoriesParameter -> R.drawable.ic_trait_multicat
-            is ResourceFileParameter -> R.drawable.ic_tb_folder
-            is RepeatedMeasureParameter -> R.drawable.ic_repeated_measures
-            is SaveImageParameter -> R.drawable.ic_transfer
             is UnitParameter -> R.drawable.ic_tag_edit
+            is ResourceFileParameter -> R.drawable.ic_tb_folder
             else -> R.drawable.ic_tag_edit
         }
 
@@ -360,15 +370,10 @@ class TraitDetailFragment : Fragment() {
             else -> context?.let { parameter.getName(it).capitalizeFirstLetter() }
         }
 
-        chipLabel?.let {
-            addChip(it, iconRes) {
+        chipLabel?.let { label ->
+            addChip(label, iconRes) { chip ->
                 parameter.toggleValue(trait)?.let { newValue -> // toggle parameter
                     viewModel.updateTraitOptions(database.valueFormatter, trait)
-                    val toastMessage = getString(
-                        if (newValue) R.string.trait_parameter_enabled else R.string.trait_parameter_disabled,
-                        getString(parameter.nameStringResourceId)
-                    )
-                    Toast.makeText(requireContext(), toastMessage, Toast.LENGTH_SHORT).show()
                 } ?: run { // not a toggle parameter, show dialog
                     showParameterEditDialog(parameter, trait)
                 }
@@ -377,7 +382,7 @@ class TraitDetailFragment : Fragment() {
     }
 
     private fun String.capitalizeFirstLetter(): String {
-        return if (isEmpty()) this else this.replaceFirstChar { it.uppercaseChar() }
+        return if (isEmpty()) this else this.lowercase().replaceFirstChar { it.uppercaseChar() }
     }
 
     private fun addChip(label: String, iconRes: Int, onClick: (Chip) -> Unit) {
