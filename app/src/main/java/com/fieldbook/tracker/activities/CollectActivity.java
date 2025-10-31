@@ -62,6 +62,7 @@ import com.fieldbook.tracker.devices.camera.UsbCameraApi;
 import com.fieldbook.tracker.devices.camera.GoProApi;
 import com.fieldbook.tracker.devices.camera.CanonApi;
 import com.fieldbook.tracker.dialogs.GeoNavCollectDialog;
+import com.fieldbook.tracker.dialogs.InvalidValueDialog;
 import com.fieldbook.tracker.dialogs.ObservationMetadataFragment;
 import com.fieldbook.tracker.dialogs.SearchDialog;
 import com.fieldbook.tracker.fragments.CropImageFragment;
@@ -155,6 +156,8 @@ import java.util.concurrent.Executors;
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function0;
 
 /**
  * All main screen logic resides here
@@ -740,16 +743,51 @@ public class CollectActivity extends ThemedActivity
 
         if (!layout.validate(value)) {
 
-            removeTrait(currentTrait);
+            // do not delete the observation if
+            // trait allows invalid valus
 
-            collectInputView.clear();
+            if (!currentTrait.getInvalidValues()) {
 
-            soundHelper.playError();
+                removeTrait(currentTrait);
+
+                collectInputView.clear();
+
+                soundHelper.playError();
+
+            }
 
             return false;
         }
 
         return true;
+    }
+
+
+    @Override
+    public void navigateIfDataIsValid(@Nullable String data, @NonNull Function0<Unit> onValidNavigation) {
+
+        if (validateData(data)) {
+
+            onValidNavigation.invoke();
+
+            return;
+
+        }
+
+        TraitObject currentTrait = traitBox.getCurrentTrait();
+
+        if (currentTrait == null) return;
+
+        if (currentTrait.getInvalidValues()) {
+
+            new InvalidValueDialog(this).show(
+                    onValidNavigation::invoke,
+                    () -> {
+                        // do not navigate or delete observation
+                    }
+            );
+
+        }
     }
 
     private void setNaText() {

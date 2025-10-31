@@ -4,6 +4,7 @@ import com.fieldbook.tracker.views.CollectInputView
 
 interface CollectRangeController: CollectController {
     fun validateData(data: String?): Boolean
+    fun navigateIfDataIsValid(data: String?, onValidNavigation: () -> Unit)
     fun initWidgets(rangeSuppress: Boolean)
     fun cancelAndFinish()
     fun callFinish()

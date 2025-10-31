@@ -369,40 +369,43 @@ class TraitBoxView : ConstraintLayout {
 
     fun moveTrait(direction: MoveDirection) {
 
-        var pos = 0
-        if (!controller.validateData(controller.getCurrentObservation()?.value)) {
-            return
-        }
+        controller.navigateIfDataIsValid(controller.getCurrentObservation()?.value) {
+            var pos = 0
 
-        val rangeBox = controller.getRangeBox()
-        if (direction == MoveDirection.LEFT) {
-            pos = getSelectedItemPosition() - 1
-            if (pos < 0) {
-                pos = visibleTraitsList.count() - 1
-                if (controller.isCyclingTraitsAdvances()) {
-                    rangeBox.clickLeft()
+            val rangeBox = controller.getRangeBox()
+            if (direction == MoveDirection.LEFT) {
+                pos = getSelectedItemPosition() - 1
+                if (pos < 0) {
+                    pos = visibleTraitsList.count() - 1
+                    if (controller.isCyclingTraitsAdvances()) {
+                        rangeBox.clickLeft()
+                    }
+                    if (controller.getPreferences()
+                            .getBoolean(PreferenceKeys.CYCLE_TRAITS_SOUND, false)
+                    ) {
+                        controller.getSoundHelper().playCycle()
+                    }
                 }
-                if (controller.getPreferences().getBoolean(PreferenceKeys.CYCLE_TRAITS_SOUND, false)) {
-                    controller.getSoundHelper().playCycle()
+            } else if (direction == MoveDirection.RIGHT) {
+                pos = getSelectedItemPosition() + 1
+                if (pos > visibleTraitsList.count() - 1) {
+                    pos = 0
+                    if (controller.isCyclingTraitsAdvances()) {
+                        rangeBox.clickRight()
+                    }
+                    if (controller.getPreferences()
+                            .getBoolean(PreferenceKeys.CYCLE_TRAITS_SOUND, false)
+                    ) {
+                        controller.getSoundHelper().playCycle()
+                    }
                 }
             }
-        } else if (direction == MoveDirection.RIGHT) {
-            pos = getSelectedItemPosition() + 1
-            if (pos > visibleTraitsList.count() - 1) {
-                pos = 0
-                if (controller.isCyclingTraitsAdvances()) {
-                    rangeBox.clickRight()
-                }
-                if (controller.getPreferences().getBoolean(PreferenceKeys.CYCLE_TRAITS_SOUND, false)) {
-                    controller.getSoundHelper().playCycle()
-                }
-            }
-        }
 
-        setSelection(pos)
-        loadLayout()
-        controller.refreshLock()
-        controller.getCollectInputView().resetInitialIndex()
+            setSelection(pos)
+            loadLayout()
+            controller.refreshLock()
+            controller.getCollectInputView().resetInitialIndex()
+        }
     }
 
     fun returnFirst() {

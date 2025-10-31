@@ -10,7 +10,6 @@ import androidx.annotation.NonNull;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
-import com.fieldbook.tracker.dialogs.InvalidValueDialog;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.utilities.Utils;
 
@@ -143,13 +142,9 @@ public class NumericTraitLayout extends BaseTraitLayout {
                         + ": " + getCurrentTrait().getMinimum();
             }
 
-            if (trait.getInvalidValues()) {
-                showInvalidDialog(message);
-                return true;
-            } else {
-                getCollectActivity().runOnUiThread(() -> Utils.makeToast(controller.getContext(), message));
-                return false;
-            }
+            getCollectActivity().runOnUiThread(() -> Utils.makeToast(controller.getContext(), message));
+            return false;
+
         }
 
         int maxDecimalPlaces = Integer.parseInt(trait.getMaxDecimalPlaces());
@@ -158,13 +153,8 @@ public class NumericTraitLayout extends BaseTraitLayout {
 
             String message = controller.getContext().getString(R.string.trait_error_mathematical_symbols_disabled);
 
-            if (trait.getInvalidValues()) {
-                showInvalidDialog(message);
-                return true;
-            } else {
-                getCollectActivity().runOnUiThread(() -> Utils.makeToast(controller.getContext(), message));
-                return false;
-            }
+            getCollectActivity().runOnUiThread(() -> Utils.makeToast(controller.getContext(), message));
+            return false;
 
         } else if (maxDecimalPlaces >= 0) { // validate decimal places
             if (!isValidDecimalPlaces(data, maxDecimalPlaces)) {
@@ -176,29 +166,13 @@ public class NumericTraitLayout extends BaseTraitLayout {
                     message = controller.getContext().getString(R.string.trait_error_decimal_places, maxDecimalPlaces);
                 }
 
-                if (trait.getInvalidValues()) {
-                    showInvalidDialog(message);
-                    return true;
-                } else {
-                    getCollectActivity().runOnUiThread(() -> Utils.makeToast(controller.getContext(), message));
-                    return false;
-                }
+                getCollectActivity().runOnUiThread(() -> Utils.makeToast(controller.getContext(), message));
+                return false;
+
             }
         }
 
         return true;
-    }
-
-    private void showInvalidDialog(String message) {
-        final CollectActivity activity = getCollectActivity();
-        final String studyId = getCurrentObservation().getStudy_id();
-        final String plotId = controller.getRangeBox().getPlotID();
-        final String traitId = getCurrentTrait().getId();
-        final String rep = getCurrentObservation().getRep();
-
-        if (plotId != null) {
-            InvalidValueDialog.show(activity, message, studyId, plotId, traitId, rep);
-        }
     }
 
     public static boolean isUnder(TraitObject trait, final String s) {
