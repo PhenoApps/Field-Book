@@ -116,7 +116,7 @@
       "name": "rust score",
       "alias": "rust score",
       "synonyms": ["rust score"],
-      "format": "rust rating",
+      "format": "disease rating",
       "defaultValue": "",
       "details": "",
       "isVisible": true,
