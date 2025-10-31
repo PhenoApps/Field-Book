@@ -639,7 +639,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
             observationUnits[study.studyDbId]?.filter {
                 if (it.observationUnitPosition?.entryType?.name == "TEST") true
-                else it.observationUnitPosition.observationLevel.levelName == level.observationLevelName
+                else it.observationUnitPosition.observationLevel.levelName.equals(level.observationLevelName, ignoreCase = true)
             }
                 ?.let { units ->
 
