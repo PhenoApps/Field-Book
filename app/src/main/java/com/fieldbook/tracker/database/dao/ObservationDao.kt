@@ -119,14 +119,23 @@ class ObservationDao {
 
         fun getAllFromAYear(year: String): Array<ObservationModel> = withDatabase { db ->
 
-            db.query(
-                    Observation.tableName,
-                    where = "observation_time_stamp LIKE ? AND study_id > 0",
-                    whereArgs = arrayOf("$year%")
-            )
-                    .toTable()
+            val query = """
+                SELECT *
+                FROM observations
+                JOIN observation_variables
+                    ON observations.observation_variable_db_id = observation_variables.internal_id_observation_variable
+                WHERE observation_time_stamp LIKE ? AND study_id > 0
+            """.trimIndent()
+
+            //Log.d(TAG, query)
+
+            db.rawQuery(query, arrayOf("$year%")).use {
+
+                it.toTable()
                     .map { ObservationModel(it) }
+                    .sortedBy { it.rep.toInt() }
                     .toTypedArray()
+            }
 
         } ?: emptyArray()
 

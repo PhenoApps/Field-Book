@@ -14,6 +14,7 @@ data class ObservationModel(val map: Row) {
         val observation_variable_db_id: Int by map
         val observation_variable_field_book_format: String? by map
         val observation_variable_name: String? by map
+        val observation_variable_alias: String? by map
         var value: String = if ("value" in map) (map["value"] ?: "NA").toString()
                         else if ("observation_variable_db_id" in map.keys) ObservationVariableDao.getTraitById(
             observation_variable_db_id.toString()
@@ -90,6 +91,7 @@ data class ObservationModel(val map: Row) {
                         "observation_unit_id" -> context.getString(R.string.observation_info_entry_id)
                         "observation_variable_field_book_format" -> context.getString(R.string.observation_info_trait_format)
                         "observation_variable_name" -> context.getString(R.string.observation_info_trait_name)
+                        "observation_variable_alias" -> context.getString(R.string.observation_info_trait_alias)
                         "value" -> context.getString(R.string.observation_info_value)
                         "observation_time_stamp" -> context.getString(R.string.observation_info_timestamp)
                         "collector" -> context.getString(R.string.observation_info_collector)

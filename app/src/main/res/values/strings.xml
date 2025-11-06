@@ -762,6 +762,7 @@
     <string name="observation_info_entry_id">Entry Id</string>
     <string name="observation_info_trait_format">Trait Format</string>
     <string name="observation_info_trait_name">Trait Name</string>
+    <string name="observation_info_trait_alias">Trait Alias</string>
     <string name="observation_info_value">Value</string>
     <string name="observation_info_timestamp">Observation Timestamp</string>
     <string name="observation_info_collector">Collector</string>

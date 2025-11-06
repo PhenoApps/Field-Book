@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +25,6 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.StatisticObject;
-import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.traits.formats.Formats;
 import com.fieldbook.tracker.traits.formats.TraitFormat;
 import com.fieldbook.tracker.traits.formats.coders.StringCoder;
@@ -113,7 +113,6 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
         int imageCount = 0;
 
         for (ObservationModel observation : observations) {
-            TraitObject trait = database.getTraitById(String.valueOf(observation.getObservation_variable_db_id()));
 
             fields.add(observation.getStudy_id());
 
@@ -142,8 +141,11 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
             }
             dateObjects.add(dateObject);
 
-            if (Formats.Companion.isCameraTrait(trait.getFormat())) {
-                imageCount++;
+            final String traitFormat = observation.getObservation_variable_field_book_format();
+            if (traitFormat != null) {
+                if (Formats.Companion.isCameraTrait(traitFormat)) {
+                    imageCount++;
+                }
             }
 
             String date = new SimpleDateFormat(DATE_FORMAT_PATTERN, Locale.getDefault()).format(dateObject);
@@ -209,25 +211,28 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
         List<String> unitWithMostObservationsList = new ArrayList<>();
         for (ObservationModel observation : observations) {
             if (observation.getObservation_unit_id().equals(unitWithMostObservations)) {
-                TraitObject trait = database.getTraitById(String.valueOf(observation.getObservation_variable_db_id()));
-                String traitFormat = trait.getFormat();
-                TraitFormat formats = Formats.Companion.findTrait(traitFormat);
+                String traitFormat = observation.getObservation_variable_field_book_format();
 
-                Object valueModel = observation.getValue();
+                if (traitFormat != null) {
+                    TraitFormat formats = Formats.Companion.findTrait(traitFormat);
 
-                if (formats instanceof StringCoder) {
+                    Object valueModel = observation.getValue();
 
-                    valueModel = ((StringCoder) formats).decode(valueModel.toString());
+                    if (formats instanceof StringCoder) {
 
-                }
+                        valueModel = ((StringCoder) formats).decode(valueModel.toString());
 
-                if (formats instanceof ValuePresenter) {
+                    }
 
-                    unitWithMostObservationsList.add(trait.getAlias() + ": " + ((ValuePresenter) formats).represent(originActivity, valueModel, trait));
+                    if (formats instanceof ValuePresenter) {
 
-                } else {
+                        unitWithMostObservationsList.add(observation.getObservation_variable_alias() + ": " + ((ValuePresenter) formats).represent(originActivity, valueModel, null));
 
-                    unitWithMostObservationsList.add(trait.getAlias() + ": " + observation.getValue());
+                    } else {
+
+                        unitWithMostObservationsList.add(observation.getObservation_variable_alias() + ": " + observation.getValue());
+
+                    }
 
                 }
 
