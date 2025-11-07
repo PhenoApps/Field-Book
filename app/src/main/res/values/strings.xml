@@ -1128,6 +1128,8 @@
     <string name="brapi_pagination">Page Size</string>
     <string name="brapi_timeout">Server Timeout</string>
     <string name="brapi_chunk_size">Chunk Size</string>
+    <string name="brapi_max_concurrent_image_content">Max Concurrent Image Export</string>
+    <string name="brapi_max_concurrent_observation_transfer">Max Concurrent Observation Transfer</string>
 
     <string name="preferences_brapi_authorization_title">Authorization</string>
     <string name="preferences_brapi_advanced_title">Advanced</string>
@@ -1233,6 +1235,7 @@
     <string name="brapi_warning_select_program">Please select a program</string>
     <string name="brapi_warning_select_trial">Please select a trial</string>
     <string name="brapi_warning_select_study">Please select a field</string>
+    <string name="brapi_export_load_stats_error">Error loading export statistics</string>
     <string name="brapi_export_failed">BrAPI Export Failed</string>
     <string name="brapi_export_permission_deny">ERROR: You do not have the permissions to send data to the specified system.</string>
     <string name="brapi_export_not_supported">ERROR: Target system does not support sending observations via BrAPI.</string>
@@ -1280,6 +1283,22 @@
     <string name="brapi_export_images">Images</string>
     <string name="brapi_delete_message">Cannot delete synced BrAPI observation, using NA instead</string>
     <string name="act_brapi_export_image_load_failed">Image load failed.</string>
+
+    <string name="brapi_export_progress_title">Exporting to BrAPI</string>
+    <string name="brapi_export_status">Status</string>
+    <string name="brapi_export_current_operation">Current Operation</string>
+    <string name="brapi_export_preparing">Preparing export...</string>
+    <string name="brapi_export_new_observations_pending">New Observations</string>
+    <string name="brapi_export_edited_observations_pending">Edited Observations</string>
+    <string name="brapi_export_new_images_pending">New Images</string>
+    <string name="brapi_export_edited_images_pending">Edited/Incomplete Images</string>
+    <string name="cancelling">Cancelling...</string>
+    <string name="brapi_export_uploading_new_observations">Uploading new observations...</string>
+    <string name="brapi_export_uploading_edited_observations">Uploading edited observations...</string>
+    <string name="brapi_export_uploading_new_images">Uploading new images...</string>
+    <string name="brapi_export_uploading_edited_images">Uploading edited/incomplete images...</string>
+    <string name="brapi_export_complete">Export complete</string>
+    <string name="cancel">Cancel</string>
 
     <!-- Pagination -->
     <string name="next">Next</string>
@@ -1630,11 +1649,46 @@
     <string name="play">Play</string>
     <string name="pause">Pause</string>
     <string name="save">Save</string>
-      
+
     <string name="database_export_invalid_filename">Invalid export file name.</string>
     <string name="device_settings_dialog_name">Name: %s</string>
     <string name="device_settings_dialog_address">Address: %s</string>
     <string name="device_settings_dialog_unknown_name">Unknown Bluetooth Device</string>
     <string name="device_settings_dialog_title">Bluetooth Device Settings</string>
     <string name="no_data_captured">No data captured.</string>
+    <string name="act_brapi_export_starting">Starting export</string>
+    <string name="act_brapi_export_success">Export success</string>
+
+    <string name="nothing_to_sync">Nothing to sync</string>
+    <string name="export_cancelled">Export cancelled.</string>
+    <string name="creating_observations">Creating %1$d observations…</string>
+    <string name="creating_observations_progress">Creating %1$d/%2$d observations…</string>
+    <string name="authentication_failed">Authentication failed.</string>
+    <string name="editing_observations">Editing %1$d observations…</string>
+    <string name="editing_observations_progress">Editing %1$d/%2$d observations…</string>
+    <string name="uploading_metadata">Uploading Metadata: %1$s</string>
+    <string name="loading_brapi_images">Loading: %1$s</string>
+    <string name="uploading_content">Uploading Content: %1$s</string>
+    <string name="completed_brapi_upload">Completed: %1$s</string>
+    <string name="failed_brapi_image_upload">Failed: %1$s</string>
+    <string name="updating_metadata_brapi_image">Updating Metadata: %1$s</string>
+    <string name="updating_content_brapi_image">Updating Content: %1$s</string>
+    <string name="edited_brapi_image">Edited: %1$s</string>
+    <string name="brapi_download_button">Download</string>
+    <string name="brapi_sync_button">Sync</string>
+    <string name="brapi_downloading_observations">Pulling data from BrAPI</string>
+    <string name="brapi_updating_local_database">Updating local database</string>
+    <string name="brapi_finished_local_update">Finished updating local database</string>
+    <string name="brapi_downloading_page">Download page %1$d/%2$d</string>
+    <string name="brapi_upload_button">Upload</string>
+    <string name="study_info_missing">Study info missing</string>
+    <string name="nothing_to_upload">Nothing to upload</string>
+    <string name="download_cancelled">Download cancelled</string>
+    <string name="download_failed">Download Failed</string>
+    <string name="no_new_or_updated_observations_found">No new or updated observations found</string>
+    <string name="user_cancelled_operation">User cancelled operation.</string>
+    <string name="upload_failed">Upload Failed</string>
+    <string name="study_not_initialized">Study not initialized</string>
+    <string name="brapi_study_db_id_is_missing">BrAPI Study db id is missing</string>
+    <string name="no_fields_to_process">No fields to process.</string>
 </resources>
