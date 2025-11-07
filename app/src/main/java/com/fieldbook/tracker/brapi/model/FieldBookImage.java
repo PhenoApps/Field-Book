@@ -51,13 +51,12 @@ public class FieldBookImage extends BrapiObservation {
         String sanitizedTraitName = FileUtil.sanitizeFileName(traitName);
         DocumentFile photosDir = DocumentTreeUtil.Companion.getFieldMediaDirectory(ctx, sanitizedTraitName);
 
+        this.mimeType = "image/jpeg";
         this.missing = missingPhoto;
         this.location = new GeoJSON();
         this.additionalInfo = new HashMap<>();
 
         if (photosDir != null) {
-
-            this.file = photosDir.findFile(filePath);
 
             Uri filePathUri = Uri.parse(filePath);
             this.file = DocumentFile.fromSingleUri(ctx, filePathUri);
@@ -101,6 +100,12 @@ public class FieldBookImage extends BrapiObservation {
     @Override
     public int hashCode() {
         return objectsHash(getUnitDbId(), fileName);//, timestamp);
+    }
+
+    public DocumentFile getFile() { return file; }
+
+    public void setFile(DocumentFile file) {
+        this.file = file;
     }
 
     public GeoJSON getLocation() {

@@ -15,16 +15,11 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.*
 import androidx.documentfile.provider.DocumentFile
-import androidx.fragment.app.FragmentActivity
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.activities.brapi.BrapiExportActivity
-import com.fieldbook.tracker.brapi.BrapiAuthDialogFragment
-import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.dialogs.CitationDialog
 import com.fieldbook.tracker.objects.FieldObject
-import com.fieldbook.tracker.objects.ImportFormat
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
@@ -44,6 +39,7 @@ import java.io.OutputStreamWriter
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
+import androidx.core.content.edit
 
 /**
  * Checks preconditions before collect and export.
@@ -97,28 +93,9 @@ class ExportUtil @Inject constructor(
     }
 
     fun export() {
-        val exporter = preferences.getString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, "")
 
-        if (!allFieldsBrAPI() || exporter == "local" || !preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false)) {
-            // use local export if any fields aren't all brapi, if brapi is disabled, or if local pref is set
-            exportPermission()
-        } else if (exporter == "brapi") {
-            exportBrAPI(fieldIds)
-        } else {
-            showExportDialog() // provide export type choice if fields are all brapi but pref is not set
-        }
-    }
+        exportPermission()
 
-    fun allFieldsBrAPI(): Boolean {
-        fieldIds.forEach { fieldId ->
-            val field = database.getFieldObject(fieldId)
-            val importFormat = field?.dataSourceFormat
-            if (importFormat != ImportFormat.BRAPI) {
-                Log.d(TAG, "Not all fields are BrAPI fields")
-                return false
-            }
-        }
-        return true
     }
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_EXPORT_DATA)
@@ -141,60 +118,6 @@ class ExportUtil @Inject constructor(
                 PERMISSIONS_REQUEST_EXPORT_DATA,
                 *perms
             )
-        }
-    }
-
-    fun showExportDialog() {
-        val inflater = LayoutInflater.from(context)
-        val layout = inflater.inflate(R.layout.dialog_list_buttonless, null)
-        val exportSourceList: ListView = layout.findViewById(R.id.myList)
-
-        val exportArray = arrayOf(
-            context.getString(R.string.export_source_local),
-            preferences.getString(PreferenceKeys.BRAPI_DISPLAY_NAME, context.getString(R.string.brapi_edit_display_name_default))
-        )
-
-        val adapter = ArrayAdapter(context, R.layout.list_item_dialog_list, exportArray)
-        exportSourceList.adapter = adapter
-
-        val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
-        builder.setTitle(R.string.export_dialog_title)
-            .setView(layout)
-            .setPositiveButton(context.getString(R.string.dialog_cancel)) { dialog, _ -> dialog.dismiss() }
-
-        val dialog = builder.create()
-        dialog.show()
-        exportSourceList.setOnItemClickListener { _, _, which, _ ->
-            when (which) {
-                0 -> exportPermission()
-                1 -> exportBrAPI(fieldIds)
-            }
-            dialog.dismiss()
-        }
-    }
-
-    fun exportBrAPI(fieldIds: List<Int>) {
-        val activeFields = fieldIds.map { fieldId -> database.getFieldObject(fieldId) }
-        val nonMatchingSourceFields = activeFields.filter { !BrAPIService.checkMatchBrapiUrl(context, it.getDataSource()) }
-
-        if (nonMatchingSourceFields.isNotEmpty()) {
-            val hostURL = BrAPIService.getHostUrl(context)
-            val badSourceMsg = context.resources.getString(
-                R.string.brapi_field_non_matching_sources,
-                nonMatchingSourceFields.joinToString(", ") { it.getDataSource() },
-                hostURL
-            )
-            Toast.makeText(context, badSourceMsg, Toast.LENGTH_LONG).show()
-            return
-        }
-
-        if (BrAPIService.isLoggedIn(context)) {
-            val exportIntent = Intent(context, BrapiExportActivity::class.java)
-            exportIntent.putIntegerArrayListExtra(BrapiExportActivity.FIELD_IDS, ArrayList(fieldIds))
-            context.startActivity(exportIntent)
-        } else {
-            val brapiAuth = BrapiAuthDialogFragment().newInstance()
-            brapiAuth?.show((context as FragmentActivity).supportFragmentManager, "BrapiAuthDialogFragment")
         }
     }
 
@@ -281,7 +204,7 @@ class ExportUtil @Inject constructor(
                 return
             }
 
-            with(preferences.edit()) {
+            preferences.edit {
                 putBoolean(GeneralKeys.EXPORT_COLUMNS_UNIQUE, isOnlyUniqueChecked)
                 putBoolean(GeneralKeys.EXPORT_COLUMNS_ALL, isAllColumnsChecked)
                 putBoolean(GeneralKeys.EXPORT_TRAITS_ALL, isAllTraitsChecked)
@@ -290,7 +213,6 @@ class ExportUtil @Inject constructor(
                 putBoolean(GeneralKeys.EXPORT_FORMAT_DATABASE, checkDB.isChecked)
                 putBoolean(GeneralKeys.EXPORT_OVERWRITE, checkOverwrite.isChecked)
                 putBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, checkBundle.isChecked)
-                apply()
             }
 
             BaseDocumentTreeUtil.getDirectory(context as Activity, R.string.dir_field_export)

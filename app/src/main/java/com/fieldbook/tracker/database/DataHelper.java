@@ -64,12 +64,13 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
-import dagger.hilt.android.qualifiers.ActivityContext;
+import dagger.hilt.android.qualifiers.ApplicationContext;
 
 /**
  * All database related functions are here
@@ -102,7 +103,7 @@ public class DataHelper {
     private final GroupDao studyGroupDao = new GroupDao(GroupsTable.Type.STUDY);
 
     @Inject
-    public DataHelper(@ActivityContext Context context) {
+    public DataHelper(@ApplicationContext Context context) {
         try {
             this.context = context;
 
@@ -446,6 +447,26 @@ public class DataHelper {
     }
 
     /**
+     * Get all BrAPI export data categorized by type and status
+     * @param fieldId The field ID to get data for
+     * @param hostUrl The BrAPI host URL
+     * @return Map containing categorized observations
+     */
+    public Map<String, List<Observation>> getBrAPIExportData(int fieldId, String hostUrl) {
+        return ObservationDao.Companion.getBrAPIExportData(Integer.toString(fieldId), hostUrl);
+    }
+
+    /**
+     * Convert observations to FieldBookImage objects
+     * @param ctx Context for file operations
+     * @param observations List of observations to convert
+     * @return List of FieldBookImage objects
+     */
+    public List<FieldBookImage> getImageDetails(Context ctx, List<Observation> observations) {
+        return ObservationDao.Companion.getImageDetails(ctx, observations, missingPhoto);
+    }
+
+    /**
      * Get the image observations for brapi export to external system
      */
     public List<FieldBookImage> getImageObservations(Context ctx, String hostUrl) {
@@ -477,11 +498,18 @@ public class DataHelper {
     /**
      * Sync with observationdbids BrAPI
      */
-    public void updateObservations(List<Observation> observations) {
+    public void updateObservationsByBrapiId(List<Observation> observations) {
 
         open();
 
-        ObservationDao.Companion.updateObservations(observations);
+        ObservationDao.Companion.updateObservationsByBrapiId(observations);
+    }
+
+    public void updateObservationsByFieldBookId(List<Observation> observations) {
+
+        open();
+
+        ObservationDao.Companion.updateObservationsByFieldBookId(observations);
     }
 
     public List<String> getPossibleUniqueAttributes(int studyId) {
@@ -504,11 +532,11 @@ public class DataHelper {
         return ObservationUnitDao.Companion.getBySearchAttribute(studyId, searchValue);
     }
 
-    public void updateImage(FieldBookImage image, Boolean writeLastSyncedTime) {
+    public void updateImage(FieldBookImage image) {
 
         open();
 
-        ObservationDao.Companion.updateImage(image, writeLastSyncedTime);
+        ObservationDao.Companion.updateImage(image);
     }
 
     /**
