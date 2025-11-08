@@ -1,5 +1,19 @@
 <changelog>
 
+    <release date="2025-11-03" versionCode="60303" versionName="v6.3.3">
+        <bugfix>GoPro preview is no longer blank on certain devices</bugfix>
+    </release>
+
+    <release date="2025-10-20" versionCode="60302" versionName="v6.3.2">
+        <bugfix>GoPro Hero 13 no longer causes a crash</bugfix>
+        <bugfix>Reduced installer size by using a different ffmpeg library</bugfix>
+    </release>
+
+    <release date="2025-10-13" versionCode="60301" versionName="v6.3.1">
+        <info>Field Book now supports 16 KB page sizes</info>
+        <bugfix>Bug fixes and enhancements</bugfix>
+    </release>
+
     <release date="2025-10-08" versionCode="60300" versionName="v6.3.0">
         <new>Fields can now be grouped and archived</new>
         <new>New trait formats: Stopwatch, Nix, Greenseeker, Scales</new>

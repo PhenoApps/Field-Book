@@ -276,8 +276,9 @@ class GoProTraitLayout :
                 dialog.dismiss()
             }
             .setPositiveButton(android.R.string.ok) { _, which ->
-                Log.d(TAG, which.toString())
-                controller.getGoProApi().onConnect(devices[selected], this)
+                if (devices.isNotEmpty() && selected < devices.size) {
+                    controller.getGoProApi().onConnect(devices[selected], this)
+                }
             }.create()
 
         dialog.show()

@@ -92,7 +92,6 @@ import com.fieldbook.tracker.traits.formats.coders.StringCoder;
 import com.fieldbook.tracker.traits.formats.Scannable;
 import com.fieldbook.tracker.traits.formats.presenters.ValuePresenter;
 import com.fieldbook.tracker.utilities.CameraXFacade;
-import com.fieldbook.tracker.utilities.BluetoothHelper;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.fieldbook.tracker.utilities.FfmpegHelper;
@@ -200,9 +199,6 @@ public class CollectActivity extends ThemedActivity
 
     @Inject
     WifiHelper wifiHelper;
-
-    @Inject
-    BluetoothHelper bluetoothHelper;
 
     @Inject
     CanonApi canonApi;
@@ -1251,8 +1247,6 @@ public class CollectActivity extends ThemedActivity
         gnssThreadHelper.stop();
 
         goProApi.onDestroy();
-
-        bluetoothHelper.onDestroy();
 
         sensorHelper.unregister();
 
@@ -2938,10 +2932,6 @@ public class CollectActivity extends ThemedActivity
     @NonNull
     @Override
     public WifiHelper getWifiHelper() { return wifiHelper; }
-
-    @NonNull
-    @Override
-    public BluetoothHelper getBluetoothHelper() { return bluetoothHelper; }
 
     @NonNull
     @Override
