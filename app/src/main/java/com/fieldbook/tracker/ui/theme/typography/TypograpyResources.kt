@@ -1,64 +1,94 @@
 package com.fieldbook.tracker.ui.theme.typography
 
-import androidx.activity.compose.LocalActivity
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.sp
 
 /**
- * Define text sizes for compact devices (smartphones)
+ * Text sizes for different devices sizes
+ *      - Compact for smartphones
+ *      - Medium for 600dp screen width
+ *      - Expanded for 720dp screen width
  */
-val SmallTypography = ThemeTypography(
-    titleSize = 18.sp,
-    bodySize = 14.sp,
-    subheadingSize = 10.sp,
-)
 
-val MediumTypography = ThemeTypography(
-    titleSize = 20.sp,
-    bodySize = 16.sp,
-    subheadingSize = 14.sp,
-)
+object CompactTypography {
+    val small = ThemeTypography(
+        titleSize = 18.sp,
+        bodySize = 14.sp,
+        subheadingSize = 10.sp,
+    )
 
-val LargeTypography = ThemeTypography(
-    titleSize = 24.sp,
-    bodySize = 20.sp,
-    subheadingSize = 18.sp,
-)
+    val medium = ThemeTypography(
+        titleSize = 20.sp,
+        bodySize = 16.sp,
+        subheadingSize = 14.sp,
+    )
 
-val ExtraLargeTypography = ThemeTypography(
-    titleSize = 28.sp,
-    bodySize = 24.sp,
-    subheadingSize = 22.sp,
-)
+    val large = ThemeTypography(
+        titleSize = 24.sp,
+        bodySize = 20.sp,
+        subheadingSize = 18.sp,
+    )
 
-/**
- * Adjusts text sizes for bigger devices (tablets)
- */
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-@Composable
-fun getResponsiveTypography(
-    baseTypography: ThemeTypography
-): ThemeTypography {
-    val activity = LocalActivity.current
+    val extraLarge = ThemeTypography(
+        titleSize = 28.sp,
+        bodySize = 24.sp,
+        subheadingSize = 22.sp,
+    )
 
-    if (activity == null) return baseTypography
+    val all = listOf(small, medium, large, extraLarge)
+}
 
-    val windowSizeClass = calculateWindowSizeClass(activity = activity)
+object MediumTypography {
+    val small = ThemeTypography(
+        titleSize = 22.sp,
+        bodySize = 18.sp,
+        subheadingSize = 12.sp,
+    )
 
-    return when (windowSizeClass.widthSizeClass) {
-        WindowWidthSizeClass.Expanded -> baseTypography.copy(
-            titleSize = baseTypography.titleSize * 1.4f,
-            bodySize = baseTypography.bodySize * 1.5f,
-            subheadingSize = baseTypography.subheadingSize * 1.4f
-        )
-        WindowWidthSizeClass.Medium -> baseTypography.copy(
-            titleSize = baseTypography.titleSize * 1.25f,
-            bodySize = baseTypography.bodySize * 1.3f,
-            subheadingSize = baseTypography.subheadingSize * 1.25f
-        )
-        else -> baseTypography
-    }
+    val medium = ThemeTypography(
+        titleSize = 30.sp,
+        bodySize = 25.sp,
+        subheadingSize = 10.sp,
+    )
+
+    val large = ThemeTypography(
+        titleSize = 35.sp,
+        bodySize = 30.sp,
+        subheadingSize = 22.sp,
+    )
+
+    val extraLarge = ThemeTypography(
+        titleSize = 40.sp,
+        bodySize = 35.sp,
+        subheadingSize = 26.sp,
+    )
+
+    val all = listOf(small, medium, large, extraLarge)
+}
+
+object ExpandedTypography {
+    val small = ThemeTypography(
+        titleSize = 26.sp,
+        bodySize = 22.sp,
+        subheadingSize = 16.sp,
+    )
+
+    val medium = ThemeTypography(
+        titleSize = 40.sp,
+        bodySize = 34.sp,
+        subheadingSize = 24.sp,
+    )
+
+    val large = ThemeTypography(
+        titleSize = 48.sp,
+        bodySize = 40.sp,
+        subheadingSize = 30.sp,
+    )
+
+    val extraLarge = ThemeTypography(
+        titleSize = 56.sp,
+        bodySize = 48.sp,
+        subheadingSize = 36.sp,
+    )
+
+    val all = listOf(small, medium, large, extraLarge)
 }

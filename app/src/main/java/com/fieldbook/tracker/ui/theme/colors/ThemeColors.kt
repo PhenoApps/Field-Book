@@ -9,6 +9,7 @@ data class ThemeColors(
     val primary: Color,
     val primaryDark: Color,
     val accent: Color,
+    val primaryTransparent: Color,
     val background: Color,
 
     // tutorial library
