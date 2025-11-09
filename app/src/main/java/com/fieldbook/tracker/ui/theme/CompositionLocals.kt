@@ -1,13 +1,13 @@
 package com.fieldbook.tracker.ui.theme
 
 import androidx.compose.runtime.staticCompositionLocalOf
-import com.fieldbook.tracker.ui.theme.colors.DefaultColors
-import com.fieldbook.tracker.ui.theme.typography.MediumTypography
+import com.fieldbook.tracker.ui.theme.colors.DefaultAppColors
+import com.fieldbook.tracker.ui.theme.typography.CompactTypography
 
 val LocalAppColors = staticCompositionLocalOf {
-    DefaultColors
+    DefaultAppColors
 }
 
 val LocalAppTypography = staticCompositionLocalOf {
-    MediumTypography.medium
+    CompactTypography.medium
 }

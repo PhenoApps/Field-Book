@@ -5,6 +5,8 @@ import androidx.compose.ui.graphics.Color
 /**
  * Define colors in BaseColors. Specify overriding colors in other objects
  * You can reuse colors like Primary, PrimaryDark, etc. for other colors eg. TraitPercentStart
+ *
+ * For other themes, only define colors that are specific to it (colors different than its corresponding value in BaseColors)
  */
 
 val LightGray = Color(0xFFE7E8E8)
@@ -44,7 +46,6 @@ object BaseColors {
     val TextSecondary = Color(0xFF595959)
     val SeekbarColor = Color(0x42000000)
     val SeekbarThumb = Color(0x90654321)
-    val CardPressed = Gray
     val ChipFirst = Color(0xFF47B65D)
     val ChipSecond = Color(0xFF00A771)
     val ChipThird = Color(0xFF009683)
@@ -86,6 +87,7 @@ object BlueThemeOverrides {
     val PrimaryTransparent = Color(0x4201A7C2)
     val TraitPercentStroke = PrimaryDark
     val TraitPercentStart = Primary
+    val IconFillTint = Color.White
     val ButtonColorPressed = Color(0xFF969696)
     val SpinnerFocused = Accent
     val SpinnerSelected = PrimaryTransparent
@@ -125,7 +127,7 @@ object HighContrastOverrides {
     val ValueSaved = Color.Black
     val ValueAltered = Color.Black
     val CategoricalButtonPress = Color.White
-    val ButtonColorNormal = Color.Transparent
+    val ButtonColorNormal = Color.Black
     val ButtonColorPressed = Color.White
     val SpinnerFocused = Accent
     val SpinnerSelected = PrimaryTransparent
