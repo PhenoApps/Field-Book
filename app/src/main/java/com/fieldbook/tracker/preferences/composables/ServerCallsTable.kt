@@ -1,11 +1,13 @@
 package com.fieldbook.tracker.preferences.composables
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -26,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.ServiceComparison
 import com.fieldbook.tracker.utilities.CallImplementedBy
 import eu.wewox.lazytable.LazyTable
@@ -35,8 +38,8 @@ import eu.wewox.lazytable.lazyTablePinConfiguration
 
 @Composable
 fun ServerCallsTable(calls: List<ServiceComparison>) {
-    val headerBackgroundColor = MaterialTheme.colorScheme.primaryContainer
-    val cellBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+    val headerBackgroundColor = AppTheme.colors.primaryTransparent
+    val cellBorderColor = AppTheme.colors.dataVisualization.dataGrid.tableBorder
 
     BoxWithConstraints {
         val totalWidth = maxWidth
@@ -105,7 +108,7 @@ fun ServerCallsTable(calls: List<ServiceComparison>) {
                                 2 -> stringResource(R.string.brapi_server_info_field_book)
                                 else -> ""
                             },
-                            style = MaterialTheme.typography.labelMedium,
+                            style = AppTheme.typography.bodyStyle,
                             fontWeight = FontWeight.Bold,
                             textAlign = if (column >= 1) TextAlign.Center else TextAlign.Start
                         )
@@ -119,7 +122,7 @@ fun ServerCallsTable(calls: List<ServiceComparison>) {
                                 ) {
                                     Text( // service resource
                                         text = call.service,
-                                        style = MaterialTheme.typography.bodySmall,
+                                        style = AppTheme.typography.bodyStyle,
                                         fontWeight = FontWeight.Medium,
                                         modifier = Modifier.fillMaxWidth()
                                     )
@@ -132,7 +135,7 @@ fun ServerCallsTable(calls: List<ServiceComparison>) {
                                             }
                                             else -> call.methods.joinToString(", ").ifEmpty { "-" }
                                         },
-                                        style = MaterialTheme.typography.bodySmall,
+                                        style = AppTheme.typography.bodyStyle,
                                         modifier = Modifier
                                             .padding(top = 2.dp)
                                             .fillMaxWidth()
@@ -140,48 +143,33 @@ fun ServerCallsTable(calls: List<ServiceComparison>) {
                                 }
 
                                 1 -> { // server column
-                                    when (call.source) {
-                                        CallImplementedBy.SERVER,
-                                        CallImplementedBy.SERVER_AND_FIELD_BOOK -> {
-                                            Icon(
-                                                imageVector = Icons.Default.Check,
-                                                contentDescription = "Supported by server",
-                                                tint = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier.size(20.dp),
-                                            )
-                                        }
-                                        CallImplementedBy.FIELD_BOOK -> {
-                                            Icon(
-                                                imageVector = Icons.Default.Close,
-                                                contentDescription = "Not on server",
-                                                tint = MaterialTheme.colorScheme.error,
-                                                modifier = Modifier.size(20.dp)
-                                            )
-                                        }
-                                    }
+                                    val isServerImplemented = call.source != CallImplementedBy.FIELD_BOOK
+
+                                    val icon = if (isServerImplemented) Icons.Default.Check else Icons.Default.Close
+                                    val contentDescription = if (isServerImplemented) stringResource(R.string.brapi_compatibility_server_support) else stringResource(R.string.brapi_compatibility_no_server_support)
+                                    val iconTint = if (isServerImplemented) AppTheme.colors.status.success else AppTheme.colors.status.error
+
+                                    Icon(
+                                        imageVector = icon,
+                                        contentDescription = contentDescription,
+                                        tint = iconTint,
+                                        modifier = Modifier.size(20.dp),
+                                    )
                                 }
 
                                 2 -> { // field book column
-                                    when (call.source) {
-                                        CallImplementedBy.FIELD_BOOK,
-                                        CallImplementedBy.SERVER_AND_FIELD_BOOK -> {
-                                            Icon(
-                                                imageVector = Icons.Default.Check,
-                                                contentDescription = "Implemented by Field Book",
-                                                tint = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier.size(20.dp)
-                                            )
-                                        }
+                                    val isFBImplemented = call.source != CallImplementedBy.SERVER
 
-                                        CallImplementedBy.SERVER -> {
-                                            Icon(
-                                                imageVector = Icons.Default.Close,
-                                                contentDescription = "Not implemented by Field Book",
-                                                tint = MaterialTheme.colorScheme.error,
-                                                modifier = Modifier.size(20.dp)
-                                            )
-                                        }
-                                    }
+                                    val icon = if (isFBImplemented) Icons.Default.Check else Icons.Default.Close
+                                    val contentDescription = if (isFBImplemented) stringResource(R.string.brapi_compatibility_fieldbook_support) else stringResource(R.string.brapi_compatibility_no_fieldbook_support)
+                                    val iconTint = if (isFBImplemented) AppTheme.colors.status.success else AppTheme.colors.status.error
+
+                                    Icon(
+                                        imageVector = icon,
+                                        contentDescription = contentDescription,
+                                        tint = iconTint,
+                                        modifier = Modifier.size(20.dp),
+                                    )
                                 }
                             }
                         }
@@ -201,10 +189,10 @@ private fun ServerCallsTablePreview() {
             methods = listOf("GET", "PUT"),
             isFbImplemented = true,
             implementedMethods = listOf("GET"),
-            source = CallImplementedBy.SERVER_AND_FIELD_BOOK,
+            source = CallImplementedBy.FIELD_BOOK,
         )
     )
-    MaterialTheme {
+    AppTheme {
         ServerCallsTable(calls)
     }
 }

@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
@@ -13,6 +12,7 @@ import androidx.fragment.app.viewModels
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.PreferencesActivity
 import com.fieldbook.tracker.preferences.composables.ServerInfoScreen
+import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.Utils
 import com.fieldbook.tracker.viewmodels.BrapiServerInfoViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -31,7 +31,7 @@ class BrapiServerInfoFragment : Fragment() {
 
         return ComposeView(requireContext()).apply {
             setContent {
-                MaterialTheme {
+                AppTheme {
                     val uiState by viewModel.uiState.observeAsState(BrapiServerInfoViewModel.ServerInfoUiState())
 
                     ServerInfoScreen(uiState)
@@ -70,7 +70,7 @@ class BrapiServerInfoFragment : Fragment() {
     private fun setupToolbar() {
         val activity = activity as? PreferencesActivity
         activity?.supportActionBar?.apply {
-            title = getString(R.string.brapi_server_info_title)
+            title = getString(R.string.brapi_compatibility)
             setDisplayHomeAsUpEnabled(true)
         }
     }

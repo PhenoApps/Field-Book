@@ -27,6 +27,7 @@ class BrapiServerInfoViewModel @Inject constructor(
         val organizationName: String = "",
         val serverDescription: String = "",
         val modulesMap: Map<String, BrapiModuleCalls> = emptyMap(),
+        val fieldBookCompatibility: BrapiModuleCalls? = null,
         val errorMessage: String? = null,
         val isBrapiV1Incompatible: Boolean = false,
         val hasApiException: Boolean = false,
@@ -64,6 +65,7 @@ class BrapiServerInfoViewModel @Inject constructor(
         response?.result?.let { serverInfo ->
             val calls = serverInfo.calls ?: emptyList()
             val comparisonMap = BrapiImplementationHelper.compareImplementation(calls)
+            val fieldBookCompatibility = BrapiImplementationHelper.getFieldBookCompatibility(calls, context)
 
             _uiState.postValue(
                 _uiState.value?.copy(
@@ -71,7 +73,8 @@ class BrapiServerInfoViewModel @Inject constructor(
                     serverName = serverInfo.serverName,
                     organizationName = serverInfo.organizationName,
                     serverDescription = serverInfo.serverDescription,
-                    modulesMap = comparisonMap
+                    modulesMap = comparisonMap,
+                    fieldBookCompatibility = fieldBookCompatibility
                 )
             )
         } ?: handleEmptyResponse()

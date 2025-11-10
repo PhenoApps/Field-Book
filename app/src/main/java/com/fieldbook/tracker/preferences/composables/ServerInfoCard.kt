@@ -3,18 +3,15 @@ package com.fieldbook.tracker.preferences.composables
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.ui.components.CardView
+import com.fieldbook.tracker.ui.theme.AppTheme
 
 @Composable
 fun ServerInfoCard(
@@ -22,11 +19,7 @@ fun ServerInfoCard(
     organizationName: String,
     serverDescription: String
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        shape = RectangleShape,
-    ) {
+    CardView {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -34,15 +27,13 @@ fun ServerInfoCard(
         ) {
             Text(
                 text = stringResource(R.string.brapi_server_name_label, serverName),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                style = AppTheme.typography.titleStyle,
             )
 
             if (organizationName.isNotEmpty()) {
                 Text(
                     text = stringResource(R.string.brapi_organization_name_label, organizationName),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = AppTheme.typography.subheadingStyle,
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }
@@ -50,8 +41,7 @@ fun ServerInfoCard(
             if (serverDescription.isNotEmpty()) {
                 Text(
                     text = stringResource(R.string.brapi_server_description_label, serverDescription),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = AppTheme.typography.subheadingStyle,
                     modifier = Modifier.padding(top = 8.dp)
                 )
             }
@@ -59,10 +49,10 @@ fun ServerInfoCard(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 private fun ServerInfoCardPreview() {
-    MaterialTheme {
+    AppTheme {
         ServerInfoCard(
             serverName = "Test Server",
             organizationName = "Breeding Insight",

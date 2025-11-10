@@ -1,5 +1,7 @@
 package com.fieldbook.tracker.utilities
 
+import android.content.Context
+import com.fieldbook.tracker.R
 import com.fieldbook.tracker.brapi.model.BrapiModule
 import com.fieldbook.tracker.brapi.model.BrapiServerCall
 import org.brapi.v2.model.core.BrAPIService
@@ -74,7 +76,44 @@ object BrapiImplementationHelper {
     }
 
     /**
+     * The top card in the screen would show implemented % for serverSupportedCount / totalFBCalls
+     * Returns the comparison as a (BrAPI) module for simplicity
+     * Shows what % of FB calls does server support
+     */
+    fun getFieldBookCompatibility(serverCalls: List<BrAPIService>, context: Context): BrapiModuleCalls {
+        // convert server calls to map
+        val serverCallsMap = serverCalls.associate { call ->
+            call.service to (call.methods?.map { it.brapiValue } ?: emptyList())
+        }
+
+        val allCalls = fieldBookCalls.map { fbCall ->
+            val serverMethods = serverCallsMap[fbCall.service] ?: emptyList()
+            val supportedMethods = fbCall.methods.filter { it in serverMethods }
+            val isSupported = supportedMethods.isNotEmpty()
+
+            ServiceComparison(
+                service = fbCall.service,
+                methods = fbCall.methods,
+                isFbImplemented = fieldBookCalls.last() != fbCall,
+                implementedMethods = supportedMethods,
+                source = if (isSupported) CallImplementedBy.SERVER_AND_FIELD_BOOK else CallImplementedBy.FIELD_BOOK
+            )
+        }
+
+        val serverSupportedCount = allCalls.count { it.implementedMethods.isNotEmpty() }
+
+        return BrapiModuleCalls(
+            moduleName = context.getString(R.string.brapi_compatibility_fieldbook),
+            calls = allCalls.sortedBy { it.service },
+            fbImplementedCount = serverSupportedCount,
+            totalCalls = allCalls.size
+        )
+    }
+
+    /**
      * Process all server calls and compare with Field Book implementation
+     * This shows implemented % for fbImplementedCount / totalServerCalls
+     * Shows what % of server calls does FB implement
      */
     private fun processServerCalls(
         serverModuleMap: Map<String, BrapiModule>,

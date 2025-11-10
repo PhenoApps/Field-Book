@@ -2,12 +2,11 @@ package com.fieldbook.tracker.preferences.composables
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.BrapiModuleCalls
 import com.fieldbook.tracker.utilities.CallImplementedBy
 import com.fieldbook.tracker.utilities.ServiceComparison
@@ -32,8 +32,7 @@ fun ServerInfoScreen(uiState: ServerInfoUiState) {
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 item {
                     ServerInfoCard(
@@ -43,12 +42,21 @@ fun ServerInfoScreen(uiState: ServerInfoUiState) {
                     )
                 }
 
+                // field book compatibility
+                // shows serverSupported / totalFBCalls as %
+                uiState.fieldBookCompatibility?.let { compatibility ->
+                    item {
+                        ModuleCard(moduleInfo = compatibility)
+                    }
+                }
+
                 // section title
                 if (uiState.modulesMap.values.toList().isNotEmpty()) {
                     item {
                         Text(
-                            text = stringResource(R.string.brapi_supported_calls_title),
-                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            text = stringResource(R.string.brapi_compatibility_all_calls),
+                            style = AppTheme.typography.subheadingStyle,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -66,7 +74,7 @@ fun ServerInfoScreen(uiState: ServerInfoUiState) {
 @Preview(showBackground = true)
 @Composable
 private fun ServerInfoScreenPreview() {
-    MaterialTheme {
+    AppTheme {
         ServerInfoScreen(
             uiState = ServerInfoUiState(
                 isLoading = false,
@@ -102,6 +110,27 @@ private fun ServerInfoScreenPreview() {
                         fbImplementedCount = 2,
                         totalCalls = 3
                     ),
+                ),
+                fieldBookCompatibility = BrapiModuleCalls(
+                    moduleName = "Field Book Compatibility",
+                    calls = listOf(
+                        ServiceComparison(
+                            service = "programs",
+                            methods = listOf("GET"),
+                            isFbImplemented = true,
+                            implementedMethods = listOf("GET"),
+                            source = CallImplementedBy.SERVER_AND_FIELD_BOOK
+                        ),
+                        ServiceComparison(
+                            service = "observations",
+                            methods = listOf("GET", "POST", "PUT"),
+                            isFbImplemented = true,
+                            implementedMethods = emptyList(),
+                            source = CallImplementedBy.FIELD_BOOK
+                        )
+                    ),
+                    fbImplementedCount = 1,
+                    totalCalls = 2
                 ),
                 errorMessage = null,
                 isBrapiV1Incompatible = false

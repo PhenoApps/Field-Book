@@ -10,10 +10,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,12 +21,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.ui.components.CardView
+import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.BrapiModuleCalls
 import com.fieldbook.tracker.utilities.CallImplementedBy
 import com.fieldbook.tracker.utilities.ServiceComparison
@@ -40,16 +38,11 @@ fun ModuleCard(
 ) {
     var isExpanded by remember { mutableStateOf(initiallyExpanded) }
 
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { isExpanded = !isExpanded },
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        shape = RectangleShape
-    ) {
+    CardView {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .clickable { isExpanded = !isExpanded }
                 .padding(16.dp)
         ) {
             Row(
@@ -60,8 +53,7 @@ fun ModuleCard(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = moduleInfo.moduleName,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        style = AppTheme.typography.titleStyle,
                     )
                     Text(
                         text = stringResource(
@@ -70,8 +62,7 @@ fun ModuleCard(
                             moduleInfo.totalCalls,
                             moduleInfo.implementationPercentage
                         ),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = AppTheme.typography.bodyStyle,
                         modifier = Modifier.padding(top = 4.dp)
                     )
                 }
@@ -94,31 +85,33 @@ fun ModuleCard(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 private fun ModuleCardWithTablePreview() {
-    ModuleCard(
-        moduleInfo = BrapiModuleCalls(
-            moduleName = "Module",
-            calls = listOf(
-                ServiceComparison(
-                    service = "studies",
-                    methods = listOf("GET", "POST"),
-                    isFbImplemented = true,
-                    implementedMethods = listOf("GET"),
-                    source = CallImplementedBy.SERVER_AND_FIELD_BOOK
+    AppTheme {
+        ModuleCard(
+            moduleInfo = BrapiModuleCalls(
+                moduleName = "Module",
+                calls = listOf(
+                    ServiceComparison(
+                        service = "studies",
+                        methods = listOf("GET", "POST"),
+                        isFbImplemented = true,
+                        implementedMethods = listOf("GET"),
+                        source = CallImplementedBy.SERVER_AND_FIELD_BOOK
+                    ),
+                    ServiceComparison(
+                        service = "observations",
+                        methods = listOf("GET", "POST", "PUT"),
+                        isFbImplemented = true,
+                        implementedMethods = listOf("GET", "POST", "PUT"),
+                        source = CallImplementedBy.SERVER_AND_FIELD_BOOK
+                    ),
                 ),
-                ServiceComparison(
-                    service = "observations",
-                    methods = listOf("GET", "POST", "PUT"),
-                    isFbImplemented = true,
-                    implementedMethods = listOf("GET", "POST", "PUT"),
-                    source = CallImplementedBy.SERVER_AND_FIELD_BOOK
-                ),
+                fbImplementedCount = 1,
+                totalCalls = 2
             ),
-            fbImplementedCount = 1,
-            totalCalls = 2
-        ),
-        initiallyExpanded = true
-    )
+            initiallyExpanded = true
+        )
+    }
 }
