@@ -13,6 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [v6.3.3] - 2025-11-03
+
+### Added
+
+### Changed
+
+### Fixed
+- GoPro preview is no longer blank on certain devices
+
 ## [v6.3.2] - 2025-10-20
 
 ### Added
@@ -781,3 +790,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v6.3.1]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.1
 
 [v6.3.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.2
+[v6.3.3]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.3
