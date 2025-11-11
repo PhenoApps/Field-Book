@@ -696,21 +696,28 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
 
     fun getFileName(uri: Uri): String? {
         var result: String? = null
-        if (uri.scheme == "content") {
-            contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-                if (cursor.moveToFirst()) {
-                    val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                    if (index > -1) {
-                        result = cursor.getString(index)
+        try {
+            if (uri.scheme == "content") {
+                contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+                    if (cursor.moveToFirst()) {
+                        val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                        if (index > -1) {
+                            result = cursor.getString(index)
+                        }
                     }
                 }
             }
-        }
-        if (result == null) {
-            result = uri.path
-            val cut = result?.lastIndexOf('/')
-            if (cut != -1) {
-                result = cut?.let { result.substring(it + 1) }
+            if (result == null) {
+                result = uri.path
+                val cut = result?.lastIndexOf('/')
+                if (cut != -1) {
+                    result = cut?.let { result.substring(it + 1) }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            runOnUiThread {
+                Toast.makeText(this, R.string.failed_to_find_file_name, Toast.LENGTH_SHORT).show()
             }
         }
         return result
