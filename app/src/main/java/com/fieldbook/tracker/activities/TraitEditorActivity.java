@@ -783,7 +783,14 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
 
         if (requestCode == REQUEST_CLOUD_FILE_CODE && resultCode == RESULT_OK && data.getData() != null) {
             Uri content_describer = data.getData();
-            String fileName = new FileUtil().getFileName(this, content_describer);
+        }
+    }
+
+    private void processCloudFile(Uri contentUri) {
+
+        try {
+
+            String fileName = new FileUtil().getFileName(this, contentUri);
 
             //append a unique id to trait file, otherwise os might append (0) after extension
             fileName = fileName.replace(".trt", "_" + UUID.randomUUID().toString() + ".trt");
@@ -799,7 +806,7 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                     OutputStream out = null;
                     try {
                         out = BaseDocumentTreeUtil.Companion.getFileOutputStream(this, R.string.dir_trait, fileName);
-                        in = getContentResolver().openInputStream(content_describer);
+                        in = getContentResolver().openInputStream(contentUri);
                         byte[] buffer = new byte[1024];
                         int len;
                         while ((len = in.read(buffer)) != -1) {
@@ -834,6 +841,14 @@ public class TraitEditorActivity extends ThemedActivity implements TraitAdapterC
                     startImportCsv(traitExportFile.getUri());
                 }
             }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            runOnUiThread(() -> {
+                Utils.makeToast(this, getString(R.string.failed_to_find_file_name));
+            });
         }
     }
 
