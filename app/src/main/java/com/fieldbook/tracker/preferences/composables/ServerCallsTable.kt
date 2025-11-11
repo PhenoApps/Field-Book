@@ -1,22 +1,20 @@
 package com.fieldbook.tracker.preferences.composables
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,19 +27,24 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.ui.theme.AppTheme
-import com.fieldbook.tracker.utilities.ServiceComparison
 import com.fieldbook.tracker.utilities.CallImplementedBy
+import com.fieldbook.tracker.utilities.ServiceComparison
 import eu.wewox.lazytable.LazyTable
 import eu.wewox.lazytable.LazyTableItem
+import eu.wewox.lazytable.LazyTableScrollDirection
 import eu.wewox.lazytable.lazyTableDimensions
 import eu.wewox.lazytable.lazyTablePinConfiguration
 
 @Composable
 fun ServerCallsTable(calls: List<ServiceComparison>) {
-    val headerBackgroundColor = AppTheme.colors.primaryTransparent
+    val headerBackgroundColor = AppTheme.colors.primaryDark
     val cellBorderColor = AppTheme.colors.dataVisualization.dataGrid.tableBorder
 
-    BoxWithConstraints {
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(max = 300.dp),
+    ) {
         val totalWidth = maxWidth
         val firstColumnWidth = totalWidth * 0.55f
         val remainingWidth = totalWidth * 0.45f
@@ -76,7 +79,8 @@ fun ServerCallsTable(calls: List<ServiceComparison>) {
                 }
             ),
             contentPadding = PaddingValues(0.dp),
-            pinConfiguration = lazyTablePinConfiguration(columns = 0, rows = 1)
+            pinConfiguration = lazyTablePinConfiguration(columns = 0, rows = 1),
+            scrollDirection = LazyTableScrollDirection.VERTICAL,
         ) {
             // total items: (header row + data rows) * 3 columns
             val totalItems = (calls.size + 1) * 3
@@ -133,7 +137,9 @@ fun ServerCallsTable(calls: List<ServiceComparison>) {
                                                     ", "
                                                 ).ifEmpty { "-" }
                                             }
-                                            else -> call.methods.joinToString(", ").ifEmpty { "-" }
+
+                                            else -> call.methods.joinToString(", ")
+                                                .ifEmpty { "-" }
                                         },
                                         style = AppTheme.typography.bodyStyle,
                                         modifier = Modifier
@@ -143,11 +149,17 @@ fun ServerCallsTable(calls: List<ServiceComparison>) {
                                 }
 
                                 1 -> { // server column
-                                    val isServerImplemented = call.source != CallImplementedBy.FIELD_BOOK
+                                    val isServerImplemented =
+                                        call.source != CallImplementedBy.FIELD_BOOK
 
-                                    val icon = if (isServerImplemented) Icons.Default.Check else Icons.Default.Close
-                                    val contentDescription = if (isServerImplemented) stringResource(R.string.brapi_compatibility_server_support) else stringResource(R.string.brapi_compatibility_no_server_support)
-                                    val iconTint = if (isServerImplemented) AppTheme.colors.status.success else AppTheme.colors.status.error
+                                    val icon =
+                                        if (isServerImplemented) Icons.Default.Check else Icons.Default.Close
+                                    val contentDescription =
+                                        if (isServerImplemented) stringResource(R.string.brapi_compatibility_server_support) else stringResource(
+                                            R.string.brapi_compatibility_no_server_support
+                                        )
+                                    val iconTint =
+                                        if (isServerImplemented) AppTheme.colors.status.success else AppTheme.colors.status.error
 
                                     Icon(
                                         imageVector = icon,
@@ -158,11 +170,17 @@ fun ServerCallsTable(calls: List<ServiceComparison>) {
                                 }
 
                                 2 -> { // field book column
-                                    val isFBImplemented = call.source != CallImplementedBy.SERVER
+                                    val isFBImplemented =
+                                        call.source != CallImplementedBy.SERVER
 
-                                    val icon = if (isFBImplemented) Icons.Default.Check else Icons.Default.Close
-                                    val contentDescription = if (isFBImplemented) stringResource(R.string.brapi_compatibility_fieldbook_support) else stringResource(R.string.brapi_compatibility_no_fieldbook_support)
-                                    val iconTint = if (isFBImplemented) AppTheme.colors.status.success else AppTheme.colors.status.error
+                                    val icon =
+                                        if (isFBImplemented) Icons.Default.Check else Icons.Default.Close
+                                    val contentDescription =
+                                        if (isFBImplemented) stringResource(R.string.brapi_compatibility_fieldbook_support) else stringResource(
+                                            R.string.brapi_compatibility_no_fieldbook_support
+                                        )
+                                    val iconTint =
+                                        if (isFBImplemented) AppTheme.colors.status.success else AppTheme.colors.status.error
 
                                     Icon(
                                         imageVector = icon,
