@@ -2,6 +2,7 @@ package com.fieldbook.tracker.utilities
 
 import android.content.Context
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.brapi.io.fieldBookImplementedCalls
 import com.fieldbook.tracker.brapi.model.BrapiModule
 import com.fieldbook.tracker.brapi.model.BrapiServerCall
 import org.brapi.v2.model.core.BrAPIService
@@ -32,25 +33,7 @@ data class BrapiModuleCalls(
 
 object BrapiImplementationHelper {
 
-    private val fieldBookCalls = listOf(
-        // core calls
-        BrapiServerCall("programs", listOf("GET")),
-        BrapiServerCall("studies", listOf("GET")),
-        BrapiServerCall("studies/{studyDbId}", listOf("GET")),
-        BrapiServerCall("serverinfo", listOf("GET")),
-        BrapiServerCall("trials", listOf("GET")),
-
-        // phenotyping calls
-        BrapiServerCall("variables", listOf("GET")),
-        BrapiServerCall("observations", listOf("GET", "POST", "PUT")),
-        BrapiServerCall("observationlevels", listOf("GET")),
-        BrapiServerCall("observationunits", listOf("GET")),
-        BrapiServerCall("images", listOf("POST")),
-        BrapiServerCall("images/{imageDbId}", listOf("PUT")),
-        BrapiServerCall("images/{imageDbId}/imagecontent", listOf("PUT")),
-    )
-
-    private val fieldBookCallsMap = fieldBookCalls.associateBy { it.service }
+    private val fieldBookCallsMap = fieldBookImplementedCalls.associateBy { it.service }
 
     fun compareImplementation(serverCalls: List<BrAPIService>): Map<String, BrapiModuleCalls> {
         // convert BrAPIService to BrapiServerCall
@@ -86,7 +69,7 @@ object BrapiImplementationHelper {
             call.service to (call.methods?.map { it.brapiValue } ?: emptyList())
         }
 
-        val allCalls = fieldBookCalls.map { fbCall ->
+        val allCalls = fieldBookImplementedCalls.map { fbCall ->
             val serverMethods = serverCallsMap[fbCall.service] ?: emptyList()
             val supportedMethods = fbCall.methods.filter { it in serverMethods }
             val isSupported = supportedMethods.isNotEmpty()
@@ -94,7 +77,7 @@ object BrapiImplementationHelper {
             ServiceComparison(
                 service = fbCall.service,
                 methods = fbCall.methods,
-                isFbImplemented = fieldBookCalls.last() != fbCall,
+                isFbImplemented = fieldBookImplementedCalls.last() != fbCall,
                 implementedMethods = supportedMethods,
                 source = if (isSupported) CallImplementedBy.SERVER_AND_FIELD_BOOK else CallImplementedBy.FIELD_BOOK
             )
@@ -164,7 +147,7 @@ object BrapiImplementationHelper {
         moduleComparisonMap: MutableMap<String, BrapiModuleCalls>,
         visited: Set<String>
     ) {
-        for (fbCall in fieldBookCalls) {
+        for (fbCall in fieldBookImplementedCalls) {
             // skip if already visited
             if (visited.contains(fbCall.service)) continue
 
