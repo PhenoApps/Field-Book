@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.CallImplementedBy
+import com.fieldbook.tracker.utilities.LazyTableTextHeightCalc
 import com.fieldbook.tracker.utilities.ServiceComparison
 import eu.wewox.lazytable.LazyTable
 import eu.wewox.lazytable.LazyTableItem
@@ -39,6 +40,7 @@ import eu.wewox.lazytable.lazyTablePinConfiguration
 fun ServerCallsTable(calls: List<ServiceComparison>) {
     val headerBackgroundColor = AppTheme.colors.primaryDark
     val cellBorderColor = AppTheme.colors.dataVisualization.dataGrid.tableBorder
+    val cellTextStyle = AppTheme.typography.bodyStyle
 
     BoxWithConstraints(
         modifier = Modifier
@@ -66,14 +68,23 @@ fun ServerCallsTable(calls: List<ServiceComparison>) {
                     } else { // dynamic height based on content
                         val callIndex = rowIndex - 1
                         if (callIndex < calls.size) {
-                            val totalTextLength = calls[callIndex].service.length +
-                                    calls[callIndex].methods.joinToString(", ").length
-                            when {
-                                totalTextLength > 150 -> 120.dp
-                                totalTextLength > 100 -> 100.dp
-                                totalTextLength > 50 -> 80.dp
-                                else -> 60.dp
+                            val call = calls[callIndex]
+                            val serviceText = call.service
+                            val methodsText = when (call.source) {
+                                CallImplementedBy.SERVER_AND_FIELD_BOOK -> {
+                                    call.implementedMethods.joinToString(", ").ifEmpty { "-" }
+                                }
+                                else -> call.methods.joinToString(", ").ifEmpty { "-" }
                             }
+
+                            LazyTableTextHeightCalc.calculateTextHeight(
+                                textBlocks = listOf(serviceText, methodsText),
+                                fontSize = cellTextStyle.fontSize.value,
+                                availableWidth = firstColumnWidth.value,
+                                horizontalPadding = 8f,
+                                verticalPadding = 8f,
+                                verticalSpacing = 2f
+                            )
                         } else 60.dp
                     }
                 }
@@ -112,7 +123,7 @@ fun ServerCallsTable(calls: List<ServiceComparison>) {
                                 2 -> stringResource(R.string.brapi_server_info_field_book)
                                 else -> ""
                             },
-                            style = AppTheme.typography.bodyStyle,
+                            style = cellTextStyle,
                             fontWeight = FontWeight.Bold,
                             textAlign = if (column >= 1) TextAlign.Center else TextAlign.Start
                         )
@@ -126,7 +137,7 @@ fun ServerCallsTable(calls: List<ServiceComparison>) {
                                 ) {
                                     Text( // service resource
                                         text = call.service,
-                                        style = AppTheme.typography.bodyStyle,
+                                        style = cellTextStyle,
                                         fontWeight = FontWeight.Medium,
                                         modifier = Modifier.fillMaxWidth()
                                     )
@@ -141,7 +152,7 @@ fun ServerCallsTable(calls: List<ServiceComparison>) {
                                             else -> call.methods.joinToString(", ")
                                                 .ifEmpty { "-" }
                                         },
-                                        style = AppTheme.typography.bodyStyle,
+                                        style = cellTextStyle,
                                         modifier = Modifier
                                             .padding(top = 2.dp)
                                             .fillMaxWidth()
