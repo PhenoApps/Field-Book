@@ -1,10 +1,10 @@
 package com.fieldbook.tracker.utilities
 
 import android.util.Log
-import com.fieldbook.tracker.activities.brapi.io.coreEndpoints
-import com.fieldbook.tracker.activities.brapi.io.genotypingEndpoints
-import com.fieldbook.tracker.activities.brapi.io.germplasmEndpoints
-import com.fieldbook.tracker.activities.brapi.io.phenotypingEndpoints
+import com.fieldbook.tracker.brapi.coreEndpoints
+import com.fieldbook.tracker.brapi.genotypingEndpoints
+import com.fieldbook.tracker.brapi.germplasmEndpoints
+import com.fieldbook.tracker.brapi.phenotypingEndpoints
 import com.fieldbook.tracker.brapi.model.BrapiModule
 import com.fieldbook.tracker.brapi.model.BrapiServerCall
 

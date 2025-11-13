@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.activities.brapi.io
+package com.fieldbook.tracker.brapi
 
 import com.fieldbook.tracker.brapi.model.BrapiServerCall
 

@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.activities.brapi.io
+package com.fieldbook.tracker.brapi
 
 /**
  * Add new endpoints that are added to the BrAPI spec

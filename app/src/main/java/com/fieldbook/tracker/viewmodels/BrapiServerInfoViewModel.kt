@@ -5,7 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.activities.brapi.io.fieldBookImplementedCalls
+import com.fieldbook.tracker.brapi.fieldBookImplementedCalls
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV1
