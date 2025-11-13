@@ -31,6 +31,32 @@ data class BrapiModuleCalls(
         get() = if (totalCalls > 0) (fbImplementedCount * 100 / totalCalls) else 0
 }
 
+/**
+ * Once we get the results from the serverinfo endpoint, we see if FB implements at least one
+ * of the methods for the corresponding service. If yes, we treat it as implemented
+ *
+ * Steps:
+ *
+ *      - compareImplementation: The received calls from the server are grouped by module, and this is stored in a map.
+ *
+ *      - processServerCalls: Iterate over the map. For each service, compare the service methods and see if
+ *        FB implements at least one of the methods and store the result.
+ *        We maintain a visited set to mark whether an FB call was visited ^
+ *        At the end of each module, we also count the number of services FB implements
+ *        to use the stat later in form of % completed.
+ *        In this step, the source may be SERVER or SERVER_AND_FIELD_BOOK
+ *
+ *      - addRemainingFieldBookCalls: ^ = Once all brapi calls are done processing from the map,
+ *        we go over the remaining FB calls which were not visited and add them according to the module mapping.
+ *        Since the server has not implemented it, the source will be FIELD_BOOK.
+ *
+ *      - getFieldBookCompatibility: This is only for the top card, which just compares the
+ *        FB implemented services and checks whether server implements it
+ *
+ * If we assume SERVER vs FieldBook as tables:
+ *      - The first card would do right join
+ *      - The rest of the cards would do left join
+ */
 object BrapiImplementationHelper {
 
     private val fieldBookCallsMap = fieldBookImplementedCalls.associateBy { it.service }
@@ -77,7 +103,7 @@ object BrapiImplementationHelper {
             ServiceComparison(
                 service = fbCall.service,
                 methods = fbCall.methods,
-                isFbImplemented = fieldBookImplementedCalls.last() != fbCall,
+                isFbImplemented = isSupported, // this denotes whether server supports the service
                 implementedMethods = supportedMethods,
                 source = if (isSupported) CallImplementedBy.SERVER_AND_FIELD_BOOK else CallImplementedBy.FIELD_BOOK
             )
