@@ -7,11 +7,18 @@ import com.fieldbook.tracker.brapi.model.BrapiServerCall
  */
 val fieldBookImplementedCalls = listOf(
     // core calls
+    BrapiServerCall("commoncropnames", listOf("GET")),
     BrapiServerCall("programs", listOf("GET")),
+    BrapiServerCall("seasons", listOf("GET")),
+    BrapiServerCall("serverinfo", listOf("GET")),
     BrapiServerCall("studies", listOf("GET")),
     BrapiServerCall("studies/{studyDbId}", listOf("GET")),
-    BrapiServerCall("serverinfo", listOf("GET")),
     BrapiServerCall("trials", listOf("GET")),
+
+    // germplasm calls
+    BrapiServerCall("germplasm", listOf("GET")),
+    BrapiServerCall("search/germplasm", listOf("POST")),
+    BrapiServerCall("search/germplasm/{searchResultsDbId}", listOf("GET")),
 
     // phenotyping calls
     BrapiServerCall("variables", listOf("GET")),
