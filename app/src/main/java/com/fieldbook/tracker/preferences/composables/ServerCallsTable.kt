@@ -71,7 +71,7 @@ fun ServerCallsTable(calls: List<ServiceComparison>) {
                             val call = calls[callIndex]
                             val serviceText = call.service
                             val methodsText = when (call.source) {
-                                CallImplementedBy.SERVER_AND_FIELD_BOOK -> {
+                                CallImplementedBy.SERVER_AND_APP -> {
                                     call.implementedMethods.joinToString(", ").ifEmpty { "-" }
                                 }
                                 else -> call.methods.joinToString(", ").ifEmpty { "-" }
@@ -143,7 +143,7 @@ fun ServerCallsTable(calls: List<ServiceComparison>) {
                                     )
                                     Text( // service methods
                                         text = when (call.source) {
-                                            CallImplementedBy.SERVER_AND_FIELD_BOOK -> {
+                                            CallImplementedBy.SERVER_AND_APP -> {
                                                 call.implementedMethods.joinToString(
                                                     ", "
                                                 ).ifEmpty { "-" }
@@ -161,7 +161,7 @@ fun ServerCallsTable(calls: List<ServiceComparison>) {
 
                                 1 -> { // server column
                                     val isServerImplemented =
-                                        call.source != CallImplementedBy.FIELD_BOOK
+                                        call.source != CallImplementedBy.APP
 
                                     val icon =
                                         if (isServerImplemented) Icons.Default.Check else Icons.Default.Close
@@ -216,9 +216,9 @@ private fun ServerCallsTablePreview() {
         ServiceComparison(
             service = "Service",
             methods = listOf("GET", "PUT"),
-            isFbImplemented = true,
+            isAppImplemented = true,
             implementedMethods = listOf("GET"),
-            source = CallImplementedBy.FIELD_BOOK,
+            source = CallImplementedBy.APP,
         )
     )
     AppTheme {

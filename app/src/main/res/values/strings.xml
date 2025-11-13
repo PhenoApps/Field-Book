@@ -1164,7 +1164,7 @@
     <string name="brapi_server_info_pref">Check Compatibility</string>
     <string name="brapi_server_info_pref_summary">View supported BrAPI calls and server information</string>
     <string name="brapi_compatibility">BrAPI Compatibility</string>
-    <string name="brapi_compatibility_fieldbook">Compatibility with Field Book</string>
+    <string name="brapi_compatibility_with_app">Compatibility with %s</string>
     <string name="brapi_server_name_label">Server Name: %1$s</string>
     <string name="brapi_organization_name_label">Organization Name: %1$s</string>
     <string name="brapi_server_description_label">Description: %1$s</string>

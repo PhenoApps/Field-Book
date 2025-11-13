@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.brapi.io.fieldBookImplementedCalls
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV1
@@ -21,13 +22,17 @@ class BrapiServerInfoViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
+    private val brapiImplementationHelper by lazy {
+        BrapiImplementationHelper(fieldBookImplementedCalls, context.getString(R.string.field_book))
+    }
+
     data class ServerInfoUiState(
         val isLoading: Boolean = false,
         val serverName: String = "",
         val organizationName: String = "",
         val serverDescription: String = "",
         val modulesMap: Map<String, BrapiModuleCalls> = emptyMap(),
-        val fieldBookCompatibility: BrapiModuleCalls? = null,
+        val appCompatibility: BrapiModuleCalls? = null,
         val errorMessage: String? = null,
         val isBrapiV1Incompatible: Boolean = false,
         val hasApiException: Boolean = false,
@@ -64,8 +69,8 @@ class BrapiServerInfoViewModel @Inject constructor(
     private fun handleServerInfoSuccess(response: BrAPIServerInfoResponse?) {
         response?.result?.let { serverInfo ->
             val calls = serverInfo.calls ?: emptyList()
-            val comparisonMap = BrapiImplementationHelper.compareImplementation(calls)
-            val fieldBookCompatibility = BrapiImplementationHelper.getFieldBookCompatibility(calls, context)
+            val comparisonMap = brapiImplementationHelper.compareImplementation(calls)
+            val appCompatibility = brapiImplementationHelper.getAppCompatibility(calls, context)
 
             _uiState.postValue(
                 _uiState.value?.copy(
@@ -74,7 +79,7 @@ class BrapiServerInfoViewModel @Inject constructor(
                     organizationName = serverInfo.organizationName,
                     serverDescription = serverInfo.serverDescription,
                     modulesMap = comparisonMap,
-                    fieldBookCompatibility = fieldBookCompatibility
+                    appCompatibility = appCompatibility
                 )
             )
         } ?: handleEmptyResponse()
