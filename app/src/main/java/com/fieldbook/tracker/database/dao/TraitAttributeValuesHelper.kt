@@ -7,6 +7,7 @@ import com.fieldbook.tracker.database.ObservationVariableAttributeDetailsView
 import com.fieldbook.tracker.database.models.AttributeDefinition
 import com.fieldbook.tracker.database.models.TraitAttributes
 import com.fieldbook.tracker.objects.TraitObject
+import com.fieldbook.tracker.utilities.SynonymsUtil.deserializeSynonyms
 import kotlin.text.isNullOrEmpty
 
 /**
@@ -42,6 +43,16 @@ class TraitAttributeValuesHelper(var traitId: String? = null) {
                         attributes[CLOSE_KEYBOARD_ON_OPEN]?.let { trait.closeKeyboardOnOpen = it.toBoolean() }
                         attributes[CROP_IMAGE]?.let { trait.cropImage = it.toBoolean() }
                         attributes[SAVE_IMAGE]?.let { trait.saveImage = it.toBoolean() }
+                        attributes[USE_DAY_OF_YEAR]?.let { trait.useDayOfYear = it.toBoolean() }
+                        attributes[CATEGORY_DISPLAY_VALUE]?.let { trait.categoryDisplayValue = it.toBoolean() }
+                        attributes[RESOURCE_FILE]?.let { trait.resourceFile = it }
+                        attributes[DECIMAL_PLACES_REQUIRED]?.let { trait.maxDecimalPlaces = it }
+                        attributes[MATH_SYMBOLS_ENABLED]?.let { trait.mathSymbolsEnabled = it.toBoolean() }
+                        attributes[ALLOW_MULTICAT]?.let { trait.allowMulticat = it.toBoolean() }
+                        attributes[REPEATED_MEASURES]?.let { trait.repeatedMeasures = it.toBoolean() }
+                        attributes[AUTO_SWITCH_PLOT]?.let { trait.autoSwitchPlot = it.toBoolean() }
+                        attributes[UNIT]?.let { trait.unit = it }
+                        attributes[INVALID_VALUES]?.let { trait.invalidValues = it.toBoolean() }
                     }
                 }
             }

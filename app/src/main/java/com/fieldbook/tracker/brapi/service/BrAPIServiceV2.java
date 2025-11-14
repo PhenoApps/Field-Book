@@ -38,6 +38,7 @@ import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.FailureFunction;
 import com.fieldbook.tracker.utilities.SuccessFunction;
+import com.fieldbook.tracker.utilities.SynonymsUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
@@ -1354,8 +1355,12 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             }
 
             // Get the synonyms for easier reading. Set it as the trait name.
-            String synonym = !var.getSynonyms().isEmpty() ? var.getSynonyms().get(0) : null;
-            trait.setName(getPrioritizedValue(synonym, var.getObservationVariableName())); //This will default to the Observation Variable Name if available.
+            String name = var.getObservationVariableName();
+            trait.setName(name);
+            trait.setAlias(name);
+
+            List<String> brapiSynonyms = var.getSynonyms() != null ? var.getSynonyms() : new ArrayList<>();
+            trait.setSynonyms(SynonymsUtil.INSTANCE.addAliasToSynonyms(name, brapiSynonyms));
 
             //v5.1.0 bugfix branch update, getPrioritizedValue can return null, trait name should never be null
             // Skip the trait if there brapi trait field isn't present
@@ -1411,7 +1416,13 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
                 }
                 if (var.getScale().getDataType() != null) {
-                    trait.setFormat(convertBrAPIDataType(var.getScale().getDataType().getBrapiValue()));
+                    String convertedFormat = convertBrAPIDataType(var.getScale().getDataType().getBrapiValue());
+                    trait.setFormat(convertedFormat);
+
+                    if (convertedFormat.equals("multicat")) {
+                        trait.setFormat("categorical");
+                        trait.setAllowMulticat(true);
+                    }
                 } else {
                     trait.setFormat("text");
                 }

@@ -119,14 +119,23 @@ class ObservationDao {
 
         fun getAllFromAYear(year: String): Array<ObservationModel> = withDatabase { db ->
 
-            db.query(
-                    Observation.tableName,
-                    where = "observation_time_stamp LIKE ? AND study_id > 0",
-                    whereArgs = arrayOf("$year%")
-            )
-                    .toTable()
+            val query = """
+                SELECT *
+                FROM observations
+                JOIN observation_variables
+                    ON observations.observation_variable_db_id = observation_variables.internal_id_observation_variable
+                WHERE observation_time_stamp LIKE ? AND study_id > 0
+            """.trimIndent()
+
+            //Log.d(TAG, query)
+
+            db.rawQuery(query, arrayOf("$year%")).use {
+
+                it.toTable()
                     .map { ObservationModel(it) }
+                    .sortedBy { it.rep.toInt() }
                     .toTypedArray()
+            }
 
         } ?: emptyArray()
 
@@ -263,6 +272,61 @@ class ObservationDao {
             }
             return null
         }
+
+         /**
+        * Gets the count of missing observations for a trait across all studies
+        * @param traitDbId The trait ID to check
+        * @return The count of observation units that don't have an observation for this trait
+        */
+        fun getMissingObservationsCount(traitDbId: String): Int = withDatabase { db ->
+            // First get all observations for this trait
+            val observations = getAllOfTrait(traitDbId)
+            
+            // Extract the unique study IDs that have observations for this trait
+            val studiesWithObservations = observations.map { it.study_id }.distinct()
+            
+            if (studiesWithObservations.isEmpty()) {
+                // If no studies have observations for this trait, return 0
+                return@withDatabase 0
+            }
+            
+            // Build a query to count all observation units in these studies
+            val studyIdList = studiesWithObservations.joinToString(",") { "'$it'" }
+            
+            // Count total observation units in these studies
+            val totalUnitsQuery = """
+                SELECT COUNT(*) as total_units 
+                FROM ${ObservationUnit.tableName} 
+                WHERE ${Study.FK} IN ($studyIdList)
+            """
+            
+            val totalUnits = db.rawQuery(totalUnitsQuery, null).use { cursor ->
+                if (cursor.moveToFirst()) {
+                    cursor.getInt(cursor.getColumnIndexOrThrow("total_units"))
+                } else {
+                    0
+                }
+            }
+            
+            // Count observation units that already have observations for this trait
+            val observedUnitsQuery = """
+                SELECT COUNT(DISTINCT ${ObservationUnit.FK}) as observed_units 
+                FROM ${Observation.tableName} 
+                WHERE ${Study.FK} IN ($studyIdList) 
+                AND ${ObservationVariable.FK} = ?
+            """
+            
+            val observedUnits = db.rawQuery(observedUnitsQuery, arrayOf(traitDbId)).use { cursor ->
+                if (cursor.moveToFirst()) {
+                    cursor.getInt(cursor.getColumnIndexOrThrow("observed_units"))
+                } else {
+                    0
+                }
+            }
+            
+            // Return the difference (missing observations)
+            totalUnits - observedUnits
+        } ?: 0
 
         fun getWrongSourceImageObservations(ctx: Context, hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
 

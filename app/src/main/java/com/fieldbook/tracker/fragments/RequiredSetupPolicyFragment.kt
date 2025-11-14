@@ -54,6 +54,7 @@ class RequiredSetupPolicyFragment : Fragment(), SlidePolicy {
         AssetSample("resources", "feekes_sample.jpg") to R.string.dir_resources,
         AssetSample("resources", "stem_rust_sample.jpg") to R.string.dir_resources,
         AssetSample("trait", "trait_sample.trt") to R.string.dir_trait,
+        AssetSample("trait", "trait_sample_json.trt") to R.string.dir_trait,
         AssetSample("trait", "severity.txt") to R.string.dir_trait,
         AssetSample("database", "sample_db.zip") to R.string.dir_database)
 
