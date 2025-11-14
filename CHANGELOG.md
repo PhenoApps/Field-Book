@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+- New BrAPI import now only displays active trials and studies
 
 ### Fixed
 - BMS studies now correctly import via BrAPI (observation level and additional info fixes)
