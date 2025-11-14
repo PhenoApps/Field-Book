@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- BMS studies now correctly import via BrAPI (observation level and additional info fixes)
 - Numerous bug fixes and enhancements
 
 ## [v6.3.3] - 2025-11-03
