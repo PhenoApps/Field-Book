@@ -364,7 +364,6 @@ class TraitBoxView : ConstraintLayout {
         val studyId =
             controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
         controller.getDatabase().deleteTrait(studyId, plotID, trait.id, rep)
-        Log.d("TAG", "remove: $plotID ")
     }
 
     fun moveTrait(direction: MoveDirection) {

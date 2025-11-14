@@ -28,6 +28,10 @@
 
     <string name="barcode_scanner_text">Scan a barcode</string>
 
+    <!-- Toolbar -->
+    <string name="appbar_more_options">More Options</string>
+    <string name="appbar_back">Back</string>
+
     <!-- Startup  -->
     <string name="startup_sample_data_title">Sample data</string>
     <string name="startup_sample_data_message">Load sample data?</string>
