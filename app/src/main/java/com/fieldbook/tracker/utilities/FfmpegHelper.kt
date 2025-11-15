@@ -8,7 +8,6 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.lang.Exception
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
@@ -33,15 +32,40 @@ class FfmpegHelper @Inject constructor() {
 
     fun cancel() {
 
-        ffmpegJob?.cancel()
+        try {
+            ffmpegJob?.cancel()
+            ffmpegJob = null
+        } catch (_: Exception) {}
 
-        keepAliveJob?.cancel()
+        try {
+            keepAliveJob?.cancel()
+            keepAliveJob = null
+        } catch (_: Exception) {}
 
-        udpSocket?.disconnect()
+        udpSocket?.let {
+            try {
+                // allow reuse (best-effort)
+                it.reuseAddress = true
+            } catch (_: Exception) {}
+            try {
+                it.disconnect()
+            } catch (e: Exception) {
+                Log.w(TAG, "Error disconnecting UDP socket: ${e.message}")
+            }
+            try {
+                it.close()
+            } catch (e: Exception) {
+                Log.w(TAG, "Error closing UDP socket: ${e.message}")
+            }
+        }
 
-        udpSocket?.close()
+        udpSocket = null
 
-        FFmpegKit.cancel()
+        try {
+            FFmpegKit.cancel()
+        } catch (e: Exception) {
+            Log.w(TAG, "Error during cancel: ${e.message}")
+        }
     }
 
     /**
@@ -60,6 +84,7 @@ class FfmpegHelper @Inject constructor() {
             try {
 
                 udpSocket?.disconnect()
+                udpSocket?.close()
 
                 if (udpSocket == null) {
                     udpSocket = DatagramSocket().also {
@@ -115,10 +140,13 @@ class FfmpegHelper @Inject constructor() {
     }
 
     fun stop() {
-
-        ffmpegJob?.cancel()
-
-        FFmpegKit.cancel()
+        try {
+            ffmpegJob?.cancel()
+            ffmpegJob = null
+            FFmpegKit.cancel()
+        } catch (e: Exception) {
+            Log.w(TAG, "Error stopping FFMPEG: ${e.message}")
+        }
     }
 
     /**
@@ -128,7 +156,7 @@ class FfmpegHelper @Inject constructor() {
 
         stop()
 
-        scope.launch {
+        ffmpegJob = scope.launch {
 
             withContext(Dispatchers.IO) {
 

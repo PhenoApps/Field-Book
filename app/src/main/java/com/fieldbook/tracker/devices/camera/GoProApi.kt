@@ -2,18 +2,31 @@ package com.fieldbook.tracker.devices.camera
 
 import android.bluetooth.BluetoothDevice
 import android.content.Context
+import android.net.ConnectivityManager
 import android.net.Network
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.core.net.toUri
+import androidx.media3.common.MimeTypes
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.mediacodec.MediaCodecUtil
 import com.fieldbook.tracker.interfaces.CollectController
 import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.utilities.WifiHelper
 import dagger.hilt.android.qualifiers.ActivityContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import okhttp3.Callback
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
@@ -24,12 +37,9 @@ import org.json.JSONObject
 import org.phenoapps.fragments.gopro.GoProGatt
 import org.phenoapps.fragments.gopro.GoProGattInterface
 import org.phenoapps.interfaces.gatt.GattCallbackInterface
+import java.net.SocketException
 import java.net.URI
 import javax.inject.Inject
-import androidx.core.net.toUri
-import androidx.media3.common.MimeTypes
-import androidx.media3.exoplayer.DefaultRenderersFactory
-import androidx.media3.exoplayer.mediacodec.MediaCodecUtil
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @UnstableApi
@@ -74,6 +84,8 @@ class GoProApi @Inject constructor(
     companion object {
         const val TAG = "GoProApi"
         private const val ffmpegOutputUri = "udp://@localhost:8555"
+        private const val REQUEST_TIMEOUT_MS = 4000
+        private const val MAX_REQUEST_RETRIES = 3
     }
 
     private val gatt by lazy {
@@ -86,14 +98,7 @@ class GoProApi @Inject constructor(
 
     private var httpClient: OkHttpClient? = OkHttpClient()
 
-    private val mediaSource: androidx.media3.exoplayer.source.MediaSource =
-        androidx.media3.exoplayer.source.ProgressiveMediaSource.Factory(
-            androidx.media3.datasource.DefaultDataSource.Factory(context)
-        ).createMediaSource(
-            androidx.media3.common.MediaItem.fromUri(
-                ffmpegOutputUri.toUri()
-            )
-        )
+    private val ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private val playerListener: Player.Listener = object : Player.Listener {
         override fun onPlaybackStateChanged(playbackState: Int) {
@@ -129,30 +134,120 @@ class GoProApi @Inject constructor(
     var range: ArrayList<ImageRequestData> = arrayListOf()
     var lastMoved: ImageRequestData? = null
 
+    /**
+     * Coroutine based execution with timeout + retry/backoff.
+     * Throws exception on final failure.
+     */
+    private suspend fun executeWithRetrySuspend(request: Request): Response {
+        var lastException: Exception? = null
+
+        for (attempt in 1..MAX_REQUEST_RETRIES) {
+            val call = try {
+                httpClient?.newCall(request) ?: throw IllegalStateException("No http client")
+            } catch (e: Exception) {
+                lastException = e
+                break
+            }
+
+            try {
+                //if it times out it will cancel the call via the catch/finally
+                val response = try {
+                    withTimeout(REQUEST_TIMEOUT_MS.toLong()) {
+                        call.execute()
+                    }
+                } catch (t: Throwable) {
+                    //ensure call is cancelled if timeout/coroutine cancelled
+                    try { call.cancel() } catch (_: Exception) {}
+                    throw t
+                }
+
+                //if we have response then return it to caller (caller must close)
+                return response
+            } catch (e: Exception) {
+                lastException = e as? Exception ?: Exception(e)
+                //attempt to reset client/network bindings
+                if (e is SocketException || (e.message?.contains("Binding socket to network") == true)) {
+                    resetStaleNetworkBindingIfNeeded(e)
+                }
+                if (attempt < MAX_REQUEST_RETRIES) {
+                    //backoff before next attempt but respect coroutine cancellation
+                    val backoff = REQUEST_TIMEOUT_MS.toLong() * attempt
+                    try {
+                        delay(backoff)
+                    } catch (cancelled: Throwable) {
+                        // propagate cancellation
+                        throw cancelled
+                    }
+                } else {
+                    throw lastException ?: Exception("Unknown network error")
+                }
+            }
+        }
+
+        throw lastException ?: Exception("Failed to execute request")
+    }
+
+    private fun closeAndEvictClientConnections(client: OkHttpClient?) {
+        try {
+            client?.dispatcher?.cancelAll()
+        } catch (_: Exception) {}
+        try {
+            client?.connectionPool?.evictAll()
+        } catch (_: Exception) {}
+        try {
+            client?.dispatcher?.executorService?.shutdown()
+        } catch (_: Exception) {}
+    }
+
+    private fun resetStaleNetworkBindingIfNeeded(e: Throwable) {
+        try {
+            val msg = e.message ?: ""
+            if (e is SocketException && msg.contains("Binding socket to network")) {
+                Log.w(TAG, "Detected stale network binding: \"$msg\" — cancelling HTTP work and resetting client.")
+
+                try {
+                    closeAndEvictClientConnections(httpClient)
+                } catch (t: Throwable) {
+                    Log.w(TAG, "Failed to cancel OkHttp calls: ${t.message}")
+                }
+
+                try {
+                    val cm = context.getSystemService(ConnectivityManager::class.java)
+                    cm?.bindProcessToNetwork(null)
+                } catch (t: Throwable) {
+                    Log.w(TAG, "Failed to unbind process network: ${t.message}")
+                }
+
+                httpClient = OkHttpClient()
+            }
+        } catch (t: Throwable) {
+            Log.w(TAG, "Error handling stale network binding: ${t.message}")
+        }
+    }
+
     fun getBusyState() {
 
-        //stop stream first, on fail or success start stream again:
         val getState: Request = Request.Builder()
             .url(URI.create("http://10.5.5.9:8080/gopro/camera/state").toHttpUrlOrNull()!!)
             .build()
 
-        httpClient?.newCall(getState)?.enqueue(object : Callback {
-
-            override fun onFailure(call: okhttp3.Call, e: okio.IOException) {
+        ioScope.launch {
+            try {
+                val response = executeWithRetrySuspend(getState)
+                response.use {
+                    if (!it.isSuccessful) {
+                        Log.e(TAG, "Request state response = not success ${it.code}")
+                    } else {
+                        parseState(it.body?.string() ?: "{}")
+                        Log.i(TAG, "Request state response = success")
+                    }
+                }
+            } catch (e: Exception) {
                 Log.e(TAG, "Request state failed.")
+                resetStaleNetworkBindingIfNeeded(e)
                 e.printStackTrace()
             }
-
-            override fun onResponse(call: okhttp3.Call, response: Response) {
-                if (!response.isSuccessful) {
-                    Log.e(TAG, "Request state response = not success")
-                } else {
-                    parseState(response.body?.string() ?: "{}")
-                    Log.i(TAG, "Request state response = success")
-                }
-                response.close()
-            }
-        })
+        }
     }
 
     private fun parseState(responseBody: String) {
@@ -188,14 +283,16 @@ class GoProApi @Inject constructor(
             }
 
             override fun onResponse(call: okhttp3.Call, response: Response) {
-                if (!response.isSuccessful) {
+                try {
+                    if (!response.isSuccessful) {
+                        Log.e(TAG, "Request stop preview response = not success")
+                    } else {
+                        Log.i(TAG, "Request stop preview response = success")
+                    }
                     requestStartStream()
-                    Log.e(TAG, "Request stop preview response = not success")
-                } else {
-                    requestStartStream()
-                    Log.i(TAG, "Request stop preview response = success")
+                } finally {
+                    response.close()
                 }
-                response.close()
             }
         })
     }
@@ -212,26 +309,36 @@ class GoProApi @Inject constructor(
             .url(URI.create("http://10.5.5.9:8080/gopro/camera/stream/start").toHttpUrlOrNull()!!)
             .build()
 
-        httpClient?.newCall(startPreview)?.enqueue(object : Callback {
+        ioScope.launch {
+            try {
 
-            override fun onFailure(call: okhttp3.Call, e: okio.IOException) {
+                withTimeoutOrNull(2000L) {
+                    while (httpClient == null) {
+                        delay(100L)
+                    }
+                }
+
+                if (httpClient == null) {
+                    Log.w(TAG, "httpClient still null after wait; aborting start stream request")
+                    return@launch
+                }
+
+                val response = executeWithRetrySuspend(startPreview)
+                response.use {
+                    if (!it.isSuccessful) {
+                        Log.e(TAG, "Request response = not success ${it.code}")
+                    } else {
+                        Log.i(TAG, "Request response = success")
+                    }
+                    controller.getFfmpegHelper().initRequestTimer()
+                    callbacks?.onStreamRequested()
+
+                }
+            } catch (e: Exception) {
                 Log.e(TAG, "Failed to make network request to GoPro AP")
                 e.printStackTrace()
             }
-
-            override fun onResponse(call: okhttp3.Call, response: Response) {
-                if (!response.isSuccessful) {
-                    Log.e(TAG, "Request response = not success ${response.code}")
-                    controller.getFfmpegHelper().initRequestTimer()
-                    callbacks?.onStreamRequested()
-                } else {
-                    Log.i(TAG, "Request response = success")
-                    controller.getFfmpegHelper().initRequestTimer()
-                    callbacks?.onStreamRequested()
-                }
-                response.close()
-            }
-        })
+        }
     }
 
     /**
@@ -259,19 +366,21 @@ class GoProApi @Inject constructor(
 
             override fun onResponse(call: okhttp3.Call, response: Response) {
 
-                if (!response.isSuccessful) {
+                try {
+                    if (!response.isSuccessful) {
 
-                    Log.e(TAG, "Media query not success")
+                        Log.e(TAG, "Media query not success")
 
-                } else {
+                    } else {
 
-                    parseMediaQueryResponse(response.body?.string() ?: "{}", model!!, requestAndSaveImage)
+                        parseMediaQueryResponse(response.body?.string() ?: "{}", model!!, requestAndSaveImage)
 
-                    Log.i(TAG, "Media query success.")
+                        Log.i(TAG, "Media query success.")
 
+                    }
+                } finally {
+                    response.close()
                 }
-
-                response.close()
             }
         })
     }
@@ -295,12 +404,15 @@ class GoProApi @Inject constructor(
             }
 
             override fun onResponse(call: okhttp3.Call, response: Response) {
-                if (!response.isSuccessful) {
-                    Log.e(TAG, "Request stop preview response = not success")
-                } else {
-                    Log.i(TAG, "Request stop preview response = success")
+                try {
+                    if (!response.isSuccessful) {
+                        Log.e(TAG, "Request stop preview response = not success")
+                    } else {
+                        Log.i(TAG, "Request stop preview response = success")
+                    }
+                } finally {
+                    response.close()
                 }
-                response.close()
             }
         })
     }
@@ -313,19 +425,31 @@ class GoProApi @Inject constructor(
 
         controller.getFfmpegHelper().cancel()
 
+        try {
+            httpClient?.dispatcher?.cancelAll()
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to cancel OkHttp calls: ${e.message}")
+        }
+
         controller.getWifiHelper().disconnect()
+
+        // recreate httpClient and evict prior sockets
+        try {
+            closeAndEvictClientConnections(httpClient)
+        } catch (_: Exception) {}
+        httpClient = OkHttpClient()
 
         gatt.clear()
 
         //reset ui component states
         player?.stop()
         player?.release()
-        player?.clearMediaItems()
         player?.clearVideoSurface()
         player = null
         //reset global flags
         this.streamStarted = false
 
+        ioScope.cancel()
     }
 
     fun onConnect(device: BluetoothDevice, callbacks: Callbacks) {
@@ -347,6 +471,7 @@ class GoProApi @Inject constructor(
         //min Buffer: The minimum length of media that the player will ensure is buffered at all times, in milliseconds.
         //Playback Buffer: The default amount of time, in milliseconds, of media that needs to be buffered in order for playback to start or resume after a user action such as a seek.
         //Buffer for playback after rebuffer: The duration of the media that needs to be buffered in order for playback to continue after a rebuffer, in milliseconds.
+        player?.removeListener(playerListener)
         player?.stop()
         player?.release()
         player = null
@@ -370,6 +495,16 @@ class GoProApi @Inject constructor(
             .build()
 
         player?.addListener(playerListener)
+
+        val mediaSource: androidx.media3.exoplayer.source.MediaSource =
+            androidx.media3.exoplayer.source.ProgressiveMediaSource.Factory(
+                androidx.media3.datasource.DefaultDataSource.Factory(context)
+            ).createMediaSource(
+                androidx.media3.common.MediaItem.fromUri(
+                    ffmpegOutputUri.toUri()
+                )
+            )
+
         player?.setMediaSource(mediaSource)
         player?.playWhenReady = true
         player?.prepare()
@@ -430,7 +565,7 @@ class GoProApi @Inject constructor(
             val pattern = Regex("^([a-zA-Z]*)([0-9]*).([a-zA-Z]*)$")
 
             val latest = images.maxByOrNull {
-                pattern.matchEntire(it.fileName)?.destructured?.let { (prefix, number, suffix) ->
+                pattern.matchEntire(it.fileName)?.destructured?.let { (_, number, _) ->
                     number.toInt()
                 } ?: -1
             }
@@ -444,6 +579,8 @@ class GoProApi @Inject constructor(
                     } else {
                         saveImageName(latest, model)
                     }
+
+                    requestStream()
                 }
             }
 
@@ -488,28 +625,29 @@ class GoProApi @Inject constructor(
 
             override fun onResponse(call: okhttp3.Call, response: Response) {
 
-                if (!response.isSuccessful) {
-
-                    Log.e(TAG, "Request image response = not success")
-
-                } else {
+                try {
+                    if (!response.isSuccessful) {
+                        Log.e(TAG, "Request image response = not success")
+                        return
+                    }
 
                     Log.i(TAG, "Request image response = success")
 
                     response.body?.byteStream()?.use { inputStream ->
 
                         val bytes = inputStream.readBytes()
-
                         Log.d(TAG, "Found image response with: ${bytes.size} bytes")
 
-                        callbacks?.onImageRequestReady(
-                            bytes,
-                            model
-                        )
+                        callbacks?.onImageRequestReady(bytes, model)
                     }
-                }
 
-                response.close()
+                    requestStream()
+
+                } catch (t: Throwable) {
+                    Log.e(TAG, "Error processing image response", t)
+                } finally {
+                    response.close()
+                }
             }
         })
     }
@@ -575,11 +713,21 @@ class GoProApi @Inject constructor(
 
     override fun onNetworkBound(network: Network) {
 
-        httpClient = OkHttpClient.Builder()
-            .socketFactory(network.socketFactory)
-            .build()
+        ioScope.launch {
+            // Assign a fresh client bound to the network. Evict old connections first.
+            try {
+                closeAndEvictClientConnections(httpClient)
+            } catch (_: Exception) {}
 
-        callbacks?.onConnected()
+            httpClient = OkHttpClient.Builder()
+                .socketFactory(network.socketFactory)
+                .build()
 
+            try {
+                delay(400L)
+            } catch (_: Exception) {}
+
+            callbacks?.onConnected()
+        }
     }
 }

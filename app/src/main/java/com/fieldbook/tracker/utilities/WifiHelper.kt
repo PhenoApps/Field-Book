@@ -110,6 +110,11 @@ class WifiHelper @Inject constructor(
         networkCallback?.let {
             try {
                 connectivityManager.unregisterNetworkCallback(it)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            try {
                 connectivityManager.bindProcessToNetwork(null)
             } catch (e: Exception) {
                 e.printStackTrace()
