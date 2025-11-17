@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+
+### Fixed
+
+## [v6.3.4] - 2025-11-17
+
+### Added
+
+### Changed
 - New BrAPI import now only displays active trials and studies
 
 ### Fixed
@@ -796,3 +804,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [v6.3.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.2
 [v6.3.3]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.3
+
+[v6.3.4]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.4
