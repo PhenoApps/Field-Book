@@ -36,7 +36,7 @@ data class AppColors(
 data class TextColors(
     val primary: Color,
     val secondary: Color,
-    val tertiary: Color,
+    val tertiary: Color, // for toolbar (blue theme has white)
     val hint: Color,
     val highContrast: Color,
     val title: Color,

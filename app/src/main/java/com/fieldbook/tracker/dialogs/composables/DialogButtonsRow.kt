@@ -12,13 +12,13 @@ import com.fieldbook.tracker.ui.theme.AppTheme
 @Composable
 fun DialogButtonsRow(
     positiveButtonText: String? = null,
-    positiveTextColor: Color,
+    positiveTextColor: Color = AppTheme.colors.text.button,
     onPositive: (() -> Unit)? = null,
     negativeButtonText: String? = null,
-    negativeTextColor: Color,
+    negativeTextColor: Color = AppTheme.colors.text.button,
     onNegative: (() -> Unit)? = null,
     neutralButtonText: String? = null,
-    neutralTextColor: Color,
+    neutralTextColor: Color = AppTheme.colors.text.button,
     onNeutral: (() -> Unit)? = null,
 ) {
     Row(
@@ -69,14 +69,11 @@ private fun DialogButtonRowPreview() {
     AppTheme {
         DialogButtonsRow(
             positiveButtonText = "Positive",
-            positiveTextColor = AppTheme.colors.text.button,
-            onPositive = {},
+            onPositive = { },
             negativeButtonText = "Negative",
-            negativeTextColor = AppTheme.colors.text.button,
-            onNegative = {},
+            onNegative = { },
             neutralButtonText = "Neutral",
-            neutralTextColor = AppTheme.colors.text.button,
-            onNeutral = {},
+            onNeutral = { },
         )
     }
 }

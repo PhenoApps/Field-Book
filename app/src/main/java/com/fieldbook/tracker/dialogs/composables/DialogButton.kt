@@ -15,28 +15,28 @@ import com.fieldbook.tracker.ui.theme.AppTheme
 @Composable
 fun DialogButton(
     text: String,
-    textColor: Color,
+    textColor: Color = AppTheme.colors.text.button,
     onClick: () -> Unit,
 ) {
-    AppTheme {
-        TextButton(
-            onClick = { onClick.invoke() },
-            shape = RectangleShape,
-            colors = ButtonDefaults.textButtonColors(
-                contentColor = textColor
-            ),
-        ) {
-            Text(
-                text = text,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Medium
-            )
-        }
+    TextButton(
+        onClick = onClick,
+        shape = RectangleShape,
+        colors = ButtonDefaults.textButtonColors(
+            contentColor = textColor
+        ),
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun DialogButtonPreview() {
-    DialogButton("Text", AppTheme.colors.text.button) { }
+    AppTheme {
+        DialogButton("Text") { }
+    }
 }

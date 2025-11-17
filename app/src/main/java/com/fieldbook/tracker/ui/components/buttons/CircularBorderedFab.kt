@@ -29,7 +29,7 @@ fun CircularBorderedFab(
     contentDescription: String
 ) {
     FloatingActionButton(
-        onClick = { onClick },
+        onClick = onClick,
         containerColor = color,
         shape = CircleShape,
         modifier = Modifier

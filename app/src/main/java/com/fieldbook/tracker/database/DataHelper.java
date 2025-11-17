@@ -69,7 +69,7 @@ import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
-import dagger.hilt.android.qualifiers.ActivityContext;
+import dagger.hilt.android.qualifiers.ApplicationContext;
 
 /**
  * All database related functions are here
@@ -102,7 +102,7 @@ public class DataHelper {
     private final GroupDao studyGroupDao = new GroupDao(GroupsTable.Type.STUDY);
 
     @Inject
-    public DataHelper(@ActivityContext Context context) {
+    public DataHelper(@ApplicationContext Context context) {
         try {
             this.context = context;
 

@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
@@ -21,31 +22,17 @@ import com.fieldbook.tracker.ui.theme.AppTheme
  * Supports icons from various sources
  */
 @Composable
-fun ActionIcon(icon: Any, contentDescription: String) {
+fun ActionIcon(
+    modifier: Modifier = Modifier,
+    icon: Any,
+    contentDescription: String? = null,
+    tint: Color = AppTheme.colors.surface.iconTint,
+) {
     when (icon) {
-        is ImageVector -> {
-            Icon(
-                imageVector = icon, contentDescription = contentDescription
-            )
-        }
-
-        is Painter -> {
-            Icon(
-                painter = icon, contentDescription = contentDescription
-            )
-        }
-
-        is Int -> {
-            Icon(
-                painter = painterResource(icon), contentDescription = contentDescription
-            )
-        }
-
-        else -> {
-            Icon(
-                imageVector = Icons.Filled.Add, contentDescription = contentDescription
-            )
-        }
+        is ImageVector -> Icon(icon, contentDescription, modifier, tint)
+        is Painter -> Icon(icon, contentDescription, modifier, tint)
+        is Int -> Icon(painterResource(icon), contentDescription, modifier, tint)
+        else -> Icon(Icons.Default.Add, contentDescription, modifier, tint)
     }
 }
 
@@ -56,18 +43,10 @@ private fun ActionIconPreview() {
         Row(
             modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            ActionIcon(
-                icon = Icons.Filled.Favorite, contentDescription = "Favorite"
-            )
-            ActionIcon(
-                icon = painterResource(R.drawable.arrow_left), contentDescription = "Back"
-            )
-            ActionIcon(
-                icon = R.drawable.ic_sort, contentDescription = "Sort"
-            )
-            ActionIcon(
-                icon = "invalid", contentDescription = "Fallback"
-            )
+            ActionIcon(icon = Icons.Filled.Favorite)
+            ActionIcon(icon = painterResource(R.drawable.arrow_left))
+            ActionIcon(icon = R.drawable.ic_sort)
+            ActionIcon(icon = "invalid")
         }
     }
 }

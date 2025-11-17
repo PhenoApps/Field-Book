@@ -60,7 +60,7 @@ fun AppBar(
         title = {
             Text(
                 text = title,
-                color = AppTheme.colors.text.primary,
+                color = AppTheme.colors.text.tertiary,
                 fontWeight = FontWeight.Medium
             )
         },
