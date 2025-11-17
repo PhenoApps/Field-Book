@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.viewmodels
+package com.fieldbook.tracker.database.viewmodels
 
 import android.util.Log
 import androidx.lifecycle.LiveData

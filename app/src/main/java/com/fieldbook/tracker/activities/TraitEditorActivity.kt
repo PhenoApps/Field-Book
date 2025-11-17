@@ -12,7 +12,7 @@ import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.ui.screens.TraitEditorScreen
 import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.Utils
-import com.fieldbook.tracker.viewmodels.TraitEditorViewModel
+import com.fieldbook.tracker.database.viewmodels.TraitEditorViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.utils.BaseDocumentTreeUtil
 

@@ -1,30 +1,30 @@
-package com.fieldbook.tracker.repositories
+package com.fieldbook.tracker.database.repository
 
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
-import android.util.Log
-import com.fieldbook.tracker.application.IoDispatcher
-import com.fieldbook.tracker.database.DataHelper
-import com.fieldbook.tracker.objects.TraitObject
-import com.fieldbook.tracker.preferences.GeneralKeys
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.withContext
-import javax.inject.Inject
 import androidx.core.content.edit
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.application.IoDispatcher
+import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.models.TraitAttributes
 import com.fieldbook.tracker.enums.FileFormat
 import com.fieldbook.tracker.objects.FieldFileObject
 import com.fieldbook.tracker.objects.TraitImportFile
+import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.objects.toTraitJson
+import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.CSVReader
 import com.fieldbook.tracker.utilities.FileUtil
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import org.phenoapps.utils.BaseDocumentTreeUtil
 import java.io.InputStreamReader
 import java.util.UUID
+import javax.inject.Inject
 
 class TraitRepository @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -74,7 +74,7 @@ class TraitRepository @Inject constructor(
         onError: suspend (String) -> Unit,
     ) = withContext(ioDispatcher) {
         runCatching {
-            val traitDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_trait)
+            val traitDir = BaseDocumentTreeUtil.Companion.getDirectory(context, R.string.dir_trait)
                 ?: return@withContext onError("Trait directory not available")
 
             if (!traitDir.exists()) {
@@ -84,7 +84,11 @@ class TraitRepository @Inject constructor(
             val exportFile = traitDir.createFile("*/*", fileName)
                 ?: return@withContext onError("Failed to create file")
 
-            val output = BaseDocumentTreeUtil.getFileOutputStream(context, R.string.dir_trait, fileName)
+            val output = BaseDocumentTreeUtil.Companion.getFileOutputStream(
+                context,
+                R.string.dir_trait,
+                fileName
+            )
                 ?: return@withContext onError("Output stream failed")
 
             output.use {
@@ -142,7 +146,7 @@ class TraitRepository @Inject constructor(
 
     private suspend fun parseJsonTraits(uri: Uri, maxPosition: Int): List<TraitObject> =
         withContext(ioDispatcher) {
-            val stream = BaseDocumentTreeUtil.getUriInputStream(context, uri)
+            val stream = BaseDocumentTreeUtil.Companion.getUriInputStream(context, uri)
                 ?: error("Cannot open JSON file")
 
             val jsonText = stream.bufferedReader().use { it.readText() }
@@ -168,7 +172,7 @@ class TraitRepository @Inject constructor(
                             val primitive = value as? JsonPrimitive
                             val stringValue = primitive?.content ?: value.toString()
                             val def =
-                                com.fieldbook.tracker.database.models.TraitAttributes.byKey(key)
+                                TraitAttributes.byKey(key)
                             if (def != null) {
                                 setAttributeValue(def, stringValue)
                             }
@@ -183,7 +187,7 @@ class TraitRepository @Inject constructor(
 
             val list = mutableListOf<TraitObject>()
 
-            BaseDocumentTreeUtil.getUriInputStream(context, uri)?.use { stream ->
+            BaseDocumentTreeUtil.Companion.getUriInputStream(context, uri)?.use { stream ->
                 CSVReader(InputStreamReader(stream)).use { reader ->
 
                     reader.readNext() // skip header
@@ -230,11 +234,11 @@ class TraitRepository @Inject constructor(
 
     private fun Uri.copyToDirectory(context: Context, dirRes: Int, fileName: String): Uri? =
         runCatching {
-            val traitDir = BaseDocumentTreeUtil.getDirectory(context, dirRes) ?: return null
+            val traitDir = BaseDocumentTreeUtil.Companion.getDirectory(context, dirRes) ?: return null
             val destination = traitDir.createFile("*/*", fileName) ?: return null
 
             context.contentResolver.openInputStream(this)?.use { input ->
-                BaseDocumentTreeUtil.getFileOutputStream(context, dirRes, fileName)?.use { output ->
+                BaseDocumentTreeUtil.Companion.getFileOutputStream(context, dirRes, fileName)?.use { output ->
                     input.copyTo(output)
                 }
             } ?: return null

@@ -44,7 +44,7 @@ import com.fieldbook.tracker.ui.dialogs.traits.SortOptionsDialog
 import com.fieldbook.tracker.ui.dialogs.traits.CreateTraitsDialog
 import com.fieldbook.tracker.ui.dialogs.traits.ExportCheckDialog
 import com.fieldbook.tracker.ui.dialogs.traits.TraitImportDialog
-import com.fieldbook.tracker.repositories.TraitRepository
+import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.ui.components.appBar.ActionDisplayMode
 import com.fieldbook.tracker.ui.components.appBar.AppBar
 import com.fieldbook.tracker.ui.components.appBar.TopAppBarAction
@@ -53,11 +53,11 @@ import com.fieldbook.tracker.ui.lists.TraitList
 import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.Utils
-import com.fieldbook.tracker.viewmodels.TraitActivityDialog
-import com.fieldbook.tracker.viewmodels.DeleteTriggerSource
-import com.fieldbook.tracker.viewmodels.ExportTriggerSource
-import com.fieldbook.tracker.viewmodels.TraitEditorEvent
-import com.fieldbook.tracker.viewmodels.TraitEditorViewModel
+import com.fieldbook.tracker.database.viewmodels.TraitActivityDialog
+import com.fieldbook.tracker.database.viewmodels.DeleteTriggerSource
+import com.fieldbook.tracker.database.viewmodels.ExportTriggerSource
+import com.fieldbook.tracker.database.viewmodels.TraitEditorEvent
+import com.fieldbook.tracker.database.viewmodels.TraitEditorViewModel
 import kotlinx.coroutines.Dispatchers
 
 @Composable

@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.viewmodels
+package com.fieldbook.tracker.database.viewmodels
 
 import android.content.SharedPreferences
 import android.net.Uri
@@ -9,7 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
-import com.fieldbook.tracker.repositories.TraitRepository
+import com.fieldbook.tracker.database.repository.TraitRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
