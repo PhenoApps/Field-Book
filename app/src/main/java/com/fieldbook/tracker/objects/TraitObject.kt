@@ -3,9 +3,12 @@ package com.fieldbook.tracker.objects
 import android.database.Cursor
 import com.fieldbook.tracker.database.Migrator.ObservationVariable
 import com.fieldbook.tracker.database.dao.TraitAttributeValuesHelper
+import com.fieldbook.tracker.database.models.AttributeDefinition
 import com.fieldbook.tracker.database.models.TraitAttributes
 import com.fieldbook.tracker.utilities.SynonymsUtil.deserializeSynonyms
 import com.fieldbook.tracker.utilities.SynonymsUtil.serializeSynonyms
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonPrimitive
 import java.util.*
 
 /**
@@ -230,5 +233,37 @@ class TraitObject {
         _synonyms = cursor.getString(synonymsIndex) ?: ""
 
         // loadAttributeAndValues()
+    }
+
+    fun setAttributeValue(attribute: AttributeDefinition, value: String) {
+        attributeValues.setValue(attribute, value)
+    }
+
+    fun applyAttributeJson(attrs: Map<String, JsonElement>) {
+        attrs.forEach { (key, jsonValue) ->
+            val def = TraitAttributes.byKey(key) ?: return@forEach
+
+            val value: String = when (jsonValue) {
+                is JsonPrimitive -> jsonValue.content // for strings/numbers/boolean
+                else -> jsonValue.toString() // for arrays
+            }
+
+            setAttributeValue(def, value)
+        }
+    }
+
+    fun toAttributeJsonMap(): Map<String, JsonElement> {
+        loadAttributeAndValues()
+
+        val map = mutableMapOf<String, JsonElement>()
+
+        for (def in TraitAttributes.ALL) {
+            val value = attributeValues.getString(def)
+            if (value.isNotEmpty() && value != def.defaultValue) {
+                map[def.key] = JsonPrimitive(value)
+            }
+        }
+
+        return map
     }
 }

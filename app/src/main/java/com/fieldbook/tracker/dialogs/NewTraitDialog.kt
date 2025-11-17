@@ -88,6 +88,12 @@ class NewTraitDialog(
 
     //private var createVisible: Boolean
 
+    private var onTraitSaved: (() -> Unit)? = null
+
+    fun setOnTraitSavedListener(listener: () -> Unit) {
+        onTraitSaved = listener
+    }
+
     fun setTraitObject(traitObject: TraitObject?) {
 
         initialTraitObject = traitObject?.clone()
@@ -391,6 +397,8 @@ class NewTraitDialog(
 
             soundHelperImpl.playCelebrate()
         }
+
+        onTraitSaved?.invoke()
 
         (activity as? TraitDialogDismissListener)?.onNewTraitDialogDismiss()
 

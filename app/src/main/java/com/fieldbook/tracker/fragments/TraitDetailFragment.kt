@@ -176,7 +176,7 @@ class TraitDetailFragment : Fragment() {
                 }
                 is CopyTraitStatus.Success -> {
                     // refresh UI
-                    (activity as? TraitEditorActivity)?.queryAndLoadTraits()
+                    // (activity as? TraitEditorActivity)?.queryAndLoadTraits()
                     CollectActivity.reloadData = true
                 }
             }
@@ -653,11 +653,9 @@ class TraitDetailFragment : Fragment() {
             .show()
     }
 
-    // Add a helper method to parse category examples
     private fun parseCategoryExample(categories: String): Pair<String, String> {
         return try {
             if (categories.startsWith("[")) {
-                // JSON format
                 val parsedCategories = CategoryJsonUtil.Companion.decode(categories)
                 if (parsedCategories.isNotEmpty()) {
                     val firstItem = parsedCategories[0]
@@ -670,7 +668,6 @@ class TraitDetailFragment : Fragment() {
                     Pair("Example", "Value")
                 }
             } else {
-                // Simple format (values only)
                 val values = categories.split("/").map { it.trim() }
                 if (values.isNotEmpty()) {
                     Pair(values[0], values[0])
@@ -713,7 +710,7 @@ class TraitDetailFragment : Fragment() {
                 val newVisibility = !trait.visible
                 viewModel.updateTraitVisibility(trait, newVisibility)
 
-                (activity as? TraitEditorActivity)?.queryAndLoadTraits()
+                // (activity as? TraitEditorActivity)?.queryAndLoadTraits()
                 CollectActivity.reloadData = true
             }
         }
@@ -814,7 +811,7 @@ class TraitDetailFragment : Fragment() {
                         true
                     }
                     R.id.edit -> {
-                        traitObject?.let { (activity as? TraitEditorActivity)?.showTraitDialog(it) }
+                        // traitObject?.let { (activity as? TraitEditorActivity)?.showTraitDialog(it) }
                         true
                     }
                     R.id.delete -> {
@@ -866,7 +863,7 @@ class TraitDetailFragment : Fragment() {
             .setTitle(getString(R.string.traits_options_delete_title))
             .setMessage(getString(R.string.traits_warning_delete))
             .setPositiveButton(getString(R.string.dialog_yes)) { d, _ ->
-                (activity as? TraitEditorActivity)?.deleteTrait(trait)
+                // (activity as? TraitEditorActivity)?.deleteTrait(trait)
                 parentFragmentManager.popBackStack()
                 d.dismiss()
             }

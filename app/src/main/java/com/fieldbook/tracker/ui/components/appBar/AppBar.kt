@@ -3,7 +3,6 @@ package com.fieldbook.tracker.ui.components.appBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -27,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.ui.components.widgets.AppIcon
 import com.fieldbook.tracker.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -98,7 +98,7 @@ fun AppBar(
                             },
                             leadingIcon = if (action.icon != null) {
                                 {
-                                    ActionIcon(
+                                    AppIcon(
                                         icon = action.icon,
                                         contentDescription = action.contentDescription
                                     )

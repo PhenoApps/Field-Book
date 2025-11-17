@@ -11,6 +11,7 @@ import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.ui.components.widgets.AppIcon
 import com.fieldbook.tracker.ui.theme.AppTheme
 
 /**
@@ -32,7 +33,7 @@ fun ActionIconButton(action: TopAppBarAction) {
     ) {
         IconButton(onClick = action.onClick) {
             if (action.icon != null) {
-                ActionIcon(icon = action.icon, contentDescription = action.contentDescription)
+                AppIcon(icon = action.icon, contentDescription = action.contentDescription)
             }
         }
     }

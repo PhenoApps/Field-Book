@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.ui.components.appBar
+package com.fieldbook.tracker.ui.components.widgets
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -22,7 +22,7 @@ import com.fieldbook.tracker.ui.theme.AppTheme
  * Supports icons from various sources
  */
 @Composable
-fun ActionIcon(
+fun AppIcon(
     modifier: Modifier = Modifier,
     icon: Any,
     contentDescription: String? = null,
@@ -38,15 +38,15 @@ fun ActionIcon(
 
 @Preview(showBackground = true)
 @Composable
-private fun ActionIconPreview() {
+private fun AppIconPreview() {
     AppTheme {
         Row(
             modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            ActionIcon(icon = Icons.Filled.Favorite)
-            ActionIcon(icon = painterResource(R.drawable.arrow_left))
-            ActionIcon(icon = R.drawable.ic_sort)
-            ActionIcon(icon = "invalid")
+            AppIcon(icon = Icons.Filled.Favorite)
+            AppIcon(icon = painterResource(R.drawable.arrow_left))
+            AppIcon(icon = R.drawable.ic_sort)
+            AppIcon(icon = "invalid")
         }
     }
 }
