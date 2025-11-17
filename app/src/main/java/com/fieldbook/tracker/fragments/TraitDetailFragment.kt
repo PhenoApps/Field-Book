@@ -61,9 +61,9 @@ import com.fieldbook.tracker.utilities.SoundHelperImpl
 import com.fieldbook.tracker.utilities.TraitNameValidator
 import com.fieldbook.tracker.utilities.Utils
 import com.fieldbook.tracker.utilities.VibrateUtil
-import com.fieldbook.tracker.viewmodels.CopyTraitStatus
-import com.fieldbook.tracker.viewmodels.TraitDetailUiState
-import com.fieldbook.tracker.viewmodels.TraitDetailViewModel
+import com.fieldbook.tracker.database.viewmodels.CopyTraitStatus
+import com.fieldbook.tracker.database.viewmodels.TraitDetailUiState
+import com.fieldbook.tracker.database.viewmodels.TraitDetailViewModel
 import com.fieldbook.tracker.viewmodels.factory.TraitDetailViewModelFactory
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup

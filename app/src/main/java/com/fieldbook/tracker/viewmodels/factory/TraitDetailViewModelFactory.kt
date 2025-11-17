@@ -3,7 +3,7 @@ package com.fieldbook.tracker.viewmodels.factory
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.fieldbook.tracker.database.DataHelper
-import com.fieldbook.tracker.viewmodels.TraitDetailViewModel
+import com.fieldbook.tracker.database.viewmodels.TraitDetailViewModel
 
 class TraitDetailViewModelFactory(
     private val database: DataHelper
