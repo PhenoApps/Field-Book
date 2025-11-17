@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.dialogs.composables.traits
+package com.fieldbook.tracker.ui.dialogs.traits
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -8,8 +8,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.dialogs.composables.components.DialogOption
-import com.fieldbook.tracker.dialogs.composables.components.OptionsDialog
+import com.fieldbook.tracker.ui.dialogs.components.DialogOption
+import com.fieldbook.tracker.ui.dialogs.components.OptionsDialog
 import com.fieldbook.tracker.ui.theme.AppTheme
 
 @Composable

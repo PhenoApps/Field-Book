@@ -9,8 +9,8 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.dialogs.composables.DialogTheme
-import com.fieldbook.tracker.dialogs.composables.FileExplorerContent
+import com.fieldbook.tracker.ui.dialogs.DialogTheme
+import com.fieldbook.tracker.ui.dialogs.FileExplorerContent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.dialogs.composables
+package com.fieldbook.tracker.ui.dialogs
 
 import android.text.Editable
 import android.text.InputFilter

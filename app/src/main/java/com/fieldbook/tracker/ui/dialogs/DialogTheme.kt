@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.dialogs.composables
+package com.fieldbook.tracker.ui.dialogs
 
 import android.util.TypedValue
 import androidx.compose.material3.MaterialTheme

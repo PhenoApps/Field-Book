@@ -26,15 +26,14 @@ import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.activities.TraitEditorActivity
 import com.fieldbook.tracker.charts.HistogramChartHelper
 import com.fieldbook.tracker.charts.HorizontalBarChartHelper
 import com.fieldbook.tracker.charts.PieChartHelper
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.databinding.FragmentTraitDetailBinding
 import com.fieldbook.tracker.dialogs.FileExploreDialogFragment
-import com.fieldbook.tracker.dialogs.composables.DialogTheme
-import com.fieldbook.tracker.dialogs.composables.TextInputDialog
+import com.fieldbook.tracker.ui.dialogs.DialogTheme
+import com.fieldbook.tracker.ui.dialogs.TextInputDialog
 import com.fieldbook.tracker.objects.FieldFileObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys

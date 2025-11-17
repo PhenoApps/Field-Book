@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.dialogs.composables.components
+package com.fieldbook.tracker.ui.dialogs.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row

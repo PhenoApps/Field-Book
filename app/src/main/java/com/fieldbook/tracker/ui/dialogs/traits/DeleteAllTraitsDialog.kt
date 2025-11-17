@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.dialogs.composables.traits
+package com.fieldbook.tracker.ui.dialogs.traits
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.dialogs.composables.AppAlertDialog
+import com.fieldbook.tracker.ui.dialogs.AppAlertDialog
 import com.fieldbook.tracker.ui.theme.AppTheme
 
 @Composable

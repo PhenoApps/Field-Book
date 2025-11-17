@@ -1,10 +1,10 @@
-package com.fieldbook.tracker.dialogs.composables.traits
+package com.fieldbook.tracker.ui.dialogs.traits
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.dialogs.composables.AppAlertDialog
+import com.fieldbook.tracker.ui.dialogs.AppAlertDialog
 
 @Composable
 fun ExportCheckDialog(
