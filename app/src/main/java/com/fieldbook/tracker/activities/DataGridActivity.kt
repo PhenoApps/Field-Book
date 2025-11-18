@@ -5,59 +5,40 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
-import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.ui.graphics.Color
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
+import androidx.core.content.edit
 import androidx.core.database.getStringOrNull
+import androidx.databinding.DataBindingUtil
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.models.ObservationModel
+import com.fieldbook.tracker.databinding.ActivityDataGridBinding
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.ui.grid.datagrid.DataGridTable
+import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
+import com.fieldbook.tracker.utilities.InsetHandler
 import com.fieldbook.tracker.utilities.Utils
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import dagger.hilt.android.AndroidEntryPoint
-import eu.wewox.lazytable.LazyTable
-import eu.wewox.lazytable.LazyTableItem
-import eu.wewox.lazytable.lazyTableDimensions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import androidx.core.content.edit
-import androidx.databinding.DataBindingUtil
-import com.fieldbook.tracker.databinding.ActivityDataGridBinding
-import com.fieldbook.tracker.utilities.InsetHandler
-import com.google.firebase.crashlytics.FirebaseCrashlytics
-import eu.wewox.lazytable.LazyTableState
-import eu.wewox.lazytable.lazyTablePinConfiguration
-import eu.wewox.lazytable.rememberSaveableLazyTableState
 
 /**
  * This activity is available as an optional toolbar action.
@@ -94,14 +75,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
     private var activePlotId: Int? = null
     private var activeTrait: Int? = null
 
-    private var activeCellBgColor: Int = 0
-    private var filledCellBgColor: Int = 0
-    private var emptyCellBgColor: Int = 0
-    private var activeCellTextColor: Int = 0
-    private var cellTextColor: Int = 0
-
     private var isLoading by mutableStateOf(true)
-    private lateinit var lazyTableState: LazyTableState
 
     @Inject
     lateinit var database: DataHelper
@@ -134,8 +108,6 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
         activePlotId = intent.extras?.getInt("plot_id")
         activeTrait = intent.extras?.getInt("trait")
 
-        setDataGridColors()
-
         initialize()
 
         binding.composeView.setContent {
@@ -146,9 +118,18 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
                     modifier = Modifier.fillMaxSize()
                 ) {
                     if (isLoading) {
-                        CircularProgressIndicator(color = Color(activeCellBgColor))
+                        CircularProgressIndicator(color = AppTheme.colors.primary)
                     } else {
-                        DataGridTable()
+                        DataGridTable(
+                            traits = mTraits,
+                            rowHeaders = mRowHeaders,
+                            gridData = mGridData,
+                            plotIds = mPlotIds,
+                            rowHeaderName = getCurrentRowHeader(),
+                            activePlotId = activePlotId,
+                            activeTrait = activeTrait,
+                            onCellClicked = { row, col -> onCellClicked(row, col) }
+                        )
                     }
                 }
             }
@@ -172,27 +153,6 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
             }
         }
         return super.onOptionsItemSelected(item)
-    }
-
-    private fun setDataGridColors() {
-        theme.apply {
-            val typedValue = TypedValue()
-
-            resolveAttribute(R.attr.activeCellColor, typedValue, true)
-            activeCellBgColor = typedValue.data
-
-            resolveAttribute(R.attr.dataFilledColor, typedValue, true)
-            filledCellBgColor = typedValue.data
-
-            resolveAttribute(R.attr.emptyCellColor, typedValue, true)
-            emptyCellBgColor = typedValue.data
-
-            resolveAttribute(R.attr.activeCellTextColor, typedValue, true)
-            activeCellTextColor = typedValue.data
-
-            resolveAttribute(R.attr.cellTextColor, typedValue, true)
-            cellTextColor = typedValue.data
-        }
     }
 
     /**
@@ -241,8 +201,6 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
                     mTraits.add(it)
                 }
             }
-
-            val traits = database.allTraitObjects
 
             // expensive database call, only asks for the unique name plot attr and all visible traits
             val cursor = database.getExportTableData(studyId, mTraits)
@@ -331,171 +289,6 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
                     isLoading = false
                 }
             }
-        }
-    }
-
-    @Composable
-    fun DataGridTable() {
-        if (mTraits.isEmpty() || mRowHeaders.isEmpty()) {
-            return
-        }
-
-        lazyTableState = rememberSaveableLazyTableState()
-
-        val columnCount = mTraits.size + 1 // +1 for rowHeader column
-        val rowCount = mRowHeaders.size + 1 // +1 for column headers (traits)
-
-        val targetColumn = activeTrait ?: 1
-        val targetRow = activePlotId ?: 1
-
-        LaunchedEffect(mTraits, mRowHeaders) {
-            // this will trigger when traits or row headers are updated
-            Log.d("DataGridActivity", "Data loaded: ${mTraits.size} traits, ${mRowHeaders.size} rows")
-            if (mTraits.isNotEmpty() && mRowHeaders.isNotEmpty() && targetColumn <= mTraits.size && targetRow <= mRowHeaders.size) {
-                lazyTableState.animateToCell(column = targetColumn, row = targetRow)
-            }
-        }
-
-        Box(modifier = Modifier.fillMaxWidth()) {
-            LazyTable(
-                state = lazyTableState,
-                dimensions = lazyTableDimensions(
-                    columnSize = { col ->
-                        when (col) {
-                            0 -> 120.dp
-                            else -> 100.dp
-                        }
-                    },
-                    rowSize = { 48.dp } // row height
-                ),
-                contentPadding = PaddingValues(0.dp),
-                pinConfiguration = lazyTablePinConfiguration(
-                    columns = 1,    // pin the rowHeaders (first column)
-                    rows = 1        // pin the columnHeaders (first row)
-                ),
-                // modifier = Modifier
-                //     .fillMaxWidth()
-            ) {
-                // set up the header row
-                items(
-                    count = columnCount,
-                    layoutInfo = { LazyTableItem(column = it, row = 0) }) { index ->
-                    if (index == 0) {
-                        HeaderCell(text = getCurrentRowHeader())
-                    } else {
-                        val traitIndex = index - 1
-                        if (traitIndex < mTraits.size) {
-                            HeaderCell(text = mTraits[traitIndex].alias)
-                        } else {
-                            HeaderCell(text = "")
-                        }
-                    }
-                }
-
-                // set up the remaining grid cells
-                items(
-                    count = (rowCount - 1) * columnCount,
-                    layoutInfo = {
-                        val row = (it / columnCount) + 1  // +1 to skip header row
-                        val column = it % columnCount
-                        LazyTableItem(column = column, row = row)
-                    }
-                ) { index ->
-                    val row = (index / columnCount)
-                    val column = index % columnCount
-
-                    if (column == 0) {
-                        // rowHeaders (first column)
-                        if (row < mRowHeaders.size) {
-                            val headerText = mRowHeaders[row].name
-                            RowHeaderCell(text = headerText)
-                        } else {
-                            RowHeaderCell(text = "")
-                        }
-                    } else {
-                        // data cells
-                        val columnIndex = column - 1 // -1 for header column
-                        val cellData =
-                            if (row < mGridData.size && columnIndex < mGridData[row].size) {
-                                mGridData[row][columnIndex]
-                            } else null
-
-                        DataCell(
-                            value = cellData?.value ?: "",
-                            isHighlighted = (row + 1 == activePlotId && columnIndex + 1 == activeTrait)
-                        ) {
-                            if (cellData != null && row < mPlotIds.size) {
-                                onCellClicked(row, columnIndex)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * This is used for the first row in the data grid
-     */
-    @Composable
-    fun HeaderCell(text: String) {
-        TableCell(
-            text = text,
-            backgroundColor = Color.White,
-            textColor = Color(cellTextColor)
-        )
-    }
-
-    @Composable
-    fun RowHeaderCell(text: String) {
-        TableCell(
-            text = text,
-            backgroundColor = Color.White,
-            textColor = Color(cellTextColor)
-        )
-    }
-
-    @Composable
-    fun DataCell(value: String, isHighlighted: Boolean = false, onClick: () -> Unit = {}) {
-        val backgroundColor = when {
-            isHighlighted -> Color(activeCellBgColor)
-            value.isNotBlank() -> Color(filledCellBgColor)
-            else -> Color(emptyCellBgColor)
-        }
-
-        val textColor = if (isHighlighted) Color(activeCellTextColor) else Color(cellTextColor)
-
-        TableCell(
-            text = value,
-            backgroundColor = backgroundColor,
-            textColor = textColor,
-            onClick = onClick,
-            isClickable = true
-        )
-    }
-
-    @Composable
-    fun TableCell(
-        text: String,
-        backgroundColor: Color,
-        textColor: Color,
-        onClick: () -> Unit = {},
-        isClickable: Boolean = false
-    ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .background(backgroundColor)
-                .border(Dp.Hairline, Color(cellTextColor))
-                .then(if (isClickable) Modifier.clickable(onClick = onClick) else Modifier)
-        ) {
-            Text(
-                text = text,
-                color = textColor,
-                textAlign = TextAlign.Center,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-            )
         }
     }
 
