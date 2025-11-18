@@ -7,6 +7,7 @@ import androidx.core.content.edit
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.application.IoDispatcher
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.database.models.TraitAttributes
 import com.fieldbook.tracker.enums.FileFormat
 import com.fieldbook.tracker.objects.FieldFileObject
@@ -41,6 +42,10 @@ class TraitRepository @Inject constructor(
         database.getAllTraitObjects()
     }
 
+    suspend fun getTraitById(id: String): TraitObject? = withContext(ioDispatcher) {
+            database.getTraitById(id)
+    }
+
     suspend fun deleteAllTraits(traits: List<TraitObject>) = withContext(ioDispatcher) {
         database.deleteTraitsTable()
 
@@ -51,6 +56,25 @@ class TraitRepository @Inject constructor(
             }
         }
     }
+
+    suspend fun updateTrait(trait: TraitObject) = withContext(ioDispatcher) {
+        database.updateTrait(trait)
+    }
+
+    suspend fun updateTraitAlias(trait: TraitObject, newAlias: String) = withContext(ioDispatcher) {
+        trait.alias = newAlias
+
+        val currentSynonyms = trait.synonyms.toMutableList()
+        if (!currentSynonyms.contains(newAlias)) {
+            // add to synonyms
+            currentSynonyms.add(newAlias)
+            trait.synonyms = currentSynonyms
+        }
+
+        updateTrait(trait)
+        trait
+    }
+
 
     suspend fun updateVisibility(id: String, visible: Boolean) = withContext(ioDispatcher) {
         database.updateTraitVisibility(id, visible)
@@ -65,6 +89,42 @@ class TraitRepository @Inject constructor(
     // returns count of traits that were actually inserted
     suspend fun insertTraits(traits: List<TraitObject>): Int = withContext(ioDispatcher) {
         traits.count { database.insertTraits(it) != -1L }
+    }
+
+    suspend fun updateResourceFile(id: String, fileUri: String): TraitObject? = withContext(ioDispatcher) {
+        val trait = getTraitById(id)
+        trait?.apply {
+            resourceFile = fileUri
+            saveAttributeValues()
+            updateTrait(this)
+        }
+        trait
+    }
+
+    suspend fun updateTraitAndAttributes(trait: TraitObject) = withContext(ioDispatcher) {
+        trait.saveAttributeValues()
+        updateTrait(trait)
+    }
+
+    suspend fun getTraitObservations(traitId: String): Array<ObservationModel> = withContext(ioDispatcher) {
+        database.getAllObservationsOfVariable(traitId)
+    }
+
+    suspend fun getMissingObservationCount(traitId: String): Int = withContext(ioDispatcher) {
+        database.getMissingObservationsCount(traitId)
+    }
+
+    suspend fun copyTrait(baseTrait: TraitObject, newName: String): Boolean = withContext(ioDispatcher) {
+        val pos = database.getMaxPositionFromTraits() + 1
+
+        baseTrait.apply {
+            name = newName
+            alias = newName
+            visible = true
+            realPosition = pos
+        }
+
+        database.insertTraits(baseTrait) != -1L
     }
 
     suspend fun exportTraitsAsJson(

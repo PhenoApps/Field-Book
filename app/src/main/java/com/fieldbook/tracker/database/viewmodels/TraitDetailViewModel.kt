@@ -6,17 +6,21 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.application.IoDispatcher
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class TraitDetailViewModel(
-    private val database: DataHelper,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+@HiltViewModel
+class TraitDetailViewModel @Inject constructor(
+    private val repo: TraitRepository,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
     companion object {
@@ -39,32 +43,33 @@ class TraitDetailViewModel(
     fun loadTraitDetails(valueFormatter: ValueProcessorFormatAdapter, traitId: String) {
         viewModelScope.launch {
             _uiState.value = TraitDetailUiState.Loading
-            try {
-                val trait = withContext(ioDispatcher) { database.getTraitById(traitId) }
 
-                trait?.let {
-                    val observationData = loadObservationData(valueFormatter, it)
-                    _uiState.value = TraitDetailUiState.Success(it.also {
-                        it.loadAttributeAndValues()
-                    }, observationData)
+            runCatching { repo.getTraitById(traitId) }
+                .onSuccess { trait ->
+                    trait?.let {
+                        val observationData = loadObservationData(valueFormatter, it)
+                        _uiState.value = TraitDetailUiState.Success(it.also {
+                            it.loadAttributeAndValues()
+                        }, observationData)
+                    }
                 }
-
-            } catch (e: Exception) {
-                Log.e(TAG, "Error loading trait details: ", e)
-                _uiState.value = TraitDetailUiState.Error(R.string.error_loading_trait_detail)
-            }
+                .onFailure { e ->
+                    Log.e(TAG, "Error loading trait details: ", e)
+                    _uiState.value = TraitDetailUiState.Error(R.string.error_loading_trait_detail)
+                }
         }
     }
 
     private suspend fun loadObservationData(valueFormatter: ValueProcessorFormatAdapter, trait: TraitObject): ObservationData =
         withContext(ioDispatcher) {
-            val observations = database.getAllObservationsOfVariable(trait.id)
+            val observations = repo.getTraitObservations(trait.id)
             val fieldsWithObservations = observations.map { it.study_id }.distinct()
-            val missingObservations = database.getMissingObservationsCount(trait.id)
-            val totalObservations = observations.size + missingObservations
-            val completeness = if (totalObservations > 0)
-                observations.size.toFloat() / totalObservations.toFloat()
-            else 0f
+
+            val missingObs = repo.getMissingObservationCount(trait.id)
+            val totalObs = observations.size + missingObs
+
+            val completeness =
+                if (totalObs > 0) observations.size.toFloat() / totalObs.toFloat() else 0f
 
             val processedObservations = observations.map { obs ->
 
@@ -82,52 +87,47 @@ class TraitDetailViewModel(
 
     fun updateTraitVisibility(trait: TraitObject, newVisibility: Boolean) {
         viewModelScope.launch {
-            try {
-                withContext(ioDispatcher) {
+            runCatching { repo.updateVisibility(trait.id, newVisibility) }
+                .onSuccess {
                     trait.visible = newVisibility
-                    database.updateTraitVisibility(trait.id, newVisibility)
-                }
 
-                val obsData = (_uiState.value as? TraitDetailUiState.Success)?.observationData
-                _uiState.value = TraitDetailUiState.Success(trait, obsData)
-            } catch (e: Exception) {
-                Log.e(TAG, "Error updating trait visibility: ", e)
-                _uiState.value = TraitDetailUiState.Error(R.string.error_updating_trait_visibility)
-            }
+                    val obsData = (_uiState.value as? TraitDetailUiState.Success)?.observationData
+                    _uiState.value = TraitDetailUiState.Success(trait, obsData)
+                }
+                .onFailure { e ->
+                    Log.e(TAG, "Error updating trait visibility: ", e)
+                    _uiState.value = TraitDetailUiState.Error(R.string.error_updating_trait_visibility)
+                }
         }
     }
 
     fun updateResourceFile(traitId: String, fileUri: String) {
         viewModelScope.launch {
-            try {
-                val updatedTrait = withContext(ioDispatcher) {
-                    val trait = database.getTraitById(traitId)
-                    trait?.let {
-                        it.resourceFile = fileUri
-                    }
-                    trait.saveAttributeValues()
-                    trait
-                }
-                updatedTrait?.let {
-                    val obsData = (_uiState.value as? TraitDetailUiState.Success)?.observationData
+            runCatching { repo.updateResourceFile(traitId, fileUri) }
+                .onSuccess { updatedTrait ->
+                    updatedTrait?.let {
+                        val obsData = (_uiState.value as? TraitDetailUiState.Success)?.observationData
 
-                    _uiState.value = TraitDetailUiState.Success(updatedTrait, obsData)
+                        _uiState.value = TraitDetailUiState.Success(updatedTrait, obsData)
+                    }
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error updating resource file: ", e)
-                _uiState.value = TraitDetailUiState.Error(R.string.error_updating_trait_resource_file)
-            }
+                .onFailure { e ->
+                    Log.e(TAG, "Error updating resource file: ", e)
+                    _uiState.value = TraitDetailUiState.Error(R.string.error_updating_trait_resource_file)
+                }
         }
     }
 
-    fun updateTraitOptions(valueFormatter: ValueProcessorFormatAdapter, trait: TraitObject) {
+    fun updateTraitAttributes(valueFormatter: ValueProcessorFormatAdapter, trait: TraitObject) {
         viewModelScope.launch {
-            try {
-                trait.saveAttributeValues()
+            runCatching {
+                repo.updateTraitAndAttributes(trait)
+
                 //reload the observations, in case they need reformatting in the graph
-                val obsData = loadObservationData(valueFormatter, trait)
+                loadObservationData(valueFormatter, trait)
+            }.onSuccess { obsData ->
                 _uiState.value = TraitDetailUiState.Success(trait, obsData)
-            } catch (e: Exception) {
+            }.onFailure { e ->
                 Log.e(TAG, "Error updating trait options: ", e)
                 _uiState.value = TraitDetailUiState.Error(R.string.error_updating_trait_options)
             }
@@ -136,56 +136,34 @@ class TraitDetailViewModel(
 
     fun updateTraitAlias(trait: TraitObject, newAlias: String) {
         viewModelScope.launch {
-            try {
-                val updatedTrait = withContext(ioDispatcher) {
-                    trait.alias = newAlias
-
-                    val currentSynonyms = trait.synonyms.toMutableList()
-                    if (!currentSynonyms.any { it == newAlias }) {
-                        // add to synonyms
-                        currentSynonyms.add(newAlias)
-                        trait.synonyms = currentSynonyms
-                    }
-
-                    database.updateTrait(trait)
-
-                    trait
+            runCatching { repo.updateTraitAlias(trait, newAlias) }
+                .onSuccess { updatedTrait ->
+                    val obsData = (_uiState.value as? TraitDetailUiState.Success)?.observationData
+                    _uiState.value = TraitDetailUiState.Success(updatedTrait, obsData)
                 }
-
-                val obsData = (_uiState.value as? TraitDetailUiState.Success)?.observationData
-                _uiState.value = TraitDetailUiState.Success(updatedTrait, obsData)
-            } catch (e: Exception) {
-                Log.e(TAG, "Error updating trait alias: ", e)
-                _uiState.value = TraitDetailUiState.Error(R.string.error_updating_trait_alias)
-            }
+                .onFailure { e ->
+                    Log.e(TAG, "Error updating trait alias: ", e)
+                    _uiState.value = TraitDetailUiState.Error(R.string.error_updating_trait_alias)
+                }
         }
     }
 
     fun copyTrait(trait: TraitObject, newName: String) {
+        if (newName.isEmpty()) {
+            _copyTraitStatus.value = CopyTraitStatus.Error(R.string.error_empty_trait_name)
+            return
+        }
+
         viewModelScope.launch {
-            if (newName.isEmpty()) {
-                _copyTraitStatus.value = CopyTraitStatus.Error(R.string.error_empty_trait_name)
-                return@launch
-            }
-
-            try {
-                withContext(ioDispatcher) {
-                    val pos = database.getMaxPositionFromTraits() + 1
-
-                    trait.apply {
-                        name = newName
-                        alias = newName
-                        visible = true
-                        realPosition = pos
-                    }
-
-                    database.insertTraits(trait)
+            runCatching { repo.copyTrait(trait, newName) }
+                .onSuccess { success ->
+                    _copyTraitStatus.value =
+                        if (success) CopyTraitStatus.Success(newName) else CopyTraitStatus.Error(R.string.error_copy_trait)
                 }
-                _copyTraitStatus.value = CopyTraitStatus.Success(newName)
-            } catch (e: Exception) {
-                Log.e(TAG, "Error copying trait: ", e)
-                _copyTraitStatus.value = CopyTraitStatus.Error(R.string.error_copy_trait)
-            }
+                .onFailure { e ->
+                    Log.e(TAG, "Error copying trait: ", e)
+                    _copyTraitStatus.value = CopyTraitStatus.Error(R.string.error_copy_trait)
+                }
         }
     }
 }

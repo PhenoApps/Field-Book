@@ -21,6 +21,7 @@ import androidx.core.net.toUri
 import androidx.core.view.isGone
 import androidx.core.view.size
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
@@ -64,7 +65,7 @@ import com.fieldbook.tracker.utilities.VibrateUtil
 import com.fieldbook.tracker.database.viewmodels.CopyTraitStatus
 import com.fieldbook.tracker.database.viewmodels.TraitDetailUiState
 import com.fieldbook.tracker.database.viewmodels.TraitDetailViewModel
-import com.fieldbook.tracker.viewmodels.factory.TraitDetailViewModelFactory
+import com.fieldbook.tracker.database.viewmodels.TraitEditorViewModel
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import dagger.hilt.android.AndroidEntryPoint
@@ -94,7 +95,9 @@ class TraitDetailFragment : Fragment() {
 
     private lateinit var binding: FragmentTraitDetailBinding
 
-    private val viewModel: TraitDetailViewModel by viewModels { TraitDetailViewModelFactory(database) }
+    private val viewModel: TraitDetailViewModel by viewModels()
+
+    private val activityViewModel: TraitEditorViewModel by activityViewModels()
 
     private var traitId: String? = null
     private var traitObject: TraitObject? = null
@@ -376,7 +379,7 @@ class TraitDetailFragment : Fragment() {
         chipLabel?.let { label ->
             addChip(label, iconRes) { chip ->
                 parameter.toggleValue(trait)?.let { newValue -> // toggle parameter
-                    viewModel.updateTraitOptions(database.valueFormatter, trait)
+                    viewModel.updateTraitAttributes(database.valueFormatter, trait)
                 } ?: run { // not a toggle parameter, show dialog
                     showParameterEditDialog(parameter, trait)
                 }
@@ -470,7 +473,7 @@ class TraitDetailFragment : Fragment() {
                         }
                     }
 
-                    viewModel.updateTraitOptions(database.valueFormatter, updatedTrait)
+                    viewModel.updateTraitAttributes(database.valueFormatter, updatedTrait)
                     Utils.makeToast(context, getString(R.string.edit_traits))
                     CollectActivity.reloadData = true
 
@@ -541,6 +544,7 @@ class TraitDetailFragment : Fragment() {
                         return@setPositiveButton
                     }
                     viewModel.updateTraitAlias(trait, newAlias)
+                    activityViewModel.loadTraits()
                 }
             }
             .setNegativeButton(getString(R.string.dialog_cancel), null)
@@ -565,23 +569,25 @@ class TraitDetailFragment : Fragment() {
                         title = getString(R.string.trait_add_synonym_new_dialog),
                         hint = getString(R.string.trait_synonym),
                         positiveButtonText = getString(R.string.trait_swap_name_set_alias),
-                        onPositive = { newSynonym ->
-                            when {
-                                newSynonym.isEmpty() -> getString(R.string.trait_add_synonym_new_dialog_blank)
+                        onPositive = onPositive@{ newSynonym ->
+                            val trimmed = newSynonym.trim()
 
-                                trait.synonyms.contains(newSynonym) -> getString(R.string.trait_add_synonym_already_exists)
-
-                                else -> {
-                                    val validationError = TraitNameValidator.validateTraitAlias(newSynonym, database, trait)
-                                    if (validationError != null) {
-                                        getString(validationError)
-                                    } else {
-                                        viewModel.updateTraitAlias(trait, newSynonym)
-                                        dialog.dismiss()
-                                        null // no error
-                                    }
-                                }
+                            if (trimmed.isEmpty()) {
+                                return@onPositive getString(R.string.trait_add_synonym_new_dialog_blank)
                             }
+
+                            if (trait.synonyms.contains(trimmed)) {
+                                return@onPositive getString(R.string.trait_add_synonym_already_exists)
+                            }
+
+                            val validationError = TraitNameValidator.validateTraitAlias(trimmed, database, trait)
+                            if (validationError != null) {
+                                return@onPositive getString(validationError)
+                            }
+
+                            viewModel.updateTraitAlias(trait, trimmed)
+                            dialog.dismiss()
+                            null
                         },
                         negativeButtonText = getString(R.string.dialog_cancel),
                         onNegative = { dialog.dismiss() },
@@ -609,7 +615,7 @@ class TraitDetailFragment : Fragment() {
             .setTitle(getString(R.string.trait_date_format_dialog_title))
             .setSingleChoiceItems(options, currentSelection) { dialog, which ->
                 val useDayOfYear = which == 1
-                viewModel.updateTraitOptions(database.valueFormatter, trait.also {
+                viewModel.updateTraitAttributes(database.valueFormatter, trait.also {
                     it.useDayOfYear = useDayOfYear
                 })
                 dialog.dismiss()
@@ -645,7 +651,7 @@ class TraitDetailFragment : Fragment() {
             .setSingleChoiceItems(options, currentSelection) { dialog, which ->
                 val useValues = which == 1
                 trait.categoryDisplayValue = useValues
-                viewModel.updateTraitOptions(database.valueFormatter, trait)
+                viewModel.updateTraitAttributes(database.valueFormatter, trait)
                 dialog.dismiss()
             }
             .setNegativeButton(R.string.dialog_cancel, null)
