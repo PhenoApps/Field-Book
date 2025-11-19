@@ -258,11 +258,10 @@ class NewTraitDialog(
     }
 
     private fun show() {
-        if (initialTraitObject == null) showFormatLayouts(Formats.getMainFormats()) else showFormatParameters(
-            Formats.entries.first {
+        if (initialTraitObject == null) showFormatLayouts(Formats.getMainFormats()) else
+            Formats.entries.firstOrNull {
                 initialTraitObject?.format == it.getDatabaseName()
-            }
-        )
+            }?.let { showFormatParameters(it) }
     }
 
     private fun getSelectedFormat(): Formats? =

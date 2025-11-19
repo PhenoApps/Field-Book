@@ -1656,6 +1656,7 @@
     <string name="device_settings_dialog_unknown_name">Unknown Bluetooth Device</string>
     <string name="device_settings_dialog_title">Bluetooth Device Settings</string>
     <string name="no_data_captured">No data captured.</string>
+    <string name="failed_to_find_file_name">Failed to retrieve file name.</string>
     <string name="act_brapi_export_starting">Starting export</string>
     <string name="act_brapi_export_success">Export success</string>
 

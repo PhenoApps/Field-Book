@@ -13,6 +13,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [v6.3.4] - 2025-11-17
+
+### Added
+
+### Changed
+- New BrAPI import now only displays active trials and studies
+
+### Fixed
+- GoPro no longer disconnects after image capture
+- BMS studies now correctly import via BrAPI (observation level and additional info fixes)
+- Numerous bug fixes and enhancements
+
 ## [v6.3.3] - 2025-11-03
 
 ### Added
@@ -789,5 +801,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v6.3.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.0
 [v6.3.1]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.1
 
+
 [v6.3.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.2
 [v6.3.3]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.3
+
+[v6.3.4]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.4
