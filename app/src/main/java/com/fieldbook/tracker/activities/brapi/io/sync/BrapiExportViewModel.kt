@@ -18,6 +18,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -713,11 +716,11 @@ class BrapiExportViewModel @Inject constructor(
         Log.d(TAG, "Observation processing complete.")
     }
 
-    private suspend fun processImages(images: List<FieldBookImage>, isNew: Boolean = true) {
+    private suspend fun processImages(images: List<FieldBookImage>, isNew: Boolean = true) = coroutineScope {
 
         if (images.isEmpty()) {
             Log.d(TAG, "No images to process.")
-            return
+            return@coroutineScope
         }
 
         val concurrencyLimit = (preferences.getString(
@@ -729,20 +732,11 @@ class BrapiExportViewModel @Inject constructor(
         val semaphore = Semaphore(concurrencyLimit)
 
         images.map { image ->
-            viewModelScope.launch(Dispatchers.IO) {
+            async(Dispatchers.IO) {
                 semaphore.withPermit {
 
-                    if (!isActive) return@launch
-
-                    val message = if (isNew) {
-
-                        processNewImage(image)
-
-                    } else {
-
-                        updateImages(image)
-
-                    }
+                    if (!isActive) return@withPermit
+                    val message = if (isNew) processNewImage(image)else updateImages(image)
 
                     _uiState.update {
                         it.copy(
@@ -754,7 +748,7 @@ class BrapiExportViewModel @Inject constructor(
                     }
                 }
             }
-        }.joinAll()
+        }.awaitAll()
 
         Log.d(TAG, "All image processing jobs have completed.")
     }

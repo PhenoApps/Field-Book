@@ -1054,6 +1054,41 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         }
     }
 
+    public void getObservationsByPage(final String studyDbId, final List<String> observationVariableDbIds,
+                                BrapiPaginationManager paginationManager, final Function<List<Observation>, Void> function,
+                                final Function<Integer, Void> failFunction) {
+
+        try {
+            BrapiV2ApiCallBack<BrAPIObservationListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationListResponse>() {
+                @Override
+                public void onSuccess(BrAPIObservationListResponse response, int i, Map<String, List<String>> map) {
+
+                    if (response.getResult() != null) {
+                        Map<String, String> extVariableDbIdMap = getExtVariableDbIdMapping();
+                        List<BrAPIObservation> brapiObservationList = response.getResult().getData();
+                        final List<Observation> observationList = mapObservations(brapiObservationList, extVariableDbIdMap, observationVariableDbIds);
+                        function.apply(observationList);
+                    }
+                }
+
+                @Override
+                public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
+                    failFunction.apply(error.getCode());
+                    Log.e("BrAPIServiceV2", "API Exception", error);
+                }
+            };
+
+            ObservationQueryParams queryParams = new ObservationQueryParams();
+            queryParams.studyDbId(studyDbId).page(paginationManager.getPage()).pageSize(paginationManager.getPageSize());
+
+            observationsApi.observationsGetAsync(queryParams, callback);
+
+        } catch (ApiException e) {
+            Log.e("error-go", e.toString());
+            failFunction.apply(e.getCode());
+        }
+    }
+
     private Map<String, String> getExtVariableDbIdMapping() {
         List<TraitObject> traits = ObservationVariableDao.Companion.getAllTraitObjects();
         Map<String, String> externalIdToInternalMap = new HashMap<>();

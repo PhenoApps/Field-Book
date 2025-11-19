@@ -4,6 +4,7 @@ import android.content.Context
 import com.fieldbook.tracker.brapi.model.FieldBookImage
 import com.fieldbook.tracker.brapi.model.Observation
 import com.fieldbook.tracker.brapi.service.BrAPIService
+import com.fieldbook.tracker.brapi.service.BrAPIServiceV2
 import com.fieldbook.tracker.brapi.service.BrapiPaginationManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -147,15 +148,19 @@ suspend fun BrAPIService.awaitGetObservations(
 
     val allObservations = ConcurrentLinkedQueue(initialPages)
     val semaphore = Semaphore(concurrencyLimit)
-    val deferredJobs = (1 until paginationManager.totalPages).map { pageIndex ->
+
+    val pageSize = paginationManager.pageSize
+    val totalPages = paginationManager.totalPages ?: 0
+
+    val deferredJobs = (1 until totalPages).map { pageIndex ->
         async(Dispatchers.IO) {
             semaphore.withPermit {
+                val pm = BrapiPaginationManager(pageIndex, pageSize)
                 val pageResult = awaitGetSingleObservationPage(
                     brapiStudyId,
                     variableDbIds,
-                    paginationManager.also {
-                        it.setNewPage(pageIndex)
-                    })
+                    pm
+                )
                 onPageCompleted(pageIndex, pageResult)
                 allObservations.addAll(pageResult)
             }
@@ -163,7 +168,6 @@ suspend fun BrAPIService.awaitGetObservations(
     }
 
     deferredJobs.awaitAll()
-
     allObservations.toList()
 }
 
@@ -176,7 +180,7 @@ suspend fun BrAPIService.awaitGetSingleObservationPage(
     variableDbIds: List<String>,
     paginationManager: BrapiPaginationManager
 ): List<Observation> = suspendCancellableCoroutine { continuation ->
-    getObservations(
+    getObservationsByPage(
         brapiStudyId, variableDbIds, paginationManager,
         { result ->
             if (continuation.isActive) {

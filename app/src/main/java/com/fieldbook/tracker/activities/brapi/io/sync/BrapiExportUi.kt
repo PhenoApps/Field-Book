@@ -101,7 +101,7 @@ fun BrapiExportScreen(
                     IconButton(onClick = onNavigateUp) {
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_left),
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.dialog_back)
                         )
                     }
                 },
@@ -109,7 +109,7 @@ fun BrapiExportScreen(
                     IconButton(onClick = onAuthenticate) {
                         Icon(
                             painter = painterResource(R.drawable.lock_reset),
-                            contentDescription = "Authenticate"
+                            contentDescription = stringResource(R.string.authenticate)
                         )
                     }
                 }
@@ -151,7 +151,7 @@ fun BrapiExportScreen(
                             ResultsCard(
                                 inserts = uiState.downloadedInserts,
                                 updates = uiState.downloadedUpdates,
-                                label = "Downloaded"
+                                label = stringResource(R.string.downloaded)
                             )
                         }
                         if (uiState.downloadSuccessMessage != null) {
@@ -185,7 +185,7 @@ fun BrapiExportScreen(
 
             //the upload card
             InfoCard(
-                title = "Upload to BrAPI",
+                title = stringResource(R.string.upload_to_brapi),
                 icon = painterResource(R.drawable.upload)
             ) {
                 if (uiState.viewMode == ViewMode.EXPORTING) {
@@ -198,8 +198,11 @@ fun BrapiExportScreen(
                     if (uiState.uploadError != null) {
                         ResultRow(
                             when (uiState.uploadError) {
-                                "401" -> "Authentication error"
-                                else -> "BrAPI Upload error ${uiState.uploadError}"
+                                "401" -> stringResource(R.string.authentication_error)
+                                else -> stringResource(
+                                    R.string.brapi_upload_error,
+                                    uiState.uploadError
+                                )
                             },
                             painterResource(R.drawable.ic_transfer_error),
                             MaterialTheme.colorScheme.error
@@ -215,15 +218,15 @@ fun BrapiExportScreen(
                                 imageInserts = uiState.uploadImageInserts,
                                 imageEdits = uiState.uploadImageEdits,
                                 imageErrors = uiState.uploadImageFails,
-                                label = "Uploaded"
+                                label = stringResource(R.string.uploaded)
                             )
                         }
 
                         if (uiState.newObservationCount + uiState.editedObservationCount + uiState.newImageCount + uiState.editedImageCount > 0) {
-                            CountRow("New Observations", uiState.newObservationCount)
-                            CountRow("Edited Observations", uiState.editedObservationCount)
-                            CountRow("New Images", uiState.newImageCount)
-                            CountRow("Edited Images", uiState.editedImageCount)
+                            CountRow(stringResource(R.string.new_observations), uiState.newObservationCount)
+                            CountRow(stringResource(R.string.edited_observations), uiState.editedObservationCount)
+                            CountRow(stringResource(R.string.new_images), uiState.newImageCount)
+                            CountRow(stringResource(R.string.edited_images), uiState.editedImageCount)
                         }
 
                     }
@@ -234,7 +237,7 @@ fun BrapiExportScreen(
                             onCheckedChange = onImageUploadToggle
                         )
                         Spacer(Modifier.width(8.dp))
-                        Text("Include Images")
+                        Text(stringResource(R.string.include_images))
                     }
 
                     Button(
@@ -249,11 +252,11 @@ fun BrapiExportScreen(
 
             //the synced stats card
             InfoCard(
-                title = "Sync Statistics",
+                title = stringResource(R.string.sync_statistics),
                 icon = painterResource(R.drawable.ic_field_sync)
             ) {
-                CountRow("Synced Observations", uiState.syncedObservationCount)
-                CountRow("Synced Images", uiState.syncedImageCount)
+                CountRow(stringResource(R.string.synced_observations), uiState.syncedObservationCount)
+                CountRow(stringResource(R.string.synced_images), uiState.syncedImageCount)
             }
         }
     }
@@ -308,23 +311,23 @@ fun ResultsCard(
     Column {
         if (cancelReason != null) {
             ResultRow(
-                text = "Operation was cancelled: $cancelReason",
+                text = stringResource(R.string.operation_was_cancelled, cancelReason),
                 icon = painterResource(R.drawable.ic_transfer_cancelled),
                 tint = MaterialTheme.colorScheme.error
             )
         } else {
             if (inserts > 0) ResultRow(
-                text = "$inserts new ${label.lowercase()} items",
-                icon = painterResource(if (label == "Uploaded") R.drawable.upload else R.drawable.download),
+                text = stringResource(R.string.new_items, inserts, label.lowercase()),
+                icon = painterResource(if (label == stringResource(R.string.uploaded)) R.drawable.upload else R.drawable.download),
                 tint = MaterialTheme.colorScheme.primary
             )
             if (updates > 0) ResultRow(
-                text = "$updates edited items",
+                text = stringResource(R.string.edited_items, updates),
                 icon = painterResource(R.drawable.pencil),
                 tint = MaterialTheme.colorScheme.primary
             )
             if (errors > 0) ResultRow(
-                text = "$errors failed items",
+                text = stringResource(R.string.failed_items, errors),
                 icon = painterResource(R.drawable.ic_transfer_error),
                 tint = MaterialTheme.colorScheme.error
             )
@@ -346,38 +349,38 @@ fun UploadResultsCard(
     Column {
         if (cancelReason != null) {
             ResultRow(
-                text = "Operation was cancelled: $cancelReason",
+                text = stringResource(R.string.user_cancelled_operation, cancelReason),
                 icon = painterResource(R.drawable.ic_transfer_cancelled),
                 tint = MaterialTheme.colorScheme.error
             )
         } else {
             if (inserts > 0) ResultRow(
-                text = "$inserts new ${label.lowercase()} items",
+                text = stringResource(R.string.new_items, inserts, label.lowercase()),
                 icon = painterResource(R.drawable.ic_stats_observation),
                 tint = MaterialTheme.colorScheme.primary
             )
             if (updates > 0) ResultRow(
-                text = "$updates edited items",
+                text = stringResource(R.string.edited_items, updates),
                 icon = painterResource(R.drawable.pencil),
                 tint = MaterialTheme.colorScheme.primary
             )
             if (imageInserts > 0) ResultRow(
-                text = "$imageInserts new ${label.lowercase()} images",
+                text = stringResource(R.string.new_images, imageInserts, label.lowercase()),
                 icon = painterResource(R.drawable.ic_stats_photo),
                 tint = MaterialTheme.colorScheme.primary
             )
             if (imageEdits > 0) ResultRow(
-                text = "$imageEdits edited images",
+                text = stringResource(R.string.edited_images, imageEdits),
                 icon = painterResource(R.drawable.pencil),
                 tint = MaterialTheme.colorScheme.primary
             )
             if (imageErrors > 0) ResultRow(
-                text = "$imageErrors failed images",
+                text = stringResource(R.string.failed_images, imageErrors),
                 icon = painterResource(R.drawable.ic_transfer_error),
                 tint = MaterialTheme.colorScheme.error
             )
             if (errors > 0) ResultRow(
-                text = "$errors failed items",
+                text = stringResource(R.string.failed_items, errors),
                 icon = painterResource(R.drawable.ic_transfer_error),
                 tint = MaterialTheme.colorScheme.error
             )
@@ -454,7 +457,7 @@ fun ExportProgressIndicator(
             if (progressState.current == progressState.total && progressState.total > 0) {
                 Icon(
                     imageVector = Icons.Default.CheckCircle,
-                    contentDescription = "Complete",
+                    contentDescription = stringResource(R.string.complete),
                     modifier = Modifier.size(120.dp),
                     tint = MaterialTheme.colorScheme.primary
                 )
@@ -503,7 +506,7 @@ fun MergeConflictStrategy(
     onStrategyChange: (MergeStrategy) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Text("Conflict Resolution Strategy")
+    Text(stringResource(R.string.conflict_resolution_strategy))
     SingleChoiceSegmentedButtonRow(modifier = modifier) {
         listOf(
             MergeStrategy.Local, MergeStrategy.Server,
@@ -516,9 +519,9 @@ fun MergeConflictStrategy(
             ) {
                 Text(
                     when (label) {
-                        is MergeStrategy.Server -> "Server"
-                        is MergeStrategy.Local -> "Local"
-                        is MergeStrategy.MostRecent -> "Recent"
+                        is MergeStrategy.Server -> stringResource(R.string.server)
+                        is MergeStrategy.Local -> stringResource(R.string.local)
+                        is MergeStrategy.MostRecent -> stringResource(R.string.recent)
                     }
                 )
             }
