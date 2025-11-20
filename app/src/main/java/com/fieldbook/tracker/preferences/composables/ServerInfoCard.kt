@@ -42,7 +42,7 @@ fun ServerInfoCard(
                 Text(
                     text = stringResource(R.string.brapi_server_description_label, serverDescription),
                     style = AppTheme.typography.subheadingStyle,
-                    modifier = Modifier.padding(top = 8.dp)
+                    modifier = Modifier.padding(top = 4.dp)
                 )
             }
         }
