@@ -90,12 +90,12 @@ fun BrapiExportScreen(
             TopAppBar(
                 title = {
                     Text(
-                        uiState.study?.name ?: stringResource(id = R.string.brapi_export_title)
+                        stringResource(R.string.brapi_sync)
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                    titleContentColor = Color.Black
                 ),
                 navigationIcon = {
                     IconButton(onClick = onNavigateUp) {

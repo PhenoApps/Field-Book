@@ -1716,4 +1716,5 @@
     <string name="server">Server</string>
     <string name="local">Local</string>
     <string name="recent">Recent</string>
+    <string name="brapi_sync">BrAPI Sync</string>
 </resources>
