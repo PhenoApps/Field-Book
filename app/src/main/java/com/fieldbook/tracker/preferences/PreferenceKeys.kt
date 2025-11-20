@@ -55,10 +55,9 @@ class PreferenceKeys {
         const val FLIP_FLOP_ARROWS = "FLIP_FLOP_ARROWS"
         const val VOLUME_NAVIGATION = "VOLUME_NAVIGATION"
         const val RETURN_CHARACTER = "RETURN_CHARACTER"
-        const val USE_DAY_OF_YEAR = "UseDay"
 
         private val behaviorPreferenceKeys = setOf(CYCLING_TRAITS_ADVANCES, RETURN_FIRST_TRAIT, DISABLE_ENTRY_ARROW_NO_DATA,
-            FLIP_FLOP_ARROWS, VOLUME_NAVIGATION, RETURN_CHARACTER, USE_DAY_OF_YEAR)
+            FLIP_FLOP_ARROWS, VOLUME_NAVIGATION, RETURN_CHARACTER)
 
         // LOCATION
         private const val GEONAV_PREFIX = "com.fieldbook.tracker.geonav."

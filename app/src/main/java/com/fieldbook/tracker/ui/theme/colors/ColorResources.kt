@@ -87,6 +87,7 @@ object BlueThemeOverrides {
     val PrimaryTransparent = Color(0x4201A7C2)
     val TraitPercentStroke = PrimaryDark
     val TraitPercentStart = Primary
+    val TextLight = Color.White
     val IconFillTint = Color.White
     val ButtonColorPressed = Color(0xFF969696)
     val SpinnerFocused = Accent

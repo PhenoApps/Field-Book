@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import androidx.activity.OnBackPressedDispatcher
 import androidx.appcompat.app.AlertDialog
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.brapi.io.BrapiCacheModel
@@ -144,7 +143,10 @@ class BrapiTraitFilterActivity(
                     searchableTexts = model.observationVariableName?.let { listOf(it) } ?: emptyList()
                 ).also {
                     model.scale?.dataType?.name?.let { dataType ->
-                        Formats.findTrait(DataTypes.convertBrAPIDataType(dataType))?.iconDrawableResourceId?.let { icon ->
+                        val convertedType = DataTypes.convertBrAPIDataType(dataType)
+                        val finalTraitFormat = if (convertedType == "multicat") "categorical" else convertedType
+
+                        Formats.findTrait(finalTraitFormat)?.iconDrawableResourceId?.let { icon ->
                             it.iconResId = icon
                         }
                     }

@@ -6,12 +6,9 @@ import android.util.AttributeSet
 import android.widget.EditText
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.database.models.ObservationModel
-import com.fieldbook.tracker.preferences.GeneralKeys
-import com.fieldbook.tracker.preferences.PreferenceKeys
 
 /**
  * View that contains the default fb edit text and the repeated values view feature.
@@ -29,10 +26,6 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
     private val originalEditText: EditText
 
     val repeatView: RepeatedValuesView
-
-    //get the current mode from settings
-    private val repeatModeFlag = PreferenceManager.getDefaultSharedPreferences(context)
-        .getBoolean(PreferenceKeys.REPEATED_VALUES_PREFERENCE_KEY, false)
 
     init {
 
@@ -108,7 +101,21 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
             } else editText.setText(value)
         }
 
-    fun isRepeatEnabled() = repeatModeFlag
+    fun isRepeatEnabled() = (context as? CollectActivity)?.currentTrait?.repeatedMeasures == true
+
+    /**
+     * Updates visibility of views based on current trait's repeatedMeasures
+     */
+    fun updateInputViewVisibility(visibility: Int) {
+        if (isRepeatEnabled()) {
+            repeatView.visibility = visibility
+            originalEditText.visibility = GONE
+        } else {
+            repeatView.visibility = GONE
+            originalEditText.visibility = visibility
+            originalEditText.hint = ""
+        }
+    }
 
     /**
      * Set Text Color

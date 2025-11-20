@@ -6,6 +6,7 @@ import com.fieldbook.tracker.views.CollectInputView
 
 interface CollectTraitController: CollectController {
     fun validateData(data: String?): Boolean
+    fun navigateIfDataIsValid(data: String?, onValidNavigation: () -> Unit)
     fun getTraitLayouts(): LayoutCollections
     fun isCyclingTraitsAdvances(): Boolean
     fun refreshLock()
