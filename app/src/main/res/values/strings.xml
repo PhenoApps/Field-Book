@@ -1694,7 +1694,7 @@
     <string name="no_fields_to_process">No fields to process.</string>
     <string name="authenticate">Authenticate</string>
     <string name="downloaded">Downloaded</string>
-    <string name="upload_to_brapi">Upload to BrAPI</string>
+    <string name="upload_to_brapi">Upload to %1$s</string>
     <string name="authentication_error">Authentication error</string>
     <string name="brapi_upload_error">BrAPI Upload error %1$s</string>
     <string name="uploaded">Uploaded</string>
@@ -1703,6 +1703,7 @@
     <string name="new_images">New Images</string>
     <string name="edited_images">Edited Images</string>
     <string name="include_images">Include Images</string>
+    <string name="no_observations_to_upload">No observations to upload</string>
     <string name="sync_statistics">Sync Statistics</string>
     <string name="synced_observations">Synced Observations</string>
     <string name="synced_images">Synced Images</string>
@@ -1717,4 +1718,11 @@
     <string name="local">Local</string>
     <string name="recent">Recent</string>
     <string name="brapi_sync">BrAPI Sync</string>
+    <string name="download_from">Download from %1$s</string>
+    <string name="last_checked">Last checked: %1$s</string>
+    <string name="brapi_conflicts_found">Found %1$d conflicting observations. Choose a merge strategy:</string>
+    <string name="manual">Manual</string>
+    <string name="select_all_local">Select all (local)</string>
+    <string name="select_all_server">Select all (server)</string>
+    <string name="toggle">Toggle</string>
 </resources>

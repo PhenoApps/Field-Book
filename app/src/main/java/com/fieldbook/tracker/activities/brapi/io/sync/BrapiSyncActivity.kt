@@ -11,8 +11,8 @@ import androidx.media3.common.util.Log
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.ThemedActivity
 import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity
-import com.fieldbook.tracker.activities.brapi.io.sync.BrapiSyncActivity.Companion.FIELD_IDS
 import com.fieldbook.tracker.brapi.service.BrAPIService
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.Utils
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -61,6 +61,10 @@ class BrapiSyncActivity : ThemedActivity() {
             viewModel.initialize(id)
         }
 
+        val brapiDisplayName = prefs.getString(PreferenceKeys.BRAPI_DISPLAY_NAME, "BrAPI") ?: "BrAPI"
+
+        viewModel.setServerDisplayName(brapiDisplayName)
+
         composeView.setContent {
 
             FieldBookTheme {
@@ -93,10 +97,18 @@ class BrapiSyncActivity : ThemedActivity() {
                     onAuthenticate = {
                         viewModel.cancelActiveJob()
                         startActivity(Intent(this, BrapiAuthActivity::class.java))
-                        viewModel.resetClient()
                     },
                     onMergeStrategyChange = {
+                        // Record the chosen strategy for UI state and immediately apply resolution to pending conflicts
                         viewModel.setMergeStrategy(it)
+                        viewModel.applyConflictResolution(it)
+                    },
+                    // persist last-checked timestamps via ViewModel helper methods
+                    onPersistLastCheckedUpload = { text -> viewModel.persistLastCheckedUpload(text) },
+                    onPersistLastCheckedDownload = { text -> viewModel.persistLastCheckedDownload(text) },
+                    onApplyManualChoices = { choices ->
+                        viewModel.setMergeStrategy(MergeStrategy.Manual)
+                        viewModel.applyConflictResolution(MergeStrategy.Manual, choices)
                     }
                 )
             }
@@ -104,6 +116,13 @@ class BrapiSyncActivity : ThemedActivity() {
 
         onBackPressedDispatcher.addCallback(this, standardBackCallback())
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // When returning from the authentication flow, refresh the BrAPI client inside the ViewModel
+        // so any newly obtained credentials are used immediately.
+        viewModel.resetClient()
     }
 
     private fun validatePrerequisites(fieldIds: ArrayList<Int>?): Boolean {

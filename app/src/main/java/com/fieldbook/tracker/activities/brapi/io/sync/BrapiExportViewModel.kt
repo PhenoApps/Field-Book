@@ -30,7 +30,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
@@ -39,6 +38,9 @@ import java.util.Calendar
 import java.util.Locale
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
+import kotlin.collections.isNotEmpty
+import kotlin.collections.map
+import androidx.core.content.edit
 
 @HiltViewModel
 class BrapiExportViewModel @Inject constructor(
@@ -59,6 +61,9 @@ class BrapiExportViewModel @Inject constructor(
     private var editedImageObservations: List<Observation> = emptyList()
     private var incompleteImageObservations: List<Observation> = emptyList()
 
+    // Conflicts detected during last download that need user resolution
+    private var pendingConflicts: List<Pair<Observation, Observation?>> = emptyList()
+
     private var activeJob: Job? = null
 
     companion object {
@@ -74,6 +79,8 @@ class BrapiExportViewModel @Inject constructor(
         )
     }
 
+    data class Conflict(val serverObservation: Observation, val localObservation: Observation)
+
     enum class UploadError {
         NONE,
         MISSING_OBSERVATION_IN_RESPONSE,
@@ -83,6 +90,14 @@ class BrapiExportViewModel @Inject constructor(
         API_UNAUTHORIZED_ERROR,
         API_NOT_SUPPORTED_ERROR,
         API_PERMISSION_ERROR
+    }
+
+    fun setServerDisplayName(name: String) {
+        _uiState.update {
+            it.copy(
+                brapiServerDisplayName = name
+            )
+        }
     }
 
     fun resetClient() {
@@ -95,6 +110,30 @@ class BrapiExportViewModel @Inject constructor(
                 downloadMergeStrategy = newStrategy
             )
         }
+    }
+
+    // Load persisted last-checked values from SharedPreferences into the UI state
+    private fun loadLastCheckedFromPrefs() {
+        val lastUpload = preferences.getString(PreferenceKeys.BRAPI_LAST_CHECKED_UPLOAD, null)
+        val lastDownload = preferences.getString(PreferenceKeys.BRAPI_LAST_CHECKED_DOWNLOAD, null)
+        _uiState.update {
+            it.copy(
+                lastCheckedUploadText = lastUpload,
+                lastCheckedDownloadText = lastDownload
+            )
+        }
+    }
+
+    // Persist the given last-checked upload text
+    fun persistLastCheckedUpload(text: String?) {
+        preferences.edit { putString(PreferenceKeys.BRAPI_LAST_CHECKED_UPLOAD, text) }
+        _uiState.update { it.copy(lastCheckedUploadText = text) }
+    }
+
+    // Persist the given last-checked download text
+    fun persistLastCheckedDownload(text: String?) {
+        preferences.edit { putString(PreferenceKeys.BRAPI_LAST_CHECKED_DOWNLOAD, text) }
+        _uiState.update { it.copy(lastCheckedDownloadText = text) }
     }
 
     fun refreshLocalStatus() {
@@ -147,6 +186,8 @@ class BrapiExportViewModel @Inject constructor(
             }
 
             refreshLocalStatus()
+            // load persisted last-checked timestamps into state
+            loadLastCheckedFromPrefs()
 
         }
     }
@@ -317,11 +358,15 @@ class BrapiExportViewModel @Inject constructor(
 
                         Log.d(TAG, "Download flow completed with cause: $cause")
 
+                        // record last checked time for download
+                        val checkedDownloadText = timestamp.format(calendar.getTime())
+
                         _uiState.update {
                             it.copy(
                                 viewMode = ViewMode.IDLE,
                                 isDownloadFinished = true,
-                                downloadError = if (cause == null) "" else cause.message
+                                downloadError = if (cause == null) "" else cause.message,
+                                lastCheckedDownloadText = checkedDownloadText
 
                             )
                         }
@@ -361,7 +406,7 @@ class BrapiExportViewModel @Inject constructor(
 
                                 Log.d(TAG, "Data size: ${update.data.size}")
 
-                                val (inserts, updates, _) = resolveObservationStatus(update.data)
+                                val (inserts, updates, conflicts) = resolveObservationStatus(update.data)
 
                                 Log.d(TAG, "Saving ${inserts.size} new observations")
 
@@ -389,18 +434,32 @@ class BrapiExportViewModel @Inject constructor(
 
                                 dataHelper.updateObservationsByBrapiId(updates)
 
-                                _uiState.update {
-                                    it.copy(
-                                        viewMode = ViewMode.IDLE,
-                                        isDownloadFinished = true,
-                                        downloadedInserts = inserts.size,
-                                        downloadedUpdates = updates.size,
-                                        downloadError = if (inserts.isEmpty() && updates.isEmpty()) {
-                                            context.getString(R.string.no_new_or_updated_observations_found)
-                                        } else {
-                                            ""
-                                        }
-                                    )
+                                if (conflicts.isNotEmpty()) {
+                                    // store pending conflicts and notify UI to prompt user
+                                    setPendingConflicts(conflicts)
+                                    _uiState.update {
+                                        it.copy(
+                                            viewMode = ViewMode.IDLE,
+                                            isDownloadFinished = true,
+                                            downloadedInserts = inserts.size,
+                                            downloadedUpdates = updates.size,
+                                            downloadError = "",
+                                        )
+                                    }
+                                } else {
+                                    _uiState.update {
+                                        it.copy(
+                                            viewMode = ViewMode.IDLE,
+                                            isDownloadFinished = true,
+                                            downloadedInserts = inserts.size,
+                                            downloadedUpdates = updates.size,
+                                            downloadError = if (inserts.isEmpty() && updates.isEmpty()) {
+                                                context.getString(R.string.no_new_or_updated_observations_found)
+                                            } else {
+                                                ""
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -450,11 +509,11 @@ class BrapiExportViewModel @Inject constructor(
      *         - second: a list of obs from brapi that can be updated in fieldbook
      *         - third: a list of obs that have conflicting edits (local is newer), and should be pushed
      */
-    private fun resolveObservationStatus(brapiObservations: List<Observation>): Triple<List<Observation>, List<Observation>, List<Observation>> {
+    private fun resolveObservationStatus(brapiObservations: List<Observation>): Triple<List<Observation>, List<Observation>, List<Conflict>> {
 
         val insertObservations = mutableListOf<Observation>()
         val updateObservations = mutableListOf<Observation>()
-        val pushObservations = mutableListOf<Observation>()
+        val conflicts = mutableListOf<Conflict>()
 
         brapiObservations.forEach { brapiObs ->
 
@@ -465,26 +524,10 @@ class BrapiExportViewModel @Inject constructor(
                 it.dbId == brapiObs.dbId
             }
 
-            if (localEdited != null) {
-                //there is a conflict, local observation was edited more recently than the server's version
-                //server data is stale compared to our local edit
-                when (uiState.value.downloadMergeStrategy) {
-                    is MergeStrategy.Local -> {
-                        pushObservations.add(localEdited)
-                    }
-
-                    is MergeStrategy.Server -> {
-                        updateObservations.add(brapiObs)
-                    }
-
-                    is MergeStrategy.MostRecent -> {
-                        if (localEdited.timestamp > brapiObs.timestamp) {
-                            pushObservations.add(localEdited)
-                        } else {
-                            updateObservations.add(brapiObs)
-                        }
-                    }
-                }
+            if (localEdited != null && localEdited.value != brapiObs.value) {
+                // Conflict between local edited and server version: record for user resolution
+                val conflict = Conflict(serverObservation = brapiObs, localObservation = localEdited)
+                conflicts.add(conflict)
                 return@forEach
             }
 
@@ -498,28 +541,81 @@ class BrapiExportViewModel @Inject constructor(
 
             } else { //already exists but check if there has been an update
 
-                when (uiState.value.downloadMergeStrategy) {
-                    is MergeStrategy.Local -> {
-                        pushObservations.add(localNew)
-                    }
+                // If timestamps differ between server and local record, it's a conflict to resolve
+                if (localNew.value != brapiObs.value) {
+                    conflicts.add(Conflict(serverObservation = brapiObs, localObservation = localNew))
+                }
+            }
+        }
 
-                    is MergeStrategy.Server -> {
-                        updateObservations.add(brapiObs)
-                    }
+        return Triple(insertObservations, updateObservations, conflicts)
+    }
 
-                    is MergeStrategy.MostRecent -> {
-                        if (localNew.timestamp > brapiObs.timestamp) {
-                            pushObservations.add(localNew)
-                        } else {
-                            updateObservations.add(brapiObs)
-                        }
+    // Store pending conflicts for UI to resolve
+    private fun setPendingConflicts(conflicts: List<Conflict>) {
+        pendingConflicts = conflicts.map { Pair(it.serverObservation, it.localObservation) }
+
+        val uiConflicts = conflicts.map { c ->
+            PendingConflictUi(
+                brapiId = c.serverObservation.dbId ?: c.localObservation.dbId ?: "",
+                localValue = c.localObservation.value ?: "",
+                serverValue = c.serverObservation.value ?: "",
+                localDbId = c.localObservation.dbId,
+                serverDbId = c.serverObservation.dbId
+            )
+        }
+        _uiState.update { it.copy(pendingConflictsCount = uiConflicts.size, pendingConflicts = uiConflicts) }
+    }
+
+    /**
+     * Apply a user-selected merge strategy to pending conflicts and persist results.
+     * Supports Manual strategy where a map of brapiId->choice is provided (true=server, false=local).
+     */
+    fun applyConflictResolution(strategy: MergeStrategy, manualChoices: Map<String, Boolean>? = null) {
+        if (pendingConflicts.isEmpty()) return
+
+        val toUpdateFromServer = mutableListOf<Observation>()
+        val toKeepLocal = mutableListOf<Observation>()
+
+        when (strategy) {
+            is MergeStrategy.Local -> {
+                pendingConflicts.forEach { (_, local) -> local?.let { toKeepLocal.add(it) } }
+            }
+
+            is MergeStrategy.Server -> {
+                pendingConflicts.forEach { (server, _) -> toUpdateFromServer.add(server) }
+            }
+
+            is MergeStrategy.MostRecent -> {
+                pendingConflicts.forEach { (server, local) ->
+                    if (local != null && local.timestamp > server.timestamp) toKeepLocal.add(local) else toUpdateFromServer.add(server)
+                }
+            }
+
+            is MergeStrategy.Manual -> {
+                // manualChoices: map from brapiId to true (choose server) or false (choose local)
+                if (manualChoices == null) return
+                Log.d(TAG, "Applying manual conflict resolution with choices: ${manualChoices.keys.size} entries")
+                pendingConflicts.forEach { (server, local) ->
+                    val id = server.dbId ?: local?.dbId
+                    if (id == null) return@forEach
+                    if (manualChoices[id] == true) {
+                        toUpdateFromServer.add(server)
+                    } else {
+                        local?.let { toKeepLocal.add(it) }
                     }
                 }
             }
         }
 
-        return Triple(insertObservations, updateObservations, pushObservations)
+        if (toUpdateFromServer.isNotEmpty()) dataHelper.updateObservationsByBrapiId(toUpdateFromServer)
+
+        // clear and update ui state
+        pendingConflicts = emptyList()
+        _uiState.update { it.copy(pendingConflictsCount = 0, pendingConflicts = emptyList()) }
+        refreshLocalStatus()
     }
+
 
     /**
      * New Observations are saved in chunks, when returning from BrAPI they are updated in the local FB
@@ -657,10 +753,13 @@ class BrapiExportViewModel @Inject constructor(
 
         processor(observations)
             .onCompletion { cause ->
+                // record last checked time for upload
+                val checkedUploadText = timestamp.format(calendar.getTime())
                 _uiState.update {
                     it.copy(
                         viewMode = ViewMode.IDLE,
                         isUploadFinished = true,
+                        lastCheckedUploadText = checkedUploadText
                     )
                 }
 

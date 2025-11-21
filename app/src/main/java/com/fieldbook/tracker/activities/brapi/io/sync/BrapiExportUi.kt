@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.activities.brapi.io.sync
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,11 +13,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -24,16 +29,17 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,7 +50,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
 
@@ -84,7 +90,21 @@ fun BrapiExportScreen(
     onNavigateUp: () -> Unit,
     onAuthenticate: () -> Unit,
     onMergeStrategyChange: (MergeStrategy) -> Unit,
+    onPersistLastCheckedUpload: (String) -> Unit = {},
+    onPersistLastCheckedDownload: (String) -> Unit = {},
+    onApplyManualChoices: (Map<String, Boolean>) -> Unit = {},
 ) {
+    // Local UI state to allow the user to temporarily dismiss the conflict-resolution prompt
+    var suppressConflictDialog by remember { mutableStateOf(false) }
+
+    // When the UI state reports a new last-checked text, persist it via the provided callbacks
+    LaunchedEffect(uiState.lastCheckedUploadText) {
+        uiState.lastCheckedUploadText?.let { onPersistLastCheckedUpload(it) }
+    }
+    LaunchedEffect(uiState.lastCheckedDownloadText) {
+        uiState.lastCheckedDownloadText?.let { onPersistLastCheckedDownload(it) }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -101,7 +121,8 @@ fun BrapiExportScreen(
                     IconButton(onClick = onNavigateUp) {
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_left),
-                            contentDescription = stringResource(R.string.dialog_back)
+                            contentDescription = stringResource(R.string.dialog_back),
+                            tint = Color.Black
                         )
                     }
                 },
@@ -109,7 +130,8 @@ fun BrapiExportScreen(
                     IconButton(onClick = onAuthenticate) {
                         Icon(
                             painter = painterResource(R.drawable.lock_reset),
-                            contentDescription = stringResource(R.string.authenticate)
+                            contentDescription = stringResource(R.string.authenticate),
+                            tint = Color.Black
                         )
                     }
                 }
@@ -122,13 +144,26 @@ fun BrapiExportScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
+            // top card: study name + statistics
+            InfoCard(
+                title = uiState.study?.name ?: stringResource(R.string.brapi_sync),
+                icon = painterResource(R.drawable.ic_field_sync)
+            ) {
+                // show synced counts in the top card
+                CountRow(
+                    stringResource(R.string.synced_observations),
+                    uiState.syncedObservationCount
+                )
+                CountRow(stringResource(R.string.synced_images), uiState.syncedImageCount)
+            }
+
             //the download card
             InfoCard(
-                title = "Download from BrAPI",
+                title = stringResource(R.string.download_from, uiState.brapiServerDisplayName),
                 icon = painterResource(R.drawable.download)
             ) {
                 when (uiState.viewMode) {
@@ -158,7 +193,7 @@ fun BrapiExportScreen(
                             ResultRow(
                                 uiState.downloadSuccessMessage,
                                 painterResource(R.drawable.ic_check_bold),
-                                MaterialTheme.colorScheme.primary
+                                Color.Black
                             )
                         }
                         if (uiState.downloadError != null && uiState.downloadError.isNotEmpty()) {
@@ -168,10 +203,81 @@ fun BrapiExportScreen(
                                 MaterialTheme.colorScheme.error
                             )
                         }
-                        MergeConflictStrategy(
-                            selectedStrategy = uiState.downloadMergeStrategy,
-                            onStrategyChange = onMergeStrategyChange
-                        )
+                        // If the ViewModel reported pending conflicts, prompt the user to choose a merge strategy.
+                        if (uiState.pendingConflictsCount > 0 && !suppressConflictDialog) {
+                            var selectedStrategy by remember { mutableStateOf(uiState.downloadMergeStrategy) }
+                            // initialize selection map for manual mode
+                            val selectionMap = remember { mutableStateMapOf<String, Boolean>() }
+                            uiState.pendingConflicts.forEach { c ->
+                                if (!selectionMap.containsKey(c.brapiId)) selectionMap[c.brapiId] =
+                                    true
+                            }
+
+                            androidx.compose.material3.AlertDialog(
+                                onDismissRequest = { suppressConflictDialog = true },
+                                confirmButton = {
+                                    TextButton(onClick = {
+                                        if (selectedStrategy is MergeStrategy.Manual) {
+                                            onApplyManualChoices(selectionMap.toMap())
+                                        } else {
+                                            onMergeStrategyChange(selectedStrategy)
+                                        }
+                                        suppressConflictDialog = true
+                                    }) {
+                                        Text(stringResource(R.string.dialog_ok))
+                                    }
+                                },
+                                dismissButton = {
+                                    TextButton(onClick = { suppressConflictDialog = true }) {
+                                        Text(stringResource(R.string.dialog_cancel))
+                                    }
+                                },
+                                title = { Text(stringResource(R.string.conflict_resolution_strategy)) },
+                                text = {
+                                    Column {
+                                        Text(
+                                            stringResource(
+                                                R.string.brapi_conflicts_found,
+                                                uiState.pendingConflictsCount
+                                            )
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        MergeConflictStrategy(
+                                            selectedStrategy = selectedStrategy,
+                                            onStrategyChange = { new -> selectedStrategy = new }
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        if (selectedStrategy is MergeStrategy.Manual) {
+                                            PendingConflictsList(
+                                                conflicts = uiState.pendingConflicts,
+                                                selectionMap = selectionMap,
+                                                onToggleAllServer = {
+                                                    uiState.pendingConflicts.forEach {
+                                                        selectionMap[it.brapiId] = true
+                                                    }
+                                                },
+                                                onToggleAllLocal = {
+                                                    uiState.pendingConflicts.forEach {
+                                                        selectionMap[it.brapiId] = false
+                                                    }
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                            )
+                        }
+                        // Show last-checked text for download if available (appears above the download button)
+                        if (uiState.lastCheckedDownloadText != null) {
+                            Text(
+                                text = stringResource(
+                                    R.string.last_checked,
+                                    uiState.lastCheckedDownloadText
+                                ),
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                        }
                         Button(
                             onClick = onDownloadClick,
                             modifier = Modifier.fillMaxWidth(),
@@ -185,9 +291,16 @@ fun BrapiExportScreen(
 
             //the upload card
             InfoCard(
-                title = stringResource(R.string.upload_to_brapi),
+                title = stringResource(R.string.upload_to_brapi, uiState.brapiServerDisplayName),
                 icon = painterResource(R.drawable.upload)
             ) {
+
+                // Determine if there are observations or images to upload
+                val totalObservations =
+                    uiState.newObservationCount + uiState.editedObservationCount
+                val totalImages = uiState.newImageCount + uiState.editedImageCount
+                val hasObservationsToUpload = (totalObservations + totalImages) > 0
+
                 if (uiState.viewMode == ViewMode.EXPORTING) {
                     ExportProgressIndicator(uiState.progress, Modifier.fillMaxWidth())
                     Button(onClick = onCancelExportClick, modifier = Modifier.fillMaxWidth()) {
@@ -223,15 +336,33 @@ fun BrapiExportScreen(
                         }
 
                         if (uiState.newObservationCount + uiState.editedObservationCount + uiState.newImageCount + uiState.editedImageCount > 0) {
-                            CountRow(stringResource(R.string.new_observations), uiState.newObservationCount)
-                            CountRow(stringResource(R.string.edited_observations), uiState.editedObservationCount)
+                            CountRow(
+                                stringResource(R.string.new_observations),
+                                uiState.newObservationCount
+                            )
+                            CountRow(
+                                stringResource(R.string.edited_observations),
+                                uiState.editedObservationCount
+                            )
                             CountRow(stringResource(R.string.new_images), uiState.newImageCount)
-                            CountRow(stringResource(R.string.edited_images), uiState.editedImageCount)
+                            CountRow(
+                                stringResource(R.string.edited_images),
+                                uiState.editedImageCount
+                            )
                         }
 
                     }
 
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (!hasObservationsToUpload) {
+                        Text(
+                            text = stringResource(R.string.no_observations_to_upload),
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                    }
+
+                    // Show include images toggle only when there are images available to upload
+                    if (totalImages > 0) {
                         Switch(
                             checked = uiState.uploadImages,
                             onCheckedChange = onImageUploadToggle
@@ -239,7 +370,19 @@ fun BrapiExportScreen(
                         Spacer(Modifier.width(8.dp))
                         Text(stringResource(R.string.include_images))
                     }
+                }
 
+                // Show last-checked text for upload if available (appears above the upload button)
+                if (uiState.lastCheckedUploadText != null) {
+                    Text(
+                        text = stringResource(R.string.last_checked, uiState.lastCheckedUploadText),
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+
+                // Show upload button only when there are observations/images to upload
+                if (hasObservationsToUpload) {
                     Button(
                         onClick = onExportClick,
                         modifier = Modifier.fillMaxWidth(),
@@ -248,15 +391,6 @@ fun BrapiExportScreen(
                         Text(stringResource(R.string.brapi_upload_button))
                     }
                 }
-            }
-
-            //the synced stats card
-            InfoCard(
-                title = stringResource(R.string.sync_statistics),
-                icon = painterResource(R.drawable.ic_field_sync)
-            ) {
-                CountRow(stringResource(R.string.synced_observations), uiState.syncedObservationCount)
-                CountRow(stringResource(R.string.synced_images), uiState.syncedImageCount)
             }
         }
     }
@@ -281,7 +415,7 @@ fun InfoCard(
                     painter = icon,
                     contentDescription = null,
                     modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = Color.Black
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
@@ -319,12 +453,12 @@ fun ResultsCard(
             if (inserts > 0) ResultRow(
                 text = stringResource(R.string.new_items, inserts, label.lowercase()),
                 icon = painterResource(if (label == stringResource(R.string.uploaded)) R.drawable.upload else R.drawable.download),
-                tint = MaterialTheme.colorScheme.primary
+                tint = Color.Black
             )
             if (updates > 0) ResultRow(
                 text = stringResource(R.string.edited_items, updates),
                 icon = painterResource(R.drawable.pencil),
-                tint = MaterialTheme.colorScheme.primary
+                tint = Color.Black
             )
             if (errors > 0) ResultRow(
                 text = stringResource(R.string.failed_items, errors),
@@ -357,22 +491,22 @@ fun UploadResultsCard(
             if (inserts > 0) ResultRow(
                 text = stringResource(R.string.new_items, inserts, label.lowercase()),
                 icon = painterResource(R.drawable.ic_stats_observation),
-                tint = MaterialTheme.colorScheme.primary
+                tint = Color.Black
             )
             if (updates > 0) ResultRow(
                 text = stringResource(R.string.edited_items, updates),
                 icon = painterResource(R.drawable.pencil),
-                tint = MaterialTheme.colorScheme.primary
+                tint = Color.Black
             )
             if (imageInserts > 0) ResultRow(
                 text = stringResource(R.string.new_images, imageInserts, label.lowercase()),
                 icon = painterResource(R.drawable.ic_stats_photo),
-                tint = MaterialTheme.colorScheme.primary
+                tint = Color.Black
             )
             if (imageEdits > 0) ResultRow(
                 text = stringResource(R.string.edited_images, imageEdits),
                 icon = painterResource(R.drawable.pencil),
-                tint = MaterialTheme.colorScheme.primary
+                tint = Color.Black
             )
             if (imageErrors > 0) ResultRow(
                 text = stringResource(R.string.failed_images, imageErrors),
@@ -459,7 +593,7 @@ fun ExportProgressIndicator(
                     imageVector = Icons.Default.CheckCircle,
                     contentDescription = stringResource(R.string.complete),
                     modifier = Modifier.size(120.dp),
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = Color.Black
                 )
             } else {
                 CircularProgressIndicator(
@@ -506,101 +640,160 @@ fun MergeConflictStrategy(
     onStrategyChange: (MergeStrategy) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Text(stringResource(R.string.conflict_resolution_strategy))
-    SingleChoiceSegmentedButtonRow(modifier = modifier) {
-        listOf(
-            MergeStrategy.Local, MergeStrategy.Server,
-            MergeStrategy.MostRecent
-        ).forEachIndexed { index, label ->
-            SegmentedButton(
-                selected = (label == selectedStrategy),
-                onClick = { onStrategyChange(label) },
-                shape = SegmentedButtonDefaults.itemShape(index = index, count = 3)
-            ) {
-                Text(
-                    when (label) {
-                        is MergeStrategy.Server -> stringResource(R.string.server)
-                        is MergeStrategy.Local -> stringResource(R.string.local)
-                        is MergeStrategy.MostRecent -> stringResource(R.string.recent)
-                    }
-                )
+    val options = listOf(
+        MergeStrategy.Local,
+        MergeStrategy.Server,
+        MergeStrategy.MostRecent,
+        MergeStrategy.Manual
+    )
+    val labels = options.map { opt ->
+        when (opt) {
+            is MergeStrategy.Local -> stringResource(R.string.local)
+            is MergeStrategy.Server -> stringResource(R.string.server)
+            is MergeStrategy.MostRecent -> stringResource(R.string.recent)
+            is MergeStrategy.Manual -> stringResource(R.string.manual)
+        }
+    }
+
+    // two rows layout: split options to avoid text wrapping, a bit complicated, but easier to add more options later
+    val splitAt = (options.size + 1) / 2
+    val firstRow = options.subList(0, splitAt)
+    val secondRow = options.subList(splitAt, options.size)
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        Row(horizontalArrangement = Arrangement.Start, modifier = Modifier.fillMaxWidth()) {
+            firstRow.forEachIndexed { index, opt ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { onStrategyChange(opt) }
+                ) {
+                    RadioButton(
+                        selected = (opt == selectedStrategy),
+                        onClick = { onStrategyChange(opt) })
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = labels[index], maxLines = 1)
+                }
+            }
+        }
+
+        Row(horizontalArrangement = Arrangement.Start, modifier = Modifier.fillMaxWidth()) {
+            secondRow.forEachIndexed { index, opt ->
+                // index offset for label lookup
+                val label = labels[splitAt + index]
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { onStrategyChange(opt) }
+                ) {
+                    RadioButton(
+                        selected = (opt == selectedStrategy),
+                        onClick = { onStrategyChange(opt) })
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = label, maxLines = 1)
+                }
             }
         }
     }
 }
 
-@Preview
 @Composable
-fun MergeConflictStrategyPreview() {
-    var selected: MergeStrategy by remember { mutableStateOf(MergeStrategy.Local) }
-    FieldBookTheme {
-        MergeConflictStrategy(
-            selectedStrategy = selected,
-            onStrategyChange = { newStrategy -> selected = newStrategy }
-        )
-    }
-}
+fun PendingConflictsList(
+    conflicts: List<PendingConflictUi>,
+    selectionMap: MutableMap<String, Boolean>,
+    onToggleAllServer: () -> Unit,
+    onToggleAllLocal: () -> Unit
+) {
+    Column {
+        // Global toggle label + buttons
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Text(stringResource(R.string.toggle))
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(onClick = onToggleAllServer) { Text(stringResource(R.string.server)) }
+            Spacer(Modifier.width(8.dp))
+            Button(onClick = onToggleAllLocal) { Text(stringResource(R.string.local)) }
+        }
 
-@Preview
-@Composable
-fun ExportProgressIndicatorPreview() {
-    val progressState = Progress(
-        message = "Uploading file 5 of 10...", current = 4, total = 10
-    )
-    ExportProgressIndicator(progressState = progressState)
-}
+        LazyColumn(modifier = Modifier.height(240.dp)) {
+            itemsIndexed(conflicts) { _, c ->
+                val id = c.brapiId
+                val chooseServer = selectionMap[id] ?: true
 
-@Preview
-@Composable
-fun CountRowPreview() {
-    CountRow(label = "New Observations", count = 15)
-}
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 6.dp, horizontal = 4.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        // Top row: Server button left, Local button right
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Button(
+                                onClick = { selectionMap[id] = true },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (chooseServer) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                                    contentColor = if (chooseServer) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                                )
+                            ) {
+                                Text(stringResource(R.string.server))
+                            }
 
-@Preview
-@Composable
-fun ResultsCardPreview() {
-    ResultsCard(inserts = 5, updates = 3, errors = 1, label = "Downloaded")
-}
+                            Spacer(modifier = Modifier.weight(1f))
 
-@Preview
-@Composable
-fun BrapiExportScreenPreview() {
-    val uiState = BrapiExportUiState(
-        progress = Progress(
-            message = "Uploading file 5 of 10...", current = 4, total = 10
-        ),
-        isInitialized = true,
-        study = null,
-        viewMode = ViewMode.IDLE,
-        newObservationCount = 10,
-        editedObservationCount = 5,
-        newImageCount = 2,
-        editedImageCount = 1,
-        syncedObservationCount = 100,
-        syncedImageCount = 50,
-    )
+                            Button(
+                                onClick = { selectionMap[id] = false },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (!chooseServer) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                                    contentColor = if (!chooseServer) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                                ),
+                                modifier = Modifier
+                                    .wrapContentWidth(Alignment.End)
+                            ) {
+                                Text(stringResource(R.string.local))
+                            }
+                        }
 
-    FieldBookTheme {
-        BrapiExportScreen(
-            uiState = uiState,
-            onDownloadClick = {},
-            onMergeStrategyChange = {},
-            onCancelDownloadClick = {},
-            onExportClick = {},
-            onCancelExportClick = {},
-            onImageUploadToggle = {},
-            onNavigateUp = {},
-            onAuthenticate = {})
-    }
-}
+                        Spacer(modifier = Modifier.height(8.dp))
 
-@Preview
-@Composable
-fun InfoCardPreview() {
-    InfoCard(
-        title = "Sample Card Title",
-        icon = painterResource(id = R.drawable.ic_field_sync)
-    ) {
-        Text("This is the content of the card.")
+                        // brapi id row (left-justified)
+                        Text(
+                            text = id,
+                            style = MaterialTheme.typography.titleSmall,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // Full-width row with two equal halves: local value | server value
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            Column(modifier = Modifier
+                                .weight(1f)
+                                .padding(start = 8.dp)) {
+                                Text(
+                                    text = c.serverValue,
+                                    maxLines = 4,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                            Column(modifier = Modifier
+                                .weight(1f)
+                                .padding(end = 8.dp)) {
+                                Text(
+                                    text = c.localValue,
+                                    maxLines = 4,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

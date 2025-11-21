@@ -18,7 +18,19 @@ sealed class MergeStrategy {
     object Local : MergeStrategy()
     object Server : MergeStrategy()
     object MostRecent : MergeStrategy()
+    object Manual : MergeStrategy()
 }
+
+/**
+ * UI-friendly representation of a single conflicting observation pair
+ */
+data class PendingConflictUi(
+    val brapiId: String,
+    val localValue: String,
+    val serverValue: String,
+    val localDbId: String?,
+    val serverDbId: String?
+)
 
 data class Progress(
     val message: String = "",
@@ -29,6 +41,8 @@ data class Progress(
 }
 
 data class BrapiExportUiState(
+
+    val brapiServerDisplayName: String = "BrAPI",
 
     val isInitialized: Boolean = false,
     val study: FieldObject? = null,
@@ -70,6 +84,14 @@ data class BrapiExportUiState(
     val uploadImageInserts: Int = 0,
     val uploadImageEdits: Int = 0,
     val uploadImageFails: Int = 0,
+
+    // Optional text to show when the download/upload buttons were last checked
+    val lastCheckedDownloadText: String? = null,
+    val lastCheckedUploadText: String? = null,
+    // Number of conflicts detected during last download that require user resolution
+    val pendingConflictsCount: Int = 0,
+    // Detailed pending conflicts for UI display (server/local pairs)
+    val pendingConflicts: List<PendingConflictUi> = emptyList(),
 )
 
 enum class ViewMode {
