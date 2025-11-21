@@ -43,7 +43,7 @@ import kotlin.collections.map
 import androidx.core.content.edit
 
 @HiltViewModel
-class BrapiExportViewModel @Inject constructor(
+class BrapiSyncViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
 

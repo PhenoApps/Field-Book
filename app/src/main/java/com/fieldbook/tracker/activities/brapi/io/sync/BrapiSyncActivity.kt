@@ -21,7 +21,7 @@ import dagger.hilt.android.AndroidEntryPoint
  *
  * This activity is responsible for:
  * - Displaying the import/export options and progress to the user using a Jetpack Compose UI.
- * - Coordinating with the [BrapiExportViewModel] to handle the logic of downloading data from
+ * - Coordinating with the [BrapiSyncViewModel] to handle the logic of downloading data from
  *   the BrAPI server, merging it with local data, and uploading the result.
  * - Validating prerequisites such as network connectivity and BrAPI server configuration.
  * - Handling user interactions like starting, canceling, and configuring the export process.
@@ -30,8 +30,8 @@ import dagger.hilt.android.AndroidEntryPoint
  * This activity is launched with an intent that must contain a list of field IDs to be processed.
  * The list of IDs is passed via an [ArrayList] of [Int] with the key [FIELD_IDS].
  *
- * @see BrapiExportViewModel
- * @see BrapiExportScreen
+ * @see BrapiSyncViewModel
+ * @see BrapiSyncScreen
  */
 @AndroidEntryPoint
 class BrapiSyncActivity : ThemedActivity() {
@@ -41,7 +41,7 @@ class BrapiSyncActivity : ThemedActivity() {
         const val FIELD_IDS: String = "FIELD_ID"
     }
 
-    private val viewModel: BrapiExportViewModel by viewModels()
+    private val viewModel: BrapiSyncViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,7 +70,7 @@ class BrapiSyncActivity : ThemedActivity() {
             FieldBookTheme {
                 val uiState by viewModel.uiState.collectAsState()
 
-                BrapiExportScreen(
+                BrapiSyncScreen(
                     uiState = uiState,
                     onDownloadClick = {
                         viewModel.startDownload()

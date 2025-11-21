@@ -4,7 +4,6 @@ import android.content.Context
 import com.fieldbook.tracker.brapi.model.FieldBookImage
 import com.fieldbook.tracker.brapi.model.Observation
 import com.fieldbook.tracker.brapi.service.BrAPIService
-import com.fieldbook.tracker.brapi.service.BrAPIServiceV2
 import com.fieldbook.tracker.brapi.service.BrapiPaginationManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async

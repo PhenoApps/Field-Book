@@ -80,7 +80,7 @@ import com.fieldbook.tracker.R
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BrapiExportScreen(
+fun BrapiSyncScreen(
     uiState: BrapiExportUiState,
     onDownloadClick: () -> Unit,
     onCancelDownloadClick: () -> Unit,
@@ -500,7 +500,7 @@ fun UploadResultsCard(
             )
             if (imageInserts > 0) ResultRow(
                 text = stringResource(R.string.new_images, imageInserts, label.lowercase()),
-                icon = painterResource(R.drawable.ic_stats_photo),
+                icon = painterResource(R.drawable.ic_trait_camera),
                 tint = Color.Black
             )
             if (imageEdits > 0) ResultRow(
