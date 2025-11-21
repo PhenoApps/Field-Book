@@ -433,10 +433,9 @@ public class BrapiServiceTest {
                 if (done) {
                     signal.countDown();
                 }
-            }, failure -> {
+            }, (failure, chunk, done) -> {
                 signal.countDown();
                 fail("There were failures saving the data via BrAPI");
-                return null;
             });
         } catch (Exception e) {
             signal.countDown();
@@ -505,10 +504,9 @@ public class BrapiServiceTest {
                 if (done) {
                     createSignal.countDown();
                 }
-            }, failure -> {
+            }, (failure, chunk, done) -> {
                 createSignal.countDown();
                 fail("There were failures saving the data via BrAPI");
-                return null;
             });
         } catch (Exception e) {
             createSignal.countDown();
@@ -533,10 +531,9 @@ public class BrapiServiceTest {
                         if (done) {
                             updateSignal.countDown();
                         }
-                    }, failure -> {
+                    }, (code, chunk, done) -> {
                         updateSignal.countDown();
                         fail("There were failures saving the data via BrAPI");
-                        return null;
                     });
                 } catch (Exception e) {
                     updateSignal.countDown();

@@ -18,6 +18,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.Toolbar
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
@@ -30,7 +31,6 @@ import com.fieldbook.tracker.adapters.FieldDetailItem
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.dialogs.SearchAttributeChooserDialog
-import com.fieldbook.tracker.dialogs.BrapiSyncObsDialog
 import com.fieldbook.tracker.interfaces.FieldSortController
 import com.fieldbook.tracker.interfaces.FieldSyncController
 import com.fieldbook.tracker.objects.FieldObject
@@ -52,6 +52,7 @@ import pub.devrel.easypermissions.EasyPermissions
 import javax.inject.Inject
 import androidx.core.view.isGone
 import androidx.core.content.edit
+import com.fieldbook.tracker.activities.brapi.io.sync.BrapiSyncActivity
 import com.fieldbook.tracker.utilities.InsetHandler
 
 @AndroidEntryPoint
@@ -95,6 +96,12 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private lateinit var studyGroupNameChip: Chip
     private lateinit var detailRecyclerView: RecyclerView
     private var adapter: FieldDetailAdapter? = null
+
+    private val brapiSyncIntentLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -234,8 +241,11 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
 
     override fun startSync(field: FieldObject) {
         activity?.runOnUiThread {
-            val syncDialog = BrapiSyncObsDialog(requireActivity(), this, field)
-            syncDialog.show()
+            val fieldId = field.studyId
+            brapiSyncIntentLauncher.launch(
+                Intent(context, BrapiSyncActivity::class.java)
+                    .putIntegerArrayListExtra(BrapiSyncActivity.FIELD_IDS, arrayListOf(fieldId))
+            )
         }
     }
 
