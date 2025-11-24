@@ -98,6 +98,8 @@ fun BrapiSyncScreen(
 ) {
     // Local UI state to allow the user to temporarily dismiss the conflict-resolution prompt
     var suppressConflictDialog by remember { mutableStateOf(false) }
+    // Prompt shown when user attempts to download but there are unuploaded items
+    var showUploadPrompt by remember { mutableStateOf(false) }
 
     // When the UI state reports a new last-checked text, persist it via the provided callbacks
     LaunchedEffect(uiState.lastCheckedUploadText) {
@@ -280,12 +282,48 @@ fun BrapiSyncScreen(
                                 modifier = Modifier.padding(bottom = 8.dp)
                             )
                         }
+                        // Determine if there are unuploaded items that should prompt the user
+                        val hasUnuploadedItems = (uiState.newObservationCount + uiState.editedObservationCount + uiState.newImageCount + uiState.editedImageCount) > 0
+
                         Button(
-                            onClick = onDownloadClick,
+                            onClick = {
+                                if (hasUnuploadedItems) {
+                                    showUploadPrompt = true
+                                } else {
+                                    onDownloadClick()
+                                }
+                            },
                             modifier = Modifier.fillMaxWidth(),
                             enabled = uiState.isInitialized && uiState.viewMode == ViewMode.IDLE
                         ) {
                             Text(stringResource(R.string.brapi_download_button))
+                        }
+
+                        if (showUploadPrompt) {
+                            androidx.compose.material3.AlertDialog(
+                                onDismissRequest = { showUploadPrompt = false },
+                                title = { Text(stringResource(R.string.brapi_download_button)) },
+                                text = {
+                                    Text(
+                                        stringResource(R.string.there_are_unuploaded_observations_or_images_do_you_want_to_upload_them_before_downloading)
+                                    )
+                                },
+                                confirmButton = {
+                                    TextButton(onClick = {
+                                        showUploadPrompt = false
+                                        onExportClick()
+                                    }) { Text(stringResource(R.string.upload_first)) }
+                                },
+                                dismissButton = {
+                                    Row {
+                                        TextButton(onClick = {
+                                            showUploadPrompt = false
+                                            onDownloadClick()
+                                        }) { Text(stringResource(R.string.download_anyway)) }
+                                        TextButton(onClick = { showUploadPrompt = false }) { Text(stringResource(R.string.dialog_cancel)) }
+                                    }
+                                }
+                            )
                         }
                     }
                 }
@@ -766,7 +804,9 @@ fun PendingConflictsList(
                         Text(
                             text = id,
                             style = MaterialTheme.typography.titleSmall,
-                            modifier = Modifier.fillMaxWidth().padding(start = 8.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 8.dp)
                         )
 
                         // Top row: Server button left, Local button right — now equal halves

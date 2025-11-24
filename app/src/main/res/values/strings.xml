@@ -1725,4 +1725,7 @@
     <string name="select_all_local">Select all (local)</string>
     <string name="select_all_server">Select all (server)</string>
     <string name="toggle">Toggle</string>
+    <string name="there_are_unuploaded_observations_or_images_do_you_want_to_upload_them_before_downloading">There are unuploaded observations or images. Do you want to upload them before downloading?</string>
+    <string name="upload_first">Upload first</string>
+    <string name="download_anyway">Download anyway</string>
 </resources>
