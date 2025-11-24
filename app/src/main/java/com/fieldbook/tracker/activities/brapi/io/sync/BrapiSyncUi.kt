@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
@@ -402,13 +403,16 @@ fun BrapiSyncScreen(
                     }
 
                     // Show include images toggle only when there are images available to upload
-                    if (totalImages > 0) {
-                        Switch(
-                            checked = uiState.uploadImages,
-                            onCheckedChange = onImageUploadToggle
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(stringResource(R.string.include_images))
+                    if (totalImages > 0 && uiState.viewMode == ViewMode.IDLE) {
+                        Row {
+                            Switch(
+                                checked = uiState.uploadImages,
+                                onCheckedChange = onImageUploadToggle
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(stringResource(R.string.include_images),
+                                modifier = Modifier.padding(top = 8.dp))
+                        }
                     }
                 }
 
@@ -756,6 +760,9 @@ fun PendingConflictsList(
         ) {
 
             // two evenly spaced toggle buttons that align with the per-item choice buttons
+            val serverSelected = globalChoice == GlobalChoice.SERVER
+            val localSelected = globalChoice == GlobalChoice.LOCAL
+
             Button(
                 onClick = {
                     onToggleAllServer()
@@ -763,10 +770,32 @@ fun PendingConflictsList(
                 },
                 modifier = Modifier.weight(0.5f),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (globalChoice == GlobalChoice.SERVER) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
-                    contentColor = if (globalChoice == GlobalChoice.SERVER) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
-                )
-            ) { Text(stringResource(R.string.server)) }
+                    containerColor = if (serverSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                    contentColor = if (serverSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                ),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+            ) {
+                Row(modifier = Modifier
+                    .wrapContentWidth(Alignment.CenterHorizontally)
+                    .padding(vertical = 2.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.download),
+                        contentDescription = stringResource(R.string.server),
+                        tint = if (serverSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(R.string.server),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.width(8.dp))
 
@@ -777,10 +806,32 @@ fun PendingConflictsList(
                 },
                 modifier = Modifier.weight(0.5f),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (globalChoice == GlobalChoice.LOCAL) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
-                    contentColor = if (globalChoice == GlobalChoice.LOCAL) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
-                )
-            ) { Text(stringResource(R.string.local)) }
+                    containerColor = if (localSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                    contentColor = if (localSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                ),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+            ) {
+                Row(modifier = Modifier
+                    .wrapContentWidth(Alignment.CenterHorizontally)
+                    .padding(vertical = 2.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.upload),
+                        contentDescription = stringResource(R.string.local),
+                        tint = if (localSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(R.string.local),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
         }
 
         LazyColumn(modifier = Modifier.height(240.dp)) {
