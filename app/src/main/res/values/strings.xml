@@ -1713,10 +1713,10 @@
     <string name="failed_items">%1$d failed items</string>
     <string name="failed_images">%1$d failed images</string>
     <string name="complete">Complete</string>
-    <string name="conflict_resolution_strategy">Conflict Resolution Strategy</string>
+    <string name="conflict_resolution_strategy">Resolve Conflicts</string>
     <string name="server">Server</string>
     <string name="local">Local</string>
-    <string name="recent">Recent</string>
+    <string name="recent">Most recent</string>
     <string name="brapi_sync">BrAPI Sync</string>
     <string name="download_from">Download from %1$s</string>
     <string name="last_checked">Last checked: %1$s</string>
