@@ -284,6 +284,7 @@ fun BrapiSyncScreen(
 
                         Button(
                             onClick = {
+                                suppressConflictDialog = false
                                 if (hasUnuploadedItems) {
                                     showUploadPrompt = true
                                 } else {
