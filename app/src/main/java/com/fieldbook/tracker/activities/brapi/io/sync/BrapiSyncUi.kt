@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
@@ -53,6 +52,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
+
+// File-level enum for global toggle state used in PendingConflictsList
+private enum class GlobalChoice { NONE, SERVER, LOCAL }
 
 /**
  * A Composable screen for managing BrAPI (Breeding API) data synchronization.
@@ -207,10 +209,9 @@ fun BrapiSyncScreen(
                         if (uiState.pendingConflictsCount > 0 && !suppressConflictDialog) {
                             var selectedStrategy by remember { mutableStateOf(uiState.downloadMergeStrategy) }
                             // initialize selection map for manual mode
-                            val selectionMap = remember { mutableStateMapOf<String, Boolean>() }
+                            val selectionMap = remember { mutableStateMapOf<String, Boolean?>() }
                             uiState.pendingConflicts.forEach { c ->
-                                if (!selectionMap.containsKey(c.brapiId)) selectionMap[c.brapiId] =
-                                    true
+                                if (!selectionMap.containsKey(c.brapiId)) selectionMap[c.brapiId] = null
                             }
 
                             androidx.compose.material3.AlertDialog(
@@ -218,7 +219,8 @@ fun BrapiSyncScreen(
                                 confirmButton = {
                                     TextButton(onClick = {
                                         if (selectedStrategy is MergeStrategy.Manual) {
-                                            onApplyManualChoices(selectionMap.toMap())
+                                            // convert nullable map to non-nullable by defaulting nulls to 'true' to preserve previous behavior
+                                            onApplyManualChoices(selectionMap.mapValues { it.value ?: true })
                                         } else {
                                             onMergeStrategyChange(selectedStrategy)
                                         }
@@ -702,24 +704,52 @@ fun MergeConflictStrategy(
 @Composable
 fun PendingConflictsList(
     conflicts: List<PendingConflictUi>,
-    selectionMap: MutableMap<String, Boolean>,
+    selectionMap: MutableMap<String, Boolean?>,
     onToggleAllServer: () -> Unit,
     onToggleAllLocal: () -> Unit
 ) {
+    var globalChoice by remember { mutableStateOf(GlobalChoice.NONE) }
+
     Column {
         // Global toggle label + buttons
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.toggle))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+
+            // two evenly spaced toggle buttons that align with the per-item choice buttons
+            Button(
+                onClick = {
+                    onToggleAllServer()
+                    globalChoice = GlobalChoice.SERVER
+                },
+                modifier = Modifier.weight(0.5f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (globalChoice == GlobalChoice.SERVER) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                    contentColor = if (globalChoice == GlobalChoice.SERVER) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                )
+            ) { Text(stringResource(R.string.server)) }
+
             Spacer(modifier = Modifier.width(8.dp))
-            Button(onClick = onToggleAllServer) { Text(stringResource(R.string.server)) }
-            Spacer(Modifier.width(8.dp))
-            Button(onClick = onToggleAllLocal) { Text(stringResource(R.string.local)) }
+
+            Button(
+                onClick = {
+                    onToggleAllLocal()
+                    globalChoice = GlobalChoice.LOCAL
+                },
+                modifier = Modifier.weight(0.5f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (globalChoice == GlobalChoice.LOCAL) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                    contentColor = if (globalChoice == GlobalChoice.LOCAL) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                )
+            ) { Text(stringResource(R.string.local)) }
         }
 
         LazyColumn(modifier = Modifier.height(240.dp)) {
             itemsIndexed(conflicts) { _, c ->
                 val id = c.brapiId
-                val chooseServer = selectionMap[id] ?: true
+                // Treat only explicit 'true' as choosing server; null means unselected
+                val chooseServer = selectionMap[id] == true
 
                 Card(
                     modifier = Modifier
@@ -728,36 +758,7 @@ fun PendingConflictsList(
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Column(modifier = Modifier.padding(12.dp)) {
-                        // Top row: Server button left, Local button right
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Button(
-                                onClick = { selectionMap[id] = true },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = if (chooseServer) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
-                                    contentColor = if (chooseServer) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
-                                )
-                            ) {
-                                Text(stringResource(R.string.server))
-                            }
 
-                            Spacer(modifier = Modifier.weight(1f))
-
-                            Button(
-                                onClick = { selectionMap[id] = false },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = if (!chooseServer) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
-                                    contentColor = if (!chooseServer) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
-                                ),
-                                modifier = Modifier
-                                    .wrapContentWidth(Alignment.End)
-                            ) {
-                                Text(stringResource(R.string.local))
-                            }
-                        }
 
                         Spacer(modifier = Modifier.height(8.dp))
 
@@ -765,25 +766,48 @@ fun PendingConflictsList(
                         Text(
                             text = id,
                             style = MaterialTheme.typography.titleSmall,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth().padding(start = 8.dp)
                         )
 
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        // Full-width row with two equal halves: local value | server value
-                        Row(modifier = Modifier.fillMaxWidth()) {
-                            Column(modifier = Modifier
-                                .weight(1f)
-                                .padding(start = 8.dp)) {
+                        // Top row: Server button left, Local button right — now equal halves
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Button(
+                                onClick = {
+                                    selectionMap[id] = true
+                                    // any manual selection should clear the global "all" toggle highlight
+                                    globalChoice = GlobalChoice.NONE
+                                },
+                                modifier = Modifier.weight(0.5f),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (chooseServer) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                                    contentColor = if (chooseServer) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                                )
+                            ) {
                                 Text(
                                     text = c.serverValue,
                                     maxLines = 4,
                                     overflow = TextOverflow.Ellipsis
                                 )
                             }
-                            Column(modifier = Modifier
-                                .weight(1f)
-                                .padding(end = 8.dp)) {
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            Button(
+                                onClick = {
+                                    selectionMap[id] = false
+                                    globalChoice = GlobalChoice.NONE
+                                },
+                                modifier = Modifier.weight(0.5f),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (!chooseServer && selectionMap[id] != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                                    contentColor = if (!chooseServer && selectionMap[id] != null) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                                )
+                            ) {
                                 Text(
                                     text = c.localValue,
                                     maxLines = 4,
