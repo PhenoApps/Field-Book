@@ -93,7 +93,6 @@ fun BrapiSyncScreen(
     onNavigateUp: () -> Unit,
     onAuthenticate: () -> Unit,
     onMergeStrategyChange: (MergeStrategy) -> Unit,
-    onPersistLastCheckedUpload: (String) -> Unit = {},
     onPersistLastCheckedDownload: (String) -> Unit = {},
     onApplyManualChoices: (Map<String, Boolean>) -> Unit = {},
 ) {
@@ -103,9 +102,6 @@ fun BrapiSyncScreen(
     var showUploadPrompt by remember { mutableStateOf(false) }
 
     // When the UI state reports a new last-checked text, persist it via the provided callbacks
-    LaunchedEffect(uiState.lastCheckedUploadText) {
-        uiState.lastCheckedUploadText?.let { onPersistLastCheckedUpload(it) }
-    }
     LaunchedEffect(uiState.lastCheckedDownloadText) {
         uiState.lastCheckedDownloadText?.let { onPersistLastCheckedDownload(it) }
     }
@@ -414,15 +410,6 @@ fun BrapiSyncScreen(
                                 modifier = Modifier.padding(top = 8.dp))
                         }
                     }
-                }
-
-                // Show last-checked text for upload if available (appears above the upload button)
-                if (uiState.lastCheckedUploadText != null) {
-                    Text(
-                        text = stringResource(R.string.last_checked, uiState.lastCheckedUploadText),
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
                 }
 
                 // Show upload button only when there are observations/images to upload

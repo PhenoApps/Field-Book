@@ -114,20 +114,12 @@ class BrapiSyncViewModel @Inject constructor(
 
     // Load persisted last-checked values from SharedPreferences into the UI state
     private fun loadLastCheckedFromPrefs() {
-        val lastUpload = preferences.getString(PreferenceKeys.BRAPI_LAST_CHECKED_UPLOAD, null)
         val lastDownload = preferences.getString(PreferenceKeys.BRAPI_LAST_CHECKED_DOWNLOAD, null)
         _uiState.update {
             it.copy(
-                lastCheckedUploadText = lastUpload,
                 lastCheckedDownloadText = lastDownload
             )
         }
-    }
-
-    // Persist the given last-checked upload text
-    fun persistLastCheckedUpload(text: String?) {
-        preferences.edit { putString(PreferenceKeys.BRAPI_LAST_CHECKED_UPLOAD, text) }
-        _uiState.update { it.copy(lastCheckedUploadText = text) }
     }
 
     // Persist the given last-checked download text
@@ -753,13 +745,11 @@ class BrapiSyncViewModel @Inject constructor(
 
         processor(observations)
             .onCompletion { cause ->
-                // record last checked time for upload
-                val checkedUploadText = timestamp.format(calendar.getTime())
+
                 _uiState.update {
                     it.copy(
                         viewMode = ViewMode.IDLE,
                         isUploadFinished = true,
-                        lastCheckedUploadText = checkedUploadText
                     )
                 }
 

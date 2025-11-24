@@ -85,9 +85,8 @@ data class BrapiExportUiState(
     val uploadImageEdits: Int = 0,
     val uploadImageFails: Int = 0,
 
-    // Optional text to show when the download/upload buttons were last checked
+    // Optional text to show when the download button was last checked
     val lastCheckedDownloadText: String? = null,
-    val lastCheckedUploadText: String? = null,
     // Number of conflicts detected during last download that require user resolution
     val pendingConflictsCount: Int = 0,
     // Detailed pending conflicts for UI display (server/local pairs)

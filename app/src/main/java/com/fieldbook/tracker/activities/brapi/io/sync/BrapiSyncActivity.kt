@@ -104,7 +104,6 @@ class BrapiSyncActivity : ThemedActivity() {
                         viewModel.applyConflictResolution(it)
                     },
                     // persist last-checked timestamps via ViewModel helper methods
-                    onPersistLastCheckedUpload = { text -> viewModel.persistLastCheckedUpload(text) },
                     onPersistLastCheckedDownload = { text -> viewModel.persistLastCheckedDownload(text) },
                     onApplyManualChoices = { choices ->
                         viewModel.setMergeStrategy(MergeStrategy.Manual)
