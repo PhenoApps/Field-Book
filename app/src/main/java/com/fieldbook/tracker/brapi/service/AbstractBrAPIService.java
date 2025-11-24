@@ -19,15 +19,24 @@ public abstract class AbstractBrAPIService implements BrAPIService {
 
     private static final String TAG = AbstractBrAPIService.class.getName();
 
-    public void createObservationsChunked(int chunkSize, List<Observation> observations, BrAPIChunkedUploadProgressCallback<Observation> uploadProgressCallback, Function<Integer, Void> failFn) {
+    public void createObservationsChunked(int chunkSize, List<Observation> observations,
+                                          BrAPIChunkedUploadProgressCallback<Observation> uploadProgressCallback,
+                                          BrAPIChunkedUploadProgressFailedCallback<Observation> failFn) {
         saveChunks(chunkSize, observations, uploadProgressCallback, failFn, this::createObservations);
     }
 
-    public void updateObservationsChunked(int chunkSize, List<Observation> observations, BrAPIChunkedUploadProgressCallback<Observation> uploadProgressCallback, Function<Integer, Void> failFn) {
+    public void updateObservationsChunked(int chunkSize, List<Observation> observations,
+                                          BrAPIChunkedUploadProgressCallback<Observation> uploadProgressCallback,
+                                          BrAPIChunkedUploadProgressFailedCallback<Observation> failFn) {
         saveChunks(chunkSize, observations, uploadProgressCallback, failFn, this::updateObservations);
     }
 
-    private <T> void saveChunks(int chunkSize, List<T> items, BrAPIChunkedUploadProgressCallback<T> uploadProgressCallback, Function<Integer, Void> failFn, SaveChunkFunction<T> processFn) {
+    private <T> void saveChunks(int chunkSize,
+                                List<T> items,
+                                BrAPIChunkedUploadProgressCallback<T> uploadProgressCallback,
+                                BrAPIChunkedUploadProgressFailedCallback<T> failFn,
+                                SaveChunkFunction<T> processFn) {
+
         List<List<T>> chunkedItemLists = createChunks(chunkSize, items);
 
         /*
@@ -35,7 +44,6 @@ public abstract class AbstractBrAPIService implements BrAPIService {
          May be worth enhancing this to be more dynamic based on the device specs
          */
         Semaphore requestSemaphore = new Semaphore(2);
-        AtomicBoolean failed = new AtomicBoolean(false);
         AtomicInteger completedChunks = new AtomicInteger(0);
         for (int chunkNum = 0; chunkNum < chunkedItemLists.size(); chunkNum++) {
             List<T> chunk = chunkedItemLists.get(chunkNum);
@@ -45,13 +53,7 @@ public abstract class AbstractBrAPIService implements BrAPIService {
                 requestSemaphore.acquire();
             } catch (InterruptedException e) {
                 Log.e(TAG, "Error getting semaphore", e);
-                failFn.apply(0);
-                failed.set(true);
-            }
-
-            //once a semaphore is acquired, check that there weren't any failures while waiting
-            if(failed.get()) {
-                return; //break out of the loop and don't let any more requests be sent.  This could be removed if the UI is updated to keep track of multiple failures
+                failFn.apply(0, chunk, completedChunks.incrementAndGet() == chunkedItemLists.size());
             }
 
             Log.d(TAG,"Starting chunk " + currentChunkNum + "/" + chunkedItemLists.size());
@@ -62,9 +64,8 @@ public abstract class AbstractBrAPIService implements BrAPIService {
                 return null;
             }, error -> {
                 Log.d(TAG,"Finished chunk " + currentChunkNum + "/" + chunkedItemLists.size());
-                Log.e(TAG,"error with chunk "+currentChunkNum+": " + error);
-                failFn.apply(error);
-                failed.set(true);
+                Log.e(TAG,"error with chunk " + currentChunkNum + ": " + error);
+                failFn.apply(error, chunk, completedChunks.incrementAndGet() == chunkedItemLists.size());
                 requestSemaphore.release();
                 return null;
             });
