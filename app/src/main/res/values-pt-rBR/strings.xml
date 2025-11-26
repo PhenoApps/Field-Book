@@ -1382,4 +1382,5 @@
     <string name="device_settings_dialog_unknown_name">Dispositivo Bluetooth Desconhecido</string>
     <string name="device_settings_dialog_title">Configurações de Dispositivo Bluetooth</string>
     <string name="no_data_captured">Nenhum dado capturado.</string>
+    <string name="failed_to_find_file_name">Falha ao recuperar o nome do arquivo.</string>
 </resources>
