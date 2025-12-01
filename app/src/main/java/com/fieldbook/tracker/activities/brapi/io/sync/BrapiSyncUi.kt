@@ -770,7 +770,7 @@ fun PendingConflictsList(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.download),
+                        painter = painterResource(R.drawable.server_network),
                         contentDescription = stringResource(R.string.server),
                         tint = if (serverSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(18.dp)
@@ -806,7 +806,7 @@ fun PendingConflictsList(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.upload),
+                        painter = painterResource(R.drawable.cellphone),
                         contentDescription = stringResource(R.string.local),
                         tint = if (localSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(18.dp)
