@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- BrAPI authorization redirect link updated
 
 ## [v6.3.5] - 2025-12-02
 
@@ -813,6 +814,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [v6.3.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.2
 [v6.3.3]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.3
+
 
 [v6.3.4]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.4
 [v6.3.5]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.5
