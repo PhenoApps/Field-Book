@@ -149,7 +149,7 @@ public class BrapiAuthActivity extends ThemedActivity {
             // Authorization code flow works better with custom URL scheme fieldbook://app/auth
             // https://github.com/openid/AppAuth-Android/issues?q=is%3Aissue+intent+null
             Uri redirectURI = flow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)) ?
-                    Uri.parse("https://phenoapps.org/field-book") : Uri.parse("fieldbook://app/auth");
+                    Uri.parse("https://www.phenoapps.org/field-book") : Uri.parse("fieldbook://app/auth");
 
             authUtil.getAuthServiceConfiguration((authorizationServiceConfiguration, ex) -> {
 
