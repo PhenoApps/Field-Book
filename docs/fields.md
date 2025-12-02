@@ -56,9 +56,6 @@ Imported entry coordinates can then be used with the <img class="icon" src="_sta
 New fields can be added by pressing the <img class="icon" src="_static/icons/fields/plus-circle.png"> button in the bottom right corner of the Fields screen.
 This opens a dialog where you can select whether to import from a local file, from cloud storage (Dropbox, Google Drive, etc.), create a new field from scratch, or import via a <img class="icon" src="_static/icons/settings/main/server-network.png"> [Brapi](brapi.md) connection (if enabled).
 
-A default import source can be set in <img class="icon" src="_static/icons/settings/main/cog-outline.png"> [System Settings](settings-system.md) to skip this dialog.
-Long-pressing the <img class="icon" src="_static/icons/fields/plus-circle.png"> button will override the default choice.
-
 <figure class="image">
   <img class="screenshot" src="_static/images/fields/fields_import_joined.png" width="1100px"> 
   <figcaption class="screenshot-caption"><i>The Field import process from local storage</i></figcaption>
@@ -136,10 +133,6 @@ The [BrAPI](brapi.md) section of the documentation has more details about the fi
 
 !> Any field can be exported locally, but only fields and traits that have been imported via BrAPI are able to export data via BrAPI.
 
-## Managing fields
-
-To set or switch your active field, press the import source icon on the left side of the field item.
-
 If your fields have location data, pressing the <img class="icon" src="_static/icons/fields/compass-outline.png"> icon in the top toolbar will set the nearest active field.
 
 Pressing the <img class="icon" src="_static/icons/fields/sort.png"> icon in the top toolbar will display a dialog with different attributes that can be selected to sort the list of fields. If grouping view is enabled, sorting by name will sort both the group headers and the fields within each group by name.
@@ -170,6 +163,7 @@ Individual groups can be expanded or collapsed by tapping the group header.
 Long pressing the group header will expand the group and select all fields within the group.
 
 #### Assigning and managing groups:
+
 - Select one or more fields with a long press, then tap the <img class="icon" src="_static/icons/fields/grouping-options.png"> grouping options icon.
 - Choose to assign fields to an existing group or create a new group.
 
@@ -194,6 +188,7 @@ Fields that are no longer actively used can be archived to reduce clutter in the
 Archived fields cannot be set as the active field, nor will their location data be searched when the <img class="icon" src="_static/icons/fields/compass-outline.png"> icon is pressed to find the nearest field.
 
 #### Archiving and accessing archived fields:
+
 - Select one or more fields and tap the <img class="icon" src="_static/icons/fields/archive.png"> archive icon. If the currently active field is selected for archiving, a prompt will be displayed to confirm or select which fields to archive.
 
 <figure class="image">
@@ -272,3 +267,45 @@ The <img class="icon" src="_static/icons/home/save.png"> [Export](export.md) car
 The Data card summarizes data that has been collected for the field.
 For each trait with data, the number of observations and percent of entries with phenotypes is displayed in sub-cards.
 Expanding each sub-card will show a chart with a distribution of the phenotypes.
+
+#### BrAPI syncing
+
+Field Book's BrAPI integration focuses on importing and uploading observation (phenotype) data only. This section describes how to import observation payloads from a BrAPI server into an existing local field and how to upload collected observations back to a server. The UI emphasizes mapping observation correctly and choosing a merge strategy to control how incoming observations affect local records.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/fields/brapi_sync_download.png" alt="BrAPI sync main screen" width="350px">
+  <figcaption class="screenshot-caption"><i>BrAPI observations main screen: shows the screen currently downloading server observations</i></figcaption>
+</figure>
+
+Main features:
+
+- Server selection and authentication: pick a configured BrAPI server or add a new one in BrAPI settings. After authenticating you can access observation endpoints for studies/trials the account has access to.
+- Import/Upload history: recent observation imports and uploads are shown with timestamps and status (success/failure) so you can retry or review problems.
+
+Importing observations (from server into an existing local field):
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/fields/brapi_sync_merge_strategy_options.png" alt="Import observations dialog" width="700px">
+  <figcaption class="screenshot-caption"><i>Selecting an observations dataset to import from the BrAPI server</i></figcaption>
+</figure>
+
+Merge strategies (how imported observations are applied to local data):
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/fields/brapi_sync_uploading.png" alt="Choose merge strategy for observations" width="350px">
+  <figcaption class="screenshot-caption"><i>Choose how imported observations are merged with local data</i></figcaption>
+</figure>
+
+When importing observations that reference entries already present on the device, choose how they should be merged:
+
+- Server: replace existing observations for the matching entry/trait/date with the imported values.
+- Local: don't override any observations, keep the local observation values
+- Recent: keep the most recent observation value
+- Manual: decide for each conflict
+
+Uploading observations (sending local observations to a BrAPI server):
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/fields/brapi_sync_final.png" alt="Upload observations dialog" width="350px">
+  <figcaption class="screenshot-caption"><i>Upload dialog: select fields, traits, and date range for export</i></figcaption>
+</figure>
