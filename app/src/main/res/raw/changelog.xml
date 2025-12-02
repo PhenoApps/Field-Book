@@ -1,5 +1,9 @@
 <changelog>
 
+    <release date="2025-12-02" versionCode="60306" versionName="v6.3.6">
+        <bugfix>BrAPI authorization redirect link updated</bugfix>
+    </release>
+
     <release date="2025-12-02" versionCode="60305" versionName="v6.3.5">
         <bugfix>BrAPI now redirects and opens Field Book when authorizing</bugfix>
     </release>
