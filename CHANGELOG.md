@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- BrAPI now redirects and opens Field Book when authorizing
 
 ## [v6.3.4] - 2025-11-17
 
