@@ -12,6 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+
+## [v6.3.5] - 2025-12-02
+
+### Added
+
+### Changed
+
+### Fixed
 - BrAPI now redirects and opens Field Book when authorizing
 
 ## [v6.3.4] - 2025-11-17
@@ -807,3 +815,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v6.3.3]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.3
 
 [v6.3.4]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.4
+[v6.3.5]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.5
