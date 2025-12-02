@@ -197,7 +197,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="www.phenoapps.org/field-book"
+                    android:host="phenoapps.org/field-book"
                     android:scheme="https"
                     tools:ignore="AppLinkUrlError" /> <!-- https://stackoverflow.com/questions/48093833/deeplink-empty-path-error-androidpath-cannot-be-empty -->
             </intent-filter>
