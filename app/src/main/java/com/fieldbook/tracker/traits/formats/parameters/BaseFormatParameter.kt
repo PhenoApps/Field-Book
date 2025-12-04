@@ -94,11 +94,4 @@ open class BaseFormatParameter @Inject constructor(
     override fun hashCode(): Int {
         return uniqueId.hashCode()
     }
-
-    /**
-     * Toggle the parameter value for toggle based parameters.
-     * @param trait The trait object to modify
-     * @return The new boolean value if this parameter supports toggling, null otherwise
-     */
-    open fun toggleValue(trait: TraitObject): Boolean? = null
 }

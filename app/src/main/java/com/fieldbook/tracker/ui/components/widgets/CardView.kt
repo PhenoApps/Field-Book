@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.ui.components
+package com.fieldbook.tracker.ui.components.widgets
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,7 +22,7 @@ fun CardView(
         colors = CardDefaults.cardColors(
             containerColor = AppTheme.colors.background
         ),
-        modifier = Modifier.fillMaxWidth().padding(8.dp),
+        modifier = modifier.fillMaxWidth().padding(8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         border = null,
         shape = RectangleShape,

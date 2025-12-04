@@ -57,7 +57,11 @@ abstract class DefaultToggleParameter(
         ) = ValidationResult()
     }
 
-    override fun toggleValue(trait: TraitObject): Boolean {
+    /**
+     * Toggle the parameter value for toggle based parameters.
+     * @return The new boolean value if this parameter supports toggling, null otherwise
+     */
+     fun toggleValue(trait: TraitObject): Boolean {
         val newValue = !getToggleValue(trait)
         setToggleValue(trait, newValue)
         return newValue

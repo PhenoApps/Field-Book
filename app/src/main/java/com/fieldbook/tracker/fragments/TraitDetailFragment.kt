@@ -31,6 +31,7 @@ import com.fieldbook.tracker.charts.HistogramChartHelper
 import com.fieldbook.tracker.charts.HorizontalBarChartHelper
 import com.fieldbook.tracker.charts.PieChartHelper
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.viewmodels.ObservationData
 import com.fieldbook.tracker.databinding.FragmentTraitDetailBinding
 import com.fieldbook.tracker.dialogs.FileExploreDialogFragment
 import com.fieldbook.tracker.ui.dialogs.DialogTheme
@@ -62,10 +63,10 @@ import com.fieldbook.tracker.utilities.SoundHelperImpl
 import com.fieldbook.tracker.utilities.TraitNameValidator
 import com.fieldbook.tracker.utilities.Utils
 import com.fieldbook.tracker.utilities.VibrateUtil
-import com.fieldbook.tracker.database.viewmodels.CopyTraitStatus
 import com.fieldbook.tracker.database.viewmodels.TraitDetailUiState
 import com.fieldbook.tracker.database.viewmodels.TraitDetailViewModel
 import com.fieldbook.tracker.database.viewmodels.TraitEditorViewModel
+import com.fieldbook.tracker.utilities.StringUtil.capitalizeFirstLetter
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import dagger.hilt.android.AndroidEntryPoint
@@ -123,9 +124,9 @@ class TraitDetailFragment : Fragment() {
 
         traitId = arguments?.getString("traitId")
 
-        traitId?.let { viewModel.loadTraitDetails(database.valueFormatter, it) }
+        traitId?.let { viewModel.loadTraitDetails(it) }
 
-        observeTraitDetailViewModel()
+        // observeTraitDetailViewModel()
 
         setupAllCollapsibleSections()
 
@@ -145,11 +146,11 @@ class TraitDetailFragment : Fragment() {
     }
 
     fun refresh() {
-        traitId?.let { viewModel.loadTraitDetails(database.valueFormatter, it) }
+        traitId?.let { viewModel.loadTraitDetails(it) }
     }
 
-    private fun observeTraitDetailViewModel() {
-        viewModel.uiState.observe(viewLifecycleOwner) { state ->
+    private suspend fun observeTraitDetailViewModel() {
+        viewModel.uiState.collect { state ->
             when (state) {
                 is TraitDetailUiState.Loading -> {
                     binding.traitDetailProgressBar.visibility = View.VISIBLE
@@ -171,21 +172,21 @@ class TraitDetailFragment : Fragment() {
             }
         }
 
-        viewModel.copyTraitStatus.observe(viewLifecycleOwner) { status ->
-            when (status) {
-                is CopyTraitStatus.Error -> {
-                    Utils.makeToast(context, getString(status.messageRes))
-                }
-                is CopyTraitStatus.Success -> {
-                    // refresh UI
-                    // (activity as? TraitEditorActivity)?.queryAndLoadTraits()
-                    CollectActivity.reloadData = true
-                }
-            }
-        }
+        // viewModel.copyTraitStatus.collect { status ->
+        //     when (status) {
+        //         is CopyTraitStatus.Error -> {
+        //             Utils.makeToast(context, getString(status.messageRes))
+        //         }
+        //         is CopyTraitStatus.Success -> {
+        //             // refresh UI
+        //             // (activity as? TraitEditorActivity)?.queryAndLoadTraits()
+        //             CollectActivity.reloadData = true
+        //         }
+        //     }
+        // }
     }
 
-    private fun renderObservationData(data: TraitDetailViewModel.ObservationData) {
+    private fun renderObservationData(data: ObservationData) {
         binding.fieldCountChip.text = data.fieldCount.toString()
         binding.observationCountChip.text = data.observationCount.toString()
 
@@ -287,7 +288,7 @@ class TraitDetailFragment : Fragment() {
                     }
 
                     setOnFileSelectedListener { selectedUri ->
-                        viewModel.updateResourceFile(trait.id, selectedUri.toString())
+                        viewModel.updateResourceFile(trait, selectedUri.toString())
                         chip.text = selectedUri.lastPathSegment?.substringAfterLast('/') ?: selectedUri.toString()
                     }
                 }
@@ -378,17 +379,13 @@ class TraitDetailFragment : Fragment() {
 
         chipLabel?.let { label ->
             addChip(label, iconRes) { chip ->
-                parameter.toggleValue(trait)?.let { newValue -> // toggle parameter
-                    viewModel.updateTraitAttributes(database.valueFormatter, trait)
-                } ?: run { // not a toggle parameter, show dialog
-                    showParameterEditDialog(parameter, trait)
-                }
+                // parameter.toggleValue(trait)?.let { newValue -> // toggle parameter
+                //     viewModel.updateTraitAndAttributes(trait)
+                // } ?: run { // not a toggle parameter, show dialog
+                //     showParameterEditDialog(parameter, trait)
+                // }
             }
         }
-    }
-
-    private fun String.capitalizeFirstLetter(): String {
-        return if (isEmpty()) this else this.lowercase().replaceFirstChar { it.uppercaseChar() }
     }
 
     private fun addChip(label: String, iconRes: Int, onClick: (Chip) -> Unit) {
@@ -473,7 +470,7 @@ class TraitDetailFragment : Fragment() {
                         }
                     }
 
-                    viewModel.updateTraitAttributes(database.valueFormatter, updatedTrait)
+                    viewModel.updateAttributes(updatedTrait)
                     Utils.makeToast(context, getString(R.string.edit_traits))
                     CollectActivity.reloadData = true
 
@@ -538,13 +535,13 @@ class TraitDetailFragment : Fragment() {
             }
             .setPositiveButton(getString(R.string.trait_swap_name_set_alias)) { _, _ ->
                 selectedSynonym?.let { newAlias ->
-                    val errorRes = TraitNameValidator.validateTraitAlias(newAlias, database, trait)
+                    val errorRes = TraitNameValidator.validateTraitAlias(newAlias, database.allTraitObjects, trait)
                     if (errorRes != null) {
                         Utils.makeToast(context, getString(errorRes))
                         return@setPositiveButton
                     }
                     viewModel.updateTraitAlias(trait, newAlias)
-                    activityViewModel.loadTraits()
+                    // activityViewModel.loadTraits()
                 }
             }
             .setNegativeButton(getString(R.string.dialog_cancel), null)
@@ -580,7 +577,7 @@ class TraitDetailFragment : Fragment() {
                                 return@onPositive getString(R.string.trait_add_synonym_already_exists)
                             }
 
-                            val validationError = TraitNameValidator.validateTraitAlias(trimmed, database, trait)
+                            val validationError = TraitNameValidator.validateTraitAlias(trimmed, database.allTraitObjects, trait)
                             if (validationError != null) {
                                 return@onPositive getString(validationError)
                             }
@@ -615,7 +612,7 @@ class TraitDetailFragment : Fragment() {
             .setTitle(getString(R.string.trait_date_format_dialog_title))
             .setSingleChoiceItems(options, currentSelection) { dialog, which ->
                 val useDayOfYear = which == 1
-                viewModel.updateTraitAttributes(database.valueFormatter, trait.also {
+                viewModel.updateAttributes(trait.also {
                     it.useDayOfYear = useDayOfYear
                 })
                 dialog.dismiss()
@@ -651,7 +648,7 @@ class TraitDetailFragment : Fragment() {
             .setSingleChoiceItems(options, currentSelection) { dialog, which ->
                 val useValues = which == 1
                 trait.categoryDisplayValue = useValues
-                viewModel.updateTraitAttributes(database.valueFormatter, trait)
+                viewModel.updateAttributes(trait)
                 dialog.dismiss()
             }
             .setNegativeButton(R.string.dialog_cancel, null)

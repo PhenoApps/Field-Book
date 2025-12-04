@@ -95,7 +95,7 @@ class NameParameter : BaseFormatParameter(
 
                 val inputText = nameEt.text.toString().trim { it <= ' ' }
 
-                val errorRes = validateTraitAlias(inputText, database, initialTraitObject)
+                val errorRes = validateTraitAlias(inputText, database.allTraitObjects, initialTraitObject)
 
                 if (errorRes != null) { // blank/duplicate
                     result = false

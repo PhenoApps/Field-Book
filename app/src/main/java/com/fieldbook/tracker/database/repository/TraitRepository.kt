@@ -17,6 +17,7 @@ import com.fieldbook.tracker.objects.toTraitJson
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.CSVReader
 import com.fieldbook.tracker.utilities.FileUtil
+import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -38,6 +39,9 @@ class TraitRepository @Inject constructor(
         prettyPrint = false
     }
 
+    val valueFormatter: ValueProcessorFormatAdapter
+        get() = database.valueFormatter
+
     suspend fun getTraits(): List<TraitObject> = withContext(ioDispatcher) {
         database.getAllTraitObjects()
     }
@@ -57,24 +61,32 @@ class TraitRepository @Inject constructor(
         }
     }
 
+    suspend fun deleteTrait(traitId: String) = withContext(ioDispatcher) {
+        database.deleteTrait(traitId)
+
+        // clear crop coordinates
+        prefs.edit {
+            remove(GeneralKeys.getCropCoordinatesKey(traitId.toInt()))
+        }
+    }
+
     suspend fun updateTrait(trait: TraitObject) = withContext(ioDispatcher) {
         database.updateTrait(trait)
     }
 
     suspend fun updateTraitAlias(trait: TraitObject, newAlias: String) = withContext(ioDispatcher) {
-        trait.alias = newAlias
+        val updatedTrait = trait.clone().apply { alias = newAlias }
 
-        val currentSynonyms = trait.synonyms.toMutableList()
+        val currentSynonyms = updatedTrait.synonyms.toMutableList()
         if (!currentSynonyms.contains(newAlias)) {
             // add to synonyms
             currentSynonyms.add(newAlias)
-            trait.synonyms = currentSynonyms
+            updatedTrait.synonyms = currentSynonyms
         }
 
-        updateTrait(trait)
-        trait
+        updateTrait(updatedTrait)
+        updatedTrait
     }
-
 
     suspend fun updateVisibility(id: String, visible: Boolean) = withContext(ioDispatcher) {
         database.updateTraitVisibility(id, visible)
@@ -91,19 +103,17 @@ class TraitRepository @Inject constructor(
         traits.count { database.insertTraits(it) != -1L }
     }
 
-    suspend fun updateResourceFile(id: String, fileUri: String): TraitObject? = withContext(ioDispatcher) {
-        val trait = getTraitById(id)
-        trait?.apply {
+    suspend fun updateResourceFile(trait: TraitObject, fileUri: String): TraitObject? = withContext(ioDispatcher) {
+        val updatedTrait = trait.clone().apply {
             resourceFile = fileUri
             saveAttributeValues()
             updateTrait(this)
         }
-        trait
+        updatedTrait
     }
 
-    suspend fun updateTraitAndAttributes(trait: TraitObject) = withContext(ioDispatcher) {
+    suspend fun updateAttributes(trait: TraitObject) = withContext(ioDispatcher) {
         trait.saveAttributeValues()
-        updateTrait(trait)
     }
 
     suspend fun getTraitObservations(traitId: String): Array<ObservationModel> = withContext(ioDispatcher) {
@@ -114,17 +124,18 @@ class TraitRepository @Inject constructor(
         database.getMissingObservationsCount(traitId)
     }
 
-    suspend fun copyTrait(baseTrait: TraitObject, newName: String): Boolean = withContext(ioDispatcher) {
+    suspend fun copyTrait(baseTrait: TraitObject, newName: String): TraitObject? = withContext(ioDispatcher) {
         val pos = database.getMaxPositionFromTraits() + 1
 
-        baseTrait.apply {
+        val newTrait = baseTrait.clone().apply {
             name = newName
             alias = newName
             visible = true
             realPosition = pos
         }
 
-        database.insertTraits(baseTrait) != -1L
+        val inserted = database.insertTraits(newTrait) != -1L
+        if (inserted) newTrait else null
     }
 
     suspend fun exportTraitsAsJson(

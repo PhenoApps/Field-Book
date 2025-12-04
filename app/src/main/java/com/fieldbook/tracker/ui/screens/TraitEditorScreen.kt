@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
@@ -30,7 +31,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.documentfile.provider.DocumentFile
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
@@ -62,9 +62,9 @@ import kotlinx.coroutines.Dispatchers
 
 @Composable
 fun TraitEditorScreen(
-    viewModel: TraitEditorViewModel = hiltViewModel(),
+    viewModel: TraitEditorViewModel,
     onNavigateBack: () -> Unit,
-    onTraitSelected: (String) -> Unit,
+    onTraitDetail: (String) -> Unit,
     onShowCreateNewTraitDialog: () -> Unit,
     onShowLocalFilePicker: () -> Unit,
 ) {
@@ -100,9 +100,7 @@ fun TraitEditorScreen(
     val brapiLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            viewModel.loadTraits()
-        }
+        viewModel.loadTraits()
     }
 
     val appBarActions = buildList {
@@ -120,7 +118,7 @@ fun TraitEditorScreen(
         //     )
         // }
 
-        if (uiState.traits.isNotEmpty()) {
+        if (uiState.hasTraits) {
             addAll(
                 listOf(
                     TopAppBarAction(
@@ -204,7 +202,7 @@ fun TraitEditorScreen(
                 else -> {
                     TraitList(
                         traits = uiState.traits,
-                        onTraitClick = onTraitSelected,
+                        onTraitClick = onTraitDetail,
                         onToggleVisibility = { trait, isVisible ->
                             viewModel.updateTraitVisibility(trait.id, isVisible)
                         },
@@ -439,11 +437,12 @@ private fun TraitEditorScreenPreview() {
         ),
         prefs = prefs,
     )
+
     AppTheme {
         TraitEditorScreen(
-            // viewModel = viewModel,
+            viewModel = viewModel,
             onNavigateBack = { },
-            onTraitSelected = { },
+            onTraitDetail = { },
             onShowCreateNewTraitDialog = { },
             onShowLocalFilePicker = { },
         )

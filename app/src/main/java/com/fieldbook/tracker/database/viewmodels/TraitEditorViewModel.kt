@@ -84,6 +84,35 @@ class TraitEditorViewModel @Inject constructor(
         loadTraits()
     }
 
+    // IN-MEMORY UPDATES (does not fetch from db)
+
+    fun addTraitObject(newTrait: TraitObject) {
+        _uiState.update { state ->
+            state.copy(
+                traits = state.traits + newTrait
+            )
+        }
+    }
+
+    fun removeTraitObject(id: String) {
+        _uiState.update { state ->
+            state.copy(
+                traits = state.traits.filterNot { it.id == id }
+            )
+        }
+    }
+
+    fun updateTraitInList(updatedTrait: TraitObject) {
+        _uiState.update { state ->
+            state.copy(
+                traits = state.traits.map {
+                    if (it.id == updatedTrait.id) updatedTrait else it
+                }
+            )
+        }
+    }
+
+
     // DB RELATED
 
     fun loadTraits() {
@@ -122,21 +151,15 @@ class TraitEditorViewModel @Inject constructor(
     }
 
     fun updateTraitVisibility(traitId: String, isVisible: Boolean) {
-        // update UI first, if something fails, rollback the UI changes
-        val oldList = uiState.value.traits
+        val trait = uiState.value.traits.find { it.id == traitId } ?: return
 
-        val updatedList = oldList.map { trait ->
-            if (trait.id == traitId) { // replace with new object
-                trait.clone().apply { visible = isVisible }
-            } else trait
-        }
-
-        _uiState.update { it.copy(traits = updatedList) }
+        val updatedTrait = trait.clone().apply { visible = isVisible }
+        updateTraitInList(updatedTrait)
 
         viewModelScope.launch {
             runCatching { repo.updateVisibility(traitId, isVisible) }
                 .onFailure { e -> // rollback
-                    _uiState.update { it.copy(traits = oldList) }
+                    updateTraitInList(trait)
                     _events.emit(
                         TraitEditorEvent.ShowError("Failed to update visibility: ${e.message}")
                     )
@@ -202,12 +225,6 @@ class TraitEditorViewModel @Inject constructor(
             add(toIndex, item)
         }
 
-        Log.d(TAG, "moveTraitItem: $fromIndex $toIndex")
-        oldList.forEachIndexed { i, oldTrait ->
-            Log.d(TAG, "oldList: ${oldTrait.alias}")
-            Log.d(TAG, "updatedList: ${updatedList[i].alias}")
-        }
-
         _uiState.update { it.copy(traits = updatedList) }
     }
 
@@ -225,10 +242,6 @@ class TraitEditorViewModel @Inject constructor(
     fun commitTraitOrder() {
         val finalList = _uiState.value.traits
         if (finalList == lastCommittedSortedList) return
-
-        Log.d(TAG, "commitTraitOrder: ")
-
-        finalList.forEach { Log.d(TAG, "finalList: ${it.alias}") }
 
         viewModelScope.launch {
             runCatching {
@@ -379,7 +392,9 @@ data class TraitEditorUiState(
     val traits: List<TraitObject> = emptyList(),
     val isLoading: Boolean = false,
     val sortOrder: String = "position",
-)
+) {
+    val hasTraits: Boolean get() = traits.isNotEmpty()
+}
 
 sealed class TraitEditorEvent {
     data class ShowMessage(val message: String) : TraitEditorEvent()
@@ -402,9 +417,4 @@ sealed class TraitActivityDialog {
     object Export : TraitActivityDialog()
     object DeleteAll : TraitActivityDialog()
     object SortTraits : TraitActivityDialog()
-}
-
-sealed class TraitExportResult {
-    data class Success(val uri: Uri, val count: Int) : TraitExportResult()
-    data class Error(val message: String) : TraitExportResult()
 }
