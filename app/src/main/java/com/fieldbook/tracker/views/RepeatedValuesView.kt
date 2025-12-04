@@ -100,19 +100,19 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
                 val current = getSelectedModel()
 
-                if (current != null && !act.validateData(current.value)) {
-                    return@setOnClickListener
+                act.navigateIfDataIsValid(current?.value) {
+
+                    if (pager.currentItem < (pager.adapter?.count ?: 1) - 1) {
+
+                        setCurrentItem(pager.currentItem + 1)
+
+                    }
+
+                    updateButtonVisibility()
+
+                    act.traitLayoutRefresh()
+
                 }
-
-                if (pager.currentItem < (pager.adapter?.count ?: 1) - 1) {
-
-                    setCurrentItem(pager.currentItem + 1)
-
-                }
-
-                updateButtonVisibility()
-
-                act.traitLayoutRefresh()
 
             }
         }
@@ -125,19 +125,19 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
                 val current = getSelectedModel()
 
-                if (current != null && !act.validateData(current.value)) {
-                    return@setOnClickListener
+                act.navigateIfDataIsValid(current?.value) {
+
+                    if (pager.currentItem > 0) {
+
+                        setCurrentItem(pager.currentItem - 1)
+
+                    }
+
+                    updateButtonVisibility()
+
+                    act.traitLayoutRefresh()
+
                 }
-
-                if (pager.currentItem > 0) {
-
-                    setCurrentItem(pager.currentItem - 1)
-
-                }
-
-                updateButtonVisibility()
-
-                act.traitLayoutRefresh()
 
             }
         }
@@ -153,22 +153,22 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
                 //only add new measurements if the current one has been observed
                 if (current != null && current.value.isNotEmpty()) {
 
-                    if (!act.validateData(current.value)) {
-                        return@setOnClickListener
+                    act.navigateIfDataIsValid(current.value) {
+
+                        val model =
+                            insertNewRep((mValues.maxOf { it.model.rep.toInt() } + 1).toString())
+
+                        mValues.add(ObservationModelViewHolder(model, Color.BLACK))
+
+                        submitList()
+
+                        setCurrentItem(mValues.size - 1)
+
+                        updateButtonVisibility()
+
+                        act.traitLayoutRefreshNew()
+                        
                     }
-
-                    val model =
-                        insertNewRep((mValues.maxOf { it.model.rep.toInt() } + 1).toString())
-
-                    mValues.add(ObservationModelViewHolder(model, Color.BLACK))
-
-                    submitList()
-
-                    setCurrentItem(mValues.size - 1)
-
-                    updateButtonVisibility()
-
-                    act.traitLayoutRefreshNew()
 
                 } else {
 

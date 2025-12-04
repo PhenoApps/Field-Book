@@ -18,9 +18,9 @@ val DefaultAppColors = AppColors(
     ),
 
     text = TextColors(
-        primary = BaseColors.TextLight,
+        primary = BaseColors.TextDark,
         secondary = BaseColors.TextSecondary,
-        tertiary = BaseColors.TextDark,
+        tertiary = BaseColors.TextLight,
         hint = BaseColors.HintText,
         highContrast = BaseColors.TextHighContrastInverted,
         title = BaseColors.TextLight,
@@ -122,6 +122,10 @@ val BlueAppColors = DefaultAppColors.copy(
 
     surface = DefaultAppColors.surface.copy(
         iconFillTint = BlueThemeOverrides.IconFillTint,
+    ),
+
+    text = DefaultAppColors.text.copy(
+        tertiary = BlueThemeOverrides.TextLight,
     ),
 
     button = DefaultAppColors.button.copy(

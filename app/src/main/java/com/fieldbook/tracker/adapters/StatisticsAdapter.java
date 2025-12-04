@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -140,8 +141,9 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
             }
             dateObjects.add(dateObject);
 
-            if (observation.getObservation_variable_field_book_format() != null) {
-                if (Formats.Companion.isCameraTrait(observation.getObservation_variable_field_book_format())) {
+            final String traitFormat = observation.getObservation_variable_field_book_format();
+            if (traitFormat != null) {
+                if (Formats.Companion.isCameraTrait(traitFormat)) {
                     imageCount++;
                 }
             }
@@ -209,10 +211,9 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
         List<String> unitWithMostObservationsList = new ArrayList<>();
         for (ObservationModel observation : observations) {
             if (observation.getObservation_unit_id().equals(unitWithMostObservations)) {
-                final String traitFormat = observation.getObservation_variable_field_book_format();
+                String traitFormat = observation.getObservation_variable_field_book_format();
 
                 if (traitFormat != null) {
-
                     TraitFormat formats = Formats.Companion.findTrait(traitFormat);
 
                     Object valueModel = observation.getValue();
@@ -225,15 +226,16 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
 
                     if (formats instanceof ValuePresenter) {
 
-                        unitWithMostObservationsList.add(observation.getObservation_variable_name() + ": " + ((ValuePresenter) formats).represent(originActivity, valueModel));
+                        unitWithMostObservationsList.add(observation.getObservation_variable_alias() + ": " + ((ValuePresenter) formats).represent(originActivity, valueModel, null));
 
                     } else {
 
-                        unitWithMostObservationsList.add(observation.getObservation_variable_name() + ": " + observation.getValue());
+                        unitWithMostObservationsList.add(observation.getObservation_variable_alias() + ": " + observation.getValue());
 
                     }
 
                 }
+
             }
         }
 
