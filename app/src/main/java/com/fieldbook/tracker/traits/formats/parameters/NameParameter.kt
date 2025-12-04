@@ -8,6 +8,8 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.ValidationResult
+import com.fieldbook.tracker.utilities.SynonymsUtil
+import com.fieldbook.tracker.utilities.TraitNameValidator.validateTraitAlias
 import com.google.android.material.textfield.TextInputEditText
 
 class NameParameter : BaseFormatParameter(
@@ -62,13 +64,22 @@ class NameParameter : BaseFormatParameter(
         }
 
         override fun merge(traitObject: TraitObject) = traitObject.apply {
-            name = nameEt.text.toString().trim { it <= ' ' }
+            val inputText = nameEt.text.toString().trim { it <= ' ' }
+
+            if (id.isEmpty()) { // new trait - assign to both name and alias
+                name = inputText
+                alias = inputText
+                synonyms = listOf(inputText)
+            } else { // edit trait - assign only to alias
+                alias = inputText
+                synonyms = SynonymsUtil.addAliasToSynonyms(inputText, synonyms)
+            }
         }
 
         override fun load(traitObject: TraitObject?): Boolean {
             try {
-                traitObject?.name?.let { name ->
-                    nameEt.setText(name)
+                traitObject?.alias?.let { alias ->
+                    nameEt.setText(alias)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -82,47 +93,19 @@ class NameParameter : BaseFormatParameter(
 
                 textInputLayout.endIconDrawable = null
 
-                val name = nameEt.text.toString().trim { it <= ' ' }
+                val inputText = nameEt.text.toString().trim { it <= ' ' }
 
-                var backendError: String? = null
+                val errorRes = validateTraitAlias(inputText, database.allTraitObjects, initialTraitObject)
 
-                if (name.isBlank()) {
-
+                if (errorRes != null) { // blank/duplicate
                     result = false
-
-                    backendError = emptyOrNullNameError
-
-                } else {
-
-                    val exists = database.getTraitByName(name) != null
-
-                    if (initialTraitObject == null) {
-
-                        if (exists) {
-
-                            result = false
-
-                            backendError = duplicateNameError
-
-                        }
-
-                    } else {
-
-                        //check if trait was renamed
-                        val originalName = initialTraitObject.name
-                        if (exists && originalName.lowercase() != name.lowercase()) {
-
-                            result = false
-
-                            backendError = duplicateNameError
-
-                        }
-                    }
+                    error = nameEt.context.getString(errorRes)
+                    nameEt.error = error
+                } else { // no error
+                    result = true
+                    error = null
+                    nameEt.error = null
                 }
-
-                error = backendError
-
-                nameEt.error = backendError
             }
     }
 }

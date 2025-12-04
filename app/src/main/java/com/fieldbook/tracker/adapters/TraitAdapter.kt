@@ -27,7 +27,19 @@ class TraitAdapter(private val sorter: TraitSorter):
     interface TraitSorter {
         fun onDrag(item: TraitAdapter.ViewHolder)
         fun getDatabase(): DataHelper
-        fun onMenuItemClicked(v: View, trait: TraitObject)
+    }
+
+    // Add OnTraitSelectedListener interface
+    interface OnTraitSelectedListener {
+        fun onTraitSelected(traitId: String)
+    }
+
+    // Add a property to store the listener
+    private var onTraitSelectedListener: OnTraitSelectedListener? = null
+
+    // Add a method to set the listener
+    fun setOnTraitSelectedListener(listener: OnTraitSelectedListener) {
+        onTraitSelectedListener = listener
     }
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -35,7 +47,6 @@ class TraitAdapter(private val sorter: TraitSorter):
         val formatImageView = view.findViewById<ImageView>(R.id.traitType)
         val visibleCheckBox = view.findViewById<CheckBox>(R.id.visible)
         val dragSortImageView = view.findViewById<ImageView>(R.id.dragSort)
-        val menuImageView = view.findViewById<ImageView>(R.id.popupMenu)
 
         init {
 
@@ -61,13 +72,6 @@ class TraitAdapter(private val sorter: TraitSorter):
                 }
             }
 
-            menuImageView.setOnClickListener { v ->
-
-                val trait = view.tag as TraitObject
-
-                sorter.onMenuItemClicked(v, trait)
-
-            }
         }
     }
 
@@ -105,7 +109,7 @@ class TraitAdapter(private val sorter: TraitSorter):
         // contents of the view with that element
         with (currentList[position]) {
             viewHolder.itemView.tag = this
-            viewHolder.nameTextView.text = this.name
+            viewHolder.nameTextView.text = this.alias
 
             val icon = Formats.entries
                 .find { it.getDatabaseName() == this.format }?.getIcon()
@@ -115,6 +119,11 @@ class TraitAdapter(private val sorter: TraitSorter):
             // Check or uncheck the list items
             val visible = sorter.getDatabase().traitVisibility[this.name]
             viewHolder.visibleCheckBox.isChecked = visible == null || visible == "true"
+            
+            // Add click listener to the item view
+            viewHolder.itemView.setOnClickListener {
+                onTraitSelectedListener?.onTraitSelected(this.id)
+            }
         }
     }
 

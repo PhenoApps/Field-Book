@@ -141,8 +141,7 @@ public class CSVWriter {
     private String searchForCategorical(ArrayList<TraitObject> traits, String name, String value) {
         for (TraitObject t : traits) {
             if (t.getName().equals(name)) {
-                if (t.getFormat().equals("categorical") || t.getFormat().equals("multicat")
-                        || t.getFormat().equals("qualitative")) {
+                if (t.getFormat().equals("categorical") || t.getFormat().equals("qualitative")) {
                     try {
                         return CategoryJsonUtil.Companion.flattenMultiCategoryValue(
                                 CategoryJsonUtil.Companion.decode(value), false

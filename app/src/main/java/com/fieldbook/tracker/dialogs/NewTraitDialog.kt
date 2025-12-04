@@ -16,7 +16,6 @@ import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.activities.TraitEditorActivity
 import com.fieldbook.tracker.adapters.TraitFormatAdapter
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.TraitObject
@@ -24,16 +23,19 @@ import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.traits.formats.TraitFormatParametersAdapter
 import com.fieldbook.tracker.traits.formats.ValidationResult
+import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 import com.fieldbook.tracker.traits.formats.ui.ParameterScrollView
 import com.fieldbook.tracker.utilities.SoundHelperImpl
 import com.fieldbook.tracker.utilities.VibrateUtil
 import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.utils.SoftKeyboardUtil
 import javax.inject.Inject
+import androidx.core.content.edit
+import com.fieldbook.tracker.traits.formats.parameters.DisplayValueParameter
 
 @AndroidEntryPoint
 class NewTraitDialog(
-    private val activity: Activity
+    private val activity: Activity,
 ) :
     DialogFragment(),
     TraitFormatAdapter.FormatSelectionListener,
@@ -85,6 +87,12 @@ class NewTraitDialog(
     private var originalInitialTraitObject: TraitObject? = null
 
     //private var createVisible: Boolean
+
+    private var onTraitSaved: (() -> Unit)? = null
+
+    fun setOnTraitSavedListener(listener: () -> Unit) {
+        onTraitSaved = listener
+    }
 
     fun setTraitObject(traitObject: TraitObject?) {
 
@@ -274,6 +282,21 @@ class NewTraitDialog(
 
         format.getTraitFormatDefinition().parameters.forEach { parameter ->
 
+            val isBrapiTrait = initialTraitObject?.traitDataSource?.let {
+                it.isNotEmpty() && it != "local"
+            } == true
+
+            // show the DisplayValueParameter only for brapi traits
+            if (parameter is DisplayValueParameter && !isBrapiTrait) {
+                return@forEach
+            }
+
+            if (parameter is ResourceFileParameter) {
+
+                parameter.setActivity(activity)
+
+            }
+
             parameter.createViewHolder(parametersSv)?.let { holder ->
 
                 holder.bind(parameter, initialTraitObject)
@@ -367,14 +390,14 @@ class NewTraitDialog(
 
         if (!isSelectingFormat && !isBrapiTraitImport) {
 
-            val ed = this.prefs.edit()
-            ed.putBoolean(GeneralKeys.TRAITS_EXPORTED, false)
-            ed.apply()
+            prefs.edit { putBoolean(GeneralKeys.TRAITS_EXPORTED, false) }
 
             CollectActivity.reloadData = true
 
             soundHelperImpl.playCelebrate()
         }
+
+        onTraitSaved?.invoke()
 
         (activity as? TraitDialogDismissListener)?.onNewTraitDialogDismiss()
 
@@ -465,6 +488,7 @@ class NewTraitDialog(
         database.editTraits(
             traitObject.id,
             traitObject.name,
+            traitObject.alias,
             traitObject.format,
             traitObject.defaultValue,
             traitObject.minimum,
@@ -474,6 +498,17 @@ class NewTraitDialog(
             traitObject.closeKeyboardOnOpen,
             traitObject.cropImage,
             traitObject.saveImage,
+            traitObject.useDayOfYear,
+            traitObject.categoryDisplayValue,
+            traitObject.resourceFile,
+            traitObject.synonyms,
+            traitObject.maxDecimalPlaces,
+            traitObject.mathSymbolsEnabled,
+            traitObject.allowMulticat,
+            traitObject.repeatedMeasures,
+            traitObject.autoSwitchPlot,
+            traitObject.unit,
+            traitObject.invalidValues,
         )
     }
 

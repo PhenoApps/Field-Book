@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/WHITE"
+    android:orientation="vertical">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        android:minHeight="?attr/actionBarSize"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ProgressBar
+        android:id="@+id/trait_detail_progress_bar"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:indeterminate="true"
+        style="@style/IndeterminateProgressStyle"
+        android:visibility="gone" />
+
+    <!-- Nested Scroll view -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <!-- Overview Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp">
+
+            <!-- Card Content -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp">
+
+                <!-- Header for collapsible area -->
+                <LinearLayout
+                    android:id="@+id/overview_collapsible_header"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_margin="8dp"
+                        android:src="@drawable/ic_ruler" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/TextViewStyle.Bold.Title"
+                            android:id="@+id/traitDisplayName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"/>
+
+                    </LinearLayout>
+
+                    <!-- Collapse/Expand Icon -->
+                    <ImageView
+                        android:id="@+id/overview_expand_collapse_icon"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:src="@drawable/ic_chevron_down" />
+                </LinearLayout>
+
+                <!-- Collapsible Content -->
+                <LinearLayout
+                    android:id="@+id/overview_collapsible_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="visible"
+                    android:paddingTop="12dp"
+                    android:paddingLeft="12dp"
+                    android:paddingRight="12dp">
+
+                    <!-- Trait Detail Chips -->
+                    <com.google.android.material.chip.ChipGroup
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:singleLine="false"
+                        app:chipSpacingHorizontal="8dp"
+                        app:chipSpacingVertical="8dp">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/sourceChip"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:clickable="false"
+                            android:focusable="false"
+                            app:chipIcon="@drawable/ic_table_arrow_right"
+                            app:chipIconSize="24dp"
+                            app:ensureMinTouchTargetSize="false"
+                            app:closeIconVisible="false"
+                            app:chipBackgroundColor="?attr/defaultChipBackground" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/formatChip"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:clickable="false"
+                            android:focusable="false"
+                            app:chipIconSize="24dp"
+                            app:ensureMinTouchTargetSize="false"
+                            app:closeIconVisible="false"
+                            app:chipBackgroundColor="?attr/defaultChipBackground" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/renameTrait"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:clickable="false"
+                            android:focusable="false"
+                            android:text="@string/trait_detail_chip_rename"
+                            app:chipIcon="@drawable/ic_rename"
+                            app:chipIconSize="24dp"
+                            app:ensureMinTouchTargetSize="false"
+                            app:closeIconVisible="false"
+                            app:chipBackgroundColor="?attr/selectableChipBackground"
+                            app:chipStartPadding="6dp"
+                            app:chipStrokeColor="?attr/selectableChipStroke"
+                            app:chipStrokeWidth="2dp" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/visibilityChip"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:clickable="false"
+                            android:focusable="false"
+                            app:chipIcon="@drawable/ic_eye"
+                            app:chipIconSize="24dp"
+                            app:ensureMinTouchTargetSize="false"
+                            app:closeIconVisible="false"
+                            app:chipBackgroundColor="?attr/selectableChipBackground"
+                            app:chipStartPadding="6dp"
+                            app:chipStrokeColor="?attr/selectableChipStroke"
+                            app:chipStrokeWidth="2dp" />
+
+                    </com.google.android.material.chip.ChipGroup>
+
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Options Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp">
+
+            <!-- Card Content -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp">
+
+                <!-- Header for collapsible area -->
+                <LinearLayout
+                    android:id="@+id/options_collapsible_header"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_margin="8dp"
+                        android:src="@drawable/ic_nav_drawer_settings" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/TextViewStyle.Bold.Title"
+                            android:text="@string/trait_options_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"/>
+
+                    </LinearLayout>
+
+                    <!-- Collapse/Expand Icon -->
+                    <ImageView
+                        android:id="@+id/options_expand_collapse_icon"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:src="@drawable/ic_chevron_down" />
+                </LinearLayout>
+
+                <!-- Collapsible Content -->
+                <LinearLayout
+                    android:id="@+id/options_collapsible_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    android:paddingTop="12dp"
+                    android:paddingLeft="12dp"
+                    android:paddingRight="12dp">
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/optionsChipGroup"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:singleLine="false"
+                        app:chipSpacingHorizontal="8dp"
+                        app:chipSpacingVertical="8dp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+    <!-- Data Card -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp">
+
+        <!-- Card Content -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp">
+
+            <!-- Header for collapsible area -->
+            <LinearLayout
+                android:id="@+id/data_collapsible_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_margin="8dp"
+                    android:src="@drawable/ic_chart_bar" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TextViewStyle.Bold.Title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/field_data_title" />
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:singleLine="true"
+                        app:chipSpacingHorizontal="8dp">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/fieldCountChip"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:clickable="false"
+                            android:focusable="false"
+                            app:chipIcon="@drawable/ic_land_fields"
+                            app:chipIconSize="24dp"
+                            app:ensureMinTouchTargetSize="false"
+                            app:closeIconVisible="false"
+                            app:chipBackgroundColor="?attr/defaultChipBackground"
+                            tools:text="5 fields" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/observationCountChip"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:clickable="false"
+                            android:focusable="false"
+                            app:chipIcon="@drawable/ic_eye"
+                            app:chipIconSize="24dp"
+                            app:ensureMinTouchTargetSize="false"
+                            app:closeIconVisible="false"
+                            app:chipBackgroundColor="?attr/defaultChipBackground"
+                            tools:text="123 observations" />
+                    </com.google.android.material.chip.ChipGroup>
+                </LinearLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="0dp">
+
+                    <com.github.mikephil.charting.charts.PieChart
+                        android:id="@+id/completenessChart"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintDimensionRatio="1:1"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <!-- Collapse/Expand Icon -->
+                <ImageView
+                    android:id="@+id/data_expand_collapse_icon"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/ic_chevron_down" />
+            </LinearLayout>
+
+            <!-- Collapsible Content -->
+            <LinearLayout
+                android:id="@+id/data_collapsible_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:padding="16dp">
+
+                <!-- Charts -->
+                <com.github.mikephil.charting.charts.BarChart
+                    android:id="@+id/histogram"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:visibility="gone"/>
+
+                <com.github.mikephil.charting.charts.HorizontalBarChart
+                    android:id="@+id/barChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:id="@+id/noChartAvailableTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:padding="16dp"
+                    android:text="@string/field_trait_chart_no_data"
+                    android:visibility="gone"/>
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+    </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>
