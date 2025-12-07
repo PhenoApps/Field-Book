@@ -41,7 +41,7 @@ import org.phenoapps.utils.BaseDocumentTreeUtil
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class TraitEditorActivity : ThemedActivity() {
+class TraitActivity : ThemedActivity() {
 
     @Inject
     lateinit var soundHelperImpl: SoundHelperImpl
@@ -185,7 +185,7 @@ class TraitEditorActivity : ThemedActivity() {
                 putString("path", traitDir.uri.toString())
                 putString(
                     "dialogTitle",
-                    this@TraitEditorActivity.getString(R.string.traits_dialog_import)
+                    this@TraitActivity.getString(R.string.traits_dialog_import)
                 )
                 putStringArray("include", arrayOf("trt"))
             }
@@ -210,7 +210,7 @@ class TraitEditorActivity : ThemedActivity() {
                 putString("path", resDir.uri.toString())
                 putString(
                     "dialogTitle",
-                    this@TraitEditorActivity.getString(R.string.main_toolbar_resources)
+                    this@TraitActivity.getString(R.string.main_toolbar_resources)
                 )
                 putStringArray("include", arrayOf("jpg", "jpeg", "png", "bmp"))
             }
