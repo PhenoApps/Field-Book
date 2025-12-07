@@ -197,7 +197,7 @@ class TraitDetailFragment : Fragment() {
             if (data.processedObservations.isNotEmpty()) {
                 setupObservationChart(trait, data.processedObservations, chartTextSize)
             } else {
-                showNoChartMessage(getString(R.string.field_trait_chart_no_data))
+                showNoChartMessage(getString(R.string.chart_no_data))
             }
         }
     }
@@ -722,14 +722,14 @@ class TraitDetailFragment : Fragment() {
         val nonChartableFormats = setOf("audio", "gnss", "gopro", "location", "photo", "text", "usb camera")
 
         if (trait.format in nonChartableFormats) {
-            showNoChartMessage(getString(R.string.field_trait_chart_incompatible_format))
+            showNoChartMessage(getString(R.string.chart_incompatible_format))
             return
         }
 
         val filteredObservations = observations.filter { it.isNotEmpty() && it != "NA" }
 
         if (filteredObservations.isEmpty()) {
-            showNoChartMessage(getString(R.string.field_trait_chart_no_data))
+            showNoChartMessage(getString(R.string.chart_no_data))
             return
         }
 
