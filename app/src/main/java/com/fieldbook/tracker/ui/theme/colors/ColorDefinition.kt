@@ -9,6 +9,7 @@ val DefaultAppColors = AppColors(
     accent = BaseColors.Accent,
     primaryTransparent = BaseColors.PrimaryTransparent,
     background = BaseColors.Background,
+    lightGray = BaseColors.LightGrayColor,
 
     surface = SurfaceColors(
         border = BaseColors.Border,
@@ -187,6 +188,7 @@ val HighContrastAppColors = DefaultAppColors.copy(
     primaryDark = HighContrastOverrides.PrimaryDark,
     accent = HighContrastOverrides.Accent,
     primaryTransparent = HighContrastOverrides.PrimaryTransparent,
+    lightGray = HighContrastOverrides.LightGrayColor,
 
     surface = DefaultAppColors.surface.copy(
         iconFillTint = HighContrastOverrides.IconFillTint,

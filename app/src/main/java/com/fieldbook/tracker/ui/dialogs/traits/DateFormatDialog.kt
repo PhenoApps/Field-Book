@@ -14,7 +14,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.ui.components.widgets.RadioButton
 import com.fieldbook.tracker.ui.dialogs.AppAlertDialog
 import com.fieldbook.tracker.ui.theme.AppTheme
-import com.fieldbook.tracker.utilities.TraitOptionChipsUtil
+import com.fieldbook.tracker.utilities.TraitDetailUtil
 
 @Composable
 fun DateFormatDialog(
@@ -24,8 +24,8 @@ fun DateFormatDialog(
 ) {
     var selectedUseDayOfYear by remember { mutableStateOf(currentUseDayOfYear) }
 
-    val todayFormattedDate = TraitOptionChipsUtil.getTodayFormattedDate()
-    val todayDayOfYear = TraitOptionChipsUtil.getTodayDayOfYear()
+    val todayFormattedDate = TraitDetailUtil.getTodayFormattedDate()
+    val todayDayOfYear = TraitDetailUtil.getTodayDayOfYear()
 
     AppAlertDialog(
         title = stringResource(R.string.trait_date_format_dialog_title),

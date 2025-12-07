@@ -1,12 +1,10 @@
 package com.fieldbook.tracker.ui.components.widgets
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -26,29 +24,35 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.ui.components.graphs.PieChart
 import com.fieldbook.tracker.ui.theme.AppTheme
+import com.fieldbook.tracker.ui.utils.noRippleClickable
 
+/**
+ * Header consists of a Row where
+ * [leadingIcon], [title] and [headerContent], and [trailingContent]
+ * are placed.
+ */
 @Composable
 fun CollapsibleSection(
-    leadingIcon: Any? = null,
-    title: String,
-    initiallyExpanded: Boolean = false,
     modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
+    leadingIcon: Any? = null,
+    title: String? = null,
+    headerContent: (@Composable () -> Unit)? = null,
+    trailingContent: (@Composable () -> Unit)? = null,
+    initiallyExpanded: Boolean = false,
+    content: @Composable () -> Unit,
 ) {
     var isExpanded by remember { mutableStateOf(initiallyExpanded) }
 
     CardView(modifier = modifier) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { isExpanded = !isExpanded }
-                .padding(16.dp)
-        ) {
-
+        Column(modifier = Modifier.fillMaxWidth()) {
             // header
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .noRippleClickable { isExpanded = !isExpanded }
+                    .padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -62,27 +66,38 @@ fun CollapsibleSection(
                     Spacer(modifier = Modifier.width(8.dp))
                 }
 
-                Text(
-                    text = title,
-                    style = AppTheme.typography.titleStyle,
-                    modifier = Modifier.weight(1f)
-                )
+                Column(modifier = Modifier.weight(1f)) {
+                    title?.let {
+                        Text(
+                            text = title,
+                            style = AppTheme.typography.titleStyle,
+                        )
+                    }
+
+                    headerContent?.invoke()
+                }
+
+                trailingContent?.invoke()
 
                 Icon(
                     imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = if (isExpanded) {
-                        stringResource(R.string.menu_collapse_all)
-                    } else {
-                        stringResource(R.string.menu_expand_all)
-                    },
+                    contentDescription =
+                        if (isExpanded) stringResource(R.string.menu_collapse_all)
+                        else stringResource(R.string.menu_expand_all),
                     modifier = Modifier.rotate(if (isExpanded) 180f else 0f)
                 )
             }
 
             // expanded section
             if (isExpanded) {
-                Spacer(modifier = Modifier.height(16.dp))
-                content()
+                Column(
+                    modifier = Modifier
+                        .padding(
+                            start = 16.dp, end = 16.dp, bottom = 16.dp
+                        )
+                ) {
+                    content()
+                }
             }
         }
     }
@@ -96,9 +111,22 @@ private fun CollapsibleSectionPreview() {
             leadingIcon = R.drawable.ic_configure,
             title = "Section Title",
             initiallyExpanded = true,
-            modifier = Modifier
-        ) {
-            Text("Section Content")
-        }
+            modifier = Modifier,
+            headerContent = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Chip(text = "2", icon = R.drawable.ic_land_fields)
+                    Chip(text = "10", icon = R.drawable.ic_eye)
+                }
+            },
+            trailingContent = {
+                PieChart(completeness = 0.75f)
+            },
+            content = {
+                Text("Section Content")
+            },
+        )
     }
 }

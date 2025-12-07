@@ -14,7 +14,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.ui.components.widgets.RadioButton
 import com.fieldbook.tracker.ui.dialogs.AppAlertDialog
 import com.fieldbook.tracker.ui.theme.AppTheme
-import com.fieldbook.tracker.utilities.TraitOptionChipsUtil.parseCategoryExample
+import com.fieldbook.tracker.utilities.TraitDetailUtil.parseCategoryExample
 
 @Composable
 fun BrapiLabelValueDialog(

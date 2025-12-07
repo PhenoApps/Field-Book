@@ -1,9 +1,10 @@
 package com.fieldbook.tracker.utilities
 
 import android.util.Log
+import java.time.LocalDate
 import java.util.Calendar
 
-object TraitOptionChipsUtil {
+object TraitDetailUtil {
     fun getTodayDayOfYear(): String = Calendar.getInstance().get(Calendar.DAY_OF_YEAR).toString()
 
     fun getTodayFormattedDate(): String {
@@ -12,7 +13,19 @@ object TraitOptionChipsUtil {
         val year = calendar.get(Calendar.YEAR)
         val month = calendar.get(Calendar.MONTH) + 1 // calendar months are 0-based
         val day = calendar.get(Calendar.DAY_OF_MONTH)
-        return String.format("%04d-%02d-%02d", year, month, day)
+        return LocalDate.of(year, month, day).toString()
+    }
+
+    fun parseCategories(categories: String): List<String> {
+        return try {
+            if (categories.startsWith("[")) {
+                CategoryJsonUtil.decode(categories).map { it.value }
+            } else {
+                categories.split("/").map { it.trim() }
+            }
+        } catch (_: Exception) {
+            emptyList()
+        }
     }
 
     fun parseCategoryExample(categories: String): Pair<String, String> {

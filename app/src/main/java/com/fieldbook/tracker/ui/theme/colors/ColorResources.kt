@@ -24,6 +24,7 @@ object BaseColors {
     val TraitPercentStart = Primary
     val TapTarget = Color.Black
     val Background = Color.White
+    val LightGrayColor = LightGray
     val TextLight = Color.Black
     val TextDark = Color.Black
     val TextButtonBackground = Color(0xFFD6D7D7)
@@ -116,6 +117,7 @@ object HighContrastOverrides {
     val PrimaryDark = Color.Black
     val Accent = Color.Black
     val PrimaryTransparent = Color.White
+    val LightGrayColor = Color.Black
     val TraitPercentBackgroundCenter = Color.White
     val TraitPercentBackgroundStartEnd = Color.White
     val TraitPercentStroke = Color.Black
