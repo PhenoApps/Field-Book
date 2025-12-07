@@ -44,7 +44,7 @@ class FileExploreDialogFragment : DialogFragment() {
         }
         exclude = arguments?.getStringArray("exclude")
         include = arguments?.getStringArray("include")
-        val dialogTitle = arguments?.getString("dialogTitle") ?: "Select File"
+        val dialogTitle = arguments?.getString("dialogTitle") ?: getString(R.string.file_explorer_select_file_title)
 
         val dialog = Dialog(requireContext(), R.style.AppAlertDialog)
 
