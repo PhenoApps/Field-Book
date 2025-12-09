@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.database.viewmodels
 
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,6 +8,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.application.IoDispatcher
 import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.TraitObject
+import com.fieldbook.tracker.preferences.GeneralKeys
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -20,6 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class TraitDetailViewModel @Inject constructor(
     private val repo: TraitRepository,
+    private val prefs: SharedPreferences,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
@@ -32,6 +35,18 @@ class TraitDetailViewModel @Inject constructor(
 
     private val _events = MutableSharedFlow<TraitDetailEvent>()
     val events = _events.asSharedFlow()
+
+    fun isOverviewExpanded(): Boolean {
+        return !prefs.getBoolean(GeneralKeys.TRAIT_DETAIL_OVERVIEW_COLLAPSED, false)
+    }
+
+    fun isOptionsExpanded(): Boolean {
+        return !prefs.getBoolean(GeneralKeys.TRAIT_DETAIL_OPTIONS_COLLAPSED, false)
+    }
+
+    fun isDataExpanded(): Boolean {
+        return !prefs.getBoolean(GeneralKeys.TRAIT_DETAIL_DATA_COLLAPSED, false)
+    }
 
     fun loadTraitDetails(traitId: String) {
         viewModelScope.launch {

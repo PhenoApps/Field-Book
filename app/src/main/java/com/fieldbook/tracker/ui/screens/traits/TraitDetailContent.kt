@@ -35,6 +35,9 @@ fun TraitDetailContent(
     onUpdateAliasAndAddSynonym: (String) -> Unit,
     onValidateSynonym: (String) -> String?,
     onShowParameterEditDialog: (BaseFormatParameter, TraitObject, (TraitObject) -> Unit) -> Unit,
+    isOverviewExpanded: Boolean,
+    isOptionsExpanded: Boolean,
+    isDataExpanded: Boolean,
 ) {
     Column(
         modifier = modifier
@@ -46,7 +49,7 @@ fun TraitDetailContent(
         CollapsibleSection(
             leadingIcon = R.drawable.ic_ruler,
             title = trait.alias,
-            initiallyExpanded = true
+            initiallyExpanded = isOverviewExpanded
         ) {
             TraitOverviewSection(
                 trait = trait,
@@ -62,7 +65,7 @@ fun TraitDetailContent(
         CollapsibleSection(
             leadingIcon = R.drawable.ic_nav_drawer_settings,
             title = stringResource(R.string.trait_options_title),
-            initiallyExpanded = true,
+            initiallyExpanded = isOptionsExpanded,
         ) {
             TraitOptionsSection(
                 trait = trait,
@@ -76,7 +79,7 @@ fun TraitDetailContent(
         CollapsibleSection(
             leadingIcon = R.drawable.ic_chart_bar,
             title = stringResource(R.string.trait_observation_data),
-            initiallyExpanded = true,
+            initiallyExpanded = isDataExpanded,
             headerContent = {
                 observationData?.let { obsData ->
                     Row(
@@ -127,10 +130,12 @@ private fun TraitDetailPreview() {
             onUpdateAttributes = { },
             onToggleVisibility = { },
             onResourceFilePickerDialog = { },
-            modifier = Modifier,
             onUpdateAliasAndAddSynonym = { },
             onValidateSynonym = { _ -> null },
             onShowParameterEditDialog = { _, _, _ -> null },
+            isOverviewExpanded = true,
+            isOptionsExpanded = true,
+            isDataExpanded = true,
         )
     }
 }

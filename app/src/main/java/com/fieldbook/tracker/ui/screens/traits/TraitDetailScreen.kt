@@ -52,6 +52,11 @@ fun TraitDetailScreen(
     val successState = uiState as? TraitDetailUiState.Success
     val currentTrait = successState?.trait
 
+    // prefs
+    val isOverviewExpanded = detailViewModel.isOverviewExpanded()
+    val isOptionsExpanded = detailViewModel.isOptionsExpanded()
+    val isDataExpanded = detailViewModel.isDataExpanded()
+
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showCopyDialog by remember { mutableStateOf(false) }
 
@@ -139,6 +144,9 @@ fun TraitDetailScreen(
                             onUpdated(updatedTrait)
                         }
                     },
+                    isOverviewExpanded = isOverviewExpanded,
+                    isOptionsExpanded = isOptionsExpanded,
+                    isDataExpanded = isDataExpanded,
                     modifier = Modifier.padding(padding),
                 )
             }
