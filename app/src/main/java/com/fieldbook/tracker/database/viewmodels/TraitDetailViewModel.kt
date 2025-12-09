@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -31,7 +33,7 @@ class TraitDetailViewModel @Inject constructor(
     }
 
     private val _uiState = MutableStateFlow<TraitDetailUiState>(TraitDetailUiState.Loading)
-    val uiState: StateFlow<TraitDetailUiState> = _uiState
+    val uiState: StateFlow<TraitDetailUiState> = _uiState.asStateFlow()
 
     private val _events = MutableSharedFlow<TraitDetailEvent>()
     val events = _events.asSharedFlow()
@@ -191,6 +193,23 @@ class TraitDetailViewModel @Inject constructor(
                 }
         }
     }
+
+    // DIALOG STATES
+    fun showDialog(nextDialog: TraitDetailDialog) {
+        _uiState.update { state ->
+            if (state is TraitDetailUiState.Success) {
+                state.copy(activeDialog = nextDialog)
+            } else state
+        }
+    }
+
+    fun hideDialog() {
+        _uiState.update { state ->
+            if (state is TraitDetailUiState.Success) {
+                state.copy(activeDialog = TraitDetailDialog.None)
+            } else state
+        }
+    }
 }
 
 sealed class TraitDetailUiState {
@@ -198,6 +217,7 @@ sealed class TraitDetailUiState {
     data class Success(
         val trait: TraitObject,
         val observationData: ObservationData?,
+        val activeDialog: TraitDetailDialog = TraitDetailDialog.None,
     ) : TraitDetailUiState()
     data class Error(val messageRes: Int) : TraitDetailUiState()
 }
@@ -214,4 +234,10 @@ sealed class TraitDetailEvent {
     object NavigateBack : TraitDetailEvent()
     data class CopySuccess(val trait: TraitObject) : TraitDetailEvent()
     data class Error(val resId: Int) : TraitDetailEvent()
+}
+
+sealed class TraitDetailDialog {
+    object None : TraitDetailDialog()
+    object Delete : TraitDetailDialog()
+    object Copy : TraitDetailDialog()
 }

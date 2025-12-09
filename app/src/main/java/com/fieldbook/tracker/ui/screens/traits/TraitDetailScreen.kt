@@ -12,14 +12,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.fieldbook.tracker.database.viewmodels.TraitDetailDialog
 import com.fieldbook.tracker.database.viewmodels.TraitDetailEvent
 import com.fieldbook.tracker.database.viewmodels.TraitDetailUiState
 import com.fieldbook.tracker.database.viewmodels.TraitDetailViewModel
@@ -46,6 +45,7 @@ fun TraitDetailScreen(
     val editorUiState by editorViewModel.uiState.collectAsState()
 
     val context = LocalContext.current
+    val resources = LocalResources.current
 
     val uiState by detailViewModel.uiState.collectAsStateWithLifecycle()
 
@@ -57,9 +57,6 @@ fun TraitDetailScreen(
     val isOptionsExpanded = detailViewModel.isOptionsExpanded()
     val isDataExpanded = detailViewModel.isDataExpanded()
 
-    var showDeleteDialog by remember { mutableStateOf(false) }
-    var showCopyDialog by remember { mutableStateOf(false) }
-
     // load trait details initially
     LaunchedEffect(traitId) {
         detailViewModel.loadTraitDetails(traitId)
@@ -70,17 +67,13 @@ fun TraitDetailScreen(
             TraitDetailToolbar(
                 trait = (uiState as? TraitDetailUiState.Success)?.trait,
                 onBack = onBack,
-                onCopyTrait = {
-                    showCopyDialog = true
-                },
+                onCopyTrait = { detailViewModel.showDialog(TraitDetailDialog.Copy) },
                 onConfigureTrait = {
                     currentTrait?.let { trait ->
                         onShowConfigureTraitDialog(trait)
                     }
                 },
-                onDeleteTrait = {
-                    showDeleteDialog = true
-                }
+                onDeleteTrait = { detailViewModel.showDialog(TraitDetailDialog.Delete) }
             )
         }
     ) { padding ->
@@ -134,7 +127,7 @@ fun TraitDetailScreen(
                             trait
                         )
                         validationError?.let { errorRes ->
-                            context.getString(errorRes)
+                            resources.getString(errorRes)
                         }
                     },
                     onShowParameterEditDialog = { param, traitObj, onUpdated ->
@@ -153,29 +146,37 @@ fun TraitDetailScreen(
         }
     }
 
-    if (showDeleteDialog) {
-        DeleteTraitDialog(
-            onCancel = { showDeleteDialog = false },
-            onDelete = {
-                currentTrait?.let { trait ->
-                    detailViewModel.deleteTrait(trait.id)
-                    editorViewModel.removeTraitObject(trait.id)
+    // observe for active dialog
+    when (successState?.activeDialog) {
+        TraitDetailDialog.Delete -> {
+            DeleteTraitDialog(
+                onCancel = { detailViewModel.hideDialog() },
+                onDelete = {
+                    currentTrait?.let { trait ->
+                        detailViewModel.deleteTrait(trait.id)
+                        editorViewModel.removeTraitObject(trait.id)
+                    }
+                    detailViewModel.hideDialog()
+                    onBack()
                 }
-                showDeleteDialog = false
-                onBack() // navigate to trait editor
+            )
+        }
+
+        TraitDetailDialog.Copy -> {
+            currentTrait?.let { trait ->
+                CopyTraitDialog(
+                    trait = trait,
+                    allTraits = editorUiState.traits,
+                    onCancel = { detailViewModel.hideDialog() },
+                    onCopy = { newName ->
+                        detailViewModel.hideDialog()
+                        detailViewModel.copyTrait(trait, newName)
+                    }
+                )
             }
-        )
-    }
-    if (showCopyDialog && currentTrait != null) {
-        CopyTraitDialog(
-            trait = currentTrait,
-            allTraits = editorUiState.traits,
-            onCancel = { showCopyDialog = false },
-            onCopy = { newName ->
-                showCopyDialog = false
-                detailViewModel.copyTrait(currentTrait, newName)
-            }
-        )
+        }
+
+        else -> Unit
     }
 
     LaunchedEffect(Unit) {
@@ -186,11 +187,11 @@ fun TraitDetailScreen(
                 }
 
                 is TraitDetailEvent.Error -> {
-                    Utils.makeToast(context, context.getString(event.resId))
+                    Utils.makeToast(context, resources.getString(event.resId))
                 }
 
                 is TraitDetailEvent.Message -> {
-                    Utils.makeToast(context, context.getString(event.resId))
+                    Utils.makeToast(context, resources.getString(event.resId))
                 }
 
                 TraitDetailEvent.NavigateBack -> {

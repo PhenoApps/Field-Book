@@ -2,7 +2,6 @@ package com.fieldbook.tracker.database.viewmodels
 
 import android.content.SharedPreferences
 import android.net.Uri
-import android.util.Log
 import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -43,12 +42,6 @@ class TraitEditorViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(TraitEditorUiState())
     val uiState: StateFlow<TraitEditorUiState> = _uiState.asStateFlow()
-
-    private val _exportTriggeredSource = MutableStateFlow(ExportTriggerSource.UNKNOWN)
-    val exportTriggerSource = _exportTriggeredSource.asStateFlow()
-
-    private val _deleteTriggeredSource = MutableStateFlow(DeleteTriggerSource.UNKNOWN)
-    val deleteTriggeredSource = _deleteTriggeredSource.asStateFlow()
 
     private val _events = MutableSharedFlow<TraitEditorEvent>()
     val events = _events.asSharedFlow()
@@ -307,22 +300,46 @@ class TraitEditorViewModel @Inject constructor(
         _uiState.update { it.copy(activeDialog = TraitActivityDialog.None) }
     }
 
-    fun showExportDialog(source: ExportTriggerSource) {
-        _exportTriggeredSource.value = source
-        _uiState.update { it.copy(activeDialog = TraitActivityDialog.Export) }
+    fun showExportDialog(source: DialogTriggerSource) {
+        _uiState.update { it.copy(activeDialog = TraitActivityDialog.Export(source)) }
     }
 
-    fun showDeleteDialog(source: DeleteTriggerSource) {
-        _deleteTriggeredSource.value = source
-        _uiState.update { it.copy(activeDialog = TraitActivityDialog.DeleteAll) }
+    fun showDeleteDialog(source: DialogTriggerSource) {
+        _uiState.update { it.copy(activeDialog = TraitActivityDialog.DeleteAll(source)) }
     }
 
-    fun clearExportTrigger() {
-        _exportTriggeredSource.value = ExportTriggerSource.UNKNOWN
+    /**
+     * Handles cancel or export dialog button in export dialog
+     *
+     * can be triggered during IMPORT_WORKFLOW OR via TOOLBAR
+     * if triggered via import workflow, show DeleteAllDialog -> Import Local/Cloud file
+     */
+    fun handleExportDialogAction(source: DialogTriggerSource, fileName: String? = null) {
+        hideDialog()
+
+        fileName?.let{ exportTraits(it) }
+
+        if (source == DialogTriggerSource.IMPORT_WORKFLOW) {
+            showDeleteDialog(DialogTriggerSource.IMPORT_WORKFLOW)
+        }
     }
 
-    fun clearDeleteTrigger() {
-        _deleteTriggeredSource.value = DeleteTriggerSource.UNKNOWN
+    /**
+     * Handles cancel or delete dialog button in delete all dialog
+     *
+     * can be triggered during IMPORT_WORKFLOW OR via TOOLBAR
+     * if triggered via IMPORT_WORKFLOW, show Import Local/Cloud file
+     */
+    fun handleDeleteDialogAction(source: DialogTriggerSource, shouldDelete: Boolean = false) {
+        hideDialog()
+
+        if (shouldDelete) {
+            deleteAllTraits()
+        }
+
+        if (source == DialogTriggerSource.IMPORT_WORKFLOW) {
+            showDialog(TraitActivityDialog.ImportChoice)
+        }
     }
 
     // ONE-TIME EVENTS
@@ -338,7 +355,7 @@ class TraitEditorViewModel @Inject constructor(
 
         if (traits.isNotEmpty()) {
             // delete all dialog
-            showDeleteDialog(DeleteTriggerSource.IMPORT_WORKFLOW)
+            showDeleteDialog(DialogTriggerSource.IMPORT_WORKFLOW)
             return
         }
 
@@ -347,7 +364,7 @@ class TraitEditorViewModel @Inject constructor(
     }
 
     fun onExportPermissionGranted() {
-        showExportDialog(ExportTriggerSource.TOOLBAR)
+        showExportDialog(DialogTriggerSource.TOOLBAR)
     }
 
     fun requestImportPermission() {
@@ -375,17 +392,15 @@ class TraitEditorViewModel @Inject constructor(
     }
 }
 
-enum class ExportTriggerSource {
-    IMPORT_WORKFLOW,
-    TOOLBAR,
-    UNKNOWN
-}
-
-enum class DeleteTriggerSource {
-    IMPORT_WORKFLOW,
-    TOOLBAR,
-    UNKNOWN
-}
+/**
+ * Used to specify how are (Export and Delete All)
+ * dialogs invoked
+ *
+ * If they were invoked through
+ * - toolbar item, nothing to show next
+ * - import workflow ("Import from File"), decide what to show next
+ */
+enum class DialogTriggerSource { IMPORT_WORKFLOW, TOOLBAR }
 
 data class TraitEditorUiState(
     val activeDialog: TraitActivityDialog = TraitActivityDialog.None,
@@ -414,7 +429,7 @@ sealed class TraitActivityDialog {
     object NewTrait : TraitActivityDialog()
     object ImportChoice : TraitActivityDialog()
     object ExportCheck : TraitActivityDialog()
-    object Export : TraitActivityDialog()
-    object DeleteAll : TraitActivityDialog()
+    data class Export(val source: DialogTriggerSource) : TraitActivityDialog()
+    data class DeleteAll(val source: DialogTriggerSource) : TraitActivityDialog()
     object SortTraits : TraitActivityDialog()
 }

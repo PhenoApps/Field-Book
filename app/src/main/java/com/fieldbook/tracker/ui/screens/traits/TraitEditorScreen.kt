@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,8 +54,7 @@ import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.Utils
 import com.fieldbook.tracker.database.viewmodels.TraitActivityDialog
-import com.fieldbook.tracker.database.viewmodels.DeleteTriggerSource
-import com.fieldbook.tracker.database.viewmodels.ExportTriggerSource
+import com.fieldbook.tracker.database.viewmodels.DialogTriggerSource
 import com.fieldbook.tracker.database.viewmodels.TraitEditorEvent
 import com.fieldbook.tracker.database.viewmodels.TraitEditorViewModel
 import kotlinx.coroutines.Dispatchers
@@ -68,11 +68,10 @@ fun TraitEditorScreen(
     onShowLocalFilePicker: () -> Unit,
 ) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val prefs = PreferenceManager.getDefaultSharedPreferences(context)
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val exportTriggerSource by viewModel.exportTriggerSource.collectAsStateWithLifecycle()
-    val deleteTriggerSource by viewModel.deleteTriggeredSource.collectAsStateWithLifecycle()
 
     val permissionCallback = remember { mutableStateOf<(() -> Unit)?>(null) }
 
@@ -144,7 +143,7 @@ fun TraitEditorScreen(
                         icon = Icons.Filled.Delete,
                         displayMode = ActionDisplayMode.IF_ROOM,
                         onClick = {
-                            viewModel.showDeleteDialog(DeleteTriggerSource.TOOLBAR)
+                            viewModel.showDeleteDialog(DialogTriggerSource.TOOLBAR)
                         }
                     ),
                     TopAppBarAction(
@@ -219,7 +218,7 @@ fun TraitEditorScreen(
     }
 
     // observe for active dialog
-    when (uiState.activeDialog) {
+    when (val dialog = uiState.activeDialog) {
         TraitActivityDialog.NewTrait -> {
             val defaultBrapiName = stringResource(R.string.brapi_edit_display_name_default)
 
@@ -264,69 +263,30 @@ fun TraitEditorScreen(
             ExportCheckDialog(
                 onConfirmExport = {
                     viewModel.hideDialog()
-                    viewModel.showExportDialog(ExportTriggerSource.IMPORT_WORKFLOW)
+                    viewModel.showExportDialog(DialogTriggerSource.IMPORT_WORKFLOW)
                 },
                 onSkipExport = {
                     viewModel.hideDialog()
-                    viewModel.showDeleteDialog(DeleteTriggerSource.IMPORT_WORKFLOW)
+                    viewModel.showDeleteDialog(DialogTriggerSource.IMPORT_WORKFLOW)
                 }
             )
         }
 
-        TraitActivityDialog.Export -> {
-            // can be triggered during IMPORT_WORKFLOW OR via TOOLBAR
-
-            // if triggered via import workflow, show DeleteAllDialog -> Import Local/Cloud file
+        is TraitActivityDialog.Export -> {
             ExportDialog(
-                onCancel = {
-                    viewModel.hideDialog()
-
-                    if (exportTriggerSource == ExportTriggerSource.IMPORT_WORKFLOW) {
-                        viewModel.showDeleteDialog(DeleteTriggerSource.IMPORT_WORKFLOW)
-                    }
-
-                    viewModel.clearExportTrigger()
-                },
+                onCancel = { viewModel.handleExportDialogAction(dialog.source) },
                 onExport = { fileName ->
-                    viewModel.hideDialog()
-                    viewModel.exportTraits(fileName)
-
-                    if (exportTriggerSource == ExportTriggerSource.IMPORT_WORKFLOW) {
-                        viewModel.showDeleteDialog(DeleteTriggerSource.IMPORT_WORKFLOW)
-                    }
-
-                    viewModel.clearExportTrigger()
+                    viewModel.handleExportDialogAction(dialog.source, fileName)
                 }
             )
         }
 
-        TraitActivityDialog.DeleteAll -> {
-            // can be triggered during IMPORT_WORKFLOW OR via TOOLBAR
-
-            // if triggered via IMPORT_WORKFLOW, show Import Local/Cloud file
+        is TraitActivityDialog.DeleteAll -> {
             DeleteAllTraitsDialog(
-                onDelete = {
-                    viewModel.deleteAllTraits()
-                    viewModel.hideDialog()
-
-                    if (deleteTriggerSource == DeleteTriggerSource.IMPORT_WORKFLOW) {
-                        viewModel.showDialog(TraitActivityDialog.ImportChoice)
-                    }
-
-                    viewModel.clearDeleteTrigger()
-                },
-                onCancel = {
-                    viewModel.hideDialog()
-
-                    if (deleteTriggerSource == DeleteTriggerSource.IMPORT_WORKFLOW) {
-                        viewModel.showDialog(TraitActivityDialog.ImportChoice)
-                    }
-
-                    viewModel.clearDeleteTrigger()
-                }
+                onCancel = { viewModel.handleDeleteDialogAction(dialog.source) },
+                onDelete = { viewModel.handleDeleteDialogAction(dialog.source, true) },
             )
         }
-
 
         TraitActivityDialog.SortTraits -> {
             SortOptionsDialog(
@@ -383,14 +343,14 @@ fun TraitEditorScreen(
                 TraitEditorEvent.OpenCloudFilePicker -> {
                     val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
                         addCategory(Intent.CATEGORY_OPENABLE)
-                        Intent.setType = "*/*"
+                        type = "*/*"
                     }
                     cloudFileImportLauncher.launch(intent)
                 }
 
                 TraitEditorEvent.NavigateToBrapi -> {
                     if (!Utils.isConnected(context)) {
-                        Utils.makeToast(context, context.getString(R.string.opening_brapi_no_network_error))
+                        Utils.makeToast(context, resources.getString(R.string.opening_brapi_no_network_error))
                         return@collect
                     }
 
