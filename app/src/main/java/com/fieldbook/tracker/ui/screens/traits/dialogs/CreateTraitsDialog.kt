@@ -1,11 +1,11 @@
-package com.fieldbook.tracker.ui.dialogs.traits
+package com.fieldbook.tracker.ui.screens.traits.dialogs
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.ui.dialogs.components.DialogOption
-import com.fieldbook.tracker.ui.dialogs.components.OptionsDialog
+import com.fieldbook.tracker.ui.dialogs.DialogOption
+import com.fieldbook.tracker.ui.dialogs.OptionsDialog
 import com.fieldbook.tracker.ui.theme.AppTheme
 
 @Composable

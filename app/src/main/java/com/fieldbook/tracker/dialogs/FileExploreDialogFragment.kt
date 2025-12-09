@@ -9,8 +9,8 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.ui.dialogs.DialogTheme
 import com.fieldbook.tracker.ui.dialogs.FileExplorerContent
+import com.fieldbook.tracker.ui.theme.AppTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -50,7 +50,7 @@ class FileExploreDialogFragment : DialogFragment() {
 
         dialog.setContentView(ComposeView(requireContext()).apply {
             setContent {
-                DialogTheme {
+                AppTheme {
                     FileExplorerContent(
                         title = dialogTitle,
                         currentPath = currentPath,

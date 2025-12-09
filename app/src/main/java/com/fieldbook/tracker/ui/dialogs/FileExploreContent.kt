@@ -19,6 +19,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.documentfile.provider.DocumentFile
 import com.fieldbook.tracker.dialogs.FileExploreDialogFragment.FileItem
+import com.fieldbook.tracker.ui.dialogs.builder.AppAlertDialog
+import com.fieldbook.tracker.ui.dialogs.components.FileItemRow
+import com.fieldbook.tracker.ui.theme.AppTheme
 
 @Composable
 fun FileExplorerContent(
@@ -80,11 +83,13 @@ fun FileExplorerContent(
 @Preview
 @Composable
 private fun FileExplorerContentPreview() {
-    FileExplorerContent(
-        title = "Title",
-        currentPath = null,
-        loadFiles = {},
-        handleItemClick = { _, _ -> {} },
-        cancelButtonText = "Cancel",
-    ) { }
+    AppTheme {
+        FileExplorerContent(
+            title = "Title",
+            currentPath = null,
+            loadFiles = {},
+            handleItemClick = { _, _ -> {} },
+            cancelButtonText = "Cancel",
+        ) { }
+    }
 }

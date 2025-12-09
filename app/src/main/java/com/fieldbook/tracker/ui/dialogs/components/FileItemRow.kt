@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.ui.dialogs
+package com.fieldbook.tracker.ui.dialogs.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable

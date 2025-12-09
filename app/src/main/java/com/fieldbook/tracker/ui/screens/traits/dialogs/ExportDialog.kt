@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.ui.dialogs.traits
+package com.fieldbook.tracker.ui.screens.traits.dialogs
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.OutlinedTextField
@@ -11,7 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.ui.dialogs.AppAlertDialog
+import com.fieldbook.tracker.ui.dialogs.builder.AppAlertDialog
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale

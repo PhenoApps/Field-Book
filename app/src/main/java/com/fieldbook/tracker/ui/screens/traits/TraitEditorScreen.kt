@@ -1,11 +1,10 @@
-package com.fieldbook.tracker.ui.screens
+package com.fieldbook.tracker.ui.screens.traits
 
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Build
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
@@ -38,12 +37,12 @@ import com.fieldbook.tracker.activities.brapi.BrapiTraitActivity
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache
 import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiTraitFilterActivity
 import com.fieldbook.tracker.database.DataHelper
-import com.fieldbook.tracker.ui.dialogs.traits.DeleteAllTraitsDialog
-import com.fieldbook.tracker.ui.dialogs.traits.ExportDialog
-import com.fieldbook.tracker.ui.dialogs.traits.SortOptionsDialog
-import com.fieldbook.tracker.ui.dialogs.traits.CreateTraitsDialog
-import com.fieldbook.tracker.ui.dialogs.traits.ExportCheckDialog
-import com.fieldbook.tracker.ui.dialogs.traits.TraitImportDialog
+import com.fieldbook.tracker.ui.screens.traits.dialogs.DeleteAllTraitsDialog
+import com.fieldbook.tracker.ui.screens.traits.dialogs.ExportDialog
+import com.fieldbook.tracker.ui.screens.traits.dialogs.SortOptionsDialog
+import com.fieldbook.tracker.ui.screens.traits.dialogs.CreateTraitsDialog
+import com.fieldbook.tracker.ui.screens.traits.dialogs.ExportCheckDialog
+import com.fieldbook.tracker.ui.screens.traits.dialogs.TraitImportDialog
 import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.ui.components.appBar.ActionDisplayMode
 import com.fieldbook.tracker.ui.components.appBar.AppBar
@@ -384,7 +383,7 @@ fun TraitEditorScreen(
                 TraitEditorEvent.OpenCloudFilePicker -> {
                     val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
                         addCategory(Intent.CATEGORY_OPENABLE)
-                        type = "*/*"
+                        Intent.setType = "*/*"
                     }
                     cloudFileImportLauncher.launch(intent)
                 }

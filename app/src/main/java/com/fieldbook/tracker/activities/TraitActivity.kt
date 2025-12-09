@@ -20,7 +20,7 @@ import com.fieldbook.tracker.database.viewmodels.TraitDetailViewModel
 import com.fieldbook.tracker.dialogs.FileExploreDialogFragment
 import com.fieldbook.tracker.dialogs.NewTraitDialog
 import com.fieldbook.tracker.objects.TraitObject
-import com.fieldbook.tracker.ui.screens.TraitEditorScreen
+import com.fieldbook.tracker.ui.screens.traits.TraitEditorScreen
 import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.Utils
 import com.fieldbook.tracker.database.viewmodels.TraitEditorViewModel

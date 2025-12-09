@@ -16,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
+import com.fieldbook.tracker.ui.dialogs.builder.AppAlertDialog
 import com.google.android.material.textfield.TextInputEditText
 
 @Composable
@@ -49,9 +50,20 @@ fun TextInputDialog(
 
                             addTextChangedListener(object : TextWatcher {
 
-                                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                                override fun beforeTextChanged(
+                                    s: CharSequence?,
+                                    start: Int,
+                                    count: Int,
+                                    after: Int
+                                ) {
+                                }
 
-                                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                                override fun onTextChanged(
+                                    s: CharSequence?,
+                                    start: Int,
+                                    before: Int,
+                                    count: Int
+                                ) {
                                     text = s?.toString() ?: ""
                                     errorMessage = null
                                 }
@@ -83,11 +95,13 @@ fun TextInputDialog(
         negativeButtonText = negativeButtonText,
         onNegative = onNegative,
         neutralButtonText = neutralButtonText,
-        onNeutral = onNeutral?.let { {
-            text = ""
-            errorMessage = null
-            it.invoke()
-        }}
+        onNeutral = onNeutral?.let {
+            {
+                text = ""
+                errorMessage = null
+                it.invoke()
+            }
+        }
     )
 }
 

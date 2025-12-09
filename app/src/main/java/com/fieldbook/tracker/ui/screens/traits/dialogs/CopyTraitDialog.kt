@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.ui.dialogs.traits
+package com.fieldbook.tracker.ui.screens.traits.dialogs
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.OutlinedTextField
@@ -13,7 +13,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.objects.TraitObject
-import com.fieldbook.tracker.ui.dialogs.AppAlertDialog
+import com.fieldbook.tracker.ui.dialogs.builder.AppAlertDialog
 import com.fieldbook.tracker.ui.theme.AppTheme
 
 @Composable

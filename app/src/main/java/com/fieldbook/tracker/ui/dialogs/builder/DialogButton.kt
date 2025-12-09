@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.ui.dialogs
+package com.fieldbook.tracker.ui.dialogs.builder
 
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme

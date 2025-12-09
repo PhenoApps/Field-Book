@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.ui.dialogs.components
+package com.fieldbook.tracker.ui.dialogs
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -7,8 +7,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.ui.dialogs.AppAlertDialog
+import com.fieldbook.tracker.ui.dialogs.builder.AppAlertDialog
 import com.fieldbook.tracker.ui.components.widgets.HorizontalDivide
+import com.fieldbook.tracker.ui.dialogs.components.OptionsDialogListItem
 import com.fieldbook.tracker.ui.theme.AppTheme
 
 data class DialogOption(

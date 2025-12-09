@@ -1,6 +1,6 @@
-package com.fieldbook.tracker.ui.dialogs.traits
+package com.fieldbook.tracker.ui.screens.traits.dialogs
 
-import com.fieldbook.tracker.ui.dialogs.AppAlertDialog
+import com.fieldbook.tracker.ui.dialogs.builder.AppAlertDialog
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions

@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.ui.dialogs
+package com.fieldbook.tracker.ui.dialogs.builder
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
