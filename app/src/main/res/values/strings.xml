@@ -1287,11 +1287,11 @@
     <string name="brapi_server_info_pref">Check Compatibility</string>
     <string name="brapi_server_info_pref_summary">View supported BrAPI calls and server information</string>
     <string name="brapi_compatibility">BrAPI Compatibility</string>
-    <string name="brapi_compatibility_fieldbook">Compatibility with Field Book</string>
-    <string name="brapi_server_name_label">Server Name: %1$s</string>
-    <string name="brapi_organization_name_label">Organization Name: %1$s</string>
-    <string name="brapi_server_description_label">Description: %1$s</string>
-    <string name="brapi_compatibility_all_calls">All BrAPI Calls</string>
+    <string name="brapi_compatibility_with_app">Compatibility with %s</string>
+    <string name="brapi_server_name_label">%1$s</string>
+    <string name="brapi_organization_name_label">%1$s</string>
+    <string name="brapi_server_description_label">%1$s</string>
+    <string name="brapi_compatibility_all_calls">BrAPI in Field Book</string>
     <string name="brapi_compatibility_server_support">Supported by server</string>
     <string name="brapi_compatibility_no_server_support">Not supported by server</string>
     <string name="brapi_compatibility_fieldbook_support">Supported by Field Book</string>

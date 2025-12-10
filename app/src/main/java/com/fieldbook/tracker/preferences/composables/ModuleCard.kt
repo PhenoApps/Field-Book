@@ -47,19 +47,19 @@ private fun ModuleCardWithTablePreview() {
                     ServiceComparison(
                         service = "studies",
                         methods = listOf("GET", "POST"),
-                        isFbImplemented = true,
+                        isAppImplemented = true,
                         implementedMethods = listOf("GET"),
-                        source = CallImplementedBy.SERVER_AND_FIELD_BOOK
+                        source = CallImplementedBy.SERVER_AND_APP
                     ),
                     ServiceComparison(
                         service = "observations",
                         methods = listOf("GET", "POST", "PUT"),
-                        isFbImplemented = true,
+                        isAppImplemented = true,
                         implementedMethods = listOf("GET", "POST", "PUT"),
-                        source = CallImplementedBy.SERVER_AND_FIELD_BOOK
+                        source = CallImplementedBy.SERVER_AND_APP
                     ),
                 ),
-                fbImplementedCount = 1,
+                appImplementedCount = 1,
                 totalCalls = 2
             )
         )

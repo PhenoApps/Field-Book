@@ -44,7 +44,7 @@ fun ServerInfoScreen(uiState: ServerInfoUiState) {
 
                 // field book compatibility
                 // shows serverSupported / totalFBCalls as %
-                uiState.fieldBookCompatibility?.let { compatibility ->
+                uiState.appCompatibility?.let { compatibility ->
                     item {
                         ModuleCard(moduleInfo = compatibility)
                     }
@@ -88,48 +88,48 @@ private fun ServerInfoScreenPreview() {
                             ServiceComparison(
                                 service = "studies",
                                 methods = listOf("GET", "POST"),
-                                isFbImplemented = true,
+                                isAppImplemented = true,
                                 implementedMethods = listOf("GET"),
-                                source = CallImplementedBy.SERVER_AND_FIELD_BOOK
+                                source = CallImplementedBy.SERVER_AND_APP
                             ),
                             ServiceComparison(
                                 service = "programs",
                                 methods = listOf("GET"),
-                                isFbImplemented = true,
+                                isAppImplemented = true,
                                 implementedMethods = listOf("GET"),
-                                source = CallImplementedBy.SERVER_AND_FIELD_BOOK
+                                source = CallImplementedBy.SERVER_AND_APP
                             ),
                             ServiceComparison(
                                 service = "trials",
                                 methods = listOf("GET", "POST"),
-                                isFbImplemented = false,
+                                isAppImplemented = false,
                                 implementedMethods = emptyList(),
                                 source = CallImplementedBy.SERVER
                             )
                         ),
-                        fbImplementedCount = 2,
+                        appImplementedCount = 2,
                         totalCalls = 3
                     ),
                 ),
-                fieldBookCompatibility = BrapiModuleCalls(
+                appCompatibility = BrapiModuleCalls(
                     moduleName = "Field Book Compatibility",
                     calls = listOf(
                         ServiceComparison(
                             service = "programs",
                             methods = listOf("GET"),
-                            isFbImplemented = true,
+                            isAppImplemented = true,
                             implementedMethods = listOf("GET"),
-                            source = CallImplementedBy.SERVER_AND_FIELD_BOOK
+                            source = CallImplementedBy.SERVER_AND_APP
                         ),
                         ServiceComparison(
                             service = "observations",
                             methods = listOf("GET", "POST", "PUT"),
-                            isFbImplemented = true,
+                            isAppImplemented = true,
                             implementedMethods = emptyList(),
-                            source = CallImplementedBy.FIELD_BOOK
+                            source = CallImplementedBy.APP
                         )
                     ),
-                    fbImplementedCount = 1,
+                    appImplementedCount = 1,
                     totalCalls = 2
                 ),
                 errorMessage = null,
