@@ -62,3 +62,6 @@ keystore.config
 
 # VS Code files
 .vscode/settings.json
+
+# python cache files
+__pycache__/
