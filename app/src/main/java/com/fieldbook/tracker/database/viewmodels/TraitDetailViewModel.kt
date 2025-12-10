@@ -74,7 +74,7 @@ class TraitDetailViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching { repo.deleteTrait(traitId) }
                 .onFailure { e ->
-                    _events.emit(TraitDetailEvent.Error(R.string.error_loading_trait_detail))
+                    _events.emit(TraitDetailEvent.ShowToast(R.string.error_loading_trait_detail))
                     Log.e(TAG, "Error loading trait details: ", e)
                     _uiState.value = TraitDetailUiState.Error(R.string.error_loading_trait_detail)
                 }
@@ -175,7 +175,7 @@ class TraitDetailViewModel @Inject constructor(
     fun copyTrait(trait: TraitObject, newName: String) {
         viewModelScope.launch {
             if (newName.isEmpty()) {
-                _events.emit(TraitDetailEvent.Error(R.string.error_empty_trait_name))
+                _events.emit(TraitDetailEvent.ShowToast(R.string.error_empty_trait_name))
                 return@launch
             }
 
@@ -183,13 +183,13 @@ class TraitDetailViewModel @Inject constructor(
                 .onSuccess { copiedTrait ->
                     val event = copiedTrait?.let {
                         TraitDetailEvent.CopySuccess(copiedTrait)
-                    } ?: TraitDetailEvent.Error(R.string.error_copy_trait)
+                    } ?: TraitDetailEvent.ShowToast(R.string.error_copy_trait)
 
                     _events.emit(event)
                 }
                 .onFailure { e ->
                     Log.e(TAG, "Error copying trait: ", e)
-                    _events.emit(TraitDetailEvent.Error(R.string.error_copy_trait))
+                    _events.emit(TraitDetailEvent.ShowToast(R.string.error_copy_trait))
                 }
         }
     }
@@ -230,10 +230,9 @@ data class ObservationData(
 )
 
 sealed class TraitDetailEvent {
-    data class Message(val resId: Int) : TraitDetailEvent()
+    data class ShowToast(val resId: Int) : TraitDetailEvent()
     object NavigateBack : TraitDetailEvent()
     data class CopySuccess(val trait: TraitObject) : TraitDetailEvent()
-    data class Error(val resId: Int) : TraitDetailEvent()
 }
 
 sealed class TraitDetailDialog {

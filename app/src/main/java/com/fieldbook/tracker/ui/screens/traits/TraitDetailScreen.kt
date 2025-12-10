@@ -186,17 +186,11 @@ fun TraitDetailScreen(
                     editorViewModel.addTraitObject(event.trait)
                 }
 
-                is TraitDetailEvent.Error -> {
+                is TraitDetailEvent.ShowToast -> {
                     Utils.makeToast(context, resources.getString(event.resId))
                 }
 
-                is TraitDetailEvent.Message -> {
-                    Utils.makeToast(context, resources.getString(event.resId))
-                }
-
-                TraitDetailEvent.NavigateBack -> {
-                    onBack()
-                }
+                TraitDetailEvent.NavigateBack -> { onBack() }
             }
         }
     }

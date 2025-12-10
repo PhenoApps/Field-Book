@@ -306,12 +306,14 @@ fun TraitEditorScreen(
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
-                is TraitEditorEvent.ShowMessage -> {
-                    Utils.makeToast(context, event.message)
+                is TraitEditorEvent.ShowMessageWithArgs -> {
+                    val message = resources.getString(event.resId, *event.args.toTypedArray())
+                    Utils.makeToast(context, message)
                 }
 
-                is TraitEditorEvent.ShowError -> {
-                    Utils.makeToast(context, event.message)
+                is TraitEditorEvent.ShowToast -> {
+                    val message = resources.getString(event.resId)
+                    Utils.makeToast(context, message)
                 }
 
                 TraitEditorEvent.RequestStoragePermissionForImport -> {

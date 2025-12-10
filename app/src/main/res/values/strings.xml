@@ -351,6 +351,14 @@
     <string name="export_error_file_creation">Failed to create export file</string>
     <string name="export_error_file_stream">Failed to open file stream</string>
 
+    <string name="error_trait_directory_not_available">Trait directory not available</string>
+    <string name="error_trait_directory_missing">Trait directory missing</string>
+    <string name="error_failed_to_create_file">Failed to create file</string>
+    <string name="error_output_stream_failed">Output stream failed</string>
+    <string name="error_export_failed">Export failed</string>
+    <string name="error_unable_to_copy_trait_file">Unable to copy trait file</string>
+    <string name="error_cannot_open_file">Cannot open file</string>
+
     <!-- Trait item menu -->
     <string name="list_item_trait_popup_content_description">Open a menu specific to this trait.</string>
     <string name="traits_options_copy">Copy</string>
@@ -462,7 +470,19 @@
     <string name="select_trait">Select Trait</string>
     <string name="edit_traits">Edit</string>
 
-    <!-- Trait Detail Strings -->
+    <!-- Trait Editor -->
+    <string name="error_loading_traits">Error loading traits</string>
+    <string name="error_deleting_traits">Failed to delete traits</string>
+    <string name="error_toggling_all_traits_visibility">Failed to toggle traits visibility</string>
+    <string name="error_importing_traits">Failed to import traits</string>
+    <string name="error_saving_trait_order">Failed to save trait order</string>
+    <string name="error_exporting_traits">Failed to export traits</string>
+    <string name="message_all_traits_deleted">All traits deleted</string>
+    <string name="message_traits_imported">Imported %1$d traits</string>
+    <string name="message_traits_imported_with_skipped">Imported %1$d traits, skipped %2$d duplicates</string>
+    <string name="message_traits_exported">Exported %1$d traits</string>
+
+    <!-- Trait Detail -->
     <string name="trait_detail_title">Trait Details</string>
     <string name="trait_format_details">Format Details</string>
     <string name="trait_data_title">Observation Data</string>
@@ -513,11 +533,6 @@
     <string name="trait_detail_chip_format_date">Format: %s</string>
     <string name="trait_detail_chip_transfer_images">Transfer images</string>
     <string name="trait_detail_chip_invalid_value">Outlier values</string>
-
-    <!-- <string name="trait_date_format_example">Date: %s</string>
-    <string name="trait_day_format_example">Day of Year: %d</string>
-    <string name="trait_brapi_label_example">Label: %s</string>
-    <string name="trait_brapi_value_example">Value: %s</string> -->
 
     <string name="trait_parameter_allow_multicat">Multiple Category Selection</string>
     <string name="trait_parameter_display_value">Display Value</string>

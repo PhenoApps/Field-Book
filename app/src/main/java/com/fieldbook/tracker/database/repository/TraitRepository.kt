@@ -3,6 +3,7 @@ package com.fieldbook.tracker.database.repository
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
+import android.util.Log
 import androidx.core.content.edit
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.application.IoDispatcher
@@ -36,6 +37,10 @@ class TraitRepository @Inject constructor(
     private val prefs: SharedPreferences,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) {
+    companion object {
+        private const val TAG = "TraitRepository"
+    }
+
     private val json = Json {
         ignoreUnknownKeys = true
         prettyPrint = false
@@ -147,24 +152,28 @@ class TraitRepository @Inject constructor(
         fileName: String,
         traits: List<TraitObject>,
         onSuccess: suspend (Uri) -> Unit,
-        onError: suspend (String) -> Unit,
+        onError: suspend (Int) -> Unit,
     ) = withContext(ioDispatcher) {
         runCatching {
             val traitDir =
                 BaseDocumentTreeUtil.Companion.getDirectory(context, R.string.dir_trait)
-                    ?: return@withContext onError("Trait directory not available")
+                    ?: return@withContext onError(R.string.error_trait_directory_not_available)
 
             if (!traitDir.exists()) {
-                return@withContext onError("Trait directory missing")
+                return@withContext onError(R.string.error_trait_directory_missing)
             }
 
             val exportFile =
                 traitDir.createFile("*/*", fileName)
-                    ?: return@withContext onError("Failed to create file")
+                    ?: return@withContext onError(R.string.error_failed_to_create_file)
 
             val output =
-                BaseDocumentTreeUtil.Companion.getFileOutputStream(context, R.string.dir_trait, fileName)
-                    ?: return@withContext onError("Output stream failed")
+                BaseDocumentTreeUtil.Companion.getFileOutputStream(
+                    context,
+                    R.string.dir_trait,
+                    fileName
+                )
+                    ?: return@withContext onError(R.string.error_output_stream_failed)
 
             output.use {
                 val wrapper = TraitImportFile(traits.map { it.toTraitJson() })
@@ -176,11 +185,15 @@ class TraitRepository @Inject constructor(
             onSuccess(exportFile.uri)
         }
             .onFailure { e ->
-                onError("Export failed: ${e.message}")
+                Log.e(TAG, "Error exporting file", e)
+                onError(R.string.error_export_failed)
             }
     }
 
-    suspend fun importTraits(sourceUri: Uri): List<TraitObject> = withContext(ioDispatcher) {
+    suspend fun parseTraits(
+        sourceUri: Uri,
+        onError: suspend (Int) -> Unit
+    ): List<TraitObject> = withContext(ioDispatcher) {
         // copy the file to dir_trait, and then import traits
 
         // generate a file name
@@ -190,23 +203,33 @@ class TraitRepository @Inject constructor(
 
         val copiedUri =
             sourceUri.copyToDirectory(context, R.string.dir_trait, fileName)
-                ?: throw IllegalStateException("Unable to copy trait file")
+                ?: run {
+                    onError(R.string.error_unable_to_copy_trait_file)
+                    return@withContext emptyList()
+                }
 
         val format = detectTraitFileFormat(context, copiedUri)
 
         val maxPos = database.getAllTraitObjects().maxOfOrNull { it.realPosition } ?: 0
 
         return@withContext when (format) {
-            FileFormat.JSON -> parseJsonTraits(copiedUri, maxPos)
-            FileFormat.CSV -> parseCsvTraits(copiedUri, maxPos)
+            FileFormat.JSON -> parseJsonTraits(copiedUri, maxPos, onError)
+            FileFormat.CSV -> parseCsvTraits(copiedUri, maxPos, onError)
             else -> emptyList()
         }
     }
 
-    private suspend fun parseJsonTraits(uri: Uri, maxPosition: Int): List<TraitObject> =
+    private suspend fun parseJsonTraits(
+        uri: Uri,
+        maxPosition: Int,
+        onError: suspend (Int) -> Unit
+    ): List<TraitObject> =
         withContext(ioDispatcher) {
             val stream = BaseDocumentTreeUtil.Companion.getUriInputStream(context, uri)
-                ?: error("Cannot open JSON file")
+                ?: run {
+                    onError(R.string.error_cannot_open_file)
+                    return@withContext emptyList()
+                }
 
             val jsonText = stream.bufferedReader().use { it.readText() }
 
@@ -241,12 +264,22 @@ class TraitRepository @Inject constructor(
             }
         }
 
-    private suspend fun parseCsvTraits(uri: Uri, maxPosition: Int): List<TraitObject> =
+    private suspend fun parseCsvTraits(
+        uri: Uri,
+        maxPosition: Int,
+        onError: suspend (Int) -> Unit
+    ): List<TraitObject> =
         withContext(ioDispatcher) {
 
             val list = mutableListOf<TraitObject>()
 
-            BaseDocumentTreeUtil.Companion.getUriInputStream(context, uri)?.use { stream ->
+            val stream = BaseDocumentTreeUtil.Companion.getUriInputStream(context, uri)
+                ?: run {
+                    onError(R.string.error_cannot_open_file)
+                    return@withContext emptyList()
+                }
+
+            stream.use { stream ->
                 CSVReader(InputStreamReader(stream)).use { reader ->
 
                     reader.readNext() // skip header
