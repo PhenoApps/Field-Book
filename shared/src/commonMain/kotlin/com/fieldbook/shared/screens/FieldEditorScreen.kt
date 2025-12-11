@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -33,11 +35,9 @@ import com.fieldbook.shared.database.repository.StudiesRepository
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.ic_file_csv
 import com.fieldbook.shared.sqldelight.DriverFactory
-import com.fieldbook.shared.sqldelight.FieldbookDatabase
+import com.fieldbook.shared.sqldelight.createDatabase
 import com.fieldbook.shared.theme.MainTheme
 import org.jetbrains.compose.resources.painterResource
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,7 +50,7 @@ fun FieldEditorScreen(
         val errorState = remember { mutableStateOf<String?>(null) }
         val loadingState = remember { mutableStateOf(true) }
         val db = remember(driverFactory) {
-            FieldbookDatabase(driverFactory.getDriver())
+            createDatabase(driverFactory)
         }
 
         LaunchedEffect(Unit) {

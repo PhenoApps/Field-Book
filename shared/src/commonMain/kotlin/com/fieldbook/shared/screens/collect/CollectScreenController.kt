@@ -11,14 +11,14 @@ import com.fieldbook.shared.database.repository.ObservationUnitRepository
 import com.fieldbook.shared.database.repository.TraitRepository
 import com.fieldbook.shared.preferences.GeneralKeys
 import com.fieldbook.shared.sqldelight.DriverFactory
-import com.fieldbook.shared.sqldelight.FieldbookDatabase
+import com.fieldbook.shared.sqldelight.createDatabase
 import com.fieldbook.shared.theme.AppColors
 import com.russhwolf.settings.Settings
 
 
 // TODO refactor to use ViewModel() ?
 class CollectScreenController(driverFactory: DriverFactory) {
-    private val db = FieldbookDatabase(driverFactory.getDriver())
+    private val db = createDatabase(driverFactory)
     private val observationUnitRepository = ObservationUnitRepository(db)
     private val traitRepository = TraitRepository(db)
     private val observationRepository = ObservationRepository(db)
