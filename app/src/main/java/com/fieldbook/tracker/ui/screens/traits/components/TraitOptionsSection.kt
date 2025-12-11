@@ -36,13 +36,13 @@ import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 import com.fieldbook.tracker.traits.formats.parameters.SaveImageParameter
 import com.fieldbook.tracker.traits.formats.parameters.UnitParameter
 import com.fieldbook.tracker.ui.components.widgets.Chip
-import com.fieldbook.tracker.ui.dialogs.traits.BrapiLabelValueDialog
-import com.fieldbook.tracker.ui.dialogs.traits.DateFormatDialog
+import com.fieldbook.tracker.ui.screens.traits.dialogs.BrapiLabelValueDialog
+import com.fieldbook.tracker.ui.screens.traits.dialogs.DateFormatDialog
 import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.StringUtil.capitalizeFirstLetter
-import com.fieldbook.tracker.utilities.TraitOptionChipsUtil.getTodayDayOfYear
-import com.fieldbook.tracker.utilities.TraitOptionChipsUtil.getTodayFormattedDate
-import com.fieldbook.tracker.utilities.TraitOptionChipsUtil.parseCategoryExample
+import com.fieldbook.tracker.utilities.TraitDetailUtil.getTodayDayOfYear
+import com.fieldbook.tracker.utilities.TraitDetailUtil.getTodayFormattedDate
+import com.fieldbook.tracker.utilities.TraitDetailUtil.parseCategoryExample
 
 private const val TAG = "TraitOptionsSection"
 

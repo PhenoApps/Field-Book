@@ -63,6 +63,7 @@
     <string name="define_button_text">Choose Folder</string>
 
     <!-- Permissions  -->
+    <string name="permission_rationale_storage">Access to the device\'s files is required.</string>
     <string name="permission_rationale_storage_import">Importing files requires access to the device\'s files.</string>
     <string name="permission_rationale_storage_export">Exporting data requires access to the device\'s files.</string>
     <string name="permission_rationale_trait_features">Collecting data requires access to the device\'s files, microphone, and camera.</string>
@@ -302,9 +303,9 @@
     <string name="field_trait_observation_total">"%d" observations</string>
 
     <!-- Field Detail Charts -->
-    <string name="field_trait_chart_no_data">No data to chart</string>
-    <string name="field_trait_chart_incompatible_format">This trait format cannot be charted</string>
-    <string name="field_trait_chart_excess_data">Too many distinct values to chart</string>
+    <string name="chart_no_data">No data to chart</string>
+    <string name="chart_incompatible_format">This trait format cannot be charted</string>
+    <string name="chart_excess_data">Too many distinct values to chart</string>
 
     <!-- Semantic dates -->
     <string name="today">Today</string>
@@ -350,6 +351,14 @@
     <string name="export_error_directory_not_found">Export directory not found</string>
     <string name="export_error_file_creation">Failed to create export file</string>
     <string name="export_error_file_stream">Failed to open file stream</string>
+
+    <string name="error_trait_directory_not_available">Trait directory not available</string>
+    <string name="error_trait_directory_missing">Trait directory missing</string>
+    <string name="error_failed_to_create_file">Failed to create file</string>
+    <string name="error_output_stream_failed">Output stream failed</string>
+    <string name="error_export_failed">Export failed</string>
+    <string name="error_unable_to_copy_trait_file">Unable to copy trait file</string>
+    <string name="error_cannot_open_file">Cannot open file</string>
 
     <!-- Trait item menu -->
     <string name="list_item_trait_popup_content_description">Open a menu specific to this trait.</string>
@@ -462,7 +471,19 @@
     <string name="select_trait">Select Trait</string>
     <string name="edit_traits">Edit</string>
 
-    <!-- Trait Detail Strings -->
+    <!-- Trait Editor -->
+    <string name="error_loading_traits">Error loading traits</string>
+    <string name="error_deleting_traits">Failed to delete traits</string>
+    <string name="error_toggling_all_traits_visibility">Failed to toggle traits visibility</string>
+    <string name="error_importing_traits">Failed to import traits</string>
+    <string name="error_saving_trait_order">Failed to save trait order</string>
+    <string name="error_exporting_traits">Failed to export traits</string>
+    <string name="message_all_traits_deleted">All traits deleted</string>
+    <string name="message_traits_imported">Imported %1$d traits</string>
+    <string name="message_traits_imported_with_skipped">Imported %1$d traits, skipped %2$d duplicates</string>
+    <string name="message_traits_exported">Exported %1$d traits</string>
+
+    <!-- Trait Detail -->
     <string name="trait_detail_title">Trait Details</string>
     <string name="trait_format_details">Format Details</string>
     <string name="trait_data_title">Observation Data</string>
@@ -513,11 +534,6 @@
     <string name="trait_detail_chip_format_date">Format: %s</string>
     <string name="trait_detail_chip_transfer_images">Transfer images</string>
     <string name="trait_detail_chip_invalid_value">Outlier values</string>
-
-    <!-- <string name="trait_date_format_example">Date: %s</string>
-    <string name="trait_day_format_example">Day of Year: %d</string>
-    <string name="trait_brapi_label_example">Label: %s</string>
-    <string name="trait_brapi_value_example">Value: %s</string> -->
 
     <string name="trait_parameter_allow_multicat">Multiple Category Selection</string>
     <string name="trait_parameter_display_value">Display Value</string>
@@ -1272,11 +1288,11 @@
     <string name="brapi_server_info_pref">Check Compatibility</string>
     <string name="brapi_server_info_pref_summary">View supported BrAPI calls and server information</string>
     <string name="brapi_compatibility">BrAPI Compatibility</string>
-    <string name="brapi_compatibility_fieldbook">Compatibility with Field Book</string>
-    <string name="brapi_server_name_label">Server Name: %1$s</string>
-    <string name="brapi_organization_name_label">Organization Name: %1$s</string>
-    <string name="brapi_server_description_label">Description: %1$s</string>
-    <string name="brapi_compatibility_all_calls">All BrAPI Calls</string>
+    <string name="brapi_compatibility_with_app">Compatibility with %s</string>
+    <string name="brapi_server_name_label">%1$s</string>
+    <string name="brapi_organization_name_label">%1$s</string>
+    <string name="brapi_server_description_label">%1$s</string>
+    <string name="brapi_compatibility_all_calls">BrAPI in Field Book</string>
     <string name="brapi_compatibility_server_support">Supported by server</string>
     <string name="brapi_compatibility_no_server_support">Not supported by server</string>
     <string name="brapi_compatibility_fieldbook_support">Supported by Field Book</string>
@@ -1520,6 +1536,7 @@
     <string name="export_util_repeated_measures_table_warning_title">Repeated Measures Table</string>
     <string name="export_util_repeated_measures_table_warning_message">Only the latest repeated measures value will be exported in table format.</string>
     <string name="activity_file_explorer_up_directory_name">Up</string>
+    <string name="file_explorer_select_file_title">Select File</string>
 
     <!-- base camera strings -->
     <string name="trait_camera_connect_content_description">Starts a device connection.</string>

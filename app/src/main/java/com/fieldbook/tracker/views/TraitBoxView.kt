@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.ImageView
@@ -15,7 +14,7 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.activities.TraitEditorActivity
+import com.fieldbook.tracker.activities.TraitActivity
 import com.fieldbook.tracker.adapters.TraitsStatusAdapter
 import com.fieldbook.tracker.interfaces.CollectTraitController
 import com.fieldbook.tracker.objects.TraitObject
@@ -260,7 +259,7 @@ class TraitBoxView : ConstraintLayout {
                 R.string.edit_traits
             ) {
                     _: DialogInterface, _: Int ->
-                    val intent = Intent(context, TraitEditorActivity::class.java)
+                    val intent = Intent(context, TraitActivity::class.java)
                     startActivity(context, intent, null)
             }
         val dialog = builder.create()

@@ -1,6 +1,10 @@
 package com.fieldbook.tracker.utilities
 
 import android.util.Log
+import com.fieldbook.tracker.brapi.coreEndpoints
+import com.fieldbook.tracker.brapi.genotypingEndpoints
+import com.fieldbook.tracker.brapi.germplasmEndpoints
+import com.fieldbook.tracker.brapi.phenotypingEndpoints
 import com.fieldbook.tracker.brapi.model.BrapiModule
 import com.fieldbook.tracker.brapi.model.BrapiServerCall
 
@@ -81,28 +85,4 @@ object BrapiModuleHelper {
         object Genotyping : BrApiModule("Genotyping")
         object Other : BrApiModule("Other")
     }
-
-
-    private val coreEndpoints = setOf(
-        "commoncropnames", "lists", "locations", "people", "programs",
-        "seasons", "serverinfo", "studies", "studytypes", "trials",
-    )
-
-    private val phenotypingEndpoints = setOf(
-        "events", "images", "methods", "observationlevels",
-        "observationunits", "observations", "ontologies", "scales",
-        "traits", "variables",
-    )
-
-    private val germplasmEndpoints = setOf(
-        "germplasm", "breedingmethods", "seedlots", "crosses",
-        "crossingprojects", "plannedcrosses", "pedigree", "progeny",
-        "attributes", "attributevalues",
-    )
-
-    private val genotypingEndpoints = setOf(
-        "allelematrix", "callsets", "calls", "maps", "markerpositions",
-        "plates", "referencesets", "references", "samples",
-        "variantsets", "variants", "vendor",
-    )
 }

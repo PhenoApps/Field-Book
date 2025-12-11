@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.database.viewmodels
 
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,12 +8,15 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.application.IoDispatcher
 import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.TraitObject
+import com.fieldbook.tracker.preferences.GeneralKeys
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -20,6 +24,7 @@ import javax.inject.Inject
 @HiltViewModel
 class TraitDetailViewModel @Inject constructor(
     private val repo: TraitRepository,
+    private val prefs: SharedPreferences,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : ViewModel() {
 
@@ -28,10 +33,22 @@ class TraitDetailViewModel @Inject constructor(
     }
 
     private val _uiState = MutableStateFlow<TraitDetailUiState>(TraitDetailUiState.Loading)
-    val uiState: StateFlow<TraitDetailUiState> = _uiState
+    val uiState: StateFlow<TraitDetailUiState> = _uiState.asStateFlow()
 
     private val _events = MutableSharedFlow<TraitDetailEvent>()
     val events = _events.asSharedFlow()
+
+    fun isOverviewExpanded(): Boolean {
+        return !prefs.getBoolean(GeneralKeys.TRAIT_DETAIL_OVERVIEW_COLLAPSED, false)
+    }
+
+    fun isOptionsExpanded(): Boolean {
+        return !prefs.getBoolean(GeneralKeys.TRAIT_DETAIL_OPTIONS_COLLAPSED, false)
+    }
+
+    fun isDataExpanded(): Boolean {
+        return !prefs.getBoolean(GeneralKeys.TRAIT_DETAIL_DATA_COLLAPSED, false)
+    }
 
     fun loadTraitDetails(traitId: String) {
         viewModelScope.launch {
@@ -57,7 +74,7 @@ class TraitDetailViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching { repo.deleteTrait(traitId) }
                 .onFailure { e ->
-                    _events.emit(TraitDetailEvent.Error(R.string.error_loading_trait_detail))
+                    _events.emit(TraitDetailEvent.ShowToast(R.string.error_loading_trait_detail))
                     Log.e(TAG, "Error loading trait details: ", e)
                     _uiState.value = TraitDetailUiState.Error(R.string.error_loading_trait_detail)
                 }
@@ -158,7 +175,7 @@ class TraitDetailViewModel @Inject constructor(
     fun copyTrait(trait: TraitObject, newName: String) {
         viewModelScope.launch {
             if (newName.isEmpty()) {
-                _events.emit(TraitDetailEvent.Error(R.string.error_empty_trait_name))
+                _events.emit(TraitDetailEvent.ShowToast(R.string.error_empty_trait_name))
                 return@launch
             }
 
@@ -166,14 +183,31 @@ class TraitDetailViewModel @Inject constructor(
                 .onSuccess { copiedTrait ->
                     val event = copiedTrait?.let {
                         TraitDetailEvent.CopySuccess(copiedTrait)
-                    } ?: TraitDetailEvent.Error(R.string.error_copy_trait)
+                    } ?: TraitDetailEvent.ShowToast(R.string.error_copy_trait)
 
                     _events.emit(event)
                 }
                 .onFailure { e ->
                     Log.e(TAG, "Error copying trait: ", e)
-                    _events.emit(TraitDetailEvent.Error(R.string.error_copy_trait))
+                    _events.emit(TraitDetailEvent.ShowToast(R.string.error_copy_trait))
                 }
+        }
+    }
+
+    // DIALOG STATES
+    fun showDialog(nextDialog: TraitDetailDialog) {
+        _uiState.update { state ->
+            if (state is TraitDetailUiState.Success) {
+                state.copy(activeDialog = nextDialog)
+            } else state
+        }
+    }
+
+    fun hideDialog() {
+        _uiState.update { state ->
+            if (state is TraitDetailUiState.Success) {
+                state.copy(activeDialog = TraitDetailDialog.None)
+            } else state
         }
     }
 }
@@ -183,6 +217,7 @@ sealed class TraitDetailUiState {
     data class Success(
         val trait: TraitObject,
         val observationData: ObservationData?,
+        val activeDialog: TraitDetailDialog = TraitDetailDialog.None,
     ) : TraitDetailUiState()
     data class Error(val messageRes: Int) : TraitDetailUiState()
 }
@@ -195,8 +230,13 @@ data class ObservationData(
 )
 
 sealed class TraitDetailEvent {
-    data class Message(val resId: Int) : TraitDetailEvent()
+    data class ShowToast(val resId: Int) : TraitDetailEvent()
     object NavigateBack : TraitDetailEvent()
     data class CopySuccess(val trait: TraitObject) : TraitDetailEvent()
-    data class Error(val resId: Int) : TraitDetailEvent()
+}
+
+sealed class TraitDetailDialog {
+    object None : TraitDetailDialog()
+    object Delete : TraitDetailDialog()
+    object Copy : TraitDetailDialog()
 }

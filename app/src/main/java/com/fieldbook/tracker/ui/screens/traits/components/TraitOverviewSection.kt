@@ -17,8 +17,8 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.ui.components.widgets.Chip
-import com.fieldbook.tracker.ui.dialogs.traits.AddSynonymDialog
-import com.fieldbook.tracker.ui.dialogs.traits.SynonymSelectionDialog
+import com.fieldbook.tracker.ui.screens.traits.dialogs.AddSynonymDialog
+import com.fieldbook.tracker.ui.screens.traits.dialogs.SynonymSelectionDialog
 import com.fieldbook.tracker.ui.theme.AppTheme
 
 @Composable

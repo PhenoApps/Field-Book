@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.fieldbook.tracker.R
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
@@ -43,12 +44,6 @@ class TraitEditorViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(TraitEditorUiState())
     val uiState: StateFlow<TraitEditorUiState> = _uiState.asStateFlow()
-
-    private val _exportTriggeredSource = MutableStateFlow(ExportTriggerSource.UNKNOWN)
-    val exportTriggerSource = _exportTriggeredSource.asStateFlow()
-
-    private val _deleteTriggeredSource = MutableStateFlow(DeleteTriggerSource.UNKNOWN)
-    val deleteTriggeredSource = _deleteTriggeredSource.asStateFlow()
 
     private val _events = MutableSharedFlow<TraitEditorEvent>()
     val events = _events.asSharedFlow()
@@ -130,7 +125,8 @@ class TraitEditorViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(isLoading = false)
                     }
-                    e.message?.let { _events.emit(TraitEditorEvent.ShowError(it)) }
+                    Log.e(TAG, "Error loading traits", e)
+                    _events.emit(TraitEditorEvent.ShowToast(R.string.error_loading_traits))
                 }
         }
     }
@@ -142,10 +138,11 @@ class TraitEditorViewModel @Inject constructor(
             runCatching { repo.deleteAllTraits(traits) }
                 .onSuccess {
                     _uiState.update { it.copy(traits = emptyList()) }
-                    _events.emit(TraitEditorEvent.ShowMessage("All traits deleted"))
+                    _events.emit(TraitEditorEvent.ShowToast(R.string.message_all_traits_deleted))
                 }
-                .onFailure {
-                    _events.emit(TraitEditorEvent.ShowError("Failed to delete traits: ${it.message}"))
+                .onFailure { e ->
+                    Log.e(TAG, "Error deleting traits", e)
+                    _events.emit(TraitEditorEvent.ShowToast(R.string.error_deleting_traits))
                 }
         }
     }
@@ -160,9 +157,8 @@ class TraitEditorViewModel @Inject constructor(
             runCatching { repo.updateVisibility(traitId, isVisible) }
                 .onFailure { e -> // rollback
                     updateTraitInList(trait)
-                    _events.emit(
-                        TraitEditorEvent.ShowError("Failed to update visibility: ${e.message}")
-                    )
+                    Log.e(TAG, "Error updating trait visibility", e)
+                    _events.emit(TraitEditorEvent.ShowToast(R.string.error_updating_trait_visibility))
                 }
         }
     }
@@ -183,9 +179,8 @@ class TraitEditorViewModel @Inject constructor(
                 }
             }.onFailure { e ->
                 _uiState.update { it.copy(traits = oldList) }
-                _events.emit(
-                    TraitEditorEvent.ShowError("Failed to toggle traits: ${e.message}")
-                )
+                Log.e(TAG, "Error toggling visibility for all traits", e)
+                _events.emit(TraitEditorEvent.ShowToast(R.string.error_toggling_all_traits_visibility))
             }
         }
     }
@@ -198,16 +193,23 @@ class TraitEditorViewModel @Inject constructor(
 
                     val skipped = newTraits.size - insertedCount
 
-                    var msg = "Imported $insertedCount traits"
-                    if (skipped > 0) msg = "$msg, skipped $skipped duplicates."
+                    val messageRes = if (skipped > 0) {
+                        R.string.message_traits_imported_with_skipped
+                    } else {
+                        R.string.message_traits_imported
+                    }
 
-                    _events.emit(TraitEditorEvent.ShowMessage(msg))
-                }
-                .onFailure {
-                    loadTraits()
                     _events.emit(
-                        TraitEditorEvent.ShowError("Failed to import: ${it.message}")
+                        TraitEditorEvent.ShowMessageWithArgs(
+                            messageRes,
+                            listOf(insertedCount, skipped)
+                        )
                     )
+                }
+                .onFailure { e ->
+                    loadTraits()
+                    Log.e(TAG, "Error importing traits", e)
+                    _events.emit(TraitEditorEvent.ShowToast(R.string.error_importing_traits))
                 }
         }
     }
@@ -255,9 +257,8 @@ class TraitEditorViewModel @Inject constructor(
 
                 _uiState.update { it.copy(sortOrder = "position") }
             }.onFailure { e ->
-                _events.emit(
-                    TraitEditorEvent.ShowError("Failed to save order: ${e.message}")
-                )
+                Log.e(TAG, "Failed to save trait order", e)
+                _events.emit(TraitEditorEvent.ShowToast(R.string.error_saving_trait_order))
             }
         }
     }
@@ -267,14 +268,26 @@ class TraitEditorViewModel @Inject constructor(
     fun importTraits(uri: Uri) {
         viewModelScope.launch {
             runCatching {
-                val traits = repo.importTraits(uri)
+                val traits =
+                    repo.parseTraits(
+                        sourceUri = uri,
+                        onError = { resId ->
+                            _events.emit(TraitEditorEvent.ShowToast(resId))
+                        },
+                    )
 
                 repo.insertTraits(traits)
                 loadTraits()
 
-                _events.emit(TraitEditorEvent.ShowMessage("Imported ${traits.size} traits"))
+                _events.emit(
+                    TraitEditorEvent.ShowMessageWithArgs(
+                        R.string.message_traits_imported,
+                        listOf(traits.size)
+                    )
+                )
             }.onFailure { e ->
-                _events.emit(TraitEditorEvent.ShowError("Import failed: ${e.message}"))
+                Log.e(TAG, "Failed to import traits", e)
+                _events.emit(TraitEditorEvent.ShowToast(R.string.error_importing_traits))
             }
         }
     }
@@ -287,11 +300,16 @@ class TraitEditorViewModel @Inject constructor(
                 fileName = fileName,
                 traits = traits,
                 onSuccess = { uri ->
-                    _events.emit(TraitEditorEvent.ShowMessage("Exported ${traits.size} traits"))
+                    _events.emit(
+                        TraitEditorEvent.ShowMessageWithArgs(
+                            R.string.message_traits_exported,
+                            listOf(traits.size)
+                        )
+                    )
                     _events.emit(TraitEditorEvent.ShareFile(uri))
                 },
-                onError = { msg ->
-                    _events.emit(TraitEditorEvent.ShowError(msg))
+                onError = { resId ->
+                    _events.emit(TraitEditorEvent.ShowToast(resId))
                 }
             )
         }
@@ -307,22 +325,46 @@ class TraitEditorViewModel @Inject constructor(
         _uiState.update { it.copy(activeDialog = TraitActivityDialog.None) }
     }
 
-    fun showExportDialog(source: ExportTriggerSource) {
-        _exportTriggeredSource.value = source
-        _uiState.update { it.copy(activeDialog = TraitActivityDialog.Export) }
+    fun showExportDialog(source: DialogTriggerSource) {
+        _uiState.update { it.copy(activeDialog = TraitActivityDialog.Export(source)) }
     }
 
-    fun showDeleteDialog(source: DeleteTriggerSource) {
-        _deleteTriggeredSource.value = source
-        _uiState.update { it.copy(activeDialog = TraitActivityDialog.DeleteAll) }
+    fun showDeleteDialog(source: DialogTriggerSource) {
+        _uiState.update { it.copy(activeDialog = TraitActivityDialog.DeleteAll(source)) }
     }
 
-    fun clearExportTrigger() {
-        _exportTriggeredSource.value = ExportTriggerSource.UNKNOWN
+    /**
+     * Handles cancel or export dialog button in export dialog
+     *
+     * can be triggered during IMPORT_WORKFLOW OR via TOOLBAR
+     * if triggered via import workflow, show DeleteAllDialog -> Import Local/Cloud file
+     */
+    fun handleExportDialogAction(source: DialogTriggerSource, fileName: String? = null) {
+        hideDialog()
+
+        fileName?.let { exportTraits(it) }
+
+        if (source == DialogTriggerSource.IMPORT_WORKFLOW) {
+            showDeleteDialog(DialogTriggerSource.IMPORT_WORKFLOW)
+        }
     }
 
-    fun clearDeleteTrigger() {
-        _deleteTriggeredSource.value = DeleteTriggerSource.UNKNOWN
+    /**
+     * Handles cancel or delete dialog button in delete all dialog
+     *
+     * can be triggered during IMPORT_WORKFLOW OR via TOOLBAR
+     * if triggered via IMPORT_WORKFLOW, show Import Local/Cloud file
+     */
+    fun handleDeleteDialogAction(source: DialogTriggerSource, shouldDelete: Boolean = false) {
+        hideDialog()
+
+        if (shouldDelete) {
+            deleteAllTraits()
+        }
+
+        if (source == DialogTriggerSource.IMPORT_WORKFLOW) {
+            showDialog(TraitActivityDialog.ImportChoice)
+        }
     }
 
     // ONE-TIME EVENTS
@@ -338,7 +380,7 @@ class TraitEditorViewModel @Inject constructor(
 
         if (traits.isNotEmpty()) {
             // delete all dialog
-            showDeleteDialog(DeleteTriggerSource.IMPORT_WORKFLOW)
+            showDeleteDialog(DialogTriggerSource.IMPORT_WORKFLOW)
             return
         }
 
@@ -347,7 +389,7 @@ class TraitEditorViewModel @Inject constructor(
     }
 
     fun onExportPermissionGranted() {
-        showExportDialog(ExportTriggerSource.TOOLBAR)
+        showExportDialog(DialogTriggerSource.TOOLBAR)
     }
 
     fun requestImportPermission() {
@@ -375,17 +417,15 @@ class TraitEditorViewModel @Inject constructor(
     }
 }
 
-enum class ExportTriggerSource {
-    IMPORT_WORKFLOW,
-    TOOLBAR,
-    UNKNOWN
-}
-
-enum class DeleteTriggerSource {
-    IMPORT_WORKFLOW,
-    TOOLBAR,
-    UNKNOWN
-}
+/**
+ * Used to specify how are (Export and Delete All)
+ * dialogs invoked
+ *
+ * If they were invoked through
+ * - toolbar item, nothing to show next
+ * - import workflow ("Import from File"), decide what to show next
+ */
+enum class DialogTriggerSource { IMPORT_WORKFLOW, TOOLBAR }
 
 data class TraitEditorUiState(
     val activeDialog: TraitActivityDialog = TraitActivityDialog.None,
@@ -397,8 +437,8 @@ data class TraitEditorUiState(
 }
 
 sealed class TraitEditorEvent {
-    data class ShowMessage(val message: String) : TraitEditorEvent()
-    data class ShowError(val message: String) : TraitEditorEvent()
+    data class ShowMessageWithArgs(val resId: Int, val args: List<Any>) : TraitEditorEvent()
+    data class ShowToast(val resId: Int) : TraitEditorEvent()
     data class ShareFile(val fileUri: Uri) : TraitEditorEvent()
     object NavigateToBrapi : TraitEditorEvent()
     object RequestStoragePermissionForImport : TraitEditorEvent()
@@ -414,7 +454,7 @@ sealed class TraitActivityDialog {
     object NewTrait : TraitActivityDialog()
     object ImportChoice : TraitActivityDialog()
     object ExportCheck : TraitActivityDialog()
-    object Export : TraitActivityDialog()
-    object DeleteAll : TraitActivityDialog()
+    data class Export(val source: DialogTriggerSource) : TraitActivityDialog()
+    data class DeleteAll(val source: DialogTriggerSource) : TraitActivityDialog()
     object SortTraits : TraitActivityDialog()
 }

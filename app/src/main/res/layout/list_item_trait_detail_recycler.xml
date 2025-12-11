@@ -147,7 +147,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:padding="16dp"
-                android:text="@string/field_trait_chart_no_data"
+                android:text="@string/chart_no_data"
                 android:visibility="gone"/>
         </LinearLayout>
     </LinearLayout>

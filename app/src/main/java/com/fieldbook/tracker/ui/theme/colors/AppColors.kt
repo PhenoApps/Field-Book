@@ -10,6 +10,7 @@ data class AppColors(
     val accent: Color,
     val primaryTransparent: Color,
     val background: Color,
+    val lightGray: Color,
 
     val surface: SurfaceColors,
 
