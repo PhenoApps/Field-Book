@@ -1,7 +1,9 @@
-package com.fieldbook.tracker.ui.lists
+package com.fieldbook.tracker.ui.screens.traits.lists
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
@@ -10,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.objects.TraitObject
-import com.fieldbook.tracker.ui.listItems.TraitListItem
+import com.fieldbook.tracker.ui.screens.traits.listItems.TraitListItem
 import com.fieldbook.tracker.ui.theme.AppTheme
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
@@ -75,13 +77,15 @@ private fun TraitListPreview() {
     val traitList = listOf(trait1, trait2)
 
     AppTheme {
-        TraitList(
-            traits = traitList,
-            onTraitClick = { },
-            onToggleVisibility = { _, _ -> },
-            onMoveItem = { _, _ -> },
-            onDragStateChanged = { },
-            modifier = Modifier,
-        )
+        Box(modifier = Modifier.fillMaxHeight()) {
+            TraitList(
+                traits = traitList,
+                onTraitClick = { },
+                onToggleVisibility = { _, _ -> },
+                onMoveItem = { _, _ -> },
+                onDragStateChanged = { },
+                modifier = Modifier,
+            )
+        }
     }
 }

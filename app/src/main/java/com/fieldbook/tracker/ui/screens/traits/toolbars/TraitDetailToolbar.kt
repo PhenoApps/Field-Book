@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.ui.toolbars
+package com.fieldbook.tracker.ui.screens.traits.toolbars
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy

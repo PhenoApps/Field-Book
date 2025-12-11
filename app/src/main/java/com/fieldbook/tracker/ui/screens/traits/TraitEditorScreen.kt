@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.ui.screens.traits
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Build
@@ -12,11 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,9 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.preference.PreferenceManager
@@ -37,27 +30,21 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.brapi.BrapiTraitActivity
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache
 import com.fieldbook.tracker.activities.brapi.io.filter.filterer.BrapiTraitFilterActivity
-import com.fieldbook.tracker.database.DataHelper
-import com.fieldbook.tracker.ui.screens.traits.dialogs.DeleteAllTraitsDialog
-import com.fieldbook.tracker.ui.screens.traits.dialogs.ExportDialog
-import com.fieldbook.tracker.ui.screens.traits.dialogs.SortOptionsDialog
-import com.fieldbook.tracker.ui.screens.traits.dialogs.CreateTraitsDialog
-import com.fieldbook.tracker.ui.screens.traits.dialogs.ExportCheckDialog
-import com.fieldbook.tracker.ui.screens.traits.dialogs.TraitImportDialog
-import com.fieldbook.tracker.database.repository.TraitRepository
-import com.fieldbook.tracker.ui.components.appBar.ActionDisplayMode
-import com.fieldbook.tracker.ui.components.appBar.AppBar
-import com.fieldbook.tracker.ui.components.appBar.TopAppBarAction
-import com.fieldbook.tracker.ui.components.buttons.CircularBorderedFab
-import com.fieldbook.tracker.ui.lists.TraitList
-import com.fieldbook.tracker.ui.theme.AppTheme
-import com.fieldbook.tracker.utilities.FileUtil
-import com.fieldbook.tracker.utilities.Utils
-import com.fieldbook.tracker.database.viewmodels.TraitActivityDialog
 import com.fieldbook.tracker.database.viewmodels.DialogTriggerSource
+import com.fieldbook.tracker.database.viewmodels.TraitActivityDialog
 import com.fieldbook.tracker.database.viewmodels.TraitEditorEvent
 import com.fieldbook.tracker.database.viewmodels.TraitEditorViewModel
-import kotlinx.coroutines.Dispatchers
+import com.fieldbook.tracker.ui.components.buttons.CircularBorderedFab
+import com.fieldbook.tracker.ui.screens.traits.dialogs.CreateTraitsDialog
+import com.fieldbook.tracker.ui.screens.traits.dialogs.DeleteAllTraitsDialog
+import com.fieldbook.tracker.ui.screens.traits.dialogs.ExportCheckDialog
+import com.fieldbook.tracker.ui.screens.traits.dialogs.ExportDialog
+import com.fieldbook.tracker.ui.screens.traits.dialogs.SortOptionsDialog
+import com.fieldbook.tracker.ui.screens.traits.dialogs.TraitImportDialog
+import com.fieldbook.tracker.ui.screens.traits.lists.TraitList
+import com.fieldbook.tracker.ui.screens.traits.toolbars.TraitEditorToolbar
+import com.fieldbook.tracker.utilities.FileUtil
+import com.fieldbook.tracker.utilities.Utils
 
 @Composable
 fun TraitEditorScreen(
@@ -82,7 +69,7 @@ fun TraitEditorScreen(
             permissionCallback.value?.invoke()
             permissionCallback.value = null
         } else {
-            Utils.makeToast(context, "Storage permission denied")
+            Utils.makeToast(context, resources.getString(R.string.permission_rationale_storage))
         }
     }
 
@@ -101,78 +88,14 @@ fun TraitEditorScreen(
         viewModel.loadTraits()
     }
 
-    val appBarActions = buildList {
-        // if (viewModel.isTutorialEnabled()) {
-        //     add(
-        //         TopAppBarAction(
-        //             title = stringResource(R.string.tutorial_dialog_title),
-        //             contentDescription = "Help",
-        //             icon = Icons.AutoMirrored.Filled.Help,
-        //             displayMode = ActionDisplayMode.ALWAYS,
-        //             onClick = {
-        //                 // TODO add tutorial
-        //             }
-        //         )
-        //     )
-        // }
-
-        if (uiState.hasTraits) {
-            addAll(
-                listOf(
-                    TopAppBarAction(
-                        title = stringResource(R.string.traits_sort_visibility),
-                        contentDescription = stringResource(R.string.traits_sort_visibility),
-                        icon = R.drawable.ic_tb_toggle_all,
-                        displayMode = ActionDisplayMode.ALWAYS,
-                        onClick = {
-                            viewModel.toggleAllTraitsVisibility()
-                        }
-                    ),
-                    TopAppBarAction(
-                        title = stringResource(R.string.traits_toolbar_sort),
-                        contentDescription = stringResource(R.string.traits_toolbar_sort),
-                        icon = R.drawable.ic_sort,
-                        displayMode = ActionDisplayMode.ALWAYS,
-                        onClick = {
-                            viewModel.showDialog(TraitActivityDialog.SortTraits)
-                        }
-                    ),
-                    TopAppBarAction(
-                        title = stringResource(R.string.traits_toolbar_delete_all),
-                        contentDescription = stringResource(R.string.traits_toolbar_delete_all),
-                        icon = Icons.Filled.Delete,
-                        displayMode = ActionDisplayMode.IF_ROOM,
-                        onClick = {
-                            viewModel.showDeleteDialog(DialogTriggerSource.TOOLBAR)
-                        }
-                    ),
-                    TopAppBarAction(
-                        title = stringResource(R.string.traits_dialog_export),
-                        contentDescription = stringResource(R.string.traits_dialog_export),
-                        icon = Icons.Filled.FileDownload,
-                        displayMode = ActionDisplayMode.IF_ROOM,
-                        onClick = {
-                            viewModel.requestExportPermission()
-                        }
-                    ),
-                )
-            )
-        }
-    }
-
     Scaffold(
         topBar = {
-            AppBar(
-                title = stringResource(R.string.settings_traits),
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            painter = painterResource(R.drawable.arrow_left),
-                            contentDescription = stringResource(R.string.appbar_back)
-                        )
-                    }
-                },
-                actions = appBarActions,
+            TraitEditorToolbar(
+                hasTraits = uiState.hasTraits,
+                isTutorialEnabled = viewModel.isTutorialEnabled(),
+                onBack = onNavigateBack,
+                onToggleAllTraits = { viewModel.toggleAllTraitsVisibility() },
+                onShowDialog = { dialog -> viewModel.showDialog(dialog) }
             )
         },
         floatingActionButton = {
@@ -377,35 +300,5 @@ fun TraitEditorScreen(
                 }
             }
         }
-    }
-}
-
-@SuppressLint("ViewModelConstructorInComposable")
-@Preview
-@Composable
-private fun TraitEditorScreenPreview() {
-    val context = LocalContext.current
-    val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-
-    val db = DataHelper(context)
-
-    val viewModel = TraitEditorViewModel(
-        repo = TraitRepository(
-            context = context,
-            database = db,
-            prefs = prefs,
-            ioDispatcher = Dispatchers.IO
-        ),
-        prefs = prefs,
-    )
-
-    AppTheme {
-        TraitEditorScreen(
-            viewModel = viewModel,
-            onNavigateBack = { },
-            onTraitDetail = { },
-            onShowCreateNewTraitDialog = { },
-            onShowLocalFilePicker = { },
-        )
     }
 }

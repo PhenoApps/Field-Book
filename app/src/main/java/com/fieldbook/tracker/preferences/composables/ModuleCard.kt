@@ -23,7 +23,7 @@ fun ModuleCard(moduleInfo: BrapiModuleCalls) {
             Text(
                 text = stringResource(
                     R.string.brapi_server_calls_implemented,
-                    moduleInfo.fbImplementedCount,
+                    moduleInfo.appImplementedCount,
                     moduleInfo.totalCalls,
                     moduleInfo.implementationPercentage
                 ),

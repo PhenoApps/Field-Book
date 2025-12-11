@@ -63,6 +63,7 @@
     <string name="define_button_text">Choose Folder</string>
 
     <!-- Permissions  -->
+    <string name="permission_rationale_storage">Access to the device\'s files is required.</string>
     <string name="permission_rationale_storage_import">Importing files requires access to the device\'s files.</string>
     <string name="permission_rationale_storage_export">Exporting data requires access to the device\'s files.</string>
     <string name="permission_rationale_trait_features">Collecting data requires access to the device\'s files, microphone, and camera.</string>

@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.ui.listItems
+package com.fieldbook.tracker.ui.screens.traits.listItems
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background

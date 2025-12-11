@@ -25,7 +25,7 @@ import com.fieldbook.tracker.database.viewmodels.TraitDetailViewModel
 import com.fieldbook.tracker.database.viewmodels.TraitEditorViewModel
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.parameters.BaseFormatParameter
-import com.fieldbook.tracker.ui.toolbars.TraitDetailToolbar
+import com.fieldbook.tracker.ui.screens.traits.toolbars.TraitDetailToolbar
 import com.fieldbook.tracker.ui.screens.traits.dialogs.CopyTraitDialog
 import com.fieldbook.tracker.ui.screens.traits.dialogs.DeleteTraitDialog
 import com.fieldbook.tracker.utilities.TraitNameValidator
