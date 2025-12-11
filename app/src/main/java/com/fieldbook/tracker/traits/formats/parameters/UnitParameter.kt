@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import androidx.core.widget.addTextChangedListener
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.ValidationResult
 
@@ -65,7 +65,7 @@ class UnitParameter : BaseFormatParameter(
         }
 
         override fun validate(
-            database: DataHelper,
+            traitRepo: TraitRepository,
             initialTraitObject: TraitObject?
         ) = ValidationResult()
     }

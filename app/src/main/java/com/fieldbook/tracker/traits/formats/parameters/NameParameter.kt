@@ -5,12 +5,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.ValidationResult
 import com.fieldbook.tracker.utilities.SynonymsUtil
 import com.fieldbook.tracker.utilities.TraitNameValidator.validateTraitAlias
 import com.google.android.material.textfield.TextInputEditText
+import kotlinx.coroutines.runBlocking
 
 class NameParameter : BaseFormatParameter(
     nameStringResourceId = R.string.traits_create_name,
@@ -88,14 +89,16 @@ class NameParameter : BaseFormatParameter(
             return true
         }
 
-        override fun validate(database: DataHelper, initialTraitObject: TraitObject?) =
+        override fun validate(traitRepo: TraitRepository, initialTraitObject: TraitObject?) =
             ValidationResult().apply {
 
                 textInputLayout.endIconDrawable = null
 
                 val inputText = nameEt.text.toString().trim { it <= ' ' }
 
-                val errorRes = validateTraitAlias(inputText, database.allTraitObjects, initialTraitObject)
+                val allTraits = runBlocking { traitRepo.getTraits() }
+
+                val errorRes = validateTraitAlias(inputText, allTraits, initialTraitObject)
 
                 if (errorRes != null) { // blank/duplicate
                     result = false

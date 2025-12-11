@@ -9,13 +9,13 @@ import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.FragmentActivity
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.dialogs.FileExploreDialogFragment
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.ValidationResult
 import com.google.android.material.textfield.TextInputEditText
 import org.phenoapps.utils.BaseDocumentTreeUtil
 import androidx.core.net.toUri
+import com.fieldbook.tracker.database.repository.TraitRepository
 
 /**
  * Display just the file name and store the file uri in the db
@@ -99,7 +99,7 @@ class ResourceFileParameter() : BaseFormatParameter(
         }
 
         override fun validate(
-            database: DataHelper,
+            traitRepo: TraitRepository,
             initialTraitObject: TraitObject?,
         ) = ValidationResult()
 

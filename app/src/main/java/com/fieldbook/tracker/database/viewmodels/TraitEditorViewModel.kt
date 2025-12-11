@@ -187,7 +187,7 @@ class TraitEditorViewModel @Inject constructor(
 
     fun insertTraits(newTraits: List<TraitObject>) {
         viewModelScope.launch {
-            runCatching { repo.insertTraits(newTraits) }
+            runCatching { repo.insertTraitsList(newTraits) }
                 .onSuccess { insertedCount ->
                     loadTraits()
 
@@ -276,7 +276,7 @@ class TraitEditorViewModel @Inject constructor(
                         },
                     )
 
-                repo.insertTraits(traits)
+                repo.insertTraitsList(traits)
                 loadTraits()
 
                 _events.emit(

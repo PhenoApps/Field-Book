@@ -9,7 +9,7 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import androidx.core.widget.addTextChangedListener
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.ValidationResult
 
@@ -110,7 +110,7 @@ class DecimalPlacesParameter : BaseFormatParameter(
             error = errorMessage
         }
 
-        override fun validate(database: DataHelper, initialTraitObject: TraitObject?): ValidationResult {
+        override fun validate(traitRepo: TraitRepository, initialTraitObject: TraitObject?): ValidationResult {
             return if (maxDecimalRadio.isChecked) validateDecimalInput() else ValidationResult()
         }
     }

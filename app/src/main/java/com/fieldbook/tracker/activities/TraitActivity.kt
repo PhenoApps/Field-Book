@@ -16,6 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.database.viewmodels.TraitDetailViewModel
 import com.fieldbook.tracker.dialogs.FileExploreDialogFragment
 import com.fieldbook.tracker.dialogs.NewTraitDialog
@@ -51,6 +52,9 @@ class TraitActivity : ThemedActivity() {
 
     @Inject
     lateinit var database: DataHelper
+
+    @Inject
+    lateinit var traitRepo: TraitRepository
 
     companion object {
         private const val TAG = "TraitEditorActivity"
@@ -251,7 +255,7 @@ class TraitActivity : ThemedActivity() {
                     holder.textInputLayout.error = null
 
                     // parameter specific validation
-                    val paramValidationResult = holder.validate(database, trait)
+                    val paramValidationResult = holder.validate(traitRepo, trait)
 
                     if (paramValidationResult.result != true) {
                         val errorMessage = paramValidationResult.error
