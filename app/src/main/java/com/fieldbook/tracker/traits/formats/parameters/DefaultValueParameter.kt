@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import androidx.core.widget.addTextChangedListener
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.ValidationResult
 
@@ -30,7 +30,7 @@ class DefaultValueParameter(
 
     inner class ViewHolder(itemView: View) : BaseFormatParameter.ViewHolder(itemView) {
 
-        val defaultValueEt =
+        val defaultValueEt: EditText =
             itemView.findViewById<EditText>(R.id.list_item_trait_parameter_default_value_et).also {
                 initialDefaultValue?.let { value ->
                     it.setText(value)
@@ -107,7 +107,7 @@ class DefaultValueParameter(
         }
 
         override fun validate(
-            database: DataHelper,
+            traitRepo: TraitRepository,
             initialTraitObject: TraitObject?
         ) = ValidationResult()
     }

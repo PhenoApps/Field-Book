@@ -14,7 +14,7 @@ import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.activities.TraitEditorActivity
+import com.fieldbook.tracker.activities.TraitActivity
 import com.fieldbook.tracker.adapters.TraitsStatusAdapter
 import com.fieldbook.tracker.interfaces.CollectTraitController
 import com.fieldbook.tracker.objects.TraitObject
@@ -223,7 +223,7 @@ class TraitBoxView : ConstraintLayout {
 
         previousSelection = traitPosition
 
-        traitTypeTv.text = currentTrait?.name
+        traitTypeTv.text = currentTrait?.alias
         traitDetails.text = currentTrait?.details ?: ""
 
         handleTraitTypeWrapping()
@@ -244,7 +244,7 @@ class TraitBoxView : ConstraintLayout {
 
         builder.setTitle(R.string.select_trait)
             .setCancelable(true)
-            .setSingleChoiceItems(visibleTraits.map { it.name }.toTypedArray(), getSelectedItemPosition()) { dialog, index ->
+            .setSingleChoiceItems(visibleTraits.map { it.alias }.toTypedArray(), getSelectedItemPosition()) { dialog, index ->
                 // Update selected trait
                 currentTrait = visibleTraits[index]
                 loadLayout()
@@ -259,7 +259,7 @@ class TraitBoxView : ConstraintLayout {
                 R.string.edit_traits
             ) {
                     _: DialogInterface, _: Int ->
-                    val intent = Intent(context, TraitEditorActivity::class.java)
+                    val intent = Intent(context, TraitActivity::class.java)
                     startActivity(context, intent, null)
             }
         val dialog = builder.create()
@@ -367,40 +367,43 @@ class TraitBoxView : ConstraintLayout {
 
     fun moveTrait(direction: MoveDirection) {
 
-        var pos = 0
-        if (!controller.validateData(controller.getCurrentObservation()?.value)) {
-            return
-        }
+        controller.navigateIfDataIsValid(controller.getCurrentObservation()?.value) {
+            var pos = 0
 
-        val rangeBox = controller.getRangeBox()
-        if (direction == MoveDirection.LEFT) {
-            pos = getSelectedItemPosition() - 1
-            if (pos < 0) {
-                pos = visibleTraitsList.count() - 1
-                if (controller.isCyclingTraitsAdvances()) {
-                    rangeBox.clickLeft()
+            val rangeBox = controller.getRangeBox()
+            if (direction == MoveDirection.LEFT) {
+                pos = getSelectedItemPosition() - 1
+                if (pos < 0) {
+                    pos = visibleTraitsList.count() - 1
+                    if (controller.isCyclingTraitsAdvances()) {
+                        rangeBox.clickLeft()
+                    }
+                    if (controller.getPreferences()
+                            .getBoolean(PreferenceKeys.CYCLE_TRAITS_SOUND, false)
+                    ) {
+                        controller.getSoundHelper().playCycle()
+                    }
                 }
-                if (controller.getPreferences().getBoolean(PreferenceKeys.CYCLE_TRAITS_SOUND, false)) {
-                    controller.getSoundHelper().playCycle()
+            } else if (direction == MoveDirection.RIGHT) {
+                pos = getSelectedItemPosition() + 1
+                if (pos > visibleTraitsList.count() - 1) {
+                    pos = 0
+                    if (controller.isCyclingTraitsAdvances()) {
+                        rangeBox.clickRight()
+                    }
+                    if (controller.getPreferences()
+                            .getBoolean(PreferenceKeys.CYCLE_TRAITS_SOUND, false)
+                    ) {
+                        controller.getSoundHelper().playCycle()
+                    }
                 }
             }
-        } else if (direction == MoveDirection.RIGHT) {
-            pos = getSelectedItemPosition() + 1
-            if (pos > visibleTraitsList.count() - 1) {
-                pos = 0
-                if (controller.isCyclingTraitsAdvances()) {
-                    rangeBox.clickRight()
-                }
-                if (controller.getPreferences().getBoolean(PreferenceKeys.CYCLE_TRAITS_SOUND, false)) {
-                    controller.getSoundHelper().playCycle()
-                }
-            }
-        }
 
-        setSelection(pos)
-        loadLayout()
-        controller.refreshLock()
-        controller.getCollectInputView().resetInitialIndex()
+            setSelection(pos)
+            loadLayout()
+            controller.refreshLock()
+            controller.getCollectInputView().resetInitialIndex()
+        }
     }
 
     fun returnFirst() {

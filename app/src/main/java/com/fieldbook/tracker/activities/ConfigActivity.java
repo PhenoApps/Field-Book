@@ -277,7 +277,7 @@ public class ConfigActivity extends ThemedActivity {
                     break;
                 case 1:
                     intent.setClassName(ConfigActivity.this,
-                            TraitEditorActivity.class.getName());
+                            TraitActivity.class.getName());
                     startActivity(intent);
 
                     break;

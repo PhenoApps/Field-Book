@@ -254,9 +254,9 @@
     <string name="field_data_title">Dados</string>
     <string name="field_trait_observation_total">\"%d\"observações</string>
     <!-- Field Detail Charts -->
-    <string name="field_trait_chart_no_data">Sem dados para o gráfico</string>
-    <string name="field_trait_chart_incompatible_format">Este formato de característica não pode ser representado graficamente</string>
-    <string name="field_trait_chart_excess_data">Muitos valores distintos para representar graficamente</string>
+    <string name="chart_no_data">Sem dados para o gráfico</string>
+    <string name="chart_incompatible_format">Este formato de característica não pode ser representado graficamente</string>
+    <string name="chart_excess_data">Muitos valores distintos para representar graficamente</string>
     <!-- Semantic dates -->
     <string name="today">Hoje</string>
     <string name="yesterday">Ontem</string>

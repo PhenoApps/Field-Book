@@ -5,7 +5,7 @@ import android.util.AttributeSet
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.traits.formats.ValidationResult
@@ -76,7 +76,7 @@ class ParameterScrollView constructor(
     }
 
     fun validateParameters(
-        database: DataHelper,
+        traitRepo: TraitRepository,
         initialTraitObject: TraitObject? = null
     ): ValidationResult {
 
@@ -84,7 +84,7 @@ class ParameterScrollView constructor(
 
         holders.forEach {
 
-            validated.add(it.validate(database, initialTraitObject))
+            validated.add(it.validate(traitRepo, initialTraitObject))
 
         }
 

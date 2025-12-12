@@ -1,10 +1,11 @@
-package com.fieldbook.tracker.offbeat.traits.formats.contracts
+package com.fieldbook.tracker.traits.formats
 
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.traits.formats.Formats
-import com.fieldbook.tracker.traits.formats.TraitFormat
+import com.fieldbook.tracker.traits.formats.parameters.AutoSwitchPlotParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
+import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
+import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 
 class AngleFormat : TraitFormat(
     format = Formats.ANGLE,
@@ -15,5 +16,8 @@ class AngleFormat : TraitFormat(
     iconDrawableResourceId = R.drawable.ic_trait_angle,
     stringNameAux = null,
     NameParameter(),
-    DetailsParameter()
+    DetailsParameter(),
+    AutoSwitchPlotParameter(),
+    RepeatedMeasureParameter(),
+    ResourceFileParameter()
 )

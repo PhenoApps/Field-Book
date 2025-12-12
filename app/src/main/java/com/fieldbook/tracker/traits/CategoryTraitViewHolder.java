@@ -9,6 +9,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.fieldbook.tracker.R;
 import com.google.android.flexbox.FlexboxLayoutManager;
 
+import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
+
 class CategoryTraitViewHolder extends RecyclerView.ViewHolder {
 
     Button mButton;
@@ -18,7 +20,8 @@ class CategoryTraitViewHolder extends RecyclerView.ViewHolder {
         mButton = (Button) itemView.findViewById(R.id.multicatButton);
     }
 
-    void bindTo() {
+    void bindTo(BrAPIScaleValidValuesCategories category) {
+        mButton.setTag(category);
         ViewGroup.LayoutParams lp = mButton.getLayoutParams();
         if (lp instanceof FlexboxLayoutManager.LayoutParams) {
             FlexboxLayoutManager.LayoutParams flexboxLp = (FlexboxLayoutManager.LayoutParams) lp;

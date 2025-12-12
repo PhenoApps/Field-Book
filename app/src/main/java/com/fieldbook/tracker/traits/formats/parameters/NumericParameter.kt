@@ -8,7 +8,7 @@ import android.widget.EditText
 import androidx.core.text.isDigitsOnly
 import androidx.core.widget.addTextChangedListener
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.ValidationResult
 import java.math.BigDecimal
@@ -205,7 +205,7 @@ open class NumericParameter<T : Number>(
         }
 
         override fun validate(
-            database: DataHelper,
+            traitRepo: TraitRepository,
             initialTraitObject: TraitObject?
         ) = validateTextEntry(numericEt.text.toString())
     }

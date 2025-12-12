@@ -360,27 +360,27 @@ class RangeBoxView : ConstraintLayout {
     // Simulate range right key press
     fun repeatKeyPress(directionStr: String) {
         val left = directionStr.equals("left", ignoreCase = true)
-        if (!controller.validateData(controller.getCurrentObservation()?.value)) {
-            return
-        }
-        if (rangeID.isNotEmpty()) {
-            val step = if (left) -1 else 1
-            paging = movePaging(paging, step, false)
 
-            // Refresh onscreen controls
-            updateCurrentRange(rangeID[paging - 1])
-            saveLastPlotAndTrait()
-            if (cRange.uniqueId.isEmpty()) return
-            if (controller.getPreferences().getBoolean(PreferenceKeys.PRIMARY_SOUND, false)) {
-                if (cRange.primaryId != lastRange && lastRange != "") {
-                    lastRange = cRange.primaryId
-                    controller.getSoundHelper().playPlonk()
+        controller.navigateIfDataIsValid(controller.getCurrentObservation()?.value) {
+            if (rangeID.isNotEmpty()) {
+                val step = if (left) -1 else 1
+                paging = movePaging(paging, step, false)
+
+                // Refresh onscreen controls
+                updateCurrentRange(rangeID[paging - 1])
+                saveLastPlotAndTrait()
+                if (cRange.uniqueId.isEmpty()) return@navigateIfDataIsValid
+                if (controller.getPreferences().getBoolean(PreferenceKeys.PRIMARY_SOUND, false)) {
+                    if (cRange.primaryId != lastRange && lastRange != "") {
+                        lastRange = cRange.primaryId
+                        controller.getSoundHelper().playPlonk()
+                    }
                 }
-            }
-            display()
-            controller.initWidgets(true)
+                display()
+                controller.initWidgets(true)
 
-            Log.d("Field Book", "refresh widgets range box repeate key press")
+                Log.d("Field Book", "refresh widgets range box repeat key press")
+            }
         }
     }
 
@@ -529,54 +529,57 @@ class RangeBoxView : ConstraintLayout {
 
     ///// paging /////
     fun moveEntryLeft() {
-        if (!controller.validateData(controller.getCurrentObservation()?.value)) {
-            return
-        }
-        if (controller.getPreferences().getBoolean(PreferenceKeys.ENTRY_NAVIGATION_SOUND, false)
-        ) {
-            controller.getSoundHelper().playAdvance()
-        }
-        val entryArrow =
-            controller.getPreferences().getString(PreferenceKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0")
-        if ((entryArrow == "1" || entryArrow == "3") && !controller.getTraitBox().existsTrait()) {
-            controller.getSoundHelper().playError()
-        } else {
-            if (rangeID.isNotEmpty()) {
-                //index.setEnabled(true);
-                paging = decrementPaging(paging)
-                controller.refreshMain()
+        controller.navigateIfDataIsValid(controller.getCurrentObservation()?.value) {
+
+            if (controller.getPreferences().getBoolean(PreferenceKeys.ENTRY_NAVIGATION_SOUND, false)
+            ) {
+                controller.getSoundHelper().playAdvance()
             }
+            val entryArrow =
+                controller.getPreferences()
+                    .getString(PreferenceKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0")
+            if ((entryArrow == "1" || entryArrow == "3") && !controller.getTraitBox()
+                    .existsTrait()
+            ) {
+                controller.getSoundHelper().playError()
+            } else {
+                if (rangeID.isNotEmpty()) {
+                    //index.setEnabled(true);
+                    paging = decrementPaging(paging)
+                    controller.refreshMain()
+                }
+            }
+            controller.resetGeoNavMessages()
+            controller.getCollectInputView().resetInitialIndex()
         }
-        controller.resetGeoNavMessages()
-        controller.getCollectInputView().resetInitialIndex()
     }
 
     fun moveEntryRight() {
-        val traitBox = controller.getTraitBox()
-        if (!controller.validateData(controller.getCurrentObservation()?.value)) {
-            return
-        }
-        if (controller.getPreferences().getBoolean(PreferenceKeys.ENTRY_NAVIGATION_SOUND, false)
-        ) {
-            controller.getSoundHelper().playAdvance()
-        }
-        val entryArrow =
-            controller.getPreferences().getString(PreferenceKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0")
-        if ((entryArrow == "2" || entryArrow == "3") && !traitBox.existsTrait()) {
-            controller.getSoundHelper().playError()
-        } else {
-            if (rangeID.isNotEmpty()) {
-                //index.setEnabled(true);
-                // In addition to advancing the entry, return to the first trait in the trait order if the preference is enabled
-                if (controller.isReturnFirstTrait()) {
-                    traitBox.returnFirst()
-                }
-                paging = incrementPaging(paging)
-                controller.refreshMain()
+        controller.navigateIfDataIsValid(controller.getCurrentObservation()?.value) {
+            val traitBox = controller.getTraitBox()
+            if (controller.getPreferences().getBoolean(PreferenceKeys.ENTRY_NAVIGATION_SOUND, false)
+            ) {
+                controller.getSoundHelper().playAdvance()
             }
+            val entryArrow =
+                controller.getPreferences()
+                    .getString(PreferenceKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0")
+            if ((entryArrow == "2" || entryArrow == "3") && !traitBox.existsTrait()) {
+                controller.getSoundHelper().playError()
+            } else {
+                if (rangeID.isNotEmpty()) {
+                    //index.setEnabled(true);
+                    // In addition to advancing the entry, return to the first trait in the trait order if the preference is enabled
+                    if (controller.isReturnFirstTrait()) {
+                        traitBox.returnFirst()
+                    }
+                    paging = incrementPaging(paging)
+                    controller.refreshMain()
+                }
+            }
+            controller.resetGeoNavMessages()
+            controller.getCollectInputView().resetInitialIndex()
         }
-        controller.resetGeoNavMessages()
-        controller.getCollectInputView().resetInitialIndex()
     }
 
     private fun decrementPaging(pos: Int): Int {

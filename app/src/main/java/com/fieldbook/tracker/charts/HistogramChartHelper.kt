@@ -9,7 +9,6 @@ import com.fieldbook.tracker.R
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.Description
 import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
@@ -20,6 +19,13 @@ import kotlin.math.ceil
 import kotlin.math.pow
 
 object HistogramChartHelper {
+
+    data class HistogramData(
+        val binLabels: List<String>,
+        val binCounts: List<Int>,
+        val isBinSizeOne: Boolean,
+        val maxCount: Int
+    )
 
     private const val TAG = "HistogramChartHelper"
     private const val MIN_BAR_WIDTH_DP = 40f // Minimum bar width in in density-independent pixels
@@ -33,44 +39,17 @@ object HistogramChartHelper {
      * @param observations The data to display in the histogram, represented as a list of BigDecimal values.
      */
     fun setupHistogram(context: Context, chart: BarChart, observations: List<BigDecimal>, chartTextSize: Float) {
-        // Calculate min, max, and range of observations
-        val minValue = observations.minOrNull() ?: BigDecimal.ZERO
-        val maxValue = observations.maxOrNull() ?: BigDecimal.ZERO
-        val range = maxValue.subtract(minValue)
 
         chart.visibility = View.VISIBLE
-        val binCount = getBinCount(context, observations, range)
 
-        // Ensure binSize is non-zero by checking range
-        val binSize = if (range > BigDecimal.ZERO) {
-            range.divide(BigDecimal(binCount), 0, RoundingMode.UP)
-        } else {
-            BigDecimal.ONE
-        }
+        val histogramData = computeHistogramData(context, observations)
 
-        val isBinSizeOne = binSize.compareTo(BigDecimal.ONE) == 0
+        val labels = histogramData.binLabels
+        val counts = histogramData.binCounts
+        val isBinSizeOne = histogramData.isBinSizeOne
+        val maxBinIndex = counts.size - 1
 
-        val binnedObservations = mutableMapOf<Int, Int>()
-        for (observation in observations) {
-            val binIndex = 1 + observation.subtract(minValue).divide(binSize, 0, RoundingMode.DOWN).toInt()
-            binnedObservations[binIndex] = (binnedObservations[binIndex] ?: 0) + 1
-        }
-
-        if (!isBinSizeOne) {
-            binnedObservations[binnedObservations.keys.maxOrNull()!! + 1] = 0
-        }
-
-        val maxBinIndex = binnedObservations.keys.maxOrNull() ?: binCount
-        val sortedBinnedObservations = (0..maxBinIndex).associateWith { binnedObservations[it] ?: 0 }
-
-        val labels = sortedBinnedObservations.keys.map { binIndex ->
-            val binStart = minValue.add(binSize.multiply(BigDecimal(binIndex)))
-            binStart.toInt().toString()
-        }.let {
-            if (isBinSizeOne) it.dropLast(1) else it
-        }
-
-        val entries = sortedBinnedObservations.map { (binIndex, count) ->
+        val entries = counts.mapIndexed { binIndex, count ->
             val adjustedBinIndex = if (isBinSizeOne) binIndex.toFloat() - 0.5f else binIndex.toFloat()
             BarEntry(adjustedBinIndex, count.toFloat())
         }
@@ -92,7 +71,7 @@ object HistogramChartHelper {
         }
         chart.data = barData
 
-        val xAxis: XAxis = chart.xAxis.apply {
+        chart.xAxis.apply {
             position = XAxis.XAxisPosition.BOTTOM
             setDrawGridLines(false)
             setDrawAxisLine(true)
@@ -101,7 +80,7 @@ object HistogramChartHelper {
             axisMinimum = 0f
             axisMaximum = maxBinIndex.toFloat()
             setCenterAxisLabels(true)
-            setLabelCount(labels.size, !(isBinSizeOne && binCount > 1))
+            setLabelCount(labels.size, !(isBinSizeOne && counts.size > 1))
 
             valueFormatter = object : ValueFormatter() {
                 override fun getFormattedValue(value: Float): String {
@@ -111,7 +90,7 @@ object HistogramChartHelper {
             }
         }
 
-        val yAxis: YAxis = chart.axisLeft.apply {
+        chart.axisLeft.apply {
             setDrawGridLines(false)
             setDrawAxisLine(true)
             textColor = Color.BLACK
@@ -132,13 +111,13 @@ object HistogramChartHelper {
             axisRight.isEnabled = false
             setScaleEnabled(false)
             setDragEnabled(false)
-            setHighlightPerTapEnabled(false)
+            isHighlightPerTapEnabled = false
             legend.isEnabled = false
 
             description = Description().apply {
                 text = ""
             }
-            setNoDataText(context.getString(R.string.field_trait_chart_no_data))
+            setNoDataText(context.getString(R.string.chart_no_data))
             setNoDataTextColor(Color.BLACK)
 
             // Add extra offsets to avoid label cut-off
@@ -147,6 +126,52 @@ object HistogramChartHelper {
             notifyDataSetChanged()
             invalidate()
         }
+    }
+
+    fun computeHistogramData(context: Context, observations: List<BigDecimal>): HistogramData {
+        // Calculate min, max, and range of observations
+        val minValue = observations.minOrNull() ?: BigDecimal.ZERO
+        val maxValue = observations.maxOrNull() ?: BigDecimal.ZERO
+        val range = maxValue.subtract(minValue)
+
+        val binCount = getBinCount(context, observations, range)
+
+        // Ensure binSize is non-zero by checking range
+        val binSize = if (range > BigDecimal.ZERO) {
+            range.divide(BigDecimal(binCount), 0, RoundingMode.UP)
+        } else {
+            BigDecimal.ONE
+        }
+
+        val isBinSizeOne = binSize.compareTo(BigDecimal.ONE) == 0
+
+        val binnedObservations = mutableMapOf<Int, Int>()
+
+        for (observation in observations) {
+            val binIndex = 1 + observation.subtract(minValue).divide(binSize, 0, RoundingMode.DOWN).toInt()
+            binnedObservations[binIndex] = (binnedObservations[binIndex] ?: 0) + 1
+        }
+
+        if (!isBinSizeOne) {
+            binnedObservations[binnedObservations.keys.maxOrNull()!! + 1] = 0
+        }
+
+        val maxBinIndex = binnedObservations.keys.maxOrNull() ?: binCount
+        val sortedBinnedObservations = (0..maxBinIndex).associateWith { binnedObservations[it] ?: 0 }
+
+        val labels = sortedBinnedObservations.keys.map { binIndex ->
+            val binStart = minValue.add(binSize.multiply(BigDecimal(binIndex)))
+            binStart.toInt().toString()
+        }.let {
+            if (isBinSizeOne) it.dropLast(1) else it
+        }
+
+        return HistogramData(
+            binLabels = labels,
+            binCounts = sortedBinnedObservations.values.toList(),
+            isBinSizeOne = isBinSizeOne,
+            maxCount = sortedBinnedObservations.values.maxOrNull() ?: 1
+        )
     }
 
     /**

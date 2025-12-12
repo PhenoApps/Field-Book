@@ -22,7 +22,7 @@ class CategoryTraitAdapter extends RecyclerView.Adapter<CategoryTraitViewHolder>
     @Override
     public CategoryTraitViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.trait_multicat_button, parent, false);
+                .inflate(R.layout.trait_category_button, parent, false);
         return new CategoryTraitViewHolder(view);
     }
 

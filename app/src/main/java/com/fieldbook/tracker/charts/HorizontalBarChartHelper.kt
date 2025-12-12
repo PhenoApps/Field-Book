@@ -118,7 +118,7 @@ object HorizontalBarChartHelper {
             description = Description().apply {
                 text = ""
             }
-            setNoDataText(context.getString(R.string.field_trait_chart_no_data))
+            setNoDataText(context.getString(R.string.chart_no_data))
             setNoDataTextColor(Color.BLACK)
 
             // Avoids label cut-off
