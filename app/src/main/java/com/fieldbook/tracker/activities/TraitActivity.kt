@@ -227,6 +227,9 @@ class TraitActivity : ThemedActivity() {
         dialog.show(supportFragmentManager, "ResourceFilePickerDialog")
     }
 
+    /**
+     * [onUpdated] calls detailViewModel.updateAttributes() and updates UI state in detail
+     */
     private fun showParameterEditDialog(
         parameter: BaseFormatParameter, trait: TraitObject,
         onUpdated: (TraitObject) -> Unit,
@@ -287,7 +290,6 @@ class TraitActivity : ThemedActivity() {
                     }
 
                     onUpdated(updatedTrait)
-                    Utils.makeToast(this, getString(R.string.edit_traits))
                     CollectActivity.reloadData = true
 
                     dialog.dismiss()
