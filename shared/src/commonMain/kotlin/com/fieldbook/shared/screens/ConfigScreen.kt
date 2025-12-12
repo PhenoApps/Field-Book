@@ -24,7 +24,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fieldbook.shared.KmpHostScreenType
+import com.fieldbook.shared.database.repository.StudiesRepository
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.ic_nav_drawer_collect_data
 import com.fieldbook.shared.generated.resources.ic_nav_drawer_fields
@@ -33,13 +36,19 @@ import com.fieldbook.shared.generated.resources.ic_nav_drawer_statistics
 import com.fieldbook.shared.generated.resources.ic_nav_drawer_traits
 import com.fieldbook.shared.generated.resources.ic_tb_info
 import com.fieldbook.shared.generated.resources.trait_date_save
+import com.fieldbook.shared.sqldelight.DriverFactory
+import com.fieldbook.shared.sqldelight.FieldbookDatabase
 import com.fieldbook.shared.theme.MainTheme
+import com.fieldbook.shared.utilities.FieldSwitchImpl
+import com.fieldbook.shared.utilities.selectFirstField
 import org.jetbrains.compose.resources.painterResource
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConfigScreen(
+    driverFactory: DriverFactory,
+    viewModel: ConfigScreenViewModel = viewModel { ConfigScreenViewModel(driverFactory) },
     onBack: (() -> Unit)? = null,
     onNavigate: ((KmpHostScreenType) -> Unit)? = null
 ) {
@@ -49,9 +58,9 @@ fun ConfigScreen(
             "Traits",
             "Collect",
             "Export",
-            "Advanced",
+            "Settings",
             "Statistics",
-            "About"
+            "About",
         )
         val configIcons = listOf(
             Res.drawable.ic_nav_drawer_fields,
@@ -60,7 +69,7 @@ fun ConfigScreen(
             Res.drawable.trait_date_save,
             Res.drawable.ic_nav_drawer_settings,
             Res.drawable.ic_nav_drawer_statistics,
-            Res.drawable.ic_tb_info
+            Res.drawable.ic_tb_info,
         )
         Surface(modifier = Modifier.fillMaxSize()) {
             Column(modifier = Modifier.fillMaxSize()) {
@@ -102,6 +111,12 @@ fun ConfigScreen(
                                             )
                                         }
 
+                                        item == "Settings" && onNavigate != null -> mod.clickable {
+                                            onNavigate(
+                                                KmpHostScreenType.PREFERENCES
+                                            )
+                                        }
+
                                         else -> mod
                                     }
                                 },
@@ -122,5 +137,16 @@ fun ConfigScreen(
                 }
             }
         }
+    }
+}
+
+class ConfigScreenViewModel(
+    driverFactory: DriverFactory
+) : ViewModel() {
+    private val db = FieldbookDatabase(driverFactory.getDriver())
+    private val studiesRepository: StudiesRepository = StudiesRepository(db)
+
+    init {
+        selectFirstField(driverFactory)
     }
 }

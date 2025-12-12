@@ -1,5 +1,6 @@
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 import org.gradle.api.tasks.Sync
+
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
     id("com.android.kotlin.multiplatform.library")
@@ -65,6 +66,10 @@ kotlin {
                 implementation(libs.multiplatform.settings)
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.lifecycle.viewmodel.compose)
+                implementation(libs.okio)
+                implementation(libs.permissions)
+                implementation(libs.filekit.core)
+                implementation(libs.filekit.compose)
             }
         }
 
@@ -140,3 +145,22 @@ sqldelight {
         }
     }
 }
+
+val unzipSampleDb by tasks.registering(Sync::class) {
+    val zipFile = file("../app/src/main/assets/database/sample_db.zip")
+    val outputDir = layout.projectDirectory.dir("./src/commonMain/composeResources/files")
+    from(zipTree(zipFile))
+    into(outputDir)
+    includeEmptyDirs = false
+}
+
+// Ensure resource-copy tasks that may consume the generated files depend on this task.
+// This avoids the Gradle warning about using a task output without declaring a dependency.
+tasks.matching { it.name == "copyNonXmlValueResourcesForCommonMain" }
+    .configureEach {
+        dependsOn(unzipSampleDb)
+    }
+
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>()
+    .configureEach { dependsOn(unzipSampleDb) }

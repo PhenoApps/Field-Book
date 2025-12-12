@@ -12,40 +12,75 @@ class StudiesRepository(private val db: FieldbookDatabase) {
             SortOrder.DateImport ->
                 db.studiesQueries.allByDateDesc().executeAsList().map { r ->
                     FieldObject(
-                        expId = r.internal_id_study.toInt(),
-                        expName = r.study_name.orEmpty(),
-                        expAlias = r.study_alias.orEmpty(),
-                        uniqueId = r.study_unique_id_name.orEmpty(),
-                        primaryId = r.study_primary_id_name.orEmpty(),
-                        secondaryId = r.study_secondary_id_name.orEmpty(),
-                        dateImport = r.date_import?.toString().orEmpty(),
-                        dateEdit = r.date_edit
+                        exp_id = r.internal_id_study.toInt(),
+                        exp_name = r.study_name.orEmpty(),
+                        exp_alias = r.study_alias.orEmpty(),
+                        unique_id = r.study_unique_id_name.orEmpty(),
+                        primary_id = r.study_primary_id_name.orEmpty(),
+                        secondary_id = r.study_secondary_id_name.orEmpty(),
+                        date_import = r.date_import?.toString() ?: "",
+                        date_edit = r.date_edit,
+                        date_export = null,
+                        date_sync = null,
+                        import_format = null,
+                        exp_source = null,
+                        count = null,
+                        observation_level = null,
+                        attribute_count = r.attribute_count.toString(),
+                        trait_count = r.trait_count.toString(),
+                        observation_count = r.observation_count.toString(),
+                        trial_name = null,
+                        search_attribute = null
                     )
                 }
+
             SortOrder.Visible ->
                 db.studiesQueries.allByVisibleAsc().executeAsList().map { r ->
                     FieldObject(
-                        expId = r.internal_id_study.toInt(),
-                        expName = r.study_name.orEmpty(),
-                        expAlias = r.study_alias.orEmpty(),
-                        uniqueId = r.study_unique_id_name.orEmpty(),
-                        primaryId = r.study_primary_id_name.orEmpty(),
-                        secondaryId = r.study_secondary_id_name.orEmpty(),
-                        dateImport = r.date_import?.toString().orEmpty(),
-                        dateEdit = r.date_edit
+                        exp_id = r.internal_id_study.toInt(),
+                        exp_name = r.study_name.orEmpty(),
+                        exp_alias = r.study_alias.orEmpty(),
+                        unique_id = r.study_unique_id_name.orEmpty(),
+                        primary_id = r.study_primary_id_name.orEmpty(),
+                        secondary_id = r.study_secondary_id_name.orEmpty(),
+                        date_import = r.date_import?.toString() ?: "",
+                        date_edit = r.date_edit,
+                        date_export = null,
+                        date_sync = null,
+                        import_format = null,
+                        exp_source = null,
+                        count = null,
+                        observation_level = null,
+                        attribute_count = r.attribute_count.toString(),
+                        trait_count = r.trait_count.toString(),
+                        observation_count = r.observation_count.toString(),
+                        trial_name = null,
+                        search_attribute = null
                     )
                 }
+
             SortOrder.Name ->
                 db.studiesQueries.allByNameAsc().executeAsList().map { r ->
                     FieldObject(
-                        expId = r.internal_id_study.toInt(),
-                        expName = r.study_name.orEmpty(),
-                        expAlias = r.study_alias.orEmpty(),
-                        uniqueId = r.study_unique_id_name.orEmpty(),
-                        primaryId = r.study_primary_id_name.orEmpty(),
-                        secondaryId = r.study_secondary_id_name.orEmpty(),
-                        dateImport = r.date_import?.toString().orEmpty(),
-                        dateEdit = r.date_edit
+                        exp_id = r.internal_id_study.toInt(),
+                        exp_name = r.study_name.orEmpty(),
+                        exp_alias = r.study_alias.orEmpty(),
+                        unique_id = r.study_unique_id_name.orEmpty(),
+                        primary_id = r.study_primary_id_name.orEmpty(),
+                        secondary_id = r.study_secondary_id_name.orEmpty(),
+                        date_import = r.date_import?.toString() ?: "",
+                        date_edit = r.date_edit,
+                        date_export = null,
+                        date_sync = null,
+                        import_format = null,
+                        exp_source = null,
+                        count = null,
+                        observation_level = null,
+                        attribute_count = r.attribute_count.toString(),
+                        trait_count = r.trait_count.toString(),
+                        observation_count = r.observation_count.toString(),
+                        trial_name = null,
+                        search_attribute = null
                     )
                 }
         }

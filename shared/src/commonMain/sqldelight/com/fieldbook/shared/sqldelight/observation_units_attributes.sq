@@ -1,5 +1,10 @@
-
 CREATE TABLE observation_units_attributes (
   id INTEGER NOT NULL PRIMARY KEY,
-  study_id INTEGER NOT NULL REFERENCES studies(internal_id_study)
+  study_id INTEGER NOT NULL REFERENCES studies(internal_id_study),
+  observation_unit_attribute_name TEXT NOT NULL
 );
+
+getAllNamesByStudyId:
+SELECT observation_unit_attribute_name
+FROM observation_units_attributes
+WHERE study_id = ?;
