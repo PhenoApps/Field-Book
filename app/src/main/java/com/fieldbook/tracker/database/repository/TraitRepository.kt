@@ -172,6 +172,14 @@ class TraitRepository @Inject constructor(
             if (inserted) newTrait else null
         }
 
+    fun changeTraitFormat(trait: TraitObject): TraitObject = TraitObject().apply {
+        id = trait.id
+        name = trait.name
+        alias = trait.alias
+        synonyms = trait.synonyms
+        details = trait.details
+    }
+
     suspend fun exportTraitsAsJson(
         fileName: String,
         traits: List<TraitObject>,

@@ -194,6 +194,8 @@ class TraitDetailViewModel @Inject constructor(
         }
     }
 
+    fun changeTraitFormat(trait: TraitObject) = repo.changeTraitFormat(trait)
+
     // DIALOG STATES
     fun showDialog(nextDialog: TraitDetailDialog) {
         _uiState.update { state ->

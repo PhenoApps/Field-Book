@@ -137,6 +137,12 @@ fun TraitDetailScreen(
                             onUpdated(updatedTrait)
                         }
                     },
+                    onEditFormat = if ((observation?.observationCount ?: 0) == 0) {
+                        {
+                            val newTrait = detailViewModel.changeTraitFormat(trait)
+                            onShowConfigureTraitDialog(newTrait)
+                        }
+                    } else null,
                     isOverviewExpanded = isOverviewExpanded,
                     isOptionsExpanded = isOptionsExpanded,
                     isDataExpanded = isDataExpanded,
