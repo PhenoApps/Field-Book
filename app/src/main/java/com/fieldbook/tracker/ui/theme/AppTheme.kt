@@ -7,15 +7,14 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
-import androidx.preference.PreferenceManager
-import com.fieldbook.tracker.preferences.PreferenceKeys
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.fieldbook.tracker.ui.theme.colors.AppColors
 import com.fieldbook.tracker.ui.theme.colors.BlueAppColors
 import com.fieldbook.tracker.ui.theme.colors.DefaultAppColors
 import com.fieldbook.tracker.ui.theme.colors.HighContrastAppColors
-import com.fieldbook.tracker.ui.theme.enums.AppTextType
 import com.fieldbook.tracker.ui.theme.enums.AppThemeType
 import com.fieldbook.tracker.ui.theme.typography.CompactTypography
 import com.fieldbook.tracker.ui.theme.typography.ExpandedTypography
@@ -37,22 +36,13 @@ import com.fieldbook.tracker.ui.theme.typography.ThemeTypography
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun AppTheme(
+    themeViewModel: ThemeViewModel = hiltViewModel(),
     content: @Composable () -> Unit
 ) {
-    val context = LocalContext.current
     val activity = LocalActivity.current
-    val prefs = PreferenceManager.getDefaultSharedPreferences(context)
 
-    val themeIndex = prefs.getString(PreferenceKeys.THEME, "0")?.toInt() ?: 0
-    val themeType = when(themeIndex) {
-        0 -> AppThemeType.Default
-        1 -> AppThemeType.HighContrast
-        2 -> AppThemeType.Blue
-        else -> AppThemeType.Default
-    }
-
-    val textIndex = prefs.getString(PreferenceKeys.TEXT_THEME, "1")?.toInt() ?: 1
-    val textType = AppTextType.entries.find { it.index == textIndex } ?: AppTextType.MEDIUM
+    val themeType by themeViewModel.themeType.collectAsState()
+    val textType by themeViewModel.textType.collectAsState()
 
     // select colors based on theme type
     val colors = remember(themeType) {
