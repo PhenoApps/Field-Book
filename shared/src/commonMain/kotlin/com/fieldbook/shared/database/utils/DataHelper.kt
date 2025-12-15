@@ -25,6 +25,64 @@ class DataHelper private constructor() {
         private const val TICK = "`"
         private const val TIME_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss.SSSZZZZZ"
 
+        fun onCreate(driver: SqlDriver) {
+            try {
+                driver.execute(null, "PRAGMA foreign_keys=ON;", 0)
+            } catch (_: Throwable) {
+            }
+
+            execute(
+                driver,
+                "CREATE TABLE $RANGE (id INTEGER PRIMARY KEY, range TEXT, plot TEXT, entry TEXT, plot_id TEXT, pedigree TEXT)"
+            )
+            execute(
+                driver,
+                "CREATE TABLE $TRAITS (id INTEGER PRIMARY KEY, external_db_id TEXT, trait_data_source TEXT, trait TEXT, format TEXT, defaultValue TEXT, minimum TEXT, maximum TEXT, details TEXT, categories TEXT, isVisible TEXT, realPosition int)"
+            )
+            execute(
+                driver,
+                "CREATE TABLE $USER_TRAITS (id INTEGER PRIMARY KEY, rid TEXT, parent TEXT, trait TEXT, userValue TEXT, timeTaken TEXT, person TEXT, location TEXT, rep TEXT, notes TEXT, exp_id TEXT, observation_db_id TEXT, last_synced_time TEXT)"
+            )
+            execute(
+                driver,
+                "CREATE TABLE $PLOTS (plot_id INTEGER PRIMARY KEY AUTOINCREMENT, exp_id INTEGER, unique_id VARCHAR, primary_id VARCHAR, secondary_id VARCHAR, coordinates VARCHAR)"
+            )
+            execute(
+                driver,
+                "CREATE TABLE $PLOT_ATTRIBUTES (attribute_id INTEGER PRIMARY KEY AUTOINCREMENT, attribute_name VARCHAR, exp_id INTEGER)"
+            )
+            execute(
+                driver,
+                "CREATE TABLE $PLOT_VALUES (attribute_value_id INTEGER PRIMARY KEY AUTOINCREMENT, attribute_id INTEGER, attribute_value VARCHAR, plot_id INTEGER, exp_id INTEGER)"
+            )
+            execute(
+                driver,
+                "CREATE TABLE $EXP_INDEX (exp_id INTEGER PRIMARY KEY AUTOINCREMENT, exp_name VARCHAR, exp_alias VARCHAR, unique_id VARCHAR, primary_id VARCHAR, secondary_id VARCHAR, exp_layout VARCHAR, exp_species VARCHAR, exp_sort VARCHAR, date_import VARCHAR, date_edit VARCHAR, date_export VARCHAR, count INTEGER, exp_source VARCHAR)"
+            )
+
+            // create android_metadata as best-effort (some drivers may not need this)
+            try {
+                execute(driver, "CREATE TABLE android_metadata (locale TEXT)")
+                execute(driver, "INSERT INTO android_metadata(locale) VALUES('en_US')")
+            } catch (_: Throwable) {
+            }
+
+            // Delegate migration of v8->v9 refactor to Migrator
+            try {
+                // gather trait objects if needed - read legacy traits table
+                val traitObjs = getAllTraitObjects(driver)
+                try {
+                    Migrator.createTables(driver, traitObjs)
+                } catch (_: Throwable) {
+                    // ignore if Migrator does not implement createTables for driver
+                }
+            } catch (_: Throwable) {
+            }
+
+            // Force upgrade logic if necessary (mimic original behavior)
+            onUpgrade(driver, 9, DATABASE_VERSION)
+        }
+
         /**
          * Ported onUpgrade that runs schema changes and delegates complex steps to Migrator.
          * Kept intentionally similar to original implementation order/logic.
@@ -164,64 +222,6 @@ class DataHelper private constructor() {
                     "UPDATE studies SET observation_unit_search_attribute = study_unique_id_name;"
                 )
             }
-        }
-
-        fun onCreate(driver: SqlDriver) {
-            try {
-                driver.execute(null, "PRAGMA foreign_keys=ON;", 0)
-            } catch (_: Throwable) {
-            }
-
-            execute(
-                driver,
-                "CREATE TABLE $RANGE (id INTEGER PRIMARY KEY, range TEXT, plot TEXT, entry TEXT, plot_id TEXT, pedigree TEXT)"
-            )
-            execute(
-                driver,
-                "CREATE TABLE $TRAITS (id INTEGER PRIMARY KEY, external_db_id TEXT, trait_data_source TEXT, trait TEXT, format TEXT, defaultValue TEXT, minimum TEXT, maximum TEXT, details TEXT, categories TEXT, isVisible TEXT, realPosition int)"
-            )
-            execute(
-                driver,
-                "CREATE TABLE $USER_TRAITS (id INTEGER PRIMARY KEY, rid TEXT, parent TEXT, trait TEXT, userValue TEXT, timeTaken TEXT, person TEXT, location TEXT, rep TEXT, notes TEXT, exp_id TEXT, observation_db_id TEXT, last_synced_time TEXT)"
-            )
-            execute(
-                driver,
-                "CREATE TABLE $PLOTS (plot_id INTEGER PRIMARY KEY AUTOINCREMENT, exp_id INTEGER, unique_id VARCHAR, primary_id VARCHAR, secondary_id VARCHAR, coordinates VARCHAR)"
-            )
-            execute(
-                driver,
-                "CREATE TABLE $PLOT_ATTRIBUTES (attribute_id INTEGER PRIMARY KEY AUTOINCREMENT, attribute_name VARCHAR, exp_id INTEGER)"
-            )
-            execute(
-                driver,
-                "CREATE TABLE $PLOT_VALUES (attribute_value_id INTEGER PRIMARY KEY AUTOINCREMENT, attribute_id INTEGER, attribute_value VARCHAR, plot_id INTEGER, exp_id INTEGER)"
-            )
-            execute(
-                driver,
-                "CREATE TABLE $EXP_INDEX (exp_id INTEGER PRIMARY KEY AUTOINCREMENT, exp_name VARCHAR, exp_alias VARCHAR, unique_id VARCHAR, primary_id VARCHAR, secondary_id VARCHAR, exp_layout VARCHAR, exp_species VARCHAR, exp_sort VARCHAR, date_import VARCHAR, date_edit VARCHAR, date_export VARCHAR, count INTEGER, exp_source VARCHAR)"
-            )
-
-            // create android_metadata as best-effort (some drivers may not need this)
-            try {
-                execute(driver, "CREATE TABLE android_metadata (locale TEXT)")
-                execute(driver, "INSERT INTO android_metadata(locale) VALUES('en_US')")
-            } catch (_: Throwable) {
-            }
-
-            // Delegate migration of v8->v9 refactor to Migrator
-            try {
-                // gather trait objects if needed - read legacy traits table
-                val traitObjs = getAllTraitObjects(driver)
-                try {
-                    Migrator.createTables(driver, traitObjs)
-                } catch (_: Throwable) {
-                    // ignore if Migrator does not implement createTables for driver
-                }
-            } catch (_: Throwable) {
-            }
-
-            // Force upgrade logic if necessary (mimic original behavior)
-            onUpgrade(driver, 9, DATABASE_VERSION)
         }
 
         // --- Helper utilities for SqlDriver-based operations ---
