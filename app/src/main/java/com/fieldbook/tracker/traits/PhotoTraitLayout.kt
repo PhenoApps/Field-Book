@@ -153,20 +153,23 @@ class PhotoTraitLayout : CameraTrait {
         }
     }
 
-    private fun setupCaptureUi(camera: Camera, executorService: ExecutorService, capture: ImageCapture) {
+    private fun setupCaptureUi(camera: Camera, executorService: ExecutorService?, capture: ImageCapture) {
 
         setupCaptureButton {
 
             val file = File(context.cacheDir, TEMPORARY_IMAGE_NAME)
 
             val outputFileOptions = ImageCapture.OutputFileOptions.Builder(file).build()
-            capture.takePicture(outputFileOptions, executorService,
-                object : ImageCapture.OnImageSavedCallback {
-                    override fun onError(error: ImageCaptureException) {}
-                    override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                        makeImage(currentTrait)
-                    }
-                })
+
+            executorService?.let {
+                capture.takePicture(outputFileOptions, executorService,
+                    object : ImageCapture.OnImageSavedCallback {
+                        override fun onError(error: ImageCaptureException) {}
+                        override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                            makeImage(currentTrait)
+                        }
+                    })
+            }
         }
     }
 
@@ -195,7 +198,8 @@ class PhotoTraitLayout : CameraTrait {
                 previewViewHolder?.previewView,
                 resolution,
                 currentTrait.id,
-                Handler(Looper.getMainLooper())
+                null,
+                showCropRegion = true
             ) { camera, executor, capture ->
 
                 setupCaptureUi(camera, executor, capture)
@@ -363,7 +367,9 @@ class PhotoTraitLayout : CameraTrait {
         controller.getCameraXFacade().unbind()
         val intent = Intent(context, CameraActivity::class.java)
         //set current trait id to set crop region
-        intent.putExtra(CameraActivity.EXTRA_TRAIT_ID, currentTrait.id)
+        intent.putExtra(CameraActivity.EXTRA_TRAIT_ID, currentTrait.id.toInt())
+        intent.putExtra(CameraActivity.EXTRA_STUDY_ID, (activity as CollectActivity).studyId)
+        intent.putExtra(CameraActivity.EXTRA_OBS_UNIT, currentRange.uniqueId)
         activity?.startActivityForResult(intent, PICTURE_REQUEST_CODE)
     }
 

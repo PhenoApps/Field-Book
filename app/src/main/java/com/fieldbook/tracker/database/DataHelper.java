@@ -30,6 +30,7 @@ import com.fieldbook.tracker.database.dao.spectral.SpectralDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.spectral.UriDao;
 import com.fieldbook.tracker.database.migrators.MulticatToCategoricalVersion20;
+import com.fieldbook.tracker.database.migrators.ObservationMediaMigratorVersion21;
 import com.fieldbook.tracker.database.views.ObservationVariableAttributeDetailViewCreator;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
@@ -76,7 +77,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext;
  */
 public class DataHelper {
 
-    public static final int DATABASE_VERSION = MulticatToCategoricalVersion20.VERSION;
+    public static final int DATABASE_VERSION = ObservationMediaMigratorVersion21.VERSION;
     private static final String DATABASE_NAME = "fieldbook.db";
     public static SQLiteDatabase db;
     private static final String TAG = "Field Book";
@@ -355,6 +356,12 @@ public class DataHelper {
         return ObservationDao.Companion.insertObservation(plotId, traitDbId, value, person, location, notes, studyId, observationDbId, timestamp, lastSyncedTime, rep);
     }
 
+    // New overload to accept optional media URIs. Kept for Java callers that may supply media URIs.
+    public long insertObservation(String plotId, String traitDbId, String value, String person, String location, String notes, String studyId, @Nullable String observationDbId, @Nullable OffsetDateTime timestamp, @Nullable OffsetDateTime lastSyncedTime, @Nullable String rep, @Nullable String audioUri, @Nullable String videoUri, @Nullable String photoUri) {
+        open();
+        return ObservationDao.Companion.insertObservation(plotId, traitDbId, value, person, location, notes, studyId, observationDbId, timestamp, lastSyncedTime, rep, audioUri, videoUri, photoUri);
+    }
+
     /**
      * Get rep of current plot/trait combination
      */
@@ -464,6 +471,13 @@ public class DataHelper {
 
         ObservationDao.Companion.updateObservationModels(db, observations);
 
+    }
+
+    public void updateObservationMediaUris(ObservationModel observation) {
+
+        open();
+
+        ObservationDao.Companion.updateObservationMediaUris(observation);
     }
 
     public void updateObservation(ObservationModel observation) {
@@ -918,14 +932,18 @@ public class DataHelper {
                            Boolean cropImage, Boolean useDayOfYear, Boolean categoryDisplayValue, String resourceFile,
                            List<String> synonyms, String decimalPlacesRequired, Boolean mathSymbolsEnabled,
                            Boolean allowMulticat, Boolean repeatMeasure, Boolean autoSwitchPlot, String unit,
-                           Boolean invalidValues) {
+                           Boolean invalidValues,
+                           Boolean multiMediaPhoto,
+                           Boolean multiMediaAudio,
+                           Boolean multiMediaVideo) {
 
         open();
 
         return ObservationVariableDao.Companion.editTraits(traitDbId, trait, traitAlias, format, defaultValue,
                 minimum, maximum, details, categories, closeKeyboardOnOpen, cropImage,
                 saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms, decimalPlacesRequired,
-                mathSymbolsEnabled, allowMulticat, repeatMeasure, autoSwitchPlot, unit, invalidValues);
+                mathSymbolsEnabled, allowMulticat, repeatMeasure, autoSwitchPlot, unit, invalidValues,
+                multiMediaPhoto, multiMediaAudio, multiMediaVideo);
     }
 
     /**
@@ -974,7 +992,8 @@ public class DataHelper {
                 trait.getSaveImage(),
                 trait.getUseDayOfYear(), trait.getCategoryDisplayValue(), trait.getResourceFile(), trait.getSynonyms(),
                 trait.getMaxDecimalPlaces(), trait.getMathSymbolsEnabled(), trait.getAllowMulticat(),
-                trait.getRepeatedMeasures(), trait.getAutoSwitchPlot(), trait.getUnit(), trait.getInvalidValues());
+                trait.getRepeatedMeasures(), trait.getAutoSwitchPlot(), trait.getUnit(), trait.getInvalidValues(),
+                trait.getMultiMediaPhoto(), trait.getMultiMediaVideo(), trait.getMultiMediaAudio());
     }
 
     public boolean checkUnique(HashMap<String, String> values) {
@@ -1722,6 +1741,11 @@ public class DataHelper {
             if (oldVersion <= 19 && newVersion >= 20) {
 
                 Migrator.Companion.migrateToVersion20(db);
+            }
+
+            if (oldVersion <= 20 && newVersion >= 21) {
+
+                Migrator.Companion.migrateToVersion21(db);
             }
         }
     }

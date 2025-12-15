@@ -422,6 +422,10 @@
     <string name="trait_parameter_decimal_places">Decimal Places</string>
     <string name="trait_parameter_decimal_places_hint">Number of decimal places (-1 for unlimited, 0 for integers)</string>
     <string name="trait_parameter_decimal_places_error">Value must be between -1 and 10</string>
+    <string name="traits_multi_media_title">Multi Media</string>
+    <string name="traits_multi_media_photo_label">Photo</string>
+    <string name="traits_multi_media_audio_label">Audio</string>
+    <string name="traits_multi_media_video_label">Video</string>
 
     <string name="traits_create_warning_name_blank">Trait name cannot be blank</string>
     <string name="traits_create_warning_duplicate">Trait already exists</string>
@@ -1008,6 +1012,11 @@
     <string name="preferences_general_use_day_number">Use Day Of Year</string>
     <string name="preferences_general_use_day_number_description">Use day of year when collecting data instead of the date</string>
 
+    <string name="preferences_behavior_barcode_scanning_enter_value">Enter value</string>
+    <string name="preferences_behavior_barcode_scanning_move_to_unit">Move to plot</string>
+    <string name="preferences_behavior_barcode_scanning_ask">Ask</string>
+    <string name="preferences_behavior_barcode_scanning_enter_if_not_id">Enter if not plot ID</string>
+
     <!-- Location -->
     <string name="preferences_location_title">Location</string>
     <string name="preferences_location_defaults_title">GeoCoordinates</string>
@@ -1541,7 +1550,17 @@
     <!-- base camera strings -->
     <string name="trait_camera_connect_content_description">Starts a device connection.</string>
     <string name="trait_camera_preview_content_description">This previews the camera\'s display.</string>
-    <string name="trait_camera_capture_content_description">Capture a photo</string>
+    <string name="trait_camera_capture_content_description">Capture</string>
+    <string name="trait_camera_view_media_content_description">View media</string>
+    <string name="trait_camera_switch_content_description">Switch camera</string>
+
+    <!-- Video recording messages -->
+    <string name="video_recording_started">Video recording started</string>
+    <string name="video_recording_saved">Video recording saved</string>
+
+    <!-- Audio pause not supported message -->
+    <string name="field_audio_pause_not_supported">Pause/resume is not supported on this device</string>
+
     <string name="delete_local_photo">Delete Photo</string>
     <string name="trait_system_photo_settings_title">System Photo Settings</string>
     <string name="trait_photos_no_settings">This trait has no settings.</string>
@@ -1784,5 +1803,25 @@
     <string name="device_settings_dialog_unknown_name">Unknown Bluetooth Device</string>
     <string name="device_settings_dialog_title">Bluetooth Device Settings</string>
     <string name="no_data_captured">No data captured.</string>
-    <string name="failed_to_find_file_name">Failed to retrieve file name.</string>
+    <string name="media_photo">Photo state</string>
+    <string name="media_video">Video state</string>
+    <string name="media_audio">Audio state</string>
+    <string name="no_observation">You must collect data before taking additional media.</string>
+    <string name="failed_to_find_file_name">Failed to find file.</string>
+    <string name="preferences_behavior_barcode_scanning_title">Barcode Scanning Options</string>
+    <string name="barcode_ask_enter">Enter Value</string>
+    <string name="barcode_ask_move">Move</string>
+    <string name="barcode_ask_message">Scanned: %s</string>
+    <string name="barcode_ask_title">Choose an option</string>
+    <string name="no_media_found">No %1$s media found</string>
+    <string name="audio">Audio</string>
+    <string name="video">Video</string>
+    <string name="photos">Photos</string>
+    <string name="media_viewer">Media Viewer</string>
+    <string name="unable_to_load_image">Unable to load image</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="are_you_sure_you_want_to_delete_this_media_item">Are you sure you want to delete this media item?</string>
+    <string name="confirm_delete">Confirm delete</string>
+    <string name="audio_permission_required">Audio permission required</string>
 </resources>

@@ -3,6 +3,7 @@ package com.fieldbook.tracker.traits.formats
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.traits.formats.parameters.DefaultValueParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
+import com.fieldbook.tracker.traits.formats.parameters.MultiMediaParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
 
 class ScaleFormat : TraitFormat(
@@ -16,4 +17,5 @@ class ScaleFormat : TraitFormat(
     NameParameter(),
     DefaultValueParameter(),
     DetailsParameter(),
+    MultiMediaParameter()
 )
