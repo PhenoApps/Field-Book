@@ -1,10 +1,8 @@
 package com.fieldbook.shared.sqldelight
 
-import app.cash.sqldelight.db.AfterVersion
 import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlCursor
 import app.cash.sqldelight.db.SqlDriver
-import com.fieldbook.shared.database.migrator.Migrator
 import com.fieldbook.shared.database.utils.DATABASE_VERSION
 
 /**
@@ -31,9 +29,9 @@ fun createDatabase(driverFactory: DriverFactory): FieldbookDatabase {
             driver,
             oldVersion.toLong(),
             DATABASE_VERSION,
-            AfterVersion(6) { d -> Migrator.migrateV6(d) },
-            AfterVersion(9) { d -> Migrator.migrateV9(d) },
-            AfterVersion(10) { d -> Migrator.fixGeoCoordinates(d) }
+//            AfterVersion(6) { d -> Migrator.migrateV6(d) },
+//            AfterVersion(9) { d -> Migrator.migrateV9(d) },
+//            AfterVersion(10) { d -> Migrator.fixGeoCoordinates(d) }
         )
     } catch (_: Throwable) {
         // Best-effort: don't crash DB creation if migration helper fails — let SQLDelight continue
