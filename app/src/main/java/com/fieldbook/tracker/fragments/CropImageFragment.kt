@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.fragments
 
+import android.app.Activity
 import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -71,6 +72,9 @@ class CropImageFragment: Fragment(R.layout.crop_image_fragment), CoroutineScope 
                     withContext(Dispatchers.Main) {
 
                         //finish from the crop activity
+                        try {
+                            activity?.setResult(Activity.RESULT_OK)
+                        } catch (_: Exception) {}
                         activity?.finish()
                     }
                 }

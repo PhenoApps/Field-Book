@@ -46,6 +46,15 @@
             android:summary="@string/preferences_general_swap_navigation_description"
             android:title="@string/preferences_general_swap_navigation" />
 
+        <ListPreference
+            android:icon="@drawable/ic_trait_barcode"
+            android:key="com.fieldbook.tracker.BARCODE_SCANNING_OPTIONS"
+            android:summary="%s"
+            android:title="@string/preferences_behavior_barcode_scanning_title"
+            android:entries="@array/pref_behavior_barcode_scanning_entries"
+            android:entryValues="@array/pref_behavior_barcode_scanning_values"
+            android:defaultValue="0"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory

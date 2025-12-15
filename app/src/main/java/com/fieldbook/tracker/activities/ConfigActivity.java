@@ -460,9 +460,13 @@ public class ConfigActivity extends ThemedActivity {
                     String scannedBarcode = data.getStringExtra(CameraActivity.EXTRA_BARCODE);
 
                     try {
+
                         fuzzySearch.fuzzyBarcodeSearch(scannedBarcode);
+
                     } catch (Exception e) {
+
                         Log.e(TAG, "Fuzzy search error", e);
+
                         Utils.makeToast(this, getString(R.string.act_config_fuzzy_search_error, scannedBarcode));
 
                         soundHelper.playError();

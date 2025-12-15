@@ -3451,4 +3451,9 @@ public class CollectActivity extends ThemedActivity
             Log.w(TAG, "Invalid uri string: " + uriString, e);
         }
     }
+
+    // Called by MediaPreviewDialogFragment when user cancels (Delete temp file)
+    public void onMediaCancelFromDialog(String mediaPath) {
+        try { new File(mediaPath).delete(); } catch (Exception ignore) {}
+    }
 }
