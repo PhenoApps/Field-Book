@@ -27,6 +27,7 @@ fun TraitOverviewSection(
     onToggleVisibility: ((Boolean) -> Unit)? = null,
     onAddSynonym: ((String) -> Unit)? = null,
     onValidateSynonym: ((String) -> String?)? = null,
+    onEditFormat: (() -> Unit)? = null,
 ) {
     var showSwapDialog by remember { mutableStateOf(false) }
     var showAddDialog by remember { mutableStateOf(false) }
@@ -50,6 +51,7 @@ fun TraitOverviewSection(
             Chip(
                 text = trait.format,
                 icon = formatIcon,
+                onClick = onEditFormat,
             )
 
             // rename

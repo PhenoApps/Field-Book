@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ToggleButton
-import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.enums.traits.ToggleLayoutType
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.ValidationResult
@@ -52,7 +52,7 @@ abstract class DefaultToggleParameter(
         }
 
         override fun validate(
-            database: DataHelper,
+            traitRepo: TraitRepository,
             initialTraitObject: TraitObject?
         ) = ValidationResult()
     }

@@ -35,6 +35,7 @@ fun TraitDetailContent(
     onUpdateAliasAndAddSynonym: (String) -> Unit,
     onValidateSynonym: (String) -> String?,
     onShowParameterEditDialog: (BaseFormatParameter, TraitObject, (TraitObject) -> Unit) -> Unit,
+    onEditFormat: (() -> Unit)?,
     isOverviewExpanded: Boolean,
     isOptionsExpanded: Boolean,
     isDataExpanded: Boolean,
@@ -57,6 +58,7 @@ fun TraitDetailContent(
                 onAddSynonym = { synonym ->
                     onUpdateAliasAndAddSynonym(synonym)
                 },
+                onEditFormat = onEditFormat,
                 onValidateSynonym = onValidateSynonym
             )
         }
@@ -132,6 +134,7 @@ private fun TraitDetailPreview() {
             onResourceFilePickerDialog = { },
             onUpdateAliasAndAddSynonym = { },
             onValidateSynonym = { _ -> null },
+            onEditFormat = { },
             onShowParameterEditDialog = { _, _, _ -> null },
             isOverviewExpanded = true,
             isOptionsExpanded = true,

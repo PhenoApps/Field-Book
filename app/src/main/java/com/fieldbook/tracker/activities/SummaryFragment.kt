@@ -11,19 +11,20 @@ import android.widget.ListView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.AttributeAdapter
 import com.fieldbook.tracker.adapters.SummaryAdapter
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
-import com.fieldbook.tracker.preferences.PreferenceKeys
-import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.fieldbook.tracker.utilities.InsetHandler
 import com.google.gson.JsonParseException
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import org.phenoapps.utils.SoftKeyboardUtil
 import javax.inject.Inject
 
@@ -38,6 +39,9 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
     @Inject
     lateinit var database: DataHelper
+
+    @Inject
+    lateinit var traitRepo: TraitRepository
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -103,43 +107,49 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
     private fun setup() {
 
-        with(activity as? CollectActivity) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            with(activity as? CollectActivity) {
 
-            this?.let { collector ->
+                this?.let { collector ->
 
-                val studyId = collector.studyId
+                    val studyId = collector.studyId
 
-                val attributes = database.getAllObservationUnitAttributeNames(studyId.toInt())
+                    val attributes = database.getAllObservationUnitAttributeNames(studyId.toInt())
 
-                val traits = ArrayList(database.allTraitObjects.filter { it.visible })
+                    val traits = ArrayList(database.allTraitObjects.filter { it.visible })
 
-                val attributeModels = attributes.map { AttributeAdapter.AttributeModel(it) }
-                val traitAttributeModels =
-                    traits.map { AttributeAdapter.AttributeModel(it.alias, trait = it) }
-                val models = attributeModels + traitAttributeModels
-
-                loadData(collector, models)
-
-                setupToolbar(attributes, traits, collector)
-
-                prevButton?.setOnClickListener {
-
-                    collector.getRangeBox().clickLeft()
+                    val attributeModels = attributes.map { AttributeAdapter.AttributeModel(it) }
+                    val traitAttributeModels =
+                        traits.map { AttributeAdapter.AttributeModel(it.alias, trait = it) }
+                    val models = attributeModels + traitAttributeModels
 
                     loadData(collector, models)
-                }
 
-                nextButton?.setOnClickListener {
+                    setupToolbar(attributes, traits, collector)
 
-                    collector.getRangeBox().clickRight()
+                    prevButton?.setOnClickListener {
 
-                    loadData(collector, models)
+                        collector.getRangeBox().clickLeft()
+
+                        viewLifecycleOwner.lifecycleScope.launch {
+                            loadData(collector, models)
+                        }
+                    }
+
+                    nextButton?.setOnClickListener {
+
+                        collector.getRangeBox().clickRight()
+
+                        viewLifecycleOwner.lifecycleScope.launch {
+                            loadData(collector, models)
+                        }
+                    }
                 }
             }
         }
     }
 
-    private fun loadData(
+    private suspend fun loadData(
         collector: CollectActivity, models: List<AttributeAdapter.AttributeModel>
     ) {
 
@@ -220,16 +230,16 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
                                     value?.let { v ->
 
-                                        if (model.trait == null) {
+                                        value = if (model.trait == null) {
 
                                             //attribute
-                                            value = v
+                                            v
 
                                         } else {
 
                                             //model.trait.loadAttributeAndValues()
 
-                                            value = database.valueFormatter.processValue(v, model.trait)
+                                            traitRepo.valueFormatter.processValue(v, model.trait)
 
                                         }
 //                                        //read the preferences, default to displaying values instead of labels
@@ -276,7 +286,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
         }
     }
 
-    private fun getPersistedFilter(ctx: Context): Pair<Set<AttributeAdapter.AttributeModel>?, Set<AttributeAdapter.AttributeModel>?> {
+    private suspend fun getPersistedFilter(ctx: Context): Pair<Set<AttributeAdapter.AttributeModel>?, Set<AttributeAdapter.AttributeModel>?> {
 
         val attributes = PreferenceManager.getDefaultSharedPreferences(ctx)
             .getStringSet(
@@ -298,8 +308,8 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
         val traitSet = if (traitIds == null) null else hashSetOf<AttributeAdapter.AttributeModel>()
         traitSet?.addAll(traitIds?.mapNotNull { traitId ->
-            val trait = ctx.database.getTraitById(traitId)
-            AttributeAdapter.AttributeModel(label = trait.alias, trait = trait)
+            val trait = traitRepo.getTraitById(traitId)
+            trait?.let { AttributeAdapter.AttributeModel(label = it.alias, trait = trait) }
         }?.toTypedArray() ?: emptyArray())
 
         return attributeSet?.toSet() to traitSet?.toSet()
@@ -329,71 +339,82 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
         activity?.let { ctx ->
 
-            val (attributeFilters, traitFilters) = getPersistedFilter(collector)
+            viewLifecycleOwner.lifecycleScope.launch {
 
-            val attributeModels = attributes.map { AttributeAdapter.AttributeModel(it) }.sortedBy { it.label }
-            val traitAttributeModels =
-                traits.map { AttributeAdapter.AttributeModel(it.alias, trait = it) }.sortedBy { it.label }
+                val (attributeFilters, traitFilters) = getPersistedFilter(collector)
 
-            val models = (attributeModels + traitAttributeModels).toMutableList()
+                val attributeModels =
+                    attributes.map { AttributeAdapter.AttributeModel(it) }.sortedBy { it.label }
+                val traitAttributeModels =
+                    traits.map { AttributeAdapter.AttributeModel(it.alias, trait = it) }
+                        .sortedBy { it.label }
 
-            //initialize which attributes are checked, if no filter is saved then check all
-            val checked = attributeModels.map { model ->
-                if (attributeFilters == null) true
-                else model in attributeFilters
-            }.toBooleanArray() + traitAttributeModels.map {
-                if (traitFilters == null) true
-                else traitFilters.map { it.trait?.id }.contains(it.trait?.id) == true
-            }.toBooleanArray()
+                val models = (attributeModels + traitAttributeModels).toMutableList()
 
-            val loadableModels = hashSetOf<AttributeAdapter.AttributeModel>()
-            loadableModels.addAll(models.filterIndexed { index, _ -> checked[index] })
+                //initialize which attributes are checked, if no filter is saved then check all
+                val checked = attributeModels.map { model ->
+                    if (attributeFilters == null) true
+                    else model in attributeFilters
+                }.toBooleanArray() + traitAttributeModels.map {
+                    if (traitFilters == null) true
+                    else traitFilters.map { it.trait?.id }.contains(it.trait?.id) == true
+                }.toBooleanArray()
 
-            filterDialog =
-                AlertDialog.Builder(activity, R.style.AppAlertDialog)
-                    .setTitle(R.string.fragment_summary_filter_title)
-                    .setMultiChoiceItems(
-                        models.map { it.label }.toTypedArray(),
-                        checked
-                    ) { _, which, isChecked ->
-                        val item = models[which]
-                        if (isChecked) {
-                            loadableModels.add(item)
-                        } else {
-                            loadableModels.remove(item)
+                val loadableModels = hashSetOf<AttributeAdapter.AttributeModel>()
+                loadableModels.addAll(models.filterIndexed { index, _ -> checked[index] })
+
+                filterDialog =
+                    AlertDialog.Builder(activity, R.style.AppAlertDialog)
+                        .setTitle(R.string.fragment_summary_filter_title)
+                        .setMultiChoiceItems(
+                            models.map { it.label }.toTypedArray(),
+                            checked
+                        ) { _, which, isChecked ->
+                            val item = models[which]
+                            if (isChecked) {
+                                loadableModels.add(item)
+                            } else {
+                                loadableModels.remove(item)
+                            }
+                        }.setPositiveButton(android.R.string.ok) { dialog, _ ->
+                            setPersistedFilter(ctx, loadableModels.toList())
+                            dialog.dismiss()
+
+                            viewLifecycleOwner.lifecycleScope.launch {
+                                loadData(
+                                    collector,
+                                    loadableModels.filter { it.trait == null } + loadableModels.filter { it.trait != null })
+                            }
+                        }.setNegativeButton(android.R.string.cancel) { dialog, _ ->
+                            dialog.dismiss()
                         }
-                    }.setPositiveButton(android.R.string.ok) { dialog, _ ->
-                        setPersistedFilter(ctx, loadableModels.toList())
-                        dialog.dismiss()
-                        loadData(collector, loadableModels.filter { it.trait == null } + loadableModels.filter { it.trait != null })
-                    }.setNegativeButton(android.R.string.cancel) { dialog, _ ->
-                        dialog.dismiss()
-                    }.setNeutralButton(R.string.dialog_fragment_summary_neutral_button) { _, _ -> }
-                    .create()
+                        .setNeutralButton(R.string.dialog_fragment_summary_neutral_button) { _, _ -> }
+                        .create()
 
-            if (isAdded && filterDialog?.isShowing != true) {
+                if (isAdded && filterDialog?.isShowing != true) {
 
-                filterDialog?.show()
+                    filterDialog?.show()
 
-                filterDialog?.getButton(AlertDialog.BUTTON_NEUTRAL)?.setOnClickListener { _ ->
+                    filterDialog?.getButton(AlertDialog.BUTTON_NEUTRAL)?.setOnClickListener { _ ->
 
-                    val list = (filterDialog as AlertDialog).listView
+                        val list = (filterDialog as AlertDialog).listView
 
-                    list.choiceMode = ListView.CHOICE_MODE_MULTIPLE
+                        list.choiceMode = ListView.CHOICE_MODE_MULTIPLE
 
-                    val toggle = loadableModels.size < models.size
+                        val toggle = loadableModels.size < models.size
 
-                    models.forEachIndexed { index, _ ->
+                        models.forEachIndexed { index, _ ->
 
-                        list.setItemChecked(index, toggle)
+                            list.setItemChecked(index, toggle)
 
-                        checked[index] = toggle
+                            checked[index] = toggle
 
-                        if (toggle) {
-                            val item = models[index]
-                            loadableModels.add(item)
-                        } else {
-                            loadableModels.remove(models[index])
+                            if (toggle) {
+                                val item = models[index]
+                                loadableModels.add(item)
+                            } else {
+                                loadableModels.remove(models[index])
+                            }
                         }
                     }
                 }

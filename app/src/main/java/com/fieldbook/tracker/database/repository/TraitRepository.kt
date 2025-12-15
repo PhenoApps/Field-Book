@@ -23,11 +23,13 @@ import com.fieldbook.tracker.utilities.TraitImportFileUtil.detectTraitFileFormat
 import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import org.phenoapps.utils.BaseDocumentTreeUtil
 import java.io.InputStreamReader
+import java.util.ArrayList
 import java.util.UUID
 import javax.inject.Inject
 
@@ -56,6 +58,19 @@ class TraitRepository @Inject constructor(
     suspend fun getTraitById(id: String): TraitObject? = withContext(ioDispatcher) {
         database.getTraitById(id)
     }
+
+    suspend fun getTraitByName(name: String): TraitObject? = withContext(ioDispatcher) {
+        database.getTraitByName(name)
+    }
+
+    suspend fun getTraitByAlias(alias: String): TraitObject? = withContext(ioDispatcher) {
+        database.getTraitByAlias(alias)
+    }
+
+    suspend fun getTraitByExternalDbId(externalDbId: String, dataSource: String): TraitObject? =
+        withContext(ioDispatcher) {
+            database.getTraitByExternalDbId(externalDbId, dataSource)
+        }
 
     suspend fun deleteAllTraits(traits: List<TraitObject>) = withContext(ioDispatcher) {
         database.deleteTraitsTable()
@@ -105,9 +120,14 @@ class TraitRepository @Inject constructor(
         }
     }
 
+    // returns -1 if insertion failed, else returns rowId if successful
+    suspend fun insertTrait(trait: TraitObject): Long = withContext(ioDispatcher) {
+        database.insertTraits(trait)
+    }
+
     // returns count of traits that were actually inserted
-    suspend fun insertTraits(traits: List<TraitObject>): Int = withContext(ioDispatcher) {
-        traits.count { database.insertTraits(it) != -1L }
+    suspend fun insertTraitsList(traits: List<TraitObject>): Int = withContext(ioDispatcher) {
+        traits.count { insertTrait(it) != -1L }
     }
 
     suspend fun updateResourceFile(trait: TraitObject, fileUri: String): TraitObject? =
@@ -133,9 +153,13 @@ class TraitRepository @Inject constructor(
         database.getMissingObservationsCount(traitId)
     }
 
+    suspend fun getMaxPosition(): Int = withContext(ioDispatcher) {
+        database.getMaxPositionFromTraits()
+    }
+
     suspend fun copyTrait(baseTrait: TraitObject, newName: String): TraitObject? =
         withContext(ioDispatcher) {
-            val pos = database.getMaxPositionFromTraits() + 1
+            val pos = getMaxPosition() + 1
 
             val newTrait = baseTrait.clone().apply {
                 name = newName
@@ -144,9 +168,17 @@ class TraitRepository @Inject constructor(
                 realPosition = pos
             }
 
-            val inserted = database.insertTraits(newTrait) != -1L
+            val inserted = insertTrait(newTrait) != -1L
             if (inserted) newTrait else null
         }
+
+    fun changeTraitFormat(trait: TraitObject): TraitObject = TraitObject().apply {
+        id = trait.id
+        name = trait.name
+        alias = trait.alias
+        synonyms = trait.synonyms
+        details = trait.details
+    }
 
     suspend fun exportTraitsAsJson(
         fileName: String,
@@ -192,7 +224,7 @@ class TraitRepository @Inject constructor(
 
     suspend fun parseTraits(
         sourceUri: Uri,
-        onError: suspend (Int) -> Unit
+        onError: suspend (Int) -> Unit,
     ): List<TraitObject> = withContext(ioDispatcher) {
         // copy the file to dir_trait, and then import traits
 
@@ -222,7 +254,7 @@ class TraitRepository @Inject constructor(
     private suspend fun parseJsonTraits(
         uri: Uri,
         maxPosition: Int,
-        onError: suspend (Int) -> Unit
+        onError: suspend (Int) -> Unit,
     ): List<TraitObject> =
         withContext(ioDispatcher) {
             val stream = BaseDocumentTreeUtil.Companion.getUriInputStream(context, uri)
@@ -267,7 +299,7 @@ class TraitRepository @Inject constructor(
     private suspend fun parseCsvTraits(
         uri: Uri,
         maxPosition: Int,
-        onError: suspend (Int) -> Unit
+        onError: suspend (Int) -> Unit,
     ): List<TraitObject> =
         withContext(ioDispatcher) {
 
@@ -323,4 +355,107 @@ class TraitRepository @Inject constructor(
 
             list
         }
+
+    // BRAPI IMPORTS
+    suspend fun saveTraitsFromHashmap(
+        varUpdates: HashMap<String, TraitObject>,
+        dbIds: ArrayList<String>?
+    ) = withContext(ioDispatcher) {
+        var nextPosition = getMaxPosition() + 1
+        varUpdates.forEach { (t, u) ->
+            if (t in dbIds!!) {
+                insertTrait(u.apply {
+                    realPosition = nextPosition++
+                })
+            }
+        }
+    }
+
+    // to simplify usage in java
+    fun saveTraitsFromBrapiBlocking(traits: List<TraitObject>): TraitSaveResult {
+        return runBlocking {
+            saveTraitsFromBrapi(traits)
+        }
+    }
+
+    suspend fun saveTraitsFromBrapi(traits: List<TraitObject>): TraitSaveResult = withContext(ioDispatcher) {
+
+        if (traits.isEmpty()) return@withContext TraitSaveResult()
+
+        val maxPosition = getMaxPosition()
+        var successfulSaves = 0
+        val failedTraits = mutableListOf<TraitObject>()
+
+        traits.forEachIndexed { index, trait ->
+            runCatching { saveBrapiTraits(trait, maxPosition + index + 1) }
+                .onSuccess { result ->
+                    when (result) {
+                        is TraitProcessResult.Success -> successfulSaves++
+                        is TraitProcessResult.NameOrAliasConflict,
+                             is TraitProcessResult.Error -> failedTraits.add(trait)
+                    }
+                }.onFailure { exception ->
+                    Log.e(TAG, "Error saving trait: ${trait.name}", exception)
+                    failedTraits.add(trait)
+                }
+        }
+
+        TraitSaveResult(
+            totalTraits = traits.size,
+            successfulInserts = successfulSaves,
+            failedInserts = failedTraits,
+        )
+    }
+
+    private suspend fun saveBrapiTraits(trait: TraitObject, position: Int): TraitProcessResult {
+        val existingTraitByName = getTraitByName(trait.name)
+        val existingTraitByAlias = getTraitByAlias(trait.name)
+        val existingTraitByExId = trait.externalDbId?.let {
+            getTraitByExternalDbId(it, trait.traitDataSource)
+        }
+
+        return when {
+            existingTraitByName != null || existingTraitByAlias != null -> {
+                TraitProcessResult.NameOrAliasConflict
+            }
+
+            existingTraitByExId != null -> { // update existing trait
+                trait.apply {
+                    id = existingTraitByExId.id
+                }
+                val res = updateTrait(trait)
+                if (res != -1L) TraitProcessResult.Success else TraitProcessResult.Error
+            }
+
+            else -> { // no conflicts, insert the new trait
+                trait.apply {
+                    realPosition = position
+                    alias = name
+                    synonyms = synonyms.ifEmpty { listOf(name) }
+                }
+                val res = insertTrait(trait)
+                if (res != -1L) TraitProcessResult.Success else TraitProcessResult.Error
+            }
+        }
+    }
+
+}
+
+private sealed class TraitProcessResult {
+    object Success : TraitProcessResult()
+    object NameOrAliasConflict : TraitProcessResult()
+    object Error: TraitProcessResult()
+}
+
+/**
+ * Used for saving trait in BrapiTraitActivity
+ */
+data class TraitSaveResult(
+    val totalTraits: Int = 0,
+    val successfulInserts: Int = 0,
+    val failedInserts: List<TraitObject> = emptyList()
+) {
+    val allSuccess: Boolean get() = failedInserts.isEmpty()
+    val allFailed: Boolean get() = successfulInserts == 0 && totalTraits > 0
+    val oneFailed: Boolean get() = failedInserts.size == 1
 }

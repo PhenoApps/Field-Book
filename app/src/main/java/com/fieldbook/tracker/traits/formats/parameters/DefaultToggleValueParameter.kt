@@ -5,7 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ToggleButton
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.ValidationResult
 
@@ -53,7 +53,7 @@ class DefaultToggleValueParameter(private val initialDefaultValue: Boolean? = nu
         }
 
         override fun validate(
-            database: DataHelper,
+            traitRepo: TraitRepository,
             initialTraitObject: TraitObject?
         ) = ValidationResult()
     }

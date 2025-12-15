@@ -31,7 +31,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.utils.SoftKeyboardUtil
 import javax.inject.Inject
 import androidx.core.content.edit
+import androidx.lifecycle.lifecycleScope
+import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.traits.formats.parameters.DisplayValueParameter
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class NewTraitDialog(
@@ -64,6 +67,9 @@ class NewTraitDialog(
 
     @Inject
     lateinit var database: DataHelper
+
+    @Inject
+    lateinit var traitRepo: TraitRepository
 
     //flag to just return selectable format
     var isSelectingFormat: Boolean = false
@@ -174,69 +180,71 @@ class NewTraitDialog(
     }
 
     private fun showFormatParameters(format: Formats) {
+        lifecycleScope.launch {
 
-        positiveBtn?.visibility = View.VISIBLE
-        negativeBtn?.visibility = View.VISIBLE
+            positiveBtn?.visibility = View.VISIBLE
+            negativeBtn?.visibility = View.VISIBLE
 
-        traitFormatsRv.visibility = View.GONE
-        parametersSv.visibility = View.VISIBLE
+            traitFormatsRv.visibility = View.GONE
+            parametersSv.visibility = View.VISIBLE
 
-        //if editing a variable and observations exist, don't allow the format to change
-        var observationsExist = false
-        if (initialTraitObject != null) {
-            initialTraitObject?.id?.let { traitDbId ->
-                observationsExist = database.getAllObservationsOfVariable(traitDbId).isNotEmpty()
-                variableEditableErrorTv.visibility =
-                    if (observationsExist) View.VISIBLE else View.GONE
-            }
-        }
-
-        if (initialTraitObject == null || !observationsExist) {
-
-            neutralBtn?.setText(R.string.dialog_back)
-            neutralBtn?.setOnClickListener {
-                //close keyboard programmatically
-                SoftKeyboardUtil.closeKeyboard(context, traitFormatsRv, 1L)
-
-                (traitFormatsRv.adapter as? TraitFormatAdapter)?.selectedFormat = null
-
-                if (observationsExist) {
-                    onCancel()
-                }
-
-                if (format in Formats.getCameraFormats()) {
-
-                    isShowingCameraOptions = true
-
-                    showFormatLayouts(Formats.getCameraFormats(), showBack = true)
-
-                } else {
-
-                    showFormatLayouts(Formats.getMainFormats())
-
+            //if editing a variable and observations exist, don't allow the format to change
+            var observationsExist = false
+            if (initialTraitObject != null) {
+                initialTraitObject?.id?.let { traitDbId ->
+                    observationsExist = traitRepo.getTraitObservations(traitDbId).isNotEmpty()
+                    variableEditableErrorTv.visibility =
+                        if (observationsExist) View.VISIBLE else View.GONE
                 }
             }
-        }
 
-        negativeBtn?.setText(R.string.dialog_cancel)
-        negativeBtn?.setOnClickListener {
-            onCancel()
-        }
+            if (initialTraitObject == null || !observationsExist) {
 
-        positiveBtn?.setText(R.string.dialog_save)
-        positiveBtn?.setOnClickListener {
-            onSave(format)
-        }
+                neutralBtn?.setText(R.string.dialog_back)
+                neutralBtn?.setOnClickListener {
+                    //close keyboard programmatically
+                    SoftKeyboardUtil.closeKeyboard(context, traitFormatsRv, 1L)
 
-        setupParametersLinearLayout(format)
+                    (traitFormatsRv.adapter as? TraitFormatAdapter)?.selectedFormat = null
 
-        context?.let { ctx ->
-            dialog?.setTitle(
-                ctx.getString(
-                    R.string.trait_creator_parameters_title,
-                    format.getName(ctx)
+                    if (observationsExist) {
+                        onCancel()
+                    }
+
+                    if (format in Formats.getCameraFormats()) {
+
+                        isShowingCameraOptions = true
+
+                        showFormatLayouts(Formats.getCameraFormats(), showBack = true)
+
+                    } else {
+
+                        showFormatLayouts(Formats.getMainFormats())
+
+                    }
+                }
+            }
+
+            negativeBtn?.setText(R.string.dialog_cancel)
+            negativeBtn?.setOnClickListener {
+                onCancel()
+            }
+
+            positiveBtn?.setText(R.string.dialog_save)
+            positiveBtn?.setOnClickListener {
+                onSave(format)
+            }
+
+            setupParametersLinearLayout(format)
+
+            context?.let { ctx ->
+                dialog?.setTitle(
+                    ctx.getString(
+                        R.string.trait_creator_parameters_title,
+                        format.getName(ctx)
+                    )
                 )
-            )
+            }
         }
     }
 
@@ -266,10 +274,21 @@ class NewTraitDialog(
     }
 
     private fun show() {
-        if (initialTraitObject == null) showFormatLayouts(Formats.getMainFormats()) else
-            Formats.entries.firstOrNull {
+        if (initialTraitObject == null) {
+            showFormatLayouts(Formats.getMainFormats())
+        } else {
+            // a match will be found if format was not empty
+            // if match was found, showFormatParameters
+            val existingFormat = Formats.entries.firstOrNull {
                 initialTraitObject?.format == it.getDatabaseName()
-            }?.let { showFormatParameters(it) }
+            }
+
+            // if no match found (empty format)
+            // copy certain trait properties (defined in repo.changeTraitFormat)
+            // and let the user select format first
+            if (existingFormat == null) showFormatLayouts(Formats.getMainFormats())
+            else showFormatParameters(existingFormat)
+        }
     }
 
     private fun getSelectedFormat(): Formats? =
@@ -322,67 +341,69 @@ class NewTraitDialog(
     }
 
     private fun onSave(format: Formats) {
+        lifecycleScope.launch {
 
-        var pass = true
+            var pass = true
 
-        if (validateParameters().result != true) pass = false
+            if (validateParameters().result != true) pass = false
 
-        if (pass && initialTraitObject == null) {
+            if (pass && initialTraitObject == null) {
 
-            if (validateFormat().result != true) {
-
-                pass = false
-
-            } else {
-
-                val pos: Int = database.maxPositionFromTraits + 1
-
-                val t = createTraitObjectFromUi()
-
-                t.realPosition = pos
-
-                database.insertTraits(t)
-
-                onSaveFinish()
-            }
-
-        } else if (pass) {
-
-            initialTraitObject?.let { traitObject ->
-
-                if (validateFormat().result != true && !isBrapiTraitImport) {
+                if (validateFormat().result != true) {
 
                     pass = false
 
                 } else {
 
-                    context?.let {
+                    val pos: Int = traitRepo.getMaxPosition() + 1
 
-                        val t = updateInitialTraitObjectFromUi(traitObject)
+                    val t = createTraitObjectFromUi()
 
-                        t.format = format.getDatabaseName()
+                    t.realPosition = pos
 
-                        if (isBrapiTraitImport) {
+                    traitRepo.insertTrait(t)
 
-                            (activity as? TraitObjectUpdateListener)?.onTraitObjectUpdated(t)
+                    onSaveFinish()
+                }
 
-                        } else {
+            } else if (pass) {
 
-                            updateDatabaseTrait(t)
+                initialTraitObject?.let { traitObject ->
 
+                    if (validateFormat().result != true && !isBrapiTraitImport) {
+
+                        pass = false
+
+                    } else {
+
+                        context?.let {
+
+                            val t = updateInitialTraitObjectFromUi(traitObject)
+
+                            t.format = format.getDatabaseName()
+
+                            if (isBrapiTraitImport) {
+
+                                (activity as? TraitObjectUpdateListener)?.onTraitObjectUpdated(t)
+
+                            } else {
+
+                                updateDatabaseTrait(t)
+
+                            }
+
+                            onSaveFinish()
                         }
-
-                        onSaveFinish()
                     }
                 }
             }
-        }
 
-        if (!pass) {
+            if (!pass) {
 
-            vibrator.vibrate()
+                vibrator.vibrate()
 
-            soundHelperImpl.playError()
+                soundHelperImpl.playError()
+            }
         }
     }
 
@@ -483,33 +504,10 @@ class NewTraitDialog(
      * The trait object passed should already have UI loaded values.
      * Simply pass these to the DataHelper editTraits function to call SQL update.
      */
-    private fun updateDatabaseTrait(traitObject: TraitObject) {
+    private suspend fun updateDatabaseTrait(traitObject: TraitObject) {
 
-        database.editTraits(
-            traitObject.id,
-            traitObject.name,
-            traitObject.alias,
-            traitObject.format,
-            traitObject.defaultValue,
-            traitObject.minimum,
-            traitObject.maximum,
-            traitObject.details,
-            traitObject.categories,
-            traitObject.closeKeyboardOnOpen,
-            traitObject.cropImage,
-            traitObject.saveImage,
-            traitObject.useDayOfYear,
-            traitObject.categoryDisplayValue,
-            traitObject.resourceFile,
-            traitObject.synonyms,
-            traitObject.maxDecimalPlaces,
-            traitObject.mathSymbolsEnabled,
-            traitObject.allowMulticat,
-            traitObject.repeatedMeasures,
-            traitObject.autoSwitchPlot,
-            traitObject.unit,
-            traitObject.invalidValues,
-        )
+        traitRepo.updateTrait(traitObject)
+
     }
 
     private fun validateFormat(): ValidationResult {
@@ -526,7 +524,7 @@ class NewTraitDialog(
     private fun validateParameters(): ValidationResult {
 
         return parametersSv.validateParameters(
-            database = database,
+            traitRepo = traitRepo,
             initialTraitObject = initialTraitObject
         )
     }
