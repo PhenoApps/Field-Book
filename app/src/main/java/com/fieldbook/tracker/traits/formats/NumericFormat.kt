@@ -13,6 +13,7 @@ import com.fieldbook.tracker.traits.formats.parameters.InvalidValueParameter
 import com.fieldbook.tracker.traits.formats.parameters.MathSymbolsParameter
 import com.fieldbook.tracker.traits.formats.parameters.MaximumParameter
 import com.fieldbook.tracker.traits.formats.parameters.MinimumParameter
+import com.fieldbook.tracker.traits.formats.parameters.MultiMediaParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
 import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
@@ -39,7 +40,8 @@ open class NumericFormat(
             DetailsParameter(),
             UnitParameter(),
             RepeatedMeasureParameter(),
-            ResourceFileParameter()
+            ResourceFileParameter(),
+            MultiMediaParameter()
         )
 ) : TraitFormat(
     format = format,

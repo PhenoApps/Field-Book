@@ -97,10 +97,28 @@ object TraitAttributes {
         defaultValue = "false"
     )
 
+    val MULTI_MEDIA_PHOTO = AttributeDefinition(
+        key = ObservationVariableAttributeDetailsView.MULTI_MEDIA_PHOTO,
+        valueType = ValueType.BOOLEAN,
+        defaultValue = "false"
+    )
+
+    val MULTI_MEDIA_VIDEO = AttributeDefinition(
+        key = ObservationVariableAttributeDetailsView.MULTI_MEDIA_VIDEO,
+        valueType = ValueType.BOOLEAN,
+        defaultValue = "false"
+    )
+
+    val MULTI_MEDIA_AUDIO = AttributeDefinition(
+        key = ObservationVariableAttributeDetailsView.MULTI_MEDIA_AUDIO,
+        valueType = ValueType.BOOLEAN,
+        defaultValue = "false"
+    )
+
     val ALL = listOf(MIN_VALUE, MAX_VALUE, CATEGORIES, CLOSE_KEYBOARD, CROP_IMAGE, SAVE_IMAGE,
         USE_DAY_OF_YEAR, CATEGORY_DISPLAY_VALUE, RESOURCE_FILE,
         DECIMAL_PLACES_REQUIRED, MATH_SYMBOLS_ENABLED, ALLOW_MULTICAT, REPEATED_MEASURES,
-        AUTO_SWITCH_PLOT, UNIT, INVALID_VALUES
+        AUTO_SWITCH_PLOT, UNIT, INVALID_VALUES, MULTI_MEDIA_AUDIO, MULTI_MEDIA_VIDEO, MULTI_MEDIA_PHOTO
     )
 
     fun byKey(key: String): AttributeDefinition? = ALL.find { it.key == key }

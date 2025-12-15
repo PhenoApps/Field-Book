@@ -85,6 +85,11 @@ public class CSVWriter {
             range.add("person");
             range.add("location");
             range.add("number");
+            range.add("photo_uri");
+            range.add("video_uri");
+            range.add("audio_uri");
+
+            //device name must be last added
             range.add("device_name");
 
             String[] labels = range.toArray(new String[range.size()]);
@@ -98,6 +103,8 @@ public class CSVWriter {
 
                 for (int i = 0; i < labels.length - 1; i++) {
                     String value = curCSV.getString(i);
+                    // prefer a media URI if present for this row
+                    //value = preferMediaUri(curCSV, value);
                     arrStr[i] = value;
                 }
 
@@ -156,6 +163,30 @@ public class CSVWriter {
         return value;
     }
 
+    // If any media URI columns are present and non-empty for the current cursor row,
+    // prefer returning a media URI over the textual value.
+    private String preferMediaUri(android.database.Cursor c, String currentValue) {
+        if (c == null) return currentValue;
+
+        // Prefer photo, then video, then audio (typical image-first preference)
+        String photo = getColumnIfExists(c, "photo_uri");
+        if (photo != null && !photo.isEmpty()) return photo;
+        String video = getColumnIfExists(c, "video_uri");
+        if (video != null && !video.isEmpty()) return video;
+        String audio = getColumnIfExists(c, "audio_uri");
+        if (audio != null && !audio.isEmpty()) return audio;
+
+        return currentValue;
+    }
+
+    private String getColumnIfExists(android.database.Cursor c, String name) {
+        try {
+            int idx = c.getColumnIndex(name);
+            if (idx >= 0) return c.getString(idx);
+        } catch (Exception ignore) {}
+        return null;
+    }
+
     /**
      * Generates data in an table style format
      */
@@ -172,14 +203,16 @@ public class CSVWriter {
 
                 for (int k = 0; k < rangeTotal; k++) {
                     String traitName = curCSV.getColumnName(k);
-                    String value = searchForCategorical(traits, traitName, curCSV.getString(k));
+                    String rawValue = curCSV.getString(k);
+                    String value = searchForCategorical(traits, traitName, rawValue);
                     arrStr[k] = value;
                 }
 
                 // Get matching values for every row in the Range table
                 for (int k = rangeTotal; k < labels.length; k++) {
                     String traitName = curCSV.getColumnName(k);
-                    String value = searchForCategorical(traits, traitName, curCSV.getString(k));
+                    String rawValue = curCSV.getString(k);
+                    String value = searchForCategorical(traits, traitName, rawValue);
                     arrStr[k] = value;
                 }
 

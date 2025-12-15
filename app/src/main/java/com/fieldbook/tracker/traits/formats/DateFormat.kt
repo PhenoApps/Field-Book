@@ -5,6 +5,7 @@ import com.fieldbook.tracker.traits.formats.coders.DateJsonCoder
 import com.fieldbook.tracker.traits.formats.coders.StringCoder
 import com.fieldbook.tracker.traits.formats.parameters.AutoSwitchPlotParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
+import com.fieldbook.tracker.traits.formats.parameters.MultiMediaParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
 import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
@@ -25,5 +26,6 @@ class DateFormat : TraitFormat(
     UseDayOfYearParameter(),
     AutoSwitchPlotParameter(),
     RepeatedMeasureParameter(),
-    ResourceFileParameter()
+    ResourceFileParameter(),
+    MultiMediaParameter()
 ), Scannable, StringCoder by DateJsonCoder(), ValuePresenter by DateValuePresenter()

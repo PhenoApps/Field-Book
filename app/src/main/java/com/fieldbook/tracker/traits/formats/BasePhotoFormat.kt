@@ -6,6 +6,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.traits.formats.parameters.AutoSwitchPlotParameter
 import com.fieldbook.tracker.traits.formats.parameters.CropImageParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
+import com.fieldbook.tracker.traits.formats.parameters.MultiMediaParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 import com.fieldbook.tracker.traits.formats.presenters.UriPresenter
@@ -31,5 +32,6 @@ open class BasePhotoFormat(
     DetailsParameter(),
     CropImageParameter(),
     AutoSwitchPlotParameter(),
-    ResourceFileParameter()
+    ResourceFileParameter(),
+    MultiMediaParameter()
 ), ValuePresenter by UriPresenter()

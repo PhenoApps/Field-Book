@@ -110,23 +110,22 @@ class ObservationUnitPropertyDao {
         ): Cursor? = withDatabase { db ->
 
             val traitRequiredFields =
-                arrayOf("trait", "userValue", "timeTaken", "person", "location", "rep")
+                arrayOf("trait", "userValue", "timeTaken", "person", "location", "rep", "photo_uri", "video_uri", "audio_uri")
             val requiredFields = fieldList + traitRequiredFields
             MatrixCursor(requiredFields).also { cursor ->
-                val placeholders = traits.joinToString(", ") { "?" }
-                val traitIds = traits.map { it.id }.toTypedArray()
+                val placeholders = traits.joinToString(", ") { it.id }
 
                 val unitSelectAttributes = fieldList.joinToString(", ") { attributeName ->
                     "MAX(CASE WHEN attr.observation_unit_attribute_name = '$attributeName' THEN vals.observation_unit_value_name ELSE NULL END) AS \"$attributeName\""
                 }
 
                 val obsSelectAttributes =
-                    arrayOf("value", "observation_time_stamp", "collector", "geo_coordinates", "rep")
+                    arrayOf("value", "observation_time_stamp", "collector", "geo_coordinates", "rep", "photo_uri", "video_uri", "audio_uri")
 
                 val varSelectAttributes =
                     arrayOf("observation_variable_name", "observation_variable_field_book_format")
 
-                val sortOrderClause = getSortOrderClause(context, studyId.toString())
+                val sortOrderClause = getSortOrderClause(context, studyId.toString()) ?: ""
                 val query = """
                     SELECT $unitSelectAttributes, ${obsSelectAttributes.joinToString { "obs.`$it` AS `$it`" }}, ${varSelectAttributes.joinToString { "vars.`$it` AS `$it`" }}
                     FROM observations AS obs
@@ -134,14 +133,14 @@ class ObservationUnitPropertyDao {
                     LEFT JOIN observation_units_values AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
                     LEFT JOIN observation_units_attributes AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
                     LEFT JOIN observation_variables AS vars ON vars.${ObservationVariable.PK} = obs.${ObservationVariable.FK}
-                    WHERE obs.study_id = ?
+                    WHERE obs.study_id = $studyId
                       AND vars.internal_id_observation_variable IN ($placeholders)
                     GROUP BY obs.internal_id_observation
                     $sortOrderClause
                 """.trimIndent()
 
                 Log.d("getExportDbData", "Final Query: $query")
-                val table = db.rawQuery(query, arrayOf(studyId.toString()) + traitIds).toTable()
+                val table = db.rawQuery(query, null).toTable()
 
                 table.forEach { row ->
                     cursor.addRow(fieldList.map { row[it] } + traitRequiredFields.map {
@@ -159,6 +158,9 @@ class ObservationUnitPropertyDao {
                             "person" -> row["collector"]
                             "location" -> row["geo_coordinates"]
                             "rep" -> row["rep"]
+                            "photo_uri" -> row["photo_uri"]
+                            "video_uri" -> row["video_uri"]
+                            "audio_uri" -> row["audio_uri"]
                             else -> String()
                         }
                     })
@@ -413,7 +415,8 @@ class ObservationUnitPropertyDao {
                 $orderByClause
             """.trimIndent()
 
-//            Log.d("getSortedObsUnitData", "Executing dynamic query: $query")
+            Log.d("getSortedObsUnitData", "Executing dynamic query: $query")
+
             db.rawQuery(query, null)
         }
 
