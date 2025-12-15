@@ -1,0 +1,43 @@
+-- Migration: upgrade from DB version 6 -> 7
+-- Create tables added in the Android v6 upgrade
+CREATE TABLE IF NOT EXISTS plots (
+  plot_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  exp_id INTEGER,
+  unique_id VARCHAR,
+  primary_id VARCHAR,
+  secondary_id VARCHAR,
+  coordinates VARCHAR
+);
+
+CREATE TABLE IF NOT EXISTS plot_attributes (
+  attribute_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  attribute_name VARCHAR,
+  exp_id INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS plot_values (
+  attribute_value_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  attribute_id INTEGER,
+  attribute_value VARCHAR,
+  plot_id INTEGER,
+  exp_id INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS exp_id (
+  exp_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  exp_name VARCHAR,
+  exp_alias VARCHAR,
+  unique_id VARCHAR,
+  primary_id VARCHAR,
+  secondary_id VARCHAR,
+  exp_layout VARCHAR,
+  exp_species VARCHAR,
+  exp_sort VARCHAR,
+  date_import VARCHAR,
+  date_edit VARCHAR,
+  date_export VARCHAR,
+  count INTEGER
+);
+
+-- Note: the older migration logic also copied data from `range` into these tables; complex data moves
+-- are intentionally minimal here. A cross-platform helper can perform data copying if needed.

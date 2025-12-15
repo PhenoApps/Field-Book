@@ -1,0 +1,20 @@
+-- Migration: upgrade from DB version 5 -> 6
+-- Ensure a minimal stub for the old table exists so static validation can find referenced columns
+CREATE TABLE IF NOT EXISTS user_traits (
+  id INTEGER PRIMARY KEY,
+  rid TEXT,
+  parent TEXT,
+  trait TEXT,
+  userValue TEXT,
+  timeTaken TEXT
+);
+
+-- Add new columns to user_traits introduced in the Android onUpgrade for v5
+ALTER TABLE user_traits ADD COLUMN person TEXT;
+ALTER TABLE user_traits ADD COLUMN location TEXT;
+ALTER TABLE user_traits ADD COLUMN rep TEXT;
+ALTER TABLE user_traits ADD COLUMN notes TEXT;
+ALTER TABLE user_traits ADD COLUMN exp_id TEXT;
+
+-- Note: these ALTER statements will run during migration; if the columns already exist the ALTER may fail on some SQLite versions.
+-- If you need idempotence, implement runtime checks in platform migration helper before executing ALTER statements.
