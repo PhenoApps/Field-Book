@@ -22,7 +22,7 @@ After that, the Python script executes in the following steps:
     insert the new release note with its PR link in brackets
 5. set_github_output: Set success=true output for conditional commit step in YAML workflow
 
-YAML workflow commits the updated CHANGELOG.md if success=true
+If success=true, YAML workflow commits the updated CHANGELOG.md on the same branch that triggered the workflow (main).
 
 Graceful exits only for: Missing release notes, no change type, or "OTHER" type (normal for some PRs)
 """
