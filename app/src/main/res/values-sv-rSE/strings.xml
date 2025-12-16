@@ -22,6 +22,8 @@
     <string name="dialog_delete">Radera</string>
     <string name="dialog_accept">Godkänn</string>
     <string name="barcode_scanner_text">Skanna en streckkod</string>
+    <!-- Toolbar -->
+    <string name="appbar_back">Bakåt</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Exempeldata</string>
     <string name="startup_sample_data_message">Ladda exempeldata?</string>
@@ -146,7 +148,10 @@
     <string name="traits_create_warning_name_blank">Karaktärsnamn får inte vara tomt</string>
     <string name="traits_create_warning_duplicate">Karaktären finns redan </string>
     <string name="traits_create_warning_numeric_required">Standardvärde samt minsta och största krävs och måste vara tal.</string>
+    <!-- Decimal Places Radio Options -->
     <string name="edit_traits">Redigera</string>
+    <!-- Trait Editor -->
+    <!-- Trait Detail -->
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">Värdet är mindre än det minsta tillåtna</string>
@@ -269,6 +274,8 @@
     <string name="brapi_info_title">Information om BrAPI-synkning</string>
     <string name="brapi_choice_to_make_default_negative">Avbryt</string>
     <string name="brapi_choice_to_make_default_positive">Spara</string>
+    <!-- Brapi Server Info -->
+    <string name="brapi_server_info_field_book">FieldBook</string>
     <!-- Community Servers -->
     <!-- Authorization -->
     <string name="brapi_auth_btn">Logga in på sida</string>
