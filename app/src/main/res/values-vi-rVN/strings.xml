@@ -15,6 +15,7 @@
     <string name="dialog_warning">Cảnh báo</string>
     <string name="dialog_save">Lưu</string>
     <string name="dialog_delete">Xóa</string>
+    <!-- Toolbar -->
     <!-- Startup  -->
     <string name="startup_sample_data_title">Dữ liệu mẫu</string>
     <string name="startup_sample_data_message">Nạp dữ liệu mẫu</string>
@@ -119,7 +120,10 @@
     <string name="traits_create_warning_name_blank">Tên tính trạng không được để trống</string>
     <string name="traits_create_warning_duplicate">Tính trạng đã tồn tại</string>
     <string name="traits_create_warning_numeric_required">Giá trị mặc định, nhỏ nhất, lớn nhất là bắt buộc và phải là định dạng số</string>
+    <!-- Decimal Places Radio Options -->
     <string name="edit_traits">Chỉnh sửa</string>
+    <!-- Trait Editor -->
+    <!-- Trait Detail -->
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">Giá trị nhỏ hơn mức nhỏ nhất</string>
@@ -266,6 +270,8 @@
     <string name="brapi_base_url_desc">Dường dẫn gốc đến máy chủ BrAPI</string>
     <string name="brapi_choice_to_make_default_negative">Bỏ qua</string>
     <string name="brapi_choice_to_make_default_positive">Lưu</string>
+    <!-- Brapi Server Info -->
+    <string name="brapi_server_info_field_book">Sổ tay đồng ruộng</string>
     <!-- Community Servers -->
     <!-- Authorization -->
     <string name="brapi_save_authorize">Lưu và đăng nhập</string>
