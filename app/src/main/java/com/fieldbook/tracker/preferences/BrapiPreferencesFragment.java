@@ -346,7 +346,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             config.setServerTimeoutMilli(preferences.getString(PreferenceKeys.BRAPI_TIMEOUT, "120"));
             config.setAuthFlow(preferences.getString(PreferenceKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)));
             config.setOidcUrl(preferences.getString(PreferenceKeys.BRAPI_OIDC_URL, getString(R.string.brapi_oidc_url_default)));
-            config.setCatDisplay(preferences.getString(PreferenceKeys.LABELVAL_CUSTOMIZE, "value"));
             config.setClientId(preferences.getString(PreferenceKeys.BRAPI_OIDC_CLIENT_ID, getString(R.string.brapi_oidc_clientid_default)));
             config.setScope(preferences.getString(PreferenceKeys.BRAPI_OIDC_SCOPE, getString(R.string.brapi_oidc_scope_default)));
 
@@ -778,7 +777,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             ((BetterEditTextPreference)findPreference(PreferenceKeys.BRAPI_PAGE_SIZE)).setText(brAPIConfig.getPageSize());
             ((BetterEditTextPreference)findPreference(PreferenceKeys.BRAPI_CHUNK_SIZE)).setText(brAPIConfig.getChunkSize());
             ((BetterEditTextPreference)findPreference(PreferenceKeys.BRAPI_TIMEOUT)).setText(brAPIConfig.getServerTimeoutMilli());
-            ((ListPreference)findPreference(PreferenceKeys.LABELVAL_CUSTOMIZE)).setValue(brAPIConfig.getCatDisplay());
 
             String clientId = brAPIConfig.getClientId();
             String scope = brAPIConfig.getScope();

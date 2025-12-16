@@ -10,7 +10,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.ui.components.CardView
+import com.fieldbook.tracker.ui.components.widgets.CardView
 import com.fieldbook.tracker.ui.theme.AppTheme
 
 @Composable

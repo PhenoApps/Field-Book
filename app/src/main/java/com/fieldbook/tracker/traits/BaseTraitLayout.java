@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -22,14 +23,12 @@ import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.interfaces.CollectController;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
-import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.views.CollectInputView;
 import com.fieldbook.tracker.views.RepeatedValuesView;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 public abstract class BaseTraitLayout extends LinearLayout {
 
@@ -296,16 +295,11 @@ public abstract class BaseTraitLayout extends LinearLayout {
 
         inputView.setVisibility(visibility);
 
-        RepeatedValuesView repeatView = inputView.getRepeatView();
-        EditText editText = inputView.getEditText();
+        inputView.updateInputViewVisibility(visibility);
 
         // Clear hint for NA since a focus change doesn't happen for the numeric trait layout
-        if (inputView.isRepeatEnabled()) {
-            repeatView.setVisibility(visibility);
-        } else {
-            editText.setVisibility(visibility);
-            editText.setHint("");
-
+        if (!inputView.isRepeatEnabled()) {
+            EditText editText = inputView.getEditText();
             if (isTraitType(TextTraitLayout.type)
                     || isTraitType(AudioTraitLayout.type)
                     || isTraitType(PhotoTraitLayout.type)) {
@@ -326,6 +320,13 @@ public abstract class BaseTraitLayout extends LinearLayout {
         ((CollectActivity) getContext()).updateObservation(trait, value, null);
 
         setCurrentValueAsEdited();
+        handleAutoSwitchToNextPlot(trait);
+    }
+
+    protected void handleAutoSwitchToNextPlot(TraitObject trait) {
+        if (trait.getAutoSwitchPlot()) {
+            controller.getRangeBox().moveEntryRight();
+        }
     }
 
     public void removeTrait(TraitObject trait) {

@@ -207,7 +207,7 @@ public class SearchDialog extends DialogFragment implements AttributeChooserDial
                         for (ObservationModel observation : observations) {
                             if (String.valueOf(observation.getObservation_variable_db_id()).equals(traitObject.getId()) && observation.getObservation_unit_id().equals(searchdata.unique)) {
                                 // If trait is categorical, format the data before adding it to the array
-                                if (traitObject.getFormat().equals("categorical") || traitObject.getFormat().equals("multicat") || traitObject.getFormat().equals("qualitative")) {
+                                if (traitObject.getFormat().equals("categorical") || traitObject.getFormat().equals("qualitative")) {
                                     temp.add(decodeCategorical(observation.getValue()));
                                 } else {
                                     temp.add(observation.getValue());

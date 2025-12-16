@@ -152,19 +152,4 @@
       
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:key="brapi_variables"
-        android:title="@string/preferences_brapi_traits_title"
-        app:iconSpaceReserved="false">
-        <ListPreference
-            android:defaultValue="value"
-            android:dialogTitle="@string/preferences_appearance_collect_labelval_customize"
-            android:entries="@array/pref_collect_labelval_customize_title"
-            android:entryValues="@array/pref_collect_customize_labelval"
-            android:icon="@drawable/ic_view_list_black_24dp"
-            android:key="LABELVAL_CUSTOMIZE"
-            android:summary="@string/preferences_appearance_collect_labelval_customize_description"
-            android:title="@string/preferences_appearance_collect_labelval_customize" />
-    </PreferenceCategory>
-
 </PreferenceScreen>

@@ -59,4 +59,8 @@
 
     <dimen name="fb_trait_line_graph_selector_size">38dp</dimen>
 
+    <!--  chip related  -->
+    <dimen name="chip_icon_size">24dp</dimen>
+    <dimen name="chip_start_padding">6dp</dimen>
+    <dimen name="chip_stroke_width">2dp</dimen>
 </resources>

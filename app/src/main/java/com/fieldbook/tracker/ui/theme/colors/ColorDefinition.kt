@@ -9,6 +9,7 @@ val DefaultAppColors = AppColors(
     accent = BaseColors.Accent,
     primaryTransparent = BaseColors.PrimaryTransparent,
     background = BaseColors.Background,
+    lightGray = BaseColors.LightGrayColor,
 
     surface = SurfaceColors(
         border = BaseColors.Border,
@@ -18,9 +19,9 @@ val DefaultAppColors = AppColors(
     ),
 
     text = TextColors(
-        primary = BaseColors.TextLight,
+        primary = BaseColors.TextDark,
         secondary = BaseColors.TextSecondary,
-        tertiary = BaseColors.TextDark,
+        tertiary = BaseColors.TextLight,
         hint = BaseColors.HintText,
         highContrast = BaseColors.TextHighContrastInverted,
         title = BaseColors.TextLight,
@@ -124,6 +125,10 @@ val BlueAppColors = DefaultAppColors.copy(
         iconFillTint = BlueThemeOverrides.IconFillTint,
     ),
 
+    text = DefaultAppColors.text.copy(
+        tertiary = BlueThemeOverrides.TextLight,
+    ),
+
     button = DefaultAppColors.button.copy(
         pressed = BlueThemeOverrides.ButtonColorPressed,
         categoricalSelected = BlueThemeOverrides.CategoricalButtonSelected
@@ -183,6 +188,7 @@ val HighContrastAppColors = DefaultAppColors.copy(
     primaryDark = HighContrastOverrides.PrimaryDark,
     accent = HighContrastOverrides.Accent,
     primaryTransparent = HighContrastOverrides.PrimaryTransparent,
+    lightGray = HighContrastOverrides.LightGrayColor,
 
     surface = DefaultAppColors.surface.copy(
         iconFillTint = HighContrastOverrides.IconFillTint,

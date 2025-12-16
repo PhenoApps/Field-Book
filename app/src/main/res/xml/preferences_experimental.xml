@@ -2,19 +2,12 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory
-        android:key="experimental_settings_stable"
-        android:title="@string/preferences_experimental_stable_title"
-        app:iconSpaceReserved="false">
+    <!--<PreferenceCategory-->
+    <!--    android:key="experimental_settings_stable"-->
+    <!--    android:title="@string/preferences_experimental_stable_title"-->
+    <!--    app:iconSpaceReserved="false">-->
 
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/ic_repeated_measures"
-            android:key="com.tracker.fieldbook.preferences.keys.repeated_values"
-            android:summary="@string/pref_experimental_repeated_values_summary"
-            android:title="@string/pref_experimental_repeated_values_title" />
-
-    </PreferenceCategory>
+    <!--</PreferenceCategory>-->
 
     <PreferenceCategory
         android:key="experimental_settings_beta"

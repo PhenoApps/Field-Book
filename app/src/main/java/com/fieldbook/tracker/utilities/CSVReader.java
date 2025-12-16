@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.utilities;
 
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ import java.util.List;
  * Custom CSV Reading Class
  * No changes in V2
  */
-public class CSVReader {
+public class CSVReader implements Closeable {
 
     private static final char DEFAULT_SEPARATOR = ',';
     private static final char DEFAULT_QUOTE_CHARACTER = '"';
