@@ -29,8 +29,8 @@ class SpectralFileProcessor @Inject constructor(private val database: DataHelper
             val decodedData = String(data)
             val values = decodedData.split(";")[0]
             return Result.success(when {
-                values.length == COLOR_DATA_SIZE -> fact.color
                 trait.format == Formats.GREEN_SEEKER.getDatabaseName() -> fact.color
+                values.length <= COLOR_DATA_SIZE -> fact.color
                 else -> uri
             })
         } else throw ProcessException.InvalidValue

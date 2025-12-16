@@ -467,7 +467,7 @@ class ExportUtil @Inject constructor(
                                 "database" -> csvWriter.writeDatabaseFormat(columns, deviceName)
                                 "table" -> {
                                     val newColumns = columns.toTypedArray()
-                                    val labels = exportTrait.map { it.name }
+                                    val labels = exportTrait.map { it.alias }
 
                                     // Log the arguments
                                     val newColumnsStr = newColumns.joinToString(", ")

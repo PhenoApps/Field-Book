@@ -22,7 +22,6 @@ public class LayoutCollections {
         traitLayouts.add(new GNSSTraitLayout(_activity));
         traitLayouts.add(new LabelPrintTraitLayout(_activity));
         traitLayouts.add(new LocationTraitLayout(_activity));
-        traitLayouts.add(new MultiCatTraitLayout(_activity));
         traitLayouts.add(new PercentTraitLayout(_activity));
         traitLayouts.add(new PhotoTraitLayout(_activity));
         traitLayouts.add(new UsbCameraTraitLayout(_activity));

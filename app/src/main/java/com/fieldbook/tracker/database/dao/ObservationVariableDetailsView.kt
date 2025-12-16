@@ -2,6 +2,7 @@ package com.fieldbook.tracker.database.dao
 
 import android.util.Log
 import com.fieldbook.tracker.database.ObservationVariableAttributeDetailsView
+import com.fieldbook.tracker.database.models.TraitAttributes
 import com.fieldbook.tracker.database.withDatabase
 
 class ObservationVariableDetailsView {
@@ -29,15 +30,13 @@ class ObservationVariableDetailsView {
                     while (cursor.moveToNext()) {
                         with (ObservationVariableAttributeDetailsView) {
                             val traitId = cursor.getString(cursor.getColumnIndexOrThrow(ObservationVariableAttributeDetailsView.INTERNAL_ID))
-                            val attributes = mapOf(
-                                VALID_VALUES_MAX to cursor.getString(cursor.getColumnIndexOrThrow(VALID_VALUES_MAX)),
-                                VALID_VALUES_MIN to cursor.getString(cursor.getColumnIndexOrThrow(VALID_VALUES_MIN)),
-                                CATEGORY to cursor.getString(cursor.getColumnIndexOrThrow(CATEGORY)),
-                                CLOSE_KEYBOARD_ON_OPEN to cursor.getString(cursor.getColumnIndexOrThrow(CLOSE_KEYBOARD_ON_OPEN)),
-                                CROP_IMAGE to cursor.getString(cursor.getColumnIndexOrThrow(CROP_IMAGE)),
-                                SAVE_IMAGE to cursor.getString(cursor.getColumnIndexOrThrow(SAVE_IMAGE))
-
-                            )
+                            val attributes = buildMap {
+                                TraitAttributes.ALL.forEach { attribute ->
+                                    put(attribute.key, cursor.getString(
+                                        cursor.getColumnIndexOrThrow(attribute.key)
+                                    ))
+                                }
+                            }
                             attributeMap[traitId] = attributes
                         }
                     }

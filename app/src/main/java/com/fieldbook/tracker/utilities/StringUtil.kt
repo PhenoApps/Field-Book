@@ -25,4 +25,6 @@ object StringUtil {
     }
 
     fun String?.escape() = this?.replace("\"", "\"\"")
+
+    fun String.capitalizeFirstLetter() = if (isEmpty()) this else this.lowercase().replaceFirstChar { it.uppercaseChar() }
 }

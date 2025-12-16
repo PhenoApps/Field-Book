@@ -1,12 +1,12 @@
 package com.fieldbook.tracker.traits.formats.presenters
 
 import android.content.Context
-import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.core.net.toUri
+import com.fieldbook.tracker.objects.TraitObject
 
 class UriPresenter : ValuePresenter {
-    override fun represent(context: Context, value: Any): String {
+    override fun represent(context: Context, value: Any, trait: TraitObject?): String {
 
         var repr = value.toString()
 

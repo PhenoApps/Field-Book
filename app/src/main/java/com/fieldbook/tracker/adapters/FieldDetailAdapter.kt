@@ -71,10 +71,10 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
         val filteredObservations = item.observations?.filter { it.isNotEmpty() && it != "NA" } ?: emptyList()
 
         if (filteredObservations == null || filteredObservations.isEmpty()) {
-            noChartAvailableMessage(holder, holder.itemView.context.getString(R.string.field_trait_chart_no_data))
+            noChartAvailableMessage(holder, holder.itemView.context.getString(R.string.chart_no_data))
             return
         } else if (item.format in nonChartableFormats) {
-            noChartAvailableMessage(holder, holder.itemView.context.getString(R.string.field_trait_chart_incompatible_format))
+            noChartAvailableMessage(holder, holder.itemView.context.getString(R.string.chart_incompatible_format))
         } else {
             try {
                 val numericObservations = filteredObservations.map { BigDecimal(it) }
