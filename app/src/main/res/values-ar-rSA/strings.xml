@@ -15,6 +15,7 @@
     <string name="dialog_warning">تحذير</string>
     <string name="dialog_save">حفظ</string>
     <string name="dialog_delete">حذف</string>
+    <!-- Toolbar -->
     <!-- Startup  -->
     <string name="startup_sample_data_title">بيانات نموذجية</string>
     <string name="startup_sample_data_message">تحميل البيانات النموذجية</string>
@@ -119,7 +120,10 @@
     <string name="traits_create_warning_name_blank">لا يمكن أن يكون اسم السمة فارغ</string>
     <string name="traits_create_warning_duplicate">السمة موجودة مسبقا</string>
     <string name="traits_create_warning_numeric_required">القيمة الافتراضية والدنيا والقصوى يجب أن تكون عددية</string>
+    <!-- Decimal Places Radio Options -->
     <string name="edit_traits">تعديل</string>
+    <!-- Trait Editor -->
+    <!-- Trait Detail -->
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">القيمة أقل من الحد الأدنى</string>
@@ -266,6 +270,8 @@
     <string name="brapi_base_url_desc">عنوان URL الأساسي لخادم BrAPI المتصل</string>
     <string name="brapi_choice_to_make_default_negative">إلغاء</string>
     <string name="brapi_choice_to_make_default_positive">حفظ</string>
+    <!-- Brapi Server Info -->
+    <string name="brapi_server_info_field_book">سجل الحقل</string>
     <!-- Community Servers -->
     <!-- Authorization -->
     <string name="brapi_save_authorize">حفظ وسماح</string>
