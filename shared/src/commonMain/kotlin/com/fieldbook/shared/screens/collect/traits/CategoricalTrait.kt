@@ -61,7 +61,7 @@ fun CategoricalTrait(
                 onClick = {
                     // Toggle selection: if already selected, clear (emit encoded empty list), otherwise emit encoded single-item list
                     if (displayedValue == buttonText) {
-                        onValueChange(CategoryJsonUtil.encode(ArrayList()))
+                        onValueChange("")
                     } else {
                         val scale = ArrayList<BrAPIScaleValidValuesCategories>()
                         scale.add(cat)

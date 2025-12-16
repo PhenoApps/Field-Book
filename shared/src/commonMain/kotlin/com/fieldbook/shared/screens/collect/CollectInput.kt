@@ -37,6 +37,7 @@ import com.fieldbook.shared.screens.collect.traits.PercentTrait
 import com.fieldbook.shared.screens.collect.traits.TextTrait
 import com.fieldbook.shared.theme.AppColors
 import com.fieldbook.shared.traits.Formats
+import com.fieldbook.shared.utilities.CategoryJsonUtil
 
 @Composable
 fun CollectInput(
@@ -59,6 +60,27 @@ fun CollectInput(
         Formats.entries.find { it.databaseName.equals(formatStr, ignoreCase = true) }
     }
 
+    val displayValue = when (formatEnum) {
+        Formats.CATEGORICAL -> {
+            try {
+                val decoded = CategoryJsonUtil.decode(value)
+                if (decoded.isNotEmpty()) decoded[0].value ?: value else value
+            } catch (_: Throwable) {
+                // If it's not valid JSON or decode fails, fall back to raw value
+                value
+            }
+        }
+        Formats.MULTI_CATEGORICAL -> {
+            try {
+                val decoded = CategoryJsonUtil.decode(value)
+                decoded.joinToString(":") { it.value ?: "" }
+            } catch (_: Throwable) {
+                value
+            }
+        }
+        else -> value
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth().fillMaxHeight(),
@@ -79,7 +101,7 @@ fun CollectInput(
             )
         } else {
             Text(
-                text = value,
+                text = displayValue,
                 style = androidx.compose.material3.MaterialTheme.typography.titleLarge.copy(
                     fontWeight = fontWeight,
                     fontStyle = fontStyle,
