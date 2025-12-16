@@ -70,6 +70,7 @@ kotlin {
                 implementation(libs.permissions)
                 implementation(libs.filekit.core)
                 implementation(libs.filekit.compose)
+                implementation(libs.kotlinx.serialization.json)
             }
         }
 

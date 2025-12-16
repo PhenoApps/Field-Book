@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.fieldbook.shared.database.models.TraitObject
+import com.fieldbook.shared.utilities.CategoryJsonUtil
 
 @Composable
 fun CategoricalTrait(
@@ -23,20 +24,21 @@ fun CategoricalTrait(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val categories = trait?.categories?.split(",")?.map { it.trim() } ?: emptyList()
+    println("CategoricalTrait: trait=$trait, value=$value")
+    val categories = CategoryJsonUtil.decodeCategories(trait?.categories ?: "[]")
     Column(modifier = modifier) {
         Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
             categories.forEach { cat ->
                 Button(
-                    onClick = { onValueChange(cat) },
+                    onClick = { cat.value?.let { onValueChange(it) } },
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (value == cat) MaterialTheme.colorScheme.primary else Color(
+                        containerColor = if (value == cat.value) MaterialTheme.colorScheme.primary else Color(
                             0xFFD9D9D9
                         )
                     )
                 ) {
-                    Text(cat)
+                    cat.label?.let { Text(it) }
                 }
                 Spacer(Modifier.size(8.dp))
             }

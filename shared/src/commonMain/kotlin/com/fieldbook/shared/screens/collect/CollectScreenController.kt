@@ -69,7 +69,7 @@ class CollectScreenController(driverFactory: DriverFactory) {
 
     private fun loadTraits() {
         try {
-            traits = traitRepository.getAllTraits()
+            traits = traitRepository.getAllTraitsWithAttributes()
             traitLoading = false
         } catch (e: Exception) {
             e.printStackTrace()
