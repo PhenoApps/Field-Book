@@ -1,0 +1,247 @@
+-- Migration: upgrade from DB version 8 -> 9
+-- Create new refactored schema tables (studies, observation_units, observation_variables, observations, observation_variable_attributes, observation_variable_values, observation_units_attributes, observation_units_values)
+
+CREATE TABLE IF NOT EXISTS studies (
+    study_db_id Text,
+    study_name Text,
+    study_alias Text,
+    study_unique_id_name Text,
+    study_primary_id_name Text,
+    study_secondary_id_name Text,
+    experimental_design Text,
+    common_crop_name Text,
+    study_sort_name Text,
+    date_import Text,
+    date_edit Text,
+    date_export Text,
+    study_source Text,
+    additional_info Text,
+    location_db_id Text,
+    location_name Text,
+    observation_levels Text,
+    seasons Text,
+    start_date Text,
+    study_code Text,
+    study_description Text,
+    study_type Text,
+    trial_db_id Text,
+    trial_name Text,
+    count Int,
+    internal_id_study INTEGER PRIMARY KEY AUTOINCREMENT
+);
+
+CREATE TABLE IF NOT EXISTS observation_units (
+    internal_id_observation_unit INTEGER PRIMARY KEY AUTOINCREMENT,
+    study_id INT REFERENCES studies(internal_id_study) ON DELETE CASCADE,
+    observation_unit_db_id TEXT,
+    primary_id TEXT,
+    secondary_id TEXT,
+    geo_coordinates TEXT,
+    additional_info TEXT,
+    germplasm_db_id TEXT,
+    germplasm_name TEXT,
+    observation_level TEXT,
+    position_coordinate_x TEXT,
+    position_coordinate_x_type TEXT,
+    position_coordinate_y TEXT,
+    position_coordinate_y_type TEXT
+);
+
+CREATE TABLE IF NOT EXISTS observation_units_attributes (
+    internal_id_observation_unit_attribute INTEGER PRIMARY KEY AUTOINCREMENT,
+    observation_unit_attribute_name TEXT,
+    study_id INT REFERENCES studies(internal_id_study) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS observation_units_values (
+    internal_id_observation_unit_value INTEGER PRIMARY KEY AUTOINCREMENT,
+    observation_unit_attribute_db_id INT REFERENCES observation_units_attributes(internal_id_observation_unit_attribute),
+    observation_unit_value_name TEXT,
+    observation_unit_id INT,
+    study_id INT REFERENCES studies(internal_id_study) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS observation_variables (
+    observation_variable_name TEXT,
+    observation_variable_field_book_format TEXT,
+    default_value TEXT,
+    visible TEXT,
+    position INT,
+    external_db_id TEXT,
+    trait_data_source TEXT,
+    additional_info TEXT,
+    common_crop_name TEXT,
+    language TEXT,
+    data_type TEXT,
+    observation_variable_db_id TEXT,
+    ontology_db_id TEXT,
+    ontology_name TEXT,
+    observation_variable_details TEXT,
+    internal_id_observation_variable INTEGER PRIMARY KEY AUTOINCREMENT
+);
+
+CREATE TABLE IF NOT EXISTS observation_variable_attributes (
+    internal_id_observation_variable_attribute INTEGER PRIMARY KEY AUTOINCREMENT,
+    observation_variable_attribute_name Text
+);
+
+CREATE TABLE IF NOT EXISTS observation_variable_values (
+    internal_id_observation_variable_value INTEGER PRIMARY KEY AUTOINCREMENT,
+    observation_variable_attribute_db_id INT REFERENCES observation_variable_attributes(internal_id_observation_variable_attribute),
+    observation_variable_attribute_value TEXT,
+    observation_variable_db_id INT REFERENCES observation_variables(internal_id_observation_variable)
+);
+
+CREATE TABLE IF NOT EXISTS observations (
+    internal_id_observation INTEGER PRIMARY KEY AUTOINCREMENT,
+    observation_unit_id TEXT,
+    study_id INT,
+    observation_variable_db_id INT,
+    observation_variable_name TEXT,
+    observation_variable_field_book_format TEXT,
+    value TEXT,
+    observation_time_stamp TEXT,
+    collector TEXT,
+    geoCoordinates TEXT,
+    observation_db_id TEXT,
+    last_synced_time TEXT,
+    additional_info TEXT,
+    rep TEXT,
+    notes TEXT
+);
+
+-- Views
+CREATE VIEW IF NOT EXISTS VisibleObservationVariable AS
+    SELECT internal_id_observation_variable, observation_variable_name, observation_variable_field_book_format, observation_variable_details, default_value, position
+    FROM observation_variables WHERE visible LIKE "true" ORDER BY position;
+
+CREATE VIEW IF NOT EXISTS NonImageObservations AS
+    SELECT observations.internal_id_observation AS id, observations.value AS value, studies.internal_id_study AS study_db_id, observation_variables.trait_data_source
+    FROM observations
+    JOIN observation_variables ON observations.observation_variable_db_id = observation_variables.internal_id_observation_variable
+    JOIN studies ON observations.study_id = studies.internal_id_study
+    WHERE observation_variables.observation_variable_field_book_format <> 'photo';
+
+CREATE VIEW IF NOT EXISTS LocalImageObservations AS
+    SELECT observations.internal_id_observation AS id, observations.value AS value, studies.internal_id_study AS study_id, observation_variables.observation_variable_name as observation_variable_name
+    FROM observations
+    JOIN observation_variables ON observations.observation_variable_db_id = observation_variables.internal_id_observation_variable
+    JOIN studies ON observations.study_id = studies.internal_id_study
+    WHERE (observation_variables.trait_data_source = 'local' OR observation_variables.trait_data_source IS NULL)
+        AND observation_variables.observation_variable_field_book_format = 'photo';
+
+CREATE VIEW IF NOT EXISTS RemoteImageObservationsView AS
+    SELECT observations.internal_id_observation AS id, observations.value AS value, studies.internal_id_study AS study_id, observation_variables.trait_data_source AS trait_data_source, observation_variables.observation_variable_field_book_format, observation_variables.observation_variable_name
+    FROM observations
+    JOIN observation_variables ON observations.observation_variable_db_id = observation_variables.internal_id_observation_variable
+    JOIN studies ON observations.study_id = studies.internal_id_study
+    WHERE studies.study_source IS NOT NULL
+        AND observation_variables.trait_data_source <> 'local'
+        AND observation_variables.trait_data_source IS NOT NULL
+        AND observation_variables.observation_variable_field_book_format = 'photo';
+
+-- Ensure stubs for old tables so data-copy queries can be validated
+CREATE TABLE IF NOT EXISTS exp_id (
+  exp_id INTEGER PRIMARY KEY,
+  exp_name TEXT,
+  exp_alias TEXT,
+  unique_id TEXT,
+  primary_id TEXT,
+  secondary_id TEXT,
+  exp_layout TEXT,
+  exp_species TEXT,
+  exp_sort TEXT,
+  date_import TEXT,
+  date_edit TEXT,
+  date_export TEXT,
+  count INTEGER,
+  exp_source TEXT
+);
+
+CREATE TABLE IF NOT EXISTS plots (
+  plot_id INTEGER PRIMARY KEY,
+  exp_id INTEGER,
+  unique_id VARCHAR,
+  primary_id VARCHAR,
+  secondary_id VARCHAR,
+  coordinates VARCHAR
+);
+
+CREATE TABLE IF NOT EXISTS plot_attributes (
+  attribute_id INTEGER PRIMARY KEY,
+  attribute_name VARCHAR,
+  exp_id INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS plot_values (
+  attribute_value_id INTEGER PRIMARY KEY,
+  attribute_id INTEGER,
+  attribute_value VARCHAR,
+  plot_id INTEGER,
+  exp_id INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS traits (
+  id INTEGER PRIMARY KEY,
+  trait TEXT,
+  format TEXT,
+  defaultValue TEXT,
+  minimum TEXT,
+  maximum TEXT,
+  details TEXT,
+  categories TEXT,
+  isVisible TEXT,
+  realPosition INT,
+  external_db_id TEXT,
+  trait_data_source TEXT
+);
+
+CREATE TABLE IF NOT EXISTS user_traits (
+  id INTEGER PRIMARY KEY,
+  rid TEXT,
+  parent TEXT,
+  trait TEXT,
+  userValue TEXT,
+  timeTaken TEXT,
+  person TEXT,
+  location TEXT,
+  rep TEXT,
+  notes TEXT,
+  exp_id TEXT,
+  observation_db_id TEXT,
+  last_synced_time TEXT
+);
+
+-- Copy straightforward data from old v8 tables to new tables using INSERT...SELECT
+-- studies <- exp_id
+INSERT INTO studies (study_db_id, study_name, study_alias, study_unique_id_name, study_primary_id_name, study_secondary_id_name, experimental_design, common_crop_name, study_sort_name, date_import, date_edit, date_export, study_source, count)
+SELECT exp_id, exp_name, exp_alias, unique_id, primary_id, secondary_id, exp_layout, exp_species, exp_sort, date_import, date_edit, date_export, exp_source, count FROM exp_id;
+
+-- observation_units <- plots
+INSERT INTO observation_units (internal_id_observation_unit, study_id, observation_unit_db_id, primary_id, secondary_id, geo_coordinates)
+SELECT plot_id, exp_id, unique_id, primary_id, secondary_id, coordinates FROM plots;
+
+-- observation_units_attributes <- plot_attributes
+INSERT INTO observation_units_attributes (internal_id_observation_unit_attribute, observation_unit_attribute_name, study_id)
+SELECT attribute_id, attribute_name, exp_id FROM plot_attributes;
+
+-- observation_units_values <- plot_values
+INSERT INTO observation_units_values (internal_id_observation_unit_value, observation_unit_attribute_db_id, observation_unit_value_name, observation_unit_id, study_id)
+SELECT attribute_value_id, attribute_id, attribute_value, plot_id, exp_id FROM plot_values;
+
+-- observation_variables <- traits (simple column mappings)
+INSERT INTO observation_variables (observation_variable_name, observation_variable_field_book_format, default_value, visible, position, external_db_id, trait_data_source, observation_variable_details, internal_id_observation_variable)
+SELECT trait, format, defaultValue, isVisible, realPosition, external_db_id, trait_data_source, details, id FROM traits;
+
+-- observations <- user_traits (simple column mappings)
+INSERT INTO observations (internal_id_observation, observation_unit_id, study_id, observation_variable_name, observation_variable_field_book_format, value, observation_time_stamp, collector, geoCoordinates, observation_db_id, last_synced_time, rep, notes)
+SELECT id, rid, exp_id, parent, trait, userValue, timeTaken, person, location, observation_db_id, last_synced_time, rep, notes FROM user_traits;
+
+-- TODO: Complex migration: trait -> observation_variable_values
+
+-- After successful data copy, old v8 tables can be dropped by platform code:
+-- DROP TABLE IF EXISTS exp_id;
+-- DROP TABLE IF EXISTS plots;
+-- DROP TABLE IF EXISTS range;
+-- DROP TABLE IF EXISTS traits;
+-- DROP TABLE IF EXISTS user_traits;

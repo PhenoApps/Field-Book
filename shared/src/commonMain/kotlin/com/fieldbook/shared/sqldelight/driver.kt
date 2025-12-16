@@ -14,17 +14,6 @@ expect class DriverFactory {
     fun close()
 }
 
-/**
- * Backward-compat helper while you migrate old call sites.
- * Anywhere you called createDriver() will keep working,
- * but internally it uses the shared driver.
- */
-@Deprecated(
-    message = "Use getDriver() to reuse the shared connection and avoid locks.",
-    replaceWith = ReplaceWith("getDriver()")
-)
-fun DriverFactory.createDriver(): SqlDriver = getDriver()
-
 fun createDatabase(driverFactory: DriverFactory): FieldbookDatabase {
     val driver = driverFactory.getDriver()
     return FieldbookDatabase(driver)
@@ -33,3 +22,6 @@ fun createDatabase(driverFactory: DriverFactory): FieldbookDatabase {
 fun closeDatabase(driverFactory: DriverFactory) {
     driverFactory.close()
 }
+
+
+

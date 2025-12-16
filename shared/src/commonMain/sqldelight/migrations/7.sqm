@@ -1,0 +1,52 @@
+-- Migration: upgrade from DB version 7 -> 8
+CREATE TABLE IF NOT EXISTS traits (
+  id INTEGER PRIMARY KEY,
+  trait TEXT,
+  format TEXT,
+  defaultValue TEXT,
+  minimum TEXT,
+  maximum TEXT,
+  details TEXT,
+  categories TEXT,
+  isVisible TEXT,
+  realPosition INT
+);
+
+CREATE TABLE IF NOT EXISTS exp_id (
+  exp_id INTEGER PRIMARY KEY,
+  exp_name TEXT,
+  exp_alias TEXT,
+  unique_id TEXT,
+  primary_id TEXT,
+  secondary_id TEXT,
+  exp_layout TEXT,
+  exp_species TEXT,
+  exp_sort TEXT,
+  date_import TEXT,
+  date_edit TEXT,
+  date_export TEXT,
+  count INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS user_traits (
+  id INTEGER PRIMARY KEY,
+  rid TEXT,
+  parent TEXT,
+  trait TEXT,
+  userValue TEXT,
+  timeTaken TEXT,
+  person TEXT,
+  location TEXT,
+  rep TEXT,
+  notes TEXT,
+  exp_id TEXT
+);
+
+-- Add brapi-related columns introduced in v7
+ALTER TABLE traits ADD COLUMN external_db_id VARCHAR;
+ALTER TABLE traits ADD COLUMN trait_data_source VARCHAR;
+
+ALTER TABLE exp_id ADD COLUMN exp_source VARCHAR;
+
+ALTER TABLE user_traits ADD COLUMN observation_db_id TEXT;
+ALTER TABLE user_traits ADD COLUMN last_synced_time TEXT;

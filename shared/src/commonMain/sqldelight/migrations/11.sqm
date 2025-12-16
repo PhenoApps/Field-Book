@@ -1,0 +1,4 @@
+-- Migration: upgrade from DB version 11 -> 12
+-- Add observation_unit_search_attribute column to studies and set default
+ALTER TABLE studies ADD COLUMN observation_unit_search_attribute TEXT;
+UPDATE studies SET observation_unit_search_attribute = study_unique_id_name;
