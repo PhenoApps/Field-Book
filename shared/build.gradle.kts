@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
-import org.gradle.api.tasks.Sync
 
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
@@ -7,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.plugin.compose)
     alias(libs.plugins.compose)
     alias(libs.plugins.app.cash.sqldelight)
+    alias(libs.plugins.kotlinx.serialization)
 }
 
 kotlin {

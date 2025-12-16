@@ -1,11 +1,13 @@
 package com.fieldbook.shared.utilities
 
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 /**
  * Momentary model placeholders
  * TODO BrAPI kotlin/ktor client?
  */
+@Serializable
 open class BrAPIScaleValidValuesCategories(
     var label: String? = null,
     var value: String? = null

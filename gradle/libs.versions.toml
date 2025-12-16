@@ -25,3 +25,4 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 app-cash-sqldelight = { id = "app.cash.sqldelight", version = "2.1.0" }
 kotlin-plugin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin-plugin-compose" }
 compose = { id = "org.jetbrains.compose", version.ref = "compose" }
+kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlinx-serialization-json" }
