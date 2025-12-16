@@ -38,6 +38,7 @@ import com.fieldbook.shared.screens.collect.traits.TextTrait
 import com.fieldbook.shared.theme.AppColors
 import com.fieldbook.shared.traits.Formats
 import com.fieldbook.shared.utilities.CategoryJsonUtil
+import com.fieldbook.shared.utilities.dateFormatMonthDay
 
 @Composable
 fun CollectInput(
@@ -74,6 +75,13 @@ fun CollectInput(
             try {
                 val decoded = CategoryJsonUtil.decode(value)
                 decoded.joinToString(":") { it.value ?: "" }
+            } catch (_: Throwable) {
+                value
+            }
+        }
+        Formats.DATE -> {
+            try {
+                dateFormatMonthDay(value)
             } catch (_: Throwable) {
                 value
             }
