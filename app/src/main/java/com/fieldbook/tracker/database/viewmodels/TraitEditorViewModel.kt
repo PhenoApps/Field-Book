@@ -276,15 +276,7 @@ class TraitEditorViewModel @Inject constructor(
                         },
                     )
 
-                repo.insertTraitsList(traits)
-                loadTraits()
-
-                _events.emit(
-                    TraitEditorEvent.ShowMessageWithArgs(
-                        R.string.message_traits_imported,
-                        listOf(traits.size)
-                    )
-                )
+                insertTraits(traits)
             }.onFailure { e ->
                 Log.e(TAG, "Failed to import traits", e)
                 _events.emit(TraitEditorEvent.ShowToast(R.string.error_importing_traits))
