@@ -14,7 +14,7 @@ def run_command(cmd):
     if result.returncode != 0:
         print(f"Error running command: {cmd}")
         print(f"Error: {result.stderr}")
-        sys.exit(0)
+        sys.exit(1)
     return result.stdout.strip()
 
 
@@ -25,7 +25,7 @@ def read_file(file_path):
             return f.read()
     except Exception as e:
         print(f"Error reading file '{file_path}': {e}")
-        sys.exit(0)
+        sys.exit(1)
 
 
 def write_file(file_path, content):
@@ -35,7 +35,7 @@ def write_file(file_path, content):
             f.write(content)
     except Exception as e:
         print(f"Error writing to file '{file_path}': {e}")
-        sys.exit(0)
+        sys.exit(1)
 
 
 def set_github_output(name, value):

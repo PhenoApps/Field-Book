@@ -1,6 +1,38 @@
 #!/usr/bin/env python3
 """
-Script to process and change CHANGELOG.md and update changelog.xml for releases.
+This script is used with do-github-release.yml. The workflow is triggered on:
+- Manual dispatch: Releases unconditionally with a specified version bump.
+- Weekly schedule: Runs every Monday at 3:00 PM EST and performs a patch release if the app directory has changed since the last release.
+
+The YAML workflow first checks if a release is needed by comparing app directory changes 
+since the last git tag. If changes are found (or manual trigger), it bumps version numbers 
+in version.properties and calls this script to process changelog content.
+
+After that, the Python script executes in the following steps:
+1. extract_unreleased_content: 
+    find_unreleased_section: locate the start and end lines of the unreleased section in CHANGELOG.md
+    extract the content between these lines
+    skip the header line and parse content between [Unreleased] and next [v*] section
+2. filter_sections_with_content: 
+    only keep sections (### Added, ### Changed, ### Fixed) that 
+    contain actual release notes with actual '- ' bullet points
+3. update_changelog_md: 
+    create new [vX.Y.Z] - YYYY-MM-DD section with filtered content above the template
+    replace [Unreleased] section with fresh template (UNRELEASED_TEMPLATE)
+    add GitHub release reference link at bottom: [vX.Y.Z]: https://github.com/repo/releases/tag/X.Y.Z
+4. update_changelog_xml: 
+    convert markdown sections to XML types (CHANGELOG_XML_TYPE_MAP)
+    strip "- " bullet points and " (PR_URL)" links from release notes
+    insert new <release version="X.Y.Z" versionCode="X0Y0Z" date="YYYY-MM-DD"> block at top
+5. format_changelog_for_github: 
+    replace "- " with "✔ " for better GitHub release formatting
+    escape newlines with %0A for GitHub Actions multi-line output
+6. set_multi_line_github_output: set changelog_additions and filtered_content for YAML workflow
+
+YAML workflow continues with: commit changes → build APK → sign APK → create GitHub release → 
+conditionally upload to Play Store (skipped April 15 - Sept 15 per date check)
+
+Note: The workflow fails if no content is found to release (no unreleased notes).
 """
 import sys
 import os
@@ -36,8 +68,8 @@ def extract_unreleased_content(changelog_md_path):
     unreleased_start, unreleased_end = find_unreleased_section(lines)
     
     if unreleased_start is None:
-        print("No Unreleased section found in CHANGELOG.md")
-        return ""
+        print("Error: No Unreleased section found in CHANGELOG.md")
+        sys.exit(1)
     
     if unreleased_end is None:
         unreleased_end = len(lines)
@@ -97,14 +129,14 @@ def filter_sections_with_content(unreleased_content):
 def update_changelog_md(filtered_content, github_repository, changelog_md_path):
     """Update CHANGELOG.md by moving unreleased content to new version"""
     if not filtered_content.strip():
-        print("No content to add to changelog. Skipping update.")
-        return
+        print("ERROR: No content to add to changelog. Skipping update.")
+        sys.exit(1)
     
     version = os.environ.get('VERSION')
     
     if not version:
         print("ERROR: VERSION environment variable not set")
-        return
+        sys.exit(1)
     
     today = datetime.now().strftime('%Y-%m-%d')
 
@@ -135,15 +167,15 @@ def update_changelog_md(filtered_content, github_repository, changelog_md_path):
 def update_changelog_xml(filtered_content, changelog_xml_path):
     """Update changelog.xml for Android app"""
     if not filtered_content.strip():
-        print("No content to add to changelog.xml. Skipping update.")
-        return
+        print("ERROR: No content to add to changelog.xml. Skipping update.")
+        sys.exit(1)
     
     version = os.environ.get('VERSION')
     version_code = os.environ.get('VERSION_CODE')
     
     if not version or not version_code:
         print("ERROR: VERSION or VERSION_CODE environment variables not set")
-        return
+        sys.exit(1)
     
     today = datetime.now().strftime('%Y-%m-%d')
     
@@ -155,7 +187,7 @@ def update_changelog_xml(filtered_content, changelog_xml_path):
         if line in CHANGELOG_XML_TYPE_MAP:
             current_type = CHANGELOG_XML_TYPE_MAP[line]
         elif line.startswith('- ') and current_type:
-            clean_note = re.sub(r'^\s*-\s*|s*\([^)]*\)\s*$', '', line)
+            clean_note = re.sub(r'^\s*-\s*|\s*\([^)]*\)\s*$', '', line)
             release_notes.append(f"        <{current_type}>{clean_note}</{current_type}>")
     
     xml_content = read_file(changelog_xml_path)
@@ -199,7 +231,7 @@ def format_changelog_for_github(filtered_content):
 def main():
     if len(sys.argv) != 4:
         print("Arguments required: <repo> <changelog_md_path> <changelog_xml_path>")
-        sys.exit(0)
+        sys.exit(1)
 
     github_repository = sys.argv[1]
     changelog_md_path = sys.argv[2]
