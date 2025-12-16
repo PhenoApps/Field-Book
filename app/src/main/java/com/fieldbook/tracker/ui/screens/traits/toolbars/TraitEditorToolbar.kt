@@ -23,7 +23,8 @@ fun TraitEditorToolbar(
     isTutorialEnabled: Boolean,
     onBack: () -> Unit,
     onToggleAllTraits: () -> Unit,
-    onShowDialog: (TraitActivityDialog) -> Unit
+    onShowDialog: (TraitActivityDialog) -> Unit,
+    onRequestExportPermission: () -> Unit
 ) {
 
 
@@ -75,9 +76,7 @@ fun TraitEditorToolbar(
                         contentDescription = stringResource(R.string.traits_dialog_export),
                         icon = Icons.Filled.FileDownload,
                         displayMode = ActionDisplayMode.IF_ROOM,
-                        onClick = {
-                            onShowDialog(TraitActivityDialog.Export(DialogTriggerSource.TOOLBAR))
-                        }
+                        onClick = onRequestExportPermission
                     ),
                 )
             )
@@ -109,6 +108,7 @@ private fun TraitEditorToolbarPreview() {
             onBack = { },
             onToggleAllTraits = { },
             onShowDialog = { },
+            onRequestExportPermission = { },
         )
     }
 }

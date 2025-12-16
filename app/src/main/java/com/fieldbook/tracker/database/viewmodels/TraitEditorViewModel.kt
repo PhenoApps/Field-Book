@@ -380,8 +380,8 @@ class TraitEditorViewModel @Inject constructor(
         showDialog(TraitActivityDialog.ImportChoice)
     }
 
-    fun onExportPermissionGranted() {
-        showExportDialog(DialogTriggerSource.TOOLBAR)
+    fun onExportPermissionGranted(source: DialogTriggerSource) {
+        showExportDialog(source)
     }
 
     fun requestImportPermission() {
@@ -390,9 +390,9 @@ class TraitEditorViewModel @Inject constructor(
         }
     }
 
-    fun requestExportPermission() {
+    fun requestExportPermission(source: DialogTriggerSource) {
         viewModelScope.launch {
-            _events.emit(TraitEditorEvent.RequestStoragePermissionForExport)
+            _events.emit(TraitEditorEvent.RequestStoragePermissionForExport(source))
         }
     }
 
@@ -434,7 +434,7 @@ sealed class TraitEditorEvent {
     data class ShareFile(val fileUri: Uri) : TraitEditorEvent()
     object NavigateToBrapi : TraitEditorEvent()
     object RequestStoragePermissionForImport : TraitEditorEvent()
-    object RequestStoragePermissionForExport : TraitEditorEvent()
+    data class RequestStoragePermissionForExport(val source: DialogTriggerSource) : TraitEditorEvent()
     object OpenFileExplorer : TraitEditorEvent()
     object OpenCloudFilePicker : TraitEditorEvent()
 }
