@@ -1784,4 +1784,5 @@
     <string name="device_settings_dialog_unknown_name">Unknown Bluetooth Device</string>
     <string name="device_settings_dialog_title">Bluetooth Device Settings</string>
     <string name="no_data_captured">No data captured.</string>
+    <string name="failed_to_find_file_name">Failed to retrieve file name.</string>
 </resources>

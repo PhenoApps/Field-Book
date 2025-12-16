@@ -272,6 +272,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         (brapiService as BrAPIServiceV2).studyService.fetchAll(
             StudyQueryParams().also {
                 it.pageSize(pageSize)
+                it.active("true")
             }
         )
             .catch {
@@ -320,6 +321,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         (brapiService as BrAPIServiceV2).trialService.fetchAll(
             TrialQueryParams().also {
                 it.pageSize(pageSize)
+                it.active("true")
             })
 
             .catch {

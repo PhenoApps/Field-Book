@@ -355,10 +355,11 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 attributes["Location"] = it
             }
 
-            unit.additionalInfo?.entrySet()?.forEach { entry ->
-                entry.value?.asString?.takeIf { it.isNotEmpty() }?.let {
-                    attributes[entry.key] = it
-                }
+            unit.additionalInfo?.entrySet()?.forEach { (key, value) ->
+                value?.takeIf { it.isJsonPrimitive || it.isJsonArray }
+                     ?.asString
+                     ?.takeIf { it.isNotEmpty() }
+                     ?.let { attributes[key] = it }
             }
 
             val position = unit.observationUnitPosition
@@ -638,7 +639,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
             observationUnits[study.studyDbId]?.filter {
                 if (it.observationUnitPosition?.entryType?.name == "TEST") true
-                else it.observationUnitPosition.observationLevel.levelName == level.observationLevelName
+                else it.observationUnitPosition.observationLevel.levelName.equals(level.observationLevelName, ignoreCase = true)
             }
                 ?.let { units ->
 

@@ -16,7 +16,6 @@ import com.fieldbook.tracker.database.internalTimeFormatter
 import com.fieldbook.tracker.devices.camera.GoProApi
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.FileUtil
-import com.fieldbook.tracker.views.CanonCameraTraitSettingsView
 import com.fieldbook.tracker.views.GoProCameraSettingsView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
@@ -224,14 +223,17 @@ class GoProTraitLayout :
     }
 
     override fun onStreamReady() {
-        dialogWaitForStream?.dismiss()
-        initializeCameraShutterButton()
-        shutterButton?.visibility = View.VISIBLE
-        settingsButton?.visibility = View.VISIBLE
 
-        settingsButton?.setOnClickListener {
+        ui.launch {
+            dialogWaitForStream?.dismiss()
+            initializeCameraShutterButton()
+            shutterButton?.visibility = View.VISIBLE
+            settingsButton?.visibility = View.VISIBLE
 
-            showSettings()
+            settingsButton?.setOnClickListener {
+
+                showSettings()
+            }
         }
     }
 
@@ -286,7 +288,7 @@ class GoProTraitLayout :
 
     override fun onConnected() {
 
-        controller.getGoProApi().requestStream()
+        controller.getGoProApi().requestStartStream()
 
     }
 
