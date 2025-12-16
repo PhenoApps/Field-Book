@@ -372,7 +372,7 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
                 )
             )
 
-        if (fieldExists()) {
+        if (db.allFieldObjects.isNotEmpty()) {
             sequence.target(
                 fieldsTapTargetRect(
                     fieldsListItemLocation(0),
@@ -416,11 +416,6 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
             desc,
             targetRadius
         )
-    }
-
-    // TODO
-    private fun fieldExists(): Boolean {
-        return false
     }
 
     private fun handleImportAction() {

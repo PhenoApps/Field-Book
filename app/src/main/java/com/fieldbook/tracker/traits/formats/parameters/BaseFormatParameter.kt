@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.ValidationResult
 import com.google.android.material.textfield.TextInputLayout
@@ -82,7 +82,7 @@ open class BaseFormatParameter @Inject constructor(
          * The validation result is returned which optionally gives an error message.
          */
         abstract fun validate(
-            database: DataHelper,
+            traitRepo: TraitRepository,
             initialTraitObject: TraitObject? = null
         ): ValidationResult
     }

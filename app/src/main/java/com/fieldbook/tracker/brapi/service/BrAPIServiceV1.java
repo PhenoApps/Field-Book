@@ -957,7 +957,13 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
             // Parse out the scale of the variable
             if (var.getScale() != null) {
                 if (var.getScale().getDataType() != null) {
-                    trait.setFormat(convertBrAPIDataType(var.getScale().getDataType().getValue()));
+                    String convertedFormat = convertBrAPIDataType(var.getScale().getDataType().getValue());
+                    trait.setFormat(convertedFormat);
+                    
+                    if (convertedFormat.equals("multicat")) {
+                        trait.setFormat("categorical");
+                        trait.setAllowMulticat(true);
+                    }
                 } else {
                     trait.setFormat("text");
                 }
