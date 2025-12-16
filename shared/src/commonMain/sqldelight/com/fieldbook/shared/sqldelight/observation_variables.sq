@@ -20,15 +20,15 @@ CREATE TABLE observation_variables (
 );
 
 CREATE TABLE observation_variable_attributes (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  name TEXT NOT NULL UNIQUE
+  internal_id_observation_variable_attribute INTEGER PRIMARY KEY AUTOINCREMENT,
+  observation_variable_attribute_name TEXT NOT NULL UNIQUE
 );
 
 CREATE TABLE observation_variable_values (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  observation_variable_id INTEGER NOT NULL REFERENCES observation_variables(internal_id_observation_variable),
-  attribute_id INTEGER NOT NULL REFERENCES observation_variable_attributes(id),
-  value TEXT
+  internal_id_observation_variable_value INTEGER PRIMARY KEY AUTOINCREMENT,
+  observation_variable_db_id INTEGER NOT NULL REFERENCES observation_variables(internal_id_observation_variable),
+  observation_variable_attribute_db_id INTEGER NOT NULL REFERENCES observation_variable_attributes(internal_id_observation_variable_attribute),
+  observation_variable_attribute_value TEXT
 );
 
 getAllTraits:
@@ -40,12 +40,12 @@ WHERE internal_id_observation_variable = ?;
 
 getAllTraitsWithAttributes:
 SELECT ov.*,
-  MIN(CASE WHEN ova.name = 'validValuesMin' THEN ovv.value END) AS minimum,
-  MAX(CASE WHEN ova.name = 'validValuesMax' THEN ovv.value END) AS maximum,
-  GROUP_CONCAT(CASE WHEN ova.name = 'category' THEN ovv.value END) AS categories,
-  MAX(CASE WHEN ova.name = 'closeKeyboardOnOpen' THEN ovv.value END) AS closeKeyboardOnOpen,
-  MAX(CASE WHEN ova.name = 'cropImage' THEN ovv.value END) AS cropImage
+  MIN(CASE WHEN ova.observation_variable_attribute_name = 'validValuesMin' THEN ovv.observation_variable_attribute_value END) AS minimum,
+  MAX(CASE WHEN ova.observation_variable_attribute_name = 'validValuesMax' THEN ovv.observation_variable_attribute_value END) AS maximum,
+  GROUP_CONCAT(CASE WHEN ova.observation_variable_attribute_name = 'category' THEN ovv.observation_variable_attribute_value END) AS categories,
+  MAX(CASE WHEN ova.observation_variable_attribute_name = 'closeKeyboardOnOpen' THEN ovv.observation_variable_attribute_value END) AS closeKeyboardOnOpen,
+  MAX(CASE WHEN ova.observation_variable_attribute_name = 'cropImage' THEN ovv.observation_variable_attribute_value END) AS cropImage
 FROM observation_variables ov
-LEFT JOIN observation_variable_values ovv ON ov.internal_id_observation_variable = ovv.observation_variable_id
-LEFT JOIN observation_variable_attributes ova ON ovv.attribute_id = ova.id
+LEFT JOIN observation_variable_values ovv ON ov.internal_id_observation_variable = ovv.observation_variable_db_id
+LEFT JOIN observation_variable_attributes ova ON ovv.observation_variable_attribute_db_id = ova.internal_id_observation_variable_attribute
 GROUP BY ov.internal_id_observation_variable;
