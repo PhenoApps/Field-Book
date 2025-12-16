@@ -14,7 +14,7 @@ If you use Field Book for research, please cite the following journal article:
 Field Book includes several sample field files that you can use to model your file (e.g., `field_sample.csv` in the `/field_import` folder).
 
 - Traits are best created directly in the app, but can be saved and moved between devices using the supported `.trt` export file.
-Field Book includes a sample trait file that can be loaded to show the different trait formats (`trait_sample.trt` in the `/trait` folder).
+Field Book includes a sample trait file that can be loaded to show the different trait formats (`trait_sample.trt` and `trait_sample_json.trt` in the `/trait` folder).
 
 ## What filetypes are compatible with Field Book?
 
