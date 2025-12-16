@@ -15,6 +15,3 @@ ALTER TABLE user_traits ADD COLUMN location TEXT;
 ALTER TABLE user_traits ADD COLUMN rep TEXT;
 ALTER TABLE user_traits ADD COLUMN notes TEXT;
 ALTER TABLE user_traits ADD COLUMN exp_id TEXT;
-
--- Note: these ALTER statements will run during migration; if the columns already exist the ALTER may fail on some SQLite versions.
--- If you need idempotence, implement runtime checks in platform migration helper before executing ALTER statements.

@@ -1,5 +1,4 @@
 -- Migration: upgrade from DB version 7 -> 8
--- Provide minimal stubs for referenced old tables so ALTER/UPDATE can be validated by static checker
 CREATE TABLE IF NOT EXISTS traits (
   id INTEGER PRIMARY KEY,
   trait TEXT,
@@ -51,5 +50,3 @@ ALTER TABLE exp_id ADD COLUMN exp_source VARCHAR;
 
 ALTER TABLE user_traits ADD COLUMN observation_db_id TEXT;
 ALTER TABLE user_traits ADD COLUMN last_synced_time TEXT;
-
--- Note: these ALTER statements will run during migration; they may fail at runtime if columns already exist.

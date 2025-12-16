@@ -237,10 +237,9 @@ SELECT trait, format, defaultValue, isVisible, realPosition, external_db_id, tra
 INSERT INTO observations (internal_id_observation, observation_unit_id, study_id, observation_variable_name, observation_variable_field_book_format, value, observation_time_stamp, collector, geoCoordinates, observation_db_id, last_synced_time, rep, notes)
 SELECT id, rid, exp_id, parent, trait, userValue, timeTaken, person, location, observation_db_id, last_synced_time, rep, notes FROM user_traits;
 
--- TODO: Complex migration: trait -> observation_variable_values (attributes and values) should be handled by a migration helper.
--- PLACEHOLDER: MigrationHelper.runComplexTraitMigration(driver) should be called after SQL migrations are applied to populate observation_variable_attributes and observation_variable_values.
+-- TODO: Complex migration: trait -> observation_variable_values
 
--- After successful data copy, old v8 tables can be dropped by platform code or by migration SQL below if safe.
+-- After successful data copy, old v8 tables can be dropped by platform code:
 -- DROP TABLE IF EXISTS exp_id;
 -- DROP TABLE IF EXISTS plots;
 -- DROP TABLE IF EXISTS range;

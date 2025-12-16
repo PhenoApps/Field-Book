@@ -38,6 +38,3 @@ CREATE TABLE IF NOT EXISTS exp_id (
   date_export VARCHAR,
   count INTEGER
 );
-
--- Note: the older migration logic also copied data from `range` into these tables; complex data moves
--- are intentionally minimal here. A cross-platform helper can perform data copying if needed.
