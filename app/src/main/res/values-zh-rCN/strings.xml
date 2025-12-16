@@ -18,6 +18,7 @@
     <string name="dialog_scan">扫描</string>
     <string name="dialog_delete">删除</string>
     <string name="barcode_scanner_text">扫描条形码</string>
+    <!-- Toolbar -->
     <!-- Startup  -->
     <string name="startup_sample_data_title">示例数据</string>
     <string name="startup_sample_data_message">加载示例数据？</string>
@@ -123,7 +124,10 @@
     <string name="traits_create_warning_name_blank">性状名称不能为空</string>
     <string name="traits_create_warning_duplicate">性状已经存在</string>
     <string name="traits_create_warning_numeric_required">默认值、最小值和最大值必须设定为数字</string>
+    <!-- Decimal Places Radio Options -->
     <string name="edit_traits">编辑</string>
+    <!-- Trait Editor -->
+    <!-- Trait Detail -->
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">数值低于最小值</string>
@@ -271,6 +275,8 @@
     <string name="brapi_base_url_desc">连接到BrAPI服务器的基础网址</string>
     <string name="brapi_choice_to_make_default_negative">取消</string>
     <string name="brapi_choice_to_make_default_positive">保存</string>
+    <!-- Brapi Server Info -->
+    <string name="brapi_server_info_field_book">田间记录本</string>
     <!-- Community Servers -->
     <!-- Authorization -->
     <string name="brapi_save_authorize">保存和授权</string>
