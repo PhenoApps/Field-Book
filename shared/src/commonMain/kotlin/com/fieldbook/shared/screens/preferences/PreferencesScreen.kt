@@ -10,8 +10,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +22,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import com.fieldbook.shared.KmpHostScreenType
 import com.fieldbook.shared.generated.resources.Res
@@ -54,7 +55,8 @@ import org.jetbrains.compose.resources.stringResource
 private data class PreferenceItem(
     val icon: DrawableResource,
     val title: StringResource,
-    val key: String
+    val key: String,
+    val isImplemented: Boolean? = null
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -108,7 +110,8 @@ fun PreferencesScreen(
             PreferenceItem(
                 icon = Res.drawable.ic_database_cog,
                 title = Res.string.preferences_storage_title,
-                key = "pref_key_storage_settings"
+                key = "pref_key_storage_settings",
+                isImplemented = true
             ),
             PreferenceItem(
                 icon = Res.drawable.ic_experimental,
@@ -137,16 +140,17 @@ fun PreferencesScreen(
                 )
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     items(preferenceItems) { item ->
-                        val isStorage = item.key == "pref_key_storage_settings"
+                        val isImplemented = item.isImplemented == true
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(16.dp)
                                 .let { mod ->
-                                    if (isStorage && onNavigate != null) {
+                                    if (isImplemented && onNavigate != null) {
                                         mod.clickable { onNavigate(KmpHostScreenType.STORAGE_PREFERENCES) }
                                     } else mod
-                                },
+                                }
+                                .graphicsLayer { alpha = if (isImplemented) 1f else 0.4f },
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
@@ -159,11 +163,10 @@ fun PreferencesScreen(
                                 style = MaterialTheme.typography.bodyLarge
                             )
                         }
-                        Divider()
+                        HorizontalDivider()
                     }
                 }
             }
         }
     }
 }
-
