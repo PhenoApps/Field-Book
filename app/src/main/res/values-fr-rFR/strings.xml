@@ -15,6 +15,7 @@
     <string name="dialog_warning">avertissement</string>
     <string name="dialog_save">enregistrer</string>
     <string name="dialog_delete">Effacer</string>
+    <!-- Toolbar -->
     <!-- Startup  -->
     <string name="startup_sample_data_title">Données tests</string>
     <string name="startup_sample_data_message">Charger les données tests ?</string>
@@ -116,7 +117,10 @@
     <string name="traits_create_warning_name_blank">le nom du caractère ne peut pas être vide</string>
     <string name="traits_create_warning_duplicate">le caractère existe déjà</string>
     <string name="traits_create_warning_numeric_required">défaut, minimum, et maximum doivent être numériques</string>
+    <!-- Decimal Places Radio Options -->
     <string name="edit_traits">Modifier</string>
+    <!-- Trait Editor -->
+    <!-- Trait Detail -->
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">la valeur est inférieure au minimum qui a été défini</string>
@@ -258,6 +262,8 @@
     <string name="brapi_base_url_desc">L\'URL de base pour se connecter a un serveur BrAPI</string>
     <string name="brapi_choice_to_make_default_negative">Annuler</string>
     <string name="brapi_choice_to_make_default_positive">enregistrer</string>
+    <!-- Brapi Server Info -->
+    <string name="brapi_server_info_field_book">Carnet d\'essai</string>
     <!-- Community Servers -->
     <!-- Authorization -->
     <string name="brapi_save_authorize">Sauvegarder et autoriser</string>

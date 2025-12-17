@@ -14,6 +14,7 @@
     <string name="dialog_import">Import</string>
     <string name="dialog_warning">Warnung</string>
     <string name="dialog_save">Speichern</string>
+    <!-- Toolbar -->
     <!-- Startup  -->
     <!-- App Intro -->
     <!-- Storage Definer -->
@@ -77,6 +78,9 @@
     <string name="traits_create_warning_name_blank">Merkmalsname muss definiert sein</string>
     <string name="traits_create_warning_duplicate">Merkmal ist bereits vorhanden</string>
     <string name="traits_create_warning_numeric_required">Vorgegeben, Minimum und Maximum muessen numerisch sein</string>
+    <!-- Decimal Places Radio Options -->
+    <!-- Trait Editor -->
+    <!-- Trait Detail -->
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">Der Wert ist kleiner als das vorgegebene Minimum</string>
@@ -177,6 +181,8 @@
     <!-- BrAPI preferences -->
     <string name="brapi_choice_to_make_default_negative">Abbrechen</string>
     <string name="brapi_choice_to_make_default_positive">Speichern</string>
+    <!-- Brapi Server Info -->
+    <string name="brapi_server_info_field_book">Fieldbuch</string>
     <!-- Community Servers -->
     <!-- Authorization -->
     <!-- BrAPI Import -->
