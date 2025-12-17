@@ -7,6 +7,7 @@ kotlinx-datetime = "0.6.2" # When upgrading, see https://github.com/Kotlin/kotli
 kotlinx-serialization-json = "1.9.0"
 okio = "2.2.0"
 filekit = "0.8.8" # compatible with compileSdk = 34
+kamel = "0.7.2" # see https://github.com/Kamel-Media/Kamel/issues/53
 
 [libraries]
 multiplatform-settings = { module = "com.russhwolf:multiplatform-settings-no-arg", version.ref = "multiplatform-settings" }
@@ -20,6 +21,7 @@ filekit-compose = { module = "io.github.vinceglb:filekit-compose", version.ref =
 #filekit-dialogs-compose = { module = "io.github.vinceglb:filekit-dialogs-compose", version.ref = "filekit" }
 #filekit-coil = { module = "io.github.vinceglb:filekit-coil", version.ref = "filekit" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
+kamel-image = { module = "media.kamel:kamel-image", version.ref = "kamel" }
 
 [plugins]
 app-cash-sqldelight = { id = "app.cash.sqldelight", version = "2.1.0" }

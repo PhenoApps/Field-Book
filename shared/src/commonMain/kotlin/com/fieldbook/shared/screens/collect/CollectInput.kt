@@ -34,6 +34,7 @@ import com.fieldbook.shared.screens.collect.traits.LocationTrait
 import com.fieldbook.shared.screens.collect.traits.MultiCatTrait
 import com.fieldbook.shared.screens.collect.traits.NumericTrait
 import com.fieldbook.shared.screens.collect.traits.PercentTrait
+import com.fieldbook.shared.screens.collect.traits.PhotoTrait
 import com.fieldbook.shared.screens.collect.traits.TextTrait
 import com.fieldbook.shared.theme.AppColors
 import com.fieldbook.shared.traits.Formats
@@ -268,8 +269,17 @@ fun TraitInputHost(
                 },
                 modifier = modifier.fillMaxWidth().padding(8.dp)
             )
-            // photo, audio, camera and other complex types are out-of-scope for now
-            "photo", "audio", "camera", "usb_camera", "gopro", "canon" -> {
+
+            "photo", "camera" -> PhotoTrait(
+                value = value,
+                onValueChange = {
+                    controller.updateCurrentTraitValue(it)
+                    onEdited()
+                },
+                modifier = modifier.fillMaxWidth().padding(8.dp)
+            )
+
+            "audio", "usb_camera", "gopro", "canon" -> {
                 TextTrait(
                     value = value,
                     onValueChange = {
