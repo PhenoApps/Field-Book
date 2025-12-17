@@ -18,9 +18,11 @@ import com.fieldbook.tracker.brapi.BrapiAuthDialogFragment;
 import com.fieldbook.tracker.brapi.service.BrAPIService;
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory;
 import com.fieldbook.tracker.brapi.service.BrapiPaginationManager;
-import com.fieldbook.tracker.database.DataHelper;
+import com.fieldbook.tracker.database.repository.TraitRepository;
+import com.fieldbook.tracker.database.repository.TraitSaveResult;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.utilities.BackgroundUiTask;
 import com.fieldbook.tracker.utilities.InsetHandler;
 import com.fieldbook.tracker.utilities.Utils;
 
@@ -37,11 +39,11 @@ public class BrapiTraitActivity extends ThemedActivity {
     private BrAPIService brAPIService;
     private List<TraitObject> selectedTraits;
     private BrapiPaginationManager paginationManager;
-
+    private TraitSaveResult saveResult;
     private final BrapiAuthDialogFragment brapiAuth = new BrapiAuthDialogFragment().newInstance();
 
     @Inject
-    DataHelper database;
+    TraitRepository traitRepo;
 
     @Inject
     SharedPreferences preferences;
@@ -227,12 +229,11 @@ public class BrapiTraitActivity extends ThemedActivity {
             paginationManager.reset();
             loadTraitsList();
         } else if (id == R.id.save) {// Save the selected traits
-            String saveMessage = saveTraits();
+            saveTraits();
 
             setResult(RESULT_OK);
             // navigate back to our traits list page
             finish();
-            Toast.makeText(this, saveMessage, Toast.LENGTH_LONG).show();
         } else if (id == R.id.prev || id == R.id.next) {// Update current page (if allowed) and start brapi call.
             paginationManager.setNewPage(view.getId());
             loadTraitsList();
@@ -240,60 +241,45 @@ public class BrapiTraitActivity extends ThemedActivity {
     }
 
     // Save our select traits
-    public String saveTraits() {
+    public void saveTraits() {
+        BackgroundUiTask.Companion.execute(
+                continuation -> {
+                    saveResult = traitRepo.saveTraitsFromBrapiBlocking(selectedTraits);
+                    return null;
+                },
+                continuation -> {
+                    handleSaveResult(saveResult);
+                    return null;
+                },
+                continuation -> {
+                    Toast.makeText(BrapiTraitActivity.this,
+                            getString(R.string.brapi_error_saving_all_traits),
+                            Toast.LENGTH_LONG).show();
+                    return null;
+                }
+        );
+    }
 
-        // Check if there are any traits selected
-        if (selectedTraits.isEmpty()) {
-            return "No traits are selected";
-        }
-
-        int totalTraits = selectedTraits.size();
-        int successfulSaves = 0;
-        String secondaryMessage = "";
-        // For now, only give the ability to create new variables
-        // Determine later if the need to edit existing variables is needed.
-        int pos = database.getMaxPositionFromTraits() + 1;
-        for (int i = 0; i < selectedTraits.size(); ++i) {
-
-            TraitObject trait = selectedTraits.get(i);
-
-            TraitObject existingTraitByName = database.getTraitByName(trait.getName());
-            TraitObject existingTraitByExId = database.getTraitByExternalDbId(trait.getExternalDbId(), trait.getTraitDataSource());
-            // Check if the trait already exists
-            if (existingTraitByName != null) {
-                secondaryMessage = getResources().getString(R.string.brapi_trait_already_exists, trait.getName());
-                // Skip this one, continue on.
-            }else if (existingTraitByExId != null) {
-                // Update existing trait
-                trait.setId(existingTraitByExId.getId());
-                long saveStatus = database.updateTrait(trait);
-                successfulSaves += saveStatus == -1 ? 0 : 1;
-            }else{
-                // Insert our new trait
-                trait.setRealPosition(pos + i);
-                long saveStatus = database.insertTraits(trait);
-                successfulSaves += saveStatus == -1 ? 0 : 1;
-            }
-        }
-
+    private void handleSaveResult(TraitSaveResult result) {
         SharedPreferences.Editor ed = preferences.edit();
         ed.putBoolean(GeneralKeys.TRAITS_EXPORTED, false);
         ed.apply();
 
         CollectActivity.reloadData = true;
 
-        // Check how successful we were at saving our traits.
-        if (successfulSaves == 0) {
-            return !secondaryMessage.isEmpty() ? secondaryMessage : getResources().getString(R.string.brapi_error_saving_all_traits);
-        } else if (successfulSaves < totalTraits) {
-            return !secondaryMessage.isEmpty() ? secondaryMessage : getResources().getString(R.string.brapi_error_saving_some_traits);
+        String message;
+        if (result.getAllSuccess()) {
+            message = getString(R.string.brapi_traits_saved_success);
+        } else if (result.getAllFailed()) {
+            message = getString(R.string.brapi_error_saving_all_traits);
+        } else if (result.getOneFailed()) {
+            TraitObject failedTrait = result.getFailedInserts().get(0);
+            message = getString(R.string.brapi_trait_already_exists, failedTrait.getName());
+        } else { // multiple failed inserts
+            message = getString(R.string.brapi_error_saving_some_traits);
         }
 
-        // Check if we had a secondary message to show.
-        // Current this secondaryMessage will always be empty for the success message.
-        // Putting selection for secondaryMessage in here now for potential future use with
-        // more detailed success and failure messages. 
-        return !secondaryMessage.isEmpty() ? secondaryMessage : getResources().getString(R.string.brapi_traits_saved_success);
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
     @Override

@@ -21,6 +21,7 @@ import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.brapi.service.core.CropService;
 import com.fieldbook.tracker.brapi.service.core.ProgramService;
 import com.fieldbook.tracker.brapi.service.core.SeasonService;
+import com.fieldbook.tracker.brapi.service.core.ServerInfoService;
 import com.fieldbook.tracker.brapi.service.core.StudyService;
 import com.fieldbook.tracker.brapi.service.core.TrialService;
 import com.fieldbook.tracker.brapi.service.germ.GermplasmService;
@@ -37,6 +38,7 @@ import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.FailureFunction;
 import com.fieldbook.tracker.utilities.SuccessFunction;
+import com.fieldbook.tracker.utilities.SynonymsUtil;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
@@ -53,6 +55,7 @@ import org.brapi.client.v2.model.queryParams.phenotype.VariableQueryParams;
 import org.brapi.client.v2.modules.core.CommonCropNamesApi;
 import org.brapi.client.v2.modules.core.ProgramsApi;
 import org.brapi.client.v2.modules.core.SeasonsApi;
+import org.brapi.client.v2.modules.core.ServerInfoApi;
 import org.brapi.client.v2.modules.core.StudiesApi;
 import org.brapi.client.v2.modules.core.TrialsApi;
 import org.brapi.client.v2.modules.germplasm.GermplasmApi;
@@ -131,6 +134,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     private final ObservationVariablesApi traitsApi;
     private final SeasonsApi seasonsApi;
     private final CommonCropNamesApi cropsApi;
+    private final ServerInfoApi serverInfoApi;
 
     public final ProgramService programService;
     public final SeasonService seasonService;
@@ -140,6 +144,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     public final ObservationVariableService observationVariableService;
     public final ObservationUnitService observationUnitService;
     public final GermplasmService germplasmService;
+    public final ServerInfoService serverInfoService;
 
     public BrAPIServiceV2(Context context) {
         this.context = context;
@@ -156,6 +161,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         this.germplasmApi = new GermplasmApi(apiClient);
         this.seasonsApi = new SeasonsApi(apiClient);
         this.cropsApi = new CommonCropNamesApi(apiClient);
+        this.serverInfoApi = new ServerInfoApi(apiClient);
 
         this.programService = new ProgramService.Default(this.programsApi);
         this.studyService = new StudyService.Default(this.studiesApi);
@@ -165,6 +171,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         this.observationVariableService = new ObservationVariableService.Default(this.traitsApi);
         this.observationUnitService = new ObservationUnitService.Default(this.observationUnitsApi);
         this.germplasmService = new GermplasmService.Default(this.germplasmApi);
+        this.serverInfoService = new ServerInfoService.Default(this.serverInfoApi);
     }
 
     @Override
@@ -1396,8 +1403,12 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             }
 
             // Get the synonyms for easier reading. Set it as the trait name.
-            String synonym = !var.getSynonyms().isEmpty() ? var.getSynonyms().get(0) : null;
-            trait.setName(getPrioritizedValue(synonym, var.getObservationVariableName())); //This will default to the Observation Variable Name if available.
+            String name = var.getObservationVariableName();
+            trait.setName(name);
+            trait.setAlias(name);
+
+            List<String> brapiSynonyms = var.getSynonyms() != null ? var.getSynonyms() : new ArrayList<>();
+            trait.setSynonyms(SynonymsUtil.INSTANCE.addAliasToSynonyms(name, brapiSynonyms));
 
             //v5.1.0 bugfix branch update, getPrioritizedValue can return null, trait name should never be null
             // Skip the trait if there brapi trait field isn't present
@@ -1451,7 +1462,13 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
                 }
                 if (var.getScale().getDataType() != null) {
-                    trait.setFormat(convertBrAPIDataType(var.getScale().getDataType().getBrapiValue()));
+                    String convertedFormat = convertBrAPIDataType(var.getScale().getDataType().getBrapiValue());
+                    trait.setFormat(convertedFormat);
+
+                    if (convertedFormat.equals("multicat")) {
+                        trait.setFormat("categorical");
+                        trait.setAllowMulticat(true);
+                    }
                 } else {
                     trait.setFormat("text");
                 }

@@ -39,6 +39,11 @@
     <color name="main_chip_third_color">#009683</color>
     <color name="main_inverse_crop_region_color">#80101010</color>
     <color name="datagrid_empty_cell_color">#B6BABA</color>
+    <!-- statistics activity heatmap observations colors -->
+    <color name="main_heatmap_color_low">#b2f2bb</color>
+    <color name="main_heatmap_color_medium">#69db7c</color>
+    <color name="main_heatmap_color_high">#40c057</color>
+    <color name="main_heatmap_color_max">#2f9e44</color>
 
     <!-- blue theme colors -->
     <color name="blue_border">@color/BLACK</color>
@@ -72,6 +77,11 @@
     <color name="blue_chip_first_color">#2fd2b3</color>
     <color name="blue_chip_second_color">#74e39b</color>
     <color name="blue_chip_third_color">#b5f082</color>
+    <!-- statistics activity heatmap observations colors for blue -->
+    <color name="blue_heatmap_color_low">#bda0bc</color>
+    <color name="blue_heatmap_color_medium">#01a7c2</color>
+    <color name="blue_heatmap_color_high">#6457a6</color>
+    <color name="blue_heatmap_color_max">#5c2751</color>
 
     <!-- high contrast theme colors -->
     <color name="high_contrast_border">@color/BLACK</color>
@@ -113,21 +123,9 @@
     <color name="circleBackgroundMiddleColorPressed">#20FEFEFE</color>
     <color name="circleBackgroundOuterColor">#FFFFFF</color>
 
-    <!-- statistics activity heatmap observations colors -->
-    <color name="main_heatmap_color_low">#b2f2bb</color>
-    <color name="main_heatmap_color_medium">#69db7c</color>
-    <color name="main_heatmap_color_high">#40c057</color>
-    <color name="main_heatmap_color_max">#2f9e44</color>
-
     <!-- statistics activity heatmap observations colors for high contrast -->
     <color name="high_heatmap_color_low">#626262</color>
     <color name="high_heatmap_color_medium">#585858</color>
     <color name="high_heatmap_color_high">#484848</color>
     <color name="high_heatmap_color_max">#343434</color>
-
-    <!-- statistics activity heatmap observations colors for blue -->
-    <color name="blue_heatmap_color_low">#bda0bc</color>
-    <color name="blue_heatmap_color_medium">#01a7c2</color>
-    <color name="blue_heatmap_color_high">#6457a6</color>
-    <color name="blue_heatmap_color_max">#5c2751</color>
 </resources>

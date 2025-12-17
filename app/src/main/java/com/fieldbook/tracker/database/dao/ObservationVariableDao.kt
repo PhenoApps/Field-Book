@@ -2,7 +2,6 @@ package com.fieldbook.tracker.database.dao
 
 import android.annotation.SuppressLint
 import android.content.ContentValues
-import android.content.Context
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.util.Log
@@ -10,6 +9,8 @@ import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.Migrator.ObservationVariable
 import com.fieldbook.tracker.database.models.ObservationVariableModel
 import com.fieldbook.tracker.objects.TraitObject
+import com.fieldbook.tracker.utilities.SynonymsUtil.deserializeSynonyms
+import com.fieldbook.tracker.utilities.SynonymsUtil.serializeSynonyms
 
 class ObservationVariableDao {
 
@@ -48,6 +49,14 @@ class ObservationVariableDao {
 
         }
 
+        fun getTraitByAlias(alias: String): TraitObject? = withDatabase { db ->
+
+            db.query(ObservationVariable.tableName,
+                where = "observation_variable_alias = ? COLLATE NOCASE",
+                whereArgs = arrayOf(alias)).toFirst().toTraitObject()
+
+        }
+
         fun getTraitByExternalDbId(externalDbId: String, traitDataSource: String): TraitObject? = withDatabase { db ->
 
             db.query(ObservationVariable.tableName,
@@ -60,6 +69,8 @@ class ObservationVariableDao {
 
             it.id = this[ObservationVariable.PK].toString()
             it.name = this["observation_variable_name"] as? String ?: ""
+            it.alias = this["observation_variable_alias"] as? String ?: ""
+            it.synonyms = deserializeSynonyms(this["variable_synonyms"] as? String ?: "")
             it.format = this["observation_variable_field_book_format"] as? String ?: ""
             it.defaultValue = this["default_value"].toString()
             it.details = this["observation_variable_details"].toString()
@@ -78,6 +89,7 @@ class ObservationVariableDao {
             it.externalDbId = this["external_db_id"] as? String ?: ""
             it.traitDataSource = this["trait_data_source"] as? String ?: ""
 
+            it.loadAttributeAndValues()
         }
         }
 
@@ -129,6 +141,7 @@ class ObservationVariableDao {
                     cursor.addRow(requiredFields.map {
                         when (it) {
                             "trait" -> trait.name
+                            "traitAlias" -> trait.alias
                             "format" -> trait.format
                             "defaultValue" -> trait.defaultValue
                             "minimum" -> trait.minimum
@@ -155,6 +168,7 @@ class ObservationVariableDao {
                     addRow(requiredFields.map { field ->
                         when (field) {
                             "trait" -> trait.name
+                            "traitAlias" -> trait.alias
                             "format" -> trait.format
                             "defaultValue" -> trait.defaultValue
                             "minimum" -> trait.minimum
@@ -231,11 +245,16 @@ class ObservationVariableDao {
             if (getTraitByName(t.name) != null) {
                 Log.d("ObservationVariableDao", "Trait ${t.name} already exists, skipping insertion.")
                 -1
+            } else if (getTraitByAlias(t.alias) != null) {
+                Log.d("ObservationVariableDao", "Trait with alias ${t.alias} already exists with id ${t.id}, skipping insertion.")
+                -1
             } else {
                 val contentValues = ContentValues().apply {
                     put("external_db_id", t.externalDbId)
                     put("trait_data_source", t.traitDataSource)
                     put("observation_variable_name", t.name)
+                    put("observation_variable_alias", t.alias)
+                    put("variable_synonyms", serializeSynonyms(t.synonyms))
                     put("observation_variable_details", t.details)
                     put("observation_variable_field_book_format", t.format)
                     put("default_value", t.defaultValue)
@@ -259,6 +278,10 @@ class ObservationVariableDao {
                 Log.d("ObservationVariableDao", "categories: ${t.categories}")
                 Log.d("ObservationVariableDao", "closeKeyboardOnOpen: ${t.closeKeyboardOnOpen}")
                 Log.d("ObservationVariableDao", "cropImage: ${t.cropImage}")
+                Log.d("ObservationVariableDao", "saveImage: ${t.saveImage}")
+                Log.d("ObservationVariableDao", "useDayOfYear: ${t.useDayOfYear}")
+                Log.d("ObservationVariableDao", "displayValue: ${t.categoryDisplayValue}")
+                Log.d("ObservationVariableDao", "resourceFile: ${t.resourceFile}")
 
                 val varRowId = db.insert(ObservationVariable.tableName, null, contentValues)
 
@@ -291,14 +314,27 @@ class ObservationVariableDao {
             }, "${ObservationVariable.PK} = ?", arrayOf(id))
         }
 
-        fun editTraits(id: String, trait: String, format: String, defaultValue: String,
+        fun editTraits(id: String, trait: String, traitAlias: String, format: String, defaultValue: String,
                        minimum: String, maximum: String, details: String, categories: String,
                        closeKeyboardOnOpen: Boolean,
                        cropImage: Boolean,
-                       saveImage: Boolean): Long = withDatabase { db ->
+                       saveImage: Boolean,
+                       useDayOfYear: Boolean,
+                       categoryDisplayValue: Boolean,
+                       resourceFile: String,
+                       synonyms: List<String>,
+                       decimalPlacesRequired: String,
+                       mathSymbolsEnabled: Boolean,
+                       allowMulticat: Boolean,
+                       repeatMeasure: Boolean,
+                       autoSwitchPlot: Boolean,
+                       unit: String,
+                       invalidValues: Boolean): Long = withDatabase { db ->
 
            val contentValues = ContentValues().apply {
                put("observation_variable_name", trait)
+               put("observation_variable_alias", traitAlias)
+               put("variable_synonyms", serializeSynonyms(synonyms))
                put("observation_variable_field_book_format", format)
                put("default_value", defaultValue)
                put("observation_variable_details", details)
@@ -321,6 +357,16 @@ class ObservationVariableDao {
                     this.closeKeyboardOnOpen = closeKeyboardOnOpen
                     this.cropImage = cropImage
                     this.saveImage = saveImage
+                    this.useDayOfYear = useDayOfYear
+                    this.categoryDisplayValue = categoryDisplayValue
+                    this.resourceFile = resourceFile
+                    this.maxDecimalPlaces = decimalPlacesRequired
+                    this.mathSymbolsEnabled = mathSymbolsEnabled
+                    this.allowMulticat = allowMulticat
+                    this.repeatedMeasures = repeatMeasure
+                    this.autoSwitchPlot = autoSwitchPlot
+                    this.unit = unit
+                    this.invalidValues = invalidValues
                 }
 
                 traitObj.saveAttributeValues()
@@ -338,6 +384,11 @@ class ObservationVariableDao {
                 "internal_id_observation_variable = ?",
                 arrayOf(traitDbId)
             )
+        }
+
+        fun updateTraitAlias(traitDbId: String, newName: String) = withDatabase { db ->
+            val contentValues = ContentValues().apply { put("observation_variable_alias", newName) }
+            db.update(ObservationVariable.tableName, contentValues, "${ObservationVariable.PK} = ?", arrayOf(traitDbId))
         }
     }
 }

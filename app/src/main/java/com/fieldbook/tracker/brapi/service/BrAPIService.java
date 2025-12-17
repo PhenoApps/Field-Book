@@ -8,13 +8,11 @@ import android.util.Patterns;
 import android.widget.Toast;
 
 import androidx.arch.core.util.Function;
-import androidx.fragment.app.FragmentActivity;
 import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.ApiError;
 import com.fieldbook.tracker.brapi.ApiErrorCode;
-import com.fieldbook.tracker.brapi.BrapiAuthDialogFragment;
 import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 import com.fieldbook.tracker.brapi.model.BrapiObservationLevel;
 import com.fieldbook.tracker.brapi.model.BrapiProgram;

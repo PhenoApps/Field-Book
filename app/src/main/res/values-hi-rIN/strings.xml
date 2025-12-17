@@ -14,6 +14,7 @@
     <string name="dialog_import">आयात करें</string>
     <string name="dialog_warning">चेतावनी</string>
     <string name="dialog_save">सुरक्षित करें</string>
+    <!-- Toolbar -->
     <!-- Startup  -->
     <!-- App Intro -->
     <string name="app_intro_tutorial_title">मदद</string>
@@ -85,6 +86,9 @@
     <string name="traits_create_warning_name_blank">विशेषता नाम खाली नहीं हो सकता</string>
     <string name="traits_create_warning_duplicate">विशेषता पहले से मौजूद है</string>
     <string name="traits_create_warning_numeric_required">पूर्व निर्धारित, न्यूनतम, और अधिकतम संख्यावाचक होने चाहिए</string>
+    <!-- Decimal Places Radio Options -->
+    <!-- Trait Editor -->
+    <!-- Trait Detail -->
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">प्रवेश किया मूल्य निर्धारित न्यूनतम से कम</string>
@@ -186,6 +190,8 @@
     <!-- BrAPI preferences -->
     <string name="brapi_choice_to_make_default_negative">रद्द करें</string>
     <string name="brapi_choice_to_make_default_positive">सुरक्षित करें</string>
+    <!-- Brapi Server Info -->
+    <string name="brapi_server_info_field_book">फील्ड बुक</string>
     <!-- Community Servers -->
     <!-- Authorization -->
     <!-- BrAPI Import -->

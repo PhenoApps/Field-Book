@@ -14,6 +14,7 @@
     <string name="dialog_import">ማስገባት፤</string>
     <string name="dialog_warning">ማስጠንቀቂያ፤</string>
     <string name="dialog_save">አስቀምጥ</string>
+    <!-- Toolbar -->
     <!-- Startup  -->
     <!-- App Intro -->
     <string name="app_intro_tutorial_title">መግለጫ</string>
@@ -85,6 +86,9 @@
     <string name="traits_create_warning_name_blank">ያጸባይ ስም ባዶ ልሆን አይችልም</string>
     <string name="traits_create_warning_duplicate">በፊት የነበራ ጸባይ</string>
     <string name="traits_create_warning_numeric_required">የነበረው ትንሹና ትልቁ ቁጥር ብቻ መሆን አለባቸው</string>
+    <!-- Decimal Places Radio Options -->
+    <!-- Trait Editor -->
+    <!-- Trait Detail -->
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">ዋጋው ከታሰበው በታች ነዉ፤</string>
@@ -186,6 +190,8 @@
     <!-- BrAPI preferences -->
     <string name="brapi_choice_to_make_default_negative">ታወው</string>
     <string name="brapi_choice_to_make_default_positive">አስቀምጥ</string>
+    <!-- Brapi Server Info -->
+    <string name="brapi_server_info_field_book">መረጃ መመዝገቢያ፤</string>
     <!-- Community Servers -->
     <!-- Authorization -->
     <!-- BrAPI Import -->

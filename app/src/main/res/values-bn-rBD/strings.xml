@@ -14,6 +14,7 @@
     <string name="dialog_import">প্রবেশ করানো</string>
     <string name="dialog_warning">সতর্কতা</string>
     <string name="dialog_save">সঞ্চিত করা</string>
+    <!-- Toolbar -->
     <!-- Startup  -->
     <string name="startup_sample_data_title">নমুনা উপাত্ত</string>
     <string name="startup_sample_data_message">সরবরাহকৃত নমুনা উপাত্ত কি লোড করতে চান ?</string>
@@ -100,7 +101,10 @@
     <string name="traits_create_warning_name_blank">বৈশিষ্ট্যের নাম ফাকা থাকতে পারে না</string>
     <string name="traits_create_warning_duplicate">বৈশিষ্ট্যটি আগে থেকেই উপাস্থিত</string>
     <string name="traits_create_warning_numeric_required">নির্দিষ্টতা, সর্বনিম্ন, এবং সরবুচ্চ এগুলো অবশ্যই নম্বর হতে হবে</string>
+    <!-- Decimal Places Radio Options -->
     <string name="edit_traits">সংস্করণ</string>
+    <!-- Trait Editor -->
+    <!-- Trait Detail -->
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">অনুমোদিত নিম্নমানের চেয়ে ছোট মান</string>
@@ -216,6 +220,8 @@
     <!-- BrAPI preferences -->
     <string name="brapi_choice_to_make_default_negative">বাতিল</string>
     <string name="brapi_choice_to_make_default_positive">সঞ্চিত করা</string>
+    <!-- Brapi Server Info -->
+    <string name="brapi_server_info_field_book">মাঠ বহি</string>
     <!-- Community Servers -->
     <!-- Authorization -->
     <!-- BrAPI Import -->

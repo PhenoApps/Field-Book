@@ -29,8 +29,8 @@ import com.fieldbook.tracker.database.dao.spectral.ProtocolDao;
 import com.fieldbook.tracker.database.dao.spectral.SpectralDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.spectral.UriDao;
+import com.fieldbook.tracker.database.migrators.MulticatToCategoricalVersion20;
 import com.fieldbook.tracker.database.views.ObservationVariableAttributeDetailViewCreator;
-import com.fieldbook.tracker.database.migrators.StudyConfigurationVersion17;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.database.models.ObservationVariableModel;
@@ -77,7 +77,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext;
  */
 public class DataHelper {
 
-    public static final int DATABASE_VERSION = StudyConfigurationVersion17.VERSION;
+    public static final int DATABASE_VERSION = MulticatToCategoricalVersion20.VERSION;
     private static final String DATABASE_NAME = "fieldbook.db";
     public static SQLiteDatabase db;
     private static final String TAG = "Field Book";
@@ -562,6 +562,10 @@ public class DataHelper {
         }
     }
 
+    public ValueProcessorFormatAdapter getValueFormatter() {
+        return new ValueProcessorFormatAdapter(context, spectralFileProcessor);
+    }
+
     /**
      * Retrieves the columns needed for database export with all imported attributes
      */
@@ -569,7 +573,7 @@ public class DataHelper {
 
         open();
 
-        ValueProcessorFormatAdapter processor = new ValueProcessorFormatAdapter(context, spectralFileProcessor);
+        ValueProcessorFormatAdapter processor = getValueFormatter();
 
         return ObservationUnitPropertyDao.Companion.getExportDbData(
                 context, fieldId, fieldList, traits, processor);
@@ -583,7 +587,7 @@ public class DataHelper {
 
         open();
 
-        ValueProcessorFormatAdapter processor = new ValueProcessorFormatAdapter(context, spectralFileProcessor);
+        ValueProcessorFormatAdapter processor = getValueFormatter();
 
         return ObservationUnitPropertyDao.Companion.getExportDbDataShort(
                 context, fieldId, fieldList, uniqueId, traits, processor);
@@ -935,16 +939,21 @@ public class DataHelper {
     /**
      * V2 - Edit existing trait
      */
-    public long editTraits(String traitDbId, String trait, String format, String defaultValue,
+    public long editTraits(String traitDbId, String trait, String traitAlias,String format, String defaultValue,
                            String minimum, String maximum, String details, String categories,
                            Boolean closeKeyboardOnOpen,
-                           Boolean cropImage,
-                           Boolean saveImage) {
+                           Boolean saveImage,
+                           Boolean cropImage, Boolean useDayOfYear, Boolean categoryDisplayValue, String resourceFile,
+                           List<String> synonyms, String decimalPlacesRequired, Boolean mathSymbolsEnabled,
+                           Boolean allowMulticat, Boolean repeatMeasure, Boolean autoSwitchPlot, String unit,
+                           Boolean invalidValues) {
 
         open();
 
-        return ObservationVariableDao.Companion.editTraits(traitDbId, trait, format, defaultValue,
-                minimum, maximum, details, categories, closeKeyboardOnOpen, cropImage, saveImage);
+        return ObservationVariableDao.Companion.editTraits(traitDbId, trait, traitAlias, format, defaultValue,
+                minimum, maximum, details, categories, closeKeyboardOnOpen, cropImage,
+                saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms, decimalPlacesRequired,
+                mathSymbolsEnabled, allowMulticat, repeatMeasure, autoSwitchPlot, unit, invalidValues);
     }
 
     /**
@@ -960,6 +969,13 @@ public class DataHelper {
         open();
 
         return ObservationVariableDao.Companion.getTraitByName(name);
+    }
+
+    public TraitObject getTraitByAlias(String name) {
+
+        open();
+
+        return ObservationVariableDao.Companion.getTraitByAlias(name);
     }
 
     public TraitObject getTraitById(String id) {
@@ -980,10 +996,13 @@ public class DataHelper {
 
         open();
 
-        return ObservationVariableDao.Companion.editTraits(trait.getId(), trait.getName(),
+        return ObservationVariableDao.Companion.editTraits(trait.getId(), trait.getName(), trait.getAlias(),
                 trait.getFormat(), trait.getDefaultValue(), trait.getMinimum(), trait.getMaximum(),
                 trait.getDetails(), trait.getCategories(), trait.getCloseKeyboardOnOpen(), trait.getCropImage(),
-                trait.getSaveImage());
+                trait.getSaveImage(),
+                trait.getUseDayOfYear(), trait.getCategoryDisplayValue(), trait.getResourceFile(), trait.getSynonyms(),
+                trait.getMaxDecimalPlaces(), trait.getMathSymbolsEnabled(), trait.getAllowMulticat(),
+                trait.getRepeatedMeasures(), trait.getAutoSwitchPlot(), trait.getUnit(), trait.getInvalidValues());
     }
 
     public boolean checkUnique(HashMap<String, String> values) {
@@ -1341,6 +1360,15 @@ public class DataHelper {
         open();
 
         return ObservationDao.Companion.getAllOfTrait(traitDbId);
+    }
+
+    /**
+     * Get the count of missing observations for a trait
+     * @param traitId the trait ID
+     * @return the count of missing observations
+     */
+    public int getMissingObservationsCount(String traitId) {
+        return ObservationDao.Companion.getMissingObservationsCount(traitId);
     }
 
     public ObservationModel[] getAllObservations(SQLiteDatabase db) {
@@ -1707,6 +1735,21 @@ public class DataHelper {
             if (oldVersion <= 16 && newVersion >= 17) {
                 // add field creator configuration columns to studies table (start corner, walking directiop/pattern)
                 Migrator.Companion.migrateToVersion17(db);
+            }
+
+            if (oldVersion <= 17 && newVersion >= 18) {
+                // add trait alias and synonyms column migration
+                Migrator.Companion.migrateToVersion18(db);
+            }
+
+            if (oldVersion <= 18 && newVersion >= 19) {
+
+                Migrator.Companion.migrateToVersion19(db);
+            }
+
+            if (oldVersion <= 19 && newVersion >= 20) {
+
+                Migrator.Companion.migrateToVersion20(db);
             }
         }
     }

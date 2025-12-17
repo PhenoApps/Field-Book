@@ -25,6 +25,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.preference.CheckBoxPreference;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
@@ -41,6 +42,7 @@ import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache;
 import com.fieldbook.tracker.objects.BrAPIConfig;
 import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.OpenAuthConfigurationUtil;
+import com.fieldbook.tracker.utilities.Utils;
 import com.google.gson.Gson;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
@@ -106,6 +108,8 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     //alert dialog displays messages when oidc or brapi urls have http
     private AlertDialog mBrapiHttpWarningDialog = null;
     private boolean mlkitEnabled;
+
+    private Preference brapiServerInfoButton;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -264,6 +268,15 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             });
         }
         setOidcFlowUi();
+
+        brapiServerInfoButton = findPreference("brapi_server_info");
+        if (brapiServerInfoButton != null) {
+            brapiServerInfoButton.setOnPreferenceClickListener(preference -> {
+                checkServerInfo();
+                return true;
+            });
+        }
+
     }
 
     private void barcodeAutoConfigure() {
@@ -333,7 +346,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             config.setServerTimeoutMilli(preferences.getString(PreferenceKeys.BRAPI_TIMEOUT, "120"));
             config.setAuthFlow(preferences.getString(PreferenceKeys.BRAPI_OIDC_FLOW, getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)));
             config.setOidcUrl(preferences.getString(PreferenceKeys.BRAPI_OIDC_URL, getString(R.string.brapi_oidc_url_default)));
-            config.setCatDisplay(preferences.getString(PreferenceKeys.LABELVAL_CUSTOMIZE, "value"));
             config.setClientId(preferences.getString(PreferenceKeys.BRAPI_OIDC_CLIENT_ID, getString(R.string.brapi_oidc_clientid_default)));
             config.setScope(preferences.getString(PreferenceKeys.BRAPI_OIDC_SCOPE, getString(R.string.brapi_oidc_scope_default)));
 
@@ -459,6 +471,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
         super.onResume();
         setBaseURLSummary();
         setButtonView();
+        setupToolbar();
     }
 
     @Override
@@ -764,7 +777,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             ((BetterEditTextPreference)findPreference(PreferenceKeys.BRAPI_PAGE_SIZE)).setText(brAPIConfig.getPageSize());
             ((BetterEditTextPreference)findPreference(PreferenceKeys.BRAPI_CHUNK_SIZE)).setText(brAPIConfig.getChunkSize());
             ((BetterEditTextPreference)findPreference(PreferenceKeys.BRAPI_TIMEOUT)).setText(brAPIConfig.getServerTimeoutMilli());
-            ((ListPreference)findPreference(PreferenceKeys.LABELVAL_CUSTOMIZE)).setValue(brAPIConfig.getCatDisplay());
 
             String clientId = brAPIConfig.getClientId();
             String scope = brAPIConfig.getScope();
@@ -799,6 +811,24 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                 .setPositiveButton(android.R.string.ok, null)
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .show();
+    }
+
+    /**
+     * Check server information and log supported calls
+     */
+    private void checkServerInfo() {
+        FragmentActivity act = getActivity();
+        if (act != null) {
+            if (Utils.isConnected(act)) {
+                act.getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.prefs_container, new BrapiServerInfoFragment())
+                        .addToBackStack(null)
+                        .commit();
+            } else {
+                Toast.makeText(act, R.string.device_offline_warning, Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     @Override

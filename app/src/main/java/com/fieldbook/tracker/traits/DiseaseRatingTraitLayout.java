@@ -8,6 +8,7 @@ import android.widget.Button;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.database.models.ObservationModel;
+import com.fieldbook.tracker.utilities.BackgroundUiTask;
 import com.fieldbook.tracker.utilities.Utils;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
@@ -22,6 +23,7 @@ import java.util.Scanner;
 
 public class DiseaseRatingTraitLayout extends BaseTraitLayout {
 
+    private List<String> loadedRustCodes = null;
     Button rustR, rustM, rustS, rustDelim;
     Map<Integer, Button> rustButtons;
 
@@ -84,10 +86,33 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
         rustS = act.findViewById(R.id.rustS);
         rustDelim = act.findViewById(R.id.rustDelim);
 
-        List<String> temps = getRustCodes();
+        loadRustCodes();
+    }
+
+    private void loadRustCodes() {
+        BackgroundUiTask.Companion.execute(
+                continuation -> {
+                    loadedRustCodes = getRustCodes();
+                    return null;
+                },
+                continuation -> {
+                    if (loadedRustCodes != null) {
+                        setupRustButtons(loadedRustCodes);
+                    }
+                    return null;
+                },
+                continuation -> {
+                    // show nothing if failed
+                    return null;
+                }
+        );
+    }
+
+
+    private void setupRustButtons(List<String> rustCodes) {
         List<Button> rustBtnArray = new ArrayList<>(rustButtons.values());
-        for (int i = 0; i < temps.size(); i++) {
-            rustBtnArray.get(i).setText(temps.get(i));
+        for (int i = 0; i < rustCodes.size(); i++) {
+            rustBtnArray.get(i).setText(rustCodes.get(i));
             rustBtnArray.get(i).setOnClickListener(new RustButtonOnClickListener());
         }
 

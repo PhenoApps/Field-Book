@@ -24,6 +24,8 @@
     <string name="dialog_accept">Aceitar</string>
     <string name="dialog_exit">Sair</string>
     <string name="barcode_scanner_text">Escanear código de barras</string>
+    <!-- Toolbar -->
+    <string name="appbar_back">Voltar</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Dados de amostra</string>
     <string name="startup_sample_data_message">Carregar dados de amostra?</string>
@@ -254,9 +256,6 @@
     <string name="field_data_title">Dados</string>
     <string name="field_trait_observation_total">\"%d\"observações</string>
     <!-- Field Detail Charts -->
-    <string name="field_trait_chart_no_data">Sem dados para o gráfico</string>
-    <string name="field_trait_chart_incompatible_format">Este formato de característica não pode ser representado graficamente</string>
-    <string name="field_trait_chart_excess_data">Muitos valores distintos para representar graficamente</string>
     <!-- Semantic dates -->
     <string name="today">Hoje</string>
     <string name="yesterday">Ontem</string>
@@ -334,6 +333,7 @@
     <string name="traits_create_true">Verdadeiro</string>
     <string name="traits_create_false">Falso</string>
     <string name="traits_create_unset">Desmarcar</string>
+    <string name="traits_create_disabled">Desabilitado</string>
     <string name="traits_create_categories_text">Separar items com uma /</string>
     <string name="traits_create_camera">Câmera</string>
     <string name="traits_create_close_keyboard">Fechar o teclado</string>
@@ -362,8 +362,14 @@
     <string name="dialog_new_trait_error_cannot_update_to_brapi_trait">As características não podem ser atualizados para características BrAPI.</string>
     <string name="required">Obrigatório</string>
     <string name="traits_create_warning_percent_value_required">Valor obrigatório</string>
+    <!-- Decimal Places Radio Options -->
+    <string name="trait_parameter_repeated_measures">Medidas Repetidas</string>
     <string name="select_trait">Selecionar Característica</string>
     <string name="edit_traits">Editar</string>
+    <!-- Trait Editor -->
+    <!-- Trait Detail -->
+    <string name="trait_observation_data">Dados</string>
+    <string name="trait_detail_chip_rename">Renomear</string>
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">O valor é menor do que o conjunto mínimo</string>
@@ -937,6 +943,9 @@
     <string name="preferences_brapi_server_barcode">Ler código de barras do servidor</string>
     <string name="preferences_brapi_server_scan_error">Erro de Escaneo</string>
     <string name="preferences_brapi_server_add">Enviar um Servidor</string>
+    <!-- Brapi Server Info -->
+    <string name="brapi_server_info_server">Servidor</string>
+    <string name="brapi_server_info_field_book">Field Book</string>
     <!-- Community Servers -->
     <string-array name="community_servers_names">
         <item>CassavaBase</item>
@@ -1382,4 +1391,5 @@
     <string name="device_settings_dialog_unknown_name">Dispositivo Bluetooth Desconhecido</string>
     <string name="device_settings_dialog_title">Configurações de Dispositivo Bluetooth</string>
     <string name="no_data_captured">Nenhum dado capturado.</string>
+    <string name="failed_to_find_file_name">Falha ao recuperar o nome do arquivo.</string>
 </resources>

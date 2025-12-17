@@ -41,6 +41,12 @@
             android:icon="@drawable/ic_pref_brapi_logout"
             android:key="revokeBrapiAuth"
             android:title="@string/brapi_revoke_auth" />
+
+        <Preference
+            android:key="brapi_server_info"
+            android:title="@string/brapi_server_info_pref"
+            android:summary="@string/brapi_server_info_pref_summary"
+            android:icon="@drawable/ic_server_compare" />
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -162,21 +168,6 @@
             android:summary="@string/preferences_brapi_cache_invalidate_summary"
             android:title="@string/preferences_brapi_cache_invalidate_title" />
       
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:key="brapi_variables"
-        android:title="@string/preferences_brapi_traits_title"
-        app:iconSpaceReserved="false">
-        <ListPreference
-            android:defaultValue="value"
-            android:dialogTitle="@string/preferences_appearance_collect_labelval_customize"
-            android:entries="@array/pref_collect_labelval_customize_title"
-            android:entryValues="@array/pref_collect_customize_labelval"
-            android:icon="@drawable/ic_view_list_black_24dp"
-            android:key="LABELVAL_CUSTOMIZE"
-            android:summary="@string/preferences_appearance_collect_labelval_customize_description"
-            android:title="@string/preferences_appearance_collect_labelval_customize" />
     </PreferenceCategory>
 
 </PreferenceScreen>

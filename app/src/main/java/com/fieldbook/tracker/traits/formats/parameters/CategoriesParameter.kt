@@ -7,7 +7,7 @@ import androidx.appcompat.widget.AppCompatImageButton
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.CategoryAdapter
-import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.ValidationResult
 import com.fieldbook.tracker.utilities.CategoryJsonUtil.Companion.decodeCategories
@@ -104,7 +104,7 @@ class CategoriesParameter : BaseFormatParameter(
                         catList.addAll(json)
                     }
 
-                } catch (e: Exception) {
+                } catch (_: Exception) {
 
                     val labels = listOf(
                         *traitObject.categories.split("/".toRegex())
@@ -147,7 +147,7 @@ class CategoriesParameter : BaseFormatParameter(
         }
 
         override fun validate(
-            database: DataHelper,
+            traitRepo: TraitRepository,
             initialTraitObject: TraitObject?
         ) = ValidationResult()
 

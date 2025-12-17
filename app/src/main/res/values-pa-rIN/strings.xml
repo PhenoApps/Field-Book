@@ -3,6 +3,7 @@
     <!-- GENERAL -->
     <!-- App -->
     <!-- Dialog -->
+    <!-- Toolbar -->
     <!-- Startup  -->
     <!-- App Intro -->
     <!-- Storage Definer -->
@@ -31,6 +32,9 @@
     <!-- Trait item menu -->
     <!-- Trait formats -->
     <!-- Trait Creation Dialog -->
+    <!-- Decimal Places Radio Options -->
+    <!-- Trait Editor -->
+    <!-- Trait Detail -->
     <!-- COLLECT -->
     <!-- Validation -->
     <!-- Toolbar -->
@@ -80,6 +84,7 @@
     <!-- Update -->
     <!-- BRAPI -->
     <!-- BrAPI preferences -->
+    <!-- Brapi Server Info -->
     <!-- Community Servers -->
     <!-- Authorization -->
     <!-- BrAPI Import -->

@@ -24,6 +24,8 @@
     <string name="dialog_accept">Accetta</string>
     <string name="dialog_exit">Esci</string>
     <string name="barcode_scanner_text">Scansiona un codice a barre</string>
+    <!-- Toolbar -->
+    <string name="appbar_back">Indietro</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Dati di Esempio</string>
     <string name="startup_sample_data_message">Caricare i dati di esempio?</string>
@@ -254,9 +256,6 @@
     <string name="field_data_title">Dato</string>
     <string name="field_trait_observation_total">\"%d\" osservazioni</string>
     <!-- Field Detail Charts -->
-    <string name="field_trait_chart_no_data">Nessun dato da visualizzare</string>
-    <string name="field_trait_chart_incompatible_format">Il formato di questo carattere non può essere tracciato nel grafico</string>
-    <string name="field_trait_chart_excess_data">Troppi valori diversi da tracciare nel grafico</string>
     <!-- Semantic dates -->
     <string name="today">Oggi</string>
     <string name="yesterday">Ieri</string>
@@ -334,6 +333,7 @@
     <string name="traits_create_true">Vero</string>
     <string name="traits_create_false">Falso</string>
     <string name="traits_create_unset">Non Settato</string>
+    <string name="traits_create_disabled">Disabilitato</string>
     <string name="traits_create_categories_text">Separa categorie con /</string>
     <string name="traits_create_camera">Fotocamera</string>
     <string name="traits_create_close_keyboard">Chiudi la Tastiera</string>
@@ -362,8 +362,14 @@
     <string name="dialog_new_trait_error_cannot_update_to_brapi_trait">I caratteri non possono essere aggiornati ai caratteri BrAPI.</string>
     <string name="required">Obbligatorio</string>
     <string name="traits_create_warning_percent_value_required">Valore obbligatorio</string>
+    <!-- Decimal Places Radio Options -->
+    <string name="trait_parameter_repeated_measures">Misure Ripeti</string>
     <string name="select_trait">Seleziona Carattere</string>
     <string name="edit_traits">Modifica</string>
+    <!-- Trait Editor -->
+    <!-- Trait Detail -->
+    <string name="trait_observation_data">Dato</string>
+    <string name="trait_detail_chip_rename">Rinomina</string>
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">Il valore è minore rispetto al minimo impostato</string>
@@ -937,6 +943,9 @@
     <string name="preferences_brapi_server_barcode">Scansiona un codice a barre del server</string>
     <string name="preferences_brapi_server_scan_error">Errore Di Scansione</string>
     <string name="preferences_brapi_server_add">Invia un server</string>
+    <!-- Brapi Server Info -->
+    <string name="brapi_server_info_server">Server</string>
+    <string name="brapi_server_info_field_book">Field Book</string>
     <!-- Community Servers -->
     <string-array name="community_servers_names">
         <item>CassavaBase</item>
@@ -1381,4 +1390,5 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="device_settings_dialog_unknown_name">Dispositivo Bluetooth Sconosciuto</string>
     <string name="device_settings_dialog_title">Impostazioni Dispositivo Bluetooth</string>
     <string name="no_data_captured">Nessun dato catturato.</string>
+    <string name="failed_to_find_file_name">Impossibile recuperare il nome del file.</string>
 </resources>

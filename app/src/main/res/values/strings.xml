@@ -28,6 +28,10 @@
 
     <string name="barcode_scanner_text">Scan a barcode</string>
 
+    <!-- Toolbar -->
+    <string name="appbar_more_options">More Options</string>
+    <string name="appbar_back">Back</string>
+
     <!-- Startup  -->
     <string name="startup_sample_data_title">Sample data</string>
     <string name="startup_sample_data_message">Load sample data?</string>
@@ -59,6 +63,7 @@
     <string name="define_button_text">Choose Folder</string>
 
     <!-- Permissions  -->
+    <string name="permission_rationale_storage">Access to the device\'s files is required.</string>
     <string name="permission_rationale_storage_import">Importing files requires access to the device\'s files.</string>
     <string name="permission_rationale_storage_export">Exporting data requires access to the device\'s files.</string>
     <string name="permission_rationale_trait_features">Collecting data requires access to the device\'s files, microphone, and camera.</string>
@@ -298,9 +303,9 @@
     <string name="field_trait_observation_total">"%d" observations</string>
 
     <!-- Field Detail Charts -->
-    <string name="field_trait_chart_no_data">No data to chart</string>
-    <string name="field_trait_chart_incompatible_format">This trait format cannot be charted</string>
-    <string name="field_trait_chart_excess_data">Too many distinct values to chart</string>
+    <string name="chart_no_data">No data to chart</string>
+    <string name="chart_incompatible_format">This trait format cannot be charted</string>
+    <string name="chart_excess_data">Too many distinct values to chart</string>
 
     <!-- Semantic dates -->
     <string name="today">Today</string>
@@ -314,6 +319,7 @@
 
 
     <!-- TRAITS -->
+
     <!-- Sort -->
     <string name="traits_toolbar_sort">Sort Traits</string>
     <string name="traits_sort_name">Name</string>
@@ -328,6 +334,9 @@
     <string name="traits_dialog_import_from_file">Import from file</string>
     <string name="traits_dialog_import">Import</string>
     <string name="import_error_format_trait">Only TRT files can be imported as a trait list</string>
+    <string name="import_error_format_trait_json">Invalid JSON format: %s</string>
+    <string name="import_error_no_traits">No traits found</string>
+    <string name="trait_import_successful">Successfully imported traits</string>
 
     <string name="traits_export_check">Export current trait list?</string>
     <string name="traits_dialog_export">Export</string>
@@ -335,6 +344,21 @@
 
     <string name="traits_toolbar_delete_all">Delete all traits</string>
     <string name="act_trait_editor_no_traits_exist">No traits exist.</string>
+
+    <string name="export_dialog_traits_exporting">Exporting traits…</string>
+    <string name="export_error_unknown">Unknown export error occurred</string>
+    <string name="export_error_directory_access">Failed to access export directory</string>
+    <string name="export_error_directory_not_found">Export directory not found</string>
+    <string name="export_error_file_creation">Failed to create export file</string>
+    <string name="export_error_file_stream">Failed to open file stream</string>
+
+    <string name="error_trait_directory_not_available">Trait directory not available</string>
+    <string name="error_trait_directory_missing">Trait directory missing</string>
+    <string name="error_failed_to_create_file">Failed to create file</string>
+    <string name="error_output_stream_failed">Output stream failed</string>
+    <string name="error_export_failed">Export failed</string>
+    <string name="error_unable_to_copy_trait_file">Unable to copy trait file</string>
+    <string name="error_cannot_open_file">Cannot open file</string>
 
     <!-- Trait item menu -->
     <string name="list_item_trait_popup_content_description">Open a menu specific to this trait.</string>
@@ -383,15 +407,21 @@
     <string name="traits_create_value_minimum">Minimum</string>
     <string name="traits_create_value_maximum">Maximum</string>
     <string name="traits_create_details">Details</string>
+    <string name="traits_create_unit">Unit</string>
     <string name="traits_create_optional">Optional</string>
     <string name="traits_create_categories_title">Categories</string>
     <string name="traits_create_photo_maximum">Maximum number of photos</string>
     <string name="traits_create_true">True</string>
     <string name="traits_create_false">False</string>
     <string name="traits_create_unset">Unset</string>
+    <string name="traits_create_enabled">Enabled</string>
+    <string name="traits_create_disabled">Disabled</string>
     <string name="traits_create_categories_text">Use / to separate categories</string>
     <string name="traits_create_camera">Camera</string>
     <string name="traits_create_close_keyboard">Close Keyboard</string>
+    <string name="trait_parameter_decimal_places">Decimal Places</string>
+    <string name="trait_parameter_decimal_places_hint">Number of decimal places (-1 for unlimited, 0 for integers)</string>
+    <string name="trait_parameter_decimal_places_error">Value must be between -1 and 10</string>
 
     <string name="traits_create_warning_name_blank">Trait name cannot be blank</string>
     <string name="traits_create_warning_duplicate">Trait already exists</string>
@@ -421,15 +451,108 @@
     <string name="required">Required</string>
     <string name="traits_create_warning_percent_value_required">Value required</string>
 
+    <!-- Decimal Places Radio Options -->
+    <string name="trait_parameter_decimal_places_no_restriction">No restriction</string>
+    <string name="trait_parameter_decimal_places_integer_only">Integers only</string>
+    <string name="trait_parameter_decimal_places_allowed">Allow decimal input</string>
+    <string name="trait_parameter_decimal_places_custom">Maximum decimal places:</string>
+    <string name="trait_parameter_decimal_places_custom_hint">1–10</string>
+    <string name="trait_parameter_decimal_places_custom_required">Please enter number of decimal places (1–10)</string>
+    <string name="trait_parameter_decimal_places_custom_error">Value must be between 1 and 10</string>
+    <string name="trait_parameter_invalid_number">Invalid number</string>
+
+    <string name="trait_parameter_mathematical_symbols">Mathematical Symbols</string>
+    <string name="traits_create_warning_math_symbols_conflict">Mathematical symbols and decimal place restrictions cannot be applied simultaneously</string>
+
+    <string name="trait_parameter_repeated_measures">Repeated Measures</string>
+    <string name="trait_parameter_auto_switch_plot">Automatically Switch To Next Plot</string>
+    <string name="trait_parameter_invalid_value">Allow Invalid Value</string>
+
     <string name="select_trait">Select Trait</string>
     <string name="edit_traits">Edit</string>
 
+    <!-- Trait Editor -->
+    <string name="error_loading_traits">Error loading traits</string>
+    <string name="error_deleting_traits">Failed to delete traits</string>
+    <string name="error_toggling_all_traits_visibility">Failed to toggle traits visibility</string>
+    <string name="error_importing_traits">Failed to import traits</string>
+    <string name="error_saving_trait_order">Failed to save trait order</string>
+    <string name="error_exporting_traits">Failed to export traits</string>
+    <string name="message_all_traits_deleted">All traits deleted</string>
+    <string name="message_traits_imported">Imported %1$d traits</string>
+    <string name="message_traits_imported_with_skipped">Imported %1$d traits, skipped %2$d duplicates</string>
+    <string name="message_traits_exported">Exported %1$d traits</string>
+
+    <!-- Trait Detail -->
+    <string name="trait_detail_title">Trait Details</string>
+    <string name="trait_format_details">Format Details</string>
+    <string name="trait_data_title">Observation Data</string>
+    <string name="trait_default_value">Default Value: %s</string>
+    <string name="trait_min_value">Minimum Value: %s</string>
+    <string name="trait_max_value">Maximum Value: %s</string>
+    <string name="trait_categories">Categories: %s</string>
+    <string name="trait_details">Details: %s</string>
+    <string name="trait_visible">Visible</string>
+    <string name="trait_hidden">Hidden</string>
+    <string name="trait_options_title">Options</string>
+    <string name="trait_swap_name">Swap name field</string>
+    <string name="trait_observation_data">Data</string>
+    <string name="trait_observation_count">%d observations</string>
+    <string name="trait_not_chartable">This trait format cannot be visualized in a chart</string>
+    <string name="traits_options_copy_title">Copy Trait</string>
+    <string name="trait_name_empty_error">Trait name cannot be empty</string>
+    <string name="trait_name_exists_error">A trait with this name already exists</string>
+    <string name="trait_copied_success">Trait copied to %1$s</string>
+    <string name="trait_date_format_dialog_title">Select Date Format</string>
+    <string name="trait_date_format_display">Date (%s)</string>
+    <string name="trait_day_format_display">Day of Year (%s)</string>
+    <string name="trait_brapi_display_dialog_title">Select Button Text</string>
+    <string name="trait_brapi_label_display">Show Labels (e.g. %s)</string>
+    <string name="trait_brapi_value_display">Show Values (e.g. %s)</string>
+    <string name="error_loading_trait_detail">Error loading trait info</string>
+    <string name="error_updating_trait_resource_file">Error updating trait resource file</string>
+    <string name="error_updating_trait_visibility">Error updating trait visibility</string>
+    <string name="error_empty_trait_name">Trait name cannot be empty</string>
+    <string name="error_copy_trait">Error while copying trait</string>
+    <string name="trait_swap_synonym_dialog_title">Synonyms</string>
+    <string name="trait_swap_name_set_alias">Set Alias</string>
+    <string name="error_updating_trait_alias">Error updating trait alias</string>
+    <string name="error_updating_trait_options">Error updating trait options</string>
+    <string name="trait_add_synonym_new">Add New</string>
+    <string name="trait_add_synonym_new_dialog">Add New Synonym</string>
+    <string name="trait_synonym">Synonym</string>
+    <string name="trait_add_synonym_new_dialog_blank">Synonym cannot be blank</string>
+    <string name="trait_add_synonym_already_exists">This synonym already exists</string>
+    <string name="trait_parameter_enabled">%s enabled</string>
+    <string name="trait_parameter_disabled">%s disabled</string>
+
+    <string name="trait_detail_chip_rename">Rename</string>
+    <string name="trait_detail_chip_math_symbols">Math symbols</string>
+    <string name="trait_detail_chip_multiple_categories">Multiple categories</string>
+    <string name="trait_detail_chip_single_category">Single category</string>
+    <string name="trait_detail_chip_automatic_switch">Automatic advance</string>
+    <string name="trait_detail_chip_format_date">Format: %s</string>
+    <string name="trait_detail_chip_transfer_images">Transfer images</string>
+    <string name="trait_detail_chip_invalid_value">Outlier values</string>
+
+    <string name="trait_parameter_allow_multicat">Multiple Category Selection</string>
+    <string name="trait_parameter_display_value">Display Value</string>
+    <string name="trait_parameter_resource_file">Resource File</string>
+    <string name="trait_parameter_use_day_of_year">Use Day of Year</string>
+    <string name="list_item_trait_parameter_resource_file_hint">Select a resource file</string>
+    <string name="trait_resource_file_updated">Resource File Updated</string>
 
     <!-- COLLECT -->
 
     <!-- Validation -->
     <string name="trait_error_minimum_value">Value is less than allowed minimum</string>
     <string name="trait_error_maximum_value">Value is larger than allowed maximum</string>
+    <string name="trait_error_decimal_places">Value cannot have more than %d decimal places</string>
+    <string name="trait_error_mathematical_symbols_disabled">Mathematical symbols are not allowed</string>
+    <string name="trait_error_integers_only">Only integer values are allowed</string>
+    <string name="dialog_invalid_value_title">Invalid Value</string>
+    <string name="dialog_save_invalid_value_message">Do you want to save this value anyway?</string>
+
     <string name="trait_error_disease_severity">Severity already stored</string>
     <string name="act_collect_study_names_empty">The selected study has empty unique, primary, or secondary names.</string>
 
@@ -659,6 +782,7 @@
     <string name="observation_info_entry_id">Entry Id</string>
     <string name="observation_info_trait_format">Trait Format</string>
     <string name="observation_info_trait_name">Trait Name</string>
+    <string name="observation_info_trait_alias">Trait Alias</string>
     <string name="observation_info_value">Value</string>
     <string name="observation_info_timestamp">Observation Timestamp</string>
     <string name="observation_info_collector">Collector</string>
@@ -1162,6 +1286,27 @@
     <string name="preferences_brapi_server_scan_error">Scan Error</string>
     <string name="preferences_brapi_server_add">Submit a server</string>
 
+    <!-- Brapi Server Info -->
+    <string name="brapi_server_info_pref">Check Compatibility</string>
+    <string name="brapi_server_info_pref_summary">View supported BrAPI calls and server information</string>
+    <string name="brapi_compatibility">BrAPI Compatibility</string>
+    <string name="brapi_compatibility_with_app">Compatibility with %s</string>
+    <string name="brapi_server_name_label">%1$s</string>
+    <string name="brapi_organization_name_label">%1$s</string>
+    <string name="brapi_server_description_label">%1$s</string>
+    <string name="brapi_compatibility_all_calls">BrAPI in Field Book</string>
+    <string name="brapi_compatibility_server_support">Supported by server</string>
+    <string name="brapi_compatibility_no_server_support">Not supported by server</string>
+    <string name="brapi_compatibility_fieldbook_support">Supported by Field Book</string>
+    <string name="brapi_compatibility_no_fieldbook_support">Supported by Field Book</string>
+    <string name="brapi_server_calls_implemented">%1$d/%2$d calls implemented (%3$d%%)</string>
+    <string name="brapi_server_returned_empty_response">Server returned empty response</string>
+    <string name="brapi_server_expand_content_description">Expand</string>
+    <string name="brapi_server_collapse_content_description">Collapse</string>
+    <string name="brapi_server_info_call">Call</string>
+    <string name="brapi_server_info_server">Server</string>
+    <string name="brapi_server_info_field_book">Field Book</string>
+
     <!-- Community Servers -->
     <string-array name="community_servers_names">
         <item>CassavaBase</item>
@@ -1410,6 +1555,7 @@
     <string name="export_util_repeated_measures_table_warning_title">Repeated Measures Table</string>
     <string name="export_util_repeated_measures_table_warning_message">Only the latest repeated measures value will be exported in table format.</string>
     <string name="activity_file_explorer_up_directory_name">Up</string>
+    <string name="file_explorer_select_file_title">Select File</string>
 
     <!-- base camera strings -->
     <string name="trait_camera_connect_content_description">Starts a device connection.</string>
@@ -1540,6 +1686,7 @@
     <string name="failed_to_save_study">Failed to save study</string>
     <string name="no_suitable_file_manager_was_found">No suitable File Manager was found.</string>
     <string name="trait_error_invalid_multicat_value">Invalid categorical data was entered.</string>
+    <string name="trait_error_multicat_disabled">Multiple categories found but multicat is disabled for this trait</string>
     <string name="dialog_crash_report_title">Failed to load data</string>
     <string name="dialog_crash_report_message">Press OK to send an anonymous diagnostic report to help improve the app.</string>
     <string name="dialog_quick_goto_title">Quick GoTo</string>

@@ -16,6 +16,7 @@
     <string name="dialog_save">保存</string>
     <string name="dialog_delete">削除</string>
     <string name="barcode_scanner_text">バーコードを読み取る</string>
+    <!-- Toolbar -->
     <!-- Startup  -->
     <string name="startup_sample_data_title">サンプルデータ</string>
     <string name="startup_sample_data_message">サンプルデータをロードしますか？</string>
@@ -120,7 +121,10 @@
     <string name="traits_create_warning_name_blank">形質名は空欄不可</string>
     <string name="traits_create_warning_duplicate">形質は既に存在</string>
     <string name="traits_create_warning_numeric_required">初期値、最小値、最大値は数値で入力</string>
+    <!-- Decimal Places Radio Options -->
     <string name="edit_traits">編集</string>
+    <!-- Trait Editor -->
+    <!-- Trait Detail -->
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">設定した最小値よりも小さい値です</string>
@@ -268,6 +272,8 @@
     <string name="brapi_base_url_desc">BrAPIサーバー接続のための基本URL</string>
     <string name="brapi_choice_to_make_default_negative">キャンセル</string>
     <string name="brapi_choice_to_make_default_positive">保存</string>
+    <!-- Brapi Server Info -->
+    <string name="brapi_server_info_field_book">Field Book</string>
     <!-- Community Servers -->
     <!-- Authorization -->
     <string name="brapi_save_authorize">保存と認証</string>

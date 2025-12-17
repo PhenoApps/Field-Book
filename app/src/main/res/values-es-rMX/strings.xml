@@ -24,6 +24,8 @@
     <string name="dialog_accept">Aceptar</string>
     <string name="dialog_exit">Salir</string>
     <string name="barcode_scanner_text">Escanear un código de barras</string>
+    <!-- Toolbar -->
+    <string name="appbar_back">Atrás</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Datos de ejemplo</string>
     <string name="startup_sample_data_message">¿Cargar datos de ejemplo?</string>
@@ -254,9 +256,6 @@
     <string name="field_data_title">Datos</string>
     <string name="field_trait_observation_total">\"%d\" observaciones</string>
     <!-- Field Detail Charts -->
-    <string name="field_trait_chart_no_data">No hay datos para graficar</string>
-    <string name="field_trait_chart_incompatible_format">Este formato de variable no puede ser graficado</string>
-    <string name="field_trait_chart_excess_data">Demasiados valores distintos para graficar</string>
     <!-- Semantic dates -->
     <string name="today">Hoy</string>
     <string name="yesterday">Ayer</string>
@@ -334,6 +333,7 @@
     <string name="traits_create_true">Verdadero</string>
     <string name="traits_create_false">Falso</string>
     <string name="traits_create_unset">Desestablecer</string>
+    <string name="traits_create_disabled">Desactivado</string>
     <string name="traits_create_categories_text">Use / para separar categorías</string>
     <string name="traits_create_camera">Cámara</string>
     <string name="traits_create_close_keyboard">Cerrar Teclado</string>
@@ -362,8 +362,14 @@
     <string name="dialog_new_trait_error_cannot_update_to_brapi_trait">Las variables no se pueden actualizar a las variables BrAPI.</string>
     <string name="required">Requerido</string>
     <string name="traits_create_warning_percent_value_required">Valor requerido</string>
+    <!-- Decimal Places Radio Options -->
+    <string name="trait_parameter_repeated_measures">Medidas Repetidas</string>
     <string name="select_trait">Seleccionar Variable</string>
     <string name="edit_traits">Editar</string>
+    <!-- Trait Editor -->
+    <!-- Trait Detail -->
+    <string name="trait_observation_data">Datos</string>
+    <string name="trait_detail_chip_rename">Renombrar</string>
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">Valor menor al mínimo permitido</string>
@@ -937,6 +943,9 @@
     <string name="preferences_brapi_server_barcode">Escanear código de barras del servidor</string>
     <string name="preferences_brapi_server_scan_error">Error al Escanear</string>
     <string name="preferences_brapi_server_add">Enviar un servidor</string>
+    <!-- Brapi Server Info -->
+    <string name="brapi_server_info_server">Servidor</string>
+    <string name="brapi_server_info_field_book">Field Book</string>
     <!-- Community Servers -->
     <string-array name="community_servers_names">
         <item>CassavaBase</item>
@@ -1382,4 +1391,5 @@
     <string name="device_settings_dialog_unknown_name">Dispositivo Bluetooth desconocido</string>
     <string name="device_settings_dialog_title">Ajustes del dispositivo Bluetooth</string>
     <string name="no_data_captured">No hay datos capturados.</string>
+    <string name="failed_to_find_file_name">Error al recuperar el nombre del archivo.</string>
 </resources>

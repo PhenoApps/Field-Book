@@ -66,13 +66,13 @@
 
         <!-- Trait manager, for importing .trt files -->
         <activity
-            android:name=".activities.TraitEditorActivity"
+            android:name=".activities.TraitActivity"
             android:alwaysRetainTaskState="false"
             android:configChanges="keyboardHidden|orientation"
             android:finishOnTaskLaunch="true"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize" /> <!-- used to display and select a local file (found in field editor and trait editor activities) -->
+            android:windowSoftInputMode="adjustPan" /> <!-- used to display and select a local file (found in field editor and trait editor activities) -->
         <activity
             android:name=".activities.FileExploreActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"

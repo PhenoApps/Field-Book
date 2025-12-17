@@ -8,10 +8,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Traits list now includes individual trait pages with options that are adjustable on a per trait basis
+- Traits include an option to enable repeated measures
+- Traits include an option to automatically switch to the next entry when data is input
+- Traits include an option to choose a specific resource image that will be displayed in Collect
+- Traits include an option to ask if outlier values should be allowed
+- Numeric traits include an option to limit decimal places for values
+- Numeric traits include an option to disable the math symbol buttons
+- Date traits include an option to convert between date and day of year
+- Categorical traits include an option to collect multiple categories
+- Categorical traits imported via BrAPI include an option to display either the label or value
+- Traits can now be renamed and will name changes in a list
+- BrAPI sync and export are now merged into a single screen
+- View BrAPI server compatibility with Field Book in the BrAPI settings
+
+### Changed
+- Multicat trait format removed (replaced with categorical option)
+- Removed the following settings (moved to traits): day of year, BrAPI label/value, enable repeated measures
+- Copy, edit, and deleting traits is now within each individual trait
+- Images can now be skipped during BrAPI export
+
+### Fixed
+- Date trait calendar now uses the correct day of year setting
+
+## [v6.3.6] - 2025-12-02
+
+### Added
 
 ### Changed
 
 ### Fixed
+- BrAPI authorization redirect link updated
+
+## [v6.3.5] - 2025-12-02
+
+### Added
+
+### Changed
+
+### Fixed
+- BrAPI now redirects and opens Field Book when authorizing
 
 ## [v6.3.4] - 2025-11-17
 
@@ -805,4 +841,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v6.3.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.2
 [v6.3.3]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.3
 
+
 [v6.3.4]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.4
+[v6.3.5]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.5
+
+
+[v6.3.6]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.6
