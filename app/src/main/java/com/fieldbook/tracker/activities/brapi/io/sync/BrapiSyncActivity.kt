@@ -13,6 +13,7 @@ import com.fieldbook.tracker.activities.ThemedActivity
 import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.preferences.PreferenceKeys
+import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.Utils
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -67,7 +68,7 @@ class BrapiSyncActivity : ThemedActivity() {
 
         composeView.setContent {
 
-            FieldBookTheme {
+            AppTheme {
                 val uiState by viewModel.uiState.collectAsState()
 
                 BrapiSyncScreen(

@@ -53,6 +53,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.ui.dialogs.builder.AppAlertDialog
 
 // File-level enum for global toggle state used in PendingConflictsList
 private enum class GlobalChoice { NONE, SERVER, LOCAL }
@@ -213,28 +214,23 @@ fun BrapiSyncScreen(
                                 if (!selectionMap.containsKey(c.brapiId)) selectionMap[c.brapiId] = null
                             }
 
-                            androidx.compose.material3.AlertDialog(
-                                onDismissRequest = { suppressConflictDialog = true },
-                                confirmButton = {
-                                    TextButton(onClick = {
-                                        if (selectedStrategy is MergeStrategy.Manual) {
-                                            // convert nullable map to non-nullable by defaulting nulls to 'true' to preserve previous behavior
-                                            onApplyManualChoices(selectionMap.mapValues { it.value ?: true })
-                                        } else {
-                                            onMergeStrategyChange(selectedStrategy)
-                                        }
-                                        suppressConflictDialog = true
-                                    }) {
-                                        Text(stringResource(R.string.dialog_ok))
+                            AppAlertDialog(
+                                positiveButtonText = stringResource(R.string.dialog_ok),
+                                negativeButtonText = stringResource(R.string.dialog_cancel),
+                                onPositive = {
+                                    if (selectedStrategy is MergeStrategy.Manual) {
+                                        // convert nullable map to non-nullable by defaulting nulls to 'true' to preserve previous behavior
+                                        onApplyManualChoices(selectionMap.mapValues { it.value ?: true })
+                                    } else {
+                                        onMergeStrategyChange(selectedStrategy)
                                     }
+                                    suppressConflictDialog = true
                                 },
-                                dismissButton = {
-                                    TextButton(onClick = { suppressConflictDialog = true }) {
-                                        Text(stringResource(R.string.dialog_cancel))
-                                    }
+                                onNegative = {
+                                    suppressConflictDialog = true
                                 },
-                                title = { Text(stringResource(R.string.conflict_resolution_strategy)) },
-                                text = {
+                                title = stringResource(R.string.conflict_resolution_strategy),
+                                content = {
                                     Column {
                                         Text(
                                             stringResource(
@@ -300,6 +296,7 @@ fun BrapiSyncScreen(
                         if (showUploadPrompt) {
                             androidx.compose.material3.AlertDialog(
                                 onDismissRequest = { showUploadPrompt = false },
+                                containerColor = Color.White,
                                 title = { Text(stringResource(R.string.brapi_download_button)) },
                                 text = {
                                     Text(
