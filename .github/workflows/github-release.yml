@@ -2,7 +2,6 @@ name: do-github-release
 
 # This workflow automates the app release process and supports multiple triggers:
 # - Manual dispatch: Releases unconditionally with a specified version bump.
-# - Dispatch from `process-pr-merge`: Releases unconditionally using the version bump from `process-pr-merge`.
 # - Weekly schedule: Runs every Monday at 3:00 PM EST and performs a patch release if the app directory has changed since the last release.
 
 # Key steps:
@@ -108,56 +107,10 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
 
-      - name: Update changelog.xml
-        id: update-changelog-xml
-        run: |
-
-          # Read the Unreleased section and process notes based on type
-          RELEASE_CONTENT="" CURRENT_TYPE=""
-          while IFS= read -r note; do
-            if [[ "$note" == "### Added"* ]]; then
-              CURRENT_TYPE="new"
-            elif [[ "$note" == "### Changed"* ]]; then
-              CURRENT_TYPE="info"
-            elif [[ "$note" == "### Fixed"* ]]; then
-              CURRENT_TYPE="bugfix"
-            elif [[ "$note" =~ ^- ]]; then
-              clean_note=$(echo "$note" | sed -E 's/^- //; s/ *\(.*\)//')
-              RELEASE_CONTENT+="        <${CURRENT_TYPE}>${clean_note}</${CURRENT_TYPE}>\n"
-              #pr_number=$(echo "$note" | grep -oP 'pull/\K[0-9]+' || echo "N/A")
-              #RELEASE_CONTENT+="        <${CURRENT_TYPE}>${clean_note} (#${pr_number})</${CURRENT_TYPE}>\n"
-              
-            fi
-          done < <(sed -n '/## \[Unreleased\]/,/^## /p' CHANGELOG.md | sed '1,2d' | sed '$d')
-
-          # Generate, insert, and log the new release block
-          today=$(date +'%Y-%m-%d')
-          RELEASE_BLOCK="    <release date=\"$today\" versionCode=\"$VERSION_CODE\" versionName=\"v$VERSION\">\n"
-          RELEASE_BLOCK+="$RELEASE_CONTENT"
-          RELEASE_BLOCK+="    </release>"
-          sed -i "/<changelog>/a \\\n$RELEASE_BLOCK" app/src/main/res/raw/changelog.xml
-          echo "Generated release block:"
-          echo -e "$RELEASE_BLOCK"
-
-      - name: Process CHANGELOG.md
+      - name: Process CHANGELOG.md and update changelog.xml
         id: process-changelog
         run: |
-          unreleased_section=$(sed -n '/## \[Unreleased\]/,/^## /p' CHANGELOG.md | sed '1,2d' | sed '$d')
-
-          if [ -z "$unreleased_section" ]; then
-            changelog_escaped="No release notes"
-          else
-            changelog_escaped=$(echo "$unreleased_section" | sed 's/^- /✔ /g' | sed ':a;N;$!ba;s/\n/%0A/g')
-          fi
-
-          echo "changelog_additions=$changelog_escaped" >> $GITHUB_OUTPUT
-
-          today=$(date +'%Y-%m-%d')
-          sed -i "s/## \[Unreleased\]/## [v$VERSION] - $today/" CHANGELOG.md
-          sed -i '/## \[v'$VERSION'\]/i ## [Unreleased]\n\n### Added\n\n### Changed\n\n### Fixed\n' CHANGELOG.md
-
-          REPO_URL="https://github.com/${{ github.repository }}/releases/tag"
-          printf "\n[v$VERSION]: $REPO_URL/$VERSION" >> CHANGELOG.md
+          python3 .github/workflows/scripts/github-release.py "${{ github.repository }}" "CHANGELOG.md" "app/src/main/res/raw/changelog.xml"
 
       - name: Set Up Build Environment
         uses: actions/setup-java@v3
@@ -176,7 +129,7 @@ jobs:
 
       - name: Get local.properties from secrets
         run: echo "${{secrets.LOCAL_PROPERTIES }}" > $GITHUB_WORKSPACE/local.properties
-  
+
       - name: Build APK
         run: ./gradlew app:assembleRelease
 
@@ -197,11 +150,11 @@ jobs:
 
       - name: Commit Version and Changelog Changes
         if: ${{ success() }}
-        uses: EndBug/add-and-commit@v7
+        uses: EndBug/add-and-commit@v9
         with:
           add: "version.properties CHANGELOG.md app/src/main/res/raw/changelog.xml"
-          message: "Bump ${{ env.BUMP_TYPE }} and update changelog for v${{ env.VERSION }}"
-          token: ${{ secrets.ACTIONS_PAT }}
+          message: "Bump ${{ needs.check-changes.outputs.bump_type }} and update changelog for v${{ env.VERSION }}"
+          github_token: ${{ secrets.ACTIONS_PAT }}
 
       - name: Push Changes
         uses: ad-m/github-push-action@master
