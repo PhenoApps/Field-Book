@@ -193,6 +193,13 @@
     <string name="import_runnable_db_failed_to_switch">Database failed to switch fields.</string>
     <string name="import_runnable_create_field_data_failed">Failed to create field data for line %d in file.</string>
     <string name="import_runnable_duplicates_skipped">Duplicate columns found, only first instance will be used.</string>
+
+    <string name="import_error_unique_exists_db">Unique identifier column contains value(s) that already exist in the database</string>
+    <string name="import_runnable_create_field_duplicate_unique_identifier">Unique identifier value %s in column %s is duplicated on row %d.</string>
+    <string name="import_runnable_create_field_special_character_error">Unique identifier value %s in column %s on row %d contains special character "%s" which is not allowed.</string>
+    <string name="import_runnable_create_field_missing_identifier">Missing value for %s %s on row %d.</string>
+    <string name="import_runnable_create_field_fix_file">Please correct the file and try importing it again.</string>
+
     <string name="fields_study_exists_message">This field already exists.</string>
     <string name="fields_study_and_obs_exists_message">This field is already imported at this observation level.</string>
     <string name="act_field_editor_failed_to_read_columns">Field Book could not load the file.</string>
