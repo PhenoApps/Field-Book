@@ -18,4 +18,8 @@ On the collect screen, deleting an observation for a entry will set the seekbar 
 <figure class="image">
   <img class="screenshot" src="../_static/images/traits/formats/joined_boolean_format.png" width="700px"> 
   <figcaption class="screenshot-caption"><i>Boolean trait creation dialog and collect format</i></figcaption> 
+
+</figure><figure class="image">
+  <img class="screenshot" src="../_static/images/traits/formats/collect_boolean_unset.png" width="325px"> 
+  <figcaption class="screenshot-caption"><i>Intitial entry state when boolean default is unset</i></figcaption> 
 </figure>
