@@ -1,6 +1,6 @@
 <link rel="stylesheet" type="text/css" href="_styles/styles.css">
 
-# <img class="icon-title" src="_static/icons/formats/printer.png"> Zebra Label Print Trait
+# <img class="icon-title" src="../_static/icons/formats/printer.png"> Zebra Label Print Trait
 
 ## Overview
 
@@ -14,7 +14,7 @@ Label size, barcode, data, and number of copies are selected and saved as defaul
 Pressing the print button will print the desired number of labels, each containing a barcode and ID for the specific entry along with any additional selected data.
 
 <figure class="image">
-  <img class="screenshot" src="_static/images/traits/formats/zebra_format_joined.png" width="700px"> 
+  <img class="screenshot" src="../_static/images/traits/formats/joined_zebra_label_print_format.png" width="700px"> 
   <figcaption class="screenshot-caption"><i>Zebra Label Print trait creation dialog and collect format</i></figcaption> 
 </figure>
 

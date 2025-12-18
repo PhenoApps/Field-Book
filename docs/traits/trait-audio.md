@@ -1,6 +1,6 @@
 <link rel="stylesheet" type="text/css" href="_styles/styles.css">
 
-# <img class="icon-title" src="_static/icons/formats/microphone.png"> Audio Trait
+# <img class="icon-title" src="../_static/icons/formats/microphone.png"> Audio Trait
 
 The audio trait format is used to record audio.
 It is created with a `name` and optional `details`.
@@ -16,6 +16,6 @@ The resulting files are stored in an audio folder within a field-specific subfol
 An example audio filepath would be `plot_data/FIELD_NAME/audio/AUDIO_FILE_NAME.mp3`.
 
 <figure class="image">
-  <img class="screenshot" src="_static/images/traits/formats/audio_format_joined.png" width="700px"> 
+  <img class="screenshot" src="../_static/images/traits/formats/joined_audio_format.png" width="700px"> 
   <figcaption class="screenshot-caption"><i>Audio trait creation dialog and collect format</i></figcaption> 
 </figure>

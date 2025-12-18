@@ -9,7 +9,7 @@ Each trait layout is optimized to collect a specific data type.
 Traits can be created and managed in the Traits screen.
 
 <figure class="image">
-  <img class="screenshot" src="_static/images/traits/traits_framed.png" width="350px"> 
+  <img class="screenshot" src="_static/images/traits/traits_screen.png" width="350px"> 
   <figcaption class="screenshot-caption"><i>The Traits screen layout with sample data loaded</i></figcaption> 
 </figure>
 
@@ -21,7 +21,7 @@ Each trait has a `format`, a trait `name`, optional `details`, and format-depend
 Trait names must be unique.
 
 <figure class="image">
-  <img class="screenshot" src="_static/images/traits/traits_create_joined.png" width="700px"> 
+  <img class="screenshot" src="_static/images/traits/joined_traits_create.png" width="700px"> 
   <figcaption class="screenshot-caption"><i>Creation of a <a href="#traits/trait-numeric">Numeric</a> trait</i></figcaption> 
 </figure>
 
@@ -50,7 +50,7 @@ Actions that apply to all traits can be initiated from the top toolbar.
 - Select **Import/Export** from the menu to load new traits into Field Book or to export the current traits to a file.
 
 <figure class="image">
-  <img class="screenshot" src="_static/images/traits/traits_menu_framed.png" width="350px"> 
+  <img class="screenshot" src="_static/images/traits/traits_screen_menu.png" width="350px"> 
   <figcaption class="screenshot-caption"><i>All traits mangement menu</i></figcaption> 
 </figure>
 

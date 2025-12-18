@@ -1,6 +1,6 @@
 <link rel="stylesheet" type="text/css" href="_styles/styles.css">
 
-# <img class="icon-title" src="_static/icons/formats/camera.png"> Photo Trait
+# <img class="icon-title" src="../_static/icons/formats/camera.png"> Photo Trait
 
 ## Overview
 
@@ -10,14 +10,14 @@ Field Book allows photos to be captured from different camera sources including 
 ## Creation
 
 <figure class="image">
-  <img class="screenshot" src="_static/images/traits/formats/create_photo_joined.png" width="700px"> 
+  <img class="screenshot" src="../_static/images/traits/formats/joined_create_photo_format.png" width="700px"> 
   <figcaption class="screenshot-caption"><i>Photo trait creation (system camera)</i></figcaption> 
 </figure>
 
 ## Collect layout
 
 <figure class="image">
-  <img class="screenshot" src="_static/images/traits/formats/collect_photo_joined.png" width="700px"> 
+  <img class="screenshot" src="../_static/images/traits/formats/collect_photo_joined.png" width="700px"> 
   <figcaption class="screenshot-caption"><i>Photo trait collection interface and settings (system camera)</i></figcaption> 
 </figure>
 
@@ -28,7 +28,7 @@ If crop region was set to true when creating the trait then the "Set Crop Region
 Press it to take a photo and adjust the crop dimensions that will automatically be applied to captured photos. 
 
 <figure class="image">
-  <img class="screenshot" src="_static/images/traits/formats/crop_region_joined.png" width="1100px"> 
+  <img class="screenshot" src="../_static/images/traits/formats/crop_region_joined.png" width="1100px"> 
   <figcaption class="screenshot-caption"><i>Setting a photo trait's crop region</i></figcaption> 
 </figure>
 
@@ -44,7 +44,7 @@ Capturing photos using external cameras requires initial connection setup using 
 The layout and process of capturing images from external cameras is the same as with the the system camera.
 
 <figure class="image">
-  <img class="screenshot" src="_static/images/traits/formats/collect_gopro_framed.png" width="350px"> 
+  <img class="screenshot" src="../_static/images/traits/formats/collect_gopro_framed.png" width="350px"> 
   <figcaption class="screenshot-caption"><i>Photo trait collection interface (GoPro)</i></figcaption> 
 </figure>
 
