@@ -21,43 +21,58 @@ fun DialogButtonsRow(
     neutralTextColor: Color = AppTheme.colors.text.button,
     onNeutral: (() -> Unit)? = null,
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp),
-        horizontalArrangement = Arrangement.End,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        neutralButtonText?.let { text ->
-            onNeutral?.let {
-                DialogButton(
-                    text = text,
-                    textColor = neutralTextColor,
-                    onClick = it,
-                )
+
+    Column {
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            neutralButtonText?.let { text ->
+                onNeutral?.let {
+                    DialogButton(
+                        text = text,
+                        textColor = neutralTextColor,
+                        onClick = it,
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            positiveButtonText?.let { text ->
+                onPositive?.let {
+                    DialogButton(
+                        text = text,
+                        textColor = positiveTextColor,
+                        onClick = it,
+                    )
+                }
             }
         }
 
-        // to space such that negative and positive are towards the right
-        Spacer(modifier = Modifier.weight(1f))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
 
-        negativeButtonText?.let { text ->
-            onNegative?.let {
-                DialogButton(
-                    text = text,
-                    textColor = negativeTextColor,
-                    onClick = it,
-                )
-            }
-        }
+            Spacer(modifier = Modifier.weight(1f))
 
-        positiveButtonText?.let { text ->
-            onPositive?.let {
-                DialogButton(
-                    text = text,
-                    textColor = positiveTextColor,
-                    onClick = it,
-                )
+            negativeButtonText?.let { text ->
+                onNegative?.let {
+                    DialogButton(
+                        text = text,
+                        textColor = negativeTextColor,
+                        onClick = it,
+                    )
+                }
             }
         }
     }
@@ -66,14 +81,12 @@ fun DialogButtonsRow(
 @Preview(showBackground = true)
 @Composable
 private fun DialogButtonRowPreview() {
-    AppTheme {
-        DialogButtonsRow(
-            positiveButtonText = "Positive",
-            onPositive = { },
-            negativeButtonText = "Negative",
-            onNegative = { },
-            neutralButtonText = "Neutral",
-            onNeutral = { },
-        )
-    }
+    DialogButtonsRow(
+        positiveButtonText = "Positive",
+        onPositive = { },
+        negativeButtonText = "Negative",
+        onNegative = { },
+        neutralButtonText = "Neutral",
+        onNeutral = { },
+    )
 }

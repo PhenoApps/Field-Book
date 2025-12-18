@@ -870,7 +870,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                     handleScannedData(scannedData);
                     break;
                 case AUTH_REQUEST_CODE:
-                    displaySuccessDialog();
+                    //displaySuccessDialog();
                     break;
             }
         }

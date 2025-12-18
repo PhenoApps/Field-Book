@@ -226,7 +226,7 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activities.brapi.BrapiExportActivity"
+            android:name=".activities.brapi.io.sync.BrapiSyncActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"

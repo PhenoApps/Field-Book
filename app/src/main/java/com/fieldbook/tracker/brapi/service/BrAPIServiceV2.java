@@ -229,7 +229,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 @Override
                 public void onSuccess(BrAPIImageListResponse imageResponse, int i, Map<String, List<String>> map) {
                     final BrAPIImage response = imageResponse.getResult().getData().get(0);
-                    function.apply(mapToImage(response));
+                    function.apply(mapToFieldBookImage(image, response));
                 }
 
                 @Override
@@ -266,22 +266,36 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         return request;
     }
 
-    private FieldBookImage mapToImage(BrAPIImage image) {
-        FieldBookImage request = new FieldBookImage();
-        request.setDescription(image.getDescription());
-        request.setDescriptiveOntologyTerms(image.getDescriptiveOntologyTerms());
-        request.setFileName(image.getImageFileName());
-        if (image.getImageFileSize() != null) request.setFileSize(image.getImageFileSize());
-        if (image.getImageHeight() != null) request.setHeight(image.getImageHeight());
-        if (image.getImageWidth() != null) request.setWidth(image.getImageWidth());
-        request.setImageName(image.getImageName());
-        request.setMimeType(image.getMimeType());
-        request.setUnitDbId(image.getObservationUnitDbId());
-        request.setDbId(image.getImageDbId());
+    private FieldBookImage mapToFieldBookImage(FieldBookImage original, BrAPIImage image) {
+        FieldBookImage fbImage = new FieldBookImage();
+        fbImage.setDescription(image.getDescription());
+        fbImage.setDescriptiveOntologyTerms(image.getDescriptiveOntologyTerms());
+        fbImage.setFileName(image.getImageFileName());
+        fbImage.setFile(original.getFile());
+        if (image.getImageFileSize() != null) {
+            fbImage.setFileSize(image.getImageFileSize());
+        } else {
+            fbImage.setFileSize(original.getFileSize());
+        }
+        if (image.getImageHeight() != null){
+            fbImage.setHeight(image.getImageHeight());
+        } else {
+            fbImage.setHeight(original.getHeight());
+        }
+        if (image.getImageWidth() != null) {
+            fbImage.setWidth(image.getImageWidth());
+        } else {
+            fbImage.setWidth(original.getWidth());
+        }
+        fbImage.setImageName(image.getImageName());
+        fbImage.setMimeType(image.getMimeType());
+        fbImage.setFieldBookDbId(original.getFieldBookDbId());
+        fbImage.setUnitDbId(image.getObservationUnitDbId());
+        fbImage.setDbId(image.getImageDbId());
         // TODO fix these
         //request.setLocation(image.getImageLocation());
-        request.setTimestamp(TimeAdapter.convertFrom(image.getImageTimeStamp()));
-        return request;
+        fbImage.setTimestamp(TimeAdapter.convertFrom(image.getImageTimeStamp()));
+        return fbImage;
     }
 
     public void putImageContent(FieldBookImage image,
@@ -293,7 +307,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 @Override
                 public void onSuccess(BrAPIImageSingleResponse imageResponse, int i, Map<String, List<String>> map) {
                     final BrAPIImage response = imageResponse.getResult();
-                    function.apply(mapToImage(response));
+                    function.apply(mapToFieldBookImage(image, response));
                 }
 
                 @Override
@@ -321,7 +335,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 @Override
                 public void onSuccess(BrAPIImageSingleResponse imageResponse, int i, Map<String, List<String>> map) {
                     final BrAPIImage response = imageResponse.getResult();
-                    function.apply(mapToImage(response));
+                    function.apply(mapToFieldBookImage(image, response));
                 }
 
                 @Override
@@ -1047,6 +1061,41 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         }
     }
 
+    public void getObservationsByPage(final String studyDbId, final List<String> observationVariableDbIds,
+                                BrapiPaginationManager paginationManager, final Function<List<Observation>, Void> function,
+                                final Function<Integer, Void> failFunction) {
+
+        try {
+            BrapiV2ApiCallBack<BrAPIObservationListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationListResponse>() {
+                @Override
+                public void onSuccess(BrAPIObservationListResponse response, int i, Map<String, List<String>> map) {
+
+                    if (response.getResult() != null) {
+                        Map<String, String> extVariableDbIdMap = getExtVariableDbIdMapping();
+                        List<BrAPIObservation> brapiObservationList = response.getResult().getData();
+                        final List<Observation> observationList = mapObservations(brapiObservationList, extVariableDbIdMap, observationVariableDbIds);
+                        function.apply(observationList);
+                    }
+                }
+
+                @Override
+                public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
+                    failFunction.apply(error.getCode());
+                    Log.e("BrAPIServiceV2", "API Exception", error);
+                }
+            };
+
+            ObservationQueryParams queryParams = new ObservationQueryParams();
+            queryParams.studyDbId(studyDbId).page(paginationManager.getPage()).pageSize(paginationManager.getPageSize());
+
+            observationsApi.observationsGetAsync(queryParams, callback);
+
+        } catch (ApiException e) {
+            Log.e("error-go", e.toString());
+            failFunction.apply(e.getCode());
+        }
+    }
+
     private Map<String, String> getExtVariableDbIdMapping() {
         List<TraitObject> traits = ObservationVariableDao.Companion.getAllTraitObjects();
         Map<String, String> externalIdToInternalMap = new HashMap<>();
@@ -1250,7 +1299,6 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     private BrAPIObservation convertToBrAPIObservation(Observation observation) {
         BrAPIObservation newObservation = new BrAPIObservation();
         String collectorName = observation.getCollector();
-
         newObservation.setCollector(collectorName != null ? collectorName.trim() : "");
         newObservation.setObservationDbId(observation.getDbId());
         newObservation.setObservationTimeStamp(TimeAdapter.convertFrom(observation.getTimestamp()));
@@ -1380,11 +1428,9 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
             // Need to set where we are getting the data from so we don't push to a different
             // external link than where the trait was retrieved from.
-            if (BrAPIService.getHostUrl(context) != null) {
-                String hostUrl = BrAPIService.getHostUrl(context);
-                if (hostUrl != null) {
-                    trait.setTraitDataSource(hostUrl);
-                }
+            String hostUrl = BrAPIService.getHostUrl(context);
+            if (hostUrl != null) {
+                trait.setTraitDataSource(hostUrl);
             } else {
                 // return null to indicate we couldn't process the traits
                 return null;
