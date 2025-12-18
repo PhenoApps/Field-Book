@@ -7,6 +7,13 @@
 The GNSS trait format is used to acquire high-precision geocoordinates from an external, Bluetooth-connected device.
 While other traits only capture phenotypic data, the GNSS trait is intended to be used to also capture entry metadata that can be used in conjunction with the <img class="icon" src="_static/icons/settings/main/map-search.png">[Geonav](geonav.md) feature to automatically navigate through the field.
 
+### Parameters
+- `Name` assign a value for trait name, alias, and assigns synonyms list to hold the value.
+- `Details` text is displayed under the trait name on the Collect screen.
+- `Automatically Switch to Next Plot` when enabled will immediately move to next entry when the user records an observation for an entry in the Collect screen.
+- `Repeated Measures` turns on repeated measure for the trait when enabled.
+- `Resource File` opens the resources folder and can be used to set a image for the trait that can be reference later in the Collect screen.
+
 <figure class="image">
   <img class="screenshot" src="../_static/images/traits/formats/joined_gnss_format.png" width="700px"> 
   <figcaption class="screenshot-caption"><i>GNSS trait creation dialog and collect format</i></figcaption> 

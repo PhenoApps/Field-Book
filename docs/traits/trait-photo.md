@@ -1,4 +1,4 @@
-<link rel="stylesheet" type="text/css" href="_styles/styles.css">
+<link rel="stylesheet" type="text/css" href="../_styles/styles.css">
 
 # <img class="icon-title" src="../_static/icons/formats/camera.png"> Photo Trait
 
@@ -8,6 +8,13 @@ The photo trait formats are used to capture images.
 Field Book allows photos to be captured from different camera sources including the device camera, <img class="icon" src="_static/icons/formats/webcam.png"> USB cameras, <img class="icon" src="_static/icons/formats/camera-gopro.png"> GoPro cameras, and <img class="icon" src="_static/icons/formats/shutter.png"> [compatible](https://developercommunity.usa.canon.com/s/article/CCAPI-Supported-Cameras) Canon cameras.
 
 ## Creation
+
+#### Parameters
+- `Name` assign a value for trait name, alias, and assigns synonyms list to hold the value.
+- `Details` text is displayed under the trait name on the Collect screen.
+- `Crop` when enabled, define a crop region through the <img class="icon" src="_static/icons/formats/cog.png"> in Collect screen or when capturing the first picture, and apply to all future pictures for the trait.
+- `Automatically Switch to Next Plot` when enabled will immediately move to next entry when the user records an observation for an entry in the Collect screen.
+- `Resource File` opens the resources folder and can be used to set a image for the trait that can be reference later in the Collect screen.
 
 <figure class="image">
   <img class="screenshot" src="../_static/images/traits/formats/joined_create_photo_format.png" width="700px"> 

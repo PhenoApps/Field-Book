@@ -1,10 +1,15 @@
-<link rel="stylesheet" type="text/css" href="_styles/styles.css">
+<link rel="stylesheet" type="text/css" href="../_styles/styles.css">
 
 # <img class="icon-title" src="../_static/icons/formats/bug.png"> Disease Rating Trait
 
 The disease rating trait format is used for collecting ratings of both disease incidence and severity.
-It is created with a trait `name` and optional `details`.
-Details text is displayed under the trait name on the Collect screen.
+
+### Parameters
+- `Name` assign a value for trait name, alias, and assigns synonyms list to hold the value.
+- `Details` text is displayed under the trait name on the Collect screen.
+- `Repeated Measures` turns on repeated measure for the trait when enabled.
+- `Resource File` opens the resources folder and can be used to set a image for the trait that can be reference later in the Collect screen.
+
 The incidence scale can be adjusted by editing the `disease_severity.txt` file in the `traits` folder.
 
 On the collect screen, buttons showing numbers between **0-100** in 5 digit increments are used to record incidence, and **R**, **M**, and **S** are used to record severity.
