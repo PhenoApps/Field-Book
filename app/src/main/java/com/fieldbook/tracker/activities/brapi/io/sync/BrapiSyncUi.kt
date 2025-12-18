@@ -294,29 +294,24 @@ fun BrapiSyncScreen(
                         }
 
                         if (showUploadPrompt) {
-                            androidx.compose.material3.AlertDialog(
-                                onDismissRequest = { showUploadPrompt = false },
-                                containerColor = Color.White,
-                                title = { Text(stringResource(R.string.brapi_download_button)) },
-                                text = {
+                            AppAlertDialog(
+                                positiveButtonText = stringResource(R.string.upload_first),
+                                negativeButtonText = stringResource(R.string.cancel),
+                                neutralButtonText = stringResource(R.string.download_anyway),
+                                onNeutral = {
+                                    showUploadPrompt = false
+                                    onDownloadClick()
+                                },
+                                onNegative = { showUploadPrompt = false },
+                                title = stringResource(R.string.brapi_download_button),
+                                content = {
                                     Text(
                                         stringResource(R.string.there_are_unuploaded_observations_or_images_do_you_want_to_upload_them_before_downloading)
                                     )
                                 },
-                                confirmButton = {
-                                    TextButton(onClick = {
-                                        showUploadPrompt = false
-                                        onExportClick()
-                                    }) { Text(stringResource(R.string.upload_first)) }
-                                },
-                                dismissButton = {
-                                    Row {
-                                        TextButton(onClick = {
-                                            showUploadPrompt = false
-                                            onDownloadClick()
-                                        }) { Text(stringResource(R.string.download_anyway)) }
-                                        TextButton(onClick = { showUploadPrompt = false }) { Text(stringResource(R.string.dialog_cancel)) }
-                                    }
+                                onPositive = {
+                                    showUploadPrompt = false
+                                    onExportClick()
                                 }
                             )
                         }
