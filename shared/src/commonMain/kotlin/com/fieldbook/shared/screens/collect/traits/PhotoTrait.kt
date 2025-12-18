@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,6 +25,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.camera_24px
+import com.fieldbook.shared.preferences.GeneralKeys
+import com.fieldbook.shared.theme.MainFloatingActionButtonShape
 import com.kashif.cameraK.controller.CameraController
 import com.kashif.cameraK.enums.CameraLens
 import com.kashif.cameraK.enums.Directory
@@ -33,11 +34,12 @@ import com.kashif.cameraK.enums.FlashMode
 import com.kashif.cameraK.enums.ImageFormat
 import com.kashif.cameraK.result.ImageCaptureResult
 import com.kashif.cameraK.ui.CameraPreview
-import com.kashif.imagesaverplugin.ImageSaverConfig
-import com.kashif.imagesaverplugin.rememberImageSaverPlugin
+import com.russhwolf.settings.Settings
+import io.github.vinceglb.filekit.core.FileKit
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 
@@ -48,29 +50,21 @@ fun PhotoTrait(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // Maintain a local list of photo URIs
+    // Maintain a local list of photo URIs // TODO onValueChange
     val photoUris = remember {
-        mutableStateOf<List<String>>(
-            if (value.isNotBlank()) value.split(",").filter { it.isNotBlank() } else emptyList()
-        )
+        // TODO initialize from value
+        mutableStateOf(emptyList<String>())
     }
 
-    // Create a state to hold the CameraController
     var cameraController by remember { mutableStateOf<CameraController?>(null) }
-
-    // Create a CoroutineScope to call the suspend function
     val scope = rememberCoroutineScope()
 
-    val imageSaverPlugin = rememberImageSaverPlugin(
-        config = ImageSaverConfig(
-            isAutoSave = false,
-            prefix = "MyApp",
-            directory = Directory.PICTURES,
-            customFolderName = "MyAppPhotos"  // Android only
-        )
-    )
+    // Retrieve default storage directory from preferences
+    val preferences = remember { Settings() }
+    // TODO
+    val defaultDirectory =
+        preferences.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY.key, "")
 
-    // Keep onValueChange referenced
     LaunchedEffect(photoUris.value) {
         onValueChange(photoUris.value.joinToString(","))
     }
@@ -80,96 +74,87 @@ fun PhotoTrait(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Camera preview
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(200.dp)
-                .background(Color.LightGray),
-            contentAlignment = Alignment.Center
-        ) {
-            CameraPreview(
-                modifier = Modifier.fillMaxWidth().height(200.dp),
-                cameraConfiguration = {
-                    setCameraLens(CameraLens.BACK)
-                    setFlashMode(FlashMode.OFF)
-                    setImageFormat(ImageFormat.JPEG)
-                    setDirectory(Directory.PICTURES)
-                },
-                onCameraControllerReady = { controller ->
-                    cameraController = controller
-                }
-            )
-        }
-
-        // Carousel for images
+        // Carousel for images and camera preview
         LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(100.dp)
                 .background(Color.LightGray)
         ) {
+            val height = 80.dp
+            val width = 80.dp
+
+            // Camera preview as first item
+            item {
+                Box(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .size(width, height),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CameraPreview(
+                        modifier = Modifier.fillMaxWidth().height(height),
+                        cameraConfiguration = {
+                            setCameraLens(CameraLens.BACK)
+                            setFlashMode(FlashMode.OFF)
+                            setImageFormat(ImageFormat.JPEG)
+                            setDirectory(Directory.PICTURES)
+                        },
+                        onCameraControllerReady = { controller ->
+                            cameraController = controller
+                        }
+                    )
+                }
+            }
+            // Images
             if (photoUris.value.isNotEmpty()) {
                 items(photoUris.value.size) { index ->
                     val rawUri = photoUris.value[index]
-
-                    // Ensure URI works with Kamel (needs file:// for local paths)
                     val displayUri = if (rawUri.startsWith("http") || rawUri.startsWith("file")) {
                         rawUri
                     } else {
                         "file://$rawUri"
                     }
-
                     Box(
                         modifier = Modifier
                             .padding(8.dp)
-                            .size(80.dp, 80.dp),
+                            .size(width, height),
                         contentAlignment = Alignment.Center
                     ) {
                         KamelImage(
                             resource = asyncPainterResource(displayUri),
                             contentDescription = "Photo $index",
-                            modifier = Modifier.fillMaxWidth().height(80.dp),
+                            modifier = Modifier.fillMaxWidth().height(height),
                             contentScale = ContentScale.Crop,
-                            onLoading = { Text("...") },
-                            onFailure = { Text("X") }
                         )
-                    }
-                }
-            } else {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(100.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("No Photos Yet", color = Color.DarkGray)
                     }
                 }
             }
         }
 
-        // Capture button
         FloatingActionButton(
             onClick = {
-                // Launch coroutine to handle the suspend function
                 scope.launch {
                     cameraController?.let { controller ->
-                        // Call takePicture and switch on the result
                         when (val result = controller.takePicture()) {
                             is ImageCaptureResult.Success -> {
-                                // Add the new path to the list
-                                // Handle the captured image
-//                                val bitmap = result.byteArray.decodeToImageBitmap()
+                                val fileName = "Photo_${Clock.System.now().toEpochMilliseconds()}"
 
-                                // Manually save the image if auto-save is disabled
-                                if (!imageSaverPlugin.config.isAutoSave) {
-                                    imageSaverPlugin.saveImage(
-                                        byteArray = result.byteArray,
-                                        // FIXME
-//                                        imageName = "Photo_${System.currentTimeMillis()}"
+                                // TODO autosave (PlatformFile(directory, fileName) not available in filekit 0.8.8)
+                                val savedFile =
+                                    FileKit.saveFile(
+                                        bytes = result.byteArray,
+                                        baseName = fileName,
+                                        extension = "jpg",
                                     )
+
+                                savedFile?.let { file ->
+                                    val path = file.path
+                                    if (path != null) {
+                                        val currentList = photoUris.value.toMutableList()
+                                        currentList.add(path)
+                                        photoUris.value = currentList
+                                    }
                                 }
                             }
 
@@ -183,6 +168,7 @@ fun PhotoTrait(
             modifier = Modifier
                 .padding(top = 24.dp)
                 .size(64.dp),
+            shape = MainFloatingActionButtonShape,
         ) {
             Icon(
                 painter = painterResource(Res.drawable.camera_24px),
@@ -191,4 +177,3 @@ fun PhotoTrait(
         }
     }
 }
-

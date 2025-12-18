@@ -2,15 +2,14 @@ package com.fieldbook.shared.theme
 
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.material3.Shapes
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import kotlin.math.roundToInt
 
 private val MainLightColors = lightColorScheme(
     primary = Color(0xFF8BC34A),
@@ -33,6 +32,8 @@ private val MainShapes = Shapes(
     large = RoundedCornerShape(0.dp)
 )
 
+val MainFloatingActionButtonShape = RoundedCornerShape(50)
+
 fun Modifier.numericButtonDefaults() =
     this.padding(4.dp).fillMaxHeight()
 
@@ -54,4 +55,3 @@ enum class AppColors(val argb: Int) {
 
     val color: Color get() = argbIntToColor(argb)
 }
-

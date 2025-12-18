@@ -63,7 +63,6 @@ kotlin {
                 implementation(compose.components.resources)
                 implementation("io.github.kashif-mehmood-km:camerak:0.0.6")
                 implementation("io.github.kashif-mehmood-km:qr_scanner_plugin:0.0.6")
-                implementation("io.github.kashif-mehmood-km:image_saver_plugin:0.0.6")
                 implementation(libs.multiplatform.settings)
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.lifecycle.viewmodel.compose)
@@ -73,6 +72,8 @@ kotlin {
                 implementation(libs.filekit.compose)
                 implementation(libs.kotlinx.serialization.json)
                 implementation(libs.kamel.image)
+                implementation(libs.ktor.client)
+                implementation(libs.ktor.client.cio)
             }
         }
 

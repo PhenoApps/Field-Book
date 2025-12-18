@@ -7,20 +7,24 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import com.fieldbook.shared.KmpHostScreenType
-import com.fieldbook.shared.screens.collect.CollectScreen
 import com.fieldbook.shared.screens.ConfigScreen
-import com.fieldbook.shared.screens.ScannerScreen
 import com.fieldbook.shared.screens.FieldEditorScreen
+import com.fieldbook.shared.screens.ScannerScreen
+import com.fieldbook.shared.screens.collect.CollectScreen
 import com.fieldbook.shared.screens.preferences.PreferencesScreen
-import com.fieldbook.shared.screens.preferences.StoragePreferencesScreen
 import com.fieldbook.shared.screens.preferences.StorageDefinerScreen
+import com.fieldbook.shared.screens.preferences.StoragePreferencesScreen
 import com.fieldbook.shared.sqldelight.DriverFactory
+import io.github.vinceglb.filekit.core.FileKit
 
 class KmpHostActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        FileKit.init(this)
+
         val screen = intent.getStringExtra(EXTRA_SCREEN)
         val hostScreenType = KmpHostScreenType.fromValue(screen ?: KmpHostScreenType.CONFIG.value)
+
         setContent {
             var currentScreen = remember { mutableStateOf(hostScreenType) }
             when (currentScreen.value) {
