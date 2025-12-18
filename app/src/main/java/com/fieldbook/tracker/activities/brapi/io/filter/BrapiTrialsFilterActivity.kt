@@ -39,14 +39,19 @@ open class BrapiTrialsFilterActivity(override val titleResId: Int = R.string.bra
 
     override fun BrapiCacheModel.mapToUiModel() = studies.mapNotNull { model ->
 
-        if (model.trialDbId != null && model.trialName != null) {
-            CheckboxListAdapter.Model(
-                checked = false,
-                id = model.trialDbId!!,
-                label = model.trialName!!,
-                subLabel = model.study.locationName ?: ""
-            )
-        } else {
+        try {
+            if (model.trialDbId != null && model.trialName != null) {
+                CheckboxListAdapter.Model(
+                    checked = false,
+                    id = model.trialDbId!!,
+                    label = model.trialName!!,
+                    subLabel = model.study.locationName ?: ""
+                )
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
             null
         }
     }
