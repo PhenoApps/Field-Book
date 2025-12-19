@@ -169,11 +169,10 @@ public class ConfigActivity extends ThemedActivity {
 
         setupBackCallback();
 
-        parseIntentExtras();
+        parseIntentExtras(getIntent());
     }
 
-    private void parseIntentExtras() {
-        Intent sentIntent = getIntent();
+    private void parseIntentExtras(Intent sentIntent) {
         if (sentIntent != null && sentIntent.getExtras() != null) {
             int loadFieldId = sentIntent.getExtras().getInt(LOAD_FIELD_ID, -1);
             if (loadFieldId != -1) {
@@ -397,49 +396,6 @@ public class ConfigActivity extends ThemedActivity {
         }
     }
 
-    @Nullable
-    private FieldObject searchStudiesForBarcode(String barcode) {
-
-        ArrayList<FieldObject> fields = database.getAllFieldObjects();
-
-        // first, search to try and match study alias
-        for (FieldObject f : fields) {
-
-            if (f != null && f.getAlias() != null && f.getAlias().equals(barcode)) {
-
-                return f;
-
-            }
-        }
-
-        // second, if field is not found search for study name
-        for (FieldObject f : fields) {
-
-            if (f != null && f.getName() != null && f.getName().equals(barcode)) {
-
-                return f;
-
-            }
-        }
-
-        return null;
-    }
-
-    @Nullable
-    private ObservationUnitModel searchPlotsForBarcode(String barcode) {
-
-        // search for barcode in database
-        ObservationUnitModel[] models = database.getAllObservationUnits();
-        for (ObservationUnitModel m : models) {
-            if (m.getObservation_unit_db_id().equals(barcode)) {
-
-                return m;
-            }
-        }
-
-        return null;
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -504,13 +460,9 @@ public class ConfigActivity extends ThemedActivity {
                     String scannedBarcode = data.getStringExtra(CameraActivity.EXTRA_BARCODE);
 
                     try {
-
                         fuzzySearch.fuzzyBarcodeSearch(scannedBarcode);
-
                     } catch (Exception e) {
-
                         Log.e(TAG, "Fuzzy search error", e);
-
                         Utils.makeToast(this, getString(R.string.act_config_fuzzy_search_error, scannedBarcode));
 
                         soundHelper.playError();
@@ -523,7 +475,7 @@ public class ConfigActivity extends ThemedActivity {
     @Override
     protected void onNewIntent(@NonNull Intent intent) {
         super.onNewIntent(intent);
-        parseIntentExtras();
+        parseIntentExtras(intent);
     }
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_TRAIT_DATA)
@@ -638,21 +590,6 @@ public class ConfigActivity extends ThemedActivity {
         };
 
         getOnBackPressedDispatcher().addCallback(this, doubleBackCallback);
-    }
-
-    /**
-     * Calls database switch field on the given studyId.
-     *
-     * @param studyId the study id to switch to
-     */
-    private void switchField(int studyId) {
-
-        if (fieldSwitcher == null) {
-            fieldSwitcher = new FieldSwitchImpl(this);
-        }
-
-        fieldSwitcher.switchField(studyId);
-
     }
 
     private void setupConfigWindowInsets() {
