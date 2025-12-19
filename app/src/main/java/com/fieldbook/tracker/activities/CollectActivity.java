@@ -408,8 +408,6 @@ public class CollectActivity extends ThemedActivity
 
         loadScreen();
 
-        checkForInitialBarcodeSearch();
-
         verifyPersonHelper.checkLastOpened();
 
         SpectralDao spectralDao = new SpectralDao(database);
@@ -469,67 +467,6 @@ public class CollectActivity extends ThemedActivity
 
             e.printStackTrace();
 
-        }
-    }
-
-    /**
-     * Checks if the user has clicked the barcode button on ConfigActivity,
-     * this will search for obs unit and load neccessary field file
-     */
-    private void checkForInitialBarcodeSearch() {
-
-        try {
-
-            Intent i = getIntent();
-            if (i != null) {
-
-                //get barcode to search for which will be an obs. unit id
-                String barcode = i.getStringExtra("barcode");
-
-                if (barcode != null) {
-
-                    Log.d(TAG, "Searching initial barcode: " + barcode);
-
-                    ObservationUnitModel model = database.getObservationUnitById(barcode);
-
-                    if (model != null) {
-
-                        try {
-
-                            //if barcode matches an obs. unit id
-                            if (model.getObservation_unit_db_id().equals(barcode)) {
-
-                                inputPlotId = barcode;
-
-                                FieldObject fo = database.getFieldObject(model.getStudy_id());
-
-                                if (fo != null && fo.getName() != null) {
-
-                                    switchField(model.getStudy_id(), barcode);
-
-                                }
-                            }
-
-                        } catch (Exception e) {
-
-                            Log.d(TAG, "Failed while searching for: " + barcode);
-
-                            e.printStackTrace();
-                        }
-
-                    } else {
-
-                        Utils.makeToast(getApplicationContext(), getString(R.string.act_collect_plot_with_code_not_found));
-
-                    }
-                }
-            }
-
-        } catch (Exception e) {
-
-            Log.d(TAG, "Something failed while searching. ");
-
-            e.printStackTrace();
         }
     }
 
@@ -3446,6 +3383,7 @@ public class CollectActivity extends ThemedActivity
     public void onMediaCancelFromDialog(String mediaPath) {
         try { new File(mediaPath).delete(); } catch (Exception ignore) {}
     }
+}
 
     private void performTraitDeleteAfterMediaCheck() {
         boolean status = database.isBrapiSynced(getStudyId(), getObservationUnit(), getTraitDbId(), getRep());
