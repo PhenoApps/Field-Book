@@ -8,6 +8,14 @@ The scale trait allows the user to connect to Bluetooth scales and collect weigh
 
 ## Creation
 
+#### Parameters
+- `Name` assign a value for trait name, alias, and assigns synonyms list to hold the value.
+- `Default` automatically assigns a specific value for the observation when visiting an entry having no observation recorded previously.
+- `Details` text is displayed under the trait name on the Collect screen.
+- `Automatically Switch to Next Plot` when enabled will immediately move to next entry when the user records an observation for an entry in the Collect screen.
+- `Repeated Measures` turns on repeated measure for the trait when enabled.
+- `Resource File` opens the resources folder and can be used to set a image for the trait that can be reference later in the Collect screen.
+
 <figure class="image" style="text-align: center">
     <p>
       <img src="../_static/images/traits/formats/scale/create_scale.png" width="250" />

@@ -1,6 +1,6 @@
-<link rel="stylesheet" type="text/css" href="_styles/styles.css">
+<link rel="stylesheet" type="text/css" href="../_styles/styles.css">
 
-# <img class="icon-title" src="_static/icons/formats/camera.png"> Photo Trait
+# <img class="icon-title" src="../_static/icons/formats/camera.png"> Photo Trait
 
 ## Overview
 
@@ -9,15 +9,22 @@ Field Book allows photos to be captured from different camera sources including 
 
 ## Creation
 
+#### Parameters
+- `Name` assign a value for trait name, alias, and assigns synonyms list to hold the value.
+- `Details` text is displayed under the trait name on the Collect screen.
+- `Crop` when enabled, define a crop region through the <img class="icon" src="_static/icons/formats/cog.png"> in Collect screen or when capturing the first picture, and apply to all future pictures for the trait.
+- `Automatically Switch to Next Plot` when enabled will immediately move to next entry when the user records an observation for an entry in the Collect screen.
+- `Resource File` opens the resources folder and can be used to set a image for the trait that can be reference later in the Collect screen.
+
 <figure class="image">
-  <img class="screenshot" src="_static/images/traits/formats/create_photo_joined.png" width="700px"> 
+  <img class="screenshot" src="../_static/images/traits/formats/joined_create_photo_format.png" width="700px"> 
   <figcaption class="screenshot-caption"><i>Photo trait creation (system camera)</i></figcaption> 
 </figure>
 
 ## Collect layout
 
 <figure class="image">
-  <img class="screenshot" src="_static/images/traits/formats/collect_photo_joined.png" width="700px"> 
+  <img class="screenshot" src="../_static/images/traits/formats/collect_photo_joined.png" width="700px"> 
   <figcaption class="screenshot-caption"><i>Photo trait collection interface and settings (system camera)</i></figcaption> 
 </figure>
 
@@ -28,7 +35,7 @@ If crop region was set to true when creating the trait then the "Set Crop Region
 Press it to take a photo and adjust the crop dimensions that will automatically be applied to captured photos. 
 
 <figure class="image">
-  <img class="screenshot" src="_static/images/traits/formats/crop_region_joined.png" width="1100px"> 
+  <img class="screenshot" src="../_static/images/traits/formats/crop_region_joined.png" width="1100px"> 
   <figcaption class="screenshot-caption"><i>Setting a photo trait's crop region</i></figcaption> 
 </figure>
 
@@ -44,7 +51,7 @@ Capturing photos using external cameras requires initial connection setup using 
 The layout and process of capturing images from external cameras is the same as with the the system camera.
 
 <figure class="image">
-  <img class="screenshot" src="_static/images/traits/formats/collect_gopro_framed.png" width="350px"> 
+  <img class="screenshot" src="../_static/images/traits/formats/collect_gopro_framed.png" width="350px"> 
   <figcaption class="screenshot-caption"><i>Photo trait collection interface (GoPro)</i></figcaption> 
 </figure>
 

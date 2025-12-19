@@ -7,7 +7,6 @@
   * [Audio](traits/trait-audio.md)
   * [Boolean](traits/trait-boolean.md)
   * [Categorical](traits/trait-categorical.md)
-  * [Multicat](traits/trait-multicat.md)
   * [Counter](traits/trait-counter.md)
   * [Date](traits/trait-date.md)
   * [Location](traits/trait-location.md)

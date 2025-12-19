@@ -13,12 +13,16 @@ Spectral data can be collected in two ways depending on the sensor:
 
 ## Creation
 
+#### Parameters
+- `Name` assign a value for trait name, alias, and assigns synonyms list to hold the value.
+- `Details` text is displayed under the trait name on the Collect screen.
+- `Automatically Switch to Next Plot` when enabled will immediately move to next entry when the user records an observation for an entry in the Collect screen.
+- `Repeated Measures` turns on repeated measure for the trait when enabled.
+- `Resource File` opens the resources folder and can be used to set a image for the trait that can be reference later in the Collect screen.
+
 <figure class="image" style="text-align: center">
-    <p>
-      <img src="../_static/images/traits/formats/spectral/trait_creator_dialog.png" width="250" />
-      <img src="../_static/images/traits/formats/spectral/trait_creator_dialog_spectral_sub_layout.png" width="250" />
-      <img src="../_static/images/traits/formats/spectral/trait_creator_dialog_spectral_options.png" width="250" />
-    </p>
+  <img src="../../_static/images/traits/formats/spectral/joined_spectral_create.png" width="1100px" />
+  <figcaption class="screenshot-caption"><i>Spectral trait creation dialog</i></figcaption> 
 </figure>
 
 ## Connect
