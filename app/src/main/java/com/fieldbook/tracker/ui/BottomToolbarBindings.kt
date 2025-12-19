@@ -29,6 +29,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.layout.offset
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.text.style.TextAlign
 
 enum class MediaOption {
@@ -53,9 +55,11 @@ fun BottomToolbar(
     listener: BottomToolbarListener? = null,
     isAudioRecording: Boolean = false,
     isMediaEnabled: Boolean = true,
-    mediaCount: Int = 0 // new param: number of media items captured (0 = none)
+    mediaCount: Int = 0,
+    deleteValueButtonEnabled: Boolean = true,
 ) {
     val bg = colorResource(id = R.color.main_primary)
+
     Surface(
         color = bg,
         tonalElevation = 0.dp,
@@ -134,6 +138,7 @@ fun BottomToolbar(
                 // Delete button: support click and long-press (long triggers onDeleteLong)
                 IconButton(
                     onClick = { listener?.onDelete() },
+                    enabled = deleteValueButtonEnabled,
                     modifier = Modifier.pointerInput(Unit) {
                         detectTapGestures(
                             onLongPress = {
@@ -149,38 +154,17 @@ fun BottomToolbar(
     }
 }
 
-// Java-friendly binding function with recording state
-fun bindBottomToolbar(
-    composeView: androidx.compose.ui.platform.ComposeView,
-    listener: BottomToolbarListener,
-    isAudioRecording: Boolean = false
-) {
-    composeView.setContent {
-        MaterialTheme {
-            BottomToolbar(listener, isAudioRecording, true, 0)
-        }
-    }
-}
-
-// Backwards-compatible overload
-fun bindBottomToolbar(
-    composeView: androidx.compose.ui.platform.ComposeView,
-    listener: BottomToolbarListener
-) {
-    bindBottomToolbar(composeView, listener, false)
-}
-
-// New overload that accepts media enabled flag and mediaCount
 fun bindBottomToolbar(
     composeView: androidx.compose.ui.platform.ComposeView,
     listener: BottomToolbarListener,
     isAudioRecording: Boolean = false,
     isMediaEnabled: Boolean = true,
-    mediaCount: Int = 0
+    mediaCount: Int = 0,
+    deleteValueButtonEnabled: Boolean = true,
 ) {
     composeView.setContent {
         MaterialTheme {
-            BottomToolbar(listener, isAudioRecording, isMediaEnabled, mediaCount)
+            BottomToolbar(listener, isAudioRecording, isMediaEnabled, mediaCount, deleteValueButtonEnabled)
         }
     }
 }

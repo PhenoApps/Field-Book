@@ -377,17 +377,9 @@ public class AudioTraitLayout extends BaseTraitLayout {
         }
 
         private void toggleNavigationButtons(boolean enabled) {
-            ImageButton deleteValue = ((CollectActivity) getContext()).getDeleteValue();
-            ImageView traitLeft = ((CollectActivity) getContext()).getTraitLeft();
-            ImageView traitRight = ((CollectActivity) getContext()).getTraitRight();
-            ImageView rangeLeft = ((CollectActivity) getContext()).getRangeLeft();
-            ImageView rangeRight = ((CollectActivity) getContext()).getRangeRight();
 
-            rangeLeft.setEnabled(enabled);
-            rangeRight.setEnabled(enabled);
-            traitLeft.setEnabled(enabled);
-            traitRight.setEnabled(enabled);
-            deleteValue.setEnabled(enabled);
+            ((CollectActivity) getContext()).toggleUiFeatures(enabled, enabled);
+
         }
     }
 }

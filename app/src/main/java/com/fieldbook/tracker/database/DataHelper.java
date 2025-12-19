@@ -354,7 +354,7 @@ public class DataHelper {
 
         open();
 
-        return ObservationDao.Companion.insertObservation(plotId, traitDbId, value, person, location, notes, studyId, observationDbId, timestamp, lastSyncedTime, rep);
+        return ObservationDao.Companion.insertObservation(plotId, traitDbId, value, person, location, notes, studyId, observationDbId, timestamp, lastSyncedTime, rep, null, null, null);
     }
 
     // New overload to accept optional media URIs. Kept for Java callers that may supply media URIs.
