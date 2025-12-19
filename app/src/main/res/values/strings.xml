@@ -495,7 +495,7 @@
     <string name="trait_visible">Visible</string>
     <string name="trait_hidden">Hidden</string>
     <string name="trait_options_title">Options</string>
-    <string name="trait_swap_name">Swap name field</string>
+    <string name="trait_new_trait_name">Copied Trait Name</string>
     <string name="trait_observation_data">Data</string>
     <string name="trait_observation_count">%d observations</string>
     <string name="trait_not_chartable">This trait format cannot be visualized in a chart</string>
