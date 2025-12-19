@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.utilities;
+package com.fieldbook.tracker.utilities
 
 import android.app.Activity
 import android.content.Context
@@ -9,18 +9,16 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.activities.ConfigActivity
 import com.fieldbook.tracker.database.DataHelper
-import com.fieldbook.tracker.database.dao.StudyDao.Companion.switchField
 import com.fieldbook.tracker.database.models.ObservationUnitModel
-import com.fieldbook.tracker.interfaces.FieldSwitcher
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import dagger.hilt.android.qualifiers.ActivityContext
 import javax.inject.Inject
 
-/**
- * TODO integrate this into the fuzzy search areas
- */
-class FuzzySearch @Inject constructor(@ActivityContext private val context: Context) {
+data class BarcodeMatch(val field: FieldObject?, val plotId: String?)
+
+
+class FuzzySearch @Inject constructor(@param:ActivityContext private val context: Context) {
 
     @Inject
     lateinit var database: DataHelper
@@ -96,6 +94,30 @@ class FuzzySearch @Inject constructor(@ActivityContext private val context: Cont
 
             resolveFuzzySearchResult(f, null)
         }
+    }
+
+    fun findBarcodeMatch(barcode: String?): BarcodeMatch {
+
+        try {
+            val fields: ArrayList<FieldObject?> = database.getAllFieldObjects()
+            for (field in fields) {
+                if (field == null) continue
+                val units = database.getObservationUnitsBySearchAttribute(field.studyId, barcode)
+                if (units != null && units.isNotEmpty()) {
+                    return BarcodeMatch(field, units[0].observation_unit_db_id)
+                }
+            }
+        } catch (_: Exception) {}
+
+        val m = searchPlotsForBarcode(barcode)
+        if (m != null && m.study_id != -1) {
+            val study: FieldObject? = database.getFieldObject(m.study_id)
+            if (study != null) {
+                return BarcodeMatch(study, m.observation_unit_db_id)
+            }
+        }
+
+        return BarcodeMatch(null, null)
     }
 
     private fun resolveFuzzySearchResult(f: FieldObject, plotId: String?) {

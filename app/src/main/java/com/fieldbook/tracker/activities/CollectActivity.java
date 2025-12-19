@@ -190,7 +190,6 @@ public class CollectActivity extends ThemedActivity
     // pending media values used when we start a crop activity and need to show the confirm dialog
     private String pendingMediaType = null;
     private String pendingMediaPath = null;
-    public static final int BARCODE_SEARCH_CODE = 98;
 
     private final HandlerThread gnssRawLogHandlerThread = new HandlerThread("log");
 
@@ -410,8 +409,6 @@ public class CollectActivity extends ThemedActivity
 
         loadScreen();
 
-        checkForInitialBarcodeSearch();
-
         verifyPersonHelper.checkLastOpened();
 
         SpectralDao spectralDao = new SpectralDao(database);
@@ -471,67 +468,6 @@ public class CollectActivity extends ThemedActivity
 
             e.printStackTrace();
 
-        }
-    }
-
-    /**
-     * Checks if the user has clicked the barcode button on ConfigActivity,
-     * this will search for obs. unit and load neccessary field file
-     */
-    private void checkForInitialBarcodeSearch() {
-
-        try {
-
-            Intent i = getIntent();
-            if (i != null) {
-
-                //get barcode to search for which will be an obs. unit id
-                String barcode = i.getStringExtra("barcode");
-
-                if (barcode != null) {
-
-                    Log.d(TAG, "Searching initial barcode: " + barcode);
-
-                    ObservationUnitModel model = database.getObservationUnitById(barcode);
-
-                    if (model != null) {
-
-                        try {
-
-                            //if barcode matches an obs. unit id
-                            if (model.getObservation_unit_db_id().equals(barcode)) {
-
-                                inputPlotId = barcode;
-
-                                FieldObject fo = database.getFieldObject(model.getStudy_id());
-
-                                if (fo != null && fo.getName() != null) {
-
-                                    switchField(model.getStudy_id(), barcode);
-
-                                }
-                            }
-
-                        } catch (Exception e) {
-
-                            Log.d(TAG, "Failed while searching for: " + barcode);
-
-                            e.printStackTrace();
-                        }
-
-                    } else {
-
-                        Utils.makeToast(getApplicationContext(), getString(R.string.act_collect_plot_with_code_not_found));
-
-                    }
-                }
-            }
-
-        } catch (Exception e) {
-
-            Log.d(TAG, "Something failed while searching. ");
-
-            e.printStackTrace();
         }
     }
 
@@ -1204,89 +1140,48 @@ public class CollectActivity extends ThemedActivity
      * @return true if found in another field, false otherwise
      */
     private boolean searchAcrossAllFields(String searchValue, boolean autoNavigate, boolean suppressReactions) {
-        Log.d("Field Book", "Searching across all fields for: " + searchValue);
+        Log.d("Field Book", "Delegating cross-field search to FuzzySearch for: " + searchValue);
 
-        boolean found = false;
-        FieldObject studyObj = null;
-
-        // Store search value in inputPlotId for use in the fallback
         inputPlotId = searchValue;
 
-        int currentFieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
-        Log.d("Field Book", "Current field ID: " + currentFieldId);
+        try {
+            com.fieldbook.tracker.utilities.BarcodeMatch match = fuzzySearch.findBarcodeMatch(searchValue);
 
-        // Check all other fields by search attribute
-        ArrayList<FieldObject> allFields = database.getAllFieldObjects();
-        Log.d("Field Book", "Searching across " + allFields.size() + " fields");
+            if (match.getField() != null) {
+                FieldObject studyObj = match.getField();
+                final String matchedPlot = match.getPlotId();
 
-        for (FieldObject field : allFields) {
-            // Skip the current field
-            if (field.getStudyId() == currentFieldId) {
-                continue;
-            }
+                if (studyObj.getName() != null && studyObj.getStudyId() != -1) {
+                    int studyId = studyObj.getStudyId();
+                    String fieldName = studyObj.getAlias();
 
-            Log.d("Field Book", "Checking field: " + field.getStudyId() + " (" + field.getName() + ")");
+                    // if fuzzy found a plotId, ensure inputPlotId is set to that
+                    if (matchedPlot != null) inputPlotId = matchedPlot;
 
-            ObservationUnitModel[] matchingUnits = database.getObservationUnitsBySearchAttribute(
-                    field.getStudyId(), searchValue);
-
-            Log.d("Field Book", "Found " + matchingUnits.length + " matches in field " + field.getStudyId());
-
-            if (matchingUnits.length > 0) {
-                studyObj = field;
-                String oldPlotId = inputPlotId;
-                inputPlotId = matchingUnits[0].getObservation_unit_db_id();
-                Log.d("Field Book", "Match found! Field: " + field.getName() +
-                        ", unit ID updated from " + oldPlotId + " to " + inputPlotId);
-                found = true;
-                break;
-            }
-        }
-
-        // If not found by search attribute in any field, try direct plot_id matching
-        if (!found) {
-            Log.d("Field Book", "No matches by search attribute, trying direct ID match");
-
-            ObservationUnitModel[] models = database.getAllObservationUnits();
-
-            for (ObservationUnitModel m : models) {
-                if (m.getObservation_unit_db_id().equals(searchValue)) {
-                    FieldObject study = database.getFieldObject(m.getStudy_id());
-                    if (study != null && study.getName() != null) {
-                        studyObj = study;
-                        found = true;
-                        Log.d("Field Book", "Direct match found in study: " + study.getName());
-                        break;
+                    if (!autoNavigate) {
+                        String msg = getString(R.string.act_collect_barcode_search_exists_in_other_field, fieldName);
+                        View anchor = findViewById(R.id.traitHolder);
+                        SoftKeyboardUtil.Companion.closeKeyboard(this, anchor, 500L);
+                        SnackbarUtils.showNavigateSnack(getLayoutInflater(), anchor,
+                                msg, R.id.toolbarBottom, 8000, null,
+                                (v) -> switchField(studyId, inputPlotId));
+                    } else {
+                        switchField(studyId, inputPlotId);
                     }
+
+                    return true;
                 }
             }
+        } catch (Exception e) {
+            Log.e(TAG, "FuzzySearch lookup failed", e);
         }
-        
-        // Handle the result of the search
-        if (found && studyObj != null && studyObj.getName() != null && studyObj.getStudyId() != -1) {
-            int studyId = studyObj.getStudyId();
-            String fieldName = studyObj.getAlias();
-            
-            // Save the matching observation unit ID from the matched unit, not the search value
-            final String matchedObsUnitId = inputPlotId; // This should be the one set earlier from matchingUnits[0]
-            
-            Log.d("Field Book", "Showing navigation prompt to field: " + fieldName + " and plot ID: " + matchedObsUnitId);
-            
-            String msg = getString(R.string.act_collect_barcode_search_exists_in_other_field, fieldName);
-            
-            SnackbarUtils.showNavigateSnack(getLayoutInflater(), findViewById(R.id.traitHolder), 
-                msg, R.id.toolbarBottom, 8000, null,
-                (v) -> switchField(studyId, matchedObsUnitId));
-                
-            return true;
-        } else {
-            Log.d("Field Book", "No match found in any field");
-            if (!suppressReactions) {
-                soundHelper.playError();
-                Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
-            }
-            return false;
+
+        if (!suppressReactions) {
+            soundHelper.playError();
+            Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
         }
+
+        return false;
     }
 
     private void moveToResultCore(int j) {
@@ -2335,45 +2230,6 @@ public class CollectActivity extends ThemedActivity
                         collectInputView.navigateToRep(rep);
                     }
                     mSkipLastUsedTrait = true;
-                }
-                break;
-            case BARCODE_SEARCH_CODE:
-                if (resultCode == RESULT_OK) {
-                    Log.d("Field Book", "Barcode scan successful");
-
-                    if (geoNavHelper.getSnackbar() != null) {
-                        geoNavHelper.getSnackbar().dismiss();
-                    }
-
-                    String barcodeValue;
-                    if (mlkitEnabled) {
-                        barcodeValue = data.getStringExtra("barcode");
-                    } else {
-                        IntentResult plotSearchResult = IntentIntegrator.parseActivityResult(resultCode, data);
-                        barcodeValue = plotSearchResult.getContents();
-                    }
-
-                    if (barcodeValue != null && !barcodeValue.isEmpty()) {
-                        Log.d("Field Book", "Scanned barcode: " + barcodeValue);
-
-                        // Set inputPlotId globally to ensure it's available everywhere
-                        inputPlotId = barcodeValue;
-
-                        rangeBox.setAllRangeID();
-                        int[] rangeID = rangeBox.getRangeID();
-
-                        boolean success = moveToSearch("barcode", rangeID, null, null, barcodeValue, -1);
-
-                        // If success is true, moveToSearch found the barcode, either in current field
-                        // or via the fallback in another field. Success sound happens in moveToSearch
-                        // if needed. No additional action required here.
-                    } else {
-                        Log.d("Field Book", "Barcode scan returned empty result");
-                        soundHelper.playError();
-                        Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
-                    }
-                } else {
-                    Log.d("Field Book", "Barcode scan cancelled or failed");
                 }
                 break;
             case PhotoTraitLayout.PICTURE_REQUEST_CODE:
