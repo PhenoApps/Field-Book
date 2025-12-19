@@ -5,7 +5,6 @@ import static com.fieldbook.tracker.ui.MediaViewerActivity.EXTRA_TRAIT_DB_ID;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -22,15 +21,16 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.webkit.MimeTypeMap;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -282,9 +282,10 @@ public class CollectActivity extends ThemedActivity
 
     UVCCameraTextureView uvcView;
 
-    ImageButton deleteValue;
-    ImageButton missingValue;
-    ImageButton barcodeInput;
+    // Runtime anchors that map to the Compose toolbar buttons (created in initToolbars)
+    private View composeMediaAnchor = null;
+    private View composeMissingAnchor = null;
+    private View composeDeleteAnchor = null;
 
     /**
      * Trait layouts
@@ -924,11 +925,73 @@ public class CollectActivity extends ThemedActivity
                     numMultiMedia = obs.getMultiMediaCount();
                 }
             } catch (Exception ignored) {}
+
             com.fieldbook.tracker.ui.BottomToolbarBindingsKt.bindBottomToolbar(composeView, toolbarListener, fieldAudioHelper.isRecording(), isMediaEnabled, numMultiMedia, deleteValueButtonEnabled);
-        } catch (Exception e) {
+
+            // Create runtime anchor Views under the ComposeView to be used by TapTarget
+            try {
+
+                final ViewGroup root = findViewById(android.R.id.content);
+
+                // Defer placement until the ComposeView has measured
+                composeView.post(() -> {
+                    try {
+                        int w = composeView.getWidth();
+                        int h = composeView.getHeight();
+                        if (w <= 0 || h <= 0) return;
+
+                        // Get composeView location relative to root (both in screen coords)
+                        int[] compLoc = new int[2];
+                        int[] rootLoc = new int[2];
+                        composeView.getLocationOnScreen(compLoc);
+                        root.getLocationOnScreen(rootLoc);
+
+                        float relX = compLoc[0] - rootLoc[0];
+                        float relY = compLoc[1] - rootLoc[1];
+
+                        int size = (int) (48 * getResources().getDisplayMetrics().density); // 48dp anchor size
+
+                        // positions: 1/6, 3/6, 5/6 of width (centered horizontally)
+                        float[] fractions = new float[]{1f/6f, 3f/6f, 5f/6f};
+
+                        View[] anchors = new View[3];
+                        for (int i = 0; i < 3; i++) {
+                            View v = new View(CollectActivity.this);
+                            v.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+                            v.setClickable(false);
+                            v.setFocusable(false);
+                            v.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+                            int id = View.generateViewId();
+                            v.setId(id);
+
+                            FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(size, size);
+
+                            root.addView(v, lp);
+
+                            float cx = fractions[i] * w;
+                            v.setX(relX + cx - size / 2f);
+                            v.setY(relY + (h - size) / 2f);
+
+                            anchors[i] = v;
+                        }
+
+                        composeMediaAnchor = anchors[0];
+                        composeMissingAnchor = anchors[1];
+                        composeDeleteAnchor = anchors[2];
+                    } catch (Exception ignored) {}
+                });
+
+            } catch (Exception ignored) {}
+
+         } catch (Exception e) {
             Log.e(TAG, "Bottom toolbar crash", e);
             finish();
-        }
+         }
+     }
+
+    // New overload that takes an explicit View anchor for TapTarget (uses the project's TapTargetUtil)
+    private TapTarget collectDataTapTargetView(View anchor, String title, String desc, int targetRadius) {
+        return TapTargetUtil.Companion.getTapTargetSettingsView(this, anchor, title, desc, targetRadius);
     }
 
     private void requestScanSingleBarcode() {
@@ -1730,10 +1793,6 @@ public class CollectActivity extends ThemedActivity
         super.onConfigurationChanged(newConfig);
     }
 
-    private TapTarget collectDataTapTargetView(int id, String title, String desc, int targetRadius) {
-        return TapTargetUtil.Companion.getTapTargetSettingsView(this, findViewById(id), title, desc, targetRadius);
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
@@ -1751,39 +1810,47 @@ public class CollectActivity extends ThemedActivity
         final int fieldAudioMicId = R.id.field_audio_mic;
         int itemId = item.getItemId();
         if (itemId == helpId) {
-            TapTargetSequence sequence = new TapTargetSequence(this)
-                    .targets(collectDataTapTargetView(R.id.act_collect_infobar_rv, getString(R.string.tutorial_main_infobars_title), getString(R.string.tutorial_main_infobars_description), 200),
-                            collectDataTapTargetView(R.id.traitLeft, getString(R.string.tutorial_main_traits_title), getString(R.string.tutorial_main_traits_description), 60),
-                            collectDataTapTargetView(R.id.traitTypeTv, getString(R.string.tutorial_main_traitlist_title), getString(R.string.tutorial_main_traitlist_description), 80),
-                            collectDataTapTargetView(R.id.rangeLeft, getString(R.string.tutorial_main_entries_title), getString(R.string.tutorial_main_entries_description), 60),
-                            collectDataTapTargetView(R.id.namesHolderLayout, getString(R.string.tutorial_main_navinfo_title), getString(R.string.tutorial_main_navinfo_description), 60),
-                            collectDataTapTargetView(R.id.traitHolder, getString(R.string.tutorial_main_datacollect_title), getString(R.string.tutorial_main_datacollect_description), 200)
-                            //collectDataTapTargetView(R.id.missingValue, getString(R.string.tutorial_main_na_title), getString(R.string.tutorial_main_na_description), 60),
-                            //collectDataTapTargetView(R.id.deleteValue, getString(R.string.tutorial_main_delete_title), getString(R.string.tutorial_main_delete_description), 60)
-                    );
+            TapTargetSequence sequence = new TapTargetSequence(this);
+            // Add main targets in order
+            sequence.target(collectDataTapTargetView(findViewById(R.id.act_collect_infobar_rv), getString(R.string.tutorial_main_infobars_title), getString(R.string.tutorial_main_infobars_description), 200));
+            sequence.target(collectDataTapTargetView(findViewById(R.id.traitLeft), getString(R.string.tutorial_main_traits_title), getString(R.string.tutorial_main_traits_description), 60));
+            sequence.target(collectDataTapTargetView(findViewById(R.id.traitTypeTv), getString(R.string.tutorial_main_traitlist_title), getString(R.string.tutorial_main_traitlist_description), 80));
+            sequence.target(collectDataTapTargetView(findViewById(R.id.rangeLeft), getString(R.string.tutorial_main_entries_title), getString(R.string.tutorial_main_entries_description), 60));
+            sequence.target(collectDataTapTargetView(findViewById(R.id.namesHolderLayout), getString(R.string.tutorial_main_navinfo_title), getString(R.string.tutorial_main_navinfo_description), 60));
+            sequence.target(collectDataTapTargetView(findViewById(R.id.traitHolder), getString(R.string.tutorial_main_datacollect_title), getString(R.string.tutorial_main_datacollect_description), 200));
+
+            // Add missing/delete targets — prefer compose anchors, fallback to legacy views if present
+            if (composeMissingAnchor != null) {
+                sequence.target(collectDataTapTargetView(composeMissingAnchor, getString(R.string.tutorial_main_na_title), getString(R.string.tutorial_main_na_description), 60));
+            }
+
+            if (composeDeleteAnchor != null) {
+                sequence.target(collectDataTapTargetView(composeDeleteAnchor, getString(R.string.tutorial_main_delete_title), getString(R.string.tutorial_main_delete_description), 60));
+            }
+
             if (systemMenu.findItem(R.id.search).isVisible()) {
-                sequence.target(collectDataTapTargetView(R.id.search, getString(R.string.tutorial_main_search_title), getString(R.string.tutorial_main_search_description), 60));
+                sequence.target(collectDataTapTargetView(findViewById(R.id.search), getString(R.string.tutorial_main_search_title), getString(R.string.tutorial_main_search_description), 60));
             }
             if (systemMenu.findItem(R.id.resources).isVisible()) {
-                sequence.target(collectDataTapTargetView(R.id.resources, getString(R.string.tutorial_main_resources_title), getString(R.string.tutorial_main_resources_description), 60));
+                sequence.target(collectDataTapTargetView(findViewById(R.id.resources), getString(R.string.tutorial_main_resources_title), getString(R.string.tutorial_main_resources_description), 60));
             }
             if (systemMenu.findItem(R.id.summary).isVisible()) {
-                sequence.target(collectDataTapTargetView(R.id.summary, getString(R.string.tutorial_main_summary_title), getString(R.string.tutorial_main_summary_description), 60));
+                sequence.target(collectDataTapTargetView(findViewById(R.id.summary), getString(R.string.tutorial_main_summary_title), getString(R.string.tutorial_main_summary_description), 60));
             }
             if (systemMenu.findItem(R.id.lockData).isVisible()) {
-                sequence.target(collectDataTapTargetView(R.id.lockData, getString(R.string.tutorial_main_lockdata_title), getString(R.string.tutorial_main_lockdata_description), 60));
+                sequence.target(collectDataTapTargetView(findViewById(R.id.lockData), getString(R.string.tutorial_main_lockdata_title), getString(R.string.tutorial_main_lockdata_description), 60));
             }
             if (systemMenu.findItem(R.id.datagrid).isVisible()) {
-                sequence.target(collectDataTapTargetView(R.id.datagrid, getString(R.string.tutorial_main_datagrid_title), getString(R.string.tutorial_main_datagrid_description), 60));
+                sequence.target(collectDataTapTargetView(findViewById(R.id.datagrid), getString(R.string.tutorial_main_datagrid_title), getString(R.string.tutorial_main_datagrid_description), 60));
             }
             if (systemMenu.findItem(R.id.field_audio_mic).isVisible()) {
-                sequence.target(collectDataTapTargetView(R.id.field_audio_mic, getString(R.string.tutorial_main_field_audio_mic_title), getString(R.string.tutorial_main_field_audio_mic_description), 60));
+                sequence.target(collectDataTapTargetView(findViewById(R.id.field_audio_mic), getString(R.string.tutorial_main_field_audio_mic_title), getString(R.string.tutorial_main_field_audio_mic_description), 60));
             }
             if (systemMenu.findItem(R.id.action_act_collect_repeated_values_indicator).isVisible()) {
-                sequence.target(collectDataTapTargetView(R.id.action_act_collect_repeated_values_indicator, getString(R.string.tutorial_main_repeated_values_title), getString(R.string.tutorial_main_repeated_values_description), 60));
+                sequence.target(collectDataTapTargetView(findViewById(R.id.action_act_collect_repeated_values_indicator), getString(R.string.tutorial_main_repeated_values_title), getString(R.string.tutorial_main_repeated_values_description), 60));
             }
             if (systemMenu.findItem(R.id.action_act_collect_geonav_sw).isVisible()) {
-                sequence.target(collectDataTapTargetView(R.id.action_act_collect_geonav_sw, getString(R.string.tutorial_main_geonav_title), getString(R.string.tutorial_main_geonav_description), 60));
+                sequence.target(collectDataTapTargetView(findViewById(R.id.action_act_collect_geonav_sw), getString(R.string.tutorial_main_geonav_title), getString(R.string.tutorial_main_geonav_description), 60));
             }
 
             sequence.start();
