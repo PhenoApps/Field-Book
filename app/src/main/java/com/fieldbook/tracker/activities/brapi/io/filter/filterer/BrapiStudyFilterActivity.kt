@@ -129,13 +129,18 @@ class BrapiStudyFilterActivity(
         }
     }
 
-    override fun BrapiCacheModel.mapToUiModel() = studies.map { model ->
-        CheckboxListAdapter.Model(
-            checked = false,
-            id = model.study.studyDbId,
-            label = model.study.studyName,
-            subLabel = model.trialName ?: model.study.locationName ?: ""
-        )
+    override fun BrapiCacheModel.mapToUiModel() = studies.mapNotNull { model ->
+        try {
+            CheckboxListAdapter.Model(
+                checked = false,
+                id = model.study.studyDbId,
+                label = model.study.studyName,
+                subLabel = model.trialName ?: model.study.locationName ?: ""
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

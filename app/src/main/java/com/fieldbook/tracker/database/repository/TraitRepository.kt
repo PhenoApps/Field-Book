@@ -11,7 +11,6 @@ import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.database.models.TraitAttributes
 import com.fieldbook.tracker.enums.FileFormat
-import com.fieldbook.tracker.objects.FieldFileObject
 import com.fieldbook.tracker.objects.TraitImportFile
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.objects.toTraitJson
@@ -228,6 +227,9 @@ class TraitRepository @Inject constructor(
     ): List<TraitObject> = withContext(ioDispatcher) {
         // copy the file to dir_trait, and then import traits
 
+        val originalFileName = FileUtil()
+            .getFileName(context, sourceUri)
+
         // generate a file name
         val fileName = FileUtil()
             .getFileName(context, sourceUri)
@@ -245,14 +247,15 @@ class TraitRepository @Inject constructor(
         val maxPos = database.getAllTraitObjects().maxOfOrNull { it.realPosition } ?: 0
 
         return@withContext when (format) {
-            FileFormat.JSON -> parseJsonTraits(copiedUri, maxPos, onError)
-            FileFormat.CSV -> parseCsvTraits(copiedUri, maxPos, onError)
+            FileFormat.JSON -> parseJsonTraits(copiedUri, originalFileName, maxPos, onError)
+            FileFormat.CSV -> parseCsvTraits(copiedUri, originalFileName, maxPos, onError)
             else -> emptyList()
         }
     }
 
     private suspend fun parseJsonTraits(
         uri: Uri,
+        originalFileName: String,
         maxPosition: Int,
         onError: suspend (Int) -> Unit,
     ): List<TraitObject> =
@@ -267,8 +270,6 @@ class TraitRepository @Inject constructor(
 
             val wrapper = json.decodeFromString(TraitImportFile.serializer(), jsonText)
 
-            val source = FieldFileObject.create(context, uri, null, null).fileStem
-
             wrapper.traits.mapNotNull { json ->
                 runCatching {
                     TraitObject().apply {
@@ -280,7 +281,7 @@ class TraitRepository @Inject constructor(
                         details = json.details
                         visible = json.visible
                         realPosition = maxPosition + json.position
-                        traitDataSource = source
+                        traitDataSource = originalFileName
 
                         json.attributes?.forEach { (key, value) ->
                             val primitive = value as? JsonPrimitive
@@ -298,6 +299,7 @@ class TraitRepository @Inject constructor(
 
     private suspend fun parseCsvTraits(
         uri: Uri,
+        originalFileName: String,
         maxPosition: Int,
         onError: suspend (Int) -> Unit,
     ): List<TraitObject> =
@@ -315,8 +317,6 @@ class TraitRepository @Inject constructor(
                 CSVReader(InputStreamReader(stream)).use { reader ->
 
                     reader.readNext() // skip header
-
-                    val source = FieldFileObject.create(context, uri, null, null).fileStem
 
                     var row = reader.readNext()
 
@@ -338,7 +338,7 @@ class TraitRepository @Inject constructor(
                                 visible =
                                     row.getOrNull(7)?.equals("true", ignoreCase = true) != false
                                 realPosition = maxPosition + (row.getOrNull(8)?.toIntOrNull() ?: 0)
-                                traitDataSource = source
+                                traitDataSource = originalFileName
 
                                 if (fmt == "multicat") {
                                     this.format = "categorical"

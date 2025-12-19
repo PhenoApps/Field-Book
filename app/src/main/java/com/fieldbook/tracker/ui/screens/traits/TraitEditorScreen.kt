@@ -95,7 +95,8 @@ fun TraitEditorScreen(
                 isTutorialEnabled = viewModel.isTutorialEnabled(),
                 onBack = onNavigateBack,
                 onToggleAllTraits = { viewModel.toggleAllTraitsVisibility() },
-                onShowDialog = { dialog -> viewModel.showDialog(dialog) }
+                onShowDialog = { dialog -> viewModel.showDialog(dialog) },
+                onRequestExportPermission = { viewModel.requestExportPermission(DialogTriggerSource.TOOLBAR) },
             )
         },
         floatingActionButton = {
@@ -252,16 +253,16 @@ fun TraitEditorScreen(
                     }
                 }
 
-                TraitEditorEvent.RequestStoragePermissionForExport -> {
+                is TraitEditorEvent.RequestStoragePermissionForExport -> {
                     if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
 
                         permissionCallback.value = {
-                            viewModel.onExportPermissionGranted()
+                            viewModel.onExportPermissionGranted(event.source)
                         }
 
                         permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
                     } else {
-                        viewModel.onExportPermissionGranted()
+                        viewModel.onExportPermissionGranted(event.source)
                     }
                 }
 

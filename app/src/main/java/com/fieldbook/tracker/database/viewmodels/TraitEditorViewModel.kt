@@ -7,6 +7,7 @@ import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
@@ -57,6 +58,10 @@ class TraitEditorViewModel @Inject constructor(
             prefs.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position") ?: "position"
         _uiState.update { it.copy(sortOrder = sortOrder) }
         loadTraits()
+    }
+
+    private fun notifyCollectReload() {
+        CollectActivity.reloadData = true
     }
 
     // PREFERENCES
@@ -138,6 +143,7 @@ class TraitEditorViewModel @Inject constructor(
             runCatching { repo.deleteAllTraits(traits) }
                 .onSuccess {
                     _uiState.update { it.copy(traits = emptyList()) }
+                    notifyCollectReload()
                     _events.emit(TraitEditorEvent.ShowToast(R.string.message_all_traits_deleted))
                 }
                 .onFailure { e ->
@@ -155,8 +161,10 @@ class TraitEditorViewModel @Inject constructor(
 
         viewModelScope.launch {
             runCatching { repo.updateVisibility(traitId, isVisible) }
+                .onSuccess { notifyCollectReload() }
                 .onFailure { e -> // rollback
                     updateTraitInList(trait)
+                    notifyCollectReload()
                     Log.e(TAG, "Error updating trait visibility", e)
                     _events.emit(TraitEditorEvent.ShowToast(R.string.error_updating_trait_visibility))
                 }
@@ -177,7 +185,9 @@ class TraitEditorViewModel @Inject constructor(
                 oldList.forEach {
                     repo.updateVisibility(it.id, newVisibility)
                 }
-            }.onFailure { e ->
+            }
+                .onSuccess { notifyCollectReload() }
+                .onFailure { e ->
                 _uiState.update { it.copy(traits = oldList) }
                 Log.e(TAG, "Error toggling visibility for all traits", e)
                 _events.emit(TraitEditorEvent.ShowToast(R.string.error_toggling_all_traits_visibility))
@@ -190,6 +200,7 @@ class TraitEditorViewModel @Inject constructor(
             runCatching { repo.insertTraitsList(newTraits) }
                 .onSuccess { insertedCount ->
                     loadTraits()
+                    notifyCollectReload()
 
                     val skipped = newTraits.size - insertedCount
 
@@ -248,6 +259,8 @@ class TraitEditorViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 repo.updateTraitOrder(finalList)
+                notifyCollectReload()
+
                 lastCommittedSortedList = finalList
 
                 // update pref and state
@@ -276,15 +289,7 @@ class TraitEditorViewModel @Inject constructor(
                         },
                     )
 
-                repo.insertTraitsList(traits)
-                loadTraits()
-
-                _events.emit(
-                    TraitEditorEvent.ShowMessageWithArgs(
-                        R.string.message_traits_imported,
-                        listOf(traits.size)
-                    )
-                )
+                insertTraits(traits)
             }.onFailure { e ->
                 Log.e(TAG, "Failed to import traits", e)
                 _events.emit(TraitEditorEvent.ShowToast(R.string.error_importing_traits))
@@ -388,8 +393,8 @@ class TraitEditorViewModel @Inject constructor(
         showDialog(TraitActivityDialog.ImportChoice)
     }
 
-    fun onExportPermissionGranted() {
-        showExportDialog(DialogTriggerSource.TOOLBAR)
+    fun onExportPermissionGranted(source: DialogTriggerSource) {
+        showExportDialog(source)
     }
 
     fun requestImportPermission() {
@@ -398,9 +403,9 @@ class TraitEditorViewModel @Inject constructor(
         }
     }
 
-    fun requestExportPermission() {
+    fun requestExportPermission(source: DialogTriggerSource) {
         viewModelScope.launch {
-            _events.emit(TraitEditorEvent.RequestStoragePermissionForExport)
+            _events.emit(TraitEditorEvent.RequestStoragePermissionForExport(source))
         }
     }
 
@@ -442,7 +447,7 @@ sealed class TraitEditorEvent {
     data class ShareFile(val fileUri: Uri) : TraitEditorEvent()
     object NavigateToBrapi : TraitEditorEvent()
     object RequestStoragePermissionForImport : TraitEditorEvent()
-    object RequestStoragePermissionForExport : TraitEditorEvent()
+    data class RequestStoragePermissionForExport(val source: DialogTriggerSource) : TraitEditorEvent()
     object OpenFileExplorer : TraitEditorEvent()
     object OpenCloudFilePicker : TraitEditorEvent()
 }

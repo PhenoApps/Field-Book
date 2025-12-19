@@ -133,23 +133,30 @@ class BrapiTraitFilterActivity(
 
     override fun BrapiCacheModel.mapToUiModel() =
         variables.values
-            .filter { it.observationVariableDbId != null }
-            .map { model ->
-                CheckboxListAdapter.Model(
-                    checked = false,
-                    id = model.observationVariableDbId,
-                    label = model.synonyms?.firstOrNull() ?: model.observationVariableName ?: model.observationVariableDbId,
-                    subLabel = "${model.commonCropName ?: ""} ${model.observationVariableDbId ?: ""}",
-                    searchableTexts = model.observationVariableName?.let { listOf(it) } ?: emptyList()
-                ).also {
-                    model.scale?.dataType?.name?.let { dataType ->
-                        val convertedType = DataTypes.convertBrAPIDataType(dataType)
-                        val finalTraitFormat = if (convertedType == "multicat") "categorical" else convertedType
+            .filter { it.observationVariableDbId != null }.mapNotNull { model ->
+                try {
+                    CheckboxListAdapter.Model(
+                        checked = false,
+                        id = model.observationVariableDbId,
+                        label = model.synonyms?.firstOrNull() ?: model.observationVariableName
+                        ?: model.observationVariableDbId,
+                        subLabel = "${model.commonCropName ?: ""} ${model.observationVariableDbId ?: ""}",
+                        searchableTexts = model.observationVariableName?.let { listOf(it) }
+                            ?: emptyList()
+                    ).also {
+                        model.scale?.dataType?.name?.let { dataType ->
+                            val convertedType = DataTypes.convertBrAPIDataType(dataType)
+                            val finalTraitFormat =
+                                if (convertedType == "multicat") "categorical" else convertedType
 
-                        Formats.findTrait(finalTraitFormat)?.iconDrawableResourceId?.let { icon ->
-                            it.iconResId = icon
+                            Formats.findTrait(finalTraitFormat)?.iconDrawableResourceId?.let { icon ->
+                                it.iconResId = icon
+                            }
                         }
                     }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    null
                 }
             }.toList()
 

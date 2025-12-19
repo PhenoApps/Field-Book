@@ -495,7 +495,7 @@
     <string name="trait_visible">Visible</string>
     <string name="trait_hidden">Hidden</string>
     <string name="trait_options_title">Options</string>
-    <string name="trait_swap_name">Swap name field</string>
+    <string name="trait_new_trait_name">Copied Trait Name</string>
     <string name="trait_observation_data">Data</string>
     <string name="trait_observation_count">%d observations</string>
     <string name="trait_not_chartable">This trait format cannot be visualized in a chart</string>
@@ -510,6 +510,7 @@
     <string name="trait_brapi_label_display">Show Labels (e.g. %s)</string>
     <string name="trait_brapi_value_display">Show Values (e.g. %s)</string>
     <string name="error_loading_trait_detail">Error loading trait info</string>
+    <string name="error_deleting_trait">Error: Could not delete the trait</string>
     <string name="error_updating_trait_resource_file">Error updating trait resource file</string>
     <string name="error_updating_trait_visibility">Error updating trait visibility</string>
     <string name="error_empty_trait_name">Trait name cannot be empty</string>

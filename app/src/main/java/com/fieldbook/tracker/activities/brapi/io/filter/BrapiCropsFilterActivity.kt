@@ -22,13 +22,18 @@ open class BrapiCropsFilterActivity(override val titleResId: Int = R.string.brap
     override val filterName: String
         get() = FILTER_NAME
 
-    override fun BrapiCacheModel.mapToUiModel() = studies.map { model ->
-        CheckboxListAdapter.Model(
-            checked = false,
-            id = model.study.commonCropName,
-            label = model.study.commonCropName,
-            subLabel = ""
-        )
+    override fun BrapiCacheModel.mapToUiModel() = studies.mapNotNull { model ->
+        try {
+            CheckboxListAdapter.Model(
+                checked = false,
+                id = model.study.commonCropName,
+                label = model.study.commonCropName,
+                subLabel = ""
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 
     override fun onCreateOptionsMenu(menu: android.view.Menu?): Boolean {
