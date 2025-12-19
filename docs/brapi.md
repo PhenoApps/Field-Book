@@ -10,7 +10,7 @@ This eliminates the need to manually transfer files and enables Field Book to of
 
 ## Setup
 
-BrAPI can be set up in the <img class="icon" src="_static/icons/settings/main/server-network.png"> [Brapi settings](settings-brapi.md).
+BrAPI can be set up in the <img class="icon" src="_static/icons/settings/main/server-network.png"> [Brapi settings](./settings/settings-brapi.md).
 To use BrAPI, set the base URL to the URL of a valid BrAPI server and authorize it.
 Once authorized, Field Book will be able to communicate with the server to import fields and traits and export data.
 
