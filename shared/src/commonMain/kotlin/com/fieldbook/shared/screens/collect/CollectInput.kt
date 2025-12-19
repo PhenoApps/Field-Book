@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,6 +22,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.fieldbook.shared.config.customKamelConfig
 import com.fieldbook.shared.screens.collect.traits.AngleTrait
 import com.fieldbook.shared.screens.collect.traits.BarcodeTrait
 import com.fieldbook.shared.screens.collect.traits.BooleanTrait
@@ -40,6 +42,7 @@ import com.fieldbook.shared.theme.AppColors
 import com.fieldbook.shared.traits.Formats
 import com.fieldbook.shared.utilities.CategoryJsonUtil
 import com.fieldbook.shared.utilities.dateFormatMonthDay
+import io.kamel.image.config.LocalKamelConfig
 
 @Composable
 fun CollectInput(
@@ -107,6 +110,13 @@ fun CollectInput(
                 fontWeight = fontWeight,
                 fontStyle = fontStyle,
                 color = fontColor,
+            )
+        } else if (formatEnum?.isCamera == true) {
+            TraitInputHost(
+                controller = controller,
+                trait = trait,
+                value = value,
+                onEdited = { isEdited = true }
             )
         } else {
             Text(
@@ -270,14 +280,18 @@ fun TraitInputHost(
                 modifier = modifier.fillMaxWidth().padding(8.dp)
             )
 
-            "photo", "camera" -> PhotoTrait(
-                value = value,
-                onValueChange = {
-                    controller.updateCurrentTraitValue(it)
-                    onEdited()
-                },
-                modifier = modifier.fillMaxWidth().padding(8.dp)
-            )
+            "photo", "camera" -> CompositionLocalProvider(
+                LocalKamelConfig provides customKamelConfig
+            ) {
+                PhotoTrait(
+                    value = value,
+                    onValueChange = {
+                        controller.updateCurrentTraitValue(it)
+                        onEdited()
+                    },
+                    modifier = modifier.fillMaxWidth().padding(8.dp)
+                )
+            }
 
             "audio", "usb_camera", "gopro", "canon" -> {
                 TextTrait(

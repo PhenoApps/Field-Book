@@ -1,16 +1,18 @@
 package com.fieldbook.shared.screens.collect.traits
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -20,7 +22,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.fieldbook.shared.generated.resources.Res
@@ -43,6 +44,7 @@ import kotlinx.datetime.Clock
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 
+
 @OptIn(ExperimentalResourceApi::class)
 @Composable
 fun PhotoTrait(
@@ -50,10 +52,14 @@ fun PhotoTrait(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // Maintain a local list of photo URIs // TODO onValueChange
+    // TODO initialize from db
     val photoUris = remember {
-        // TODO initialize from value
-        mutableStateOf(emptyList<String>())
+        val initial = if (value.isNotBlank()) {
+            value.split(",")
+                .map { it.trim() }
+                .filter { it.isNotBlank() }
+        } else emptyList()
+        mutableStateOf(initial)
     }
 
     var cameraController by remember { mutableStateOf<CameraController?>(null) }
@@ -70,7 +76,7 @@ fun PhotoTrait(
     }
 
     Column(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -78,22 +84,68 @@ fun PhotoTrait(
         LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(100.dp)
-                .background(Color.LightGray)
+                // FIXME looks good on emulator, find the right setting
+                .fillMaxHeight(0.7f)
         ) {
-            val height = 80.dp
-            val width = 80.dp
+            val width = 230.dp
 
-            // Camera preview as first item
+            // Images
+            if (photoUris.value.isNotEmpty()) {
+                items(photoUris.value.size) { index ->
+                    val rawUri = photoUris.value[index]
+                    val displayUri = if (rawUri.startsWith("http") || rawUri.startsWith("file") || rawUri.startsWith("content:")) {
+                        rawUri
+                    } else {
+                        // Ensure local absolute paths get a file:// scheme
+                        "file://$rawUri"
+                    }
+
+                    // Log for debugging so you can confirm what is being loaded
+                    println("PhotoTrait: loading image: $displayUri")
+
+                    Box(
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .fillMaxHeight(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        KamelImage(
+                            resource = asyncPainterResource(displayUri),
+                            contentDescription = "Photo $index",
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .width(width),
+                            contentScale = ContentScale.Crop,
+                            onFailure =  { error ->
+                                // Log loading errors for debugging
+                                println("PhotoTrait: error loading image $displayUri : ${error.message}")
+                            }
+                        )
+
+                        // TODO remove
+                        // Small debug URI text so you can see the exact URI being handed to Kamel
+                        Text(
+                            text = displayUri,
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(4.dp)
+                        )
+                    }
+                }
+            }
+
+            // Camera preview
             item {
                 Box(
                     modifier = Modifier
                         .padding(8.dp)
-                        .size(width, height),
+                        .fillMaxHeight(),
                     contentAlignment = Alignment.Center
                 ) {
                     CameraPreview(
-                        modifier = Modifier.fillMaxWidth().height(height),
+                        modifier = Modifier.
+                        fillMaxHeight()
+                            .width(width),
                         cameraConfiguration = {
                             setCameraLens(CameraLens.BACK)
                             setFlashMode(FlashMode.OFF)
@@ -104,30 +156,6 @@ fun PhotoTrait(
                             cameraController = controller
                         }
                     )
-                }
-            }
-            // Images
-            if (photoUris.value.isNotEmpty()) {
-                items(photoUris.value.size) { index ->
-                    val rawUri = photoUris.value[index]
-                    val displayUri = if (rawUri.startsWith("http") || rawUri.startsWith("file")) {
-                        rawUri
-                    } else {
-                        "file://$rawUri"
-                    }
-                    Box(
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .size(width, height),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        KamelImage(
-                            resource = asyncPainterResource(displayUri),
-                            contentDescription = "Photo $index",
-                            modifier = Modifier.fillMaxWidth().height(height),
-                            contentScale = ContentScale.Crop,
-                        )
-                    }
                 }
             }
         }
@@ -151,8 +179,10 @@ fun PhotoTrait(
                                 savedFile?.let { file ->
                                     val path = file.path
                                     if (path != null) {
+                                        // Normalize the stored path so consumers see a consistent URI
+                                        val normalized = if (path.startsWith("file") || path.startsWith("content:")) path else "file://$path"
                                         val currentList = photoUris.value.toMutableList()
-                                        currentList.add(path)
+                                        currentList.add(normalized)
                                         photoUris.value = currentList
                                     }
                                 }
