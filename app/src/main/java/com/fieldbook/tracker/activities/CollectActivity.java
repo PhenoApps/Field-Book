@@ -350,6 +350,8 @@ public class CollectActivity extends ThemedActivity
 
     private AlertDialog dialogCrashReport;
 
+    private Boolean deleteValueButtonEnabled = true;
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -922,10 +924,10 @@ public class CollectActivity extends ThemedActivity
                     numMultiMedia = obs.getMultiMediaCount();
                 }
             } catch (Exception ignored) {}
-            com.fieldbook.tracker.ui.BottomToolbarBindingsKt.bindBottomToolbar(composeView, toolbarListener, fieldAudioHelper.isRecording(), isMediaEnabled, numMultiMedia);
+            com.fieldbook.tracker.ui.BottomToolbarBindingsKt.bindBottomToolbar(composeView, toolbarListener, fieldAudioHelper.isRecording(), isMediaEnabled, numMultiMedia, deleteValueButtonEnabled);
         } catch (Exception e) {
-            // fallback: bind default toolbar
-            com.fieldbook.tracker.ui.BottomToolbarBindingsKt.bindBottomToolbar(composeView, toolbarListener);
+            Log.e(TAG, "Bottom toolbar crash", e);
+            finish();
         }
     }
 
@@ -2676,24 +2678,13 @@ public class CollectActivity extends ThemedActivity
         return collectInputView;
     }
 
-    public ImageButton getDeleteValue() {
-        return deleteValue;
-    }
-
-    public ImageView getTraitLeft() {
-        return traitBox.getTraitLeft();
-    }
-
-    public ImageView getTraitRight() {
-        return traitBox.getTraitRight();
-    }
-
-    public ImageView getRangeLeft() {
-        return rangeBox.getRangeLeft();
-    }
-
-    public ImageView getRangeRight() {
-        return rangeBox.getRangeRight();
+    public void toggleUiFeatures(Boolean navigation, Boolean deleteValue) {
+        traitBox.getTraitLeft().setEnabled(navigation);
+        traitBox.getTraitRight().setEnabled(navigation);
+        rangeBox.getRangeLeft().setEnabled(navigation);
+        rangeBox.getRangeRight().setEnabled(navigation);
+        deleteValueButtonEnabled = deleteValue;
+        initToolbars();
     }
 
     /**
