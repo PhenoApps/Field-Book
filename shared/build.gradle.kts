@@ -74,6 +74,7 @@ kotlin {
                 implementation(libs.kamel.image)
                 implementation(libs.ktor.client)
                 implementation(libs.ktor.client.cio)
+                implementation(libs.coil.compose)
             }
         }
 

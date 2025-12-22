@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.camera_24px
 import com.fieldbook.shared.preferences.GeneralKeys
@@ -37,8 +38,6 @@ import com.kashif.cameraK.result.ImageCaptureResult
 import com.kashif.cameraK.ui.CameraPreview
 import com.russhwolf.settings.Settings
 import io.github.vinceglb.filekit.core.FileKit
-import io.kamel.image.KamelImage
-import io.kamel.image.asyncPainterResource
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import org.jetbrains.compose.resources.ExperimentalResourceApi
@@ -109,21 +108,21 @@ fun PhotoTrait(
                             .fillMaxHeight(),
                         contentAlignment = Alignment.Center
                     ) {
-                        KamelImage(
-                            resource = asyncPainterResource(displayUri),
+                        AsyncImage(
+                            model = displayUri,
                             contentDescription = "Photo $index",
                             modifier = Modifier
                                 .fillMaxHeight()
                                 .width(width),
                             contentScale = ContentScale.Crop,
-                            onFailure =  { error ->
+                            onError = { error ->
                                 // Log loading errors for debugging
-                                println("PhotoTrait: error loading image $displayUri : ${error.message}")
+                                println("PhotoTrait: error loading image $displayUri : ${error?.result?.throwable?.message}")
                             }
                         )
 
                         // TODO remove
-                        // Small debug URI text so you can see the exact URI being handed to Kamel
+                        // Small debug URI text so you can see the exact URI being handed to AsyncImage
                         Text(
                             text = displayUri,
                             modifier = Modifier
