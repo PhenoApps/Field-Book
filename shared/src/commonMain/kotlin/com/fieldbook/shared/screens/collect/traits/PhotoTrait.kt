@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -28,6 +27,7 @@ import coil3.compose.AsyncImage
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.camera_24px
 import com.fieldbook.shared.preferences.GeneralKeys
+import com.fieldbook.shared.storage.PlatformPhotos
 import com.fieldbook.shared.theme.MainFloatingActionButtonShape
 import com.kashif.cameraK.controller.CameraController
 import com.kashif.cameraK.enums.CameraLens
@@ -37,9 +37,11 @@ import com.kashif.cameraK.enums.ImageFormat
 import com.kashif.cameraK.result.ImageCaptureResult
 import com.kashif.cameraK.ui.CameraPreview
 import com.russhwolf.settings.Settings
-import io.github.vinceglb.filekit.core.FileKit
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import okio.FileSystem
+import okio.Path.Companion.toPath
+import okio.SYSTEM
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 
@@ -51,11 +53,24 @@ fun PhotoTrait(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // TODO initialize from db
+    fun normalizeStoredPhotoRef(raw: String): String {
+        val trimmed = raw.trim()
+        if (trimmed.isBlank()) return ""
+        return when {
+            trimmed.startsWith("http://") || trimmed.startsWith("https://") -> trimmed
+            trimmed.startsWith("content://") -> trimmed
+            trimmed.startsWith("file://") -> trimmed
+            // Legacy values sometimes stored as absolute paths
+            trimmed.startsWith("/") -> "file://$trimmed"
+            else -> trimmed
+        }
+    }
+
+    // Initialize from db value (comma-separated)
     val photoUris = remember {
         val initial = if (value.isNotBlank()) {
             value.split(",")
-                .map { it.trim() }
+                .map { normalizeStoredPhotoRef(it) }
                 .filter { it.isNotBlank() }
         } else emptyList()
         mutableStateOf(initial)
@@ -91,13 +106,7 @@ fun PhotoTrait(
             // Images
             if (photoUris.value.isNotEmpty()) {
                 items(photoUris.value.size) { index ->
-                    val rawUri = photoUris.value[index]
-                    val displayUri = if (rawUri.startsWith("http") || rawUri.startsWith("file") || rawUri.startsWith("content:")) {
-                        rawUri
-                    } else {
-                        // Ensure local absolute paths get a file:// scheme
-                        "file://$rawUri"
-                    }
+                    val displayUri = normalizeStoredPhotoRef(photoUris.value[index])
 
                     // Log for debugging so you can confirm what is being loaded
                     println("PhotoTrait: loading image: $displayUri")
@@ -117,18 +126,20 @@ fun PhotoTrait(
                             contentScale = ContentScale.Crop,
                             onError = { error ->
                                 // Log loading errors for debugging
-                                println("PhotoTrait: error loading image $displayUri : ${error?.result?.throwable?.message}")
+                                println(
+                                    "PhotoTrait: error loading image $displayUri : ${error.result.throwable.message}"
+                                )
                             }
                         )
 
-                        // TODO remove
+                        // TODO remove (debug)
                         // Small debug URI text so you can see the exact URI being handed to AsyncImage
-                        Text(
+                        /*Text(
                             text = displayUri,
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
                                 .padding(4.dp)
-                        )
+                        )*/
                     }
                 }
             }
@@ -165,7 +176,24 @@ fun PhotoTrait(
                     cameraController?.let { controller ->
                         when (val result = controller.takePicture()) {
                             is ImageCaptureResult.Success -> {
-                                val fileName = "Photo_${Clock.System.now().toEpochMilliseconds()}"
+                                val fileName =
+                                    "Photo_${Clock.System.now().toEpochMilliseconds()}.jpg"
+
+                                // Save in an app-controlled directory so the file definitely exists.
+                                val absPath = PlatformPhotos.newPhotoFilePath(fileName)
+                                val p = absPath.toPath()
+                                FileSystem.SYSTEM.createDirectories(p.parent!!)
+                                FileSystem.SYSTEM.write(p) {
+                                    write(result.byteArray)
+                                }
+
+                                val normalized = "file://$absPath"
+                                photoUris.value = photoUris.value + normalized
+
+                                // TODO cannot get fileKit 0.8.8 to work, files are saved but path is wrong
+                                //  using PlatformPhotos workaround for now
+
+                                /*val fileName = "Photo_${Clock.System.now().toEpochMilliseconds()}"
 
                                 // TODO autosave (PlatformFile(directory, fileName) not available in filekit 0.8.8)
                                 val savedFile =
@@ -184,7 +212,8 @@ fun PhotoTrait(
                                         currentList.add(normalized)
                                         photoUris.value = currentList
                                     }
-                                }
+                                }*/
+
                             }
 
                             is ImageCaptureResult.Error -> {
