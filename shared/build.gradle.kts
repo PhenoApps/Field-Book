@@ -71,7 +71,6 @@ kotlin {
                 implementation(libs.filekit.core)
                 implementation(libs.filekit.compose)
                 implementation(libs.kotlinx.serialization.json)
-                implementation(libs.kamel.image)
                 implementation(libs.ktor.client)
                 implementation(libs.ktor.client.cio)
                 implementation(libs.coil.compose)

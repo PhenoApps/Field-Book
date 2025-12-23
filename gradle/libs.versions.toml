@@ -7,7 +7,6 @@ kotlinx-datetime = "0.6.2" # When upgrading, see https://github.com/Kotlin/kotli
 kotlinx-serialization-json = "1.9.0"
 okio = "2.2.0"
 filekit = "0.8.8" # compatible with compileSdk = 34
-kamel = "0.7.2" # see https://github.com/Kamel-Media/Kamel/issues/53
 ktor = "3.3.3"
 coil = "3.0.0" # compatible with compileSdk = 34
 
@@ -20,7 +19,6 @@ permissions = { module = "dev.icerock.moko:permissions", version = "0.20.1" }
 filekit-core = { module = "io.github.vinceglb:filekit-core", version.ref = "filekit" }
 filekit-compose = { module = "io.github.vinceglb:filekit-compose", version.ref = "filekit" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
-kamel-image = { module = "media.kamel:kamel-image", version.ref = "kamel" }
 ktor-client = { module = "io.ktor:ktor-client", version.ref = "ktor" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }

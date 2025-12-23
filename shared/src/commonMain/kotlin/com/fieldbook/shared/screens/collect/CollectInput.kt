@@ -22,7 +22,6 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.fieldbook.shared.config.customKamelConfig
 import com.fieldbook.shared.screens.collect.traits.AngleTrait
 import com.fieldbook.shared.screens.collect.traits.BarcodeTrait
 import com.fieldbook.shared.screens.collect.traits.BooleanTrait
@@ -42,7 +41,6 @@ import com.fieldbook.shared.theme.AppColors
 import com.fieldbook.shared.traits.Formats
 import com.fieldbook.shared.utilities.CategoryJsonUtil
 import com.fieldbook.shared.utilities.dateFormatMonthDay
-import io.kamel.image.config.LocalKamelConfig
 
 @Composable
 fun CollectInput(
@@ -280,9 +278,7 @@ fun TraitInputHost(
                 modifier = modifier.fillMaxWidth().padding(8.dp)
             )
 
-            "photo", "camera" -> CompositionLocalProvider(
-                LocalKamelConfig provides customKamelConfig
-            ) {
+            "photo", "camera" -> {
                 PhotoTrait(
                     value = value,
                     onValueChange = {
