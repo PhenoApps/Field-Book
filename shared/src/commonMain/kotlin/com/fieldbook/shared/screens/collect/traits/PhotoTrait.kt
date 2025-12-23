@@ -13,7 +13,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,7 +48,7 @@ import org.jetbrains.compose.resources.painterResource
 @OptIn(ExperimentalResourceApi::class)
 @Composable
 fun PhotoTrait(
-    value: String,
+    values: List<String>,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -66,13 +65,9 @@ fun PhotoTrait(
         }
     }
 
-    // Initialize from db value (comma-separated)
+    // Initialize from db values (list)
     val photoUris = remember {
-        val initial = if (value.isNotBlank()) {
-            value.split(",")
-                .map { normalizeStoredPhotoRef(it) }
-                .filter { it.isNotBlank() }
-        } else emptyList()
+        val initial = values.map { normalizeStoredPhotoRef(it) }.filter { it.isNotBlank() }
         mutableStateOf(initial)
     }
 
@@ -84,10 +79,6 @@ fun PhotoTrait(
     // TODO
     val defaultDirectory =
         preferences.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY.key, "")
-
-    LaunchedEffect(photoUris.value) {
-        onValueChange(photoUris.value.joinToString(","))
-    }
 
     Column(
         modifier = modifier.fillMaxSize(),
@@ -153,8 +144,7 @@ fun PhotoTrait(
                     contentAlignment = Alignment.Center
                 ) {
                     CameraPreview(
-                        modifier = Modifier.
-                        fillMaxHeight()
+                        modifier = Modifier.fillMaxHeight()
                             .width(width),
                         cameraConfiguration = {
                             setCameraLens(CameraLens.BACK)
@@ -214,6 +204,7 @@ fun PhotoTrait(
                                     }
                                 }*/
 
+                                onValueChange(normalized)
                             }
 
                             is ImageCaptureResult.Error -> {

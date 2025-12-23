@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,7 +46,8 @@ fun CollectInput(
     controller: CollectScreenController,
 ) {
     val trait = controller.traits.getOrNull(controller.currentTraitIndex)
-    val value = trait?.let { controller.traitValues[it.id] } ?: ""
+    val values = trait?.let { controller.traitValues[it.id] } ?: emptyList()
+    val value = values.firstOrNull() ?: ""
 
     var isEdited by remember(
         controller.currentTraitIndex,
@@ -113,7 +113,7 @@ fun CollectInput(
             TraitInputHost(
                 controller = controller,
                 trait = trait,
-                value = value,
+                values = values,
                 onEdited = { isEdited = true }
             )
         } else {
@@ -135,7 +135,7 @@ fun CollectInput(
             TraitInputHost(
                 controller = controller,
                 trait = trait,
-                value = value,
+                values = values,
                 onEdited = { isEdited = true }
             )
         }
@@ -146,10 +146,11 @@ fun CollectInput(
 fun TraitInputHost(
     controller: CollectScreenController,
     trait: com.fieldbook.shared.database.models.TraitObject?,
-    value: String,
+    values: List<String>,
     onEdited: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
+    val value = values.firstOrNull() ?: ""
     val formatEnum = trait?.format?.let { formatStr ->
         Formats.entries.find { it.databaseName.equals(formatStr, ignoreCase = true) }
     }
@@ -240,6 +241,18 @@ fun TraitInputHost(
             },
             modifier = modifier.fillMaxWidth().padding(8.dp)
         )
+
+        Formats.PHOTO -> {
+            PhotoTrait(
+                values = values,
+                onValueChange = {
+                    controller.addCurrentTraitValue(it)
+                    onEdited()
+                },
+                modifier = modifier.fillMaxWidth().padding(8.dp)
+            )
+        }
+
         // Add more as needed, or use legacy string fallback for custom/unknown
         else -> when (trait?.format) {
             "barcode" -> BarcodeTrait(
@@ -277,17 +290,6 @@ fun TraitInputHost(
                 },
                 modifier = modifier.fillMaxWidth().padding(8.dp)
             )
-
-            "photo", "camera" -> {
-                PhotoTrait(
-                    value = value,
-                    onValueChange = {
-                        controller.updateCurrentTraitValue(it)
-                        onEdited()
-                    },
-                    modifier = modifier.fillMaxWidth().padding(8.dp)
-                )
-            }
 
             "audio", "usb_camera", "gopro", "canon" -> {
                 TextTrait(
