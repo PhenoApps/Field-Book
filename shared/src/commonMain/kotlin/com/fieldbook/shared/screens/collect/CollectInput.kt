@@ -249,7 +249,8 @@ fun TraitInputHost(
                     controller.addCurrentTraitValue(it)
                     onEdited()
                 },
-                modifier = modifier.fillMaxWidth().padding(8.dp)
+                modifier = modifier.fillMaxWidth().padding(8.dp),
+                controller
             )
         }
 

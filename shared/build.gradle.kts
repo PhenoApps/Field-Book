@@ -1,3 +1,4 @@
+
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
 plugins {
@@ -90,6 +91,8 @@ kotlin {
                 // dependencies declared in commonMain.
                 implementation("app.cash.sqldelight:android-driver:2.1.0")
                 implementation(libs.lifecycle.viewmodel.compose)
+//                implementation(libs.documentfile)
+                implementation("com.github.phenoapps:phenolib:v0.9.53")
             }
         }
 

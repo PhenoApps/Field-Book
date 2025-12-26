@@ -25,9 +25,9 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.camera_24px
-import com.fieldbook.shared.preferences.GeneralKeys
-import com.fieldbook.shared.storage.PlatformPhotos
+import com.fieldbook.shared.screens.collect.CollectScreenController
 import com.fieldbook.shared.theme.MainFloatingActionButtonShape
+import com.fieldbook.shared.utilities.DocumentTreeUtil
 import com.kashif.cameraK.controller.CameraController
 import com.kashif.cameraK.enums.CameraLens
 import com.kashif.cameraK.enums.Directory
@@ -35,12 +35,8 @@ import com.kashif.cameraK.enums.FlashMode
 import com.kashif.cameraK.enums.ImageFormat
 import com.kashif.cameraK.result.ImageCaptureResult
 import com.kashif.cameraK.ui.CameraPreview
-import com.russhwolf.settings.Settings
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
-import okio.FileSystem
-import okio.Path.Companion.toPath
-import okio.SYSTEM
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 
@@ -51,6 +47,7 @@ fun PhotoTrait(
     values: List<String>,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
+    controller: CollectScreenController,
 ) {
     fun normalizeStoredPhotoRef(raw: String): String {
         val trimmed = raw.trim()
@@ -73,12 +70,6 @@ fun PhotoTrait(
 
     var cameraController by remember { mutableStateOf<CameraController?>(null) }
     val scope = rememberCoroutineScope()
-
-    // Retrieve default storage directory from preferences
-    val preferences = remember { Settings() }
-    // TODO
-    val defaultDirectory =
-        preferences.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY.key, "")
 
     Column(
         modifier = modifier.fillMaxSize(),
@@ -163,22 +154,29 @@ fun PhotoTrait(
         FloatingActionButton(
             onClick = {
                 scope.launch {
-                    cameraController?.let { controller ->
-                        when (val result = controller.takePicture()) {
+                    cameraController?.let { cameraController ->
+                        when (val result = cameraController.takePicture()) {
                             is ImageCaptureResult.Success -> {
                                 val fileName =
                                     "Photo_${Clock.System.now().toEpochMilliseconds()}.jpg"
 
-                                // Save in an app-controlled directory so the file definitely exists.
-                                val absPath = PlatformPhotos.newPhotoFilePath(fileName)
-                                val p = absPath.toPath()
-                                FileSystem.SYSTEM.createDirectories(p.parent!!)
-                                FileSystem.SYSTEM.write(p) {
-                                    write(result.byteArray)
-                                }
+                                val dir = DocumentTreeUtil.getFieldMediaDirectory(controller.traits[controller.currentTraitIndex].name)
+                                dir?.let {
+                                    val createdFile = it.createFile(
+                                        mimeType = "*/*",
+                                        name = fileName
+                                    )
+                                    createdFile?.let { file ->
+                                        file.writeBytes(result.byteArray)
 
-                                val normalized = "file://$absPath"
-                                photoUris.value = photoUris.value + normalized
+                                        val uri = file.uri()
+                                        val currentList = photoUris.value.toMutableList()
+                                        currentList.add(uri)
+                                        photoUris.value = currentList
+
+                                        onValueChange(uri)
+                                    }
+                                }
 
                                 // TODO cannot get fileKit 0.8.8 to work, files are saved but path is wrong
                                 //  using PlatformPhotos workaround for now
@@ -203,8 +201,6 @@ fun PhotoTrait(
                                         photoUris.value = currentList
                                     }
                                 }*/
-
-                                onValueChange(normalized)
                             }
 
                             is ImageCaptureResult.Error -> {
