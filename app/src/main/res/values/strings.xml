@@ -747,6 +747,7 @@
     <string name="dialog_multi_measure_delete_no_observations">No observations exist.</string>
     <string name="dialog_multi_measure_delete_title">Observations</string>
     <string name="dialog_multi_measure_confirm_delete_title">All observations for this trait will be permanently deleted.</string>
+    <string name="dialog_multi_measure_confirm_delete_message">This will also delete any attached media.</string>
     <string name="dialog_multi_measure_delete">Delete</string>
     <string name="dialog_multi_measure_select_all">Select all</string>
 
@@ -1824,4 +1825,6 @@
     <string name="are_you_sure_you_want_to_delete_this_media_item">Are you sure you want to delete this media item?</string>
     <string name="confirm_delete">Confirm delete</string>
     <string name="audio_permission_required">Audio permission required</string>
+    <string name="confirm_delete_with_media_title">Delete observation with attached media?</string>
+    <string name="confirm_delete_with_media_message">This observation has attached media (photo, audio, or video). Deleting the observation will also delete the attached media files. Are you sure you want to continue?</string>
 </resources>

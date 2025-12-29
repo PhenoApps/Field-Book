@@ -123,7 +123,7 @@ data class ObservationModel(val map: Row) {
 
     fun getMultiMediaCount(): Int {
 
-        return setOf(photo_uri, video_uri, audio_uri).count { it != null }
+        return setOf(photo_uri, video_uri, audio_uri).count { it != null && it.isNotBlank() }
 
     }
 }
