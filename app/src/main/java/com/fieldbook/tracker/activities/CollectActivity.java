@@ -795,16 +795,40 @@ public class CollectActivity extends ThemedActivity
 
             @Override
             public void onDelete() {
-                boolean status = database.isBrapiSynced(getStudyId(), getObservationUnit(), getTraitDbId(), getRep());
-                String format = getTraitFormat();
-                if (status && !Formats.Companion.isCameraTrait(format)) {
-                    brapiDelete(getCurrentTrait(), false);
-                } else {
-                    traitLayouts.deleteTraitListener(getTraitFormat());
+                // check for attached media on the current observation
+                ObservationModel obs = null;
+                try {
+                    obs = getCurrentObservation();
+                } catch (Exception ignored) {}
+
+                if (obs != null) {
+                    boolean hasMedia = obs.getMultiMediaCount() > 0;
+
+                    if (hasMedia) {
+                        // Warn the user that attached media will also be removed
+                        ObservationModel finalObs = obs;
+                        new AlertDialog.Builder(CollectActivity.this, R.style.AppAlertDialog)
+                                .setTitle(R.string.confirm_delete_with_media_title)
+                                .setMessage(getString(R.string.confirm_delete_with_media_message))
+                                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                                    // delete attached media files
+                                    try {
+                                        deleteMediaUrisForObservation(finalObs);
+                                    } catch (Exception e) {
+                                        Log.e(TAG, "Error deleting attached media", e);
+                                    }
+
+                                    // proceed with existing delete behavior
+                                    performTraitDeleteAfterMediaCheck();
+                                })
+                                .setNegativeButton(android.R.string.cancel, null)
+                                .show();
+                        return;
+                    }
                 }
-                if (getCurrentObservation() == null) updateCurrentTraitStatus(false);
-                initToolbars();
-                triggerTts(deleteTts);
+
+                // If no media or no current observation, proceed with original behavior
+                performTraitDeleteAfterMediaCheck();
             }
 
             @Override
@@ -1985,6 +2009,7 @@ public class CollectActivity extends ThemedActivity
 
         dialogMultiMeasureConfirmDelete = new AlertDialog.Builder(this, R.style.AppAlertDialog)
                 .setTitle(R.string.dialog_multi_measure_confirm_delete_title)
+                .setMessage(R.string.dialog_multi_measure_confirm_delete_message)
                 .setPositiveButton(android.R.string.ok, (d, which) -> {
                     deleteMultiMeasures(models);
                 })
@@ -2032,6 +2057,8 @@ public class CollectActivity extends ThemedActivity
                 collectInputView.prepareObservationsExistMode(Arrays.asList(currentModels));
 
             }
+
+            deleteMediaUrisForObservation(model);
 
             traitLayoutRefresh();
         }
@@ -3343,8 +3370,72 @@ public class CollectActivity extends ThemedActivity
         } catch (Exception e) { e.printStackTrace(); }
     }
 
-    // Called by MediaPreviewDialogFragment when user cancels (Delete temp file)
     public void onMediaCancelFromDialog(String mediaPath) {
         try { new File(mediaPath).delete(); } catch (Exception ignore) {}
+    }
+
+    private void performTraitDeleteAfterMediaCheck() {
+        boolean status = database.isBrapiSynced(getStudyId(), getObservationUnit(), getTraitDbId(), getRep());
+        String format = getTraitFormat();
+        if (status && !Formats.Companion.isCameraTrait(format)) {
+            brapiDelete(getCurrentTrait(), false);
+        } else {
+            traitLayouts.deleteTraitListener(getTraitFormat());
+        }
+        if (getCurrentObservation() == null) updateCurrentTraitStatus(false);
+        initToolbars();
+        String deleteTts = getString(R.string.act_collect_delete_btn_tts);
+        triggerTts(deleteTts);
+    }
+
+    // Delete any attached media URIs stored on the observation (photo_uri, video_uri, audio_uri)
+    private void deleteMediaUrisForObservation(ObservationModel obs) {
+        if (obs == null) return;
+
+        List<String> uris = new ArrayList<>();
+        try { if (obs.getPhoto_uri() != null && !obs.getPhoto_uri().isEmpty()) uris.add(obs.getPhoto_uri()); } catch (Exception ignored) {}
+        try { if (obs.getVideo_uri() != null && !obs.getVideo_uri().isEmpty()) uris.add(obs.getVideo_uri()); } catch (Exception ignored) {}
+        try { if (obs.getAudio_uri() != null && !obs.getAudio_uri().isEmpty()) uris.add(obs.getAudio_uri()); } catch (Exception ignored) {}
+
+        for (String s : uris) {
+            try {
+                safeDeleteUriString(s);
+            } catch (Exception e) {
+                Log.w(TAG, "Failed to delete media at: " + s, e);
+            }
+        }
+    }
+
+    // Attempt to delete a media reference. Prefer DocumentFile deletion (for SAF URIs) then fallback to java.io.File.
+    private void safeDeleteUriString(String uriString) {
+        if (uriString == null || uriString.isEmpty()) return;
+        try {
+            Uri uri = Uri.parse(uriString);
+
+            //saf delete
+            try {
+                DocumentFile d = DocumentFile.fromSingleUri(this, uri);
+                if (d.exists()) {
+                    boolean deleted = d.delete();
+                    Log.d(TAG, "Deleted DocumentFile: " + uriString + " -> " + deleted);
+                    return;
+                }
+            } catch (Exception e) {
+                Log.d(TAG, "DocumentFile deletion failed for " + uriString, e);
+            }
+
+            //ry deleting as a normal file path
+            try {
+                java.io.File f = new java.io.File(Objects.requireNonNull(uri.getPath()));
+                if (f.exists()) {
+                    boolean deleted = f.delete();
+                    Log.d(TAG, "Deleted File: " + f.getAbsolutePath() + " -> " + deleted);
+                }
+            } catch (Exception e) {
+                Log.d(TAG, "File deletion failed for " + uriString, e);
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "Invalid uri string: " + uriString, e);
+        }
     }
 }

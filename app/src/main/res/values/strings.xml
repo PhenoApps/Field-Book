@@ -748,6 +748,7 @@
     <string name="dialog_multi_measure_delete_no_observations">No observations exist.</string>
     <string name="dialog_multi_measure_delete_title">Observations</string>
     <string name="dialog_multi_measure_confirm_delete_title">All observations for this trait will be permanently deleted.</string>
+    <string name="dialog_multi_measure_confirm_delete_message">This will also delete any attached media.</string>
     <string name="dialog_multi_measure_delete">Delete</string>
     <string name="dialog_multi_measure_select_all">Select all</string>
 
@@ -1914,4 +1915,6 @@
     <string name="there_are_unuploaded_observations_or_images_do_you_want_to_upload_them_before_downloading">There are unuploaded observations or images. Do you want to upload them before downloading?</string>
     <string name="upload_first">Upload</string>
     <string name="download_anyway">Download</string>
+    <string name="confirm_delete_with_media_title">Delete observation with attached media?</string>
+    <string name="confirm_delete_with_media_message">This observation has attached media (photo, audio, or video). Deleting the observation will also delete the attached media files. Are you sure you want to continue?</string>
 </resources>
