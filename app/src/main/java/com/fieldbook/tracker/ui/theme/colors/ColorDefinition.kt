@@ -1,5 +1,7 @@
 package com.fieldbook.tracker.ui.theme.colors
 
+import androidx.compose.material3.TopAppBarColors
+
 /**
  * Define theme colors for default theme, and override specific colors for other theme in their own implementation
  */
@@ -113,6 +115,15 @@ val DefaultAppColors = AppColors(
     crop = CropColors(
         inverseRegion = BaseColors.InverseCropRegion
     ),
+
+    topAppBarColors = TopAppBarColors(
+        containerColor = BaseColors.Primary,
+        scrolledContainerColor = BaseColors.PrimaryTransparent,
+        navigationIconContentColor = BaseColors.IconTint,
+        titleContentColor = BaseColors.TextDark,
+        actionIconContentColor = BaseColors.IconTint,
+        subtitleContentColor = BaseColors.TextDark
+    )
 )
 
 val BlueAppColors = DefaultAppColors.copy(
