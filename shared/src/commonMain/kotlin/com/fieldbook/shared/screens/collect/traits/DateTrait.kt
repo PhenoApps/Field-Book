@@ -4,12 +4,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.Button
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,6 +27,8 @@ import com.fieldbook.shared.generated.resources.ic_event_black_24dp
 import com.fieldbook.shared.generated.resources.ic_plus
 import com.fieldbook.shared.generated.resources.minus
 import com.fieldbook.shared.generated.resources.trait_date_save
+import com.fieldbook.shared.theme.Button
+import com.fieldbook.shared.theme.FilledIconButton
 import com.fieldbook.shared.utilities.dateFormatMonthDay
 import com.fieldbook.shared.utilities.epochMillisToLocalDate
 import com.fieldbook.shared.utilities.localDateToEpochMillis
@@ -72,13 +74,16 @@ fun DateTrait(
         Row(verticalAlignment = Alignment.CenterVertically) {
             FilledIconButton(
                 onClick = { localDate = localDate?.plus(-1, DateTimeUnit.DAY) },
-                enabled = localDate != null
+                enabled = localDate != null,
+                shape = CircleShape,
+                modifier = Modifier.size(76.dp),
             ) {
                 Icon(
                     painter = painterResource(
                         Res.drawable.minus
                     ),
-                    contentDescription = "Previous day"
+                    contentDescription = "Previous day",
+                    modifier = Modifier.size(38.dp)
                 )
             }
             Spacer(Modifier.width(16.dp))
@@ -89,11 +94,14 @@ fun DateTrait(
             Spacer(Modifier.width(16.dp))
             FilledIconButton(
                 onClick = { localDate = localDate?.plus(1, DateTimeUnit.DAY) },
-                enabled = localDate != null
+                enabled = localDate != null,
+                shape = CircleShape,
+                modifier = Modifier.size(76.dp),
             ) {
                 Icon(
                     painter = painterResource(Res.drawable.ic_plus),
-                    contentDescription = "Next day"
+                    contentDescription = "Next day",
+                    modifier = Modifier.size(38.dp)
                 )
             }
         }
@@ -101,11 +109,14 @@ fun DateTrait(
         Row(verticalAlignment = Alignment.CenterVertically) {
             FilledIconButton(
                 onClick = { showDatePicker = true },
-                enabled = localDate != null
+                enabled = localDate != null,
+                shape = CircleShape,
+                modifier = Modifier.size(76.dp),
             ) {
                 Icon(
                     painter = painterResource(Res.drawable.ic_event_black_24dp),
-                    contentDescription = "Pick date"
+                    contentDescription = "Pick date",
+                    modifier = Modifier.size(38.dp)
                 )
             }
             Spacer(Modifier.width(32.dp))
@@ -113,19 +124,28 @@ fun DateTrait(
                 onClick = {
                     localDate?.let { onValueChange(saveFormat(it)) }
                 },
-                enabled = localDate != null
+                enabled = localDate != null,
+                shape = CircleShape,
+                modifier = Modifier.size(76.dp),
             ) {
                 Icon(
                     painter = painterResource(Res.drawable.trait_date_save),
-                    contentDescription = "Save date"
+                    contentDescription = "Save date",
+                    modifier = Modifier.size(38.dp)
                 )
             }
         }
         if (localDate == null) {
             Spacer(Modifier.height(8.dp))
-            Button(onClick = {
-                localDate = nowDate()
-            }) { Text("Clear NA") }
+            Button(
+                onClick = {
+                    localDate = nowDate()
+                },
+                shape = CircleShape,
+                modifier = Modifier.size(76.dp),
+            ) {
+                Text("Clear NA")
+            }
         }
     }
 
@@ -136,16 +156,18 @@ fun DateTrait(
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
-                Button(onClick = {
-                    val selectedMillis = datePickerState.selectedDateMillis
-                    if (selectedMillis != null) {
-                        localDate = epochMillisToLocalDate(selectedMillis)
-                    }
-                    showDatePicker = false
-                }) { Text("OK") }
+                androidx.compose.material3.Button(
+                    onClick = {
+                        val selectedMillis = datePickerState.selectedDateMillis
+                        if (selectedMillis != null) {
+                            localDate = epochMillisToLocalDate(selectedMillis)
+                        }
+                        showDatePicker = false
+                    },
+                ) { Text("OK") }
             },
             dismissButton = {
-                Button(onClick = { showDatePicker = false }) { Text("Cancel") }
+                androidx.compose.material3.Button(onClick = { showDatePicker = false }) { Text("Cancel") }
             }
         ) {
             DatePicker(state = datePickerState)

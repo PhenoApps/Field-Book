@@ -4,14 +4,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import com.fieldbook.shared.database.models.TraitObject
+import com.fieldbook.shared.theme.Button
 import com.fieldbook.shared.theme.numericButtonDefaults
 import com.fieldbook.shared.utilities.BrAPIScaleValidValuesCategories
 import com.fieldbook.shared.utilities.CategoryJsonUtil
@@ -68,14 +65,8 @@ fun CategoricalTrait(
                         onValueChange(CategoryJsonUtil.encode(scale))
                     }
                 },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (displayedValue == buttonText) MaterialTheme.colorScheme.primary else Color(
-                        0xFFD9D9D9
-                    )
-                ),
-                modifier = Modifier.fillMaxWidth()
-                    .numericButtonDefaults(),
-                shape = MaterialTheme.shapes.small
+                selected = displayedValue == buttonText,
+                modifier = Modifier.fillMaxWidth().numericButtonDefaults(),
             ) {
                 Text(buttonText)
             }
