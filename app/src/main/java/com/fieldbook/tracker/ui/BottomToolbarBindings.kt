@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 
 enum class MediaOption {
     CAPTURE_MEDIA,
@@ -50,6 +51,7 @@ interface BottomToolbarListener {
     fun onMediaOption(option: MediaOption)
 }
 
+@Preview
 @Composable
 fun BottomToolbar(
     listener: BottomToolbarListener? = null,
@@ -76,8 +78,7 @@ fun BottomToolbar(
             Row(
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp),
+                    .fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
