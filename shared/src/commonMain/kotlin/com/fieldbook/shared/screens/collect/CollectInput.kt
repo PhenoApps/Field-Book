@@ -31,7 +31,6 @@ import com.fieldbook.shared.screens.collect.traits.DiseaseRatingTrait
 import com.fieldbook.shared.screens.collect.traits.GnsSTrait
 import com.fieldbook.shared.screens.collect.traits.LabelPrintTrait
 import com.fieldbook.shared.screens.collect.traits.LocationTrait
-import com.fieldbook.shared.screens.collect.traits.MultiCatTrait
 import com.fieldbook.shared.screens.collect.traits.NumericTrait
 import com.fieldbook.shared.screens.collect.traits.PercentTrait
 import com.fieldbook.shared.screens.collect.traits.PhotoTrait
@@ -187,6 +186,17 @@ fun TraitInputHost(
             modifier = modifier.fillMaxWidth().padding(8.dp)
         )
 
+        Formats.MULTI_CATEGORICAL -> CategoricalTrait(
+            trait = trait,
+            value = value,
+            onValueChange = {
+                controller.updateCurrentTraitValue(it)
+                onEdited()
+            },
+            modifier = modifier.fillMaxWidth().padding(8.dp),
+            multi = true
+        )
+
         Formats.BOOLEAN -> BooleanTrait(
             value = value,
             onValueChange = {
@@ -215,16 +225,6 @@ fun TraitInputHost(
         )
 
         Formats.DATE -> DateTrait(
-            value = value,
-            onValueChange = {
-                controller.updateCurrentTraitValue(it)
-                onEdited()
-            },
-            modifier = modifier.fillMaxWidth().padding(8.dp)
-        )
-
-        Formats.MULTI_CATEGORICAL -> MultiCatTrait(
-            trait = trait,
             value = value,
             onValueChange = {
                 controller.updateCurrentTraitValue(it)

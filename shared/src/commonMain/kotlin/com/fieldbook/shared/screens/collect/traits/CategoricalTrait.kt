@@ -18,11 +18,12 @@ fun CategoricalTrait(
     trait: TraitObject?,
     value: String,
     onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    multi: Boolean = false,
 ) {
     // TODO Determine the button text according to the user's preference (label or value)
     val labelValPref = "value"
-    println("CategoricalTrait: trait=$trait, value=$value")
+    println("CategoricalTrait: trait=$trait, value=$value, multi=$multi")
 
     // Parse the trait's category definition. Try JSON first, then fall back to legacy slash-separated format.
     val categories: ArrayList<BrAPIScaleValidValuesCategories> = try {
@@ -34,15 +35,19 @@ fun CategoricalTrait(
         ArrayList(fallback)
     }
 
-    // Compute the displayed text from the stored value (which may be JSON or legacy raw)
-    val displayedValue: String = try {
+    // Compute the displayed values from the stored value (which may be JSON or legacy raw)
+    val displayedValues: List<String> = try {
         val scale = CategoryJsonUtil.decode(value)
         if (scale.isNotEmpty()) {
-            if (labelValPref == "value") scale[0].value ?: "" else scale[0].label ?: ""
-        } else ""
+            if (labelValPref == "value") scale.mapNotNull { it.value } else scale.mapNotNull { it.label }
+        } else if (!multi && value.isNotBlank()) {
+            // Legacy single value
+            listOf(value)
+        } else {
+            emptyList()
+        }
     } catch (_: Exception) {
-        // If decode unexpectedly fails, fall back to the raw stored string
-        value
+        if (!multi && value.isNotBlank()) listOf(value) else emptyList()
     }
 
     // Display buttons in a grid (3 columns per row)
@@ -54,18 +59,31 @@ fun CategoricalTrait(
     ) {
         items(categories) { cat ->
             val buttonText = if (labelValPref == "value") cat.value ?: "" else cat.label ?: ""
+            val isSelected = displayedValues.contains(buttonText)
             Button(
                 onClick = {
-                    // Toggle selection: if already selected, clear (emit encoded empty list), otherwise emit encoded single-item list
-                    if (displayedValue == buttonText) {
-                        onValueChange("")
+                    if (multi) {
+                        // Multi-select: add or remove from selection
+                        val scale = CategoryJsonUtil.decode(value).toMutableList()
+                        val alreadySelected = scale.any { (if (labelValPref == "value") it.value else it.label) == buttonText }
+                        if (alreadySelected) {
+                            val newScale = scale.filterNot { (if (labelValPref == "value") it.value else it.label) == buttonText }
+                            onValueChange(CategoryJsonUtil.encode(ArrayList(newScale)))
+                        } else {
+                            scale.add(cat)
+                            onValueChange(CategoryJsonUtil.encode(ArrayList(scale)))
+                        }
                     } else {
-                        val scale = ArrayList<BrAPIScaleValidValuesCategories>()
-                        scale.add(cat)
-                        onValueChange(CategoryJsonUtil.encode(scale))
+                        // Single-select: toggle selection
+                        if (isSelected) {
+                            onValueChange("")
+                        } else {
+                            val scale = arrayListOf(cat)
+                            onValueChange(CategoryJsonUtil.encode(scale))
+                        }
                     }
                 },
-                selected = displayedValue == buttonText,
+                selected = isSelected,
                 modifier = Modifier.fillMaxWidth().numericButtonDefaults(),
             ) {
                 Text(buttonText)
