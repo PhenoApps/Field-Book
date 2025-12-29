@@ -4,7 +4,7 @@
 
 ## Overview
 
-The Export dialog allows the user to customize how collected data is exported.
+The Export dialog allows the user to customize how data is exported.
 Collected data is exported as `.csv` files.
 
 <figure class="image">
@@ -33,14 +33,12 @@ If repeated measures have been collected, only the first value will be exported 
 #### Included Columns
 
 The exported file can include only the unique identifier or all field columns that were imported.
-
 The exported file can contain traits that are currently active or all traits that have been created.
 
 #### Details
 
 The filename is generated based on the current date and the name of the field.
-
-After pressing Save, you will see Field Book app citation information and an option to share the exported file with other apps.
+After pressing Save, the Field Book app citation will be displayed and an option to share the exported file with other apps will show.
 Exported files are stored in the `field_export` folder.
 
 #### Other customizations

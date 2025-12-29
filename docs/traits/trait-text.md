@@ -5,14 +5,14 @@
 The text trait format is used to record open-ended text.
 
 ### Parameters
-- `Name` assign a value for trait name, alias, and assigns synonyms list to hold the value.
-- `Default` automatically assigns a specific value for the observation when visiting an entry having no observation recorded previously.
+- `Name` assign a value for trait name.
+- `Default` automatically assigns a value when visiting an entry that has no observations.
 - `Details` text is displayed under the trait name on the Collect screen.
-- `Close Keyboard` opens up the system keyboard for each entry when enabled.
-- `Repeated Measures` turns on repeated measure for the trait when enabled.
-- `Resource File` opens the resources folder and can be used to set a image for the trait that can be reference later in the Collect screen.
+- `Close Keyboard` opens the system keyboard for each entry when enabled.
+- `Repeated Measures` toggles repeated measure for the trait.
+- `Resource File` sets an image for the trait that will be opened by default when accessing resources from Collect.
 
-On the Collect screen, text can be typed or dictated using the system keyboard.
+In Collect, text can be typed or dictated using the system keyboard.
 
 <figure class="image">
   <img class="screenshot" src="../_static/images/traits/formats/joined_text_format.png" width="700px"> 

@@ -4,7 +4,7 @@
 
 ## Overview
 
-Experiments in Field Book are called `fields`.
+Experiments in Field Book are called `Fields`.
 Fields can be imported from a file, downloaded from a BrAPI-enabled database, or created from scratch.
 
 <figure class="image">
@@ -27,9 +27,9 @@ Each entry within a field must have a `unique identifier`.
 The `unique identifier` is used to associate data with the specific entry and must be unique across all of your fields.
 The sample field import file shown below contains a unique identifier called **plot_id** (highlighted in red).
 
-Any number of additional columns can be included to provide contextual information on the Collect screen.
+Additional data columns can be included to provide contextual information on the Collect screen.
 Values from two additional columns can be displayed as the primary and secondary ID between the entry navigation arrows, and any number of additional columns can be displayed in the Infobar section.
-Details of how to customize these choices and use the primary and secondary IDs for Quick GoTo are documented in <img class="icon" src="_static/icons/home/barley.png"> [Collect](collect.md).
+These choices can be customized or used for for Quick GoTo, as documented in <img class="icon" src="_static/icons/home/barley.png"> [Collect](collect.md).
 
 Examples of useful columns for navigation include layout numbers like `plot_number`, `row`, `column`, `rep`, or `block`.
 The sample field import file contains columns called `row` and `plot` (highlighted in blue) which are used as the primary and secondary identifiers in this documentation.
@@ -46,18 +46,14 @@ Other useful context columns like `variety_name`, `pedigree`, or `treatment` are
   <figcaption class="screenshot-caption"><i>The Fields screen layout with sample fields loaded</i></figcaption> 
 </figure>
 
-Field Book includes a set of sample field files.
-Samples `field_sample.csv`, `field_sample2.csv`, and `field_sample3.csv` represent typical wheat breeding fields.
-Sample `rtk_sample.csv` demonstrates the import format for entry location data (an additional `geo_coordinates` column).
+Field Book includes a set of sample field files: `field_sample.csv`, `field_sample2.csv`, and `field_sample3.csv` represent typical wheat breeding fields and `rtk_sample.csv` demonstrates the import format for entry location data (an additional `geo_coordinates` column).
 Imported entry coordinates can then be used with the <img class="icon" src="_static/icons/settings/main/map-search.png"> [Geonav](geonav.md) feature.
 
 ## Adding a field
 
 New fields can be added by pressing the <img class="icon" src="_static/icons/fields/plus-circle.png"> button in the bottom right corner of the Fields screen.
 This opens a dialog where you can select whether to import from a local file, from cloud storage (Dropbox, Google Drive, etc.), create a new field from scratch, or import via a <img class="icon" src="_static/icons/settings/main/server-network.png"> [Brapi](brapi.md) connection (if enabled).
-
-A default import source can be set in <img class="icon" src="_static/icons/settings/main/cog-outline.png"> [System Settings](settings-system.md) to skip this dialog.
-Long-pressing the <img class="icon" src="_static/icons/fields/plus-circle.png"> button will override the default choice.
+A default import source can be set in <img class="icon" src="_static/icons/settings/main/cog-outline.png"> [System Settings](settings-system.md) to skip this dialog, and long-pressing the <img class="icon" src="_static/icons/fields/plus-circle.png"> button will override the default choice.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/fields/fields_import_joined.png" width="1100px"> 
@@ -70,7 +66,7 @@ Selecting local will display a list of files in the `field_import` folder.
 Files can be added to the import folder by downloading or [transferring from a computer](storage.md#file-transfer).
 Only `.csv`, `.xls`, or `.xlsx` files will appear in the import dialog.
 
-!> Filenames and column headers must exclude the special characters: `/ ? < > * | "`
+!> Filenames and column headers must exclude the following special characters: `/ ? < > * | "`
 
 Once a file has been selected, the dropdown menu is used to select which column from the file should be used as the `unique_identifier`.
 
@@ -92,15 +88,14 @@ The <img class="icon" src="_static/icons/fields/menu.png"> menu icon in the uppe
 Creating a new field directly in Field Book requires a field name, dimensions, starting corner for entry ordering, walking direction and pattern.
 Universal unique IDs will be generated for all entries.
 
-Press the <img class="icon" src="_static/icons/fields/chevron-left.png"> left icon or <img class="icon" src="_static/icons/fields/chevron-right.png"> right icon to move between steps when available.
-You can also use the stepper to move between steps.
+Press the <img class="icon" src="_static/icons/fields/chevron-left.png"> left icon or <img class="icon" src="_static/icons/fields/chevron-right.png"> right icon to move between steps in the creation process.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/fields/field_create_stepper.png" width="350px"> 
   <figcaption class="screenshot-caption"><i>Stepper</i></figcaption> 
 </figure>
 
-Plot numbers indicate the sequence you'll follow when collecting data in the field.
+Entry numbers indicate the sequence you'll follow when collecting data in the field.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/fields/field_create1.png" width="700px"> 
@@ -115,7 +110,7 @@ Direction determines whether entries progress horizontally or vertically, and pa
 </figure>
 
 Use the <img class="icon" src="_static/icons/fields/expand-all.png"> expand icon to see the full preview, and <img class="icon" src="_static/icons/fields/collapse-all.png"> collapse icon to see collapsed preview of the field when available.
-Confirm the planned settings are as expected, then press <img class="icon" src="_static/icons/fields/check-bold.png"> done icon.
+Confirm the planned settings are as expected, then press <img class="icon" src="_static/icons/fields/check-bold.png"> to save the field.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/fields/field_create3.png" width="700px"> 
@@ -129,9 +124,9 @@ Confirm the planned settings are as expected, then press <img class="icon" src="
 
 #### Breeding API (BrAPI)
 
-To import a field using BrAPI, ensure make sure BrAPI is enabled and configured in the <img class="icon" src="_static/icons/settings/main/server-network.png"> [Brapi settings](settings-brapi.md)
+To import a field using BrAPI, ensure BrAPI is enabled and configured in the <img class="icon" src="_static/icons/settings/main/server-network.png"> [Brapi settings](settings-brapi.md)
 
-Once you have authenticated with a compatible database, the BrAPI server will be displayed as an option for field import.
+Once your device is authenticated with a compatible database, the BrAPI server will be displayed as an option for field import.
 The [BrAPI](brapi.md) section of the documentation has more details about the field and trait import process.
 
 !> Any field can be exported locally, but only fields and traits that have been imported via BrAPI are able to export data via BrAPI.
@@ -142,16 +137,17 @@ To set or switch your active field, press the import source icon on the left sid
 
 If your fields have location data, pressing the <img class="icon" src="_static/icons/fields/compass-outline.png"> icon in the top toolbar will set the nearest active field.
 
-Pressing the <img class="icon" src="_static/icons/fields/sort.png"> icon in the top toolbar will display a dialog with different attributes that can be selected to sort the list of fields. If grouping view is enabled, sorting by name will sort both the group headers and the fields within each group by name.
+Pressing the <img class="icon" src="_static/icons/fields/sort.png"> icon in the top toolbar will display a dialog with different attributes that can be selected to sort the list of fields. If grouping is enabled, sorting by name will sort both the group headers and the fields within each group.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/fields/fields_sort_framed.png" width="350px"> 
   <figcaption class="screenshot-caption"><i>Field list sort options</i></figcaption> 
 </figure>
 
-For batch operations, long pressing one or more field items opens an action menu on the top toolbar.
-Use the action menu icons to <img class="icon" src="_static/icons/fields/check-all.png"> select all, <img class="icon" src="_static/icons/fields/file-export-outline.png"> export all, <img class="icon" src="_static/icons/fields/delete.png"> delete all, <img class="icon" src="_static/icons/fields/grouping-options.png"> access the grouping options, or <img class="icon" src="_static/icons/fields/archive.png"> archive all selected fields.
+For batch operations, long pressing a field opens an action menu on the top toolbar.
+Use the action menu icons to <img class="icon" src="_static/icons/fields/check-all.png"> select all, <img class="icon" src="_static/icons/fields/file-export-outline.png"> export all, <img class="icon" src="_static/icons/fields/delete.png"> delete all, <img class="icon" src="_static/icons/fields/grouping-options.png"> create a group, or <img class="icon" src="_static/icons/fields/archive.png"> archive all selected fields.
 A confirmation dialog message will be displayed prior to field deletion.
+Deleted fields cannot be recovered.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/fields/fields_delete_framed.png" width="350px"> 
@@ -164,8 +160,8 @@ Fields can be grouped for better organization.
 When grouping is enabled, fields are displayed under expandable group headers in the fields list.
 The number of fields in each group is displayed in parentheses in the group header.
 
-Once a group exists, using the <img class="icon" src="_static/icons/fields/group.png"> grouping on or <img class="icon" src="_static/icons/fields/ungroup.png"> grouping off icon in the toolbar will toggle the organization of fields within groups.
-Use the expand all or collapse all options from the overflow menu to quickly manage the field visibility within each group.
+Once a group exists, the <img class="icon" src="_static/icons/fields/group.png"> or <img class="icon" src="_static/icons/fields/ungroup.png"> toolbar options will toggle groups visibility.
+Use the expand all or collapse all options from the toolbar to manage the field visibility across groups.
 Individual groups can be expanded or collapsed by tapping the group header.
 Long pressing the group header will expand the group and select all fields within the group.
 
@@ -183,15 +179,15 @@ Long pressing the group header will expand the group and select all fields withi
   <figcaption class="screenshot-caption"><i>Assign an existing group</i></figcaption> 
 </figure>
 
-- Fields imported via BrAPI will automatically be assigned a group with their trial name.
+- Fields imported via BrAPI are automatically assigned to a group with their trial name.
 - Fields can be removed from groups by selecting them and choosing the "Remove from group" option.
 - Groups that do not have any fields assigned to them are automatically deleted.
 - Fields without an assigned group appear under an "Ungrouped" header when grouping is enabled.
 
 ### Archiving
 
-Fields that are no longer actively used can be archived to reduce clutter in the main fields list while preserving all data.
-Archived fields cannot be set as the active field, nor will their location data be searched when the <img class="icon" src="_static/icons/fields/compass-outline.png"> icon is pressed to find the nearest field.
+Fields that are no longer active can be archived to reduce clutter in the main fields list while preserving all data.
+Archived fields cannot be set as the active field and their location data be not searched when the <img class="icon" src="_static/icons/fields/compass-outline.png"> icon is pressed to find the nearest field.
 
 #### Archiving and accessing archived fields:
 - Select one or more fields and tap the <img class="icon" src="_static/icons/fields/archive.png"> archive icon. If the currently active field is selected for archiving, a prompt will be displayed to confirm or select which fields to archive.
@@ -208,7 +204,7 @@ Archived fields cannot be set as the active field, nor will their location data 
   <figcaption class="screenshot-caption"><i>Archived header</i></figcaption> 
 </figure>
 
-- Tap the archived fields item to view and manage archived studies in a separate screen.
+- Tap the archived fields item to view and manage archived studies.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/fields/archived_fields_screen.png" width="350px"> 
@@ -222,7 +218,7 @@ Archived fields cannot be set as the active field, nor will their location data 
   <figcaption class="screenshot-caption"><i>Archived fields screen batch options</i></figcaption> 
 </figure>
 
-- Since archived fields cannot be set as active, you will be prompted to unarchive the field when trying to set it active.
+- Since archived fields cannot be set as active, you will be prompted to unarchive the field when trying to collect data or set it as active.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/fields/archived_field_active.png" width="700px"> 
@@ -257,7 +253,7 @@ The <img class="icon" src="_static/icons/settings/sounds/delete.png"> icon will 
 
 The Search ID dialog displays a list of attributes that are unique within the field.
 By default barcode searches check against the unique identifer that was selected on import.
-Select a different attribute to modify that behavior - barcode searches will check against the selected Search ID first, then fall back to checking against the unique identifier if no match is found.
+Selecting a different attribute will modify the behavior to check against the selected Search ID first, then fall back to checking against the unique identifier if no match is found.
 This choice can be applied to all fields that have the same attribute by selecting the checkbox.
 
 <figure class="image">

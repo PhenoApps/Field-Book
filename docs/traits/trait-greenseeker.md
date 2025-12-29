@@ -4,21 +4,20 @@
 
 ## Overview
 
-This trait format supports [GreenSeeker](https://ww2.agriculture.trimble.com/product/greenseeker-handheld-crop-sensor/) devices.
-
-GreenSeekers allow users to capture NDVI (Normalized Difference Vegetation Index) values that can measure plant health.
+This trait format supports [GreenSeeker](https://ww2.agriculture.trimble.com/product/greenseeker-handheld-crop-sensor/) devices that allow users to capture NDVI (Normalized Difference Vegetation Index) values to measure plant health.
 The GreenSeeker emits light in the red and near-infrared regions of the spectrum and measures the amount of light reflected back to the sensor.
+
 Please refer to the [datasheet](https://ww2.agriculture.trimble.com/wp-content/uploads/2022/03/022503-1487B-en-US_GreenSeeker_Handheld_Crop_Sensor_DS_USL_0222_LR.pdf) provided by Trimble for more information on the GreenSeeker device and NDVI.
 
 ## Creation
 
 #### Parameters
-- `Name` assign a value for trait name, alias, and assigns synonyms list to hold the value.
+- `Name` assign a value for trait name.
 - `Default` automatically assigns a specific value for the observation when visiting an entry having no observation recorded previously.
 - `Details` text is displayed under the trait name on the Collect screen.
-- `Automatically Switch to Next Plot` when enabled will immediately move to next entry when the user records an observation for an entry in the Collect screen.
-- `Repeated Measures` turns on repeated measure for the trait when enabled.
-- `Resource File` opens the resources folder and can be used to set a image for the trait that can be reference later in the Collect screen.
+- `Automatically Switch to Next Plot` toggles immediately moving to next entry when the user records an observation for an entry in the Collect screen.
+- `Repeated Measures` toggles repeated measure for the trait.
+- `Resource File` sets an image for the trait that will be opened by default when accessing resources from Collect.
 
 <figure class="image" style="text-align: center">
     <p>

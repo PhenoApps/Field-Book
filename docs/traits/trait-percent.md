@@ -5,13 +5,13 @@
 The percent trait format is used to collect percentage-based phenotypes.
 
 ### Parameters
-- `Name` assign a value for trait name, alias, and assigns synonyms list to hold the value.
-- `Default` automatically assigns a specific value  within the set range for the observation when visiting an entry having no observation recorded previously.
-- `minimum` and `maximum` defines the range for acceptable inputs.
+- `Name` assign a value for trait name.
+- `Default` automatically assigns a value when visiting an entry that has no observations.
+- `Minimum` and `Maximum` can be set to create lower and upper boundaries for observation values.
 - `Details` text is displayed under the trait name on the Collect screen.
 - `Unit` text can be set to denote the unit for the observation.
-- `Repeated Measures` turns on repeated measure for the trait when enabled.
-- `Resource File` opens the resources folder and can be used to set a image for the trait that can be reference later in the Collect screen.
+- `Repeated Measures` toggles repeated measure for the trait.
+- `Resource File` sets an image for the trait that will be opened by default when accessing resources from Collect.
 
 On the Collect screen, percent values are recorded by adjusting the percent slider.
 

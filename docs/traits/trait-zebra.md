@@ -5,13 +5,13 @@
 ## Overview
 
 The Zebra Label Print trait format is used to print labels from an external printer.
-The trait is designed to work with Zebra's [ZQ500 Series](https://www.zebra.com/us/en/products/printers/mobile/zq500.html) of mobile printers.
+The trait is designed to work with the Zebra [ZQ500 Series](https://www.zebra.com/us/en/products/printers/mobile/zq500.html).
 
 ### Parameters
-- `Name` assign a value for trait name, alias, and assigns synonyms list to hold the value.
+- `Name` assign a value for trait name.
 - `Details` text is displayed under the trait name on the Collect screen.
-- `Automatically Switch to Next Plot` when enabled will immediately move to next entry when the user records an observation for an entry in the Collect screen.
-- `Resource File` opens the resources folder and can be used to set a image for the trait that can be reference later in the Collect screen.
+- `Automatically Switch to Next Plot` toggles immediately moving to next entry when the user records an observation for an entry in the Collect screen.
+- `Resource File` sets an image for the trait that will be opened by default when accessing resources from Collect.
 
 To use this trait, the Zebra printer must first be paired via Bluetooth.
 Label size, barcode, data, and number of copies are selected and saved as defaults.

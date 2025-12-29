@@ -14,11 +14,11 @@ Spectral data can be collected in two ways depending on the sensor:
 ## Creation
 
 #### Parameters
-- `Name` assign a value for trait name, alias, and assigns synonyms list to hold the value.
+- `Name` assign a value for trait name.
 - `Details` text is displayed under the trait name on the Collect screen.
-- `Automatically Switch to Next Plot` when enabled will immediately move to next entry when the user records an observation for an entry in the Collect screen.
-- `Repeated Measures` turns on repeated measure for the trait when enabled.
-- `Resource File` opens the resources folder and can be used to set a image for the trait that can be reference later in the Collect screen.
+- `Automatically Switch to Next Plot` toggles immediately moving to next entry when the user records an observation for an entry in the Collect screen.
+- `Repeated Measures` toggles repeated measure for the trait.
+- `Resource File` sets an image for the trait that will be opened by default when accessing resources from Collect.
 
 <figure class="image" style="text-align: center">
   <img src="../../_static/images/traits/formats/spectral/joined_spectral_create.png" width="1100px" />
@@ -45,8 +45,8 @@ Once a device is connected, a settings button and capture button are displayed.
     <img class="screenshot" src="../_static/images/traits/formats/spectral/trait_spectral_capture_ui.png" width="256"  alt=""/>
 </figure>
 
+A loading icon is displayed when capturing data.
 Color data is shown as a preview of the color along with its hexadecimal value.
-When capturing the data, a loading icon is displayed.
 
 <figure class="image" style="text-align: center">
     <p>
@@ -57,7 +57,7 @@ When capturing the data, a loading icon is displayed.
 
 Spectral scans are visually displayed on a graph.
 Selecting an individual scan will highlight the corresponding line on the graph.
-Long-press the scan number to save a text comment.
+Long-pressing the scan will allow users to save a text comment.
 
 <figure class="image">
       <img class="screenshot" src="../_static/images/traits/formats/spectral/trait_spectral_capturing_line_graph.png" width="256"  alt=""/>
@@ -71,9 +71,7 @@ Only one sensor model may be used for each trait:entry combination.
       <img class="screenshot" src="../_static/images/traits/formats/spectral/trait_spectral_settings_dialog.png" width="256"  alt=""/>
 </figure>
 
-
 ## Export
-
 
 | plot_id    | value                      | trait |
 |------------|----------------------------|-------|
@@ -83,8 +81,8 @@ Only one sensor model may be used for each trait:entry combination.
 | 13RPN00002 | SPECTRO2_spectral_file.csv | nix   |
 | 13RPN00002 | SPECTRO2_spectral_file.csv | nix   |
 
-While color scans are stored as hexadecimal values, spectral scans are stored in a secondary file with the spectral wavelengths as headers and reflectance values in the rows.
-This file can be automatically included in the exported file by exporting with media bundled which will create a folder structure similar to below.
+While colors are stored as hexadecimal values and accessible from the standard file export, spectral data are stored in a secondary file with the wavelengths as columns and reflectance values in the rows.
+This file can be included in the exported file by exporting with media bundled.
 In this example, the `SPECTRO2_spectral_file.csv` contains the reflectance values for the scans that were collected in `field_sample`.
 
 <figure class="image">

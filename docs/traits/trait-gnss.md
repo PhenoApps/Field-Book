@@ -5,14 +5,14 @@
 ## Overview
 
 The GNSS trait format is used to acquire high-precision geocoordinates from an external, Bluetooth-connected device.
-While other traits only capture phenotypic data, the GNSS trait is intended to be used to also capture entry metadata that can be used in conjunction with the <img class="icon" src="_static/icons/settings/main/map-search.png">[Geonav](geonav.md) feature to automatically navigate through the field.
+While other traits only capture phenotypic data, the GNSS trait is used to also capture entry metadata that can be used in conjunction with the <img class="icon" src="_static/icons/settings/main/map-search.png">[Geonav](geonav.md) feature to automatically navigate through the field.
 
 ### Parameters
-- `Name` assign a value for trait name, alias, and assigns synonyms list to hold the value.
+- `Name` assign a value for trait name.
 - `Details` text is displayed under the trait name on the Collect screen.
-- `Automatically Switch to Next Plot` when enabled will immediately move to next entry when the user records an observation for an entry in the Collect screen.
-- `Repeated Measures` turns on repeated measure for the trait when enabled.
-- `Resource File` opens the resources folder and can be used to set a image for the trait that can be reference later in the Collect screen.
+- `Automatically Switch to Next Plot` toggles immediately moving to next entry when the user records an observation for an entry in the Collect screen.
+- `Repeated Measures` toggles repeated measure for the trait.
+- `Resource File` sets an image for the trait that will be opened by default when accessing resources from Collect.
 
 <figure class="image">
   <img class="screenshot" src="../_static/images/traits/formats/joined_gnss_format.png" width="700px"> 
@@ -21,7 +21,7 @@ While other traits only capture phenotypic data, the GNSS trait is intended to b
 
 ## Details
 
-When first navigating to a GNSS trait, the Collect screen will display a <img class="icon" src="_static/icons/formats/satellite-variant.png"> button that will list devices that can be used in conjunction with this trait.
+When first navigating to a GNSS trait, the Collect screen will display a <img class="icon" src="_static/icons/formats/satellite-variant.png"> button that will list devices that can be used with this trait.
 
 <figure class="image">
   <img class="screenshot" src="../_static/images/traits/formats/collect_gnss_select_device.png" width="325px"> 
