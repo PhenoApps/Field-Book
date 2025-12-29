@@ -223,7 +223,6 @@ class CameraActivity : ThemedActivity() {
                         else -> currentMode
                     }
                 }
-
             } else {
 
                 mediaCompose.visibility = View.GONE
@@ -232,6 +231,7 @@ class CameraActivity : ThemedActivity() {
 
                 if (currentMode == MODE_BARCODE) {
                     captureButton.visibility = View.GONE
+                    switchCameraButton.visibility = View.GONE
                 }
             }
 

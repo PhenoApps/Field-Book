@@ -1,10 +1,10 @@
 package com.fieldbook.tracker.activities;
 
+import static com.fieldbook.tracker.ui.MediaViewerActivity.EXTRA_TRAIT_DB_ID;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -21,15 +21,15 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.webkit.MimeTypeMap;
 import android.widget.EditText;
-import android.widget.ImageButton;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -77,6 +77,7 @@ import com.fieldbook.tracker.objects.InfoBarModel;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
+import com.fieldbook.tracker.preferences.enums.BarcodeScanningOptions;
 import com.fieldbook.tracker.traits.AbstractCameraTrait;
 import com.fieldbook.tracker.traits.SpectralTraitLayout;
 import com.fieldbook.tracker.traits.formats.Formats;
@@ -88,9 +89,9 @@ import com.fieldbook.tracker.traits.CategoricalTraitLayout;
 import com.fieldbook.tracker.traits.GNSSTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
+import com.fieldbook.tracker.traits.formats.Scannable;
 import com.fieldbook.tracker.traits.formats.TraitFormat;
 import com.fieldbook.tracker.traits.formats.coders.StringCoder;
-import com.fieldbook.tracker.traits.formats.Scannable;
 import com.fieldbook.tracker.traits.formats.presenters.ValuePresenter;
 import com.fieldbook.tracker.utilities.CameraXFacade;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
@@ -98,6 +99,8 @@ import com.fieldbook.tracker.utilities.DocumentTreeUtil;
 import com.fieldbook.tracker.utilities.FfmpegHelper;
 import com.fieldbook.tracker.utilities.FieldAudioHelper;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
+import com.fieldbook.tracker.utilities.FileUtil;
+import com.fieldbook.tracker.utilities.FuzzySearch;
 import com.fieldbook.tracker.utilities.GeoJsonUtil;
 import com.fieldbook.tracker.utilities.GeoNavHelper;
 import com.fieldbook.tracker.utilities.GnssThreadHelper;
@@ -137,11 +140,14 @@ import org.phenoapps.utils.BaseDocumentTreeUtil;
 import org.phenoapps.utils.SoftKeyboardUtil;
 import org.phenoapps.utils.TextToSpeechHelper;
 import org.threeten.bp.OffsetDateTime;
+import org.threeten.bp.format.DateTimeFormatter;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -178,8 +184,11 @@ public class CollectActivity extends ThemedActivity
 
     public static final int REQUEST_FILE_EXPLORER_CODE = 1;
     public static final int REQUEST_CROP_IMAGE_CODE = 101;
-    public static final int BARCODE_COLLECT_CODE = 99;
-    public static final int BARCODE_SEARCH_CODE = 98;
+    public static final int REQUEST_CROP_FINISHED_CODE = 103;
+    public static final int REQUEST_MEDIA_CODE = 102;
+    // pending media values used when we start a crop activity and need to show the confirm dialog
+    private String pendingMediaType = null;
+    private String pendingMediaPath = null;
 
     private final HandlerThread gnssRawLogHandlerThread = new HandlerThread("log");
 
@@ -249,6 +258,9 @@ public class CollectActivity extends ThemedActivity
     @Inject
     ScaleGattManager scaleGattManager;
 
+    @Inject
+    FuzzySearch fuzzySearch;
+
     private SpectralViewModel spectralViewModel;
 
     //used to track rotation relative to device
@@ -268,9 +280,10 @@ public class CollectActivity extends ThemedActivity
 
     UVCCameraTextureView uvcView;
 
-    ImageButton deleteValue;
-    ImageButton missingValue;
-    ImageButton barcodeInput;
+    // Runtime anchors that map to the Compose toolbar buttons (created in initToolbars)
+    private View composeMediaAnchor = null;
+    private View composeMissingAnchor = null;
+    private View composeDeleteAnchor = null;
 
     /**
      * Trait layouts
@@ -335,6 +348,8 @@ public class CollectActivity extends ThemedActivity
     private boolean mlkitEnabled;
 
     private AlertDialog dialogCrashReport;
+
+    private Boolean deleteValueButtonEnabled = true;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -807,6 +822,8 @@ public class CollectActivity extends ThemedActivity
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        setTitle(null);
+
         Toolbar toolbarBottom = findViewById(R.id.toolbarBottom);
         toolbarBottom.setNavigationIcon(null);
 
@@ -814,80 +831,217 @@ public class CollectActivity extends ThemedActivity
         String barcodeTts = getString(R.string.act_collect_barcode_btn_tts);
         String deleteTts = getString(R.string.act_collect_delete_btn_tts);
 
-        missingValue = toolbarBottom.findViewById(R.id.missingValue);
-        missingValue.setOnClickListener(v -> {
-            triggerTts(naTts);
-            TraitObject currentTrait = traitBox.getCurrentTrait();
-            if (currentTrait != null) {
-                String format = currentTrait.getFormat();
-                if (format != null && Formats.Companion.isCameraTrait(format)) {
-                    ((AbstractCameraTrait) traitLayouts.getTraitLayout(format)).setImageNa();
-                } else if (format != null && Formats.Companion.isSpectralFormat(format)) {
-                    ((SpectralTraitLayout) traitLayouts.getTraitLayout(format)).setNa();
-                } else {
-                    updateObservation(currentTrait, "NA", null);
-                    setNaText();
-                }
-            }
-        });
-
-        barcodeInput = toolbarBottom.findViewById(R.id.barcodeInput);
-        barcodeInput.setOnClickListener(v -> {
-            triggerTts(barcodeTts);
-            if(mlkitEnabled) {
-                ScannerActivity.Companion.requestCameraAndStartScanner(this,
-                        BARCODE_COLLECT_CODE,
-                        getCurrentTrait().getId(), getObservationUnit(), getRep());
-            }
-            else {
-                TraitObject trait = getCurrentTrait();
-                if (trait != null) {
-
-                    if (Objects.equals(trait.getFormat(), Formats.BASE_SPECTRAL.getDatabaseName())) {
-
-                        Toast.makeText(this, getString(R.string.act_collect_barcode_spectral), Toast.LENGTH_SHORT).show();
-
+        // Bind Compose bottom toolbar (pass current audio recording state so label toggles)
+        androidx.compose.ui.platform.ComposeView composeView = findViewById(R.id.toolbarBottomCompose);
+        com.fieldbook.tracker.ui.BottomToolbarListener toolbarListener = new com.fieldbook.tracker.ui.BottomToolbarListener() {
+            @Override
+            public void onMissing() {
+                triggerTts(naTts);
+                TraitObject currentTrait = traitBox.getCurrentTrait();
+                if (currentTrait != null) {
+                    String format = currentTrait.getFormat();
+                    if (format != null && Formats.Companion.isCameraTrait(format)) {
+                        ((AbstractCameraTrait) traitLayouts.getTraitLayout(format)).setImageNa();
+                    } else if (format != null && Formats.Companion.isSpectralFormat(format)) {
+                        ((SpectralTraitLayout) traitLayouts.getTraitLayout(format)).setNa();
                     } else {
-                        new IntentIntegrator(CollectActivity.this)
-                                .setPrompt(getString(R.string.barcode_scanner_text))
-                                .setBeepEnabled(false)
-                                .setRequestCode(BARCODE_COLLECT_CODE)
-                                .initiateScan();
+                        updateObservation(currentTrait, "NA", null);
+                        setNaText();
                     }
                 }
             }
 
-        });
+            @Override
+            public void onBarcode() {
+                triggerTts(barcodeTts);
 
-        deleteValue = toolbarBottom.findViewById(R.id.deleteValue);
-        deleteValue.setOnClickListener(v -> {
-            boolean status = database.isBrapiSynced(getStudyId(), getObservationUnit(), getTraitDbId(), getRep());
-            // if a brapi observation that has been synced, don't allow deleting
-            String format = getTraitFormat();
-            if (status && !Formats.Companion.isCameraTrait(format)) {
-                brapiDelete(getCurrentTrait(), false);
-            } else {
-                traitLayouts.deleteTraitListener(getTraitFormat());
+                requestScanSingleBarcode();
             }
 
-            // if no more observations present, update trait status
-            if (getCurrentObservation() == null) updateCurrentTraitStatus(false);
+            @Override
+            public void onDelete() {
+                // check for attached media on the current observation
+                ObservationModel obs = null;
+                try {
+                    obs = getCurrentObservation();
+                } catch (Exception ignored) {}
 
-            triggerTts(deleteTts);
-        });
+                if (obs != null) {
+                    boolean hasMedia = obs.getMultiMediaCount() > 0;
 
-        deleteValue.setOnLongClickListener(v -> {
+                    if (hasMedia) {
+                        // Warn the user that attached media will also be removed
+                        ObservationModel finalObs = obs;
+                        new AlertDialog.Builder(CollectActivity.this, R.style.AppAlertDialog)
+                                .setTitle(R.string.confirm_delete_with_media_title)
+                                .setMessage(getString(R.string.confirm_delete_with_media_message))
+                                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                                    // delete attached media files
+                                    try {
+                                        deleteMediaUrisForObservation(finalObs);
+                                    } catch (Exception e) {
+                                        Log.e(TAG, "Error deleting attached media", e);
+                                    }
 
-            ObservationModel[] models = database.getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId());
+                                    // proceed with existing delete behavior
+                                    performTraitDeleteAfterMediaCheck();
+                                })
+                                .setNegativeButton(android.R.string.cancel, null)
+                                .show();
+                        return;
+                    }
+                }
 
-            if (models.length > 0) {
-
-                showConfirmMultiMeasureDeleteDialog(List.of(models));
-
+                // If no media or no current observation, proceed with original behavior
+                performTraitDeleteAfterMediaCheck();
             }
 
-            return true;
-        });
+            @Override
+            public void onDeleteLong() {
+                ObservationModel[] models = database.getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId());
+                if (models.length > 0) {
+                    showConfirmMultiMeasureDeleteDialog(java.util.List.of(models));
+                }
+            }
+
+            @Override
+            public void onMediaOption(com.fieldbook.tracker.ui.MediaOption option) {
+                switch (option) {
+                    case CAPTURE_MEDIA:
+                        try {
+                            Intent intent = new Intent(CollectActivity.this, CameraActivity.class);
+                            intent.putExtra(CameraActivity.EXTRA_MODE, CameraActivity.MODE_PHOTO);
+                            intent.putExtra(CameraActivity.EXTRA_TRAIT_NAME, getTraitName());
+                            intent.putExtra(CameraActivity.EXTRA_STUDY_ID, getStudyId());
+                            intent.putExtra(CameraActivity.EXTRA_OBS_UNIT, getObservationUnit());
+                            intent.putExtra(CameraActivity.EXTRA_TRAIT_ID, Integer.parseInt(getCurrentTrait().getId()));
+
+                            String obsId = "-1";
+                            try {
+                                obsId = String.valueOf(Objects.requireNonNull(getCurrentObservation()).getInternal_id_observation());
+                            } catch (Exception ignored) {}
+
+                            intent.putExtra(CameraActivity.EXTRA_OBS_ID, obsId);
+
+                            cameraXFacade.unbind();
+                            // start activity for result so CollectActivity receives returned media path directly
+                            startActivityForResult(intent, REQUEST_MEDIA_CODE);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        break;
+                    case VIEW_MEDIA:
+                        try {
+                            Intent mediaIntent = new Intent(CollectActivity.this, com.fieldbook.tracker.ui.MediaViewerActivity.class);
+                            mediaIntent.putExtra(com.fieldbook.tracker.ui.MediaViewerActivity.EXTRA_STUDY_ID, getStudyId());
+                            mediaIntent.putExtra(com.fieldbook.tracker.ui.MediaViewerActivity.EXTRA_OBS_UNIT, getObservationUnit());
+                            mediaIntent.putExtra(EXTRA_TRAIT_DB_ID, getTraitDbId());
+                            startActivity(mediaIntent);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                 break;
+                }
+            }
+        };
+
+        // bind the compose view with current state
+        try {
+            boolean isMediaEnabled = false;
+            int numMultiMedia = 0;
+            try {
+                // get current trait and check multimedia flags
+                TraitObject current = getCurrentTrait();
+                if (current != null) {
+                    isMediaEnabled = current.getMultiMediaPhoto() || current.getMultiMediaVideo() || current.getMultiMediaAudio();
+                }
+                ObservationModel obs = getCurrentObservation();
+                if (obs != null) {
+                    numMultiMedia = obs.getMultiMediaCount();
+                }
+            } catch (Exception ignored) {}
+
+            com.fieldbook.tracker.ui.BottomToolbarBindingsKt.bindBottomToolbar(composeView, toolbarListener, fieldAudioHelper.isRecording(), isMediaEnabled, numMultiMedia, deleteValueButtonEnabled);
+
+            // Create runtime anchor Views under the ComposeView to be used by TapTarget
+            try {
+
+                final ViewGroup root = findViewById(android.R.id.content);
+
+                // Defer placement until the ComposeView has measured
+                composeView.post(() -> {
+                    try {
+                        int w = composeView.getWidth();
+                        int h = composeView.getHeight();
+                        if (w <= 0 || h <= 0) return;
+
+                        // Get composeView location relative to root (both in screen coords)
+                        int[] compLoc = new int[2];
+                        int[] rootLoc = new int[2];
+                        composeView.getLocationOnScreen(compLoc);
+                        root.getLocationOnScreen(rootLoc);
+
+                        float relX = compLoc[0] - rootLoc[0];
+                        float relY = compLoc[1] - rootLoc[1];
+
+                        int size = (int) (48 * getResources().getDisplayMetrics().density); // 48dp anchor size
+
+                        // positions: 1/6, 3/6, 5/6 of width (centered horizontally)
+                        float[] fractions = new float[]{1f/6f, 3f/6f, 5f/6f};
+
+                        View[] anchors = new View[3];
+                        for (int i = 0; i < 3; i++) {
+                            View v = new View(CollectActivity.this);
+                            v.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+                            v.setClickable(false);
+                            v.setFocusable(false);
+                            v.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+                            int id = View.generateViewId();
+                            v.setId(id);
+
+                            FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(size, size);
+
+                            root.addView(v, lp);
+
+                            float cx = fractions[i] * w;
+                            v.setX(relX + cx - size / 2f);
+                            v.setY(relY + (h - size) / 2f);
+
+                            anchors[i] = v;
+                        }
+
+                        composeMediaAnchor = anchors[0];
+                        composeMissingAnchor = anchors[1];
+                        composeDeleteAnchor = anchors[2];
+                    } catch (Exception ignored) {}
+                });
+
+            } catch (Exception ignored) {}
+
+         } catch (Exception e) {
+            Log.e(TAG, "Bottom toolbar crash", e);
+            finish();
+         }
+     }
+
+    // New overload that takes an explicit View anchor for TapTarget (uses the project's TapTargetUtil)
+    private TapTarget collectDataTapTargetView(View anchor, String title, String desc, int targetRadius) {
+        return TapTargetUtil.Companion.getTapTargetSettingsView(this, anchor, title, desc, targetRadius);
+    }
+
+    private void requestScanSingleBarcode() {
+        try {
+            Intent intent = new Intent(CollectActivity.this, CameraActivity.class);
+            intent.putExtra(CameraActivity.EXTRA_MODE, CameraActivity.MODE_BARCODE);
+            intent.putExtra(CameraActivity.EXTRA_TRAIT_NAME, getTraitName());
+            intent.putExtra(CameraActivity.EXTRA_STUDY_ID, getStudyId());
+            intent.putExtra(CameraActivity.EXTRA_OBS_UNIT, getObservationUnit());
+            intent.putExtra(CameraActivity.EXTRA_TRAIT_ID, Integer.parseInt(getCurrentTrait().getId()));
+            cameraXFacade.unbind();
+            startActivityForResult(intent, REQUEST_MEDIA_CODE);
+        } catch (Exception e) {
+            Log.e(TAG, "Unable to open camera", e);
+        }
     }
 
     /**
@@ -928,6 +1082,9 @@ public class CollectActivity extends ThemedActivity
         }
 
         traitBox.initialize(visibleTraits);
+
+        initToolbars();
+        setupCollectInsets();
     }
 
     /**
@@ -1065,7 +1222,7 @@ public class CollectActivity extends ThemedActivity
 
             // Check other fields if we didn't find it in the current field
             Log.d("Field Book", "Not found in current field, trying other fields");
-            return searchAcrossAllFields(data);
+            return searchAcrossAllFields(data, false, false);
         }
 
         if (!command.equals("quickgoto") && !command.equals("barcode"))
@@ -1077,90 +1234,53 @@ public class CollectActivity extends ThemedActivity
     /**
      * Searches for a barcode across all fields when not found in the current field.
      * @param searchValue The barcode or search value to find
+     * @param autoNavigate whether to show a snackbar or automatically navigate
+     * @param suppressReactions whether to ignore toasts and noises
      * @return true if found in another field, false otherwise
      */
-    private boolean searchAcrossAllFields(String searchValue) {
-        Log.d("Field Book", "Searching across all fields for: " + searchValue);
+    private boolean searchAcrossAllFields(String searchValue, boolean autoNavigate, boolean suppressReactions) {
+        Log.d("Field Book", "Delegating cross-field search to FuzzySearch for: " + searchValue);
 
-        boolean found = false;
-        FieldObject studyObj = null;
-
-        // Store search value in inputPlotId for use in the fallback
         inputPlotId = searchValue;
 
-        int currentFieldId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
-        Log.d("Field Book", "Current field ID: " + currentFieldId);
+        try {
+            com.fieldbook.tracker.utilities.BarcodeMatch match = fuzzySearch.findBarcodeMatch(searchValue);
 
-        // Check all other fields by search attribute
-        ArrayList<FieldObject> allFields = database.getAllFieldObjects();
-        Log.d("Field Book", "Searching across " + allFields.size() + " fields");
+            if (match.getField() != null) {
+                FieldObject studyObj = match.getField();
+                final String matchedPlot = match.getPlotId();
 
-        for (FieldObject field : allFields) {
-            // Skip the current field
-            if (field.getStudyId() == currentFieldId) {
-                continue;
-            }
+                if (studyObj.getName() != null && studyObj.getStudyId() != -1) {
+                    int studyId = studyObj.getStudyId();
+                    String fieldName = studyObj.getAlias();
 
-            Log.d("Field Book", "Checking field: " + field.getStudyId() + " (" + field.getName() + ")");
+                    // if fuzzy found a plotId, ensure inputPlotId is set to that
+                    if (matchedPlot != null) inputPlotId = matchedPlot;
 
-            ObservationUnitModel[] matchingUnits = database.getObservationUnitsBySearchAttribute(
-                    field.getStudyId(), searchValue);
-
-            Log.d("Field Book", "Found " + matchingUnits.length + " matches in field " + field.getStudyId());
-
-            if (matchingUnits.length > 0) {
-                studyObj = field;
-                String oldPlotId = inputPlotId;
-                inputPlotId = matchingUnits[0].getObservation_unit_db_id();
-                Log.d("Field Book", "Match found! Field: " + field.getName() +
-                        ", unit ID updated from " + oldPlotId + " to " + inputPlotId);
-                found = true;
-                break;
-            }
-        }
-
-        // If not found by search attribute in any field, try direct plot_id matching
-        if (!found) {
-            Log.d("Field Book", "No matches by search attribute, trying direct ID match");
-
-            ObservationUnitModel[] models = database.getAllObservationUnits();
-
-            for (ObservationUnitModel m : models) {
-                if (m.getObservation_unit_db_id().equals(searchValue)) {
-                    FieldObject study = database.getFieldObject(m.getStudy_id());
-                    if (study != null && study.getName() != null) {
-                        studyObj = study;
-                        found = true;
-                        Log.d("Field Book", "Direct match found in study: " + study.getName());
-                        break;
+                    if (!autoNavigate) {
+                        String msg = getString(R.string.act_collect_barcode_search_exists_in_other_field, fieldName);
+                        View anchor = findViewById(R.id.traitHolder);
+                        SoftKeyboardUtil.Companion.closeKeyboard(this, anchor, 500L);
+                        SnackbarUtils.showNavigateSnack(getLayoutInflater(), anchor,
+                                msg, R.id.toolbarBottom, 8000, null,
+                                (v) -> switchField(studyId, inputPlotId));
+                    } else {
+                        switchField(studyId, inputPlotId);
                     }
+
+                    return true;
                 }
             }
+        } catch (Exception e) {
+            Log.e(TAG, "FuzzySearch lookup failed", e);
         }
-        
-        // Handle the result of the search
-        if (found && studyObj != null && studyObj.getName() != null && studyObj.getStudyId() != -1) {
-            int studyId = studyObj.getStudyId();
-            String fieldName = studyObj.getAlias();
-            
-            // Save the matching observation unit ID from the matched unit, not the search value
-            final String matchedObsUnitId = inputPlotId; // This should be the one set earlier from matchingUnits[0]
-            
-            Log.d("Field Book", "Showing navigation prompt to field: " + fieldName + " and plot ID: " + matchedObsUnitId);
-            
-            String msg = getString(R.string.act_collect_barcode_search_exists_in_other_field, fieldName);
-            
-            SnackbarUtils.showNavigateSnack(getLayoutInflater(), findViewById(R.id.traitHolder), 
-                msg, R.id.toolbarBottom, 8000, null,
-                (v) -> switchField(studyId, matchedObsUnitId));
-                
-            return true;
-        } else {
-            Log.d("Field Book", "No match found in any field");
+
+        if (!suppressReactions) {
             soundHelper.playError();
             Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
-            return false;
         }
+
+        return false;
     }
 
     private void moveToResultCore(int j) {
@@ -1284,7 +1404,11 @@ public class CollectActivity extends ThemedActivity
 
         gnssThreadHelper.stop();
 
-        goProApi.onDestroy();
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                goProApi.onDestroy();
+            }
+        } catch (Exception ignore) {}
 
         sensorHelper.unregister();
 
@@ -1593,8 +1717,6 @@ public class CollectActivity extends ThemedActivity
         //added in geonav 310 only make goenav switch visible if preference is set
         MenuItem geoNavEnable = systemMenu.findItem(R.id.action_act_collect_geonav_sw);
         geoNavEnable.setVisible(mPrefs.getBoolean(PreferenceKeys.ENABLE_GEONAV, false));
-//        View actionView = MenuItemCompat.getActionView(geoNavEnable);
-//        actionView.setOnClickListener((View) -> onOptionsItemSelected(geoNavEnable));
 
         MenuItem fieldAudioMic = systemMenu.findItem(R.id.field_audio_mic);
         fieldAudioMic.setVisible(mPrefs.getBoolean(PreferenceKeys.ENABLE_FIELD_AUDIO, false));
@@ -1665,10 +1787,6 @@ public class CollectActivity extends ThemedActivity
         super.onConfigurationChanged(newConfig);
     }
 
-    private TapTarget collectDataTapTargetView(int id, String title, String desc, int targetRadius) {
-        return TapTargetUtil.Companion.getTapTargetSettingsView(this, findViewById(id), title, desc, targetRadius);
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
@@ -1686,39 +1804,47 @@ public class CollectActivity extends ThemedActivity
         final int fieldAudioMicId = R.id.field_audio_mic;
         int itemId = item.getItemId();
         if (itemId == helpId) {
-            TapTargetSequence sequence = new TapTargetSequence(this)
-                    .targets(collectDataTapTargetView(R.id.act_collect_infobar_rv, getString(R.string.tutorial_main_infobars_title), getString(R.string.tutorial_main_infobars_description), 200),
-                            collectDataTapTargetView(R.id.traitLeft, getString(R.string.tutorial_main_traits_title), getString(R.string.tutorial_main_traits_description), 60),
-                            collectDataTapTargetView(R.id.traitTypeTv, getString(R.string.tutorial_main_traitlist_title), getString(R.string.tutorial_main_traitlist_description), 80),
-                            collectDataTapTargetView(R.id.rangeLeft, getString(R.string.tutorial_main_entries_title), getString(R.string.tutorial_main_entries_description), 60),
-                            collectDataTapTargetView(R.id.namesHolderLayout, getString(R.string.tutorial_main_navinfo_title), getString(R.string.tutorial_main_navinfo_description), 60),
-                            collectDataTapTargetView(R.id.traitHolder, getString(R.string.tutorial_main_datacollect_title), getString(R.string.tutorial_main_datacollect_description), 200),
-                            collectDataTapTargetView(R.id.missingValue, getString(R.string.tutorial_main_na_title), getString(R.string.tutorial_main_na_description), 60),
-                            collectDataTapTargetView(R.id.deleteValue, getString(R.string.tutorial_main_delete_title), getString(R.string.tutorial_main_delete_description), 60)
-                    );
+            TapTargetSequence sequence = new TapTargetSequence(this);
+            // Add main targets in order
+            sequence.target(collectDataTapTargetView(findViewById(R.id.act_collect_infobar_rv), getString(R.string.tutorial_main_infobars_title), getString(R.string.tutorial_main_infobars_description), 200));
+            sequence.target(collectDataTapTargetView(findViewById(R.id.traitLeft), getString(R.string.tutorial_main_traits_title), getString(R.string.tutorial_main_traits_description), 60));
+            sequence.target(collectDataTapTargetView(findViewById(R.id.traitTypeTv), getString(R.string.tutorial_main_traitlist_title), getString(R.string.tutorial_main_traitlist_description), 80));
+            sequence.target(collectDataTapTargetView(findViewById(R.id.rangeLeft), getString(R.string.tutorial_main_entries_title), getString(R.string.tutorial_main_entries_description), 60));
+            sequence.target(collectDataTapTargetView(findViewById(R.id.namesHolderLayout), getString(R.string.tutorial_main_navinfo_title), getString(R.string.tutorial_main_navinfo_description), 60));
+            sequence.target(collectDataTapTargetView(findViewById(R.id.traitHolder), getString(R.string.tutorial_main_datacollect_title), getString(R.string.tutorial_main_datacollect_description), 200));
+
+            // Add missing/delete targets — prefer compose anchors, fallback to legacy views if present
+            if (composeMissingAnchor != null) {
+                sequence.target(collectDataTapTargetView(composeMissingAnchor, getString(R.string.tutorial_main_na_title), getString(R.string.tutorial_main_na_description), 60));
+            }
+
+            if (composeDeleteAnchor != null) {
+                sequence.target(collectDataTapTargetView(composeDeleteAnchor, getString(R.string.tutorial_main_delete_title), getString(R.string.tutorial_main_delete_description), 60));
+            }
+
             if (systemMenu.findItem(R.id.search).isVisible()) {
-                sequence.target(collectDataTapTargetView(R.id.search, getString(R.string.tutorial_main_search_title), getString(R.string.tutorial_main_search_description), 60));
+                sequence.target(collectDataTapTargetView(findViewById(R.id.search), getString(R.string.tutorial_main_search_title), getString(R.string.tutorial_main_search_description), 60));
             }
             if (systemMenu.findItem(R.id.resources).isVisible()) {
-                sequence.target(collectDataTapTargetView(R.id.resources, getString(R.string.tutorial_main_resources_title), getString(R.string.tutorial_main_resources_description), 60));
+                sequence.target(collectDataTapTargetView(findViewById(R.id.resources), getString(R.string.tutorial_main_resources_title), getString(R.string.tutorial_main_resources_description), 60));
             }
             if (systemMenu.findItem(R.id.summary).isVisible()) {
-                sequence.target(collectDataTapTargetView(R.id.summary, getString(R.string.tutorial_main_summary_title), getString(R.string.tutorial_main_summary_description), 60));
+                sequence.target(collectDataTapTargetView(findViewById(R.id.summary), getString(R.string.tutorial_main_summary_title), getString(R.string.tutorial_main_summary_description), 60));
             }
             if (systemMenu.findItem(R.id.lockData).isVisible()) {
-                sequence.target(collectDataTapTargetView(R.id.lockData, getString(R.string.tutorial_main_lockdata_title), getString(R.string.tutorial_main_lockdata_description), 60));
+                sequence.target(collectDataTapTargetView(findViewById(R.id.lockData), getString(R.string.tutorial_main_lockdata_title), getString(R.string.tutorial_main_lockdata_description), 60));
             }
             if (systemMenu.findItem(R.id.datagrid).isVisible()) {
-                sequence.target(collectDataTapTargetView(R.id.datagrid, getString(R.string.tutorial_main_datagrid_title), getString(R.string.tutorial_main_datagrid_description), 60));
+                sequence.target(collectDataTapTargetView(findViewById(R.id.datagrid), getString(R.string.tutorial_main_datagrid_title), getString(R.string.tutorial_main_datagrid_description), 60));
             }
             if (systemMenu.findItem(R.id.field_audio_mic).isVisible()) {
-                sequence.target(collectDataTapTargetView(R.id.field_audio_mic, getString(R.string.tutorial_main_field_audio_mic_title), getString(R.string.tutorial_main_field_audio_mic_description), 60));
+                sequence.target(collectDataTapTargetView(findViewById(R.id.field_audio_mic), getString(R.string.tutorial_main_field_audio_mic_title), getString(R.string.tutorial_main_field_audio_mic_description), 60));
             }
             if (systemMenu.findItem(R.id.action_act_collect_repeated_values_indicator).isVisible()) {
-                sequence.target(collectDataTapTargetView(R.id.action_act_collect_repeated_values_indicator, getString(R.string.tutorial_main_repeated_values_title), getString(R.string.tutorial_main_repeated_values_description), 60));
+                sequence.target(collectDataTapTargetView(findViewById(R.id.action_act_collect_repeated_values_indicator), getString(R.string.tutorial_main_repeated_values_title), getString(R.string.tutorial_main_repeated_values_description), 60));
             }
             if (systemMenu.findItem(R.id.action_act_collect_geonav_sw).isVisible()) {
-                sequence.target(collectDataTapTargetView(R.id.action_act_collect_geonav_sw, getString(R.string.tutorial_main_geonav_title), getString(R.string.tutorial_main_geonav_description), 60));
+                sequence.target(collectDataTapTargetView(findViewById(R.id.action_act_collect_geonav_sw), getString(R.string.tutorial_main_geonav_title), getString(R.string.tutorial_main_geonav_description), 60));
             }
 
             sequence.start();
@@ -1752,15 +1878,7 @@ public class CollectActivity extends ThemedActivity
             if (moveToUniqueIdValue.equals("1")) {
                 moveToPlotID();
             } else if (moveToUniqueIdValue.equals("2")) {
-                if (mlkitEnabled) {
-                    ScannerActivity.Companion.requestCameraAndStartScanner(this, BARCODE_SEARCH_CODE, null, null, null);
-                } else {
-                    new IntentIntegrator(this)
-                            .setPrompt(getString(R.string.barcode_scanner_text))
-                            .setBeepEnabled(false)
-                            .setRequestCode(BARCODE_SEARCH_CODE)
-                            .initiateScan();
-                }
+                requestScanSingleBarcode();
             }
         } else if (itemId == summaryId) {
             showSummary();
@@ -1964,6 +2082,7 @@ public class CollectActivity extends ThemedActivity
 
         dialogMultiMeasureConfirmDelete = new AlertDialog.Builder(this, R.style.AppAlertDialog)
                 .setTitle(R.string.dialog_multi_measure_confirm_delete_title)
+                .setMessage(R.string.dialog_multi_measure_confirm_delete_message)
                 .setPositiveButton(android.R.string.ok, (d, which) -> {
                     deleteMultiMeasures(models);
                 })
@@ -1983,10 +2102,6 @@ public class CollectActivity extends ThemedActivity
      * @param models the observations to be deleted
      */
     public void deleteMultiMeasures(@NonNull List<ObservationModel> models) {
-
-        String studyId = getStudyId();
-        String obsUnitId = getObservationUnit();
-        String traitDbId = getTraitDbId();
 
         for (ObservationModel model : models) {
 
@@ -2015,6 +2130,8 @@ public class CollectActivity extends ThemedActivity
                 collectInputView.prepareObservationsExistMode(Arrays.asList(currentModels));
 
             }
+
+            deleteMediaUrisForObservation(model);
 
             traitLayoutRefresh();
         }
@@ -2099,36 +2216,18 @@ public class CollectActivity extends ThemedActivity
                 .setCancelable(true)
                 .setView(layout);
 
-        builder.setPositiveButton(getString(R.string.dialog_go), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                inputPlotId = barcodeId.getText().toString();
-                rangeBox.setAllRangeID();
-                int[] rangeID = rangeBox.getRangeID();
-                moveToSearch("barcode", rangeID, null, null, inputPlotId, -1);
-                goToId.dismiss();
-            }
+        builder.setPositiveButton(getString(R.string.dialog_go), (dialog, which) -> {
+            inputPlotId = barcodeId.getText().toString();
+            rangeBox.setAllRangeID();
+            int[] rangeID = rangeBox.getRangeID();
+            moveToSearch("barcode", rangeID, null, null, inputPlotId, -1);
+            goToId.dismiss();
         });
 
-        builder.setNegativeButton(getString(R.string.dialog_cancel), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
+        builder.setNegativeButton(getString(R.string.dialog_cancel), (dialog, which) -> dialog.dismiss());
 
-        builder.setNeutralButton(getString(R.string.main_toolbar_moveto_scan), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                if(mlkitEnabled) {
-                    ScannerActivity.Companion.requestCameraAndStartScanner(CollectActivity.this, BARCODE_SEARCH_CODE, null, null, null);
-                }
-                else {
-                    new IntentIntegrator(CollectActivity.this)
-                            .setPrompt(getString(R.string.barcode_scanner_text))
-                            .setBeepEnabled(false)
-                            .setRequestCode(BARCODE_SEARCH_CODE)
-                            .initiateScan();
-                }
-            }
+        builder.setNeutralButton(getString(R.string.main_toolbar_moveto_scan), (dialogInterface, i) -> {
+            requestScanSingleBarcode();
         });
 
         goToId = builder.create();
@@ -2235,98 +2334,6 @@ public class CollectActivity extends ThemedActivity
                     mSkipLastUsedTrait = true;
                 }
                 break;
-            case BARCODE_SEARCH_CODE:
-                if (resultCode == RESULT_OK) {
-                    Log.d("Field Book", "Barcode scan successful");
-
-                    if (geoNavHelper.getSnackbar() != null) {
-                        geoNavHelper.getSnackbar().dismiss();
-                    }
-
-                    String barcodeValue;
-                    if (mlkitEnabled) {
-                        barcodeValue = data.getStringExtra("barcode");
-                    } else {
-                        IntentResult plotSearchResult = IntentIntegrator.parseActivityResult(resultCode, data);
-                        barcodeValue = plotSearchResult.getContents();
-                    }
-
-                    if (barcodeValue != null && !barcodeValue.isEmpty()) {
-                        Log.d("Field Book", "Scanned barcode: " + barcodeValue);
-
-                        // Set inputPlotId globally to ensure it's available everywhere
-                        inputPlotId = barcodeValue;
-
-                        rangeBox.setAllRangeID();
-                        int[] rangeID = rangeBox.getRangeID();
-
-                        boolean success = moveToSearch("barcode", rangeID, null, null, barcodeValue, -1);
-
-                        // If success is true, moveToSearch found the barcode, either in current field
-                        // or via the fallback in another field. Success sound happens in moveToSearch
-                        // if needed. No additional action required here.
-                    } else {
-                        Log.d("Field Book", "Barcode scan returned empty result");
-                        soundHelper.playError();
-                        Utils.makeToast(getApplicationContext(), getString(R.string.main_toolbar_moveto_no_match));
-                    }
-                } else {
-                    Log.d("Field Book", "Barcode scan cancelled or failed");
-                }
-                break;
-            case BARCODE_COLLECT_CODE:
-                if(resultCode == RESULT_OK) {
-                    // store barcode value as data
-                    String scannedBarcode = "";
-
-                    if (mlkitEnabled) {
-
-                        if (data.hasExtra(ScannerActivity.EXTRA_BARCODE)) {
-
-                            scannedBarcode = data.getStringExtra("barcode");
-
-                        } else if (data.hasExtra(ScannerActivity.EXTRA_PHOTO_URI)) {
-
-                            String uri = data.getStringExtra(ScannerActivity.EXTRA_PHOTO_URI);
-                            database.insertObservation(getObservationUnit(),
-                                    getCurrentTrait().getId(),
-                                    uri,
-                                    getPerson(),
-                                    getLocationByPreferences(),
-                                    "",
-                                    getStudyId(),
-                                    "",
-                                    null,
-                                    null,
-                                    getRep());
-                        }
-
-                    } else {
-
-                        IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
-                        scannedBarcode = plotDataResult.getContents();
-
-                    }
-
-                    TraitObject currentTrait = traitBox.getCurrentTrait();
-                    BaseTraitLayout currentTraitLayout = traitLayouts.getTraitLayout(currentTrait.getFormat());
-                    TraitFormat traitFormat = Formats.Companion.findTrait(currentTrait.getFormat());
-
-                    String oldValue = "";
-                    ObservationModel currentObs = getCurrentObservation();
-                    if (currentObs != null) {
-                        oldValue = currentObs.getValue();
-                    }
-
-                    if (scannedBarcode != null && traitFormat instanceof Scannable && validateData(scannedBarcode)) {
-                        updateObservation(currentTrait, ((Scannable) traitFormat).preprocess(scannedBarcode), null);
-                    } else {
-                        updateObservation(currentTrait, oldValue, null);
-                    }
-
-                    currentTraitLayout.loadLayout();
-                }
-                break;
             case PhotoTraitLayout.PICTURE_REQUEST_CODE:
                 String success = getString(R.string.trait_photo_tts_success);
                 String fail = getString(R.string.trait_photo_tts_fail);
@@ -2344,14 +2351,163 @@ public class CollectActivity extends ThemedActivity
 
                 } else triggerTts(fail);
                 break;
+
             case REQUEST_CROP_IMAGE_CODE:
+                if (resultCode == RESULT_OK && data != null) {
+                    String mediaPath = data.getStringExtra("media_path");
+                    if (mediaPath != null) {
+                        File f = new File(getContext().getCacheDir(), AbstractCameraTrait.TEMPORARY_IMAGE_NAME);
+                        Uri uri = Uri.fromFile(f);
+                        startCropActivity(getCurrentTrait().getId(), uri);
+                    }
+                }
+                break;
+            case REQUEST_MEDIA_CODE:
+                if (resultCode == RESULT_OK && data != null) {
+                    // Camera returned a media_path
+                    String mediaPath = data.getStringExtra("media_path");
+                    String mediaType = data.getStringExtra("media_type");
+                    String barcode = data.getStringExtra(CameraActivity.EXTRA_BARCODE);
+                    if (mediaPath != null) {
+
+                        if (Objects.equals(mediaType, "photo")) {
+                            TraitObject trait = getCurrentTrait();
+                            String roiString = preferences.getString(GeneralKeys.getCropCoordinatesKey(Integer.parseInt(trait.getId())), "");
+                            if (roiString.isEmpty()) {
+
+                                File f = new File(getContext().getCacheDir(), AbstractCameraTrait.TEMPORARY_IMAGE_NAME);
+                                Uri uri = Uri.fromFile(f);
+                                // we will need to show the confirm dialog once cropping finishes. Use the
+                                // cache temp file as the pending media so the cropped image is shown.
+                                pendingMediaPath = f.getAbsolutePath();
+                                // delete the previously saved copy (mediaPath) to avoid duplicates later
+                                try { if (mediaPath != null && !mediaPath.equals(pendingMediaPath)) new File(mediaPath).delete(); } catch (Exception ignore) {}
+                                pendingMediaType = mediaType;
+                                startCropActivity(getCurrentTrait().getId(), uri);
+                            } else {
+                                // If an ROI is defined, apply the crop to the saved image before showing the confirm dialog.
+                                // Do this off the UI thread to avoid blocking.
+                                try {
+                                    final String finalMediaPath = mediaPath;
+                                    final String finalRoi = roiString;
+                                    Executors.newSingleThreadExecutor().execute(() -> {
+                                        try {
+
+                                            Uri srcUri;
+                                            if (finalMediaPath.startsWith("content://") || finalMediaPath.startsWith("file://")) {
+                                                srcUri = Uri.parse(finalMediaPath);
+                                            } else {
+                                                File srcFile = new File(finalMediaPath);
+                                                srcUri = Uri.fromFile(srcFile);
+                                            }
+
+                                            // Use BitmapLoader to crop the bitmap according to ROI
+                                            android.graphics.Bitmap cropped = com.fieldbook.tracker.utilities.BitmapLoader.Companion.cropBitmap(CollectActivity.this, srcUri, finalRoi);
+
+                                            java.io.OutputStream out = null;
+                                            try {
+                                                out = getContentResolver().openOutputStream(srcUri);
+                                                if (out != null) {
+                                                    cropped.compress(android.graphics.Bitmap.CompressFormat.JPEG, 80, out);
+                                                    out.flush();
+                                                }
+                                            } catch (Exception ex) {
+                                                ex.printStackTrace();
+                                            } finally {
+                                                try { if (out != null) out.close(); } catch (Exception ignore) {}
+                                            }
+                                        } catch (Exception ex) {
+                                            ex.printStackTrace();
+                                        }
+
+                                        // After cropping (or on failure), show the confirm dialog on UI thread
+                                        runOnUiThread(() -> showMediaConfirmDialog(mediaType, mediaPath));
+                                    });
+                                 } catch (Exception e) {
+                                     e.printStackTrace();
+                                     showMediaConfirmDialog(mediaType, mediaPath);
+                                 }
+                             }
+                         } else if (mediaType.equals("audio") || mediaType.equals("video")) {
+                            runOnUiThread(() -> showMediaConfirmDialog(mediaType, mediaPath));
+                        }
+
+                     } else if (barcode != null) {
+
+                        Log.d(TAG, "Fuzzy search on barcode: " + barcode);
+
+                        String option = preferences.getString(PreferenceKeys.BARCODE_SCANNING_OPTIONS, BarcodeScanningOptions.EnterValue.INSTANCE.getValue());
+                        String optionEnter = BarcodeScanningOptions.EnterValue.INSTANCE.getValue();
+                        String optionMove = BarcodeScanningOptions.Move.INSTANCE.getValue();
+                        String optionAsk = BarcodeScanningOptions.Ask.INSTANCE.getValue();
+                        String optionEnterIfNotId = BarcodeScanningOptions.EnterIfNotId.INSTANCE.getValue();
+
+                        if (option.equals(optionEnter)) {
+
+                            validateAndSaveBarcodeScan(barcode);
+
+                        } else if (option.equals(optionMove)) {
+
+                            searchAcrossAllFields(barcode, true, false);
+
+                        } else if (option.equals(optionAsk)) {
+
+                            showBarcodeAskDialog(barcode);
+
+                        } else if (option.equals(optionEnterIfNotId)) {
+
+                            if (!searchAcrossAllFields(barcode, true, true)) {
+                                validateAndSaveBarcodeScan(barcode);
+                            }
+                        }
+                    }
+                }
+                break;
+            case REQUEST_CROP_FINISHED_CODE:
                 if (resultCode == RESULT_OK) {
-                    File f = new File(getContext().getCacheDir(), AbstractCameraTrait.TEMPORARY_IMAGE_NAME);
-                    Uri uri = Uri.fromFile(f);
-                    startCropActivity(getCurrentTrait().getId(), uri);
+                    // Crop activity finished; if we have a pending media, show confirm dialog
+                    if (pendingMediaType != null && pendingMediaPath != null) {
+                        showMediaConfirmDialog(pendingMediaType, pendingMediaPath);
+                    }
+                    // clear pending state
+                    pendingMediaType = null;
+                    pendingMediaPath = null;
                 }
                 break;
         }
+    }
+
+    private void validateAndSaveBarcodeScan(String barcode) {
+        TraitObject currentTrait = traitBox.getCurrentTrait();
+        BaseTraitLayout currentTraitLayout = traitLayouts.getTraitLayout(currentTrait.getFormat());
+        TraitFormat traitFormat = Formats.Companion.findTrait(currentTrait.getFormat());
+
+        String oldValue = "";
+        ObservationModel currentObs = getCurrentObservation();
+        if (currentObs != null) {
+            oldValue = currentObs.getValue();
+        }
+
+        if (barcode != null && traitFormat instanceof Scannable && validateData(barcode)) {
+            updateObservation(currentTrait, ((Scannable) traitFormat).preprocess(barcode), null);
+        } else {
+            updateObservation(currentTrait, oldValue, null);
+        }
+
+        currentTraitLayout.loadLayout();
+    }
+
+    private void showBarcodeAskDialog(String barcode) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+
+        builder.setTitle(R.string.barcode_ask_title);
+        builder.setMessage(getString(R.string.barcode_ask_message, barcode));
+
+        builder.setPositiveButton(R.string.barcode_ask_enter, (dialog, which) -> validateAndSaveBarcodeScan(barcode));
+        builder.setNegativeButton(R.string.barcode_ask_move, (dialog, which) -> searchAcrossAllFields(barcode, true, true));
+
+        builder.create().show();
     }
 
     public boolean isTraitBlocked() {
@@ -2362,6 +2518,7 @@ public class CollectActivity extends ThemedActivity
     public void traitLayoutRefresh() {
         refreshRepeatedValuesToolbarIndicator();
         traitLayouts.getTraitLayout(getCurrentTrait().getFormat()).refreshLayout(false);
+        initToolbars();
     }
 
     //triggers when pressing the repeated values add button
@@ -2464,7 +2621,11 @@ public class CollectActivity extends ThemedActivity
                         String format = traitBox.getCurrentFormat();
                         if (format.equals(CanonTraitLayout.type)) {
                             canonApi.stopSession();
-                            wifiHelper.disconnect();
+                            try {
+                                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                                    wifiHelper.disconnect();
+                                }
+                            } catch (Exception ignore) {}
                         }
                         finish();
                 } else {
@@ -2542,24 +2703,13 @@ public class CollectActivity extends ThemedActivity
         return collectInputView;
     }
 
-    public ImageButton getDeleteValue() {
-        return deleteValue;
-    }
-
-    public ImageView getTraitLeft() {
-        return traitBox.getTraitLeft();
-    }
-
-    public ImageView getTraitRight() {
-        return traitBox.getTraitRight();
-    }
-
-    public ImageView getRangeLeft() {
-        return rangeBox.getRangeLeft();
-    }
-
-    public ImageView getRangeRight() {
-        return rangeBox.getRangeRight();
+    public void toggleUiFeatures(Boolean navigation, Boolean deleteValue) {
+        traitBox.getTraitLeft().setEnabled(navigation);
+        traitBox.getTraitRight().setEnabled(navigation);
+        rangeBox.getRangeLeft().setEnabled(navigation);
+        rangeBox.getRangeRight().setEnabled(navigation);
+        deleteValueButtonEnabled = deleteValue;
+        initToolbars();
     }
 
     /**
@@ -2663,6 +2813,7 @@ public class CollectActivity extends ThemedActivity
         holder.addView(v);
         layout.init(this);
         v.setVisibility(View.VISIBLE);
+        initToolbars();
     }
 
     @Override
@@ -3121,21 +3272,24 @@ public class CollectActivity extends ThemedActivity
      * a function that starts the crop activity and sends it required intent data
      */
     public void startCropActivity(String traitId, Uri uri) {
-        try {
-            Intent intent = new Intent(this, CropImageActivity.class);
-            intent.putExtra(CropImageFragment.EXTRA_TRAIT_ID, Integer.parseInt(traitId));
-            intent.putExtra(CropImageFragment.EXTRA_IMAGE_URI, uri.toString());
-            cameraXFacade.unbind();
-            startActivity(intent);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+         try {
+             Intent intent = new Intent(this, CropImageActivity.class);
+             intent.putExtra(CropImageFragment.EXTRA_TRAIT_ID, Integer.parseInt(traitId));
+             intent.putExtra(CropImageFragment.EXTRA_IMAGE_URI, uri.toString());
+             cameraXFacade.unbind();
+             startActivityForResult(intent, REQUEST_CROP_FINISHED_CODE);
+         } catch (Exception e) {
+             e.printStackTrace();
+         }
+     }
 
     public void requestAndCropImage() {
         try {
             Intent intent = new Intent(this, CameraActivity.class);
-            intent.putExtra(CropImageFragment.EXTRA_TRAIT_ID, Integer.parseInt(getCurrentTrait().getId()));
+            intent.putExtra(CameraActivity.EXTRA_MODE, CameraActivity.MODE_CROP);
+            intent.putExtra(CameraActivity.EXTRA_TRAIT_ID, Integer.parseInt(getCurrentTrait().getId()));
+            intent.putExtra(CameraActivity.EXTRA_STUDY_ID, String.valueOf(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)));
+            intent.putExtra(CameraActivity.EXTRA_OBS_UNIT, getObservationUnit());
             cameraXFacade.unbind();
             startActivityForResult(intent, REQUEST_CROP_IMAGE_CODE);
         } catch (Exception e) {
@@ -3191,9 +3345,170 @@ public class CollectActivity extends ThemedActivity
 
     private void setupCollectInsets() {
         View rootView = findViewById(android.R.id.content);
-        Toolbar bottomToolbar = findViewById(R.id.toolbarBottom);
-        LinearLayout bottomContent = bottomToolbar.findViewById(R.id.toolbarBottomContent);
 
-        InsetHandler.INSTANCE.setupInsetsWithBottomBar(rootView, toolbar, bottomToolbar, bottomContent);
+        View bottomContent = findViewById(R.id.toolbarBottomCompose);
+
+        InsetHandler.INSTANCE.setupInsetsWithBottomBar(rootView, toolbar, bottomContent);
+    }
+
+    public void showMediaConfirmDialog(String mediaType, String mediaPath) {
+         if (mediaType == null || mediaPath == null) return;
+         try {
+
+            try {
+
+                ObservationModel model = getCurrentObservation();
+
+                if (model == null) {
+                    Utils.makeToast(this, getString(R.string.no_observation));
+                    return;
+                }
+
+                com.fieldbook.tracker.ui.MediaPreviewDialogFragment.Companion.newInstance(String.valueOf(model.getInternal_id_observation()), mediaType, mediaPath)
+                        .show(getSupportFragmentManager(), "media_preview");
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+         } catch (Exception e) {
+             e.printStackTrace();
+         }
+     }
+
+    public void onMediaConfirmFromDialog(String obsId, String mediaType, String mediaPath) {
+        try {
+
+            ObservationModel obs = database.getObservationById(obsId);
+            if (obs == null) {
+                Utils.makeToast(this, getString(R.string.no_observations_warning));
+                return;
+            } else {
+                obs.getValue();
+            }
+
+            File f = new File(mediaPath);
+            String uri = Uri.fromFile(f).toString();
+            if (f.exists()) {
+                TraitObject currentTrait = getCurrentTrait();
+                if (currentTrait != null) {
+                    try {
+                        String traitName = currentTrait.getName();
+                        String sanitizedTraitName = com.fieldbook.tracker.utilities.FileUtil.sanitizeFileName(traitName);
+                        DocumentFile traitPhotos = DocumentTreeUtil.Companion.getFieldMediaDirectory(this, sanitizedTraitName);
+                        if (traitPhotos != null) {
+                            String srcName = f.getName();
+                            String ext = "";
+                            int dot = srcName.lastIndexOf('.');
+                            if (dot > 0) ext = srcName.substring(dot);
+                            DateTimeFormatter internalTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZZZZZ");
+                            String destName = sanitizedTraitName + "_" + getCRange().uniqueId + "_"
+                                    + FileUtil.sanitizeFileName(OffsetDateTime.now().format(internalTimeFormatter)) + ext;
+                            DocumentFile dest = traitPhotos.createFile("*/*", destName);
+                            if (dest != null) {
+                                InputStream in = null;
+                                OutputStream out = null;
+                                try {
+                                    in = new FileInputStream(f);
+                                    out = getContentResolver().openOutputStream(dest.getUri());
+                                    if (out == null) throw new IOException("Unable to open output stream for destination file");
+                                    byte[] buf = new byte[8192];
+                                    int len;
+                                    while ((len = in.read(buf)) > 0) out.write(buf, 0, len);
+                                    out.flush();
+                                    try { f.delete(); } catch (Exception ignore) {}
+                                    uri = dest.getUri().toString();
+
+                                } finally {
+                                    try { if (in != null) in.close(); } catch (Exception ignore) {}
+                                    try { if (out != null) out.close(); } catch (Exception ignore) {}
+                                }
+                            }
+                        }
+                    } catch (Exception ex) { ex.printStackTrace(); }
+                }
+            }
+
+            if (mediaType.startsWith("photo")) {
+                obs.setPhoto_uri(uri);
+            } else if ("audio".equals(mediaType)) {
+                obs.setAudio_uri(uri);
+            } else {
+                obs.setVideo_uri(uri);
+            }
+
+            database.updateObservationMediaUris(obs);
+
+            initToolbars();
+
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    public void onMediaCancelFromDialog(String mediaPath) {
+        try { new File(mediaPath).delete(); } catch (Exception ignore) {}
+    }
+
+    private void performTraitDeleteAfterMediaCheck() {
+        boolean status = database.isBrapiSynced(getStudyId(), getObservationUnit(), getTraitDbId(), getRep());
+        String format = getTraitFormat();
+        if (status && !Formats.Companion.isCameraTrait(format)) {
+            brapiDelete(getCurrentTrait(), false);
+        } else {
+            traitLayouts.deleteTraitListener(getTraitFormat());
+        }
+        if (getCurrentObservation() == null) updateCurrentTraitStatus(false);
+        initToolbars();
+        String deleteTts = getString(R.string.act_collect_delete_btn_tts);
+        triggerTts(deleteTts);
+    }
+
+    // Delete any attached media URIs stored on the observation (photo_uri, video_uri, audio_uri)
+    private void deleteMediaUrisForObservation(ObservationModel obs) {
+        if (obs == null) return;
+
+        List<String> uris = new ArrayList<>();
+        try { if (obs.getPhoto_uri() != null && !obs.getPhoto_uri().isEmpty()) uris.add(obs.getPhoto_uri()); } catch (Exception ignored) {}
+        try { if (obs.getVideo_uri() != null && !obs.getVideo_uri().isEmpty()) uris.add(obs.getVideo_uri()); } catch (Exception ignored) {}
+        try { if (obs.getAudio_uri() != null && !obs.getAudio_uri().isEmpty()) uris.add(obs.getAudio_uri()); } catch (Exception ignored) {}
+
+        for (String s : uris) {
+            try {
+                safeDeleteUriString(s);
+            } catch (Exception e) {
+                Log.w(TAG, "Failed to delete media at: " + s, e);
+            }
+        }
+    }
+
+    // Attempt to delete a media reference. Prefer DocumentFile deletion (for SAF URIs) then fallback to java.io.File.
+    private void safeDeleteUriString(String uriString) {
+        if (uriString == null || uriString.isEmpty()) return;
+        try {
+            Uri uri = Uri.parse(uriString);
+
+            //saf delete
+            try {
+                DocumentFile d = DocumentFile.fromSingleUri(this, uri);
+                if (d.exists()) {
+                    boolean deleted = d.delete();
+                    Log.d(TAG, "Deleted DocumentFile: " + uriString + " -> " + deleted);
+                    return;
+                }
+            } catch (Exception e) {
+                Log.d(TAG, "DocumentFile deletion failed for " + uriString, e);
+            }
+
+            //ry deleting as a normal file path
+            try {
+                java.io.File f = new java.io.File(Objects.requireNonNull(uri.getPath()));
+                if (f.exists()) {
+                    boolean deleted = f.delete();
+                    Log.d(TAG, "Deleted File: " + f.getAbsolutePath() + " -> " + deleted);
+                }
+            } catch (Exception e) {
+                Log.d(TAG, "File deletion failed for " + uriString, e);
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "Invalid uri string: " + uriString, e);
+        }
     }
 }
