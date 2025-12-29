@@ -48,7 +48,7 @@ class MediaPreviewDialogFragment : DialogFragment() {
         }
 
         // create preview compose view with delete button hidden
-        val preview = createMediaPreviewComposeView(requireContext(), mediaPath, if (mediaType.startsWith("photo")) "photo" else if (mediaType == "video") "video" else "audio", false)
+        val preview = createMediaPreviewComposeView(requireContext(), mediaPath, if (mediaType.startsWith("photo")) "photo" else if (mediaType == "video") "video" else "audio")
 
         // wrap preview in a container and attach viewtree owners to ensure Compose can find them
         val container = FrameLayout(requireContext())

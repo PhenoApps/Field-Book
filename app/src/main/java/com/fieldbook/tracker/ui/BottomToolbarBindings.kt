@@ -98,7 +98,7 @@ fun BottomToolbar(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.camera_plus),
+                            painter = painterResource(id = R.drawable.camera_iris),
                             contentDescription = null,
                             tint = Color.White
                         )
