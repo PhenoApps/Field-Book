@@ -40,13 +40,6 @@ class MediaPreviewDialogFragment : DialogFragment() {
             dismiss()
         }
 
-        val title = when {
-            mediaType.startsWith("photo") -> getString(R.string.trait_photo_tts_success)
-            mediaType == "audio" -> getString(R.string.field_audio_recording_stop)
-            mediaType == "video" -> getString(R.string.video_recording_saved)
-            else -> getString(R.string.trait_photo_tts_success)
-        }
-
         // create preview compose view with delete button hidden
         val preview = createMediaPreviewComposeView(requireContext(), mediaPath, if (mediaType.startsWith("photo")) "photo" else if (mediaType == "video") "video" else "audio")
 
@@ -76,7 +69,6 @@ class MediaPreviewDialogFragment : DialogFragment() {
         container.addView(preview)
 
         val builder = AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
-            .setTitle(title)
             .setView(container)
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 (activity as? com.fieldbook.tracker.activities.CollectActivity)?.onMediaConfirmFromDialog(obsId, mediaType, mediaPath)
