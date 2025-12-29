@@ -77,6 +77,7 @@ class CameraActivity : ThemedActivity() {
     private var traitId: String? = null
     private var studyId: String? = null
     private var obsUnit: String? = null
+    private var obsId: String? = null
     private var traitName: String? = null
     private var studyName: String? = null
     private var currentMode = MODE_PHOTO
@@ -101,6 +102,7 @@ class CameraActivity : ThemedActivity() {
         const val EXTRA_TRAIT_NAME = "trait_name"
         const val EXTRA_STUDY_ID = "study_id"
         const val EXTRA_OBS_UNIT = "obs_unit"
+        const val EXTRA_OBS_ID = "obs_id"
         const val EXTRA_MODE = "mode"
         const val MODE_PHOTO = "photo"
         const val MODE_CROP = "crop"
@@ -125,6 +127,7 @@ class CameraActivity : ThemedActivity() {
         traitName = intent.getStringExtra(EXTRA_TRAIT_NAME)
         studyId = intent.getStringExtra(EXTRA_STUDY_ID)
         obsUnit = intent.getStringExtra(EXTRA_OBS_UNIT)
+        obsId = intent.getStringExtra(EXTRA_OBS_ID)
 
         currentMode = intent.getStringExtra(EXTRA_MODE) ?: MODE_PHOTO
 
@@ -195,6 +198,7 @@ class CameraActivity : ThemedActivity() {
                         }
                     }
                 }
+
             } else {
 
                 toggleGroup.visibility = View.GONE
@@ -255,6 +259,24 @@ class CameraActivity : ThemedActivity() {
             captureButton.visibility = View.GONE
         } else {
             captureButton.visibility = View.VISIBLE
+        }
+
+        //if no observations exist in this mode, don't display the shutter or view media buttons
+        if (obsId != null) {
+
+            if (obsId == "-1") {
+
+                captureButton.visibility = View.GONE
+
+            } else {
+
+                database.getObservationById(obsId)?.let { obs ->
+
+                    val hasMedia = obs.getMultiMediaCount() > 0
+
+                    viewMediaButton.visibility = if (hasMedia) View.VISIBLE else View.GONE
+                }
+            }
         }
 
         captureButton.setOnClickListener {

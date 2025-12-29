@@ -850,6 +850,14 @@ public class CollectActivity extends ThemedActivity
                             intent.putExtra(CameraActivity.EXTRA_STUDY_ID, getStudyId());
                             intent.putExtra(CameraActivity.EXTRA_OBS_UNIT, getObservationUnit());
                             intent.putExtra(CameraActivity.EXTRA_TRAIT_ID, Integer.parseInt(getCurrentTrait().getId()));
+
+                            String obsId = "-1";
+                            try {
+                                obsId = String.valueOf(Objects.requireNonNull(getCurrentObservation()).getInternal_id_observation());
+                            } catch (Exception ignored) {}
+
+                            intent.putExtra(CameraActivity.EXTRA_OBS_ID, obsId);
+
                             cameraXFacade.unbind();
                             // start activity for result so CollectActivity receives returned media path directly
                             startActivityForResult(intent, REQUEST_MEDIA_CODE);
