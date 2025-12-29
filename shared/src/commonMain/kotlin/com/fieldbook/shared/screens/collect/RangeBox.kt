@@ -71,7 +71,7 @@ fun RangeBox(viewModel: CollectScreenController, modifier: Modifier = Modifier) 
                     style = MaterialTheme.typography.titleLarge
                 )
                 Text(
-                    "plo: ${unit?.observation_unit_db_id ?: "-"}",
+                    "plot: ${unit?.observation_unit_db_id ?: "-"}",
                     style = MaterialTheme.typography.titleLarge
                 )
             }

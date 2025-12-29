@@ -11,8 +11,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -23,6 +23,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -92,33 +93,27 @@ fun ConfigScreen(
                 )
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     itemsIndexed(configItems) { index, item ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp)
-                                .let { mod ->
-                                    when {
-                                        item == "Fields" && onNavigate != null -> mod.clickable {
-                                            onNavigate(
-                                                KmpHostScreenType.FIELD_EDITOR
-                                            )
+                        val isEnabled = item == "Fields" || item == "Collect" || item == "Settings"
+                        val rowModifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .let { mod ->
+                                if (isEnabled && onNavigate != null) {
+                                    mod.clickable {
+                                        when (item) {
+                                            "Fields" -> onNavigate(KmpHostScreenType.FIELD_EDITOR)
+                                            "Collect" -> onNavigate(KmpHostScreenType.COLLECT)
+                                            "Settings" -> onNavigate(KmpHostScreenType.PREFERENCES)
                                         }
-
-                                        item == "Collect" && onNavigate != null -> mod.clickable {
-                                            onNavigate(
-                                                KmpHostScreenType.COLLECT
-                                            )
-                                        }
-
-                                        item == "Settings" && onNavigate != null -> mod.clickable {
-                                            onNavigate(
-                                                KmpHostScreenType.PREFERENCES
-                                            )
-                                        }
-
-                                        else -> mod
                                     }
-                                },
+                                } else {
+                                    mod
+                                }
+                            }
+                            .graphicsLayer { alpha = if (isEnabled) 1f else 0.4f }
+
+                        Row(
+                            modifier = rowModifier,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
@@ -131,7 +126,7 @@ fun ConfigScreen(
                                 style = MaterialTheme.typography.bodyLarge
                             )
                         }
-                        Divider()
+                        HorizontalDivider()
                     }
                 }
             }

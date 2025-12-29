@@ -1,5 +1,5 @@
+
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
-import org.gradle.api.tasks.Sync
 
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.kotlin.plugin.compose)
     alias(libs.plugins.compose)
     alias(libs.plugins.app.cash.sqldelight)
+    alias(libs.plugins.kotlinx.serialization)
 }
 
 kotlin {
@@ -70,6 +71,10 @@ kotlin {
                 implementation(libs.permissions)
                 implementation(libs.filekit.core)
                 implementation(libs.filekit.compose)
+                implementation(libs.kotlinx.serialization.json)
+                implementation(libs.ktor.client)
+                implementation(libs.ktor.client.cio)
+                implementation(libs.coil.compose)
             }
         }
 
@@ -86,6 +91,8 @@ kotlin {
                 // dependencies declared in commonMain.
                 implementation("app.cash.sqldelight:android-driver:2.1.0")
                 implementation(libs.lifecycle.viewmodel.compose)
+//                implementation(libs.documentfile)
+                implementation("com.github.phenoapps:phenolib:v0.9.53")
             }
         }
 

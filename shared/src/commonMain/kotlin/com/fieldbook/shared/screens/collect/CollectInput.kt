@@ -21,29 +21,25 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.fieldbook.shared.screens.collect.traits.AngleTrait
-import com.fieldbook.shared.screens.collect.traits.BarcodeTrait
 import com.fieldbook.shared.screens.collect.traits.BooleanTrait
 import com.fieldbook.shared.screens.collect.traits.CategoricalTrait
 import com.fieldbook.shared.screens.collect.traits.CounterTrait
 import com.fieldbook.shared.screens.collect.traits.DateTrait
-import com.fieldbook.shared.screens.collect.traits.DiseaseRatingTrait
-import com.fieldbook.shared.screens.collect.traits.GnsSTrait
-import com.fieldbook.shared.screens.collect.traits.LabelPrintTrait
-import com.fieldbook.shared.screens.collect.traits.LocationTrait
-import com.fieldbook.shared.screens.collect.traits.MultiCatTrait
 import com.fieldbook.shared.screens.collect.traits.NumericTrait
 import com.fieldbook.shared.screens.collect.traits.PercentTrait
-import com.fieldbook.shared.screens.collect.traits.TextTrait
+import com.fieldbook.shared.screens.collect.traits.PhotoTrait
 import com.fieldbook.shared.theme.AppColors
 import com.fieldbook.shared.traits.Formats
+import com.fieldbook.shared.utilities.CategoryJsonUtil
+import com.fieldbook.shared.utilities.dateFormatMonthDay
 
 @Composable
 fun CollectInput(
     controller: CollectScreenController,
 ) {
     val trait = controller.traits.getOrNull(controller.currentTraitIndex)
-    val value = trait?.let { controller.traitValues[it.id] } ?: ""
+    val values = trait?.let { controller.traitValues[it.id] } ?: emptyList()
+    val value = values.firstOrNull() ?: ""
 
     var isEdited by remember(
         controller.currentTraitIndex,
@@ -57,6 +53,37 @@ fun CollectInput(
 
     val formatEnum = trait?.format?.let { formatStr ->
         Formats.entries.find { it.databaseName.equals(formatStr, ignoreCase = true) }
+    }
+
+    val displayValue = when (formatEnum) {
+        Formats.CATEGORICAL -> {
+            try {
+                val decoded = CategoryJsonUtil.decode(value)
+                if (decoded.isNotEmpty()) decoded[0].value ?: value else value
+            } catch (_: Throwable) {
+                // If it's not valid JSON or decode fails, fall back to raw value
+                value
+            }
+        }
+
+        Formats.MULTI_CATEGORICAL -> {
+            try {
+                val decoded = CategoryJsonUtil.decode(value)
+                decoded.joinToString(":") { it.value ?: "" }
+            } catch (_: Throwable) {
+                value
+            }
+        }
+
+        Formats.DATE -> {
+            try {
+                dateFormatMonthDay(value)
+            } catch (_: Throwable) {
+                value
+            }
+        }
+
+        else -> value
     }
 
     Column(
@@ -77,9 +104,16 @@ fun CollectInput(
                 fontStyle = fontStyle,
                 color = fontColor,
             )
+        } else if (formatEnum?.isCamera == true) {
+            TraitInputHost(
+                controller = controller,
+                trait = trait,
+                values = values,
+                onEdited = { isEdited = true }
+            )
         } else {
             Text(
-                text = value,
+                text = displayValue,
                 style = androidx.compose.material3.MaterialTheme.typography.titleLarge.copy(
                     fontWeight = fontWeight,
                     fontStyle = fontStyle,
@@ -96,7 +130,7 @@ fun CollectInput(
             TraitInputHost(
                 controller = controller,
                 trait = trait,
-                value = value,
+                values = values,
                 onEdited = { isEdited = true }
             )
         }
@@ -107,10 +141,11 @@ fun CollectInput(
 fun TraitInputHost(
     controller: CollectScreenController,
     trait: com.fieldbook.shared.database.models.TraitObject?,
-    value: String,
+    values: List<String>,
     onEdited: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
+    val value = values.firstOrNull() ?: ""
     val formatEnum = trait?.format?.let { formatStr ->
         Formats.entries.find { it.databaseName.equals(formatStr, ignoreCase = true) }
     }
@@ -128,13 +163,8 @@ fun TraitInputHost(
                 .padding(8.dp)
         )
 
-        Formats.ANGLE -> AngleTrait(
-            value = value,
-            onValueChange = {
-                controller.updateCurrentTraitValue(it)
-                onEdited()
-            },
-            modifier = modifier.fillMaxWidth().padding(8.dp)
+        Formats.ANGLE -> NotImplementedTrait(
+            traitFormat = trait.format!!,
         )
 
         Formats.CATEGORICAL -> CategoricalTrait(
@@ -145,6 +175,17 @@ fun TraitInputHost(
                 onEdited()
             },
             modifier = modifier.fillMaxWidth().padding(8.dp)
+        )
+
+        Formats.MULTI_CATEGORICAL -> CategoricalTrait(
+            trait = trait,
+            value = value,
+            onValueChange = {
+                controller.updateCurrentTraitValue(it)
+                onEdited()
+            },
+            modifier = modifier.fillMaxWidth().padding(8.dp),
+            multi = true
         )
 
         Formats.BOOLEAN -> BooleanTrait(
@@ -183,72 +224,43 @@ fun TraitInputHost(
             modifier = modifier.fillMaxWidth().padding(8.dp)
         )
 
-        Formats.MULTI_CATEGORICAL -> MultiCatTrait(
-            trait = trait,
-            value = value,
-            onValueChange = {
-                controller.updateCurrentTraitValue(it)
-                onEdited()
-            },
-            modifier = modifier.fillMaxWidth().padding(8.dp)
+        Formats.LOCATION ->NotImplementedTrait(
+            traitFormat = trait.format!!,
         )
 
-        Formats.LOCATION -> LocationTrait(
-            value = value,
-            onValueChange = {
-                controller.updateCurrentTraitValue(it)
-                onEdited()
-            },
-            modifier = modifier.fillMaxWidth().padding(8.dp)
-        )
+        Formats.PHOTO -> {
+            PhotoTrait(
+                values = values,
+                onValueChange = {
+                    controller.addCurrentTraitValue(it)
+                    onEdited()
+                },
+                modifier = modifier.fillMaxWidth().padding(8.dp),
+                controller
+            )
+        }
+
         // Add more as needed, or use legacy string fallback for custom/unknown
         else -> when (trait?.format) {
-            "barcode" -> BarcodeTrait(
-                value = value,
-                onValueChange = {
-                    controller.updateCurrentTraitValue(it)
-                    onEdited()
-                },
-                modifier = modifier.fillMaxWidth().padding(8.dp)
+            "barcode" -> NotImplementedTrait(
+                traitFormat = trait.format!!,
             )
 
-            "disease", "disease_rating" -> DiseaseRatingTrait(
-                value = value,
-                onValueChange = {
-                    controller.updateCurrentTraitValue(it)
-                    onEdited()
-                },
-                modifier = modifier.fillMaxWidth().padding(8.dp)
+            "disease", "disease_rating" -> NotImplementedTrait(
+                traitFormat = trait.format!!,
             )
 
-            "gnss", "gps" -> GnsSTrait(
-                value = value,
-                onValueChange = {
-                    controller.updateCurrentTraitValue(it)
-                    onEdited()
-                },
-                modifier = modifier.fillMaxWidth().padding(8.dp)
+            "gnss", "gps" -> NotImplementedTrait(
+                traitFormat = trait.format!!,
             )
 
-            "labelprint", "label_print" -> LabelPrintTrait(
-                value = value,
-                onValueChange = {
-                    controller.updateCurrentTraitValue(it)
-                    onEdited()
-                },
-                modifier = modifier.fillMaxWidth().padding(8.dp)
+            "labelprint", "label_print" -> NotImplementedTrait(
+                traitFormat = trait.format!!,
             )
-            // photo, audio, camera and other complex types are out-of-scope for now
-            "photo", "audio", "camera", "usb_camera", "gopro", "canon" -> {
-                TextTrait(
-                    value = value,
-                    onValueChange = {
-                        controller.updateCurrentTraitValue(it)
-                        onEdited()
-                    },
-                    modifier = modifier.fillMaxWidth().padding(8.dp)
-                )
-            }
+
+            "audio", "usb_camera", "gopro", "canon" -> NotImplementedTrait(
+                traitFormat = trait.format!!,
+            )
 
             else -> {
                 EditableValueText(
@@ -303,4 +315,19 @@ fun EditableValueText(
             .padding(8.dp)
             .background(androidx.compose.material3.MaterialTheme.colorScheme.primary)
     )
+}
+
+@Composable
+fun NotImplementedTrait(traitFormat: String, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier.background(AppColors.fb_color_text_dark.color.copy(alpha = 0.05f)),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "Trait '$traitFormat' not implemented yet",
+            color = AppColors.fb_color_text_dark.color,
+            style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center
+        )
+    }
 }

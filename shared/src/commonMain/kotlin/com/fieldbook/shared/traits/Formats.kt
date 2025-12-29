@@ -20,6 +20,7 @@ enum class Formats(
     PERCENT("percent"),
     TEXT("text"),
     ANGLE("angle"),
+    PHOTO("photo", isCamera = true),
 
     // CUSTOM formats
     // DISEASE_RATING(Types.CUSTOM), GNSS(Types.CUSTOM),

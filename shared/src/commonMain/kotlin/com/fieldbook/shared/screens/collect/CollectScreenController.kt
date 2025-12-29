@@ -44,7 +44,7 @@ class CollectScreenController(driverFactory: DriverFactory) {
     var currentTraitIndex by mutableStateOf(0)
         private set
 
-    var traitValues by mutableStateOf<Map<Long, String>>(emptyMap())
+    var traitValues by mutableStateOf<Map<Long, List<String>>>(emptyMap())
         private set
     var traitValuesLoading by mutableStateOf(true)
         private set
@@ -69,7 +69,7 @@ class CollectScreenController(driverFactory: DriverFactory) {
 
     private fun loadTraits() {
         try {
-            traits = traitRepository.getAllTraits()
+            traits = traitRepository.getAllTraitsWithAttributes()
             traitLoading = false
         } catch (e: Exception) {
             e.printStackTrace()
@@ -111,6 +111,27 @@ class CollectScreenController(driverFactory: DriverFactory) {
         val plotId = unit?.observation_unit_db_id
 
         if (plotId != null && trait?.id != null) {
+            observationRepository.upsertObservation(
+                plotId = plotId,
+                traitDbId = trait.id!!,
+                value = value,
+                studyId = studyId.toLong()
+            )
+            traitValues = traitValues.toMutableMap().apply {
+                put(trait.id!!, listOf(value))
+            }
+        }
+    }
+
+    /**
+     * Add a new observation for the current trait and unit, and persist to DB.
+     */
+    fun addCurrentTraitValue(value: String) {
+        val trait = traits.getOrNull(currentTraitIndex)
+        val unit = units.getOrNull(currentUnitIndex)
+        val plotId = unit?.observation_unit_db_id
+
+        if (plotId != null && trait?.id != null) {
             observationRepository.insertObservation(
                 plotId = plotId,
                 traitDbId = trait.id!!,
@@ -118,7 +139,8 @@ class CollectScreenController(driverFactory: DriverFactory) {
                 studyId = studyId.toLong()
             )
             traitValues = traitValues.toMutableMap().apply {
-                put(trait.id!!, value)
+                val currentList = get(trait.id!!) ?: emptyList()
+                put(trait.id!!, currentList + value)
             }
         }
     }

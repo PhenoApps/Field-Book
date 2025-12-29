@@ -5,14 +5,12 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.fieldbook.shared.theme.Button
 import com.fieldbook.shared.theme.numericButtonDefaults
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -46,6 +44,7 @@ fun NumericTrait(
                                 else -> onValueChange(value + label)
                             }
                         },
+                        selected = false,
                         modifier = Modifier
                             .numericButtonDefaults()
                             .weight(1f)
@@ -57,8 +56,6 @@ fun NumericTrait(
                                     }
                                 }
                             ),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD9D9D9)),
-                        shape = MaterialTheme.shapes.small
                     ) {
                         Text(label, color = Color.Black)
                     }
