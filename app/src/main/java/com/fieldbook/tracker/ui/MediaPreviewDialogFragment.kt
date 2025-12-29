@@ -70,7 +70,7 @@ class MediaPreviewDialogFragment : DialogFragment() {
 
         val builder = AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
             .setView(container)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
+            .setPositiveButton(R.string.attach) { _, _ ->
                 (activity as? com.fieldbook.tracker.activities.CollectActivity)?.onMediaConfirmFromDialog(obsId, mediaType, mediaPath)
             }
             .setNegativeButton(android.R.string.cancel) { _, _ ->
