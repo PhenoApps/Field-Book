@@ -81,8 +81,6 @@ private fun parseUri(uriStr: String): Uri {
 fun PhotoItem(
     uri: String,
     modifier: Modifier = Modifier,
-    showDelete: Boolean = true,
-    onDelete: () -> Unit = {}
 ) {
     val context = LocalContext.current
     var bitmap by remember { mutableStateOf<Bitmap?>(null) }
@@ -165,19 +163,6 @@ fun PhotoItem(
                 )
             }
         }
-
-        if (showDelete) {
-            IconButton(
-                onClick = onDelete, modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = stringResource(R.string.delete)
-                )
-            }
-        }
     }
 }
 
@@ -185,8 +170,6 @@ fun PhotoItem(
 fun VideoItem(
     uri: String,
     modifier: Modifier = Modifier,
-    showDelete: Boolean = true,
-    onDelete: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val exoPlayer = remember {
@@ -220,19 +203,6 @@ fun VideoItem(
                 )
             }
         }, modifier = Modifier.fillMaxSize())
-
-        if (showDelete) {
-            IconButton(
-                onClick = onDelete, modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = stringResource(R.string.delete)
-                )
-            }
-        }
     }
 }
 
@@ -240,8 +210,6 @@ fun VideoItem(
 fun AudioItem(
     uri: String,
     modifier: Modifier = Modifier,
-    showDelete: Boolean = true,
-    onDelete: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val exoPlayer = remember { ExoPlayer.Builder(context).build().apply { playWhenReady = false } }
@@ -314,14 +282,6 @@ fun AudioItem(
                     Text(if (duration <= 0) "--:--" else formatMillis(duration))
                 }
             }
-            if (showDelete) {
-                IconButton(onClick = onDelete) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = stringResource(R.string.delete)
-                    )
-                }
-            }
         }
     }
 }
@@ -359,7 +319,6 @@ fun createMediaPreviewComposeView(
     context: Context,
     uri: String,
     type: String,
-    showDelete: Boolean = true
 ): ComposeView {
     val cv = ComposeView(context)
 
@@ -386,19 +345,16 @@ fun createMediaPreviewComposeView(
                 "photo" -> PhotoItem(
                     uri = uri,
                     modifier = Modifier.padding(8.dp),
-                    showDelete = showDelete
                 )
 
                 "video" -> VideoItem(
                     uri = uri,
                     modifier = Modifier.padding(8.dp),
-                    showDelete = showDelete
                 )
 
                 else -> AudioItem(
                     uri = uri,
                     modifier = Modifier.padding(8.dp),
-                    showDelete = showDelete
                 )
             }
         }
