@@ -1,23 +1,36 @@
 package com.fieldbook.tracker.ui
 
+import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -26,10 +39,16 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.ui.components.appBar.AppBar
+import com.fieldbook.tracker.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -47,7 +66,7 @@ class MediaViewerActivity : ComponentActivity() {
         viewModel.loadMediaFor(studyId, obsUnit, traitDbId)
 
         setContent {
-            MaterialTheme {
+            AppTheme {
                 MediaViewerScreen(
                     viewModel = viewModel,
                     studyId = studyId,
@@ -80,10 +99,26 @@ fun MediaViewerScreen(
     var deleteTarget by remember { mutableStateOf<MediaEntry?>(null) }
     val showDelete = deleteTarget != null
 
-    val selectedTab = remember { mutableIntStateOf(0) }
+    val context = LocalContext.current
+    val activity = remember { context as? Activity }
+
+    val combined = remember(audio, video, photo) {
+        buildList {
+            audio.forEach { add("audio" to it) }
+            video.forEach { add("video" to it) }
+            photo.forEach { add("photo" to it) }
+        }
+    }
 
     Scaffold(topBar = {
-        TopAppBar(title = { Text(text = stringResource(R.string.media_viewer)) })
+        AppBar(
+            title = stringResource(R.string.media_viewer),
+            navigationIcon = {
+                IconButton(onClick = { activity?.finish() }) {
+                    Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.appbar_back))
+                }
+            }
+        )
     }) { padding ->
         Column(
             modifier = Modifier
@@ -91,58 +126,55 @@ fun MediaViewerScreen(
                 .fillMaxSize()
                 .padding(8.dp)
         ) {
+            if (combined.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(text = stringResource(R.string.no_media_found, ""))
+                }
+            } else {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(combined) { (type, entry) ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 4.dp),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(8.dp)) {
 
-            TabRow(selectedTabIndex = selectedTab.value) {
-                Tab(
-                    selected = selectedTab.intValue == 0,
-                    onClick = { selectedTab.intValue = 0 },
-                    text = {
-                        Text(
-                            stringResource(R.string.audio)
-                        )
-                    })
-                Tab(
-                    selected = selectedTab.intValue == 1,
-                    onClick = { selectedTab.intValue = 1 },
-                    text = {
-                        Text(
-                            stringResource(R.string.video)
-                        )
-                    })
-                Tab(
-                    selected = selectedTab.intValue == 2,
-                    onClick = { selectedTab.intValue = 2 },
-                    text = {
-                        Text(
-                            stringResource(R.string.photos)
-                        )
-                    })
-            }
+                                when (type) {
+                                    "photo" -> PhotoItem(uri = entry.uri)
+                                    "video" -> VideoItem(uri = entry.uri)
+                                    else -> AudioItem(uri = entry.uri)
+                                }
 
-            when (selectedTab.intValue) {
-                0 -> MediaEntryList(
-                    items = audio,
-                    type = "audio",
-                    onRequestDelete = { deleteTarget = it })
+                                Spacer(modifier = Modifier.size(8.dp))
 
-                1 -> MediaEntryList(
-                    items = video,
-                    type = "video",
-                    onRequestDelete = { deleteTarget = it })
-
-                2 -> MediaEntryList(
-                    items = photo,
-                    type = "photo",
-                    onRequestDelete = { deleteTarget = it })
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Spacer(modifier = Modifier.weight(1f))
+                                    IconButton(onClick = { deleteTarget = entry }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = stringResource(R.string.delete),
+                                            tint = MaterialTheme.colorScheme.error
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 
     if (showDelete && deleteTarget != null) {
         ConfirmDeleteDialog(show = true, onConfirm = {
-            if (deleteTarget != null) {
-                // request deletion and reload after the async job completes
-                val job = viewModel.deleteMedia(deleteTarget!!)
+            val target = deleteTarget
+            if (target != null) {
+                val job = viewModel.deleteMedia(target)
                 job.invokeOnCompletion {
                     viewModel.loadMediaFor(studyId, obsUnit, traitDbId)
                 }
@@ -151,29 +183,5 @@ fun MediaViewerScreen(
         }, onDismiss = {
             deleteTarget = null
         })
-    }
-}
-
-@Composable
-fun MediaEntryList(items: List<MediaEntry>, type: String, onRequestDelete: (MediaEntry) -> Unit) {
-    if (items.isEmpty()) {
-        Text(text = stringResource(R.string.no_media_found, type))
-        return
-    }
-
-    LazyColumn {
-        items(items) { entry ->
-            Card(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .fillMaxWidth(), shape = RoundedCornerShape(8.dp)
-            ) {
-                when (type) {
-                    "photo" -> PhotoItem(uri = entry.uri, onDelete = { onRequestDelete(entry) })
-                    "video" -> VideoItem(uri = entry.uri, onDelete = { onRequestDelete(entry) })
-                    else -> AudioItem(uri = entry.uri, onDelete = { onRequestDelete(entry) })
-                }
-            }
-        }
     }
 }
