@@ -1,12 +1,11 @@
 package com.fieldbook.shared.screens.collect.traits
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -23,21 +22,19 @@ fun CounterTrait(
     modifier: Modifier = Modifier
 ) {
     var count by remember { mutableStateOf(value.toIntOrNull() ?: 0) }
-    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
         Button(
             onClick = { count--; onValueChange(count.toString()) },
             modifier = Modifier.size(56.dp)
         ) { Text("-") }
         Spacer(Modifier.size(8.dp))
-        Text(
-            count.toString(),
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(8.dp)
-        )
-        Spacer(Modifier.size(8.dp))
         Button(
             onClick = { count++; onValueChange(count.toString()) },
-            modifier = Modifier.size(56.dp)
+            modifier = Modifier.size(156.dp)
         ) { Text("+") }
     }
 }
