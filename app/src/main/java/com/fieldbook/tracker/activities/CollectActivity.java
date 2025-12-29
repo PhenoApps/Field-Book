@@ -757,6 +757,8 @@ public class CollectActivity extends ThemedActivity
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        setTitle(null);
+
         Toolbar toolbarBottom = findViewById(R.id.toolbarBottom);
         toolbarBottom.setNavigationIcon(null);
 
