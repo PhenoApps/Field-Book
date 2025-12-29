@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fieldbook.shared.KmpHostScreenType
-import com.fieldbook.shared.database.repository.StudiesRepository
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.ic_nav_drawer_collect_data
 import com.fieldbook.shared.generated.resources.ic_nav_drawer_fields
@@ -138,7 +137,6 @@ class ConfigScreenViewModel(
     driverFactory: DriverFactory
 ) : ViewModel() {
     private val db = createDatabase(driverFactory)
-    private val studiesRepository: StudiesRepository = StudiesRepository(db)
 
     init {
         selectFirstField(driverFactory)
