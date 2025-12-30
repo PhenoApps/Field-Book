@@ -9,7 +9,8 @@ CREATE TABLE studies (
   study_secondary_id_name TEXT,
   study_sort_name TEXT,
   date_import INTEGER,     
-  date_edit TEXT
+  date_edit TEXT,
+  import_format TEXT
 );
 
 

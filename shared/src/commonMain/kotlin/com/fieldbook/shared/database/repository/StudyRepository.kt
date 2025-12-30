@@ -22,7 +22,7 @@ class StudyRepository(private val db: FieldbookDatabase) {
                         date_edit = r.date_edit,
                         date_export = null,
                         date_sync = null,
-                        import_format = null,
+                        import_format = r.import_format,
                         exp_source = null,
                         count = null,
                         observation_level = null,

@@ -33,7 +33,9 @@ import androidx.compose.ui.unit.dp
 import com.fieldbook.shared.database.models.FieldObject
 import com.fieldbook.shared.database.repository.StudyRepository
 import com.fieldbook.shared.generated.resources.Res
+import com.fieldbook.shared.generated.resources.ic_field
 import com.fieldbook.shared.generated.resources.ic_file_csv
+import com.fieldbook.shared.objects.ImportFormat
 import com.fieldbook.shared.sqldelight.DriverFactory
 import com.fieldbook.shared.sqldelight.createDatabase
 import com.fieldbook.shared.theme.MainTheme
@@ -132,6 +134,10 @@ fun FieldEditorScreen(
 
 @Composable
 private fun FieldListItem(field: FieldObject) {
+    val importFormat = ImportFormat.fromString(field.import_format)
+    val iconRes =
+        if (importFormat == ImportFormat.CSV) Res.drawable.ic_file_csv else Res.drawable.ic_field
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -145,7 +151,7 @@ private fun FieldListItem(field: FieldObject) {
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                painter = painterResource(Res.drawable.ic_file_csv),
+                painter = painterResource(iconRes),
                 contentDescription = "Field Icon",
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier.size(24.dp)
