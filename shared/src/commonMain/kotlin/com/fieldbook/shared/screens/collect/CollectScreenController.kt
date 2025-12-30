@@ -19,9 +19,11 @@ import com.russhwolf.settings.Settings
 // TODO refactor to use ViewModel() ?
 class CollectScreenController(driverFactory: DriverFactory) {
     private val db = createDatabase(driverFactory)
+
     private val observationUnitRepository = ObservationUnitRepository(db)
     private val traitRepository = TraitRepository(db)
     private val observationRepository = ObservationRepository(db)
+
     private val settings: Settings = Settings()
 
     private val studyId: Int = settings.getInt(GeneralKeys.SELECTED_FIELD_ID.key, 0)

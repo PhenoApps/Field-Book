@@ -1,9 +1,13 @@
 package com.fieldbook.shared.database.repository
 
+import app.cash.sqldelight.db.SqlDriver
 import com.fieldbook.shared.database.models.FieldObject
 import com.fieldbook.shared.sqldelight.FieldbookDatabase
 
-class StudyRepository(private val db: FieldbookDatabase) {
+class StudyRepository(
+    private val db: FieldbookDatabase,
+    private val driver: SqlDriver,
+) {
 
     enum class SortOrder { DateImport, Visible, Name }
 
@@ -130,6 +134,6 @@ class StudyRepository(private val db: FieldbookDatabase) {
             WHERE units.study_id = $studyId
             GROUP BY units.internal_id_observation_unit
         """.trimIndent()
-        (db as app.cash.sqldelight.db.SqlDriver).execute(null, query, 0)
+        driver.execute(null, query, 0)
     }
 }

@@ -27,13 +27,21 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.fieldbook.shared.database.models.FieldObject
+import com.fieldbook.shared.database.repository.ObservationUnitAttributeRepository
 import com.fieldbook.shared.database.repository.StudyRepository
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.ic_field
@@ -43,7 +51,12 @@ import com.fieldbook.shared.preferences.GeneralKeys
 import com.fieldbook.shared.sqldelight.DriverFactory
 import com.fieldbook.shared.sqldelight.createDatabase
 import com.fieldbook.shared.theme.MainTheme
+import com.fieldbook.shared.utilities.FieldSwitchImpl
 import com.russhwolf.settings.Settings
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,7 +77,7 @@ fun FieldEditorScreen(
             loadingState.value = true
             errorState.value = null
             try {
-                val repo = StudyRepository(db)
+                val repo = StudyRepository(db, driverFactory.getDriver())
                 fieldsState.value = repo.getAllFields()
                 println("Fields loaded: ${fieldsState.value}")
             } catch (e: Exception) {
@@ -126,7 +139,7 @@ fun FieldEditorScreen(
                     else -> {
                         LazyColumn(modifier = Modifier.fillMaxSize()) {
                             items(fieldsState.value!!) { field ->
-                                FieldListItem(field = field)
+                                FieldListItem(field = field, driverFactory)
                                 androidx.compose.material3.HorizontalDivider()
                             }
                         }
@@ -138,14 +151,18 @@ fun FieldEditorScreen(
 }
 
 @Composable
-private fun FieldListItem(field: FieldObject) {
+private fun FieldListItem(
+    field: FieldObject,
+    driverFactory: DriverFactory,
+    viewModel: FieldListItemViewModel = viewModel(
+        factory = fieldListItemViewModelFactory(driverFactory)
+    )
+) {
+    val activeStudyId by viewModel.activeFieldId.collectAsState()
     val importFormat = ImportFormat.fromString(field.import_format)
-    val iconRes = if (importFormat == ImportFormat.CSV) Res.drawable.ic_file_csv else Res.drawable.ic_field
-
-    val settings = remember { Settings() }
-    val activeStudyId: Int = settings.getInt(GeneralKeys.SELECTED_FIELD_ID.key, 0)
+    val iconRes =
+        if (importFormat == ImportFormat.CSV) Res.drawable.ic_file_csv else Res.drawable.ic_field
     val isActive = field.exp_id == activeStudyId
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -165,12 +182,16 @@ private fun FieldListItem(field: FieldObject) {
                 ),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                painter = painterResource(iconRes),
-                contentDescription = "Field Icon",
-                tint = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.size(24.dp)
-            )
+            IconButton(
+                onClick = { viewModel.switchField(field) }
+            ) {
+                Icon(
+                    painter = painterResource(iconRes),
+                    contentDescription = "Field Icon",
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
@@ -179,5 +200,36 @@ private fun FieldListItem(field: FieldObject) {
                 style = MaterialTheme.typography.bodyLarge
             )
         }
+    }
+}
+
+class FieldListItemViewModel(
+    private val observationUnitAttributeRepository: ObservationUnitAttributeRepository,
+    private val studyRepository: StudyRepository,
+    private val fieldSwitchImpl: FieldSwitchImpl = FieldSwitchImpl(
+        observationUnitAttributeRepository,
+        studyRepository
+    ),
+    private val settings: Settings = Settings()
+) : ViewModel() {
+    private val _activeFieldId = MutableStateFlow(settings.getInt(GeneralKeys.SELECTED_FIELD_ID.key, 0))
+    val activeFieldId: StateFlow<Int> = _activeFieldId.asStateFlow()
+
+    fun switchField(field: FieldObject) {
+        fieldSwitchImpl.switchField(field)
+        viewModelScope.launch {
+            settings.putInt(GeneralKeys.SELECTED_FIELD_ID.key, field.exp_id)
+            _activeFieldId.value = field.exp_id
+        }
+    }
+}
+
+fun fieldListItemViewModelFactory(driverFactory: DriverFactory) = viewModelFactory {
+    initializer {
+        val db = createDatabase(driverFactory)
+        FieldListItemViewModel(
+            observationUnitAttributeRepository = ObservationUnitAttributeRepository(db),
+            studyRepository = StudyRepository(db, driverFactory.getDriver())
+        )
     }
 }
