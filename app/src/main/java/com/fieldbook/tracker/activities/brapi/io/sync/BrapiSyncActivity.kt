@@ -3,6 +3,7 @@ package com.fieldbook.tracker.activities.brapi.io.sync
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -47,10 +48,6 @@ class BrapiSyncActivity : ThemedActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_brapi_export)
-
-        val composeView = findViewById<ComposeView>(R.id.compose_view)
-
         val fieldIds = intent.getIntegerArrayListExtra(FIELD_IDS)
         if (!validatePrerequisites(fieldIds)) {
             finish()
@@ -66,7 +63,7 @@ class BrapiSyncActivity : ThemedActivity() {
 
         viewModel.setServerDisplayName(brapiDisplayName)
 
-        composeView.setContent {
+        setContent {
 
             AppTheme {
                 val uiState by viewModel.uiState.collectAsState()

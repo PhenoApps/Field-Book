@@ -132,7 +132,6 @@ suspend fun BrAPIService.awaitUpdateObservations(
  *
  * @param brapiStudyId The BrAPI database ID for the study.
  * @param variableDbIds A list of variable IDs to filter by.
- * @param pageSize The number of items to fetch per page.
  * @param concurrencyLimit The maximum number of pages to fetch simultaneously.
  * @return A list containing all observations fetched from all pages.
  */

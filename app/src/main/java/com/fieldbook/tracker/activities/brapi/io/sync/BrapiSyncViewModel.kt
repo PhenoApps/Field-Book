@@ -1,10 +1,10 @@
 package com.fieldbook.tracker.activities.brapi.io.sync
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.brapi.model.FieldBookImage
 import com.fieldbook.tracker.brapi.model.Observation
@@ -41,13 +41,17 @@ import javax.inject.Inject
 import kotlin.collections.isNotEmpty
 import kotlin.collections.map
 import androidx.core.content.edit
+import com.fieldbook.tracker.database.repository.TraitRepository
+import kotlinx.coroutines.withContext
 
 @HiltViewModel
 class BrapiSyncViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val dataHelper: DataHelper,
+    private val preferences: SharedPreferences,
+    private val traitRepo: TraitRepository
 ) : ViewModel() {
 
-    private val dataHelper by lazy { DataHelper(context) }
     private var brAPIService = BrAPIServiceFactory.getBrAPIService(context)
 
     private val _uiState = MutableStateFlow(BrapiExportUiState())
@@ -70,7 +74,6 @@ class BrapiSyncViewModel @Inject constructor(
         private const val TAG = "BrapiExportViewModel"
     }
 
-    private val preferences by lazy { PreferenceManager.getDefaultSharedPreferences(context) }
     private val calendar: Calendar by lazy { Calendar.getInstance() }
     private val timestamp by lazy {
         SimpleDateFormat(
@@ -209,7 +212,7 @@ class BrapiSyncViewModel @Inject constructor(
             return
         }
 
-        activeJob = viewModelScope.launch {
+        activeJob = viewModelScope.launch(Dispatchers.IO) {
 
             try {
 
@@ -330,7 +333,7 @@ class BrapiSyncViewModel @Inject constructor(
             return
         }
 
-        activeJob = viewModelScope.launch {
+        activeJob = viewModelScope.launch(Dispatchers.IO) {
 
             try {
 
@@ -398,33 +401,41 @@ class BrapiSyncViewModel @Inject constructor(
 
                                 Log.d(TAG, "Data size: ${update.data.size}")
 
-                                val (inserts, updates, conflicts) = resolveObservationStatus(update.data)
+                                val (inserts, updates, conflicts) = withContext(Dispatchers.IO) {
 
-                                Log.d(TAG, "Saving ${inserts.size} new observations")
+                                    val resolved = resolveObservationStatus(update.data)
 
-                                inserts.forEach { obs ->
+                                    Log.d(TAG, "Saving ${resolved.first.size} new observations")
 
-                                    Log.d(TAG, "Saving observation: ${obs.dbId}")
+                                    uiState.value.study?.let { fieldObject ->
 
-                                    obs.internalVariableDbId = obs.variableDbId
-                                    dataHelper.insertObservation(
-                                        obs.unitDbId,
-                                        obs.internalVariableDbId,
-                                        obs.value ?: "",
-                                        obs.collector ?: "",
-                                        "",
-                                        "",
-                                        uiState.value.study!!.studyId.toString(),
-                                        obs.dbId,
-                                        obs.timestamp,
-                                        obs.lastSyncedTime,
-                                        "1"
-                                    )
+                                        resolved.first.forEach { obs ->
+
+                                            Log.d(TAG, "Saving observation: ${obs.dbId}")
+
+                                            obs.internalVariableDbId = obs.variableDbId
+                                            dataHelper.insertObservation(
+                                                obs.unitDbId,
+                                                obs.internalVariableDbId,
+                                                obs.value ?: "",
+                                                obs.collector ?: "",
+                                                "",
+                                                "",
+                                                fieldObject.studyId.toString(),
+                                                obs.dbId,
+                                                obs.timestamp,
+                                                obs.lastSyncedTime,
+                                                "1"
+                                            )
+                                        }
+                                    }
+
+                                    Log.d(TAG, "Updating local database with ${resolved.second.size} updates")
+
+                                    dataHelper.updateObservationsByBrapiId(resolved.second)
+
+                                    resolved
                                 }
-
-                                Log.d(TAG, "Updating local database with ${updates.size} updates")
-
-                                dataHelper.updateObservationsByBrapiId(updates)
 
                                 if (conflicts.isNotEmpty()) {
                                     // store pending conflicts and notify UI to prompt user
@@ -600,12 +611,22 @@ class BrapiSyncViewModel @Inject constructor(
             }
         }
 
-        if (toUpdateFromServer.isNotEmpty()) dataHelper.updateObservationsByBrapiId(toUpdateFromServer)
+        if (toUpdateFromServer.isNotEmpty()) {
+            viewModelScope.launch(Dispatchers.IO) {
+                dataHelper.updateObservationsByBrapiId(toUpdateFromServer)
+            }
+        }
 
         // clear and update ui state
         pendingConflicts = emptyList()
+
         _uiState.update { it.copy(pendingConflictsCount = 0, pendingConflicts = emptyList()) }
-        refreshLocalStatus()
+
+        viewModelScope.launch(Dispatchers.IO) {
+
+            refreshLocalStatus()
+
+        }
     }
 
 
@@ -1014,7 +1035,7 @@ class BrapiSyncViewModel @Inject constructor(
         val brapiStudyId =
             study.studyDbId ?: throw IllegalStateException(context.getString(R.string.brapi_study_db_id_is_missing))
 
-        val variables = dataHelper.allTraitObjects.filter {
+        val variables = traitRepo.getTraits().filter {
             it.traitDataSource.isNotEmpty() && it.traitDataSource == study.dataSource
         }
 
@@ -1065,7 +1086,7 @@ class BrapiSyncViewModel @Inject constructor(
                 paginationManager = paginationManager,
                 initialPages = firstPageResult,
                 concurrencyLimit = concurrencyLimit
-            ) { page, observations ->
+            ) { _, observations ->
 
                 trySend(
                     DownloadProgressUpdate.InDownloadProgress(

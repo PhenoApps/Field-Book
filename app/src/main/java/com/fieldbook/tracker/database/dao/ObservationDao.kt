@@ -361,12 +361,6 @@ class ObservationDao {
             }
         }
 
-        // Helper function to safely get string values from cursor
-        private fun getStringVal(cursor: Cursor, columnName: String): String? {
-            val columnIndex = cursor.getColumnIndex(columnName)
-            return if (columnIndex >= 0 && !cursor.isNull(columnIndex)) cursor.getString(columnIndex) else null
-        }
-
         /**
          * important note:  observationUnitDbId and observationUnitName are unit attributes that
          * are required to have for brapi fields; otherwise, this query will fail.

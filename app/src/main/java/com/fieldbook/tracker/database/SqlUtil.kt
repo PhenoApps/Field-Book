@@ -33,6 +33,12 @@ typealias Table = MutableList<Row>
 fun getTime(): String = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZZZZZ",
         Locale.getDefault()).format(Calendar.getInstance().time)
 
+// Helper function to safely get string values from cursor
+fun getStringVal(cursor: Cursor, columnName: String): String? {
+    val columnIndex = cursor.getColumnIndex(columnName)
+    return if (columnIndex >= 0 && !cursor.isNull(columnIndex)) cursor.getString(columnIndex) else null
+}
+
 //endregion
 
 /**
