@@ -85,4 +85,51 @@ class StudyRepository(private val db: FieldbookDatabase) {
                 }
         }
     }
+
+    /**
+     * Ensures observation_units_attributes is synchronized with plot attributes for the given study.
+     * This is a type-safe version of fixPlotAttributes from StudyDao.
+     */
+    private fun fixPlotAttributes(studyId: Int) {
+         db.observation_units_attributesQueries.insertOrReplaceFromPlotAttributes(studyId.toLong())
+    }
+
+    /**
+     * Transpose observation unit attribute/values into a table for the selected study.
+     * This mimics the switchField logic from StudyDao.
+     */
+    fun switchField(studyId: Int) {
+        fixPlotAttributes(studyId)
+
+        val attributeNames =
+            db.observation_units_attributesQueries.getAllNamesByStudyId(studyId.toLong())
+                .executeAsList()
+                .filter { it != "geo_coordinates" }
+
+        val selectClauses = attributeNames.map { col ->
+            "MAX(CASE WHEN attr.observation_unit_attribute_name = '" + col.replace(
+                "'",
+                "''"
+            ) + "' THEN vals.value ELSE NULL END) AS '" + col.replace("'", "''") + "'"
+        }
+        val selectStatement = if (selectClauses.isNotEmpty()) {
+            selectClauses.joinToString(", ") + ", "
+        } else ""
+        val tableName = "observation_unit_property_view_" + studyId
+
+        /**
+         * Creating a view here is faster, but
+         * using a table gives better performance for getRangeByIdAndPlot query
+         */
+        val query = """
+            CREATE TABLE IF NOT EXISTS $tableName AS
+            SELECT $selectStatement units.internal_id_observation_unit AS id, units.geo_coordinates as 'geo_coordinates'
+            FROM observation_units AS units
+            LEFT JOIN observations AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
+            LEFT JOIN observation_units_attributes AS attr ON vals.observation_variable_db_id = attr.id
+            WHERE units.study_id = $studyId
+            GROUP BY units.internal_id_observation_unit
+        """.trimIndent()
+        (db as app.cash.sqldelight.db.SqlDriver).execute(null, query, 0)
+    }
 }

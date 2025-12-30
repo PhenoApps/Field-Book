@@ -41,3 +41,4 @@ SELECT
   (SELECT COUNT(*) FROM observations o WHERE o.study_id = s.internal_id_study AND o.observation_variable_db_id > 0) AS observation_count
 FROM studies s
 ORDER BY study_name COLLATE NOCASE ASC;
+
