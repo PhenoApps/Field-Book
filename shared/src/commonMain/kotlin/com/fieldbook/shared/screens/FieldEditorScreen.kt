@@ -1,6 +1,7 @@
 package com.fieldbook.shared.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
@@ -29,6 +31,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.fieldbook.shared.database.models.FieldObject
 import com.fieldbook.shared.database.repository.StudyRepository
@@ -36,9 +39,11 @@ import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.ic_field
 import com.fieldbook.shared.generated.resources.ic_file_csv
 import com.fieldbook.shared.objects.ImportFormat
+import com.fieldbook.shared.preferences.GeneralKeys
 import com.fieldbook.shared.sqldelight.DriverFactory
 import com.fieldbook.shared.sqldelight.createDatabase
 import com.fieldbook.shared.theme.MainTheme
+import com.russhwolf.settings.Settings
 import org.jetbrains.compose.resources.painterResource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -135,8 +140,11 @@ fun FieldEditorScreen(
 @Composable
 private fun FieldListItem(field: FieldObject) {
     val importFormat = ImportFormat.fromString(field.import_format)
-    val iconRes =
-        if (importFormat == ImportFormat.CSV) Res.drawable.ic_file_csv else Res.drawable.ic_field
+    val iconRes = if (importFormat == ImportFormat.CSV) Res.drawable.ic_file_csv else Res.drawable.ic_field
+
+    val settings = remember { Settings() }
+    val activeStudyId: Int = settings.getInt(GeneralKeys.SELECTED_FIELD_ID.key, 0)
+    val isActive = field.exp_id == activeStudyId
 
     Row(
         modifier = Modifier
@@ -147,13 +155,20 @@ private fun FieldListItem(field: FieldObject) {
         Box(
             modifier = Modifier
                 .size(40.dp)
-                .padding(6.dp),
+                .clip(CircleShape)
+                .then(
+                    if (isActive) Modifier.border(
+                        width = 2.dp,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        shape = CircleShape
+                    ) else Modifier
+                ),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 painter = painterResource(iconRes),
                 contentDescription = "Field Icon",
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.size(24.dp)
             )
         }
