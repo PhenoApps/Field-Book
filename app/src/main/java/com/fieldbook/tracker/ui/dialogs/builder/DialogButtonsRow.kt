@@ -44,32 +44,21 @@ fun DialogButtonsRow(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            positiveButtonText?.let { text ->
-                onPositive?.let {
-                    DialogButton(
-                        text = text,
-                        textColor = positiveTextColor,
-                        onClick = it,
-                    )
-                }
-            }
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-
-            Spacer(modifier = Modifier.weight(1f))
-
             negativeButtonText?.let { text ->
                 onNegative?.let {
                     DialogButton(
                         text = text,
                         textColor = negativeTextColor,
+                        onClick = it,
+                    )
+                }
+            }
+
+            positiveButtonText?.let { text ->
+                onPositive?.let {
+                    DialogButton(
+                        text = text,
+                        textColor = positiveTextColor,
                         onClick = it,
                     )
                 }
