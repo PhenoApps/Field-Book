@@ -34,18 +34,3 @@ Examples of release notes:
 ```release-note
 
 ```
-___
-
-### Release Type
-
-_For internal use - please leave these unchecked unless you are the one completing the merge._
-
-<!--
-- On merge:
-  - If `MAJOR` or `MINOR` is checked, a release action will be dispatched to create a release of the selected type.
-  - If `WAIT` is checked, the release action will be skipped. The merged changes will later be included in the next dispatched or scheduled release (A scheduled check for unreleased changes runs every Monday at 3pm EST).
--->
-
-- [ ] **`MAJOR`**
-- [ ] **`MINOR`**
-- [ ] **`WAIT`** (No immediate release, but the changelog will be still be updated if there is a release note.)
