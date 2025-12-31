@@ -414,6 +414,9 @@ class BrapiSyncViewModel @Inject constructor(
                                             Log.d(TAG, "Saving observation: ${obs.dbId}")
 
                                             obs.internalVariableDbId = obs.variableDbId
+
+                                            val rep = dataHelper.getNextRep(fieldObject.studyId.toString(), obs.unitDbId, obs.internalVariableDbId).toInt()
+
                                             dataHelper.insertObservation(
                                                 obs.unitDbId,
                                                 obs.internalVariableDbId,
@@ -425,7 +428,7 @@ class BrapiSyncViewModel @Inject constructor(
                                                 obs.dbId,
                                                 obs.timestamp,
                                                 obs.lastSyncedTime,
-                                                "1"
+                                                rep.toString()
                                             )
                                         }
                                     }
