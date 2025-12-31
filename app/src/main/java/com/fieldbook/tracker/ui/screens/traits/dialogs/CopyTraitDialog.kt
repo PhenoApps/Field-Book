@@ -31,7 +31,7 @@ fun CopyTraitDialog(
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text(stringResource(R.string.trait_swap_name)) },
+                label = { Text(stringResource(R.string.trait_new_trait_name)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )

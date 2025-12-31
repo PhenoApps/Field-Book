@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.application.IoDispatcher
 import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.TraitObject
@@ -38,6 +39,12 @@ class TraitDetailViewModel @Inject constructor(
     private val _events = MutableSharedFlow<TraitDetailEvent>()
     val events = _events.asSharedFlow()
 
+
+    private fun notifyCollectReload() {
+        CollectActivity.reloadData = true
+    }
+
+    // PREFERENCES
     fun isOverviewExpanded(): Boolean {
         return !prefs.getBoolean(GeneralKeys.TRAIT_DETAIL_OVERVIEW_COLLAPSED, false)
     }
@@ -50,6 +57,7 @@ class TraitDetailViewModel @Inject constructor(
         return !prefs.getBoolean(GeneralKeys.TRAIT_DETAIL_DATA_COLLAPSED, false)
     }
 
+    // DB-RELATED
     fun loadTraitDetails(traitId: String) {
         viewModelScope.launch {
             _uiState.value = TraitDetailUiState.Loading
@@ -73,10 +81,11 @@ class TraitDetailViewModel @Inject constructor(
     fun deleteTrait(traitId: String) {
         viewModelScope.launch {
             runCatching { repo.deleteTrait(traitId) }
+                .onSuccess { notifyCollectReload() }
                 .onFailure { e ->
-                    _events.emit(TraitDetailEvent.ShowToast(R.string.error_loading_trait_detail))
-                    Log.e(TAG, "Error loading trait details: ", e)
-                    _uiState.value = TraitDetailUiState.Error(R.string.error_loading_trait_detail)
+                    _events.emit(TraitDetailEvent.ShowToast(R.string.error_deleting_trait))
+                    Log.e(TAG, "Error while deleting trait: ", e)
+                    _uiState.value = TraitDetailUiState.Error(R.string.error_deleting_trait)
                 }
         }
     }
@@ -114,6 +123,7 @@ class TraitDetailViewModel @Inject constructor(
 
                     val obsData = (_uiState.value as? TraitDetailUiState.Success)?.observationData
                     _uiState.value = TraitDetailUiState.Success(updated, obsData)
+                    notifyCollectReload()
                 }
                 .onFailure { e ->
                     Log.e(TAG, "Error updating trait visibility: ", e)
@@ -131,6 +141,7 @@ class TraitDetailViewModel @Inject constructor(
 
                         _uiState.value = TraitDetailUiState.Success(updatedTrait, obsData)
                     }
+                    notifyCollectReload()
                 }
                 .onFailure { e ->
                     Log.e(TAG, "Error updating resource file: ", e)
@@ -146,6 +157,7 @@ class TraitDetailViewModel @Inject constructor(
 
                 //reload the observations, in case they need reformatting in the graph
                 loadObservationData(trait)
+                notifyCollectReload()
             }.onSuccess { obsData ->
                 _uiState.value = TraitDetailUiState.Success(trait, obsData)
             }.onFailure { e ->
@@ -164,6 +176,7 @@ class TraitDetailViewModel @Inject constructor(
                 .onSuccess { updatedTrait ->
                     val obsData = (_uiState.value as? TraitDetailUiState.Success)?.observationData
                     _uiState.value = TraitDetailUiState.Success(updatedTrait, obsData)
+                    notifyCollectReload()
                 }
                 .onFailure { e ->
                     Log.e(TAG, "Error updating trait alias: ", e)
@@ -186,6 +199,7 @@ class TraitDetailViewModel @Inject constructor(
                     } ?: TraitDetailEvent.ShowToast(R.string.error_copy_trait)
 
                     _events.emit(event)
+                    notifyCollectReload()
                 }
                 .onFailure { e ->
                     Log.e(TAG, "Error copying trait: ", e)

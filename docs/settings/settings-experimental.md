@@ -3,27 +3,9 @@
 # Experimental Settings
 
 <figure class="image">
-  <img class="screenshot" src="_static/images/settings/experimental/settings_experimental_framed.png" width="350px"> 
+  <img class="screenshot" src="../_static/images/settings/experimental/settings_experimental.png" width="350px"> 
   <figcaption class="screenshot-caption"><i>Experimental settings screen layout</i></figcaption> 
 </figure>
-
-## Stable
-
-#### <img class="icon" src="_static/icons/settings/experimental/flask-outline.png"> Repeated Measures
-
-Turns on repeated measures.
-When turned on, a plus symbol appears next to the trait value entry box on the Collect screen.
-
-<figure class="image">
-  <img class="screenshot" src="_static/images/settings/experimental/settings_experimental_repeated_icon.png" width="325px"> 
-  <figcaption class="screenshot-caption"><i>Collect screen value entry with repeated measurements enabled</i></figcaption> 
-</figure>
-
-When pressed it creates a new entry field for collecting additional phenotypes on the same entry for the same trait.
-
-!> To export data that includes repeated measures make sure to choose the **Database** format or to use **BrAPI**.
-These formats allow repeated measures to be differentiated by timestamp.
-If exporting in **Table** format, only the most recent measurement will be included.
 
 ## Beta
 
