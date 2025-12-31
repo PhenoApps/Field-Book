@@ -32,6 +32,23 @@ Set the display name Field Book should use when referring to the BrAPI server.
   <figcaption class="screenshot-caption"><i>BrAPI Display Name setting</i></figcaption> 
 </figure>
 
+#### <img class="icon" src="_static/icons/settings/brapi/compatibility.png"> Check Compatibility
+
+View the supported BrAPI calls and server information.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/settings/brapi/joined_brapi_compatibility.png" width="700px"> 
+  <figcaption class="screenshot-caption"><i>BrAPI Display Name setting</i></figcaption> 
+</figure>
+
+The top card shows the server name, organization and description.
+
+The second card shows a comparison between all the BrAPI calls that Field Book supports with whether the server supports it.
+This is crucial to identify shortcomings on the server side.
+The user can choose to implement any missing calls on the server so that all Field Book supported BrAPI functionalities can be used with the server.
+
+The remaining cards show module-wise comparison of all calls in the BrAPI specification and whether the server and/or Field Book supports it.
+
 ## Authorization
 
 #### <img class="icon" src="_static/icons/settings/brapi/alpha-v-box-outline.png"> OIDC Flow
