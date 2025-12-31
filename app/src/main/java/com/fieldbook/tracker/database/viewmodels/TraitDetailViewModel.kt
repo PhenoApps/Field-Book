@@ -155,9 +155,9 @@ class TraitDetailViewModel @Inject constructor(
             runCatching {
                 repo.updateAttributes(trait)
 
+                notifyCollectReload()
                 //reload the observations, in case they need reformatting in the graph
                 loadObservationData(trait)
-                notifyCollectReload()
             }.onSuccess { obsData ->
                 _uiState.value = TraitDetailUiState.Success(trait, obsData)
             }.onFailure { e ->
