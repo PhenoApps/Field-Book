@@ -77,7 +77,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
      */
     abstract val filterName: String
 
-    abstract fun BrapiCacheModel.mapToUiModel(): List<CheckboxListAdapter.Model>
+    abstract fun BrapiCacheModel.mapToUiModel(): List<CheckboxListAdapter.Model?>
 
     abstract fun List<CheckboxListAdapter.Model>.filterExists(): List<CheckboxListAdapter.Model>
 
@@ -385,6 +385,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         val uiModels = models
             .filterByPreferences()
             .mapToUiModel()
+            .filterNotNull()
             .distinct()
             .filterBySearchTextPreferences()
             .filterExists()

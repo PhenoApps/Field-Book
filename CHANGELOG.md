@@ -12,15 +12,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Traits include an option to enable repeated measures
 - Traits include an option to automatically switch to the next entry when data is input
 - Traits include an option to choose a specific resource image that will be displayed in Collect
-- Traits include an option to ask if outlier values should be allowed
+- Numeric traits include an option to ask if outlier values should be allowed
 - Numeric traits include an option to limit decimal places for values
 - Numeric traits include an option to disable the math symbol buttons
 - Date traits include an option to convert between date and day of year
 - Categorical traits include an option to collect multiple categories
 - Categorical traits imported via BrAPI include an option to display either the label or value
-- Traits can now be renamed and will name changes in a list
+- Traits can now be renamed with previous names appearing in a list
 - BrAPI sync and export are now merged into a single screen
-- View BrAPI server compatibility with Field Book in the BrAPI settings
+- BrAPI server compatibility can now be viewed in the BrAPI settings
 
 ### Changed
 - Multicat trait format removed (replaced with categorical option)
@@ -847,3 +847,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 [v6.3.6]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.6
+

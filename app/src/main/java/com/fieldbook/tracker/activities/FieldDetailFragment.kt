@@ -54,6 +54,7 @@ import androidx.core.view.isGone
 import androidx.core.content.edit
 import com.fieldbook.tracker.activities.brapi.io.sync.BrapiSyncActivity
 import com.fieldbook.tracker.utilities.InsetHandler
+import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter
 
 @AndroidEntryPoint
 class FieldDetailFragment : Fragment(), FieldSyncController {
@@ -70,6 +71,9 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
 
     @Inject
     lateinit var exportUtil: ExportUtil
+
+    @Inject
+    lateinit var valueProcessor: ValueProcessorFormatAdapter
 
     private var toolbar: Toolbar? = null
     private var fieldId: Int? = null
@@ -390,13 +394,21 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                 val iconRes = Formats.entries
                     .find { it.getDatabaseName() == traitDetail.format }?.getIcon()
 
+                val processedObservations =
+                    traitDetail.observations?.map { observation ->
+                        val trait = database.getTraitByName(traitDetail.traitName)
+                        trait?.let {
+                            valueProcessor.processValue(observation, it)
+                        } ?: observation
+                    }
+
                 FieldDetailItem(
                     traitDetail.traitName,
                     traitDetail.format,
                     traitDetail.categories,
                     getString(R.string.field_trait_observation_total, traitDetail.count),
                     ContextCompat.getDrawable(requireContext(), iconRes ?: R.drawable.ic_trait_categorical),
-                    traitDetail.observations,
+                    processedObservations,
                     traitDetail.completeness
                 )
             }
