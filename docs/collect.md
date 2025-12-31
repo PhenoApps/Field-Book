@@ -15,7 +15,8 @@ The large black arrows are used to navigate between **entries**.
 The progress bar above the arrows indicates current positional progress through the list of entries.
 
 Data is entered in the bottom area of the screen using a trait-specific layout.
-Values turn from black to red once they have been saved to the internal database.
+Newly entered or edited values are displayed in italics text.
+Previously collected values are displayed as red and bold text.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/collect/collect_framed.png" width="350px"> 
@@ -44,7 +45,7 @@ The search dialog can be populated by pressing the <img class="icon" src="_stati
 Once a column is added, you can enter a search string on the text entry line.
 The <img class="icon" src="_static/icons/collect/equal-box.png"> icon allows you to select the search operator including `is equals to`, `is not equal to`, `contains`, `is more than`, and `is less than`.
 The <img class="icon" src="_static/icons/settings/sounds/delete.png"> icon will remove the selected column from the search.
-Multiple columns can be added when searching for specific entries.
+Multiple columns can be added when searching.
 The search will return a table of matching entries that match the search criteria.
 Pressing any line in the results table will navigate to the corresponding entry.
 
@@ -124,16 +125,18 @@ Pressing "Edit" will navigate to the [Traits](traits.md) screen where you can mo
 The large, black arrows navigate between different entries.
 The bar at the top of the section shows progress through all entries in the field.
 Pressing and holding the an arrow will continuously scroll through the entries.
-The longer the arrows are pressed, the faster the scrolling becomes.
+The longer the arrows are pressed, the faster the scrolling speed.
 
-Primary and secondary IDs are displayed between the entry arrows. Different attributes can be selected to be displayed by pressing the labels.
+Primary and secondary IDs are displayed between the entry arrows.
+Different attributes can be displayed in this area by pressing the labels.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/collect/collect_choose_id_framed.png" width="325px"> 
   <figcaption class="screenshot-caption"><i>Modifying which attribute is used as primary id</i></figcaption> 
 </figure>
 
-The values can be pressed to open the new Quick GoTo dialog (The legacy Quick GoTo setting has been removed now that the feature is available by default). Enter a new value to jump to the first matching entry.
+The values in this area can be pressed to open the Quick GoTo dialog.
+Enter a new value to jump to the first matching entry.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/collect/collect_quick_go_to.png" width="325px"> 
@@ -146,7 +149,8 @@ The bottom half of the screen is used to input data.
 The elements and layout of this area change based on the trait that is currently active.
 Information for each specific trait format can be found in the Trait Formats pages.
 
-Newly input or edited values are colored black and displayed with italic font. Saved values are colored red and displayed in normal font. The font difference can be used to distinguish between the two even on black and white screens.
+Newly input or edited values are colored black and displayed with italic font.
+Saved values are colored red and displayed in normal font.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/collect/collect_framed.png" width="350px"> 
@@ -159,4 +163,4 @@ The bottom toolbar contains three buttons for data input:
 
 - <img class="icon" src="_static/icons/collect/barcode-scan.png"> enters data by scanning a barcode.
 - <img class="icon" src="_static/icons/collect/not-applicable.png"> enters NA for when a phenotype is not available.
-- <img class="icon" src="_static/icons/collect/delete-outline.png"> deletes the entered data.
+- <img class="icon" src="_static/icons/collect/delete-outline.png"> deletes the observation.
