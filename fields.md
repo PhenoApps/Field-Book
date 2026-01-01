@@ -127,7 +127,7 @@ Confirm the planned settings are as expected, then press <img class="icon" src="
 To import a field using BrAPI, ensure BrAPI is enabled and configured in the <img class="icon" src="_static/icons/settings/main/server-network.png"> [Brapi settings](settings-brapi.md)
 
 Once your device is authenticated with a compatible database, the BrAPI server will be displayed as an option for field import.
-The [BrAPI](brapi.md) section of the documentation has more details about the field and trait import process.
+The [BrAPI](brapi.md) section of the documentation has more details about the import, sync, and export process.
 
 !> Any field can be exported locally, but only fields and traits that have been imported via BrAPI are able to export data via BrAPI.
 
@@ -166,6 +166,7 @@ Individual groups can be expanded or collapsed by tapping the group header.
 Long pressing the group header will expand the group and select all fields within the group.
 
 #### Assigning and managing groups:
+
 - Select one or more fields with a long press, then tap the <img class="icon" src="_static/icons/fields/grouping-options.png"> grouping options icon.
 - Choose to assign fields to an existing group or create a new group.
 
@@ -190,6 +191,7 @@ Fields that are no longer active can be archived to reduce clutter in the main f
 Archived fields cannot be set as the active field and their location data be not searched when the <img class="icon" src="_static/icons/fields/compass-outline.png"> icon is pressed to find the nearest field.
 
 #### Archiving and accessing archived fields:
+
 - Select one or more fields and tap the <img class="icon" src="_static/icons/fields/archive.png"> archive icon. If the currently active field is selected for archiving, a prompt will be displayed to confirm or select which fields to archive.
 
 <figure class="image">
