@@ -127,9 +127,13 @@ Confirm the planned settings are as expected, then press <img class="icon" src="
 To import a field using BrAPI, ensure BrAPI is enabled and configured in the <img class="icon" src="_static/icons/settings/main/server-network.png"> [Brapi settings](settings-brapi.md)
 
 Once your device is authenticated with a compatible database, the BrAPI server will be displayed as an option for field import.
-The [BrAPI](brapi.md) section of the documentation has more details about the field and trait import process.
+The [BrAPI](brapi.md) section of the documentation has more details about the import, sync, and export process.
 
 !> Any field can be exported locally, but only fields and traits that have been imported via BrAPI are able to export data via BrAPI.
+
+## Managing fields
+
+To set or switch your active field, press the import source icon on the left side of the field item.
 
 If your fields have location data, pressing the <img class="icon" src="_static/icons/fields/compass-outline.png"> icon in the top toolbar will set the nearest active field.
 

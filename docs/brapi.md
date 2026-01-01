@@ -88,35 +88,28 @@ Once you are satisified with the traits, press the Import button at the bottom o
 
 ## Sync
 
-The <img class="icon" src="./_static/icons/fields/sync.png"> **Sync** option is found on the field detail page of BrAPI fields.
-Sync connects to your BrAPI server and updates the field with new data that has been added from other users since your last sync or import.
-This option is not available for fields imported from a file.
-
-Field Book's BrAPI integration focuses on importing and uploading observation (phenotype) data only. This section describes how to import observation payloads from a BrAPI server into an existing local field and how to upload collected observations back to a server. The UI emphasizes mapping observation correctly and choosing a merge strategy to control how incoming observations affect local records.
+Fields imported using BrAPI include a <img class="icon" src="./_static/icons/fields/sync.png"> **Sync** option in the field detail page to transfer data between Field Book and BrAPI-compatible databases.
+The top card shows a summary of transfers to the BrAPI database including uploaded observations and images.
 
 <figure class="image">
   <img class="screenshot" src="./_static/images/brapi/joined_brapi_sync_intro.png" alt="BrAPI sync main screen" width="700px">
-  <figcaption class="screenshot-caption"><i>BrAPI Sync initial screen with no observations</i></figcaption>
+  <figcaption class="screenshot-caption"><i>BrAPI Sync with no observations</i></figcaption>
 </figure>
 
-### Main features
-
-- Server selection and authentication: pick a configured BrAPI server or add a new one in BrAPI settings. After authenticating you can access observation endpoints for studies/trials the account has access to.
-- Import/Upload history: recent observation imports and uploads are shown with timestamps and status (success/failure) so you can retry or review problems.
-
-### Importing observations (from server into an existing local field)
+### Importing and merging observations
 
 <figure class="image">
   <img class="screenshot" src="./_static/images/brapi/joined_brapi_sync_download.png" alt="BrAPI sync main screen" width="1100px">
   <figcaption class="screenshot-caption"><i>Downloading observations from the server</i></figcaption>
 </figure>
 
-### Merge strategies (how imported observations are applied to local data)
+Remote observations can be imported into Field Book in the second card.
+If observations have been collected on different devices, this is a good way to synchronize data across users.
 
-When importing observations that reference entries already present on the device, choose how they should be merged:
+If there are conflicts between local and remote observations, there are several different merge options:
 
-- Server: replace existing observations for the matching entry/trait/date with the imported values.
-- Local: don't override any observations, keep the local observation values
+- Server: replace local observations with the remote values
+- Local: keep local observation values
 - Recent: keep the most recent observation value
 - Manual: decide for each conflict
 
@@ -125,9 +118,13 @@ When importing observations that reference entries already present on the device
   <figcaption class="screenshot-caption"><i>Resolving conflicts during download</i></figcaption>
 </figure> 
 
-### Uploading observations (sending local observations to a BrAPI server)
+### Uploading observations
 
 <figure class="image">
   <img class="screenshot" src="./_static/images/brapi/joined_brapi_sync_upload.png" alt="BrAPI sync main screen" width="1100px">
   <figcaption class="screenshot-caption"><i>Uploading Field Book (local) observations to the server</i></figcaption>
 </figure>
+
+A summary of new observations is displayed in the last card.
+These observations can be uploaded to the connected BrAPI database.
+Images can be optionally skipped during upload to decrease upload time.
