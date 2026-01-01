@@ -88,25 +88,46 @@ Once you are satisified with the traits, press the Import button at the bottom o
 
 ## Sync
 
-The <img class="icon" src="_static/icons/fields/sync.png"> **Sync** option is found on the field detail page of BrAPI fields.
+The <img class="icon" src="./_static/icons/fields/sync.png"> **Sync** option is found on the field detail page of BrAPI fields.
 Sync connects to your BrAPI server and updates the field with new data that has been added from other users since your last sync or import.
 This option is not available for fields imported from a file.
 
-<figure class="image">
-  <img src="_static/images/brapi/brapi_sync_joined.png" width="1100px" class="screenshot"> 
-  <figcaption class="screenshot-caption"><i>Downloading 25 observations from the BrAPI server using BrAPI sync</i></figcaption> 
-</figure>
-
-## Export data
-
-Once data has been collected it can be exported via BrAPI by pressing **Export** and selecting BrAPI from the Export Data options.
-
-Field Book will display a summary of BrAPI Export statistics including a breakdown of the number of new, synced, and edited observations, as well as skipped observations.
-The same statistics are displayed for images.
+Field Book's BrAPI integration focuses on importing and uploading observation (phenotype) data only. This section describes how to import observation payloads from a BrAPI server into an existing local field and how to upload collected observations back to a server. The UI emphasizes mapping observation correctly and choosing a merge strategy to control how incoming observations affect local records.
 
 <figure class="image">
-  <img src="_static/images/brapi/brapi_export_process_joined.png" width="700px" class="screenshot"> 
-  <figcaption class="screenshot-caption"><i>The BrAPI data export process</i></figcaption> 
+  <img class="screenshot" src="./_static/images/brapi/joined_brapi_sync_intro.png" alt="BrAPI sync main screen" width="700px">
+  <figcaption class="screenshot-caption"><i>BrAPI Sync initial screen with no observations</i></figcaption>
 </figure>
 
-Pressing the **Export** button uploads the observations to the external BrAPI database.
+### Main features
+
+- Server selection and authentication: pick a configured BrAPI server or add a new one in BrAPI settings. After authenticating you can access observation endpoints for studies/trials the account has access to.
+- Import/Upload history: recent observation imports and uploads are shown with timestamps and status (success/failure) so you can retry or review problems.
+
+### Importing observations (from server into an existing local field)
+
+<figure class="image">
+  <img class="screenshot" src="./_static/images/brapi/joined_brapi_sync_download.png" alt="BrAPI sync main screen" width="1100px">
+  <figcaption class="screenshot-caption"><i>Downloading observations from the server</i></figcaption>
+</figure>
+
+### Merge strategies (how imported observations are applied to local data)
+
+When importing observations that reference entries already present on the device, choose how they should be merged:
+
+- Server: replace existing observations for the matching entry/trait/date with the imported values.
+- Local: don't override any observations, keep the local observation values
+- Recent: keep the most recent observation value
+- Manual: decide for each conflict
+
+<figure class="image">
+  <img class="screenshot" src="./_static/images/brapi/joined_brapi_sync_conflict.png" alt="BrAPI sync main screen" width="1100px">
+  <figcaption class="screenshot-caption"><i>Resolving conflicts during download</i></figcaption>
+</figure> 
+
+### Uploading observations (sending local observations to a BrAPI server)
+
+<figure class="image">
+  <img class="screenshot" src="./_static/images/brapi/joined_brapi_sync_upload.png" alt="BrAPI sync main screen" width="1100px">
+  <figcaption class="screenshot-caption"><i>Uploading Field Book (local) observations to the server</i></figcaption>
+</figure>
