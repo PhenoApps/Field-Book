@@ -140,6 +140,24 @@
             android:summary="%s"
             android:title="@string/brapi_timeout" />
 
+        <com.fieldbook.tracker.preferences.BetterEditTextPreference
+            android:defaultValue="5"
+            android:icon="@drawable/image_multiple_outline"
+            android:inputType="number"
+            android:key="BRAPI_MAX_CONCURRENT_IMAGE_CONTENT"
+            android:selectAllOnFocus="true"
+            android:summary="%s"
+            android:title="@string/brapi_max_concurrent_image_content" />
+
+        <com.fieldbook.tracker.preferences.BetterEditTextPreference
+            android:defaultValue="5"
+            android:icon="@drawable/transfer_down"
+            android:inputType="number"
+            android:key="BRAPI_MAX_CONCURRENT_OBSERVATION_TRANSFER"
+            android:selectAllOnFocus="true"
+            android:summary="%s"
+            android:title="@string/brapi_max_concurrent_observation_transfer" />
+
         <ListPreference
             android:defaultValue="value"
             android:dialogTitle="@string/preferences_brapi_cache_invalidate_dialog_title"
