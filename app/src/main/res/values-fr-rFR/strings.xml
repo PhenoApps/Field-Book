@@ -319,6 +319,9 @@
     <string name="brapi_export_skipped_images">Images ignorées</string>
     <string name="brapi_export_skipped_user_created_images">Images de caractères crées par l\'utilisateur</string>
     <string name="brapi_delete_message">L\'observation BrAPI synchronisée ne peut pas etre effacée, remplacée par NA</string>
+    <string name="brapi_export_new_images_pending">Nouvelles images</string>
+    <string name="brapi_export_complete">export terminé</string>
+    <string name="cancel">Annuler</string>
     <!-- Pagination -->
     <string name="next">Suivant</string>
     <string name="prev">précédent</string>
@@ -396,4 +399,7 @@ Phenotypes et essais créés manuellement ou importés via CSV devront être exp
     <!--  NearbyShare  -->
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="save">enregistrer</string>
+    <string name="new_images">Nouvelles images</string>
+    <string name="edited_images">Images éditées </string>
+    <string name="synced_images">Images synchronisées </string>
 </resources>
