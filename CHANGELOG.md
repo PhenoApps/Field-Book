@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Fixed
+
+## [v7.0.0] - 2026-01-01
+
+### Added
 - Traits list now includes individual trait pages with options that are adjustable on a per trait basis
 - Traits include an option to enable repeated measures
 - Traits include an option to automatically switch to the next entry when data is input
@@ -848,3 +856,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [v6.3.6]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.6
 
+
+[v7.0.0]: https://github.com/PhenoApps/Field-Book/releases/tag/7.0.0
