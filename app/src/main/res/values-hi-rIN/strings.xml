@@ -198,6 +198,8 @@
     <!-- BrAPI Export -->
     <string name="brapi_export_button">निर्यात करें</string>
     <string name="brapi_close_button">बंद करें</string>
+    <string name="brapi_export_complete">निर्यात सम्पूर्ण</string>
+    <string name="cancel">रद्द करें</string>
     <!-- Pagination -->
     <!-- General -->
     <!-- APP INTRO  -->

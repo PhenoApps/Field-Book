@@ -330,6 +330,9 @@
     <string name="brapi_export_skipped_user_created_images">Ảnh được tạo bởi người dùng</string>
     <string name="brapi_export_images">Ảnh</string>
     <string name="brapi_delete_message">Không thể xóa đánh giá đã được đồng bộ ở BrAPI, hãy sử dụng NA</string>
+    <string name="brapi_export_new_images_pending">Ảnh mới</string>
+    <string name="brapi_export_complete">Xuất thành công</string>
+    <string name="cancel">Bỏ qua</string>
     <!-- Pagination -->
     <string name="next">Tiếp theo</string>
     <string name="prev">Trước</string>
@@ -407,4 +410,8 @@ Các tính trạng và ruộng được tạo thủ công hoặc được nhập
     <!--  NearbyShare  -->
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="save">Lưu</string>
+    <string name="new_images">Ảnh mới</string>
+    <string name="edited_images">Ảnh đã được chỉnh sửa</string>
+    <string name="synced_images">Ảnh được đồng bộ</string>
+    <string name="local">Bộ nhớ máy</string>
 </resources>

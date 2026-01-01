@@ -335,6 +335,9 @@
     <string name="brapi_export_skipped_user_created_images">用户创建性状的图像</string>
     <string name="brapi_export_images">图像</string>
     <string name="brapi_delete_message">不能删除同步的BrAPI观测值，以缺失代替</string>
+    <string name="brapi_export_new_images_pending">新图像</string>
+    <string name="brapi_export_complete">导出完成</string>
+    <string name="cancel">取消</string>
     <!-- Pagination -->
     <string name="next">下一个</string>
     <string name="prev">前一个</string>
@@ -414,4 +417,8 @@
     <!--  NearbyShare  -->
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="save">保存</string>
+    <string name="new_images">新图像</string>
+    <string name="edited_images">编辑的图像</string>
+    <string name="synced_images">同步的图像</string>
+    <string name="local">本地</string>
 </resources>

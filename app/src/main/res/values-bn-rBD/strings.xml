@@ -228,6 +228,8 @@
     <!-- BrAPI Export -->
     <string name="brapi_export_button">দিয়ে দেয়া</string>
     <string name="brapi_close_button">বন্ধ</string>
+    <string name="brapi_export_complete">পাঠানো সম্পন্ন</string>
+    <string name="cancel">বাতিল</string>
     <!-- Pagination -->
     <!-- General -->
     <!-- APP INTRO  -->

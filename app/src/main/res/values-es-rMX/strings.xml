@@ -1063,6 +1063,9 @@
     <string name="brapi_export_images">Fotos</string>
     <string name="brapi_delete_message">No se puede eliminar la observación BrAPI sincronizada, usando NA en su lugar</string>
     <string name="act_brapi_export_image_load_failed">Error al cargar la Foto.</string>
+    <string name="brapi_export_new_images_pending">Fotos Nuevas</string>
+    <string name="brapi_export_complete">Exportación ha sido completada</string>
+    <string name="cancel">Cancelar</string>
     <!-- Pagination -->
     <string name="next">Siguiente</string>
     <string name="prev">Anterior</string>
@@ -1392,4 +1395,12 @@
     <string name="device_settings_dialog_title">Ajustes del dispositivo Bluetooth</string>
     <string name="no_data_captured">No hay datos capturados.</string>
     <string name="failed_to_find_file_name">Error al recuperar el nombre del archivo.</string>
+    <string name="brapi_sync_button">Sincronizar</string>
+    <string name="new_images">Fotos Nuevas</string>
+    <string name="edited_images">Fotos Editadas</string>
+    <string name="synced_images">Fotos Sincronizadas</string>
+    <string name="complete">Completo</string>
+    <string name="server">Servidor</string>
+    <string name="local">Local</string>
+    <string name="manual">Manual</string>
 </resources>

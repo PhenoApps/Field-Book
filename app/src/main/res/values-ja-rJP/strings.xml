@@ -332,6 +332,9 @@
     <string name="brapi_export_skipped_user_created_images">ユーザーが作成した形質の画像</string>
     <string name="brapi_export_images">画像</string>
     <string name="brapi_delete_message">同期したBrAPI観測値は削除できません。代わりにNAを使って下さい。</string>
+    <string name="brapi_export_new_images_pending">新しい画像</string>
+    <string name="brapi_export_complete">エクスポート完了</string>
+    <string name="cancel">キャンセル</string>
     <!-- Pagination -->
     <string name="next">次へ</string>
     <string name="prev">前へ</string>
@@ -410,4 +413,8 @@
     <!--  NearbyShare  -->
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="save">保存</string>
+    <string name="new_images">新しい画像</string>
+    <string name="edited_images">編集した画像</string>
+    <string name="synced_images">同期した画像</string>
+    <string name="local">ローカル</string>
 </resources>

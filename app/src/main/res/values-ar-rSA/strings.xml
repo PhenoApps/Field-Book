@@ -330,6 +330,9 @@
     <string name="brapi_export_skipped_user_created_images">المستخدم أنشأ صور للسمات</string>
     <string name="brapi_export_images">صور</string>
     <string name="brapi_delete_message">لا يمكن حذف ملاحظة BrAPI المتزامنة ، وذلك باستخدام NA بدلاً من ذلك</string>
+    <string name="brapi_export_new_images_pending">صور جديدة</string>
+    <string name="brapi_export_complete">تم التصدير</string>
+    <string name="cancel">إلغاء</string>
     <!-- Pagination -->
     <string name="next">التالي</string>
     <string name="prev">السابق</string>
@@ -407,4 +410,8 @@
     <!--  NearbyShare  -->
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="save">حفظ</string>
+    <string name="new_images">صور جديدة</string>
+    <string name="edited_images">الصور المعدلة</string>
+    <string name="synced_images">الصور المتزامنة</string>
+    <string name="local">محلي</string>
 </resources>

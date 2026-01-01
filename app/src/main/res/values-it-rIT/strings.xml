@@ -1063,6 +1063,9 @@
     <string name="brapi_export_images">Immagini</string>
     <string name="brapi_delete_message">Impossibile eliminare l\'osservazione BrAPI sincronizzata, utilizzando invece NA</string>
     <string name="act_brapi_export_image_load_failed">Caricamento immagine fallito.</string>
+    <string name="brapi_export_new_images_pending">Nuove immagini</string>
+    <string name="brapi_export_complete">Esportazione completata</string>
+    <string name="cancel">Annulla</string>
     <!-- Pagination -->
     <string name="next">Successivo</string>
     <string name="prev">Precedente</string>
@@ -1391,4 +1394,12 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="device_settings_dialog_title">Impostazioni Dispositivo Bluetooth</string>
     <string name="no_data_captured">Nessun dato catturato.</string>
     <string name="failed_to_find_file_name">Impossibile recuperare il nome del file.</string>
+    <string name="brapi_sync_button">Sincronizza</string>
+    <string name="new_images">Nuove immagini</string>
+    <string name="edited_images">Immagini modificate</string>
+    <string name="synced_images">Immagini sincronizzate</string>
+    <string name="complete">Completo</string>
+    <string name="server">Server</string>
+    <string name="local">Locale</string>
+    <string name="manual">Manuale</string>
 </resources>
