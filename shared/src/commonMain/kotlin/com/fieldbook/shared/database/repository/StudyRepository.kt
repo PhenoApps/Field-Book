@@ -1,13 +1,14 @@
 package com.fieldbook.shared.database.repository
 
 import app.cash.sqldelight.db.SqlDriver
+import com.fieldbook.shared.AppContext
 import com.fieldbook.shared.database.models.FieldObject
 import com.fieldbook.shared.sqldelight.FieldbookDatabase
 
-class StudyRepository(
-    private val db: FieldbookDatabase,
-    private val driver: SqlDriver,
-) {
+class StudyRepository {
+
+    private val driver: SqlDriver = AppContext.driverFactory().getDriver()
+    private val db: FieldbookDatabase = FieldbookDatabase(driver)
 
     enum class SortOrder { DateImport, Visible, Name }
 
@@ -95,7 +96,7 @@ class StudyRepository(
      * This is a type-safe version of fixPlotAttributes from StudyDao.
      */
     private fun fixPlotAttributes(studyId: Int) {
-         db.observation_units_attributesQueries.insertOrReplaceFromPlotAttributes(studyId.toLong())
+        db.observation_units_attributesQueries.insertOrReplaceFromPlotAttributes(studyId.toLong())
     }
 
     /**

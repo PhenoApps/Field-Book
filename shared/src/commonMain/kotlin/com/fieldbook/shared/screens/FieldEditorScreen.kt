@@ -40,6 +40,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.fieldbook.shared.AppContext
 import com.fieldbook.shared.database.models.FieldObject
 import com.fieldbook.shared.database.repository.ObservationUnitAttributeRepository
 import com.fieldbook.shared.database.repository.StudyRepository
@@ -48,7 +49,6 @@ import com.fieldbook.shared.generated.resources.ic_field
 import com.fieldbook.shared.generated.resources.ic_file_csv
 import com.fieldbook.shared.objects.ImportFormat
 import com.fieldbook.shared.preferences.GeneralKeys
-import com.fieldbook.shared.sqldelight.DriverFactory
 import com.fieldbook.shared.sqldelight.createDatabase
 import com.fieldbook.shared.theme.MainTheme
 import com.fieldbook.shared.utilities.FieldSwitchImpl
@@ -62,22 +62,22 @@ import org.jetbrains.compose.resources.painterResource
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FieldEditorScreen(
-    driverFactory: DriverFactory,
     onBack: (() -> Unit)? = null
 ) {
     MainTheme {
         val fieldsState = remember { mutableStateOf<List<FieldObject>?>(null) }
         val errorState = remember { mutableStateOf<String?>(null) }
         val loadingState = remember { mutableStateOf(true) }
+        val driverFactory = AppContext.driverFactory()
         val db = remember(driverFactory) {
-            createDatabase(driverFactory)
+            createDatabase()
         }
 
         LaunchedEffect(Unit) {
             loadingState.value = true
             errorState.value = null
             try {
-                val repo = StudyRepository(db, driverFactory.getDriver())
+                val repo = StudyRepository()
                 fieldsState.value = repo.getAllFields()
                 println("Fields loaded: ${fieldsState.value}")
             } catch (e: Exception) {
@@ -139,7 +139,7 @@ fun FieldEditorScreen(
                     else -> {
                         LazyColumn(modifier = Modifier.fillMaxSize()) {
                             items(fieldsState.value!!) { field ->
-                                FieldListItem(field = field, driverFactory)
+                                FieldListItem(field = field)
                                 androidx.compose.material3.HorizontalDivider()
                             }
                         }
@@ -153,9 +153,8 @@ fun FieldEditorScreen(
 @Composable
 private fun FieldListItem(
     field: FieldObject,
-    driverFactory: DriverFactory,
     viewModel: FieldListItemViewModel = viewModel(
-        factory = fieldListItemViewModelFactory(driverFactory)
+        factory = fieldListItemViewModelFactory()
     )
 ) {
     val activeStudyId by viewModel.activeFieldId.collectAsState()
@@ -163,6 +162,7 @@ private fun FieldListItem(
     val iconRes =
         if (importFormat == ImportFormat.CSV) Res.drawable.ic_file_csv else Res.drawable.ic_field
     val isActive = field.exp_id == activeStudyId
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -224,12 +224,11 @@ class FieldListItemViewModel(
     }
 }
 
-fun fieldListItemViewModelFactory(driverFactory: DriverFactory) = viewModelFactory {
+fun fieldListItemViewModelFactory() = viewModelFactory {
     initializer {
-        val db = createDatabase(driverFactory)
         FieldListItemViewModel(
-            observationUnitAttributeRepository = ObservationUnitAttributeRepository(db),
-            studyRepository = StudyRepository(db, driverFactory.getDriver())
+            observationUnitAttributeRepository = ObservationUnitAttributeRepository(),
+            studyRepository = StudyRepository()
         )
     }
 }

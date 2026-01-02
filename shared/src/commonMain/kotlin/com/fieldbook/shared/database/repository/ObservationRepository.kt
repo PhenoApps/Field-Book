@@ -3,12 +3,15 @@ package com.fieldbook.shared.database.repository
 import com.fieldbook.shared.database.models.ObservationObject
 import com.fieldbook.shared.database.utils.internalTimeFormatter
 import com.fieldbook.shared.sqldelight.FieldbookDatabase
+import com.fieldbook.shared.sqldelight.createDatabase
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.format
 import kotlinx.datetime.format.FormatStringsInDatetimeFormats
 
-class ObservationRepository(private val db: FieldbookDatabase) {
+class ObservationRepository() {
+    private val db: FieldbookDatabase = createDatabase()
+
     /**
      * Returns a map of observation_variable_db_id to list of values for the given studyId and plotId.
      * Aggregates multiple values for the same traitId.

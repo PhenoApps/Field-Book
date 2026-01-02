@@ -1,6 +1,7 @@
 package com.fieldbook.shared.sqldelight
 
 import app.cash.sqldelight.db.SqlDriver
+import com.fieldbook.shared.AppContext
 
 /**
  * Expect/Actual DriverFactory:
@@ -14,14 +15,13 @@ expect class DriverFactory {
     fun close()
 }
 
-fun createDatabase(driverFactory: DriverFactory): FieldbookDatabase {
+fun createDatabase(): FieldbookDatabase {
+    val driverFactory: DriverFactory = AppContext.driverFactory()
     val driver = driverFactory.getDriver()
     return FieldbookDatabase(driver)
 }
 
-fun closeDatabase(driverFactory: DriverFactory) {
+fun closeDatabase() {
+    val driverFactory: DriverFactory = AppContext.driverFactory()
     driverFactory.close()
 }
-
-
-

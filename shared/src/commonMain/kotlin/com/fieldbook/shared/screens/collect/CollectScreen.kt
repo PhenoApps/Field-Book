@@ -23,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.fieldbook.shared.sqldelight.DriverFactory
 import com.fieldbook.shared.theme.MainTheme
 
 /**
@@ -34,11 +33,10 @@ import com.fieldbook.shared.theme.MainTheme
 @Composable
 fun CollectScreen(
     modifier: Modifier = Modifier,
-    driverFactory: DriverFactory,
     onBack: (() -> Unit)? = null,
 ) {
     MainTheme {
-        val controller = remember { CollectScreenController(driverFactory) }
+        val controller = remember { CollectScreenController() }
 
         Surface(modifier = modifier.fillMaxSize()) {
             Column(modifier = Modifier.fillMaxSize()) {
@@ -88,4 +86,3 @@ fun CollectScreen(
         }
     }
 }
-

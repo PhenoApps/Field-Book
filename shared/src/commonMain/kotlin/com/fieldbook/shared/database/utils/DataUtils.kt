@@ -1,7 +1,6 @@
 package com.fieldbook.shared.database.utils
 
 import com.fieldbook.shared.generated.resources.Res
-import com.fieldbook.shared.sqldelight.DriverFactory
 import com.fieldbook.shared.sqldelight.closeDatabase
 import okio.FileSystem
 import okio.Path.Companion.toPath
@@ -19,8 +18,8 @@ expect object PlatformEnv : PlatformPaths
 
 fun fileExists(path: String) = FileSystem.SYSTEM.exists(path.toPath())
 
-fun writeAllBytes(driverFactory: DriverFactory, path: String, bytes: ByteArray) {
-    closeDatabase(driverFactory)
+fun writeAllBytes(path: String, bytes: ByteArray) {
+    closeDatabase()
 
     val p = path.toPath()
     FileSystem.SYSTEM.createDirectories(p.parent!!)
@@ -30,10 +29,10 @@ fun writeAllBytes(driverFactory: DriverFactory, path: String, bytes: ByteArray) 
 
 @OptIn(ExperimentalResourceApi::class)
 suspend fun importDatabaseFromBundled(
-    driverFactory: DriverFactory,
-    dbName: String, bundledName: String = "files/$DATABASE_NAME"
+    dbName: String,
+    bundledName: String = "files/$DATABASE_NAME"
 ) {
     val bytes = Res.readBytes(bundledName)
     val dst = PlatformEnv.databaseFilePath(dbName)
-    writeAllBytes(driverFactory, dst, bytes)
+    writeAllBytes(dst, bytes)
 }
