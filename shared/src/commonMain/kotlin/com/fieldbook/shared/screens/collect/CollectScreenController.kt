@@ -7,8 +7,10 @@ import androidx.compose.ui.graphics.Color
 import com.fieldbook.shared.database.models.ObservationUnitModel
 import com.fieldbook.shared.database.models.TraitObject
 import com.fieldbook.shared.database.repository.ObservationRepository
+import com.fieldbook.shared.database.repository.ObservationUnitPropertyRepository
 import com.fieldbook.shared.database.repository.ObservationUnitRepository
 import com.fieldbook.shared.database.repository.TraitRepository
+import com.fieldbook.shared.objects.RangeObject
 import com.fieldbook.shared.preferences.GeneralKeys
 import com.fieldbook.shared.theme.AppColors
 import com.russhwolf.settings.Settings
@@ -19,13 +21,17 @@ class CollectScreenController {
     private val observationUnitRepository = ObservationUnitRepository()
     private val traitRepository = TraitRepository()
     private val observationRepository = ObservationRepository()
+    private val observationUnitPropertyRepository = ObservationUnitPropertyRepository()
 
     private val settings: Settings = Settings()
 
-    private val studyId: Int = settings.getInt(GeneralKeys.SELECTED_FIELD_ID.key, 0)
+    val studyId: Int = settings.getInt(GeneralKeys.SELECTED_FIELD_ID.key, 0)
 
     var units by mutableStateOf<List<ObservationUnitModel>>(emptyList())
         private set
+    var rangeID by mutableStateOf<Array<Int>>(emptyArray())
+        private set
+
     var unitLoading by mutableStateOf(true)
         private set
     var unitError by mutableStateOf<String?>(null)
@@ -48,15 +54,37 @@ class CollectScreenController {
         private set
     private var lastUnitId: String? = null
 
+    val primaryId = settings.getString(GeneralKeys.PRIMARY_NAME.key, "")
+    val secondaryId = settings.getString(GeneralKeys.SECONDARY_NAME.key, "")
+    val uniqueId = settings.getString(GeneralKeys.UNIQUE_NAME.key, "")
+
+    var cRange: RangeObject by mutableStateOf(RangeObject())
+
     init {
         loadUnits()
         loadTraits()
         loadTraitValues()
     }
 
+    fun updateCurrentRange(id: Int) {
+        try {
+            cRange = observationUnitPropertyRepository.getRangeFromId(
+                id.toLong(),
+                primaryId,
+                secondaryId,
+                uniqueId
+            )
+        } catch (e: Exception) {
+            // On error, ensure UI doesn't crash and show an empty range
+            e.printStackTrace()
+            cRange = RangeObject("", "", "")
+        }
+    }
+
     private fun loadUnits() {
         try {
             units = observationUnitRepository.getAllObservationUnits(studyId.toLong())
+            rangeID = observationUnitPropertyRepository.allRangeID(studyId)
             unitLoading = false
         } catch (e: Exception) {
             e.printStackTrace()

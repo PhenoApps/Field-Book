@@ -26,8 +26,7 @@ class FieldSwitchImpl(
     fun switchField(field: FieldObject?) {
         if (field != null && field.exp_id != -1 && field.date_import.isNotBlank()) {
 
-            // FIXME crashing
-            // studyRepository?.switchField(field.exp_id)
+            studyRepository?.switchField(field.exp_id)
 
             // Get all entry props from repository if available, otherwise empty list
             val entryProps =

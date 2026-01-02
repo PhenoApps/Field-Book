@@ -116,6 +116,11 @@ enum class GeneralKeys(val key: String) {
     DATAGRID_PREFIX_TRAIT("com.fieldbook.tracker.datagrid.DATAGRID_PREFIX_TRAIT"),
 
     // summary filter
-    SUMMARY_FILTER_ATTRIBUTES("com.fieldbook.tracker.summary.SUMMARY_FILTER_ATTRIBUTES");
+    SUMMARY_FILTER_ATTRIBUTES("com.fieldbook.tracker.summary.SUMMARY_FILTER_ATTRIBUTES"),
+
+    // Other
+
+    SORT_ORDER("SORT_ORDER");
+
     // ...add remaining keys as needed...
 }

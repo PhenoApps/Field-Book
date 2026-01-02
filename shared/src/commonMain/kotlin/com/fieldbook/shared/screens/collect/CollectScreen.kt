@@ -71,14 +71,14 @@ fun CollectScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Spacer(Modifier.height(8.dp))
-                        InfoBar(viewModel = controller)
+                        InfoBar(controller = controller)
                         Spacer(Modifier.height(8.dp))
                         TraitBox(
                             viewModel = controller,
                             modifier = Modifier.fillMaxWidth()
                         )
                         Spacer(Modifier.height(8.dp))
-                        RangeBox(viewModel = controller)
+                        RangeBox(controller = controller)
                         CollectInput(controller = controller)
                     }
                 }

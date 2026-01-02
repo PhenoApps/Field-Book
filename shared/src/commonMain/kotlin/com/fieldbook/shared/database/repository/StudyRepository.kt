@@ -2,6 +2,8 @@ package com.fieldbook.shared.database.repository
 
 import app.cash.sqldelight.db.SqlDriver
 import com.fieldbook.shared.AppContext
+import com.fieldbook.shared.database.Migrator
+import com.fieldbook.shared.database.Migrator.Companion.sObservationUnitPropertyViewName
 import com.fieldbook.shared.database.models.FieldObject
 import com.fieldbook.shared.sqldelight.FieldbookDatabase
 
@@ -112,36 +114,37 @@ class StudyRepository {
                 .filter { it != "geo_coordinates" }
 
         val selectClauses = attributeNames.map { col ->
-            "MAX(CASE WHEN attr.observation_unit_attribute_name = '" + col.replace(
-                "'",
-                "''"
-            ) + "' THEN vals.value ELSE NULL END) AS '" + col.replace("'", "''") + "'"
+            "MAX(CASE WHEN attr.observation_unit_attribute_name = \"$col\" THEN vals.observation_unit_value_name ELSE NULL END) AS \"$col\""
         }
         val selectStatement = if (selectClauses.isNotEmpty()) {
             selectClauses.joinToString(", ") + ", "
         } else ""
-        val tableName = "observation_unit_property_view_" + studyId
+
+        driver.execute(
+            identifier = null,
+            sql = "DROP TABLE IF EXISTS $sObservationUnitPropertyViewName",
+            parameters = 0
+        )
 
         /**
          * Creating a view here is faster, but
          * using a table gives better performance for getRangeByIdAndPlot query
          */
         val query = """
-            CREATE TABLE IF NOT EXISTS $tableName AS
-            SELECT $selectStatement units.internal_id_observation_unit AS id, units.geo_coordinates as 'geo_coordinates'
-            FROM observation_units AS units
-            LEFT JOIN observations AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
-            LEFT JOIN observation_units_attributes AS attr ON vals.observation_variable_db_id = attr.id
-            WHERE units.study_id = ?
-            GROUP BY units.internal_id_observation_unit
+            CREATE TABLE $sObservationUnitPropertyViewName AS 
+            SELECT $selectStatement units.${Migrator.ObservationUnit.PK} AS id, units.`geo_coordinates` as "geo_coordinates"
+            FROM ${Migrator.ObservationUnit.tableName} AS units
+            LEFT JOIN ${Migrator.ObservationUnitValue.tableName} AS vals ON units.${Migrator.ObservationUnit.PK} = vals.${Migrator.ObservationUnit.FK}
+            LEFT JOIN ${Migrator.ObservationUnitAttribute.tableName} AS attr on vals.${Migrator.ObservationUnitAttribute.FK} = attr.${Migrator.ObservationUnitAttribute.PK}
+            LEFT JOIN plot_attributes as a on vals.observation_unit_attribute_db_id = a.attribute_id
+            WHERE units.${Migrator.Study.FK} = $studyId
+            GROUP BY units.${Migrator.ObservationUnit.PK}
         """.trimIndent()
 
         driver.execute(
             identifier = null,
             sql = query,
-            parameters = 1
-        ) {
-            bindLong(0, studyId.toLong())
-        }
+            parameters = 0
+        )
     }
 }
