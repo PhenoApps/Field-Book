@@ -132,9 +132,16 @@ class StudyRepository {
             FROM observation_units AS units
             LEFT JOIN observations AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
             LEFT JOIN observation_units_attributes AS attr ON vals.observation_variable_db_id = attr.id
-            WHERE units.study_id = $studyId
+            WHERE units.study_id = ?
             GROUP BY units.internal_id_observation_unit
         """.trimIndent()
-        driver.execute(null, query, 0)
+
+        driver.execute(
+            identifier = null,
+            sql = query,
+            parameters = 1
+        ) {
+            bindLong(0, studyId.toLong())
+        }
     }
 }
