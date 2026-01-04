@@ -1,6 +1,6 @@
 <changelog>
 
-    <release version="7.0.0" versionCode="70000" date="2026-01-01">
+    <release date="2026-01-01" versionCode="70000" versionName="v7.0.0">
         <new>Traits list now includes individual trait pages with options that are adjustable on a per trait basis</new>
         <new>Traits include an option to enable repeated measures</new>
         <new>Traits include an option to automatically switch to the next entry when data is input</new>
