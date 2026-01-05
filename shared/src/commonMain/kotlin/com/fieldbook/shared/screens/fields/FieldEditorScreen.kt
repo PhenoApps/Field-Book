@@ -72,6 +72,7 @@ fun FieldEditorScreen(
         val fieldsState = remember { mutableStateOf<List<FieldObject>?>(null) }
         val errorState = remember { mutableStateOf<String?>(null) }
         val loadingState = remember { mutableStateOf(true) }
+        val showFieldCreatorDialog = remember { mutableStateOf(false) }
         val driverFactory = AppContext.driverFactory()
         val db = remember(driverFactory) {
             createDatabase()
@@ -115,7 +116,7 @@ fun FieldEditorScreen(
             },
             floatingActionButton = {
                 FloatingActionButton(
-                    onClick = {}, // No action yet
+                    onClick = { showFieldCreatorDialog.value = true },
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
                     shape = CircleShape
@@ -161,6 +162,12 @@ fun FieldEditorScreen(
                             }
                         }
                     }
+                }
+
+                if (showFieldCreatorDialog.value) {
+                    FieldCreatorDialogFragment(
+                        onDismiss = { showFieldCreatorDialog.value = false }
+                    )
                 }
             }
         }
