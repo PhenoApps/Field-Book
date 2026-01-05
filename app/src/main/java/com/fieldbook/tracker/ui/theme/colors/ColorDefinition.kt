@@ -5,6 +5,14 @@ import androidx.compose.material3.TopAppBarColors
 /**
  * Define theme colors for default theme, and override specific colors for other theme in their own implementation
  */
+
+val DefaultToggleColors = ToggleColors(
+    track = BaseColors.Background,
+    indicator = BaseColors.Primary.copy(alpha = 0.8f),
+    icon = BaseColors.IconTint,
+    iconUnselected = BaseColors.LightGrayColor
+)
+
 val DefaultAppColors = AppColors(
     primary = BaseColors.Primary,
     primaryDark = BaseColors.PrimaryDark,
@@ -116,6 +124,8 @@ val DefaultAppColors = AppColors(
         inverseRegion = BaseColors.InverseCropRegion
     ),
 
+    toggle = DefaultToggleColors,
+
     topAppBarColors = TopAppBarColors(
         containerColor = BaseColors.Primary,
         scrolledContainerColor = BaseColors.PrimaryTransparent,
@@ -149,6 +159,13 @@ val BlueAppColors = DefaultAppColors.copy(
         spinnerFocused = BlueThemeOverrides.SpinnerFocused,
         spinnerSelected = BlueThemeOverrides.SpinnerSelected,
         selectedItemBackground = BlueThemeOverrides.SelectedItemBackground
+    ),
+
+    toggle = DefaultToggleColors.copy(
+        indicator = BlueThemeOverrides.Primary,
+        track = BlueThemeOverrides.IconFillTint.copy(alpha = 0.28f),
+        icon = BlueThemeOverrides.IconFillTint,
+        iconUnselected = BlueThemeOverrides.IconFillTint.copy(alpha = 0.6f)
     ),
 
     status = DefaultAppColors.status.copy(
