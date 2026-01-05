@@ -1,14 +1,12 @@
 package com.fieldbook.shared.utilities
 
 import com.fieldbook.shared.database.repository.ObservationUnitAttributeRepository
-import com.fieldbook.shared.database.repository.StudiesRepository
-import com.fieldbook.shared.sqldelight.DriverFactory
-import com.fieldbook.shared.sqldelight.createDatabase
+import com.fieldbook.shared.database.repository.StudyRepository
 
-fun selectFirstField(driverFactory: DriverFactory) {
-    val db = createDatabase(driverFactory)
-    val studiesRepository = StudiesRepository(db)
-    val fs = studiesRepository.getAllFields()
-    val attrRepo = ObservationUnitAttributeRepository(db)
-    FieldSwitchImpl(attrRepo).switchField(fs.firstOrNull())
+fun selectFirstField() {
+    val studyRepository = StudyRepository()
+    val fs = studyRepository.getAllFields()
+    val attrRepo = ObservationUnitAttributeRepository()
+
+    FieldSwitchImpl(attrRepo, studyRepository).switchField(fs.firstOrNull())
 }

@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fieldbook.shared.KmpHostScreenType
-import com.fieldbook.shared.database.repository.StudiesRepository
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.ic_nav_drawer_collect_data
 import com.fieldbook.shared.generated.resources.ic_nav_drawer_fields
@@ -37,8 +36,6 @@ import com.fieldbook.shared.generated.resources.ic_nav_drawer_statistics
 import com.fieldbook.shared.generated.resources.ic_nav_drawer_traits
 import com.fieldbook.shared.generated.resources.ic_tb_info
 import com.fieldbook.shared.generated.resources.trait_date_save
-import com.fieldbook.shared.sqldelight.DriverFactory
-import com.fieldbook.shared.sqldelight.createDatabase
 import com.fieldbook.shared.theme.MainTheme
 import com.fieldbook.shared.utilities.selectFirstField
 import org.jetbrains.compose.resources.painterResource
@@ -47,8 +44,7 @@ import org.jetbrains.compose.resources.painterResource
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConfigScreen(
-    driverFactory: DriverFactory,
-    viewModel: ConfigScreenViewModel = viewModel { ConfigScreenViewModel(driverFactory) },
+    viewModel: ConfigScreenViewModel = viewModel { ConfigScreenViewModel() },
     onBack: (() -> Unit)? = null,
     onNavigate: ((KmpHostScreenType) -> Unit)? = null
 ) {
@@ -134,13 +130,8 @@ fun ConfigScreen(
     }
 }
 
-class ConfigScreenViewModel(
-    driverFactory: DriverFactory
-) : ViewModel() {
-    private val db = createDatabase(driverFactory)
-    private val studiesRepository: StudiesRepository = StudiesRepository(db)
-
+class ConfigScreenViewModel : ViewModel() {
     init {
-        selectFirstField(driverFactory)
+        selectFirstField()
     }
 }

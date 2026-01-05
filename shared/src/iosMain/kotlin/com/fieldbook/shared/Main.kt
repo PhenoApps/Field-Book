@@ -14,22 +14,21 @@ import com.fieldbook.shared.screens.preferences.StoragePreferencesScreen
 import com.fieldbook.shared.sqldelight.DriverFactory
 
 fun MainViewController(driverFactory: DriverFactory) = ComposeUIViewController {
+    AppContext.init(driverFactory)
+
     var currentScreen by remember { mutableStateOf(KmpHostScreenType.CONFIG) }
 
     when (currentScreen) {
         KmpHostScreenType.CONFIG -> ConfigScreen(
             onNavigate = { target -> currentScreen = target },
-            driverFactory = driverFactory,
             onBack = { currentScreen = KmpHostScreenType.CONFIG }
         )
 
         KmpHostScreenType.FIELD_EDITOR -> FieldEditorScreen(
-            driverFactory = driverFactory,
             onBack = { currentScreen = KmpHostScreenType.CONFIG }
         )
 
         KmpHostScreenType.COLLECT -> CollectScreen(
-            driverFactory = driverFactory,
             onBack = { currentScreen = KmpHostScreenType.CONFIG }
         )
 
@@ -39,7 +38,6 @@ fun MainViewController(driverFactory: DriverFactory) = ComposeUIViewController {
         )
 
         KmpHostScreenType.STORAGE_PREFERENCES -> StoragePreferencesScreen(
-            driverFactory,
             onBack = { currentScreen = KmpHostScreenType.PREFERENCES }
         )
 

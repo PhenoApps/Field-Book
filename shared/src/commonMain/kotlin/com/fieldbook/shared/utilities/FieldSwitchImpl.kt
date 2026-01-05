@@ -1,15 +1,19 @@
 package com.fieldbook.shared.utilities
 
 import com.fieldbook.shared.database.models.FieldObject
-import com.fieldbook.shared.preferences.GeneralKeys
 import com.fieldbook.shared.database.repository.ObservationUnitAttributeRepository
+import com.fieldbook.shared.database.repository.StudyRepository
+import com.fieldbook.shared.preferences.GeneralKeys
 import com.russhwolf.settings.Settings
 
 /**
  * Field Switcher implementation allows an object with context to switch currently selected field.
  * This handles all necessary preferences and database updates.
  */
-class FieldSwitchImpl(private val repo: ObservationUnitAttributeRepository? = null) {
+class FieldSwitchImpl(
+    private val repo: ObservationUnitAttributeRepository? = null,
+    private val studyRepository: StudyRepository? = null
+) {
 
     private val preferences: Settings = Settings()
 
@@ -21,6 +25,8 @@ class FieldSwitchImpl(private val repo: ObservationUnitAttributeRepository? = nu
 
     fun switchField(field: FieldObject?) {
         if (field != null && field.exp_id != -1 && field.date_import.isNotBlank()) {
+
+            studyRepository?.switchField(field.exp_id)
 
             // Get all entry props from repository if available, otherwise empty list
             val entryProps =

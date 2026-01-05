@@ -3,8 +3,11 @@ package com.fieldbook.shared.database.repository
 import com.fieldbook.shared.database.models.ObservationUnitModel
 import com.fieldbook.shared.sqldelight.FieldbookDatabase
 import com.fieldbook.shared.sqldelight.Observation_units
+import com.fieldbook.shared.sqldelight.createDatabase
 
-class ObservationUnitRepository(private val db: FieldbookDatabase) {
+class ObservationUnitRepository() {
+    private val db: FieldbookDatabase = createDatabase()
+
     private fun Observation_units.toMap(): Map<String, Any?> {
         return mapOf(
             "internal_id_observation_unit" to internal_id_observation_unit,

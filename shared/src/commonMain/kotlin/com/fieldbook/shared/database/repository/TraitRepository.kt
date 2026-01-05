@@ -3,8 +3,11 @@ package com.fieldbook.shared.database.repository
 import com.fieldbook.shared.database.models.TraitObject
 import com.fieldbook.shared.sqldelight.FieldbookDatabase
 import com.fieldbook.shared.sqldelight.Observation_variables
+import com.fieldbook.shared.sqldelight.createDatabase
 
-class TraitRepository(private val db: FieldbookDatabase) {
+class TraitRepository() {
+    private val db: FieldbookDatabase = createDatabase()
+
     private fun Observation_variables.toTraitObject(): TraitObject {
         return TraitObject(
             id = internal_id_observation_variable,

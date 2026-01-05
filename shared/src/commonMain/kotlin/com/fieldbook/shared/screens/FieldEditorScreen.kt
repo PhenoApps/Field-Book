@@ -1,6 +1,7 @@
 package com.fieldbook.shared.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
@@ -25,39 +27,57 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.fieldbook.shared.AppContext
 import com.fieldbook.shared.database.models.FieldObject
-import com.fieldbook.shared.database.repository.StudiesRepository
+import com.fieldbook.shared.database.repository.ObservationUnitAttributeRepository
+import com.fieldbook.shared.database.repository.StudyRepository
 import com.fieldbook.shared.generated.resources.Res
+import com.fieldbook.shared.generated.resources.ic_field
 import com.fieldbook.shared.generated.resources.ic_file_csv
-import com.fieldbook.shared.sqldelight.DriverFactory
+import com.fieldbook.shared.objects.ImportFormat
+import com.fieldbook.shared.preferences.GeneralKeys
 import com.fieldbook.shared.sqldelight.createDatabase
 import com.fieldbook.shared.theme.MainTheme
+import com.fieldbook.shared.utilities.FieldSwitchImpl
+import com.russhwolf.settings.Settings
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FieldEditorScreen(
-    driverFactory: DriverFactory,
     onBack: (() -> Unit)? = null
 ) {
     MainTheme {
         val fieldsState = remember { mutableStateOf<List<FieldObject>?>(null) }
         val errorState = remember { mutableStateOf<String?>(null) }
         val loadingState = remember { mutableStateOf(true) }
+        val driverFactory = AppContext.driverFactory()
         val db = remember(driverFactory) {
-            createDatabase(driverFactory)
+            createDatabase()
         }
 
         LaunchedEffect(Unit) {
             loadingState.value = true
             errorState.value = null
             try {
-                val repo = StudiesRepository(db)
+                val repo = StudyRepository()
                 fieldsState.value = repo.getAllFields()
                 println("Fields loaded: ${fieldsState.value}")
             } catch (e: Exception) {
@@ -131,7 +151,18 @@ fun FieldEditorScreen(
 }
 
 @Composable
-private fun FieldListItem(field: FieldObject) {
+private fun FieldListItem(
+    field: FieldObject,
+    viewModel: FieldListItemViewModel = viewModel(
+        factory = fieldListItemViewModelFactory()
+    )
+) {
+    val activeStudyId by viewModel.activeFieldId.collectAsState()
+    val importFormat = ImportFormat.fromString(field.import_format)
+    val iconRes =
+        if (importFormat == ImportFormat.CSV) Res.drawable.ic_file_csv else Res.drawable.ic_field
+    val isActive = field.exp_id == activeStudyId
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -141,15 +172,26 @@ private fun FieldListItem(field: FieldObject) {
         Box(
             modifier = Modifier
                 .size(40.dp)
-                .padding(6.dp),
+                .clip(CircleShape)
+                .then(
+                    if (isActive) Modifier.border(
+                        width = 2.dp,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        shape = CircleShape
+                    ) else Modifier
+                ),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                painter = painterResource(Res.drawable.ic_file_csv),
-                contentDescription = "Field Icon",
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                modifier = Modifier.size(24.dp)
-            )
+            IconButton(
+                onClick = { viewModel.switchField(field) }
+            ) {
+                Icon(
+                    painter = painterResource(iconRes),
+                    contentDescription = "Field Icon",
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
@@ -158,5 +200,35 @@ private fun FieldListItem(field: FieldObject) {
                 style = MaterialTheme.typography.bodyLarge
             )
         }
+    }
+}
+
+class FieldListItemViewModel(
+    private val observationUnitAttributeRepository: ObservationUnitAttributeRepository,
+    private val studyRepository: StudyRepository,
+    private val fieldSwitchImpl: FieldSwitchImpl = FieldSwitchImpl(
+        observationUnitAttributeRepository,
+        studyRepository
+    ),
+    private val settings: Settings = Settings()
+) : ViewModel() {
+    private val _activeFieldId = MutableStateFlow(settings.getInt(GeneralKeys.SELECTED_FIELD_ID.key, 0))
+    val activeFieldId: StateFlow<Int> = _activeFieldId.asStateFlow()
+
+    fun switchField(field: FieldObject) {
+        fieldSwitchImpl.switchField(field)
+        viewModelScope.launch {
+            settings.putInt(GeneralKeys.SELECTED_FIELD_ID.key, field.exp_id)
+            _activeFieldId.value = field.exp_id
+        }
+    }
+}
+
+fun fieldListItemViewModelFactory() = viewModelFactory {
+    initializer {
+        FieldListItemViewModel(
+            observationUnitAttributeRepository = ObservationUnitAttributeRepository(),
+            studyRepository = StudyRepository()
+        )
     }
 }

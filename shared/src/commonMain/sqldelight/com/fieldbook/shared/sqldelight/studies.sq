@@ -9,7 +9,8 @@ CREATE TABLE studies (
   study_secondary_id_name TEXT,
   study_sort_name TEXT,
   date_import INTEGER,     
-  date_edit TEXT
+  date_edit TEXT,
+  import_format TEXT
 );
 
 
@@ -41,3 +42,6 @@ SELECT
   (SELECT COUNT(*) FROM observations o WHERE o.study_id = s.internal_id_study AND o.observation_variable_db_id > 0) AS observation_count
 FROM studies s
 ORDER BY study_name COLLATE NOCASE ASC;
+
+getSortNameById:
+SELECT study_sort_name FROM studies WHERE internal_id_study = ? LIMIT 1;

@@ -12,6 +12,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,11 +41,21 @@ fun PlotsProgressBar(
 }
 
 @Composable
-fun RangeBox(viewModel: CollectScreenController, modifier: Modifier = Modifier) {
+fun RangeBox(
+    controller: CollectScreenController,
+    modifier: Modifier = Modifier,
+) {
+    LaunchedEffect(controller.currentUnitIndex) {
+        val id = controller.rangeID.getOrNull(controller.currentUnitIndex)
+        if (id != null) {
+            controller.updateCurrentRange(id)
+        }
+    }
+
     Column(modifier = modifier.fillMaxWidth()) {
         PlotsProgressBar(
-            currentIndex = viewModel.currentUnitIndex,
-            total = viewModel.units.size,
+            currentIndex = controller.currentUnitIndex,
+            total = controller.units.size,
             visible = true // Optionally, make this conditional on a preference
         )
         Spacer(Modifier.size(16.dp))
@@ -54,8 +65,8 @@ fun RangeBox(viewModel: CollectScreenController, modifier: Modifier = Modifier) 
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             IconButton(
-                onClick = { viewModel.updateCurrentUnitIndex(viewModel.currentUnitIndex - 1) },
-                enabled = viewModel.currentUnitIndex > 0,
+                onClick = { controller.updateCurrentUnitIndex(controller.currentUnitIndex - 1) },
+                enabled = controller.currentUnitIndex > 0,
                 modifier = Modifier.size(56.dp)
             ) {
                 Icon(
@@ -64,20 +75,19 @@ fun RangeBox(viewModel: CollectScreenController, modifier: Modifier = Modifier) 
                     modifier = Modifier.size(56.dp)
                 )
             }
-            val unit = viewModel.units.getOrNull(viewModel.currentUnitIndex)
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    "row: ${unit?.position_coordinate_x ?: "-"}",
+                    "row: ${controller.cRange.primaryId}",
                     style = MaterialTheme.typography.titleLarge
                 )
                 Text(
-                    "plot: ${unit?.observation_unit_db_id ?: "-"}",
+                    "plot: ${controller.cRange.secondaryId}",
                     style = MaterialTheme.typography.titleLarge
                 )
             }
             IconButton(
-                onClick = { viewModel.updateCurrentUnitIndex(viewModel.currentUnitIndex + 1) },
-                enabled = viewModel.currentUnitIndex < viewModel.units.size - 1,
+                onClick = { controller.updateCurrentUnitIndex(controller.currentUnitIndex + 1) },
+                enabled = controller.currentUnitIndex < controller.units.size - 1,
                 modifier = Modifier.size(56.dp)
             ) {
                 Icon(

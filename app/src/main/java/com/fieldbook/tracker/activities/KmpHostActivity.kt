@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import com.fieldbook.shared.AppContext
 import com.fieldbook.shared.KmpHostScreenType
 import com.fieldbook.shared.screens.ConfigScreen
 import com.fieldbook.shared.screens.FieldEditorScreen
@@ -21,15 +22,15 @@ class KmpHostActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         FileKit.init(this)
+        AppContext.init(DriverFactory(context = this))
 
         val screen = intent.getStringExtra(EXTRA_SCREEN)
         val hostScreenType = KmpHostScreenType.fromValue(screen ?: KmpHostScreenType.CONFIG.value)
 
         setContent {
-            var currentScreen = remember { mutableStateOf(hostScreenType) }
+            val currentScreen = remember { mutableStateOf(hostScreenType) }
             when (currentScreen.value) {
                 KmpHostScreenType.CONFIG -> ConfigScreen(
-                    driverFactory = DriverFactory(context = this),
                     onBack = { finish() },
                     onNavigate = { target -> currentScreen.value = target }
                 )
@@ -49,14 +50,12 @@ class KmpHostActivity : ComponentActivity() {
 
                 KmpHostScreenType.FIELD_EDITOR -> {
                     FieldEditorScreen(
-                        driverFactory = DriverFactory(context = this),
                         onBack = { currentScreen.value = KmpHostScreenType.CONFIG }
                     )
                 }
 
                 KmpHostScreenType.COLLECT -> {
                     CollectScreen(
-                        driverFactory = DriverFactory(context = this),
                         onBack = { currentScreen.value = KmpHostScreenType.CONFIG }
                     )
                 }
@@ -70,7 +69,6 @@ class KmpHostActivity : ComponentActivity() {
 
                 KmpHostScreenType.STORAGE_PREFERENCES -> {
                     StoragePreferencesScreen(
-                        driverFactory = DriverFactory(context = this),
                         onNavigate = { target -> currentScreen.value = target },
                         onBack = {
                             currentScreen.value = KmpHostScreenType.PREFERENCES

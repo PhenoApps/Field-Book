@@ -11,8 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun InfoBar(viewModel: CollectScreenController, modifier: Modifier = Modifier) {
-    val unit = viewModel.units.getOrNull(viewModel.currentUnitIndex)
+fun InfoBar(controller: CollectScreenController, modifier: Modifier = Modifier) {
+    val unit = controller.units.getOrNull(controller.currentUnitIndex)
     Column(modifier = modifier.fillMaxWidth()) {
         Spacer(Modifier.height(8.dp))
         Text("field_name: ${unit?.primary_id ?: "-"}", style = MaterialTheme.typography.bodyLarge)
@@ -21,7 +21,7 @@ fun InfoBar(viewModel: CollectScreenController, modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.bodyLarge
         )
         Text(
-            "row: ${unit?.position_coordinate_x ?: "-"}",
+            "row: ${controller.cRange.primaryId ?: "-"}",
             style = MaterialTheme.typography.bodyLarge
         )
         Spacer(Modifier.height(8.dp))
