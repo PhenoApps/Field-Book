@@ -45,3 +45,4 @@ ORDER BY study_name COLLATE NOCASE ASC;
 
 getSortNameById:
 SELECT study_sort_name FROM studies WHERE internal_id_study = ? LIMIT 1;
+

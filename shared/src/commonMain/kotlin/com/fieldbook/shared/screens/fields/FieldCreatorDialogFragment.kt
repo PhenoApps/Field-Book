@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.fieldbook.shared.database.repository.StudyRepository
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.dialog_field_creator_ask_pattern
 import com.fieldbook.shared.generated.resources.dialog_field_creator_ask_size
@@ -324,6 +325,7 @@ private fun ReviewGroupDialog(
         FieldPattern.ZIGZAG -> Res.drawable.ic_plot_pattern_zigzag
         else -> null
     }
+    val studyRepository = remember { StudyRepository() }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(Res.string.dialog_field_creator_review_title)) },
@@ -352,7 +354,14 @@ private fun ReviewGroupDialog(
             }
         },
         confirmButton = {
-            Button(onClick = onDismiss) {
+            Button(onClick = {
+                // TODO: Map dialog state to columns and data for createFieldData
+                val studyId = 1L // Replace with actual study ID
+                val columns = listOf("unique_id", "primary_id", "secondary_id", "geo_coordinates") // Example columns
+                val data = listOf(name, rows, columns, "") // Example data, replace with actual
+                studyRepository.createFieldData(studyId, columns, data)
+                onDismiss()
+            }) {
                 Text("Ok")
             }
         },

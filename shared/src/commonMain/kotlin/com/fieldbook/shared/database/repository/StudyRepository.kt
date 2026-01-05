@@ -147,4 +147,69 @@ class StudyRepository {
             parameters = 0
         )
     }
+
+    /**
+     * Inserts a new field (observation unit) and its attribute values for a study.
+     * This is the SQLDelight equivalent of createFieldData from StudyDao.
+     */
+    fun createFieldData(studyId: Long, columns: List<String>, data: List<String>) {
+        // Get all attribute names for the study
+        val attributeNames = db.observation_units_attributesQueries.getAllNamesByStudyId(studyId).executeAsList()
+
+        // Indices for unique, primary, secondary columns
+        val uniqueIndex = columns.indexOfFirst { it.equals("unique_id", ignoreCase = true) }
+        val primaryIndex = columns.indexOfFirst { it.equals("primary_id", ignoreCase = true) }
+        val secondaryIndex = columns.indexOfFirst { it.equals("secondary_id", ignoreCase = true) }
+
+        // Fill missing data with "NA"
+        val actualData = if (data.size != columns.size) {
+            val tempData = data.toMutableList()
+            repeat(columns.size - data.size) { tempData += "NA" }
+            tempData
+        } else data
+
+        // Insert into observation_units
+        val observationUnitDbId = if (uniqueIndex >= 0) actualData[uniqueIndex] else ""
+        val primaryId = if (primaryIndex >= 0) actualData[primaryIndex] else ""
+        val secondaryId = if (secondaryIndex >= 0) actualData[secondaryIndex] else ""
+        val geoCoordinatesIndex = columns.indexOf("geo_coordinates")
+        val geoCoordinates = if (geoCoordinatesIndex >= 0 && geoCoordinatesIndex < actualData.size) actualData[geoCoordinatesIndex] else ""
+
+        db.observation_unitsQueries.insert(
+            study_id = studyId,
+            observation_unit_db_id = observationUnitDbId,
+            primary_id = primaryId,
+            secondary_id = secondaryId,
+            geo_coordinates = geoCoordinates,
+            additional_info = null,
+            germplasm_db_id = null,
+            germplasm_name = null,
+            observation_level = null,
+            position_coordinate_x = null,
+            position_coordinate_x_type = null,
+            position_coordinate_y = null,
+            position_coordinate_y_type = null
+        )
+
+        // Get the last inserted observation unit id
+        val observationUnitId = db.observation_unitsQueries.selectById(observationUnitDbId, studyId).executeAsOneOrNull()?.internal_id_observation_unit
+
+        // Insert attribute values for this observation unit
+        columns.forEachIndexed { index, colName ->
+            if (colName != "geo_coordinates" && observationUnitId != null) {
+                val attrId = db.observation_units_attributesQueries.getAllNamesByStudyId(studyId)
+                    .executeAsList()
+                    .indexOf(colName)
+                // Only insert if attribute exists
+                if (attrId >= 0) {
+                    db.observation_units_valuesQueries.insert(
+                        study_id = studyId,
+                        observation_unit_id = observationUnitId,
+                        attribute_id = attrId.toLong(),
+                        value_ = actualData[index]
+                    )
+                }
+            }
+        }
+    }
 }
