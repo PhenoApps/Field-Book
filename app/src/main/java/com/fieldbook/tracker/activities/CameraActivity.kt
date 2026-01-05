@@ -10,7 +10,6 @@ import android.provider.MediaStore
 import android.util.Size
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.OptIn
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
@@ -33,10 +32,8 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.view.OnApplyWindowInsetsListener
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updateLayoutParams
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -172,7 +169,7 @@ class CameraActivity : ThemedActivity() {
         // We'll prepare a list of visible mode ids (strings) and set visibility later
         val visibleModes = mutableListOf<String>()
 
-        // Read trait multimedia flags and toggle visibility of the three choices.
+        // Read trait attach media flags and toggle visibility of the three choices.
         try {
 
             if (currentMode in setOf(MODE_PHOTO, MODE_VIDEO, MODE_AUDIO)) {
@@ -182,9 +179,9 @@ class CameraActivity : ThemedActivity() {
                 }
 
                 // Set visibility and build painters list based on trait flags. Default to visible if trait unavailable.
-                val showPhoto = trait?.multiMediaPhoto != false
-                val showVideo = trait?.multiMediaVideo != false
-                val showAudio = trait?.multiMediaAudio != false
+                val showPhoto = trait?.attachPhoto != false
+                val showVideo = trait?.attachVideo != false
+                val showAudio = trait?.attachAudio != false
 
                 if (showPhoto) visibleModes.add(MODE_PHOTO)
                 if (showVideo) visibleModes.add(MODE_VIDEO)
@@ -332,7 +329,7 @@ class CameraActivity : ThemedActivity() {
 
                 database.getObservationById(obsId)?.let { obs ->
 
-                    val hasMedia = obs.getMultiMediaCount() > 0
+                    val hasMedia = obs.getAttachedMediaCount() > 0
 
                     viewMediaButton.visibility = if (hasMedia) View.VISIBLE else View.GONE
                 }

@@ -9,13 +9,13 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.ValidationResult
-import com.fieldbook.tracker.traits.formats.ui.MultiMediaChoice
+import com.fieldbook.tracker.traits.formats.ui.AttachMediaChoice
 
-class MultiMediaParameter(private val initialDefaultValue: Boolean? = null) :
+class AttachMediaParameter(private val initialDefaultValue: Boolean? = null) :
     BaseFormatParameter(
-        nameStringResourceId = R.string.traits_multi_media_title,
+        nameStringResourceId = R.string.traits_attach_media_title,
         defaultLayoutId = R.layout.list_item_trait_parameter_compose_view,
-        parameter = Parameters.MULTIMEDIA,
+        parameter = Parameters.ATTACH_MEDIA,
     ) {
 
     override fun createViewHolder(
@@ -43,21 +43,21 @@ class MultiMediaParameter(private val initialDefaultValue: Boolean? = null) :
              }
 
             composeView.setContent {
-                MultiMediaChoice(photoState, videoState, audioState)
+                AttachMediaChoice(photoState, videoState, audioState)
             }
          }
 
         override fun merge(traitObject: TraitObject) = traitObject.apply {
-            this.multiMediaPhoto = photoState.value
-            this.multiMediaVideo = videoState.value
-            this.multiMediaAudio = audioState.value
+            this.attachPhoto = photoState.value
+            this.attachVideo = videoState.value
+            this.attachAudio = audioState.value
         }
 
         override fun load(traitObject: TraitObject?): Boolean {
             try {
-                photoState.value = traitObject?.multiMediaPhoto == true
-                videoState.value = traitObject?.multiMediaVideo == true
-                audioState.value = traitObject?.multiMediaAudio == true
+                photoState.value = traitObject?.attachPhoto == true
+                videoState.value = traitObject?.attachVideo == true
+                audioState.value = traitObject?.attachAudio == true
             } catch (e: Exception) {
                 e.printStackTrace()
                 return false

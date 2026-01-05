@@ -422,10 +422,10 @@
     <string name="trait_parameter_decimal_places">Decimal Places</string>
     <string name="trait_parameter_decimal_places_hint">Number of decimal places (-1 for unlimited, 0 for integers)</string>
     <string name="trait_parameter_decimal_places_error">Value must be between -1 and 10</string>
-    <string name="traits_multi_media_title">Multi Media</string>
-    <string name="traits_multi_media_photo_label">Photo</string>
-    <string name="traits_multi_media_audio_label">Audio</string>
-    <string name="traits_multi_media_video_label">Video</string>
+    <string name="traits_attach_media_title">Attach Media</string>
+    <string name="traits_attach_media_photo_label">Photo</string>
+    <string name="traits_attach_media_audio_label">Audio</string>
+    <string name="traits_attach_media_video_label">Video</string>
 
     <string name="traits_create_warning_name_blank">Trait name cannot be blank</string>
     <string name="traits_create_warning_duplicate">Trait already exists</string>
@@ -1807,7 +1807,7 @@
     <string name="media_photo">Photo state</string>
     <string name="media_video">Video state</string>
     <string name="media_audio">Audio state</string>
-    <string name="no_observation">You must collect data before taking additional media.</string>
+    <string name="no_observation">You must collect data before attaching media.</string>
     <string name="failed_to_find_file_name">Failed to find file.</string>
     <string name="preferences_behavior_barcode_scanning_title">Barcode Scanning Options</string>
     <string name="barcode_ask_enter">Enter Value</string>
@@ -1822,7 +1822,7 @@
     <string name="unable_to_load_image">Unable to load image</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
-    <string name="are_you_sure_you_want_to_delete_this_media_item">Are you sure you want to delete this media item?</string>
+    <string name="are_you_sure_you_want_to_delete_this_media_item">Are you sure you want to delete this attached media?</string>
     <string name="confirm_delete">Confirm delete</string>
     <string name="audio_permission_required">Audio permission required</string>
     <string name="confirm_delete_with_media_title">Delete observation with attached media?</string>

@@ -4,7 +4,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.traits.formats.parameters.CloseKeyboardParameter
 import com.fieldbook.tracker.traits.formats.parameters.DefaultValueParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
-import com.fieldbook.tracker.traits.formats.parameters.MultiMediaParameter
+import com.fieldbook.tracker.traits.formats.parameters.AttachMediaParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
 import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
@@ -23,5 +23,5 @@ class TextFormat : TraitFormat(
     CloseKeyboardParameter(false),
     RepeatedMeasureParameter(),
     ResourceFileParameter(),
-    MultiMediaParameter()
+    AttachMediaParameter()
 ), Scannable

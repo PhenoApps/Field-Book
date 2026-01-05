@@ -29,7 +29,6 @@ import com.fieldbook.tracker.database.dao.spectral.ProtocolDao;
 import com.fieldbook.tracker.database.dao.spectral.SpectralDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.spectral.UriDao;
-import com.fieldbook.tracker.database.migrators.MulticatToCategoricalVersion20;
 import com.fieldbook.tracker.database.migrators.ObservationMediaMigratorVersion21;
 import com.fieldbook.tracker.database.views.ObservationVariableAttributeDetailViewCreator;
 import com.fieldbook.tracker.database.models.ObservationModel;
@@ -993,7 +992,7 @@ public class DataHelper {
                 trait.getUseDayOfYear(), trait.getCategoryDisplayValue(), trait.getResourceFile(), trait.getSynonyms(),
                 trait.getMaxDecimalPlaces(), trait.getMathSymbolsEnabled(), trait.getAllowMulticat(),
                 trait.getRepeatedMeasures(), trait.getAutoSwitchPlot(), trait.getUnit(), trait.getInvalidValues(),
-                trait.getMultiMediaPhoto(), trait.getMultiMediaVideo(), trait.getMultiMediaAudio());
+                trait.getAttachPhoto(), trait.getAttachVideo(), trait.getAttachAudio());
     }
 
     public boolean checkUnique(HashMap<String, String> values) {
