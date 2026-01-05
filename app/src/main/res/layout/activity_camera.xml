@@ -5,6 +5,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/act_camera_toolbar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:navigationIcon="@drawable/ic_arrow_left"
+        android:contentDescription="@string/back_button" />
+
     <TextView
         android:id="@+id/act_camera_title_tv"
         android:layout_width="wrap_content"
@@ -14,7 +24,7 @@
         android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/act_camera_toolbar" />
 
     <androidx.camera.view.PreviewView
         android:id="@+id/act_camera_pv"
@@ -22,7 +32,7 @@
         android:layout_height="0dp"
         app:scaleType="fitCenter"
         app:layout_constraintDimensionRatio="H,3:4"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/act_camera_toolbar"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
     <com.fieldbook.tracker.ui.BarcodeOverlayView
