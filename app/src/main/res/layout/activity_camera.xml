@@ -62,7 +62,7 @@
         app:maxImageSize="@dimen/fb_trait_fab_image_size"
         app:useCompatPadding="true"
         android:tint="@color/BLACK"
-        app:layout_constraintBottom_toTopOf="@id/media_mode_toggle"
+        app:layout_constraintBottom_toTopOf="@id/media_mode_compose"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -84,48 +84,14 @@
         app:layout_constraintStart_toEndOf="@id/camerax_capture_btn"
         android:contentDescription="@string/trait_camera_switch_content_description" />
 
-    <!-- Small icon-only three-state toggle placed above the bottom edge; capture FAB sits above it -->
-    <com.google.android.material.button.MaterialButtonToggleGroup
-        android:id="@+id/media_mode_toggle"
+    <!-- Compose host for three-state media toggle -->
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/media_mode_compose"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:singleSelection="true"
-        app:selectionRequired="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="12dp">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/toggle_photo"
-            style="@style/Widget.MaterialComponents.Button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            app:icon="@drawable/ic_trait_camera"
-            app:iconTint="@android:color/white"
-            android:contentDescription="@string/media_photo"
-            android:text="" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/toggle_video"
-            style="@style/Widget.MaterialComponents.Button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            app:icon="@drawable/video"
-            app:iconTint="@android:color/white"
-            android:contentDescription="@string/media_video"
-            android:text="" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/toggle_audio"
-            style="@style/Widget.MaterialComponents.Button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            app:icon="@drawable/trait_audio"
-            app:iconTint="@android:color/white"
-            android:contentDescription="@string/media_audio"
-            android:text="" />
-
-    </com.google.android.material.button.MaterialButtonToggleGroup>
+        android:layout_marginBottom="12dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

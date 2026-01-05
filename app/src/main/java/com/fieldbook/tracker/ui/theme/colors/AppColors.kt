@@ -33,6 +33,8 @@ data class AppColors(
 
     val crop: CropColors,
 
+    val toggle: ToggleColors,
+
     val topAppBarColors: TopAppBarColors
 )
 
@@ -162,4 +164,12 @@ data class SurfaceColors(
     val preferencesHorizontalBreak: Color,
     val iconTint: Color,
     val iconFillTint: Color,
+)
+
+@Immutable
+data class ToggleColors(
+    val track: Color,
+    val indicator: Color,
+    val icon: Color,
+    val iconUnselected: Color,
 )

@@ -3,17 +3,14 @@ package com.fieldbook.tracker.activities
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.res.ColorStateList
 import android.graphics.PointF
 import android.media.MediaRecorder
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.provider.MediaStore
-import android.util.Log
 import android.util.Size
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.OptIn
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
@@ -31,14 +28,22 @@ import androidx.camera.video.Recorder
 import androidx.camera.video.VideoCapture
 import androidx.camera.video.VideoRecordEvent
 import androidx.camera.view.PreviewView
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.painterResource
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.view.isVisible
+import androidx.core.view.OnApplyWindowInsetsListener
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.traits.AbstractCameraTrait
 import com.fieldbook.tracker.ui.MediaViewerActivity
+import com.fieldbook.tracker.ui.components.widgets.ThreeStateToggle
+import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.CameraXFacade
 import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.InsetHandler
@@ -148,11 +153,24 @@ class CameraActivity : ThemedActivity() {
         viewMediaButton = findViewById(R.id.camerax_view_btn)
         switchCameraButton = findViewById(R.id.camerax_switch_btn)
 
-        // media toggle
-        val toggleGroup = findViewById<com.google.android.material.button.MaterialButtonToggleGroup>(R.id.media_mode_toggle)
-        val togglePhoto = findViewById<com.google.android.material.button.MaterialButton>(R.id.toggle_photo)
-        val toggleVideo = findViewById<com.google.android.material.button.MaterialButton>(R.id.toggle_video)
-        val toggleAudio = findViewById<com.google.android.material.button.MaterialButton>(R.id.toggle_audio)
+        // Compose host for media toggle
+        val mediaCompose = findViewById<ComposeView>(R.id.media_mode_compose)
+
+        //move ui above gesture bar
+        ViewCompat.setOnApplyWindowInsetsListener(
+            window.decorView
+        ) { v, insets ->
+            v.setPadding(
+                0,
+                0,
+                0,
+                insets.getInsets(WindowInsetsCompat.Type.systemGestures()).bottom
+            )
+            insets
+        }
+
+        // We'll prepare a list of visible mode ids (strings) and set visibility later
+        val visibleModes = mutableListOf<String>()
 
         // Read trait multimedia flags and toggle visibility of the three choices.
         try {
@@ -163,68 +181,101 @@ class CameraActivity : ThemedActivity() {
                     database.getTraitById(id)
                 }
 
-                // Set visibility based on trait flags. Default to visible if trait unavailable.
-                togglePhoto.visibility = if (trait?.multiMediaPhoto == true) View.VISIBLE else View.GONE
-                toggleVideo.visibility = if (trait?.multiMediaVideo == true) View.VISIBLE else View.GONE
-                toggleAudio.visibility = if (trait?.multiMediaAudio == true) View.VISIBLE else View.GONE
+                // Set visibility and build painters list based on trait flags. Default to visible if trait unavailable.
+                val showPhoto = trait?.multiMediaPhoto != false
+                val showVideo = trait?.multiMediaVideo != false
+                val showAudio = trait?.multiMediaAudio != false
 
-                // Count visible options and hide the toggle group if there's 0 or 1 option
-                val visibleCount = listOf(togglePhoto, toggleVideo, toggleAudio).count { it.isVisible }
+                if (showPhoto) visibleModes.add(MODE_PHOTO)
+                if (showVideo) visibleModes.add(MODE_VIDEO)
+                if (showAudio) visibleModes.add(MODE_AUDIO)
+
+                // Count visible options and hide the compose view if there's 0 or 1 option
+                val visibleCount = visibleModes.size
                 if (visibleCount <= 1) {
-                    // hide the group when there's only one (or none) to simplify the UI
-                    toggleGroup.visibility = View.GONE
-                    // set currentMode based on the one visible option if present
-                    when {
-                        togglePhoto.isVisible -> currentMode = MODE_PHOTO
-                        toggleVideo.isVisible -> currentMode = MODE_VIDEO
-                        toggleAudio.isVisible -> currentMode = MODE_AUDIO
-                        // else keep currentMode as provided by intent
+                    mediaCompose.visibility = View.GONE
+                    ViewCompat.requestApplyInsets(mediaCompose)
+                    when (visibleModes.firstOrNull()) {
+                        MODE_PHOTO -> currentMode = MODE_PHOTO
+                        MODE_VIDEO -> currentMode = MODE_VIDEO
+                        MODE_AUDIO -> currentMode = MODE_AUDIO
                     }
                 } else {
-                    // multiple choices: show toggle group and pick sensible default photo > video > audio
-                    toggleGroup.visibility = View.VISIBLE
-                    when {
-                        togglePhoto.isVisible -> {
-                            togglePhoto.isChecked = true
-                            currentMode = MODE_PHOTO
-                        }
-                        toggleVideo.isVisible -> {
-                            toggleVideo.isChecked = true
-                            currentMode = MODE_VIDEO
-                        }
-                        toggleAudio.isVisible -> {
-                            toggleAudio.isChecked = true
-                            currentMode = MODE_AUDIO
-                        }
+                    mediaCompose.visibility = View.VISIBLE
+                    ViewCompat.requestApplyInsets(mediaCompose)
+                    // pick sensible default photo > video > audio
+                    currentMode = when {
+                        visibleModes.contains(MODE_PHOTO) -> MODE_PHOTO
+                        visibleModes.contains(MODE_VIDEO) -> MODE_VIDEO
+                        visibleModes.contains(MODE_AUDIO) -> MODE_AUDIO
+                        else -> currentMode
                     }
                 }
 
             } else {
 
-                toggleGroup.visibility = View.GONE
+                mediaCompose.visibility = View.GONE
+                ViewCompat.requestApplyInsets(mediaCompose)
                 viewMediaButton.visibility = View.GONE
 
                 if (currentMode == MODE_BARCODE) {
                     captureButton.visibility = View.GONE
-                    switchCameraButton.visibility = View.GONE
                 }
             }
 
         } catch (e: Exception) {
             e.printStackTrace()
-            // Fallback: default to photo checked
-            togglePhoto.isChecked = true
+            // Fallback: default to photo
+            visibleModes.clear()
+            visibleModes.add(MODE_PHOTO)
+            mediaCompose.visibility = View.VISIBLE
+            ViewCompat.requestApplyInsets(mediaCompose)
             currentMode = MODE_PHOTO
         }
 
-        toggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (!isChecked) return@addOnButtonCheckedListener
-            when (checkedId) {
-                R.id.toggle_photo -> switchMode(MODE_PHOTO)
-                R.id.toggle_video -> switchMode(MODE_VIDEO)
-                R.id.toggle_audio -> switchMode(MODE_AUDIO)
-            }
-        }
+        // If multiple states are visible, set Compose content. Build Painter resources inside the composable lambda (painterResource is @Composable).
+        if (visibleModes.size > 1) {
+            val modes = visibleModes.toList()
+            mediaCompose.setContent {
+                AppTheme {
+                    val painters = modes.map { mode ->
+                        when (mode) {
+                            MODE_PHOTO -> painterResource(R.drawable.ic_trait_camera)
+                            MODE_VIDEO -> painterResource(R.drawable.video)
+                            MODE_AUDIO -> painterResource(R.drawable.trait_audio)
+                            else -> painterResource(R.drawable.ic_trait_camera)
+                        }
+                    }
+
+                    // pad to length 3
+                    val paintersToShow = when (painters.size) {
+                        3 -> painters
+                        2 -> painters + listOf(painters.last())
+                        1 -> painters + listOf(painters.last(), painters.last())
+                        else -> painters
+                    }
+                    val modesToShow = when (modes.size) {
+                        3 -> modes
+                        2 -> modes + listOf(modes.last())
+                        1 -> modes + listOf(modes.last(), modes.last())
+                        else -> modes
+                    }
+
+                    val initialIdx = modesToShow.indexOf(currentMode).takeIf { it >= 0 } ?: 0
+                    var selectedIdxState = remember { androidx.compose.runtime.mutableStateOf(initialIdx) }
+
+                    ThreeStateToggle(
+                        states = paintersToShow,
+                        selectedIndex = selectedIdxState.value,
+                        onSelected = { idx ->
+                            selectedIdxState.value = idx
+                            val mode = modesToShow.getOrNull(idx) ?: MODE_PHOTO
+                            switchMode(mode)
+                        }
+                    )
+                 }
+             }
+         }
 
         cameraXFacade.await(this) {
             bindCameraForInformation()
@@ -261,12 +312,21 @@ class CameraActivity : ThemedActivity() {
             captureButton.visibility = View.VISIBLE
         }
 
+        if (currentMode == MODE_AUDIO) {
+            switchCameraButton.visibility = View.GONE
+        } else {
+            switchCameraButton.visibility = View.VISIBLE
+        }
+
         //if no observations exist in this mode, don't display the shutter or view media buttons
         if (obsId != null) {
 
             if (obsId == "-1") {
 
                 captureButton.visibility = View.GONE
+
+                viewMediaButton.visibility = View.GONE
+
 
             } else {
 
@@ -322,6 +382,8 @@ class CameraActivity : ThemedActivity() {
                 captureButton.setImageResource(R.drawable.camera_24px)
             }
         }
+
+        setupUiForMode()
 
         bindLifecycle()
     }
