@@ -9,9 +9,9 @@ import androidx.compose.runtime.remember
 import com.fieldbook.shared.AppContext
 import com.fieldbook.shared.KmpHostScreenType
 import com.fieldbook.shared.screens.ConfigScreen
-import com.fieldbook.shared.screens.FieldEditorScreen
 import com.fieldbook.shared.screens.ScannerScreen
 import com.fieldbook.shared.screens.collect.CollectScreen
+import com.fieldbook.shared.screens.fields.FieldEditorScreen
 import com.fieldbook.shared.screens.preferences.PreferencesScreen
 import com.fieldbook.shared.screens.preferences.StorageDefinerScreen
 import com.fieldbook.shared.screens.preferences.StoragePreferencesScreen
