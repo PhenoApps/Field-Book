@@ -59,6 +59,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.ui.dialogs.builder.AppAlertDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -300,16 +301,17 @@ private fun formatMillis(ms: Long): String {
 @Composable
 fun ConfirmDeleteDialog(show: Boolean, onConfirm: () -> Unit, onDismiss: () -> Unit) {
     if (!show) return
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = onConfirm) { Text(stringResource(R.string.delete)) }
+
+    AppAlertDialog(
+        title = stringResource(R.string.confirm_delete),
+        positiveButtonText = stringResource(R.string.delete),
+        negativeButtonText = stringResource(R.string.cancel),
+        content = {
+            Text(stringResource(R.string.are_you_sure_you_want_to_delete_this_media_item))
         },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
-        },
-        title = { Text(stringResource(R.string.confirm_delete)) },
-        text = { Text(stringResource(R.string.are_you_sure_you_want_to_delete_this_media_item)) })
+        onPositive = onConfirm,
+        onNegative = onDismiss
+    )
 }
 
 // helper to create a ComposeView preview for CollectActivity
