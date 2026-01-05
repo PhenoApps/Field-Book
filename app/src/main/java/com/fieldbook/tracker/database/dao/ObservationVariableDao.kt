@@ -330,9 +330,9 @@ class ObservationVariableDao {
                        autoSwitchPlot: Boolean,
                        unit: String,
                        invalidValues: Boolean,
-                       multiMediaPhoto: Boolean,
-                       multiMediaVideo: Boolean,
-                       multiMediaAudio: Boolean): Long = withDatabase { db ->
+                       attachPhoto: Boolean,
+                       attachVideo: Boolean,
+                       attachAudio: Boolean): Long = withDatabase { db ->
 
            val contentValues = ContentValues().apply {
                put("observation_variable_name", trait)
@@ -370,9 +370,9 @@ class ObservationVariableDao {
                     this.autoSwitchPlot = autoSwitchPlot
                     this.unit = unit
                     this.invalidValues = invalidValues
-                    this.multiMediaPhoto = multiMediaPhoto
-                    this.multiMediaVideo = multiMediaVideo
-                    this.multiMediaAudio = multiMediaAudio
+                    this.attachPhoto = attachPhoto
+                    this.attachVideo = attachVideo
+                    this.attachAudio = attachAudio
                 }
 
                 traitObj.saveAttributeValues()

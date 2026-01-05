@@ -8,7 +8,7 @@ import com.fieldbook.tracker.traits.formats.parameters.DefaultNumericParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.traits.formats.parameters.MaximumParameter
 import com.fieldbook.tracker.traits.formats.parameters.MinimumParameter
-import com.fieldbook.tracker.traits.formats.parameters.MultiMediaParameter
+import com.fieldbook.tracker.traits.formats.parameters.AttachMediaParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
 import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
@@ -40,7 +40,7 @@ class PercentFormat : NumericFormat(
     UnitParameter(),
     RepeatedMeasureParameter(),
     ResourceFileParameter(),
-    MultiMediaParameter()
+    AttachMediaParameter()
 ), Scannable by PercentageScannable() {
 
     override fun validate(

@@ -16,7 +16,7 @@
         android:layout_gravity="start|center_vertical"
         android:ellipsize="end"
         android:maxLines="1"
-        android:text="@string/traits_multi_media_title" />
+        android:text="@string/traits_attach_media_title" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/list_item_trait_parameter_til"

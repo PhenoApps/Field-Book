@@ -26,7 +26,6 @@ import android.view.inputmethod.EditorInfo;
 import android.webkit.MimeTypeMap;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
@@ -130,8 +129,6 @@ import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.google.firebase.crashlytics.CustomKeysAndValues;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
 import com.serenegiant.widget.UVCCameraTextureView;
 
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
@@ -802,7 +799,7 @@ public class CollectActivity extends ThemedActivity
                 } catch (Exception ignored) {}
 
                 if (obs != null) {
-                    boolean hasMedia = obs.getMultiMediaCount() > 0;
+                    boolean hasMedia = obs.getAttachedMediaCount() > 0;
 
                     if (hasMedia) {
                         // Warn the user that attached media will also be removed
@@ -888,11 +885,11 @@ public class CollectActivity extends ThemedActivity
                 // get current trait and check multimedia flags
                 TraitObject current = getCurrentTrait();
                 if (current != null) {
-                    isMediaEnabled = current.getMultiMediaPhoto() || current.getMultiMediaVideo() || current.getMultiMediaAudio();
+                    isMediaEnabled = current.getAttachPhoto() || current.getAttachVideo() || current.getAttachAudio();
                 }
                 ObservationModel obs = getCurrentObservation();
                 if (obs != null) {
-                    numMultiMedia = obs.getMultiMediaCount();
+                    numMultiMedia = obs.getAttachedMediaCount();
                 }
             } catch (Exception ignored) {}
 
