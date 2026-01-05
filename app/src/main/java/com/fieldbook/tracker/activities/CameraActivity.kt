@@ -57,6 +57,7 @@ import java.io.OutputStream
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import javax.inject.Inject
+import androidx.appcompat.widget.Toolbar
 
 @AndroidEntryPoint
 class CameraActivity : ThemedActivity() {
@@ -153,18 +154,32 @@ class CameraActivity : ThemedActivity() {
         // Compose host for media toggle
         val mediaCompose = findViewById<ComposeView>(R.id.media_mode_compose)
 
-        //move ui above gesture bar
-        ViewCompat.setOnApplyWindowInsetsListener(
-            window.decorView
-        ) { v, insets ->
-            v.setPadding(
-                0,
-                0,
-                0,
-                insets.getInsets(WindowInsetsCompat.Type.systemGestures()).bottom
-            )
-            insets
+        val toolbar = findViewById<Toolbar>(R.id.act_camera_toolbar)
+        toolbar?.let {
+            it.title = ""
+            it.setNavigationOnClickListener {
+                // trigger normal back behavior
+                onBackPressedDispatcher.onBackPressed()
+            }
         }
+
+        //move ui above gesture bar
+        ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { v, insets ->
+             // Apply bottom inset for system gestures to the root view so FABs and toggles sit above the gesture bar
+             val bottomInset = insets.getInsets(WindowInsetsCompat.Type.systemGestures()).bottom
+             v.setPadding(0, 0, 0, bottomInset)
+
+             // Also apply the status bar top inset to the toolbar so the app bar is positioned below the status bar
+             try {
+                 val statusTop = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+                 val toolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.act_camera_toolbar)
+                 toolbar?.setPadding(0, statusTop, 0, toolbar.paddingBottom)
+             } catch (_: Exception) {
+                 // ignore if toolbar not found yet
+             }
+
+             insets
+         }
 
         // We'll prepare a list of visible mode ids (strings) and set visibility later
         val visibleModes = mutableListOf<String>()

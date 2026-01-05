@@ -1920,4 +1920,5 @@
     <string name="confirm_delete_with_media_title">Delete observation with attached media?</string>
     <string name="confirm_delete_with_media_message">This observation has attached media (photo, audio, or video). Deleting the observation will also delete the attached media files. Are you sure you want to continue?</string>
     <string name="attach">Attach</string>
+    <string name="back_button">Go back to previous activity</string>
 </resources>
