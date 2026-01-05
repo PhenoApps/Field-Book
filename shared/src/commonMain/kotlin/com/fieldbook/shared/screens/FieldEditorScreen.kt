@@ -15,9 +15,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -47,6 +49,7 @@ import com.fieldbook.shared.database.repository.StudyRepository
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.ic_field
 import com.fieldbook.shared.generated.resources.ic_file_csv
+import com.fieldbook.shared.generated.resources.tutorial_fields_add_title
 import com.fieldbook.shared.objects.ImportFormat
 import com.fieldbook.shared.preferences.GeneralKeys
 import com.fieldbook.shared.sqldelight.createDatabase
@@ -108,6 +111,19 @@ fun FieldEditorScreen(
                         navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 )
+            },
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = {}, // No action yet
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    shape = CircleShape
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = Res.string.tutorial_fields_add_title.key
+                    )
+                }
             }
         ) { innerPadding ->
             Box(
