@@ -37,7 +37,6 @@ import androidx.core.view.WindowInsetsCompat
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.preferences.GeneralKeys
-import com.fieldbook.tracker.views.CropImageView
 import com.fieldbook.tracker.traits.AbstractCameraTrait
 import com.fieldbook.tracker.ui.MediaViewerActivity
 import com.fieldbook.tracker.ui.components.widgets.ThreeStateToggle
@@ -59,8 +58,6 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import javax.inject.Inject
 import androidx.appcompat.widget.Toolbar
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.core.view.isVisible
 
 @AndroidEntryPoint
 class CameraActivity : ThemedActivity() {
@@ -475,7 +472,6 @@ class CameraActivity : ThemedActivity() {
                                 input.copyTo(out)
                                 out.close()
                                 input.close()
-
                                 // return result to calling activity and finish so CollectActivity receives the media_path
                                 val result = Intent()
                                 result.putExtra("media_type", "video")
