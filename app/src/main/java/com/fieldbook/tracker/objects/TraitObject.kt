@@ -104,15 +104,15 @@ class TraitObject {
         get() = attributeValues.getBoolean(TraitAttributes.INVALID_VALUES)
         set(value) = attributeValues.setValue(TraitAttributes.INVALID_VALUES, value.toString())
 
-    var multiMediaPhoto: Boolean
+    var attachPhoto: Boolean
         get() = attributeValues.getBoolean(TraitAttributes.MULTI_MEDIA_PHOTO)
         set(value) = attributeValues.setValue(TraitAttributes.MULTI_MEDIA_PHOTO, value.toString())
 
-    var multiMediaVideo: Boolean
+    var attachVideo: Boolean
         get() = attributeValues.getBoolean(TraitAttributes.MULTI_MEDIA_VIDEO)
         set(value) = attributeValues.setValue(TraitAttributes.MULTI_MEDIA_VIDEO, value.toString())
 
-    var multiMediaAudio: Boolean
+    var attachAudio: Boolean
         get() = attributeValues.getBoolean(TraitAttributes.MULTI_MEDIA_AUDIO)
         set(value) = attributeValues.setValue(TraitAttributes.MULTI_MEDIA_AUDIO, value.toString())
 
@@ -161,9 +161,9 @@ class TraitObject {
                 autoSwitchPlot == that.autoSwitchPlot &&
                 unit == that.unit &&
                 invalidValues == that.invalidValues &&
-                multiMediaAudio == that.multiMediaAudio &&
-                multiMediaPhoto == that.multiMediaPhoto &&
-                multiMediaVideo == that.multiMediaVideo
+                attachAudio == that.attachAudio &&
+                attachPhoto == that.attachPhoto &&
+                attachVideo == that.attachVideo
     }
 
     override fun hashCode(): Int {
@@ -173,7 +173,7 @@ class TraitObject {
             additionalInfo, observationLevelNames, closeKeyboardOnOpen, cropImage,
             saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms,
             maxDecimalPlaces, mathSymbolsEnabled, allowMulticat, repeatedMeasures,
-            autoSwitchPlot, unit, invalidValues, multiMediaAudio, multiMediaPhoto, multiMediaVideo
+            autoSwitchPlot, unit, invalidValues, attachAudio, attachPhoto, attachVideo
         )
     }
 
@@ -208,9 +208,9 @@ class TraitObject {
         t.autoSwitchPlot = this.autoSwitchPlot
         t.unit = this.unit
         t.invalidValues = this.invalidValues
-        t.multiMediaAudio = this.multiMediaAudio
-        t.multiMediaPhoto = this.multiMediaPhoto
-        t.multiMediaVideo = this.multiMediaVideo
+        t.attachAudio = this.attachAudio
+        t.attachPhoto = this.attachPhoto
+        t.attachVideo = this.attachVideo
 
         return t
     }

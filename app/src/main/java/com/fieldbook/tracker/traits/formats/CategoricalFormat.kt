@@ -8,7 +8,7 @@ import com.fieldbook.tracker.traits.formats.parameters.CategoriesParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
 import com.fieldbook.tracker.traits.formats.parameters.DisplayValueParameter
-import com.fieldbook.tracker.traits.formats.parameters.MultiMediaParameter
+import com.fieldbook.tracker.traits.formats.parameters.AttachMediaParameter
 import com.fieldbook.tracker.traits.formats.parameters.MultipleCategoriesParameter
 import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
@@ -36,7 +36,7 @@ class CategoricalFormat : TraitFormat(
     AutoSwitchPlotParameter(),
     RepeatedMeasureParameter(),
     ResourceFileParameter(),
-    MultiMediaParameter()
+    AttachMediaParameter()
 ),
     StringCoder by CategoricalJsonCoder(),
     ValuePresenter by CategoricalValuePresenter(),

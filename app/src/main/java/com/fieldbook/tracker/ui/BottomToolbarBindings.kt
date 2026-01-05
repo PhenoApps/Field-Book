@@ -83,7 +83,7 @@ fun BottomToolbar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
-                // Show media button if trait supports any multimedia; otherwise show barcode button.
+                // Show media button if trait supports any attach media; otherwise show barcode button.
                 if (isMediaEnabled) {
 
                     Box(

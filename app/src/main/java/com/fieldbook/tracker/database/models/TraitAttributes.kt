@@ -98,19 +98,19 @@ object TraitAttributes {
     )
 
     val MULTI_MEDIA_PHOTO = AttributeDefinition(
-        key = ObservationVariableAttributeDetailsView.MULTI_MEDIA_PHOTO,
+        key = ObservationVariableAttributeDetailsView.ATTACH_PHOTO,
         valueType = ValueType.BOOLEAN,
         defaultValue = "false"
     )
 
     val MULTI_MEDIA_VIDEO = AttributeDefinition(
-        key = ObservationVariableAttributeDetailsView.MULTI_MEDIA_VIDEO,
+        key = ObservationVariableAttributeDetailsView.ATTACH_VIDEO,
         valueType = ValueType.BOOLEAN,
         defaultValue = "false"
     )
 
     val MULTI_MEDIA_AUDIO = AttributeDefinition(
-        key = ObservationVariableAttributeDetailsView.MULTI_MEDIA_AUDIO,
+        key = ObservationVariableAttributeDetailsView.ATTACH_AUDIO,
         valueType = ValueType.BOOLEAN,
         defaultValue = "false"
     )

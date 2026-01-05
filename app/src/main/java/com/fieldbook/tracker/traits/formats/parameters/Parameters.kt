@@ -11,7 +11,7 @@ enum class Parameters {
     AUTO_SWITCH_PLOT,
     UNIT,
     INVALID_VALUE,
-    MULTIMEDIA;
+    ATTACH_MEDIA;
 
     companion object {
 
@@ -21,7 +21,7 @@ enum class Parameters {
             "category",
             "closeKeyboardOnOpen",
             "cropImage",
-            "multiMedia"
+            "attachMedia"
         )
     }
 }

@@ -29,7 +29,7 @@ import com.fieldbook.tracker.traits.formats.parameters.DecimalPlacesParameter
 import com.fieldbook.tracker.traits.formats.parameters.DefaultToggleParameter
 import com.fieldbook.tracker.traits.formats.parameters.InvalidValueParameter
 import com.fieldbook.tracker.traits.formats.parameters.MathSymbolsParameter
-import com.fieldbook.tracker.traits.formats.parameters.MultiMediaParameter
+import com.fieldbook.tracker.traits.formats.parameters.AttachMediaParameter
 import com.fieldbook.tracker.traits.formats.parameters.MultipleCategoriesParameter
 import com.fieldbook.tracker.traits.formats.parameters.Parameters
 import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
@@ -219,7 +219,7 @@ private fun getParamIcon(param: BaseFormatParameter, trait: TraitObject): Int {
         is DecimalPlacesParameter -> R.drawable.ic_decimal
         is UnitParameter -> R.drawable.ic_tag_edit
         is ResourceFileParameter -> R.drawable.ic_tb_folder
-        is MultiMediaParameter -> R.drawable.multimedia
+        is AttachMediaParameter -> R.drawable.multimedia
         else -> R.drawable.ic_tag_edit
     }
 }

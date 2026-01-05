@@ -20,7 +20,7 @@ import com.fieldbook.tracker.R
 
 @Preview
 @Composable
-fun MultiMediaChoice(
+fun AttachMediaChoice(
     photoState: MutableState<Boolean> = mutableStateOf(false),
     videoState: MutableState<Boolean> = mutableStateOf(false),
     audioState: MutableState<Boolean> = mutableStateOf(false)
@@ -31,15 +31,15 @@ fun MultiMediaChoice(
             .padding(16.dp)
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            MultiMediaItem(
+            AttachMediaItem(
                 state = photoState,
                 iconId = R.drawable.ic_trait_camera
             )
-            MultiMediaItem(
+            AttachMediaItem(
                 state = videoState,
                 iconId = R.drawable.video
             )
-            MultiMediaItem(
+            AttachMediaItem(
                 state = audioState,
                 iconId = R.drawable.trait_audio
             )
@@ -48,7 +48,7 @@ fun MultiMediaChoice(
 }
 
 @Composable
-fun MultiMediaItem(state: MutableState<Boolean>, iconId: Int) {
+fun AttachMediaItem(state: MutableState<Boolean>, iconId: Int) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Icon(painter = painterResource(iconId), contentDescription = null)
         Checkbox(checked = state.value, onCheckedChange = { state.value = it })
