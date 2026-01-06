@@ -7,10 +7,12 @@ import com.fieldbook.shared.database.Migrator.Companion.sObservationUnitProperty
 import com.fieldbook.shared.database.models.FieldObject
 import com.fieldbook.shared.sqldelight.FieldbookDatabase
 
-class StudyRepository {
-
+class StudyRepository(
+    val db: FieldbookDatabase = FieldbookDatabase(
+        AppContext.driverFactory().getDriver()
+    )
+) {
     private val driver: SqlDriver = AppContext.driverFactory().getDriver()
-    private val db: FieldbookDatabase = FieldbookDatabase(driver)
 
     enum class SortOrder { DateImport, Visible, Name }
 
@@ -148,18 +150,33 @@ class StudyRepository {
         )
     }
 
-    /**
-     * Inserts a new field (observation unit) and its attribute values for a study.
-     * This is the SQLDelight equivalent of createFieldData from StudyDao.
-     */
-    fun createFieldData(studyId: Long, columns: List<String>, data: List<String>) {
-        // Get all attribute names for the study
-        val attributeNames = db.observation_units_attributesQueries.getAllNamesByStudyId(studyId).executeAsList()
+    data class FieldPreferenceNames(val unique: String, val primary: String, val secondary: String)
 
-        // Indices for unique, primary, secondary columns
-        val uniqueIndex = columns.indexOfFirst { it.equals("unique_id", ignoreCase = true) }
-        val primaryIndex = columns.indexOfFirst { it.equals("primary_id", ignoreCase = true) }
-        val secondaryIndex = columns.indexOfFirst { it.equals("secondary_id", ignoreCase = true) }
+    /**
+     * Function that queries the field/study table for the imported unique/primary/secondary names.
+     */
+    fun getNames(exp_id: Long): FieldPreferenceNames {
+        val fieldNames = db.studiesQueries.getFieldPreferenceNamesById(exp_id).executeAsOneOrNull()
+        return if (fieldNames == null) {
+            FieldPreferenceNames("", "", "")
+        } else {
+            FieldPreferenceNames(
+                unique = fieldNames.study_unique_id_name.orEmpty(),
+                primary = fieldNames.study_primary_id_name.orEmpty(),
+                secondary = fieldNames.study_secondary_id_name.orEmpty()
+            )
+        }
+    }
+
+    fun createFieldData(
+        studyId: Long, columns: List<String>, data: List<String>
+    ) {
+        val names = getNames(studyId)
+
+        // input data corresponds to original database column names
+        val uniqueIndex = columns.indexOf(names.unique)
+        val primaryIndex = columns.indexOf(names.primary)
+        val secondaryIndex = columns.indexOf(names.secondary)
 
         // Fill missing data with "NA"
         val actualData = if (data.size != columns.size) {
@@ -173,9 +190,10 @@ class StudyRepository {
         val primaryId = if (primaryIndex >= 0) actualData[primaryIndex] else ""
         val secondaryId = if (secondaryIndex >= 0) actualData[secondaryIndex] else ""
         val geoCoordinatesIndex = columns.indexOf("geo_coordinates")
-        val geoCoordinates = if (geoCoordinatesIndex >= 0 && geoCoordinatesIndex < actualData.size) actualData[geoCoordinatesIndex] else ""
+        val geoCoordinates =
+            if (geoCoordinatesIndex >= 0 && geoCoordinatesIndex < actualData.size) actualData[geoCoordinatesIndex] else ""
 
-        db.observation_unitsQueries.insert(
+        val rowId = db.observation_unitsQueries.insert(
             study_id = studyId,
             observation_unit_db_id = observationUnitDbId,
             primary_id = primaryId,
@@ -191,20 +209,18 @@ class StudyRepository {
             position_coordinate_y_type = null
         )
 
-        // Get the last inserted observation unit id
-        val observationUnitId = db.observation_unitsQueries.selectById(observationUnitDbId, studyId).executeAsOneOrNull()?.internal_id_observation_unit
+        val attributes =
+            db.observation_units_attributesQueries.getAllNamesByStudyId(studyId).executeAsList()
 
         // Insert attribute values for this observation unit
         columns.forEachIndexed { index, colName ->
-            if (colName != "geo_coordinates" && observationUnitId != null) {
-                val attrId = db.observation_units_attributesQueries.getAllNamesByStudyId(studyId)
-                    .executeAsList()
-                    .indexOf(colName)
+            if (colName != "geo_coordinates") {
+                val attrId = attributes.indexOf(colName)
                 // Only insert if attribute exists
                 if (attrId >= 0) {
                     db.observation_units_valuesQueries.insert(
                         study_id = studyId,
-                        observation_unit_id = observationUnitId,
+                        observation_unit_id = rowId.value,
                         attribute_id = attrId.toLong(),
                         value_ = actualData[index]
                     )
