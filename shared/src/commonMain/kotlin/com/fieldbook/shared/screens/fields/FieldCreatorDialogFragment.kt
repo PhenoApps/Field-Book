@@ -47,6 +47,7 @@ import com.fieldbook.shared.generated.resources.ic_plot_pattern_zigzag
 import com.fieldbook.shared.objects.ImportFormat
 import com.fieldbook.shared.sqldelight.FieldbookDatabase
 import com.fieldbook.shared.sqldelight.createDatabase
+import com.fieldbook.shared.utilities.FieldSwitchImpl
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.format
@@ -448,6 +449,8 @@ class FieldCreatorDialogFragmentViewModel : ViewModel() {
                 cols,
                 linear = pattern == FieldPattern.LINEAR,
             )
+
+            FieldSwitchImpl().switchField(studyId)
             onDismiss()
         }
     }

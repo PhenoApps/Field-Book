@@ -21,6 +21,14 @@ CREATE TABLE studies (
   observation_levels TEXT
 );
 
+getById:
+SELECT
+  s.*,
+  (SELECT COUNT(*) FROM observation_units_attributes a WHERE a.study_id = s.internal_id_study) AS attribute_count,
+  (SELECT COUNT(DISTINCT o.observation_variable_name) FROM observations o WHERE o.study_id = s.internal_id_study AND o.observation_variable_db_id > 0) AS trait_count,
+  (SELECT COUNT(*) FROM observations o WHERE o.study_id = s.internal_id_study AND o.observation_variable_db_id > 0) AS observation_count
+FROM studies s WHERE internal_id_study = ? LIMIT 1;
+
 allByDateDesc:
 SELECT
   s.*,

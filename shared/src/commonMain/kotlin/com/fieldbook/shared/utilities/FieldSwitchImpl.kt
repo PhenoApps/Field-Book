@@ -23,6 +23,13 @@ class FieldSwitchImpl(
         private val POSSIBLE_ROW_IDS = listOf("row", "row_id")
     }
 
+    fun switchField(fieldId: Int?) {
+        if (fieldId != null && fieldId != -1) {
+            val field = studyRepository?.getById(fieldId)
+            switchField(field)
+        }
+    }
+
     fun switchField(field: FieldObject?) {
         if (field != null && field.exp_id != -1 && field.date_import.isNotBlank()) {
 

@@ -277,4 +277,30 @@ class StudyRepository(
             }
         }
     }
+
+    fun getById(fieldId: Int): FieldObject {
+        return db.studiesQueries.getById(fieldId.toLong()).executeAsOneOrNull()?.let { r ->
+            FieldObject(
+                exp_id = r.internal_id_study.toInt(),
+                exp_name = r.study_name.orEmpty(),
+                exp_alias = r.study_alias.orEmpty(),
+                unique_id = r.study_unique_id_name.orEmpty(),
+                primary_id = r.study_primary_id_name.orEmpty(),
+                secondary_id = r.study_secondary_id_name.orEmpty(),
+                date_import = r.date_import ?: "",
+                date_edit = r.date_edit,
+                date_export = null,
+                date_sync = null,
+                import_format = r.import_format,
+                exp_source = null,
+                count = null,
+                observation_level = null,
+                attribute_count = r.attribute_count.toString(),
+                trait_count = r.trait_count.toString(),
+                observation_count = r.observation_count.toString(),
+                trial_name = null,
+                search_attribute = null
+            )
+        } ?: FieldObject()
+    }
 }
