@@ -26,11 +26,11 @@ class FieldSwitchImpl(
     fun switchField(field: FieldObject?) {
         if (field != null && field.exp_id != -1 && field.date_import.isNotBlank()) {
 
-            studyRepository?.switchField(field.exp_id)
+            studyRepository?.switchField(field.exp_id!!)
 
             // Get all entry props from repository if available, otherwise empty list
             val entryProps =
-                repo?.getAllNames(field.exp_id.toLong())?.toMutableList() ?: mutableListOf()
+                repo?.getAllNames(field.exp_id?.toLong())?.toMutableList() ?: mutableListOf()
 
             // remove unique id as a choice for the initial primary/secondary ids
             val uniqueId = field.unique_id
@@ -72,7 +72,7 @@ class FieldSwitchImpl(
             } else field.secondary_id
 
             // save preferences using Settings API
-            preferences.putInt(GeneralKeys.SELECTED_FIELD_ID.key, field.exp_id)
+            preferences.putInt(GeneralKeys.SELECTED_FIELD_ID.key, field.exp_id!!)
             preferences.putString(GeneralKeys.FIELD_FILE.key, field.exp_name)
             preferences.putString(GeneralKeys.FIELD_ALIAS.key, field.exp_alias)
             preferences.putString(GeneralKeys.FIELD_OBS_LEVEL.key, field.observation_level ?: "")

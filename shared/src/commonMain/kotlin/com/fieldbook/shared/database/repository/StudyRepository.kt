@@ -27,7 +27,7 @@ class StudyRepository(
                         unique_id = r.study_unique_id_name.orEmpty(),
                         primary_id = r.study_primary_id_name.orEmpty(),
                         secondary_id = r.study_secondary_id_name.orEmpty(),
-                        date_import = r.date_import?.toString() ?: "",
+                        date_import = r.date_import ?: "",
                         date_edit = r.date_edit,
                         date_export = null,
                         date_sync = null,
@@ -52,7 +52,7 @@ class StudyRepository(
                         unique_id = r.study_unique_id_name.orEmpty(),
                         primary_id = r.study_primary_id_name.orEmpty(),
                         secondary_id = r.study_secondary_id_name.orEmpty(),
-                        date_import = r.date_import?.toString() ?: "",
+                        date_import = r.date_import ?: "",
                         date_edit = r.date_edit,
                         date_export = null,
                         date_sync = null,
@@ -77,7 +77,7 @@ class StudyRepository(
                         unique_id = r.study_unique_id_name.orEmpty(),
                         primary_id = r.study_primary_id_name.orEmpty(),
                         secondary_id = r.study_secondary_id_name.orEmpty(),
-                        date_import = r.date_import?.toString() ?: "",
+                        date_import = r.date_import ?: "",
                         date_edit = r.date_edit,
                         date_export = null,
                         date_sync = null,
@@ -148,6 +148,55 @@ class StudyRepository(
             sql = query,
             parameters = 0
         )
+    }
+
+    /**
+     * Search for the first studies row that matches the name and observationLevel parameter.
+     * Default return value is -1
+     */
+    fun checkFieldNameAndObsLvl(name: String, observationLevel: String?): Int  {
+        val id = db.studiesQueries.getIdByNameAndObsLvl(name, observationLevel ?: "").executeAsOneOrNull()
+        return id?.toInt() ?: -1
+    }
+
+    fun checkBrapiStudyUnique(observationLevel: String?, brapiId: String?): Int   {
+        val id = db.studiesQueries.getIdByBrapiStudyUnique(observationLevel, brapiId ?: "").executeAsOneOrNull()
+        return id?.toInt() ?: -1
+    }
+
+    /**
+     * This function uses a field object to create a exp/study row in the database.
+     * Columns are new observation unit attribute names that are inserted as well.
+     */
+    fun createField(e: FieldObject, timestamp: String, fromBrapi: Boolean = false): Int {
+        return when (val sid = if (fromBrapi) checkBrapiStudyUnique(
+            e.observation_level,
+            e.study_db_id
+        ) else checkFieldNameAndObsLvl(e.exp_name, e.observation_level)) {
+            -1 -> {
+                val rowId = db.studiesQueries.insert(
+                    study_db_id = e.study_db_id,
+                    study_name = e.exp_name,
+                    study_alias = e.exp_alias,
+                    study_unique_id_name = e.unique_id,
+                    study_primary_id_name = e.primary_id,
+                    study_secondary_id_name = e.secondary_id,
+                    study_sort_name = e.exp_sort,
+                    date_import = timestamp,
+                    date_edit = e.date_edit,
+                    date_export = e.date_export,
+                    date_sync = e.date_sync,
+                    import_format = e.import_format,
+                    experimental_design = e.exp_layout,
+                    common_crop_name = e.exp_species,
+                    study_source = e.exp_source,
+                    count = e.count,
+                    observation_levels = e.observation_level
+                )
+                rowId.value.toInt()
+            }
+            else -> sid
+        }
     }
 
     data class FieldPreferenceNames(val unique: String, val primary: String, val secondary: String)
@@ -221,8 +270,8 @@ class StudyRepository(
                     db.observation_units_valuesQueries.insert(
                         study_id = studyId,
                         observation_unit_id = rowId.value,
-                        attribute_id = attrId.toLong(),
-                        value_ = actualData[index]
+                        observation_unit_attribute_db_id = attrId.toLong(),
+                        observation_unit_value_name = actualData[index]
                     )
                 }
             }

@@ -242,8 +242,8 @@ class FieldListItemViewModel(
     fun switchField(field: FieldObject) {
         fieldSwitchImpl.switchField(field)
         viewModelScope.launch {
-            settings.putInt(GeneralKeys.SELECTED_FIELD_ID.key, field.exp_id)
-            _activeFieldId.value = field.exp_id
+            settings.putInt(GeneralKeys.SELECTED_FIELD_ID.key, field.exp_id!!)
+            _activeFieldId.value = field.exp_id!!
         }
     }
 }

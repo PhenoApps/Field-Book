@@ -2,17 +2,24 @@
 
 CREATE TABLE studies (
   internal_id_study INTEGER NOT NULL PRIMARY KEY,
+  study_db_id TEXT,
   study_name TEXT,
   study_alias TEXT,
   study_unique_id_name TEXT,
   study_primary_id_name TEXT,
   study_secondary_id_name TEXT,
   study_sort_name TEXT,
-  date_import INTEGER,     
+  date_import TEXT,
   date_edit TEXT,
-  import_format TEXT
+  date_export TEXT,
+  date_sync TEXT,
+  import_format TEXT,
+  experimental_design TEXT,
+  common_crop_name TEXT,
+  study_source TEXT,
+  count TEXT,
+  observation_levels TEXT
 );
-
 
 allByDateDesc:
 SELECT
@@ -51,3 +58,41 @@ SELECT study_unique_id_name, study_primary_id_name, study_secondary_id_name
 FROM studies
 WHERE internal_id_study = ?
 LIMIT 1;
+
+checkFieldNameAndObsLvl:
+SELECT COUNT(*)
+FROM studies
+WHERE study_name = ? AND observation_levels = ?;
+
+checkBrapiStudyUnique:
+SELECT COUNT(*)
+FROM studies
+WHERE observation_levels = ? AND study_db_id = ?;
+
+-- helper queries returning primary key for compatibility with repository
+getIdByNameAndObsLvl:
+SELECT internal_id_study FROM studies WHERE study_name = ? AND observation_levels = ? LIMIT 1;
+
+getIdByBrapiStudyUnique:
+SELECT internal_id_study FROM studies WHERE observation_levels = ? AND study_db_id = ? LIMIT 1;
+
+insert:
+INSERT INTO studies (
+  study_db_id,
+  study_name,
+  study_alias,
+  study_unique_id_name,
+  study_primary_id_name,
+  study_secondary_id_name,
+  study_sort_name,
+  date_import,
+  date_edit,
+  date_export,
+  date_sync,
+  import_format,
+  experimental_design,
+  common_crop_name,
+  study_source,
+  count,
+  observation_levels
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);

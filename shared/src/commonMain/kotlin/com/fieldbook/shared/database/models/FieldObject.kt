@@ -2,6 +2,7 @@ package com.fieldbook.shared.database.models
 
 class FieldObject(
     var exp_id: Int? = null,
+    var study_db_id: String = "",
     var exp_name: String = "",
     var exp_alias: String = "",
     var exp_sort: String? = null,
@@ -20,5 +21,7 @@ class FieldObject(
     var trait_count: String? = null,
     var observation_count: String? = null,
     var trial_name: String? = null,
-    var search_attribute: String? = null
+    var search_attribute: String? = null,
+    var exp_layout: String? = null, // Added missing field
+    var exp_species: String? = null // Added missing field
 )

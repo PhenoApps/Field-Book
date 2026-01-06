@@ -2,16 +2,16 @@ CREATE TABLE observation_units_values (
     internal_id_observation_unit_value INTEGER PRIMARY KEY AUTOINCREMENT,
     study_id INTEGER NOT NULL REFERENCES studies(internal_id_study),
     observation_unit_id INTEGER NOT NULL REFERENCES observation_units(internal_id_observation_unit),
-    attribute_id INTEGER NOT NULL REFERENCES observation_units_attributes(internal_id_observation_unit_attribute),
-    value TEXT
+    observation_unit_attribute_db_id INTEGER NOT NULL REFERENCES observation_units_attributes(internal_id_observation_unit_attribute),
+    observation_unit_value_name TEXT
 );
 
 insert:
 INSERT INTO observation_units_values (
     study_id,
     observation_unit_id,
-    attribute_id,
-    value
+    observation_unit_attribute_db_id,
+    observation_unit_value_name
 ) VALUES (
     ?, ?, ?, ?
 );
