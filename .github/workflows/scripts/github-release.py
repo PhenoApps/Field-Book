@@ -200,7 +200,7 @@ def update_changelog_xml(filtered_content, changelog_xml_path):
 
             content = f'''{newline}{newline.join(release_notes)}'''
 
-            opening_tag = f'''{newline}{tab}<release version="{version}" versionCode="{version_code}" date="{today}">'''
+            opening_tag = f'''{newline}{tab}<release date="{today}" versionCode="{version_code} versionName="v{version}"">'''
             closing_tag = f'''{newline}{tab}</release>'''
 
             release_block = f'''{opening_tag}{content}{closing_tag}'''
