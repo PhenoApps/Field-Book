@@ -25,6 +25,9 @@ selectById:
 SELECT * FROM observation_units WHERE observation_unit_db_id = ?
 AND study_id = ?;
 
+getLastInsertedId:
+SELECT last_insert_rowid();
+
 insert:
 INSERT INTO observation_units (
     study_id,

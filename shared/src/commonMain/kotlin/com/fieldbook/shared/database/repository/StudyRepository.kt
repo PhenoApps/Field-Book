@@ -260,7 +260,7 @@ class StudyRepository(
         val geoCoordinates =
             if (geoCoordinatesIndex >= 0 && geoCoordinatesIndex < actualData.size) actualData[geoCoordinatesIndex] else ""
 
-        val rowId = db.observation_unitsQueries.insert(
+        db.observation_unitsQueries.insert(
             study_id = studyId,
             observation_unit_db_id = observationUnitDbId,
             primary_id = primaryId,
@@ -276,6 +276,9 @@ class StudyRepository(
             position_coordinate_y_type = null
         )
 
+        val observation_unit_id =
+            db.observation_unitsQueries.getLastInsertedId().executeAsOne()
+
         val attributes =
             db.observation_units_attributesQueries.getAllNamesByStudyId(studyId).executeAsList()
 
@@ -287,7 +290,7 @@ class StudyRepository(
                 if (attrId >= 0) {
                     db.observation_units_valuesQueries.insert(
                         study_id = studyId,
-                        observation_unit_id = rowId.value,
+                        observation_unit_id = observation_unit_id,
                         observation_unit_attribute_db_id = attrId.toLong(),
                         observation_unit_value_name = actualData[index]
                     )
