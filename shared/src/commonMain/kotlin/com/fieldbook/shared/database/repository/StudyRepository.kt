@@ -279,19 +279,20 @@ class StudyRepository(
         val observation_unit_id =
             db.observation_unitsQueries.getLastInsertedId().executeAsOne()
 
-        val attributes =
-            db.observation_units_attributesQueries.getAllNamesByStudyId(studyId).executeAsList()
+        val attributesMap =
+            db.observation_units_attributesQueries.getAllIdsByStudyId(studyId).executeAsList()
+                .associate { it.observation_unit_attribute_name to it.internal_id_observation_unit_attribute }
 
         // Insert attribute values for this observation unit
         columns.forEachIndexed { index, colName ->
             if (colName != "geo_coordinates") {
-                val attrId = attributes.indexOf(colName)
+                val attrId: Long? = attributesMap[colName]
                 // Only insert if attribute exists
-                if (attrId >= 0) {
+                if (attrId != null) {
                     db.observation_units_valuesQueries.insert(
                         study_id = studyId,
                         observation_unit_id = observation_unit_id,
-                        observation_unit_attribute_db_id = attrId.toLong(),
+                        observation_unit_attribute_db_id = attrId,
                         observation_unit_value_name = actualData[index]
                     )
                 }
@@ -320,7 +321,7 @@ class StudyRepository(
                 trait_count = r.trait_count.toString(),
                 observation_count = r.observation_count.toString(),
                 trial_name = null,
-                search_attribute = null
+                        search_attribute = null
             )
         } ?: FieldObject()
     }
