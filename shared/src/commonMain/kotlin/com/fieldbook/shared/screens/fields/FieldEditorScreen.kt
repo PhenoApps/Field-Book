@@ -158,12 +158,11 @@ fun FieldEditorScreen(
                 if (showFieldCreatorDialog.value) {
                     FieldCreatorDialogFragment(
                         onDismiss = { showFieldCreatorDialog.value = false },
-                        onSuccess = {
-                            // reload fields after a successful create
+                        onSuccess = { fieldId ->
                             showFieldCreatorDialog.value = false
                             coroutineScope.launch {
-                                // invoke ViewModel reload which queries the DB
                                 viewModel.loadFields()
+                                viewModel.switchField(fieldId)
                             }
                         }
                     )
@@ -251,6 +250,14 @@ class FieldEditorScreenViewModel(
         viewModelScope.launch {
             settings.putInt(GeneralKeys.SELECTED_FIELD_ID.key, field.exp_id!!)
             _activeFieldId.value = field.exp_id!!
+        }
+    }
+
+    fun switchField(fieldId: Int) {
+        fieldSwitchImpl.switchField(fieldId)
+        viewModelScope.launch {
+            settings.putInt(GeneralKeys.SELECTED_FIELD_ID.key, fieldId)
+            _activeFieldId.value = fieldId
         }
     }
 

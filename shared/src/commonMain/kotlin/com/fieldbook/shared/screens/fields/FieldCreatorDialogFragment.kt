@@ -48,7 +48,6 @@ import com.fieldbook.shared.generated.resources.ic_plot_pattern_zigzag
 import com.fieldbook.shared.objects.ImportFormat
 import com.fieldbook.shared.sqldelight.FieldbookDatabase
 import com.fieldbook.shared.sqldelight.createDatabase
-import com.fieldbook.shared.utilities.FieldSwitchImpl
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.format
@@ -71,7 +70,7 @@ fun FieldCreatorDialogFragment(
         FieldCreatorDialogFragmentViewModel()
     },
     onDismiss: () -> Unit,
-    onSuccess: () -> Unit
+    onSuccess: (Int) -> Unit
 ) {
     var currentStep by remember { mutableStateOf(FieldCreatorStep.SizeGroup) }
     var name by remember { mutableStateOf("") }
@@ -348,7 +347,7 @@ private fun ReviewGroupDialog(
     pattern: FieldPattern?,
     startPoint: String?,
     viewModel: FieldCreatorDialogFragmentViewModel,
-    onSuccess: () -> Unit
+    onSuccess: (Int) -> Unit
 ) {
     val patternIcon = when (pattern) {
         FieldPattern.LINEAR -> Res.drawable.ic_plot_pattern_linear
@@ -422,7 +421,7 @@ class FieldCreatorDialogFragmentViewModel : ViewModel() {
         rows: Int,
         cols: Int,
         pattern: FieldPattern?,
-        onSuccess: () -> Unit
+        onSuccess: (Int) -> Unit
     ) {
         val source = getString(Res.string.field_book)
 
@@ -460,15 +459,7 @@ class FieldCreatorDialogFragmentViewModel : ViewModel() {
             )
         }
 
-        // perform the switch after the transaction completes
-        if (createdStudyId != -1) {
-            FieldSwitchImpl(
-                studyRepository = studyRepository,
-                observationUnitAttributeRepository = observationUnitPropertyRepository
-            ).switchField(createdStudyId)
-        }
-
-        onSuccess()
+        onSuccess(createdStudyId)
     }
 
     private fun insertPlotData(
