@@ -13,6 +13,11 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun InfoBar(controller: CollectScreenController, modifier: Modifier = Modifier) {
     val unit = controller.units.getOrNull(controller.currentUnitIndex)
+
+    /*
+     * TODO configurable info bar fields
+     */
+
     Column(modifier = modifier.fillMaxWidth()) {
         Spacer(Modifier.height(8.dp))
         Text("field_name: ${controller.field.exp_name}", style = MaterialTheme.typography.bodyLarge)
@@ -21,7 +26,7 @@ fun InfoBar(controller: CollectScreenController, modifier: Modifier = Modifier) 
             style = MaterialTheme.typography.bodyLarge
         )
         Text(
-            "row: ${controller.cRange.primaryId ?: "-"}",
+            "${controller.primaryId}: ${controller.cRange.primaryId ?: "-"}",
             style = MaterialTheme.typography.bodyLarge
         )
         Spacer(Modifier.height(8.dp))
