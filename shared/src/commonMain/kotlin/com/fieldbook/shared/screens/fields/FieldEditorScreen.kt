@@ -34,6 +34,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,7 +44,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.fieldbook.shared.AppContext
 import com.fieldbook.shared.database.models.FieldObject
 import com.fieldbook.shared.database.repository.ObservationUnitAttributeRepository
 import com.fieldbook.shared.database.repository.StudyRepository
@@ -53,7 +53,6 @@ import com.fieldbook.shared.generated.resources.ic_file_csv
 import com.fieldbook.shared.generated.resources.tutorial_fields_add_title
 import com.fieldbook.shared.objects.ImportFormat
 import com.fieldbook.shared.preferences.GeneralKeys
-import com.fieldbook.shared.sqldelight.createDatabase
 import com.fieldbook.shared.theme.MainTheme
 import com.fieldbook.shared.utilities.FieldSwitchImpl
 import com.russhwolf.settings.Settings
@@ -66,31 +65,23 @@ import org.jetbrains.compose.resources.painterResource
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FieldEditorScreen(
-    onBack: (() -> Unit)? = null
+    onBack: (() -> Unit)? = null,
+    viewModel: FieldEditorScreenViewModel = viewModel(
+        factory = fieldEditorViewModelFactory()
+    )
 ) {
     MainTheme {
-        val fieldsState = remember { mutableStateOf<List<FieldObject>?>(null) }
-        val errorState = remember { mutableStateOf<String?>(null) }
-        val loadingState = remember { mutableStateOf(true) }
         val showFieldCreatorDialog = remember { mutableStateOf(false) }
-        val driverFactory = AppContext.driverFactory()
-        val db = remember(driverFactory) {
-            createDatabase()
-        }
+        val coroutineScope = rememberCoroutineScope()
 
+        // Observe state from the ViewModel
+        val fieldsState by viewModel.fields.collectAsState(initial = null)
+        val errorState by viewModel.error.collectAsState(initial = null)
+        val loadingState by viewModel.loading.collectAsState(initial = true)
+
+        // load fields when the screen appears
         LaunchedEffect(Unit) {
-            loadingState.value = true
-            errorState.value = null
-            try {
-                val repo = StudyRepository()
-                fieldsState.value = repo.getAllFields()
-                println("Fields loaded: ${fieldsState.value}")
-            } catch (e: Exception) {
-                e.printStackTrace()
-                errorState.value = e.message ?: "Unknown error"
-            } finally {
-                loadingState.value = false
-            }
+            viewModel.loadFields()
         }
 
         Scaffold(
@@ -135,19 +126,19 @@ fun FieldEditorScreen(
                     .background(MaterialTheme.colorScheme.background)
             ) {
                 when {
-                    loadingState.value -> {
+                    loadingState -> {
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                     }
 
-                    errorState.value != null -> {
+                    errorState != null -> {
                         Text(
-                            text = "Error: ${errorState.value}",
+                            text = "Error: ${errorState}",
                             modifier = Modifier.align(Alignment.Center),
                             color = MaterialTheme.colorScheme.error
                         )
                     }
 
-                    fieldsState.value.isNullOrEmpty() -> {
+                    fieldsState.isNullOrEmpty() -> {
                         Text(
                             text = "No fields found.",
                             modifier = Modifier.align(Alignment.Center)
@@ -156,8 +147,8 @@ fun FieldEditorScreen(
 
                     else -> {
                         LazyColumn(modifier = Modifier.fillMaxSize()) {
-                            items(fieldsState.value!!) { field ->
-                                FieldListItem(field = field)
+                            items(fieldsState!!) { field ->
+                                FieldListItem(field = field, viewModel)
                                 HorizontalDivider()
                             }
                         }
@@ -166,7 +157,15 @@ fun FieldEditorScreen(
 
                 if (showFieldCreatorDialog.value) {
                     FieldCreatorDialogFragment(
-                        onDismiss = { showFieldCreatorDialog.value = false }
+                        onDismiss = { showFieldCreatorDialog.value = false },
+                        onSuccess = {
+                            // reload fields after a successful create
+                            showFieldCreatorDialog.value = false
+                            coroutineScope.launch {
+                                // invoke ViewModel reload which queries the DB
+                                viewModel.loadFields()
+                            }
+                        }
                     )
                 }
             }
@@ -177,9 +176,7 @@ fun FieldEditorScreen(
 @Composable
 private fun FieldListItem(
     field: FieldObject,
-    viewModel: FieldListItemViewModel = viewModel(
-        factory = fieldListItemViewModelFactory()
-    )
+    viewModel: FieldEditorScreenViewModel
 ) {
     val activeStudyId by viewModel.activeFieldId.collectAsState()
     val importFormat = ImportFormat.fromString(field.import_format)
@@ -227,7 +224,7 @@ private fun FieldListItem(
     }
 }
 
-class FieldListItemViewModel(
+class FieldEditorScreenViewModel(
     private val observationUnitAttributeRepository: ObservationUnitAttributeRepository,
     private val studyRepository: StudyRepository,
     private val fieldSwitchImpl: FieldSwitchImpl = FieldSwitchImpl(
@@ -236,8 +233,18 @@ class FieldListItemViewModel(
     ),
     private val settings: Settings = Settings()
 ) : ViewModel() {
-    private val _activeFieldId = MutableStateFlow(settings.getInt(GeneralKeys.SELECTED_FIELD_ID.key, 0))
+    private val _activeFieldId =
+        MutableStateFlow(settings.getInt(GeneralKeys.SELECTED_FIELD_ID.key, 0))
     val activeFieldId: StateFlow<Int> = _activeFieldId.asStateFlow()
+
+    private val _fields = MutableStateFlow<List<FieldObject>?>(null)
+    val fields: StateFlow<List<FieldObject>?> = _fields.asStateFlow()
+
+    private val _loading = MutableStateFlow(false)
+    val loading: StateFlow<Boolean> = _loading.asStateFlow()
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error.asStateFlow()
 
     fun switchField(field: FieldObject) {
         fieldSwitchImpl.switchField(field)
@@ -246,11 +253,27 @@ class FieldListItemViewModel(
             _activeFieldId.value = field.exp_id!!
         }
     }
+
+    fun loadFields() {
+        viewModelScope.launch {
+            _loading.value = true
+            _error.value = null
+            try {
+                _fields.value = studyRepository.getAllFields()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _error.value = e.message ?: "Unknown error"
+                _fields.value = null
+            } finally {
+                _loading.value = false
+            }
+        }
+    }
 }
 
-fun fieldListItemViewModelFactory() = viewModelFactory {
+fun fieldEditorViewModelFactory() = viewModelFactory {
     initializer {
-        FieldListItemViewModel(
+        FieldEditorScreenViewModel(
             observationUnitAttributeRepository = ObservationUnitAttributeRepository(),
             studyRepository = StudyRepository()
         )

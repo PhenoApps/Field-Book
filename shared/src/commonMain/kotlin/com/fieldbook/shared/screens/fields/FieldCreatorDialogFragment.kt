@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fieldbook.shared.database.models.FieldObject
+import com.fieldbook.shared.database.repository.ObservationUnitAttributeRepository
 import com.fieldbook.shared.database.repository.StudyRepository
 import com.fieldbook.shared.database.utils.internalTimeFormatter
 import com.fieldbook.shared.generated.resources.Res
@@ -69,7 +70,8 @@ fun FieldCreatorDialogFragment(
     viewModel: FieldCreatorDialogFragmentViewModel = viewModel {
         FieldCreatorDialogFragmentViewModel()
     },
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onSuccess: () -> Unit
 ) {
     var currentStep by remember { mutableStateOf(FieldCreatorStep.SizeGroup) }
     var name by remember { mutableStateOf("") }
@@ -97,12 +99,12 @@ fun FieldCreatorDialogFragment(
         FieldCreatorStep.StartPoint -> {
             StartPointDialog(
                 selected = selectedStartPoint,
-                onSelected = { selectedStartPoint = it },
+                onSelected = {
+                    selectedStartPoint = it
+                    if (selectedStartPoint != null) currentStep = FieldCreatorStep.PatternGroup
+                },
                 onDismiss = onDismiss,
                 onBack = { currentStep = FieldCreatorStep.SizeGroup },
-                onNext = {
-                    if (selectedStartPoint != null) currentStep = FieldCreatorStep.PatternGroup
-                }
             )
         }
 
@@ -128,7 +130,8 @@ fun FieldCreatorDialogFragment(
                 columns = columns,
                 pattern = selectedPattern,
                 startPoint = selectedStartPoint,
-                viewModel
+                viewModel,
+                onSuccess = onSuccess
             )
         }
     }
@@ -216,7 +219,6 @@ private fun StartPointDialog(
     onSelected: (String) -> Unit,
     onDismiss: () -> Unit,
     onBack: () -> Unit,
-    onNext: () -> Unit
 ) {
     val options = listOf(
         Res.string.dialog_field_creator_top_left,
@@ -246,12 +248,13 @@ private fun StartPointDialog(
                                     .weight(1f)
                                     .clickable {
                                         onSelected(key)
-                                        onNext()
                                     }
                             ) {
                                 RadioButton(
                                     selected = selected == key,
-                                    onClick = { onSelected(key) }
+                                    onClick = {
+                                        onSelected(key)
+                                    }
                                 )
                                 Text(
                                     label,
@@ -345,13 +348,13 @@ private fun ReviewGroupDialog(
     pattern: FieldPattern?,
     startPoint: String?,
     viewModel: FieldCreatorDialogFragmentViewModel,
+    onSuccess: () -> Unit
 ) {
     val patternIcon = when (pattern) {
         FieldPattern.LINEAR -> Res.drawable.ic_plot_pattern_linear
         FieldPattern.ZIGZAG -> Res.drawable.ic_plot_pattern_zigzag
         else -> null
     }
-    val db = createDatabase()
     val coroutineScope = rememberCoroutineScope()
 
     AlertDialog(
@@ -389,7 +392,7 @@ private fun ReviewGroupDialog(
                         rows.toIntOrNull() ?: 0,
                         columns.toIntOrNull() ?: 0,
                         pattern,
-                        onDismiss
+                        onSuccess
                     )
                 }
             }) {
@@ -412,15 +415,18 @@ private fun ReviewGroupDialog(
 class FieldCreatorDialogFragmentViewModel : ViewModel() {
     val db: FieldbookDatabase = createDatabase()
     val studyRepository = StudyRepository(db)
+    val observationUnitPropertyRepository = ObservationUnitAttributeRepository(db)
 
     suspend fun insertBasicField(
         name: String,
         rows: Int,
         cols: Int,
         pattern: FieldPattern?,
-        onDismiss: () -> Unit
+        onSuccess: () -> Unit
     ) {
         val source = getString(Res.string.field_book)
+
+        var createdStudyId: Int = -1
 
         db.transaction {
             val field = FieldObject().apply {
@@ -439,6 +445,9 @@ class FieldCreatorDialogFragmentViewModel : ViewModel() {
             val timestamp = Clock.System.now().format(internalTimeFormatter)
             val studyId: Int = studyRepository.createField(field, timestamp)
 
+            // capture created study id to use after the transaction
+            createdStudyId = studyId
+
             // TODO
             // updateFieldInsertText(rows.toString(), cols.toString())
 
@@ -449,10 +458,17 @@ class FieldCreatorDialogFragmentViewModel : ViewModel() {
                 cols,
                 linear = pattern == FieldPattern.LINEAR,
             )
-
-            FieldSwitchImpl().switchField(studyId)
-            onDismiss()
         }
+
+        // perform the switch after the transaction completes
+        if (createdStudyId != -1) {
+            FieldSwitchImpl(
+                studyRepository = studyRepository,
+                observationUnitAttributeRepository = observationUnitPropertyRepository
+            ).switchField(createdStudyId)
+        }
+
+        onSuccess()
     }
 
     private fun insertPlotData(

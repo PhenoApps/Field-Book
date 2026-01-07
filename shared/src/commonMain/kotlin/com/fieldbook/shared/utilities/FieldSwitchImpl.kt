@@ -11,8 +11,8 @@ import com.russhwolf.settings.Settings
  * This handles all necessary preferences and database updates.
  */
 class FieldSwitchImpl(
-    private val repo: ObservationUnitAttributeRepository? = null,
-    private val studyRepository: StudyRepository? = null
+    private val observationUnitAttributeRepository: ObservationUnitAttributeRepository? = ObservationUnitAttributeRepository(),
+    private val studyRepository: StudyRepository? = StudyRepository()
 ) {
 
     private val preferences: Settings = Settings()
@@ -37,7 +37,7 @@ class FieldSwitchImpl(
 
             // Get all entry props from repository if available, otherwise empty list
             val entryProps =
-                repo?.getAllNames(field.exp_id?.toLong())?.toMutableList() ?: mutableListOf()
+                observationUnitAttributeRepository?.getAllNames(field.exp_id?.toLong())?.toMutableList() ?: mutableListOf()
 
             // remove unique id as a choice for the initial primary/secondary ids
             val uniqueId = field.unique_id
