@@ -27,3 +27,9 @@ SELECT
   exp_id AS study_id
 FROM plot_attributes
 WHERE exp_id = ?;
+
+insertObservationUnitAttribute:
+INSERT OR IGNORE INTO observation_units_attributes (
+  observation_unit_attribute_name,
+  study_id
+) VALUES (?, ?);

@@ -154,13 +154,15 @@ class StudyRepository(
      * Search for the first studies row that matches the name and observationLevel parameter.
      * Default return value is -1
      */
-    fun checkFieldNameAndObsLvl(name: String, observationLevel: String?): Int  {
-        val id = db.studiesQueries.getIdByNameAndObsLvl(name, observationLevel ?: "").executeAsOneOrNull()
+    fun checkFieldNameAndObsLvl(name: String, observationLevel: String?): Int {
+        val id = db.studiesQueries.getIdByNameAndObsLvl(name, observationLevel ?: "")
+            .executeAsOneOrNull()
         return id?.toInt() ?: -1
     }
 
-    fun checkBrapiStudyUnique(observationLevel: String?, brapiId: String?): Int   {
-        val id = db.studiesQueries.getIdByBrapiStudyUnique(observationLevel, brapiId ?: "").executeAsOneOrNull()
+    fun checkBrapiStudyUnique(observationLevel: String?, brapiId: String?): Int {
+        val id = db.studiesQueries.getIdByBrapiStudyUnique(observationLevel, brapiId ?: "")
+            .executeAsOneOrNull()
         return id?.toInt() ?: -1
     }
 
@@ -194,8 +196,23 @@ class StudyRepository(
                     observation_levels = e.observation_level
                 )
                 val id = db.studiesQueries.getLastInsertedId().executeAsOne().toInt()
+
+                val cols = mutableListOf<String>()
+                e.primary_id.takeIf { it.isNotBlank() }?.let { cols.add(it) }
+                e.secondary_id.takeIf { it.isNotBlank() }?.let { cols.add(it) }
+                e.exp_sort?.takeIf { it.isNotBlank() }?.let { cols.add(it) }
+                e.unique_id.takeIf { it.isNotBlank() }?.let { cols.add(it) }
+
+                cols.distinct().forEach { colName ->
+                    db.observation_units_attributesQueries.insertObservationUnitAttribute(
+                        colName,
+                        id.toLong()
+                    )
+                }
+
                 id
             }
+
             else -> sid
         }
     }
