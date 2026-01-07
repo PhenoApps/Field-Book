@@ -15,7 +15,7 @@ fun InfoBar(controller: CollectScreenController, modifier: Modifier = Modifier) 
     val unit = controller.units.getOrNull(controller.currentUnitIndex)
     Column(modifier = modifier.fillMaxWidth()) {
         Spacer(Modifier.height(8.dp))
-        Text("field_name: ${unit?.primary_id ?: "-"}", style = MaterialTheme.typography.bodyLarge)
+        Text("field_name: ${controller.field.exp_name}", style = MaterialTheme.typography.bodyLarge)
         Text(
             "plot_id: ${unit?.observation_unit_db_id ?: "-"}",
             style = MaterialTheme.typography.bodyLarge

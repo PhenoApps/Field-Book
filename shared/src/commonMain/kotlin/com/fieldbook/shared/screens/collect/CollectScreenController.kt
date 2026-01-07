@@ -4,11 +4,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import com.fieldbook.shared.database.models.FieldObject
 import com.fieldbook.shared.database.models.ObservationUnitModel
 import com.fieldbook.shared.database.models.TraitObject
 import com.fieldbook.shared.database.repository.ObservationRepository
 import com.fieldbook.shared.database.repository.ObservationUnitPropertyRepository
 import com.fieldbook.shared.database.repository.ObservationUnitRepository
+import com.fieldbook.shared.database.repository.StudyRepository
 import com.fieldbook.shared.database.repository.TraitRepository
 import com.fieldbook.shared.objects.RangeObject
 import com.fieldbook.shared.preferences.GeneralKeys
@@ -22,10 +24,12 @@ class CollectScreenController {
     private val traitRepository = TraitRepository()
     private val observationRepository = ObservationRepository()
     private val observationUnitPropertyRepository = ObservationUnitPropertyRepository()
+    private val studyRepository = StudyRepository()
 
     private val settings: Settings = Settings()
 
     val studyId: Int = settings.getInt(GeneralKeys.SELECTED_FIELD_ID.key, 0)
+    val field: FieldObject = studyRepository.getById(studyId)
 
     var units by mutableStateOf<List<ObservationUnitModel>>(emptyList())
         private set
