@@ -84,6 +84,9 @@ SELECT internal_id_study FROM studies WHERE study_name = ? AND observation_level
 getIdByBrapiStudyUnique:
 SELECT internal_id_study FROM studies WHERE observation_levels = ? AND study_db_id = ? LIMIT 1;
 
+getLastInsertedId:
+SELECT last_insert_rowid();
+
 insert:
 INSERT INTO studies (
   study_db_id,

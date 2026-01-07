@@ -174,7 +174,7 @@ class StudyRepository(
             e.study_db_id
         ) else checkFieldNameAndObsLvl(e.exp_name, e.observation_level)) {
             -1 -> {
-                val rowId = db.studiesQueries.insert(
+                db.studiesQueries.insert(
                     study_db_id = e.study_db_id,
                     study_name = e.exp_name,
                     study_alias = e.exp_alias,
@@ -193,7 +193,8 @@ class StudyRepository(
                     count = e.count,
                     observation_levels = e.observation_level
                 )
-                rowId.value.toInt()
+                val id = db.studiesQueries.getLastInsertedId().executeAsOne().toInt()
+                id
             }
             else -> sid
         }
