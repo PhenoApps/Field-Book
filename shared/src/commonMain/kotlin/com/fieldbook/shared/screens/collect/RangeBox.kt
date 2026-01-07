@@ -77,11 +77,11 @@ fun RangeBox(
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    "row: ${controller.cRange.primaryId}",
+                    "${controller.primaryId}: ${controller.cRange.primaryId}",
                     style = MaterialTheme.typography.titleLarge
                 )
                 Text(
-                    "plot: ${controller.cRange.secondaryId}",
+                    "${controller.secondaryId}: ${controller.cRange.secondaryId}",
                     style = MaterialTheme.typography.titleLarge
                 )
             }

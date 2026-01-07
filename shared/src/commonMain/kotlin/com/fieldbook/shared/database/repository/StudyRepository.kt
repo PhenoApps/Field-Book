@@ -7,10 +7,12 @@ import com.fieldbook.shared.database.Migrator.Companion.sObservationUnitProperty
 import com.fieldbook.shared.database.models.FieldObject
 import com.fieldbook.shared.sqldelight.FieldbookDatabase
 
-class StudyRepository {
-
+class StudyRepository(
+    val db: FieldbookDatabase = FieldbookDatabase(
+        AppContext.driverFactory().getDriver()
+    )
+) {
     private val driver: SqlDriver = AppContext.driverFactory().getDriver()
-    private val db: FieldbookDatabase = FieldbookDatabase(driver)
 
     enum class SortOrder { DateImport, Visible, Name }
 
@@ -25,7 +27,7 @@ class StudyRepository {
                         unique_id = r.study_unique_id_name.orEmpty(),
                         primary_id = r.study_primary_id_name.orEmpty(),
                         secondary_id = r.study_secondary_id_name.orEmpty(),
-                        date_import = r.date_import?.toString() ?: "",
+                        date_import = r.date_import ?: "",
                         date_edit = r.date_edit,
                         date_export = null,
                         date_sync = null,
@@ -50,7 +52,7 @@ class StudyRepository {
                         unique_id = r.study_unique_id_name.orEmpty(),
                         primary_id = r.study_primary_id_name.orEmpty(),
                         secondary_id = r.study_secondary_id_name.orEmpty(),
-                        date_import = r.date_import?.toString() ?: "",
+                        date_import = r.date_import ?: "",
                         date_edit = r.date_edit,
                         date_export = null,
                         date_sync = null,
@@ -75,7 +77,7 @@ class StudyRepository {
                         unique_id = r.study_unique_id_name.orEmpty(),
                         primary_id = r.study_primary_id_name.orEmpty(),
                         secondary_id = r.study_secondary_id_name.orEmpty(),
-                        date_import = r.date_import?.toString() ?: "",
+                        date_import = r.date_import ?: "",
                         date_edit = r.date_edit,
                         date_export = null,
                         date_sync = null,
@@ -146,5 +148,181 @@ class StudyRepository {
             sql = query,
             parameters = 0
         )
+    }
+
+    /**
+     * Search for the first studies row that matches the name and observationLevel parameter.
+     * Default return value is -1
+     */
+    fun checkFieldNameAndObsLvl(name: String, observationLevel: String?): Int {
+        val id = db.studiesQueries.getIdByNameAndObsLvl(name, observationLevel ?: "")
+            .executeAsOneOrNull()
+        return id?.toInt() ?: -1
+    }
+
+    fun checkBrapiStudyUnique(observationLevel: String?, brapiId: String?): Int {
+        val id = db.studiesQueries.getIdByBrapiStudyUnique(observationLevel, brapiId ?: "")
+            .executeAsOneOrNull()
+        return id?.toInt() ?: -1
+    }
+
+    /**
+     * This function uses a field object to create a exp/study row in the database.
+     * Columns are new observation unit attribute names that are inserted as well.
+     */
+    fun createField(e: FieldObject, timestamp: String, fromBrapi: Boolean = false): Int {
+        return when (val sid = if (fromBrapi) checkBrapiStudyUnique(
+            e.observation_level,
+            e.study_db_id
+        ) else checkFieldNameAndObsLvl(e.exp_name, e.observation_level)) {
+            -1 -> {
+                db.studiesQueries.insert(
+                    study_db_id = e.study_db_id,
+                    study_name = e.exp_name,
+                    study_alias = e.exp_alias,
+                    study_unique_id_name = e.unique_id,
+                    study_primary_id_name = e.primary_id,
+                    study_secondary_id_name = e.secondary_id,
+                    study_sort_name = e.exp_sort,
+                    date_import = timestamp,
+                    date_edit = e.date_edit,
+                    date_export = e.date_export,
+                    date_sync = e.date_sync,
+                    import_format = e.import_format,
+                    experimental_design = e.exp_layout,
+                    common_crop_name = e.exp_species,
+                    study_source = e.exp_source,
+                    count = e.count,
+                    observation_levels = e.observation_level
+                )
+                val id = db.studiesQueries.getLastInsertedId().executeAsOne().toInt()
+
+                val cols = mutableListOf<String>()
+                e.primary_id.takeIf { it.isNotBlank() }?.let { cols.add(it) }
+                e.secondary_id.takeIf { it.isNotBlank() }?.let { cols.add(it) }
+                e.exp_sort?.takeIf { it.isNotBlank() }?.let { cols.add(it) }
+                e.unique_id.takeIf { it.isNotBlank() }?.let { cols.add(it) }
+
+                cols.distinct().forEach { colName ->
+                    db.observation_units_attributesQueries.insertObservationUnitAttribute(
+                        colName,
+                        id.toLong()
+                    )
+                }
+
+                id
+            }
+
+            else -> sid
+        }
+    }
+
+    data class FieldPreferenceNames(val unique: String, val primary: String, val secondary: String)
+
+    /**
+     * Function that queries the field/study table for the imported unique/primary/secondary names.
+     */
+    fun getNames(exp_id: Long): FieldPreferenceNames {
+        val fieldNames = db.studiesQueries.getFieldPreferenceNamesById(exp_id).executeAsOneOrNull()
+        return if (fieldNames == null) {
+            FieldPreferenceNames("", "", "")
+        } else {
+            FieldPreferenceNames(
+                unique = fieldNames.study_unique_id_name.orEmpty(),
+                primary = fieldNames.study_primary_id_name.orEmpty(),
+                secondary = fieldNames.study_secondary_id_name.orEmpty()
+            )
+        }
+    }
+
+    fun createFieldData(
+        studyId: Long, columns: List<String>, data: List<String>
+    ) {
+        val names = getNames(studyId)
+
+        // input data corresponds to original database column names
+        val uniqueIndex = columns.indexOf(names.unique)
+        val primaryIndex = columns.indexOf(names.primary)
+        val secondaryIndex = columns.indexOf(names.secondary)
+
+        // Fill missing data with "NA"
+        val actualData = if (data.size != columns.size) {
+            val tempData = data.toMutableList()
+            repeat(columns.size - data.size) { tempData += "NA" }
+            tempData
+        } else data
+
+        // Insert into observation_units
+        val observationUnitDbId = if (uniqueIndex >= 0) actualData[uniqueIndex] else ""
+        val primaryId = if (primaryIndex >= 0) actualData[primaryIndex] else ""
+        val secondaryId = if (secondaryIndex >= 0) actualData[secondaryIndex] else ""
+        val geoCoordinatesIndex = columns.indexOf("geo_coordinates")
+        val geoCoordinates =
+            if (geoCoordinatesIndex >= 0 && geoCoordinatesIndex < actualData.size) actualData[geoCoordinatesIndex] else ""
+
+        db.observation_unitsQueries.insert(
+            study_id = studyId,
+            observation_unit_db_id = observationUnitDbId,
+            primary_id = primaryId,
+            secondary_id = secondaryId,
+            geo_coordinates = geoCoordinates,
+            additional_info = null,
+            germplasm_db_id = null,
+            germplasm_name = null,
+            observation_level = null,
+            position_coordinate_x = null,
+            position_coordinate_x_type = null,
+            position_coordinate_y = null,
+            position_coordinate_y_type = null
+        )
+
+        val observation_unit_id =
+            db.observation_unitsQueries.getLastInsertedId().executeAsOne()
+
+        val attributesMap =
+            db.observation_units_attributesQueries.getAllIdsByStudyId(studyId).executeAsList()
+                .associate { it.observation_unit_attribute_name to it.internal_id_observation_unit_attribute }
+
+        // Insert attribute values for this observation unit
+        columns.forEachIndexed { index, colName ->
+            if (colName != "geo_coordinates") {
+                val attrId: Long? = attributesMap[colName]
+                // Only insert if attribute exists
+                if (attrId != null) {
+                    db.observation_units_valuesQueries.insert(
+                        study_id = studyId,
+                        observation_unit_id = observation_unit_id,
+                        observation_unit_attribute_db_id = attrId,
+                        observation_unit_value_name = actualData[index]
+                    )
+                }
+            }
+        }
+    }
+
+    fun getById(fieldId: Int): FieldObject {
+        return db.studiesQueries.getById(fieldId.toLong()).executeAsOneOrNull()?.let { r ->
+            FieldObject(
+                exp_id = r.internal_id_study.toInt(),
+                exp_name = r.study_name.orEmpty(),
+                exp_alias = r.study_alias.orEmpty(),
+                unique_id = r.study_unique_id_name.orEmpty(),
+                primary_id = r.study_primary_id_name.orEmpty(),
+                secondary_id = r.study_secondary_id_name.orEmpty(),
+                date_import = r.date_import ?: "",
+                date_edit = r.date_edit,
+                date_export = null,
+                date_sync = null,
+                import_format = r.import_format,
+                exp_source = null,
+                count = null,
+                observation_level = null,
+                attribute_count = r.attribute_count.toString(),
+                trait_count = r.trait_count.toString(),
+                observation_count = r.observation_count.toString(),
+                trial_name = null,
+                        search_attribute = null
+            )
+        } ?: FieldObject()
     }
 }

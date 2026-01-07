@@ -24,3 +24,25 @@ WHERE study_id = ?;
 selectById:
 SELECT * FROM observation_units WHERE observation_unit_db_id = ?
 AND study_id = ?;
+
+getLastInsertedId:
+SELECT last_insert_rowid();
+
+insert:
+INSERT INTO observation_units (
+    study_id,
+    observation_unit_db_id,
+    primary_id,
+    secondary_id,
+    geo_coordinates,
+    additional_info,
+    germplasm_db_id,
+    germplasm_name,
+    observation_level,
+    position_coordinate_x,
+    position_coordinate_x_type,
+    position_coordinate_y,
+    position_coordinate_y_type
+) VALUES (
+    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+);

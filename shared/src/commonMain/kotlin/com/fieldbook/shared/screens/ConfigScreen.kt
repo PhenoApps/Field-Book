@@ -37,7 +37,6 @@ import com.fieldbook.shared.generated.resources.ic_nav_drawer_traits
 import com.fieldbook.shared.generated.resources.ic_tb_info
 import com.fieldbook.shared.generated.resources.trait_date_save
 import com.fieldbook.shared.theme.MainTheme
-import com.fieldbook.shared.utilities.selectFirstField
 import org.jetbrains.compose.resources.painterResource
 
 
@@ -132,6 +131,6 @@ fun ConfigScreen(
 
 class ConfigScreenViewModel : ViewModel() {
     init {
-        selectFirstField()
+        // selectFirstField()
     }
 }

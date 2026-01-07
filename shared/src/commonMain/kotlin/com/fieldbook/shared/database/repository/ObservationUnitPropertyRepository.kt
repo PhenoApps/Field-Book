@@ -11,9 +11,10 @@ import com.fieldbook.shared.sqldelight.FieldbookDatabase
 import com.fieldbook.shared.sqldelight.createDatabase
 import com.russhwolf.settings.Settings
 
-class ObservationUnitPropertyRepository() {
-    private val db: FieldbookDatabase = createDatabase()
+class ObservationUnitPropertyRepository(
+    private val db: FieldbookDatabase = createDatabase(),
     private val driver: SqlDriver = AppContext.driverFactory().getDriver()
+) {
 
     /**
      * Get a RangeObject from the observation_units_property view/table by id.
