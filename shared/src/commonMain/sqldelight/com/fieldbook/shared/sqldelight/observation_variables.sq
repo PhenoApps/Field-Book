@@ -34,6 +34,9 @@ CREATE TABLE observation_variable_values (
 getAllTraits:
 SELECT * FROM observation_variables;
 
+getAllTraitsOrdered:
+SELECT * FROM observation_variables ORDER BY position ASC;
+
 getTraitById:
 SELECT * FROM observation_variables
 WHERE internal_id_observation_variable = ?;
@@ -49,3 +52,9 @@ FROM observation_variables ov
 LEFT JOIN observation_variable_values ovv ON ov.internal_id_observation_variable = ovv.observation_variable_db_id
 LEFT JOIN observation_variable_attributes ova ON ovv.observation_variable_attribute_db_id = ova.internal_id_observation_variable_attribute
 GROUP BY ov.internal_id_observation_variable;
+
+updateTraitVisibility:
+UPDATE observation_variables SET visible = ? WHERE internal_id_observation_variable = ?;
+
+updateTraitPosition:
+UPDATE observation_variables SET position = ? WHERE internal_id_observation_variable = ?;
