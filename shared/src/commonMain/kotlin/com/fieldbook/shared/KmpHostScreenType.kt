@@ -4,6 +4,7 @@ enum class KmpHostScreenType(val value: String) {
     CONFIG("config"),
     SCANNER("scanner"),
     FIELD_EDITOR("field_editor"),
+    TRAIT_EDITOR("trait_editor"),
     COLLECT("collect"),
     PREFERENCES("preferences"),
     STORAGE_PREFERENCES("storage_preferences"),
