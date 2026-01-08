@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -24,6 +25,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -93,7 +96,10 @@ fun TraitEditorScreen(
                 )
             },
             floatingActionButton = {
-                FloatingActionButton(onClick = { /* no-op for now */ }) {
+                FloatingActionButton(
+                    onClick = { /* no-op for now */ },
+                    shape = CircleShape
+                ) {
                     Icon(imageVector = Icons.Filled.Add, contentDescription = "Add")
                 }
             }
@@ -135,7 +141,6 @@ fun TraitEditorScreen(
                                 ) { isDragging ->
                                     val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
                                     androidx.compose.material3.Surface(shadowElevation = elevation) {
-                                        // 'this' is ReorderableCollectionItemScope here; provide draggable handle modifier
                                         val dragModifier = with(this) { Modifier.draggableHandle() }
                                         TraitListItem(
                                             trait = trait,
@@ -150,7 +155,8 @@ fun TraitEditorScreen(
                                                 .fillMaxWidth()
                                                 .padding(horizontal = 8.dp)
                                                 .height(40.dp),
-                                            onMenuClick = { traitToDelete = it }
+                                            onCopyClick = { viewModel.copyTrait(it) },
+                                            onDeleteClick = { traitToDelete = it }
                                         )
                                     }
                                 }
@@ -193,10 +199,13 @@ fun TraitListItem(
     trait: TraitObject,
     onToggleVisible: (Boolean) -> Unit,
     dragModifier: Modifier = Modifier,
-    onMenuClick: (TraitObject) -> Unit = {},
+    onCopyClick: (TraitObject) -> Unit = {},
+    onDeleteClick: (TraitObject) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val iconRes = Formats.findTrait(trait.format ?: "")?.iconDrawableResource
+
+    var menuOpen by remember { mutableStateOf(false) }
 
     Row(
         modifier = modifier
@@ -224,7 +233,7 @@ fun TraitListItem(
         Box(
             modifier = Modifier
                 .size(40.dp)
-                .clickable { onMenuClick(trait) },
+                .clickable { menuOpen = true },
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -232,6 +241,20 @@ fun TraitListItem(
                 contentDescription = "More",
                 modifier = Modifier.size(24.dp)
             )
+
+            DropdownMenu(
+                expanded = menuOpen,
+                onDismissRequest = { menuOpen = false }
+            ) {
+                DropdownMenuItem(text = { Text("Copy") }, onClick = {
+                    menuOpen = false
+                    onCopyClick(trait)
+                })
+                DropdownMenuItem(text = { Text("Delete") }, onClick = {
+                    menuOpen = false
+                    onDeleteClick(trait)
+                })
+            }
         }
 
         Checkbox(

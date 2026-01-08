@@ -77,4 +77,32 @@ class TraitRepository() {
     fun deleteTrait(id: Long) {
         db.observation_variablesQueries.deleteTrait(id)
     }
+
+    fun getAllTraitNames(): List<String> {
+        return db.observation_variablesQueries.getAllTraitNames().executeAsList().mapNotNull { it.observation_variable_name }
+    }
+
+    fun getMaxPositionFromTraits(): Int {
+        return db.observation_variablesQueries.getMaxPositionFromTraits().executeAsOne().toInt()
+    }
+
+    fun insertTrait(trait: TraitObject) {
+        db.observation_variablesQueries.insertTrait(
+            trait.name,
+            trait.format,
+            trait.defaultValue,
+            trait.visible,
+            trait.realPosition.toLong(),
+            trait.externalDbId,
+            trait.traitDataSource,
+            trait.additionalInfo,
+            trait.commonCropName,
+            trait.language,
+            trait.dataType,
+            trait.observationVariableDbId,
+            trait.ontologyDbId,
+            trait.ontologyName,
+            trait.details
+        )
+    }
 }

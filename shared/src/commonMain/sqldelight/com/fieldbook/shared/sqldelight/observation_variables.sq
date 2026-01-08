@@ -61,3 +61,31 @@ UPDATE observation_variables SET position = ? WHERE internal_id_observation_vari
 
 deleteTrait:
 DELETE FROM observation_variables WHERE internal_id_observation_variable = ?;
+
+-- Return all trait names (used to pick a unique copy name)
+getAllTraitNames:
+SELECT observation_variable_name FROM observation_variables;
+
+-- Return max position (or -1 if none)
+getMaxPositionFromTraits:
+SELECT COALESCE(MAX(position), -1) FROM observation_variables;
+
+-- Insert a trait; preserve most fields except internal id
+insertTrait:
+INSERT INTO observation_variables(
+  observation_variable_name,
+  observation_variable_field_book_format,
+  default_value,
+  visible,
+  position,
+  external_db_id,
+  trait_data_source,
+  additional_info,
+  common_crop_name,
+  language,
+  data_type,
+  observation_variable_db_id,
+  ontology_db_id,
+  ontology_name,
+  observation_variable_details
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);

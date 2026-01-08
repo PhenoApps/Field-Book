@@ -73,6 +73,39 @@ class TraitEditorScreenViewModel(
         }
     }
 
+    fun copyTrait(trait: TraitObject?) {
+        if (trait == null) return
+        viewModelScope.launch {
+            // Build base name without any existing -Copy suffix
+            var baseName = trait.name
+            if (baseName.contains("-Copy")) {
+                baseName = baseName.substring(0, baseName.indexOf("-Copy"))
+            }
+
+            val existingNames = traitRepository.getAllTraitNames()
+
+            var newName = ""
+            for (i in 0..Int.MAX_VALUE) {
+                val candidate = "$baseName-Copy-($i)"
+                if (!existingNames.contains(candidate)) {
+                    newName = candidate
+                    break
+                }
+            }
+
+            val pos = traitRepository.getMaxPositionFromTraits() + 1
+
+            val newTrait = trait.copy()
+            newTrait.name = newName
+            newTrait.visible = "true"
+            newTrait.realPosition = pos
+
+            traitRepository.insertTrait(newTrait)
+
+            loadTraits()
+        }
+    }
+
     fun refresh() {
         loadTraits()
     }
