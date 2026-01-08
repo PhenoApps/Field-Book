@@ -1,5 +1,7 @@
 package com.fieldbook.shared.traits
 
+import androidx.compose.runtime.Composable
+import com.fieldbook.shared.database.models.TraitObject
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 
@@ -18,4 +20,10 @@ open class TraitFormat(
     open var nameStringResource: StringResource,
     open var iconDrawableResource: DrawableResource,
 ) {
+
+    @Composable
+    open fun ParametersEditor(trait: TraitObject, onTraitChange: (TraitObject) -> Unit) {
+        // no-op by default
+    }
+
 }

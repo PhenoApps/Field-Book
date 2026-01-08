@@ -89,3 +89,19 @@ INSERT INTO observation_variables(
   ontology_name,
   observation_variable_details
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+getTraitByName:
+SELECT * FROM observation_variables WHERE observation_variable_name = ?;
+
+getAttributeIdByName:
+SELECT internal_id_observation_variable_attribute FROM observation_variable_attributes WHERE observation_variable_attribute_name = ?;
+
+insertObservationVariableAttribute:
+INSERT INTO observation_variable_attributes(observation_variable_attribute_name) VALUES (?);
+
+insertObservationVariableValue:
+INSERT INTO observation_variable_values(observation_variable_db_id, observation_variable_attribute_db_id, observation_variable_attribute_value)
+VALUES (?, ?, ?);
+
+updateObservationVariableValue:
+UPDATE observation_variable_values SET observation_variable_attribute_value = ? WHERE observation_variable_db_id = ? AND observation_variable_attribute_db_id = ?;

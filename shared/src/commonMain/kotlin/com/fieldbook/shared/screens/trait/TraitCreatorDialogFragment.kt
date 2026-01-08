@@ -94,6 +94,18 @@ fun TraitCreatorDialog(
         }
 
         TraitCreatorStep.NameDetails -> {
+            val traitState = remember {
+                TraitObject().apply {
+                    name = name
+                    details = details
+                    format = selectedFormat?.databaseName
+                    visible = "true"
+                    traitDataSource = "local"
+                }
+            }
+
+            var paramError by remember { mutableStateOf("") }
+
             AlertDialog(
                 onDismissRequest = onDismiss,
                 title = {
@@ -104,35 +116,36 @@ fun TraitCreatorDialog(
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedTextField(
                             value = name,
-                            onValueChange = { name = it },
+                            onValueChange = {
+                                name = it
+                                traitState.name = it
+                            },
                             label = { Text("Name") },
                             modifier = Modifier.fillMaxWidth()
                         )
 
                         OutlinedTextField(
                             value = details,
-                            onValueChange = { details = it },
+                            onValueChange = {
+                                details = it
+                                traitState.details = it
+                            },
                             label = { Text("Details") },
                             modifier = Modifier.fillMaxWidth()
                         )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        selectedFormat?.getTraitFormatDefinition()?.ParametersEditor(traitState) { updated ->
+                            paramError = updated.additionalInfo ?: ""
+                        }
                     }
                 },
                 confirmButton = {
                     Button(onClick = {
-                        // Build trait and insert
-                        val trait = TraitObject().apply {
-                            this.name = name
-                            this.details = details
-                            this.format = selectedFormat?.databaseName
-                            this.visible = "true"
-                            this.traitDataSource = "local"
-                        }
-
-                        viewModel.insertTrait(trait)
-
-                        onSuccess(trait)
-
-                    }, enabled = name.isNotBlank()) {
+                        viewModel.insertTrait(traitState)
+                        onSuccess(traitState)
+                    }, enabled = name.isNotBlank() && paramError.isBlank()) {
                         Text("Save")
                     }
                 },

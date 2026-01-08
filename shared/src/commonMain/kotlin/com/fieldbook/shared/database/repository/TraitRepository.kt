@@ -87,6 +87,7 @@ class TraitRepository() {
     }
 
     fun insertTrait(trait: TraitObject) {
+        // insert the base observation_variables row
         db.observation_variablesQueries.insertTrait(
             trait.name,
             trait.format,
@@ -104,5 +105,26 @@ class TraitRepository() {
             trait.ontologyName,
             trait.details
         )
+
+        val insertedRow = db.observation_variablesQueries.getTraitByName(trait.name).executeAsOneOrNull()
+        val insertedId = insertedRow?.internal_id_observation_variable ?: return
+
+        val attrs: Map<String, String> = mapOf(
+            "validValuesMin" to (trait.minimum ?: ""),
+            "validValuesMax" to (trait.maximum ?: ""),
+            "category" to (trait.categories ?: ""),
+        )
+
+        attrs.forEach { (attrName, attrValue) ->
+            val attrIdRow = db.observation_variablesQueries.getAttributeIdByName(attrName).executeAsOneOrNull()
+
+            if (attrIdRow != null) {
+                db.observation_variablesQueries.insertObservationVariableValue(
+                    insertedId,
+                    attrIdRow,
+                    attrValue
+                )
+            }
+        }
     }
 }
