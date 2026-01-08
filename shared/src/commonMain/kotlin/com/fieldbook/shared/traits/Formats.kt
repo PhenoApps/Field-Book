@@ -23,13 +23,13 @@ enum class Formats(
     PHOTO("photo", isCamera = true),
 
     // CUSTOM formats
-    // DISEASE_RATING(Types.CUSTOM), GNSS(Types.CUSTOM),
-    // BASE_PHOTO(Types.CUSTOM), USB_CAMERA(Types.CUSTOM, isCamera = true), GO_PRO(
-    //     Types.CUSTOM,
-    //     isCamera = true
-    // ),
-    // CANON(Types.CUSTOM, isCamera = true),
-    // LABEL_PRINT(Types.CUSTOM),
+    DISEASE_RATING("rust rating", Types.CUSTOM),
+    GNSS("gnss", Types.CUSTOM),
+    BASE_PHOTO("photo", Types.CUSTOM),
+    USB_CAMERA("usb camera", Types.CUSTOM, isCamera = true),
+    GO_PRO("gopro", Types.CUSTOM, isCamera = true),
+    CANON("canon", Types.CUSTOM, isCamera = true),
+    LABEL_PRINT("zebra label print", Types.CUSTOM),
     ;
 
     companion object {
@@ -54,7 +54,7 @@ enum class Formats(
     fun getTraitFormatDefinition() = when (this) {
         AUDIO -> AudioFormat()
         BOOLEAN -> BooleanFormat()
-        // CAMERA -> BasePhotoFormat()
+        CAMERA -> BasePhotoFormat()
         CATEGORICAL -> CategoricalFormat()
         MULTI_CATEGORICAL -> MultiCategoricalFormat()
         COUNTER -> CounterFormat()
@@ -64,9 +64,13 @@ enum class Formats(
         PERCENT -> PercentFormat()
         TEXT -> TextFormat()
         ANGLE -> AngleFormat()
-        // GNSS -> GnssFormat()
-        // DISEASE_RATING -> DiseaseRatingFormat()
-        // LABEL_PRINT -> ZebraLabelPrintFormat()
+        PHOTO -> BasePhotoFormat()
+        GNSS -> GnssFormat()
+        DISEASE_RATING -> DiseaseRatingFormat()
+        LABEL_PRINT -> ZebraLabelPrintFormat()
+        USB_CAMERA -> UsbCameraFormat()
+        GO_PRO -> GoProFormat()
+        CANON -> CanonFormat()
         else -> TextFormat()
     }
 
