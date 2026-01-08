@@ -68,6 +68,7 @@ fun TraitEditorScreen(
         val error by viewModel.error.collectAsState()
 
         var traitToDelete by remember { mutableStateOf<TraitObject?>(null) }
+        var showCreator by remember { mutableStateOf(false) }
 
         val lazyListState = rememberLazyListState()
         val reorderState = rememberReorderableLazyListState(lazyListState) { from, to ->
@@ -97,7 +98,7 @@ fun TraitEditorScreen(
             },
             floatingActionButton = {
                 FloatingActionButton(
-                    onClick = { /* no-op for now */ },
+                    onClick = { showCreator = true },
                     shape = CircleShape
                 ) {
                     Icon(imageVector = Icons.Filled.Add, contentDescription = "Add")
@@ -188,6 +189,12 @@ fun TraitEditorScreen(
                             }
                         }
                     )
+                }
+
+                if (showCreator) {
+                    TraitCreatorDialog(onDismiss = { showCreator = false }, onSuccess = {
+                        showCreator = false
+                    })
                 }
             }
         }

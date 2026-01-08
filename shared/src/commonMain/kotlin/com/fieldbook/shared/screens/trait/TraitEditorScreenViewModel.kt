@@ -106,6 +106,13 @@ class TraitEditorScreenViewModel(
         }
     }
 
+    fun insertTrait(trait: TraitObject) {
+        viewModelScope.launch {
+            traitRepository.insertTrait(trait)
+            loadTraits()
+        }
+    }
+
     fun refresh() {
         loadTraits()
     }
