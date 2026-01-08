@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.fieldbook.shared.theme.MainTheme
 import com.fieldbook.shared.traits.Formats
 import org.jetbrains.compose.resources.painterResource
 import sh.calvin.reorderable.ReorderableItem
@@ -48,77 +49,96 @@ fun TraitEditorScreen(
     onBack: (() -> Unit)? = null,
     viewModel: TraitEditorScreenViewModel = viewModel()
 ) {
-    val traits by viewModel.traits.collectAsState()
-    val loading by viewModel.loading.collectAsState()
-    val error by viewModel.error.collectAsState()
+    MainTheme {
+        val traits by viewModel.traits.collectAsState()
+        val loading by viewModel.loading.collectAsState()
+        val error by viewModel.error.collectAsState()
 
-    val lazyListState = rememberLazyListState()
-    val reorderState = rememberReorderableLazyListState(lazyListState) { from, to ->
-        viewModel.moveTrait(from.index, to.index)
-    }
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Traits") },
-                navigationIcon = {
-                    if (onBack != null) {
-                        IconButton(onClick = onBack) {
-                            Icon(
-                                imageVector = Icons.Filled.ArrowBack,
-                                contentDescription = "Back"
-                            )
-                        }
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(onClick = { /* no-op for now */ }) {
-                Icon(imageVector = Icons.Filled.Add, contentDescription = "Add")
-            }
+        val lazyListState = rememberLazyListState()
+        val reorderState = rememberReorderableLazyListState(lazyListState) { from, to ->
+            viewModel.moveTrait(from.index, to.index)
         }
-    ) { innerPadding ->
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .padding(innerPadding)
-            .background(MaterialTheme.colorScheme.background)) {
 
-            when {
-                loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Traits") },
+                    navigationIcon = {
+                        if (onBack != null) {
+                            IconButton(onClick = onBack) {
+                                Icon(
+                                    imageVector = Icons.Filled.ArrowBack,
+                                    contentDescription = "Back"
+                                )
+                            }
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                )
+            },
+            floatingActionButton = {
+                FloatingActionButton(onClick = { /* no-op for now */ }) {
+                    Icon(imageVector = Icons.Filled.Add, contentDescription = "Add")
                 }
-                error != null -> {
-                    Text(text = "Error: ${error}", modifier = Modifier.align(Alignment.Center), color = MaterialTheme.colorScheme.error)
-                }
-                traits.isEmpty() -> {
-                    Text(text = "No traits", modifier = Modifier.align(Alignment.Center))
-                }
-                else -> {
-                    androidx.compose.foundation.lazy.LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        state = lazyListState,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(traits, key = { it.id ?: it.name }) { trait ->
-                            ReorderableItem(reorderState, key = trait.id ?: trait.name) { isDragging ->
-                                val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
-                                Surface(shadowElevation = elevation) {
-                                    // 'this' is ReorderableCollectionItemScope here; provide draggable handle modifier
-                                    val dragModifier = with(this) { Modifier.draggableHandle() }
-                                    TraitListItem(
-                                        trait = trait,
-                                        onToggleVisible = { visible -> viewModel.toggleVisibility(trait.id, visible) },
-                                        dragModifier = dragModifier,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 8.dp)
-                                    )
+            }
+        ) { innerPadding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .background(MaterialTheme.colorScheme.background)
+            ) {
+
+                when {
+                    loading -> {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    }
+
+                    error != null -> {
+                        Text(
+                            text = "Error: ${error}",
+                            modifier = Modifier.align(Alignment.Center),
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+
+                    traits.isEmpty() -> {
+                        Text(text = "No traits", modifier = Modifier.align(Alignment.Center))
+                    }
+
+                    else -> {
+                        androidx.compose.foundation.lazy.LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            state = lazyListState,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(traits, key = { it.id ?: it.name }) { trait ->
+                                ReorderableItem(
+                                    reorderState,
+                                    key = trait.id ?: trait.name
+                                ) { isDragging ->
+                                    val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
+                                    Surface(shadowElevation = elevation) {
+                                        // 'this' is ReorderableCollectionItemScope here; provide draggable handle modifier
+                                        val dragModifier = with(this) { Modifier.draggableHandle() }
+                                        TraitListItem(
+                                            trait = trait,
+                                            onToggleVisible = { visible ->
+                                                viewModel.toggleVisibility(
+                                                    trait.id,
+                                                    visible
+                                                )
+                                            },
+                                            dragModifier = dragModifier,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 8.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -142,7 +162,11 @@ fun TraitListItem(
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))
-            .border(width = 2.dp, color = MaterialTheme.colorScheme.onSurface, shape = RoundedCornerShape(8.dp)),
+            .border(
+                width = 2.dp,
+                color = MaterialTheme.colorScheme.onSurface,
+                shape = RoundedCornerShape(8.dp)
+            ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
