@@ -12,12 +12,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -37,6 +39,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.fieldbook.shared.database.models.TraitObject
+import com.fieldbook.shared.generated.resources.Res
+import com.fieldbook.shared.generated.resources.ic_reorder
 import com.fieldbook.shared.theme.MainTheme
 import com.fieldbook.shared.traits.Formats
 import org.jetbrains.compose.resources.painterResource
@@ -111,7 +116,7 @@ fun TraitEditorScreen(
                     }
 
                     else -> {
-                        androidx.compose.foundation.lazy.LazyColumn(
+                        LazyColumn(
                             modifier = Modifier.fillMaxSize(),
                             state = lazyListState,
                             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -151,7 +156,7 @@ fun TraitEditorScreen(
 
 @Composable
 fun TraitListItem(
-    trait: com.fieldbook.shared.database.models.TraitObject,
+    trait: TraitObject,
     onToggleVisible: (Boolean) -> Unit,
     dragModifier: Modifier = Modifier,
     onStartDrag: () -> Unit = {},
@@ -173,12 +178,15 @@ fun TraitListItem(
             modifier = dragModifier,
             onClick = {}
         ) {
-            Text("≡")
+            Icon(
+                painter = painterResource(Res.drawable.ic_reorder),
+                contentDescription = ""
+            )
         }
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        androidx.compose.material3.Checkbox(
+        Checkbox(
             checked = trait.visible == null || trait.visible == "true",
             onCheckedChange = onToggleVisible,
             modifier = Modifier.padding(4.dp)
