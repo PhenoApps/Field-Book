@@ -65,8 +65,15 @@ class TraitEditorScreenViewModel(
         }
     }
 
+    fun deleteTrait(traitId: Long?) {
+        if (traitId == null) return
+        viewModelScope.launch {
+            traitRepository.deleteTrait(traitId)
+            loadTraits()
+        }
+    }
+
     fun refresh() {
         loadTraits()
     }
 }
-

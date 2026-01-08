@@ -3,6 +3,7 @@ package com.fieldbook.shared.screens.trait
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -18,8 +19,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,14 +29,15 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fieldbook.shared.database.models.TraitObject
 import com.fieldbook.shared.generated.resources.Res
+import com.fieldbook.shared.generated.resources.ic_more_vert
 import com.fieldbook.shared.generated.resources.ic_reorder
 import com.fieldbook.shared.theme.MainTheme
 import com.fieldbook.shared.traits.Formats
@@ -60,12 +64,14 @@ fun TraitEditorScreen(
         val loading by viewModel.loading.collectAsState()
         val error by viewModel.error.collectAsState()
 
+        var traitToDelete by remember { mutableStateOf<TraitObject?>(null) }
+
         val lazyListState = rememberLazyListState()
         val reorderState = rememberReorderableLazyListState(lazyListState) { from, to ->
             viewModel.moveTrait(from.index, to.index)
         }
 
-        Scaffold(
+        androidx.compose.material3.Scaffold(
             topBar = {
                 TopAppBar(
                     title = { Text("Traits") },
@@ -73,7 +79,7 @@ fun TraitEditorScreen(
                         if (onBack != null) {
                             IconButton(onClick = onBack) {
                                 Icon(
-                                    imageVector = Icons.Filled.ArrowBack,
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                     contentDescription = "Back"
                                 )
                             }
@@ -128,7 +134,7 @@ fun TraitEditorScreen(
                                     key = trait.id ?: trait.name
                                 ) { isDragging ->
                                     val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
-                                    Surface(shadowElevation = elevation) {
+                                    androidx.compose.material3.Surface(shadowElevation = elevation) {
                                         // 'this' is ReorderableCollectionItemScope here; provide draggable handle modifier
                                         val dragModifier = with(this) { Modifier.draggableHandle() }
                                         TraitListItem(
@@ -143,13 +149,39 @@ fun TraitEditorScreen(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .padding(horizontal = 8.dp)
-                                                .height(40.dp)
+                                                .height(40.dp),
+                                            onMenuClick = { traitToDelete = it }
                                         )
                                     }
                                 }
                             }
                         }
                     }
+                }
+
+                // Delete confirmation dialog
+                if (traitToDelete != null) {
+                    val trait = traitToDelete!!
+                    AlertDialog(
+                        onDismissRequest = { traitToDelete = null },
+                        title = { Text("Delete trait") },
+                        text = { Text("Are you sure you want to delete '${trait.name}'?") },
+                        confirmButton = {
+                            androidx.compose.material3.TextButton(onClick = {
+                                viewModel.deleteTrait(trait.id)
+                                traitToDelete = null
+                            }) {
+                                Text("Delete", color = MaterialTheme.colorScheme.error)
+                            }
+                        },
+                        dismissButton = {
+                            androidx.compose.material3.TextButton(onClick = {
+                                traitToDelete = null
+                            }) {
+                                Text("Cancel")
+                            }
+                        }
+                    )
                 }
             }
         }
@@ -161,7 +193,7 @@ fun TraitListItem(
     trait: TraitObject,
     onToggleVisible: (Boolean) -> Unit,
     dragModifier: Modifier = Modifier,
-    onStartDrag: () -> Unit = {},
+    onMenuClick: (TraitObject) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val iconRes = Formats.findTrait(trait.format ?: "")?.iconDrawableResource
@@ -175,25 +207,37 @@ fun TraitListItem(
                 shape = RoundedCornerShape(8.dp)
             ),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
     ) {
-        IconButton(
-            modifier = dragModifier,
-            onClick = {}
+        Box(
+            modifier = dragModifier
+                .size(40.dp),
+            contentAlignment = Alignment.Center
         ) {
             Icon(
                 painter = painterResource(Res.drawable.ic_reorder),
-                contentDescription = ""
+                contentDescription = null,
+                modifier = Modifier.size(24.dp)
             )
         }
 
-        Spacer(modifier = Modifier.width(8.dp))
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clickable { onMenuClick(trait) },
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painterResource(Res.drawable.ic_more_vert),
+                contentDescription = "More",
+                modifier = Modifier.size(24.dp)
+            )
+        }
 
         Checkbox(
             checked = trait.visible == null || trait.visible == "true",
             onCheckedChange = onToggleVisible,
         )
-
-        Spacer(modifier = Modifier.width(8.dp))
 
         if (iconRes != null) {
             Icon(

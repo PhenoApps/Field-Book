@@ -58,3 +58,6 @@ UPDATE observation_variables SET visible = ? WHERE internal_id_observation_varia
 
 updateTraitPosition:
 UPDATE observation_variables SET position = ? WHERE internal_id_observation_variable = ?;
+
+deleteTrait:
+DELETE FROM observation_variables WHERE internal_id_observation_variable = ?;

@@ -60,20 +60,21 @@ class TraitRepository() {
         }
     }
 
-    // New: return traits ordered by position
     fun getAllTraitsOrdered(): List<TraitObject> {
         return db.observation_variablesQueries.getAllTraitsOrdered().executeAsList()
             .map { it.toTraitObject() }
     }
 
-    // New: update visible flag for a trait
     fun updateTraitVisibility(id: Long, visibleFlag: Boolean) {
         val valStr = if (visibleFlag) "true" else "false"
         db.observation_variablesQueries.updateTraitVisibility(valStr, id)
     }
 
-    // New: update position for a trait
     fun updateTraitPosition(id: Long, position: Int) {
         db.observation_variablesQueries.updateTraitPosition(position.toLong(), id)
+    }
+
+    fun deleteTrait(id: Long) {
+        db.observation_variablesQueries.deleteTrait(id)
     }
 }
