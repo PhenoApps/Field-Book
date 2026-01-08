@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -142,6 +143,7 @@ fun TraitEditorScreen(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .padding(horizontal = 8.dp)
+                                                .height(40.dp)
                                         )
                                     }
                                 }
@@ -168,11 +170,11 @@ fun TraitListItem(
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))
             .border(
-                width = 2.dp,
+                width = 1.dp,
                 color = MaterialTheme.colorScheme.onSurface,
                 shape = RoundedCornerShape(8.dp)
             ),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         IconButton(
             modifier = dragModifier,
@@ -189,7 +191,6 @@ fun TraitListItem(
         Checkbox(
             checked = trait.visible == null || trait.visible == "true",
             onCheckedChange = onToggleVisible,
-            modifier = Modifier.padding(4.dp)
         )
 
         Spacer(modifier = Modifier.width(8.dp))
