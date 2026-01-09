@@ -88,7 +88,7 @@ fun ConfigScreen(
                 )
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     itemsIndexed(configItems) { index, item ->
-                        val isEnabled = item == "Fields" || item == "Collect" || item == "Settings" || item == "Traits"
+                        val isEnabled = item == "Fields" || item == "Collect" || item == "Settings" || item == "Traits" || item == "Export"
                         val rowModifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)
@@ -100,6 +100,7 @@ fun ConfigScreen(
                                             "Collect" -> onNavigate(KmpHostScreenType.COLLECT)
                                             "Settings" -> onNavigate(KmpHostScreenType.PREFERENCES)
                                             "Traits" -> onNavigate(KmpHostScreenType.TRAIT_EDITOR)
+                                            "Export" -> onNavigate(KmpHostScreenType.EXPORT)
                                         }
                                     }
                                 } else {

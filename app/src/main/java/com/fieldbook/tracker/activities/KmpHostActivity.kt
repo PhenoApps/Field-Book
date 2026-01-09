@@ -6,11 +6,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import com.fieldbook.shared.AndroidAppContextHolder
 import com.fieldbook.shared.AppContext
 import com.fieldbook.shared.KmpHostScreenType
 import com.fieldbook.shared.screens.ConfigScreen
 import com.fieldbook.shared.screens.ScannerScreen
 import com.fieldbook.shared.screens.collect.CollectScreen
+import com.fieldbook.shared.screens.export.ExportScreen
 import com.fieldbook.shared.screens.fields.FieldEditorScreen
 import com.fieldbook.shared.screens.preferences.PreferencesScreen
 import com.fieldbook.shared.screens.preferences.StorageDefinerScreen
@@ -24,6 +26,7 @@ class KmpHostActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         FileKit.init(this)
         AppContext.init(DriverFactory(context = this))
+        AndroidAppContextHolder.initialize(this)
 
         val screen = intent.getStringExtra(EXTRA_SCREEN)
         val hostScreenType = KmpHostScreenType.fromValue(screen ?: KmpHostScreenType.CONFIG.value)
@@ -86,6 +89,13 @@ class KmpHostActivity : ComponentActivity() {
                 KmpHostScreenType.STORAGE_DEFINER -> {
                     StorageDefinerScreen(
                         onBack = { currentScreen.value = KmpHostScreenType.PREFERENCES }
+                    )
+                }
+
+                KmpHostScreenType.EXPORT -> {
+                    ExportScreen(
+                        fieldIds = listOf(), // placeholder empty selection
+                        onBack = { currentScreen.value = KmpHostScreenType.CONFIG }
                     )
                 }
             }

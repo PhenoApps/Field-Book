@@ -1,5 +1,6 @@
 package com.fieldbook.shared.utilities
 
+import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 
 fun localDateToEpochMillis(date: LocalDate): Long {
@@ -25,3 +26,5 @@ fun dateFormatMonthDay(date: String): String {
     }
     return dateFormatMonthDay(localDate)
 }
+
+fun nowMillis(): Long = Clock.System.now().toEpochMilliseconds()

@@ -9,6 +9,15 @@ interface DocumentFile {
 
     fun uri(): String
     fun writeBytes(byteArray: ByteArray)
+    fun name(): String?
 }
 
 expect fun createDir(parent: String, child: String): DocumentFile?
+
+expect fun getExportDirectory(): DocumentFile?
+expect fun openOutputStream(file: DocumentFile): Any? // actual will return OutputStream on JVM
+expect fun listFiles(dir: DocumentFile): List<DocumentFile>
+expect fun copyFileToDirectory(source: DocumentFile, destinationDir: DocumentFile, newFileName: String): DocumentFile?
+expect fun zipFiles(files: List<DocumentFile>, zipFileName: String): DocumentFile?
+expect fun shareFile(file: DocumentFile)
+expect fun deleteFile(file: DocumentFile)
