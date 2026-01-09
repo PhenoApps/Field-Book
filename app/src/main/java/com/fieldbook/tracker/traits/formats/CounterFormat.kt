@@ -24,4 +24,4 @@ class CounterFormat : TraitFormat(
     RepeatedMeasureParameter(),
     ResourceFileParameter(),
     AttachMediaParameter()
-), Scannable
+), Scannable, ChartableData

@@ -41,7 +41,7 @@ class PercentFormat : NumericFormat(
     RepeatedMeasureParameter(),
     ResourceFileParameter(),
     AttachMediaParameter()
-), Scannable by PercentageScannable() {
+), ChartableData, Scannable by PercentageScannable() {
 
     override fun validate(
         context: Context,
