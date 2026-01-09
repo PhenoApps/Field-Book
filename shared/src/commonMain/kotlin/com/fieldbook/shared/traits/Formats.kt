@@ -10,7 +10,7 @@ enum class Formats(
     // SYSTEM formats
     AUDIO("audio"),
     BOOLEAN("boolean"),
-    CAMERA("camera", isCamera = true),
+    CAMERA("photo", isCamera = true),
     CATEGORICAL("categorical"),
     MULTI_CATEGORICAL("multicat"),
     COUNTER("counter"),
