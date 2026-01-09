@@ -38,4 +38,4 @@ class CategoricalFormat : TraitFormat(
 ),
     StringCoder by CategoricalJsonCoder(),
     ValuePresenter by CategoricalValuePresenter(),
-    Scannable
+    Scannable, ChartableData
