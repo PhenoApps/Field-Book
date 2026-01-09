@@ -228,7 +228,7 @@ fun TraitInputHost(
             traitFormat = trait.format!!,
         )
 
-        Formats.PHOTO -> {
+        Formats.CAMERA -> {
             PhotoTrait(
                 values = values,
                 onValueChange = {

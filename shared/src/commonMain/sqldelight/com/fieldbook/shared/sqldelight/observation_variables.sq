@@ -34,6 +34,9 @@ CREATE TABLE observation_variable_values (
 getAllTraits:
 SELECT * FROM observation_variables;
 
+getAllTraitsOrdered:
+SELECT * FROM observation_variables ORDER BY position ASC;
+
 getTraitById:
 SELECT * FROM observation_variables
 WHERE internal_id_observation_variable = ?;
@@ -49,3 +52,56 @@ FROM observation_variables ov
 LEFT JOIN observation_variable_values ovv ON ov.internal_id_observation_variable = ovv.observation_variable_db_id
 LEFT JOIN observation_variable_attributes ova ON ovv.observation_variable_attribute_db_id = ova.internal_id_observation_variable_attribute
 GROUP BY ov.internal_id_observation_variable;
+
+updateTraitVisibility:
+UPDATE observation_variables SET visible = ? WHERE internal_id_observation_variable = ?;
+
+updateTraitPosition:
+UPDATE observation_variables SET position = ? WHERE internal_id_observation_variable = ?;
+
+deleteTrait:
+DELETE FROM observation_variables WHERE internal_id_observation_variable = ?;
+
+-- Return all trait names (used to pick a unique copy name)
+getAllTraitNames:
+SELECT observation_variable_name FROM observation_variables;
+
+-- Return max position (or -1 if none)
+getMaxPositionFromTraits:
+SELECT COALESCE(MAX(position), -1) FROM observation_variables;
+
+-- Insert a trait; preserve most fields except internal id
+insertTrait:
+INSERT INTO observation_variables(
+  observation_variable_name,
+  observation_variable_field_book_format,
+  default_value,
+  visible,
+  position,
+  external_db_id,
+  trait_data_source,
+  additional_info,
+  common_crop_name,
+  language,
+  data_type,
+  observation_variable_db_id,
+  ontology_db_id,
+  ontology_name,
+  observation_variable_details
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+getTraitByName:
+SELECT * FROM observation_variables WHERE observation_variable_name = ?;
+
+getAttributeIdByName:
+SELECT internal_id_observation_variable_attribute FROM observation_variable_attributes WHERE observation_variable_attribute_name = ?;
+
+insertObservationVariableAttribute:
+INSERT INTO observation_variable_attributes(observation_variable_attribute_name) VALUES (?);
+
+insertObservationVariableValue:
+INSERT INTO observation_variable_values(observation_variable_db_id, observation_variable_attribute_db_id, observation_variable_attribute_value)
+VALUES (?, ?, ?);
+
+updateObservationVariableValue:
+UPDATE observation_variable_values SET observation_variable_attribute_value = ? WHERE observation_variable_db_id = ? AND observation_variable_attribute_db_id = ?;

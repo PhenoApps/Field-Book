@@ -11,6 +11,7 @@ import com.fieldbook.shared.screens.fields.FieldEditorScreen
 import com.fieldbook.shared.screens.preferences.PreferencesScreen
 import com.fieldbook.shared.screens.preferences.StorageDefinerScreen
 import com.fieldbook.shared.screens.preferences.StoragePreferencesScreen
+import com.fieldbook.shared.screens.trait.TraitEditorScreen
 import com.fieldbook.shared.sqldelight.DriverFactory
 
 fun MainViewController(driverFactory: DriverFactory) = ComposeUIViewController {
@@ -49,5 +50,12 @@ fun MainViewController(driverFactory: DriverFactory) = ComposeUIViewController {
             // TODO: Implement scanner screen or fallback UI
         }
 
+        KmpHostScreenType.TRAIT_EDITOR -> TraitEditorScreen(
+            onBack = { currentScreen = KmpHostScreenType.CONFIG }
+        )
+
+        else -> {
+            // fallback for future enum values
+        }
     }
 }

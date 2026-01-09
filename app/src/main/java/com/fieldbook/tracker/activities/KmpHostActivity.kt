@@ -15,6 +15,7 @@ import com.fieldbook.shared.screens.fields.FieldEditorScreen
 import com.fieldbook.shared.screens.preferences.PreferencesScreen
 import com.fieldbook.shared.screens.preferences.StorageDefinerScreen
 import com.fieldbook.shared.screens.preferences.StoragePreferencesScreen
+import com.fieldbook.shared.screens.trait.TraitEditorScreen
 import com.fieldbook.shared.sqldelight.DriverFactory
 import io.github.vinceglb.filekit.core.FileKit
 
@@ -50,6 +51,12 @@ class KmpHostActivity : ComponentActivity() {
 
                 KmpHostScreenType.FIELD_EDITOR -> {
                     FieldEditorScreen(
+                        onBack = { currentScreen.value = KmpHostScreenType.CONFIG }
+                    )
+                }
+
+                KmpHostScreenType.TRAIT_EDITOR -> {
+                    TraitEditorScreen(
                         onBack = { currentScreen.value = KmpHostScreenType.CONFIG }
                     )
                 }
