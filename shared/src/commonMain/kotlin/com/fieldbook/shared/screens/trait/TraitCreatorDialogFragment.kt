@@ -55,7 +55,8 @@ fun TraitCreatorDialog(
                 onDismissRequest = onDismiss,
                 title = { Text("Trait Layout") },
                 text = {
-                    val formats = Formats.entries
+                    val formats = Formats.supportedFormats()
+
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(3),
                         modifier = Modifier.fillMaxWidth(),

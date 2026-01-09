@@ -17,8 +17,8 @@ import org.jetbrains.compose.resources.StringResource
  */
 open class TraitFormat(
     open val format: Formats,
-    open var nameStringResource: StringResource,
-    open var iconDrawableResource: DrawableResource,
+    open val nameStringResource: StringResource,
+    open val iconDrawableResource: DrawableResource,
 ) {
 
     @Composable
