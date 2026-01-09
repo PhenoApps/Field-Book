@@ -28,4 +28,5 @@ class DateFormat : TraitFormat(
     RepeatedMeasureParameter(),
     ResourceFileParameter(),
     AttachMediaParameter()
-), Scannable, StringCoder by DateJsonCoder(), ValuePresenter by DateValuePresenter()
+), Scannable, StringCoder by DateJsonCoder(), ValuePresenter by DateValuePresenter(),
+        ChartableData

@@ -20,4 +20,4 @@ class DiseaseRatingFormat : TraitFormat(
     RepeatedMeasureParameter(),
     ResourceFileParameter(),
     AttachMediaParameter()
-), Scannable
+), Scannable, ChartableData

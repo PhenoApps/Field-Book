@@ -22,4 +22,4 @@ class AngleFormat : TraitFormat(
     RepeatedMeasureParameter(),
     ResourceFileParameter(),
     AttachMediaParameter()
-)
+), ChartableData

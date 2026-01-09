@@ -24,4 +24,4 @@ class BooleanFormat : TraitFormat(
     RepeatedMeasureParameter(),
     ResourceFileParameter(),
     AttachMediaParameter()
-), Scannable
+), Scannable, ChartableData
