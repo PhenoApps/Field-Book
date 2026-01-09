@@ -50,8 +50,8 @@ fun TraitCreatorDialog(
 
     when (currentStep) {
         TraitCreatorStep.ChooseFormat -> {
-            // Grid of icons - 3 columns
             AlertDialog(
+                modifier = Modifier.fillMaxWidth(), // TODO not working?
                 onDismissRequest = onDismiss,
                 title = { Text("Trait Layout") },
                 text = {
