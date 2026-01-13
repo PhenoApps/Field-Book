@@ -479,14 +479,6 @@ public class DataHelper {
         ObservationDao.Companion.updateObservationMediaUris(observation);
     }
 
-    public void updateObservation(ObservationModel observation) {
-
-        open();
-
-        ObservationDao.Companion.updateObservation(observation);
-
-    }
-
     /**
      * Sync with observationdbids BrAPI
      */
