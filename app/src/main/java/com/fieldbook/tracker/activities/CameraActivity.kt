@@ -59,6 +59,8 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import javax.inject.Inject
 import androidx.appcompat.widget.Toolbar
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.core.view.isVisible
 
 @AndroidEntryPoint
 class CameraActivity : ThemedActivity() {

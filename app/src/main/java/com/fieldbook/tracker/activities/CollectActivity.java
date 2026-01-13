@@ -115,6 +115,7 @@ import com.fieldbook.tracker.utilities.SensorHelper;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
+import com.fieldbook.tracker.utilities.ExifUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.VerifyPersonHelper;
 import com.fieldbook.tracker.utilities.VibrateUtil;
