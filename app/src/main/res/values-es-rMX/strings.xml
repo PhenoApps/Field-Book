@@ -420,10 +420,17 @@
     <string name="trait_format_details">Detalles del Formato</string>
     <string name="trait_observation_data">Datos</string>
     <string name="trait_detail_chip_rename">Renombrar</string>
+    <string name="list_item_trait_parameter_resource_file_hint">Seleccionar un archivo de recursos</string>
+    <string name="trait_resource_file_updated">Archivo de Recursos Actualizado</string>
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">Valor menor al mínimo permitido</string>
     <string name="trait_error_maximum_value">Valor mayor al máximo permitido</string>
+    <string name="trait_error_decimal_places">Valor no puede tener más de %d decimales</string>
+    <string name="trait_error_mathematical_symbols_disabled">Símbolos matemáticos no permitidos</string>
+    <string name="trait_error_integers_only">Sólo se permiten valores enteros</string>
+    <string name="dialog_invalid_value_title">Valor Inválido</string>
+    <string name="dialog_save_invalid_value_message">¿Desea guardar este valor de todos modos?</string>
     <string name="trait_error_disease_severity">Severidad ya almacenada</string>
     <string name="act_collect_study_names_empty">El estudio seleccionado tiene vacíos los nombres único, primario, o secundario.</string>
     <!-- Toolbar -->
@@ -625,6 +632,7 @@
     <string name="observation_info_entry_id">Id de la entrada</string>
     <string name="observation_info_trait_format">Formato de Variable</string>
     <string name="observation_info_trait_name">Nombre de Variable</string>
+    <string name="observation_info_trait_alias">Alias de Variable</string>
     <string name="observation_info_value">Valor</string>
     <string name="observation_info_timestamp">Timestamp de la Observación</string>
     <string name="observation_info_collector">Colector</string>
