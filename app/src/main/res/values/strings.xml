@@ -378,6 +378,7 @@
     <string name="traits_format_boolean">Boolean</string>
     <string name="traits_format_text">Text</string>
     <string name="traits_format_photo">Photo</string>
+    <string name="traits_format_video">Video</string>
     <string name="traits_format_audio">Audio</string>
     <string name="traits_format_multicategorical">Multicat</string>
     <string name="traits_format_location">Location</string>
@@ -1582,7 +1583,7 @@
     <!-- Audio pause not supported message -->
     <string name="field_audio_pause_not_supported">Pause/resume is not supported on this device</string>
 
-    <string name="delete_local_photo">Delete Photo</string>
+    <string name="delete_local_photo">Delete Item</string>
     <string name="trait_system_photo_settings_title">System Photo Settings</string>
     <string name="trait_photos_no_settings">This trait has no settings.</string>
     <string name="view_trait_photo_settings_preview_title">Preview</string>
@@ -1921,4 +1922,6 @@
     <string name="confirm_delete_with_media_message">This observation has attached media (photo, audio, or video). Deleting the observation will also delete the attached media files. Are you sure you want to continue?</string>
     <string name="attach">Attach</string>
     <string name="back_button">Go back to previous activity</string>
+    <string name="na_placeholder">Not applicable image placeholder</string>
+    <string name="confirm_replace_media_message">Replace existing media?</string>
 </resources>
