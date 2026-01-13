@@ -12,14 +12,10 @@ import android.widget.TextView
 import androidx.camera.view.PreviewView
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.database.models.ObservationModel
-import com.fieldbook.tracker.dialogs.ObservationMetadataFragment
 import com.fieldbook.tracker.utilities.BitmapLoader
 import java.io.FileNotFoundException
 
