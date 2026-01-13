@@ -1818,7 +1818,7 @@
     <string name="play">Play</string>
     <string name="pause">Pause</string>
     <string name="save">Save</string>
-      
+
     <string name="database_export_invalid_filename">Invalid export file name.</string>
     <string name="device_settings_dialog_name">Name: %s</string>
     <string name="device_settings_dialog_address">Address: %s</string>
