@@ -294,6 +294,17 @@
     <string name="act_trait_editor_no_traits_exist">No existen variables.</string>
     <string name="export_dialog_traits_exporting">Exportando variables…</string>
     <string name="export_error_unknown">Ocurrió un error de exportación desconocido</string>
+    <string name="export_error_directory_access">Error al acceder al directorio de exportación</string>
+    <string name="export_error_directory_not_found">Directorio de exportación no encontrado</string>
+    <string name="export_error_file_creation">Error al crear archivo de exportación</string>
+    <string name="export_error_file_stream">Error al abrir flujo de archivo</string>
+    <string name="error_trait_directory_not_available">Directorio de variables no disponible</string>
+    <string name="error_trait_directory_missing">Falta el directorio devariables</string>
+    <string name="error_failed_to_create_file">Error al crear archivo</string>
+    <string name="error_output_stream_failed">Flujo de salida fallido</string>
+    <string name="error_export_failed">Error al exportar</string>
+    <string name="error_unable_to_copy_trait_file">No se puede copiar el archivo trt</string>
+    <string name="error_cannot_open_file">No se puede abrir el archivo</string>
     <!-- Trait item menu -->
     <string name="list_item_trait_popup_content_description">Abre un menú específico a esta variable.</string>
     <string name="traits_options_copy">Copiar</string>
@@ -337,16 +348,21 @@
     <string name="traits_create_value_minimum">Mínimo</string>
     <string name="traits_create_value_maximum">Máximo</string>
     <string name="traits_create_details">Detalles</string>
+    <string name="traits_create_unit">Unidad</string>
     <string name="traits_create_optional">Opcional</string>
     <string name="traits_create_categories_title">Categorías</string>
     <string name="traits_create_photo_maximum">Número máximo de fotos</string>
     <string name="traits_create_true">Verdadero</string>
     <string name="traits_create_false">Falso</string>
     <string name="traits_create_unset">Desestablecer</string>
+    <string name="traits_create_enabled">Activado</string>
     <string name="traits_create_disabled">Desactivado</string>
     <string name="traits_create_categories_text">Use / para separar categorías</string>
     <string name="traits_create_camera">Cámara</string>
     <string name="traits_create_close_keyboard">Cerrar Teclado</string>
+    <string name="trait_parameter_decimal_places">Decimales</string>
+    <string name="trait_parameter_decimal_places_hint">Número de decimales (-1 para ilimitado, 0 para enteros)</string>
+    <string name="trait_parameter_decimal_places_error">Valor debe estar entre -1 y 10</string>
     <string name="traits_create_warning_name_blank">Nombre de la variable no puede estar vacío</string>
     <string name="traits_create_warning_duplicate">Variable ya existe</string>
     <string name="traits_create_warning_numeric_required">Los valores predeterminado, mínimo y máximo deben ser numéricos</string>
@@ -373,10 +389,23 @@
     <string name="required">Requerido</string>
     <string name="traits_create_warning_percent_value_required">Valor requerido</string>
     <!-- Decimal Places Radio Options -->
+    <string name="trait_parameter_decimal_places_no_restriction">Sin restricción</string>
+    <string name="trait_parameter_decimal_places_integer_only">Solo enteros</string>
+    <string name="trait_parameter_decimal_places_allowed">Permitir decimales</string>
+    <string name="trait_parameter_decimal_places_custom">Máximo de decimales:</string>
+    <string name="trait_parameter_decimal_places_custom_hint">1–10</string>
+    <string name="trait_parameter_decimal_places_custom_required">Por favor, introduzca el número de decimales (1–10)</string>
+    <string name="trait_parameter_decimal_places_custom_error">Valor debe estar entre 1 y 10</string>
+    <string name="trait_parameter_invalid_number">Número inválido</string>
+    <string name="trait_parameter_mathematical_symbols">Símbolos Matemáticos</string>
+    <string name="traits_create_warning_math_symbols_conflict">Los símbolos matemáticos y las restricciones decimales no se pueden aplicar simultáneamente</string>
     <string name="trait_parameter_repeated_measures">Medidas Repetidas</string>
+    <string name="trait_parameter_auto_switch_plot">Cambiar Automáticamente a la Siguiente Parcela</string>
+    <string name="trait_parameter_invalid_value">Permitir Valor Inválido</string>
     <string name="select_trait">Seleccionar Variable</string>
     <string name="edit_traits">Editar</string>
     <!-- Trait Editor -->
+    <string name="error_loading_traits">Error cargando variables</string>
     <!-- Trait Detail -->
     <string name="trait_observation_data">Datos</string>
     <string name="trait_detail_chip_rename">Renombrar</string>
