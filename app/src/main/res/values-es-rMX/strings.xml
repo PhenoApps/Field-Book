@@ -286,11 +286,14 @@
     <string name="import_error_format_trait">Solo se pueden importar archivos TRT como lista de variables</string>
     <string name="import_error_format_trait_json">Formato JSON no válido: %s</string>
     <string name="import_error_no_traits">No se encontraron variables</string>
+    <string name="trait_import_successful">Variables importadas con éxito</string>
     <string name="traits_export_check">¿Exportar lista de variables actual?</string>
     <string name="traits_dialog_export">Exportar</string>
     <string name="dialog_delete_traits_message">¿Quieres eliminar todas las variables actuales? Eliminar una variable también elimina los datos que se han recopilado para esa variable.</string>
     <string name="traits_toolbar_delete_all">Eliminar todas las variables</string>
     <string name="act_trait_editor_no_traits_exist">No existen variables.</string>
+    <string name="export_dialog_traits_exporting">Exportando variables…</string>
+    <string name="export_error_unknown">Ocurrió un error de exportación desconocido</string>
     <!-- Trait item menu -->
     <string name="list_item_trait_popup_content_description">Abre un menú específico a esta variable.</string>
     <string name="traits_options_copy">Copiar</string>
