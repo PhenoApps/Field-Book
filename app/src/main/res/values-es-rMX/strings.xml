@@ -25,6 +25,7 @@
     <string name="dialog_exit">Salir</string>
     <string name="barcode_scanner_text">Escanear un código de barras</string>
     <!-- Toolbar -->
+    <string name="appbar_more_options">Más Opciones</string>
     <string name="appbar_back">Atrás</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Datos de ejemplo</string>
@@ -54,6 +55,7 @@
     <string name="storage_definer_summary">Por favor, seleccione o cree una carpeta que Field Book pueda usar para almacenar datos.</string>
     <string name="define_button_text">Elegir Carpeta</string>
     <!-- Permissions  -->
+    <string name="permission_rationale_storage">Se requiere acceso a los archivos del dispositivo.</string>
     <string name="permission_rationale_storage_import">La importación de archivos requiere acceso a los archivos del dispositivo.</string>
     <string name="permission_rationale_storage_export">La exportación de datos requiere acceso a los archivos del dispositivo.</string>
     <string name="permission_rationale_trait_features">La captura de datos requiere acceso a los archivos, el micrófono y la cámara del dispositivo.</string>
@@ -256,6 +258,9 @@
     <string name="field_data_title">Datos</string>
     <string name="field_trait_observation_total">\"%d\" observaciones</string>
     <!-- Field Detail Charts -->
+    <string name="chart_no_data">No hay datos para graficar</string>
+    <string name="chart_incompatible_format">Este formato de variable no puede ser graficado</string>
+    <string name="chart_excess_data">Demasiados valores distintos para graficar</string>
     <!-- Semantic dates -->
     <string name="today">Hoy</string>
     <string name="yesterday">Ayer</string>
@@ -279,6 +284,8 @@
     <string name="traits_dialog_import_from_file">Importar desde archivo</string>
     <string name="traits_dialog_import">Importar</string>
     <string name="import_error_format_trait">Solo se pueden importar archivos TRT como lista de variables</string>
+    <string name="import_error_format_trait_json">Formato JSON no válido: %s</string>
+    <string name="import_error_no_traits">No se encontraron variables</string>
     <string name="traits_export_check">¿Exportar lista de variables actual?</string>
     <string name="traits_dialog_export">Exportar</string>
     <string name="dialog_delete_traits_message">¿Quieres eliminar todas las variables actuales? Eliminar una variable también elimina los datos que se han recopilado para esa variable.</string>
@@ -1403,4 +1410,8 @@
     <string name="server">Servidor</string>
     <string name="local">Local</string>
     <string name="manual">Manual</string>
+    <string name="toggle">Alternar</string>
+    <string name="there_are_unuploaded_observations_or_images_do_you_want_to_upload_them_before_downloading">Hay observaciones o imágenes sin cargar. ¿Quieres subirlas antes de descargar?</string>
+    <string name="upload_first">Cargar</string>
+    <string name="download_anyway">Descargar</string>
 </resources>
