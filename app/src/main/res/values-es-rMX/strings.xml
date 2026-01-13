@@ -406,7 +406,18 @@
     <string name="edit_traits">Editar</string>
     <!-- Trait Editor -->
     <string name="error_loading_traits">Error cargando variables</string>
+    <string name="error_deleting_traits">Error al eliminar variables</string>
+    <string name="error_toggling_all_traits_visibility">Error al cambiar la visibilidad de las variables</string>
+    <string name="error_importing_traits">Error al importar variables</string>
+    <string name="error_saving_trait_order">Error al guardar el orden de variables</string>
+    <string name="error_exporting_traits">Error al exportar variables</string>
+    <string name="message_all_traits_deleted">Todas las variables eliminadas</string>
+    <string name="message_traits_imported">Importadas %1$d variables</string>
+    <string name="message_traits_imported_with_skipped">Variables importadas %1$d, omitidas %2$d duplicadas</string>
+    <string name="message_traits_exported">Importadas %1$d variables</string>
     <!-- Trait Detail -->
+    <string name="trait_detail_title">Detalles de Variable</string>
+    <string name="trait_format_details">Detalles del Formato</string>
     <string name="trait_observation_data">Datos</string>
     <string name="trait_detail_chip_rename">Renombrar</string>
     <!-- COLLECT -->
