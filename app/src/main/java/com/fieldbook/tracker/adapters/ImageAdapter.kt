@@ -289,17 +289,7 @@ class ImageAdapter(private val context: Context, private val listener: ImageItem
                             BitmapLoader.getPreview(view.context, model.uri, model.orientation)
                         }
 
-                        preview?.let { imageView.setImageBitmap(it) } ?: imageView.setImageDrawable(null)
-                        videoView?.visibility = View.GONE
-                        playButton?.visibility = View.GONE
-                        pauseButton?.visibility = View.GONE
-
-                    } catch (f: FileNotFoundException) {
-
-                        f.printStackTrace()
-
-                    }
-                }
+                imageView.setImageBitmap(preview)
 
             } catch (f: FileNotFoundException) {
 
