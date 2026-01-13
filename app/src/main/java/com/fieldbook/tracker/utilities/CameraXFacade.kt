@@ -356,7 +356,9 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
 
         // create Recorder and VideoCapture use case
         val exec = executor ?: Executors.newSingleThreadExecutor()
-        val recorder = Recorder.Builder().setExecutor(exec).build()
+        val recorder = Recorder.Builder().setExecutor(exec)
+            .setAspectRatio(AspectRatio.RATIO_4_3)
+            .build()
         val videoCapture = VideoCapture.withOutput(recorder)
 
         val useCaseGroupBuilder = UseCaseGroup.Builder()
