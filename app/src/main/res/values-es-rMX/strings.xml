@@ -1002,6 +1002,12 @@
     <string name="preferences_brapi_server_scan_error">Error al Escanear</string>
     <string name="preferences_brapi_server_add">Enviar un servidor</string>
     <!-- Brapi Server Info -->
+    <string name="brapi_server_info_pref">Verificar Compatibilidad</string>
+    <string name="brapi_compatibility">Compatibilidad BrAPI</string>
+    <string name="brapi_compatibility_with_app">Compatibilidad con %s</string>
+    <string name="brapi_server_name_label">%1$s</string>
+    <string name="brapi_organization_name_label">%1$s</string>
+    <string name="brapi_server_description_label">%1$s</string>
     <string name="brapi_server_info_server">Servidor</string>
     <string name="brapi_server_info_field_book">Field Book</string>
     <!-- Community Servers -->
@@ -1460,6 +1466,7 @@
     <string name="complete">Completo</string>
     <string name="server">Servidor</string>
     <string name="local">Local</string>
+    <string name="last_checked">Última verificación: %1$s</string>
     <string name="manual">Manual</string>
     <string name="toggle">Alternar</string>
     <string name="there_are_unuploaded_observations_or_images_do_you_want_to_upload_them_before_downloading">Hay observaciones o imágenes sin cargar. ¿Quieres subirlas antes de descargar?</string>
