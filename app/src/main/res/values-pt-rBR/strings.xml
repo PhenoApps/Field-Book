@@ -25,6 +25,7 @@
     <string name="dialog_exit">Sair</string>
     <string name="barcode_scanner_text">Escanear código de barras</string>
     <!-- Toolbar -->
+    <string name="appbar_more_options">Mais Opções</string>
     <string name="appbar_back">Voltar</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Dados de amostra</string>
@@ -54,6 +55,7 @@
     <string name="storage_definer_summary">Por favor, selecione ou crie uma pasta que o Field Book pode usar para armazenar os dados do aplicativo.</string>
     <string name="define_button_text">Escolher Pasta</string>
     <!-- Permissions  -->
+    <string name="permission_rationale_storage">Acesso aos arquivos do dispositivo é necessário.</string>
     <string name="permission_rationale_storage_import">A importação de arquivos requer acesso aos arquivos do dispositivo.</string>
     <string name="permission_rationale_storage_export">A exportação de dados requer acesso aos arquivos do dispositivo.</string>
     <string name="permission_rationale_trait_features">A coleta de dados requer acesso aos arquivos do dispositivo, microfone e câmera do dispositivo.</string>
