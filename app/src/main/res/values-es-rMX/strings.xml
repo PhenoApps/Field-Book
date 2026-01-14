@@ -148,7 +148,7 @@
         <item quantity="other">¿Estás seguro de que deseas eliminar los campos: \"%s\"?</item>
     </plurals>
     <!-- Import -->
-    <string name="fields_new_button_content_description">Añadir un nuevo campo.</string>
+    <string name="fields_new_button_content_description">Agregar un nuevo campo.</string>
     <string name="fields_new_dialog_title">Nuevo campo</string>
     <string name="fields_new_create_field">Crear nuevo</string>
     <string name="import_dialog_unique">Identificador único</string>
@@ -418,7 +418,43 @@
     <!-- Trait Detail -->
     <string name="trait_detail_title">Detalles de Variable</string>
     <string name="trait_format_details">Detalles del Formato</string>
+    <string name="trait_data_title">Datos de Observación</string>
+    <string name="trait_default_value">Valor Predeterminado: %s</string>
+    <string name="trait_min_value">Valor Mínimo: %s</string>
+    <string name="trait_max_value">Valor Máximo: %s</string>
+    <string name="trait_categories">Categorias: %s</string>
+    <string name="trait_details">Detalles: %s</string>
+    <string name="trait_visible">Visible</string>
+    <string name="trait_hidden">Oculto</string>
+    <string name="trait_options_title">Opciones</string>
+    <string name="trait_new_trait_name">Nombre de Variable Copiada</string>
     <string name="trait_observation_data">Datos</string>
+    <string name="trait_observation_count">%d observaciones</string>
+    <string name="trait_not_chartable">Este formato de variable no se puede visualizar en un gráfico</string>
+    <string name="traits_options_copy_title">Copiar Variable</string>
+    <string name="trait_name_empty_error">El nombre de variable no puede estar vacío</string>
+    <string name="trait_name_exists_error">Ya existe una variable con este nombre</string>
+    <string name="trait_copied_success">Variable copiada a %1$s</string>
+    <string name="trait_date_format_dialog_title">Seleccionar Formato de Fecha</string>
+    <string name="trait_date_format_display">Fecha (%s)</string>
+    <string name="trait_day_format_display">Día del Año (%s)</string>
+    <string name="trait_brapi_display_dialog_title">Seleccionar Texto del Botón</string>
+    <string name="trait_brapi_label_display">Mostrar Etiquetas (e.g. %s)</string>
+    <string name="trait_brapi_value_display">Mostrar Valores (ej: %s)</string>
+    <string name="error_loading_trait_detail">Error cargando información de variable</string>
+    <string name="error_deleting_trait">Error: No se pudo eliminar la variable</string>
+    <string name="error_updating_trait_resource_file">Error al actualizar el archivo de recursos de variable</string>
+    <string name="error_updating_trait_visibility">Error al actualizar la visibilidad de variable</string>
+    <string name="error_empty_trait_name">El nombre de variable no puede estar vacío</string>
+    <string name="error_copy_trait">Error al copiar variable</string>
+    <string name="trait_swap_synonym_dialog_title">Sinónimos</string>
+    <string name="trait_swap_name_set_alias">Establecer Alias</string>
+    <string name="error_updating_trait_alias">Error actualizando alias de variable</string>
+    <string name="error_updating_trait_options">Error actualizando opciones de variable</string>
+    <string name="trait_add_synonym_new">Agregar Nuevo</string>
+    <string name="trait_add_synonym_new_dialog">Agregar Nuevo Sinónimo</string>
+    <string name="trait_add_synonym_new_dialog_blank">Sinónimo no puede estar vacío</string>
+    <string name="trait_add_synonym_already_exists">Ya existe este sinónimo</string>
     <string name="trait_detail_chip_rename">Renombrar</string>
     <string name="list_item_trait_parameter_resource_file_hint">Seleccionar un archivo de recursos</string>
     <string name="trait_resource_file_updated">Archivo de Recursos Actualizado</string>
@@ -736,7 +772,7 @@
     <string name="preferences_appearance_language_description">Idioma establecido por el sistema</string>
     <string name="preference_language_default">Idioma del Sistema</string>
     <string name="preferences_appearance_collect_toolbar_title">Barra de Herramientas en Captura</string>
-    <string name="preferences_appearance_tutorial_description">Añadir un botón en barra de herramientas que abre el tutorial</string>
+    <string name="preferences_appearance_tutorial_description">Agregar un botón en barra de herramientas que abre el tutorial</string>
     <string name="preferences_appearance_toolbar_customize">Acciones de la Barra de Herramientas</string>
     <string name="preferences_appearance_toolbar_customize_description">Alternar la visibilidad de las funcionalidades predeterminadas</string>
     <string name="preferences_appearance_toolbar_customize_search">Buscar</string>
@@ -744,7 +780,7 @@
     <string name="preferences_appearance_toolbar_customize_summary">Resumen</string>
     <string name="preferences_appearance_toolbar_customize_lock">Bloquear</string>
     <string name="preferences_general_feature_datagrid">Grilla de datos</string>
-    <string name="preferences_general_feature_datagrid_description">Añadir un botón para mostrar una grilla de datos capturados</string>
+    <string name="preferences_general_feature_datagrid_description">Agregar un botón para mostrar una grilla de datos capturados</string>
     <string name="preferences_general_feature_next_missing">Siguiente Entrada Sin Datos</string>
     <string name="preferences_general_skip_entries_disabled">Desactivado</string>
     <string name="preferences_general_skip_entries_with_data">Botón omite las entradas que ya tienen valores para la variable actual</string>
@@ -1008,6 +1044,9 @@
     <string name="brapi_server_name_label">%1$s</string>
     <string name="brapi_organization_name_label">%1$s</string>
     <string name="brapi_server_description_label">%1$s</string>
+    <string name="brapi_server_expand_content_description">Expandir</string>
+    <string name="brapi_server_collapse_content_description">Colapsar</string>
+    <string name="brapi_server_info_call">Llamar</string>
     <string name="brapi_server_info_server">Servidor</string>
     <string name="brapi_server_info_field_book">Field Book</string>
     <!-- Community Servers -->
@@ -1081,6 +1120,7 @@
     <string name="brapi_warning_select_program">Por favor, seleccione un programa</string>
     <string name="brapi_warning_select_trial">Por favor, seleccione un ensayo</string>
     <string name="brapi_warning_select_study">Por favor, seleccione un campo</string>
+    <string name="brapi_export_load_stats_error">Error al cargar estadísticas de exportación</string>
     <string name="brapi_export_failed">Exportación por BrAPI fallida</string>
     <string name="brapi_export_permission_deny">ERROR: no tiene los permisos para enviar datos al sistema especificado.</string>
     <string name="brapi_export_not_supported">ERROR: El sistema de destino no admite el envío de observaciones vía BrAPI.</string>
@@ -1127,6 +1167,9 @@
     <string name="brapi_export_images">Fotos</string>
     <string name="brapi_delete_message">No se puede eliminar la observación BrAPI sincronizada, usando NA en su lugar</string>
     <string name="act_brapi_export_image_load_failed">Error al cargar la Foto.</string>
+    <string name="brapi_export_progress_title">Exportando a BrAPI</string>
+    <string name="brapi_export_status">Estado</string>
+    <string name="brapi_export_current_operation">Operación Actual</string>
     <string name="brapi_export_new_images_pending">Fotos Nuevas</string>
     <string name="brapi_export_complete">Exportación ha sido completada</string>
     <string name="cancel">Cancelar</string>
