@@ -467,6 +467,9 @@
     <string name="trait_detail_chip_transfer_images">Transferir imágenes</string>
     <string name="trait_detail_chip_invalid_value">Valores atipicos</string>
     <string name="trait_parameter_allow_multicat">Selección de Múltiples Categorías</string>
+    <string name="trait_parameter_display_value">Mostrar Valor</string>
+    <string name="trait_parameter_resource_file">Archivo de Recurso</string>
+    <string name="trait_parameter_use_day_of_year">Usar Día del Año</string>
     <string name="list_item_trait_parameter_resource_file_hint">Seleccionar un archivo de recursos</string>
     <string name="trait_resource_file_updated">Archivo de Recursos Actualizado</string>
     <!-- COLLECT -->
@@ -1028,6 +1031,8 @@
     <string name="brapi_pagination">Tamaño de Página</string>
     <string name="brapi_timeout">Tiempo de Espera del Servidor</string>
     <string name="brapi_chunk_size">Tamaño del Chunk</string>
+    <string name="brapi_max_concurrent_image_content">Exportación Concurrente Máxima de Imagenes</string>
+    <string name="brapi_max_concurrent_observation_transfer">Transferencia Concurrente Máxima de Observaciones</string>
     <string name="preferences_brapi_authorization_title">Autorización</string>
     <string name="preferences_brapi_advanced_title">Avanzado</string>
     <string name="preferences_brapi_oidc_flow_oauth_code">Código de Autorización OAuth2</string>
@@ -1050,11 +1055,19 @@
     <string name="preferences_brapi_server_add">Enviar un servidor</string>
     <!-- Brapi Server Info -->
     <string name="brapi_server_info_pref">Verificar Compatibilidad</string>
+    <string name="brapi_server_info_pref_summary">Ver las llamadas BrAPI y la información del servidor</string>
     <string name="brapi_compatibility">Compatibilidad BrAPI</string>
     <string name="brapi_compatibility_with_app">Compatibilidad con %s</string>
     <string name="brapi_server_name_label">%1$s</string>
     <string name="brapi_organization_name_label">%1$s</string>
     <string name="brapi_server_description_label">%1$s</string>
+    <string name="brapi_compatibility_all_calls">BrAPI en Field Book</string>
+    <string name="brapi_compatibility_server_support">Soportado por el servidor</string>
+    <string name="brapi_compatibility_no_server_support">No soportado por el servidor</string>
+    <string name="brapi_compatibility_fieldbook_support">Soportado por Field Book</string>
+    <string name="brapi_compatibility_no_fieldbook_support">Soportado por Field Book</string>
+    <string name="brapi_server_calls_implemented">%1$d/%2$d llamadas implementadas (%3$d%%)</string>
+    <string name="brapi_server_returned_empty_response">El servidor devolvió una respuesta vacía</string>
     <string name="brapi_server_expand_content_description">Expandir</string>
     <string name="brapi_server_collapse_content_description">Colapsar</string>
     <string name="brapi_server_info_call">Llamar</string>
@@ -1181,6 +1194,7 @@
     <string name="brapi_export_progress_title">Exportando a BrAPI</string>
     <string name="brapi_export_status">Estado</string>
     <string name="brapi_export_current_operation">Operación Actual</string>
+    <string name="brapi_export_preparing">Preparando exportación...</string>
     <string name="brapi_export_new_images_pending">Fotos Nuevas</string>
     <string name="brapi_export_complete">Exportación ha sido completada</string>
     <string name="cancel">Cancelar</string>
