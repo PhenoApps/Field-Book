@@ -453,9 +453,19 @@
     <string name="error_updating_trait_options">Error actualizando opciones de variable</string>
     <string name="trait_add_synonym_new">Agregar Nuevo</string>
     <string name="trait_add_synonym_new_dialog">Agregar Nuevo Sinónimo</string>
+    <string name="trait_synonym">Sinónimo</string>
     <string name="trait_add_synonym_new_dialog_blank">Sinónimo no puede estar vacío</string>
     <string name="trait_add_synonym_already_exists">Ya existe este sinónimo</string>
+    <string name="trait_parameter_enabled">%s activado</string>
+    <string name="trait_parameter_disabled">%s desactivado</string>
     <string name="trait_detail_chip_rename">Renombrar</string>
+    <string name="trait_detail_chip_math_symbols">Símbolos matemáticos</string>
+    <string name="trait_detail_chip_multiple_categories">Categorías múltiples</string>
+    <string name="trait_detail_chip_single_category">Categoría individual</string>
+    <string name="trait_detail_chip_automatic_switch">Avance automático</string>
+    <string name="trait_detail_chip_format_date">Formato: %s</string>
+    <string name="trait_detail_chip_transfer_images">Transferir imágenes</string>
+    <string name="trait_detail_chip_invalid_value">Valores atipicos</string>
     <string name="list_item_trait_parameter_resource_file_hint">Seleccionar un archivo de recursos</string>
     <string name="trait_resource_file_updated">Archivo de Recursos Actualizado</string>
     <!-- COLLECT -->
@@ -928,7 +938,7 @@
     <string name="trait_audio_timestamp">Timestamp: </string>
     <string name="trait_audio_duration">Duración: </string>
     <string name="trait_audio_file_size">Tamaño de Archivo</string>
-    <string name="pref_beta_enable_individual_field_page_title">Habilitar Páginas de Campos Individuales</string>
+    <string name="pref_beta_enable_individual_field_page_title">Activar Páginas de Campos Individuales</string>
     <string name="pref_beta_enable_individual_field_page_summary">Seleccionar un campo en la lista de campos abre una página de detalles</string>
     <string name="pref_beta_mlkit_title">Biblioteca MLKit</string>
     <string name="pref_beta_mlkit_summary">Esta opción usa la biblioteca MLKit en lugar de la biblioteca ZXing para escanear códigos de barras</string>
@@ -1191,7 +1201,7 @@
     <string name="intro_tutorial_warning">Por favor, elija</string>
     <!-- TUTORIAL -->
     <string name="tutorial_dialog_title">Tutorial</string>
-    <string name="tutorial_dialog_description">¿Desea habilitar el tutorial? Esta configuración se puede cambiar en Ajustes.</string>
+    <string name="tutorial_dialog_description">¿Desea activar el tutorial? Esta configuración se puede cambiar en Ajustes.</string>
     <string name="tutorial_main_infobars_title">InfoBars</string>
     <string name="tutorial_main_infobars_description">Los InfoBars muestran datos adicionales para cada entrada y se pueden cambiar usando los menús desplegables.</string>
     <string name="tutorial_main_traits_title">Variables</string>
@@ -1388,13 +1398,14 @@
     <string name="opening_brapi_no_network_error">La red debe estar activada para usar funcionalidad BrAPI.</string>
     <string name="act_brapi_list_filter_reset_selection_message">Esto limpiará la lista en ejecución de los elementos seleccionados.</string>
     <string name="pref_alpha_media_keycode_events_summary">Activar para usar comandos multimedia para interacciones de aplicaciones</string>
-    <string name="pref_alpha_media_keycode_events_title">Habilitar Comandos Multimedia</string>
+    <string name="pref_alpha_media_keycode_events_title">Activar Comandos Multimedia</string>
     <string name="pref_geonav_distance_threshold_summary">GeoNav se detiene automáticamente cuando la distancia de todas las parcelas excede este valor en kilómetros.</string>
     <string name="pref_geonav_distance_threshold_title">Verificación de Proximidad</string>
     <string name="activity_collect_proximity_warning">GeoNav detenido, fuera de coordenadas de proximidad</string>
     <string name="failed_to_save_study">Error al guardar el estudio</string>
     <string name="no_suitable_file_manager_was_found">No se encontró un Administrador de Archivos adecuado.</string>
     <string name="trait_error_invalid_multicat_value">Se introdujeron datos categóricos inválidos.</string>
+    <string name="trait_error_multicat_disabled">Múltiples categorías encontradas pero multicat está desactivado para esta variable</string>
     <string name="dialog_crash_report_title">Error al cargar los datos</string>
     <string name="dialog_crash_report_message">Presione OK para enviar un informe de diagnóstico anónimo para ayudar a mejorar la app.</string>
     <string name="dialog_quick_goto_title">Rápido Ir a</string>
@@ -1502,7 +1513,11 @@
     <string name="device_settings_dialog_title">Ajustes del dispositivo Bluetooth</string>
     <string name="no_data_captured">No hay datos capturados.</string>
     <string name="failed_to_find_file_name">Error al recuperar el nombre del archivo.</string>
+    <string name="brapi_download_button">Descargar</string>
     <string name="brapi_sync_button">Sincronizar</string>
+    <string name="no_new_or_updated_observations_found">No se encontraron observaciones nuevas o actualizadas</string>
+    <string name="user_cancelled_operation">Operación cancelada por usuario.</string>
+    <string name="upload_failed">Error al Cargar</string>
     <string name="new_images">Fotos Nuevas</string>
     <string name="edited_images">Fotos Editadas</string>
     <string name="synced_images">Fotos Sincronizadas</string>
