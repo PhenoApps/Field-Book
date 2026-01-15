@@ -258,6 +258,9 @@
     <string name="field_data_title">Dados</string>
     <string name="field_trait_observation_total">\"%d\"observações</string>
     <!-- Field Detail Charts -->
+    <string name="chart_no_data">Sem dados para o gráfico</string>
+    <string name="chart_incompatible_format">Este formato de característica não pode ser representado graficamente</string>
+    <string name="chart_excess_data">Muitos valores distintos para representar graficamente</string>
     <!-- Semantic dates -->
     <string name="today">Hoje</string>
     <string name="yesterday">Ontem</string>
@@ -1397,7 +1400,11 @@
     <string name="device_settings_dialog_title">Configurações de Dispositivo Bluetooth</string>
     <string name="no_data_captured">Nenhum dado capturado.</string>
     <string name="failed_to_find_file_name">Falha ao recuperar o nome do arquivo.</string>
+    <string name="brapi_download_button">Baixar</string>
     <string name="brapi_sync_button">Sincronizar</string>
+    <string name="brapi_downloading_observations">Extraindo dados do BrAPI</string>
+    <string name="brapi_downloading_page">Página de baixada %1$d/%2$d</string>
+    <string name="download_cancelled">Download foi cancelado</string>
     <string name="new_images">Novas Imagens</string>
     <string name="edited_images">Imagens Editadas</string>
     <string name="synced_images">Imagens Sincronizadas</string>
@@ -1405,4 +1412,5 @@
     <string name="server">Servidor</string>
     <string name="local">Local</string>
     <string name="manual">Manual</string>
+    <string name="download_anyway">Baixar</string>
 </resources>
