@@ -289,6 +289,7 @@
     <string name="dialog_delete_traits_message">Você gostaria de excluir todas as características atuais? Excluir uma característica também exclui dados que foram coletados para esta característica.</string>
     <string name="traits_toolbar_delete_all">Excluir todas as características</string>
     <string name="act_trait_editor_no_traits_exist">Não existem características.</string>
+    <string name="error_cannot_open_file">Não é possível abrir o arquivo</string>
     <!-- Trait item menu -->
     <string name="list_item_trait_popup_content_description">Abra um menu específico para esta característica.</string>
     <string name="traits_options_copy">Copiar</string>
@@ -332,18 +333,21 @@
     <string name="traits_create_value_minimum">Mínimo</string>
     <string name="traits_create_value_maximum">Máximo</string>
     <string name="traits_create_details">Detalhes</string>
+    <string name="traits_create_unit">Unidade</string>
     <string name="traits_create_optional">Opcional</string>
     <string name="traits_create_categories_title">Categorias</string>
     <string name="traits_create_photo_maximum">Número máximo de fotos</string>
     <string name="traits_create_true">Verdadeiro</string>
     <string name="traits_create_false">Falso</string>
     <string name="traits_create_unset">Desmarcar</string>
+    <string name="traits_create_enabled">Habilitado</string>
     <string name="traits_create_disabled">Desabilitado</string>
     <string name="traits_create_categories_text">Separar items com uma /</string>
     <string name="traits_create_camera">Câmera</string>
     <string name="traits_create_close_keyboard">Fechar o teclado</string>
-    <string name="traits_create_warning_name_blank">Nome do caractere não pode ser vazio</string>
-    <string name="traits_create_warning_duplicate">Esse caractere já existe</string>
+    <string name="trait_parameter_decimal_places">Casas Decimais</string>
+    <string name="traits_create_warning_name_blank">Nome da característica não pode estar em branco</string>
+    <string name="traits_create_warning_duplicate">Característica já existe</string>
     <string name="traits_create_warning_numeric_required">Padrão, mínimo e máximo devem ser numéricos</string>
     <string name="dialog_new_trait_add_cat_button_text">Adicionar</string>
     <string name="traits_create_categories_value_text">Insira o valor da categoria aqui</string>
@@ -368,22 +372,55 @@
     <string name="required">Obrigatório</string>
     <string name="traits_create_warning_percent_value_required">Valor obrigatório</string>
     <!-- Decimal Places Radio Options -->
+    <string name="trait_parameter_decimal_places_no_restriction">Sem restrição</string>
+    <string name="trait_parameter_decimal_places_integer_only">Somente inteiros</string>
+    <string name="trait_parameter_decimal_places_custom_hint">1–10</string>
+    <string name="trait_parameter_invalid_number">Número inválido</string>
+    <string name="trait_parameter_mathematical_symbols">Símbolos Matemáticos</string>
+    <string name="traits_create_warning_math_symbols_conflict">Símbolos matemáticos e restrições decimal não podem ser aplicadas simultaneamente</string>
     <string name="trait_parameter_repeated_measures">Medidas Repetidas</string>
     <string name="select_trait">Selecionar Característica</string>
     <string name="edit_traits">Editar</string>
     <!-- Trait Editor -->
     <!-- Trait Detail -->
+    <string name="trait_detail_title">Detalhes da Característica</string>
+    <string name="trait_format_details">Detalhes do Formato</string>
+    <string name="trait_data_title">Dados de Observação</string>
+    <string name="trait_default_value">Valor Padrão: %s</string>
+    <string name="trait_min_value">Valor Mínimo %s</string>
+    <string name="trait_max_value">Valor Máximo: %s</string>
+    <string name="trait_categories">Categorias: %s</string>
+    <string name="trait_details">Detalhes: %s</string>
+    <string name="trait_visible">Visível</string>
+    <string name="trait_hidden">Oculto</string>
+    <string name="trait_options_title">Opções</string>
+    <string name="trait_new_trait_name">Nome da Característica Copiado</string>
     <string name="trait_observation_data">Dados</string>
+    <string name="trait_not_chartable">Esta característica não pode ser visualizada em uma tabela</string>
+    <string name="traits_options_copy_title">Copiar Característica</string>
+    <string name="trait_name_empty_error">Nome da característica não pode estar vazio</string>
+    <string name="trait_name_exists_error">Uma característica com este nome já existe</string>
+    <string name="trait_copied_success">Característica copiada para %1$s</string>
+    <string name="trait_date_format_dialog_title">Selecionar um Formato de Data</string>
+    <string name="trait_date_format_display">Data (%s)</string>
+    <string name="trait_day_format_display">Dia do Ano (%s)</string>
+    <string name="trait_brapi_display_dialog_title">Selecionar Texto do Botão</string>
+    <string name="trait_brapi_label_display">Mostrar Rótulos (ex. %s)</string>
+    <string name="trait_brapi_value_display">Mostrar valores (ex.: %s)</string>
+    <string name="error_empty_trait_name">Nome da característica não pode estar vazio</string>
+    <string name="trait_add_synonym_new_dialog_blank">Sinônimo não pode estar em branco</string>
+    <string name="trait_parameter_enabled">%s habilitado</string>
     <string name="trait_detail_chip_rename">Renomear</string>
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">O valor é menor do que o conjunto mínimo</string>
     <string name="trait_error_maximum_value">O valor é maior do que o conjunto mínimo</string>
+    <string name="trait_error_decimal_places">O valor não pode ter mais do que %d casas decimais</string>
     <string name="trait_error_disease_severity">Severidade já armazenada</string>
     <string name="act_collect_study_names_empty">O estudo selecionado tem nomes único, primário ou secundário vazios.</string>
     <!-- Toolbar -->
     <string name="main_toolbar_resources">Recursos</string>
-    <string name="main_trait_details">Detalhes do caractere</string>
+    <string name="main_trait_details">Detalhes da característica</string>
     <string name="main_infobar_data_missing">Não há dados</string>
     <string name="main_infobar_select_data">Selecionar</string>
     <string name="main_toolbar_next_entry_no_data">Nova entrada de dados</string>
@@ -949,6 +986,10 @@
     <string name="preferences_brapi_server_scan_error">Erro de Escaneo</string>
     <string name="preferences_brapi_server_add">Enviar um Servidor</string>
     <!-- Brapi Server Info -->
+    <string name="brapi_server_name_label">%1$s</string>
+    <string name="brapi_organization_name_label">%1$s</string>
+    <string name="brapi_server_description_label">%1$s</string>
+    <string name="brapi_server_returned_empty_response">Servidor retornou resposta vazia</string>
     <string name="brapi_server_info_server">Servidor</string>
     <string name="brapi_server_info_field_book">Field Book</string>
     <!-- Community Servers -->
@@ -1405,12 +1446,16 @@
     <string name="brapi_downloading_observations">Extraindo dados do BrAPI</string>
     <string name="brapi_downloading_page">Página de baixada %1$d/%2$d</string>
     <string name="download_cancelled">Download foi cancelado</string>
+    <string name="download_failed">Falha ao Baixar</string>
+    <string name="downloaded">Baixado</string>
     <string name="new_images">Novas Imagens</string>
     <string name="edited_images">Imagens Editadas</string>
     <string name="synced_images">Imagens Sincronizadas</string>
     <string name="complete">Completo</string>
     <string name="server">Servidor</string>
     <string name="local">Local</string>
+    <string name="download_from">Baixar do %1$s</string>
     <string name="manual">Manual</string>
+    <string name="there_are_unuploaded_observations_or_images_do_you_want_to_upload_them_before_downloading">Existem observações ou imagens não carregadas. Você quer enviá-las antes de baixá-las?</string>
     <string name="download_anyway">Baixar</string>
 </resources>
