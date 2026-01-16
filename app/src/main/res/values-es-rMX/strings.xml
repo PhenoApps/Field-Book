@@ -1129,7 +1129,7 @@
     <string name="brapi_plot_detail_error">Error al cargar las parcelas del estudio. Estudio no guardado.</string>
     <string name="brapi_study_traits_error">Error al cargar las variables del estudio. Estudio no guardado.</string>
     <string name="brapi_ontology_error">Error al cargar variables desde BrAPI.</string>
-    <string name="brapi_save_field_error">Error al guardar el Campo</string>
+    <string name="brapi_save_field_error">Error al Guardar el Campo</string>
     <string name="brapi_field_not_selected">El Campo seleccionado debe importarse desde BrAPI.</string>
     <string name="brapi_fields_filter_by_program">Filtrar por programa</string>
     <string name="brapi_fields_filter_by_trial">Filtrar por ensayo</string>
@@ -1137,7 +1137,7 @@
     <string name="brapi_programs_select">Seleccionar programa</string>
     <string name="brapi_programs_error">Error al cargar los programas.</string>
     <string name="brapi_trials_load">Cargar ensayos</string>
-    <string name="brapi_trials_select">Seleccionar trial</string>
+    <string name="brapi_trials_select">Seleccionar ensayo</string>
     <string name="brapi_trials_error">Error al cargar los ensayos.</string>
     <string name="brapi_save_trait">Guardar Variables</string>
     <string name="brapi_must_configure_url">Debe configurar una URL de BrAPI válida en Ajustes antes de continuar</string>
