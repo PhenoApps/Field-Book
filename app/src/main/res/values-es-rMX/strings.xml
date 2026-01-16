@@ -612,7 +612,7 @@
     <string name="trait_labelprint_preview_description">Vista previa de etiquetas.</string>
     <string name="trait_labelprint_print_button_description">Botón que imprime etiquetas configuradas en este diálogo.</string>
     <string name="printer_success">Impresión exitosa</string>
-    <string name="bluetooth_printer_choose_device_title">Eligir el dispositivo Bluetooth desde el que imprimir.</string>
+    <string name="bluetooth_printer_choose_device_title">Elegir el dispositivo Bluetooth desde el que imprimir.</string>
     <!--- Trait Layout: Counter -->
     <string name="trait_counter_layout_failed">Error al guardar el contador, por favor vuelva a crear esta variable.</string>
     <!--- Trait Layout: Location -->
@@ -884,7 +884,7 @@
     <string name="pref_geonav_update_interval_summary">El tiempo entre actualizaciones de ubicación es %ss</string>
     <string name="pref_geonav_pair">Proveedor de Ubicación</string>
     <string name="pref_behavior_geonav_internal_gps_choice">GPS interno</string>
-    <string name="choose_paired_bluetooth_devices_title">Elige tu dispositivo Bluetooth vinculado</string>
+    <string name="choose_paired_bluetooth_devices_title">Elegir tu dispositivo Bluetooth vinculado</string>
     <!-- Sounds -->
     <string name="preferences_sounds">Sonido</string>
     <string name="preferences_sound_primary_order_title">Cambiar Orden Primario</string>
@@ -899,7 +899,7 @@
     <string name="preferences_general_tts_title">Texto a Voz</string>
     <string name="preferences_general_tts_description">Activar Texto a Voz cuando los datos son introducidos en la actividad de Captura</string>
     <string name="preferences_general_tts_language_title">Elegir idioma</string>
-    <string name="preferences_general_tts_language_description">Eligir un idioma de Texto a Voz compatible</string>
+    <string name="preferences_general_tts_language_description">Elegir un idioma de Texto a Voz compatible</string>
     <!-- BrAPI preferences are in the BrAPI section below -->
     <!-- Storage -->
     <string name="preferences_storage_title">Almacenamiento</string>
@@ -1291,7 +1291,7 @@
     <string name="tutorial_main_geonav_title">GeoNav</string>
     <string name="tutorial_main_geonav_description">Esto abrirá un diálogo de configuración para ayudar con la navegación del campo.</string>
     <string name="oauth_configured_incorrectly">Falló la solicitud de autorización, por favor compruebe la configuración de BrAPI.</string>
-    <string name="brapi_programs_activity_title">Elige tu Programa</string>
+    <string name="brapi_programs_activity_title">Elegir tu Programa</string>
     <string name="import_brapi_title">Importación BrAPI</string>
     <string name="import_brapi_field_title">Importar Campo con BrAPI</string>
     <string name="import_brapi_trait_title">Importación de Variable BrAPI</string>
@@ -1320,7 +1320,7 @@
     <string name="trait_name_alt_usb">USB</string>
     <string name="view_trait_photo_settings_camera_custom">Predeterminado</string>
     <string name="view_trait_photo_settings_camera_system">Android</string>
-    <string name="view_trait_photo_settings_camera_choice_description">Elija entre la cámara predeterminada de Field Book o la cámara predeterminada de Android.</string>
+    <string name="view_trait_photo_settings_camera_choice_description">Elegir entre la cámara predeterminada de Field Book o la cámara predeterminada de Android.</string>
     <!-- usb camera trait -->
     <string name="usb_camera_resolution_options_title">Resoluciones Soportadas</string>
     <string name="usb_camera_plug_in_camera">Por favor, conecta una cámara web compatible con UVC.</string>
