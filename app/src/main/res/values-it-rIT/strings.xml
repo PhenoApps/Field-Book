@@ -184,7 +184,7 @@
     <string name="field_creator_size_field_name_hint">Nome del Campo</string>
     <string name="field_creator_size_rows_hint">Righe</string>
     <string name="field_creator_size_columns_hint">Colonne</string>
-    <string name="field_name_required_error">Nome del campo obbligatorio</string>
+    <string name="field_name_required_error">Nome del campo è richiesto</string>
     <string name="field_name_exists_error">Nome del campo già esistente</string>
     <string name="field_creator_positive_number_error">Deve essere un numero positivo</string>
     <string name="field_creator_rows_exceeded_error">Impossibile superare %s</string>
@@ -259,6 +259,8 @@
     <string name="field_trait_observation_total">\"%d\" osservazioni</string>
     <!-- Field Detail Charts -->
     <string name="chart_no_data">Nessun dato da rappresentare graficamente</string>
+    <string name="chart_incompatible_format">Questo formato di caratteristica non può essere grafitato</string>
+    <string name="chart_excess_data">Troppi valori distinti da rappresentare graficamente</string>
     <!-- Semantic dates -->
     <string name="today">Oggi</string>
     <string name="yesterday">Ieri</string>
@@ -282,6 +284,8 @@
     <string name="traits_dialog_import_from_file">Importa da file</string>
     <string name="traits_dialog_import">Importa</string>
     <string name="import_error_format_trait">Solo i file TRT possono essere importati come una lista di caratteri</string>
+    <string name="import_error_format_trait_json">Formato JSON non valido: %s</string>
+    <string name="import_error_no_traits">Nessuna caratteristica trovata</string>
     <string name="traits_export_check">Esporta la lista de caratteri corrente?</string>
     <string name="traits_dialog_export">Esporta</string>
     <string name="dialog_delete_traits_message">Vuoi eliminare tutti i caratteri correnti? Eliminare un carattere elimina anche i dati che sono stati raccolti per quel carattere.</string>
@@ -342,7 +346,7 @@
     <string name="traits_create_close_keyboard">Chiudi la Tastiera</string>
     <string name="traits_create_warning_name_blank">Il nome del carattere non può essere vuoto</string>
     <string name="traits_create_warning_duplicate">Il carattere esiste già</string>
-    <string name="traits_create_warning_numeric_required">Default, minimo e massimo devono essere numerici</string>
+    <string name="traits_create_warning_numeric_required">Predefinito, minimo e massimo sono richiesti e deve essere numerico</string>
     <string name="dialog_new_trait_add_cat_button_text">Aggiungi</string>
     <string name="traits_create_categories_value_text">Inserisci il valore della categoria qui</string>
     <string name="list_item_category_delete_content_description">Elimina la categoria.</string>
@@ -363,9 +367,10 @@
     <string name="dialog_new_trait_error_must_select_a_layout">Devi selezionare una disposizione.</string>
     <string name="trait_creator_parameter_warning_integer_required">Intero richiesto.</string>
     <string name="dialog_new_trait_error_cannot_update_to_brapi_trait">I caratteri non possono essere aggiornati ai caratteri BrAPI.</string>
-    <string name="required">Obbligatorio</string>
-    <string name="traits_create_warning_percent_value_required">Valore obbligatorio</string>
+    <string name="required">Richiesto</string>
+    <string name="traits_create_warning_percent_value_required">Valore richiesto</string>
     <!-- Decimal Places Radio Options -->
+    <string name="trait_parameter_decimal_places_custom_required">Inserisci il numero di cifre decimali (1–10)</string>
     <string name="trait_parameter_repeated_measures">Misure Ripeti</string>
     <string name="select_trait">Seleziona Carattere</string>
     <string name="edit_traits">Modifica</string>
