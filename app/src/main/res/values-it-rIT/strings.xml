@@ -346,6 +346,7 @@
     <string name="traits_create_categories_text">Separa categorie con /</string>
     <string name="traits_create_camera">Fotocamera</string>
     <string name="traits_create_close_keyboard">Chiudi la Tastiera</string>
+    <string name="trait_parameter_decimal_places_error">Il valore deve essere compreso tra -1 e 10</string>
     <string name="traits_create_warning_name_blank">Il nome del carattere non può essere vuoto</string>
     <string name="traits_create_warning_duplicate">Il carattere esiste già</string>
     <string name="traits_create_warning_numeric_required">Predefinito, minimo e massimo sono richiesti e deve essere numerico</string>
@@ -372,7 +373,14 @@
     <string name="required">Richiesto</string>
     <string name="traits_create_warning_percent_value_required">Valore richiesto</string>
     <!-- Decimal Places Radio Options -->
+    <string name="trait_parameter_decimal_places_no_restriction">Nessuna restrizione</string>
+    <string name="trait_parameter_decimal_places_integer_only">Solo interi</string>
+    <string name="trait_parameter_decimal_places_custom_hint">1–10</string>
     <string name="trait_parameter_decimal_places_custom_required">Inserisci il numero di cifre decimali (1–10)</string>
+    <string name="trait_parameter_decimal_places_custom_error">Il valore deve essere compreso tra 1 e 10</string>
+    <string name="trait_parameter_invalid_number">Numero non valido</string>
+    <string name="trait_parameter_mathematical_symbols">Simboli Matematici</string>
+    <string name="traits_create_warning_math_symbols_conflict">Simboli matematici e restrizioni della posizione decimale non possono essere applicati simultaneamente</string>
     <string name="trait_parameter_repeated_measures">Misure Ripeti</string>
     <string name="select_trait">Seleziona Carattere</string>
     <string name="edit_traits">Modifica</string>
@@ -1107,7 +1115,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="tutorial_main_entries_description">Le grandi frecce nere si spostano tra le entrate.</string>
     <string name="tutorial_main_navinfo_title">Ordinare le colonne</string>
     <string name="tutorial_main_navinfo_description">Qui è dove vengono visualizzati l\'ordine primario e secondario.</string>
-    <string name="tutorial_main_datacollect_title">Input di dati</string>
+    <string name="tutorial_main_datacollect_title">Inserire i dati</string>
     <string name="tutorial_main_datacollect_description">I dati vengono immessi nell\'area inferiore dello schermo. Diversi tipi di carattere hanno disposizione diversi.</string>
     <string name="tutorial_main_na_title">Dati mancanti</string>
     <string name="tutorial_main_na_description">Il pulsante NA viene utilizzato per contrassegnare i valori come mancanti.</string>
@@ -1124,7 +1132,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="tutorial_main_lockdata_title">Blocca dati</string>
     <string name="tutorial_main_lockdata_description">Questo blocca l\'input di dati corrente</string>
     <string name="tutorial_settings_fields_title">Campi</string>
-    <string name="tutorial_settings_fields_description">ti permette di importare e gestire i campi.</string>
+    <string name="tutorial_settings_fields_description">ti consente di importare e gestire i campi.</string>
     <string name="tutorial_settings_fields_import">Per iniziare a usare Field Book, prima importare un file di campo.</string>
     <string name="tutorial_settings_traits_title">Caratteri</string>
     <string name="tutorial_settings_traits_description">ti consente di aggiungere, importare e gestire i caratteri.</string>
