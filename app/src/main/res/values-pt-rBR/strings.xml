@@ -448,8 +448,8 @@
     <string name="error_empty_trait_name">Nome da característica não pode estar vazio</string>
     <string name="error_copy_trait">Erro ao copiar característica</string>
     <string name="trait_swap_synonym_dialog_title">Sinônimos</string>
-    <string name="trait_swap_name_set_alias">Definir Alias</string>
-    <string name="error_updating_trait_alias">Erro ao atualizar aliás de característica</string>
+    <string name="trait_swap_name_set_alias">Definir Alcunha</string>
+    <string name="error_updating_trait_alias">Erro ao atualizar alcunha de característica</string>
     <string name="error_updating_trait_options">Erro ao atualizar opções de característica</string>
     <string name="trait_add_synonym_new">Adicionar Novo</string>
     <string name="trait_add_synonym_new_dialog">Adicionar Novo Sinônimo</string>
@@ -460,11 +460,27 @@
     <string name="trait_parameter_disabled">%s desabilitado</string>
     <string name="trait_detail_chip_rename">Renomear</string>
     <string name="trait_detail_chip_math_symbols">Símbolos matemáticos</string>
+    <string name="trait_detail_chip_multiple_categories">Categorias múltiplas</string>
+    <string name="trait_detail_chip_single_category">Categorias únicas</string>
+    <string name="trait_detail_chip_automatic_switch">Avançar automaticamente</string>
+    <string name="trait_detail_chip_format_date">Formato: %s</string>
+    <string name="trait_detail_chip_transfer_images">Transferir imagens</string>
+    <string name="trait_detail_chip_invalid_value">Valores atípicos</string>
+    <string name="trait_parameter_allow_multicat">Seleção de Múltiplas Categorias</string>
+    <string name="trait_parameter_display_value">Exibir Valor</string>
+    <string name="trait_parameter_resource_file">Arquivo de Recurso</string>
+    <string name="trait_parameter_use_day_of_year">Usar Dia do Ano</string>
+    <string name="list_item_trait_parameter_resource_file_hint">Selecione um arquivo de recurso</string>
+    <string name="trait_resource_file_updated">Arquivo de Recurso Atualizado</string>
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">O valor é menor do que o conjunto mínimo</string>
     <string name="trait_error_maximum_value">O valor é maior do que o conjunto mínimo</string>
     <string name="trait_error_decimal_places">O valor não pode ter mais do que %d casas decimais</string>
+    <string name="trait_error_mathematical_symbols_disabled">Símbolos matemáticos não são permitidos</string>
+    <string name="trait_error_integers_only">Somente valores inteiros são permitidos</string>
+    <string name="dialog_invalid_value_title">Valor Inválido</string>
+    <string name="dialog_save_invalid_value_message">Você deseja salvar este valor de qualquer maneira?</string>
     <string name="trait_error_disease_severity">Severidade já armazenada</string>
     <string name="act_collect_study_names_empty">O estudo selecionado tem nomes único, primário ou secundário vazios.</string>
     <!-- Toolbar -->
@@ -666,6 +682,7 @@
     <string name="observation_info_entry_id">Id da entrada</string>
     <string name="observation_info_trait_format">Formato de Característica</string>
     <string name="observation_info_trait_name">Nome da Característica</string>
+    <string name="observation_info_trait_alias">Alcunha de Característica</string>
     <string name="observation_info_value">Valor</string>
     <string name="observation_info_timestamp">Timestamp da Observação</string>
     <string name="observation_info_collector">Coletor</string>
@@ -1014,6 +1031,8 @@
     <string name="brapi_pagination">Tamanho da Página</string>
     <string name="brapi_timeout">Tempo Limite do Servidor</string>
     <string name="brapi_chunk_size">Tamanho do Chunk</string>
+    <string name="brapi_max_concurrent_image_content">Exportação de Imagem Máxima Simultânea</string>
+    <string name="brapi_max_concurrent_observation_transfer">Transferência Máxima de Observação Simultânea</string>
     <string name="preferences_brapi_authorization_title">Autorização</string>
     <string name="preferences_brapi_advanced_title">Avançado</string>
     <string name="preferences_brapi_oidc_flow_oauth_code">Código de Autorização OAuth2</string>
@@ -1026,7 +1045,7 @@
     <string name="brapi_oidc_scope">Escopo OIDC</string>
     <string name="brapi_oidc_scope_desc">O Escopo a ser usado no provedor de autenticação</string>
     <string name="preferences_brapi_traits_title">Preferências</string>
-    <string name="preferences_appearance_collect_labelval_customize">Valor vs Exibição de Rótulo</string>
+    <string name="preferences_appearance_collect_labelval_customize">Exibição de Valor versus Rótulo</string>
     <string name="preferences_appearance_collect_labelval_customize_description">Mostrar valores ou rótulos na tela de coleta</string>
     <string name="preferences_appearance_collect_labelval_customize_value">Valor</string>
     <string name="preferences_appearance_collect_labelval_customize_label">Rótulo</string>
@@ -1035,10 +1054,23 @@
     <string name="preferences_brapi_server_scan_error">Erro de Escaneo</string>
     <string name="preferences_brapi_server_add">Enviar um Servidor</string>
     <!-- Brapi Server Info -->
+    <string name="brapi_server_info_pref">Verificar Compatibilidade</string>
+    <string name="brapi_server_info_pref_summary">Exibir informações de servidor e chamadas BrAPI suportadas</string>
+    <string name="brapi_compatibility">Compatibilidade BrAPI</string>
+    <string name="brapi_compatibility_with_app">Compatibilidade com %s</string>
     <string name="brapi_server_name_label">%1$s</string>
     <string name="brapi_organization_name_label">%1$s</string>
     <string name="brapi_server_description_label">%1$s</string>
+    <string name="brapi_compatibility_all_calls">BrAPI em Field Book</string>
+    <string name="brapi_compatibility_server_support">Suportado pelo servidor</string>
+    <string name="brapi_compatibility_no_server_support">Não suportado pelo servidor</string>
+    <string name="brapi_compatibility_fieldbook_support">Suportado pelo Field Book</string>
+    <string name="brapi_compatibility_no_fieldbook_support">Suportado pelo Field Book</string>
+    <string name="brapi_server_calls_implemented">%1$d/%2$d chamadas implementadas (%3$d%%)</string>
     <string name="brapi_server_returned_empty_response">Servidor retornou resposta vazia</string>
+    <string name="brapi_server_expand_content_description">Expandir</string>
+    <string name="brapi_server_collapse_content_description">Retrair</string>
+    <string name="brapi_server_info_call">Ligar</string>
     <string name="brapi_server_info_server">Servidor</string>
     <string name="brapi_server_info_field_book">Field Book</string>
     <!-- Community Servers -->
@@ -1112,6 +1144,7 @@
     <string name="brapi_warning_select_program">Por favor, selecione um programa</string>
     <string name="brapi_warning_select_trial">Por favor, selecione um estudo</string>
     <string name="brapi_warning_select_study">Por favor, selecione o campo</string>
+    <string name="brapi_export_load_stats_error">Erro ao carregar estatísticas da exportação</string>
     <string name="brapi_export_failed">Exportação do BrAPI falhou</string>
     <string name="brapi_export_permission_deny">ERRO: Você não tem permissões para enviar dados para o sistema especificado.</string>
     <string name="brapi_export_not_supported">ERRO: Sistema de destino não suporta o envio de observações via BrAPI.</string>
@@ -1158,7 +1191,19 @@
     <string name="brapi_export_images">Imagens</string>
     <string name="brapi_delete_message">Não é possível excluir a observação BrAPI sincronizada, usando NA em vez disso</string>
     <string name="act_brapi_export_image_load_failed">Carregamento de imagem falhou.</string>
+    <string name="brapi_export_progress_title">Exportando para BrAPI</string>
+    <string name="brapi_export_status">Estado</string>
+    <string name="brapi_export_current_operation">Operação atual</string>
+    <string name="brapi_export_preparing">Preparando exportação...</string>
+    <string name="brapi_export_new_observations_pending">Novas Observações</string>
+    <string name="brapi_export_edited_observations_pending">Observações Editadas</string>
     <string name="brapi_export_new_images_pending">Novas Imagens</string>
+    <string name="brapi_export_edited_images_pending">Imagens Editadas/Incompletas</string>
+    <string name="cancelling">Cancelando...</string>
+    <string name="brapi_export_uploading_new_observations">Carregando novas observações...</string>
+    <string name="brapi_export_uploading_edited_observations">Carregando observações editadas...</string>
+    <string name="brapi_export_uploading_new_images">Carregando novas imagens...</string>
+    <string name="brapi_export_uploading_edited_images">Carregando imagens editadas/incompletas...</string>
     <string name="brapi_export_complete">Exportação completada</string>
     <string name="cancel">Cancelar</string>
     <!-- Pagination -->
@@ -1492,6 +1537,9 @@
     <string name="device_settings_dialog_title">Configurações de Dispositivo Bluetooth</string>
     <string name="no_data_captured">Nenhum dado capturado.</string>
     <string name="failed_to_find_file_name">Falha ao recuperar o nome do arquivo.</string>
+    <string name="act_brapi_export_starting">Iniciando exportação</string>
+    <string name="act_brapi_export_success">Exportação com sucesso</string>
+    <string name="nothing_to_sync">Nada para sincronizar</string>
     <string name="export_cancelled">Exportação cancelada.</string>
     <string name="creating_observations">Criando observações %1$d…</string>
     <string name="creating_observations_progress">Criando %1$d/%2$d observações…</string>
