@@ -25,6 +25,7 @@
     <string name="dialog_exit">Esci</string>
     <string name="barcode_scanner_text">Scansiona un codice a barre</string>
     <!-- Toolbar -->
+    <string name="appbar_more_options">Altre Opzioni</string>
     <string name="appbar_back">Indietro</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Dati di Esempio</string>
@@ -54,6 +55,7 @@
     <string name="storage_definer_summary">Seleziona o crea una cartella che Field Book può utilizzare per archiviare i dati dell\'app.</string>
     <string name="define_button_text">Scegli Cartella</string>
     <!-- Permissions  -->
+    <string name="permission_rationale_storage">È richiesto l\'accesso ai file del dispositivo.</string>
     <string name="permission_rationale_storage_import">Per importare i file è necessario accedere ai file del dispositivo.</string>
     <string name="permission_rationale_storage_export">Per esportare i dati è necessario accedere ai file del dispositivo.</string>
     <string name="permission_rationale_trait_features">La raccolta dei dati richiede l\'accesso ai file, al microfono e alla camera del dispositivo.</string>
@@ -256,6 +258,7 @@
     <string name="field_data_title">Dato</string>
     <string name="field_trait_observation_total">\"%d\" osservazioni</string>
     <!-- Field Detail Charts -->
+    <string name="chart_no_data">Nessun dato da rappresentare graficamente</string>
     <!-- Semantic dates -->
     <string name="today">Oggi</string>
     <string name="yesterday">Ieri</string>
