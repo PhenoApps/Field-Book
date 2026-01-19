@@ -284,11 +284,25 @@
     <string name="traits_dialog_import_from_file">Importar de um arquivo</string>
     <string name="traits_dialog_import">Importar</string>
     <string name="import_error_format_trait">Somente arquivos TRT podem ser importados como uma lista de características</string>
+    <string name="import_error_format_trait_json">Formato JSON inválido: %s</string>
+    <string name="import_error_no_traits">Nenhuma característica encontrada</string>
+    <string name="trait_import_successful">Características importadas com sucesso</string>
     <string name="traits_export_check">Exportar lista de características atual?</string>
     <string name="traits_dialog_export">Exportar</string>
     <string name="dialog_delete_traits_message">Você gostaria de excluir todas as características atuais? Excluir uma característica também exclui dados que foram coletados para esta característica.</string>
     <string name="traits_toolbar_delete_all">Excluir todas as características</string>
     <string name="act_trait_editor_no_traits_exist">Não existem características.</string>
+    <string name="export_dialog_traits_exporting">Exportando características…</string>
+    <string name="export_error_unknown">Ocorreu um erro de exportação desconhecido</string>
+    <string name="export_error_directory_access">Falha ao acessar o diretório de exportação</string>
+    <string name="export_error_directory_not_found">Diretório de exportação não encontrado</string>
+    <string name="export_error_file_creation">Falha ao criar arquivo de exportação</string>
+    <string name="export_error_file_stream">Falha ao abrir fluxo de arquivo</string>
+    <string name="error_trait_directory_not_available">Diretório de característica não disponível</string>
+    <string name="error_trait_directory_missing">Diretório de característica faltando</string>
+    <string name="error_failed_to_create_file">Falha ao criar arquivo</string>
+    <string name="error_output_stream_failed">Fluxo de saída falhou</string>
+    <string name="error_export_failed">Exportação falhou</string>
     <string name="error_cannot_open_file">Não é possível abrir o arquivo</string>
     <!-- Trait item menu -->
     <string name="list_item_trait_popup_content_description">Abra um menu específico para esta característica.</string>
@@ -382,6 +396,11 @@
     <string name="select_trait">Selecionar Característica</string>
     <string name="edit_traits">Editar</string>
     <!-- Trait Editor -->
+    <string name="error_deleting_traits">Falha ao excluir características</string>
+    <string name="error_toggling_all_traits_visibility">Falha ao alternar a visibilidade de características</string>
+    <string name="error_importing_traits">Falha ao importar características</string>
+    <string name="error_saving_trait_order">Falha ao salvar ordem de características</string>
+    <string name="error_exporting_traits">Falha ao exportar características</string>
     <!-- Trait Detail -->
     <string name="trait_detail_title">Detalhes da Característica</string>
     <string name="trait_format_details">Detalhes do Formato</string>
@@ -1441,16 +1460,23 @@
     <string name="device_settings_dialog_title">Configurações de Dispositivo Bluetooth</string>
     <string name="no_data_captured">Nenhum dado capturado.</string>
     <string name="failed_to_find_file_name">Falha ao recuperar o nome do arquivo.</string>
+    <string name="authentication_failed">Autenticação falhou.</string>
+    <string name="failed_brapi_image_upload">Falha:%1$s</string>
     <string name="brapi_download_button">Baixar</string>
     <string name="brapi_sync_button">Sincronizar</string>
     <string name="brapi_downloading_observations">Extraindo dados do BrAPI</string>
     <string name="brapi_downloading_page">Página de baixada %1$d/%2$d</string>
+    <string name="study_info_missing">Informações do estudo faltando</string>
     <string name="download_cancelled">Download foi cancelado</string>
     <string name="download_failed">Falha ao Baixar</string>
+    <string name="upload_failed">Carregamento falhou</string>
+    <string name="brapi_study_db_id_is_missing">ID de Estudo da BrAPI está faltando</string>
     <string name="downloaded">Baixado</string>
     <string name="new_images">Novas Imagens</string>
     <string name="edited_images">Imagens Editadas</string>
     <string name="synced_images">Imagens Sincronizadas</string>
+    <string name="failed_items">%1$d itens falhados</string>
+    <string name="failed_images">%1$d imagens falhadas</string>
     <string name="complete">Completo</string>
     <string name="server">Servidor</string>
     <string name="local">Local</string>
