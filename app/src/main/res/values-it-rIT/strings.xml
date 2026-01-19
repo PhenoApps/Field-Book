@@ -259,7 +259,7 @@
     <string name="field_trait_observation_total">\"%d\" osservazioni</string>
     <!-- Field Detail Charts -->
     <string name="chart_no_data">Nessun dato da rappresentare graficamente</string>
-    <string name="chart_incompatible_format">Questo formato di caratteristica non può essere grafitato</string>
+    <string name="chart_incompatible_format">Questo formato di carattere non può essere grafitato</string>
     <string name="chart_excess_data">Troppi valori distinti da rappresentare graficamente</string>
     <!-- Semantic dates -->
     <string name="today">Oggi</string>
@@ -286,11 +286,13 @@
     <string name="import_error_format_trait">Solo i file TRT possono essere importati come una lista di caratteri</string>
     <string name="import_error_format_trait_json">Formato JSON non valido: %s</string>
     <string name="import_error_no_traits">Nessuna caratteristica trovata</string>
+    <string name="trait_import_successful">Caratteri importati con successo</string>
     <string name="traits_export_check">Esporta la lista de caratteri corrente?</string>
     <string name="traits_dialog_export">Esporta</string>
     <string name="dialog_delete_traits_message">Vuoi eliminare tutti i caratteri correnti? Eliminare un carattere elimina anche i dati che sono stati raccolti per quel carattere.</string>
     <string name="traits_toolbar_delete_all">Elimina tutti i caratteri</string>
     <string name="act_trait_editor_no_traits_exist">Non esistono caratteri.</string>
+    <string name="export_dialog_traits_exporting">Esportazione dei caratteri…</string>
     <!-- Trait item menu -->
     <string name="list_item_trait_popup_content_description">Apri un menu specifico per questo carattere.</string>
     <string name="traits_options_copy">Copia</string>
@@ -377,6 +379,7 @@
     <!-- Trait Editor -->
     <!-- Trait Detail -->
     <string name="trait_observation_data">Dato</string>
+    <string name="trait_copied_success">Carattere copiato in %1$s</string>
     <string name="trait_detail_chip_rename">Rinomina</string>
     <!-- COLLECT -->
     <!-- Validation -->
@@ -1071,7 +1074,9 @@
     <string name="brapi_export_images">Immagini</string>
     <string name="brapi_delete_message">Impossibile eliminare l\'osservazione BrAPI sincronizzata, utilizzando invece NA</string>
     <string name="act_brapi_export_image_load_failed">Caricamento immagine fallito.</string>
+    <string name="brapi_export_progress_title">Esportazione a BrAPI</string>
     <string name="brapi_export_new_images_pending">Nuove immagini</string>
+    <string name="cancelling">Annullando...</string>
     <string name="brapi_export_complete">Esportazione completata</string>
     <string name="cancel">Annulla</string>
     <!-- Pagination -->
@@ -1402,12 +1407,26 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="device_settings_dialog_title">Impostazioni Dispositivo Bluetooth</string>
     <string name="no_data_captured">Nessun dato catturato.</string>
     <string name="failed_to_find_file_name">Impossibile recuperare il nome del file.</string>
+    <string name="act_brapi_export_success">Esportazione eseguita con successo</string>
+    <string name="export_cancelled">Esportazione annullata.</string>
+    <string name="brapi_download_button">Scarica</string>
     <string name="brapi_sync_button">Sincronizza</string>
+    <string name="brapi_downloading_observations">Estrazione dei dati da BrAPI</string>
+    <string name="brapi_downloading_page">Scarica la pagina %1$d/%2$d</string>
+    <string name="download_cancelled">Scaricamento annullato</string>
+    <string name="download_failed">Scaricamento Fallito</string>
+    <string name="user_cancelled_operation">Operazione annullata dall\'utente.</string>
+    <string name="upload_failed">Caricamento Fallito</string>
+    <string name="downloaded">Scaricato</string>
     <string name="new_images">Nuove immagini</string>
     <string name="edited_images">Immagini modificate</string>
     <string name="synced_images">Immagini sincronizzate</string>
+    <string name="operation_was_cancelled">Operazione annullata: %1$s</string>
     <string name="complete">Completo</string>
     <string name="server">Server</string>
     <string name="local">Locale</string>
+    <string name="download_from">Download da %1$s</string>
     <string name="manual">Manuale</string>
+    <string name="there_are_unuploaded_observations_or_images_do_you_want_to_upload_them_before_downloading">Ci sono osservazioni o immagini non caricate. Vuoi caricarle prima di scaricare?</string>
+    <string name="download_anyway">Scarica</string>
 </resources>
