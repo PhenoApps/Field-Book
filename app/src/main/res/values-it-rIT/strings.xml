@@ -34,7 +34,7 @@
     <string name="app_intro_intro_title_slide1">Benvenuto su Field Book!</string>
     <string name="app_intro_intro_summary_slide1">Tradizionalmente la raccolta dei dati in campo si basa sull\'utilizzo e sulla trascrizione da carta e matita. Field Book è stato creato come soluzione digitale per la raccolta dei dati, permettendo una maggiore velocità e una migliore integrità dei dati.</string>
     <string name="app_intro_intro_title_slide2">Funzionalità e Personalizzazione</string>
-    <string name="app_intro_intro_summary_slide2">I dati vengono inseriti su Field Book con disposizione dei caratteri che sono progettate per semplificare l\'inserimento dei dati e minimizzare gli errori. \n\n Per impostazione predefinita, i dati raccolti vengono archiviati localmente, ma Field Book supporta la Breeding-API che permette l\'invio di dati a sistemi compatibili con BrAPI.</string>
+    <string name="app_intro_intro_summary_slide2">I dati vengono inseriti su Field Book con disposizione dei caratteri che sono progettate per semplificare l\'input dei dati e minimizzare gli errori. \n\n Per impostazione predefinita, i dati raccolti vengono archiviati localmente, ma Field Book supporta la Breeding-API che permette l\'invio di dati a sistemi compatibili con BrAPI.</string>
     <string name="app_intro_required_setup_title">Impostazione Richiesta</string>
     <string name="app_intro_required_setup_summary">Per iniziare a usare Field Book, concedi i permessi necessari all\'applicazione e scegli una cartella in cui salvare i tuoi dati.</string>
     <string name="app_intro_permissions_title">Permessi</string>
@@ -97,8 +97,8 @@
     <string name="dialog_group_name_warning">Campo non può essere vuoto</string>
     <string name="menu_group">Raggruppa</string>
     <string name="menu_archive">Archivio</string>
-    <string name="menu_groups_toggle">Commuta Visibilità Gruppi</string>
-    <string name="group_toggle_icon">Commuta Gruppo</string>
+    <string name="menu_groups_toggle">Attiva Visibilità Gruppi</string>
+    <string name="group_toggle_icon">Attiva/Disattiva Gruppo</string>
     <string name="archived_fields">Campi Archiviati</string>
     <string name="menu_unarchive">Rimuovi dall\'archivio</string>
     <string name="menu_collapse_all">Comprimi Tutto</string>
@@ -375,6 +375,7 @@
     <!-- Decimal Places Radio Options -->
     <string name="trait_parameter_decimal_places_no_restriction">Nessuna restrizione</string>
     <string name="trait_parameter_decimal_places_integer_only">Solo interi</string>
+    <string name="trait_parameter_decimal_places_allowed">Consenti input decimale</string>
     <string name="trait_parameter_decimal_places_custom_hint">1–10</string>
     <string name="trait_parameter_decimal_places_custom_required">Inserisci il numero di cifre decimali (1–10)</string>
     <string name="trait_parameter_decimal_places_custom_error">Il valore deve essere compreso tra 1 e 10</string>
@@ -385,6 +386,7 @@
     <string name="select_trait">Seleziona Carattere</string>
     <string name="edit_traits">Modifica</string>
     <!-- Trait Editor -->
+    <string name="error_toggling_all_traits_visibility">Impossibile attivare la visibilità dei caratteri</string>
     <!-- Trait Detail -->
     <string name="trait_observation_data">Dato</string>
     <string name="trait_copied_success">Carattere copiato in %1$s</string>
@@ -1115,7 +1117,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="tutorial_main_entries_description">Le grandi frecce nere si spostano tra le entrate.</string>
     <string name="tutorial_main_navinfo_title">Ordinare le colonne</string>
     <string name="tutorial_main_navinfo_description">Qui è dove vengono visualizzati l\'ordine primario e secondario.</string>
-    <string name="tutorial_main_datacollect_title">Inserire i dati</string>
+    <string name="tutorial_main_datacollect_title">Input di dati</string>
     <string name="tutorial_main_datacollect_description">I dati vengono immessi nell\'area inferiore dello schermo. Diversi tipi di carattere hanno disposizione diversi.</string>
     <string name="tutorial_main_na_title">Dati mancanti</string>
     <string name="tutorial_main_na_description">Il pulsante NA viene utilizzato per contrassegnare i valori come mancanti.</string>
@@ -1322,7 +1324,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="dialog_crop_message">Definire una regione di ritaglio che sarà applicata a tutte le immagini future per questo carattere.</string>
     <string name="view_trait_photo_settings_crop">Imposta Regione Ritaglio</string>
     <string name="crop_image_clip_data_label">Dati della regione di retaglio del Field Book</string>
-    <string name="quick_goto_swap_content_description">commuta tipo d\'ingresso</string>
+    <string name="quick_goto_swap_content_description">attiva/disattiva tipo d\'input</string>
     <!--  NearbyShare  -->
     <string name="nearby_share_title">Condividi Nelle Vicinanze</string>
     <string name="nearby_share_preferences_title">Preferenze Di Condividi</string>
@@ -1435,6 +1437,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="local">Locale</string>
     <string name="download_from">Download da %1$s</string>
     <string name="manual">Manuale</string>
+    <string name="toggle">Attiva/Disattiva</string>
     <string name="there_are_unuploaded_observations_or_images_do_you_want_to_upload_them_before_downloading">Ci sono osservazioni o immagini non caricate. Vuoi caricarle prima di scaricare?</string>
     <string name="download_anyway">Scarica</string>
 </resources>
