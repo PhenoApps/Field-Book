@@ -241,12 +241,12 @@
     <string name="activity_field_editor_switch_field_same">Campo più vicino già selezionato.</string>
     <!-- Field Details -->
     <string name="field_detail_title">Dettagli del Campo</string>
-    <string name="field_edit_display_name">Modifica Visualizzazione Nome Del Campo</string>
+    <string name="field_edit_display_name">Modifica Nome del Campo Visualizzato</string>
     <string name="name_cannot_be_empty">Il nome non può essere vuoto.</string>
     <string name="illegal_characters_message">Trovati caratteri di testo non validi: %1$s</string>
     <string name="name_conflict_message">\"%1$s\" è già utilizzato come %2$s per un altro campo.</string>
     <string name="name_conflict_import_name">nome di importazione</string>
-    <string name="name_conflict_display_name">visualizza nome</string>
+    <string name="name_conflict_display_name">mostra nome</string>
     <string name="dialog_att_chooser_title_default">Scegliere un attributo</string>
     <string name="search_attribute_dialog_title">Imposta ID di Ricerca</string>
     <string name="dialog_att_chooser_unique_attributes">Attributi Unici</string>
@@ -273,7 +273,7 @@
     <!-- TRAITS -->
     <!-- Sort -->
     <string name="traits_toolbar_sort">Ordina Caratteri</string>
-    <string name="traits_sort_name">Nome del carattere</string>
+    <string name="traits_sort_name">Nome</string>
     <string name="traits_sort_import_order">Ordine d\'importazione</string>
     <string name="traits_sort_visibility">Visibilità</string>
     <string name="traits_sort_format">Formato</string>
@@ -431,14 +431,56 @@
     <string name="trait_observation_data">Dato</string>
     <string name="trait_observation_count">%d osservazioni</string>
     <string name="trait_not_chartable">Questo formato de carattere non può essere visualizzato in un grafico</string>
+    <string name="traits_options_copy_title">Copia Carattere</string>
+    <string name="trait_name_empty_error">Il nome del carattere non può essere vuoto</string>
+    <string name="trait_name_exists_error">Esiste già un carattere con questo nome</string>
     <string name="trait_copied_success">Carattere copiato in %1$s</string>
+    <string name="trait_date_format_dialog_title">Seleziona Formato Della Data</string>
+    <string name="trait_date_format_display">Data (%s)</string>
+    <string name="trait_day_format_display">Giorno dell\'Anno (%s)</string>
+    <string name="trait_brapi_display_dialog_title">Seleziona Testo Del Pulsante</string>
+    <string name="trait_brapi_label_display">Mostra Descrizione (es. %s)</string>
+    <string name="trait_brapi_value_display">Mostra Valori (es. %s)</string>
+    <string name="error_loading_trait_detail">Errore nel caricare le informazioni del carattere</string>
     <string name="error_deleting_trait">Errore: impossibile eliminare il carattere</string>
+    <string name="error_updating_trait_resource_file">Errore nell\'aggiornamento del file risorsa del carattere</string>
+    <string name="error_updating_trait_visibility">Errore nell\'aggiornare la visibilità del carattere</string>
+    <string name="error_empty_trait_name">Il nome del carattere non può essere vuoto</string>
+    <string name="error_copy_trait">Errore durante la copia del carattere</string>
+    <string name="trait_swap_synonym_dialog_title">Sinonimi</string>
+    <string name="trait_swap_name_set_alias">Imposta Alias</string>
+    <string name="error_updating_trait_alias">Errore nell\'aggiornare l\'alias di carattere</string>
+    <string name="error_updating_trait_options">Errore nell\'aggiornare le opzioni di carattere</string>
+    <string name="trait_add_synonym_new">Aggiungi Nuovo</string>
+    <string name="trait_add_synonym_new_dialog">Aggiungi Nuovo Sinonimo</string>
+    <string name="trait_synonym">Sinonimo</string>
+    <string name="trait_add_synonym_new_dialog_blank">Sinonimo non può essere vuoto</string>
+    <string name="trait_add_synonym_already_exists">Questo sinonimo già esiste</string>
     <string name="trait_parameter_enabled">%s abilitato</string>
+    <string name="trait_parameter_disabled">%s disabilitato</string>
     <string name="trait_detail_chip_rename">Rinomina</string>
+    <string name="trait_detail_chip_math_symbols">Simboli matematici</string>
+    <string name="trait_detail_chip_multiple_categories">Categorie multiple</string>
+    <string name="trait_detail_chip_single_category">Categoria singola</string>
+    <string name="trait_detail_chip_automatic_switch">Avanzamento automatico</string>
+    <string name="trait_detail_chip_format_date">Formato: %s</string>
+    <string name="trait_detail_chip_transfer_images">Trasferire immagini</string>
+    <string name="trait_detail_chip_invalid_value">Valori anomali</string>
+    <string name="trait_parameter_allow_multicat">Selezione Categoria Multiple</string>
+    <string name="trait_parameter_display_value">Mostra Valore</string>
+    <string name="trait_parameter_resource_file">File di Risorsa</string>
+    <string name="trait_parameter_use_day_of_year">Usa Giorno Dell\'Anno</string>
+    <string name="list_item_trait_parameter_resource_file_hint">Selezionare un file di risorsa</string>
+    <string name="trait_resource_file_updated">File di Risorsa Aggiornato</string>
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">Il valore è minore rispetto al minimo impostato</string>
     <string name="trait_error_maximum_value">Il valore è maggiore del massimo impostato</string>
+    <string name="trait_error_decimal_places">Il valore non può avere più di %d decimali</string>
+    <string name="trait_error_mathematical_symbols_disabled">I simboli matematici non sono consentiti</string>
+    <string name="trait_error_integers_only">Sono consentiti solo valori interi</string>
+    <string name="dialog_invalid_value_title">Valore non Valido</string>
+    <string name="dialog_save_invalid_value_message">Vuoi comunque salvare questo valore?</string>
     <string name="trait_error_disease_severity">Severità già registrata</string>
     <string name="act_collect_study_names_empty">Lo studio selezionato ha nomi univoco, primario o secondario vuoti.</string>
     <!-- Toolbar -->
@@ -602,7 +644,7 @@
     <!--- Repeated measures -->
     <string name="view_repeated_values_add_button_content_description">Aggiunge una nuova osservazione.</string>
     <string name="view_repeated_values_add_button_fail">Devi inserire un valore prima di creare una nuova osservazione.</string>
-    <string name="menu_collect_repeated_values_indicator">Visualizza il numero di valori ripetuti.</string>
+    <string name="menu_collect_repeated_values_indicator">Mostra il numero di valori ripetuti.</string>
     <string name="dialog_multi_measure_delete_no_observations">Nessuna osservazione esistente.</string>
     <string name="dialog_multi_measure_delete_title">Osservazioni</string>
     <string name="dialog_multi_measure_confirm_delete_title">Tutte le osservazioni per questo carattere verranno eliminate definitivamente.</string>
@@ -640,6 +682,7 @@
     <string name="observation_info_entry_id">ID Entrata</string>
     <string name="observation_info_trait_format">Formati del Carattere</string>
     <string name="observation_info_trait_name">Nome del Carattere</string>
+    <string name="observation_info_trait_alias">Alias di Carattere</string>
     <string name="observation_info_value">Valore</string>
     <string name="observation_info_timestamp">Timestamp Dell\'Osservazione</string>
     <string name="observation_info_collector">Collettore</string>
@@ -988,6 +1031,8 @@
     <string name="brapi_pagination">Dimensione Della Pagina</string>
     <string name="brapi_timeout">Timeout del server</string>
     <string name="brapi_chunk_size">Dimensione Chunk</string>
+    <string name="brapi_max_concurrent_image_content">Esporta Massima Immagine Concorrente</string>
+    <string name="brapi_max_concurrent_observation_transfer">Trasferimento Di Osservazione Concorrente Massima</string>
     <string name="preferences_brapi_authorization_title">Authorization</string>
     <string name="preferences_brapi_advanced_title">Avanzato</string>
     <string name="preferences_brapi_oidc_flow_oauth_code">OAuth2 Authorization Code</string>
@@ -1001,7 +1046,7 @@
     <string name="brapi_oidc_scope_desc">The Scope to be used in the authentication provider</string>
     <string name="preferences_brapi_traits_title">Preferenze</string>
     <string name="preferences_appearance_collect_labelval_customize">Valore vs Descrizione per Visualizzare</string>
-    <string name="preferences_appearance_collect_labelval_customize_description">Visualizza i valori o le descrizione sullo schermo di raccolta</string>
+    <string name="preferences_appearance_collect_labelval_customize_description">Mostra i valori o le descrizione sullo schermo di raccolta</string>
     <string name="preferences_appearance_collect_labelval_customize_value">Valore</string>
     <string name="preferences_appearance_collect_labelval_customize_label">Descrizione</string>
     <string name="preferences_brapi_servers_title">Server Della Community</string>
@@ -1009,6 +1054,8 @@
     <string name="preferences_brapi_server_scan_error">Errore Di Scansione</string>
     <string name="preferences_brapi_server_add">Invia un server</string>
     <!-- Brapi Server Info -->
+    <string name="brapi_server_info_pref">Verifica compatibilità</string>
+    <string name="brapi_server_info_pref_summary">Visualizza le chiamate BrAPI supportate e le informazioni sul server</string>
     <string name="brapi_compatibility">Compatibilità BrAPI</string>
     <string name="brapi_compatibility_with_app">Compatibilità con %s</string>
     <string name="brapi_server_name_label">%1$s</string>
@@ -1057,7 +1104,7 @@
     </string-array>
     <!-- Authorization -->
     <string name="brapi_save_authorize">Salva e autorizza</string>
-    <string name="brapi_display_name">Visualizza Nome</string>
+    <string name="brapi_display_name">Mostra Nome</string>
     <string name="brapi_revoke_auth">Disconnettersi</string>
     <string name="brapi_auth_btn">Accedi al sito</string>
     <string name="brapi_auth_success">Autorizzazione BrAPI riuscita</string>
