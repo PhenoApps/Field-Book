@@ -170,7 +170,7 @@
     <string name="fields_study_and_obs_exists_message">Questo campo è già importato a questo livello di osservazione.</string>
     <string name="act_field_editor_failed_to_read_columns">Field Book non può caricare il file.</string>
     <string name="act_field_editor_load_file_failed">Errore durante il caricamento del file.</string>
-    <string name="act_field_editor_file_open_failed">Impossibile aprire il file.</string>
+    <string name="act_field_editor_file_open_failed">Apertura del file fallita.</string>
     <!-- Field Creator  -->
     <string name="field_creator_activity_toolbar_title">Crea Nuovo Campo</string>
     <string name="field_creator_size_title">Dettagli del Campo</string>
@@ -190,7 +190,7 @@
     <string name="field_creator_rows_exceeded_error">Impossibile superare %s</string>
     <string name="field_creator_cols_exceeded_error">Impossibile superare %s</string>
     <string name="field_creator_total_plots_exceeded_error">Il totale di parcelle non può superare %1$s. Totale attuale: %2$s</string>
-    <string name="field_creation_failed_error">Impossibile creare il campo</string>
+    <string name="field_creation_failed_error">Creazione del campo fallita</string>
     <string name="field_creator_start_point_instruction">Tocca un angolo per selezionare il punto di partenza</string>
     <string name="field_dimensions_format">Campo: %d × %d</string>
     <string name="field_creator_pattern_linear">Lineare</string>
@@ -293,6 +293,13 @@
     <string name="traits_toolbar_delete_all">Elimina tutti i caratteri</string>
     <string name="act_trait_editor_no_traits_exist">Non esistono caratteri.</string>
     <string name="export_dialog_traits_exporting">Esportazione dei caratteri…</string>
+    <string name="export_error_unknown">Errore di esportazione sconosciuto</string>
+    <string name="export_error_directory_access">Accesso alla directory di esportazione fallito</string>
+    <string name="export_error_file_creation">Creazione file di esportazione fallita</string>
+    <string name="export_error_file_stream">Apertura del flusso file fallita</string>
+    <string name="error_failed_to_create_file">Creazione del file fallita</string>
+    <string name="error_output_stream_failed">Flusso di output fallito</string>
+    <string name="error_export_failed">Esportazione fallita</string>
     <!-- Trait item menu -->
     <string name="list_item_trait_popup_content_description">Apri un menu specifico per questo carattere.</string>
     <string name="traits_options_copy">Copia</string>
@@ -354,7 +361,7 @@
     <string name="traits_create_categories_value_text">Inserisci il valore della categoria qui</string>
     <string name="list_item_category_delete_content_description">Elimina la categoria.</string>
     <string name="dialog_new_trait_add_category_content_description">Aggiungi una nuova categoria.</string>
-    <string name="list_item_traits_grid_content_description">Commuta selezione</string>
+    <string name="list_item_traits_grid_content_description">Inverti selezione</string>
     <string name="dialog_trait_parameters_title">Parametri di Caratteri</string>
     <string name="traits_create_warning_percent_magnitude_relation">Errore di relazione di magnitudine</string>
     <string name="trait_parameter_default_value_number_format_error">Deve essere un numero</string>
@@ -386,7 +393,11 @@
     <string name="select_trait">Seleziona Carattere</string>
     <string name="edit_traits">Modifica</string>
     <!-- Trait Editor -->
+    <string name="error_deleting_traits">Eliminazione caratteri fallita</string>
     <string name="error_toggling_all_traits_visibility">Impossibile attivare la visibilità dei caratteri</string>
+    <string name="error_importing_traits">Importazione caratteri fallita</string>
+    <string name="error_saving_trait_order">Impossibile salvare l\'ordine di caratteri</string>
+    <string name="error_exporting_traits">Esportazione caratteri fallita</string>
     <!-- Trait Detail -->
     <string name="trait_observation_data">Dato</string>
     <string name="trait_copied_success">Carattere copiato in %1$s</string>
@@ -456,7 +467,7 @@
     <string name="trait_error_hardware_missing">Il dispositivo non dispone una fotocamera che può essere utilizzata per scattare una foto.</string>
     <string name="trait_delete_warning_photo">Sei sicuro di voler eliminare questa foto?</string>
     <string name="trait_photo_capture_button_content_description">Premere per aprire una vista della fotocamera per catturare.</string>
-    <string name="photo_failed_to_delete">Impossibile eliminare il file.</string>
+    <string name="photo_failed_to_delete">Eliminazione del file fallita.</string>
     <!-- Trait Layout: GNSS -->
     <string name="trait_gnss_geo_coord_update_dialog_title">Avviso Aggiornamento Coordinata</string>
     <string name="trait_gnss_geo_coord_update_dialog_message">Hai una coordinata salvata per questa unità, sei sicuro di volerla aggiornare?</string>
@@ -549,7 +560,7 @@
     <string name="fragment_summary_toolbar_title">Riepilogo</string>
     <string name="menu_fragment_summary_filter_title">Filtro</string>
     <string name="fragment_summary_filter_title">Seleziona etichette di riepilogo</string>
-    <string name="dialog_fragment_summary_neutral_button">Commuta Tutto</string>
+    <string name="dialog_fragment_summary_neutral_button">Attiva/Disattiva Tutto</string>
     <string name="fragment_summary_prev_button_text">Precedente</string>
     <string name="fragment_summary_next_button_text">Successivo</string>
     <string name="fragment_summary_prev_button_content_description">Naviga alla entrata precedente.</string>
@@ -701,7 +712,7 @@
     <string name="preferences_appearance_collect_toolbar_title">Barra Degli Strumenti Di Raccolta</string>
     <string name="preferences_appearance_tutorial_description">Aggiungi un pulsante nella barra degli strumenti nell\'app che apre il tutorial</string>
     <string name="preferences_appearance_toolbar_customize">Barra Degli Strumenti Di Azioni</string>
-    <string name="preferences_appearance_toolbar_customize_description">Commuta la visibilità delle funzioni predefinite</string>
+    <string name="preferences_appearance_toolbar_customize_description">Attiva/disattiva la visibilità delle funzioni predefinite</string>
     <string name="preferences_appearance_toolbar_customize_search">Cerca</string>
     <string name="preferences_appearance_toolbar_customize_resources">Risorse</string>
     <string name="preferences_appearance_toolbar_customize_summary">Riassunto</string>
@@ -1038,7 +1049,7 @@
     <string name="brapi_warning_select_program">Per favore seleziona un programma</string>
     <string name="brapi_warning_select_trial">Per favore seleziona una prova</string>
     <string name="brapi_warning_select_study">Per favore seleziona un campo</string>
-    <string name="brapi_export_failed">Esportazione BrAPI non riuscita</string>
+    <string name="brapi_export_failed">Esportazione BrAPI Fallita</string>
     <string name="brapi_export_permission_deny">ERRORE: non si dispone delle autorizzazioni per inviare i dati al sistema specificato.</string>
     <string name="brapi_export_not_supported">ERRORE: il sistema di destinazione non supporta l\'invio di osservazioni tramite BrAPI.</string>
     <string name="brapi_export_wrong_num_obs">ERRORE: numero di risposta delle osservazioni diverso dalla richiesta</string>
@@ -1087,6 +1098,10 @@
     <string name="brapi_export_progress_title">Esportazione a BrAPI</string>
     <string name="brapi_export_new_images_pending">Nuove immagini</string>
     <string name="cancelling">Annullando...</string>
+    <string name="brapi_export_uploading_new_observations">Caricando nuove osservazioni...</string>
+    <string name="brapi_export_uploading_edited_observations">Caricando osservazioni modificate...</string>
+    <string name="brapi_export_uploading_new_images">Caricando nuove immagini...</string>
+    <string name="brapi_export_uploading_edited_images">Caricando immagini modificate/incomplete...</string>
     <string name="brapi_export_complete">Esportazione completata</string>
     <string name="cancel">Annulla</string>
     <!-- Pagination -->
@@ -1267,7 +1282,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="act_brapi_study_import_title">Importazione Studio</string>
     <string name="select">Seleziona</string>
     <string name="results">risultati</string>
-    <string name="failed_to_fetch_observation_units">Recupero delle unità di osservazione non riuscito</string>
+    <string name="failed_to_fetch_observation_units">Recupero delle unità di osservazione fallito</string>
     <string name="preferences_brapi_cache_invalidate_dialog_title">Invalida le Scelte dell\'Intervallo della Cache</string>
     <string name="preferences_brapi_cache_invalidate_summary">%s</string>
     <string name="preferences_brapi_cache_invalidate_title">Invalidazione Cache</string>
@@ -1307,10 +1322,10 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="pref_geonav_distance_threshold_summary">GeoNav si ferma automaticamente quando la distanza da tutti le parcelle supera questo valore in chilometri.</string>
     <string name="pref_geonav_distance_threshold_title">Controllo Di Prossimità</string>
     <string name="activity_collect_proximity_warning">GeoNav Fermo, al di fuori delle coordinate</string>
-    <string name="failed_to_save_study">Impossibile salvare lo studio</string>
+    <string name="failed_to_save_study">Salvataggio dello studio fallito</string>
     <string name="no_suitable_file_manager_was_found">Non è stato trovato alcun Gestore File adatto.</string>
     <string name="trait_error_invalid_multicat_value">Dati categorici inseriti non validi.</string>
-    <string name="dialog_crash_report_title">Impossibile caricare i dati</string>
+    <string name="dialog_crash_report_title">Caricamento dei dati fallito</string>
     <string name="dialog_crash_report_message">Premi OK per inviare un report diagnostico anonimo per aiutarti a migliorare l\'app.</string>
     <string name="dialog_quick_goto_title">Vai Rapido a</string>
     <string name="dialog_quick_goto_go">Vai</string>
@@ -1345,14 +1360,14 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="nearby_share_already_searching_for_sender">Già alla ricerca del mittente…</string>
     <string name="nearby_share_no_devices_found">Nessun dispositivo trovato ancora</string>
     <string name="nearby_share_permissions_required">Autorizzazioni Per Dispositivi Nelle Vicinanze Richieste</string>
-    <string name="nearby_share_failed_discovery">Avvio della scoperta non riuscito: %s</string>
+    <string name="nearby_share_failed_discovery">Avvio della scoperta fallito: %s</string>
     <string name="nearby_share_failed_advertising">Errore durante l\'attesa dei dispositivi: %s</string>
-    <string name="nearby_share_failed_transfer">Avvio del trasferimento non riuscito: %s</string>
+    <string name="nearby_share_failed_transfer">Avvio del trasferimento fallito: %s</string>
     <string name="nearby_share_failed_payload">Creazione del file payload non riuscita</string>
-    <string name="nearby_share_failed_request">Impossibile richiedere la connessione: %s</string>
+    <string name="nearby_share_failed_request">Richiesta di connessione fallita: %s</string>
     <string name="nearby_share_failed_handle_file">Gestione del file non riuscita: %s</string>
     <string name="nearby_share_generating_file">Preparazione del file per il trasferimento</string>
-    <string name="nearby_share_failed_import">Importazione del file non riuscita: %s</string>
+    <string name="nearby_share_failed_import">Importazione del file fallita: %s</string>
     <string name="nearby_share_failed_export_generation_message">Errore nel generare il file per la condivisione: %s</string>
     <string name="nearby_share_failed_export_generation">Errore nel generare il file per la condivisione</string>
     <string name="nearby_share_file_imported_successfully">%s importato con successo</string>
@@ -1419,25 +1434,40 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="failed_to_find_file_name">Impossibile recuperare il nome del file.</string>
     <string name="act_brapi_export_success">Esportazione eseguita con successo</string>
     <string name="export_cancelled">Esportazione annullata.</string>
+    <string name="authentication_failed">Autenticazione fallita.</string>
+    <string name="uploading_metadata">Caricando Metadati: %1$s</string>
+    <string name="uploading_content">Caricando Contenuto: %1$s</string>
+    <string name="completed_brapi_upload">Completato: %1$s</string>
+    <string name="failed_brapi_image_upload">Fallito: %1$s</string>
     <string name="brapi_download_button">Scarica</string>
     <string name="brapi_sync_button">Sincronizza</string>
     <string name="brapi_downloading_observations">Estrazione dei dati da BrAPI</string>
     <string name="brapi_downloading_page">Scarica la pagina %1$d/%2$d</string>
+    <string name="brapi_upload_button">Caricare</string>
+    <string name="nothing_to_upload">Niente da caricare</string>
     <string name="download_cancelled">Scaricamento annullato</string>
     <string name="download_failed">Scaricamento Fallito</string>
     <string name="user_cancelled_operation">Operazione annullata dall\'utente.</string>
     <string name="upload_failed">Caricamento Fallito</string>
     <string name="downloaded">Scaricato</string>
+    <string name="upload_to_brapi">Carica su %1$s</string>
+    <string name="brapi_upload_error">Errore di caricamento BrAPI %1$s</string>
+    <string name="uploaded">Caricato</string>
     <string name="new_images">Nuove immagini</string>
     <string name="edited_images">Immagini modificate</string>
+    <string name="no_observations_to_upload">Nessuna osservazione da caricare</string>
     <string name="synced_images">Immagini sincronizzate</string>
     <string name="operation_was_cancelled">Operazione annullata: %1$s</string>
+    <string name="failed_items">%1$d elementi falliti</string>
+    <string name="failed_images">%1$d immagini fallite</string>
     <string name="complete">Completo</string>
     <string name="server">Server</string>
     <string name="local">Locale</string>
-    <string name="download_from">Download da %1$s</string>
+    <string name="download_from">Scarica da %1$s</string>
     <string name="manual">Manuale</string>
+    <string name="select_all_server">Seleziona tutto (server)</string>
     <string name="toggle">Attiva/Disattiva</string>
     <string name="there_are_unuploaded_observations_or_images_do_you_want_to_upload_them_before_downloading">Ci sono osservazioni o immagini non caricate. Vuoi caricarle prima di scaricare?</string>
+    <string name="upload_first">Caricare</string>
     <string name="download_anyway">Scarica</string>
 </resources>
