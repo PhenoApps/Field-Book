@@ -127,7 +127,7 @@
     <string name="field_sort_entries">Ordina</string>
     <string name="sort_dialog_saved">Ordinamento aggiornato</string>
     <string name="sort_dialog_error_saving">Errore durante l\'aggiornamento dell\'ordinamento</string>
-    <string name="list_item_field_sort_delete_content_description">Cancella criterio di ordinamento.</string>
+    <string name="list_item_field_sort_delete_content_description">Elimina l\'attributo di ordinamento.</string>
     <string name="dialog_field_sort_title">Ordina le Entrate</string>
     <string name="list_item_field_sort_drag_content_description">Trascina per spostare l\'elemento.</string>
     <string name="dialog_field_sort_no_attributes_found">Nessun attributo trovato.</string>
@@ -295,11 +295,16 @@
     <string name="export_dialog_traits_exporting">Esportazione dei caratteri…</string>
     <string name="export_error_unknown">Errore di esportazione sconosciuto</string>
     <string name="export_error_directory_access">Accesso alla directory di esportazione fallito</string>
+    <string name="export_error_directory_not_found">Directory di esportazione non trovato</string>
     <string name="export_error_file_creation">Creazione file di esportazione fallita</string>
     <string name="export_error_file_stream">Apertura del flusso file fallita</string>
+    <string name="error_trait_directory_not_available">Directory di caratteri non disponibile</string>
+    <string name="error_trait_directory_missing">Directory di caratteri mancante</string>
     <string name="error_failed_to_create_file">Creazione del file fallita</string>
     <string name="error_output_stream_failed">Flusso di output fallito</string>
     <string name="error_export_failed">Esportazione fallita</string>
+    <string name="error_unable_to_copy_trait_file">Impossibile copiare il file di caratteri</string>
+    <string name="error_cannot_open_file">Impossibile aprire il file</string>
     <!-- Trait item menu -->
     <string name="list_item_trait_popup_content_description">Apri un menu specifico per questo carattere.</string>
     <string name="traits_options_copy">Copia</string>
@@ -343,16 +348,20 @@
     <string name="traits_create_value_minimum">Minimo</string>
     <string name="traits_create_value_maximum">Massimo</string>
     <string name="traits_create_details">Dettagli</string>
+    <string name="traits_create_unit">Unità</string>
     <string name="traits_create_optional">Opzionale</string>
     <string name="traits_create_categories_title">Categorie</string>
     <string name="traits_create_photo_maximum">Numero massimo di foto</string>
     <string name="traits_create_true">Vero</string>
     <string name="traits_create_false">Falso</string>
     <string name="traits_create_unset">Non Settato</string>
+    <string name="traits_create_enabled">Abilitato</string>
     <string name="traits_create_disabled">Disabilitato</string>
     <string name="traits_create_categories_text">Separa categorie con /</string>
     <string name="traits_create_camera">Fotocamera</string>
     <string name="traits_create_close_keyboard">Chiudi la Tastiera</string>
+    <string name="trait_parameter_decimal_places">Posizioni Decimali</string>
+    <string name="trait_parameter_decimal_places_hint">Numero di decimali (-1 per illimitati, 0 per interi)</string>
     <string name="trait_parameter_decimal_places_error">Il valore deve essere compreso tra -1 e 10</string>
     <string name="traits_create_warning_name_blank">Il nome del carattere non può essere vuoto</string>
     <string name="traits_create_warning_duplicate">Il carattere esiste già</string>
@@ -383,6 +392,7 @@
     <string name="trait_parameter_decimal_places_no_restriction">Nessuna restrizione</string>
     <string name="trait_parameter_decimal_places_integer_only">Solo interi</string>
     <string name="trait_parameter_decimal_places_allowed">Consenti input decimale</string>
+    <string name="trait_parameter_decimal_places_custom">Numero massimo di decimali:</string>
     <string name="trait_parameter_decimal_places_custom_hint">1–10</string>
     <string name="trait_parameter_decimal_places_custom_required">Inserisci il numero di cifre decimali (1–10)</string>
     <string name="trait_parameter_decimal_places_custom_error">Il valore deve essere compreso tra 1 e 10</string>
@@ -390,17 +400,23 @@
     <string name="trait_parameter_mathematical_symbols">Simboli Matematici</string>
     <string name="traits_create_warning_math_symbols_conflict">Simboli matematici e restrizioni della posizione decimale non possono essere applicati simultaneamente</string>
     <string name="trait_parameter_repeated_measures">Misure Ripeti</string>
+    <string name="trait_parameter_auto_switch_plot">Passa Automaticamente Alla Prossima Parcella</string>
+    <string name="trait_parameter_invalid_value">Consenti Valore Non Valido</string>
     <string name="select_trait">Seleziona Carattere</string>
     <string name="edit_traits">Modifica</string>
     <!-- Trait Editor -->
+    <string name="error_loading_traits">Errore nel caricamento delle caratteri</string>
     <string name="error_deleting_traits">Eliminazione caratteri fallita</string>
     <string name="error_toggling_all_traits_visibility">Impossibile attivare la visibilità dei caratteri</string>
     <string name="error_importing_traits">Importazione caratteri fallita</string>
     <string name="error_saving_trait_order">Impossibile salvare l\'ordine di caratteri</string>
     <string name="error_exporting_traits">Esportazione caratteri fallita</string>
+    <string name="message_all_traits_deleted">Tutti i caratteri eliminati</string>
     <!-- Trait Detail -->
     <string name="trait_observation_data">Dato</string>
     <string name="trait_copied_success">Carattere copiato in %1$s</string>
+    <string name="error_deleting_trait">Errore: impossibile eliminare il carattere</string>
+    <string name="trait_parameter_enabled">%s abilitato</string>
     <string name="trait_detail_chip_rename">Rinomina</string>
     <!-- COLLECT -->
     <!-- Validation -->
