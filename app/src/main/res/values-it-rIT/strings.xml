@@ -287,7 +287,7 @@
     <string name="import_error_format_trait_json">Formato JSON non valido: %s</string>
     <string name="import_error_no_traits">Nessuna caratteristica trovata</string>
     <string name="trait_import_successful">Caratteri importati con successo</string>
-    <string name="traits_export_check">Esporta la lista de caratteri corrente?</string>
+    <string name="traits_export_check">Esporta la lista di caratteri corrente?</string>
     <string name="traits_dialog_export">Esporta</string>
     <string name="dialog_delete_traits_message">Vuoi eliminare tutti i caratteri correnti? Eliminare un carattere elimina anche i dati che sono stati raccolti per quel carattere.</string>
     <string name="traits_toolbar_delete_all">Elimina tutti i caratteri</string>
@@ -338,7 +338,7 @@
     <string name="traits_format_scale">Scala</string>
     <string name="traits_format_stop_watch">Cronometro</string>
     <!-- Trait Creation Dialog -->
-    <string name="traits_toolbar_add_trait">Formati del Carattere</string>
+    <string name="traits_toolbar_add_trait">Formati di Carattere</string>
     <string name="trait_creator_title_layout">Disposizione dei Caratteri</string>
     <string name="trait_creator_parameters_title">Parametri %s</string>
     <string name="activity_traits_new_button_content_description">Aggiungi un nuovo carattere.</string>
@@ -405,7 +405,7 @@
     <string name="select_trait">Seleziona Carattere</string>
     <string name="edit_traits">Modifica</string>
     <!-- Trait Editor -->
-    <string name="error_loading_traits">Errore nel caricamento delle caratteri</string>
+    <string name="error_loading_traits">Errore nel caricamento dei caratteri</string>
     <string name="error_deleting_traits">Eliminazione caratteri fallita</string>
     <string name="error_toggling_all_traits_visibility">Impossibile attivare la visibilità dei caratteri</string>
     <string name="error_importing_traits">Importazione caratteri fallita</string>
@@ -485,7 +485,7 @@
     <string name="act_collect_study_names_empty">Lo studio selezionato ha nomi univoco, primario o secondario vuoti.</string>
     <!-- Toolbar -->
     <string name="main_toolbar_resources">Risorse</string>
-    <string name="main_trait_details">Dettagli carattere</string>
+    <string name="main_trait_details">Dettagli del carattere</string>
     <string name="main_infobar_data_missing">Nessun dato</string>
     <string name="main_infobar_select_data">Seleziona</string>
     <string name="main_toolbar_next_entry_no_data">Prossima entrata senza dati</string>
@@ -680,8 +680,8 @@
     <string name="observation_metadata_title">Metadati Dell\'Osservazione</string>
     <string name="observation_info_study_name">Nome dello Studio</string>
     <string name="observation_info_entry_id">ID Entrata</string>
-    <string name="observation_info_trait_format">Formati del Carattere</string>
-    <string name="observation_info_trait_name">Nome del Carattere</string>
+    <string name="observation_info_trait_format">Formati di Carattere</string>
+    <string name="observation_info_trait_name">Nome di Carattere</string>
     <string name="observation_info_trait_alias">Alias di Carattere</string>
     <string name="observation_info_value">Valore</string>
     <string name="observation_info_timestamp">Timestamp Dell\'Osservazione</string>
