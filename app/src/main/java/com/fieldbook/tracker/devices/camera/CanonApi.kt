@@ -2,6 +2,7 @@ package com.fieldbook.tracker.devices.camera
 
 import android.content.Context
 import android.graphics.BitmapFactory
+import android.net.Network
 import android.util.Log
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.devices.ptpip.ChannelBufferManager
@@ -42,6 +43,9 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
         const val HANDLE_UPDATE_FRAME_COUNT = 30
         const val PHONE_NAME = "Field Book"
     }
+
+    @Volatile
+    var boundNetwork: Network? = null
 
     var isConnected = false
 
@@ -335,7 +339,22 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
     private fun startNewSession(sessionCallback: PtpSessionCallback) {
 
         //TODO potentially add these timeouts to preferences
-        val command: SocketChannel = SocketChannel.open(InetSocketAddress(canonIp, canonPort))
+        //open and bind the command channel to the selected network when available
+        val command: SocketChannel = try {
+            val address = InetSocketAddress(canonIp, canonPort)
+            if (boundNetwork != null) {
+                val ch = SocketChannel.open()
+                // Bind the socket to the network so traffic goes over the chosen network
+                boundNetwork!!.bindSocket(ch.socket())
+                ch.connect(address)
+                ch
+            } else {
+                SocketChannel.open(address)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            SocketChannel.open(InetSocketAddress(canonIp, canonPort))
+        }
         command.socket().soTimeout = 10000
         command.socket().keepAlive = true
         command.socket().tcpNoDelay = true
@@ -345,7 +364,20 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
 
         val connectionNumber = requestConnection(chanMan)
 
-        val events = SocketChannel.open(InetSocketAddress(canonIp, canonPort))
+        val events: SocketChannel = try {
+            val address = InetSocketAddress(canonIp, canonPort)
+            if (boundNetwork != null) {
+                val ch = SocketChannel.open()
+                boundNetwork!!.bindSocket(ch.socket())
+                ch.connect(address)
+                ch
+            } else {
+                SocketChannel.open(address)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            SocketChannel.open(InetSocketAddress(canonIp, canonPort))
+        }
         events.socket().soTimeout = 120000
         events.socket().keepAlive = true
         events.socket().tcpNoDelay = true

@@ -14,7 +14,6 @@ import android.util.AttributeSet
 import android.util.Log
 import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.documentfile.provider.DocumentFile
 import androidx.media3.ui.PlayerView
@@ -45,7 +44,10 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
 import org.threeten.bp.OffsetDateTime
 import java.io.File
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
 import java.io.IOException
+import java.io.OutputStream
 import java.io.RandomAccessFile
 import javax.inject.Inject
 import androidx.core.net.toUri
@@ -188,79 +190,279 @@ abstract class AbstractCameraTrait :
         goProImage: GoProApi.GoProImage? = null,
     ) {
 
-        saveToStorage(obsUnit, traitObj, saveTime, saveState, data.isEmpty()) { uri ->
+        // Resolve/create destination Uri synchronously so chunked writes can start immediately.
+        val uri = resolveOrCreateFileUri(obsUnit, saveTime, saveState)
 
-            if (saveState != SaveState.SINGLE_SHOT) {
+        if (saveState != SaveState.SINGLE_SHOT) {
 
-                context.externalCacheDir?.let { dir ->
+            context.externalCacheDir?.let { dir ->
 
-                    RandomAccessFile(File(dir, TEMPORARY_IMAGE_NAME), "rw").use { raf ->
+                RandomAccessFile(File(dir, TEMPORARY_IMAGE_NAME), "rw").use { raf ->
 
-                        if (saveState != SaveState.COMPLETE) {
+                    if (saveState != SaveState.COMPLETE) {
 
-                            saveBufferedData(raf, data, offset)
+                        saveBufferedData(raf, data, offset)
 
+                    } else {
+
+                        if (uri == Uri.EMPTY) {
+                            Log.e(TAG, "saveJpegToStorage: destination URI empty on COMPLETE, cannot write assembled file")
                         } else {
-
                             saveTempFileToStorage(uri, raf)
                         }
                     }
                 }
+            } ?: Log.e(TAG, "saveJpegToStorage: externalCacheDir is null, cannot assemble chunks")
 
-            } else {
+        } else {
 
-                if (uri == Uri.EMPTY && goProImage != null) {
+            if (uri == Uri.EMPTY && goProImage != null) {
 
-                    val studyId = collectActivity.studyId
+                val studyId = collectActivity.studyId
 
-                    val rep = database.getNextRep(studyId, obsUnit.uniqueId, currentTrait.id)
+                val rep = database.getNextRep(studyId, obsUnit.uniqueId, currentTrait.id)
 
-                    (context as? CollectActivity)?.updateObservation(traitObj, goProImage.fileName, rep)
+                (context as? CollectActivity)?.updateObservation(traitObj, goProImage.fileName, rep)
 
-                    ui.launch {
+                ui.launch {
 
-                        notifyItemInserted(goProImage.fileName.toUri())
+                    notifyItemInserted(goProImage.fileName.toUri())
 
-                        (context as CollectActivity).refreshRepeatedValuesToolbarIndicator()
+                    (context as CollectActivity).refreshRepeatedValuesToolbarIndicator()
 
-                    }
-                } else {
-                    saveSingleShot(uri, data)
                 }
+            } else {
+                saveSingleShot(uri, data)
             }
         }
     }
 
+    // Lightweight synchronous resolver/creator for the destination file Uri.
+    private fun resolveOrCreateFileUri(obsUnit: RangeObject, saveTime: String, saveState: SaveState): Uri {
+        val plot = obsUnit.uniqueId
+        val studyId = collectActivity.studyId
+        val person = (activity as? CollectActivity)?.person
+        val location = (activity as? CollectActivity)?.locationByPreferences
+        val rep = database.getNextRep(studyId, plot, currentTrait.id)
+
+        val sanitizedTraitName = FileUtil.sanitizeFileName(currentTrait.name)
+        val name = "${plot}_${sanitizedTraitName}_$saveTime.jpg"
+
+        try {
+            DocumentTreeUtil.getFieldMediaDirectory(context, sanitizedTraitName)?.let { dir ->
+                if (saveState == SaveState.NEW || saveState == SaveState.SINGLE_SHOT) {
+                    dir.createFile("*/*", name)?.let { created ->
+                        background.launch {
+                            database.insertObservation(
+                                plot, currentTrait.id, created.uri.toString(),
+                                person, location, "", studyId,
+                                null, null, null, rep
+                            )
+
+                            if (saveState == SaveState.SINGLE_SHOT) {
+                                writeExif(created, studyId, plot, currentTrait.id, saveTime)
+                                ui.launch { notifyItemInserted(created.uri) }
+                            }
+
+                            ui.launch { (context as CollectActivity).refreshRepeatedValuesToolbarIndicator() }
+                        }
+
+                        return created.uri
+                    } ?: return Uri.EMPTY
+                } else {
+                    val found = dir.findFile(name)
+                    if (found != null) {
+                        if (saveState == SaveState.COMPLETE) {
+                            background.launch {
+                                writeExif(found, studyId, plot, currentTrait.id, saveTime)
+                                ui.launch { notifyItemInserted(found.uri) }
+                            }
+                        }
+
+                        return found.uri
+                    }
+                    return Uri.EMPTY
+                }
+            } ?: return Uri.EMPTY
+        } catch (_: Exception) {
+            return Uri.EMPTY
+        }
+    }
+
+    // Helper that opens an OutputStream safely for content:// and file:// URIs.
+    // Returns null if it cannot be opened.
+    private fun openOutputStreamSafely(uri: Uri, append: Boolean = false, mode: String? = null): OutputStream? {
+        if (uri == Uri.EMPTY) return null
+
+        // Prefer content resolver when possible
+        try {
+            mode?.let {
+                // try to use ContentResolver with given mode if provided
+                return try {
+                    context.contentResolver.openOutputStream(uri, it)
+                } catch (_: FileNotFoundException) {
+                    null
+                }
+            }
+
+            // First attempt: content resolver default
+            try {
+                context.contentResolver.openOutputStream(uri)?.let { return it }
+            } catch (_: FileNotFoundException) {
+                // fallthrough to other strategies
+            }
+
+            // If the URI points to a file scheme, use a FileOutputStream
+            if (uri.scheme == "file") {
+                uri.path?.let { path ->
+                    val file = File(path)
+                    // ensure parent exists
+                    file.parentFile?.let { parent ->
+                        if (!parent.exists()) parent.mkdirs()
+                    }
+                    return FileOutputStream(file, append)
+                }
+            }
+
+            // Try resolving DocumentFile and then opening via content resolver
+            DocumentFile.fromSingleUri(context, uri)?.let { doc ->
+                try {
+                    context.contentResolver.openOutputStream(doc.uri)?.let { return it }
+                } catch (_: FileNotFoundException) {
+                    // ignore
+                }
+            }
+
+            // Fallback: try opening a ParcelFileDescriptor then create a FileOutputStream
+            try {
+                val pfd = context.contentResolver.openFileDescriptor(uri, if (append) "wa" else "w")
+                if (pfd != null) {
+                    return FileOutputStream(pfd.fileDescriptor)
+                }
+            } catch (_: Exception) {
+                // ignore and continue
+            }
+
+            // As a last resort, try interpreting path as a filesystem path
+            uri.path?.let { p ->
+                val file = File(p)
+                if (file.exists() || file.parentFile?.exists() == true) {
+                    return FileOutputStream(file, append)
+                }
+            }
+
+        } catch (e: Exception) {
+            Log.e(TAG, "openOutputStreamSafely failed for uri=$uri", e)
+        }
+
+        Log.e(TAG, "Unable to open output stream for uri: $uri")
+        return null
+    }
+
     private fun saveTempFileToStorage(uri: Uri, raf: RandomAccessFile) {
 
-        context.contentResolver.openOutputStream(uri, "wa")?.use { output ->
-            try {
-                val buffer = ByteArray(1024)
-                var bytesRead = raf.read(buffer)
-                while (bytesRead != -1) {
-                    output.write(buffer, 0, bytesRead)
-                    bytesRead = raf.read(buffer)
+        try {
+            Log.d(TAG, "saveTempFileToStorage: target uri=[$uri]")
+            // ensure we read from the start of the temp file
+            raf.seek(0)
+
+            // Prefer writing in overwrite mode for SAF providers (some don't support append)
+            val output = openOutputStreamSafely(uri)
+
+            if (output != null) {
+                output.use { out ->
+                    try {
+                        val buffer = ByteArray(16 * 1024)
+                        var bytesRead = raf.read(buffer)
+                        while (bytesRead != -1) {
+                            out.write(buffer, 0, bytesRead)
+                            bytesRead = raf.read(buffer)
+                        }
+                        out.flush()
+                    } catch (e: IOException) {
+                        Log.e(TAG, "Failed to copy temporary file to destination via OutputStream: $uri", e)
+                    }
                 }
-            } catch (e: IOException) {
-                e.printStackTrace()
-                Log.e(TAG, e.message ?: "Failed to save image.")
+
+            } else {
+                Log.w(TAG, "openOutputStreamSafely returned null for uri=$uri, attempting BaseDocumentTreeUtil.copy fallback")
+
+                // Attempt to perform a copy using BaseDocumentTreeUtil from the temporary cache file
+                try {
+                    context.externalCacheDir?.let { dir ->
+                        val tmp = File(dir, TEMPORARY_IMAGE_NAME)
+                        Log.d(TAG, "saveTempFileToStorage: temp file path=${tmp.absolutePath}, exists=${tmp.exists()}")
+
+                        if (tmp.exists()) {
+                            try {
+                                val destDoc = DocumentFile.fromSingleUri(context, uri)
+                                if (destDoc != null) {
+                                    org.phenoapps.utils.BaseDocumentTreeUtil.copy(context, DocumentFile.fromFile(tmp), destDoc)
+                                    Log.d(TAG, "saveTempFileToStorage: fallback copy via BaseDocumentTreeUtil succeeded to $uri")
+                                } else {
+                                    Log.e(TAG, "saveTempFileToStorage: DocumentFile.fromSingleUri returned null for $uri")
+                                }
+                            } catch (e: Exception) {
+                                Log.e(TAG, "saveTempFileToStorage: fallback copy failed", e)
+                            }
+                        } else {
+                            Log.e(TAG, "saveTempFileToStorage: temp file does not exist: ${tmp.absolutePath}")
+                        }
+                    } ?: Log.e(TAG, "saveTempFileToStorage: externalCacheDir is null; cannot perform fallback copy")
+                } catch (e: Exception) {
+                    Log.e(TAG, "saveTempFileToStorage: unexpected error during fallback copy", e)
+                }
             }
+
+            // Attempt to delete the temporary cache file in externalCacheDir
+            try {
+                context.externalCacheDir?.let { dir ->
+                    val tmp = File(dir, TEMPORARY_IMAGE_NAME)
+                    if (tmp.exists()) tmp.delete()
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to delete temporary cache file", e)
+            }
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Unexpected error while saving temp file to storage: $uri", e)
         }
     }
 
     private fun saveBufferedData(raf: RandomAccessFile, data: ByteArray, offset: Int?) {
 
-        raf.seek((offset ?: 0).toLong())
+        val pos = (offset ?: 0).toLong()
+
+        // If this is the first chunk (offset 0), truncate any previous contents
+        if (pos == 0L) {
+            try {
+                raf.setLength(0)
+            } catch (e: Exception) {
+                Log.w(TAG, "saveBufferedData: failed to truncate temp file", e)
+            }
+        }
+
+        raf.seek(pos)
 
         raf.write(data)
     }
 
     private fun saveSingleShot(uri: Uri, data: ByteArray) {
 
-        context.contentResolver.openOutputStream(uri, "wa")?.use { output ->
+        Log.d(TAG, "saveSingleShot: target uri=[$uri], dataLen=${data.size}")
 
-            output.write(data)
+        val output = openOutputStreamSafely(uri) ?: run {
+            Log.e(TAG, "Unable to open output stream for single-shot uri: $uri")
+            return
+        }
 
+        output.use { out ->
+            try {
+                out.write(data)
+                out.flush()
+            } catch (e: IOException) {
+                Log.e(TAG, "Failed to write single-shot image to $uri", e)
+            }
         }
     }
 
@@ -274,11 +476,21 @@ abstract class AbstractCameraTrait :
             ), saveState = SaveState.SINGLE_SHOT
         ) { uri ->
 
-            context.contentResolver.openOutputStream(uri)?.let { output ->
+            openOutputStreamSafely(uri)?.let { output ->
 
                 bmp.compress(Bitmap.CompressFormat.JPEG, 80, output)
+                try {
+                    output.flush()
+                } catch (e: IOException) {
+                    // ignore
+                }
+                try {
+                    output.close()
+                } catch (e: IOException) {
+                    // ignore
+                }
 
-            }
+            } ?: Log.e(TAG, "Failed to open output stream for bitmap uri: $uri")
         }
     }
 
@@ -322,24 +534,96 @@ abstract class AbstractCameraTrait :
         val location = (activity as? CollectActivity)?.locationByPreferences
         val rep = database.getNextRep(studyId, plot, currentTrait.id)
 
+        // Prepare file name
+        val sanitizedTraitName = FileUtil.sanitizeFileName(currentTrait.name)
+        val name = "${plot}_${sanitizedTraitName}_$saveTime.jpg"
+
+        // Try to synchronously resolve/create the file so saver is invoked immediately
+        try {
+            DocumentTreeUtil.getFieldMediaDirectory(context, sanitizedTraitName)?.let { dir ->
+
+                Log.d(TAG, "saveToStorage (sync): resolved dir=${dir.uri}")
+
+                if (saveState == SaveState.NEW || saveState == SaveState.SINGLE_SHOT) {
+
+                    val created = dir.createFile("*/*", name)
+                    if (created != null) {
+                        Log.d(TAG, "saveToStorage (sync): created file=${created.uri}")
+                        saver.invoke(created.uri)
+
+                        // do DB insert and potential notifications in background
+                        background.launch {
+                            database.insertObservation(
+                                plot, currentTrait.id, created.uri.toString(),
+                                person,
+                                location, "", studyId,
+                                null,
+                                null,
+                                null,
+                                rep
+                            )
+
+                            if (saveState == SaveState.SINGLE_SHOT) {
+                                writeExif(created, studyId, plot, traitId, saveTime)
+                                ui.launch { notifyItemInserted(created.uri) }
+                            }
+
+                            ui.launch { (context as CollectActivity).refreshRepeatedValuesToolbarIndicator() }
+                        }
+
+                        return
+                    } else {
+                        Log.e(TAG, "saveToStorage (sync): failed to create file $name in dir ${dir.uri}")
+                    }
+
+                } else if (saveState in setOf(SaveState.SAVING, SaveState.COMPLETE)) {
+
+                    val found = dir.findFile(name)
+                    if (found != null) {
+                        Log.d(TAG, "saveToStorage (sync): found file=${found.uri}")
+                        saver.invoke(found.uri)
+
+                        if (saveState == SaveState.COMPLETE) {
+                            // write exif and notify in background
+                            background.launch {
+                                writeExif(found, studyId, plot, traitId, saveTime)
+                                ui.launch { notifyItemInserted(found.uri) }
+                            }
+                        }
+
+                        return
+                    } else {
+                        Log.e(TAG, "saveToStorage (sync): file not found for saving: $name in dir ${dir.uri}")
+                    }
+                }
+            } ?: Log.e(TAG, "saveToStorage (sync): could not resolve media directory for trait=$sanitizedTraitName")
+        } catch (e: Exception) {
+            Log.e(TAG, "saveToStorage (sync) failed", e)
+        }
+
+        // Fallback to async behavior if sync path didn't resolve
         background.launch {
 
             //get current trait's trait name, use it as a plot_media directory
             currentTrait.name.let { traitName ->
 
-                val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
+                val sanitizedTraitNameLocal = FileUtil.sanitizeFileName(traitName)
 
                 val traitDbId = currentTrait.id
 
                 //get the bitmap from the texture view, only use it if its not null
 
-                val name = "${plot}_${sanitizedTraitName}_$saveTime.jpg"
+                val nameLocal = "${plot}_${sanitizedTraitNameLocal}_$saveTime.jpg"
 
-                DocumentTreeUtil.getFieldMediaDirectory(context, sanitizedTraitName)?.let { dir ->
+                DocumentTreeUtil.getFieldMediaDirectory(context, sanitizedTraitNameLocal)?.let { dir ->
+
+                    Log.d(TAG, "saveToStorage: resolved dir=${dir.uri}")
 
                     if (saveState == SaveState.NEW || saveState == SaveState.SINGLE_SHOT) {
 
-                        dir.createFile("*/*", name)?.let { file ->
+                        dir.createFile("*/*", nameLocal)?.let { file ->
+
+                            Log.d(TAG, "saveToStorage: created file=${file.uri}")
 
                             saver.invoke(file.uri)
 
@@ -359,7 +643,7 @@ abstract class AbstractCameraTrait :
 
                                 notifyItemInserted(file.uri)
                             }
-                        }
+                        } ?: Log.e(TAG, "saveToStorage: failed to create file $nameLocal in dir ${dir.uri}")
 
                         ui.launch {
 
@@ -369,23 +653,29 @@ abstract class AbstractCameraTrait :
 
                     } else if (saveState in setOf(SaveState.SAVING, SaveState.COMPLETE)) {
 
-                        dir.findFile(name)?.let { file ->
+                        val found = dir.findFile(nameLocal)
+                        if (found == null) {
+                            Log.e(TAG, "saveToStorage: file not found for saving: $nameLocal in dir ${dir.uri}")
+                        } else {
+                            Log.d(TAG, "saveToStorage: found file=${found.uri}")
 
                             if (saveState == SaveState.COMPLETE) {
 
-                                saver.invoke(file.uri)
+                                saver.invoke(found.uri)
 
-                                writeExif(file, studyId, plot, traitId, saveTime)
+                                writeExif(found, studyId, plot, traitId, saveTime)
 
-                                notifyItemInserted(file.uri)
+                                notifyItemInserted(found.uri)
 
                             } else {
 
-                                saver.invoke(file.uri)
+                                saver.invoke(found.uri)
 
                             }
                         }
                     }
+                } ?: run {
+                    Log.e(TAG, "saveToStorage: could not resolve media directory for trait=$sanitizedTraitNameLocal")
                 }
             }
         }
@@ -408,9 +698,9 @@ abstract class AbstractCameraTrait :
                         val croppedBmp = BitmapLoader.cropBitmap(context, uri, cropRect)
 
                         //save cropped bmp to uri
-                        context.contentResolver.openOutputStream(uri)?.use { output ->
+                        openOutputStreamSafely(uri)?.use { output ->
                             croppedBmp.compress(Bitmap.CompressFormat.JPEG, 80, output)
-                        }
+                        } ?: Log.e(TAG, "Failed to open output stream for cropping uri: $uri")
 
                         withContext(Dispatchers.Main) {
                             loadItems()
