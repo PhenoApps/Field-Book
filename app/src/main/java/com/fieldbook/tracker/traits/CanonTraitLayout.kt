@@ -226,7 +226,8 @@ class CanonTraitLayout :
     }
 
     override fun onNetworkBound(network: Network) {
+        // Provide the bound network's socketFactory to CanonApi so its sockets are created on that network
+        controller.getCanonApi().boundNetwork = network
         startCanonSession(currentRange)
     }
 }
-
