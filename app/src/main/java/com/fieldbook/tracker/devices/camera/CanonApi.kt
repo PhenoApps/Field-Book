@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import android.net.Network
 import android.util.Log
 import androidx.preference.PreferenceManager
+import com.fieldbook.tracker.database.internalTimeFormatter
 import com.fieldbook.tracker.devices.ptpip.ChannelBufferManager
 import com.fieldbook.tracker.devices.ptpip.PtpOperations.Companion.writeOperation
 import com.fieldbook.tracker.devices.ptpip.PtpSession
@@ -25,10 +26,12 @@ import com.fieldbook.tracker.devices.ptpip.toInt
 import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.traits.AbstractCameraTrait
+import com.fieldbook.tracker.utilities.FileUtil
 import dagger.hilt.android.qualifiers.ActivityContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.threeten.bp.OffsetDateTime
 import java.io.ByteArrayInputStream
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
@@ -36,7 +39,7 @@ import java.nio.channels.SocketChannel
 import javax.inject.Inject
 
 
-class CanonApi @Inject constructor(@ActivityContext private val context: Context) {
+class CanonApi @Inject constructor(@param:ActivityContext private val context: Context) {
 
     companion object {
         const val TAG = "CanonAPI"
@@ -437,7 +440,10 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
 
         var payloadSize = 0
 
-        var nextData: ByteArray = byteArrayOf()
+        val initialOffset = offset ?: 0
+        var currentOffset = initialOffset
+
+        var isFirstChunk = true
 
         session.transaction({ tid ->
 
@@ -451,7 +457,23 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
 
                 val (packetType, nd) = awaitImageEndPacket(session)
 
-                nextData += nd
+                // Stream each chunk immediately to callbacks so we don't accumulate them in memory
+                try {
+                    session.callbacks?.onJpegCaptured(
+                        nd,
+                        unit,
+                        saveTime,
+                        saveState = if (isFirstChunk && initialOffset == 0) AbstractCameraTrait.SaveState.NEW else AbstractCameraTrait.SaveState.SAVING,
+                        offset = currentOffset
+                    )
+                } catch (e: Exception) {
+                    log("Error invoking onJpegCaptured for chunk at offset=$currentOffset: ${e.message}")
+                }
+
+                isFirstChunk = false
+
+                // advance offset by the requested chunk length
+                currentOffset += length
 
                 if (packetType == PACKET_TYPE_END_DATA) {
 
@@ -465,13 +487,18 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
 
             if (payloadSize == length) {
 
-                session.callbacks?.onJpegCaptured(nextData, unit, saveTime,
-                    saveState = if (offset == 0) AbstractCameraTrait.SaveState.NEW else AbstractCameraTrait.SaveState.SAVING,
-                    offset = offset ?: 0)
-
                 Log.d(TAG, "Getting offset: ${offset ?: 0} for ${unit.uniqueId}")
                 requestGetImage(session, handle, unit, (offset ?: 0) + length, saveTime)
 
+            } else {
+                // No more full-size chunks; signal COMPLETE so the assembled temp file can be written to destination.
+                session.callbacks?.onJpegCaptured(
+                    byteArrayOf(),
+                    unit,
+                    saveTime,
+                    AbstractCameraTrait.SaveState.COMPLETE,
+                    offset = 0
+                )
             }
         }
     }
@@ -503,7 +530,7 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
 
                     log("REQUESTING UPDATES")
 
-                    requestUpdateHandles(session, storageId, lastSaveTime)
+                    requestUpdateHandles(session, storageId)
 
                 } else {
 
@@ -520,7 +547,7 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
     private fun requestUpdateHandles(
         session: PtpSession,
         storageId: ByteArray,
-        lastSavedTime: String? = null
+        lastSavedTime: String? = FileUtil.sanitizeFileName(OffsetDateTime.now().format(internalTimeFormatter))
     ) {
 
         log("Requesting update image handles")
@@ -557,15 +584,8 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
 
                             //requestUiLock(true, session, storageId, unit)
 
+                            // requestGetImage will stream NEW/SAVING chunks and will send COMPLETE
                             requestGetImage(session, handle, unit, saveTime = time)
-
-                            session.callbacks?.onJpegCaptured(
-                                byteArrayOf(),
-                                unit,
-                                time,
-                                AbstractCameraTrait.SaveState.COMPLETE,
-                                offset = 0
-                            )
                         }
                     }
                 }
@@ -876,7 +896,7 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
 
         val numStorageIds = session.comMan.getInt()
 
-        for (i in 0..<numStorageIds) {
+        for (i in 0 until numStorageIds) {
 
             handles.add(session.comMan.getInt().toByteArray())
 
@@ -897,7 +917,7 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
 
         val numStorageIds = session.comMan.getInt()
 
-        for (i in 0..<numStorageIds) {
+        for (i in 0 until numStorageIds) {
 
             handles.add(session.comMan.getInt().toByteArray())
 
