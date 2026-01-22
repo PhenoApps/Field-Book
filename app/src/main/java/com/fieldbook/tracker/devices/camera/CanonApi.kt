@@ -68,7 +68,7 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
     }
 
     private val isDebug by lazy {
-        prefs.getBoolean(GeneralKeys.CANON_DEBUG, false)
+        true //prefs.getBoolean(GeneralKeys.CANON_DEBUG, true)
     }
 
     private fun log(message: String) {
@@ -280,6 +280,10 @@ class CanonApi @Inject constructor(@ActivityContext private val context: Context
             if (response) {
 
                 writeParameter3(session, storageId)
+
+            } else {
+
+                writeParameter902f(session, storageId)
 
             }
         }

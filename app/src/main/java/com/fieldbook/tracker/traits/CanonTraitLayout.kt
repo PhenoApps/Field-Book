@@ -90,6 +90,24 @@ class CanonTraitLayout :
                         controller.getWifiHelper().startWifiSearch(ssid, this)
 
                     }
+                } else {
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+
+                        collectActivity.advisor().withPermission(
+                            arrayOf(
+                                android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                                android.Manifest.permission.ACCESS_FINE_LOCATION,
+                                android.Manifest.permission.BLUETOOTH
+                            )
+                        ) {
+
+                            controller.getWifiHelper().disconnect()
+
+                            controller.getWifiHelper().startWifiSearch(ssid, this)
+
+                        }
+                    }
                 }
             }
         }
