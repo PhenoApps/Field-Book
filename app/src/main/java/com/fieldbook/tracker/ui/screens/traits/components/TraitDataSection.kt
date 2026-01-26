@@ -16,12 +16,14 @@ import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.viewmodels.ObservationData
 import com.fieldbook.tracker.objects.TraitObject
+import com.fieldbook.tracker.traits.formats.ChartableData
+import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.ui.components.graphs.BarChart
 import com.fieldbook.tracker.ui.components.graphs.HistogramChart
 import com.fieldbook.tracker.ui.theme.AppTheme
 
 private val nonChartableFormats =
-    setOf("audio", "gnss", "gopro", "location", "photo", "text", "usb camera")
+    Formats.entries.filter { it.getTraitFormatDefinition() !is ChartableData }.map { it.getDatabaseName() }.toTypedArray()
 
 @Composable
 fun TraitDataSection(
