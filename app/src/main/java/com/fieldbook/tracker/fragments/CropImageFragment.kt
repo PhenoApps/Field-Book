@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.fragments
 
 import android.app.Activity
+import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -21,6 +22,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import androidx.core.content.edit
 import androidx.core.net.toUri
+import com.fieldbook.tracker.activities.CameraActivity
 
 /**
  * Controller code for handling user input for cropping an image.
@@ -43,13 +45,15 @@ class CropImageFragment: Fragment(R.layout.crop_image_fragment), CoroutineScope 
         super.onViewCreated(view, savedInstanceState)
         val traitId = requireArguments().getInt(EXTRA_TRAIT_ID)
         val imageUri = requireArguments().getString(EXTRA_IMAGE_URI) ?: ""
+        val skipSave = activity?.intent?.getBooleanExtra(CameraActivity.EXTRA_SKIP_SAVE, false) ?: false
+
         cropImageView = view.findViewById(R.id.crop_image_view)
-        setupCropImageView(traitId, imageUri)
+        setupCropImageView(traitId, imageUri, skipSave)
 
         cropImageView?.let { InsetHandler.setupCropImageInsets(it) }
     }
 
-    private fun setupCropImageView(traitId: Int, imageUri: String) {
+    private fun setupCropImageView(traitId: Int, imageUri: String, skipSave: Boolean) {
 
         cropImageView?.cropImageHandler = object: CropImageView.CropImageHandler {
 
@@ -73,7 +77,10 @@ class CropImageFragment: Fragment(R.layout.crop_image_fragment), CoroutineScope 
 
                         //finish from the crop activity
                         try {
-                            activity?.setResult(Activity.RESULT_OK)
+                            activity?.setResult(Activity.RESULT_OK,
+                                Intent().also {
+                                    it.putExtra(CameraActivity.EXTRA_SKIP_SAVE, skipSave)
+                                })
                         } catch (_: Exception) {}
                         activity?.finish()
                     }

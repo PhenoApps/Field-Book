@@ -37,6 +37,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.views.CropImageView
 import com.fieldbook.tracker.traits.AbstractCameraTrait
 import com.fieldbook.tracker.ui.MediaViewerActivity
 import com.fieldbook.tracker.ui.components.widgets.ThreeStateToggle
@@ -87,6 +88,8 @@ class CameraActivity : ThemedActivity() {
     private var studyName: String? = null
     private var currentMode = MODE_PHOTO
 
+    private var skipSaveFlag: Boolean = false
+
     private var launchedForVideoTrait = false
 
     private var imageCapture: ImageCapture? = null
@@ -111,6 +114,7 @@ class CameraActivity : ThemedActivity() {
         const val EXTRA_OBS_UNIT = "obs_unit"
         const val EXTRA_OBS_ID = "obs_id"
         const val EXTRA_MODE = "mode"
+        const val EXTRA_SKIP_SAVE = "skip_save"
         const val MODE_PHOTO = "photo"
         const val MODE_CROP = "crop"
         const val MODE_VIDEO = "video"
@@ -139,6 +143,8 @@ class CameraActivity : ThemedActivity() {
         studyId = intent.getStringExtra(EXTRA_STUDY_ID)
         obsUnit = intent.getStringExtra(EXTRA_OBS_UNIT)
         obsId = intent.getStringExtra(EXTRA_OBS_ID)
+
+        skipSaveFlag = intent.getBooleanExtra(EXTRA_SKIP_SAVE, false)
 
         currentMode = intent.getStringExtra(EXTRA_MODE) ?: MODE_PHOTO
 
@@ -571,6 +577,7 @@ class CameraActivity : ThemedActivity() {
                         val intent = Intent()
                         intent.putExtra("media_type", "photo")
                         intent.putExtra("media_path", destPath)
+                        intent.putExtra(EXTRA_SKIP_SAVE, skipSaveFlag)
                         setResult(RESULT_OK, intent)
                         finish()
                     }
@@ -761,33 +768,31 @@ class CameraActivity : ThemedActivity() {
                     }
                 }
                 MODE_VIDEO -> {
-                    // bind preview + video capture
-                    val provider = cameraXFacade.cameraXInstance.get()
-                    val preview = Preview.Builder().build().also { it.setSurfaceProvider(previewView.surfaceProvider) }
-
+                    // Use facade to bind preview+video use case with the same ResolutionSelector / Recorder aspect ratio
                     val resolution = getSupportedResolutionByPreferences()
 
-                    cameraXFacade.bindPreview(
+                    // Determine whether to show crop region overlay for video based on saved crop coordinates for this trait
+                    val showCropForVideo = try {
+                        val key = GeneralKeys.getCropCoordinatesKey(traitId?.toInt() ?: -1)
+                        val cropCoordinates = prefs.getString(key, "")
+                        !cropCoordinates.isNullOrEmpty() && cropCoordinates != CropImageView.DEFAULT_CROP_COORDINATES
+                    } catch (_: Exception) {
+                        false
+                    }
+
+                    cameraXFacade.bindPreviewForVideo(
                         previewView,
                         resolution,
                         traitId,
-                        null,
-                        showCropRegion = false
-                    ) { camera, _, capture ->
-
+                        analysis = null,
+                        showCropRegion = showCropForVideo
+                    ) { camera, _, vc ->
+                        // facade provides the VideoCapture configured with the correct Recorder
                         boundCamera = camera
-
-                        imageCapture = capture
+                        videoCapture = vc
+                        previewView.visibility = View.VISIBLE
+                        barcodeOverlay.visibility = View.VISIBLE
                     }
-
-                    val recorder = Recorder.Builder().setExecutor(cameraExecutor).build()
-                    videoCapture = VideoCapture.withOutput(recorder)
-
-                    provider.unbindAll()
-                    previewView.visibility = View.VISIBLE
-                    barcodeOverlay.visibility = View.VISIBLE
-                    val cam2 = provider.bindToLifecycle(this, cameraXFacade.currentSelector, preview, videoCapture)
-                    boundCamera = cam2
                 }
                 MODE_AUDIO -> {
                     // Audio mode: no camera preview; unbind camera and hide preview

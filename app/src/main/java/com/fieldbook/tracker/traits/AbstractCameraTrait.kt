@@ -414,7 +414,9 @@ abstract class AbstractCameraTrait :
 
         ui.launch {
 
-            if (isCropRequired()) {
+            val isPhoto = uri.toString().lowercase().endsWith(".jpg")
+
+            if (isCropRequired() && isPhoto) {
 
                 if (isCropExist()) {
 

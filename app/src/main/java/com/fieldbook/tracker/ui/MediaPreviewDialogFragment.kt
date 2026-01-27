@@ -17,13 +17,15 @@ class MediaPreviewDialogFragment : DialogFragment() {
         private const val ARG_MEDIA_TYPE = "arg_media_type"
         private const val ARG_MEDIA_PATH = "arg_media_path"
         private const val ARG_OBS_ID = "obs_id"
+        private const val ARG_SKIP_SAVE = "arg_skip_save"
 
-        fun newInstance(obsId: String, mediaType: String, mediaPath: String): MediaPreviewDialogFragment {
+        fun newInstance(obsId: String, mediaType: String, mediaPath: String, skipSave: Boolean): MediaPreviewDialogFragment {
             val f = MediaPreviewDialogFragment()
             val b = Bundle()
             b.putString(ARG_MEDIA_TYPE, mediaType)
             b.putString(ARG_MEDIA_PATH, mediaPath)
             b.putString(ARG_OBS_ID, obsId)
+            b.putBoolean(ARG_SKIP_SAVE, skipSave)
 
             f.arguments = b
             return f
@@ -34,6 +36,7 @@ class MediaPreviewDialogFragment : DialogFragment() {
         val mediaType = arguments?.getString(ARG_MEDIA_TYPE) ?: "photo"
         val mediaPath = arguments?.getString(ARG_MEDIA_PATH) ?: ""
         val obsId = arguments?.getString(ARG_OBS_ID) ?: ""
+        val skipSave = arguments?.getBoolean(ARG_SKIP_SAVE) ?: false
 
         if (obsId.isEmpty()) {
             Utils.makeToast(context, getString(R.string.no_observation))
@@ -68,10 +71,12 @@ class MediaPreviewDialogFragment : DialogFragment() {
 
         container.addView(preview)
 
+        val positiveRes = if (skipSave) android.R.string.ok else R.string.attach
+
         val builder = AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
             .setView(container)
-            .setPositiveButton(R.string.attach) { _, _ ->
-                (activity as? com.fieldbook.tracker.activities.CollectActivity)?.onMediaConfirmFromDialog(obsId, mediaType, mediaPath)
+            .setPositiveButton(positiveRes) { _, _ ->
+                (activity as? com.fieldbook.tracker.activities.CollectActivity)?.onMediaConfirmFromDialog(obsId, mediaType, mediaPath, skipSave)
             }
             .setNegativeButton(android.R.string.cancel) { _, _ ->
                 (activity as? com.fieldbook.tracker.activities.CollectActivity)?.onMediaCancelFromDialog(mediaPath)
