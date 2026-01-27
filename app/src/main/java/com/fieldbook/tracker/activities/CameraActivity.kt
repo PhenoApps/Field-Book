@@ -37,6 +37,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.views.CropImageView
 import com.fieldbook.tracker.traits.AbstractCameraTrait
 import com.fieldbook.tracker.ui.MediaViewerActivity
 import com.fieldbook.tracker.ui.components.widgets.ThreeStateToggle
@@ -85,6 +86,10 @@ class CameraActivity : ThemedActivity() {
     private var studyName: String? = null
     private var currentMode = MODE_PHOTO
 
+    private var skipSaveFlag: Boolean = false
+
+    private var launchedForVideoTrait = false
+
     private var imageCapture: ImageCapture? = null
 
     // video components
@@ -107,6 +112,7 @@ class CameraActivity : ThemedActivity() {
         const val EXTRA_OBS_UNIT = "obs_unit"
         const val EXTRA_OBS_ID = "obs_id"
         const val EXTRA_MODE = "mode"
+        const val EXTRA_SKIP_SAVE = "skip_save"
         const val MODE_PHOTO = "photo"
         const val MODE_CROP = "crop"
         const val MODE_VIDEO = "video"
@@ -114,7 +120,11 @@ class CameraActivity : ThemedActivity() {
         const val MODE_AUDIO = "audio"
         const val EXTRA_BARCODE = "barcode_value"
         const val REQUEST_RECORD_AUDIO_PERMISSION = 301
+        // Request code used when opening the media viewer so CameraActivity can refresh UI on return
+        const val REQUEST_VIEW_MEDIA_CODE = 203
         const val MAX_BARCODE_DETECTIONS = 10
+        // new extra key to mark launches from the video trait embiggen button
+        const val EXTRA_LAUNCHED_FOR_VIDEO_TRAIT = "launched_for_video_trait"
     }
 
     private var boundCamera: Camera? = null
@@ -132,7 +142,11 @@ class CameraActivity : ThemedActivity() {
         obsUnit = intent.getStringExtra(EXTRA_OBS_UNIT)
         obsId = intent.getStringExtra(EXTRA_OBS_ID)
 
+        skipSaveFlag = intent.getBooleanExtra(EXTRA_SKIP_SAVE, false)
+
         currentMode = intent.getStringExtra(EXTRA_MODE) ?: MODE_PHOTO
+
+        launchedForVideoTrait = intent.getBooleanExtra(EXTRA_LAUNCHED_FOR_VIDEO_TRAIT, false)
 
         studyName = studyId?.let { studyId -> database.getStudyById(studyId)?.study_name }
 
@@ -207,22 +221,27 @@ class CameraActivity : ThemedActivity() {
                 if (visibleCount <= 1) {
                     mediaCompose.visibility = View.GONE
                     ViewCompat.requestApplyInsets(mediaCompose)
-                    when (visibleModes.firstOrNull()) {
-                        MODE_PHOTO -> currentMode = MODE_PHOTO
-                        MODE_VIDEO -> currentMode = MODE_VIDEO
-                        MODE_AUDIO -> currentMode = MODE_AUDIO
+                    val onlyMode = visibleModes.firstOrNull()
+                    if (onlyMode != null) {
+                        // Prefer an intent-specified mode when present and valid, otherwise set the only available mode
+                        if (currentMode !in visibleModes) {
+                            currentMode = onlyMode
+                        }
                     }
                 } else {
                     mediaCompose.visibility = View.VISIBLE
                     ViewCompat.requestApplyInsets(mediaCompose)
-                    // pick sensible default photo > video > audio
-                    currentMode = when {
-                        visibleModes.contains(MODE_PHOTO) -> MODE_PHOTO
-                        visibleModes.contains(MODE_VIDEO) -> MODE_VIDEO
-                        visibleModes.contains(MODE_AUDIO) -> MODE_AUDIO
-                        else -> currentMode
+                    // pick sensible default photo > video > audio only if currentMode isn't one of the visible modes
+                    if (currentMode !in visibleModes) {
+                        currentMode = when {
+                            visibleModes.contains(MODE_PHOTO) -> MODE_PHOTO
+                            visibleModes.contains(MODE_VIDEO) -> MODE_VIDEO
+                            visibleModes.contains(MODE_AUDIO) -> MODE_AUDIO
+                            else -> currentMode
+                        }
                     }
                 }
+
             } else {
 
                 mediaCompose.visibility = View.GONE
@@ -245,8 +264,14 @@ class CameraActivity : ThemedActivity() {
             currentMode = MODE_PHOTO
         }
 
+        if (launchedForVideoTrait) {
+            viewMediaButton.visibility = View.GONE
+            mediaCompose.visibility = View.GONE
+            currentMode = MODE_VIDEO
+        }
+
         // If multiple states are visible, set Compose content. Build Painter resources inside the composable lambda (painterResource is @Composable).
-        if (visibleModes.size > 1) {
+        if (visibleModes.size > 1 && mediaCompose.isVisible) {
             val modes = visibleModes.toList()
             mediaCompose.setContent {
                 AppTheme {
@@ -274,13 +299,13 @@ class CameraActivity : ThemedActivity() {
                     }
 
                     val initialIdx = modesToShow.indexOf(currentMode).takeIf { it >= 0 } ?: 0
-                    var selectedIdxState = remember { androidx.compose.runtime.mutableStateOf(initialIdx) }
+                    val selectedIdxState = remember { mutableIntStateOf(initialIdx) }
 
                     ThreeStateToggle(
                         states = paintersToShow,
-                        selectedIndex = selectedIdxState.value,
+                        selectedIndex = selectedIdxState.intValue,
                         onSelected = { idx ->
-                            selectedIdxState.value = idx
+                            selectedIdxState.intValue = idx
                             val mode = modesToShow.getOrNull(idx) ?: MODE_PHOTO
                             switchMode(mode)
                         }
@@ -301,12 +326,17 @@ class CameraActivity : ThemedActivity() {
 
         setupUiForMode()
 
+        if (launchedForVideoTrait) {
+            viewMediaButton.visibility = View.GONE
+        }
+
         viewMediaButton.setOnClickListener {
             val mediaIntent = Intent(this, MediaViewerActivity::class.java)
             mediaIntent.putExtra(MediaViewerActivity.EXTRA_STUDY_ID, studyId)
             mediaIntent.putExtra(MediaViewerActivity.EXTRA_OBS_UNIT, obsUnit)
             mediaIntent.putExtra(MediaViewerActivity.EXTRA_TRAIT_DB_ID, traitId)
-            startActivity(mediaIntent)
+            // start for result so we can refresh camera UI (hide view button when media deleted)
+            startActivityForResult(mediaIntent, REQUEST_VIEW_MEDIA_CODE)
         }
 
         switchCameraButton.setOnClickListener {
@@ -320,8 +350,10 @@ class CameraActivity : ThemedActivity() {
         // hide capture button when running pure barcode-detection mode (auto-return on first detection)
         if (currentMode == MODE_BARCODE) {
             captureButton.visibility = View.GONE
+            switchCameraButton.visibility = View.GONE
         } else {
             captureButton.visibility = View.VISIBLE
+            switchCameraButton.visibility = View.VISIBLE
         }
 
         if (currentMode == MODE_AUDIO) {
@@ -336,7 +368,7 @@ class CameraActivity : ThemedActivity() {
             if (obsId == "-1") {
 
                 captureButton.visibility = View.GONE
-
+                switchCameraButton.visibility = View.GONE
                 viewMediaButton.visibility = View.GONE
 
 
@@ -351,9 +383,13 @@ class CameraActivity : ThemedActivity() {
             }
         }
 
+        if (launchedForVideoTrait) {
+            viewMediaButton.visibility = View.GONE
+        }
+
         captureButton.setOnClickListener {
             when (currentMode) {
-                MODE_PHOTO, MODE_CROP -> takePhotoWithBarcodeDetection()
+                MODE_PHOTO, MODE_CROP -> capturePhotoAndReturn()
                 MODE_VIDEO -> toggleVideoRecording()
                 MODE_AUDIO -> {
                     // start/stop simple audio recording
@@ -437,6 +473,7 @@ class CameraActivity : ThemedActivity() {
                                 input.copyTo(out)
                                 out.close()
                                 input.close()
+
                                 // return result to calling activity and finish so CollectActivity receives the media_path
                                 val result = Intent()
                                 result.putExtra("media_type", "video")
@@ -522,7 +559,7 @@ class CameraActivity : ThemedActivity() {
         }
     }
 
-    private fun takePhotoWithBarcodeDetection() {
+    private fun capturePhotoAndReturn() {
         val capture = imageCapture ?: return
         val tmp = File(cacheDir, AbstractCameraTrait.TEMPORARY_IMAGE_NAME)
         val outputFileOptions = ImageCapture.OutputFileOptions.Builder(tmp).build()
@@ -534,18 +571,13 @@ class CameraActivity : ThemedActivity() {
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
                     // after photo saved to file, run ML Kit on the saved file to detect a barcode
                     runOnUiThread {
-                        try {
-                            val destPath = saveFileToFieldStorage(tmp, traitName ?: "unknown")
-                            val intent = Intent()
-                            intent.putExtra("media_type", "photo")
-                            intent.putExtra("media_path", destPath)
-                            setResult(RESULT_OK, intent)
-                            finish()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            setResult(RESULT_OK, intent)
-                            finish()
-                        }
+                        val destPath = saveFileToFieldStorage(tmp, traitName ?: "unknown")
+                        val intent = Intent()
+                        intent.putExtra("media_type", "photo")
+                        intent.putExtra("media_path", destPath)
+                        intent.putExtra(EXTRA_SKIP_SAVE, skipSaveFlag)
+                        setResult(RESULT_OK, intent)
+                        finish()
                     }
                 }
             })
@@ -734,33 +766,31 @@ class CameraActivity : ThemedActivity() {
                     }
                 }
                 MODE_VIDEO -> {
-                    // bind preview + video capture
-                    val provider = cameraXFacade.cameraXInstance.get()
-                    val preview = Preview.Builder().build().also { it.setSurfaceProvider(previewView.surfaceProvider) }
-
+                    // Use facade to bind preview+video use case with the same ResolutionSelector / Recorder aspect ratio
                     val resolution = getSupportedResolutionByPreferences()
 
-                    cameraXFacade.bindPreview(
+                    // Determine whether to show crop region overlay for video based on saved crop coordinates for this trait
+                    val showCropForVideo = try {
+                        val key = GeneralKeys.getCropCoordinatesKey(traitId?.toInt() ?: -1)
+                        val cropCoordinates = prefs.getString(key, "")
+                        !cropCoordinates.isNullOrEmpty() && cropCoordinates != CropImageView.DEFAULT_CROP_COORDINATES
+                    } catch (_: Exception) {
+                        false
+                    }
+
+                    cameraXFacade.bindPreviewForVideo(
                         previewView,
                         resolution,
                         traitId,
-                        null,
-                        showCropRegion = false
-                    ) { camera, _, capture ->
-
+                        analysis = null,
+                        showCropRegion = showCropForVideo
+                    ) { camera, _, vc ->
+                        // facade provides the VideoCapture configured with the correct Recorder
                         boundCamera = camera
-
-                        imageCapture = capture
+                        videoCapture = vc
+                        previewView.visibility = View.VISIBLE
+                        barcodeOverlay.visibility = View.VISIBLE
                     }
-
-                    val recorder = Recorder.Builder().setExecutor(cameraExecutor).build()
-                    videoCapture = VideoCapture.withOutput(recorder)
-
-                    provider.unbindAll()
-                    previewView.visibility = View.VISIBLE
-                    barcodeOverlay.visibility = View.VISIBLE
-                    val cam2 = provider.bindToLifecycle(this, cameraXFacade.currentSelector, preview, videoCapture)
-                    boundCamera = cam2
                 }
                 MODE_AUDIO -> {
                     // Audio mode: no camera preview; unbind camera and hide preview
@@ -858,5 +888,18 @@ class CameraActivity : ThemedActivity() {
             mediaRecorder?.release()
             mediaRecorder = null
         } catch (_: Exception) {}
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == REQUEST_VIEW_MEDIA_CODE) {
+            // Re-evaluate UI: the media viewer may have deleted media so hide view button accordingly
+            try {
+                setupUiForMode()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 }

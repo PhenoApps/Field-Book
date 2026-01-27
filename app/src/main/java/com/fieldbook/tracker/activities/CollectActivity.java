@@ -26,8 +26,6 @@ import android.view.inputmethod.EditorInfo;
 import android.webkit.MimeTypeMap;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
@@ -131,8 +129,6 @@ import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.google.firebase.crashlytics.CustomKeysAndValues;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
 import com.serenegiant.widget.UVCCameraTextureView;
 
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
@@ -188,6 +184,10 @@ public class CollectActivity extends ThemedActivity
     public static final int REQUEST_CROP_IMAGE_CODE = 101;
     public static final int REQUEST_CROP_FINISHED_CODE = 103;
     public static final int REQUEST_MEDIA_CODE = 102;
+    // New request code used when CameraActivity is launched from VideoTrait embiggen button
+    public static final int REQUEST_MEDIA_VIDEO_TRAIT = 202;
+    // Request code for opening the media viewer to refresh after returning
+    public static final int REQUEST_VIEW_MEDIA_CODE = 203;
     // pending media values used when we start a crop activity and need to show the confirm dialog
     private String pendingMediaType = null;
     private String pendingMediaPath = null;
@@ -806,7 +806,7 @@ public class CollectActivity extends ThemedActivity
                 } catch (Exception ignored) {}
 
                 if (obs != null) {
-                    boolean hasMedia = obs.getMultiMediaCount() > 0;
+                    boolean hasMedia = obs.getAttachedMediaCount() > 0;
 
                     if (hasMedia) {
                         // Warn the user that attached media will also be removed
@@ -875,7 +875,8 @@ public class CollectActivity extends ThemedActivity
                             mediaIntent.putExtra(com.fieldbook.tracker.ui.MediaViewerActivity.EXTRA_STUDY_ID, getStudyId());
                             mediaIntent.putExtra(com.fieldbook.tracker.ui.MediaViewerActivity.EXTRA_OBS_UNIT, getObservationUnit());
                             mediaIntent.putExtra(EXTRA_TRAIT_DB_ID, getTraitDbId());
-                            startActivity(mediaIntent);
+                            // Start for result so we can refresh Collect UI when the user returns (media may have been deleted)
+                            startActivityForResult(mediaIntent, REQUEST_VIEW_MEDIA_CODE);
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -892,11 +893,11 @@ public class CollectActivity extends ThemedActivity
                 // get current trait and check multimedia flags
                 TraitObject current = getCurrentTrait();
                 if (current != null) {
-                    isMediaEnabled = current.getMultiMediaPhoto() || current.getMultiMediaVideo() || current.getMultiMediaAudio();
+                    isMediaEnabled = current.getAttachPhoto() || current.getAttachVideo() || current.getAttachAudio();
                 }
                 ObservationModel obs = getCurrentObservation();
                 if (obs != null) {
-                    numMultiMedia = obs.getMultiMediaCount();
+                    numMultiMedia = obs.getAttachedMediaCount();
                 }
             } catch (Exception ignored) {}
 
@@ -2294,10 +2295,35 @@ public class CollectActivity extends ThemedActivity
             case REQUEST_CROP_IMAGE_CODE:
                 if (resultCode == RESULT_OK && data != null) {
                     String mediaPath = data.getStringExtra("media_path");
+                    Boolean skipSave = data.getBooleanExtra(CameraActivity.EXTRA_SKIP_SAVE, false);
                     if (mediaPath != null) {
                         File f = new File(getContext().getCacheDir(), AbstractCameraTrait.TEMPORARY_IMAGE_NAME);
                         Uri uri = Uri.fromFile(f);
-                        startCropActivity(getCurrentTrait().getId(), uri);
+                        // store pending media so the crop-finished handler can show confirm dialog
+                        pendingMediaPath = f.getAbsolutePath();
+                        pendingMediaType = "photo";
+                        // delete the previously saved copy (mediaPath) to avoid duplicates later
+                        try { if (!mediaPath.equals(pendingMediaPath)) new File(mediaPath).delete(); } catch (Exception ignore) {}
+                        startCropActivity(getCurrentTrait().getId(), uri, skipSave);
+                    }
+                }
+                break;
+            case REQUEST_CROP_FINISHED_CODE:
+                // Crop activity finished — use the pending media values (set before starting crop)
+                if (resultCode == RESULT_OK) {
+                    try {
+                        if (pendingMediaPath != null && pendingMediaType != null) {
+                            final String path = pendingMediaPath;
+                            final String type = pendingMediaType;
+                            // clear pending values before proceeding
+                            pendingMediaPath = null;
+                            pendingMediaType = null;
+                            // Show confirm dialog on UI thread
+                            Boolean skipSave = data.getBooleanExtra(CameraActivity.EXTRA_SKIP_SAVE, false);
+                            runOnUiThread(() -> showMediaConfirmDialog(type, path, skipSave));
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
                 break;
@@ -2322,7 +2348,7 @@ public class CollectActivity extends ThemedActivity
                                 // delete the previously saved copy (mediaPath) to avoid duplicates later
                                 try { if (mediaPath != null && !mediaPath.equals(pendingMediaPath)) new File(mediaPath).delete(); } catch (Exception ignore) {}
                                 pendingMediaType = mediaType;
-                                startCropActivity(getCurrentTrait().getId(), uri);
+                                startCropActivity(getCurrentTrait().getId(), uri, false);
                             } else {
                                 // If an ROI is defined, apply the crop to the saved image before showing the confirm dialog.
                                 // Do this off the UI thread to avoid blocking.
@@ -2360,15 +2386,15 @@ public class CollectActivity extends ThemedActivity
                                         }
 
                                         // After cropping (or on failure), show the confirm dialog on UI thread
-                                        runOnUiThread(() -> showMediaConfirmDialog(mediaType, mediaPath));
+                                        runOnUiThread(() -> showMediaConfirmDialog(mediaType, mediaPath, false));
                                     });
                                  } catch (Exception e) {
                                      e.printStackTrace();
-                                     showMediaConfirmDialog(mediaType, mediaPath);
+                                     showMediaConfirmDialog(mediaType, mediaPath, false);
                                  }
                              }
                          } else if (mediaType.equals("audio") || mediaType.equals("video")) {
-                            runOnUiThread(() -> showMediaConfirmDialog(mediaType, mediaPath));
+                            runOnUiThread(() -> showMediaConfirmDialog(mediaType, mediaPath, false));
                         }
 
                      } else if (barcode != null) {
@@ -2402,15 +2428,99 @@ public class CollectActivity extends ThemedActivity
                     }
                 }
                 break;
-            case REQUEST_CROP_FINISHED_CODE:
-                if (resultCode == RESULT_OK) {
-                    // Crop activity finished; if we have a pending media, show confirm dialog
-                    if (pendingMediaType != null && pendingMediaPath != null) {
-                        showMediaConfirmDialog(pendingMediaType, pendingMediaPath);
+            case REQUEST_MEDIA_VIDEO_TRAIT:
+            // This result path is used when CameraActivity was launched from the VideoTrait embiggen button.
+            if (resultCode == RESULT_OK && data != null) {
+                String mediaPath = data.getStringExtra("media_path");
+                String mediaType = data.getStringExtra("media_type");
+
+                // Try to delegate to the current trait layout if it is a VideoTraitLayout
+                try {
+                    BaseTraitLayout videoLayout = traitLayouts.getTraitLayout(com.fieldbook.tracker.traits.VideoTraitLayout.type);
+                    if (videoLayout instanceof com.fieldbook.tracker.traits.VideoTraitLayout) {
+                        ((com.fieldbook.tracker.traits.VideoTraitLayout) videoLayout).handleExternalMedia(mediaType, mediaPath);
+                        break;
                     }
-                    // clear pending state
-                    pendingMediaType = null;
-                    pendingMediaPath = null;
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+
+                if (mediaPath != null && "video".equals(mediaType)) {
+                    try {
+                        // Reuse the same logic as onMediaConfirmFromDialog to copy file into field media directory and attach to observation
+                        ObservationModel obs = getCurrentObservation();
+                        if (obs == null) {
+                            Utils.makeToast(this, getString(R.string.no_observation));
+                            break;
+                        }
+
+                        File f = new File(mediaPath);
+                        String uri = Uri.fromFile(f).toString();
+                        if (f.exists()) {
+                            TraitObject currentTrait = getCurrentTrait();
+                            if (currentTrait != null) {
+                                try {
+                                    String traitName = currentTrait.getName();
+                                    String sanitizedTraitName = com.fieldbook.tracker.utilities.FileUtil.sanitizeFileName(traitName);
+                                    DocumentFile traitPhotos = DocumentTreeUtil.Companion.getFieldMediaDirectory(this, sanitizedTraitName);
+                                    if (traitPhotos != null) {
+                                        String srcName = f.getName();
+                                        String ext = "";
+                                        int dot = srcName.lastIndexOf('.');
+                                        if (dot > 0) ext = srcName.substring(dot);
+                                        DateTimeFormatter internalTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZZZZZ");
+                                        String destName = sanitizedTraitName + "_" + getCRange().uniqueId + "_"
+                                                + FileUtil.sanitizeFileName(OffsetDateTime.now().format(internalTimeFormatter)) + ext;
+                                        DocumentFile dest = traitPhotos.createFile("*/*", destName);
+                                        if (dest != null) {
+                                            InputStream in = null;
+                                            OutputStream out = null;
+                                            try {
+                                                in = new FileInputStream(f);
+                                                out = getContentResolver().openOutputStream(dest.getUri());
+                                                if (out == null) throw new IOException("Unable to open output stream for destination file");
+                                                byte[] buf = new byte[8192];
+                                                int len;
+                                                while ((len = in.read(buf)) > 0) out.write(buf, 0, len);
+                                                out.flush();
+                                                try { f.delete(); } catch (Exception ignore) {}
+                                                uri = dest.getUri().toString();
+
+                                            } finally {
+                                                try { if (in != null) in.close(); } catch (Exception ignore) {}
+                                                try { if (out != null) out.close(); } catch (Exception ignore) {}
+                                            }
+                                        }
+                                    }
+                                } catch (Exception ex) { ex.printStackTrace(); }
+                            }
+                        }
+
+                        // attach to observation and update database
+                        ObservationModel currentObsModel = getCurrentObservation();
+                        if (currentObsModel != null) {
+                            currentObsModel.setVideo_uri(uri);
+                            database.updateObservationMediaUris(currentObsModel);
+                        }
+
+                        initToolbars();
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            break;
+            case REQUEST_VIEW_MEDIA_CODE:
+                // Refresh the UI since the media viewer may have deleted media
+                try {
+                    refreshInfoBarAdapter();
+                    refreshRepeatedValuesToolbarIndicator();
+                    // refresh the current trait layout to reflect any removed media
+                    traitLayoutRefresh();
+                    initToolbars();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
                 break;
         }
@@ -3210,11 +3320,12 @@ public class CollectActivity extends ThemedActivity
     /**
      * a function that starts the crop activity and sends it required intent data
      */
-    public void startCropActivity(String traitId, Uri uri) {
+    public void startCropActivity(String traitId, Uri uri, Boolean skipSave) {
          try {
              Intent intent = new Intent(this, CropImageActivity.class);
              intent.putExtra(CropImageFragment.EXTRA_TRAIT_ID, Integer.parseInt(traitId));
              intent.putExtra(CropImageFragment.EXTRA_IMAGE_URI, uri.toString());
+             intent.putExtra(CameraActivity.EXTRA_SKIP_SAVE, skipSave);
              cameraXFacade.unbind();
              startActivityForResult(intent, REQUEST_CROP_FINISHED_CODE);
          } catch (Exception e) {
@@ -3229,6 +3340,7 @@ public class CollectActivity extends ThemedActivity
             intent.putExtra(CameraActivity.EXTRA_TRAIT_ID, Integer.parseInt(getCurrentTrait().getId()));
             intent.putExtra(CameraActivity.EXTRA_STUDY_ID, String.valueOf(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)));
             intent.putExtra(CameraActivity.EXTRA_OBS_UNIT, getObservationUnit());
+            intent.putExtra(CameraActivity.EXTRA_SKIP_SAVE, true);
             cameraXFacade.unbind();
             startActivityForResult(intent, REQUEST_CROP_IMAGE_CODE);
         } catch (Exception e) {
@@ -3245,7 +3357,7 @@ public class CollectActivity extends ThemedActivity
             builder.setTitle(R.string.dialog_crop_title);
             builder.setMessage(R.string.dialog_crop_message);
             builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                startCropActivity(traitId, uri);
+                startCropActivity(traitId, uri, false);
             });
             builder.setNegativeButton(android.R.string.no, (dialog, which) -> {
                 dialog.dismiss();
@@ -3290,7 +3402,7 @@ public class CollectActivity extends ThemedActivity
         InsetHandler.INSTANCE.setupInsetsWithBottomBar(rootView, toolbar, bottomContent);
     }
 
-    public void showMediaConfirmDialog(String mediaType, String mediaPath) {
+    public void showMediaConfirmDialog(String mediaType, String mediaPath, Boolean skipSave) {
          if (mediaType == null || mediaPath == null) return;
          try {
 
@@ -3303,8 +3415,8 @@ public class CollectActivity extends ThemedActivity
                     return;
                 }
 
-                com.fieldbook.tracker.ui.MediaPreviewDialogFragment.Companion.newInstance(String.valueOf(model.getInternal_id_observation()), mediaType, mediaPath)
-                        .show(getSupportFragmentManager(), "media_preview");
+                 com.fieldbook.tracker.ui.MediaPreviewDialogFragment.Companion.newInstance(String.valueOf(model.getInternal_id_observation()), mediaType, mediaPath, skipSave)
+                         .show(getSupportFragmentManager(), "media_preview");
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -3314,8 +3426,10 @@ public class CollectActivity extends ThemedActivity
          }
      }
 
-    public void onMediaConfirmFromDialog(String obsId, String mediaType, String mediaPath) {
+    public void onMediaConfirmFromDialog(String obsId, String mediaType, String mediaPath, Boolean skipSave) {
         try {
+
+            if (skipSave) return;
 
             ObservationModel obs = database.getObservationById(obsId);
             if (obs == null) {
@@ -3326,66 +3440,122 @@ public class CollectActivity extends ThemedActivity
             }
 
             File f = new File(mediaPath);
-            String uri = Uri.fromFile(f).toString();
-            if (f.exists()) {
-                TraitObject currentTrait = getCurrentTrait();
-                if (currentTrait != null) {
-                    try {
-                        String traitName = currentTrait.getName();
-                        String sanitizedTraitName = com.fieldbook.tracker.utilities.FileUtil.sanitizeFileName(traitName);
-                        DocumentFile traitPhotos = DocumentTreeUtil.Companion.getFieldMediaDirectory(this, sanitizedTraitName);
-                        if (traitPhotos != null) {
-                            String srcName = f.getName();
-                            String ext = "";
-                            int dot = srcName.lastIndexOf('.');
-                            if (dot > 0) ext = srcName.substring(dot);
-                            DateTimeFormatter internalTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZZZZZ");
-                            String destName = sanitizedTraitName + "_" + getCRange().uniqueId + "_"
-                                    + FileUtil.sanitizeFileName(OffsetDateTime.now().format(internalTimeFormatter)) + ext;
-                            DocumentFile dest = traitPhotos.createFile("*/*", destName);
-                            if (dest != null) {
-                                InputStream in = null;
-                                OutputStream out = null;
-                                try {
-                                    in = new FileInputStream(f);
-                                    out = getContentResolver().openOutputStream(dest.getUri());
-                                    if (out == null) throw new IOException("Unable to open output stream for destination file");
-                                    byte[] buf = new byte[8192];
-                                    int len;
-                                    while ((len = in.read(buf)) > 0) out.write(buf, 0, len);
-                                    out.flush();
-                                    try { f.delete(); } catch (Exception ignore) {}
-                                    uri = dest.getUri().toString();
+            if (!f.exists()) {
+                Utils.makeToast(this, getString(R.string.no_observations_warning));
+                return;
+            }
 
-                                } finally {
-                                    try { if (in != null) in.close(); } catch (Exception ignore) {}
-                                    try { if (out != null) out.close(); } catch (Exception ignore) {}
+            // Determine whether this will replace existing media on the observation
+            String existingUri;
+            if (mediaType != null) {
+                if (mediaType.startsWith("photo")) existingUri = obs.getPhoto_uri();
+                else if ("audio".equals(mediaType)) existingUri = obs.getAudio_uri();
+                else existingUri = obs.getVideo_uri();
+            } else {
+                existingUri = null;
+            }
+
+            // A helper to perform the copy and attach flow after confirmation
+            Runnable performAttach = () -> {
+                String uri = Uri.fromFile(f).toString();
+                try {
+                    TraitObject currentTrait = getCurrentTrait();
+                    if (currentTrait != null) {
+                        try {
+                            String traitName = currentTrait.getName();
+                            String sanitizedTraitName = com.fieldbook.tracker.utilities.FileUtil.sanitizeFileName(traitName);
+                            DocumentFile traitPhotos = DocumentTreeUtil.Companion.getFieldMediaDirectory(this, sanitizedTraitName);
+                            if (traitPhotos != null) {
+                                String srcName = f.getName();
+                                String ext = "";
+                                int dot = srcName.lastIndexOf('.');
+                                if (dot > 0) ext = srcName.substring(dot);
+                                DateTimeFormatter internalTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZZZZZ");
+                                String destName = sanitizedTraitName + "_" + getCRange().uniqueId + "_"
+                                        + FileUtil.sanitizeFileName(OffsetDateTime.now().format(internalTimeFormatter)) + ext;
+                                DocumentFile dest = traitPhotos.createFile("*/*", destName);
+                                if (dest != null) {
+                                    InputStream in = null;
+                                    OutputStream out = null;
+                                    try {
+                                        in = new FileInputStream(f);
+                                        out = getContentResolver().openOutputStream(dest.getUri());
+                                        if (out == null) throw new IOException("Unable to open output stream for destination file");
+                                        byte[] buf = new byte[8192];
+                                        int len;
+                                        while ((len = in.read(buf)) > 0) out.write(buf, 0, len);
+                                        out.flush();
+                                        try { f.delete(); } catch (Exception ignore) {}
+                                        uri = dest.getUri().toString();
+
+                                    } finally {
+                                        try { if (in != null) in.close(); } catch (Exception ignore) {}
+                                        try { if (out != null) out.close(); } catch (Exception ignore) {}
+                                    }
                                 }
                             }
-                        }
-                    } catch (Exception ex) { ex.printStackTrace(); }
-                }
-            }
+                        } catch (Exception ex) { ex.printStackTrace(); }
+                    }
 
-            if (mediaType.startsWith("photo")) {
-                obs.setPhoto_uri(uri);
-            } else if ("audio".equals(mediaType)) {
-                obs.setAudio_uri(uri);
+                    if (mediaType != null && mediaType.startsWith("photo")) {
+                        // Write EXIF metadata to the saved photo if possible
+                        try {
+                            org.threeten.bp.format.DateTimeFormatter fmt = org.threeten.bp.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZZZZZ");
+                            String ts = org.threeten.bp.OffsetDateTime.now().format(fmt);
+                            String studyId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
+                            ExifUtil.Companion.saveVariableUnitModelToExif(
+                                    this,
+                                    getPerson(),
+                                    ts,
+                                    database.getStudyById(studyId),
+                                    database.getObservationUnitById(getCRange().uniqueId),
+                                    database.getObservationVariableById(getCurrentTrait() != null ? getCurrentTrait().getId() : null),
+                                    Uri.parse(uri),
+                                    getRotationRelativeToDevice()
+                            );
+                        } catch (Exception e) { e.printStackTrace(); }
+
+                        // if there was an old photo attached, delete it now
+                        try { if (existingUri != null && !existingUri.isEmpty()) safeDeleteUriString(existingUri); } catch (Exception ignore) {}
+
+                        obs.setPhoto_uri(uri);
+                    } else if ("audio".equals(mediaType)) {
+                        try { if (existingUri != null && !existingUri.isEmpty()) safeDeleteUriString(existingUri); } catch (Exception ignore) {}
+                        obs.setAudio_uri(uri);
+                    } else {
+                        try { if (existingUri != null && !existingUri.isEmpty()) safeDeleteUriString(existingUri); } catch (Exception ignore) {}
+                        obs.setVideo_uri(uri);
+                    }
+
+                    database.updateObservationMediaUris(obs);
+
+                    runOnUiThread(this::initToolbars);
+
+                } catch (Exception e) { e.printStackTrace(); }
+            };
+
+            // If there's existing media, ask the user before replacing
+            if (existingUri != null && !existingUri.isEmpty()) {
+                new AlertDialog.Builder(this, R.style.AppAlertDialog)
+                        .setTitle(R.string.dialog_confirm)
+                        .setMessage(getString(R.string.confirm_replace_media_message))
+                        .setPositiveButton(android.R.string.ok, (d, which) -> performAttach.run())
+                        .setNegativeButton(android.R.string.cancel, (d, which) -> {
+                            try { f.delete(); } catch (Exception ignore) {}
+                        })
+                        .show();
             } else {
-                obs.setVideo_uri(uri);
+                performAttach.run();
             }
 
-            database.updateObservationMediaUris(obs);
-
-            initToolbars();
-
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void onMediaCancelFromDialog(String mediaPath) {
         try { new File(mediaPath).delete(); } catch (Exception ignore) {}
     }
-}
 
     private void performTraitDeleteAfterMediaCheck() {
         boolean status = database.isBrapiSynced(getStudyId(), getObservationUnit(), getTraitDbId(), getRep());
@@ -3450,10 +3620,5 @@ public class CollectActivity extends ThemedActivity
         } catch (Exception e) {
             Log.w(TAG, "Invalid uri string: " + uriString, e);
         }
-    }
-
-    // Called by MediaPreviewDialogFragment when user cancels (Delete temp file)
-    public void onMediaCancelFromDialog(String mediaPath) {
-        try { new File(mediaPath).delete(); } catch (Exception ignore) {}
     }
 }
