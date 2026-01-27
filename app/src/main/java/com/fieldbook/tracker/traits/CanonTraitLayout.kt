@@ -61,12 +61,11 @@ class CanonTraitLayout :
 
         activity?.runOnUiThread {
 
-            shutterButton?.visibility = View.INVISIBLE
-
-            imageView?.visibility = View.INVISIBLE
-            previewCardView?.visibility = View.INVISIBLE
-
-            connectBtn?.visibility = View.VISIBLE
+            connectProgress?.visibility = VISIBLE
+            shutterButton?.visibility = INVISIBLE
+            imageView?.visibility = INVISIBLE
+            previewCardView?.visibility = INVISIBLE
+            connectBtn?.visibility = VISIBLE
 
             if (controller.getCanonApi().isConnected) {
 
@@ -136,10 +135,10 @@ class CanonTraitLayout :
 
         uiScope.launch {
 
-            connectBtn?.visibility = View.INVISIBLE
-            imageView?.visibility = View.VISIBLE
+            connectBtn?.visibility = INVISIBLE
+            imageView?.visibility = VISIBLE
             previewCardView?.visibility = if (prefs.getBoolean(GeneralKeys.CANON_CAMERA_PREVIEW, true))
-                View.VISIBLE else View.GONE
+                VISIBLE else GONE
             previewCardView?.layoutParams = ConstraintLayout.LayoutParams(
                 ConstraintLayout.LayoutParams.MATCH_PARENT,
                 ConstraintLayout.LayoutParams.WRAP_CONTENT
@@ -178,7 +177,7 @@ class CanonTraitLayout :
 
     override fun onSettingsChanged() {
         previewCardView?.visibility = if (prefs.getBoolean(GeneralKeys.CANON_CAMERA_PREVIEW, true))
-            View.VISIBLE else View.GONE
+            VISIBLE else GONE
     }
 
     override fun showSettings() {
@@ -202,13 +201,11 @@ class CanonTraitLayout :
 
         uiScope.launch {
 
-            imageView?.visibility = View.INVISIBLE
-            previewCardView?.visibility = View.INVISIBLE
-
-            shutterButton?.visibility = View.INVISIBLE
-
-            connectBtn?.visibility = View.VISIBLE
-
+            connectProgress?.visibility = GONE
+            imageView?.visibility = INVISIBLE
+            previewCardView?.visibility = INVISIBLE
+            shutterButton?.visibility = INVISIBLE
+            connectBtn?.visibility = VISIBLE
             shutterButton?.setOnClickListener(null)
         }
     }
@@ -217,8 +214,9 @@ class CanonTraitLayout :
 
         uiScope.launch(Dispatchers.Main) {
 
-            shutterButton?.visibility = View.VISIBLE
-            settingsButton?.visibility = View.VISIBLE
+            shutterButton?.visibility = VISIBLE
+            settingsButton?.visibility = VISIBLE
+            connectProgress?.visibility = GONE
 
             imageView?.setImageBitmap(bmp)
 

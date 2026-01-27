@@ -14,6 +14,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.ProgressBar
 import androidx.cardview.widget.CardView
 import androidx.documentfile.provider.DocumentFile
 import androidx.media3.ui.PlayerView
@@ -84,6 +85,7 @@ abstract class AbstractCameraTrait :
     protected var shutterButton: ImageButton? = null
     protected var imageView: ImageView? = null
     protected var previewCardView: CardView? = null
+    protected var connectProgress: ProgressBar? = null
 
     private var loader = CoroutineScope(Dispatchers.IO)
     protected val background = CoroutineScope(Dispatchers.IO)
@@ -147,6 +149,7 @@ abstract class AbstractCameraTrait :
         settingsButton = act.findViewById(R.id.camera_fragment_settings_btn)
         shutterButton = act.findViewById(R.id.camera_fragment_capture_btn)
         previewCardView = act.findViewById(R.id.trait_camera_cv)
+        connectProgress = act.findViewById(R.id.camera_fragment_connect_progress)
 
         recyclerView?.adapter = ImageAdapter(context, this)
 
