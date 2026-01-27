@@ -2293,6 +2293,7 @@ public class CollectActivity extends ThemedActivity
             case REQUEST_CROP_IMAGE_CODE:
                 if (resultCode == RESULT_OK && data != null) {
                     String mediaPath = data.getStringExtra("media_path");
+                    Boolean skipSave = data.getBooleanExtra(CameraActivity.EXTRA_SKIP_SAVE, false);
                     if (mediaPath != null) {
                         File f = new File(getContext().getCacheDir(), AbstractCameraTrait.TEMPORARY_IMAGE_NAME);
                         Uri uri = Uri.fromFile(f);
@@ -2301,7 +2302,7 @@ public class CollectActivity extends ThemedActivity
                         pendingMediaType = "photo";
                         // delete the previously saved copy (mediaPath) to avoid duplicates later
                         try { if (!mediaPath.equals(pendingMediaPath)) new File(mediaPath).delete(); } catch (Exception ignore) {}
-                        startCropActivity(getCurrentTrait().getId(), uri);
+                        startCropActivity(getCurrentTrait().getId(), uri, skipSave);
                     }
                 }
                 break;
@@ -2316,7 +2317,8 @@ public class CollectActivity extends ThemedActivity
                             pendingMediaPath = null;
                             pendingMediaType = null;
                             // Show confirm dialog on UI thread
-                            runOnUiThread(() -> showMediaConfirmDialog(type, path));
+                            Boolean skipSave = data.getBooleanExtra(CameraActivity.EXTRA_SKIP_SAVE, false);
+                            runOnUiThread(() -> showMediaConfirmDialog(type, path, skipSave));
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -2344,7 +2346,7 @@ public class CollectActivity extends ThemedActivity
                                 // delete the previously saved copy (mediaPath) to avoid duplicates later
                                 try { if (mediaPath != null && !mediaPath.equals(pendingMediaPath)) new File(mediaPath).delete(); } catch (Exception ignore) {}
                                 pendingMediaType = mediaType;
-                                startCropActivity(getCurrentTrait().getId(), uri);
+                                startCropActivity(getCurrentTrait().getId(), uri, false);
                             } else {
                                 // If an ROI is defined, apply the crop to the saved image before showing the confirm dialog.
                                 // Do this off the UI thread to avoid blocking.
@@ -2382,15 +2384,15 @@ public class CollectActivity extends ThemedActivity
                                         }
 
                                         // After cropping (or on failure), show the confirm dialog on UI thread
-                                        runOnUiThread(() -> showMediaConfirmDialog(mediaType, mediaPath));
+                                        runOnUiThread(() -> showMediaConfirmDialog(mediaType, mediaPath, false));
                                     });
                                  } catch (Exception e) {
                                      e.printStackTrace();
-                                     showMediaConfirmDialog(mediaType, mediaPath);
+                                     showMediaConfirmDialog(mediaType, mediaPath, false);
                                  }
                              }
                          } else if (mediaType.equals("audio") || mediaType.equals("video")) {
-                            runOnUiThread(() -> showMediaConfirmDialog(mediaType, mediaPath));
+                            runOnUiThread(() -> showMediaConfirmDialog(mediaType, mediaPath, false));
                         }
 
                      } else if (barcode != null) {
@@ -3316,11 +3318,12 @@ public class CollectActivity extends ThemedActivity
     /**
      * a function that starts the crop activity and sends it required intent data
      */
-    public void startCropActivity(String traitId, Uri uri) {
+    public void startCropActivity(String traitId, Uri uri, Boolean skipSave) {
          try {
              Intent intent = new Intent(this, CropImageActivity.class);
              intent.putExtra(CropImageFragment.EXTRA_TRAIT_ID, Integer.parseInt(traitId));
              intent.putExtra(CropImageFragment.EXTRA_IMAGE_URI, uri.toString());
+             intent.putExtra(CameraActivity.EXTRA_SKIP_SAVE, skipSave);
              cameraXFacade.unbind();
              startActivityForResult(intent, REQUEST_CROP_FINISHED_CODE);
          } catch (Exception e) {
@@ -3335,6 +3338,7 @@ public class CollectActivity extends ThemedActivity
             intent.putExtra(CameraActivity.EXTRA_TRAIT_ID, Integer.parseInt(getCurrentTrait().getId()));
             intent.putExtra(CameraActivity.EXTRA_STUDY_ID, String.valueOf(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)));
             intent.putExtra(CameraActivity.EXTRA_OBS_UNIT, getObservationUnit());
+            intent.putExtra(CameraActivity.EXTRA_SKIP_SAVE, true);
             cameraXFacade.unbind();
             startActivityForResult(intent, REQUEST_CROP_IMAGE_CODE);
         } catch (Exception e) {
@@ -3351,7 +3355,7 @@ public class CollectActivity extends ThemedActivity
             builder.setTitle(R.string.dialog_crop_title);
             builder.setMessage(R.string.dialog_crop_message);
             builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                startCropActivity(traitId, uri);
+                startCropActivity(traitId, uri, false);
             });
             builder.setNegativeButton(android.R.string.no, (dialog, which) -> {
                 dialog.dismiss();
@@ -3396,7 +3400,7 @@ public class CollectActivity extends ThemedActivity
         InsetHandler.INSTANCE.setupInsetsWithBottomBar(rootView, toolbar, bottomContent);
     }
 
-    public void showMediaConfirmDialog(String mediaType, String mediaPath) {
+    public void showMediaConfirmDialog(String mediaType, String mediaPath, Boolean skipSave) {
          if (mediaType == null || mediaPath == null) return;
          try {
 
@@ -3409,8 +3413,8 @@ public class CollectActivity extends ThemedActivity
                     return;
                 }
 
-                com.fieldbook.tracker.ui.MediaPreviewDialogFragment.Companion.newInstance(String.valueOf(model.getInternal_id_observation()), mediaType, mediaPath)
-                        .show(getSupportFragmentManager(), "media_preview");
+                 com.fieldbook.tracker.ui.MediaPreviewDialogFragment.Companion.newInstance(String.valueOf(model.getInternal_id_observation()), mediaType, mediaPath, skipSave)
+                         .show(getSupportFragmentManager(), "media_preview");
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -3420,8 +3424,10 @@ public class CollectActivity extends ThemedActivity
          }
      }
 
-    public void onMediaConfirmFromDialog(String obsId, String mediaType, String mediaPath) {
+    public void onMediaConfirmFromDialog(String obsId, String mediaType, String mediaPath, Boolean skipSave) {
         try {
+
+            if (skipSave) return;
 
             ObservationModel obs = database.getObservationById(obsId);
             if (obs == null) {
