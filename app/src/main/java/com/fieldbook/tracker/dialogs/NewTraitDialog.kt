@@ -71,10 +71,10 @@ class NewTraitDialog(
     @Inject
     lateinit var traitRepo: TraitRepository
 
-    // flag to just return selectable format
+    //flag to just return selectable format
     var isSelectingFormat: Boolean = false
 
-    // flag for editing existing brapi variable being imported
+    //flag for editing existing brapi variable being imported
     var isBrapiTraitImport: Boolean = false
 
     // UI elements of new trait dialog
@@ -86,13 +86,13 @@ class NewTraitDialog(
     private var positiveBtn: Button? = null
     private var neutralBtn: Button? = null
 
-    // holds the trait objects sent from trait editor activity
+    //holds the trait objects sent from trait editor activity
     private var initialTraitObject: TraitObject? = null
 
-    // when editing this tracks the original object, to see if values changed when discarding
+    //when editing this tracks the original object, to see if values changed when discarding
     private var originalInitialTraitObject: TraitObject? = null
 
-    // private var createVisible: Boolean
+    //private var createVisible: Boolean
 
     private var onTraitSaved: (() -> Unit)? = null
 
@@ -121,7 +121,7 @@ class NewTraitDialog(
         dialog?.window?.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE)
         dialog?.window?.clearFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
 
-        // following stretches dialog a bit for more pixel real estate
+        //following stretches dialog a bit for more pixel real estate
         val params = dialog?.window?.attributes
         params?.width = LinearLayout.LayoutParams.MATCH_PARENT
         params?.height = LinearLayout.LayoutParams.WRAP_CONTENT
@@ -188,7 +188,7 @@ class NewTraitDialog(
             traitFormatsRv.visibility = View.GONE
             parametersSv.visibility = View.VISIBLE
 
-            // if editing a variable and observations exist, don't allow the format to change
+            //if editing a variable and observations exist, don't allow the format to change
             var observationsExist = false
             if (initialTraitObject != null) {
                 initialTraitObject?.id?.let { traitDbId ->
@@ -202,7 +202,7 @@ class NewTraitDialog(
 
                 neutralBtn?.setText(R.string.dialog_back)
                 neutralBtn?.setOnClickListener {
-                    // close keyboard programmatically
+                    //close keyboard programmatically
                     SoftKeyboardUtil.closeKeyboard(context, traitFormatsRv, 1L)
 
                     (traitFormatsRv.adapter as? TraitFormatAdapter)?.selectedFormat = null
@@ -274,17 +274,21 @@ class NewTraitDialog(
     }
 
     private fun show() {
-        // a match will be found if format was not empty
-        // if match was found, showFormatParameters
+        if (initialTraitObject == null) {
+            showFormatLayouts(Formats.getMainFormats())
+        } else {
+            // a match will be found if format was not empty
+            // if match was found, showFormatParameters
+            val existingFormat = Formats.entries.firstOrNull {
+                initialTraitObject?.format == it.getDatabaseName()
+            }
 
-        // if no match found (empty format)
-        // copy certain trait properties (defined in repo.changeTraitFormat)
-        // or if initialTraitObject is null
-        // let the user select format first
-        Formats.entries.firstOrNull {
-            initialTraitObject?.format == it.getDatabaseName()
-        }?.let { showFormatParameters(it) }
-            ?: showFormatLayouts(Formats.getMainFormats())
+            // if no match found (empty format)
+            // copy certain trait properties (defined in repo.changeTraitFormat)
+            // and let the user select format first
+            if (existingFormat == null) showFormatLayouts(Formats.getMainFormats())
+            else showFormatParameters(existingFormat)
+        }
     }
 
     private fun getSelectedFormat(): Formats? =
