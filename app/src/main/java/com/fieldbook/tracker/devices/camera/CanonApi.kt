@@ -312,11 +312,8 @@ class CanonApi @Inject constructor(@param:ActivityContext private val context: C
 
             log("d246 response $response")
 
-            if (response) {
+            writeParameter902f(session, storageId)
 
-                writeParameter902f(session, storageId)
-
-            }
         }
     }
 
