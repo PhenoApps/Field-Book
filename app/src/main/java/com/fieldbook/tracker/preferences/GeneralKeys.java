@@ -267,6 +267,12 @@ public class GeneralKeys {
         );
     }
 
+    @NotNull
+    public static final String PREF_KEY_SHOWN_JUMP_INFO = "pref_shown_jump_to_plot_bottom_toolbar_alert";
+
+    @NotNull
+    public static final String PREF_KEY_SHOWN_BARCODE_OPTION = "pref_shown_barcode_option";
+
     private GeneralKeys() {
 
     }

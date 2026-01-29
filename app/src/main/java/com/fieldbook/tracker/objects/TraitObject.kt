@@ -104,6 +104,18 @@ class TraitObject {
         get() = attributeValues.getBoolean(TraitAttributes.INVALID_VALUES)
         set(value) = attributeValues.setValue(TraitAttributes.INVALID_VALUES, value.toString())
 
+    var attachPhoto: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.MULTI_MEDIA_PHOTO)
+        set(value) = attributeValues.setValue(TraitAttributes.MULTI_MEDIA_PHOTO, value.toString())
+
+    var attachVideo: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.MULTI_MEDIA_VIDEO)
+        set(value) = attributeValues.setValue(TraitAttributes.MULTI_MEDIA_VIDEO, value.toString())
+
+    var attachAudio: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.MULTI_MEDIA_AUDIO)
+        set(value) = attributeValues.setValue(TraitAttributes.MULTI_MEDIA_AUDIO, value.toString())
+
     fun loadAttributeAndValues() {
         attributeValues.traitId = id
         attributeValues.load()
@@ -148,7 +160,10 @@ class TraitObject {
                 repeatedMeasures == that.repeatedMeasures &&
                 autoSwitchPlot == that.autoSwitchPlot &&
                 unit == that.unit &&
-                invalidValues == that.invalidValues
+                invalidValues == that.invalidValues &&
+                attachAudio == that.attachAudio &&
+                attachPhoto == that.attachPhoto &&
+                attachVideo == that.attachVideo
     }
 
     override fun hashCode(): Int {
@@ -158,7 +173,7 @@ class TraitObject {
             additionalInfo, observationLevelNames, closeKeyboardOnOpen, cropImage,
             saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms,
             maxDecimalPlaces, mathSymbolsEnabled, allowMulticat, repeatedMeasures,
-            autoSwitchPlot, unit, invalidValues
+            autoSwitchPlot, unit, invalidValues, attachAudio, attachPhoto, attachVideo
         )
     }
 
@@ -193,6 +208,9 @@ class TraitObject {
         t.autoSwitchPlot = this.autoSwitchPlot
         t.unit = this.unit
         t.invalidValues = this.invalidValues
+        t.attachAudio = this.attachAudio
+        t.attachPhoto = this.attachPhoto
+        t.attachVideo = this.attachVideo
 
         return t
     }
@@ -232,7 +250,7 @@ class TraitObject {
         traitDataSource = cursor.getString(traitDataSourceIndex) ?: ""
         _synonyms = cursor.getString(synonymsIndex) ?: ""
 
-        // loadAttributeAndValues()
+        loadAttributeAndValues()
     }
 
     fun setAttributeValue(attribute: AttributeDefinition, value: String) {

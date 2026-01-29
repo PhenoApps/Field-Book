@@ -3,6 +3,7 @@ package com.fieldbook.tracker.traits.formats
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.traits.formats.parameters.AutoSwitchPlotParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
+import com.fieldbook.tracker.traits.formats.parameters.AttachMediaParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
 import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
@@ -21,5 +22,6 @@ class CounterFormat : TraitFormat(
     UnitParameter(),
     AutoSwitchPlotParameter(),
     RepeatedMeasureParameter(),
-    ResourceFileParameter()
-), Scannable
+    ResourceFileParameter(),
+    AttachMediaParameter()
+), Scannable, ChartableData

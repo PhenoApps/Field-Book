@@ -10,6 +10,7 @@ import android.graphics.Bitmap
 import androidx.core.content.contentValuesOf
 import com.fieldbook.tracker.brapi.model.FieldBookImage
 import com.fieldbook.tracker.database.*
+import com.fieldbook.tracker.database.DataHelper.db
 import com.fieldbook.tracker.database.Migrator.*
 import com.fieldbook.tracker.database.Migrator.Companion.sLocalImageObservationsViewName
 import com.fieldbook.tracker.database.Migrator.Companion.sNonImageObservationsViewName
@@ -582,8 +583,11 @@ class ObservationDao {
             notes: String, studyId: String, observationDbId: String?,
             timestamp: OffsetDateTime?,
             lastSyncedTime: OffsetDateTime?,
-            rep: String? = (getRep(studyId, plotId, traitDbId) + 1).toString()
-        ): Long = withDatabase { db ->
+            rep: String? = (getRep(studyId, plotId, traitDbId) + 1).toString(),
+            audioUri: String? = null,
+            videoUri: String? = null,
+            photoUri: String? = null
+         ): Long = withDatabase { db ->
 
             val traitObj = ObservationVariableDao.getTraitById(traitDbId)
             val internalTraitId = if (traitObj == null) {
@@ -601,7 +605,6 @@ class ObservationDao {
             //remove null control characters which are added to strings by some devices (Samsung)
             //when the user pastes clipboard data
             val removeNullCharacters = value.replace("\u0000", "")
-
             db.insert(Observation.tableName, null, contentValuesOf(
                 "observation_db_id" to observationDbId,
                 "value" to removeNullCharacters,
@@ -611,6 +614,9 @@ class ObservationDao {
                 "last_synced_time" to lastSyncedTime?.format(internalTimeFormatter),
                 "rep" to rep,
                 "notes" to notes,
+                "audio_uri" to audioUri,
+                "video_uri" to videoUri,
+                "photo_uri" to photoUri,
                 Study.FK to studyId.toInt(),
                 ObservationUnit.FK to plotId,
                 ObservationVariable.FK to internalTraitId
@@ -775,6 +781,18 @@ class ObservationDao {
                     "${Observation.PK} = ?", arrayOf(it.fieldBookDbId))
 
             }
+        }
+
+        fun updateObservationMediaUris(observation: ObservationModel) = withDatabase {
+            db.update(Observation.tableName, contentValuesOf().apply {
+                put("value", observation.value)
+                put("rep", observation.rep)
+                put("audio_uri", observation.audio_uri)
+                put("video_uri", observation.video_uri)
+                put("photo_uri", observation.photo_uri)
+            },
+                "${Observation.PK} = ?", arrayOf(observation.internal_id_observation.toString())
+            )
         }
 
         fun updateObservation(observation: ObservationModel) = withDatabase { db ->
