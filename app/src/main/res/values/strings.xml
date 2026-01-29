@@ -1922,4 +1922,7 @@
     <string name="confirm_delete_with_media_title">Delete observation with attached media?</string>
     <string name="confirm_delete_with_media_message">This observation has attached media (photo, audio, or video). Deleting the observation will also delete the attached media files. Are you sure you want to continue?</string>
     <string name="attach">Attach</string>
+
+    <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
+    <string name="alert_jump_to_plot_bottom_toolbar_message">The bottom toolbar is the new approach for quick actions like moving to a plot; you can use the bottom barcode button to scan or navigate.</string>
 </resources>

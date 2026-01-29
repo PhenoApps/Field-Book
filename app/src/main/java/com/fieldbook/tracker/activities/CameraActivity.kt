@@ -61,14 +61,6 @@ import javax.inject.Inject
 import androidx.appcompat.widget.Toolbar
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.core.view.isVisible
-import com.fieldbook.tracker.activities.CameraActivity.Companion.EXTRA_BARCODE
-import com.fieldbook.tracker.activities.CameraActivity.Companion.EXTRA_SKIP_SAVE
-import com.fieldbook.tracker.activities.CameraActivity.Companion.MAX_BARCODE_DETECTIONS
-import com.fieldbook.tracker.activities.CameraActivity.Companion.MODE_BARCODE
-import com.fieldbook.tracker.activities.CameraActivity.Companion.MODE_CROP
-import com.fieldbook.tracker.activities.CameraActivity.Companion.MODE_PHOTO
-import com.fieldbook.tracker.activities.CameraActivity.Companion.REQUEST_RECORD_AUDIO_PERMISSION
-import com.serenegiant.utils.UIThreadHelper.runOnUiThread
 
 @AndroidEntryPoint
 class CameraActivity : ThemedActivity() {

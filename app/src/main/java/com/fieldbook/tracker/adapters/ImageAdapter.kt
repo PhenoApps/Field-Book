@@ -109,10 +109,7 @@ class ImageAdapter(private val context: Context, private val listener: ImageItem
                     height = actualHeight
                 }
 
-                val isVideo = model.uri?.lowercase()
-                    ?.endsWith(".mp4") == true || (model.uri?.startsWith("content://") == true && view.context.contentResolver.getType(
-                    android.net.Uri.parse(model.uri)
-                )?.startsWith("video/") == true)
+                val isVideo = model.uri?.lowercase()?.endsWith(".mp4") == true || (model.uri?.startsWith("content://") == true && view.context.contentResolver.getType(android.net.Uri.parse(model.uri))?.startsWith("video/") == true)
 
                 //set or clear the click listener, videos should not open the external viewer
                 if (isVideo) {
@@ -131,18 +128,12 @@ class ImageAdapter(private val context: Context, private val listener: ImageItem
                         val fd = cr.openFileDescriptor(uri, "r")
                         fd?.fileDescriptor?.let { retriever.setDataSource(it) }
                         // get frame at 0ms or closest
-                        thumbBmp = retriever.getFrameAtTime(
-                            0,
-                            android.media.MediaMetadataRetriever.OPTION_CLOSEST
-                        )
+                        thumbBmp = retriever.getFrameAtTime(0, android.media.MediaMetadataRetriever.OPTION_CLOSEST)
                     } catch (_: Exception) {
                         // ignore and fallback
                         thumbBmp = null
                     } finally {
-                        try {
-                            retriever.release()
-                        } catch (_: Exception) {
-                        }
+                        try { retriever.release() } catch (_: Exception) {}
                     }
 
                     if (thumbBmp != null) {
@@ -158,22 +149,10 @@ class ImageAdapter(private val context: Context, private val listener: ImageItem
 
                     // Always show thumbnail on bind and clear any previously attached media/listeners.
                     // This prevents VideoView from auto-starting when the view is rebound.
-                    try {
-                        videoView?.stopPlayback()
-                    } catch (_: Exception) {
-                    }
-                    try {
-                        videoView?.setOnPreparedListener(null)
-                    } catch (_: Exception) {
-                    }
-                    try {
-                        videoView?.setOnCompletionListener(null)
-                    } catch (_: Exception) {
-                    }
-                    try {
-                        videoView?.setOnErrorListener(null)
-                    } catch (_: Exception) {
-                    }
+                    try { videoView?.stopPlayback() } catch (_: Exception) {}
+                    try { videoView?.setOnPreparedListener(null) } catch (_: Exception) {}
+                    try { videoView?.setOnCompletionListener(null) } catch (_: Exception) {}
+                    try { videoView?.setOnErrorListener(null) } catch (_: Exception) {}
                     // Reset UI to thumbnail state (do not auto-start playback on bind)
                     videoView?.visibility = View.GONE
                     imageView.visibility = View.VISIBLE
@@ -186,34 +165,19 @@ class ImageAdapter(private val context: Context, private val listener: ImageItem
                     val resetToThumbnail: () -> Unit = {
                         try {
                             // clear model playback state
-                            (itemView.tag as? Model)?.let {
-                                it.isPlaying = false; it.lastPlaybackPosition = 0
-                            }
+                            (itemView.tag as? Model)?.let { it.isPlaying = false; it.lastPlaybackPosition = 0 }
                             currentlyPlayingVideo = null
                             currentlyPlayingHolder = null
                             // stop and clear listeners to fully reset
-                            try {
-                                videoView?.stopPlayback()
-                            } catch (_: Exception) {
-                            }
-                            try {
-                                videoView?.setOnPreparedListener(null)
-                            } catch (_: Exception) {
-                            }
-                            try {
-                                videoView?.setOnCompletionListener(null)
-                            } catch (_: Exception) {
-                            }
-                            try {
-                                videoView?.setOnErrorListener(null)
-                            } catch (_: Exception) {
-                            }
+                            try { videoView?.stopPlayback() } catch (_: Exception) {}
+                            try { videoView?.setOnPreparedListener(null) } catch (_: Exception) {}
+                            try { videoView?.setOnCompletionListener(null) } catch (_: Exception) {}
+                            try { videoView?.setOnErrorListener(null) } catch (_: Exception) {}
                             videoView?.visibility = View.GONE
                             imageView.visibility = View.VISIBLE
                             playButton?.visibility = View.VISIBLE
                             pauseButton?.visibility = View.GONE
-                        } catch (_: Exception) {
-                        }
+                        } catch (_: Exception) {}
                     }
 
                     // play button starts inline playback using VideoView
@@ -238,34 +202,23 @@ class ImageAdapter(private val context: Context, private val listener: ImageItem
                                     currentlyPlayingHolder?.let { holder ->
                                         // save current playback position for the other holder, and pause it
                                         (holder.itemView.tag as? Model)?.let { m ->
-                                            try {
-                                                m.lastPlaybackPosition =
-                                                    holder.videoView?.currentPosition ?: 0
-                                            } catch (_: Exception) {
-                                            }
+                                            try { m.lastPlaybackPosition = holder.videoView?.currentPosition ?: 0 } catch (_: Exception) {}
                                             m.isPlaying = false
                                         }
-                                        try {
-                                            holder.videoView?.pause()
-                                        } catch (_: Exception) {
-                                        }
+                                        try { holder.videoView?.pause() } catch (_: Exception) {}
                                         holder.pauseButton?.visibility = View.GONE
                                         holder.playButton?.visibility = View.VISIBLE
                                         holder.videoView?.visibility = View.GONE
                                         holder.imageView.visibility = View.VISIBLE
                                     }
-                                } catch (_: Exception) {
-                                }
+                                } catch (_: Exception) {}
                                 currentlyPlayingVideo = null
                                 currentlyPlayingHolder = null
                             }
 
                             val uri = android.net.Uri.parse(model.uri)
                             // prepare video; do not assume it's already prepared from previous binds
-                            try {
-                                videoView?.stopPlayback()
-                            } catch (_: Exception) {
-                            }
+                            try { videoView?.stopPlayback() } catch (_: Exception) {}
                             videoView?.setVideoURI(uri)
                             // ensure UI updates for playback start
                             imageView.visibility = View.GONE
@@ -309,11 +262,7 @@ class ImageAdapter(private val context: Context, private val listener: ImageItem
                         try {
                             if (videoView?.isPlaying == true) {
                                 // persist current position and pause without fully stopping playback
-                                try {
-                                    (itemView.tag as? Model)?.lastPlaybackPosition =
-                                        videoView.currentPosition
-                                } catch (_: Exception) {
-                                }
+                                try { (itemView.tag as? Model)?.lastPlaybackPosition = videoView.currentPosition } catch (_: Exception) {}
                                 (itemView.tag as? Model)?.isPlaying = false
                                 videoView.pause()
                                 pauseButton.visibility = View.GONE
@@ -331,8 +280,7 @@ class ImageAdapter(private val context: Context, private val listener: ImageItem
 
                         val preview = if (model.uri == "NA") {
                             // show NA placeholder only when value is literally "NA"
-                            val data =
-                                context.resources.assets.open("na_placeholder.jpg").readBytes()
+                            val data = context.resources.assets.open("na_placeholder.jpg").readBytes()
                             BitmapFactory.decodeByteArray(data, 0, data.size)
                         } else if (model.uri?.contains("content://") != true) {
                             // external/no content URI: show nothing or placeholder label
@@ -341,7 +289,10 @@ class ImageAdapter(private val context: Context, private val listener: ImageItem
                             BitmapLoader.getPreview(view.context, model.uri, model.orientation)
                         }
 
-                        imageView.setImageBitmap(preview)
+                        preview?.let { imageView.setImageBitmap(it) } ?: imageView.setImageDrawable(null)
+                        videoView?.visibility = View.GONE
+                        playButton?.visibility = View.GONE
+                        pauseButton?.visibility = View.GONE
 
                     } catch (f: FileNotFoundException) {
 
@@ -349,8 +300,11 @@ class ImageAdapter(private val context: Context, private val listener: ImageItem
 
                     }
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
+
+            } catch (f: FileNotFoundException) {
+
+                f.printStackTrace()
+
             }
         }
     }

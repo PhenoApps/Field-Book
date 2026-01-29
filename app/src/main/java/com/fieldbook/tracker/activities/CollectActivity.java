@@ -521,9 +521,6 @@ public class CollectActivity extends ThemedActivity
     private void loadScreen() {
         setContentView(R.layout.activity_collect);
 
-        initToolbars();
-        setupCollectInsets();
-
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(null);
             getSupportActionBar().getThemedContext();
@@ -1816,10 +1813,35 @@ public class CollectActivity extends ThemedActivity
             refreshMain();
         } else if (itemId == jumpToPlotId) {
             String moveToUniqueIdValue = preferences.getString(PreferenceKeys.MOVE_TO_UNIQUE_ID, "");
-            if (moveToUniqueIdValue.equals("1")) {
-                moveToPlotID();
-            } else if (moveToUniqueIdValue.equals("2")) {
-                requestScanSingleBarcode();
+
+            // If this is the first time the user clicks the jumpToPlot toolbar icon,
+            // show an informational alert pointing them to the bottom toolbar as the
+            // new approach. Use SharedPreferences to ensure it only shows once.
+            final Runnable performJumpAction = () -> {
+                if (moveToUniqueIdValue.equals("1")) {
+                    moveToPlotID();
+                } else if (moveToUniqueIdValue.equals("2")) {
+                    requestScanSingleBarcode();
+                }
+            };
+
+            boolean hasShownJumpInfo = preferences.getBoolean(GeneralKeys.PREF_KEY_SHOWN_JUMP_INFO, false);
+
+            if (!hasShownJumpInfo) {
+                // Mark as shown so we don't display this again
+                preferences.edit().putBoolean(GeneralKeys.PREF_KEY_SHOWN_JUMP_INFO, true).apply();
+
+                // Show an alert dialog explaining the new bottom toolbar approach,
+                // then perform the original jump action when the user acknowledges it.
+                new AlertDialog.Builder(CollectActivity.this)
+                        .setTitle(getString(R.string.main_toolbar_moveto))
+                        .setMessage(getString(R.string.alert_jump_to_plot_bottom_toolbar_message))
+                        .setPositiveButton(android.R.string.ok, (dialog, which) -> performJumpAction.run())
+                        .setCancelable(true)
+                        .show();
+            } else {
+                // Already shown before — proceed immediately with the action
+                performJumpAction.run();
             }
         } else if (itemId == summaryId) {
             showSummary();
