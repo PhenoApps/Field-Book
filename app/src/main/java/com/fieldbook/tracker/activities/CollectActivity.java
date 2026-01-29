@@ -13,7 +13,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Message;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -26,7 +25,6 @@ import android.view.inputmethod.EditorInfo;
 import android.webkit.MimeTypeMap;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
@@ -295,26 +293,17 @@ public class CollectActivity extends ThemedActivity
     LayoutCollections traitLayouts;
     private String inputPlotId = "";
     private AlertDialog goToId;
-    private final Object lock = new Object();
 
     /**
      * Main screen elements
      */
     private Menu systemMenu;
     private Toolbar toolbar;
-    private InfoBarAdapter infoBarAdapter;
     private TraitBoxView traitBox;
     private RangeBoxView rangeBox;
     private RecyclerView infoBarRv;
 
-    /**
-     * Trait-related elements
-     */
-    private final HandlerThread guiThread = new HandlerThread("ui");
-
     private CollectInputView collectInputView;
-
-    public Handler myGuiHandler;
 
     public int numNixInternetWarnings = 0;
 
@@ -338,18 +327,7 @@ public class CollectActivity extends ThemedActivity
 
     private SecureBluetoothActivityImpl secureBluetooth;
 
-    /**
-     * Multi Measure delete dialogs
-     */
-    private AlertDialog dialogMultiMeasureDelete;
-    private AlertDialog dialogMultiMeasureConfirmDelete;
-
-    /**
-     * GeoNav dialog
-     */
-    private AlertDialog dialogGeoNav;
     private AlertDialog dialogPrecisionLoss;
-    private boolean mlkitEnabled;
 
     private AlertDialog dialogCrashReport;
 
@@ -361,30 +339,6 @@ public class CollectActivity extends ThemedActivity
         gps = new GPSTracker(this, this, 0, 10000);
         
         setupBackCallback();
-
-        guiThread.start();
-        myGuiHandler = new Handler(guiThread.getLooper()) {
-            @Override
-            public void handleMessage(Message msg) {
-                synchronized (lock) {
-                    if (msg.what == 1) {
-                        ImageView btn = findViewById(msg.arg1);
-                        if (btn.getTag() != null) {  // button is still pressed
-                            // schedule next btn pressed check
-                            Message msg1 = new Message();
-                            msg1.copyFrom(msg);
-                            if (msg.arg1 == R.id.rangeLeft) {
-                                rangeBox.repeatKeyPress("left");
-                            } else {
-                                rangeBox.repeatKeyPress("right");
-                            }
-                            myGuiHandler.removeMessages(1);
-                            myGuiHandler.sendMessageDelayed(msg1, msg1.arg2);
-                        }
-                    }
-                }
-            }
-        };
 
         secureBluetooth = new SecureBluetoothActivityImpl(this);
         secureBluetooth.initialize();
@@ -407,8 +361,6 @@ public class CollectActivity extends ThemedActivity
         });
 
         sensorHelper.register();
-
-        mlkitEnabled = mPrefs.getBoolean(PreferenceKeys.MLKIT_PREFERENCE_KEY, false);
 
         loadScreen();
 
@@ -467,9 +419,7 @@ public class CollectActivity extends ThemedActivity
 
         } catch (Exception e) {
 
-            Log.d(TAG,"Error during switch field");
-
-            e.printStackTrace();
+            Log.e(TAG,"Error during switch field", e);
 
         }
     }
@@ -619,7 +569,7 @@ public class CollectActivity extends ThemedActivity
 
             } catch (Exception e) {
 
-                e.printStackTrace();
+                Log.e(TAG, "Error setting snackbar bottom margin.", e);
 
             }
 
@@ -639,7 +589,7 @@ public class CollectActivity extends ThemedActivity
 
         try {
 
-            infoBarAdapter = new InfoBarAdapter(this);
+            InfoBarAdapter infoBarAdapter = new InfoBarAdapter(this);
 
             infoBarRv.setAdapter(infoBarAdapter);
 
@@ -649,9 +599,7 @@ public class CollectActivity extends ThemedActivity
 
         } catch (Exception e) {
 
-            e.printStackTrace();
-
-            Log.d(TAG, "Error: info bar adapter loading.");
+            Log.e(TAG, "Error: info bar adapter loading.", e);
         }
     }
 
@@ -669,9 +617,7 @@ public class CollectActivity extends ThemedActivity
 
     /**
      * Is used to ensure the UI entered data is within the bounds of the trait's min/max
-     *
      * Added a check to return NA as valid for BrAPI data.
-     *
      * @return boolean flag false when data is out of bounds, true otherwise
      */
     @Override
@@ -778,9 +724,9 @@ public class CollectActivity extends ThemedActivity
                 TraitObject currentTrait = traitBox.getCurrentTrait();
                 if (currentTrait != null) {
                     String format = currentTrait.getFormat();
-                    if (format != null && Formats.Companion.isCameraTrait(format)) {
+                    if (Formats.Companion.isCameraTrait(format)) {
                         ((AbstractCameraTrait) traitLayouts.getTraitLayout(format)).setImageNa();
-                    } else if (format != null && Formats.Companion.isSpectralFormat(format)) {
+                    } else if (Formats.Companion.isSpectralFormat(format)) {
                         ((SpectralTraitLayout) traitLayouts.getTraitLayout(format)).setNa();
                     } else {
                         updateObservation(currentTrait, "NA", null);
@@ -865,7 +811,8 @@ public class CollectActivity extends ThemedActivity
                             // start activity for result so CollectActivity receives returned media path directly
                             startActivityForResult(intent, REQUEST_MEDIA_CODE);
                         } catch (Exception e) {
-                            e.printStackTrace();
+
+                            Log.e(TAG, "Failed to start camera activity", e);
                         }
                         break;
                     case VIEW_MEDIA:
@@ -877,7 +824,7 @@ public class CollectActivity extends ThemedActivity
                             // Start for result so we can refresh Collect UI when the user returns (media may have been deleted)
                             startActivityForResult(mediaIntent, REQUEST_VIEW_MEDIA_CODE);
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            Log.e(TAG, "Failed to start media viewer activity", e);
                         }
                  break;
                 }
@@ -1276,8 +1223,6 @@ public class CollectActivity extends ThemedActivity
 
         database.updateEditDate(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
-        guiThread.quit();
-
         // Backup database
         try {
 
@@ -1292,14 +1237,14 @@ public class CollectActivity extends ThemedActivity
                         database.exportDatabase(this,"backup");
 
                     } catch (IOException io) {
-                        io.printStackTrace();
+                        Log.e(TAG, "Error exporting database.", io);
                     }
 
                 });
             }
 
         } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(TAG, "Error backing up database.", e);
         }
 
         geoNavHelper.stopGeoNav();
@@ -1318,8 +1263,6 @@ public class CollectActivity extends ThemedActivity
     @Override
     public void onDestroy() {
 
-        guiThread.quit();
-
         //save last plot id
         if (preferences.getBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, false)) {
             rangeBox.saveLastPlotAndTrait();
@@ -1328,7 +1271,7 @@ public class CollectActivity extends ThemedActivity
         try {
             ttsHelper.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "Error closing TTS Helper.", e);
         }
 
         getTraitLayout().onExit();
@@ -1361,15 +1304,6 @@ public class CollectActivity extends ThemedActivity
     @Override
     public void onResume() {
         super.onResume();
-
-        if (!guiThread.isAlive()) {
-            try {
-                //TODO test with just .run() to avoid exception
-                guiThread.start();
-            } catch (IllegalThreadStateException e) {
-                e.printStackTrace();
-            }
-        }
 
         // Update menu item visibility
         if (systemMenu != null) {
@@ -1433,8 +1367,6 @@ public class CollectActivity extends ThemedActivity
 
         if (!mSkipLastUsedTrait) {
 
-            mSkipLastUsedTrait = false;
-
             navigateToLastOpenedTrait();
 
         }
@@ -1455,7 +1387,7 @@ public class CollectActivity extends ThemedActivity
                 return null;
             });
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "Error starting GeoNav.", e);
         }
     }
 
@@ -1657,7 +1589,7 @@ public class CollectActivity extends ThemedActivity
         //toggle repeated values indicator
         systemMenu.findItem(R.id.action_act_collect_repeated_values_indicator).setVisible(collectInputView.isRepeatEnabled());
 
-        //added in geonav 310 only make goenav switch visible if preference is set
+        //added in geonav 310 only make GeoNav switch visible if preference is set
         MenuItem geoNavEnable = systemMenu.findItem(R.id.action_act_collect_geonav_sw);
         geoNavEnable.setVisible(mPrefs.getBoolean(PreferenceKeys.ENABLE_GEONAV, false));
 
@@ -1675,7 +1607,7 @@ public class CollectActivity extends ThemedActivity
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         if (hasFocus) { // Ensure the menu item view is already created before setting longpress listener
-            toolbar.post(() -> setupLongPressListener());
+            toolbar.post(this::setupLongPressListener);
         }
     }
 
@@ -1708,7 +1640,7 @@ public class CollectActivity extends ThemedActivity
                 open.setDataAndType(resultUri, mime);
                 startActivity(open);
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e(TAG, "Error opening saved resource file.", e);
             }
         } else {
             Utils.makeToast(this, "No file preference saved, select a file with a short press");
@@ -1726,7 +1658,7 @@ public class CollectActivity extends ThemedActivity
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
     }
 
@@ -1743,7 +1675,7 @@ public class CollectActivity extends ThemedActivity
         final int dataGridId = R.id.datagrid;
         final int lockDataId = R.id.lockData;
         final int summaryId = R.id.summary;
-        final int geonavId = R.id.action_act_collect_geonav_sw;
+        final int geoNavId = R.id.action_act_collect_geonav_sw;
         final int fieldAudioMicId = R.id.field_audio_mic;
         int itemId = item.getItemId();
         if (itemId == helpId) {
@@ -1878,10 +1810,10 @@ public class CollectActivity extends ThemedActivity
              * Toggling the geo nav icon turns the automatic plot navigation on/off.
              * If geonav is enabled, collect activity will auto move to the plot in user's vicinity
              */
-        } else if (itemId == geonavId) {
+        } else if (itemId == geoNavId) {
             Log.d(GEOTAG, "Menu item clicked.");
 
-            dialogGeoNav = new GeoNavCollectDialog(this).create();
+            AlertDialog dialogGeoNav = new GeoNavCollectDialog(this).create();
 
             if (!dialogGeoNav.isShowing()) {
 
@@ -1890,7 +1822,7 @@ public class CollectActivity extends ThemedActivity
                     try {
                         dialogGeoNav.show();
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Log.e(TAG, "Error showing GeoNav dialog.", e);
                     }
                 }
             }
@@ -1995,7 +1927,10 @@ public class CollectActivity extends ThemedActivity
                 checked[n] = false;
             }
 
-            dialogMultiMeasureDelete = new AlertDialog.Builder(this, R.style.AppAlertDialog)
+            /*
+             * Multi Measure delete dialogs
+             */
+            AlertDialog dialogMultiMeasureDelete = new AlertDialog.Builder(this, R.style.AppAlertDialog)
                     .setTitle(R.string.dialog_multi_measure_delete_title)
                     .setMultiChoiceItems(items, checked, (d, which, isChecked) -> {
                     })
@@ -2015,12 +1950,8 @@ public class CollectActivity extends ThemedActivity
 
                         }
                     })
-                    .setPositiveButton(android.R.string.cancel, (d, which) -> {
-                        d.dismiss();
-                    })
-                    .setNeutralButton(R.string.dialog_multi_measure_select_all, (d, which) -> {
-                        //Arrays.fill(checked, true);
-                    })
+                    .setPositiveButton(android.R.string.cancel, (d, which) -> d.dismiss())
+                    .setNeutralButton(R.string.dialog_multi_measure_select_all, (d, which) -> {})
                     .create();
 
             dialogMultiMeasureDelete.setOnShowListener((d) -> {
@@ -2048,15 +1979,11 @@ public class CollectActivity extends ThemedActivity
 
     private void showConfirmMultiMeasureDeleteDialog(List<ObservationModel> models) {
 
-        dialogMultiMeasureConfirmDelete = new AlertDialog.Builder(this, R.style.AppAlertDialog)
+        AlertDialog dialogMultiMeasureConfirmDelete = new AlertDialog.Builder(this, R.style.AppAlertDialog)
                 .setTitle(R.string.dialog_multi_measure_confirm_delete_title)
                 .setMessage(R.string.dialog_multi_measure_confirm_delete_message)
-                .setPositiveButton(android.R.string.ok, (d, which) -> {
-                    deleteMultiMeasures(models);
-                })
-                .setNegativeButton(android.R.string.cancel, (d, which) -> {
-                    d.dismiss();
-                })
+                .setPositiveButton(android.R.string.ok, (d, which) -> deleteMultiMeasures(models))
+                .setNegativeButton(android.R.string.cancel, (d, which) -> d.dismiss())
                 .create();
 
         if (!dialogMultiMeasureConfirmDelete.isShowing()) {
@@ -2154,18 +2081,10 @@ public class CollectActivity extends ThemedActivity
     }
 
     private void enableDataEntry() {
-//        missingValue.setEnabled(true);
-//        deleteValue.setEnabled(true);
-//        barcodeInput.setEnabled(true);
-//        traitLayouts.enableViews();
         findViewById(R.id.lockOverlay).setVisibility(View.GONE);
     }
 
     private void disableDataEntry(int toastMessageId) {
-//        missingValue.setEnabled(false);
-//        deleteValue.setEnabled(false);
-//        barcodeInput.setEnabled(false);
-//        traitLayouts.disableViews();
         View overlay = findViewById(R.id.lockOverlay);
         overlay.setOnClickListener((v) -> {
             getSoundHelper().playError();
@@ -2194,22 +2113,16 @@ public class CollectActivity extends ThemedActivity
 
         builder.setNegativeButton(getString(R.string.dialog_cancel), (dialog, which) -> dialog.dismiss());
 
-        builder.setNeutralButton(getString(R.string.main_toolbar_moveto_scan), (dialogInterface, i) -> {
-            requestScanSingleBarcode(true);
-        });
+        builder.setNeutralButton(getString(R.string.main_toolbar_moveto_scan), (dialogInterface, i) -> requestScanSingleBarcode(true));
 
         goToId = builder.create();
 
-        goToId.setOnShowListener(dialog -> {
-            barcodeId.post(() -> {
-                barcodeId.requestFocus();
-                SoftKeyboardUtil.Companion.showKeyboard(getContext(), barcodeId, 250L);
-            });
-        });
+        goToId.setOnShowListener(dialog -> barcodeId.post(() -> {
+            barcodeId.requestFocus();
+            SoftKeyboardUtil.Companion.showKeyboard(getContext(), barcodeId, 250L);
+        }));
 
-        goToId.setOnDismissListener(dialog -> {
-            barcodeId.post(() -> SoftKeyboardUtil.Companion.closeKeyboard(getContext(), barcodeId, 250L));
-        });
+        goToId.setOnDismissListener(dialog -> barcodeId.post(() -> SoftKeyboardUtil.Companion.closeKeyboard(getContext(), barcodeId, 250L)));
 
         goToId.show();
 
@@ -2280,7 +2193,7 @@ public class CollectActivity extends ThemedActivity
                         open.setDataAndType(resultUri, mime);
                         startActivity(open);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Log.e(TAG, "Error opening saved resource file.", e);
                     }
 
                 } else {
@@ -2331,7 +2244,10 @@ public class CollectActivity extends ThemedActivity
                         pendingMediaPath = f.getAbsolutePath();
                         pendingMediaType = "photo";
                         // delete the previously saved copy (mediaPath) to avoid duplicates later
-                        try { if (!mediaPath.equals(pendingMediaPath)) new File(mediaPath).delete(); } catch (Exception ignore) {}
+                        try { if (!mediaPath.equals(pendingMediaPath)) {
+                            boolean deleteSuccess = new File(mediaPath).delete();
+                            Log.d(TAG, "Request crop image: deleteSuccess: " + deleteSuccess);
+                        } } catch (Exception ignore) {}
                         startCropActivity(getCurrentTrait().getId(), uri, skipSave);
                     }
                 }
@@ -2351,7 +2267,7 @@ public class CollectActivity extends ThemedActivity
                             runOnUiThread(() -> showMediaDialog(type, path, skipSave, true));
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Log.e(TAG, "Error showing media dialog.", e);
                     }
                 }
                 break;
@@ -2390,7 +2306,12 @@ public class CollectActivity extends ThemedActivity
                                 // cache temp file as the pending media so the cropped image is shown.
                                 pendingMediaPath = f.getAbsolutePath();
                                 // delete the previously saved copy (mediaPath) to avoid duplicates later
-                                try { if (mediaPath != null && !mediaPath.equals(pendingMediaPath)) new File(mediaPath).delete(); } catch (Exception ignore) {}
+                                try {
+                                    if (!mediaPath.equals(pendingMediaPath)) {
+                                        boolean deleteSuccess = new File(mediaPath).delete();
+                                        Log.d(TAG, "Request photo temp image: deleteSuccess: " + deleteSuccess);
+                                    }
+                                } catch (Exception ignore) {}
                                 pendingMediaType = mediaType;
                                 startCropActivity(getCurrentTrait().getId(), uri, false);
                             } else {
@@ -2421,19 +2342,19 @@ public class CollectActivity extends ThemedActivity
                                                     out.flush();
                                                 }
                                             } catch (Exception ex) {
-                                                ex.printStackTrace();
+                                                Log.e(TAG, "Error compressing cropped image", ex);
                                             } finally {
                                                 try { if (out != null) out.close(); } catch (Exception ignore) {}
                                             }
                                         } catch (Exception ex) {
-                                            ex.printStackTrace();
+                                            Log.e(TAG, "Error cropping image", ex);
                                         }
 
                                         // After cropping (or on failure), show the confirm dialog on UI thread
                                         runOnUiThread(() -> showMediaDialog(mediaType, mediaPath, false, false));
                                     });
                                  } catch (Exception e) {
-                                     e.printStackTrace();
+                                     Log.e(TAG, "Error cropping image", e);
                                      showMediaDialog(mediaType, mediaPath, false, false);
                                  }
                              }
@@ -2461,7 +2382,7 @@ public class CollectActivity extends ThemedActivity
                             break;
                         }
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        Log.e(TAG, "Error saving video in VideoTraitLayout", ex);
                     }
 
                     if (mediaPath != null && "video".equals(mediaType)) {
@@ -2502,7 +2423,10 @@ public class CollectActivity extends ThemedActivity
                                                     int len;
                                                     while ((len = in.read(buf)) > 0) out.write(buf, 0, len);
                                                     out.flush();
-                                                    try { f.delete(); } catch (Exception ignore) {}
+                                                    try {
+                                                        boolean deleted = f.delete();
+                                                        Log.d(TAG, "Deleted temp media file: " + deleted);
+                                                    } catch (Exception ignore) {}
                                                     uri = dest.getUri().toString();
 
                                                 } finally {
@@ -2511,7 +2435,9 @@ public class CollectActivity extends ThemedActivity
                                                 }
                                             }
                                         }
-                                    } catch (Exception ex) { ex.printStackTrace(); }
+                                    } catch (Exception ex) {
+                                        Log.e(TAG, "Error saving attached video media", ex);
+                                    }
                                 }
                             }
 
@@ -2525,7 +2451,7 @@ public class CollectActivity extends ThemedActivity
                             initToolbars();
 
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            Log.e(TAG, "Error saving attached video media", e);
                         }
                     }
                 }
@@ -2539,7 +2465,7 @@ public class CollectActivity extends ThemedActivity
                     traitLayoutRefresh();
                     initToolbars();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.e(TAG, "Error refreshing UI after deleting media", e);
                 }
                 break;
         }
@@ -2857,6 +2783,7 @@ public class CollectActivity extends ThemedActivity
         return rangeBox.getCRange();
     }
 
+    @NonNull
     @Override
     public CollectInputView getInputView() {
         return collectInputView;
@@ -2905,10 +2832,9 @@ public class CollectActivity extends ThemedActivity
      * Inserts a user observation whenever a label is printed.
      * @param plotID: The plot ID at the time of printing.
      * @param traitID: The trait ID at the time of printing.
-     * @param traitFormat: The format of the trait.
      * @param labelNumber: The number of labels printed.
      */
-    public void insertPrintObservation(String plotID, String traitID, String traitFormat, String labelNumber) {
+    public void insertPrintObservation(String plotID, String traitID, String labelNumber) {
         String studyId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
         database.insertObservation(plotID, traitID, labelNumber,
@@ -3133,15 +3059,13 @@ public class CollectActivity extends ThemedActivity
                 dialogPrecisionLoss = new AlertDialog.Builder(this, R.style.AppAlertDialog)
                         .setTitle(getString(R.string.dialog_geonav_precision_loss_title))
                         .setMessage(getString(R.string.dialog_geonav_precision_loss_msg))
-                        .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                            dialog.dismiss();
-                        })
+                        .setPositiveButton(android.R.string.ok, (dialog, which) -> dialog.dismiss())
                         .create();
 
                 dialogPrecisionLoss.show();
 
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e(TAG, "Error showing location precision loss dialog", e);
             }
         }
     }
@@ -3253,7 +3177,7 @@ public class CollectActivity extends ThemedActivity
 
             } catch (Exception e) {
 
-                e.printStackTrace();
+                Log.e(TAG, "Error writing GNSS log message to file.", e);
 
             } finally {
 
@@ -3262,9 +3186,7 @@ public class CollectActivity extends ThemedActivity
                     if (output != null) output.close();
 
                 } catch (Exception e) {
-
-                    e.printStackTrace();
-
+                    Log.e(TAG, "Error closing GNSS log output stream.", e);
                 }
 
                 try {
@@ -3278,9 +3200,7 @@ public class CollectActivity extends ThemedActivity
             }
 
         } catch (Exception e) {
-
-            e.printStackTrace();
-
+            Log.e(TAG, "Error logging GNSS message.", e);
         }
     }
 
@@ -3439,7 +3359,7 @@ public class CollectActivity extends ThemedActivity
              cameraXFacade.unbind();
              startActivityForResult(intent, REQUEST_CROP_FINISHED_CODE);
          } catch (Exception e) {
-             e.printStackTrace();
+             Log.e(TAG, "Error starting crop activity.", e);
          }
      }
 
@@ -3454,7 +3374,7 @@ public class CollectActivity extends ThemedActivity
             cameraXFacade.unbind();
             startActivityForResult(intent, REQUEST_CROP_IMAGE_CODE);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "Error requesting and cropping image.", e);
         }
     }
 
@@ -3466,15 +3386,11 @@ public class CollectActivity extends ThemedActivity
             AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
             builder.setTitle(R.string.dialog_crop_title);
             builder.setMessage(R.string.dialog_crop_message);
-            builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                startCropActivity(traitId, uri, false);
-            });
-            builder.setNegativeButton(android.R.string.no, (dialog, which) -> {
-                dialog.dismiss();
-            });
+            builder.setPositiveButton(android.R.string.ok, (dialog, which) -> startCropActivity(traitId, uri, false));
+            builder.setNegativeButton(android.R.string.no, (dialog, which) -> dialog.dismiss());
             builder.create().show();
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "Error showing crop dialog.", e);
         }
     }
 
@@ -3513,27 +3429,22 @@ public class CollectActivity extends ThemedActivity
     }
 
     public void showMediaDialog(String mediaType, String mediaPath, Boolean skipSave, Boolean forCropping) {
-         if (mediaType == null || mediaPath == null) return;
-         try {
+        if (mediaType == null || mediaPath == null) return;
+        try {
 
-            try {
+            ObservationModel model = getCurrentObservation();
 
-                ObservationModel model = getCurrentObservation();
-
-                if (model == null && !forCropping) {
-                    Utils.makeToast(this, getString(R.string.no_observation));
-                    return;
-                }
-
-                 com.fieldbook.tracker.ui.MediaPreviewDialogFragment.Companion.newInstance(String.valueOf(model.getInternal_id_observation()), mediaType, mediaPath, skipSave)
-                         .show(getSupportFragmentManager(), "media_preview");
-
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (model == null && !forCropping) {
+                Utils.makeToast(this, getString(R.string.no_observation));
+                return;
             }
-         } catch (Exception e) {
-             e.printStackTrace();
-         }
+
+            com.fieldbook.tracker.ui.MediaPreviewDialogFragment.Companion.newInstance(String.valueOf(model.getInternal_id_observation()), mediaType, mediaPath, skipSave)
+                    .show(getSupportFragmentManager(), "media_preview");
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error showing media dialog.", e);
+        }
      }
 
     public void onMediaConfirmFromDialog(String obsId, String mediaType, String mediaPath, Boolean skipSave) {
@@ -3595,7 +3506,10 @@ public class CollectActivity extends ThemedActivity
                                         int len;
                                         while ((len = in.read(buf)) > 0) out.write(buf, 0, len);
                                         out.flush();
-                                        try { f.delete(); } catch (Exception ignore) {}
+                                        try {
+                                            boolean deleted = f.delete();
+                                            Log.d(TAG, "Deleted media at: " + f.getName() + " -> " + deleted);
+                                        } catch (Exception ignore) {}
                                         uri = dest.getUri().toString();
 
                                     } finally {
@@ -3604,7 +3518,9 @@ public class CollectActivity extends ThemedActivity
                                     }
                                 }
                             }
-                        } catch (Exception ex) { ex.printStackTrace(); }
+                        } catch (Exception ex) {
+                            Log.e(TAG, "Error attaching media to observation.", ex);
+                        }
                     }
 
                     if (mediaType != null && mediaType.startsWith("photo")) {
@@ -3623,7 +3539,9 @@ public class CollectActivity extends ThemedActivity
                                     Uri.parse(uri),
                                     getRotationRelativeToDevice()
                             );
-                        } catch (Exception e) { e.printStackTrace(); }
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error writing EXIF metadata to attached photo.", e);
+                        }
 
                         // if there was an old photo attached, delete it now
                         try { if (existingUri != null && !existingUri.isEmpty()) safeDeleteUriString(existingUri); } catch (Exception ignore) {}
@@ -3641,7 +3559,9 @@ public class CollectActivity extends ThemedActivity
 
                     runOnUiThread(this::initToolbars);
 
-                } catch (Exception e) { e.printStackTrace(); }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error attaching media to observation.", e);
+                }
             };
 
             // If there's existing media, ask the user before replacing
@@ -3651,7 +3571,10 @@ public class CollectActivity extends ThemedActivity
                         .setMessage(getString(R.string.confirm_replace_media_message))
                         .setPositiveButton(android.R.string.ok, (d, which) -> performAttach.run())
                         .setNegativeButton(android.R.string.cancel, (d, which) -> {
-                            try { f.delete(); } catch (Exception ignore) {}
+                            try {
+                                boolean deleted = f.delete();
+                                Log.d(TAG, "Deleted media at: " + f.getName() + " -> " + deleted);
+                            } catch (Exception ignore) {}
                         })
                         .show();
             } else {
@@ -3659,12 +3582,15 @@ public class CollectActivity extends ThemedActivity
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "Error showing media dialog.", e);
         }
     }
 
     public void onMediaCancelFromDialog(String mediaPath) {
-        try { new File(mediaPath).delete(); } catch (Exception ignore) {}
+        try {
+            boolean deleteSuccess = new File(mediaPath).delete();
+            Log.d(TAG, "Deleted media at: " + mediaPath + " -> " + deleteSuccess);
+        } catch (Exception ignore) {}
     }
 
     private void performTraitDeleteAfterMediaCheck() {
