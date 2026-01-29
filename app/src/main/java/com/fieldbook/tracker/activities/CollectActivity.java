@@ -185,6 +185,7 @@ public class CollectActivity extends ThemedActivity
     public static final int REQUEST_CROP_IMAGE_CODE = 101;
     public static final int REQUEST_CROP_FINISHED_CODE = 103;
     public static final int REQUEST_MEDIA_CODE = 102;
+    public static final int REQUEST_MOVE_TO_BARCODE = 105;
     // New request code used when CameraActivity is launched from VideoTrait embiggen button
     public static final int REQUEST_MEDIA_VIDEO_TRAIT = 202;
     // Request code for opening the media viewer to refresh after returning
@@ -792,7 +793,7 @@ public class CollectActivity extends ThemedActivity
             public void onBarcode() {
                 triggerTts(barcodeTts);
 
-                requestScanSingleBarcode();
+                requestScanSingleBarcode(false);
             }
 
             @Override
@@ -967,7 +968,7 @@ public class CollectActivity extends ThemedActivity
         return TapTargetUtil.Companion.getTapTargetSettingsView(this, anchor, title, desc, targetRadius);
     }
 
-    private void requestScanSingleBarcode() {
+    private void requestScanSingleBarcode(Boolean moveToBarcode) {
         try {
             Intent intent = new Intent(CollectActivity.this, CameraActivity.class);
             intent.putExtra(CameraActivity.EXTRA_MODE, CameraActivity.MODE_BARCODE);
@@ -976,7 +977,11 @@ public class CollectActivity extends ThemedActivity
             intent.putExtra(CameraActivity.EXTRA_OBS_UNIT, getObservationUnit());
             intent.putExtra(CameraActivity.EXTRA_TRAIT_ID, Integer.parseInt(getCurrentTrait().getId()));
             cameraXFacade.unbind();
-            startActivityForResult(intent, REQUEST_MEDIA_CODE);
+            if (moveToBarcode) {
+                startActivityForResult(intent, REQUEST_MOVE_TO_BARCODE);
+            } else {
+                startActivityForResult(intent, REQUEST_MEDIA_CODE);
+            }
         } catch (Exception e) {
             Log.e(TAG, "Unable to open camera", e);
         }
@@ -1821,7 +1826,7 @@ public class CollectActivity extends ThemedActivity
                 if (moveToUniqueIdValue.equals("1")) {
                     moveToPlotID();
                 } else if (moveToUniqueIdValue.equals("2")) {
-                    requestScanSingleBarcode();
+                    requestScanSingleBarcode(true);
                 }
             };
 
@@ -2190,7 +2195,7 @@ public class CollectActivity extends ThemedActivity
         builder.setNegativeButton(getString(R.string.dialog_cancel), (dialog, which) -> dialog.dismiss());
 
         builder.setNeutralButton(getString(R.string.main_toolbar_moveto_scan), (dialogInterface, i) -> {
-            requestScanSingleBarcode();
+            requestScanSingleBarcode(true);
         });
 
         goToId = builder.create();
@@ -2343,13 +2348,29 @@ public class CollectActivity extends ThemedActivity
                             pendingMediaType = null;
                             // Show confirm dialog on UI thread
                             Boolean skipSave = data.getBooleanExtra(CameraActivity.EXTRA_SKIP_SAVE, false);
-                            runOnUiThread(() -> showMediaConfirmDialog(type, path, skipSave));
+                            runOnUiThread(() -> showMediaDialog(type, path, skipSave, true));
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
                 break;
+
+            case REQUEST_MOVE_TO_BARCODE:
+
+                if (resultCode == RESULT_OK && data != null) {
+
+
+                    String barcode = data.getStringExtra(CameraActivity.EXTRA_BARCODE);
+
+                    if (barcode != null) {
+
+                        startFuzzySearchRequest(barcode, true);
+                    }
+                }
+
+                break;
+
             case REQUEST_MEDIA_CODE:
                 if (resultCode == RESULT_OK && data != null) {
                     // Camera returned a media_path
@@ -2409,131 +2430,106 @@ public class CollectActivity extends ThemedActivity
                                         }
 
                                         // After cropping (or on failure), show the confirm dialog on UI thread
-                                        runOnUiThread(() -> showMediaConfirmDialog(mediaType, mediaPath, false));
+                                        runOnUiThread(() -> showMediaDialog(mediaType, mediaPath, false, false));
                                     });
                                  } catch (Exception e) {
                                      e.printStackTrace();
-                                     showMediaConfirmDialog(mediaType, mediaPath, false);
+                                     showMediaDialog(mediaType, mediaPath, false, false);
                                  }
                              }
                          } else if (mediaType.equals("audio") || mediaType.equals("video")) {
-                            runOnUiThread(() -> showMediaConfirmDialog(mediaType, mediaPath, false));
+                            runOnUiThread(() -> showMediaDialog(mediaType, mediaPath, false, false));
                         }
 
                      } else if (barcode != null) {
 
-                        Log.d(TAG, "Fuzzy search on barcode: " + barcode);
-
-                        String option = preferences.getString(PreferenceKeys.BARCODE_SCANNING_OPTIONS, BarcodeScanningOptions.EnterValue.INSTANCE.getValue());
-                        String optionEnter = BarcodeScanningOptions.EnterValue.INSTANCE.getValue();
-                        String optionMove = BarcodeScanningOptions.Move.INSTANCE.getValue();
-                        String optionAsk = BarcodeScanningOptions.Ask.INSTANCE.getValue();
-                        String optionEnterIfNotId = BarcodeScanningOptions.EnterIfNotId.INSTANCE.getValue();
-
-                        if (option.equals(optionEnter)) {
-
-                            validateAndSaveBarcodeScan(barcode);
-
-                        } else if (option.equals(optionMove)) {
-
-                            searchAcrossAllFields(barcode, true, false);
-
-                        } else if (option.equals(optionAsk)) {
-
-                            showBarcodeAskDialog(barcode);
-
-                        } else if (option.equals(optionEnterIfNotId)) {
-
-                            if (!searchAcrossAllFields(barcode, true, true)) {
-                                validateAndSaveBarcodeScan(barcode);
-                            }
-                        }
+                        startFuzzySearchRequest(barcode, false);
                     }
                 }
                 break;
             case REQUEST_MEDIA_VIDEO_TRAIT:
-            // This result path is used when CameraActivity was launched from the VideoTrait embiggen button.
-            if (resultCode == RESULT_OK && data != null) {
-                String mediaPath = data.getStringExtra("media_path");
-                String mediaType = data.getStringExtra("media_type");
+                // This result path is used when CameraActivity was launched from the VideoTrait embiggen button.
+                if (resultCode == RESULT_OK && data != null) {
+                    String mediaPath = data.getStringExtra("media_path");
+                    String mediaType = data.getStringExtra("media_type");
 
-                // Try to delegate to the current trait layout if it is a VideoTraitLayout
-                try {
-                    BaseTraitLayout videoLayout = traitLayouts.getTraitLayout(com.fieldbook.tracker.traits.VideoTraitLayout.type);
-                    if (videoLayout instanceof com.fieldbook.tracker.traits.VideoTraitLayout) {
-                        ((com.fieldbook.tracker.traits.VideoTraitLayout) videoLayout).handleExternalMedia(mediaType, mediaPath);
-                        break;
-                    }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-
-                if (mediaPath != null && "video".equals(mediaType)) {
+                    // Try to delegate to the current trait layout if it is a VideoTraitLayout
                     try {
-                        // Reuse the same logic as onMediaConfirmFromDialog to copy file into field media directory and attach to observation
-                        ObservationModel obs = getCurrentObservation();
-                        if (obs == null) {
-                            Utils.makeToast(this, getString(R.string.no_observation));
+                        BaseTraitLayout videoLayout = traitLayouts.getTraitLayout(com.fieldbook.tracker.traits.VideoTraitLayout.type);
+                        if (videoLayout instanceof com.fieldbook.tracker.traits.VideoTraitLayout) {
+                            ((com.fieldbook.tracker.traits.VideoTraitLayout) videoLayout).handleExternalMedia(mediaType, mediaPath);
                             break;
                         }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
 
-                        File f = new File(mediaPath);
-                        String uri = Uri.fromFile(f).toString();
-                        if (f.exists()) {
-                            TraitObject currentTrait = getCurrentTrait();
-                            if (currentTrait != null) {
-                                try {
-                                    String traitName = currentTrait.getName();
-                                    String sanitizedTraitName = com.fieldbook.tracker.utilities.FileUtil.sanitizeFileName(traitName);
-                                    DocumentFile traitPhotos = DocumentTreeUtil.Companion.getFieldMediaDirectory(this, sanitizedTraitName);
-                                    if (traitPhotos != null) {
-                                        String srcName = f.getName();
-                                        String ext = "";
-                                        int dot = srcName.lastIndexOf('.');
-                                        if (dot > 0) ext = srcName.substring(dot);
-                                        DateTimeFormatter internalTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZZZZZ");
-                                        String destName = sanitizedTraitName + "_" + getCRange().uniqueId + "_"
-                                                + FileUtil.sanitizeFileName(OffsetDateTime.now().format(internalTimeFormatter)) + ext;
-                                        DocumentFile dest = traitPhotos.createFile("*/*", destName);
-                                        if (dest != null) {
-                                            InputStream in = null;
-                                            OutputStream out = null;
-                                            try {
-                                                in = new FileInputStream(f);
-                                                out = getContentResolver().openOutputStream(dest.getUri());
-                                                if (out == null) throw new IOException("Unable to open output stream for destination file");
-                                                byte[] buf = new byte[8192];
-                                                int len;
-                                                while ((len = in.read(buf)) > 0) out.write(buf, 0, len);
-                                                out.flush();
-                                                try { f.delete(); } catch (Exception ignore) {}
-                                                uri = dest.getUri().toString();
+                    if (mediaPath != null && "video".equals(mediaType)) {
+                        try {
+                            // Reuse the same logic as onMediaConfirmFromDialog to copy file into field media directory and attach to observation
+                            ObservationModel obs = getCurrentObservation();
+                            if (obs == null) {
+                                Utils.makeToast(this, getString(R.string.no_observation));
+                                break;
+                            }
 
-                                            } finally {
-                                                try { if (in != null) in.close(); } catch (Exception ignore) {}
-                                                try { if (out != null) out.close(); } catch (Exception ignore) {}
+                            File f = new File(mediaPath);
+                            String uri = Uri.fromFile(f).toString();
+                            if (f.exists()) {
+                                TraitObject currentTrait = getCurrentTrait();
+                                if (currentTrait != null) {
+                                    try {
+                                        String traitName = currentTrait.getName();
+                                        String sanitizedTraitName = com.fieldbook.tracker.utilities.FileUtil.sanitizeFileName(traitName);
+                                        DocumentFile traitPhotos = DocumentTreeUtil.Companion.getFieldMediaDirectory(this, sanitizedTraitName);
+                                        if (traitPhotos != null) {
+                                            String srcName = f.getName();
+                                            String ext = "";
+                                            int dot = srcName.lastIndexOf('.');
+                                            if (dot > 0) ext = srcName.substring(dot);
+                                            DateTimeFormatter internalTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZZZZZ");
+                                            String destName = sanitizedTraitName + "_" + getCRange().uniqueId + "_"
+                                                    + FileUtil.sanitizeFileName(OffsetDateTime.now().format(internalTimeFormatter)) + ext;
+                                            DocumentFile dest = traitPhotos.createFile("*/*", destName);
+                                            if (dest != null) {
+                                                InputStream in = null;
+                                                OutputStream out = null;
+                                                try {
+                                                    in = new FileInputStream(f);
+                                                    out = getContentResolver().openOutputStream(dest.getUri());
+                                                    if (out == null) throw new IOException("Unable to open output stream for destination file");
+                                                    byte[] buf = new byte[8192];
+                                                    int len;
+                                                    while ((len = in.read(buf)) > 0) out.write(buf, 0, len);
+                                                    out.flush();
+                                                    try { f.delete(); } catch (Exception ignore) {}
+                                                    uri = dest.getUri().toString();
+
+                                                } finally {
+                                                    try { if (in != null) in.close(); } catch (Exception ignore) {}
+                                                    try { if (out != null) out.close(); } catch (Exception ignore) {}
+                                                }
                                             }
                                         }
-                                    }
-                                } catch (Exception ex) { ex.printStackTrace(); }
+                                    } catch (Exception ex) { ex.printStackTrace(); }
+                                }
                             }
+
+                            // attach to observation and update database
+                            ObservationModel currentObsModel = getCurrentObservation();
+                            if (currentObsModel != null) {
+                                currentObsModel.setVideo_uri(uri);
+                                database.updateObservationMediaUris(currentObsModel);
+                            }
+
+                            initToolbars();
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
-
-                        // attach to observation and update database
-                        ObservationModel currentObsModel = getCurrentObservation();
-                        if (currentObsModel != null) {
-                            currentObsModel.setVideo_uri(uri);
-                            database.updateObservationMediaUris(currentObsModel);
-                        }
-
-                        initToolbars();
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
                 }
-            }
-            break;
+                break;
             case REQUEST_VIEW_MEDIA_CODE:
                 // Refresh the UI since the media viewer may have deleted media
                 try {
@@ -2546,6 +2542,97 @@ public class CollectActivity extends ThemedActivity
                     e.printStackTrace();
                 }
                 break;
+        }
+    }
+
+    /**
+     * Starts a fuzzy search request for the given barcode.
+     * @param barcode the barcode to search for
+     * @param alwaysMove whether to always move to the encoded id
+     */
+    private void startFuzzySearchRequest(String barcode, Boolean alwaysMove) {
+
+        Log.d(TAG, "Fuzzy search on barcode: " + barcode);
+
+        String option = preferences.getString(PreferenceKeys.BARCODE_SCANNING_OPTIONS, BarcodeScanningOptions.EnterValue.INSTANCE.getValue());
+        String optionEnter = BarcodeScanningOptions.EnterValue.INSTANCE.getValue();
+        String optionMove = BarcodeScanningOptions.Move.INSTANCE.getValue();
+        String optionAsk = BarcodeScanningOptions.Ask.INSTANCE.getValue();
+        String optionEnterIfNotId = BarcodeScanningOptions.EnterIfNotId.INSTANCE.getValue();
+
+        // If alwaysMove is false, show a one-time dialog to let the user pick their preferred barcode action
+        boolean hasShownBarcodeFuzzy = preferences.getBoolean(GeneralKeys.PREF_KEY_SHOWN_BARCODE_OPTION, false);
+
+        if (!alwaysMove && !hasShownBarcodeFuzzy) {
+            // Load entries and values from resources (same as preferences behavior)
+            String[] entries = getResources().getStringArray(R.array.pref_behavior_barcode_scanning_entries);
+            String[] values = getResources().getStringArray(R.array.pref_behavior_barcode_scanning_values);
+
+            // Determine currently selected index based on saved preference
+            int checkedIndex = 0;
+            for (int i = 0; i < values.length; i++) {
+                if (values[i].equals(option)) {
+                    checkedIndex = i;
+                    break;
+                }
+            }
+
+            final int[] selected = new int[]{checkedIndex};
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+            builder.setTitle(R.string.preferences_behavior_barcode_scanning_title);
+            builder.setSingleChoiceItems(entries, checkedIndex, (dialog, which) -> selected[0] = which);
+            builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                try {
+                    // Save user's choice to preferences
+                    String chosenValue = values[selected[0]];
+                    preferences.edit().putString(PreferenceKeys.BARCODE_SCANNING_OPTIONS, chosenValue).apply();
+                    // Mark the one-time dialog as shown
+                    preferences.edit().putBoolean(GeneralKeys.PREF_KEY_SHOWN_BARCODE_OPTION, true).apply();
+
+                    // Execute the selected action for this barcode
+                    if (chosenValue.equals(optionMove)) {
+                        searchAcrossAllFields(barcode, true, false);
+                    } else if (chosenValue.equals(optionEnter)) {
+                        validateAndSaveBarcodeScan(barcode);
+                    } else if (chosenValue.equals(optionAsk)) {
+                        showBarcodeAskDialog(barcode);
+                    } else if (chosenValue.equals(optionEnterIfNotId)) {
+                        if (!searchAcrossAllFields(barcode, true, true)) {
+                            validateAndSaveBarcodeScan(barcode);
+                        }
+                    }
+                } catch (Exception e) {
+
+                    Log.e(TAG, "Error saving barcode scanning option", e);
+
+                }
+            });
+
+            builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> dialog.dismiss());
+            builder.setCancelable(true);
+            builder.show();
+
+            return;
+        }
+
+        if (alwaysMove || option.equals(optionMove)) {
+
+            searchAcrossAllFields(barcode, true, false);
+
+        } else if (option.equals(optionEnter)) {
+
+            validateAndSaveBarcodeScan(barcode);
+
+        } else if (option.equals(optionAsk)) {
+
+            showBarcodeAskDialog(barcode);
+
+        } else if (option.equals(optionEnterIfNotId)) {
+
+            if (!searchAcrossAllFields(barcode, true, true)) {
+                validateAndSaveBarcodeScan(barcode);
+            }
         }
     }
 
@@ -3425,7 +3512,7 @@ public class CollectActivity extends ThemedActivity
         InsetHandler.INSTANCE.setupInsetsWithBottomBar(rootView, toolbar, bottomContent);
     }
 
-    public void showMediaConfirmDialog(String mediaType, String mediaPath, Boolean skipSave) {
+    public void showMediaDialog(String mediaType, String mediaPath, Boolean skipSave, Boolean forCropping) {
          if (mediaType == null || mediaPath == null) return;
          try {
 
@@ -3433,7 +3520,7 @@ public class CollectActivity extends ThemedActivity
 
                 ObservationModel model = getCurrentObservation();
 
-                if (model == null) {
+                if (model == null && !forCropping) {
                     Utils.makeToast(this, getString(R.string.no_observation));
                     return;
                 }

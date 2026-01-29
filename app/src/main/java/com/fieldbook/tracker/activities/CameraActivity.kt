@@ -374,7 +374,6 @@ class CameraActivity : ThemedActivity() {
                 switchCameraButton.visibility = View.GONE
                 viewMediaButton.visibility = View.GONE
 
-
             } else {
 
                 database.getObservationById(obsId)?.let { obs ->
@@ -660,7 +659,7 @@ class CameraActivity : ThemedActivity() {
                         barcodeScanner.process(inputImage)
                             .addOnSuccessListener { barcodes ->
 
-                                if (currentMode == MODE_BARCODE) {
+                                if (currentMode == MODE_BARCODE || (currentMode != MODE_CROP && obsId == "-1")) {
                                     val first = barcodes.firstOrNull()
                                     if (first != null) {
                                         runOnUiThread {
