@@ -61,6 +61,14 @@ import javax.inject.Inject
 import androidx.appcompat.widget.Toolbar
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.core.view.isVisible
+import com.fieldbook.tracker.activities.CameraActivity.Companion.EXTRA_BARCODE
+import com.fieldbook.tracker.activities.CameraActivity.Companion.EXTRA_SKIP_SAVE
+import com.fieldbook.tracker.activities.CameraActivity.Companion.MAX_BARCODE_DETECTIONS
+import com.fieldbook.tracker.activities.CameraActivity.Companion.MODE_BARCODE
+import com.fieldbook.tracker.activities.CameraActivity.Companion.MODE_CROP
+import com.fieldbook.tracker.activities.CameraActivity.Companion.MODE_PHOTO
+import com.fieldbook.tracker.activities.CameraActivity.Companion.REQUEST_RECORD_AUDIO_PERMISSION
+import com.serenegiant.utils.UIThreadHelper.runOnUiThread
 
 @AndroidEntryPoint
 class CameraActivity : ThemedActivity() {
@@ -350,18 +358,19 @@ class CameraActivity : ThemedActivity() {
     private fun setupUiForMode() {
 
         // hide capture button when running pure barcode-detection mode (auto-return on first detection)
-        if (currentMode == MODE_BARCODE) {
-            captureButton.visibility = View.GONE
-            switchCameraButton.visibility = View.GONE
-        } else {
-            captureButton.visibility = View.VISIBLE
-            switchCameraButton.visibility = View.VISIBLE
-        }
-
-        if (currentMode == MODE_AUDIO) {
-            switchCameraButton.visibility = View.GONE
-        } else {
-            switchCameraButton.visibility = View.VISIBLE
+        when (currentMode) {
+            MODE_BARCODE -> {
+                captureButton.visibility = View.GONE
+                switchCameraButton.visibility = View.GONE
+            }
+            MODE_AUDIO -> {
+                captureButton.visibility = View.VISIBLE
+                switchCameraButton.visibility = View.GONE
+            }
+            else -> {
+                captureButton.visibility = View.VISIBLE
+                switchCameraButton.visibility = View.VISIBLE
+            }
         }
 
         //if no observations exist in this mode, don't display the shutter or view media buttons
