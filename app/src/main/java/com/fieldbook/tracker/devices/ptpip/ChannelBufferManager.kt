@@ -1,5 +1,7 @@
 package com.fieldbook.tracker.devices.ptpip
 
+import java.io.EOFException
+import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.channels.SocketChannel
 
@@ -11,9 +13,21 @@ class ChannelBufferManager(val channel: SocketChannel) {
 
     private val shortBuffer = ByteBuffer.allocate(Short.SIZE_BYTES)
 
+    // helper that ensures the provided ByteBuffer is completely filled from the channel
+    @Throws(IOException::class)
+    private fun readFully(buffer: ByteBuffer) {
+        buffer.clear()
+        while (buffer.hasRemaining()) {
+            val read = channel.read(buffer)
+            if (read == -1) throw EOFException("Unexpected EOF while reading from channel")
+        }
+        buffer.rewind()
+    }
+
+    @Throws(IOException::class)
     fun getInt(): Int {
 
-        channel.read(intBuffer)
+        readFully(intBuffer)
 
         val value = intBuffer.toInt()
 
@@ -22,9 +36,10 @@ class ChannelBufferManager(val channel: SocketChannel) {
         return value
     }
 
+    @Throws(IOException::class)
     fun getShort(): Int {
 
-        channel.read(shortBuffer)
+        readFully(shortBuffer)
 
         val value = shortBuffer.toInt()
 
@@ -33,9 +48,10 @@ class ChannelBufferManager(val channel: SocketChannel) {
         return value
     }
 
+    @Throws(IOException::class)
     fun getLong(): Long {
 
-        channel.read(longBuffer)
+        readFully(longBuffer)
 
         val value = longBuffer.toLong()
 
@@ -44,20 +60,22 @@ class ChannelBufferManager(val channel: SocketChannel) {
         return value
     }
 
+    @Throws(IOException::class)
     fun getBytes(length: Int): ByteArray {
 
-        val reader = channel.socket().getInputStream()
+        if (length < 0) throw IOException("Negative length requested: $length")
+
+        if (length == 0) return byteArrayOf()
 
         val data = ByteArray(length)
-        var index = 0
-        while (index < length) {
+        val buf = ByteBuffer.wrap(data)
 
-            val bytes = reader.read(data, index, length - index)
-
-            index += bytes
+        while (buf.hasRemaining()) {
+            val read = channel.read(buf)
+            if (read == -1) throw EOFException("Unexpected EOF while reading $length bytes from channel")
         }
 
-        return data.clone()
+        return data
     }
 
 }
