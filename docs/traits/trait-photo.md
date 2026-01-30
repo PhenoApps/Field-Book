@@ -97,7 +97,7 @@ Set the encryption to None.
   <img class="screenshot" src="../_static/images/traits/formats/canon/canon_encryption_settings.png" width="350px">
 </figure>
 
-Choose automatic for the channel and IP options.
+Choose `Auto setting` for the channel and IP options.
 
 <figure class="image">
   <img class="screenshot" src="../_static/images/traits/formats/canon/canon_auto_channel.png" width="350px">
@@ -107,7 +107,7 @@ Choose automatic for the channel and IP options.
   <img class="screenshot" src="../_static/images/traits/formats/canon/canon_auto_ip_setting.png" width="350px">
 </figure>
 
-The camera should display should be similar to the screenshot below, indicating that it is waiting for Field Book to connect to its network.
+The camera display should be similar to the screenshot below, indicating that it is waiting for Field Book to connect to its network.
 
 <figure class="image">
   <img class="screenshot" src="../_static/images/traits/formats/canon/canon_wait_for_network.png" width="350px">
