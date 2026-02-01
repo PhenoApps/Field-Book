@@ -1,4 +1,4 @@
-name: update-docs
+name: pages-build-deployment
 
 on:
   workflow_dispatch:
