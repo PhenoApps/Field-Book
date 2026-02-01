@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+
+## [v7.0.1] - 2026-02-01
+
+### Fixed
 - BrAPI imports no longer always include "TEST" entry types (https://github.com/PhenoApps/Field-Book/pull/1387)
 - Improvements for Canon integration (https://github.com/PhenoApps/Field-Book/pull/1389)
 
@@ -860,3 +864,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 [v7.0.0]: https://github.com/PhenoApps/Field-Book/releases/tag/7.0.0
+[v7.0.1]: https://github.com/PhenoApps/Field-Book/releases/tag/7.0.1
