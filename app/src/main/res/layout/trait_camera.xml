@@ -65,6 +65,19 @@
 
         </androidx.cardview.widget.CardView>
 
+        <!-- Indeterminate progress shown while connecting -->
+        <ProgressBar
+            android:id="@+id/camera_fragment_connect_progress"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:indeterminate="true"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/camera_fragment_rv"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             style="@style/FloatingActionButtonStyle.TraitButtons"
             android:contentDescription="@string/trait_camera_connect_content_description"

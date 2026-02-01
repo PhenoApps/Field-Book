@@ -107,15 +107,19 @@ class ImageAdapter(private val context: Context, private val listener: ImageItem
                     height = actualHeight
                 }
 
-                val preview = if (model.uri?.contains("content://") != true) {
-                    if (model.uri != "NA") {
-                        labelView.text = model.uri
-                        labelView.visibility = View.VISIBLE
+                val preview = try {
+                    if (model.uri?.contains("content://") != true) {
+                        if (model.uri != "NA") {
+                            labelView.text = model.uri
+                            labelView.visibility = View.VISIBLE
+                        }
+                        val data = context.resources.assets.open("na_placeholder.jpg").readBytes()
+                        BitmapFactory.decodeByteArray(data, 0, data.size)
+                    } else {
+                        BitmapLoader.getPreview(view.context, model.uri, model.orientation)
                     }
-                    val data = context.resources.assets.open("na_placeholder.jpg").readBytes()
-                    BitmapFactory.decodeByteArray(data, 0, data.size)
-                } else {
-                    BitmapLoader.getPreview(view.context, model.uri, model.orientation)
+                } catch (_: Exception) {
+                    null
                 }
 
                 imageView.setImageBitmap(preview)
