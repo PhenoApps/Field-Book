@@ -23,7 +23,7 @@ import com.ISCSDK.ISCNIRScanSDK
 import com.ISCSDK.ISCNIRScanSDK.*
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.devices.spectrometers.innospectra.interfaces.NanoEventListener
-import com.fieldbook.tracker.devices.spectrometers.innospectra.interfaces.Spectrometer
+import com.fieldbook.tracker.devices.spectrometers.innospectra.interfaces.InnoSpectraViewModel
 import com.fieldbook.tracker.devices.spectrometers.innospectra.models.Config
 import com.fieldbook.tracker.devices.spectrometers.innospectra.models.DeviceInfo
 import com.fieldbook.tracker.devices.spectrometers.innospectra.models.DeviceStatus
@@ -39,7 +39,7 @@ import javax.inject.Inject
 import kotlin.collections.ArrayList
 
 @HiltViewModel
-class InnoSpectraViewModel @Inject constructor() : ViewModel(), Spectrometer,
+class InnoSpectraViewModel @Inject constructor() : ViewModel(), InnoSpectraViewModel,
     NanoEventListener {
 
     private var mBluetoothManager: BluetoothManager? = null

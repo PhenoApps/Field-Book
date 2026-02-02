@@ -226,6 +226,12 @@ public class GeneralKeys {
     public static final String INNOSPECTRA_NANO_CONFIG_INDEX = "com.fieldbook.tracker.traits.innospectra_nano.INDEX";
 
     @NonNull
+    public static final String INNOSPECTRA_NANO_DEVICE_ID = "nano_device_id";
+
+    @NonNull
+    public static final String INNOSPECTRA_NANO_DEVICE_NAME = "nano_device_name";
+
+    @NonNull
     public static final String NIX_NAME = "com.fieldbook.tracker.traits.nix.NAME";
 
     @NonNull

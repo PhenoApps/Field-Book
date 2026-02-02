@@ -11,7 +11,7 @@ import com.fieldbook.tracker.devices.spectrometers.innospectra.models.Frame
  * Generic Spectrometer App interface to be extended by external apps using their
  * provided API.
  */
-interface Spectrometer {
+interface InnoSpectraViewModel {
 
     fun manager(context: Context): SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 

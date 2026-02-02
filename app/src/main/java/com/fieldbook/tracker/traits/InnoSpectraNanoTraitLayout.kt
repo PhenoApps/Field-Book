@@ -36,6 +36,7 @@ import com.fieldbook.tracker.devices.spectrometers.innospectra.InnoSpectraBase
 import com.fieldbook.tracker.devices.spectrometers.innospectra.interfaces.NanoEventListener
 import com.fieldbook.tracker.database.saver.SpectralSaver
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.utilities.DocumentTreeUtil
 import com.fieldbook.tracker.utilities.FileUtil
 import kotlinx.coroutines.Dispatchers
@@ -48,7 +49,6 @@ class InnoSpectraNanoTraitLayout : SpectralTraitLayout {
 
     companion object {
         const val TAG = "SpectralTraitLayout"
-        const val type = "inno_spectra"
     }
 
     private var bluetoothManager: BluetoothManager? = null
@@ -70,30 +70,32 @@ class InnoSpectraNanoTraitLayout : SpectralTraitLayout {
 
     private fun <T> LiveData<T>.observeOnce(lifecycleOwner: LifecycleOwner, observer: Observer<T?>) {
         observe(lifecycleOwner, object : Observer<T?> {
-            override fun onChanged(t: T?) {
-                observer.onChanged(t)
+            override fun onChanged(value: T?) {
+                observer.onChanged(value)
                 removeObserver(this)
             }
         })
     }
 
     override fun type(): String {
-        return type
-    }
-
-    override fun layoutId(): Int {
-        return R.layout.traits_inno_spectra_nano
+        return Formats.INNO_SPECTRA_NANO_SENSOR.getDatabaseName()
     }
 
     private fun NanoDevice.toDevice() = Device(this).also {
         it.displayableName = this.nanoName
     }
 
+    override fun colorUiMode() { /* only spectral line graphing mode */ }
+
+    override fun loadLayout() {
+        super.loadLayout()
+        spectralUiMode()
+    }
+
     override fun establishConnection(): Boolean {
         val connected = (context as CollectActivity).innoSpectraViewModel?.isConnected() == true
 
         if (connected) {
-            toggleProgressBar(false)
             connectedNanoDevice?.let { nano ->
                 enableCapture(nano.toDevice())
             }
@@ -104,8 +106,8 @@ class InnoSpectraNanoTraitLayout : SpectralTraitLayout {
 
     override fun startDeviceSearch() {
 
-        val deviceId = controller.getPreferences().getString("nano_device_id", "") ?: ""
-        val deviceName = controller.getPreferences().getString("nano_device_name", "") ?: ""
+        val deviceId = controller.getPreferences().getString(GeneralKeys.INNOSPECTRA_NANO_DEVICE_ID, "") ?: ""
+        val deviceName = controller.getPreferences().getString(GeneralKeys.INNOSPECTRA_NANO_DEVICE_NAME, "") ?: ""
 
         if (deviceId.isNotBlank() && deviceName.isNotBlank()) {
 
@@ -249,9 +251,38 @@ class InnoSpectraNanoTraitLayout : SpectralTraitLayout {
         }
     }
 
-    override fun loadLayout() {
-        super.loadLayout()
-        toggleProgressBar(false)
+    override fun showSettings() {
+        var dialog: android.app.AlertDialog? = null
+
+        // if we have a connected nano device, show device info in settings
+        connectedNanoDevice?.let { nano ->
+
+            // create settings view using the new InnoSpectra settings view
+            val settingsView = com.fieldbook.tracker.views.InnoSpectraNanoSettingsView(context, nano) {
+                // onDisconnect callback
+                if (isLocked) {
+                    return@InnoSpectraNanoSettingsView
+                }
+
+                // perform disconnect and erase saved device
+                disconnectAndEraseDevice(Device(nano))
+
+                setupConnectUi()
+
+                dialog?.dismiss()
+            }
+
+            dialog = android.app.AlertDialog.Builder(context, R.style.AppAlertDialog)
+                .setTitle(context.getString(R.string.traits_format_inno_spectra_nano_sensor))
+                .setView(settingsView)
+                .setPositiveButton(android.R.string.ok) { d, _ ->
+                    onSettingsChanged()
+                    d.dismiss()
+                }
+                .create()
+
+            dialog?.show()
+        }
     }
 
     override fun connectDevice(device: Device) {
@@ -269,8 +300,8 @@ class InnoSpectraNanoTraitLayout : SpectralTraitLayout {
 
         // persist selection
         controller.getPreferences().edit {
-            putString("nano_device_id", nano.nanoMac)
-            putString("nano_device_name", nano.nanoName)
+            putString(GeneralKeys.INNOSPECTRA_NANO_DEVICE_ID, nano.nanoMac)
+            putString(GeneralKeys.INNOSPECTRA_NANO_DEVICE_NAME, nano.nanoName)
         }
 
         // save references for later use
@@ -310,9 +341,10 @@ class InnoSpectraNanoTraitLayout : SpectralTraitLayout {
             val gattService = Intent(context, ISCNIRScanSDK::class.java)
             context.bindService(gattService, connection!!, Context.BIND_AUTO_CREATE)
 
-            val listener = (context as CollectActivity).innoSpectraViewModel as? NanoEventListener
-            nanoReceiver = InnoSpectraBase(listener!!).also {
-                it.register(context)
+            ((context as CollectActivity).innoSpectraViewModel as? NanoEventListener)?.let { listener ->
+                nanoReceiver = InnoSpectraBase(listener).also {
+                    it.register(context)
+                }
             }
         }
     }
@@ -333,79 +365,29 @@ class InnoSpectraNanoTraitLayout : SpectralTraitLayout {
         val nano = deviceData?.second as? NanoDevice
         nano?.let {
             controller.getPreferences().edit {
-                putString("nano_device_id", it.nanoMac)
-                putString("nano_device_name", it.nanoName)
+                putString(GeneralKeys.INNOSPECTRA_NANO_DEVICE_ID, it.nanoMac)
+                putString(GeneralKeys.INNOSPECTRA_NANO_DEVICE_NAME, it.nanoName)
             }
         }
     }
 
     override fun enableCapture(device: Device) {
         super.enableCapture(device)
-        toggleProgressBar(false)
         scheduleDeviceConnection()
     }
 
     override fun disconnectAndEraseDevice(device: Device) {
-        super.disconnectAndEraseDevice(device)
         if (!isLocked) {
             isStarting = false
             endConnection()
             controller.getPreferences().edit {
-                remove("nano_device_id")
-                remove("nano_device_name")
+                remove(GeneralKeys.INNOSPECTRA_NANO_DEVICE_ID)
+                remove(GeneralKeys.INNOSPECTRA_NANO_DEVICE_NAME)
             }
             connectButton?.visibility = VISIBLE
             captureButton?.visibility = GONE
             disconnectButton?.visibility = GONE
             setupConnectButton()
-        }
-    }
-
-    private fun saveDataToFile(values: String, wavelengths: String) {
-
-        val plot = (context as? CollectActivity)?.observationUnit
-        val traitDbId = currentTrait.id
-        val person = (context as? CollectActivity)?.person
-        val location = (context as? CollectActivity)?.locationByPreferences
-        val studyId = collectActivity.studyId
-        val rep = database.getNextRep(studyId, plot, currentTrait.id)
-        val saveTime = FileUtil.sanitizeFileName(OffsetDateTime.now().format(internalTimeFormatter))
-
-        background.launch(Dispatchers.IO) {
-
-            currentTrait.name.let { traitName ->
-
-                val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
-
-                val name = "${plot}_${sanitizedTraitName}_$saveTime.jpg"
-
-                DocumentTreeUtil.getFieldMediaDirectory(context, sanitizedTraitName)?.let { dir ->
-
-                    dir.createFile("*/*", name)?.let { file ->
-
-                        context.contentResolver.openOutputStream(file.uri).use { output ->
-                            output?.write(wavelengths.toByteArray())
-                            output?.write("\n".toByteArray())
-                            output?.write(values.toByteArray())
-                            output?.write("\n".toByteArray())
-                        }
-
-                        database.insertObservation(
-                            plot, traitDbId, "$values;$wavelengths",
-                            person,
-                            location, "", studyId,
-                            null,
-                            null,
-                            null,
-                            rep
-                        )
-
-                        withContext(Dispatchers.Main) {
-                            (context as CollectActivity).refreshRepeatedValuesToolbarIndicator()
-                        }
-                    }
-                }
-            }
         }
     }
 
