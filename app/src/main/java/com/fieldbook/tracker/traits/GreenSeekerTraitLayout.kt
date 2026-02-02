@@ -127,7 +127,7 @@ class GreenSeekerTraitLayout : BaseTraitLayout, LineGraphSelectableAdapter.Liste
             }
         }
 
-        controller.getInputView().visibility = View.VISIBLE
+        controller.getInputView().visibility = VISIBLE
 
         controller.updateNumberOfObservations()
     }
@@ -318,7 +318,7 @@ class GreenSeekerTraitLayout : BaseTraitLayout, LineGraphSelectableAdapter.Liste
                 )
             }
 
-        controller.getInputView().visibility = View.VISIBLE
+        controller.getInputView().visibility = VISIBLE
 
         (recyclerView?.adapter as? LineGraphSelectableAdapter)?.submitList(lineData)
     }
@@ -374,7 +374,7 @@ class GreenSeekerTraitLayout : BaseTraitLayout, LineGraphSelectableAdapter.Liste
 
             //get system bluetooth adapter
             val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-            val adapter = bluetoothManager.adapter
+            bluetoothManager.adapter
 
 //            adapter.bondedDevices.forEach { bonded ->
 //                deviceList = deviceList + Device(bonded).apply {

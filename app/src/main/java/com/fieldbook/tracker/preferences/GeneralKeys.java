@@ -222,10 +222,6 @@ public class GeneralKeys {
         return "com.fieldbook.tracker.crop_coordinates." + traitId;
     }
 
-    /**
-     * InnoSpectra Nano
-     */
-
     @NonNull
     public static final String INNOSPECTRA_NANO_CONFIG_INDEX = "com.fieldbook.tracker.traits.innospectra_nano.INDEX";
 

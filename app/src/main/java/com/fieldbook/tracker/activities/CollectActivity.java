@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -39,6 +40,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.DialogFragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -61,6 +63,7 @@ import com.fieldbook.tracker.database.viewmodels.SpectralViewModel;
 import com.fieldbook.tracker.devices.camera.UsbCameraApi;
 import com.fieldbook.tracker.devices.camera.GoProApi;
 import com.fieldbook.tracker.devices.camera.CanonApi;
+import com.fieldbook.tracker.devices.spectrometers.innospectra.InnoSpectraViewModel;
 import com.fieldbook.tracker.dialogs.GeoNavCollectDialog;
 import com.fieldbook.tracker.dialogs.InvalidValueDialog;
 import com.fieldbook.tracker.dialogs.ObservationMetadataFragment;
@@ -78,6 +81,7 @@ import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.traits.AbstractCameraTrait;
+import com.fieldbook.tracker.traits.InnoSpectraNanoTraitLayout;
 import com.fieldbook.tracker.traits.SpectralTraitLayout;
 import com.fieldbook.tracker.traits.formats.Formats;
 import com.fieldbook.tracker.preferences.GeneralKeys;
@@ -251,6 +255,9 @@ public class CollectActivity extends ThemedActivity
 
     private SpectralViewModel spectralViewModel;
 
+    //innospectra nano spectrometer viewmodel, intialized in onCreate
+    private InnoSpectraViewModel innoSpectraViewModel = null;
+
     //used to track rotation relative to device
     private SensorHelper.RotationModel rotationModel = null;
     private SensorHelper.RotationModel gravityRotationModel = null;
@@ -340,7 +347,7 @@ public class CollectActivity extends ThemedActivity
         super.onCreate(savedInstanceState);
 
         gps = new GPSTracker(this, this, 0, 10000);
-        
+
         setupBackCallback();
 
         guiThread.start();
@@ -404,6 +411,25 @@ public class CollectActivity extends ThemedActivity
 
         spectralViewModel = new SpectralViewModelFactory(new SpectralRepository(spectralDao, protocolDao, deviceDao, uriDao))
                 .create(SpectralViewModel.class);
+
+        initializeInnoSpectraViewModel();
+    }
+
+    private void initializeInnoSpectraViewModel() {
+
+        try {
+
+            ViewModelProvider.Factory factory = new ViewModelProvider.NewInstanceFactory();
+
+            innoSpectraViewModel = new ViewModelProvider(this, factory).get(InnoSpectraViewModel.class);
+
+        } catch (Exception e) {
+
+            Log.d(TAG, "Error initializing InnoSpectraViewModel");
+
+            e.printStackTrace();
+
+        }
     }
 
     @Override
@@ -823,7 +849,12 @@ public class CollectActivity extends ThemedActivity
                 if (format != null && Formats.Companion.isCameraTrait(format)) {
                     ((AbstractCameraTrait) traitLayouts.getTraitLayout(format)).setImageNa();
                 } else if (format != null && Formats.Companion.isSpectralFormat(format)) {
-                    ((SpectralTraitLayout) traitLayouts.getTraitLayout(format)).setNa();
+                    BaseTraitLayout base = traitLayouts.getTraitLayout(format);
+                    if (base instanceof SpectralTraitLayout) {
+                        ((SpectralTraitLayout) base).setNa();
+                    } else if (base instanceof InnoSpectraNanoTraitLayout) {
+                        ((InnoSpectraNanoTraitLayout) base).setNa();
+                    }
                 } else {
                     updateObservation(currentTrait, "NA", null);
                     setNaText();
@@ -1284,7 +1315,9 @@ public class CollectActivity extends ThemedActivity
 
         gnssThreadHelper.stop();
 
-        goProApi.onDestroy();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            goProApi.onDestroy();
+        }
 
         sensorHelper.unregister();
 
@@ -1629,7 +1662,7 @@ public class CollectActivity extends ThemedActivity
      * @param resourceFileName Optional resource file name to open
      */
     private void openSavedResourceFile(String resourceFileName) {
-        String fileString = resourceFileName != null ? resourceFileName : 
+        String fileString = resourceFileName != null ? resourceFileName :
                             preferences.getString(GeneralKeys.LAST_USED_RESOURCE_FILE, "");
         Log.d(TAG, "fileString after selection: " + fileString);
         if (!fileString.isEmpty()) {
@@ -2464,7 +2497,9 @@ public class CollectActivity extends ThemedActivity
                         String format = traitBox.getCurrentFormat();
                         if (format.equals(CanonTraitLayout.type)) {
                             canonApi.stopSession();
-                            wifiHelper.disconnect();
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                                wifiHelper.disconnect();
+                            }
                         }
                         finish();
                 } else {
@@ -3042,6 +3077,11 @@ public class CollectActivity extends ThemedActivity
     @Nullable
     public SensorHelper.RotationModel getDeviceTilt() {
         return gravityRotationModel;
+    }
+
+    @Nullable
+    public InnoSpectraViewModel getInnoSpectraViewModel() {
+        return innoSpectraViewModel;
     }
 
     @Override
