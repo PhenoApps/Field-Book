@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.database.models
 
+import android.content.ContentValues
 import android.content.Context
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.Row
@@ -21,8 +22,9 @@ data class ObservationModel(val map: Row) {
     )?.defaultValue ?: "NA"
     else "NA"
     val observation_time_stamp: String? by map
-    val collector: String? by map
-    val geo_coordinates: String? =
+    var collector: String? =
+        if (map.containsKey("collector")) map["collector"]?.toString() else null
+    var geo_coordinates: String? =
         if (map.containsKey("geo_coordinates")) map["geo_coordinates"]?.toString() else null
     val study_id: String = (map["study_id"] ?: -1).toString()
     val last_synced_time: String by map
@@ -125,5 +127,23 @@ data class ObservationModel(val map: Row) {
 
         return setOf(photo_uri, video_uri, audio_uri).count { it != null && it.isNotBlank() }
 
+    }
+
+    //turns the current model into a database row for insertion into the database using a cursor
+    fun toContentValues() = ContentValues().apply {
+        put("internal_id_observation", internal_id_observation)
+        put("observation_unit_id", observation_unit_id)
+        put("observation_variable_db_id", observation_variable_db_id)
+        put("value", value)
+        put("observation_time_stamp", observation_time_stamp)
+        put("collector", collector)
+        put("geo_coordinates", geo_coordinates)
+        put("study_id", study_id)
+        put("last_synced_time", last_synced_time)
+        put("additional_info", additional_info)
+        put("rep", rep)
+        put("photo_uri", photo_uri)
+        put("video_uri", video_uri)
+        put("audio_uri", audio_uri)
     }
 }

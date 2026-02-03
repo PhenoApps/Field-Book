@@ -147,6 +147,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -1441,64 +1442,60 @@ public class CollectActivity extends ThemedActivity
     }
 
     /**
-     * Helper function update user data in the memory based hashmap as well as
-     * the database
+     * Use this function to insert new observation rows or update existing observation rows.
      *
-     * @param trait       the trait object to update
+     * @param trait       the trait object to update, if null this function will use the currently selected trait
      * @param value       the new string value to be saved in the database
      * @param nullableRep the repeated value to update, could be null to represent the latest rep value
      */
-    public void updateObservation(TraitObject trait, String value, @Nullable String nullableRep) {
+    public void updateObservation(@Nullable TraitObject trait, String value, @Nullable String nullableRep) {
 
         if (rangeBox.isEmpty()) {
             return;
         }
 
-        String studyId = getStudyId();
-        String obsUnit = getObservationUnit();
-        String person = preferences.getString(GeneralKeys.FIRST_NAME, "") + " " + preferences.getString(GeneralKeys.LAST_NAME, "");
-
-        String rep = nullableRep;
-
-        //if not updating a repeated value, get the latest repeated value
-        if (nullableRep == null) {
-
-            rep = getRep();
+        String traitDbId = trait != null ? trait.getId() : null;
+        if (traitDbId == null) {
+            traitDbId = getTraitDbId();
         }
 
-        Observation observation = database.getObservation(studyId, obsUnit, trait.getId(), rep);
-        String observationDbId = observation.getDbId();
-        OffsetDateTime lastSyncedTime = observation.getLastSyncedTime();
+        //get the observation data, this gets the latest repeated value or the requested rep
+        ObservationModel obs = getRepObservation(traitDbId, nullableRep);
 
-        // Always remove existing trait before inserting again
-        // Based on plot_id, prevent duplicates
-        database.deleteTrait(studyId, obsUnit, trait.getId(), rep);
+        //get the current collector
+        String person = getPerson();
 
-        if (!value.isEmpty()) {
-
-            //don't update the database if the value is blank or undesirable
-            boolean pass = false;
-
-            if (CategoricalTraitLayout.isTraitCategorical(trait.getFormat())) {
-
-                if (value.equals("[]")) {
-
-                    pass = true;
-                }
-            }
-
-            if (!pass) {
-                database.insertObservation(obsUnit, trait.getId(), value, person,
-                        getLocationByPreferences(), "", studyId, observationDbId,
-                        null, lastSyncedTime, rep);
-
-                runOnUiThread(() -> updateCurrentTraitStatus(true));
-            }
+        String location = null;
+        try {
+            location = getLocationByPreferences();
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to get location", e);
         }
 
-        //update the info bar in case a variable is used
-        refreshInfoBarAdapter();
-        refreshRepeatedValuesToolbarIndicator();
+        if (obs == null) {
+            String obsUnit = getObservationUnit();
+            String studyId = getStudyId();
+            String rep = getRep();
+            //insert the new observation
+            database.insertObservation(obsUnit, traitDbId, value, person, location,
+                    "", studyId, null, null, null, rep);
+
+        } else {
+
+            //update the provided values
+            obs.setCollector(person);
+            obs.setGeo_coordinates(location);
+            obs.setValue(value);
+
+            database.updateObservationModels(database.getDb(), Collections.singletonList(obs));
+        }
+
+        runOnUiThread(() -> {
+            //update the UI
+            updateCurrentTraitStatus(true);
+            refreshInfoBarAdapter();
+            refreshRepeatedValuesToolbarIndicator();
+        });
     }
 
     public void insertRep(String value, String rep) {
@@ -3116,6 +3113,26 @@ public class CollectActivity extends ThemedActivity
     public void showObservationMetadataDialog() {
         ObservationModel currentObservationObject = getCurrentObservation();
         showObservationMetadataDialog(currentObservationObject);
+    }
+
+    public ObservationModel getRepObservation(String traitId, @Nullable String rep) {
+
+        String searchRep = rep;
+
+
+        if (searchRep == null) {
+            searchRep = getCollectInputView().getRep();
+        }
+
+        ObservationModel[] models = getDatabase().getRepeatedValues(getStudyId(), getObservationUnit(), traitId);
+
+        for (ObservationModel m : models) {
+            if (searchRep.equals(m.getRep())) {
+                return m;
+            }
+        }
+
+        return null;
     }
 
     public ObservationModel getCurrentObservation() {

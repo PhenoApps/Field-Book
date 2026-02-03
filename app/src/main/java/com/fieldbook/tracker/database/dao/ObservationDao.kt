@@ -84,6 +84,10 @@ class ObservationDao {
 
         } ?: emptyArray()
 
+        /**
+         * Creates a relational object of observation and observation variable rows
+         * TODO: create a new model to differentiate between the relational and individual models
+         */
         fun getAll(studyId: String, obsUnit: String, traitDbId: String): Array<ObservationModel> = withDatabase { db ->
 
             val query = """
@@ -96,7 +100,7 @@ class ObservationDao {
 
             //Log.d(TAG, query)
 
-            db.rawQuery(query, arrayOf(studyId, obsUnit, traitDbId.toString())).use {
+            db.rawQuery(query, arrayOf(studyId, obsUnit, traitDbId)).use {
 
                 it.toTable()
                     .map { ObservationModel(it) }
@@ -733,15 +737,12 @@ class ObservationDao {
 
             observations.forEach {
 
+                val content = it.toContentValues()
                 db.update(
                     Observation.tableName,
-                    ContentValues().apply {
-                        put(Observation.PK, it.internal_id_observation)
-                        put("value", it.value)
-                    },
+                    content,
                     "${Observation.PK} = ?", arrayOf(it.internal_id_observation.toString())
                 )
-
             }
         }
 
