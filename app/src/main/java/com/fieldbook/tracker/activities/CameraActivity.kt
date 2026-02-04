@@ -21,7 +21,6 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.MeteringPoint
 import androidx.camera.core.MeteringPointFactory
-import androidx.camera.core.Preview
 import androidx.camera.video.MediaStoreOutputOptions
 import androidx.camera.video.Recorder
 import androidx.camera.video.VideoCapture
@@ -30,10 +29,6 @@ import androidx.camera.view.PreviewView
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -60,6 +55,10 @@ import java.util.concurrent.Executors
 import javax.inject.Inject
 import androidx.appcompat.widget.Toolbar
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 
 @AndroidEntryPoint
@@ -77,6 +76,7 @@ class CameraActivity : ThemedActivity() {
     private lateinit var captureButton: FloatingActionButton
     private lateinit var viewMediaButton: FloatingActionButton
     private lateinit var switchCameraButton: FloatingActionButton
+    private lateinit var mediaCompose: ComposeView
 
     private var supportedResolutions: List<Size> = listOf()
 
@@ -168,7 +168,7 @@ class CameraActivity : ThemedActivity() {
         switchCameraButton = findViewById(R.id.camerax_switch_btn)
 
         // Compose host for media toggle
-        val mediaCompose = findViewById<ComposeView>(R.id.media_mode_compose)
+        mediaCompose = findViewById(R.id.media_mode_compose)
 
         val toolbar = findViewById<Toolbar>(R.id.act_camera_toolbar)
         toolbar?.let {
@@ -277,7 +277,11 @@ class CameraActivity : ThemedActivity() {
             val modes = visibleModes.toList()
             mediaCompose.setContent {
                 AppTheme {
-                    val painters = modes.map { mode ->
+
+                    val orderedModes = listOf(MODE_PHOTO, MODE_VIDEO, MODE_AUDIO)
+                    val enabledSet = modes.toSet()
+
+                    val paintersToShow = orderedModes.map { mode ->
                         when (mode) {
                             MODE_PHOTO -> painterResource(R.drawable.ic_trait_camera)
                             MODE_VIDEO -> painterResource(R.drawable.video)
@@ -286,30 +290,19 @@ class CameraActivity : ThemedActivity() {
                         }
                     }
 
-                    // pad to length 3
-                    val paintersToShow = when (painters.size) {
-                        3 -> painters
-                        2 -> painters + listOf(painters.last())
-                        1 -> painters + listOf(painters.last(), painters.last())
-                        else -> painters
-                    }
-                    val modesToShow = when (modes.size) {
-                        3 -> modes
-                        2 -> modes + listOf(modes.last())
-                        1 -> modes + listOf(modes.last(), modes.last())
-                        else -> modes
-                    }
-
-                    val initialIdx = modesToShow.indexOf(currentMode).takeIf { it >= 0 } ?: 0
+                    val initialIdx = orderedModes.indexOf(currentMode).takeIf { it >= 0 } ?: 0
                     val selectedIdxState = remember { mutableIntStateOf(initialIdx) }
 
                     ThreeStateToggle(
                         states = paintersToShow,
                         selectedIndex = selectedIdxState.intValue,
+                        enabledStates = orderedModes.map { it in enabledSet },
                         onSelected = { idx ->
                             selectedIdxState.intValue = idx
-                            val mode = modesToShow.getOrNull(idx) ?: MODE_PHOTO
-                            switchMode(mode)
+                            val mode = orderedModes.getOrNull(idx)
+                            if (mode != null && enabledSet.contains(mode)) {
+                                switchMode(mode)
+                            }
                         }
                     )
                  }
@@ -373,6 +366,8 @@ class CameraActivity : ThemedActivity() {
                 captureButton.visibility = View.GONE
                 switchCameraButton.visibility = View.GONE
                 viewMediaButton.visibility = View.GONE
+                // also hide bottom media toggle when no observation exists
+                mediaCompose.visibility = View.GONE
 
             } else {
 
@@ -383,6 +378,9 @@ class CameraActivity : ThemedActivity() {
                     viewMediaButton.visibility = if (hasMedia) View.VISIBLE else View.GONE
                 }
             }
+        } else {
+            // treat null obsId as no observation: hide the media compose toggle
+            mediaCompose.visibility = View.GONE
         }
 
         if (launchedForVideoTrait) {

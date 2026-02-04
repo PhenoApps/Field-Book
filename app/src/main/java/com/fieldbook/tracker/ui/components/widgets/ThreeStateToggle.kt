@@ -62,7 +62,8 @@ fun ThreeStateToggle(
     iconTint: Color? = null,
     unselectedIconTint: Color? = null,
     contentDescriptions: List<String>? = null,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    enabledStates: List<Boolean>? = null // per-slot enabled flags; if null fallback to `enabled`
 ) {
     require(states.size == 3) { "ThreeStateToggle requires exactly 3 states" }
 
@@ -145,6 +146,9 @@ fun ThreeStateToggle(
                                      bestIndex = idx
                                  }
                              }
+                            // Ignore taps on disabled slots
+                            val slotEnabled = enabledStates?.getOrNull(bestIndex) ?: enabled
+                            if (!slotEnabled) return@detectTapGestures
                              onSelected(bestIndex)
                              // animate indicator to feedback
                              val targetOffsetImmediate = (centers[bestIndex] - indicatorSizePx / 2f).coerceIn(0f, trackPxWidth - indicatorSizePx)
@@ -189,16 +193,18 @@ fun ThreeStateToggle(
                     val targetTint = if (i == selectedIndex) finalIconTint else finalUnselectedIconTint
                     val tint by animateColorAsState(targetValue = targetTint)
 
+                    val slotEnabled = enabledStates?.getOrNull(i) ?: enabled
+
                     Box(
                         modifier = Modifier
                             .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
-                            .clickable(enabled = enabled) { onSelected(i) }
-                            .onGloballyPositioned { coords ->
-                                // record center X in window coordinates
-                                val center = coords.positionInWindow().x + coords.size.width / 2f
-                                iconCentersWindow[i] = center
-                            }
-                            .semantics(mergeDescendants = false) { this.contentDescription = desc },
+                            .clickable(enabled = slotEnabled) { if (slotEnabled) onSelected(i) }
+                             .onGloballyPositioned { coords ->
+                                 // record center X in window coordinates
+                                 val center = coords.positionInWindow().x + coords.size.width / 2f
+                                 iconCentersWindow[i] = center
+                             }
+                             .semantics(mergeDescendants = false) { this.contentDescription = desc },
                         contentAlignment = Alignment.Center
                     ) {
                         Image(
@@ -238,7 +244,8 @@ fun ThreeStateToggle(
                  indicatorSize = 40.dp,
                  iconSize = 24.dp,
                  contentDescriptions = listOf("Home", "Favorites", "Settings"),
-                 enabled = true
+                 enabled = true,
+                 enabledStates = listOf(true, true, true)
              )
          }
      }
