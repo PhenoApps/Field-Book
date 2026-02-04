@@ -45,7 +45,6 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.AttributeAdapter;
 import com.fieldbook.tracker.adapters.InfoBarAdapter;
 import com.fieldbook.tracker.adapters.TraitsStatusAdapter;
-import com.fieldbook.tracker.brapi.model.Observation;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.dao.spectral.DeviceDao;
 import com.fieldbook.tracker.database.dao.spectral.ProtocolDao;
@@ -83,7 +82,6 @@ import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.traits.AudioTraitLayout;
 import com.fieldbook.tracker.traits.BaseTraitLayout;
 import com.fieldbook.tracker.traits.CanonTraitLayout;
-import com.fieldbook.tracker.traits.CategoricalTraitLayout;
 import com.fieldbook.tracker.traits.GNSSTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
@@ -190,8 +188,23 @@ public class CollectActivity extends ThemedActivity
     // Request code for opening the media viewer to refresh after returning
     public static final int REQUEST_VIEW_MEDIA_CODE = 203;
     // pending media values used when we start a crop activity and need to show the confirm dialog
-    private String pendingMediaType = null;
-    private String pendingMediaPath = null;
+    private final PendingMedia pendingMedia = new PendingMedia();
+
+    private static class PendingMedia {
+        String type = null;
+        String path = null;
+        boolean attach = false; // indicates this crop was started as part of attaching new media
+        Long observationId = null; // store pending observation id so we attach to the correct observation even if UI changes
+
+        boolean hasMedia() { return path != null && type != null; }
+
+        void clear() {
+            type = null;
+            path = null;
+            attach = false;
+            observationId = null;
+        }
+    }
 
     private final HandlerThread gnssRawLogHandlerThread = new HandlerThread("log");
 
@@ -2238,10 +2251,10 @@ public class CollectActivity extends ThemedActivity
                         File f = new File(getContext().getCacheDir(), AbstractCameraTrait.TEMPORARY_IMAGE_NAME);
                         Uri uri = Uri.fromFile(f);
                         // store pending media so the crop-finished handler can show confirm dialog
-                        pendingMediaPath = f.getAbsolutePath();
-                        pendingMediaType = "photo";
+                        pendingMedia.path = f.getAbsolutePath();
+                        pendingMedia.type = "photo";
                         // delete the previously saved copy (mediaPath) to avoid duplicates later
-                        try { if (!mediaPath.equals(pendingMediaPath)) {
+                        try { if (!mediaPath.equals(pendingMedia.path)) {
                             boolean deleteSuccess = new File(mediaPath).delete();
                             Log.d(TAG, "Request crop image: deleteSuccess: " + deleteSuccess);
                         } } catch (Exception ignore) {}
@@ -2253,15 +2266,17 @@ public class CollectActivity extends ThemedActivity
                 // Crop activity finished — use the pending media values (set before starting crop)
                 if (resultCode == RESULT_OK) {
                     try {
-                        if (pendingMediaPath != null && pendingMediaType != null) {
-                            final String path = pendingMediaPath;
-                            final String type = pendingMediaType;
-                            // clear pending values before proceeding
-                            pendingMediaPath = null;
-                            pendingMediaType = null;
-                            // Show confirm dialog on UI thread
-                            Boolean skipSave = data.getBooleanExtra(CameraActivity.EXTRA_SKIP_SAVE, false);
-                            runOnUiThread(() -> showMediaDialog(type, path, skipSave, true));
+                        if (pendingMedia.hasMedia()) {
+                            final String path = pendingMedia.path;
+                            final String type = pendingMedia.type;
+                            // clear pending values before proceeding (capture current values first)
+                            // If this crop was started as part of attaching new media, save/attach it immediately
+                            if (pendingMedia.attach) {
+                                final Long obsId = pendingMedia.observationId;
+                                pendingMedia.clear();
+                                final ObservationModel model = obsId != null ? database.getObservationById(String.valueOf(obsId)) : getCurrentObservation();
+                                Executors.newSingleThreadExecutor().execute(() -> saveAttachedMedia(model, type, path));
+                            }
                         }
                     } catch (Exception e) {
                         Log.e(TAG, "Error showing media dialog.", e);
@@ -2290,7 +2305,9 @@ public class CollectActivity extends ThemedActivity
                     String mediaPath = data.getStringExtra("media_path");
                     String mediaType = data.getStringExtra("media_type");
                     String barcode = data.getStringExtra(CameraActivity.EXTRA_BARCODE);
-                    if (mediaPath != null) {
+                    ObservationModel model = getCurrentObservation();
+
+                    if (mediaPath != null && model != null) {
 
                         if (Objects.equals(mediaType, "photo")) {
                             TraitObject trait = getCurrentTrait();
@@ -2301,16 +2318,22 @@ public class CollectActivity extends ThemedActivity
                                 Uri uri = Uri.fromFile(f);
                                 // we will need to show the confirm dialog once cropping finishes. Use the
                                 // cache temp file as the pending media so the cropped image is shown.
-                                pendingMediaPath = f.getAbsolutePath();
+                                pendingMedia.path = f.getAbsolutePath();
+                                // mark that this crop was started as part of attaching new media
+                                pendingMedia.attach = true;
+                                // store the id of the current observation so we attach to the correct one even if UI changes
+                                try {
+                                    pendingMedia.observationId = (long) model.getInternal_id_observation();
+                                } catch (Exception ignore) {}
                                 // delete the previously saved copy (mediaPath) to avoid duplicates later
                                 try {
-                                    if (!mediaPath.equals(pendingMediaPath)) {
+                                    if (!mediaPath.equals(pendingMedia.path)) {
                                         boolean deleteSuccess = new File(mediaPath).delete();
                                         Log.d(TAG, "Request photo temp image: deleteSuccess: " + deleteSuccess);
                                     }
                                 } catch (Exception ignore) {}
-                                pendingMediaType = mediaType;
-                                startCropActivity(getCurrentTrait().getId(), uri, false);
+                                pendingMedia.type = mediaType;
+                                showCropDialog(getCurrentTrait().getId(), uri);
                             } else {
                                 // If an ROI is defined, apply the crop to the saved image before showing the confirm dialog.
                                 // Do this off the UI thread to avoid blocking.
@@ -2348,15 +2371,16 @@ public class CollectActivity extends ThemedActivity
                                         }
 
                                         // After cropping (or on failure), show the confirm dialog on UI thread
-                                        runOnUiThread(() -> showMediaDialog(mediaType, mediaPath, false, false));
+                                        saveAttachedMedia(model, mediaType, mediaPath);
                                     });
                                  } catch (Exception e) {
                                      Log.e(TAG, "Error cropping image", e);
-                                     showMediaDialog(mediaType, mediaPath, false, false);
-                                 }
+                                     saveAttachedMedia(model, mediaType, mediaPath);
+
+                                }
                              }
                          } else if (mediaType.equals("audio") || mediaType.equals("video")) {
-                            runOnUiThread(() -> showMediaDialog(mediaType, mediaPath, false, false));
+                            saveAttachedMedia(model, mediaType, mediaPath);
                         }
 
                      } else if (barcode != null) {
@@ -3138,7 +3162,7 @@ public class CollectActivity extends ThemedActivity
     public ObservationModel getCurrentObservation() {
         String rep = getCollectInputView().getRep();
 
-        ObservationModel[] models = getDatabase().getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId());
+        ObservationModel[] models = database.getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId());
 
         for (ObservationModel m : models) {
             if (rep.equals(m.getRep())) {
@@ -3404,7 +3428,24 @@ public class CollectActivity extends ThemedActivity
             builder.setTitle(R.string.dialog_crop_title);
             builder.setMessage(R.string.dialog_crop_message);
             builder.setPositiveButton(android.R.string.ok, (dialog, which) -> startCropActivity(traitId, uri, false));
-            builder.setNegativeButton(android.R.string.no, (dialog, which) -> dialog.dismiss());
+            builder.setNegativeButton(android.R.string.no, (dialog, which) -> {
+                // If this crop dialog was presented during attaching new media, save the pending media
+                try {
+                    if (pendingMedia.attach && pendingMedia.hasMedia()) {
+                        final String path = pendingMedia.path;
+                        final String type = pendingMedia.type;
+                        // resolve observation by saved id if present
+                        final Long obsId = pendingMedia.observationId;
+                        // clear pending values before proceeding
+                        pendingMedia.clear();
+                        final ObservationModel model = obsId != null ? database.getObservationById(String.valueOf(obsId)) : getCurrentObservation();
+                        Executors.newSingleThreadExecutor().execute(() -> saveAttachedMedia(model, type, path));
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error handling crop dialog cancellation for attach flow.", e);
+                }
+                dialog.dismiss();
+            });
             builder.create().show();
         } catch (Exception e) {
             Log.e(TAG, "Error showing crop dialog.", e);
@@ -3445,36 +3486,12 @@ public class CollectActivity extends ThemedActivity
         InsetHandler.INSTANCE.setupInsetsWithBottomBar(rootView, toolbar, bottomContent);
     }
 
-    public void showMediaDialog(String mediaType, String mediaPath, Boolean skipSave, Boolean forCropping) {
-        if (mediaType == null || mediaPath == null) return;
+    public void saveAttachedMedia(ObservationModel obs, String mediaType, String mediaPath) {
         try {
 
-            ObservationModel model = getCurrentObservation();
-
-            if (model == null && !forCropping) {
-                Utils.makeToast(this, getString(R.string.no_observation));
-                return;
-            }
-
-            com.fieldbook.tracker.ui.MediaPreviewDialogFragment.Companion.newInstance(String.valueOf(model.getInternal_id_observation()), mediaType, mediaPath, skipSave)
-                    .show(getSupportFragmentManager(), "media_preview");
-
-        } catch (Exception e) {
-            Log.e(TAG, "Error showing media dialog.", e);
-        }
-     }
-
-    public void onMediaConfirmFromDialog(String obsId, String mediaType, String mediaPath, Boolean skipSave) {
-        try {
-
-            if (skipSave) return;
-
-            ObservationModel obs = database.getObservationById(obsId);
             if (obs == null) {
                 Utils.makeToast(this, getString(R.string.no_observations_warning));
                 return;
-            } else {
-                obs.getValue();
             }
 
             File f = new File(mediaPath);
@@ -3498,8 +3515,15 @@ public class CollectActivity extends ThemedActivity
                 String uri = Uri.fromFile(f).toString();
                 try {
                     TraitObject currentTrait = getCurrentTrait();
+                    // Prefer the trait tied to the ObservationModel (obs) to ensure we attach to the correct trait
                     if (currentTrait != null) {
                         try {
+                            TraitObject traitForObs = null;
+                            try {
+                                traitForObs = database.getTraitById(String.valueOf(obs.getObservation_variable_db_id()));
+                            } catch (Exception ignore) {}
+                            if (traitForObs != null) currentTrait = traitForObs;
+
                             String traitName = currentTrait.getName();
                             String sanitizedTraitName = com.fieldbook.tracker.utilities.FileUtil.sanitizeFileName(traitName);
                             DocumentFile traitPhotos = DocumentTreeUtil.Companion.getFieldMediaDirectory(this, sanitizedTraitName);
@@ -3525,7 +3549,7 @@ public class CollectActivity extends ThemedActivity
                                         out.flush();
                                         try {
                                             boolean deleted = f.delete();
-                                            Log.d(TAG, "Deleted media at: " + f.getName() + " -> " + deleted);
+                                            Log.d(TAG, "Deleted temp media file: " + deleted);
                                         } catch (Exception ignore) {}
                                         uri = dest.getUri().toString();
 
@@ -3581,33 +3605,36 @@ public class CollectActivity extends ThemedActivity
                 }
             };
 
-            // If there's existing media, ask the user before replacing
+            // If there's existing media, ask the user before replacing. Ensure dialog runs on UI thread
             if (existingUri != null && !existingUri.isEmpty()) {
-                new AlertDialog.Builder(this, R.style.AppAlertDialog)
-                        .setTitle(R.string.dialog_confirm)
-                        .setMessage(getString(R.string.confirm_replace_media_message))
-                        .setPositiveButton(android.R.string.ok, (d, which) -> performAttach.run())
-                        .setNegativeButton(android.R.string.cancel, (d, which) -> {
-                            try {
-                                boolean deleted = f.delete();
-                                Log.d(TAG, "Deleted media at: " + f.getName() + " -> " + deleted);
-                            } catch (Exception ignore) {}
-                        })
-                        .show();
+                runOnUiThread(() -> {
+                    try {
+                        new AlertDialog.Builder(this, R.style.AppAlertDialog)
+                                .setTitle(R.string.dialog_confirm)
+                                .setMessage(getString(R.string.confirm_replace_media_message))
+                                .setPositiveButton(android.R.string.ok, (d, which) -> {
+                                    // perform actual attach on background thread
+                                    Executors.newSingleThreadExecutor().execute(performAttach);
+                                })
+                                .setNegativeButton(android.R.string.cancel, (d, which) -> {
+                                    try {
+                                        boolean deleted = f.delete();
+                                        Log.d(TAG, "Deleted media at: " + f.getName() + " -> " + deleted);
+                                    } catch (Exception ignore) {}
+                                })
+                                .show();
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error showing replace confirmation dialog.", e);
+                    }
+                });
             } else {
-                performAttach.run();
+                // No existing media: perform attach in background
+                Executors.newSingleThreadExecutor().execute(performAttach);
             }
 
         } catch (Exception e) {
             Log.e(TAG, "Error showing media dialog.", e);
         }
-    }
-
-    public void onMediaCancelFromDialog(String mediaPath) {
-        try {
-            boolean deleteSuccess = new File(mediaPath).delete();
-            Log.d(TAG, "Deleted media at: " + mediaPath + " -> " + deleteSuccess);
-        } catch (Exception ignore) {}
     }
 
     private void performTraitDeleteAfterMediaCheck() {

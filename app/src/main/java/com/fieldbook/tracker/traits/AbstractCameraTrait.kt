@@ -441,6 +441,8 @@ abstract class AbstractCameraTrait :
                 } else {
 
                     requestCropDefinition(currentTrait.id, uri)
+
+                    loadItems()
                 }
 
             } else {
