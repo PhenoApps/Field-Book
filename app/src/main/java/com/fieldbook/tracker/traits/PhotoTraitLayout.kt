@@ -375,6 +375,8 @@ open class PhotoTraitLayout : CameraTrait {
         intent.putExtra(CameraActivity.EXTRA_STUDY_ID, (activity as CollectActivity).studyId)
         intent.putExtra(CameraActivity.EXTRA_OBS_UNIT, currentRange.uniqueId)
         if (mode.isNotEmpty()) intent.putExtra(CameraActivity.EXTRA_MODE, mode)
+        // mark that CameraActivity was launched from PhotoTrait so it can behave accordingly
+        intent.putExtra(CameraActivity.EXTRA_LAUNCHED_FOR_PHOTO_TRAIT, true)
         activity?.startActivityForResult(intent, PICTURE_REQUEST_CODE)
     }
 

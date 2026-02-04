@@ -60,6 +60,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import com.fieldbook.tracker.utilities.SnackbarUtils
 
 @AndroidEntryPoint
 class CameraActivity : ThemedActivity() {
@@ -91,6 +92,8 @@ class CameraActivity : ThemedActivity() {
     private var skipSaveFlag: Boolean = false
 
     private var launchedForVideoTrait = false
+    // flag set when CameraActivity was launched specifically from a photo-trait capture flow
+    private var launchedForPhotoTrait = false
 
     private var imageCapture: ImageCapture? = null
 
@@ -127,6 +130,8 @@ class CameraActivity : ThemedActivity() {
         const val MAX_BARCODE_DETECTIONS = 10
         // new extra key to mark launches from the video trait embiggen button
         const val EXTRA_LAUNCHED_FOR_VIDEO_TRAIT = "launched_for_video_trait"
+        // new extra key to mark launches from the photo trait (embiggen / capture from trait UI)
+        const val EXTRA_LAUNCHED_FOR_PHOTO_TRAIT = "launched_for_photo_trait"
     }
 
     private var boundCamera: Camera? = null
@@ -149,6 +154,7 @@ class CameraActivity : ThemedActivity() {
         currentMode = intent.getStringExtra(EXTRA_MODE) ?: MODE_PHOTO
 
         launchedForVideoTrait = intent.getBooleanExtra(EXTRA_LAUNCHED_FOR_VIDEO_TRAIT, false)
+        launchedForPhotoTrait = intent.getBooleanExtra(EXTRA_LAUNCHED_FOR_PHOTO_TRAIT, false)
 
         studyName = studyId?.let { studyId -> database.getStudyById(studyId)?.study_name }
 
@@ -368,6 +374,16 @@ class CameraActivity : ThemedActivity() {
                 viewMediaButton.visibility = View.GONE
                 // also hide bottom media toggle when no observation exists
                 mediaCompose.visibility = View.GONE
+                // show snackbar informing user they must collect data before attaching media,
+                // except when CameraActivity was launched from trait layouts (photo/video capture flows)
+                try {
+                    // only show the snackbar when not launched from a trait-specific capture flow (photo/video)
+                    val launchedFromTrait = launchedForVideoTrait || launchedForPhotoTrait || currentMode == MODE_BARCODE
+                    if (!launchedFromTrait) {
+                        val root = findViewById<View>(android.R.id.content)
+                        SnackbarUtils.showShortSnackbar(root, getString(R.string.no_observation))
+                    }
+                } catch (_: Exception) {}
 
             } else {
 
@@ -381,6 +397,14 @@ class CameraActivity : ThemedActivity() {
         } else {
             // treat null obsId as no observation: hide the media compose toggle
             mediaCompose.visibility = View.GONE
+            // inform user they must collect data before attaching media, except when launched from trait layouts
+            try {
+                val launchedFromTrait = launchedForVideoTrait || launchedForPhotoTrait || currentMode == MODE_BARCODE
+                if (!launchedFromTrait) {
+                    val root = findViewById<View>(android.R.id.content)
+                    SnackbarUtils.showShortSnackbar(root, getString(R.string.no_observation))
+                }
+            } catch (_: Exception) {}
         }
 
         if (launchedForVideoTrait) {
