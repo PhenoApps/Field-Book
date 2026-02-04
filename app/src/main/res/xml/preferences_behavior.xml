@@ -55,6 +55,13 @@
             android:entryValues="@array/pref_behavior_barcode_scanning_values"
             android:defaultValue="0"/>
 
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:icon="@drawable/keyboard_return"
+            android:key="ATTACH_MEDIA_BARCODE_PRIORITIZE"
+            android:summary="@string/preferences_behavior_attach_media_barcode_prioritize_description"
+            android:title="@string/preferences_behavior_attach_media_barcode_prioritize" />
+
     </PreferenceCategory>
 
     <PreferenceCategory

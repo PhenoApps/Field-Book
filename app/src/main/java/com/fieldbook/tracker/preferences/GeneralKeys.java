@@ -181,6 +181,9 @@ public class GeneralKeys {
 
     public static final String USB_CAMERA_AUTO_FOCUS = "com.fieldbook.tracker.traits.camera.usb.AUTO_FOCUS";
 
+    // Preference: when attaching media, prioritize detected barcode and auto-return with it
+    public static final String ATTACH_MEDIA_BARCODE_PRIORITIZE = "ATTACH_MEDIA_BARCODE_PRIORITIZE";
+
     @NotNull
     public static final Object SORT_ORDER = "com.fieldbook.tracker.field_sort_order";
     @Nullable

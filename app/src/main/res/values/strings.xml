@@ -1925,4 +1925,9 @@
 
     <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
     <string name="alert_jump_to_plot_bottom_toolbar_message">The bottom toolbar is the new approach for quick actions like moving to a plot; you can use the bottom barcode button to scan or navigate.</string>
+
+    <!-- Preference: Attach media barcode prioritize -->
+    <string name="preferences_behavior_attach_media_barcode_prioritize">Automatically use detected barcode</string>
+    <string name="preferences_behavior_attach_media_barcode_prioritize_description">When a barcode is detected while attaching media, immediately return it to the calling activity instead of waiting for user tap.</string>
+
 </resources>

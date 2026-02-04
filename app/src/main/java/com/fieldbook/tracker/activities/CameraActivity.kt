@@ -681,12 +681,27 @@ class CameraActivity : ThemedActivity() {
                         barcodeScanner.process(inputImage)
                             .addOnSuccessListener { barcodes ->
 
-                                if (currentMode == MODE_BARCODE || (currentMode != MODE_CROP && obsId == "-1")) {
+                                if (currentMode != MODE_CROP && !launchedForVideoTrait && !launchedForPhotoTrait) {
                                     val first = barcodes.firstOrNull()
                                     if (first != null) {
-                                        runOnUiThread {
+                                        // Check user preference: if true, automatically return with detected barcode; otherwise wait for user click
+                                        val autoReturn = try {
+                                            prefs.getBoolean(GeneralKeys.ATTACH_MEDIA_BARCODE_PRIORITIZE, true)
+                                        } catch (_: Exception) {
+                                            true
+                                        }
+
+                                        if (autoReturn) {
+                                            runOnUiThread {
+                                                val text = first.rawValue ?: first.displayValue ?: ""
+                                                finishWithBarcode(text)
+                                            }
+                                        } else {
+                                            // If not auto-returning, update overlay list so user can tap
                                             val text = first.rawValue ?: first.displayValue ?: ""
-                                            finishWithBarcode(text)
+                                            overlayBarcodes.clear()
+                                            overlayBarcodes.add(text)
+                                            runOnUiThread { barcodeOverlay.setDetections(listOf()) }
                                         }
                                     }
                                 }
