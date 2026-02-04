@@ -1784,6 +1784,10 @@ public class CollectActivity extends ThemedActivity
                         .setTitle(getString(R.string.main_toolbar_moveto))
                         .setMessage(getString(R.string.alert_jump_to_plot_bottom_toolbar_message))
                         .setPositiveButton(android.R.string.ok, (dialog, which) -> performJumpAction.run())
+                        .setOnDismissListener((dialog) -> {
+                            systemMenu.findItem(R.id.jumpToPlot).setVisible(false);
+                            preferences.edit().putString(PreferenceKeys.MOVE_TO_UNIQUE_ID, "0").apply();
+                        })
                         .setCancelable(true)
                         .show();
             } else {
