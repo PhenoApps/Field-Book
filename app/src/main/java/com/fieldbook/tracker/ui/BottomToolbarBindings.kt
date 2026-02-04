@@ -98,7 +98,7 @@ fun BottomToolbar(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.camera_iris),
+                            painter = painterResource(id = R.drawable.star_four_points_circle_outline),
                             contentDescription = null,
                             tint = Color.White
                         )
@@ -128,7 +128,7 @@ fun BottomToolbar(
                     }
                 } else {
                     IconButton(onClick = { listener?.onBarcode() }) {
-                        Icon(painter = painterResource(id = R.drawable.main_ic_input_barcode), contentDescription = null, tint = Color.White)
+                        Icon(painter = painterResource(id = R.drawable.star_four_points_circle_outline), contentDescription = null, tint = Color.White)
                     }
                 }
 
