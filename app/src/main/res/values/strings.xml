@@ -378,6 +378,7 @@
     <string name="traits_format_boolean">Boolean</string>
     <string name="traits_format_text">Text</string>
     <string name="traits_format_photo">Photo</string>
+    <string name="traits_format_camera">Camera</string>
     <string name="traits_format_video">Video</string>
     <string name="traits_format_audio">Audio</string>
     <string name="traits_format_multicategorical">Multicat</string>

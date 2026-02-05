@@ -15,7 +15,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.charts.HorizontalBarChartHelper
 import com.fieldbook.tracker.charts.HistogramChartHelper
 import com.fieldbook.tracker.charts.PieChartHelper
-import com.fieldbook.tracker.traits.formats.ChartableData
+import com.fieldbook.tracker.traits.formats.feature.ChartableData
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.github.mikephil.charting.charts.BarChart

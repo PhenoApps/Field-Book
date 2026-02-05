@@ -1,6 +1,8 @@
 package com.fieldbook.tracker.traits.formats
 
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.traits.formats.feature.DisplayValue
+import com.fieldbook.tracker.traits.formats.feature.Scannable
 import com.fieldbook.tracker.traits.formats.parameters.AutoSwitchPlotParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.traits.formats.parameters.AttachMediaParameter
@@ -22,4 +24,4 @@ class LocationFormat : TraitFormat(
     RepeatedMeasureParameter(),
     ResourceFileParameter(),
     AttachMediaParameter()
-), Scannable
+), Scannable, DisplayValue

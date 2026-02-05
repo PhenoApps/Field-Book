@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.traits.formats
+package com.fieldbook.tracker.traits.formats.feature
 
 /**
  * Interface for defining traits that can be scanned in from a barcode.

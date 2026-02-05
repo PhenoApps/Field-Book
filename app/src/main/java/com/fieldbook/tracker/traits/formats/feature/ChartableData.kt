@@ -1,4 +1,4 @@
-package com.fieldbook.tracker.traits.formats
+package com.fieldbook.tracker.traits.formats.feature
 
 /**
  * Trait format definitions implement this when their observation value data can be plotted in a chart.

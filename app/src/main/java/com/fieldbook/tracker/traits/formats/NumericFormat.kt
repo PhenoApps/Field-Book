@@ -4,6 +4,9 @@ import android.content.Context
 import android.view.View
 import android.widget.TextView
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.traits.formats.feature.ChartableData
+import com.fieldbook.tracker.traits.formats.feature.DisplayValue
+import com.fieldbook.tracker.traits.formats.feature.Scannable
 import com.fieldbook.tracker.traits.formats.parameters.BaseFormatParameter
 import com.fieldbook.tracker.traits.formats.parameters.DecimalPlacesParameter
 import com.fieldbook.tracker.traits.formats.parameters.DefaultNumericParameter
@@ -52,7 +55,7 @@ open class NumericFormat(
     iconDrawableResourceId = iconDrawableResourceId,
     stringNameAux = null,
     *parameters
-), Scannable, ChartableData {
+), DisplayValue, Scannable, ChartableData {
 
     override fun validate(
         context: Context,

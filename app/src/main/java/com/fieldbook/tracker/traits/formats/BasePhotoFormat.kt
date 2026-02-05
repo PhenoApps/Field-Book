@@ -17,7 +17,7 @@ open class BasePhotoFormat(
     override var defaultLayoutId: Int = R.layout.trait_photo,
     override var layoutView: View? = null,
     override var databaseName: String = "photo",
-    override var nameStringResourceId: Int = R.string.traits_format_photo,
+    override var nameStringResourceId: Int = R.string.traits_format_camera,
     override var iconDrawableResourceId: Int = R.drawable.ic_trait_camera,
     override var stringNameAux: ((Context) -> String?)? = null
 ) : TraitFormat(

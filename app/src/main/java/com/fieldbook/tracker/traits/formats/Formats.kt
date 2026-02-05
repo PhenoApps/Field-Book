@@ -9,8 +9,8 @@ enum class Formats(val type: Types = Types.SYSTEM, val isCamera: Boolean = false
 
     //CUSTOM formats
     DISEASE_RATING(Types.CUSTOM), GNSS(Types.CUSTOM), STOP_WATCH(Types.CUSTOM),
-    BASE_PHOTO(Types.CUSTOM), USB_CAMERA(Types.CUSTOM, isCamera = true), GO_PRO(Types.CUSTOM, isCamera = true), CANON(Types.CUSTOM, isCamera = true),
-    VIDEO(Types.CUSTOM, isCamera = true),
+    BASE_PHOTO(Types.CUSTOM), VIDEO(Types.CUSTOM, isCamera = true),
+    USB_CAMERA(Types.CUSTOM, isCamera = true), GO_PRO(Types.CUSTOM, isCamera = true), CANON(Types.CUSTOM, isCamera = true),
     NIX(Types.CUSTOM), GREEN_SEEKER(Types.CUSTOM), SCALE(Types.CUSTOM),
     LABEL_PRINT(Types.CUSTOM);
 

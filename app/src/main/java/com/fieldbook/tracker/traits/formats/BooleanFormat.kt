@@ -1,6 +1,9 @@
 package com.fieldbook.tracker.traits.formats
 
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.traits.formats.feature.ChartableData
+import com.fieldbook.tracker.traits.formats.feature.DisplayValue
+import com.fieldbook.tracker.traits.formats.feature.Scannable
 import com.fieldbook.tracker.traits.formats.parameters.AutoSwitchPlotParameter
 import com.fieldbook.tracker.traits.formats.parameters.DefaultRadioValueParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
@@ -24,4 +27,4 @@ class BooleanFormat : TraitFormat(
     RepeatedMeasureParameter(),
     ResourceFileParameter(),
     AttachMediaParameter()
-), Scannable, ChartableData
+), Scannable, ChartableData, DisplayValue

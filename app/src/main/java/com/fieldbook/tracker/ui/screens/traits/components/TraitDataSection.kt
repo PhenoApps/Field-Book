@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.viewmodels.ObservationData
 import com.fieldbook.tracker.objects.TraitObject
-import com.fieldbook.tracker.traits.formats.ChartableData
+import com.fieldbook.tracker.traits.formats.feature.ChartableData
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.ui.components.graphs.BarChart
 import com.fieldbook.tracker.ui.components.graphs.HistogramChart
