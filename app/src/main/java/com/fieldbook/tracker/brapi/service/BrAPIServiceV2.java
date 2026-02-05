@@ -121,6 +121,7 @@ import java.util.stream.Collectors;
 
 public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService {
 
+    public static final String TAG = "BrAPIServiceV2";
     public static final String ADDITIONAL_INFO_OBSERVATION_LEVEL_NAMES = "observationLevelNames";
     protected final StudiesApi studiesApi;
     protected final ProgramsApi programsApi;
@@ -301,7 +302,11 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         fbImage.setDbId(image.getImageDbId());
         // TODO fix these
         //request.setLocation(image.getImageLocation());
-        fbImage.setTimestamp(TimeAdapter.convertFrom(image.getImageTimeStamp()));
+        try {
+            fbImage.setTimestamp(TimeAdapter.convertFrom(image.getImageTimeStamp()));
+        } catch (Exception e) {
+            Log.e(TAG, "Error setting image timestamp", e);
+        }
         return fbImage;
     }
 
