@@ -32,6 +32,9 @@ public class GeneralKeys {
     public static final String HIDE_ENTRIES_WITH_DATA               = "com.fieldbook.tracker.HIDE_ENTRIES";
     public static final String ATTR_CHOOSER_DIALOG_TAB              = "ATTR_CHOOSER_DIALOG_TAB";
 
+    //Behavior
+    public static final String BARCODE_SCANNING_OPTIONS_EDIT = "BARCODE_SCANNING_OPTIONS_EDIT";
+
     // Files and Naming
     public static final String DEFAULT_STORAGE_LOCATION_PREFERENCE  = "DEFAULT_STORAGE_LOCATION_PREFERENCE";
 

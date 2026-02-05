@@ -1929,5 +1929,6 @@
     <!-- Preference: Attach media barcode prioritize -->
     <string name="preferences_behavior_attach_media_barcode_prioritize">Automatically use detected barcode</string>
     <string name="preferences_behavior_attach_media_barcode_prioritize_description">When a barcode is detected while attaching media, immediately return it to the calling activity instead of waiting for user tap.</string>
+    <string name="edit">Edit</string>
 
 </resources>

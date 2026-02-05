@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.preference.PreferenceActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -2559,7 +2560,6 @@ public class CollectActivity extends ThemedActivity
 
                 }
             });
-
             builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> dialog.dismiss());
             builder.setCancelable(true);
             builder.show();
@@ -2616,6 +2616,11 @@ public class CollectActivity extends ThemedActivity
 
         builder.setPositiveButton(R.string.barcode_ask_enter, (dialog, which) -> validateAndSaveBarcodeScan(barcode));
         builder.setNegativeButton(R.string.barcode_ask_move, (dialog, which) -> searchAcrossAllFields(barcode, true, true));
+        builder.setNeutralButton(R.string.edit, (dialog, which) -> {
+            Intent editBehaviorIntent = new Intent(this, PreferencesActivity.class);
+            editBehaviorIntent.putExtra(GeneralKeys.BARCODE_SCANNING_OPTIONS_EDIT, true);
+            startActivity(editBehaviorIntent);
+        });
 
         builder.create().show();
     }
