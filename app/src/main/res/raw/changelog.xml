@@ -1,5 +1,10 @@
 <changelog>
 
+    <release date="2026-02-01" versionCode="70001 versionName="v7.0.1"">
+        <bugfix>BrAPI imports no longer always include "TEST" entry types</bugfix>
+        <bugfix>Improvements for Canon integration</bugfix>
+    </release>
+
     <release date="2026-01-01" versionCode="70000" versionName="v7.0.0">
         <new>Traits list now includes individual trait pages with options that are adjustable on a per trait basis</new>
         <new>Traits include an option to enable repeated measures</new>

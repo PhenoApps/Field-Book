@@ -638,8 +638,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         attributesTable?.get(study.studyDbId)?.let { studyAttributes ->
 
             observationUnits[study.studyDbId]?.filter {
-                if (it.observationUnitPosition?.entryType?.name == "TEST") true
-                else it.observationUnitPosition.observationLevel.levelName.equals(level.observationLevelName, ignoreCase = true)
+                it.observationUnitPosition.observationLevel.levelName.equals(level.observationLevelName, ignoreCase = true)
             }
                 ?.let { units ->
 
