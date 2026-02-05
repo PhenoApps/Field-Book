@@ -66,6 +66,7 @@ import org.brapi.client.v2.modules.phenotype.ObservationsApi;
 import org.brapi.v2.model.BrAPIAcceptedSearchResponse;
 import org.brapi.v2.model.BrAPIExternalReference;
 import org.brapi.v2.model.BrAPIMetadata;
+import org.brapi.v2.model.BrAPIPagination;
 import org.brapi.v2.model.BrAPIResponse;
 import org.brapi.v2.model.BrAPIResponseResult;
 import org.brapi.v2.model.BrAPISearchRequestParametersPaging;
@@ -93,6 +94,7 @@ import org.brapi.v2.model.pheno.response.BrAPIImageListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIImageSingleResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationLevelListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationListResponse;
+import org.brapi.v2.model.pheno.response.BrAPIObservationListResponseResult;
 import org.brapi.v2.model.pheno.response.BrAPIObservationUnitListResponse;
 import org.brapi.v2.model.pheno.response.BrAPIObservationUnitListResponseResult;
 import org.brapi.v2.model.pheno.response.BrAPIObservationVariableListResponse;
@@ -228,8 +230,13 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             BrapiV2ApiCallBack<BrAPIImageListResponse> callback = new BrapiV2ApiCallBack<BrAPIImageListResponse>() {
                 @Override
                 public void onSuccess(BrAPIImageListResponse imageResponse, int i, Map<String, List<String>> map) {
-                    final BrAPIImage response = imageResponse.getResult().getData().get(0);
-                    function.apply(mapToFieldBookImage(image, response));
+                    if (imageResponse != null) {
+                        final List<BrAPIImage> data = imageResponse.getResult().getData();
+                        if (data != null && !data.isEmpty()) {
+                            final BrAPIImage response = data.get(0);
+                            function.apply(mapToFieldBookImage(image, response));
+                        }
+                    }
                 }
 
                 @Override
@@ -1070,7 +1077,18 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 @Override
                 public void onSuccess(BrAPIObservationListResponse response, int i, Map<String, List<String>> map) {
 
-                    if (response.getResult() != null) {
+                    BrAPIObservationListResponseResult result = response.getResult();
+                    if (result != null) {
+                        BrAPIMetadata metadata = response.getMetadata();
+                        if (metadata != null) {
+                            BrAPIPagination pagination = metadata.getPagination();
+                            if (pagination != null) {
+                                Integer resultTotalPages = pagination.getTotalPages();
+                                if (resultTotalPages != null) {
+                                    paginationManager.setTotalPages(resultTotalPages);
+                                }
+                            }
+                        }
                         Map<String, String> extVariableDbIdMap = getExtVariableDbIdMapping();
                         List<BrAPIObservation> brapiObservationList = response.getResult().getData();
                         final List<Observation> observationList = mapObservations(brapiObservationList, extVariableDbIdMap, observationVariableDbIds);
