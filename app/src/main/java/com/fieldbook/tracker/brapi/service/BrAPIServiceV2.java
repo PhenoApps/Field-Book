@@ -574,12 +574,17 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
                     queryParams.page(queryParams.page() + 1);
 
-                    // Extract germplasmDbIds from observationUnit info
-                    List<String> germplasmDbIds = response.getResult().getData().stream()
-                            .filter(unit -> unit.getGermplasmDbId() != null)
-                            .map(BrAPIObservationUnit::getGermplasmDbId)
-                            .collect(Collectors.toList());
-                    allGermplasmDbIds.addAll(germplasmDbIds);
+                    try {
+                        // Extract germplasmDbIds from observationUnit info
+                        List<String> germplasmDbIds = response.getResult().getData()
+                                .stream()
+                                .filter(unit -> unit.getGermplasmDbId() != null)
+                                .map(BrAPIObservationUnit::getGermplasmDbId)
+                                .collect(Collectors.toList());
+                        allGermplasmDbIds.addAll(germplasmDbIds);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error getting plot germplasm details", e);
+                    }
 
                     // Stop after 50 iterations (for safety)
                     // Stop if the current page is the last page according to the server
@@ -587,8 +592,15 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                     if ((queryParams.page() > 50)
                             || (page >= (response.getMetadata().getPagination().getTotalPages() - 1))
                             || (response.getResult().getData().isEmpty())) {
+
                         List<String> uniqueDbIds = new ArrayList<>(new HashSet<>(allGermplasmDbIds));
-                        Map<String, BrAPIGermplasm> data = getGermplasmDetails(uniqueDbIds, failFunction);
+
+                        Map<String, BrAPIGermplasm> data = new HashMap<>();
+
+                        if (!allGermplasmDbIds.isEmpty()) {
+                            data = getGermplasmDetails(uniqueDbIds, failFunction);
+                        }
+
                         mapAttributeValues(study, allAttributeValues, data);
                         function.apply(study);
 
@@ -668,7 +680,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 }
             }
 
-            if (germplasmDetailsMap != null && unit.getGermplasmDbId() != null) {
+            if (germplasmDetailsMap != null && !germplasmDetailsMap.isEmpty() && unit.getGermplasmDbId() != null) {
                 // find matching germplasm in germplasmDetailsMap and extract synonyms and pedigree
                 BrAPIGermplasm matchingGermplasm = germplasmDetailsMap.get(unit.getGermplasmDbId());
 
