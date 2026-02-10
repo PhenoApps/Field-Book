@@ -3448,6 +3448,11 @@ public class CollectActivity extends ThemedActivity
                         pendingMedia.clear();
                         final ObservationModel model = obsId != null ? database.getObservationById(String.valueOf(obsId)) : getCurrentObservation();
                         Executors.newSingleThreadExecutor().execute(() -> saveAttachedMedia(model, type, path));
+
+                        //update crop region to full image
+                        preferences.edit()
+                            .putString(GeneralKeys.getCropCoordinatesKey(Integer.parseInt(traitId)), "0,0,1,1")
+                            .apply();
                     }
                 } catch (Exception e) {
                     Log.e(TAG, "Error handling crop dialog cancellation for attach flow.", e);
