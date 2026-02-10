@@ -1348,6 +1348,13 @@ public class DataHelper {
         openHelper.getWritableDatabase().setTransactionSuccessful();
     }
 
+    public ObservationModel[] getAllObservationDetails(boolean includeDeleted) {
+
+        open();
+
+        return ObservationDao.Companion.getAllVariableDetails(includeDeleted);
+    }
+
     public ObservationModel[] getAllObservations() {
 
         open();

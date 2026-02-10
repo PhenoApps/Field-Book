@@ -29,6 +29,7 @@ enum class Formats(val type: Types = Types.SYSTEM, val isCamera: Boolean = false
 
         fun findTrait(format: String) = entries.find { it.getDatabaseName() == format }?.getTraitFormatDefinition()
 
+        fun isGeoFormat(format: String) = format in setOf(LOCATION.getDatabaseName(), GNSS.getDatabaseName())
     }
 
     fun getTraitFormatDefinition() = when (this) {
