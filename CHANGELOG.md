@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- BrAPI improvements and optimizations (https://github.com/PhenoApps/Field-Book/pull/1396)
 
 ## [v7.0.1] - 2026-02-01
 
