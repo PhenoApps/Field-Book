@@ -155,7 +155,10 @@ public abstract class BaseTraitLayout extends LinearLayout {
 
                 for (ObservationModel m : observations) {
                     if (!m.getValue().isEmpty()) {
-                        m.setValue(decodeValue(m.getValue()));
+                        String decoded = decodeValue(m.getValue());
+                        if (decoded != null) {
+                            m.setValue(decoded);
+                        }
                     }
                 }
 
