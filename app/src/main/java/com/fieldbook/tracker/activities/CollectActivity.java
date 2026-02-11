@@ -2635,6 +2635,7 @@ public class CollectActivity extends ThemedActivity
     public void traitLayoutRefreshNew() {
         refreshRepeatedValuesToolbarIndicator();
         traitLayouts.getTraitLayout(getCurrentTrait().getFormat()).refreshLayout(true);
+        initToolbars();
     }
 
     public void refreshRepeatedValuesToolbarIndicator() {
