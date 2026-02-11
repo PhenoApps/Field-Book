@@ -21,14 +21,6 @@
             android:summary="@string/pref_experimental_enable_field_audio_summary"
             android:title="@string/pref_experimental_enable_field_audio_title" />
 
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/qrcode_scan"
-            android:key="com.tracker.fieldbook.preferences.keys.mlkit"
-            android:summary="@string/pref_beta_mlkit_summary"
-            android:title="@string/pref_beta_mlkit_title" />
-
     </PreferenceCategory>
 
     <PreferenceCategory

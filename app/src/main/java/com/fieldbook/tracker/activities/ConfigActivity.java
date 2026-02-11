@@ -112,7 +112,6 @@ public class ConfigActivity extends ThemedActivity {
     private Menu systemMenu;
     //barcode search fab
     private FloatingActionButton barcodeSearchFab;
-    private boolean mlkitEnabled;
 
     @Override
     public void onResume() {
@@ -330,8 +329,6 @@ public class ConfigActivity extends ThemedActivity {
 
         ImageListAdapter adapterImg = new ImageListAdapter(this, image_id, configList);
         settingsList.setAdapter(adapterImg);
-
-        mlkitEnabled = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferenceKeys.MLKIT_PREFERENCE_KEY, false);
 
         barcodeSearchFab = findViewById(R.id.act_config_search_fab);
         barcodeSearchFab.setOnClickListener(v -> {
