@@ -1764,35 +1764,31 @@ public class CollectActivity extends ThemedActivity
             // If this is the first time the user clicks the jumpToPlot toolbar icon,
             // show an informational alert pointing them to the bottom toolbar as the
             // new approach. Use SharedPreferences to ensure it only shows once.
-            final Runnable performJumpAction = () -> {
-                if (moveToUniqueIdValue.equals("1")) {
-                    moveToPlotID();
-                } else if (moveToUniqueIdValue.equals("2")) {
+            if (moveToUniqueIdValue.equals("1")) {
+                moveToPlotID();
+            } else if (moveToUniqueIdValue.equals("2")) {
+                boolean hasShownJumpInfo = preferences.getBoolean(GeneralKeys.PREF_KEY_SHOWN_JUMP_INFO, false);
+
+                if (!hasShownJumpInfo) {
+                    // Mark as shown so we don't display this again
+                    preferences.edit().putBoolean(GeneralKeys.PREF_KEY_SHOWN_JUMP_INFO, true).apply();
+
+                    // Show an alert dialog explaining the new bottom toolbar approach,
+                    // then perform the original jump action when the user acknowledges it.
+                    new AlertDialog.Builder(CollectActivity.this)
+                            .setTitle(getString(R.string.main_toolbar_moveto))
+                            .setMessage(getString(R.string.alert_jump_to_plot_bottom_toolbar_message))
+                            .setPositiveButton(android.R.string.ok, (dialog, which) -> requestScanSingleBarcode(true))
+                            .setOnDismissListener((dialog) -> {
+                                systemMenu.findItem(R.id.jumpToPlot).setVisible(false);
+                                preferences.edit().putString(PreferenceKeys.MOVE_TO_UNIQUE_ID, "0").apply();
+                            })
+                            .setCancelable(true)
+                            .show();
+                } else {
+                    // Already shown before — proceed immediately with the action
                     requestScanSingleBarcode(true);
                 }
-            };
-
-            boolean hasShownJumpInfo = preferences.getBoolean(GeneralKeys.PREF_KEY_SHOWN_JUMP_INFO, false);
-
-            if (!hasShownJumpInfo) {
-                // Mark as shown so we don't display this again
-                preferences.edit().putBoolean(GeneralKeys.PREF_KEY_SHOWN_JUMP_INFO, true).apply();
-
-                // Show an alert dialog explaining the new bottom toolbar approach,
-                // then perform the original jump action when the user acknowledges it.
-                new AlertDialog.Builder(CollectActivity.this)
-                        .setTitle(getString(R.string.main_toolbar_moveto))
-                        .setMessage(getString(R.string.alert_jump_to_plot_bottom_toolbar_message))
-                        .setPositiveButton(android.R.string.ok, (dialog, which) -> performJumpAction.run())
-                        .setOnDismissListener((dialog) -> {
-                            systemMenu.findItem(R.id.jumpToPlot).setVisible(false);
-                            preferences.edit().putString(PreferenceKeys.MOVE_TO_UNIQUE_ID, "0").apply();
-                        })
-                        .setCancelable(true)
-                        .show();
-            } else {
-                // Already shown before — proceed immediately with the action
-                performJumpAction.run();
             }
         } else if (itemId == summaryId) {
             showSummary();
