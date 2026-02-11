@@ -87,6 +87,13 @@
             android:summary="%s"
             android:title="@string/preferences_behavior_return_character" />
 
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/gamepad"
+            android:key="com.tracker.fieldbook.preferences.keys.enable_media_keycode_events"
+            android:summary="@string/pref_alpha_media_keycode_events_summary"
+            android:title="@string/pref_alpha_media_keycode_events_title" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>
