@@ -62,6 +62,8 @@ fun BottomToolbar(
 ) {
     val bg = colorResource(id = R.color.main_primary)
 
+    val iconColor = colorResource(id = R.color.collect_bottom_toolbar_icon_color)
+
     Surface(
         color = bg,
         tonalElevation = 0.dp,
@@ -100,7 +102,7 @@ fun BottomToolbar(
                         Icon(
                             painter = painterResource(id = R.drawable.star_four_points_circle_outline),
                             contentDescription = null,
-                            tint = Color.White
+                            tint = iconColor
                         )
 
                         // badge overlay: show when mediaCount > 0, max is 3
@@ -128,12 +130,17 @@ fun BottomToolbar(
                     }
                 } else {
                     IconButton(onClick = { listener?.onBarcode() }) {
-                        Icon(painter = painterResource(id = R.drawable.star_four_points_circle_outline), contentDescription = null, tint = Color.White)
+                        Icon(painter = painterResource(
+                            id = R.drawable.star_four_points_circle_outline),
+                            contentDescription = null,
+                            tint = iconColor)
                     }
                 }
 
                 IconButton(onClick = { listener?.onMissing() }) {
-                    Icon(painter = painterResource(id = R.drawable.main_ic_missing), contentDescription = null, tint = Color.White)
+                    Icon(painter = painterResource(id = R.drawable.main_ic_missing),
+                        contentDescription = null,
+                        tint = iconColor)
                 }
 
                 // Delete button: support click and long-press (long triggers onDeleteLong)
@@ -148,7 +155,9 @@ fun BottomToolbar(
                         )
                     }
                 ) {
-                    Icon(painter = painterResource(id = R.drawable.main_ic_delete_forever), contentDescription = null, tint = Color.White)
+                    Icon(painter = painterResource(id = R.drawable.main_ic_delete_forever),
+                        contentDescription = null,
+                        tint = iconColor)
                 }
             }
         }

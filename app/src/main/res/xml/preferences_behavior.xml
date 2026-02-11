@@ -47,7 +47,7 @@
             android:title="@string/preferences_general_swap_navigation" />
 
         <ListPreference
-            android:icon="@drawable/ic_trait_barcode"
+            android:icon="@drawable/star_four_points_circle_outline"
             android:key="com.fieldbook.tracker.BARCODE_SCANNING_OPTIONS"
             android:summary="%s"
             android:title="@string/preferences_behavior_barcode_scanning_title"
@@ -57,7 +57,7 @@
 
         <CheckBoxPreference
             android:defaultValue="true"
-            android:icon="@drawable/keyboard_return"
+            android:icon="@drawable/ic_trait_barcode"
             android:key="ATTACH_MEDIA_BARCODE_PRIORITIZE"
             android:summary="@string/preferences_behavior_attach_media_barcode_prioritize_description"
             android:title="@string/preferences_behavior_attach_media_barcode_prioritize" />
