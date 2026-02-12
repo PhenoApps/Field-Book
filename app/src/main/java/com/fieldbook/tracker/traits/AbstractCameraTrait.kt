@@ -902,7 +902,7 @@ abstract class AbstractCameraTrait :
             AlertDialog.Builder(context, R.style.AppAlertDialog)
                 .setTitle(R.string.delete_local_photo)
                 .setOnCancelListener { dialog -> dialog.dismiss() }
-                .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                .setPositiveButton(R.string.delete) { dialog, _ ->
 
                     dialog.dismiss()
 

@@ -306,9 +306,6 @@ fun ConfirmDeleteDialog(show: Boolean, onConfirm: () -> Unit, onDismiss: () -> U
         title = stringResource(R.string.confirm_delete),
         positiveButtonText = stringResource(R.string.delete),
         negativeButtonText = stringResource(R.string.cancel),
-        content = {
-            Text(stringResource(R.string.are_you_sure_you_want_to_delete_this_media_item))
-        },
         onPositive = onConfirm,
         onNegative = onDismiss
     )

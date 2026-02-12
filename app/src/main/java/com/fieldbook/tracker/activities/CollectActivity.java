@@ -773,7 +773,7 @@ public class CollectActivity extends ThemedActivity
                         new AlertDialog.Builder(CollectActivity.this, R.style.AppAlertDialog)
                                 .setTitle(R.string.confirm_delete_with_media_title)
                                 .setMessage(getString(R.string.confirm_delete_with_media_message))
-                                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                                .setPositiveButton(R.string.delete, (dialog, which) -> {
                                     // delete attached media files
                                     try {
                                         deleteMediaUrisForObservation(finalObs);
@@ -1775,7 +1775,7 @@ public class CollectActivity extends ThemedActivity
 
                     // Show an alert dialog explaining the new bottom toolbar approach,
                     // then perform the original jump action when the user acknowledges it.
-                    new AlertDialog.Builder(CollectActivity.this)
+                    new AlertDialog.Builder(CollectActivity.this, R.style.AppAlertDialog)
                             .setTitle(getString(R.string.main_toolbar_moveto))
                             .setMessage(getString(R.string.alert_jump_to_plot_bottom_toolbar_message))
                             .setPositiveButton(android.R.string.ok, (dialog, which) -> requestScanSingleBarcode(true))
@@ -1991,8 +1991,7 @@ public class CollectActivity extends ThemedActivity
 
         AlertDialog dialogMultiMeasureConfirmDelete = new AlertDialog.Builder(this, R.style.AppAlertDialog)
                 .setTitle(R.string.dialog_multi_measure_confirm_delete_title)
-                .setMessage(R.string.dialog_multi_measure_confirm_delete_message)
-                .setPositiveButton(android.R.string.ok, (d, which) -> deleteMultiMeasures(models))
+                .setPositiveButton(R.string.delete, (d, which) -> deleteMultiMeasures(models))
                 .setNegativeButton(android.R.string.cancel, (d, which) -> d.dismiss())
                 .create();
 
@@ -3432,8 +3431,8 @@ public class CollectActivity extends ThemedActivity
             AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
             builder.setTitle(R.string.dialog_crop_title);
             builder.setMessage(R.string.dialog_crop_message);
-            builder.setPositiveButton(android.R.string.ok, (dialog, which) -> startCropActivity(traitId, uri, false));
-            builder.setNegativeButton(android.R.string.no, (dialog, which) -> {
+            builder.setPositiveButton(R.string.dialog_yes, (dialog, which) -> startCropActivity(traitId, uri, false));
+            builder.setNegativeButton(R.string.dialog_no, (dialog, which) -> {
                 // If this crop dialog was presented during attaching new media, save the pending media
                 try {
                     if (pendingMedia.attach && pendingMedia.hasMedia()) {
@@ -3620,9 +3619,9 @@ public class CollectActivity extends ThemedActivity
                 runOnUiThread(() -> {
                     try {
                         new AlertDialog.Builder(this, R.style.AppAlertDialog)
-                                .setTitle(R.string.dialog_confirm)
+                                .setTitle(R.string.confirm_replace_media_title)
                                 .setMessage(getString(R.string.confirm_replace_media_message))
-                                .setPositiveButton(android.R.string.ok, (d, which) -> {
+                                .setPositiveButton(R.string.dialog_yes, (d, which) -> {
                                     // perform actual attach on background thread
                                     Executors.newSingleThreadExecutor().execute(performAttach);
                                 })
