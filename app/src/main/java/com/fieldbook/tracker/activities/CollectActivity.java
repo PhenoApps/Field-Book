@@ -2504,7 +2504,7 @@ public class CollectActivity extends ThemedActivity
 
         Log.d(TAG, "Fuzzy search on barcode: " + barcode);
 
-        String option = preferences.getString(PreferenceKeys.BARCODE_SCANNING_OPTIONS, BarcodeScanningOptions.EnterValue.INSTANCE.getValue());
+        String option = preferences.getString(PreferenceKeys.BARCODE_SCANNING_OPTIONS, BarcodeScanningOptions.Move.INSTANCE.getValue());
         String optionEnter = BarcodeScanningOptions.EnterValue.INSTANCE.getValue();
         String optionMove = BarcodeScanningOptions.Move.INSTANCE.getValue();
         String optionAsk = BarcodeScanningOptions.Ask.INSTANCE.getValue();
