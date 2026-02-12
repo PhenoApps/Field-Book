@@ -374,6 +374,7 @@ class CameraActivity : ThemedActivity() {
                 viewMediaButton.visibility = View.GONE
                 // also hide bottom media toggle when no observation exists
                 mediaCompose.visibility = View.GONE
+
                 // show snackbar informing user they must collect data before attaching media,
                 // except when CameraActivity was launched from trait layouts (photo/video capture flows)
                 try {

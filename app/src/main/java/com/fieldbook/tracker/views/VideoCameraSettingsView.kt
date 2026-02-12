@@ -68,7 +68,7 @@ class VideoCameraSettingsView : ConstraintLayout {
         }
 
         cropButton?.setOnClickListener {
-            (context as? CollectActivity)?.requestAndCropImage()
+            (context as? CollectActivity)?.requestAndCropImage(false, true)
         }
     }
 

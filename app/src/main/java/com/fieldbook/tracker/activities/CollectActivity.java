@@ -3412,7 +3412,7 @@ public class CollectActivity extends ThemedActivity
          }
      }
 
-    public void requestAndCropImage() {
+    public void requestAndCropImage(Boolean photoLaunch, Boolean videoLaunch) {
         try {
             Intent intent = new Intent(this, CameraActivity.class);
             intent.putExtra(CameraActivity.EXTRA_MODE, CameraActivity.MODE_CROP);
@@ -3420,6 +3420,8 @@ public class CollectActivity extends ThemedActivity
             intent.putExtra(CameraActivity.EXTRA_STUDY_ID, String.valueOf(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)));
             intent.putExtra(CameraActivity.EXTRA_OBS_UNIT, getObservationUnit());
             intent.putExtra(CameraActivity.EXTRA_SKIP_SAVE, true);
+            intent.putExtra(CameraActivity.EXTRA_LAUNCHED_FOR_PHOTO_TRAIT, photoLaunch);
+            intent.putExtra(CameraActivity.EXTRA_LAUNCHED_FOR_VIDEO_TRAIT, videoLaunch);
             cameraXFacade.unbind();
             startActivityForResult(intent, REQUEST_CROP_IMAGE_CODE);
         } catch (Exception e) {
