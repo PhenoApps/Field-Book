@@ -486,6 +486,8 @@ public class CollectActivity extends ThemedActivity
     private void loadScreen() {
         setContentView(R.layout.activity_collect);
 
+        initTopToolbar();
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(null);
             getSupportActionBar().getThemedContext();
@@ -716,11 +718,13 @@ public class CollectActivity extends ThemedActivity
         traitLayouts.setNaTraitsText(traitBox.getCurrentFormat());
     }
 
-    private void initToolbars() {
+    private void initTopToolbar() {
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         setTitle(null);
+    }
+
+    private void initToolbars() {
 
         Toolbar toolbarBottom = findViewById(R.id.toolbarBottom);
         toolbarBottom.setNavigationIcon(null);
