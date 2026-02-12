@@ -31,6 +31,7 @@ import com.fieldbook.tracker.utilities.InsetHandler
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -343,6 +344,8 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         val unitAttributes = hashMapOf<String, Map<String, String>>()
         val germs = germplasms[studyDbId] ?: listOf()
 
+        val gson = Gson()
+
         observationUnits[studyDbId]?.forEach { unit ->
 
             val attributes = hashMapOf<String, String>()
@@ -355,12 +358,19 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 attributes["Location"] = it
             }
 
+            // Additional info is a Json object that can contain primitives or JSON objs/arrays.
+            // In the case of the latter, add the String version of the JSON to attributes.
+
             unit.additionalInfo?.entrySet()?.forEach { (key, value) ->
                 try {
-                    value?.takeIf { it.isJsonPrimitive || it.isJsonArray }
-                        ?.asString
-                        ?.takeIf { it.isNotEmpty() }
-                        ?.let { attributes[key] = it }
+                    val atr = when {
+                        value.isJsonPrimitive -> value.asString
+                        value.isJsonArray || value.isJsonObject -> gson.toJson(value)
+                        else -> null
+                        }
+                    atr?.takeIf { it.isNotEmpty() }?.let {
+                        attributes[key] = it
+                        }
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed loading additionalInfo $key, $value", e)
                 }
