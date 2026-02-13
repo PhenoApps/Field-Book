@@ -176,7 +176,7 @@ dependencies {
 
     implementation 'com.google.zxing:core:3.5.3'
 
-    //implementation('com.github.phenoapps:phenolib:v0.9.55')
+    implementation('com.github.phenoapps:phenolib:v0.9.55')
 
     implementation 'com.google.android.exoplayer:exoplayer:2.19.1'
     implementation 'androidx.media3:media3-exoplayer:1.8.0'
