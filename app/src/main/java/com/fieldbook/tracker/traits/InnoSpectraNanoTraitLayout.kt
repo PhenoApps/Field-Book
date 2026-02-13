@@ -398,15 +398,38 @@ class InnoSpectraNanoTraitLayout : SpectralTraitLayout {
         val adapter = bluetoothManager?.adapter
         val scanner = adapter?.bluetoothLeScanner
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            controller.getSecurityChecker().withPermission(arrayOf(Manifest.permission.BLUETOOTH_SCAN)) {
+        val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            arrayOf(
+                Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.BLUETOOTH_CONNECT,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.BLUETOOTH_ADVERTISE,
+                Manifest.permission.NEARBY_WIFI_DEVICES
+            )
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            // Request both SCAN and CONNECT on Android S+ because some secure helpers
+            // (withNearby/withPermission) may access bonded devices which require
+            // BLUETOOTH_CONNECT at runtime. Requesting both prevents SecurityException.
+            arrayOf(
+                Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.BLUETOOTH_CONNECT,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.BLUETOOTH_ADVERTISE,
+            )
+        } else {
+            arrayOf(
+                Manifest.permission.BLUETOOTH,
+                Manifest.permission.BLUETOOTH_ADMIN,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION)
+        }
 
-                controller.getSecurityChecker().withNearby {
+        controller.getSecurityChecker().withPermission(permissions) {
 
-                    scanner?.let { s ->
-                        startScan(s)
-                    }
-                }
+            scanner?.let { s ->
+                startScan(s)
             }
         }
     }
