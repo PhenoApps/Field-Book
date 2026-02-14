@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ScrollView
+        android:id="@+id/scroll_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:id="@+id/view_trait_innospectra_content_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_margin="16dp">
+
+            <!-- Nano device name -->
+            <TextView
+                android:id="@+id/view_trait_innospectra_device_name_label"
+                style="@style/TextViewStyle.Bold.Title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/view_trait_innospectra_device_name_label" />
+
+            <TextView
+                android:id="@+id/view_trait_innospectra_device_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/view_trait_innospectra_unknown" />
+
+            <!-- Nano MAC address -->
+            <TextView
+                android:id="@+id/view_trait_innospectra_mac_label"
+                style="@style/TextViewStyle.Bold.Title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/view_trait_innospectra_mac_label" />
+
+            <TextView
+                android:id="@+id/view_trait_innospectra_mac"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/view_trait_innospectra_unknown" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <Button
+        android:id="@+id/view_trait_innospectra_disconnect_btn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/scroll_view"
+        android:layout_margin="16dp"
+        android:text="@string/disconnect" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

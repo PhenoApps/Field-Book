@@ -26,6 +26,7 @@ import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.CSVWriter
 import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.ZipUtil
+import com.fieldbook.tracker.traits.formats.Formats
 import dagger.hilt.android.qualifiers.ActivityContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -40,6 +41,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
 import androidx.core.content.edit
+import com.fieldbook.tracker.utilities.DocumentTreeUtil
 
 /**
  * Checks preconditions before collect and export.
@@ -79,6 +81,44 @@ class ExportUtil @Inject constructor(
     // a temporary directory is created for bundled media export
     // this needs to be deleted AFTER zipping is completed
     private var tempDirectory: DocumentFile? = null
+
+    fun exportInnoSpectraFile(studyId: Int, format: Formats) {
+
+        val observations = database.getAllObservations(studyId.toString())
+            .filter { it.observation_variable_field_book_format == format.getDatabaseName() }
+
+        val header = buildList<String> {
+
+            add("sample_name") // entry name
+
+            add("device_id") // device id
+        }
+
+        DocumentTreeUtil.getFieldMediaDirectory(context, format.getDatabaseName())?.uri?.let { fileUri ->
+
+            context.contentResolver.openOutputStream(fileUri).use {
+
+                val writer = OutputStreamWriter(it)
+
+                writer.write(header.joinToString(",") + "\n")
+
+                observations.forEach { observation ->
+
+                    val row = buildList<String> {
+
+                        add(observation.observation_unit_id)
+
+                        //add(observation.)
+                    }
+
+                    writer.write(row.joinToString(",") + "\n")
+                }
+
+                writer.close()
+            }
+        }
+
+    }
 
     fun exportMultipleFields(fieldIds: List<Int>) {
         this.fieldIds = fieldIds

@@ -7,7 +7,6 @@ import com.fieldbook.tracker.database.ObservationVariableAttributeDetailsView
 import com.fieldbook.tracker.database.models.AttributeDefinition
 import com.fieldbook.tracker.database.models.TraitAttributes
 import com.fieldbook.tracker.objects.TraitObject
-import com.fieldbook.tracker.utilities.SynonymsUtil.deserializeSynonyms
 import kotlin.text.isNullOrEmpty
 
 /**
