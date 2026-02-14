@@ -35,6 +35,26 @@ class ObservationDao {
 
         }
 
+        fun getAllVariableDetails(includeDeleted: Boolean): Array<ObservationModel> = withDatabase { db ->
+
+            val query = """
+                SELECT *
+                FROM observations
+                JOIN observation_variables
+                    ON observations.observation_variable_db_id = observation_variables.internal_id_observation_variable
+                ${if (includeDeleted) "" else "WHERE CAST(study_id AS INTEGER) > 0"}
+            """.trimIndent()
+
+            db.rawQuery(query, arrayOf()).use { cursor ->
+
+                cursor.toTable()
+                    .map { ObservationModel(it) }
+                    .sortedBy { it.rep.toInt() }
+                    .toTypedArray()
+            }
+
+        } ?: emptyArray()
+
         fun getAll(): Array<ObservationModel> = withDatabase { db ->
 
             db.query(Observation.tableName)
