@@ -13,7 +13,7 @@ enum class Formats {
     BASE_SPECTRAL, NIX, INNO_SPECTRA_SENSOR, GREEN_SEEKER,
     TEXT,
     CUSTOM, DISEASE_RATING,
-    BASE_EXPERIMENTAL, POLLINATOR, CANOPY_COVER;
+    BASE_EXPERIMENTAL, POLLINATOR, CANOPY_COVER, MULTISPEQ;
 
     companion object {
 
@@ -74,6 +74,7 @@ enum class Formats {
         POLLINATOR -> PollinatorFormat()
         BASE_EXPERIMENTAL -> BaseExperimentalFormat()
         CANOPY_COVER -> CanopyCoverFormat()
+        MULTISPEQ -> MultispeqFormat()
         else -> TextFormat()
     }
 

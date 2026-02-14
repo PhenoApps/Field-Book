@@ -1,0 +1,64 @@
+[
+  {
+    "id": "phi2",
+    "name": "Phi2 (Photosystem II Efficiency)",
+    "code": [
+      [
+        {
+          "pulse_distance": [10000, 10000, 10000, 10000],
+          "pulse_length": [[30], [30], [30], [30]],
+          "pulsed_lights": [[2], [0], [2], [0]],
+          "pulsed_lights_brightness": [[2000], [0], [2000], [0]],
+          "nonpulsed_lights": [1, 1, 1, 1],
+          "nonpulsed_lights_brightness": [100, 100, 100, 100],
+          "number_samples": 20,
+          "environmental": [["light_intensity"], ["temperature_humidity"]],
+          "label": "phi2"
+        }
+      ]
+    ]
+  },
+  {
+    "id": "spad",
+    "name": "SPAD (Chlorophyll Content)",
+    "code": [
+      [
+        {
+          "pulse_distance": [10000, 10000, 10000, 10000],
+          "pulse_length": [[30], [30], [30], [30]],
+          "pulsed_lights": [[3], [0], [6], [0]],
+          "pulsed_lights_brightness": [[2000], [0], [2000], [0]],
+          "nonpulsed_lights": [0, 0, 0, 0],
+          "nonpulsed_lights_brightness": [0, 0, 0, 0],
+          "number_samples": 20,
+          "environmental": [["light_intensity"], ["temperature_humidity"]],
+          "label": "spad"
+        }
+      ]
+    ]
+  },
+  {
+    "id": "relative_chlorophyll",
+    "name": "Relative Chlorophyll (SPAD-like)",
+    "code": [
+      [
+        {
+          "pulse_distance": [10000, 10000, 10000, 10000],
+          "pulse_length": [[30], [30], [30], [30]],
+          "pulsed_lights": [[3], [0], [6], [0]],
+          "pulsed_lights_brightness": [[2000], [0], [2000], [0]],
+          "nonpulsed_lights": [0, 0, 0, 0],
+          "nonpulsed_lights_brightness": [0, 0, 0, 0],
+          "number_samples": 20,
+          "environmental": [["light_intensity"], ["temperature_humidity"]],
+          "label": "relative_chlorophyll"
+        }
+      ]
+    ]
+  },
+  {
+    "id": "device_info",
+    "name": "Device Info",
+    "code": "1"
+  }
+]
