@@ -243,7 +243,6 @@ class MultispeqTraitLayout : BaseTraitLayout, MultispeqListener {
     // -------------------------------------------------------------------------
 
     override fun setNaTraitsText() {
-        // NA is not meaningful for hardware measurements; no-op
     }
 
     override fun loadLayout() {
