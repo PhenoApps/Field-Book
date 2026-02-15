@@ -35,12 +35,6 @@ fun AppBar(
     title: String,
     navigationIcon: @Composable (() -> Unit)? = null,
     actions: List<TopAppBarAction> = emptyList(),
-    colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(
-        containerColor = AppTheme.colors.primary,
-        titleContentColor = AppTheme.colors.text.primary,
-        navigationIconContentColor = AppTheme.colors.surface.iconTint,
-        actionIconContentColor = AppTheme.colors.surface.iconTint,
-    ),
     maxVisibleActions: Int = 3, // includes overflow as an action. applies to actions that are set to IF_ROOM display mode
 ) {
     var showOverflowMenu by remember { mutableStateOf(false) }
@@ -64,7 +58,7 @@ fun AppBar(
                 fontWeight = FontWeight.Medium
             )
         },
-        colors = colors,
+        colors = AppTheme.colors.topAppBarColors,
         navigationIcon = navigationIcon ?: { },
         actions = {
             alwaysVisible.forEach { action ->

@@ -44,11 +44,6 @@ class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
             true
         }
 
-        val barcode = findPreference<CheckBoxPreference>(PreferenceKeys.MLKIT_PREFERENCE_KEY)
-        barcode?.setOnPreferenceChangeListener { _, newValue ->
-            true
-        }
-
         val fieldAudio = findPreference<CheckBoxPreference>(PreferenceKeys.ENABLE_FIELD_AUDIO)
         fieldAudio?.setOnPreferenceChangeListener { _, newValue ->
             context?.let { ctx ->

@@ -159,8 +159,60 @@ Saved values are colored red and displayed in normal font.
 
 #### Bottom toolbar
 
-The bottom toolbar contains three buttons for data input:
+The bottom toolbar contains three buttons for data input as well as an attach-media control when a trait supports media:
 
-- <img class="icon" src="_static/icons/collect/barcode-scan.png"> enters data by scanning a barcode.
+- <img class="icon" src="_static/icons/collect/barcode-scan.png"> attaches media, enters data or navigates by scanning a barcode.
 - <img class="icon" src="_static/icons/collect/not-applicable.png"> enters NA for when a phenotype is not available.
 - <img class="icon" src="_static/icons/collect/delete-outline.png"> deletes the observation.
+
+Below are details and examples for the most commonly used bottom-toolbar actions: attaching media, barcode scanning, and viewing attached media.
+
+##### Attaching media
+
+Individual traits can define what types of media they can attach. Each observation of that trait can have a unique attached media for each type that is set. 
+
+<figure class="image">
+  <div style="display:flex;gap:8px;align-items:flex-start;">
+    <img class="screenshot" src="_static/images/collect/bottom_toolbar/height_trait_details.png" alt="Height trait example" style="width:350px;height:auto;">
+    <img class="screenshot" src="_static/images/collect/bottom_toolbar/attach_media_example_parameters.png" alt="Attach media parameters dialog showing optional metadata fields" style="width:350px;height:auto;">
+  </div>
+  <figcaption class="screenshot-caption"><i>Setting attached media types for individual traits</i></figcaption>
+</figure>
+
+- Tap the attach-media icon to open the media capture screen. Media files are linked to observations, so an observation must exist before attaching media. If no observation exists, barcodes will still be scanned.
+- Long-press the attach-media icon to manage currently attached media.
+- Depending on the Barcode Scanning Options setting, the user may enter data or navigate from a succesfull scan.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/collect/bottom_toolbar/attach_media_example.png" alt="Attach media options: capture or choose a file" width="350px">
+  <figcaption class="screenshot-caption"><i>Attach media: capture or choose a file</i></figcaption>
+</figure>
+
+##### Barcode scanning
+
+Barcode scanning options will be asked the first time a barcode is scanned. Otherwise, they can always be changed in the settings.
+
+<figure class="image">
+  <div style="display:flex;gap:8px;align-items:flex-start;">
+    <img class="screenshot" src="_static/images/collect/bottom_toolbar/scanning_barcode_example.png" alt="Camera scanning a barcode" width="350px;height:auto;">
+    <img class="screenshot" src="_static/images/collect/bottom_toolbar/barcode_scanning_options_dialog.png" alt="Barcode scanning options dialog" width="350px;height:auto;">
+  </div>
+  <figcaption class="screenshot-caption"><i>Scanning a barcode and setting an option.</i></figcaption>
+</figure>
+
+There is a setting to disable automatic barcode scanning. When disabled, the user must click the detection box to use the barcode.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/collect/bottom_toolbar/prioritize_barcode_setting.png" alt="Setting to prioritise barcode input" width="350px">
+  <figcaption class="screenshot-caption"><i>Setting to prioritize barcode input when scanning</i></figcaption>
+</figure>
+
+##### Viewing and managing attached media
+
+Long-pressing the barcode scanning button on the collect screen, or the view media button on the attach-media screen, the user will be navigated to the media viewer.
+Here the user can delete and view attached media.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/collect/bottom_toolbar/view_media_example.png" alt="Media viewer showing attached media" width="350px">
+  <figcaption class="screenshot-caption"><i>Viewing attached media and media controls</i></figcaption>
+</figure>

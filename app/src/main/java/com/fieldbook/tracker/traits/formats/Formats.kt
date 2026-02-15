@@ -9,7 +9,8 @@ enum class Formats(val type: Types = Types.SYSTEM, val isCamera: Boolean = false
 
     //CUSTOM formats
     DISEASE_RATING(Types.CUSTOM), GNSS(Types.CUSTOM), STOP_WATCH(Types.CUSTOM),
-    BASE_PHOTO(Types.CUSTOM), USB_CAMERA(Types.CUSTOM, isCamera = true), GO_PRO(Types.CUSTOM, isCamera = true), CANON(Types.CUSTOM, isCamera = true),
+    BASE_PHOTO(Types.CUSTOM), VIDEO(Types.CUSTOM, isCamera = true),
+    USB_CAMERA(Types.CUSTOM, isCamera = true), GO_PRO(Types.CUSTOM, isCamera = true), CANON(Types.CUSTOM, isCamera = true),
     NIX(Types.CUSTOM), GREEN_SEEKER(Types.CUSTOM), SCALE(Types.CUSTOM),
     LABEL_PRINT(Types.CUSTOM);
 
@@ -17,7 +18,7 @@ enum class Formats(val type: Types = Types.SYSTEM, val isCamera: Boolean = false
 
         fun isSpectralFormat(format: String) = format in setOf("inno_spectra", "nix")
 
-        fun isCameraTrait(format: String) = format in setOf("photo", "usb camera", "gopro", "canon")
+        fun isCameraTrait(format: String) = format in setOf("photo", "usb camera", "gopro", "canon", "video")
 
         fun isExternalCameraTrait(format: String) = format in setOf("usb camera", "gopro", "canon")
 
@@ -54,6 +55,7 @@ enum class Formats(val type: Types = Types.SYSTEM, val isCamera: Boolean = false
         STOP_WATCH -> StopWatchFormat()
         GREEN_SEEKER -> GreenSeekerFormat()
         SCALE -> ScaleFormat()
+        VIDEO -> VideoFormat()
         else -> TextFormat()
     }
 

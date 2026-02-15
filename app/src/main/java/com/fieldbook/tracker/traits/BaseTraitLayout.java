@@ -24,6 +24,8 @@ import com.fieldbook.tracker.interfaces.CollectController;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
+import com.fieldbook.tracker.traits.formats.Formats;
+import com.fieldbook.tracker.traits.formats.feature.DisplayValue;
 import com.fieldbook.tracker.views.CollectInputView;
 import com.fieldbook.tracker.views.RepeatedValuesView;
 
@@ -101,16 +103,9 @@ public abstract class BaseTraitLayout extends LinearLayout {
 
         //right now text entry is disabled in the camera and photo traits
         //uris are too long to be nicely displayed in the current editTexts
-        if (type().equals(PhotoTraitLayout.type)
-                || type().equals(UsbCameraTraitLayout.type)
-                || isTraitType(LabelPrintTraitLayout.type)
-                || type().equals(AudioTraitLayout.type)
-                || type().equals(GoProTraitLayout.type)
-                || type().equals(CanonTraitLayout.type)) {
-            toggleVisibility(View.GONE);
-        } else {
+        if (Formats.Companion.findTrait(type()) instanceof DisplayValue) {
             toggleVisibility(View.VISIBLE);
-        }
+        } else toggleVisibility(View.GONE);
 
         //hide soft input if it is not the text format
         if (!type().equals(TextTraitLayout.type)) {
