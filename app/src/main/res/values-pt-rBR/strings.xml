@@ -591,7 +591,7 @@
     <string name="trait_usb_camera_capture_content_description">Tire uma foto.</string>
     <string name="trait_usb_camera_capture_button_text">Capturar</string>
     <!--- Trait Layout: Zebra label print -->
-    <string name="trait_layout_data_stored">Salvar</string>
+    <string name="trait_layout_data_stored">Salvo</string>
     <string name="trait_layout_print_label_size_title">Tamanho:</string>
     <string name="trait_layout_print_text_field_title">Texto:</string>
     <string name="trait_layout_print_text_field_title_2">Texto2:</string>
