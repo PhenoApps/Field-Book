@@ -620,8 +620,13 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
         this.filterText = filter;
         List<FieldObject> filteredFields = new ArrayList<>(fullFieldList);
         for (FieldObject field : fullFieldList) {
-            if (!filter.isEmpty() && !field.getName().toLowerCase().contains(filter.toLowerCase())) {
-                filteredFields.remove(field);
+            if (!filter.isEmpty()) {
+                String lowerFilter = filter.toLowerCase();
+                boolean matchesName = field.getName().toLowerCase().contains(lowerFilter);
+                boolean matchesAlias = field.getAlias().toLowerCase().contains(lowerFilter);
+                if (!matchesName && !matchesAlias) {
+                    filteredFields.remove(field);
+                }
             }
         }
         submitFieldsList(filteredFields);
