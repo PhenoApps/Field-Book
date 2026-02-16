@@ -3,15 +3,22 @@ package com.fieldbook.tracker.preferences
 import android.app.AlertDialog
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.CheckBoxPreference
+import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.PreferencesActivity
-import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import com.fieldbook.tracker.utilities.GeoNavHelper
+import com.fieldbook.tracker.utilities.SampleDataGenerator
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
@@ -61,6 +68,31 @@ class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
                             GeoNavHelper.GeoNavLoggingMode.LIMITED.value
                         ).apply()
                 }
+            }
+            true
+        }
+
+        val generateSampleData = findPreference<Preference>(PreferenceKeys.GENERATE_SAMPLE_DATA)
+        generateSampleData?.setOnPreferenceClickListener {
+            context?.let { ctx ->
+                AlertDialog.Builder(ctx, R.style.AppAlertDialog)
+                    .setTitle(getString(R.string.pref_experimental_generate_sample_data_confirm_title))
+                    .setMessage(getString(R.string.pref_experimental_generate_sample_data_confirm_message))
+                    .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                        dialog.dismiss()
+                        lifecycleScope.launch {
+                            val studyId = withContext(Dispatchers.IO) {
+                                SampleDataGenerator(ctx).generateSampleField()
+                            }
+                            val messageRes = if (studyId >= 0)
+                                R.string.pref_experimental_generate_sample_data_success
+                            else
+                                R.string.pref_experimental_generate_sample_data_failure
+                            Toast.makeText(ctx, messageRes, Toast.LENGTH_LONG).show()
+                        }
+                    }
+                    .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss() }
+                    .show()
             }
             true
         }

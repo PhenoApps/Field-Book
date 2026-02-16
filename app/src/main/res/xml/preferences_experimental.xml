@@ -50,6 +50,12 @@
             android:summary="@string/pref_alpha_media_keycode_events_summary"
             android:title="@string/pref_alpha_media_keycode_events_title" />
 
+        <Preference
+            android:icon="@drawable/ic_tb_datagrid"
+            android:key="com.tracker.fieldbook.preferences.keys.generate_sample_data"
+            android:summary="@string/pref_experimental_generate_sample_data_summary"
+            android:title="@string/pref_experimental_generate_sample_data_title" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>
