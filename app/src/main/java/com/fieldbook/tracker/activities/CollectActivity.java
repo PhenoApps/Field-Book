@@ -297,6 +297,8 @@ public class CollectActivity extends ThemedActivity
 
     private CollectInputView collectInputView;
 
+    private final StringBuilder hardwareScanBuffer = new StringBuilder();
+
     public Handler myGuiHandler;
 
     public int numNixInternetWarnings = 0;
@@ -2178,6 +2180,37 @@ public class CollectActivity extends ThemedActivity
                 return MediaKeyCodeActionHelper.Companion.dispatchKeyEvent(this, event);
 
             default:
+
+                if (action == KeyEvent.ACTION_DOWN) {
+                    TraitObject currentTrait = traitBox.getCurrentTrait();
+                    if (currentTrait != null) {
+                        TraitFormat traitFormat = Formats.Companion.findTrait(currentTrait.getFormat());
+                        // Intercept keyboard input for Scannable traits without an active EditText
+                        // (e.g. numeric, percent), enabling hardware barcode scanner support
+                        if (traitFormat instanceof Scannable && !(getCurrentFocus() instanceof EditText)) {
+                            if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_TAB) {
+                                String scanned = hardwareScanBuffer.toString();
+                                hardwareScanBuffer.setLength(0);
+                                if (!scanned.isEmpty() && validateData(scanned)) {
+                                    updateObservation(currentTrait,
+                                            ((Scannable) traitFormat).preprocess(scanned), null);
+                                    traitLayouts.getTraitLayout(currentTrait.getFormat()).loadLayout();
+                                    String actionOnScan = preferences.getString(
+                                            PreferenceKeys.RETURN_CHARACTER, "0");
+                                    if ("1".equals(actionOnScan)) {
+                                        rangeBox.moveEntryRight();
+                                    } else if ("2".equals(actionOnScan)) {
+                                        traitBox.moveTrait(TraitBoxView.MoveDirection.RIGHT);
+                                    }
+                                }
+                                return true;
+                            } else if (event.getUnicodeChar() != 0) {
+                                hardwareScanBuffer.append((char) event.getUnicodeChar());
+                                return true;
+                            }
+                        }
+                    }
+                }
 
                 if (action == KeyEvent.ACTION_UP) {
 
