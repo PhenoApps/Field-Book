@@ -95,6 +95,15 @@ public abstract class BaseTraitLayout extends LinearLayout {
 
     }
 
+    /**
+     * Called when navigating to a new plot or trait with the same format.
+     * Skips view inflation and only reloads data to prevent flickering.
+     * Override in subclasses to customize refresh behavior.
+     */
+    public void onRefresh() {
+        loadLayout();
+    }
+
     public void loadLayout() {
 
         ((CollectActivity) getContext()).refreshRepeatedValuesToolbarIndicator();
