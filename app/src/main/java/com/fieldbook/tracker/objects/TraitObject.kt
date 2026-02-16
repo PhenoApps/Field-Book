@@ -104,6 +104,10 @@ class TraitObject {
         get() = attributeValues.getBoolean(TraitAttributes.INVALID_VALUES)
         set(value) = attributeValues.setValue(TraitAttributes.INVALID_VALUES, value.toString())
 
+    var allowOther: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.ALLOW_OTHER)
+        set(value) = attributeValues.setValue(TraitAttributes.ALLOW_OTHER, value.toString())
+
     fun loadAttributeAndValues() {
         attributeValues.traitId = id
         attributeValues.load()
@@ -148,7 +152,8 @@ class TraitObject {
                 repeatedMeasures == that.repeatedMeasures &&
                 autoSwitchPlot == that.autoSwitchPlot &&
                 unit == that.unit &&
-                invalidValues == that.invalidValues
+                invalidValues == that.invalidValues &&
+                allowOther == that.allowOther
     }
 
     override fun hashCode(): Int {
@@ -158,7 +163,7 @@ class TraitObject {
             additionalInfo, observationLevelNames, closeKeyboardOnOpen, cropImage,
             saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms,
             maxDecimalPlaces, mathSymbolsEnabled, allowMulticat, repeatedMeasures,
-            autoSwitchPlot, unit, invalidValues
+            autoSwitchPlot, unit, invalidValues, allowOther
         )
     }
 
@@ -193,6 +198,7 @@ class TraitObject {
         t.autoSwitchPlot = this.autoSwitchPlot
         t.unit = this.unit
         t.invalidValues = this.invalidValues
+        t.allowOther = this.allowOther
 
         return t
     }

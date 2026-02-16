@@ -1,11 +1,15 @@
 package com.fieldbook.tracker.traits;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Color;
+import android.text.InputType;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
@@ -14,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
+import com.fieldbook.tracker.database.dao.ObservationVariableDao;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.Utils;
@@ -36,6 +41,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
     //private StaggeredGridView gridMultiCat;
     private RecyclerView gridMultiCat;
+    private Button otherButton;
     private ArrayList<BrAPIScaleValidValuesCategories> categoryList;
     private final BrAPIScaleValidValuesCategories defaultNaCategory = new BrAPIScaleValidValuesCategories().label("NA").value("NA");
 
@@ -64,6 +70,15 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
     private boolean isMulticatEnabled() {
         return getCurrentTrait().getAllowMulticat();
+    }
+
+    private boolean isAllowOtherEnabled() {
+        return getCurrentTrait().getAllowOther() && isLocalTrait();
+    }
+
+    private boolean isLocalTrait() {
+        String src = getCurrentTrait().getTraitDataSource();
+        return src == null || src.isEmpty() || src.equals("local");
     }
 
     private String getDisplayText(BrAPIScaleValidValuesCategories category) {
@@ -98,6 +113,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
     public void init(Activity act) {
 
         gridMultiCat = act.findViewById(R.id.catGrid);
+        otherButton = act.findViewById(R.id.otherCatButton);
 
         if (isMulticatEnabled()) {
             categoryList = new ArrayList<>();
@@ -299,6 +315,76 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                 gridMultiCat.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
             }
         });
+
+        if (otherButton != null) {
+            if (isAllowOtherEnabled()) {
+                otherButton.setVisibility(View.VISIBLE);
+                otherButton.setOnClickListener(v -> showAddOtherDialog());
+            } else {
+                otherButton.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    private void showAddOtherDialog() {
+        if (((CollectActivity) getContext()).isDataLocked()) return;
+
+        EditText input = new EditText(getContext());
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        input.setHint(getContext().getString(R.string.trait_other_dialog_hint));
+
+        new AlertDialog.Builder(getContext())
+                .setTitle(R.string.trait_other_dialog_title)
+                .setView(input)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    String newLabel = input.getText().toString().trim();
+
+                    if (newLabel.isEmpty()) {
+                        Utils.makeToast(getContext(), getContext().getString(R.string.trait_other_empty));
+                        return;
+                    }
+
+                    ArrayList<BrAPIScaleValidValuesCategories> existingCategories = getCategories();
+                    BrAPIScaleValidValuesCategories newCategory = new BrAPIScaleValidValuesCategories()
+                            .label(newLabel)
+                            .value(newLabel);
+
+                    if (CategoryJsonUtil.Companion.contains(existingCategories, newCategory)) {
+                        Utils.makeToast(getContext(), getContext().getString(R.string.trait_other_duplicate));
+                        return;
+                    }
+
+                    existingCategories.add(newCategory);
+                    String newCategoriesJson = CategoryJsonUtil.Companion.encode(existingCategories);
+
+                    // Update in-memory trait object
+                    getCurrentTrait().setCategories(newCategoriesJson);
+
+                    // Persist to database
+                    ObservationVariableDao.Companion.updateTraitCategories(getCurrentTrait().getId(), newCategoriesJson);
+
+                    // Refresh buttons
+                    setAdapter();
+
+                    // Select the new category
+                    if (isMulticatEnabled()) {
+                        if (categoryList == null) categoryList = new ArrayList<>();
+                        removeCategory(defaultNaCategory);
+                        addCategory(newCategory);
+                        String json = CategoryJsonUtil.Companion.encode(categoryList);
+                        updateObservation(getCurrentTrait(), json);
+                        triggerTts(getDisplayText(newCategory));
+                    } else {
+                        ArrayList<BrAPIScaleValidValuesCategories> scale = new ArrayList<>();
+                        scale.add(newCategory);
+                        getCollectInputView().setText(getDisplayText(newCategory));
+                        updateObservation(getCurrentTrait(), CategoryJsonUtil.Companion.encode(scale));
+                        triggerTts(getDisplayText(newCategory));
+                        refreshLayout(false);
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     /**

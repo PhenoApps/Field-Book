@@ -19,4 +19,11 @@
         tools:listitem="@layout/trait_category_button"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
+    <Button
+        android:id="@+id/otherCatButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/trait_other_button"
+        android:visibility="gone" />
+
 </com.fieldbook.tracker.traits.CategoricalTraitLayout>
