@@ -537,6 +537,12 @@
     <string name="trait_detail_chip_invalid_value">Outlier values</string>
 
     <string name="trait_parameter_allow_multicat">Multiple Category Selection</string>
+    <string name="trait_parameter_allow_other">Allow Other Category</string>
+    <string name="trait_other_button">Other</string>
+    <string name="trait_other_dialog_title">Add New Category</string>
+    <string name="trait_other_dialog_hint">Category name</string>
+    <string name="trait_other_duplicate">Category already exists</string>
+    <string name="trait_other_empty">Category name cannot be empty</string>
     <string name="trait_parameter_display_value">Display Value</string>
     <string name="trait_parameter_resource_file">Resource File</string>
     <string name="trait_parameter_use_day_of_year">Use Day of Year</string>

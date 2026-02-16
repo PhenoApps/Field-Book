@@ -10,7 +10,8 @@ enum class Parameters {
     REPEATED_MEASURES,
     AUTO_SWITCH_PLOT,
     UNIT,
-    INVALID_VALUE;
+    INVALID_VALUE,
+    ALLOW_OTHER;
 
     companion object {
 

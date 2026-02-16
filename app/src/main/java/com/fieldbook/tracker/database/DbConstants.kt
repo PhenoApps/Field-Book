@@ -78,4 +78,5 @@ object ObservationVariableAttributeDetailsView {
     const val AUTO_SWITCH_PLOT = "autoSwitchPlot"
     const val UNIT = "unit"
     const val INVALID_VALUES = "allowInvalidValues"
+    const val ALLOW_OTHER = "allowOther"
 }

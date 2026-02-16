@@ -97,10 +97,16 @@ object TraitAttributes {
         defaultValue = "false"
     )
 
+    val ALLOW_OTHER = AttributeDefinition(
+        key = ObservationVariableAttributeDetailsView.ALLOW_OTHER,
+        valueType = ValueType.BOOLEAN,
+        defaultValue = "false"
+    )
+
     val ALL = listOf(MIN_VALUE, MAX_VALUE, CATEGORIES, CLOSE_KEYBOARD, CROP_IMAGE, SAVE_IMAGE,
         USE_DAY_OF_YEAR, CATEGORY_DISPLAY_VALUE, RESOURCE_FILE,
         DECIMAL_PLACES_REQUIRED, MATH_SYMBOLS_ENABLED, ALLOW_MULTICAT, REPEATED_MEASURES,
-        AUTO_SWITCH_PLOT, UNIT, INVALID_VALUES
+        AUTO_SWITCH_PLOT, UNIT, INVALID_VALUES, ALLOW_OTHER
     )
 
     fun byKey(key: String): AttributeDefinition? = ALL.find { it.key == key }
