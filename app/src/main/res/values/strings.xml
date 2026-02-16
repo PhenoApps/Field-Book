@@ -968,6 +968,9 @@
     <string name="preferences_appearance_traits_progress_bar">Traits progress bar</string>
     <string name="preferences_appearance_traits_progress_bar_description">Shows whether the active traits have data and highlights the current trait</string>
 
+    <string name="preferences_appearance_observation_timestamp">Observation timestamp</string>
+    <string name="preferences_appearance_observation_timestamp_description">Shows the timestamp of the saved observation below the value</string>
+
     <!-- Behavior -->
     <string name="preferences_behavior_title">Behavior</string>
     <string name="preferences_behavior_movement_title">Movement</string>

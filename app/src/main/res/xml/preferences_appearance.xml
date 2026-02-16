@@ -69,5 +69,12 @@
             android:summary="@string/preferences_appearance_traits_progress_bar_description"
             android:title="@string/preferences_appearance_traits_progress_bar" />
 
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_pref_timestamp"
+            android:key="SHOW_OBSERVATION_TIMESTAMP"
+            android:summary="@string/preferences_appearance_observation_timestamp_description"
+            android:title="@string/preferences_appearance_observation_timestamp" />
+
     </PreferenceCategory>
 </PreferenceScreen>
