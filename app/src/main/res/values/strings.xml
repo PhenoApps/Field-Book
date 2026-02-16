@@ -1555,6 +1555,9 @@
     <string name="repeated_values_left_button_content_description">left</string>
     <string name="export_util_repeated_measures_table_warning_title">Repeated Measures Table</string>
     <string name="export_util_repeated_measures_table_warning_message">Only the latest repeated measures value will be exported in table format.</string>
+    <string name="export_util_bundle_media_warning_title">Large Media Bundle</string>
+    <string name="export_util_bundle_media_warning_message">This export contains %d media files. Bundling a large number of files may be slow and could cause the device to freeze. Continue?</string>
+    <string name="export_util_bundle_media_warning_continue">Continue</string>
     <string name="activity_file_explorer_up_directory_name">Up</string>
     <string name="file_explorer_select_file_title">Select File</string>
 
