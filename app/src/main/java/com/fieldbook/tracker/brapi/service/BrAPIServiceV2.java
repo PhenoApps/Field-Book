@@ -35,6 +35,7 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
+import com.fieldbook.tracker.utilities.BrapiAccountHelper;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.FailureFunction;
 import com.fieldbook.tracker.utilities.SuccessFunction;
@@ -180,8 +181,14 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     @Override
     public void authorizeClient() {
         try {
-            apiClient.authenticate(t -> PreferenceManager.getDefaultSharedPreferences(context)
-                    .getString(PreferenceKeys.BRAPI_TOKEN, null));
+            apiClient.authenticate(t -> {
+                String token = BrapiAccountHelper.INSTANCE.peekToken(context);
+                if (token == null) {
+                    token = PreferenceManager.getDefaultSharedPreferences(context)
+                            .getString(PreferenceKeys.BRAPI_TOKEN, null);
+                }
+                return token;
+            });
         } catch (ApiException error) {
             Log.e("BrAPIServiceV2", "API Exception", error);
         }

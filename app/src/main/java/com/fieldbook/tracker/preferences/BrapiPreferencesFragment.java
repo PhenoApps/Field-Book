@@ -40,6 +40,7 @@ import com.fieldbook.tracker.activities.ScannerActivity;
 import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity;
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache;
 import com.fieldbook.tracker.objects.BrAPIConfig;
+import com.fieldbook.tracker.utilities.BrapiAccountHelper;
 import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.OpenAuthConfigurationUtil;
 import com.fieldbook.tracker.utilities.Utils;
@@ -155,6 +156,8 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                             preferences.edit().putString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, "ask").apply();
                         }
                         // remove brapi auth token when brapi is disabled
+                        String serverUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
+                        BrapiAccountHelper.INSTANCE.removeAccount(context, serverUrl);
                         preferences.edit().remove(PreferenceKeys.BRAPI_TOKEN).apply();
                     }
                     updatePreferencesVisibility(isChecked);
@@ -223,6 +226,8 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
                 } else {
 
+                    String serverUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
+                    BrapiAccountHelper.INSTANCE.removeAccount(context, serverUrl);
                     preferences.edit().remove(PreferenceKeys.BRAPI_TOKEN).apply();
 
                     setButtonView();
@@ -848,6 +853,8 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                     scannedData = result.getContents();
                 }
             } else if (requestCode == BrapiAuthActivity.END_SESSION_REQUEST_CODE) {
+                String serverUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
+                BrapiAccountHelper.INSTANCE.removeAccount(context, serverUrl);
                 preferences.edit().remove(PreferenceKeys.BRAPI_ID_TOKEN).apply();
                 preferences.edit().remove(PreferenceKeys.BRAPI_TOKEN).apply();
                 setButtonView();

@@ -26,6 +26,7 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
+import com.fieldbook.tracker.utilities.BrapiAccountHelper;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.FailureFunction;
 import com.fieldbook.tracker.utilities.SuccessFunction;
@@ -135,7 +136,12 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
     }
 
     private String getBrapiToken() {
-        return "Bearer " + PreferenceManager.getDefaultSharedPreferences(context).getString(PreferenceKeys.BRAPI_TOKEN, "");
+        String token = BrapiAccountHelper.INSTANCE.peekToken(context);
+        if (token == null) {
+            token = PreferenceManager.getDefaultSharedPreferences(context)
+                    .getString(PreferenceKeys.BRAPI_TOKEN, "");
+        }
+        return "Bearer " + token;
     }
 
     public void postImageMetaData(FieldBookImage image,

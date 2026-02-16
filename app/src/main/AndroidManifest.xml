@@ -268,6 +268,18 @@
 
         <!--TODO: Temporarily opt out of forced layout changes in sdk 36. Needs to be addressed before updating to sdk 37 -->
         <property android:name="android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY" android:value="true" />
+
+        <!-- BrAPI AccountManager authenticator service -->
+        <service
+            android:name=".brapi.BrapiAuthenticatorService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/brapi_authenticator" />
+        </service>
     </application>
 
     <queries>
@@ -327,6 +339,8 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES"/>
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"/>
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
 
     <uses-sdk tools:overrideLibrary="com.google.zxing.client.android,com.binayshaw7777.kotstep" />
 

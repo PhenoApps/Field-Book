@@ -6,10 +6,13 @@ import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
+import com.fieldbook.tracker.utilities.BrapiAccountHelper;
 
 public class BrAPIServiceFactory {
 
     public static BrAPIService getBrAPIService(Context context){
+
+        BrapiAccountHelper.INSTANCE.migrateFromPrefsIfNeeded(context);
 
         String version = PreferenceManager.getDefaultSharedPreferences(context)
                 .getString(PreferenceKeys.BRAPI_VERSION, "V1");
