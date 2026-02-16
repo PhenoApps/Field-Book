@@ -1089,6 +1089,6 @@ abstract class AbstractCameraTrait :
      */
     override fun onRefresh() {
         loadAdapterItems()
-        super.loadLayout()
+        super.onRefresh()
     }
 }

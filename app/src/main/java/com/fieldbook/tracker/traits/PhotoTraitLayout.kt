@@ -236,7 +236,9 @@ class PhotoTraitLayout : CameraTrait {
 
     override fun loadLayout() {
         super.loadLayout()
-        setup()
+        if (!isCameraActive) {
+            setup()
+        }
     }
 
     override fun showSettings() {
