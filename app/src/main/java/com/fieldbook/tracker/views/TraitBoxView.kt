@@ -203,6 +203,7 @@ class TraitBoxView : ConstraintLayout {
     }
 
     private var previousSelection = 0
+    private var lastInflatedFormat: String? = null
 
     private fun getSelectedItemPosition(): Int {
         return visibleTraitsList.indexOf(currentTrait)
@@ -233,10 +234,17 @@ class TraitBoxView : ConstraintLayout {
 
         val currentTraitLayout: BaseTraitLayout = layoutCollections.getTraitLayout(currentTrait?.format)
 
-        controller.inflateTrait(currentTraitLayout)
-
-        //Call specific load layout code for the current trait layout
-        currentTraitLayout.loadLayout()
+        val currentFormat = currentTrait?.format
+        if (currentFormat != null && currentFormat == lastInflatedFormat) {
+            // Same format already inflated — skip re-inflation and just reload data
+            // to avoid flickering (e.g. camera preview restart) when navigating plots
+            currentTraitLayout.onRefresh()
+        } else {
+            controller.inflateTrait(currentTraitLayout)
+            //Call specific load layout code for the current trait layout
+            currentTraitLayout.loadLayout()
+            lastInflatedFormat = currentFormat
+        }
     }
 
     private fun showTraitPickerDialog(visibleTraits: Array<TraitObject>) {

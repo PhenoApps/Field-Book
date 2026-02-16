@@ -46,6 +46,7 @@ class PhotoTraitLayout : CameraTrait {
 
     private var supportedResolutions: List<Size> = listOf()
     private var previewViewHolder: ImageAdapter.PreviewViewHolder? = null
+    private var isCameraActive = false
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
@@ -56,6 +57,11 @@ class PhotoTraitLayout : CameraTrait {
     )
 
     override fun type() = type
+
+    override fun init(act: Activity) {
+        super.init(act)
+        isCameraActive = false
+    }
 
     private fun displayPreviewMode(mode: Mode) {
 
@@ -115,7 +121,10 @@ class PhotoTraitLayout : CameraTrait {
 
         }
 
-        onSettingsChanged()
+        if (!isCameraActive) {
+            isCameraActive = true
+            onSettingsChanged()
+        }
     }
 
     @OptIn(ExperimentalCamera2Interop::class)
@@ -361,17 +370,25 @@ class PhotoTraitLayout : CameraTrait {
 
     private fun launchCameraX() {
         controller.getCameraXFacade().unbind()
+        isCameraActive = false
         val intent = Intent(context, CameraActivity::class.java)
         //set current trait id to set crop region
         intent.putExtra(CameraActivity.EXTRA_TRAIT_ID, currentTrait.id)
         activity?.startActivityForResult(intent, PICTURE_REQUEST_CODE)
     }
 
+    override fun onRefresh() {
+        super.onRefresh()
+        if (!isCameraActive) {
+            setup()
+        }
+    }
+
     override fun refreshLock() {
         super.refreshLock()
         (context as CollectActivity).traitLockData()
         try {
-            loadLayout()
+            onRefresh()
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
         }
