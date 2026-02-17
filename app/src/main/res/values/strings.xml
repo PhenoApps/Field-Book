@@ -430,6 +430,11 @@
     <string name="multispeq_power_off_button">Power Off</string>
     <string name="multispeq_device_info">Battery: %1$s · FW: %2$s</string>
     <string name="multispeq_device_info_loading">Battery: -- · FW: --</string>
+    <string name="multispeq_parameters_card_title">Measurement Parameters</string>
+    <string name="multispeq_parameters_summary">%1$d of %2$d parameters selected</string>
+    <string name="multispeq_parameters_tune_button_description">Select measurement parameters</string>
+    <string name="multispeq_parameters_none_selected">No parameters selected — environment data collected by default</string>
+    <string name="multispeq_parameters_edit_button">Edit</string>
 
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Trait Format</string>

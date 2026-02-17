@@ -13,29 +13,6 @@
         android:layout_height="match_parent"
         android:padding="8dp">
 
-        <!-- Protocol selection spinner -->
-        <TextView
-            android:id="@+id/multispeq_protocol_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:text="@string/multispeq_protocol_label"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <Spinner
-            android:id="@+id/multispeq_protocol_spinner"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="4dp"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/multispeq_protocol_label" />
-
         <!-- Connect button (shown when disconnected) -->
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/multispeq_connect_button"
@@ -47,7 +24,7 @@
             android:contentDescription="@string/multispeq_connect_button_description"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/multispeq_protocol_spinner" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <!-- Connected device name — "Connected: MultispeQ Beta (ABC123)" -->
         <TextView
@@ -62,7 +39,7 @@
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/multispeq_protocol_spinner" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <!-- Device info row — "Battery: 85% · FW: 2.0058" -->
         <TextView
@@ -137,7 +114,7 @@
             app:layout_constraintStart_toEndOf="@id/multispeq_disconnect_button"
             app:layout_constraintTop_toBottomOf="@id/multispeq_measure_button" />
 
-        <!-- Raw result display -->
+        <!-- Calculated parameter result display -->
         <ScrollView
             android:id="@+id/multispeq_result_scroll"
             android:layout_width="0dp"
@@ -149,13 +126,12 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/multispeq_disconnect_button">
 
-            <TextView
-                android:id="@+id/multispeq_result_text"
+            <LinearLayout
+                android:id="@+id/multispeq_result_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="monospace"
-                android:padding="8dp"
-                android:textSize="11sp" />
+                android:orientation="vertical"
+                android:padding="8dp" />
 
         </ScrollView>
 
