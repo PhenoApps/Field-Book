@@ -85,9 +85,9 @@ public class CSVWriter {
             range.add("person");
             range.add("location");
             range.add("number");
-            range.add("photo_uri");
-            range.add("video_uri");
-            range.add("audio_uri");
+            range.add("attached_photo");
+            range.add("attached_video");
+            range.add("attached_audio");
 
             //device name must be last added
             range.add("device_name");

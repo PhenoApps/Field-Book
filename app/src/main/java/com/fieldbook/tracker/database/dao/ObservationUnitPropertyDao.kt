@@ -183,7 +183,7 @@ class ObservationUnitPropertyDao {
         ): Cursor? {
             // Get the full data set
             getExportDbData(context, studyId, fieldList, traits, processor)?.use { fullCursor ->
-                val traitRequiredFields = arrayOf("trait", "userValue", "timeTaken", "person", "location", "rep")
+                val traitRequiredFields = arrayOf("trait", "userValue", "timeTaken", "person", "location", "rep", "photo_uri", "video_uri", "audio_uri")
                 val requiredColumns = mutableListOf(uniqueName).apply {
                     addAll(traitRequiredFields)
                 }.toTypedArray()
