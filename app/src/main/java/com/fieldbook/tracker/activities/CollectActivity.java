@@ -1521,6 +1521,8 @@ public class CollectActivity extends ThemedActivity
         String traitDbId = getTraitDbId();
 
         database.deleteTrait(studyId, obsUnit, traitDbId, rep);
+
+        collectInputView.refreshTimestamp();
     }
 
     public String getLocationByPreferences() {
@@ -1558,12 +1560,15 @@ public class CollectActivity extends ThemedActivity
             // Based on plot_id, prevent duplicate
             traitBox.remove(trait, getObservationUnit(), getRep());
         }
+
+        collectInputView.refreshTimestamp();
     }
 
     // for format without specific control
     public void removeTrait() {
         traitBox.remove(getCurrentTrait(), getObservationUnit(), getRep());
         collectInputView.setText("");
+        collectInputView.refreshTimestamp();
     }
 
     private void customizeToolbarIcons() {
