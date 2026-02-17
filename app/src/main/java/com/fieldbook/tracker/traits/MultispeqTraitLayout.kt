@@ -31,10 +31,14 @@ import org.json.JSONObject
  * Flow:
  * 1. User selects a protocol from the spinner (populated from bundled JSON).
  * 2. User taps "Connect" → dialog lists bonded MultispeQ devices.
- * 3. On connection, device name shown + "Measure" and "Disconnect" buttons appear.
- * 4. User taps "Measure" → command sent, progress shown.
- * 5. Raw JSON response displayed; user taps "Accept" (Measure again) or collects data
- *    automatically by calling updateObservation() with the JSON string.
+ * 3. On connection the UI shows a placeholder; [requestDeviceInfo] is called which sends "1"
+ *    and updates battery, firmware, and device ID when the response arrives.
+ * 4. User taps the leaf-icon FAB to measure → command sent, progress shown.
+ * 5. Raw JSON response displayed; observation saved automatically.
+ *
+ * The [MultispeqManager] is created once and kept alive across entry navigation.
+ * On each [init] call the views are re-bound to the freshly-inflated layout, and
+ * the UI is restored to match the current connection state.
  */
 class MultispeqTraitLayout : BaseTraitLayout, MultispeqListener {
 
@@ -44,15 +48,26 @@ class MultispeqTraitLayout : BaseTraitLayout, MultispeqListener {
 
     private val mainHandler = Handler(Looper.getMainLooper())
 
+    // Persists across init() calls (entry navigation re-inflates views but reuses this object)
     private var multispeqManager: MultispeqManager? = null
     private var protocols: List<MultispeqProtocol> = emptyList()
+    private var connectedDeviceName: String = ""
+    /** "Name (deviceId)" — set once device info arrives; empty until then. */
+    private var connectedDisplayName: String = ""
+    /** Full device-info line text — restored on view re-inflation. */
+    private var connectedDeviceInfoText: String = ""
+    /** Firmware string from device info; kept so battery-only updates don't lose it. */
+    private var connectedFirmware: String = "--"
 
+    // Re-bound on every init() because inflateTrait() creates new view instances
     private lateinit var protocolSpinner: Spinner
     private lateinit var connectButton: FloatingActionButton
     private lateinit var deviceNameText: TextView
+    private lateinit var deviceInfoText: TextView
     private lateinit var progressBar: ProgressBar
-    private lateinit var measureButton: Button
+    private lateinit var measureButton: FloatingActionButton
     private lateinit var disconnectButton: Button
+    private lateinit var powerOffButton: Button
     private lateinit var resultScroll: ScrollView
     private lateinit var resultText: TextView
 
@@ -66,19 +81,31 @@ class MultispeqTraitLayout : BaseTraitLayout, MultispeqListener {
     override fun layoutId(): Int = R.layout.trait_multispeq
 
     override fun init(act: Activity) {
+        // Re-bind views — inflateTrait() produces a fresh view tree on every navigation
         protocolSpinner = act.findViewById(R.id.multispeq_protocol_spinner)
         connectButton = act.findViewById(R.id.multispeq_connect_button)
         deviceNameText = act.findViewById(R.id.multispeq_device_name)
+        deviceInfoText = act.findViewById(R.id.multispeq_device_info)
         progressBar = act.findViewById(R.id.multispeq_progress)
         measureButton = act.findViewById(R.id.multispeq_measure_button)
         disconnectButton = act.findViewById(R.id.multispeq_disconnect_button)
+        powerOffButton = act.findViewById(R.id.multispeq_power_off_button)
         resultScroll = act.findViewById(R.id.multispeq_result_scroll)
         resultText = act.findViewById(R.id.multispeq_result_text)
 
-        multispeqManager = MultispeqManager(this)
+        // Keep the existing manager (and its live Bluetooth connection) across navigations
+        if (multispeqManager == null) {
+            multispeqManager = MultispeqManager(this)
+        }
 
         loadProtocols()
-        setupConnectButton()
+
+        // Restore UI to reflect the current connection state
+        if (connectedDeviceName.isNotEmpty()) {
+            restoreConnectedUi()
+        } else {
+            setupConnectButton()
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -105,9 +132,78 @@ class MultispeqTraitLayout : BaseTraitLayout, MultispeqListener {
 
     private fun setupConnectButton() {
         connectButton.visibility = View.VISIBLE
-        connectButton.setOnClickListener {
-            showDevicePickerDialog()
+        connectButton.setOnClickListener { showDevicePickerDialog() }
+    }
+
+    /** Called on first connection — shows placeholder text and registers button listeners. */
+    private fun showConnectedUi(deviceName: String) {
+        val nameDisplay = connectedDisplayName.ifBlank { deviceName }
+        deviceNameText.text = context.getString(R.string.multispeq_connected, nameDisplay)
+        deviceNameText.visibility = View.VISIBLE
+
+        val infoText = connectedDeviceInfoText.ifBlank {
+            context.getString(R.string.multispeq_device_info_loading)
         }
+        deviceInfoText.text = infoText
+        deviceInfoText.visibility = View.VISIBLE
+
+        connectButton.visibility = View.GONE
+        measureButton.visibility = View.VISIBLE
+        disconnectButton.visibility = View.VISIBLE
+        powerOffButton.visibility = View.VISIBLE
+
+        wireConnectedButtons()
+    }
+
+    /**
+     * Called by [init] when the view is re-inflated but a connection is already live.
+     * Restores all stored display text and re-registers button listeners.
+     */
+    private fun restoreConnectedUi() {
+        val nameDisplay = connectedDisplayName.ifBlank { connectedDeviceName }
+        deviceNameText.text = context.getString(R.string.multispeq_connected, nameDisplay)
+        deviceNameText.visibility = View.VISIBLE
+
+        val infoText = connectedDeviceInfoText.ifBlank {
+            context.getString(R.string.multispeq_device_info_loading)
+        }
+        deviceInfoText.text = infoText
+        deviceInfoText.visibility = View.VISIBLE
+
+        connectButton.visibility = View.GONE
+        measureButton.visibility = View.VISIBLE
+        disconnectButton.visibility = View.VISIBLE
+        powerOffButton.visibility = View.VISIBLE
+        progressBar.visibility = View.GONE
+
+        wireConnectedButtons()
+    }
+
+    private fun wireConnectedButtons() {
+        measureButton.setOnClickListener { runMeasurement() }
+        disconnectButton.setOnClickListener {
+            multispeqManager?.disconnect()
+            resetToConnectState()
+        }
+        powerOffButton.setOnClickListener {
+            multispeqManager?.sendCommand("sleep")
+        }
+    }
+
+    private fun resetToConnectState() {
+        connectedDeviceName = ""
+        connectedDisplayName = ""
+        connectedDeviceInfoText = ""
+        connectedFirmware = "--"
+        deviceNameText.visibility = View.GONE
+        deviceInfoText.visibility = View.GONE
+        connectButton.visibility = View.VISIBLE
+        measureButton.visibility = View.GONE
+        disconnectButton.visibility = View.GONE
+        powerOffButton.visibility = View.GONE
+        progressBar.visibility = View.GONE
+        resultScroll.visibility = View.GONE
+        setupConnectButton()
     }
 
     private fun showDevicePickerDialog() {
@@ -118,14 +214,12 @@ class MultispeqTraitLayout : BaseTraitLayout, MultispeqListener {
         }
 
         val devices = multispeqManager?.getMultispeqDevices() ?: emptyList()
-
         if (devices.isEmpty()) {
             Toast.makeText(context, context.getString(R.string.multispeq_no_devices_found), Toast.LENGTH_LONG).show()
             return
         }
 
         val names = devices.map { it.name ?: it.address }.toTypedArray()
-
         AlertDialog.Builder(context, R.style.AppAlertDialog)
             .setTitle(context.getString(R.string.multispeq_choose_device_title))
             .setSingleChoiceItems(names, -1) { dialog, which ->
@@ -136,37 +230,11 @@ class MultispeqTraitLayout : BaseTraitLayout, MultispeqListener {
     }
 
     private fun connectToDevice(device: BluetoothDevice) {
+        connectedDeviceName = device.name ?: device.address
         deviceNameText.text = context.getString(R.string.multispeq_connecting)
         deviceNameText.visibility = View.VISIBLE
         connectButton.visibility = View.GONE
         multispeqManager?.connect(device)
-    }
-
-    private fun showConnectedUi(deviceName: String) {
-        deviceNameText.text = context.getString(R.string.multispeq_connected, deviceName)
-        deviceNameText.visibility = View.VISIBLE
-        connectButton.visibility = View.GONE
-        measureButton.visibility = View.VISIBLE
-        disconnectButton.visibility = View.VISIBLE
-
-        measureButton.setOnClickListener {
-            runMeasurement()
-        }
-
-        disconnectButton.setOnClickListener {
-            multispeqManager?.disconnect()
-            resetToConnectState()
-        }
-    }
-
-    private fun resetToConnectState() {
-        deviceNameText.visibility = View.GONE
-        connectButton.visibility = View.VISIBLE
-        measureButton.visibility = View.GONE
-        disconnectButton.visibility = View.GONE
-        progressBar.visibility = View.GONE
-        resultScroll.visibility = View.GONE
-        setupConnectButton()
     }
 
     // -------------------------------------------------------------------------
@@ -190,12 +258,31 @@ class MultispeqTraitLayout : BaseTraitLayout, MultispeqListener {
     }
 
     // -------------------------------------------------------------------------
-    // MultispeqListener callbacks (delivered on background thread → switch to main)
+    // MultispeqListener callbacks (background thread → post to main)
     // -------------------------------------------------------------------------
 
     override fun onConnected(device: BluetoothDevice) {
         mainHandler.post {
-            showConnectedUi(device.name ?: device.address)
+            showConnectedUi(connectedDeviceName)
+            // Request device info NOW — after the UI is ready, eliminating the race condition
+            // where onDeviceInfo could arrive before showConnectedUi runs.
+            multispeqManager?.requestDeviceInfo()
+        }
+    }
+
+    override fun onDeviceInfo(deviceId: String, firmware: String, battery: Int) {
+        mainHandler.post {
+            connectedDisplayName = "$connectedDeviceName ($deviceId)"
+            connectedFirmware = firmware.ifBlank { "--" }
+            deviceNameText.text = context.getString(R.string.multispeq_connected, connectedDisplayName)
+
+            val batteryStr = if (battery >= 0) "$battery%" else "--"
+            connectedDeviceInfoText = context.getString(
+                R.string.multispeq_device_info,
+                batteryStr,
+                connectedFirmware
+            )
+            deviceInfoText.text = connectedDeviceInfoText
         }
     }
 
@@ -204,12 +291,25 @@ class MultispeqTraitLayout : BaseTraitLayout, MultispeqListener {
             progressBar.visibility = View.GONE
             measureButton.isEnabled = true
 
-            // Restore device name in status text
-            deviceNameText.text = deviceNameText.text.toString()
-                .replace(context.getString(R.string.multispeq_measuring), "")
-                .trim()
+            val nameDisplay = connectedDisplayName.ifBlank { connectedDeviceName }
+            deviceNameText.text = context.getString(R.string.multispeq_connected, nameDisplay)
 
-            // Pretty-print JSON if possible
+            // Update battery and firmware from every scan result
+            try {
+                val obj = JSONObject(rawJson)
+                val liveBattery = obj.optInt("device_battery", -1)
+                val liveFirmware = obj.optString("device_firmware", "").ifBlank { null }
+                if (liveFirmware != null) connectedFirmware = liveFirmware
+                if (liveBattery >= 0) {
+                    connectedDeviceInfoText = context.getString(
+                        R.string.multispeq_device_info,
+                        "$liveBattery%",
+                        connectedFirmware
+                    )
+                    deviceInfoText.text = connectedDeviceInfoText
+                }
+            } catch (_: JSONException) { /* non-JSON result — leave as-is */ }
+
             val display = try {
                 JSONObject(rawJson).toString(2)
             } catch (e: JSONException) {
@@ -219,8 +319,8 @@ class MultispeqTraitLayout : BaseTraitLayout, MultispeqListener {
             resultText.text = display
             resultScroll.visibility = View.VISIBLE
 
-            // Save raw JSON as the observation value
             updateObservation(currentTrait, rawJson)
+            collectInputView.text = rawJson
         }
     }
 
@@ -257,7 +357,6 @@ class MultispeqTraitLayout : BaseTraitLayout, MultispeqListener {
             JSONObject(data)
             true
         } catch (e: JSONException) {
-            // Accept plain string responses (e.g. device info)
             data.isNotBlank()
         }
     }

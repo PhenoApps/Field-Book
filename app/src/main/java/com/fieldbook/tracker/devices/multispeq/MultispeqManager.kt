@@ -14,12 +14,14 @@ import java.util.UUID
 /**
  * Manages Bluetooth Classic communication with a MultispeQ device.
  *
- * MultispeQ devices use the Serial Port Profile (SPP) over Bluetooth Classic.
- * Commands are sent as JSON strings followed by CRLF.
- * Responses arrive as JSON followed by an 8-character checksum and a newline:
- *   <json_data><8-char-checksum>\n
+ * After [connect] succeeds, call [requestDeviceInfo] to kick off a two-phase handshake
+ * that mirrors the TypeScript app:
  *
- * Device name filter: name must contain "multi" or "photo" (case-insensitive).
+ *   Phase 1 – sends "battery"  → response "battery:XX…" → parses percent
+ *   Phase 2 – sends "1"        → response JSON          → parses device_id / firmware
+ *
+ * Both results are combined into a single [MultispeqListener.onDeviceInfo] callback.
+ * All other responses go to [MultispeqListener.onMeasurementResult].
  */
 class MultispeqManager(private val listener: MultispeqListener) {
 
@@ -29,18 +31,25 @@ class MultispeqManager(private val listener: MultispeqListener) {
         private const val CHECKSUM_LENGTH = 8
     }
 
+    private enum class PendingInfo { NONE, BATTERY, DEVICE_INFO }
+
     private var connectThread: ConnectThread? = null
     private var connectedThread: ConnectedThread? = null
+
+    /** Tracks which device-info response we are waiting for. Read/written on the I/O thread
+     *  and set on the main thread, so marked @Volatile. */
+    @Volatile private var pendingInfo = PendingInfo.NONE
+    /** Battery level captured during Phase 1, held until Phase 2 completes. */
+    @Volatile private var pendingBattery = -1
 
     /** Returns bonded Bluetooth devices whose names suggest a MultispeQ device. */
     fun getMultispeqDevices(): List<BluetoothDevice> {
         val adapter = BluetoothAdapter.getDefaultAdapter() ?: return emptyList()
         if (!adapter.isEnabled) return emptyList()
-        return adapter.bondedDevices
-            .filter { device ->
-                val name = device.name?.lowercase() ?: ""
-                name.contains("multi") || name.contains("photo")
-            }
+        return adapter.bondedDevices.filter { device ->
+            val name = device.name?.lowercase() ?: ""
+            name.contains("multi") || name.contains("photo")
+        }
     }
 
     /** Begins connecting to the given device. Result delivered via [MultispeqListener]. */
@@ -50,15 +59,24 @@ class MultispeqManager(private val listener: MultispeqListener) {
     }
 
     /**
-     * Sends a command to the connected device.
-     * The command is serialized to JSON and sent as "<json>\r\n".
+     * Kicks off the two-phase device-info handshake (battery then "1").
+     * Must be called from the main thread after [MultispeqListener.onConnected].
+     */
+    fun requestDeviceInfo() {
+        pendingBattery = -1
+        pendingInfo = PendingInfo.BATTERY
+        sendCommand("battery")
+    }
+
+    /**
+     * Sends a command to the connected device as "<json>\r\n".
      */
     fun sendCommand(command: Any) {
         val json = when (command) {
-            is String -> command
+            is String  -> command
             is JSONObject -> command.toString()
-            is JSONArray -> command.toString()
-            else -> command.toString()
+            is JSONArray  -> command.toString()
+            else       -> command.toString()
         }
         connectedThread?.write("$json\r\n")
             ?: listener.onError("Not connected to a device")
@@ -66,6 +84,7 @@ class MultispeqManager(private val listener: MultispeqListener) {
 
     /** Closes the current connection and stops all threads. */
     fun disconnect() {
+        pendingInfo = PendingInfo.NONE
         connectedThread?.cancel()
         connectedThread = null
         connectThread?.cancel()
@@ -73,48 +92,74 @@ class MultispeqManager(private val listener: MultispeqListener) {
     }
 
     // -------------------------------------------------------------------------
-    // ConnectThread — establishes the RFCOMM socket
+    // ConnectThread
     // -------------------------------------------------------------------------
 
     private inner class ConnectThread(private val device: BluetoothDevice) : Thread() {
 
-        private val socket: BluetoothSocket? = try {
-            device.createRfcommSocketToServiceRecord(SPP_UUID)
-        } catch (e: Exception) {
-            Log.e(TAG, "createRfcommSocketToServiceRecord failed", e)
-            null
-        }
+        // Socket is created lazily in run() so we can swap to a fallback if needed
+        @Volatile private var activeSocket: BluetoothSocket? = null
 
         override fun run() {
-            // Cancel discovery to speed up connection
-            try {
-                BluetoothAdapter.getDefaultAdapter()?.cancelDiscovery()
-            } catch (_: Exception) {}
+            try { BluetoothAdapter.getDefaultAdapter()?.cancelDiscovery() } catch (_: Exception) {}
 
-            try {
-                socket?.connect()
-            } catch (e: IOException) {
-                Log.e(TAG, "connect() failed", e)
-                try { socket?.close() } catch (_: Exception) {}
-                listener.onError("Failed to connect: ${e.message}")
+            val sock = tryConnect() ?: run {
+                listener.onError("Failed to connect to device")
+                listener.onDisconnected()
                 return
             }
 
-            socket?.let { sock ->
-                connectedThread = ConnectedThread(sock, device).apply { start() }
-                listener.onConnected(device)
+            activeSocket = sock
+            connectedThread = ConnectedThread(sock, device).apply { start() }
+            listener.onConnected(device)
+        }
+
+        /**
+         * Attempts connection via the standard SDP method first.
+         * Falls back to a direct RFCOMM channel-1 socket via reflection — this recovers
+         * the common Android "read failed, socket might closed or timeout, read ret: -1"
+         * error that occurs after an unexpected disconnect (e.g. screen-off).
+         */
+        private fun tryConnect(): BluetoothSocket? {
+            // Primary: SDP-based socket
+            val primary = try {
+                device.createRfcommSocketToServiceRecord(SPP_UUID)
+            } catch (e: Exception) {
+                Log.e(TAG, "createRfcommSocketToServiceRecord failed", e); null
+            }
+            if (primary != null) {
+                try {
+                    primary.connect()
+                    return primary
+                } catch (e: IOException) {
+                    Log.w(TAG, "primary connect failed, trying fallback: ${e.message}")
+                    try { primary.close() } catch (_: Exception) {}
+                }
+            }
+
+            // Fallback: direct channel-1 socket via reflection
+            return try {
+                @Suppress("DiscouragedPrivateApi")
+                val fallback = device.javaClass
+                    .getMethod("createRfcommSocket", Int::class.java)
+                    .invoke(device, 1) as BluetoothSocket
+                fallback.connect()
+                fallback
+            } catch (e: Exception) {
+                Log.e(TAG, "fallback connect failed", e)
+                null
             }
         }
 
         fun cancel() {
-            try { socket?.close() } catch (e: IOException) {
+            try { activeSocket?.close() } catch (e: IOException) {
                 Log.e(TAG, "cancel: socket close failed", e)
             }
         }
     }
 
     // -------------------------------------------------------------------------
-    // ConnectedThread — reads responses from the device
+    // ConnectedThread
     // -------------------------------------------------------------------------
 
     private inner class ConnectedThread(
@@ -124,17 +169,11 @@ class MultispeqManager(private val listener: MultispeqListener) {
 
         private val inputStream: InputStream? = try {
             socket.inputStream
-        } catch (e: IOException) {
-            Log.e(TAG, "inputStream failed", e)
-            null
-        }
+        } catch (e: IOException) { Log.e(TAG, "inputStream failed", e); null }
 
         private val outputStream: OutputStream? = try {
             socket.outputStream
-        } catch (e: IOException) {
-            Log.e(TAG, "outputStream failed", e)
-            null
-        }
+        } catch (e: IOException) { Log.e(TAG, "outputStream failed", e); null }
 
         override fun run() {
             val buffer = StringBuilder()
@@ -145,26 +184,15 @@ class MultispeqManager(private val listener: MultispeqListener) {
                     if (byte == -1) break
 
                     val ch = byte.toChar()
-
                     if (ch == '\n') {
-                        // We have a complete response — strip trailing \r if present
                         val raw = buffer.toString().trimEnd('\r')
                         buffer.clear()
-
-                        if (raw.length > CHECKSUM_LENGTH) {
-                            val jsonPart = raw.dropLast(CHECKSUM_LENGTH)
-                            deliverResult(jsonPart)
-                        } else if (raw.isNotBlank()) {
-                            // Short response (e.g. device info "1" command returns plain text)
-                            deliverResult(raw)
-                        }
+                        if (raw.isNotBlank()) deliverResult(raw)
                     } else {
                         buffer.append(ch)
                     }
                 } catch (e: Exception) {
-                    if ("socket closed" in (e.message ?: "")) {
-                        break
-                    }
+                    if ("socket closed" in (e.message ?: "")) break
                     Log.e(TAG, "read error", e)
                     break
                 }
@@ -173,8 +201,46 @@ class MultispeqManager(private val listener: MultispeqListener) {
             listener.onDisconnected()
         }
 
-        private fun deliverResult(json: String) {
-            listener.onMeasurementResult(json)
+        private fun deliverResult(raw: String) {
+            when (pendingInfo) {
+
+                PendingInfo.BATTERY -> {
+                    // Response: "battery:75XXXXXXXX" — strip checksum, then remove prefix
+                    val stripped = if (raw.length > CHECKSUM_LENGTH) raw.dropLast(CHECKSUM_LENGTH) else raw
+                    pendingBattery = stripped.removePrefix("battery:").trim().toIntOrNull() ?: -1
+                    // Phase 2: request device id + firmware
+                    pendingInfo = PendingInfo.DEVICE_INFO
+                    write("1\r\n")
+                }
+
+                PendingInfo.DEVICE_INFO -> {
+                    pendingInfo = PendingInfo.NONE
+                    var deviceId = device.address
+                    var firmware = ""
+
+                    // Try with checksum stripped, then full string (firmware-version compat)
+                    val candidates = buildList {
+                        if (raw.length > CHECKSUM_LENGTH) add(raw.dropLast(CHECKSUM_LENGTH))
+                        add(raw)
+                    }
+                    for (candidate in candidates) {
+                        try {
+                            val obj = JSONObject(candidate)
+                            deviceId = obj.optString("device_id", device.address).ifBlank { device.address }
+                            firmware = obj.optString("device_firmware", "")
+                            break
+                        } catch (_: Exception) { /* try next */ }
+                    }
+
+                    listener.onDeviceInfo(deviceId, firmware, pendingBattery)
+                }
+
+                PendingInfo.NONE -> {
+                    // Normal measurement response: strip 8-char checksum
+                    val json = if (raw.length > CHECKSUM_LENGTH) raw.dropLast(CHECKSUM_LENGTH) else raw
+                    listener.onMeasurementResult(json)
+                }
+            }
         }
 
         fun write(data: String) {
