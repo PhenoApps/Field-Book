@@ -1,6 +1,5 @@
 package com.fieldbook.tracker.activities
 
-import android.app.AlertDialog
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,11 +8,13 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.remember
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.repository.TraitRepository
@@ -246,54 +247,88 @@ class TraitActivity : ThemedActivity() {
             holder.bind(parameter, trait)
             parameterContainer.addView(holder.itemView)
 
-            val dialog = AlertDialog.Builder(this, R.style.AppAlertDialog)
-                .setView(dialogView)
-                .setPositiveButton(R.string.dialog_save, null)
-                .setNegativeButton(R.string.dialog_cancel, null)
-                .create()
+            //required for using composable parameter ui
+            try {
+                dialogView.setViewTreeLifecycleOwner(this@TraitActivity)
+                dialogView.setViewTreeSavedStateRegistryOwner(this@TraitActivity)
+            } catch (_: Exception) {
+            }
 
-            dialog.setOnShowListener {
-                val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-                positiveButton.setOnClickListener {
-                    holder.textInputLayout.error = null
+            val dialog = android.app.Dialog(this, R.style.AppAlertDialog)
+            dialog.setContentView(dialogView)
+
+            // Add Save/Cancel buttons at the bottom of the dialogView programmatically
+            val buttonContainer = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                val params = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                layoutParams = params
+                setPadding(16, 16, 16, 16)
+                gravity = android.view.Gravity.END
+            }
+
+            val cancelButton = android.widget.Button(this).apply {
+                text = getString(R.string.dialog_cancel)
+                background = null
+            }
+
+            val saveButton = android.widget.Button(this).apply {
+                text = getString(R.string.dialog_save)
+                background = null
+            }
+
+            buttonContainer.addView(cancelButton)
+            buttonContainer.addView(saveButton)
+
+            val rootLinear = dialogView.findViewById<LinearLayout>(R.id.parameter_container)
+            rootLinear.addView(buttonContainer)
+
+            cancelButton.setOnClickListener {
+                dialog.dismiss()
+            }
+
+            saveButton.setOnClickListener {
+                holder.textInputLayout.error = null
 
                     // parameter specific validation
                     val paramValidationResult = holder.validate(traitRepo, trait)
 
-                    if (paramValidationResult.result != true) {
-                        val errorMessage = paramValidationResult.error
-                            ?: getString(R.string.error_loading_trait_detail)
+                if (paramValidationResult.result != true) {
+                    val errorMessage = paramValidationResult.error
+                        ?: getString(R.string.error_loading_trait_detail)
+                    holder.textInputLayout.error = errorMessage
+                    soundHelperImpl.playError()
+                    vibrator.vibrate()
+                    return@setOnClickListener
+                }
+
+                val updatedTrait = holder.merge(trait.clone())
+
+                // inter-parameter validation if needed
+                if (formatDefinition != null && paramHasValidationDependency(
+                        formatDefinition,
+                        parameter
+                    )
+                ) {
+
+                    val errorMessage =
+                        validateInterParameterValidation(formatDefinition, updatedTrait)
+
+                    if (errorMessage != null) {
                         holder.textInputLayout.error = errorMessage
                         soundHelperImpl.playError()
                         vibrator.vibrate()
                         return@setOnClickListener
                     }
-
-                    val updatedTrait = holder.merge(trait.clone())
-
-                    // inter-parameter validation if needed
-                    if (formatDefinition != null && paramHasValidationDependency(
-                            formatDefinition,
-                            parameter
-                        )
-                    ) {
-
-                        val errorMessage =
-                            validateInterParameterValidation(formatDefinition, updatedTrait)
-
-                        if (errorMessage != null) {
-                            holder.textInputLayout.error = errorMessage
-                            soundHelperImpl.playError()
-                            vibrator.vibrate()
-                            return@setOnClickListener
-                        }
-                    }
-
-                    onUpdated(updatedTrait)
-                    CollectActivity.reloadData = true
-
-                    dialog.dismiss()
                 }
+
+                onUpdated(updatedTrait)
+
+                CollectActivity.reloadData = true
+
+                dialog.dismiss()
             }
 
             dialog.show()

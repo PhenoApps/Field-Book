@@ -15,6 +15,7 @@ import com.bytehamster.lib.preferencesearch.SearchPreferenceResult;
 import com.bytehamster.lib.preferencesearch.SearchPreferenceResultListener;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.AppearancePreferencesFragment;
+import com.fieldbook.tracker.preferences.BehaviorPreferencesFragment;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferencesFragment;
 import com.fieldbook.tracker.preferences.ProfilePreferencesFragment;
@@ -68,6 +69,13 @@ public class PreferencesActivity extends ThemedActivity implements PreferenceFra
             appearance.setArguments(infobarsUpdate);
             getSupportFragmentManager().beginTransaction().replace(R.id.prefs_container, appearance).commit();
 
+        } else if (extras != null && extras.getBoolean(GeneralKeys.BARCODE_SCANNING_OPTIONS_EDIT, false)) {
+
+            Fragment behavior = new BehaviorPreferencesFragment();
+            Bundle barcodeUpdate = new Bundle();
+            barcodeUpdate.putBoolean(GeneralKeys.BARCODE_SCANNING_OPTIONS_EDIT, true);
+            behavior.setArguments(barcodeUpdate);
+            getSupportFragmentManager().beginTransaction().replace(R.id.prefs_container, behavior).commit();
         }
 
         boolean flag = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(GeneralKeys.THEME_FLAG, false);

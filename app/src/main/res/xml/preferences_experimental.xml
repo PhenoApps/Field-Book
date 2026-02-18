@@ -2,12 +2,19 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!--<PreferenceCategory-->
-    <!--    android:key="experimental_settings_stable"-->
-    <!--    android:title="@string/preferences_experimental_stable_title"-->
-    <!--    app:iconSpaceReserved="false">-->
+    <PreferenceCategory
+        android:key="experimental_settings_stable"
+        android:title="@string/preferences_experimental_stable_title"
+        app:iconSpaceReserved="false">
 
-    <!--</PreferenceCategory>-->
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:icon="@drawable/ic_pref_brapi_server"
+            android:key="com.tracker.fieldbook.preferences.keys.enable_enhanced_brapi_import"
+            android:summary="@string/pref_alpha_enhanced_brapi_import_summary"
+            android:title="@string/pref_alpha_brapi_import_title" />
+
+    </PreferenceCategory>
 
     <PreferenceCategory
         android:key="experimental_settings_beta"
@@ -21,35 +28,13 @@
             android:summary="@string/pref_experimental_enable_field_audio_summary"
             android:title="@string/pref_experimental_enable_field_audio_title" />
 
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/qrcode_scan"
-            android:key="com.tracker.fieldbook.preferences.keys.mlkit"
-            android:summary="@string/pref_beta_mlkit_summary"
-            android:title="@string/pref_beta_mlkit_title" />
-
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:key="experimental_settings_alpha"
-        android:title="@string/preferences_experimental_alpha_title"
-        app:iconSpaceReserved="false">
+<!--    <PreferenceCategory-->
+<!--        android:key="experimental_settings_alpha"-->
+<!--        android:title="@string/preferences_experimental_alpha_title"-->
+<!--        app:iconSpaceReserved="false">-->
 
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:icon="@drawable/ic_pref_brapi_server"
-            android:key="com.tracker.fieldbook.preferences.keys.enable_enhanced_brapi_import"
-            android:summary="@string/pref_alpha_enhanced_brapi_import_summary"
-            android:title="@string/pref_alpha_brapi_import_title" />
-
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:icon="@drawable/gamepad"
-            android:key="com.tracker.fieldbook.preferences.keys.enable_media_keycode_events"
-            android:summary="@string/pref_alpha_media_keycode_events_summary"
-            android:title="@string/pref_alpha_media_keycode_events_title" />
-
-    </PreferenceCategory>
+<!--    </PreferenceCategory>-->
 
 </PreferenceScreen>

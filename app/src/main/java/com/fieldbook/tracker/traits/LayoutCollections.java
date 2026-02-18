@@ -27,6 +27,7 @@ public class LayoutCollections {
         traitLayouts.add(new UsbCameraTraitLayout(_activity));
         traitLayouts.add(new GoProTraitLayout(_activity));
         traitLayouts.add(new CanonTraitLayout(_activity));
+        traitLayouts.add(new VideoTraitLayout(_activity));
         traitLayouts.add(new SpectralTraitLayout(_activity));
         traitLayouts.add(new NixTraitLayout(_activity));
         traitLayouts.add(new InnoSpectraTraitLayout(_activity));
@@ -48,14 +49,6 @@ public class LayoutCollections {
         return getTraitLayout("text");
     }
 
-    public AbstractCameraTrait getPhotoTrait(String format) {
-        switch (format) {
-            case "photo":
-                return (PhotoTraitLayout) getTraitLayout("photo");
-        }
-        return (PhotoTraitLayout) getTraitLayout("photo");
-    }
-
     public void deleteTraitListener(String format) {
         getTraitLayout(format).deleteTraitListener();
     }
@@ -64,34 +57,6 @@ public class LayoutCollections {
         getTraitLayout(format).setNaTraitsText();
         getTraitLayout(format).setCurrentValueAsEdited();
     }
-
-//    Deprecated - simpler to disable/enable data collection using lockOverlay instead
-//
-//    public void enableViews() {
-//        for (LinearLayout traitLayout : traitLayouts) {
-//            enableViews(true, traitLayout);
-//        }
-//    }
-//
-//    public void disableViews() {
-//        for (BaseTraitLayout traitLayout : traitLayouts) {
-//            String type = traitLayout.type();
-//            if (!type.equals("photo") && !type.equals("audio") && !type.equals("percent"))
-//                enableViews(false, traitLayout);
-//        }
-//    }
-//
-//    public void enableViews(Boolean toggle, ViewGroup layout) {
-//        layout.setEnabled(false);
-//        for (int i = 0; i < layout.getChildCount(); i++) {
-//            View child = layout.getChildAt(i);
-//            if (child instanceof ViewGroup) {
-//                enableViews(toggle, (ViewGroup) child);
-//            } else {
-//                child.setEnabled(toggle);
-//            }
-//        }
-//    }
 
     public void registerAllReceivers() {
         for (BaseTraitLayout layout : this.traitLayouts) {
