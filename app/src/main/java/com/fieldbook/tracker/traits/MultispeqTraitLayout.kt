@@ -8,6 +8,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
@@ -45,6 +46,7 @@ class MultispeqTraitLayout : BaseTraitLayout, MultispeqListener {
 
     companion object {
         const val type = "multispeq"
+        private const val TAG = "MultispeqTraitLayout"
     }
 
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -189,7 +191,7 @@ class MultispeqTraitLayout : BaseTraitLayout, MultispeqListener {
             resetToConnectState()
         }
         powerOffButton.setOnClickListener {
-            multispeqManager?.sendCommand("sleep")
+            multispeqManager?.sendSleep()
         }
     }
 
@@ -296,6 +298,8 @@ class MultispeqTraitLayout : BaseTraitLayout, MultispeqListener {
             progressBar.visibility = View.GONE
             measureButton.isEnabled = true
 
+            Log.d(TAG, "onMeasurementResult: received raw JSON (${rawJson.length} chars): ${rawJson.take(500)}")
+
             val nameDisplay = connectedDisplayName.ifBlank { connectedDeviceName }
             deviceNameText.text = context.getString(R.string.multispeq_connected, nameDisplay)
 
@@ -318,13 +322,24 @@ class MultispeqTraitLayout : BaseTraitLayout, MultispeqListener {
             // Calculate and display selected parameters
             val rawParams = MultispeqParameter.fromJsonString(currentTrait.categories)
             val selectedParameters = rawParams.ifEmpty { MultispeqParameter.defaultSelection() }
+            Log.d(TAG, "Selected parameters (${selectedParameters.size}): ${selectedParameters.map { it.name }}")
+
             val results = MultispeqCalculator.calculate(rawJson, selectedParameters)
+            Log.d(TAG, "Calculation results (${results.size} entries): ${results.map { (k, v) -> "${k.name}=$v" }}")
+
+            val naCount = results.values.count { it == "N/A" }
+            if (naCount > 0) {
+                Log.w(TAG, "$naCount/${results.size} parameters returned N/A")
+            }
 
             displayResults(results, selectedParameters)
 
             // Save observation as compact JSON
             val observationJson = buildObservationJson(results)
+            Log.d(TAG, "Observation JSON to save: $observationJson")
+            Log.d(TAG, "Calling updateObservation for trait '${currentTrait.name}' (id=${currentTrait.id})")
             updateObservation(currentTrait, observationJson)
+            Log.d(TAG, "updateObservation returned; setting collectInputView text")
             collectInputView.text = observationJson
         }
     }
@@ -391,9 +406,9 @@ class MultispeqTraitLayout : BaseTraitLayout, MultispeqListener {
 
     private fun buildObservationJson(results: Map<MultispeqParameter, String>): String {
         val obj = JSONObject()
-        for ((param, value) in results) {
-            if (value != "N/A") obj.put(param.displayName, value)
-        }
+        results.entries
+            .sortedBy { (param, _) -> param.ordinal }
+            .forEach { (param, value) -> obj.put(param.displayName, value) }
         return obj.toString()
     }
 

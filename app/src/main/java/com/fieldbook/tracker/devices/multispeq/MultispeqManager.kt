@@ -31,7 +31,7 @@ class MultispeqManager(private val listener: MultispeqListener) {
         private const val CHECKSUM_LENGTH = 8
     }
 
-    private enum class PendingInfo { NONE, BATTERY, DEVICE_INFO }
+    private enum class PendingInfo { NONE, BATTERY, DEVICE_INFO, SLEEP }
 
     private var connectThread: ConnectThread? = null
     private var connectedThread: ConnectedThread? = null
@@ -80,6 +80,16 @@ class MultispeqManager(private val listener: MultispeqListener) {
         }
         connectedThread?.write("$json\r\n")
             ?: listener.onError("Not connected to a device")
+    }
+
+    /**
+     * Sends the "sleep" command to power off the device.
+     * Any final response from the device before it disconnects is suppressed
+     * so it does not overwrite the last saved observation.
+     */
+    fun sendSleep() {
+        pendingInfo = PendingInfo.SLEEP
+        sendCommand("sleep")
     }
 
     /** Closes the current connection and stops all threads. */
@@ -233,6 +243,11 @@ class MultispeqManager(private val listener: MultispeqListener) {
                     }
 
                     listener.onDeviceInfo(deviceId, firmware, pendingBattery)
+                }
+
+                PendingInfo.SLEEP -> {
+                    // Device is powering off; ignore any final acknowledgement response
+                    pendingInfo = PendingInfo.NONE
                 }
 
                 PendingInfo.NONE -> {
