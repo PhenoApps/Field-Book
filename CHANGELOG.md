@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- Correct value is now displayed for saved dates (https://github.com/PhenoApps/Field-Book/pull/1404)
 
 ## [v7.0.2] - 2026-02-10
 
