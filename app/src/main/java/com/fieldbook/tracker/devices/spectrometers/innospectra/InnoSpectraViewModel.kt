@@ -159,7 +159,7 @@ class InnoSpectraViewModel @Inject constructor() : ViewModel(), InnoSpectraViewM
                                                         device,
                                                         result.rssi,
                                                         record.bytes,
-                                                        //nanoName
+                                                        nanoName
                                                     )
 
                                                     mConnectionStarting = true

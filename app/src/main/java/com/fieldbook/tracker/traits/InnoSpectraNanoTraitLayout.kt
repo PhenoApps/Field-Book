@@ -452,7 +452,7 @@ class InnoSpectraNanoTraitLayout : SpectralTraitLayout {
                         device,
                         result.rssi,
                         record.bytes,
-                        //nanoName
+                        nanoName
                     )
 
                     if (!deviceList.map { it.second.nanoMac }.contains(nanoDevice.nanoMac)) {
