@@ -34,6 +34,7 @@ import com.fieldbook.tracker.traits.formats.parameters.Parameters
 import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 import com.fieldbook.tracker.traits.formats.parameters.SaveImageParameter
+import com.fieldbook.tracker.traits.formats.parameters.SeveritiesParameter
 import com.fieldbook.tracker.traits.formats.parameters.UnitParameter
 import com.fieldbook.tracker.ui.components.widgets.Chip
 import com.fieldbook.tracker.ui.screens.traits.dialogs.BrapiLabelValueDialog
@@ -215,6 +216,7 @@ private fun getParamIcon(param: BaseFormatParameter, trait: TraitObject): Int {
         }
 
         is CategoriesParameter -> R.drawable.ic_trait_categorical
+        is SeveritiesParameter -> R.drawable.ic_order_numeric_ascending
         is DecimalPlacesParameter -> R.drawable.ic_decimal
         is UnitParameter -> R.drawable.ic_tag_edit
         is ResourceFileParameter -> R.drawable.ic_tb_folder
@@ -234,6 +236,7 @@ private fun getParamText(context: Context, param: BaseFormatParameter, trait: Tr
         }
 
         is SaveImageParameter -> context.getString(R.string.trait_detail_chip_transfer_images)
+        is SeveritiesParameter -> context.getString(R.string.trait_detail_chip_severities)
         else -> param.getName(context).capitalizeFirstLetter()
     }
 }

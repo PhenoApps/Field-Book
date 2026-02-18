@@ -6,26 +6,26 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
 
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.adapters.DiseaseRatingAdapter;
 import com.fieldbook.tracker.database.models.ObservationModel;
-import com.fieldbook.tracker.utilities.BackgroundUiTask;
+import com.fieldbook.tracker.traits.formats.parameters.SeveritiesParameter;
+import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.Utils;
+import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 
-import org.phenoapps.utils.BaseDocumentTreeUtil;
-
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+
+import kotlin.Unit;
 
 public class DiseaseRatingTraitLayout extends BaseTraitLayout {
 
-    private List<String> loadedRustCodes = null;
     Button rustR, rustM, rustS, rustDelim;
-    Map<Integer, Button> rustButtons;
+    RecyclerView severityGrid;
+    DiseaseRatingAdapter severityAdapter;
 
     public DiseaseRatingTraitLayout(Context context) {
         super(context);
@@ -59,111 +59,60 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
 
     @Override
     public void init(Activity act) {
-        rustButtons = new LinkedHashMap<>();
-        rustButtons.put(R.id.rust0, act.findViewById(R.id.rust0));
-        rustButtons.put(R.id.rust5, act.findViewById(R.id.rust5));
-        rustButtons.put(R.id.rust10, act.findViewById(R.id.rust10));
-        rustButtons.put(R.id.rust15, act.findViewById(R.id.rust15));
-        rustButtons.put(R.id.rust20, act.findViewById(R.id.rust20));
-        rustButtons.put(R.id.rust25, act.findViewById(R.id.rust25));
-        rustButtons.put(R.id.rust30, act.findViewById(R.id.rust30));
-        rustButtons.put(R.id.rust35, act.findViewById(R.id.rust35));
-        rustButtons.put(R.id.rust40, act.findViewById(R.id.rust40));
-        rustButtons.put(R.id.rust45, act.findViewById(R.id.rust45));
-        rustButtons.put(R.id.rust50, act.findViewById(R.id.rust50));
-        rustButtons.put(R.id.rust55, act.findViewById(R.id.rust55));
-        rustButtons.put(R.id.rust60, act.findViewById(R.id.rust60));
-        rustButtons.put(R.id.rust65, act.findViewById(R.id.rust65));
-        rustButtons.put(R.id.rust70, act.findViewById(R.id.rust70));
-        rustButtons.put(R.id.rust75, act.findViewById(R.id.rust75));
-        rustButtons.put(R.id.rust80, act.findViewById(R.id.rust80));
-        rustButtons.put(R.id.rust85, act.findViewById(R.id.rust85));
-        rustButtons.put(R.id.rust90, act.findViewById(R.id.rust90));
-        rustButtons.put(R.id.rust95, act.findViewById(R.id.rust95));
-        rustButtons.put(R.id.rust100, act.findViewById(R.id.rust100));
+        severityGrid = act.findViewById(R.id.severityGrid);
         rustR = act.findViewById(R.id.rustR);
         rustM = act.findViewById(R.id.rustM);
         rustS = act.findViewById(R.id.rustS);
         rustDelim = act.findViewById(R.id.rustDelim);
 
-        loadRustCodes();
-    }
+        severityAdapter = new DiseaseRatingAdapter(value -> {
+            handleSeverityClick(value);
+            return Unit.INSTANCE;
+        });
 
-    private void loadRustCodes() {
-        BackgroundUiTask.Companion.execute(
-                continuation -> {
-                    loadedRustCodes = getRustCodes();
-                    return null;
-                },
-                continuation -> {
-                    if (loadedRustCodes != null) {
-                        setupRustButtons(loadedRustCodes);
-                    }
-                    return null;
-                },
-                continuation -> {
-                    // show nothing if failed
-                    return null;
-                }
-        );
-    }
-
-
-    private void setupRustButtons(List<String> rustCodes) {
-        List<Button> rustBtnArray = new ArrayList<>(rustButtons.values());
-        for (int i = 0; i < rustCodes.size(); i++) {
-            rustBtnArray.get(i).setText(rustCodes.get(i));
-            rustBtnArray.get(i).setOnClickListener(new RustButtonOnClickListener());
-        }
+        androidx.recyclerview.widget.GridLayoutManager layoutManager =
+                new androidx.recyclerview.widget.GridLayoutManager(getContext(), 6);
+        severityGrid.setLayoutManager(layoutManager);
+        severityGrid.setAdapter(severityAdapter);
 
         rustR.setOnClickListener(new RustButtonOnClickListener());
         rustM.setOnClickListener(new RustButtonOnClickListener());
         rustS.setOnClickListener(new RustButtonOnClickListener());
         rustDelim.setOnClickListener(new RustButtonOnClickListener());
-
-        rustButtons.get(R.id.rust0).requestFocus();
     }
 
-    private List<String> getRustCodes() {
-        List<String> rustCodes = new ArrayList<>();
-        String token1;
-        Scanner inFile1 = null;
+    private List<String> getSeverityCodes() {
+        List<String> codes = new ArrayList<>();
 
-        try {
-            InputStream severityInput = BaseDocumentTreeUtil.Companion
-                    .getFileInputStream(getContext(), R.string.dir_trait, "severity.txt");
-
-            if (severityInput != null) {
-
-                inFile1 = new Scanner(severityInput);
-
+        if (getCurrentTrait() != null) {
+            String categories = getCurrentTrait().getCategories();
+            if (categories != null && !categories.isEmpty()) {
+                try {
+                    ArrayList<BrAPIScaleValidValuesCategories> cats =
+                            CategoryJsonUtil.Companion.decodeCategories(categories);
+                    if (!cats.isEmpty()) {
+                        for (BrAPIScaleValidValuesCategories cat : cats) {
+                            codes.add(cat.getValue());
+                        }
+                        return codes;
+                    }
+                } catch (Exception e) {
+                    // fall through to defaults
+                }
             }
-
-        } catch (Exception e) {
-            e.printStackTrace();
         }
 
-        if (inFile1 != null) {
-            while (inFile1.hasNext()) {
-                token1 = inFile1.next();
-                rustCodes.add(token1);
-            }
-            inFile1.close();
-
-            //Trim list to 21 since only 21 buttons
-            int k = rustCodes.size();
-            if (k > 21) {
-                rustCodes.subList(21, k).clear();
-            }
-        } else {
-            rustCodes = Arrays.asList("0", "5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", "60", "65", "70", "75", "80", "85", "90", "95", "100");
-        }
-        return rustCodes;
+        // fallback to defaults
+        codes.addAll(SeveritiesParameter.Companion.getDEFAULT_SEVERITIES());
+        return codes;
     }
 
     @Override
     public void loadLayout() {
         super.loadLayout();
+
+        // refresh severity buttons from trait categories
+        severityAdapter.submitList(getSeverityCodes());
 
         ObservationModel model = getCurrentObservation();
         if (model != null) {
@@ -184,6 +133,34 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
         }
     }
 
+    private void handleSeverityClick(String v) {
+        triggerTts(v);
+
+        if (getVisibility() == View.VISIBLE) {
+            String textValue = getCollectInputView().getText();
+            if (textValue.length() > 0
+                    && !textValue.endsWith("/")) {
+
+                String lastChar = textValue.substring(textValue.length() - 1);
+                if (!lastChar.matches("^[a-zA-Z]*$")) {
+                    v = ":" + v;
+                }
+            }
+
+            if (textValue.matches(".*\\d.*")
+                    && v.matches(".*\\d.*")
+                    && !textValue.contains("/")) {
+                String error = getContext().getString(R.string.trait_error_disease_severity);
+                Utils.makeToast(getContext(), error);
+                triggerTts(error);
+            } else {
+                String value = textValue + v;
+                getCollectInputView().setText(value);
+                updateObservation(getCurrentTrait(), value);
+            }
+        }
+    }
+
     private class RustButtonOnClickListener implements OnClickListener {
 
         @Override
@@ -197,8 +174,6 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
                 v = "S";
             } else if (view.getId() == R.id.rustDelim) {
                 v = "/";
-            } else {
-                v = rustButtons.get(view.getId()).getText().toString();
             }
 
             triggerTts(v);
@@ -215,17 +190,9 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
                     }
                 }
 
-                if (textValue.matches(".*\\d.*")
-                        && v.matches(".*\\d.*")
-                        && !textValue.contains("/")) {
-                    String error = getContext().getString(R.string.trait_error_disease_severity);
-                    Utils.makeToast(getContext(),error);
-                    triggerTts(error);
-                } else {
-                    String value = textValue + v;
-                    getCollectInputView().setText(value);
-                    updateObservation(getCurrentTrait(), value);
-                }
+                String value = textValue + v;
+                getCollectInputView().setText(value);
+                updateObservation(getCurrentTrait(), value);
             }
         }
     }

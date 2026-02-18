@@ -5,6 +5,7 @@ import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
 import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
+import com.fieldbook.tracker.traits.formats.parameters.SeveritiesParameter
 
 class DiseaseRatingFormat : TraitFormat(
     format = Formats.DISEASE_RATING,
@@ -16,6 +17,7 @@ class DiseaseRatingFormat : TraitFormat(
     stringNameAux = null,
     NameParameter(),
     DetailsParameter(),
+    SeveritiesParameter(),
     RepeatedMeasureParameter(),
     ResourceFileParameter()
 ), Scannable
