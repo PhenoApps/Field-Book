@@ -44,7 +44,7 @@ open class PhotoTraitLayout : CameraTrait {
 
     private var supportedResolutions: List<Size> = listOf()
 
-    private var previewHolder: ImageAdapter.PreviewViewHolder? = null
+    protected var previewHolder: ImageAdapter.PreviewViewHolder? = null
     private var isCameraActive = false
 
     constructor(context: Context?) : super(context)
