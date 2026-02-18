@@ -323,6 +323,7 @@
     <string name="traits_format_text">Texto</string>
     <string name="traits_format_photo">Foto</string>
     <string name="traits_format_camera">Cámara</string>
+    <string name="traits_format_video">Vídeo</string>
     <string name="traits_format_audio">Audio</string>
     <string name="traits_format_multicategorical">Multi-Categorías</string>
     <string name="traits_format_location">Ubicación</string>
@@ -364,8 +365,10 @@
     <string name="trait_parameter_decimal_places">Decimales</string>
     <string name="trait_parameter_decimal_places_hint">Número de decimales (-1 para ilimitado, 0 para enteros)</string>
     <string name="trait_parameter_decimal_places_error">Valor debe estar entre -1 y 10</string>
+    <string name="traits_attach_media_title">Adjuntar Multimedia</string>
     <string name="traits_attach_media_photo_label">Foto</string>
     <string name="traits_attach_media_audio_label">Audio</string>
+    <string name="traits_attach_media_video_label">Vídeo</string>
     <string name="traits_create_warning_name_blank">Nombre de la variable no puede estar vacío</string>
     <string name="traits_create_warning_duplicate">Variable ya existe</string>
     <string name="traits_create_warning_numeric_required">Los valores predeterminado, mínimo y máximo deben ser numéricos</string>
@@ -816,6 +819,7 @@
     <string name="preferences_appearance_range_progress_bar_description">Muestra su posición actual en el campo</string>
     <string name="preferences_appearance_traits_progress_bar">Barra de progreso de variables</string>
     <string name="preferences_appearance_traits_progress_bar_description">Muestra si las variables activas tienen datos y resalta la variable actual</string>
+    <string name="preferences_appearance_observation_timestamp">Timestamp de la Observación</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamiento</string>
     <string name="preferences_behavior_movement_title">Movimiento</string>
@@ -848,6 +852,8 @@
     <string name="preferences_behavior_return_character_next_trait">Tecla retorno avanza variable</string>
     <string name="preferences_general_use_day_number">Usar Día del Año</string>
     <string name="preferences_general_use_day_number_description">Usar número de día del año para capturar datos en lugar de la fecha</string>
+    <string name="preferences_behavior_barcode_scanning_move_to_entry">Mover a la entrada</string>
+    <string name="preferences_behavior_barcode_scanning_ask">Preguntar siempre</string>
     <!-- Location -->
     <string name="preferences_location_title">Ubicación</string>
     <string name="preferences_location_defaults_title">GeoCoordenadas</string>
@@ -1312,6 +1318,8 @@
     <string name="trait_camera_connect_content_description">Inicia una conexión de dispositivo.</string>
     <string name="trait_camera_preview_content_description">Esta vista previa de la pantalla de la cámara.</string>
     <string name="trait_camera_capture_content_description">Capturar una foto</string>
+    <string name="trait_camera_view_media_content_description">Ver multimedia</string>
+    <string name="trait_camera_switch_content_description">Cambiar cámara</string>
     <!-- Video recording messages -->
     <!-- Audio pause not supported message -->
     <string name="trait_system_photo_settings_title">Ajustes de Fotos del Sistema</string>
@@ -1535,7 +1543,11 @@
     <string name="device_settings_dialog_unknown_name">Dispositivo Bluetooth desconocido</string>
     <string name="device_settings_dialog_title">Ajustes del dispositivo Bluetooth</string>
     <string name="no_data_captured">No hay datos capturados.</string>
+    <string name="media_viewer">Visor Multimedia</string>
+    <string name="unable_to_load_image">No se puede cargar la imagen</string>
     <string name="delete">Eliminar</string>
+    <string name="confirm_delete">¿Quieres eliminar permanentemente este elemento multimedia?</string>
+    <string name="audio_permission_required">Permiso de audio requerido</string>
     <string name="failed_to_find_file_name">Error al recuperar el nombre del archivo.</string>
     <string name="act_brapi_export_starting">Iniciando exportación</string>
     <string name="act_brapi_export_success">Exportación exitosa</string>
@@ -1607,7 +1619,11 @@
     <string name="there_are_unuploaded_observations_or_images_do_you_want_to_upload_them_before_downloading">Hay observaciones o imágenes sin cargar. ¿Quieres subirlas antes de descargar?</string>
     <string name="upload_first">Cargar</string>
     <string name="download_anyway">Descargar</string>
+    <string name="attach">Adjuntar</string>
     <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
+    <string name="alert_jump_to_plot_bottom_toolbar_message">La barra de herramientas inferior ha sido actualizada para soportar la navegación de entrada a través de código de barras.</string>
     <!-- Preference: Attach media barcode prioritize -->
+    <string name="preferences_behavior_attach_media_barcode_prioritize">Usar siempre código de barras detectado</string>
+    <string name="preferences_behavior_attach_media_barcode_prioritize_description">Cuando se detecta un código de barras, Field Book analizará automáticamente el código de barras sin la interacción del usuario.</string>
     <string name="edit">Editar</string>
 </resources>
