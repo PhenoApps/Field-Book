@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Photos, videos, and audio files can now be attached to individual observations (https://github.com/PhenoApps/Field-Book/pull/1390)
 
 ### Changed
+- Nearest field finder now searches across all location data (https://github.com/PhenoApps/Field-Book/pull/1399)
 
 ### Fixed
 - GeoNav popup no longer causes a crash when navigating (https://github.com/PhenoApps/Field-Book/pull/1415)
