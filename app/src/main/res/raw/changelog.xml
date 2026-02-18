@@ -1,5 +1,16 @@
 <changelog>
 
+    <release date="2026-02-18" versionCode="70100 versionName="v7.1.0"">
+        <new>Bottom toolbar in Collect can now be used for barcode navigation</new>
+        <new>Photos, videos, and audio files can now be attached to individual observations</new>
+        <new>Timestamp can now be optionally displayed under phenotypes in Collect</new>
+        <new>New video trait format</new>
+        <info>Nearest field finder now searches across all location data</info>
+        <bugfix>Camera previews no longer reload when navigating between entries</bugfix>
+        <bugfix>GeoNav popup no longer causes a crash when navigating</bugfix>
+        <bugfix>Correct value is now displayed for saved dates</bugfix>
+    </release>
+
     <release date="2026-02-10" versionCode="70002 versionName="v7.0.2"">
         <bugfix>Internal GeoJSON data are now saved as doubles</bugfix>
         <bugfix>BrAPI improvements and optimizations</bugfix>
