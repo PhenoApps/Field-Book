@@ -121,6 +121,8 @@
     <string name="traits_create_true">正确</string>
     <string name="traits_create_false">错误</string>
     <string name="traits_create_categories_text">用“/\"分割类别</string>
+    <string name="traits_attach_media_photo_label">图片</string>
+    <string name="traits_attach_media_audio_label">音频</string>
     <string name="traits_create_warning_name_blank">性状名称不能为空</string>
     <string name="traits_create_warning_duplicate">性状已经存在</string>
     <string name="traits_create_warning_numeric_required">默认值、最小值和最大值必须设定为数字</string>
@@ -406,6 +408,8 @@
     <string name="act_brapi_filter_import">导入</string>
     <string name="act_brapi_filter_clear">清除</string>
     <!-- base camera strings -->
+    <!-- Video recording messages -->
+    <!-- Audio pause not supported message -->
     <string name="view_trait_photo_settings_camera_custom">默认值</string>
     <!-- usb camera trait -->
     <!-- gopro -->
@@ -417,8 +421,12 @@
     <!--  NearbyShare  -->
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="save">保存</string>
+    <string name="delete">删除</string>
     <string name="new_images">新图像</string>
     <string name="edited_images">编辑的图像</string>
     <string name="synced_images">同步的图像</string>
     <string name="local">本地</string>
+    <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
+    <!-- Preference: Attach media barcode prioritize -->
+    <string name="edit">编辑</string>
 </resources>

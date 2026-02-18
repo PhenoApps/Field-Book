@@ -117,6 +117,8 @@
     <string name="traits_create_true">Đúng</string>
     <string name="traits_create_false">Sai</string>
     <string name="traits_create_categories_text">Sử dụng / để phân chia các mục</string>
+    <string name="traits_attach_media_photo_label">Ảnh</string>
+    <string name="traits_attach_media_audio_label">Tiếng</string>
     <string name="traits_create_warning_name_blank">Tên tính trạng không được để trống</string>
     <string name="traits_create_warning_duplicate">Tính trạng đã tồn tại</string>
     <string name="traits_create_warning_numeric_required">Giá trị mặc định, nhỏ nhất, lớn nhất là bắt buộc và phải là định dạng số</string>
@@ -399,6 +401,8 @@ Các tính trạng và ruộng được tạo thủ công hoặc được nhập
     <string name="act_brapi_filter_import">Nhập</string>
     <string name="act_brapi_filter_clear">Xóa</string>
     <!-- base camera strings -->
+    <!-- Video recording messages -->
+    <!-- Audio pause not supported message -->
     <string name="view_trait_photo_settings_camera_custom">Mặc định</string>
     <!-- usb camera trait -->
     <!-- gopro -->
@@ -410,8 +414,12 @@ Các tính trạng và ruộng được tạo thủ công hoặc được nhập
     <!--  NearbyShare  -->
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="save">Lưu</string>
+    <string name="delete">Xóa</string>
     <string name="new_images">Ảnh mới</string>
     <string name="edited_images">Ảnh đã được chỉnh sửa</string>
     <string name="synced_images">Ảnh được đồng bộ</string>
     <string name="local">Bộ nhớ máy</string>
+    <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
+    <!-- Preference: Attach media barcode prioritize -->
+    <string name="edit">Chỉnh sửa</string>
 </resources>

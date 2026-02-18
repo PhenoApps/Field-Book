@@ -114,6 +114,7 @@
     <string name="traits_create_true">vrai</string>
     <string name="traits_create_false">faux</string>
     <string name="traits_create_categories_text">séparer les catégories par un /</string>
+    <string name="traits_attach_media_photo_label">photo</string>
     <string name="traits_create_warning_name_blank">le nom du caractère ne peut pas être vide</string>
     <string name="traits_create_warning_duplicate">le caractère existe déjà</string>
     <string name="traits_create_warning_numeric_required">défaut, minimum, et maximum doivent être numériques</string>
@@ -388,6 +389,8 @@ Phenotypes et essais créés manuellement ou importés via CSV devront être exp
     <string name="act_brapi_filter_import">importer</string>
     <string name="act_brapi_filter_clear">effacer</string>
     <!-- base camera strings -->
+    <!-- Video recording messages -->
+    <!-- Audio pause not supported message -->
     <string name="view_trait_photo_settings_camera_custom">défaut</string>
     <!-- usb camera trait -->
     <!-- gopro -->
@@ -399,7 +402,11 @@ Phenotypes et essais créés manuellement ou importés via CSV devront être exp
     <!--  NearbyShare  -->
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="save">enregistrer</string>
+    <string name="delete">Effacer</string>
     <string name="new_images">Nouvelles images</string>
     <string name="edited_images">Images éditées </string>
     <string name="synced_images">Images synchronisées </string>
+    <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
+    <!-- Preference: Attach media barcode prioritize -->
+    <string name="edit">Modifier</string>
 </resources>
