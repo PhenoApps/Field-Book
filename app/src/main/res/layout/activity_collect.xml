@@ -25,57 +25,10 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent">
 
-        <LinearLayout
-            android:id="@+id/toolbarBottomContent"
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/toolbarBottomCompose"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:weightSum="1">
-
-            <ImageButton
-                android:id="@+id/barcodeInput"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:visibility="visible"
-                android:layout_gravity="center"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_weight="0.4"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:gravity="center"
-                android:src="@drawable/main_ic_input_barcode"
-                android:textColor="#FFFFFF"
-                android:contentDescription="@string/act_collect_barcode_button_content_description" />
-
-            <ImageButton
-                android:id="@+id/missingValue"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_weight="0.4"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:gravity="center"
-                android:src="@drawable/main_ic_missing"
-                android:textColor="#FFFFFF"
-                android:contentDescription="@string/act_collect_na_value_button_content_description" />
-
-            <ImageButton
-                android:id="@+id/deleteValue"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_weight="0.4"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:gravity="center"
-                android:src="@drawable/main_ic_delete_forever"
-                android:textColor="#FFFFFF"
-                android:contentDescription="@string/act_collect_delete_value_button_content_description" />
-
-        </LinearLayout>
+            android:layout_height="match_parent"/>
 
     </androidx.appcompat.widget.Toolbar>
 

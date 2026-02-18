@@ -128,4 +128,6 @@
     <color name="high_heatmap_color_medium">#585858</color>
     <color name="high_heatmap_color_high">#484848</color>
     <color name="high_heatmap_color_max">#343434</color>
+
+    <color name="collect_bottom_toolbar_icon_color">#343434</color>
 </resources>

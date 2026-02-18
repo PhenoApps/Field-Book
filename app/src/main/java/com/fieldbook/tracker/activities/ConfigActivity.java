@@ -35,6 +35,7 @@ import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.AppLanguageUtil;
+import com.fieldbook.tracker.utilities.FuzzySearch;
 import com.fieldbook.tracker.utilities.InsetHandler;
 import com.fieldbook.tracker.utilities.export.ExportUtil;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
@@ -49,8 +50,6 @@ import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.getkeepsafe.taptargetview.TapTargetView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
 import com.michaelflisar.changelog.ChangelogBuilder;
 import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
 import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
@@ -86,6 +85,7 @@ import pub.devrel.easypermissions.EasyPermissions;
 @AndroidEntryPoint
 public class ConfigActivity extends ThemedActivity {
 
+    public static final String LOAD_FIELD_ID = "load_field_id";
     private static final int REQUEST_BARCODE = 100;
     private final static String TAG = ConfigActivity.class.getSimpleName();
     private final int PERMISSIONS_REQUEST_TRAIT_DATA = 9950;
@@ -104,13 +104,14 @@ public class ConfigActivity extends ThemedActivity {
     PersonNameManager nameManager;
     @Inject
     public ExportUtil exportUtil;
+    @Inject
+    public FuzzySearch fuzzySearch;
     Handler mHandler = new Handler();
     boolean doubleBackToExitPressedOnce = false;
     ListView settingsList;
     private Menu systemMenu;
     //barcode search fab
     private FloatingActionButton barcodeSearchFab;
-    private boolean mlkitEnabled;
 
     @Override
     public void onResume() {
@@ -166,6 +167,17 @@ public class ConfigActivity extends ThemedActivity {
         nameManager.migrateExistingPersonName();
 
         setupBackCallback();
+
+        parseIntentExtras(getIntent());
+    }
+
+    private void parseIntentExtras(Intent sentIntent) {
+        if (sentIntent != null && sentIntent.getExtras() != null) {
+            int loadFieldId = sentIntent.getExtras().getInt(LOAD_FIELD_ID, -1);
+            if (loadFieldId != -1) {
+                startActivity(new Intent(this, CollectActivity.class));
+            }
+        }
     }
 
     private void versionBasedSetup() {
@@ -318,18 +330,15 @@ public class ConfigActivity extends ThemedActivity {
         ImageListAdapter adapterImg = new ImageListAdapter(this, image_id, configList);
         settingsList.setAdapter(adapterImg);
 
-        mlkitEnabled = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(PreferenceKeys.MLKIT_PREFERENCE_KEY, false);
-
         barcodeSearchFab = findViewById(R.id.act_config_search_fab);
         barcodeSearchFab.setOnClickListener(v -> {
-            if (mlkitEnabled) {
-                ScannerActivity.Companion.requestCameraAndStartScanner(this, REQUEST_BARCODE, null, null, null);
-            } else {
-                new IntentIntegrator(this)
-                        .setPrompt(getString(R.string.barcode_scanner_text))
-                        .setBeepEnabled(false)
-                        .setRequestCode(REQUEST_BARCODE)
-                        .initiateScan();
+
+            try {
+                Intent intent = new Intent(this, CameraActivity.class);
+                intent.putExtra(CameraActivity.EXTRA_MODE, CameraActivity.MODE_BARCODE);
+                startActivityForResult(intent, REQUEST_BARCODE);
+            } catch (Exception e) {
+                Log.e(TAG, "Unable to open camera", e);
             }
         });
 
@@ -373,32 +382,6 @@ public class ConfigActivity extends ThemedActivity {
         return 1;
     }
 
-    private void resolveFuzzySearchResult(FieldObject f, @Nullable String plotId) {
-
-        soundHelper.playCelebrate();
-
-        int studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
-
-        int newStudyId = f.getStudyId();
-
-        if (studyId != newStudyId) {
-
-            switchField(newStudyId);
-
-        }
-
-        CollectActivity.reloadData = true;
-
-        if (plotId != null) {
-
-            preferences.edit().putString(GeneralKeys.LAST_PLOT, plotId).apply();
-
-        }
-
-        startCollectActivity();
-
-    }
-
     private void startCollectActivity() {
 
         int selectedField = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
@@ -407,80 +390,6 @@ public class ConfigActivity extends ThemedActivity {
         if (field != null && field.getDateImport() != null && !field.getDateImport().isEmpty()) {
             Intent intent = new Intent(this, CollectActivity.class);
             startActivity(intent);
-        }
-    }
-
-    @Nullable
-    private FieldObject searchStudiesForBarcode(String barcode) {
-
-        ArrayList<FieldObject> fields = database.getAllFieldObjects();
-
-        // first, search to try and match study alias
-        for (FieldObject f : fields) {
-
-            if (f != null && f.getAlias() != null && f.getAlias().equals(barcode)) {
-
-                return f;
-
-            }
-        }
-
-        // second, if field is not found search for study name
-        for (FieldObject f : fields) {
-
-            if (f != null && f.getName() != null && f.getName().equals(barcode)) {
-
-                return f;
-
-            }
-        }
-
-        return null;
-    }
-
-    @Nullable
-    private ObservationUnitModel searchPlotsForBarcode(String barcode) {
-
-        // search for barcode in database
-        ObservationUnitModel[] models = database.getAllObservationUnits();
-        for (ObservationUnitModel m : models) {
-            if (m.getObservation_unit_db_id().equals(barcode)) {
-
-                return m;
-            }
-        }
-
-        return null;
-    }
-
-    //1) study alias, 2) study names, 3) plotdbids
-    private void fuzzyBarcodeSearch(String barcode) {
-
-        // search for studies
-        FieldObject f = searchStudiesForBarcode(barcode);
-
-        if (f == null) {
-
-            // search for plots
-            ObservationUnitModel m = searchPlotsForBarcode(barcode);
-
-            if (m != null && m.getStudy_id() != -1) {
-
-                FieldObject study = database.getFieldObject(m.getStudy_id());
-
-                resolveFuzzySearchResult(study, barcode);
-
-            } else {
-
-                soundHelper.playError();
-
-                Utils.makeToast(this, getString(R.string.act_config_fuzzy_search_failed, barcode));
-            }
-
-        } else {
-
-            resolveFuzzySearchResult(f, null);
-
         }
     }
 
@@ -543,27 +452,27 @@ public class ConfigActivity extends ThemedActivity {
             if (resultCode == RESULT_OK) {
 
                 // get barcode from scan result
-                String scannedBarcode;
-                if (mlkitEnabled) {
-                    scannedBarcode = data.getStringExtra("barcode");
-                } else {
-                    IntentResult plotDataResult = IntentIntegrator.parseActivityResult(resultCode, data);
-                    scannedBarcode = plotDataResult.getContents();
-                }
-                try {
+                if (data != null) {
 
-                    fuzzyBarcodeSearch(scannedBarcode);
+                    String scannedBarcode = data.getStringExtra(CameraActivity.EXTRA_BARCODE);
 
-                } catch (Exception e) {
+                    try {
+                        fuzzySearch.fuzzyBarcodeSearch(scannedBarcode);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Fuzzy search error", e);
+                        Utils.makeToast(this, getString(R.string.act_config_fuzzy_search_error, scannedBarcode));
 
-                    e.printStackTrace();
-
-                    Utils.makeToast(this, getString(R.string.act_config_fuzzy_search_error, scannedBarcode));
-
-                    soundHelper.playError();
+                        soundHelper.playError();
+                    }
                 }
             }
         }
+    }
+
+    @Override
+    protected void onNewIntent(@NonNull Intent intent) {
+        super.onNewIntent(intent);
+        parseIntentExtras(intent);
     }
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_TRAIT_DATA)
@@ -678,21 +587,6 @@ public class ConfigActivity extends ThemedActivity {
         };
 
         getOnBackPressedDispatcher().addCallback(this, doubleBackCallback);
-    }
-
-    /**
-     * Calls database switch field on the given studyId.
-     *
-     * @param studyId the study id to switch to
-     */
-    private void switchField(int studyId) {
-
-        if (fieldSwitcher == null) {
-            fieldSwitcher = new FieldSwitchImpl(this);
-        }
-
-        fieldSwitcher.switchField(studyId);
-
     }
 
     private void setupConfigWindowInsets() {

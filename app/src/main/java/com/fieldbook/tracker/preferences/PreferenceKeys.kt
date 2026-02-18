@@ -34,6 +34,7 @@ class PreferenceKeys {
         const val QUICK_GOTO = "QuickGoTo"
         const val RANGE_PROGRESS_BAR = "RANGE_PROGRESS_BAR"
         const val TRAITS_PROGRESS_BAR = "TRAITS_PROGRESS_BAR"
+        const val SHOW_OBSERVATION_TIMESTAMP = "SHOW_OBSERVATION_TIMESTAMP"
         // themes
         const val THEME = "key_preferences_theme_theme"
         const val TEXT_THEME = "key_preferences_theme_text"
@@ -45,8 +46,8 @@ class PreferenceKeys {
         const val LANGUAGE_LOCALE_DEFAULT_ID = "com.tracker.fieldbook.preference.language.default_id"
 
         private val appearancePreferenceKeys = setOf(TOOLBAR_CUSTOMIZE, INFOBAR_NUMBER, HIDE_INFOBAR_PREFIX, QUICK_GOTO, RANGE_PROGRESS_BAR,
-            TRAITS_PROGRESS_BAR, THEME, TEXT_THEME, SAVED_DATA_COLOR, LANGUAGE_PREF, LANGUAGE_LOCALE_ID, LANGUAGE_LOCALE_SUMMARY,
-            LANGUAGE_LOCALE_DEFAULT_ID)
+            TRAITS_PROGRESS_BAR, SHOW_OBSERVATION_TIMESTAMP, THEME, TEXT_THEME, SAVED_DATA_COLOR, LANGUAGE_PREF, LANGUAGE_LOCALE_ID,
+            LANGUAGE_LOCALE_SUMMARY, LANGUAGE_LOCALE_DEFAULT_ID)
 
         // BEHAVIOR
         const val CYCLING_TRAITS_ADVANCES = "CycleTraits"
@@ -55,9 +56,11 @@ class PreferenceKeys {
         const val FLIP_FLOP_ARROWS = "FLIP_FLOP_ARROWS"
         const val VOLUME_NAVIGATION = "VOLUME_NAVIGATION"
         const val RETURN_CHARACTER = "RETURN_CHARACTER"
+        const val BARCODE_SCANNING_OPTIONS = "com.fieldbook.tracker.BARCODE_SCANNING_OPTIONS"
+        const val MEDIA_KEYCODE_NAVIGATION = "com.tracker.fieldbook.preferences.keys.enable_media_keycode_events"
 
         private val behaviorPreferenceKeys = setOf(CYCLING_TRAITS_ADVANCES, RETURN_FIRST_TRAIT, DISABLE_ENTRY_ARROW_NO_DATA,
-            FLIP_FLOP_ARROWS, VOLUME_NAVIGATION, RETURN_CHARACTER)
+            FLIP_FLOP_ARROWS, VOLUME_NAVIGATION, RETURN_CHARACTER, BARCODE_SCANNING_OPTIONS, MEDIA_KEYCODE_NAVIGATION)
 
         // LOCATION
         private const val GEONAV_PREFIX = "com.fieldbook.tracker.geonav."
@@ -133,13 +136,11 @@ class PreferenceKeys {
 
         // EXPERIMENTAL
         const val REPEATED_VALUES_PREFERENCE_KEY = "com.tracker.fieldbook.preferences.keys.repeated_values"
-        const val MEDIA_KEYCODE_NAVIGATION = "com.tracker.fieldbook.preferences.keys.enable_media_keycode_events"
-        const val MLKIT_PREFERENCE_KEY = "com.tracker.fieldbook.preferences.keys.mlkit"
         const val ENABLE_FIELD_AUDIO = "com.tracker.fieldbook.preferences.keys.enable_field_audio"
         const val EXPERIMENTAL_NEW_BRAPI_UI = "com.tracker.fieldbook.preferences.keys.enable_enhanced_brapi_import"
         const val GENERATE_SAMPLE_DATA = "com.tracker.fieldbook.preferences.keys.generate_sample_data"
 
-        private val experimentalPreferenceKeys = setOf(REPEATED_VALUES_PREFERENCE_KEY, MEDIA_KEYCODE_NAVIGATION, MLKIT_PREFERENCE_KEY,
+        private val experimentalPreferenceKeys = setOf(REPEATED_VALUES_PREFERENCE_KEY,
             ENABLE_FIELD_AUDIO, EXPERIMENTAL_NEW_BRAPI_UI)
 
         val SETTINGS_KEYS = profilePreferenceKeys + featurePreferenceKeys + appearancePreferenceKeys +

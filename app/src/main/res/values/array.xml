@@ -188,4 +188,19 @@
         <item>RTK</item>
         <item>Float RTK</item>
     </string-array>
+
+    <string-array name="pref_behavior_barcode_scanning_entries">
+        <item>@string/preferences_behavior_barcode_scanning_move_to_entry</item>
+        <item>@string/preferences_behavior_barcode_scanning_record_value</item>
+        <item>@string/preferences_behavior_barcode_scanning_enter_if_not_id</item>
+        <item>@string/preferences_behavior_barcode_scanning_ask</item>
+    </string-array>
+
+    <string-array name="pref_behavior_barcode_scanning_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
 </resources>

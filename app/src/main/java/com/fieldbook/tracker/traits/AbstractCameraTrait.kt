@@ -15,9 +15,13 @@ import android.util.Log
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.ProgressBar
+import android.widget.FrameLayout
+import android.view.ViewGroup
 import androidx.cardview.widget.CardView
 import androidx.documentfile.provider.DocumentFile
 import androidx.media3.ui.PlayerView
+import androidx.media3.common.MediaItem
+import androidx.media3.exoplayer.ExoPlayer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
@@ -107,7 +111,21 @@ abstract class AbstractCameraTrait :
 
         if (!isLocked) {
 
-            val image = getSelectedImage()
+            var image: ImageAdapter.Model? = null
+
+            try {
+                image = getSelectedImage()
+            } catch (_: Exception) {
+            }
+
+            if (image == null) {
+                try {
+                    val list = (recyclerView?.adapter as? ImageAdapter)?.currentList
+                    image = list?.lastOrNull { it.type == ImageAdapter.Type.IMAGE }
+                } catch (_: Exception) {
+                    image = null
+                }
+            }
 
             if (image == null) {
 
@@ -516,12 +534,13 @@ abstract class AbstractCameraTrait :
         }
     }
 
-    private fun saveToStorage(
+    protected fun saveToStorage(
         obsUnit: RangeObject,
         traitObj: TraitObject,
         saveTime: String,
         saveState: SaveState,
         isEmpty: Boolean = false,
+        fileSuffix: String = ".jpg",
         saver: (Uri) -> Unit
     ) {
 
@@ -531,7 +550,7 @@ abstract class AbstractCameraTrait :
         }
 
         val plot = obsUnit.uniqueId
-        val traitId = traitObj.id.toString()
+        val traitId = traitObj.id
         val studyId = collectActivity.studyId
         val person = (activity as? CollectActivity)?.person
         val location = (activity as? CollectActivity)?.locationByPreferences
@@ -539,7 +558,8 @@ abstract class AbstractCameraTrait :
 
         // Prepare file name
         val sanitizedTraitName = FileUtil.sanitizeFileName(currentTrait.name)
-        val name = "${plot}_${sanitizedTraitName}_$saveTime.jpg"
+        // Build filename using parameter suffix (.jpg or .mp4)
+        val name = "${plot}_${sanitizedTraitName}_$saveTime${fileSuffix}"
 
         // Try to synchronously resolve/create the file so saver is invoked immediately
         try {
@@ -614,9 +634,8 @@ abstract class AbstractCameraTrait :
 
                 val traitDbId = currentTrait.id
 
-                //get the bitmap from the texture view, only use it if its not null
-
-                val nameLocal = "${plot}_${sanitizedTraitNameLocal}_$saveTime.jpg"
+                // Build filename using parameter suffix (.jpg or .mp4)
+                val name = "${plot}_${sanitizedTraitName}_$saveTime${fileSuffix}"
 
                 DocumentTreeUtil.getFieldMediaDirectory(context, sanitizedTraitNameLocal)?.let { dir ->
 
@@ -624,7 +643,7 @@ abstract class AbstractCameraTrait :
 
                     if (saveState == SaveState.NEW || saveState == SaveState.SINGLE_SHOT) {
 
-                        dir.createFile("*/*", nameLocal)?.let { file ->
+                        dir.createFile("*/*", name)?.let { file ->
 
                             Log.d(TAG, "saveToStorage: created file=${file.uri}")
 
@@ -642,11 +661,14 @@ abstract class AbstractCameraTrait :
 
                             if (saveState == SaveState.SINGLE_SHOT) {
 
-                                writeExif(file, studyId, plot, traitId, saveTime)
+                                // Only write EXIF for JPEG images
+                                if (fileSuffix.equals(".jpg", ignoreCase = true) || fileSuffix.equals(".jpeg", ignoreCase = true)) {
+                                    writeExif(file, studyId, plot, traitId, saveTime)
+                                }
 
                                 notifyItemInserted(file.uri)
                             }
-                        } ?: Log.e(TAG, "saveToStorage: failed to create file $nameLocal in dir ${dir.uri}")
+                        } ?: Log.e(TAG, "saveToStorage: failed to create file $name in dir ${dir.uri}")
 
                         ui.launch {
 
@@ -656,9 +678,9 @@ abstract class AbstractCameraTrait :
 
                     } else if (saveState in setOf(SaveState.SAVING, SaveState.COMPLETE)) {
 
-                        val found = dir.findFile(nameLocal)
+                        val found = dir.findFile(name)
                         if (found == null) {
-                            Log.e(TAG, "saveToStorage: file not found for saving: $nameLocal in dir ${dir.uri}")
+                            Log.e(TAG, "saveToStorage: file not found for saving: $name in dir ${dir.uri}")
                         } else {
                             Log.d(TAG, "saveToStorage: found file=${found.uri}")
 
@@ -666,7 +688,9 @@ abstract class AbstractCameraTrait :
 
                                 saver.invoke(found.uri)
 
-                                writeExif(found, studyId, plot, traitId, saveTime)
+                                if (fileSuffix.equals(".jpg", ignoreCase = true) || fileSuffix.equals(".jpeg", ignoreCase = true)) {
+                                    writeExif(found, studyId, plot, traitId, saveTime)
+                                }
 
                                 notifyItemInserted(found.uri)
 
@@ -688,7 +712,9 @@ abstract class AbstractCameraTrait :
 
         ui.launch {
 
-            if (isCropRequired()) {
+            val isPhoto = uri.toString().lowercase().endsWith(".jpg")
+
+            if (isCropRequired() && isPhoto) {
 
                 if (isCropExist()) {
 
@@ -713,6 +739,8 @@ abstract class AbstractCameraTrait :
                 } else {
 
                     requestCropDefinition(currentTrait.id, uri)
+
+                    loadItems()
                 }
 
             } else {
@@ -782,18 +810,119 @@ abstract class AbstractCameraTrait :
                     imageView.setImageBitmap(bmp)
                 }
             } else {
-                val preview = BitmapLoader.getPreview(context, model.uri, model.orientation)
-                imageView.setImageBitmap(preview)
-            }
+                // If the observation is a video (.mp4), show a video preview using ExoPlayer (Media3)
+                val uriStr = model.uri ?: ""
+                if (uriStr.lowercase().endsWith(".mp4")) {
+                    // create an ExoPlayer and PlayerView for the dialog
+                    val playerView = PlayerView(context)
+                    val player: ExoPlayer? = try {
+                        ExoPlayer.Builder(context).build()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        null
+                    }
+
+                    try {
+                        val videoUri = Uri.parse(uriStr)
+
+                        player?.let {
+                            playerView.player = it
+
+                            val heightDp = 240 // desired dialog video height in dp to fit in dialog
+                            val density = context.resources.displayMetrics.density
+                            val heightPx = (heightDp * density).toInt()
+                            val lp = FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, heightPx)
+                            playerView.layoutParams = lp
+
+                            val mediaItem = MediaItem.fromUri(videoUri)
+                            it.setMediaItem(mediaItem)
+                            it.prepare()
+                            //seek slightly so a frame is available
+                            try { it.seekTo(1) } catch (_: Exception) {}
+                        }
+
+                    } catch (e: Exception) {
+                        // fallback to image preview on any failure
+                        e.printStackTrace()
+                        val preview = BitmapLoader.getPreview(context, model.uri, model.orientation)
+                        imageView.setImageBitmap(preview)
+                    }
+
+                    // wrap the PlayerView in a container
+                    val container = FrameLayout(context)
+                    container.addView(playerView)
+
+                    // use the container (with PlayerView) as the dialog content
+                    AlertDialog.Builder(context, R.style.AppAlertDialog)
+                        .setTitle(R.string.delete_local_photo)
+                        .setOnCancelListener { dialog ->
+                            try {
+                                try { playerView.player?.release() } catch (_: Exception) {}
+                            } catch (e: Exception) { e.printStackTrace() }
+                            dialog.dismiss()
+                        }
+                        .setPositiveButton(android.R.string.ok) { dialog, _ ->
+
+                            try { playerView.player?.release() } catch (_: Exception) {}
+                            dialog.dismiss()
+
+                            // perform deletion and then refresh adapter/toolbar on UI thread so changes are visible immediately
+                            try {
+                                deleteItem(model, setNa)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+
+                            ui.launch {
+                                try {
+                                    loadAdapterItems()
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                                try {
+                                    (context as CollectActivity).refreshRepeatedValuesToolbarIndicator()
+                                } catch (_: Exception) {}
+                            }
+
+                        }
+                        .setNegativeButton(android.R.string.cancel) { dialog, _ ->
+                            try { playerView.player?.release() } catch (_: Exception) {}
+                            dialog.dismiss()
+                        }
+                        .setView(container)
+                        .show()
+
+                    return
+                } else {
+                    val preview = BitmapLoader.getPreview(context, model.uri, model.orientation)
+                    imageView.setImageBitmap(preview)
+                }
+             }
 
             AlertDialog.Builder(context, R.style.AppAlertDialog)
                 .setTitle(R.string.delete_local_photo)
                 .setOnCancelListener { dialog -> dialog.dismiss() }
-                .setPositiveButton(android.R.string.ok) { dialog, _ ->
+                .setPositiveButton(R.string.delete) { dialog, _ ->
 
                     dialog.dismiss()
 
-                    deleteItem(model, setNa)
+                    // perform deletion and then refresh adapter/toolbar on UI thread so changes are visible immediately
+                    try {
+                        deleteItem(model, setNa)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+
+                    ui.launch {
+                        try {
+                            loadAdapterItems()
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                        try {
+                            (context as CollectActivity).refreshRepeatedValuesToolbarIndicator()
+                        } catch (_: Exception) {}
+                    }
 
                 }
                 .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss() }
@@ -957,9 +1086,7 @@ abstract class AbstractCameraTrait :
 
     private fun updateObservationValueToNa(observation: ObservationModel) {
 
-        database.updateObservation(observation.also {
-            it.value = "NA"
-        })
+        database.updateObservationValue(observation.internal_id_observation, "NA")
     }
 
     private fun deleteImage(image: DocumentFile) {
@@ -1081,5 +1208,14 @@ abstract class AbstractCameraTrait :
     override fun refreshLayout(onNew: Boolean?) {
         super.refreshLayout(onNew)
         loadAdapterItems()
+    }
+
+    /**
+     * Reloads data for the new plot/trait without re-inflating the view or restarting
+     * the camera, preventing flickering when navigating between plots or same-format traits.
+     */
+    override fun onRefresh() {
+        loadAdapterItems()
+        super.onRefresh()
     }
 }
