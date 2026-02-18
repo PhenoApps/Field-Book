@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.preference.CheckBoxPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -63,7 +64,22 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
             });
         }
 
-        ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.preferences_behavior_title));
+        if (this.getActivity() != null) {
+            ActionBar bar = ((PreferencesActivity) this.getActivity()).getSupportActionBar();
+            if (bar != null) {
+                bar.setTitle(getString(R.string.preferences_behavior_title));
+            }
+        }
+
+        Bundle arguments = getArguments();
+        if (arguments == null || !arguments.getBoolean(GeneralKeys.BARCODE_SCANNING_OPTIONS_EDIT, false)) {
+            return;
+        }
+
+        Preference scanningOptionsPref = findPreference(PreferenceKeys.BARCODE_SCANNING_OPTIONS);
+        if (scanningOptionsPref != null) {
+            onDisplayPreferenceDialog(scanningOptionsPref);
+        }
     }
 
     @Override

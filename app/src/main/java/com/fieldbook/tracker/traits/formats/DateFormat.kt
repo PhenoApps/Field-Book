@@ -3,8 +3,12 @@ package com.fieldbook.tracker.traits.formats
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.traits.formats.coders.DateJsonCoder
 import com.fieldbook.tracker.traits.formats.coders.StringCoder
+import com.fieldbook.tracker.traits.formats.feature.ChartableData
+import com.fieldbook.tracker.traits.formats.feature.DisplayValue
+import com.fieldbook.tracker.traits.formats.feature.Scannable
 import com.fieldbook.tracker.traits.formats.parameters.AutoSwitchPlotParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
+import com.fieldbook.tracker.traits.formats.parameters.AttachMediaParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
 import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
@@ -25,5 +29,7 @@ class DateFormat : TraitFormat(
     UseDayOfYearParameter(),
     AutoSwitchPlotParameter(),
     RepeatedMeasureParameter(),
-    ResourceFileParameter()
-), Scannable, StringCoder by DateJsonCoder(), ValuePresenter by DateValuePresenter()
+    ResourceFileParameter(),
+    AttachMediaParameter()
+), Scannable, StringCoder by DateJsonCoder(), ValuePresenter by DateValuePresenter(),
+    ChartableData, DisplayValue

@@ -31,14 +31,50 @@
         app:layout_constraintTop_toBottomOf="@id/list_item_image_label_tv"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <ImageView
-            android:adjustViewBounds="true"
-            android:scaleType="fitCenter"
-            tools:src="@raw/chip"
-            android:id="@+id/list_item_image_iv"
+        <!-- Container that holds thumbnail ImageView and VideoView for inline playback -->
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="@string/list_item_image_content_description"/>
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                tools:src="@raw/chip"
+                android:id="@+id/list_item_image_iv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/list_item_image_content_description"/>
+
+            <VideoView
+                android:id="@+id/list_item_video_vv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+            <ImageButton
+                android:id="@+id/list_item_play_btn"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:background="@drawable/circle_background"
+                android:src="@drawable/trait_audio_play"
+                android:contentDescription="@string/play"
+                android:visibility="visible"/>
+
+            <!-- Pause button (hidden by default). Adapter toggles visibility when video is playing/paused -->
+            <ImageButton
+                android:id="@+id/list_item_pause_btn"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:background="@drawable/circle_background"
+                android:src="@drawable/ic_media_stop"
+                app:tint="@color/BLACK"
+                android:contentDescription="@string/pause"
+                android:visibility="gone"/>
+
+        </FrameLayout>
 
     </androidx.cardview.widget.CardView>
 
