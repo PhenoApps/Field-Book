@@ -24,6 +24,9 @@ import javax.inject.Inject
 class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
 
     @Inject
+    lateinit var sampleGenerator: SampleDataGenerator
+
+    @Inject
     lateinit var prefs: SharedPreferences
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -82,7 +85,7 @@ class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
                         dialog.dismiss()
                         lifecycleScope.launch {
                             val studyId = withContext(Dispatchers.IO) {
-                                SampleDataGenerator(ctx).generateSampleField()
+                                sampleGenerator.generateSampleField()
                             }
                             val messageRes = if (studyId >= 0)
                                 R.string.pref_experimental_generate_sample_data_success

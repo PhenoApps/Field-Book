@@ -676,6 +676,13 @@ public class DataHelper {
         );
     }
 
+    public ArrayList<FieldObject> getAllFieldObjects(String sortOrder) {
+
+        open();
+
+        return StudyDao.Companion.getAllFieldObjects(sortOrder);
+    }
+
     public FieldObject getFieldObject(Integer studyId) {
 
         open();

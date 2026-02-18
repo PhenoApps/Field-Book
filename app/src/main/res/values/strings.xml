@@ -1685,7 +1685,7 @@
     <string name="pref_experimental_generate_sample_data_title">Generate Sample Field</string>
     <string name="pref_experimental_generate_sample_data_summary">Creates a sample field with artificial observations for all loaded traits. Timestamps are randomized over the last three months.</string>
     <string name="pref_experimental_generate_sample_data_confirm_title">Generate Sample Field?</string>
-    <string name="pref_experimental_generate_sample_data_confirm_message">This will create a new field named \"field_sample\" and populate it with artificial observations. Sample traits will be loaded automatically if none are present.</string>
+    <string name="pref_experimental_generate_sample_data_confirm_message">This will create or populate a field named \"field_sample\" with artificial observations. Sample traits will be loaded automatically if none are present.</string>
     <string name="pref_experimental_generate_sample_data_success">Sample field created successfully.</string>
     <string name="pref_experimental_generate_sample_data_failure">Failed to generate sample field. Check that storage is configured correctly.</string>
 
