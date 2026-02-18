@@ -173,12 +173,13 @@ class RangeBoxView : ConstraintLayout {
                     updateCurrentRange(rangeID[progress])
                     saveLastPlotAndTrait()
                     display()
-                    controller.initWidgets(true)
                 }
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
-            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar) {
+                controller.initWidgets(true)
+            }
         })
 
         setName()
