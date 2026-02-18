@@ -294,16 +294,7 @@ class SampleDataGenerator @Inject constructor(
                 "SAMPLE_photo_${String.format(Locale.getDefault(), "%03d", Random.nextInt(1, MEDIA_FILE_COUNT + 1))}.jpg"
             }
 
-            "audio" -> {
-                // Artificial filename — no actual audio file is created
-                "SAMPLE_audio_${String.format(Locale.getDefault(), "%03d", Random.nextInt(1, MEDIA_FILE_COUNT + 1))}.wav"
-            }
-
-            "gopro" -> {
-                "SAMPLE_video_${String.format(Locale.getDefault(), "%03d", Random.nextInt(1, MEDIA_FILE_COUNT + 1))}.mp4"
-            }
-
-            "angle" -> Random.nextInt(0, 361).toString()
+            "angle" -> Random.nextInt(0, 180).toString()
 
             // Skip formats that require real sensor data or file paths
             else -> null
