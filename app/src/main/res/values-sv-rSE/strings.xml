@@ -145,6 +145,8 @@
     <string name="traits_create_true">Sant</string>
     <string name="traits_create_false">Falskt </string>
     <string name="traits_create_categories_text">Använd / för att separera kategorier</string>
+    <string name="traits_attach_media_photo_label">Foto</string>
+    <string name="traits_attach_media_audio_label">Ljud</string>
     <string name="traits_create_warning_name_blank">Karaktärsnamn får inte vara tomt</string>
     <string name="traits_create_warning_duplicate">Karaktären finns redan </string>
     <string name="traits_create_warning_numeric_required">Standardvärde samt minsta och största krävs och måste vara tal.</string>
@@ -342,6 +344,8 @@ Karaktärer och fält som skapats manuellt eller importerats via CSV kommer beh�
     <string name="tutorial_main_datagrid_title">Tabell</string>
     <string name="act_brapi_filter_import">Importera</string>
     <!-- base camera strings -->
+    <!-- Video recording messages -->
+    <!-- Audio pause not supported message -->
     <string name="view_trait_photo_settings_camera_custom">Standard</string>
     <!-- usb camera trait -->
     <!-- gopro -->
@@ -353,4 +357,8 @@ Karaktärer och fält som skapats manuellt eller importerats via CSV kommer beh�
     <!--  NearbyShare  -->
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="save">Spara</string>
+    <string name="delete">Radera</string>
+    <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
+    <!-- Preference: Attach media barcode prioritize -->
+    <string name="edit">Redigera</string>
 </resources>
