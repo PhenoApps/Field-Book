@@ -43,7 +43,9 @@ open class PhotoTraitLayout : CameraTrait {
     }
 
     private var supportedResolutions: List<Size> = listOf()
-    protected var previewHolder: ImageAdapter.PreviewViewHolder? = null
+
+    private var previewHolder: ImageAdapter.PreviewViewHolder? = null
+    private var isCameraActive = false
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
@@ -54,6 +56,11 @@ open class PhotoTraitLayout : CameraTrait {
     )
 
     override fun type() = type
+
+    override fun init(act: Activity) {
+        super.init(act)
+        isCameraActive = false
+    }
 
     private fun displayPreviewMode(mode: Mode) {
 
@@ -113,7 +120,10 @@ open class PhotoTraitLayout : CameraTrait {
 
         }
 
-        onSettingsChanged()
+        if (!isCameraActive) {
+            isCameraActive = true
+            onSettingsChanged()
+        }
     }
 
     @OptIn(ExperimentalCamera2Interop::class)
@@ -235,7 +245,9 @@ open class PhotoTraitLayout : CameraTrait {
 
     override fun loadLayout() {
         super.loadLayout()
-        setup()
+        if (!isCameraActive) {
+            setup()
+        }
     }
 
     override fun showSettings() {
@@ -369,6 +381,7 @@ open class PhotoTraitLayout : CameraTrait {
 
     protected open fun launchCameraX(mode: String = CameraActivity.MODE_PHOTO) {
         controller.getCameraXFacade().unbind()
+        isCameraActive = false
         val intent = Intent(context, CameraActivity::class.java)
         //set current trait id to set crop region
         intent.putExtra(CameraActivity.EXTRA_TRAIT_ID, currentTrait.id.toInt())
@@ -380,11 +393,18 @@ open class PhotoTraitLayout : CameraTrait {
         activity?.startActivityForResult(intent, PICTURE_REQUEST_CODE)
     }
 
+    override fun onRefresh() {
+        super.onRefresh()
+        if (!isCameraActive) {
+            setup()
+        }
+    }
+
     override fun refreshLock() {
         super.refreshLock()
         (context as CollectActivity).traitLockData()
         try {
-            loadLayout()
+            onRefresh()
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
         }

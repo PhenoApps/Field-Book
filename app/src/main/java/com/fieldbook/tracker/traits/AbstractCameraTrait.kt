@@ -1209,4 +1209,13 @@ abstract class AbstractCameraTrait :
         super.refreshLayout(onNew)
         loadAdapterItems()
     }
+
+    /**
+     * Reloads data for the new plot/trait without re-inflating the view or restarting
+     * the camera, preventing flickering when navigating between plots or same-format traits.
+     */
+    override fun onRefresh() {
+        loadAdapterItems()
+        super.onRefresh()
+    }
 }
