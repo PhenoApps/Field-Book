@@ -410,6 +410,7 @@
     <string name="traits_create_unit">Unit</string>
     <string name="traits_create_optional">Optional</string>
     <string name="traits_create_categories_title">Categories</string>
+    <string name="traits_create_severities_title">Severities</string>
     <string name="traits_create_photo_maximum">Maximum number of photos</string>
     <string name="traits_create_true">True</string>
     <string name="traits_create_false">False</string>
@@ -535,6 +536,7 @@
     <string name="trait_detail_chip_format_date">Format: %s</string>
     <string name="trait_detail_chip_transfer_images">Transfer images</string>
     <string name="trait_detail_chip_invalid_value">Outlier values</string>
+    <string name="trait_detail_chip_severities">Severities</string>
 
     <string name="trait_parameter_allow_multicat">Multiple Category Selection</string>
     <string name="trait_parameter_display_value">Display Value</string>
