@@ -8,9 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- New video trait format (https://github.com/PhenoApps/Field-Book/pull/1390)
+- Photos, videos, and audio files can now be attached to individual observations (https://github.com/PhenoApps/Field-Book/pull/1390)
 
 ### Changed
-- New video trait format (https://github.com/PhenoApps/Field-Book/pull/1390)
 
 ### Fixed
 
