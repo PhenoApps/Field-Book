@@ -689,27 +689,19 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
 
         // handle the case where trait has been disabled by the user
         val popupItems = (controller.getContext() as CollectActivity).getGeoNavPopupSpinnerItems()
-        var index = -1
-        for (item in popupItems) {
-            if (item == popupHeader) {
-                newPopupHeader = item
-                preferences.edit {
-                    putString(GeneralKeys.GEONAV_POPUP_DISPLAY, newPopupHeader.label)
-                    putString(GeneralKeys.GEONAV_POPUP_TRAIT, newPopupHeader.trait?.id ?: DropDownKeyModel.DEFAULT_TRAIT_ID)
-                }
-                break
-            }
-            index++
+        val matchedItem = popupItems.find { it == popupHeader }
+
+        if (matchedItem != null) {
+            newPopupHeader = matchedItem
+        } else if (popupItems.isNotEmpty()) {
+            // if the attribute/trait cannot be found
+            // then default to first available attribute
+            newPopupHeader = popupItems.first()
         }
 
-        // if the attribute/trait cannot be found
-        // then default to 'plot_id'
-        if (index == -1) {
-            preferences.edit {
-                putString(GeneralKeys.GEONAV_POPUP_DISPLAY, DropDownKeyModel.DEFAULT_ATTRIBUTE_LABEL)
-                putString(GeneralKeys.GEONAV_POPUP_TRAIT, DropDownKeyModel.DEFAULT_TRAIT_ID)
-            }
-            newPopupHeader = AttributeModel(DropDownKeyModel.DEFAULT_ATTRIBUTE_LABEL, null)
+        preferences.edit {
+            putString(GeneralKeys.GEONAV_POPUP_DISPLAY, newPopupHeader.label)
+            putString(GeneralKeys.GEONAV_POPUP_TRAIT, newPopupHeader.trait?.id ?: DropDownKeyModel.DEFAULT_TRAIT_ID)
         }
 
         return geoNavController.queryForLabelValue(id, newPopupHeader)

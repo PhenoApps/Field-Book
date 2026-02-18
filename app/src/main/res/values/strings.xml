@@ -378,6 +378,8 @@
     <string name="traits_format_boolean">Boolean</string>
     <string name="traits_format_text">Text</string>
     <string name="traits_format_photo">Photo</string>
+    <string name="traits_format_camera">Camera</string>
+    <string name="traits_format_video">Video</string>
     <string name="traits_format_audio">Audio</string>
     <string name="traits_format_multicategorical">Multicat</string>
     <string name="traits_format_location">Location</string>
@@ -422,6 +424,10 @@
     <string name="trait_parameter_decimal_places">Decimal Places</string>
     <string name="trait_parameter_decimal_places_hint">Number of decimal places (-1 for unlimited, 0 for integers)</string>
     <string name="trait_parameter_decimal_places_error">Value must be between -1 and 10</string>
+    <string name="traits_attach_media_title">Attach Media</string>
+    <string name="traits_attach_media_photo_label">Photo</string>
+    <string name="traits_attach_media_audio_label">Audio</string>
+    <string name="traits_attach_media_video_label">Video</string>
 
     <string name="traits_create_warning_name_blank">Trait name cannot be blank</string>
     <string name="traits_create_warning_duplicate">Trait already exists</string>
@@ -743,7 +749,7 @@
     <string name="menu_collect_repeated_values_indicator">Displays the number of repeated values.</string>
     <string name="dialog_multi_measure_delete_no_observations">No observations exist.</string>
     <string name="dialog_multi_measure_delete_title">Observations</string>
-    <string name="dialog_multi_measure_confirm_delete_title">All observations for this trait will be permanently deleted.</string>
+    <string name="dialog_multi_measure_confirm_delete_title">Selected observations and attached media for this trait will be permanently deleted.</string>
     <string name="dialog_multi_measure_delete">Delete</string>
     <string name="dialog_multi_measure_select_all">Select all</string>
 
@@ -1011,6 +1017,11 @@
 
     <string name="preferences_general_use_day_number">Use Day Of Year</string>
     <string name="preferences_general_use_day_number_description">Use day of year when collecting data instead of the date</string>
+
+    <string name="preferences_behavior_barcode_scanning_move_to_entry">Move to entry</string>
+    <string name="preferences_behavior_barcode_scanning_record_value">Record value</string>
+    <string name="preferences_behavior_barcode_scanning_enter_if_not_id">Record value if not entry ID</string>
+    <string name="preferences_behavior_barcode_scanning_ask">Ask every time</string>
 
     <!-- Location -->
     <string name="preferences_location_title">Location</string>
@@ -1565,7 +1576,17 @@
     <string name="trait_camera_connect_content_description">Starts a device connection.</string>
     <string name="trait_camera_preview_content_description">This previews the camera\'s display.</string>
     <string name="trait_camera_capture_content_description">Capture a photo</string>
-    <string name="delete_local_photo">Delete Photo</string>
+    <string name="trait_camera_view_media_content_description">View media</string>
+    <string name="trait_camera_switch_content_description">Switch camera</string>
+
+    <!-- Video recording messages -->
+    <string name="video_recording_started">Video recording started</string>
+    <string name="video_recording_saved">Video recording saved</string>
+
+    <!-- Audio pause not supported message -->
+    <string name="field_audio_pause_not_supported">Pause/resume is not supported on this device</string>
+
+    <string name="delete_local_photo">Are you sure you want to delete this item?</string>
     <string name="trait_system_photo_settings_title">System Photo Settings</string>
     <string name="trait_photos_no_settings">This trait has no settings.</string>
     <string name="view_trait_photo_settings_preview_title">Preview</string>
@@ -1682,8 +1703,8 @@
     <string name="pref_alpha_brapi_import_title">New BrAPI Import UI</string>
     <string name="opening_brapi_no_network_error">Networking must be enabled to use BrAPI features.</string>
     <string name="act_brapi_list_filter_reset_selection_message">This will clear the running list of selected items.</string>
-    <string name="pref_alpha_media_keycode_events_summary">Enable to use media commands for app interactions</string>
-    <string name="pref_alpha_media_keycode_events_title">Enable Media Commands</string>
+    <string name="pref_alpha_media_keycode_events_summary">Next/previous track navigates entries, Up/down volume moves through traits, Call will capture photos</string>
+    <string name="pref_alpha_media_keycode_events_title">Navigate With Hardware Media Commands</string>
     <string name="pref_geonav_distance_threshold_summary">GeoNav automatically stops when distance from all plots exceeds this value in kilometers.</string>
     <string name="pref_geonav_distance_threshold_title">Proximity Check</string>
     <string name="activity_collect_proximity_warning">GeoNav Stopping, outside proximity of coordinates</string>
@@ -1701,8 +1722,8 @@
     <string name="failed_to_fetch_observation_levels">Failed fetching observation levels</string>
     <string name="traits_sort_default">Default</string>
     <string name="traits_crop_image_parameter">Crop</string>
-    <string name="dialog_crop_title">Setup Crop Region</string>
-    <string name="dialog_crop_message">Define a crop region that will be applied to all future pictures for this trait.</string>
+    <string name="dialog_crop_title">Define Crop Region</string>
+    <string name="dialog_crop_message">Do you want to crop captured images for this trait?</string>
     <string name="view_trait_photo_settings_crop">Set Crop Region</string>
     <string name="crop_image_clip_data_label">Field Book crop region data</string>
     <string name="quick_goto_swap_content_description">toggle input type</string>
@@ -1807,6 +1828,25 @@
     <string name="device_settings_dialog_unknown_name">Unknown Bluetooth Device</string>
     <string name="device_settings_dialog_title">Bluetooth Device Settings</string>
     <string name="no_data_captured">No data captured.</string>
+    <string name="media_photo">Photo state</string>
+    <string name="media_video">Video state</string>
+    <string name="media_audio">Audio state</string>
+    <string name="no_observation">Data must be collected before media can be attached.</string>
+    <string name="preferences_behavior_barcode_scanning_title">Toolbar Barcode Scanning</string>
+    <string name="barcode_ask_enter">Enter Value</string>
+    <string name="barcode_ask_move">Move</string>
+    <string name="barcode_ask_message">Scanned: %s</string>
+    <string name="barcode_ask_title">Choose an option</string>
+    <string name="no_media_found">No %1$s media found</string>
+    <string name="media_viewer">Media Viewer</string>
+    <string name="unable_to_load_image">Unable to load image</string>
+    <string name="delete">Delete</string>
+    <string name="confirm_delete">Do you want to permanently delete this media item?</string>
+    <string name="audio_permission_required">Audio permission required</string>
+    <string name="back_button">Go back to previous activity</string>
+    <string name="na_placeholder">Not available image placeholder</string>
+    <string name="confirm_replace_media_message">Do you want to replace the current media for this observation?</string>
+    <string name="confirm_replace_media_title">Replace Existing Media</string>
     <string name="failed_to_find_file_name">Failed to retrieve file name.</string>
     <string name="act_brapi_export_starting">Starting export</string>
     <string name="act_brapi_export_success">Export success</string>
@@ -1879,4 +1919,16 @@
     <string name="there_are_unuploaded_observations_or_images_do_you_want_to_upload_them_before_downloading">There are unuploaded observations or images. Do you want to upload them before downloading?</string>
     <string name="upload_first">Upload</string>
     <string name="download_anyway">Download</string>
+    <string name="confirm_delete_with_media_title">Delete observation</string>
+    <string name="confirm_delete_with_media_message">Deleting this observation will also delete any attached media. Are you sure you want to delete this observation?</string>
+    <string name="attach">Attach</string>
+
+    <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
+    <string name="alert_jump_to_plot_bottom_toolbar_message">The bottom toolbar has been updated to support entry navigation via barcode.</string>
+
+    <!-- Preference: Attach media barcode prioritize -->
+    <string name="preferences_behavior_attach_media_barcode_prioritize">Always use detected barcode</string>
+    <string name="preferences_behavior_attach_media_barcode_prioritize_description">When a barcode is detected, Field Book will automatically parse the barcode without user interaction.</string>
+    <string name="edit">Edit</string>
+
 </resources>

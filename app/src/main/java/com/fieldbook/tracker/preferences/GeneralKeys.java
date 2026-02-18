@@ -32,6 +32,9 @@ public class GeneralKeys {
     public static final String HIDE_ENTRIES_WITH_DATA               = "com.fieldbook.tracker.HIDE_ENTRIES";
     public static final String ATTR_CHOOSER_DIALOG_TAB              = "ATTR_CHOOSER_DIALOG_TAB";
 
+    //Behavior
+    public static final String BARCODE_SCANNING_OPTIONS_EDIT = "BARCODE_SCANNING_OPTIONS_EDIT";
+
     // Files and Naming
     public static final String DEFAULT_STORAGE_LOCATION_PREFERENCE  = "DEFAULT_STORAGE_LOCATION_PREFERENCE";
 
@@ -181,6 +184,9 @@ public class GeneralKeys {
 
     public static final String USB_CAMERA_AUTO_FOCUS = "com.fieldbook.tracker.traits.camera.usb.AUTO_FOCUS";
 
+    // Preference: when attaching media, prioritize detected barcode and auto-return with it
+    public static final String ATTACH_MEDIA_BARCODE_PRIORITIZE = "ATTACH_MEDIA_BARCODE_PRIORITIZE";
+
     @NotNull
     public static final Object SORT_ORDER = "com.fieldbook.tracker.field_sort_order";
     @Nullable
@@ -266,6 +272,12 @@ public class GeneralKeys {
                 getDropDownTraitKey(index)
         );
     }
+
+    @NotNull
+    public static final String PREF_KEY_SHOWN_JUMP_INFO = "pref_shown_jump_to_plot_bottom_toolbar_alert";
+
+    @NotNull
+    public static final String PREF_KEY_SHOWN_BARCODE_OPTION = "pref_shown_barcode_option";
 
     private GeneralKeys() {
 

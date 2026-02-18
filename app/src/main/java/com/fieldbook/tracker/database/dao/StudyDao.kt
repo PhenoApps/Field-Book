@@ -26,6 +26,8 @@ class StudyDao {
 
     companion object {
 
+        const val TAG = "StudyDao"
+
         fun getPossibleUniqueAttributes(studyId: Int): List<String> = withDatabase { db ->
             val query = """
                 SELECT observation_unit_attribute_name 
@@ -39,14 +41,14 @@ class StudyDao {
                 )
             """
 
-            Log.d("StudyDao", "Running query: $query")
+            Log.d(TAG, "Running query: $query")
 
             db.rawQuery(query, arrayOf(studyId.toString())).use { cursor ->
                 val attributes = mutableListOf<String>()
                 while (cursor.moveToNext()) {
                     cursor.getString(0)?.let {
                          attributes.add(it)
-                         Log.d("StudyDao", "Found unique attribute: $it")
+                         Log.d(TAG, "Found unique attribute: $it")
                     }
                 }
                 attributes
@@ -82,13 +84,13 @@ class StudyDao {
                 WHERE observation_unit_attribute_name = ?
             """
 
-            Log.d("StudyDao", "Finding studies with attribute: $newSearchAttribute")
+            Log.d(TAG, "Finding studies with attribute: $newSearchAttribute")
 
             db.rawQuery(query, arrayOf(newSearchAttribute)).use { cursor ->
                 while (cursor.moveToNext()) {
                     cursor.getInt(0).let { studyId ->
                         studiesWithAttribute.add(studyId)
-                        Log.d("StudyDao", "Found study with matching attribute: $studyId")
+                        Log.d(TAG, "Found study with matching attribute: $studyId")
                     }
                 }
             }
@@ -103,7 +105,7 @@ class StudyDao {
                 }
             }
 
-            Log.d("StudyDao", "Updated search attribute for $updatedCount studies")
+            Log.d(TAG, "Updated search attribute for $updatedCount studies")
             updatedCount
         } ?: 0
 
@@ -142,6 +144,8 @@ class StudyDao {
             GROUP BY units.${ObservationUnit.PK}
         """.trimMargin()
 
+            Log.d(TAG, query)
+
             db.execSQL(query)
         }
 
@@ -161,7 +165,7 @@ class StudyDao {
 
                 e.printStackTrace()
 
-                Log.d("StudyDao", "error during field deletion")
+                Log.d(TAG, "error during field deletion")
 
             }
 

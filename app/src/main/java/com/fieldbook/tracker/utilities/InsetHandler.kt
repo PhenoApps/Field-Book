@@ -140,7 +140,6 @@ object InsetHandler {
     fun setupInsetsWithBottomBar(
         rootView: View,
         topToolbar: Toolbar,
-        bottomToolbar: Toolbar,
         bottomContent: View
     ) {
         val typedValue = TypedValue()
@@ -156,11 +155,8 @@ object InsetHandler {
 
             topToolbar.updatePadding(top = systemBars.top)
 
-            // update the bottom toolbar height so it draws under nav/gesture area
-            val desiredHeight = actionBarPx + systemBars.bottom
-            bottomToolbar.updateLayoutParams {
-                height = desiredHeight
-            }
+            // unused, update the bottom toolbar height so it draws under nav/gesture area
+            //val desiredHeight = actionBarPx + systemBars.bottom
 
             // update bottom toolbar content padding
             bottomContent.updatePadding(bottom = systemBars.bottom)
