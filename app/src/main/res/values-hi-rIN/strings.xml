@@ -83,6 +83,8 @@
     <string name="traits_create_true">सही</string>
     <string name="traits_create_false">ग़लत</string>
     <string name="traits_create_categories_text">मदों को / से बाँटें</string>
+    <string name="traits_attach_media_photo_label">फोटो</string>
+    <string name="traits_attach_media_audio_label">श्रव्य</string>
     <string name="traits_create_warning_name_blank">विशेषता नाम खाली नहीं हो सकता</string>
     <string name="traits_create_warning_duplicate">विशेषता पहले से मौजूद है</string>
     <string name="traits_create_warning_numeric_required">पूर्व निर्धारित, न्यूनतम, और अधिकतम संख्यावाचक होने चाहिए</string>
@@ -219,6 +221,8 @@
     <string name="act_brapi_filter_import">आयात करें</string>
     <string name="act_brapi_filter_clear">मिटाएँ</string>
     <!-- base camera strings -->
+    <!-- Video recording messages -->
+    <!-- Audio pause not supported message -->
     <string name="view_trait_photo_settings_camera_custom">पूर्व निर्धारित</string>
     <!-- usb camera trait -->
     <!-- gopro -->
@@ -229,4 +233,6 @@
     <!--  NearbyShare  -->
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="save">सुरक्षित करें</string>
+    <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
+    <!-- Preference: Attach media barcode prioritize -->
 </resources>
