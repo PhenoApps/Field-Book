@@ -410,7 +410,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         }
     }
 
-    protected fun enableCapture(device: Device) {
+    protected open fun enableCapture(device: Device) {
         connectButton?.visibility = INVISIBLE
         captureButton?.visibility = VISIBLE
         disconnectButton?.visibility = VISIBLE
@@ -618,7 +618,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
         background.launch(Dispatchers.Main) {
 
-            //progressBar?.visibility = if (flag) VISIBLE else INVISIBLE
+            progressBar?.visibility = if (flag) VISIBLE else INVISIBLE
 
         }
     }
