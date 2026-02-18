@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Nearest field finder now searches across all location data (https://github.com/PhenoApps/Field-Book/pull/1399)
 
 ### Fixed
+- Camera previews no longer reload when navigating between entries (https://github.com/PhenoApps/Field-Book/pull/1405)
 - GeoNav popup no longer causes a crash when navigating (https://github.com/PhenoApps/Field-Book/pull/1415)
 - Correct value is now displayed for saved dates (https://github.com/PhenoApps/Field-Book/pull/1404)
 
