@@ -30,11 +30,17 @@
 
     </PreferenceCategory>
 
-<!--    <PreferenceCategory-->
-<!--        android:key="experimental_settings_alpha"-->
-<!--        android:title="@string/preferences_experimental_alpha_title"-->
-<!--        app:iconSpaceReserved="false">-->
+    <PreferenceCategory
+        android:key="experimental_settings_alpha"
+        android:title="@string/preferences_experimental_alpha_title"
+        app:iconSpaceReserved="false">
 
-<!--    </PreferenceCategory>-->
+        <Preference
+            android:icon="@drawable/ic_tb_datagrid"
+            android:key="com.tracker.fieldbook.preferences.keys.generate_sample_data"
+            android:summary="@string/pref_experimental_generate_sample_data_summary"
+            android:title="@string/pref_experimental_generate_sample_data_title" />
+
+    </PreferenceCategory>
 
 </PreferenceScreen>

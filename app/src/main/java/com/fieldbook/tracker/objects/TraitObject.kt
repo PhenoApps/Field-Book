@@ -7,6 +7,7 @@ import com.fieldbook.tracker.database.models.AttributeDefinition
 import com.fieldbook.tracker.database.models.TraitAttributes
 import com.fieldbook.tracker.utilities.SynonymsUtil.deserializeSynonyms
 import com.fieldbook.tracker.utilities.SynonymsUtil.serializeSynonyms
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
 import java.util.*
@@ -104,6 +105,31 @@ class TraitObject {
         get() = attributeValues.getBoolean(TraitAttributes.INVALID_VALUES)
         set(value) = attributeValues.setValue(TraitAttributes.INVALID_VALUES, value.toString())
 
+    companion object {
+
+        fun fromJson(json: TraitJson, maxPosition: Int, originalFileName: String) = TraitObject().apply {
+            name = json.name
+            alias = json.alias ?: json.name
+            synonyms = json.synonyms.ifEmpty { listOf(name) }
+            format = json.format
+            defaultValue = json.defaultValue
+            details = json.details
+            visible = json.visible
+            realPosition = maxPosition + json.position
+            traitDataSource = originalFileName
+
+            json.attributes?.forEach { (key, value) ->
+                val primitive = value as? JsonPrimitive
+                val stringValue = primitive?.content ?: value.toString()
+                val def =
+                    TraitAttributes.byKey(key)
+                if (def != null) {
+                    setAttributeValue(def, stringValue)
+                }
+            }
+        }
+    }
+    
     var attachPhoto: Boolean
         get() = attributeValues.getBoolean(TraitAttributes.MULTI_MEDIA_PHOTO)
         set(value) = attributeValues.setValue(TraitAttributes.MULTI_MEDIA_PHOTO, value.toString())

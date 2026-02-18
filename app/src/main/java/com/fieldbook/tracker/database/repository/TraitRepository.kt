@@ -129,7 +129,7 @@ class TraitRepository @Inject constructor(
         traits.count { insertTrait(it) != -1L }
     }
 
-    suspend fun updateResourceFile(trait: TraitObject, fileUri: String): TraitObject? =
+    suspend fun updateResourceFile(trait: TraitObject, fileUri: String): TraitObject =
         withContext(ioDispatcher) {
             val updatedTrait = trait.clone().apply {
                 resourceFile = fileUri
@@ -187,7 +187,7 @@ class TraitRepository @Inject constructor(
     ) = withContext(ioDispatcher) {
         runCatching {
             val traitDir =
-                BaseDocumentTreeUtil.Companion.getDirectory(context, R.string.dir_trait)
+                BaseDocumentTreeUtil.getDirectory(context, R.string.dir_trait)
                     ?: return@withContext onError(R.string.error_trait_directory_not_available)
 
             if (!traitDir.exists()) {
@@ -199,7 +199,7 @@ class TraitRepository @Inject constructor(
                     ?: return@withContext onError(R.string.error_failed_to_create_file)
 
             val output =
-                BaseDocumentTreeUtil.Companion.getFileOutputStream(
+                BaseDocumentTreeUtil.getFileOutputStream(
                     context,
                     R.string.dir_trait,
                     fileName
@@ -260,7 +260,7 @@ class TraitRepository @Inject constructor(
         onError: suspend (Int) -> Unit,
     ): List<TraitObject> =
         withContext(ioDispatcher) {
-            val stream = BaseDocumentTreeUtil.Companion.getUriInputStream(context, uri)
+            val stream = BaseDocumentTreeUtil.getUriInputStream(context, uri)
                 ?: run {
                     onError(R.string.error_cannot_open_file)
                     return@withContext emptyList()
@@ -272,27 +272,7 @@ class TraitRepository @Inject constructor(
 
             wrapper.traits.mapNotNull { json ->
                 runCatching {
-                    TraitObject().apply {
-                        name = json.name
-                        alias = json.alias ?: json.name
-                        synonyms = if (json.synonyms.isEmpty()) listOf(name) else json.synonyms
-                        format = json.format
-                        defaultValue = json.defaultValue
-                        details = json.details
-                        visible = json.visible
-                        realPosition = maxPosition + json.position
-                        traitDataSource = originalFileName
-
-                        json.attributes?.forEach { (key, value) ->
-                            val primitive = value as? JsonPrimitive
-                            val stringValue = primitive?.content ?: value.toString()
-                            val def =
-                                TraitAttributes.byKey(key)
-                            if (def != null) {
-                                setAttributeValue(def, stringValue)
-                            }
-                        }
-                    }
+                    TraitObject.fromJson(json, maxPosition, originalFileName)
                 }.getOrNull()
             }
         }
@@ -307,7 +287,7 @@ class TraitRepository @Inject constructor(
 
             val list = mutableListOf<TraitObject>()
 
-            val stream = BaseDocumentTreeUtil.Companion.getUriInputStream(context, uri)
+            val stream = BaseDocumentTreeUtil.getUriInputStream(context, uri)
                 ?: run {
                     onError(R.string.error_cannot_open_file)
                     return@withContext emptyList()

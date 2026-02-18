@@ -1703,8 +1703,17 @@
     <string name="pref_alpha_brapi_import_title">New BrAPI Import UI</string>
     <string name="opening_brapi_no_network_error">Networking must be enabled to use BrAPI features.</string>
     <string name="act_brapi_list_filter_reset_selection_message">This will clear the running list of selected items.</string>
+
+    <string name="pref_experimental_generate_sample_data_title">Generate Sample Field</string>
+    <string name="pref_experimental_generate_sample_data_summary">Creates a sample field with artificial observations for all loaded traits. Timestamps are randomized over the last three months.</string>
+    <string name="pref_experimental_generate_sample_data_confirm_title">Generate Sample Field?</string>
+    <string name="pref_experimental_generate_sample_data_confirm_message">This will create or populate a field named \"field_sample\" with artificial observations. Sample traits will be loaded automatically if none are present.</string>
+    <string name="pref_experimental_generate_sample_data_success">Sample field created successfully.</string>
+    <string name="pref_experimental_generate_sample_data_failure">Failed to generate sample field. Check that storage is configured correctly.</string>
+
     <string name="pref_alpha_media_keycode_events_summary">Next/previous track navigates entries, Up/down volume moves through traits, Call will capture photos</string>
     <string name="pref_alpha_media_keycode_events_title">Navigate With Hardware Media Commands</string>
+
     <string name="pref_geonav_distance_threshold_summary">GeoNav automatically stops when distance from all plots exceeds this value in kilometers.</string>
     <string name="pref_geonav_distance_threshold_title">Proximity Check</string>
     <string name="activity_collect_proximity_warning">GeoNav Stopping, outside proximity of coordinates</string>

@@ -138,6 +138,7 @@ class PreferenceKeys {
         const val REPEATED_VALUES_PREFERENCE_KEY = "com.tracker.fieldbook.preferences.keys.repeated_values"
         const val ENABLE_FIELD_AUDIO = "com.tracker.fieldbook.preferences.keys.enable_field_audio"
         const val EXPERIMENTAL_NEW_BRAPI_UI = "com.tracker.fieldbook.preferences.keys.enable_enhanced_brapi_import"
+        const val GENERATE_SAMPLE_DATA = "com.tracker.fieldbook.preferences.keys.generate_sample_data"
 
         private val experimentalPreferenceKeys = setOf(REPEATED_VALUES_PREFERENCE_KEY,
             ENABLE_FIELD_AUDIO, EXPERIMENTAL_NEW_BRAPI_UI)
