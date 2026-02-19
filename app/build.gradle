@@ -274,7 +274,9 @@ dependencies {
 
     implementation 'com.google.android.gms:play-services-nearby:19.3.0'
 
-    implementation "com.moizhassan.ffmpeg:ffmpeg-kit-16kb:6.1.1"
+    //implementation("io.github.jamaismagic.ffmpeg:ffmpeg-kit-lts-min-16kb:6.1.4")
+    //implementation "com.moizhassan.ffmpeg:ffmpeg-kit-16kb:6.1.1"
+    implementation("com.arthenica:smart-exception-java:0.2.1")
 
     //AppIntro
     implementation 'com.github.AppIntro:AppIntro:6.3.1'
