@@ -853,6 +853,8 @@
     <string name="preferences_general_use_day_number">Usar Día del Año</string>
     <string name="preferences_general_use_day_number_description">Usar número de día del año para capturar datos en lugar de la fecha</string>
     <string name="preferences_behavior_barcode_scanning_move_to_entry">Mover a la entrada</string>
+    <string name="preferences_behavior_barcode_scanning_record_value">Registrar valor</string>
+    <string name="preferences_behavior_barcode_scanning_enter_if_not_id">Registrar valor si no hay ID de entrada</string>
     <string name="preferences_behavior_barcode_scanning_ask">Preguntar siempre</string>
     <!-- Location -->
     <string name="preferences_location_title">Ubicación</string>
@@ -1321,6 +1323,8 @@
     <string name="trait_camera_view_media_content_description">Ver multimedia</string>
     <string name="trait_camera_switch_content_description">Cambiar cámara</string>
     <!-- Video recording messages -->
+    <string name="video_recording_started">Grabación de vídeo iniciada</string>
+    <string name="video_recording_saved">Grabación de vídeo guardada</string>
     <!-- Audio pause not supported message -->
     <string name="delete_local_photo">¿Está seguro que quieres eliminar este elemento?</string>
     <string name="trait_system_photo_settings_title">Ajustes de Fotos del Sistema</string>
@@ -1450,6 +1454,8 @@
     <string name="failed_to_fetch_observation_levels">Fallo obteniendo el nivel de las observaciónes</string>
     <string name="traits_sort_default">Predeterminado</string>
     <string name="traits_crop_image_parameter">Recortar</string>
+    <string name="dialog_crop_title">Definir Región de Recorte</string>
+    <string name="dialog_crop_message">¿Quieres recortar imágenes capturadas para este rasgo?</string>
     <string name="view_trait_photo_settings_crop">Fijar Región de Recorte</string>
     <string name="crop_image_clip_data_label">Datos de región de recorte en Field Book</string>
     <string name="quick_goto_swap_content_description">alternar tipo de teclado de entrada</string>
@@ -1547,11 +1553,22 @@
     <string name="media_photo">Estado de foto</string>
     <string name="media_video">Estado del vídeo</string>
     <string name="media_audio">Estado de audio</string>
+    <string name="no_observation">Los datos deben ser capturados antes de que multimedia pueda ser adjuntada.</string>
+    <string name="preferences_behavior_barcode_scanning_title">Barra de Herramienta Escaneo de Código de Barras</string>
+    <string name="barcode_ask_enter">Ingresar Valor</string>
+    <string name="barcode_ask_move">Mover</string>
+    <string name="barcode_ask_message">Escaneado: %s</string>
+    <string name="barcode_ask_title">Elegir una opción</string>
+    <string name="no_media_found">No se encontraro multimedia %1$s</string>
     <string name="media_viewer">Visor Multimedia</string>
     <string name="unable_to_load_image">No se puede cargar la imagen</string>
     <string name="delete">Eliminar</string>
     <string name="confirm_delete">¿Quieres eliminar permanentemente este elemento multimedia?</string>
     <string name="audio_permission_required">Permiso de audio requerido</string>
+    <string name="back_button">Volver a la actividad anterior</string>
+    <string name="na_placeholder">Marcador de posición de imagen no disponible</string>
+    <string name="confirm_replace_media_message">¿Desea reemplazar multimedia actual para esta observación?</string>
+    <string name="confirm_replace_media_title">Reemplazar Multimedia Existente</string>
     <string name="failed_to_find_file_name">Error al recuperar el nombre del archivo.</string>
     <string name="act_brapi_export_starting">Iniciando exportación</string>
     <string name="act_brapi_export_success">Exportación exitosa</string>
@@ -1623,6 +1640,8 @@
     <string name="there_are_unuploaded_observations_or_images_do_you_want_to_upload_them_before_downloading">Hay observaciones o imágenes sin cargar. ¿Quieres subirlas antes de descargar?</string>
     <string name="upload_first">Cargar</string>
     <string name="download_anyway">Descargar</string>
+    <string name="confirm_delete_with_media_title">Eliminar observación</string>
+    <string name="confirm_delete_with_media_message">Eliminar esta observación también eliminará cualquier multimedia adjunta. ¿Está seguro de que desea eliminar esta observación?</string>
     <string name="attach">Adjuntar</string>
     <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
     <string name="alert_jump_to_plot_bottom_toolbar_message">La barra de herramientas inferior ha sido actualizada para soportar la navegación de entrada a través de código de barras.</string>
