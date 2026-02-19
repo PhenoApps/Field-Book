@@ -9,7 +9,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.widget.ImageView
-import android.widget.ProgressBar
+import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -52,7 +52,7 @@ class RangeBoxView : ConstraintLayout {
     private var rangeLeft: ImageView
     private var rangeRight: ImageView
 
-    private var plotsProgressBar: ProgressBar
+    private var plotsProgressBar: ThumbOnlySeekBar
 
     private var repeatHandler: Handler? = null
 
@@ -162,6 +162,23 @@ class RangeBoxView : ConstraintLayout {
 
         // Go to next range
         rangeRight.setOnClickListener { moveEntryRight() }
+
+        // Allow dragging the progress bar thumb to seek to any entry
+        plotsProgressBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                if (fromUser && rangeID.isNotEmpty() && progress in rangeID.indices) {
+                    paging = progress + 1
+                    updateCurrentRange(rangeID[progress])
+                    saveLastPlotAndTrait()
+                    display()
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar) {
+                controller.initWidgets(true)
+            }
+        })
 
         setName()
 
