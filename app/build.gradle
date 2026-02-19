@@ -189,6 +189,9 @@ dependencies {
     //uvc camera java native libs
     implementation("com.serenegiant:common:2.12.4")
 
+    //ffmpeg 16kb
+    implementation("com.arthenica:smart-exception-java:0.2.1")
+
     //brapi and required dependencies
     implementation 'org.brapi:brapi-java-client:2.1.0'
     //necessary when building phenolib locally
@@ -273,8 +276,6 @@ dependencies {
     implementation 'io.github.architshah248.calendar:awesome-calendar:2.0.0'
 
     implementation 'com.google.android.gms:play-services-nearby:19.3.0'
-
-    implementation "com.moizhassan.ffmpeg:ffmpeg-kit-16kb:6.1.1"
 
     //AppIntro
     implementation 'com.github.AppIntro:AppIntro:6.3.1'

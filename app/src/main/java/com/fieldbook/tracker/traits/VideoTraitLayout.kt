@@ -52,11 +52,19 @@ class VideoTraitLayout : PhotoTraitLayout {
     // resolutions specific to video mode (populated from camera identity)
     private var videoSupportedResolutions: List<Size> = listOf()
 
+    // guard so bindIdentity() (which unbinds the camera) only runs once per layout instance
+    private var videoInfoLoaded = false
+
     constructor(context: android.content.Context?) : super(context)
     constructor(context: android.content.Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: android.content.Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     override fun type() = type
+
+    override fun init(act: android.app.Activity) {
+        super.init(act)
+        videoInfoLoaded = false
+    }
 
     // Start/stop inline recording when shutter pressed. If inline capture is unavailable, fallback to fullscreen CameraActivity.
     override fun capture() {
@@ -501,14 +509,20 @@ class VideoTraitLayout : PhotoTraitLayout {
             e.printStackTrace()
         }
 
-        // populate available resolutions for settings UI
-        try {
-            controller.getCameraXFacade().bindIdentity({ _, sizes ->
-                videoSupportedResolutions = sizes
-                settingsButton?.isEnabled = true
-            }, {})
-        } catch (e: Exception) {
-            e.printStackTrace()
+        // populate available resolutions for settings UI — only on first load to avoid
+        // unbinding the live camera preview on every navigation (bindIdentity calls unbind internally)
+        if (!videoInfoLoaded) {
+            videoInfoLoaded = true
+            try {
+                controller.getCameraXFacade().bindIdentity({ _, sizes ->
+                    videoSupportedResolutions = sizes
+                    settingsButton?.isEnabled = true
+                }, {})
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        } else {
+            settingsButton?.isEnabled = videoSupportedResolutions.isNotEmpty()
         }
     }
 
