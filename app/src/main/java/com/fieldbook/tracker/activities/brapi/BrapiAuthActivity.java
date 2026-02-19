@@ -11,6 +11,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.fieldbook.tracker.utilities.BrapiAccountHelper;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 
@@ -262,6 +264,12 @@ public class BrapiAuthActivity extends ThemedActivity {
         editor.putString(PreferenceKeys.BRAPI_TOKEN, accessToken);
         editor.putString(PreferenceKeys.BRAPI_ID_TOKEN, idToken).apply();
         editor.apply();
+
+        // Store token in AccountManager so other apps can share it
+        String serverUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
+        if (!serverUrl.isEmpty()) {
+            BrapiAccountHelper.INSTANCE.storeToken(this, serverUrl, accessToken, idToken);
+        }
 
         // Clear our data from our deep link so the app doesn't think it is
         // coming from a deep link if it is coming from deep link on pause and resume.
