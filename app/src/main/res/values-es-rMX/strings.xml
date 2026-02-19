@@ -584,7 +584,7 @@
     <string name="trait_go_pro_await_ap_title">Esperando GoPro AP</string>
     <string name="trait_go_pro_await_ap_message">Conectando a la red, esto puede tardar un minuto. \n SSID: %s \n Pass: %s</string>
     <string name="trait_go_pro_await_ap_neutral">Conexión Manual</string>
-    <string name="trait_go_pro_camera_delete_photo_title">Eliminar Imagen</string>
+    <string name="trait_go_pro_camera_delete_photo_title">Eliminar Foto</string>
     <string name="go_pro_layout_black_11_not_detected">Esta Variable fue creada para una GoPro Black 11, por favor contacte con los desarrolladores para implementar su modelo GoPro.\n</string>
     <string name="go_pro_frag_connect_btn_content_description">Conectar a una cámara GoPro.\n</string>
     <string name="trait_go_pro_capture_content_description">Capturar una foto desde un dispositivo GoPro conectado.\n</string>
@@ -1322,6 +1322,7 @@
     <string name="trait_camera_switch_content_description">Cambiar cámara</string>
     <!-- Video recording messages -->
     <!-- Audio pause not supported message -->
+    <string name="delete_local_photo">¿Está seguro que quieres eliminar este elemento?</string>
     <string name="trait_system_photo_settings_title">Ajustes de Fotos del Sistema</string>
     <string name="trait_photos_no_settings">Este variable no tiene ajustes.</string>
     <string name="view_trait_photo_settings_preview_title">Vista Previa</string>
@@ -1543,6 +1544,9 @@
     <string name="device_settings_dialog_unknown_name">Dispositivo Bluetooth desconocido</string>
     <string name="device_settings_dialog_title">Ajustes del dispositivo Bluetooth</string>
     <string name="no_data_captured">No hay datos capturados.</string>
+    <string name="media_photo">Estado de foto</string>
+    <string name="media_video">Estado del vídeo</string>
+    <string name="media_audio">Estado de audio</string>
     <string name="media_viewer">Visor Multimedia</string>
     <string name="unable_to_load_image">No se puede cargar la imagen</string>
     <string name="delete">Eliminar</string>
