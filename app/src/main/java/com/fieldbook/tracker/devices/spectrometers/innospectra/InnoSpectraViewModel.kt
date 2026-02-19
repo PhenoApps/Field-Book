@@ -96,7 +96,7 @@ class InnoSpectraViewModel @Inject constructor() : ViewModel(), InnoSpectraViewM
                     sdk.initialize()
 
                     mBluetoothManager =
-                        context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+                        context.getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
                     val adapter = mBluetoothManager?.adapter
                     val scanner = adapter?.bluetoothLeScanner
                     val connect = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -204,7 +204,7 @@ class InnoSpectraViewModel @Inject constructor() : ViewModel(), InnoSpectraViewM
 
     fun setBluetoothDevice(context: Context, device: BluetoothDevice) {
         mBluetoothManager =
-            context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+            context.getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
         mBluetoothDevice = device
     }
 
@@ -218,7 +218,7 @@ class InnoSpectraViewModel @Inject constructor() : ViewModel(), InnoSpectraViewM
 
                 val gattService = Intent(context, ISCNIRScanSDK::class.java)
 
-                context.bindService(gattService, conn, Context.BIND_AUTO_CREATE)
+                context.bindService(gattService, conn, BIND_AUTO_CREATE)
 
                 mNanoReceiver = InnoSpectraBase(this).also {
                     it.register(context)
