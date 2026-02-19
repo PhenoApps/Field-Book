@@ -28,22 +28,21 @@ import com.ISCSDK.ISCNIRScanSDK.getStringPref
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.database.basicTimeFormatter
-import com.fieldbook.tracker.database.internalTimeFormatter
 import com.fieldbook.tracker.devices.spectrometers.Device
 import com.fieldbook.tracker.devices.spectrometers.SpectralFrame
 import com.fieldbook.tracker.devices.spectrometers.Spectrometer
 import com.fieldbook.tracker.devices.spectrometers.innospectra.InnoSpectraBase
 import com.fieldbook.tracker.devices.spectrometers.innospectra.interfaces.NanoEventListener
+import com.fieldbook.tracker.devices.spectrometers.innospectra.models.Frame
 import com.fieldbook.tracker.database.saver.SpectralSaver
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.traits.formats.Formats
-import com.fieldbook.tracker.utilities.DocumentTreeUtil
-import com.fieldbook.tracker.utilities.FileUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.threeten.bp.OffsetDateTime
+import java.util.UUID
 
 class InnoSpectraNanoTraitLayout : SpectralTraitLayout {
 
@@ -81,6 +80,58 @@ class InnoSpectraNanoTraitLayout : SpectralTraitLayout {
         return Formats.INNO_SPECTRA_NANO_SENSOR.getDatabaseName()
     }
 
+    private var lastProcessedFrameHash: String = "-1"
+    private var hardwareButtonObserver: Observer<Frame?>? = null
+
+    private fun observeHardwareButtonScans() {
+        val activity = (context as? CollectActivity) ?: return
+        val viewModel = activity.innoSpectraViewModel ?: return
+
+        // Only set up observer once
+        if (hardwareButtonObserver != null) {
+            return
+        }
+
+        // Create observer that only saves new frames from hardware button
+        hardwareButtonObserver = Observer { frame ->
+            if (frame != null && !isLocked && !viewModel.isUiScan()) {
+                //avoid duplication
+                val frameId = UUID.randomUUID().toString()
+
+                // Only save if this is a new frame (different hash from last processed)
+                if (frameId != lastProcessedFrameHash) {
+                    val entryId = currentRange?.uniqueId
+                    val traitId = currentTrait?.id
+
+                    if (entryId != null && traitId != null) {
+                        saveSpectralFrame(frame, entryId, traitId)
+                        lastProcessedFrameHash = frameId
+
+                        // Hide progress bar after hardware scan completes
+                        toggleProgressBar(false)
+                    }
+                }
+            } else if (frame == null) {
+                lastProcessedFrameHash = "-1"
+            }
+        }
+
+        // Register observer only once
+        hardwareButtonObserver?.let { observer ->
+            viewModel.getSpectralData().observe(activity, observer)
+        }
+    }
+
+    private fun setupScanStartedListener() {
+        val activity = (context as? CollectActivity) ?: return
+        val viewModel = activity.innoSpectraViewModel ?: return
+
+        viewModel.setScanStartedListener {
+            // Show progress bar when any scan starts (hardware or software)
+            toggleProgressBar(true)
+        }
+    }
+
     private fun NanoDevice.toDevice() = Device(this).also {
         it.displayableName = this.nanoName
     }
@@ -90,6 +141,12 @@ class InnoSpectraNanoTraitLayout : SpectralTraitLayout {
     override fun loadLayout() {
         super.loadLayout()
         spectralUiMode()
+
+        // Observe spectral data from hardware button scans and auto-save them
+        observeHardwareButtonScans()
+
+        // Set up listener to show progress bar when any scan starts
+        setupScanStartedListener()
     }
 
     override fun establishConnection(): Boolean {
@@ -171,36 +228,56 @@ class InnoSpectraNanoTraitLayout : SpectralTraitLayout {
                 it?.let { frames ->
                     Log.d(TAG, "Frames: $frames")
                     for (f in frames) {
+
                         Log.d(TAG, "Frame: ${f.rawData}")
-                        val values = f.rawData.joinToString(" ") { it.toString() }
-                        val wavelengths = f.data.joinToString(" ") { it.toString() }
-                        val timestamp = OffsetDateTime.now().format(basicTimeFormatter)
 
-                        // build SpectralFrame with correct parameter order
-                        val frame = SpectralFrame(
-                            values = values,
-                            wavelengths = wavelengths,
-                            color = "", // InnoSpectra frame does not provide color here
-                            timestamp = timestamp,
-                            entryId = entryId,
-                            traitId = traitId
-                        )
-
-                        // write spectral data to file and database via saver
-                        writeSpectralDataToFile("inno_spectra", frame, true)?.let { spectralUri ->
-                            writeSpectralDataToDatabase(frame, "", spectralUri, entryId, traitId)
-                        }
-
-                        enableCapture(device)
+                        saveSpectralFrame(f, entryId, traitId)
 
                         Log.d(TAG, "Spectral Data queued for save")
                     }
+
+                    // Re-enable capture and hide progress bar
+                    enableCapture(device)
+
+                    // Notify callback that capture completed successfully
+                    callback.onResult(true)
+                } ?: run {
+                    // Scan failed or returned null
+                    enableCapture(device)
+                    callback.onResult(false)
                 }
             }
+        } else {
+            // If locked, immediately callback with failure
+            enableCapture(device)
+            callback.onResult(false)
         }
 
         (context as CollectActivity).innoSpectraViewModel?.setEventListener {
             Log.d(TAG, "Event listener called")
+        }
+    }
+
+
+    private fun saveSpectralFrame(frame: Frame, entryId: String, traitId: String) {
+
+        val values = frame.rawData.joinToString(" ") { it.toString() }
+        val wavelengths = frame.data.joinToString(" ") { it.toString() }
+        val timestamp = OffsetDateTime.now().format(basicTimeFormatter)
+
+        // Build SpectralFrame
+        val spectralFrame = SpectralFrame(
+            values = values,
+            wavelengths = wavelengths,
+            color = "",
+            timestamp = timestamp,
+            entryId = entryId,
+            traitId = traitId
+        )
+
+        // Write to file and database
+        writeSpectralDataToFile("inno_spectra", spectralFrame, true)?.let { spectralUri ->
+            writeSpectralDataToDatabase(spectralFrame, "", spectralUri, entryId, traitId)
         }
     }
 

@@ -15,8 +15,10 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import androidx.preference.PreferenceManager
 import com.ISCSDK.ISCNIRScanSDK
@@ -29,7 +31,6 @@ import com.fieldbook.tracker.devices.spectrometers.innospectra.models.DeviceInfo
 import com.fieldbook.tracker.devices.spectrometers.innospectra.models.DeviceStatus
 import com.fieldbook.tracker.devices.spectrometers.innospectra.models.Frame
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.fieldbook.tracker.devices.spectrometers.innospectra.receivers.DeviceInfoReceiver
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -66,9 +67,13 @@ class InnoSpectraViewModel @Inject constructor() : ViewModel(), InnoSpectraViewM
     private var mNanoReceiver: InnoSpectraBase? = null
 
     //live data that receivers will produce and listeners will consume
-    private var mSpectralData: Frame? = null
+    private val mSpectralData: MutableLiveData<Frame?> = MutableLiveData(null)
+
+    private var mLastPostedFrame: Frame? = null
 
     private var OnDeviceButtonClicked: (() -> Unit)? = null
+
+    private var OnScanStarted: (() -> Unit)? = null
 
     private var mIsScanning = false
 
@@ -308,40 +313,40 @@ class InnoSpectraViewModel @Inject constructor() : ViewModel(), InnoSpectraViewM
 
     }
 
-    override fun scan(context: Context, manual: Boolean?): LiveData<List<Frame>?> = liveData {
+    fun setScanStartedListener(listener: () -> Unit) {
+        OnScanStarted = listener
+    }
 
-        if (isConnected() && isRefDataReady()) {
+    override fun scan(context: Context, manual: Boolean?): LiveData<List<Frame>?> {
 
-            mUiScan = !(manual ?: false)
+        if (!isConnected() || !isRefDataReady()) {
+            return MutableLiveData(null)
+        }
 
-            //pressing Nano button automatically starts a scan, no need to call jni
-            if (manual != true) {
-                //jni call
-                StartScan()
-            }
+        mUiScan = !(manual ?: false)
 
-            //wait for spectral data from the receiver
-            while (mSpectralData == null) {
+        // Reset spectral data before starting scan
+        mSpectralData.value = null
 
-                delay(500)
+        // Start scan if not manual (hardware button will trigger automatically)
+        if (manual != true) {
+            StartScan()
+        }
 
-            }
-
-            mSpectralData?.let { frame ->
-
+        // Transform spectral data LiveData into scan result format
+        // This reactive approach eliminates the need for observer callbacks and emit()
+        return mSpectralData.map { frame ->
+            if (frame != null) {
+                // Reset state after receiving frame
                 mIsScanning = false
-
                 ControlPhysicalButton(PhysicalButton.Unlock)
 
-                //reset data to null for next scan
-                mSpectralData = null
-
-                mUiScan = false
-
-                emit(listOf(frame))
+                // Return the frame as a list
+                listOf(frame)
+            } else {
+                null
             }
-
-        } else emit(null)
+        }
     }
 
     override fun onNotifyReceived() {
@@ -376,6 +381,9 @@ class InnoSpectraViewModel @Inject constructor() : ViewModel(), InnoSpectraViewM
 
             mIsScanning = true
 
+            // Notify that scan has started (for both UI and hardware button scans)
+            OnScanStarted?.invoke()
+
             if (!mUiScan) {
 
                 ControlPhysicalButton(PhysicalButton.Lock)
@@ -390,8 +398,22 @@ class InnoSpectraViewModel @Inject constructor() : ViewModel(), InnoSpectraViewM
 
         if (isGattStateConnected()) {
 
-            mSpectralData = spectral
+            // Only post if this is a new frame (different reference)
+            if (spectral !== mLastPostedFrame) {
+                mSpectralData.postValue(spectral)
+                mLastPostedFrame = spectral
 
+                // Reset scan state after data is received
+                mIsScanning = false
+
+                // Unlock button for next scan if this was hardware button scan
+                if (!mUiScan) {
+                    ControlPhysicalButton(PhysicalButton.Unlock)
+                } else {
+                    // Reset UI scan flag after posting so next scan can work
+                    mUiScan = false
+                }
+            }
         }
     }
 
@@ -590,6 +612,10 @@ class InnoSpectraViewModel @Inject constructor() : ViewModel(), InnoSpectraViewM
     }
 
     fun getDeviceStatusObject() = mDeviceStatus
+
+    fun isUiScan() = mUiScan
+
+    fun getSpectralData(): LiveData<Frame?> = mSpectralData
 
     fun getDeviceStatus(context: Context): String {
 
