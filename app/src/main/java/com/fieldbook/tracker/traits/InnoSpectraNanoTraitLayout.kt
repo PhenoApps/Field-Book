@@ -57,6 +57,8 @@ class InnoSpectraNanoTraitLayout : SpectralTraitLayout {
     private var nanoReceiver: InnoSpectraBase? = null
     private var isStarting = false
 
+    private var deviceConnectionJob: kotlinx.coroutines.Job? = null
+
     private var connection: ServiceConnection? = null
 
     private val nanoSaver = SpectralSaver(database)
@@ -295,16 +297,24 @@ class InnoSpectraNanoTraitLayout : SpectralTraitLayout {
     }
 
     private fun scheduleDeviceConnection() {
-        background.launch {
+        // Cancel any existing job first
+        deviceConnectionJob?.cancel()
+
+        deviceConnectionJob = background.launch {
             while (true) {
                 val connected = (context as CollectActivity).innoSpectraViewModel?.isConnected()
                 if (connected == false) {
-                    // when the view model reports disconnected, update UI
+                    // Hardware disconnect detected - perform proper cleanup
                     withContext(Dispatchers.Main) {
-                        connectButton?.visibility = VISIBLE
-                        captureButton?.visibility = GONE
-                        disconnectButton?.visibility = GONE
-                        progressBar?.visibility = GONE
+                        if (!isLocked) {
+                            isStarting = false
+                            endConnection()
+
+                            connectButton?.visibility = VISIBLE
+                            captureButton?.visibility = GONE
+                            progressBar?.visibility = GONE
+                            settingsButton?.visibility = GONE
+                        }
                     }
                     break
                 }
@@ -375,6 +385,12 @@ class InnoSpectraNanoTraitLayout : SpectralTraitLayout {
             return
         }
 
+        // If already in the process of connecting, prevent duplicate attempts
+        if (isStarting) {
+            Log.w(TAG, "connectDevice: connection already in progress, ignoring duplicate attempt")
+            return
+        }
+
         // persist selection
         controller.getPreferences().edit {
             putString(GeneralKeys.INNOSPECTRA_NANO_DEVICE_ID, nano.nanoMac)
@@ -402,36 +418,65 @@ class InnoSpectraNanoTraitLayout : SpectralTraitLayout {
 
     private fun beginConnection(device: NanoDevice) {
 
+        // Ensure previous service connection is cleaned up before starting new one
+        try {
+            if (connection != null) {
+                context?.unbindService(connection!!)
+                Log.d(TAG, "beginConnection: cleaned up previous service connection")
+            }
+        } catch (e: Exception) {
+            Log.d(TAG, "beginConnection: no previous connection to clean up - ${e.message}")
+        }
+
         connection = buildInnoSpectraServiceConnection { sdk ->
 
             if (sdk.connect(device.nanoMac)) {
+                Log.d(TAG, "SDK connection initiated for device: ${device.nanoMac}")
 
                 val configIndex = PreferenceManager.getDefaultSharedPreferences(context)
                     .getInt(GeneralKeys.INNOSPECTRA_NANO_CONFIG_INDEX, 0)
 
                 ISCNIRScanSDK.SetActiveConfig(byteArrayOf(configIndex.toByte(), (configIndex/256).toByte()))
+            } else {
+                Log.e(TAG, "SDK failed to initiate connection for device: ${device.nanoMac}")
             }
         }
 
         if (!isStarting) {
             isStarting = true
+            Log.d(TAG, "beginConnection: binding to GATT service for device ${device.nanoMac}")
             val gattService = Intent(context, ISCNIRScanSDK::class.java)
             context.bindService(gattService, connection!!, Context.BIND_AUTO_CREATE)
 
             ((context as CollectActivity).innoSpectraViewModel as? NanoEventListener)?.let { listener ->
                 nanoReceiver = InnoSpectraBase(listener).also {
                     it.register(context)
+                    Log.d(TAG, "beginConnection: registered InnoSpectraBase receiver")
                 }
             }
+        } else {
+            Log.w(TAG, "beginConnection: connection already starting, ignoring duplicate attempt")
         }
     }
 
     private fun endConnection() {
         try {
+            // Unregister the broadcast receiver to prevent stale listeners
+            nanoReceiver?.unregister(context)
+            nanoReceiver = null
+        } catch (e: Exception) {
+            Log.d(TAG, "Error unregistering nanoReceiver: ${e.message}")
+        }
+
+        try {
             connection?.let { context?.unbindService(it) }
         } catch (e: Exception) {
             e.printStackTrace()
         }
+
+        connection = null
+        bluetoothDevice = null
+        connectedNanoDevice = null
 
         (context as CollectActivity).innoSpectraViewModel?.disconnect(context)
     }
@@ -455,16 +500,24 @@ class InnoSpectraNanoTraitLayout : SpectralTraitLayout {
 
     override fun disconnectAndEraseDevice(device: Device) {
         if (!isLocked) {
+            // Cancel the connection monitoring job to prevent race conditions
+            deviceConnectionJob?.cancel()
+            deviceConnectionJob = null
+
             isStarting = false
             endConnection()
             controller.getPreferences().edit {
                 remove(GeneralKeys.INNOSPECTRA_NANO_DEVICE_ID)
                 remove(GeneralKeys.INNOSPECTRA_NANO_DEVICE_NAME)
             }
-            connectButton?.visibility = VISIBLE
-            captureButton?.visibility = GONE
-            disconnectButton?.visibility = GONE
-            setupConnectButton()
+
+            background.launch(Dispatchers.Main) {
+                connectButton?.visibility = VISIBLE
+                captureButton?.visibility = GONE
+                disconnectButton?.visibility = GONE
+                settingsButton?.visibility = GONE
+                setupConnectButton()
+            }
         }
     }
 
