@@ -1066,12 +1066,4 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
         dialog.show()
     }
 
-    private fun archiveFields(fieldIds: List<Int>) {
-        for (fieldId in fieldIds) {
-            db.setIsArchived(fieldId, true)
-        }
-        queryAndLoadFields()
-        mAdapter.exitSelectionMode()
-        invalidateOptionsMenu()
-    }
 }
