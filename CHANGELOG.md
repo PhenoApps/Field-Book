@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Fixed
+
+## [v7.1.0] - 2026-02-18
+
+### Added
 - Bottom toolbar in Collect can now be used for barcode navigation (https://github.com/PhenoApps/Field-Book/pull/1390)
 - Photos, videos, and audio files can now be attached to individual observations (https://github.com/PhenoApps/Field-Book/pull/1390)
 - Timestamp can now be optionally displayed under phenotypes in Collect (https://github.com/PhenoApps/Field-Book/pull/1409)
@@ -880,3 +888,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v7.0.0]: https://github.com/PhenoApps/Field-Book/releases/tag/7.0.0
 [v7.0.1]: https://github.com/PhenoApps/Field-Book/releases/tag/7.0.1
 [v7.0.2]: https://github.com/PhenoApps/Field-Book/releases/tag/7.0.2
+
+[v7.1.0]: https://github.com/PhenoApps/Field-Book/releases/tag/7.1.0
