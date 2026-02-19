@@ -1,11 +1,11 @@
 <changelog>
 
-    <release date="2026-02-10" versionCode="70002 versionName="v7.0.2"">
+    <release date="2026-02-10" versionCode="70002" versionName="v7.0.2">
         <bugfix>Internal GeoJSON data are now saved as doubles</bugfix>
         <bugfix>BrAPI improvements and optimizations</bugfix>
     </release>
 
-    <release date="2026-02-01" versionCode="70001 versionName="v7.0.1"">
+    <release date="2026-02-01" versionCode="70001" versionName="v7.0.1">
         <bugfix>BrAPI imports no longer always include "TEST" entry types</bugfix>
         <bugfix>Improvements for Canon integration</bugfix>
     </release>
