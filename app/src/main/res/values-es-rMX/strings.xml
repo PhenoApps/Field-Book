@@ -323,6 +323,7 @@
     <string name="traits_format_text">Texto</string>
     <string name="traits_format_photo">Foto</string>
     <string name="traits_format_camera">Cámara</string>
+    <string name="traits_format_video">Vídeo</string>
     <string name="traits_format_audio">Audio</string>
     <string name="traits_format_multicategorical">Multi-Categorías</string>
     <string name="traits_format_location">Ubicación</string>
@@ -364,8 +365,10 @@
     <string name="trait_parameter_decimal_places">Decimales</string>
     <string name="trait_parameter_decimal_places_hint">Número de decimales (-1 para ilimitado, 0 para enteros)</string>
     <string name="trait_parameter_decimal_places_error">Valor debe estar entre -1 y 10</string>
+    <string name="traits_attach_media_title">Adjuntar Multimedia</string>
     <string name="traits_attach_media_photo_label">Foto</string>
     <string name="traits_attach_media_audio_label">Audio</string>
+    <string name="traits_attach_media_video_label">Vídeo</string>
     <string name="traits_create_warning_name_blank">Nombre de la variable no puede estar vacío</string>
     <string name="traits_create_warning_duplicate">Variable ya existe</string>
     <string name="traits_create_warning_numeric_required">Los valores predeterminado, mínimo y máximo deben ser numéricos</string>
@@ -581,7 +584,7 @@
     <string name="trait_go_pro_await_ap_title">Esperando GoPro AP</string>
     <string name="trait_go_pro_await_ap_message">Conectando a la red, esto puede tardar un minuto. \n SSID: %s \n Pass: %s</string>
     <string name="trait_go_pro_await_ap_neutral">Conexión Manual</string>
-    <string name="trait_go_pro_camera_delete_photo_title">Eliminar Imagen</string>
+    <string name="trait_go_pro_camera_delete_photo_title">Eliminar Foto</string>
     <string name="go_pro_layout_black_11_not_detected">Esta Variable fue creada para una GoPro Black 11, por favor contacte con los desarrolladores para implementar su modelo GoPro.\n</string>
     <string name="go_pro_frag_connect_btn_content_description">Conectar a una cámara GoPro.\n</string>
     <string name="trait_go_pro_capture_content_description">Capturar una foto desde un dispositivo GoPro conectado.\n</string>
@@ -816,6 +819,7 @@
     <string name="preferences_appearance_range_progress_bar_description">Muestra su posición actual en el campo</string>
     <string name="preferences_appearance_traits_progress_bar">Barra de progreso de variables</string>
     <string name="preferences_appearance_traits_progress_bar_description">Muestra si las variables activas tienen datos y resalta la variable actual</string>
+    <string name="preferences_appearance_observation_timestamp">Timestamp de la Observación</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamiento</string>
     <string name="preferences_behavior_movement_title">Movimiento</string>
@@ -848,6 +852,10 @@
     <string name="preferences_behavior_return_character_next_trait">Tecla retorno avanza variable</string>
     <string name="preferences_general_use_day_number">Usar Día del Año</string>
     <string name="preferences_general_use_day_number_description">Usar número de día del año para capturar datos en lugar de la fecha</string>
+    <string name="preferences_behavior_barcode_scanning_move_to_entry">Mover a la entrada</string>
+    <string name="preferences_behavior_barcode_scanning_record_value">Registrar valor</string>
+    <string name="preferences_behavior_barcode_scanning_enter_if_not_id">Registrar valor si no hay ID de entrada</string>
+    <string name="preferences_behavior_barcode_scanning_ask">Preguntar siempre</string>
     <!-- Location -->
     <string name="preferences_location_title">Ubicación</string>
     <string name="preferences_location_defaults_title">GeoCoordenadas</string>
@@ -1312,8 +1320,13 @@
     <string name="trait_camera_connect_content_description">Inicia una conexión de dispositivo.</string>
     <string name="trait_camera_preview_content_description">Esta vista previa de la pantalla de la cámara.</string>
     <string name="trait_camera_capture_content_description">Capturar una foto</string>
+    <string name="trait_camera_view_media_content_description">Ver multimedia</string>
+    <string name="trait_camera_switch_content_description">Cambiar cámara</string>
     <!-- Video recording messages -->
+    <string name="video_recording_started">Grabación de vídeo iniciada</string>
+    <string name="video_recording_saved">Grabación de vídeo guardada</string>
     <!-- Audio pause not supported message -->
+    <string name="delete_local_photo">¿Está seguro que quieres eliminar este elemento?</string>
     <string name="trait_system_photo_settings_title">Ajustes de Fotos del Sistema</string>
     <string name="trait_photos_no_settings">Este variable no tiene ajustes.</string>
     <string name="view_trait_photo_settings_preview_title">Vista Previa</string>
@@ -1441,6 +1454,8 @@
     <string name="failed_to_fetch_observation_levels">Fallo obteniendo el nivel de las observaciónes</string>
     <string name="traits_sort_default">Predeterminado</string>
     <string name="traits_crop_image_parameter">Recortar</string>
+    <string name="dialog_crop_title">Definir Región de Recorte</string>
+    <string name="dialog_crop_message">¿Quieres recortar imágenes capturadas para este rasgo?</string>
     <string name="view_trait_photo_settings_crop">Fijar Región de Recorte</string>
     <string name="crop_image_clip_data_label">Datos de región de recorte en Field Book</string>
     <string name="quick_goto_swap_content_description">alternar tipo de teclado de entrada</string>
@@ -1535,7 +1550,25 @@
     <string name="device_settings_dialog_unknown_name">Dispositivo Bluetooth desconocido</string>
     <string name="device_settings_dialog_title">Ajustes del dispositivo Bluetooth</string>
     <string name="no_data_captured">No hay datos capturados.</string>
+    <string name="media_photo">Estado de foto</string>
+    <string name="media_video">Estado del vídeo</string>
+    <string name="media_audio">Estado de audio</string>
+    <string name="no_observation">Los datos deben ser capturados antes de que multimedia pueda ser adjuntada.</string>
+    <string name="preferences_behavior_barcode_scanning_title">Barra de Herramienta Escaneo de Código de Barras</string>
+    <string name="barcode_ask_enter">Ingresar Valor</string>
+    <string name="barcode_ask_move">Mover</string>
+    <string name="barcode_ask_message">Escaneado: %s</string>
+    <string name="barcode_ask_title">Elegir una opción</string>
+    <string name="no_media_found">No se encontraro multimedia %1$s</string>
+    <string name="media_viewer">Visor Multimedia</string>
+    <string name="unable_to_load_image">No se puede cargar la imagen</string>
     <string name="delete">Eliminar</string>
+    <string name="confirm_delete">¿Quieres eliminar permanentemente este elemento multimedia?</string>
+    <string name="audio_permission_required">Permiso de audio requerido</string>
+    <string name="back_button">Volver a la actividad anterior</string>
+    <string name="na_placeholder">Marcador de posición de imagen no disponible</string>
+    <string name="confirm_replace_media_message">¿Desea reemplazar multimedia actual para esta observación?</string>
+    <string name="confirm_replace_media_title">Reemplazar Multimedia Existente</string>
     <string name="failed_to_find_file_name">Error al recuperar el nombre del archivo.</string>
     <string name="act_brapi_export_starting">Iniciando exportación</string>
     <string name="act_brapi_export_success">Exportación exitosa</string>
@@ -1607,7 +1640,13 @@
     <string name="there_are_unuploaded_observations_or_images_do_you_want_to_upload_them_before_downloading">Hay observaciones o imágenes sin cargar. ¿Quieres subirlas antes de descargar?</string>
     <string name="upload_first">Cargar</string>
     <string name="download_anyway">Descargar</string>
+    <string name="confirm_delete_with_media_title">Eliminar observación</string>
+    <string name="confirm_delete_with_media_message">Eliminar esta observación también eliminará cualquier multimedia adjunta. ¿Está seguro de que desea eliminar esta observación?</string>
+    <string name="attach">Adjuntar</string>
     <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
+    <string name="alert_jump_to_plot_bottom_toolbar_message">La barra de herramientas inferior ha sido actualizada para soportar la navegación de entrada a través de código de barras.</string>
     <!-- Preference: Attach media barcode prioritize -->
+    <string name="preferences_behavior_attach_media_barcode_prioritize">Usar siempre código de barras detectado</string>
+    <string name="preferences_behavior_attach_media_barcode_prioritize_description">Cuando se detecta un código de barras, Field Book analizará automáticamente el código de barras sin la interacción del usuario.</string>
     <string name="edit">Editar</string>
 </resources>
