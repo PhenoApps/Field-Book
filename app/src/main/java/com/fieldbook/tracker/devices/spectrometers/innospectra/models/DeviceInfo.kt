@@ -1,13 +1,14 @@
 package com.fieldbook.tracker.devices.spectrometers.innospectra.models
 
 data class DeviceInfo(
-    val softwareVersion: String,
-    val hardwareVersion: String,
-    val deviceId: String,
-    val alias: String,
-    val opMode: String,
-    val deviceType: String,
-    val serialNumber: String? = null,
-    val humidity: String? = null,
-    val temperature: String? = null
+    var softwareVersion: String = "",
+    var hardwareVersion: String = "",
+    var deviceId: String = "",
+    var alias: String = "",
+    var opMode: String = "",
+    var deviceType: String = "",
+    var serialNumber: String = "",
+    var humidity: String = "",
+    var temperature: String = "",
+    var uuid: String = "",
 )

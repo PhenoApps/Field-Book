@@ -344,8 +344,16 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
         // if we have a connected nano device, show device info in settings
         connectedNanoDevice?.let { nano ->
 
+            // Get device info and status from ViewModel
+            val viewModel = (context as CollectActivity).innoSpectraViewModel
+            val deviceInfo = viewModel?.getDeviceInfo()
+            val deviceStatus = viewModel?.getDeviceStatusObject()
+
+            val firmwareVersion = deviceInfo?.softwareVersion ?: context.getString(R.string.unknown)
+            val batteryLevel = deviceStatus?.battery ?: context.getString(R.string.unknown)
+
             // create settings view using the new InnoSpectra settings view
-            val settingsView = com.fieldbook.tracker.views.InnoSpectraSettingsView(context, nano) {
+            val settingsView = com.fieldbook.tracker.views.InnoSpectraSettingsView(context, nano, firmwareVersion, batteryLevel) {
                 // onDisconnect callback
                 if (isLocked) {
                     return@InnoSpectraSettingsView

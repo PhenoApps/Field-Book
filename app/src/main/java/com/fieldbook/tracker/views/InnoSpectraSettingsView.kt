@@ -13,6 +13,8 @@ open class InnoSpectraSettingsView : ConstraintLayout {
     private val disconnectButton: Button
     private val deviceNameText: TextView
     private val macText: TextView
+    private val firmwareText: TextView
+    private val batteryText: TextView
 
     private var onDisconnect: (() -> Unit)? = null
 
@@ -22,13 +24,17 @@ open class InnoSpectraSettingsView : ConstraintLayout {
         disconnectButton = view.findViewById(R.id.view_trait_innospectra_disconnect_btn)
         deviceNameText = view.findViewById(R.id.view_trait_innospectra_device_name)
         macText = view.findViewById(R.id.view_trait_innospectra_mac)
+        firmwareText = view.findViewById(R.id.view_trait_innospectra_firmware)
+        batteryText = view.findViewById(R.id.view_trait_innospectra_battery)
     }
 
-    constructor(ctx: Context, device: NanoDevice, onDisconnect: () -> Unit) : super(ctx) {
+    constructor(ctx: Context, device: NanoDevice, firmwareVersion: String, batteryLevel: String, onDisconnect: () -> Unit) : super(ctx) {
         setup()
         this.onDisconnect = onDisconnect
         deviceNameText.text = device.nanoName
         macText.text = device.nanoMac
+        firmwareText.text = firmwareVersion
+        batteryText.text = batteryLevel
     }
 
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)

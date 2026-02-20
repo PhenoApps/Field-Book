@@ -1621,12 +1621,14 @@
     <string name="inno_spectra_function_locked">Function locked</string>
     <string name="header_temperature">Temperature</string>
     <string name="header_humidity">Humidity</string>
+    <string name="header_firmware">Firmware</string>
     <string name="header_total_lamp_time">Total Lamp Time</string>
     <string name="header_battery">Battery</string>
     <string name="header_software_version">Software Version</string>
     <string name="header_hardware_version">Hardware Version</string>
     <string name="header_device_id">Device ID</string>
     <string name="header_serial_id">Serial ID</string>
+    <string name="header_uuid">UUID</string>
     <string name="delete_spectral_data_plot">Delete Spectral Data</string>
 
     <string name="brapi_studies_filter_title">Studies</string>
@@ -1892,9 +1894,10 @@
     <string name="download_anyway">Download</string>
 
     <!-- InnoSpectra settings layout -->
-    <string name="view_trait_innospectra_device_name_label">Name:</string>
-    <string name="view_trait_innospectra_mac_label">MAC:</string>
+    <string name="view_trait_innospectra_device_name_label">Name</string>
+    <string name="view_trait_innospectra_mac_label">MAC</string>
     <string name="view_trait_innospectra_unknown">Unknown</string>
     <string name="view_trait_innospectra_na">N/A</string>
+    <string name="unknown">Unknown</string>
 
 </resources>

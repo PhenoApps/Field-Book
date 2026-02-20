@@ -51,6 +51,38 @@
                 android:layout_marginTop="4dp"
                 android:text="@string/view_trait_innospectra_unknown" />
 
+            <!-- Firmware Version -->
+            <TextView
+                android:id="@+id/view_trait_innospectra_firmware_label"
+                style="@style/TextViewStyle.Bold.Title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/header_firmware" />
+
+            <TextView
+                android:id="@+id/view_trait_innospectra_firmware"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/view_trait_innospectra_unknown" />
+
+            <!-- Battery Level -->
+            <TextView
+                android:id="@+id/view_trait_innospectra_battery_label"
+                style="@style/TextViewStyle.Bold.Title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/header_battery" />
+
+            <TextView
+                android:id="@+id/view_trait_innospectra_battery"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/view_trait_innospectra_unknown" />
+
         </LinearLayout>
     </ScrollView>
 

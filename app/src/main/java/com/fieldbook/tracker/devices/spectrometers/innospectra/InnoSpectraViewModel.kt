@@ -79,7 +79,7 @@ class InnoSpectraViewModel @Inject constructor() : ViewModel(), InnoSpectraViewM
 
     private var mUiScan = false
 
-    private var mDeviceInfo: DeviceInfo? = null
+    private var mDeviceInfo = DeviceInfo()
 
     private var mDeviceStatus: DeviceStatus? = null
 
@@ -419,16 +419,7 @@ class InnoSpectraViewModel @Inject constructor() : ViewModel(), InnoSpectraViewM
 
     override fun onGetUuid(uuid: String) {
 
-        mDeviceInfo?.let { info ->
-//            mDeviceInfo = Spectrometer.DeviceInfo(
-//                info.softwareVersion,
-//                info.hardwareVersion,
-//                uuid,
-//                info.alias,
-//                info.opMode,
-//                info.deviceType
-//            )
-        }
+        mDeviceInfo.uuid = uuid
 
         GetDeviceStatus()
 
@@ -436,17 +427,11 @@ class InnoSpectraViewModel @Inject constructor() : ViewModel(), InnoSpectraViewM
 
     override fun onGetDeviceInfo(info: DeviceInfoReceiver.NanoDeviceInfo) {
 
-        mDeviceInfo = with(info) {
-            DeviceInfo(
-                this.spec,
-                this.hardware,
-                this.model,
-                "",
-                "",
-                DEVICE_TYPE_NANO,
-                serialNumber = serial,
-            )
-        }
+        mDeviceInfo.softwareVersion = info.spec
+        mDeviceInfo.hardwareVersion = info.hardware
+        mDeviceInfo.deviceId = info.model
+        mDeviceInfo.deviceType = DEVICE_TYPE_NANO
+        mDeviceInfo.serialNumber = info.serial
 
         mConnected = true
 
@@ -644,10 +629,10 @@ class InnoSpectraViewModel @Inject constructor() : ViewModel(), InnoSpectraViewM
         if (mDeviceInfo == null) return ""
 
         return """
-            $softwareHeader: ${mDeviceInfo?.softwareVersion}
-            $hardwareHeader: ${mDeviceInfo?.hardwareVersion}
-            $deviceIdHeader: ${mDeviceInfo?.deviceId}
-            $serialHeader:   ${mDeviceInfo?.serialNumber}
+            $softwareHeader: ${mDeviceInfo.softwareVersion}
+            $hardwareHeader: ${mDeviceInfo.hardwareVersion}
+            $deviceIdHeader: ${mDeviceInfo.deviceId}
+            $serialHeader:   ${mDeviceInfo.serialNumber}
         """.trimIndent()
     }
 
