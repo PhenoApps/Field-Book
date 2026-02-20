@@ -1890,11 +1890,10 @@
     <string name="there_are_unuploaded_observations_or_images_do_you_want_to_upload_them_before_downloading">There are unuploaded observations or images. Do you want to upload them before downloading?</string>
     <string name="upload_first">Upload</string>
     <string name="download_anyway">Download</string>
-    <string name="traits_format_inno_spectra_nano_sensor">Inno Spectra Nano</string>
 
     <!-- InnoSpectra settings layout -->
-    <string name="view_trait_innospectra_device_name_label">Nano Name:</string>
-    <string name="view_trait_innospectra_mac_label">Nano MAC:</string>
+    <string name="view_trait_innospectra_device_name_label">Name:</string>
+    <string name="view_trait_innospectra_mac_label">MAC:</string>
     <string name="view_trait_innospectra_unknown">Unknown</string>
     <string name="view_trait_innospectra_na">N/A</string>
 

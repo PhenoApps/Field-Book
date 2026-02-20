@@ -44,7 +44,7 @@ import kotlinx.coroutines.withContext
 import org.threeten.bp.OffsetDateTime
 import java.util.UUID
 
-class InnoSpectraNanoTraitLayout : SpectralTraitLayout {
+class InnoSpectraTraitLayout : SpectralTraitLayout {
 
     companion object {
         const val TAG = "SpectralTraitLayout"
@@ -79,7 +79,7 @@ class InnoSpectraNanoTraitLayout : SpectralTraitLayout {
     }
 
     override fun type(): String {
-        return Formats.INNO_SPECTRA_NANO_SENSOR.getDatabaseName()
+        return Formats.INNO_SPECTRA_SENSOR.getDatabaseName()
     }
 
     private var lastProcessedFrameHash: String = "-1"
@@ -345,10 +345,10 @@ class InnoSpectraNanoTraitLayout : SpectralTraitLayout {
         connectedNanoDevice?.let { nano ->
 
             // create settings view using the new InnoSpectra settings view
-            val settingsView = com.fieldbook.tracker.views.InnoSpectraNanoSettingsView(context, nano) {
+            val settingsView = com.fieldbook.tracker.views.InnoSpectraSettingsView(context, nano) {
                 // onDisconnect callback
                 if (isLocked) {
-                    return@InnoSpectraNanoSettingsView
+                    return@InnoSpectraSettingsView
                 }
 
                 // perform disconnect and erase saved device
@@ -360,7 +360,7 @@ class InnoSpectraNanoTraitLayout : SpectralTraitLayout {
             }
 
             dialog = android.app.AlertDialog.Builder(context, R.style.AppAlertDialog)
-                .setTitle(context.getString(R.string.traits_format_inno_spectra_nano_sensor))
+                .setTitle(context.getString(R.string.traits_format_inno_spectra))
                 .setView(settingsView)
                 .setPositiveButton(android.R.string.ok) { d, _ ->
                     onSettingsChanged()

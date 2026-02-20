@@ -3,13 +3,12 @@ package com.fieldbook.tracker.views
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.Button
-import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.fieldbook.tracker.R
 import com.ISCSDK.ISCNIRScanSDK.NanoDevice
 
-open class InnoSpectraNanoSettingsView : ConstraintLayout {
+open class InnoSpectraSettingsView : ConstraintLayout {
 
     private val disconnectButton: Button
     private val deviceNameText: TextView
@@ -19,7 +18,7 @@ open class InnoSpectraNanoSettingsView : ConstraintLayout {
 
     init {
         // inflate the new InnoSpectra Nano settings layout
-        val view = inflate(context, R.layout.view_trait_innospectra_nano_settings, this)
+        val view = inflate(context, R.layout.view_trait_innospectra_settings, this)
         disconnectButton = view.findViewById(R.id.view_trait_innospectra_disconnect_btn)
         deviceNameText = view.findViewById(R.id.view_trait_innospectra_device_name)
         macText = view.findViewById(R.id.view_trait_innospectra_mac)

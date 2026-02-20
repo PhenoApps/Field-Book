@@ -81,7 +81,7 @@ import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.traits.AbstractCameraTrait;
-import com.fieldbook.tracker.traits.InnoSpectraNanoTraitLayout;
+import com.fieldbook.tracker.traits.InnoSpectraTraitLayout;
 import com.fieldbook.tracker.traits.SpectralTraitLayout;
 import com.fieldbook.tracker.traits.formats.Formats;
 import com.fieldbook.tracker.preferences.GeneralKeys;
@@ -846,14 +846,12 @@ public class CollectActivity extends ThemedActivity
             TraitObject currentTrait = traitBox.getCurrentTrait();
             if (currentTrait != null) {
                 String format = currentTrait.getFormat();
-                if (format != null && Formats.Companion.isCameraTrait(format)) {
+                if (!format.isEmpty() && Formats.Companion.isCameraTrait(format)) {
                     ((AbstractCameraTrait) traitLayouts.getTraitLayout(format)).setImageNa();
-                } else if (format != null && Formats.Companion.isSpectralFormat(format)) {
+                } else if (!format.isEmpty() && Formats.Companion.isSpectralFormat(format)) {
                     BaseTraitLayout base = traitLayouts.getTraitLayout(format);
                     if (base instanceof SpectralTraitLayout) {
                         ((SpectralTraitLayout) base).setNa();
-                    } else if (base instanceof InnoSpectraNanoTraitLayout) {
-                        ((InnoSpectraNanoTraitLayout) base).setNa();
                     }
                 } else {
                     updateObservation(currentTrait, "NA", null);
