@@ -540,9 +540,11 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         if (frames.isEmpty() && !submitPlaceholder) {
             lineChart?.visibility = GONE
             recycler?.visibility = GONE
+            (context as CollectActivity).updateCurrentTraitStatus(false)
         } else {
             lineChart?.visibility = VISIBLE
             recycler?.visibility = VISIBLE
+            (context as CollectActivity).updateCurrentTraitStatus(true)
         }
 
         renderNormal(
@@ -572,8 +574,10 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
         if (frames.isEmpty()) {
             colorRecycler?.visibility = GONE
+            (context as CollectActivity).updateCurrentTraitStatus(false)
         } else {
             colorRecycler?.visibility = VISIBLE
+            (context as CollectActivity).updateCurrentTraitStatus(true)
         }
 
         (colorRecycler?.adapter as? ColorAdapter)?.submitList(frames.map { if (it.traitId.isEmpty()) "-1" else it.color })
