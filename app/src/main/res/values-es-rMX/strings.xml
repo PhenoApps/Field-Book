@@ -419,10 +419,10 @@
     <string name="error_exporting_traits">Error al exportar rasgos</string>
     <string name="message_all_traits_deleted">Todos los rasgos eliminados</string>
     <string name="message_traits_imported">Importados %1$d rasgos</string>
-    <string name="message_traits_imported_with_skipped">Variables importadas %1$d, omitidas %2$d duplicadas</string>
-    <string name="message_traits_exported">Importadas %1$d variables</string>
+    <string name="message_traits_imported_with_skipped">Rasgos importados %1$d, omitidos %2$d duplicados</string>
+    <string name="message_traits_exported">Importados %1$d rasgos</string>
     <!-- Trait Detail -->
-    <string name="trait_detail_title">Detalles de Variable</string>
+    <string name="trait_detail_title">Detalles del Rasgo</string>
     <string name="trait_format_details">Detalles del Formato</string>
     <string name="trait_data_title">Datos de Observación</string>
     <string name="trait_default_value">Valor Predeterminado: %s</string>
