@@ -277,8 +277,10 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
             traitId = traitId
         )
 
+        val deviceAddress = connectedNanoDevice?.nanoMac ?: return
+
         // Write to file and database
-        writeSpectralDataToFile("inno_spectra", spectralFrame, true)?.let { spectralUri ->
+        writeSpectralDataToFile("inno_spectra_$deviceAddress", spectralFrame, true)?.let { spectralUri ->
             writeSpectralDataToDatabase(spectralFrame, "", spectralUri, entryId, traitId)
         }
     }
