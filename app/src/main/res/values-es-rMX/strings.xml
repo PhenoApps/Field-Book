@@ -34,7 +34,7 @@
     <string name="app_intro_intro_title_slide1">¡Bienvenido a Field Book!</string>
     <string name="app_intro_intro_summary_slide1">Tradicionalmente, la captura de datos en el campo requería la escritura y transcripción desde papel. Field Book se creó como una solución digital para la captura de datos que aumenta la velocidad de recolección con una mayor integridad de los mismos.</string>
     <string name="app_intro_intro_title_slide2">Funcionalidad y Personalización</string>
-    <string name="app_intro_intro_summary_slide2">Los datos se introducen en Field Book con diseños de variables personalizadas y diseñadas para simplificar la captura de datos y minimizar los errores.\n\n Por defecto, los datos recolectados se almacenan localmente, ademas Field Book soporta la Breeding API que permite enviar datos a sistemas compatibles con BrAPI.</string>
+    <string name="app_intro_intro_summary_slide2">Los datos se introducen en Field Book con diseños de rasgos personalizados y diseñadas para simplificar la captura de datos y minimizar los errores.\n\n Por defecto, los datos recolectados se almacenan localmente, ademas Field Book soporta la Breeding API que permite enviar datos a sistemas compatibles con BrAPI.</string>
     <string name="app_intro_required_setup_title">Configuración Requerida</string>
     <string name="app_intro_required_setup_summary">Para empezar a usar Field Book, otorga los permisos necesarios para la aplicación y luego define una carpeta donde tus datos serán almacenados.</string>
     <string name="app_intro_permissions_title">Permisos</string>
@@ -45,7 +45,7 @@
     <string name="app_intro_required_optional_title">Configuración Opcional</string>
     <string name="app_intro_required_optional_summary">Estos ajustes opcionales personalizan Field Book y se pueden realizar en los Ajustes.</string>
     <string name="app_intro_load_sample_data_title">Cargar Datos de Ejemplo</string>
-    <string name="app_intro_load_sample_data_summary">Importe una base de datos de ejemplo que incluye campos y variables de ejemplo.</string>
+    <string name="app_intro_load_sample_data_summary">Importe una base de datos de ejemplo que incluye campos y rasgos de ejemplo.</string>
     <string name="app_intro_tutorial_title">Tutorial</string>
     <string name="app_intro_tutorial_summary">Agrega un icono de ayuda a la barra de herramientas superior que describe las funcionalidades de la aplicación.</string>
     <string name="app_intro_high_contrast_title">Tema de Alto Contraste</string>
@@ -62,7 +62,7 @@
     <string name="permission_ask_bluetooth">Por favor, acepte los permisos de bluetooth.</string>
     <!-- Config Activity  -->
     <string name="settings_fields">Campos</string>
-    <string name="settings_traits">Variables</string>
+    <string name="settings_traits">Rasgos</string>
     <string name="settings_collect">Capturar</string>
     <string name="settings_export">Exportar</string>
     <string name="settings_advanced">Ajustes</string>
@@ -81,7 +81,7 @@
     <string name="act_file_explorer_no_file_error">No se han encontrado directorios de Field Book.</string>
     <!-- Warnings/Catches -->
     <string name="warning_field_missing">El campo no ha sido cargado. Por favor cargue un campo antes de capturar datos.</string>
-    <string name="warning_traits_missing">No existen variables. Cree variables antes de capturar datos.</string>
+    <string name="warning_traits_missing">No existen rasgos. Cree rasgos antes de capturar datos.</string>
     <!-- Changelog -->
     <string name="changelog_title">Registro de Cambios</string>
     <!--  Field Grouping  -->
@@ -259,7 +259,7 @@
     <string name="field_trait_observation_total">\"%d\" observaciones</string>
     <!-- Field Detail Charts -->
     <string name="chart_no_data">No hay datos para graficar</string>
-    <string name="chart_incompatible_format">Este formato de variable no puede ser graficado</string>
+    <string name="chart_incompatible_format">Este formato de rasgo no puede ser graficado</string>
     <string name="chart_excess_data">Demasiados valores distintos para graficar</string>
     <!-- Semantic dates -->
     <string name="today">Hoy</string>
@@ -272,46 +272,46 @@
     <string name="invalid_date">Fecha inválida</string>
     <!-- TRAITS -->
     <!-- Sort -->
-    <string name="traits_toolbar_sort">Ordenar Variables</string>
+    <string name="traits_toolbar_sort">Ordenar Rasgos</string>
     <string name="traits_sort_name">Nombre</string>
     <string name="traits_sort_import_order">Orden de Importación</string>
     <string name="traits_sort_visibility">Visibilidad</string>
     <string name="traits_sort_format">Formato</string>
-    <string name="warning_traits_missing_modify">Crear variables antes de modificarlas.</string>
+    <string name="warning_traits_missing_modify">Crear rasgos antes de modificarlos.</string>
     <!-- Trait import/export -->
-    <string name="traits_new_dialog_title">Nueva(s) Variable(s)</string>
-    <string name="traits_dialog_create">Crear una nueva variable</string>
+    <string name="traits_new_dialog_title">Nuevo(s) Rasgo(s)</string>
+    <string name="traits_dialog_create">Crear un nuevo rasgo</string>
     <string name="traits_dialog_import_from_file">Importar desde archivo</string>
     <string name="traits_dialog_import">Importar</string>
-    <string name="import_error_format_trait">Solo se pueden importar archivos TRT como lista de variables</string>
+    <string name="import_error_format_trait">Solo se pueden importar archivos TRT como lista de rasgos</string>
     <string name="import_error_format_trait_json">Formato JSON no válido: %s</string>
-    <string name="import_error_no_traits">No se encontraron variables</string>
-    <string name="trait_import_successful">Variables importadas con éxito</string>
-    <string name="traits_export_check">¿Exportar lista de variables actual?</string>
+    <string name="import_error_no_traits">No se encontraron rasgos</string>
+    <string name="trait_import_successful">Rasgos importados con éxito</string>
+    <string name="traits_export_check">¿Exportar lista de rasgos actual?</string>
     <string name="traits_dialog_export">Exportar</string>
-    <string name="dialog_delete_traits_message">¿Quieres eliminar todas las variables actuales? Eliminar una variable también elimina los datos que se han recopilado para esa variable.</string>
-    <string name="traits_toolbar_delete_all">Eliminar todas las variables</string>
-    <string name="act_trait_editor_no_traits_exist">No existen variables.</string>
-    <string name="export_dialog_traits_exporting">Exportando variables…</string>
+    <string name="dialog_delete_traits_message">¿Quieres eliminar todos los rasgos actuales? Eliminar un rasgo también elimina los datos que se han recopilado para ese rasgo.</string>
+    <string name="traits_toolbar_delete_all">Eliminar todos los rasgos</string>
+    <string name="act_trait_editor_no_traits_exist">No existen rasgos.</string>
+    <string name="export_dialog_traits_exporting">Exportando rasgos…</string>
     <string name="export_error_unknown">Ocurrió un error de exportación desconocido</string>
     <string name="export_error_directory_access">Error al acceder al directorio de exportación</string>
     <string name="export_error_directory_not_found">Directorio de exportación no encontrado</string>
     <string name="export_error_file_creation">Error al crear archivo de exportación</string>
     <string name="export_error_file_stream">Error al abrir flujo de archivo</string>
-    <string name="error_trait_directory_not_available">Directorio de variables no disponible</string>
-    <string name="error_trait_directory_missing">Falta el directorio devariables</string>
+    <string name="error_trait_directory_not_available">Directorio de rasgos no disponible</string>
+    <string name="error_trait_directory_missing">Falta el directorio de rasgos</string>
     <string name="error_failed_to_create_file">Error al crear archivo</string>
     <string name="error_output_stream_failed">Flujo de salida fallido</string>
     <string name="error_export_failed">Error al exportar</string>
     <string name="error_unable_to_copy_trait_file">No se puede copiar el archivo trt</string>
     <string name="error_cannot_open_file">No se puede abrir el archivo</string>
     <!-- Trait item menu -->
-    <string name="list_item_trait_popup_content_description">Abre un menú específico a esta variable.</string>
+    <string name="list_item_trait_popup_content_description">Abre un menú específico a este rasgo.</string>
     <string name="traits_options_copy">Copiar</string>
     <string name="traits_options_edit">Editar</string>
     <string name="traits_options_delete">Eliminar</string>
-    <string name="traits_options_delete_title">Eliminar variable</string>
-    <string name="traits_warning_delete">Eliminando una variable también se eliminan los datos que se han capturado para esta variable. ¿Estás seguro(a) de que quieres eliminar esta variable?</string>
+    <string name="traits_options_delete_title">Eliminar rasgo</string>
+    <string name="traits_warning_delete">Eliminando un rasgo también se eliminan los datos que se han capturado para este rasgo. ¿Estás seguro(a) de que quieres eliminar este rasgo?</string>
     <!-- Trait formats -->
     <string name="traits_format_numeric">Numérico</string>
     <string name="traits_format_categorical">Categórico</string>
@@ -340,10 +340,10 @@
     <string name="traits_format_scale">Escala</string>
     <string name="traits_format_stop_watch">Cronómetro</string>
     <!-- Trait Creation Dialog -->
-    <string name="traits_toolbar_add_trait">Formato de Variable</string>
-    <string name="trait_creator_title_layout">Diseño de Variable</string>
+    <string name="traits_toolbar_add_trait">Formato de Rasgo</string>
+    <string name="trait_creator_title_layout">Diseño del Rasgo</string>
     <string name="trait_creator_parameters_title">Parámetros %s</string>
-    <string name="activity_traits_new_button_content_description">Agregar un nueva variable.</string>
+    <string name="activity_traits_new_button_content_description">Agregar un nuevo rasgo.</string>
     <string name="traits_create_name">Nombre</string>
     <string name="traits_create_format">Formato</string>
     <string name="traits_create_value_default">Predeterminado</string>
@@ -369,8 +369,8 @@
     <string name="traits_attach_media_photo_label">Foto</string>
     <string name="traits_attach_media_audio_label">Audio</string>
     <string name="traits_attach_media_video_label">Vídeo</string>
-    <string name="traits_create_warning_name_blank">Nombre de la variable no puede estar vacío</string>
-    <string name="traits_create_warning_duplicate">Variable ya existe</string>
+    <string name="traits_create_warning_name_blank">Nombre del rasgo no puede estar vacío</string>
+    <string name="traits_create_warning_duplicate">Rasgo ya existe</string>
     <string name="traits_create_warning_numeric_required">Los valores predeterminado, mínimo y máximo deben ser numéricos</string>
     <string name="dialog_new_trait_add_cat_button_text">Agregar</string>
     <string name="traits_create_categories_value_text">Ingrese aquí el valor de la categoría</string>
@@ -387,11 +387,11 @@
     <string name="trait_creator_parameter_warning_too_big">Número demasiado grande</string>
     <string name="trait_creator_parameter_warning_too_small">Número demasiado pequeño</string>
     <string name="list_item_trait_parameter_categories_value_hint">Escriba un nombre de categoría a agregar</string>
-    <string name="list_item_trait_parameter_name_hint">Ingrese nombre de variable</string>
-    <string name="dialog_new_trait_observations_exist_error">Ya existen observaciones para esta variable. Sólo se pueden editar los siguientes parámetros.</string>
+    <string name="list_item_trait_parameter_name_hint">Ingrese nombre del rasgo</string>
+    <string name="dialog_new_trait_observations_exist_error">Ya existen observaciones para este rasgo. Sólo se pueden editar los siguientes parámetros.</string>
     <string name="dialog_new_trait_error_must_select_a_layout">Debe seleccionar un diseño.</string>
     <string name="trait_creator_parameter_warning_integer_required">Entero requerido.</string>
-    <string name="dialog_new_trait_error_cannot_update_to_brapi_trait">Las variables no se pueden actualizar a las variables BrAPI.</string>
+    <string name="dialog_new_trait_error_cannot_update_to_brapi_trait">Los rasgos no se pueden actualizar a rasgos de BrAPI.</string>
     <string name="required">Requerido</string>
     <string name="traits_create_warning_percent_value_required">Valor requerido</string>
     <!-- Decimal Places Radio Options -->
@@ -408,21 +408,21 @@
     <string name="trait_parameter_repeated_measures">Medidas Repetidas</string>
     <string name="trait_parameter_auto_switch_plot">Cambiar Automáticamente a la Siguiente Parcela</string>
     <string name="trait_parameter_invalid_value">Permitir Valor Inválido</string>
-    <string name="select_trait">Seleccionar Variable</string>
+    <string name="select_trait">Seleccionar Rasgo</string>
     <string name="edit_traits">Editar</string>
     <!-- Trait Editor -->
-    <string name="error_loading_traits">Error cargando variables</string>
-    <string name="error_deleting_traits">Error al eliminar variables</string>
-    <string name="error_toggling_all_traits_visibility">Error al cambiar la visibilidad de las variables</string>
-    <string name="error_importing_traits">Error al importar variables</string>
-    <string name="error_saving_trait_order">Error al guardar el orden de variables</string>
-    <string name="error_exporting_traits">Error al exportar variables</string>
-    <string name="message_all_traits_deleted">Todas las variables eliminadas</string>
-    <string name="message_traits_imported">Importadas %1$d variables</string>
-    <string name="message_traits_imported_with_skipped">Variables importadas %1$d, omitidas %2$d duplicadas</string>
-    <string name="message_traits_exported">Importadas %1$d variables</string>
+    <string name="error_loading_traits">Error cargando rasgos</string>
+    <string name="error_deleting_traits">Error al eliminar rasgos</string>
+    <string name="error_toggling_all_traits_visibility">Error al cambiar la visibilidad de los rasgos</string>
+    <string name="error_importing_traits">Error al importar rasgos</string>
+    <string name="error_saving_trait_order">Error al guardar el orden de rasgos</string>
+    <string name="error_exporting_traits">Error al exportar rasgos</string>
+    <string name="message_all_traits_deleted">Todos los rasgos eliminados</string>
+    <string name="message_traits_imported">Importados %1$d rasgos</string>
+    <string name="message_traits_imported_with_skipped">Rasgos importados %1$d, omitidos %2$d duplicados</string>
+    <string name="message_traits_exported">Importados %1$d rasgos</string>
     <!-- Trait Detail -->
-    <string name="trait_detail_title">Detalles de Variable</string>
+    <string name="trait_detail_title">Detalles del Rasgo</string>
     <string name="trait_format_details">Detalles del Formato</string>
     <string name="trait_data_title">Datos de Observación</string>
     <string name="trait_default_value">Valor Predeterminado: %s</string>
@@ -497,7 +497,7 @@
     <string name="main_toolbar_next_entry_no_data">Siguiente entrada vacía</string>
     <!-- InfoBars -->
     <string name="dialog_att_chooser_attributes">Atributos</string>
-    <string name="dialog_att_chooser_traits">Variables</string>
+    <string name="dialog_att_chooser_traits">Rasgos</string>
     <string name="dialog_att_chooser_other">Otro</string>
     <string name="dialog_att_chooser_customize">Personalizar</string>
     <string name="dialog_infobar_att_chooser_title">InfoBar %d</string>
@@ -653,6 +653,7 @@
     <string name="menu_collect_repeated_values_indicator">Muestra el número de valores repetidos.</string>
     <string name="dialog_multi_measure_delete_no_observations">No existen observaciones.</string>
     <string name="dialog_multi_measure_delete_title">Observaciones</string>
+    <string name="dialog_multi_measure_confirm_delete_title">Las observaciones seleccionadas y la multimedia adjunta para este rasgo se eliminarán permanentemente.</string>
     <string name="dialog_multi_measure_delete">Eliminar</string>
     <string name="dialog_multi_measure_select_all">Seleccionar todo</string>
     <!--- GeoNav -->
@@ -685,7 +686,7 @@
     <string name="observation_metadata_title">Metadatos de Observación</string>
     <string name="observation_info_study_name">Nombre del Estudio</string>
     <string name="observation_info_entry_id">Id de la entrada</string>
-    <string name="observation_info_trait_format">Formato de Variable</string>
+    <string name="observation_info_trait_format">Formato de Rasgo</string>
     <string name="observation_info_trait_name">Nombre de Variable</string>
     <string name="observation_info_trait_alias">Alias de Variable</string>
     <string name="observation_info_value">Valor</string>
@@ -820,6 +821,7 @@
     <string name="preferences_appearance_traits_progress_bar">Barra de progreso de variables</string>
     <string name="preferences_appearance_traits_progress_bar_description">Muestra si las variables activas tienen datos y resalta la variable actual</string>
     <string name="preferences_appearance_observation_timestamp">Timestamp de la Observación</string>
+    <string name="preferences_appearance_observation_timestamp_description">Muestra el timestamp de la observación guardada por debajo del valor</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamiento</string>
     <string name="preferences_behavior_movement_title">Movimiento</string>
@@ -1170,7 +1172,7 @@
     <string name="brapi_trait_already_exists">La variable ya existe: %1$s. No guardado</string>
     <string name="brapi_error_saving_all_traits">Error al guardar las variables. No se guardaron variables.</string>
     <string name="brapi_error_saving_some_traits">Error al guardar algunas variables. Algunas variables no se guardaron</string>
-    <string name="brapi_traits_saved_success">Variables seleccionadas guardadas con éxito.</string>
+    <string name="brapi_traits_saved_success">Rasgos seleccionados guardados exitosamente.</string>
     <string name="brapi_obs_sync_menu_name">Sincronizar</string>
     <string name="brapi_obs_header_name">Descargando Observaciones para Estudio:</string>
     <string name="number_traits_label">Número de Variables:</string>
@@ -1326,6 +1328,7 @@
     <string name="video_recording_started">Grabación de vídeo iniciada</string>
     <string name="video_recording_saved">Grabación de vídeo guardada</string>
     <!-- Audio pause not supported message -->
+    <string name="field_audio_pause_not_supported">Pausar/reanudar no es soportado en este dispositivo</string>
     <string name="delete_local_photo">¿Está seguro que quieres eliminar este elemento?</string>
     <string name="trait_system_photo_settings_title">Ajustes de Fotos del Sistema</string>
     <string name="trait_photos_no_settings">Este variable no tiene ajustes.</string>
@@ -1419,7 +1422,7 @@
     <string name="primary">Primario</string>
     <string name="secondary">Secundario</string>
     <string name="sort">Ordenar</string>
-    <string name="brapi_traits_filter_title">Variables</string>
+    <string name="brapi_traits_filter_title">Rasgos</string>
     <string name="brapi_filter_type_study">Estudio</string>
     <string name="act_brapi_study_filter">Filtro</string>
     <string name="act_brapi_trait_preprocess_title">Selector de Formato de Field Book</string>
@@ -1437,6 +1440,14 @@
     <string name="pref_alpha_brapi_import_title">Nueva Interfaz de Importación BrAPI</string>
     <string name="opening_brapi_no_network_error">La red debe estar activada para usar funcionalidad BrAPI.</string>
     <string name="act_brapi_list_filter_reset_selection_message">Esto limpiará la lista en ejecución de los elementos seleccionados.</string>
+    <string name="pref_experimental_generate_sample_data_title">Generar Campo de Ejemplo</string>
+    <string name="pref_experimental_generate_sample_data_summary">Crea un campo de ejemplo con observaciones artificiales para todos los rasgos cargados. Los timestamps son aleatorizados durante los últimos tres meses.</string>
+    <string name="pref_experimental_generate_sample_data_confirm_title">¿Generar Campo de Ejemplo?</string>
+    <string name="pref_experimental_generate_sample_data_confirm_message">Esto creará o rellenará un campo llamado \"field_sample\" con observaciones artificiales. Los rasgos de ejemplo se cargarán automáticamente si ninguno está presente.</string>
+    <string name="pref_experimental_generate_sample_data_success">Campo de ejemplo creado exitosamente.</string>
+    <string name="pref_experimental_generate_sample_data_failure">Error al generar el campo de muestra. Compruebe que el almacenamiento está configurado correctamente.</string>
+    <string name="pref_alpha_media_keycode_events_summary">Siguiente/anterior pista navega entradas, el volumen de arriba o abajo se mueve a través de rasgos, la llamada capturará fotos</string>
+    <string name="pref_alpha_media_keycode_events_title">Navegar con Comandos Multimedia del Hardware</string>
     <string name="pref_geonav_distance_threshold_summary">GeoNav se detiene automáticamente cuando la distancia de todas las parcelas excede este valor en kilómetros.</string>
     <string name="pref_geonav_distance_threshold_title">Verificación de Proximidad</string>
     <string name="activity_collect_proximity_warning">GeoNav detenido, fuera de coordenadas de proximidad</string>
