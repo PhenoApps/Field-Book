@@ -263,6 +263,9 @@ abstract class BaseFieldActivity : ThemedActivity(), FieldAdapterController, Fie
         }
     }
 
+    /**
+     * The Field List search bar is only visible once the recycler view can scroll.
+     */
     protected fun setupSearchBar() {
         if (recyclerView.canScrollVertically(1) || recyclerView.canScrollVertically(-1)) {
             searchBar.visibility = View.VISIBLE
