@@ -77,6 +77,7 @@ import com.fieldbook.tracker.objects.InfoBarModel;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
+import com.fieldbook.tracker.preferences.models.ReturnCharacterMode;
 import com.fieldbook.tracker.traits.AbstractCameraTrait;
 import com.fieldbook.tracker.traits.SpectralTraitLayout;
 import com.fieldbook.tracker.traits.formats.Formats;
@@ -2190,18 +2191,21 @@ public class CollectActivity extends ThemedActivity
                         if (traitFormat instanceof Scannable && !(getCurrentFocus() instanceof EditText)) {
                             if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_TAB) {
                                 String scanned = hardwareScanBuffer.toString();
-                                hardwareScanBuffer.setLength(0);
                                 if (!scanned.isEmpty() && validateData(scanned)) {
+                                    hardwareScanBuffer.setLength(0);
                                     updateObservation(currentTrait,
                                             ((Scannable) traitFormat).preprocess(scanned), null);
                                     traitLayouts.getTraitLayout(currentTrait.getFormat()).loadLayout();
                                     String actionOnScan = preferences.getString(
-                                            PreferenceKeys.RETURN_CHARACTER, "0");
-                                    if ("1".equals(actionOnScan)) {
+                                            PreferenceKeys.RETURN_CHARACTER, ReturnCharacterMode.DoNothing.INSTANCE.getMode());
+                                    if (ReturnCharacterMode.NextPlot.INSTANCE.getMode().equals(actionOnScan) && rangeBox != null) {
                                         rangeBox.moveEntryRight();
-                                    } else if ("2".equals(actionOnScan)) {
+                                    } else if (ReturnCharacterMode.NextTrait.INSTANCE.getMode().equals(actionOnScan) && traitBox != null) {
                                         traitBox.moveTrait(TraitBoxView.MoveDirection.RIGHT);
                                     }
+                                } else if (!scanned.isEmpty()) {
+                                    Log.w(TAG, "Invalid scan data: " + scanned);
+                                    hardwareScanBuffer.setLength(0);
                                 }
                                 return true;
                             } else if (event.getUnicodeChar() != 0) {
