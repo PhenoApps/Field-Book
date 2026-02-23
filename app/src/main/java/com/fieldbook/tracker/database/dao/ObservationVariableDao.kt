@@ -390,13 +390,5 @@ class ObservationVariableDao {
             val contentValues = ContentValues().apply { put("observation_variable_alias", newName) }
             db.update(ObservationVariable.tableName, contentValues, "${ObservationVariable.PK} = ?", arrayOf(traitDbId))
         }
-
-        fun updateTraitCategories(traitId: String, newCategories: String) {
-            TraitObject().also {
-                it.id = traitId
-                it.categories = newCategories
-                it.saveAttributeValues()
-            }
-        }
     }
 }

@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.database.dao.ObservationVariableDao;
+import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.Utils;
@@ -31,6 +32,7 @@ import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 
 import java.util.ArrayList;
 import java.util.StringJoiner;
+import java.util.concurrent.Executors;
 
 public class CategoricalTraitLayout extends BaseTraitLayout {
 
@@ -354,14 +356,16 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                         return;
                     }
 
+                    TraitObject trait = getCurrentTrait();
+                    if (trait == null) return;
+
                     existingCategories.add(newCategory);
                     String newCategoriesJson = CategoryJsonUtil.Companion.encode(existingCategories);
 
                     // Update in-memory trait object
-                    getCurrentTrait().setCategories(newCategoriesJson);
+                    trait.setCategories(newCategoriesJson);
 
-                    // Persist to database
-                    ObservationVariableDao.Companion.updateTraitCategories(getCurrentTrait().getId(), newCategoriesJson);
+                    controller.getViewModel().updateAttributes(trait);
 
                     // Refresh buttons
                     setAdapter();
@@ -372,13 +376,13 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                         removeCategory(defaultNaCategory);
                         addCategory(newCategory);
                         String json = CategoryJsonUtil.Companion.encode(categoryList);
-                        updateObservation(getCurrentTrait(), json);
+                        updateObservation(trait, json);
                         triggerTts(getDisplayText(newCategory));
                     } else {
                         ArrayList<BrAPIScaleValidValuesCategories> scale = new ArrayList<>();
                         scale.add(newCategory);
                         getCollectInputView().setText(getDisplayText(newCategory));
-                        updateObservation(getCurrentTrait(), CategoryJsonUtil.Companion.encode(scale));
+                        updateObservation(trait, CategoryJsonUtil.Companion.encode(scale));
                         triggerTts(getDisplayText(newCategory));
                         refreshLayout(false);
                     }
