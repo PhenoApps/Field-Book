@@ -150,7 +150,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         controller.updateNumberOfObservations()
     }
 
-    protected fun setupConnectUi() {
+    open fun setupConnectUi() {
         (context as CollectActivity).getNixSensorHelper().connectedDevice = null
         connectButton?.visibility = VISIBLE
         captureButton?.visibility = GONE

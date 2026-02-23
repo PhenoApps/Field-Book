@@ -58,6 +58,7 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
     private var isStarting = false
 
     private var deviceConnectionJob: kotlinx.coroutines.Job? = null
+    private var deviceSearchJob: kotlinx.coroutines.Job? = null
 
     private var connection: ServiceConnection? = null
 
@@ -149,6 +150,26 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
 
         // Set up listener to show progress bar when any scan starts
         setupScanStartedListener()
+    }
+
+    override fun setupConnectUi() {
+        // Cancel any ongoing device search
+        deviceSearchJob?.cancel()
+        deviceSearchJob = null
+
+        // Reset connection state
+        isStarting = false
+
+        // Set up UI for disconnected state
+        background.launch(Dispatchers.Main) {
+            connectButton?.visibility = VISIBLE
+            captureButton?.visibility = GONE
+            disconnectButton?.visibility = GONE
+            settingsButton?.visibility = GONE
+            toggleProgressBar(false)
+            startDeviceSearch()
+            setupConnectButton()
+        }
     }
 
     override fun establishConnection(): Boolean {
@@ -326,8 +347,17 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
     }
 
     private fun scheduleDeviceSearch(deviceName: String, macAddress: String, onDeviceFound: suspend (Pair<*, *>) -> Unit) {
-        background.launch {
+        // Cancel any existing search job to prevent duplicates
+        deviceSearchJob?.cancel()
+
+        deviceSearchJob = background.launch {
             while (true) {
+                // Check if already starting to prevent race conditions
+                if (isStarting) {
+                    Log.d(TAG, "scheduleDeviceSearch: connection already starting, stopping search")
+                    break
+                }
+
                 val device = deviceList.firstOrNull { deviceData ->
                     deviceData.second.nanoMac == macAddress && deviceData.second.nanoName == deviceName
                 }
@@ -449,19 +479,33 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
                 ISCNIRScanSDK.SetActiveConfig(byteArrayOf(configIndex.toByte(), (configIndex/256).toByte()))
             } else {
                 Log.e(TAG, "SDK failed to initiate connection for device: ${device.nanoMac}")
+                // Reset state on connection failure
+                isStarting = false
+                background.launch(Dispatchers.Main) {
+                    setupConnectUi()
+                }
             }
         }
 
         if (!isStarting) {
             isStarting = true
             Log.d(TAG, "beginConnection: binding to GATT service for device ${device.nanoMac}")
-            val gattService = Intent(context, ISCNIRScanSDK::class.java)
-            context.bindService(gattService, connection!!, Context.BIND_AUTO_CREATE)
 
-            ((context as CollectActivity).innoSpectraViewModel as? NanoEventListener)?.let { listener ->
-                nanoReceiver = InnoSpectraBase(listener).also {
-                    it.register(context)
-                    Log.d(TAG, "beginConnection: registered InnoSpectraBase receiver")
+            try {
+                val gattService = Intent(context, ISCNIRScanSDK::class.java)
+                context.bindService(gattService, connection!!, Context.BIND_AUTO_CREATE)
+
+                ((context as CollectActivity).innoSpectraViewModel as? NanoEventListener)?.let { listener ->
+                    nanoReceiver = InnoSpectraBase(listener).also {
+                        it.register(context)
+                        Log.d(TAG, "beginConnection: registered InnoSpectraBase receiver")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "beginConnection: failed to bind service - ${e.message}")
+                isStarting = false
+                background.launch(Dispatchers.Main) {
+                    setupConnectUi()
                 }
             }
         } else {
@@ -470,6 +514,13 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
     }
 
     private fun endConnection() {
+        // Cancel ongoing device search to prevent reconnection attempts
+        deviceSearchJob?.cancel()
+        deviceSearchJob = null
+
+        // Reset connection state
+        isStarting = false
+
         try {
             // Unregister the broadcast receiver to prevent stale listeners
             nanoReceiver?.unregister(context)
