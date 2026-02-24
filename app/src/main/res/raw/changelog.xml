@@ -1,5 +1,12 @@
 <changelog>
 
+    <release date="2026-02-24" versionCode="70102" versionName="v7.1.2">
+        <new>External scanners can now be used on numeric and percent traits</new>
+        <info>Bundling more than 100 media items now warns users that it will slow down the app</info>
+        <bugfix>Both names and aliases now display in the field search results</bugfix>
+        <bugfix>BrAPI observation timestamps now update correctly when edited</bugfix>
+    </release>
+
     <release date="2026-02-19" versionCode="70101" versionName="v7.1.1">
         <bugfix>Bug fixes and enhancements</bugfix>
     </release>
