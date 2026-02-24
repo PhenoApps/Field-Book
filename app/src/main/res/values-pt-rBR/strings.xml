@@ -820,6 +820,8 @@
     <string name="preferences_appearance_range_progress_bar_description">Mostra sua posição atual no campo</string>
     <string name="preferences_appearance_traits_progress_bar">Barra de progresso de características</string>
     <string name="preferences_appearance_traits_progress_bar_description">Mostra se as características ativas têm dados e destacam a característica atual</string>
+    <string name="preferences_appearance_observation_timestamp">Timestamp da Observação</string>
+    <string name="preferences_appearance_observation_timestamp_description">Mostra o carimbo de data/hora da observação salva abaixo do valor</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamento</string>
     <string name="preferences_behavior_movement_title">Movimento</string>
@@ -852,6 +854,10 @@
     <string name="preferences_behavior_return_character_next_trait">A tecla de retorno de carro avança característica</string>
     <string name="preferences_general_use_day_number">Usar Dia do Ano</string>
     <string name="preferences_general_use_day_number_description">Usar dia do ano na coleta de dados em vez da data</string>
+    <string name="preferences_behavior_barcode_scanning_move_to_entry">Mover para a entrada</string>
+    <string name="preferences_behavior_barcode_scanning_record_value">Registre um valor</string>
+    <string name="preferences_behavior_barcode_scanning_enter_if_not_id">Registre um valor se não for o ID da entrada</string>
+    <string name="preferences_behavior_barcode_scanning_ask">Perguntar a cada caso</string>
     <!-- Location -->
     <string name="preferences_location_title">Localização</string>
     <string name="preferences_location_defaults_title">Geocoordenadas</string>
@@ -1316,7 +1322,10 @@
     <string name="trait_camera_connect_content_description">Inicia uma conexão do dispositivo.</string>
     <string name="trait_camera_preview_content_description">Esta pré-visualiza a tela da câmera.</string>
     <string name="trait_camera_capture_content_description">Tire uma foto</string>
+    <string name="trait_camera_view_media_content_description">Ver mídia</string>
+    <string name="trait_camera_switch_content_description">Alternar câmera</string>
     <!-- Video recording messages -->
+    <string name="video_recording_started">Gravação de vídeo iniciada</string>
     <!-- Audio pause not supported message -->
     <string name="trait_system_photo_settings_title">Configurações da Foto do Sistema</string>
     <string name="trait_photos_no_settings">Esta característica não tem configurações.</string>
@@ -1539,6 +1548,7 @@
     <string name="device_settings_dialog_unknown_name">Dispositivo Bluetooth Desconhecido</string>
     <string name="device_settings_dialog_title">Configurações de Dispositivo Bluetooth</string>
     <string name="no_data_captured">Nenhum dado capturado.</string>
+    <string name="media_viewer">Visualizador de Mídia</string>
     <string name="delete">Excluir</string>
     <string name="failed_to_find_file_name">Falha ao recuperar o nome do arquivo.</string>
     <string name="act_brapi_export_starting">Iniciando exportação</string>
