@@ -323,6 +323,7 @@
     <string name="traits_format_text">Texto</string>
     <string name="traits_format_photo">Foto</string>
     <string name="traits_format_camera">Câmera</string>
+    <string name="traits_format_video">Vídeo</string>
     <string name="traits_format_audio">Áudio</string>
     <string name="traits_format_multicategorical">Multicategórico</string>
     <string name="traits_format_location">Localização</string>
@@ -364,8 +365,10 @@
     <string name="trait_parameter_decimal_places">Casas Decimais</string>
     <string name="trait_parameter_decimal_places_hint">Número de casas decimais (-1 para ilimitado, 0 para números inteiros)</string>
     <string name="trait_parameter_decimal_places_error">Valor deve ser entre -1 e 10</string>
+    <string name="traits_attach_media_title">Anexar Mídia</string>
     <string name="traits_attach_media_photo_label">Foto</string>
     <string name="traits_attach_media_audio_label">Áudio</string>
+    <string name="traits_attach_media_video_label">Vídeo</string>
     <string name="traits_create_warning_name_blank">Nome da característica não pode estar em branco</string>
     <string name="traits_create_warning_duplicate">Característica já existe</string>
     <string name="traits_create_warning_numeric_required">Padrão, mínimo e máximo devem ser numéricos</string>
@@ -650,6 +653,7 @@
     <string name="menu_collect_repeated_values_indicator">Exibe o número de valores repetidos.</string>
     <string name="dialog_multi_measure_delete_no_observations">Não existem observações.</string>
     <string name="dialog_multi_measure_delete_title">Observações</string>
+    <string name="dialog_multi_measure_confirm_delete_title">As observações selecionadas e mídia anexada para esta característica serão excluídas permanentemente.</string>
     <string name="dialog_multi_measure_delete">Excluir</string>
     <string name="dialog_multi_measure_select_all">Selecionar tudo</string>
     <!--- GeoNav -->
