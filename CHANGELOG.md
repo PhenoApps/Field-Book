@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- BrAPI observation timestamps now update correctly when edited (https://github.com/PhenoApps/Field-Book/pull/1432)
 
 ## [v7.1.1] - 2026-02-19
 
