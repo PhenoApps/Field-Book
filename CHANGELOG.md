@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- External scanners can now be used on numeric and percent traits (https://github.com/PhenoApps/Field-Book/pull/1410)
 
 ### Changed
 
