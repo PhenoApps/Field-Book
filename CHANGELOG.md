@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - External scanners can now be used on numeric and percent traits (https://github.com/PhenoApps/Field-Book/pull/1410)
 
 ### Changed
+- Bundling more than 100 media items now warns users that it will slow down the app (https://github.com/PhenoApps/Field-Book/pull/1407)
 
 ### Fixed
 - Both names and aliases now display in the field search results (https://github.com/PhenoApps/Field-Book/pull/1408)
