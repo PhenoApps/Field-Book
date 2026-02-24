@@ -123,7 +123,7 @@ open class CameraTraitSettingsView: ConstraintLayout {
 
         cropButton.setOnClickListener {
 
-            (context as CollectActivity).requestAndCropImage()
+            (context as CollectActivity).requestAndCropImage(true, false)
 
         }
     }

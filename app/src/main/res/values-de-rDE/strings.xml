@@ -75,6 +75,7 @@
     <string name="traits_create_true">Wahr</string>
     <string name="traits_create_false">Falsch</string>
     <string name="traits_create_categories_text">Separieren Sie Begriffe mit /</string>
+    <string name="traits_attach_media_photo_label">Foto</string>
     <string name="traits_create_warning_name_blank">Merkmalsname muss definiert sein</string>
     <string name="traits_create_warning_duplicate">Merkmal ist bereits vorhanden</string>
     <string name="traits_create_warning_numeric_required">Vorgegeben, Minimum und Maximum muessen numerisch sein</string>
@@ -209,6 +210,8 @@
     <string name="act_brapi_filter_import">Import</string>
     <string name="act_brapi_filter_clear">Löschen</string>
     <!-- base camera strings -->
+    <!-- Video recording messages -->
+    <!-- Audio pause not supported message -->
     <string name="view_trait_photo_settings_camera_custom">Vorgegeben</string>
     <!-- usb camera trait -->
     <!-- gopro -->
@@ -219,4 +222,6 @@
     <!--  NearbyShare  -->
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="save">Speichern</string>
+    <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
+    <!-- Preference: Attach media barcode prioritize -->
 </resources>

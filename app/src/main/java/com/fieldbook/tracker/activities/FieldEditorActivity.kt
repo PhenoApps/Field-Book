@@ -59,6 +59,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.util.Locale
 import androidx.core.content.edit
 import androidx.core.net.toUri
+import com.fieldbook.tracker.traits.formats.Formats
 
 @AndroidEntryPoint
 class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
@@ -591,12 +592,33 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
             // find all observation units with a coordinate
             for (model in units) {
                 val latlng = model.geo_coordinates
-                if (latlng != null && latlng.isNotEmpty()) {
+                if (!latlng.isNullOrEmpty()) {
                     val study = db.getFieldObject(model.study_id)
                     if (study != null && !study.archived) { // do not add archived field coordinates
                         coordinates.add(model)
                     }
                 }
+            }
+
+            // find all observations with coordinates by filtering the type of format used in the variable
+            try {
+                db.getAllObservationDetails(false).filter {
+                    Formats.isGeoFormat(it.observation_variable_field_book_format ?: "text")
+                }.mapNotNull {
+                    // convert to obs. unit model with just the study id and geo_coordinates,
+                    // this will allow obs. value coordinate comparison and navigation to the
+                    // nearest field
+                    ObservationUnitModel(
+                        mapOf(
+                            "study_id" to it.study_id,
+                            "geo_coordinates" to it.value,
+                        )
+                    )
+                }.forEach { lngLat ->
+                    coordinates.add(lngLat)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error while getting coordinates", e)
             }
 
             // sort the coordinates based on the distance from the user

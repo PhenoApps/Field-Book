@@ -322,6 +322,7 @@
     <string name="traits_format_boolean">Booliano</string>
     <string name="traits_format_text">Texto</string>
     <string name="traits_format_photo">Foto</string>
+    <string name="traits_format_camera">Câmera</string>
     <string name="traits_format_audio">Áudio</string>
     <string name="traits_format_multicategorical">Multicategórico</string>
     <string name="traits_format_location">Localização</string>
@@ -363,6 +364,8 @@
     <string name="trait_parameter_decimal_places">Casas Decimais</string>
     <string name="trait_parameter_decimal_places_hint">Número de casas decimais (-1 para ilimitado, 0 para números inteiros)</string>
     <string name="trait_parameter_decimal_places_error">Valor deve ser entre -1 e 10</string>
+    <string name="traits_attach_media_photo_label">Foto</string>
+    <string name="traits_attach_media_audio_label">Áudio</string>
     <string name="traits_create_warning_name_blank">Nome da característica não pode estar em branco</string>
     <string name="traits_create_warning_duplicate">Característica já existe</string>
     <string name="traits_create_warning_numeric_required">Padrão, mínimo e máximo devem ser numéricos</string>
@@ -591,7 +594,7 @@
     <string name="trait_usb_camera_capture_content_description">Tire uma foto.</string>
     <string name="trait_usb_camera_capture_button_text">Capturar</string>
     <!--- Trait Layout: Zebra label print -->
-    <string name="trait_layout_data_stored">Salvar</string>
+    <string name="trait_layout_data_stored">Salvo</string>
     <string name="trait_layout_print_label_size_title">Tamanho:</string>
     <string name="trait_layout_print_text_field_title">Texto:</string>
     <string name="trait_layout_print_text_field_title_2">Texto2:</string>
@@ -647,7 +650,6 @@
     <string name="menu_collect_repeated_values_indicator">Exibe o número de valores repetidos.</string>
     <string name="dialog_multi_measure_delete_no_observations">Não existem observações.</string>
     <string name="dialog_multi_measure_delete_title">Observações</string>
-    <string name="dialog_multi_measure_confirm_delete_title">Todas as observações desta característica serão excluídas permanentemente.</string>
     <string name="dialog_multi_measure_delete">Excluir</string>
     <string name="dialog_multi_measure_select_all">Selecionar tudo</string>
     <!--- GeoNav -->
@@ -1310,7 +1312,8 @@
     <string name="trait_camera_connect_content_description">Inicia uma conexão do dispositivo.</string>
     <string name="trait_camera_preview_content_description">Esta pré-visualiza a tela da câmera.</string>
     <string name="trait_camera_capture_content_description">Tire uma foto</string>
-    <string name="delete_local_photo">Excluir Foto</string>
+    <!-- Video recording messages -->
+    <!-- Audio pause not supported message -->
     <string name="trait_system_photo_settings_title">Configurações da Foto do Sistema</string>
     <string name="trait_photos_no_settings">Esta característica não tem configurações.</string>
     <string name="view_trait_photo_settings_preview_title">Pré-visualizar</string>
@@ -1421,8 +1424,6 @@
     <string name="pref_alpha_brapi_import_title">Nova interface do usuário de importação BrAPI</string>
     <string name="opening_brapi_no_network_error">Rede deve ser habilitada para usar funcionalidade BrAPI.</string>
     <string name="act_brapi_list_filter_reset_selection_message">Isto irá limpar a lista de itens selecionados.</string>
-    <string name="pref_alpha_media_keycode_events_summary">Habilitar para usar comandos de mídia para interações com o app</string>
-    <string name="pref_alpha_media_keycode_events_title">Habilitar Comandos de Mídia</string>
     <string name="pref_geonav_distance_threshold_summary">GeoNav automaticamente para quando a distância de todos os lotes exceder esse valor em quilômetros.</string>
     <string name="pref_geonav_distance_threshold_title">Verificação de Proximidade</string>
     <string name="activity_collect_proximity_warning">GeoNav Parando, fora da proximidade das coordenadas</string>
@@ -1440,8 +1441,6 @@
     <string name="failed_to_fetch_observation_levels">Falha ao buscar nível de observações</string>
     <string name="traits_sort_default">Padrão</string>
     <string name="traits_crop_image_parameter">Recortar</string>
-    <string name="dialog_crop_title">Configuração Região de Recorte</string>
-    <string name="dialog_crop_message">Defina uma região de recorte que será aplicada a todas as imagens futuras para esta característica.</string>
     <string name="view_trait_photo_settings_crop">Definir Região de Recorte</string>
     <string name="crop_image_clip_data_label">Dados da região de recorte de Field Book</string>
     <string name="quick_goto_swap_content_description">alternar tipo de entrada</string>
@@ -1536,6 +1535,7 @@
     <string name="device_settings_dialog_unknown_name">Dispositivo Bluetooth Desconhecido</string>
     <string name="device_settings_dialog_title">Configurações de Dispositivo Bluetooth</string>
     <string name="no_data_captured">Nenhum dado capturado.</string>
+    <string name="delete">Excluir</string>
     <string name="failed_to_find_file_name">Falha ao recuperar o nome do arquivo.</string>
     <string name="act_brapi_export_starting">Iniciando exportação</string>
     <string name="act_brapi_export_success">Exportação com sucesso</string>
@@ -1607,4 +1607,7 @@
     <string name="there_are_unuploaded_observations_or_images_do_you_want_to_upload_them_before_downloading">Existem observações ou imagens não carregadas. Você quer enviá-las antes de baixá-las?</string>
     <string name="upload_first">Carregar</string>
     <string name="download_anyway">Baixar</string>
+    <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
+    <!-- Preference: Attach media barcode prioritize -->
+    <string name="edit">Editar</string>
 </resources>
