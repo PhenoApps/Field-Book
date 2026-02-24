@@ -1502,6 +1502,10 @@ public class CollectActivity extends ThemedActivity
             //update the provided values
             obs.setCollector(person);
             obs.setGeo_coordinates(location);
+
+            String timestamp = OffsetDateTime.now().format(DateTimeFormatter.ofPattern(DataHelper.TIME_FORMAT_PATTERN));
+            obs.setObservation_time_stamp(timestamp);
+
             obs.setValue(value);
 
             database.updateObservationModels(database.getDb(), Collections.singletonList(obs));
