@@ -272,4 +272,8 @@ class TraitObject {
 
         return map
     }
+
+    fun isLocalTrait(): Boolean {
+        return traitDataSource.isEmpty() || traitDataSource == "local"
+    }
 }

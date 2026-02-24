@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
@@ -36,14 +37,12 @@ import java.util.concurrent.Executors;
 
 public class CategoricalTraitLayout extends BaseTraitLayout {
 
-    //todo this can eventually be merged with multicattraitlayout when we can support a switch in traits on how many categories to allow user to select
-
     public static String[] POSSIBLE_VALUES = new String[]{ "qualitative", "categorical" };
     private static final String CATEGORY_SEPARATOR = ":";
 
     //private StaggeredGridView gridMultiCat;
     private RecyclerView gridMultiCat;
-    private Button otherButton;
+    private ImageButton otherButton;
     private ArrayList<BrAPIScaleValidValuesCategories> categoryList;
     private final BrAPIScaleValidValuesCategories defaultNaCategory = new BrAPIScaleValidValuesCategories().label("NA").value("NA");
 
@@ -75,12 +74,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
     }
 
     private boolean isAllowOtherEnabled() {
-        return getCurrentTrait().getAllowOther() && isLocalTrait();
-    }
-
-    private boolean isLocalTrait() {
-        String src = getCurrentTrait().getTraitDataSource();
-        return src == null || src.isEmpty() || src.equals("local");
+        return getCurrentTrait().getAllowOther() && getCurrentTrait().isLocalTrait();
     }
 
     private String getDisplayText(BrAPIScaleValidValuesCategories category) {
