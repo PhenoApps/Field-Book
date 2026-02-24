@@ -74,6 +74,7 @@ import com.fieldbook.tracker.objects.InfoBarModel;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
+import com.fieldbook.tracker.preferences.models.ReturnCharacterMode;
 import com.fieldbook.tracker.preferences.enums.BarcodeScanningOptions;
 import com.fieldbook.tracker.traits.AbstractCameraTrait;
 import com.fieldbook.tracker.traits.SpectralTraitLayout;
@@ -318,6 +319,10 @@ public class CollectActivity extends ThemedActivity
     private RecyclerView infoBarRv;
 
     private CollectInputView collectInputView;
+
+    private final StringBuilder hardwareScanBuffer = new StringBuilder();
+
+    public Handler myGuiHandler;
 
     public int numNixInternetWarnings = 0;
 
@@ -2181,6 +2186,40 @@ public class CollectActivity extends ThemedActivity
                 return MediaKeyCodeActionHelper.Companion.dispatchKeyEvent(this, event);
 
             default:
+
+                if (action == KeyEvent.ACTION_DOWN) {
+                    TraitObject currentTrait = traitBox.getCurrentTrait();
+                    if (currentTrait != null) {
+                        TraitFormat traitFormat = Formats.Companion.findTrait(currentTrait.getFormat());
+                        // Intercept keyboard input for Scannable traits without an active EditText
+                        // (e.g. numeric, percent), enabling hardware barcode scanner support
+                        if (traitFormat instanceof Scannable && !(getCurrentFocus() instanceof EditText)) {
+                            if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_TAB) {
+                                String scanned = hardwareScanBuffer.toString();
+                                if (!scanned.isEmpty() && validateData(scanned)) {
+                                    hardwareScanBuffer.setLength(0);
+                                    updateObservation(currentTrait,
+                                            ((Scannable) traitFormat).preprocess(scanned), null);
+                                    traitLayouts.getTraitLayout(currentTrait.getFormat()).loadLayout();
+                                    String actionOnScan = preferences.getString(
+                                            PreferenceKeys.RETURN_CHARACTER, ReturnCharacterMode.DoNothing.INSTANCE.getMode());
+                                    if (ReturnCharacterMode.NextPlot.INSTANCE.getMode().equals(actionOnScan) && rangeBox != null) {
+                                        rangeBox.moveEntryRight();
+                                    } else if (ReturnCharacterMode.NextTrait.INSTANCE.getMode().equals(actionOnScan) && traitBox != null) {
+                                        traitBox.moveTrait(TraitBoxView.MoveDirection.RIGHT);
+                                    }
+                                } else if (!scanned.isEmpty()) {
+                                    Log.w(TAG, "Invalid scan data: " + scanned);
+                                    hardwareScanBuffer.setLength(0);
+                                }
+                                return true;
+                            } else if (event.getUnicodeChar() != 0) {
+                                hardwareScanBuffer.append((char) event.getUnicodeChar());
+                                return true;
+                            }
+                        }
+                    }
+                }
 
                 if (action == KeyEvent.ACTION_UP) {
 
