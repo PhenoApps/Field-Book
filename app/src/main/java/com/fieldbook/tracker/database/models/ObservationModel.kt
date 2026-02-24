@@ -21,7 +21,8 @@ data class ObservationModel(val map: Row) {
         observation_variable_db_id.toString()
     )?.defaultValue ?: "NA"
     else "NA"
-    val observation_time_stamp: String? by map
+    var observation_time_stamp: String? =
+        if (map.containsKey("observation_time_stamp")) map["observation_time_stamp"]?.toString() else null
     var collector: String? =
         if (map.containsKey("collector")) map["collector"]?.toString() else null
     var geo_coordinates: String? =
