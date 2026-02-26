@@ -173,6 +173,8 @@ class RangeBoxView : ConstraintLayout {
                     updateCurrentRange(rangeID[progress])
                     saveLastPlotAndTrait()
                     display()
+                    // Update the top info toolbar to reflect the new plot
+                    (controller.getContext() as CollectActivity).refreshInfoBarAdapter()
                 }
             }
 

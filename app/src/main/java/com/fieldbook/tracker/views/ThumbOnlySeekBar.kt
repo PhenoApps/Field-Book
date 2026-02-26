@@ -30,10 +30,21 @@ class ThumbOnlySeekBar @JvmOverloads constructor(
                 isDraggingThumb = kotlin.math.abs(event.x - thumbX) <= slop
                 if (!isDraggingThumb) return false
             }
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+            MotionEvent.ACTION_UP -> {
+                if (isDraggingThumb) {
+                    performClick()
+                }
+                isDraggingThumb = false
+            }
+            MotionEvent.ACTION_CANCEL -> {
                 isDraggingThumb = false
             }
         }
         return super.onTouchEvent(event)
+    }
+
+    override fun performClick(): Boolean {
+        super.performClick()
+        return true
     }
 }
