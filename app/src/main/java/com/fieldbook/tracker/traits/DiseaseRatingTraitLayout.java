@@ -86,7 +86,7 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
 
         if (getCurrentTrait() != null) {
             String categories = getCurrentTrait().getCategories();
-            if (categories != null && !categories.isEmpty()) {
+            if (!categories.isEmpty()) {
                 try {
                     ArrayList<BrAPIScaleValidValuesCategories> cats =
                             CategoryJsonUtil.Companion.decodeCategories(categories);
@@ -138,8 +138,7 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
 
         if (getVisibility() == View.VISIBLE) {
             String textValue = getCollectInputView().getText();
-            if (textValue.length() > 0
-                    && !textValue.endsWith("/")) {
+            if (!textValue.isEmpty() && !textValue.endsWith("/")) {
 
                 String lastChar = textValue.substring(textValue.length() - 1);
                 if (!lastChar.matches("^[a-zA-Z]*$")) {
@@ -180,7 +179,7 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
 
             if (getVisibility() == View.VISIBLE) {
                 String textValue = getCollectInputView().getText();
-                if (textValue.length() > 0
+                if (!textValue.isEmpty()
                         && !v.equals("/")
                         && !textValue.endsWith("/")) {
 

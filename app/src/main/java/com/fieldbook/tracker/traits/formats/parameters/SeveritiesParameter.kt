@@ -50,8 +50,9 @@ class SeveritiesParameter : BaseFormatParameter(
                 // validate numeric
                 val numericValue = value.toDoubleOrNull() ?: return
 
-                val existing = catList.map { it.value }
-                if (!existing.contains(value)) {
+                //avoid duplicates like 4.0 and 4
+                val existing = catList.map { it.value.toDoubleOrNull() }
+                if (!existing.contains(numericValue)) {
                     val scale = BrAPIScaleValidValuesCategories()
                     scale.label = value
                     scale.value = value
@@ -69,7 +70,7 @@ class SeveritiesParameter : BaseFormatParameter(
         private fun updateCatAdapter() {
             val adapter = categoriesRv.adapter as CategoryAdapter
             adapter.submitList(ArrayList(catList))
-            adapter.notifyDataSetChanged()
+            adapter.notifyItemRangeChanged(0, catList.size)
         }
 
         override fun bind(parameter: BaseFormatParameter, initialTraitObject: TraitObject?) {
@@ -136,11 +137,7 @@ class SeveritiesParameter : BaseFormatParameter(
 
             // if no categories loaded, use default severity values
             if (catList.isEmpty()) {
-                val defaults = listOf(
-                    "0", "5", "10", "15", "20", "25", "30", "35", "40", "45",
-                    "50", "55", "60", "65", "70", "75", "80", "85", "90", "95", "100"
-                )
-                for (v in defaults) {
+                for (v in DEFAULT_SEVERITIES) {
                     val scale = BrAPIScaleValidValuesCategories()
                     scale.label = v
                     scale.value = v
