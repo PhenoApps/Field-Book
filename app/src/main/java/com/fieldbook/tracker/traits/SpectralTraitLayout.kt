@@ -32,6 +32,7 @@ import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -854,6 +855,23 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         graph.xAxis.granularity = 1f
         graph.axisLeft.granularity = 0.01f
         graph.axisRight.isEnabled = false
+
+        // Set custom y-axis formatter to scale down large numbers
+        graph.axisLeft.valueFormatter = object : ValueFormatter() {
+            override fun getFormattedValue(value: Float): String {
+                return when {
+                    value >= 1_000_000 -> {
+                        val scaledValue = value / 1_000_000
+                        "%.1f".format(scaledValue).replace(Regex("\\.?0+$"), "") + "M"
+                    }
+                    value >= 1_000 -> {
+                        val scaledValue = value / 1_000
+                        "%.1f".format(scaledValue).replace(Regex("\\.?0+$"), "") + "K"
+                    }
+                    else -> "%.0f".format(value)
+                }
+            }
+        }
 
         graph.data = LineData(
             *entries
