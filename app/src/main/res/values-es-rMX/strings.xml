@@ -1316,6 +1316,7 @@
     <string name="repeated_values_left_button_content_description">izquierdo</string>
     <string name="export_util_repeated_measures_table_warning_title">Tabla de Medidas Repetidas</string>
     <string name="export_util_repeated_measures_table_warning_message">Sólo el ultimo valor de las medidas repetidas será exportado en formato de tabla.</string>
+    <string name="export_util_bundle_media_warning_message">Esta exportación contiene %d archivos multimedia. La vinculación de un gran número de archivos puede ser lenta y puede hacer que el dispositivo se paralice. ¿Continuar?</string>
     <string name="export_util_bundle_media_warning_continue">Continuar</string>
     <string name="activity_file_explorer_up_directory_name">Subir</string>
     <string name="file_explorer_select_file_title">Seleccionar Archivo</string>
