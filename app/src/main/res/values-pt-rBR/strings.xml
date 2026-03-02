@@ -17,13 +17,13 @@
     <string name="dialog_go">Ir</string>
     <string name="dialog_save_error_title">Erro ao Salvar</string>
     <string name="dialog_back">Voltar</string>
-    <string name="dialog_scan">Escanear</string>
+    <string name="dialog_scan">Ler</string>
     <string name="dialog_sort_by">Organizar por</string>
     <string name="dialog_enable">Habilitar</string>
     <string name="dialog_delete">Excluir</string>
     <string name="dialog_accept">Aceitar</string>
     <string name="dialog_exit">Sair</string>
-    <string name="barcode_scanner_text">Escanear código de barras</string>
+    <string name="barcode_scanner_text">Ler código de barras</string>
     <!-- Toolbar -->
     <string name="appbar_more_options">Mais Opções</string>
     <string name="appbar_back">Voltar</string>
@@ -509,8 +509,8 @@
     <string name="act_collect_barcode_search_exists_in_other_field">Este ID está em %s</string>
     <string name="main_toolbar_moveto_no_match">Nenhum valor correspondente</string>
     <string name="main_toolbar_moveto">Ir para ID</string>
-    <string name="main_toolbar_barcode_scan">Escanear el código de barras</string>
-    <string name="main_toolbar_moveto_scan">Escanear</string>
+    <string name="main_toolbar_barcode_scan">Ler código de barras</string>
+    <string name="main_toolbar_moveto_scan">Ler</string>
     <string name="act_collect_plot_with_code_not_found">Código de barras não encontrado. U\n</string>
     <!-- Search  -->
     <string name="main_toolbar_search">Procurar</string>
@@ -808,7 +808,7 @@
     <string name="preferences_general_feature_barcode_text">Mover para ID único</string>
     <string name="move_to_unique_id_disabled">Desabilitado</string>
     <string name="move_to_unique_id_text_or_scan">O botão usa entrada de texto com escaneado de câmera opcional</string>
-    <string name="move_to_unique_id_direct_camera_scan">O botão usa a escaneado direto da câmera</string>
+    <string name="move_to_unique_id_direct_camera_scan">O botão usa a leitura direta da câmera</string>
     <string name="preferences_appearance_collect_screen_title">Tela de Coleta</string>
     <string name="preferences_appearance_infobar_number">Número de InfoBars</string>
     <string name="preferences_appearance_infobar_number_description">Ajustar o número de Infobars exibidas na tela principal</string>
@@ -957,7 +957,7 @@
     <string name="pref_beta_enable_individual_field_page_title">Habilitar Páginas de Campo Individuais</string>
     <string name="pref_beta_enable_individual_field_page_summary">Selecionar um campo na lista de campos abre uma página de detalhes</string>
     <string name="pref_beta_mlkit_title">Biblioteca MLKit</string>
-    <string name="pref_beta_mlkit_summary">Esta opção usa a biblioteca MLKit em vez da biblioteca ZXing para escanear códigos de barras</string>
+    <string name="pref_beta_mlkit_summary">Esta opção usa a biblioteca MLKit em vez da biblioteca ZXing para leitura de códigos de barras</string>
     <string name="pref_beta_mlkit_enabled_title">Leitura Código de Barras usando MLKit habilitado</string>
     <string name="pref_beta_mlkit_enabled_message">Habilitar essa funcionalidade irá mudar a biblioteca de leitura de código de barras do ZXing para MLKit</string>
     <!-- STATISTICS -->
@@ -1063,7 +1063,7 @@
     <string name="preferences_appearance_collect_labelval_customize_label">Rótulo</string>
     <string name="preferences_brapi_servers_title">Servidores Comunitários</string>
     <string name="preferences_brapi_server_barcode">Ler código de barras do servidor</string>
-    <string name="preferences_brapi_server_scan_error">Erro de Escaneo</string>
+    <string name="preferences_brapi_server_scan_error">Erro de Leitura</string>
     <string name="preferences_brapi_server_add">Enviar um Servidor</string>
     <!-- Brapi Server Info -->
     <string name="brapi_server_info_pref">Verificar Compatibilidade</string>
@@ -1530,7 +1530,7 @@
     <string name="nix_error_ambient_light">Foi detectada muita luz ambiente.</string>
     <string name="nix_error_timeout">Ocorreu um erro de tempo limite.</string>
     <string name="nix_error_low_power">As baterias são muito baixas para escanear.</string>
-    <string name="nix_error_scan_not_supported">Esta escaneada não é suportada pelo dispositivo.</string>
+    <string name="nix_error_scan_not_supported">Esta leitura não é suportada pelo dispositivo.</string>
     <string name="nix_error_not_ready">O dispositivo não está pronto.</string>
     <string name="view_trait_nix_settings_battery_level">Nível de Bateria: %s</string>
     <string name="view_trait_nix_settings_rssi">RSSI: %s</string>
@@ -1545,7 +1545,7 @@
     <string name="nix_error_bluetooth_permissions">Você deve aceitar permissões Bluetooth ou tentar reiniciar o aplicativo.</string>
     <string name="nix_error_bluetooth_unavailable">Bluetooth indisponível.</string>
     <string name="nix_error_bluetooth_disabled">Bluetooth está desativado no dispositivo.</string>
-    <string name="list_item_color_placeholder_content_description">Espaço reservado para uma nova escaneada</string>
+    <string name="list_item_color_placeholder_content_description">Espaço reservado para uma nova leitura</string>
     <string name="loading">Carregando</string>
     <string name="nix_error_no_network">Nix pode exigir que a internet funcione corretamente.</string>
     <string name="import_runnable_field_name_exists">Nome do campo já existe.</string>
@@ -1570,9 +1570,18 @@
     <string name="no_observation">Os dados devem ser coletados antes que a mídia possa ser anexada.</string>
     <string name="preferences_behavior_barcode_scanning_title">Barra de Ferramentas com Leitor de Códigos de Barras</string>
     <string name="barcode_ask_enter">Inserir Valor</string>
-    <string name="barcode_ask_message">Escaneado: %s</string>
+    <string name="barcode_ask_move">Mover</string>
+    <string name="barcode_ask_message">Lido: %s</string>
+    <string name="barcode_ask_title">Escolha uma opção</string>
+    <string name="no_media_found">Nenhuma mídia %1$s encontrada</string>
     <string name="media_viewer">Visualizador de Mídia</string>
+    <string name="unable_to_load_image">Não foi possí­vel carregar a imagem</string>
     <string name="delete">Excluir</string>
+    <string name="confirm_delete">Você deseja excluir permanentemente este item de mídia?</string>
+    <string name="audio_permission_required">É necessária a permissão de áudio</string>
+    <string name="back_button">Retornar à atividade anterior</string>
+    <string name="na_placeholder">Espaço reservado de imagem indisponível</string>
+    <string name="confirm_replace_media_message">Você deseja substituir a mídia atual para esta observação?</string>
     <string name="confirm_replace_media_title">Substituir Mídia Existente</string>
     <string name="failed_to_find_file_name">Falha ao recuperar o nome do arquivo.</string>
     <string name="act_brapi_export_starting">Iniciando exportação</string>
