@@ -29,7 +29,7 @@
     <string name="appbar_back">Voltar</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Dados de amostra</string>
-    <string name="startup_sample_data_message">Carregar dados de amostra?</string>
+    <string name="startup_sample_data_message">Carregar dados de exemplo?</string>
     <!-- App Intro -->
     <string name="app_intro_intro_title_slide1">Bem-vindo ao Field Book!</string>
     <string name="app_intro_intro_summary_slide1">A coleta de dados no campo exige, tradicionalmente, a escrita e a transcrição de notas em papel. O Field Book foi criado como uma solução digital para captura de dados que permite aumentar a velocidade de coleta com maior integridade de dados.</string>
@@ -45,7 +45,7 @@
     <string name="app_intro_required_optional_title">Configuração Opcional</string>
     <string name="app_intro_required_optional_summary">Estas configurações opcionais personalizam o Field Book e podem ser ajustadas nas Configurações de Field Book.</string>
     <string name="app_intro_load_sample_data_title">Carregar Dados de Exemplo</string>
-    <string name="app_intro_load_sample_data_summary">Importar um banco de dados de amostra que inclui campos de exemplo e características.</string>
+    <string name="app_intro_load_sample_data_summary">Importar um banco de dados de exemplo que inclui campos de exemplo e características.</string>
     <string name="app_intro_tutorial_title">Tutorial</string>
     <string name="app_intro_tutorial_summary">Adicione um ícone de ajuda ao topo da barra de ferramentas que descreve recursos em todo o aplicativo.</string>
     <string name="app_intro_high_contrast_title">Tema de Alto Contraste</string>
@@ -630,7 +630,7 @@
     <string name="trait_gnss_internal_tts">GPS interno</string>
     <string name="trait_gnss_external_device_tts">Dispositivo externo %s escolhido.</string>
     <string name="act_collect_na_btn_tts">Não aplicável</string>
-    <string name="act_collect_barcode_btn_tts">Abrindo scanner de código de barras</string>
+    <string name="act_collect_barcode_btn_tts">Abrindo leitor de código de barras</string>
     <string name="act_collect_delete_btn_tts">Valor foi excluído.</string>
     <string name="trait_numeric_backspace_tts">Retrocesso</string>
     <string name="trait_date_minus_day_tts">Voltar um dia</string>
@@ -680,7 +680,7 @@
     <string name="view_range_box_left_button_content_description">Navega para a entrada anterior.</string>
     <string name="view_range_box_right_button_content_description">Navega para a próxima entrada.</string>
     <string name="act_collect_delete_value_button_content_description">Exclui o valor atual.</string>
-    <string name="act_collect_barcode_button_content_description">Inicie um scanner de código de barras.</string>
+    <string name="act_collect_barcode_button_content_description">Inicie um leitor de código de barras.</string>
     <string name="act_collect_na_value_button_content_description">Preencher o valor com não disponível.</string>
     <!-- Observation Info -->
     <string name="observation_metadata_title">Metadados da Observação</string>
@@ -958,7 +958,7 @@
     <string name="pref_beta_enable_individual_field_page_summary">Selecionar um campo na lista de campos abre uma página de detalhes</string>
     <string name="pref_beta_mlkit_title">Biblioteca MLKit</string>
     <string name="pref_beta_mlkit_summary">Esta opção usa a biblioteca MLKit em vez da biblioteca ZXing para escanear códigos de barras</string>
-    <string name="pref_beta_mlkit_enabled_title">Escanear código de barras usando MLKit habilitado</string>
+    <string name="pref_beta_mlkit_enabled_title">Leitura Código de Barras usando MLKit habilitado</string>
     <string name="pref_beta_mlkit_enabled_message">Habilitar essa funcionalidade irá mudar a biblioteca de leitura de código de barras do ZXing para MLKit</string>
     <!-- STATISTICS -->
     <string name="warning_no_observations">Não foram coletadas observações</string>
@@ -1316,6 +1316,9 @@
     <string name="repeated_values_left_button_content_description">esquerda</string>
     <string name="export_util_repeated_measures_table_warning_title">Tabela de Medidas Repetidas</string>
     <string name="export_util_repeated_measures_table_warning_message">Apenas os últimos valores de medidas repetidas serão exportados no formato de tabela.</string>
+    <string name="export_util_bundle_media_warning_title">Pacote de Mídia Grande</string>
+    <string name="export_util_bundle_media_warning_message">Esta exportação contém %d arquivos de mídia. Empacotar um grande número de arquivos pode ser lento e pode fazer com que o dispositivo congele. Continuar?</string>
+    <string name="export_util_bundle_media_warning_continue">Continuar</string>
     <string name="activity_file_explorer_up_directory_name">Cima</string>
     <string name="file_explorer_select_file_title">Selecionar Arquivo</string>
     <!-- base camera strings -->
@@ -1326,7 +1329,10 @@
     <string name="trait_camera_switch_content_description">Alternar câmera</string>
     <!-- Video recording messages -->
     <string name="video_recording_started">Gravação de vídeo iniciada</string>
+    <string name="video_recording_saved">Gravação de vídeo salva</string>
     <!-- Audio pause not supported message -->
+    <string name="field_audio_pause_not_supported">Não há suporte para pausar/retomar neste dispositivo</string>
+    <string name="delete_local_photo">Tem certeza que deseja remover este item?</string>
     <string name="trait_system_photo_settings_title">Configurações da Foto do Sistema</string>
     <string name="trait_photos_no_settings">Esta característica não tem configurações.</string>
     <string name="view_trait_photo_settings_preview_title">Pré-visualizar</string>
@@ -1437,6 +1443,14 @@
     <string name="pref_alpha_brapi_import_title">Nova interface do usuário de importação BrAPI</string>
     <string name="opening_brapi_no_network_error">Rede deve ser habilitada para usar funcionalidade BrAPI.</string>
     <string name="act_brapi_list_filter_reset_selection_message">Isto irá limpar a lista de itens selecionados.</string>
+    <string name="pref_experimental_generate_sample_data_title">Gerar Campo de Exemplo</string>
+    <string name="pref_experimental_generate_sample_data_summary">Cria um campo de exemplo com observações artificiais para todas as características carregadas. Os horários são aleatórios nos últimos três meses.</string>
+    <string name="pref_experimental_generate_sample_data_confirm_title">Gerar Campo de Exemplo?</string>
+    <string name="pref_experimental_generate_sample_data_confirm_message">Isto irá criar ou preencher um campo chamado \"field_sample\" com observações artificiais. Características de exemplo serão carregadas automaticamente se nenhuma estiver presente.</string>
+    <string name="pref_experimental_generate_sample_data_success">Campo de exemplo criado com sucesso.</string>
+    <string name="pref_experimental_generate_sample_data_failure">Falha ao gerar o campo de exemplo. Verifique se o armazenamento está configurado corretamente.</string>
+    <string name="pref_alpha_media_keycode_events_summary">Seguinte/anterior navega pelas entradas, o botão de aumentar/diminuir o volume alterna entre as características e a função \"Ligar\" captura fotos</string>
+    <string name="pref_alpha_media_keycode_events_title">Navegar Com Comandos de Mídia de Hardware</string>
     <string name="pref_geonav_distance_threshold_summary">GeoNav automaticamente para quando a distância de todos os lotes exceder esse valor em quilômetros.</string>
     <string name="pref_geonav_distance_threshold_title">Verificação de Proximidade</string>
     <string name="activity_collect_proximity_warning">GeoNav Parando, fora da proximidade das coordenadas</string>
@@ -1454,6 +1468,8 @@
     <string name="failed_to_fetch_observation_levels">Falha ao buscar nível de observações</string>
     <string name="traits_sort_default">Padrão</string>
     <string name="traits_crop_image_parameter">Recortar</string>
+    <string name="dialog_crop_title">Definir Região de Recorte</string>
+    <string name="dialog_crop_message">Você quer recortar imagens capturadas para esta característica?</string>
     <string name="view_trait_photo_settings_crop">Definir Região de Recorte</string>
     <string name="crop_image_clip_data_label">Dados da região de recorte de Field Book</string>
     <string name="quick_goto_swap_content_description">alternar tipo de entrada</string>
@@ -1548,8 +1564,16 @@
     <string name="device_settings_dialog_unknown_name">Dispositivo Bluetooth Desconhecido</string>
     <string name="device_settings_dialog_title">Configurações de Dispositivo Bluetooth</string>
     <string name="no_data_captured">Nenhum dado capturado.</string>
+    <string name="media_photo">Estado da foto</string>
+    <string name="media_video">Estado do vídeo</string>
+    <string name="media_audio">Estado do áudio</string>
+    <string name="no_observation">Os dados devem ser coletados antes que a mídia possa ser anexada.</string>
+    <string name="preferences_behavior_barcode_scanning_title">Barra de Ferramentas com Leitor de Códigos de Barras</string>
+    <string name="barcode_ask_enter">Inserir Valor</string>
+    <string name="barcode_ask_message">Escaneado: %s</string>
     <string name="media_viewer">Visualizador de Mídia</string>
     <string name="delete">Excluir</string>
+    <string name="confirm_replace_media_title">Substituir Mídia Existente</string>
     <string name="failed_to_find_file_name">Falha ao recuperar o nome do arquivo.</string>
     <string name="act_brapi_export_starting">Iniciando exportação</string>
     <string name="act_brapi_export_success">Exportação com sucesso</string>
@@ -1621,7 +1645,13 @@
     <string name="there_are_unuploaded_observations_or_images_do_you_want_to_upload_them_before_downloading">Existem observações ou imagens não carregadas. Você quer enviá-las antes de baixá-las?</string>
     <string name="upload_first">Carregar</string>
     <string name="download_anyway">Baixar</string>
+    <string name="confirm_delete_with_media_title">Excluir observação</string>
+    <string name="confirm_delete_with_media_message">Excluir esta observação também irá excluir qualquer mídia em anexo. Tem certeza de que deseja excluir esta observação?</string>
+    <string name="attach">Anexar</string>
     <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
+    <string name="alert_jump_to_plot_bottom_toolbar_message">A barra de ferramentas inferior foi atualizada para suportar a navegação por meio do código de barras.</string>
     <!-- Preference: Attach media barcode prioritize -->
+    <string name="preferences_behavior_attach_media_barcode_prioritize">Sempre usar código de barras detectado</string>
+    <string name="preferences_behavior_attach_media_barcode_prioritize_description">Quando um código de barras é detectado, o Field Book analisará automaticamente o código de barras sem a interação do usuário.</string>
     <string name="edit">Editar</string>
 </resources>
