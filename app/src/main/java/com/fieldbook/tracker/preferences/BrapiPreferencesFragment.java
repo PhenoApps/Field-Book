@@ -80,6 +80,9 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class BrapiPreferencesFragment extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
 
     @Inject
+    BrapiAccountHelper accountHelper;
+
+    @Inject
     SharedPreferences preferences;
 
     @Inject
@@ -155,9 +158,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                         if (preferences.getString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, "").equals("brapi")) {
                             preferences.edit().putString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, "ask").apply();
                         }
-                        // remove brapi auth token when brapi is disabled
-                        String serverUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
-                        BrapiAccountHelper.INSTANCE.removeAccount(context, serverUrl);
+                        clearAccountHelperUrl();
                         preferences.edit().remove(PreferenceKeys.BRAPI_TOKEN).apply();
                     }
                     updatePreferencesVisibility(isChecked);
@@ -226,8 +227,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
                 } else {
 
-                    String serverUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
-                    BrapiAccountHelper.INSTANCE.removeAccount(context, serverUrl);
+                    clearAccountHelperUrl();
                     preferences.edit().remove(PreferenceKeys.BRAPI_TOKEN).apply();
 
                     setButtonView();
@@ -853,8 +853,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                     scannedData = result.getContents();
                 }
             } else if (requestCode == BrapiAuthActivity.END_SESSION_REQUEST_CODE) {
-                String serverUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
-                BrapiAccountHelper.INSTANCE.removeAccount(context, serverUrl);
+                clearAccountHelperUrl();
                 preferences.edit().remove(PreferenceKeys.BRAPI_ID_TOKEN).apply();
                 preferences.edit().remove(PreferenceKeys.BRAPI_TOKEN).apply();
                 setButtonView();
@@ -881,5 +880,10 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                     break;
             }
         }
+    }
+
+    private void clearAccountHelperUrl() {
+        String serverUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
+        accountHelper.removeAccount(serverUrl);
     }
 }

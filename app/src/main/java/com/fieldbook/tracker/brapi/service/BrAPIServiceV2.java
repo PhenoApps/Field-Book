@@ -2,6 +2,7 @@ package com.fieldbook.tracker.brapi.service;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.util.Pair;
 
@@ -150,6 +151,9 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     public final GermplasmService germplasmService;
     public final ServerInfoService serverInfoService;
 
+    private final SharedPreferences preferences;
+    private final BrapiAccountHelper accountHelper;
+
     public BrAPIServiceV2(Context context) {
         this.context = context;
         // Make timeout longer. Set it to 60 seconds for now
@@ -176,16 +180,18 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         this.observationUnitService = new ObservationUnitService.Default(this.observationUnitsApi);
         this.germplasmService = new GermplasmService.Default(this.germplasmApi);
         this.serverInfoService = new ServerInfoService.Default(this.serverInfoApi);
+
+        this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        this.accountHelper = new BrapiAccountHelper(context, preferences);
     }
 
     @Override
     public void authorizeClient() {
         try {
             apiClient.authenticate(t -> {
-                String token = BrapiAccountHelper.INSTANCE.peekToken(context);
+                String token = accountHelper.peekToken();
                 if (token == null) {
-                    token = PreferenceManager.getDefaultSharedPreferences(context)
-                            .getString(PreferenceKeys.BRAPI_TOKEN, null);
+                    token = preferences.getString(PreferenceKeys.BRAPI_TOKEN, null);
                 }
                 return token;
             });
@@ -551,8 +557,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                                BrapiObservationLevel observationLevel, final Function<BrapiStudyDetails, Void> function,
                                final Function<Integer, Void> failFunction) {
         try {
-            final Integer pageSize = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context)
-                    .getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50"));
+            final Integer pageSize = Integer.parseInt(preferences.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50"));
             final BrapiStudyDetails study = new BrapiStudyDetails();
             study.setAttributes(new ArrayList<>());
             study.setValues(new ArrayList<>());
@@ -753,8 +758,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     }
 
     public Map<String, BrAPIGermplasm> getGermplasmDetails(List<String> allGermplasmDbIds, final Function<Integer, Void> failFunction) {
-        final Integer pageSize = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context)
-                .getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50"));
+        final Integer pageSize = Integer.parseInt(preferences.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50"));
         BrAPIGermplasmSearchRequest germplasmBody = new BrAPIGermplasmSearchRequest();
         List<String> doubledGermplasmDbIds = new ArrayList<>(allGermplasmDbIds);
         doubledGermplasmDbIds.addAll(allGermplasmDbIds);

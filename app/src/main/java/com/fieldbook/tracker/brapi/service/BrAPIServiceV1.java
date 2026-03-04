@@ -2,6 +2,7 @@ package com.fieldbook.tracker.brapi.service;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.util.Pair;
 
@@ -89,6 +90,9 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
     private final ObservationsApi observationsApi;
     private final ObservationVariablesApi traitsApi;
 
+    private final SharedPreferences preferences;
+    private final BrapiAccountHelper accountHelper;
+
     public BrAPIServiceV1(Context context) {
         this.context = context;
         ApiClient apiClient = new ApiClient().setBasePath(BrAPIService.getBrapiUrl(context));
@@ -100,6 +104,9 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
         this.trialsApi = new TrialsApi(apiClient);
         this.traitsApi = new ObservationVariablesApi(apiClient);
         this.observationsApi = new ObservationsApi(apiClient);
+
+        this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        this.accountHelper = new BrapiAccountHelper(context, preferences);
     }
 
     @Override
@@ -136,10 +143,9 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
     }
 
     private String getBrapiToken() {
-        String token = BrapiAccountHelper.INSTANCE.peekToken(context);
+        String token = accountHelper.peekToken();
         if (token == null) {
-            token = PreferenceManager.getDefaultSharedPreferences(context)
-                    .getString(PreferenceKeys.BRAPI_TOKEN, "");
+            token = preferences.getString(PreferenceKeys.BRAPI_TOKEN, "");
         }
         return "Bearer " + token;
     }
@@ -468,7 +474,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
             final String level = levelName;
 
             final AtomicInteger currentPage = new AtomicInteger(0);
-            final Integer pageSize = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context).getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50"));
+            final Integer pageSize = Integer.parseInt(preferences.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50"));
             final BrapiStudyDetails study = new BrapiStudyDetails();
             study.setValues(new ArrayList<>());
 

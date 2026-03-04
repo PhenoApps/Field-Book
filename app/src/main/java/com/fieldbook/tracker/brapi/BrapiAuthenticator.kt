@@ -7,6 +7,7 @@ import android.accounts.AccountManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity
 
 class BrapiAuthenticator(private val context: Context) : AbstractAccountAuthenticator(context) {
@@ -59,7 +60,7 @@ class BrapiAuthenticator(private val context: Context) : AbstractAccountAuthenti
         }
     }
 
-    override fun getAuthTokenLabel(authTokenType: String): String = "BrAPI Access Token"
+    override fun getAuthTokenLabel(authTokenType: String): String = context.getString(R.string.brapi_auth_token_label)
 
     override fun confirmCredentials(
         response: AccountAuthenticatorResponse,

@@ -52,6 +52,9 @@ public class BrapiAuthActivity extends ThemedActivity {
     public static String REDIRECT_URI = "fieldbook://app/auth";
 
     @Inject
+    BrapiAccountHelper accountHelper;
+
+    @Inject
     SharedPreferences preferences;
 
     @Inject
@@ -268,7 +271,7 @@ public class BrapiAuthActivity extends ThemedActivity {
         // Store token in AccountManager so other apps can share it
         String serverUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
         if (!serverUrl.isEmpty()) {
-            BrapiAccountHelper.INSTANCE.storeToken(this, serverUrl, accessToken, idToken);
+            accountHelper.storeToken(serverUrl, accessToken, idToken);
         }
 
         // Clear our data from our deep link so the app doesn't think it is

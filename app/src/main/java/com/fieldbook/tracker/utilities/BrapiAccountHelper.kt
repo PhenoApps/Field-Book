@@ -3,20 +3,28 @@ package com.fieldbook.tracker.utilities
 import android.accounts.Account
 import android.accounts.AccountManager
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.brapi.BrapiAuthenticator
 import com.fieldbook.tracker.preferences.PreferenceKeys
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 
-object BrapiAccountHelper {
+class BrapiAccountHelper @Inject constructor(
+    @param:ApplicationContext private val context: Context,
+    private val preferences: SharedPreferences
+){
 
-    private const val KEY_SERVER_URL = "server_url"
+    companion object {
+        private const val KEY_SERVER_URL = "server_url"
+    }
 
     /**
      * Returns the AccountManager account matching the given server URL.
      * Matches by the "server_url" user-data key (new accounts), or by account name as a
      * fallback for accounts created before this naming scheme was introduced.
      */
-    fun findAccount(context: Context): Account? {
+    fun findAccount(): Account? {
         val am = AccountManager.get(context)
         val serverUrl = PreferenceManager.getDefaultSharedPreferences(context)
             .getString(PreferenceKeys.BRAPI_BASE_URL, "") ?: ""
@@ -28,18 +36,18 @@ object BrapiAccountHelper {
      * Retrieves the BrAPI access token from AccountManager for the current server.
      * Returns null if no account or no token is found.
      */
-    fun peekToken(context: Context): String? {
+    fun peekToken(): String? {
         val am = AccountManager.get(context)
-        val account = findAccount(context) ?: return null
+        val account = findAccount() ?: return null
         return am.peekAuthToken(account, BrapiAuthenticator.AUTH_TOKEN_TYPE)
     }
 
     /**
      * Retrieves the OIDC ID token stored as user data for the current server's account.
      */
-    fun peekIdToken(context: Context): String? {
+    fun peekIdToken(): String? {
         val am = AccountManager.get(context)
-        val account = findAccount(context) ?: return null
+        val account = findAccount() ?: return null
         return am.getUserData(account, BrapiAuthenticator.KEY_ID_TOKEN)
     }
 
@@ -48,10 +56,9 @@ object BrapiAccountHelper {
      * The account is created with the server's display name as the visible account name.
      * The server URL is stored as user data so accounts can be matched by URL across app restarts.
      */
-    fun storeToken(context: Context, serverUrl: String, accessToken: String, idToken: String?) {
+    fun storeToken(serverUrl: String, accessToken: String, idToken: String?) {
         val am = AccountManager.get(context)
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        val displayName = prefs.getString(PreferenceKeys.BRAPI_DISPLAY_NAME, serverUrl)
+        val displayName = preferences.getString(PreferenceKeys.BRAPI_DISPLAY_NAME, serverUrl)
             ?.takeIf { it.isNotEmpty() } ?: serverUrl
 
         // Find an existing account for this server URL (by user data), or create a new one
@@ -71,7 +78,7 @@ object BrapiAccountHelper {
     /**
      * Removes the AccountManager account associated with the given server URL (if present).
      */
-    fun removeAccount(context: Context, serverUrl: String) {
+    fun removeAccount(serverUrl: String) {
         val am = AccountManager.get(context)
         am.getAccountsByType(BrapiAuthenticator.ACCOUNT_TYPE)
             .filter { am.getUserData(it, KEY_SERVER_URL) == serverUrl || it.name == serverUrl }
@@ -82,13 +89,12 @@ object BrapiAccountHelper {
      * One-time migration: if an access token exists in SharedPreferences but no AccountManager
      * account exists for the current server, migrate the token into AccountManager.
      */
-    fun migrateFromPrefsIfNeeded(context: Context) {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-        val serverUrl = prefs.getString(PreferenceKeys.BRAPI_BASE_URL, "") ?: ""
-        val existingToken = prefs.getString(PreferenceKeys.BRAPI_TOKEN, null) ?: return
+    fun migrateFromPrefsIfNeeded() {
+        val serverUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "") ?: ""
+        val existingToken = preferences.getString(PreferenceKeys.BRAPI_TOKEN, null) ?: return
         if (serverUrl.isEmpty()) return
-        if (findAccount(context) != null) return // already migrated
-        val idToken = prefs.getString(PreferenceKeys.BRAPI_ID_TOKEN, null)
-        storeToken(context, serverUrl, existingToken, idToken)
+        if (findAccount() != null) return // already migrated
+        val idToken = preferences.getString(PreferenceKeys.BRAPI_ID_TOKEN, null)
+        storeToken(serverUrl, existingToken, idToken)
     }
 }
