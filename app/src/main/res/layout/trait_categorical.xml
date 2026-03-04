@@ -1,30 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.fieldbook.tracker.traits.CategoricalTraitLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/categoricalLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:visibility="gone"
-    xmlns:tools="http://schemas.android.com/tools"
     tools:visibility="visible">
 
     <androidx.recyclerview.widget.RecyclerView
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/catGrid"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
         app:spanCount="4"
         tools:itemCount="8"
         tools:listitem="@layout/trait_category_button"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-    <ImageButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        style="@style/FloatingActionButtonStyle.TraitButtons"
         android:id="@+id/otherCatButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/fb_trait_fab_size"
+        android:layout_height="@dimen/fb_trait_fab_size"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="8dp"
         android:contentDescription="@string/trait_categorical_other_btn_description"
-        android:text="@string/trait_other_button"
         android:src="@drawable/ic_categorical_other"
         android:visibility="gone" />
 

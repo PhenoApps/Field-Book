@@ -10,8 +10,9 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -42,7 +43,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
     //private StaggeredGridView gridMultiCat;
     private RecyclerView gridMultiCat;
-    private ImageButton otherButton;
+    private FloatingActionButton otherButton;
     private ArrayList<BrAPIScaleValidValuesCategories> categoryList;
     private final BrAPIScaleValidValuesCategories defaultNaCategory = new BrAPIScaleValidValuesCategories().label("NA").value("NA");
 
@@ -329,9 +330,14 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         input.setHint(getContext().getString(R.string.trait_other_dialog_hint));
 
+        LinearLayout container = new LinearLayout(getContext());
+        int padding = (int) (16 * getContext().getResources().getDisplayMetrics().density);
+        container.setPadding(padding, 0, padding, 0);
+        container.addView(input, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+
         new AlertDialog.Builder(getContext())
                 .setTitle(R.string.trait_other_dialog_title)
-                .setView(input)
+                .setView(container)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                     String newLabel = input.getText().toString().trim();
 
@@ -418,6 +424,10 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                     pressOffButton(button);
                     currentCat = "";
                 } else {
+                    for (int i = 0; i < gridMultiCat.getChildCount(); i++) {
+                        Button btn = gridMultiCat.getChildAt(i).findViewById(R.id.multicatButton);
+                        if (btn != null) pressOffButton(btn);
+                    }
                     pressOnButton(button);
                     currentCat = category;
                     scale.add(pair);
@@ -428,8 +438,6 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                 updateObservation(getCurrentTrait(), CategoryJsonUtil.Companion.encode(scale));
 
                 triggerTts(category);
-
-                refreshLayout(false);
             }
         };
     }
