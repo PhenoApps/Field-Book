@@ -323,6 +323,7 @@
     <string name="traits_format_text">Testo</string>
     <string name="traits_format_photo">Foto</string>
     <string name="traits_format_camera">Fotocamera</string>
+    <string name="traits_format_video">Video</string>
     <string name="traits_format_audio">Audio</string>
     <string name="traits_format_multicategorical">Multi cat</string>
     <string name="traits_format_location">Posizione</string>
@@ -366,6 +367,7 @@
     <string name="trait_parameter_decimal_places_error">Il valore deve essere compreso tra -1 e 10</string>
     <string name="traits_attach_media_photo_label">Foto</string>
     <string name="traits_attach_media_audio_label">Audio</string>
+    <string name="traits_attach_media_video_label">Video</string>
     <string name="traits_create_warning_name_blank">Il nome del carattere non può essere vuoto</string>
     <string name="traits_create_warning_duplicate">Il carattere esiste già</string>
     <string name="traits_create_warning_numeric_required">Predefinito, minimo e massimo sono richiesti e deve essere numerico</string>
