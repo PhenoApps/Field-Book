@@ -465,7 +465,7 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
     }
 
     private fun showFileDialog() {
-        val hasBrapi = brapiAccountHelper.hasActiveAccount()
+        val hasBrapi = brapiAccountHelper.hasActiveServer()
         val importArray = arrayOfNulls<String>(if (hasBrapi) 4 else 3)
         importArray[0] = getString(R.string.import_source_local)
         importArray[1] = getString(R.string.import_source_cloud)

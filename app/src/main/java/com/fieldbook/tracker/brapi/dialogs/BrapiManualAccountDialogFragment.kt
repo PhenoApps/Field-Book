@@ -5,15 +5,19 @@ import android.accounts.AccountManager
 import android.app.Activity
 import android.app.Dialog
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
 import android.widget.ArrayAdapter
-import android.widget.Spinner
+import android.widget.AutoCompleteTextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.ScannerActivity
@@ -23,6 +27,7 @@ import com.fieldbook.tracker.objects.BrAPIConfig
 import com.fieldbook.tracker.utilities.BrapiAccountHelper
 import com.fieldbook.tracker.utilities.JsonUtil
 import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import com.google.gson.Gson
 import com.google.zxing.integration.android.IntentIntegrator
 import com.google.zxing.integration.android.IntentResult
@@ -77,10 +82,16 @@ class BrapiManualAccountDialogFragment : DialogFragment() {
     private lateinit var oidcUrlEdit: TextInputEditText
     private lateinit var oidcClientIdEdit: TextInputEditText
     private lateinit var oidcScopeEdit: TextInputEditText
-    private lateinit var oidcFlowSpinner: Spinner
-    private lateinit var versionSpinner: Spinner
+    private lateinit var oidcFlowSpinner: AutoCompleteTextView
+    private lateinit var versionSpinner: AutoCompleteTextView
 
     private var mlkitEnabled = false
+
+    /** True when the OIDC URL was set by the user (directly or via scan), suppressing auto-derive. */
+    private var oidcUrlExplicitlySet = false
+
+    /** Set to true while the code is programmatically updating oidcUrlEdit to avoid triggering the explicit flag. */
+    private var suppressOidcWatcher = false
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         authResponse = arguments?.getParcelable(ARG_AUTH_RESPONSE)
@@ -96,42 +107,85 @@ class BrapiManualAccountDialogFragment : DialogFragment() {
         oidcFlowSpinner = view.findViewById(R.id.brapi_manual_oidc_flow_spinner)
         versionSpinner = view.findViewById(R.id.brapi_manual_version_spinner)
 
-        // Set up OIDC flow spinner
+        // Apply gray hint color to all fields. We do this programmatically because
+        // ?attr/fb_color_text_secondary can fail to resolve inside the dialog's
+        // ContextThemeWrapper, causing Material to fall back to colorOnSurface (black).
+        val grayHint = ContextCompat.getColor(requireContext(), R.color.main_color_text_secondary)
+        val grayHintList = ColorStateList.valueOf(grayHint)
+        listOf(
+            view.findViewById<TextInputLayout>(R.id.brapi_manual_url_input_layout),
+            view.findViewById(R.id.brapi_manual_display_name_layout),
+            view.findViewById(R.id.brapi_manual_oidc_flow_layout),
+            view.findViewById(R.id.brapi_manual_oidc_url_layout),
+            view.findViewById(R.id.brapi_manual_oidc_client_id_layout),
+            view.findViewById(R.id.brapi_manual_oidc_scope_layout),
+            view.findViewById(R.id.brapi_manual_version_layout)
+        ).forEach { layout ->
+            layout?.defaultHintTextColor = grayHintList
+            layout?.hintTextColor = grayHintList
+        }
+        listOf(urlEdit, displayNameEdit, oidcUrlEdit, oidcClientIdEdit, oidcScopeEdit).forEach {
+            it.setHintTextColor(grayHint)
+        }
+
+        // Set up OIDC flow exposed dropdown
         val oidcFlowOptions = resources.getStringArray(R.array.pref_brapi_oidc_flow)
-        oidcFlowSpinner.adapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_spinner_item,
-            oidcFlowOptions
-        ).also { it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
-        // Default to Implicit Grant
+        val oidcFlowAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, oidcFlowOptions)
+        oidcFlowSpinner.setAdapter(oidcFlowAdapter)
         val implicitIndex = oidcFlowOptions.indexOfFirst {
             it.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit), ignoreCase = true)
         }
-        if (implicitIndex >= 0) oidcFlowSpinner.setSelection(implicitIndex)
+        if (implicitIndex >= 0) oidcFlowSpinner.setText(oidcFlowOptions[implicitIndex], false)
 
-        // Set up BrAPI version spinner
+        // Set up BrAPI version exposed dropdown
         val versionOptions = resources.getStringArray(R.array.pref_brapi_version)
-        versionSpinner.adapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_spinner_item,
-            versionOptions
-        ).also { it.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
-        // Default to V2
+        val versionAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, versionOptions)
+        versionSpinner.setAdapter(versionAdapter)
         val v2Index = versionOptions.indexOfFirst { it.equals("V2", ignoreCase = true) }
-        if (v2Index >= 0) versionSpinner.setSelection(v2Index)
+        if (v2Index >= 0) versionSpinner.setText(versionOptions[v2Index], false)
 
-        // Auto-populate display name from URL
+        // Auto-derive OIDC discovery URL from base URL while typing
         urlEdit.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                if (displayNameEdit.text.isNullOrEmpty()) {
-                    val url = s?.toString() ?: ""
-                    val hostname = try {
-                        java.net.URL(accountHelper.normalizeUrl(url)).host
-                    } catch (e: Exception) { "" }
-                    if (hostname.isNotEmpty()) displayNameEdit.setText(hostname)
+                val raw = s?.toString()?.trim() ?: ""
+                val normalized = try { accountHelper.normalizeUrl(raw) } catch (e: Exception) { "" }
+
+                // Auto-derive OIDC discovery URL unless user has explicitly set it
+                if (!oidcUrlExplicitlySet && normalized.isNotEmpty() && normalized != "https://") {
+                    val derived = normalized.trimEnd('/') + "/.well-known/openid-configuration"
+                    suppressOidcWatcher = true
+                    oidcUrlEdit.setText(derived)
+                    suppressOidcWatcher = false
                 }
+            }
+        })
+
+        // Auto-populate display name via server fetch when focus leaves the URL field
+        urlEdit.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus && displayNameEdit.text.isNullOrEmpty()) {
+                val raw = urlEdit.text?.toString()?.trim() ?: ""
+                val url = try { accountHelper.normalizeUrl(raw) } catch (e: Exception) { "" }
+                if (url.isNotEmpty() && url != "https://") fetchDisplayName(url)
+            }
+        }
+
+        // Also fetch display name from server when the display name field is focused and empty
+        displayNameEdit.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus && displayNameEdit.text.isNullOrEmpty()) {
+                val raw = urlEdit.text?.toString()?.trim() ?: ""
+                val url = try { accountHelper.normalizeUrl(raw) } catch (e: Exception) { "" }
+                if (url.isNotEmpty() && url != "https://") fetchDisplayName(url)
+            }
+        }
+
+        // Track explicit user edits to the OIDC URL field
+        oidcUrlEdit.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                if (!suppressOidcWatcher) oidcUrlExplicitlySet = true
             }
         })
 
@@ -140,6 +194,7 @@ class BrapiManualAccountDialogFragment : DialogFragment() {
             startScan(REQUEST_SCAN_BASE_URL)
         }
         view.findViewById<View>(R.id.brapi_manual_oidc_url_scan_btn).setOnClickListener {
+            oidcUrlExplicitlySet = true
             startScan(REQUEST_SCAN_OIDC_URL)
         }
         view.findViewById<View>(R.id.brapi_manual_display_name_auto_btn).setOnClickListener {
@@ -159,17 +214,26 @@ class BrapiManualAccountDialogFragment : DialogFragment() {
         val dialog = AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
             .setTitle(R.string.brapi_add_account_title)
             .setView(view)
-            .setPositiveButton(R.string.brapi_save_authorize, null) // set below to avoid auto-dismiss
-            .setNegativeButton(R.string.dialog_cancel) { _, _ -> onCancelled() }
             .create()
 
+        // Wire embedded buttons
+        view.findViewById<View>(R.id.brapi_btn_authorize).setOnClickListener {
+            onAuthorize(dialog)
+        }
+        view.findViewById<View>(R.id.brapi_btn_cancel).setOnClickListener {
+            onCancelled()
+            dialog.dismiss()
+        }
+
         dialog.setOnShowListener {
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                onAuthorize(dialog)
-            }
+            dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
         }
 
         return dialog
+    }
+
+    override fun onStart() {
+        super.onStart()
     }
 
     override fun onResume() {
@@ -204,11 +268,11 @@ class BrapiManualAccountDialogFragment : DialogFragment() {
             ?.takeIf { it.isNotEmpty() }
             ?: url
 
-        val oidcFlow = oidcFlowSpinner.selectedItem?.toString() ?: ""
+        val oidcFlow = oidcFlowSpinner.text?.toString() ?: ""
         val oidcUrl = oidcUrlEdit.text?.toString()?.trim() ?: ""
         val oidcClientId = oidcClientIdEdit.text?.toString()?.trim() ?: ""
         val oidcScope = oidcScopeEdit.text?.toString()?.trim() ?: ""
-        val brapiVersion = versionSpinner.selectedItem?.toString() ?: "V2"
+        val brapiVersion = versionSpinner.text?.toString() ?: "V2"
 
         // Save config to AccountManager (no token yet — that comes after OAuth)
         accountHelper.addAccountConfig(
@@ -295,27 +359,36 @@ class BrapiManualAccountDialogFragment : DialogFragment() {
     }
 
     private fun applyConfig(config: BrAPIConfig) {
+        // If config provides an explicit OIDC URL, lock it in before setting the base URL
+        // (so the URL watcher's auto-derive doesn't overwrite it).
+        if (!config.oidcUrl.isNullOrEmpty()) {
+            oidcUrlExplicitlySet = true
+        }
         config.url?.let { urlEdit.setText(it) }
         config.name?.let { displayNameEdit.setText(it) }
-        config.oidcUrl?.let { oidcUrlEdit.setText(it) }
+        if (!config.oidcUrl.isNullOrEmpty()) {
+            suppressOidcWatcher = true
+            oidcUrlEdit.setText(config.oidcUrl)
+            suppressOidcWatcher = false
+        }
         config.clientId?.let { oidcClientIdEdit.setText(it) }
         config.scope?.let { oidcScopeEdit.setText(it) }
 
-        // Set OIDC flow spinner
+        // Set OIDC flow dropdown
         val oidcFlowOptions = resources.getStringArray(R.array.pref_brapi_oidc_flow)
         val flowMatch = oidcFlowOptions.indexOfFirst {
             it.equals(config.authFlow, ignoreCase = true)
         }
-        if (flowMatch >= 0) oidcFlowSpinner.setSelection(flowMatch)
+        if (flowMatch >= 0) oidcFlowSpinner.setText(oidcFlowOptions[flowMatch], false)
 
-        // Set version spinner
+        // Set version dropdown
         val versionOptions = resources.getStringArray(R.array.pref_brapi_version)
         val versionStr = when {
             "v1".equals(config.version, ignoreCase = true) -> "V1"
             else -> "V2"
         }
         val versionMatch = versionOptions.indexOfFirst { it.equals(versionStr, ignoreCase = true) }
-        if (versionMatch >= 0) versionSpinner.setSelection(versionMatch)
+        if (versionMatch >= 0) versionSpinner.setText(versionOptions[versionMatch], false)
     }
 
     private fun onCancelled() {

@@ -183,6 +183,13 @@ public class BrapiAuthActivity extends ThemedActivity {
             Uri redirectURI = flow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)) ?
                     Uri.parse("https://phenoapps.org/field-book") : Uri.parse("fieldbook://app/auth");
 
+            // Prefer per-account OIDC discovery URL from Intent extras
+            String oidcUrl = extras != null && extras.hasExtra(EXTRA_OIDC_URL)
+                    ? extras.getStringExtra(EXTRA_OIDC_URL)
+                    : sharedPreferences.getString(PreferenceKeys.BRAPI_OIDC_URL, "");
+            if (oidcUrl == null) oidcUrl = "";
+            final String finalOidcUrl = oidcUrl;
+
             authUtil.getAuthServiceConfiguration((authorizationServiceConfiguration, ex) -> {
 
                 if (ex != null) {
@@ -206,7 +213,7 @@ public class BrapiAuthActivity extends ThemedActivity {
                 }
 
                 return null;
-            });
+            }, finalOidcUrl);
 
         } catch (Exception ex) {
 

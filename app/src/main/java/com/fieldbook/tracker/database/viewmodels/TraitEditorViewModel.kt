@@ -70,7 +70,7 @@ class TraitEditorViewModel @Inject constructor(
 
     fun isTutorialEnabled() = prefs.getBoolean(PreferenceKeys.TIPS, false)
 
-    fun isBrapiEnabled() = brapiAccountHelper.hasActiveAccount()
+    fun isBrapiEnabled() = brapiAccountHelper.hasActiveServer()
 
     fun isBrapiNewUi() = prefs.getBoolean(PreferenceKeys.EXPERIMENTAL_NEW_BRAPI_UI, true)
 

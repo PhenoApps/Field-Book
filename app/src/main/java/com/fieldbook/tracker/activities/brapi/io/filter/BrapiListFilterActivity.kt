@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.content.res.AppCompatResources
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity
 import com.fieldbook.tracker.activities.brapi.io.BrapiCacheModel
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterTypeAdapter
@@ -279,8 +280,8 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
                 it.active("true")
             }
         )
-            .catch {
-                onApiException()
+            .catch { e ->
+                onApiException(e)
                 queryStudiesJob?.cancel()
             }
             .collect {
@@ -307,14 +308,40 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         }
     }
 
-    protected fun onApiException() {
+    protected fun onApiException(e: Throwable? = null) {
+        val httpCode = try {
+            (e as? org.brapi.client.v2.model.exceptions.ApiException)?.code
+                ?: (e?.cause as? org.brapi.client.v2.model.exceptions.ApiException)?.code
+                ?: 0
+        } catch (_: Exception) { 0 }
+
         launch(Dispatchers.Main) {
-            Toast.makeText(
-                this@BrapiListFilterActivity,
-                getString(R.string.act_brapi_list_api_exception),
-                Toast.LENGTH_SHORT
-            ).show()
-            finish()
+            if (httpCode == 401) {
+                BrAPIService.handleConnectionError(this@BrapiListFilterActivity, httpCode)
+                AlertDialog.Builder(this@BrapiListFilterActivity, R.style.AppAlertDialog)
+                    .setTitle(R.string.brapi_auth_required_title)
+                    .setMessage(R.string.brapi_auth_required_message)
+                    .setPositiveButton(R.string.brapi_save_authorize) { _, _ ->
+                        val intent = Intent(this@BrapiListFilterActivity, BrapiAuthActivity::class.java).apply {
+                            putExtra(BrapiAuthActivity.EXTRA_SERVER_URL, prefs.getString(PreferenceKeys.BRAPI_BASE_URL, ""))
+                            putExtra(BrapiAuthActivity.EXTRA_OIDC_URL, prefs.getString(PreferenceKeys.BRAPI_OIDC_URL, ""))
+                            putExtra(BrapiAuthActivity.EXTRA_OIDC_FLOW, prefs.getString(PreferenceKeys.BRAPI_OIDC_FLOW, ""))
+                            putExtra(BrapiAuthActivity.EXTRA_OIDC_CLIENT_ID, prefs.getString(PreferenceKeys.BRAPI_OIDC_CLIENT_ID, ""))
+                            putExtra(BrapiAuthActivity.EXTRA_OIDC_SCOPE, prefs.getString(PreferenceKeys.BRAPI_OIDC_SCOPE, ""))
+                        }
+                        startActivity(intent)
+                        finish()
+                    }
+                    .setNegativeButton(R.string.dialog_cancel) { _, _ -> finish() }
+                    .show()
+            } else {
+                Toast.makeText(
+                    this@BrapiListFilterActivity,
+                    getString(R.string.act_brapi_list_api_exception),
+                    Toast.LENGTH_SHORT
+                ).show()
+                finish()
+            }
         }
     }
 
@@ -331,8 +358,8 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
                 it.active("true")
             })
 
-            .catch {
-                onApiException()
+            .catch { e ->
+                onApiException(e)
                 cancel()
                 queryTrialsJob?.cancel()
             }

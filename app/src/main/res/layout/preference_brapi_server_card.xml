@@ -15,7 +15,7 @@
         android:orientation="vertical"
         android:padding="12dp">
 
-        <!-- Header row: icon + name + overflow menu -->
+        <!-- Header row: radio button + name/url + status icon -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -23,11 +23,13 @@
             android:gravity="center_vertical">
 
             <ImageView
-                android:id="@+id/brapi_card_icon"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:src="@drawable/brapi_logo"
-                android:contentDescription="@string/brapi_info_title" />
+                android:id="@+id/brapi_card_logo"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/brapi_card_enable" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -56,65 +58,78 @@
 
             </LinearLayout>
 
-            <ImageButton
-                android:id="@+id/brapi_card_overflow_btn"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_more_vert"
-                android:contentDescription="@string/menu_overflow"
-                android:padding="8dp" />
+            <ImageView
+                android:id="@+id/brapi_card_status_icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="8dp" />
 
         </LinearLayout>
 
-        <!-- Status row -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginTop="6dp">
-
-            <View
-                android:id="@+id/brapi_card_status_dot"
-                android:layout_width="10dp"
-                android:layout_height="10dp"
-                android:background="@drawable/circle_green" />
-
-            <TextView
-                android:id="@+id/brapi_card_status_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:textSize="@dimen/text_size_small"
-                android:textColor="?android:attr/textColorSecondary" />
-
-        </LinearLayout>
-
-        <!-- Action buttons row -->
-        <LinearLayout
+        <!-- Action chips row -->
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/brapi_card_chip_group"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="8dp">
+            android:layout_marginTop="8dp"
+            app:chipSpacingVertical="8dp"
+            app:chipSpacingHorizontal="4dp">
 
-            <Button
-                android:id="@+id/brapi_card_logout_btn"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
+            <com.google.android.material.chip.Chip
+                android:id="@+id/brapi_card_chip_compat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/brapi_revoke_auth"
-                android:textAllCaps="false" />
+                android:checkable="false"
+                app:chipIcon="@drawable/ic_server_compare"
+                app:chipIconSize="20dp"
+                app:ensureMinTouchTargetSize="false"
+                app:closeIconVisible="false"
+                app:chipBackgroundColor="?attr/selectableChipBackground"
+                app:chipStrokeColor="?attr/selectableChipStroke"
+                app:chipStrokeWidth="2dp"
+                android:text="@string/brapi_chip_compatibility" />
 
-            <Button
-                android:id="@+id/brapi_card_enable_btn"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
+            <com.google.android.material.chip.Chip
+                android:id="@+id/brapi_card_chip_share"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/brapi_card_enable"
-                android:textAllCaps="false" />
+                android:checkable="false"
+                app:chipIcon="@drawable/ic_share"
+                app:chipIconSize="20dp"
+                app:ensureMinTouchTargetSize="false"
+                app:closeIconVisible="false"
+                app:chipBackgroundColor="?attr/selectableChipBackground"
+                app:chipStrokeColor="?attr/selectableChipStroke"
+                app:chipStrokeWidth="2dp"
+                android:text="@string/brapi_chip_share" />
 
-        </LinearLayout>
+            <com.google.android.material.chip.Chip
+                android:id="@+id/brapi_card_chip_edit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checkable="false"
+                app:chipIcon="@drawable/square_edit_outline"
+                app:chipIconSize="20dp"
+                app:ensureMinTouchTargetSize="false"
+                app:closeIconVisible="false"
+                app:chipBackgroundColor="?attr/selectableChipBackground"
+                app:chipStrokeColor="?attr/selectableChipStroke"
+                app:chipStrokeWidth="2dp"
+                android:text="@string/brapi_chip_edit" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/brapi_card_chip_auth"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checkable="false"
+                app:chipIconSize="20dp"
+                app:ensureMinTouchTargetSize="false"
+                app:closeIconVisible="false"
+                app:chipBackgroundColor="?attr/selectableChipBackground"
+                app:chipStrokeColor="?attr/selectableChipStroke"
+                app:chipStrokeWidth="2dp" />
+
+        </com.google.android.material.chip.ChipGroup>
 
     </LinearLayout>
 

@@ -100,6 +100,12 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
     // Tracks which account triggered the auth flow for re-auth
     private Account pendingAuthAccount = null;
 
+    // Tracks whether to remove the account after logout completes
+    private boolean pendingRemoveAfterLogout = false;
+
+    // Saves the active server URL before a temporary compatibility-check sync, so it can be restored on resume
+    private String compatCheckPreviousUrl = null;
+
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
@@ -151,6 +157,10 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
     public void onResume() {
         super.onResume();
         setupToolbar();
+        if (compatCheckPreviousUrl != null) {
+            preferences.edit().putString(PreferenceKeys.BRAPI_BASE_URL, compatCheckPreviousUrl).apply();
+            compatCheckPreviousUrl = null;
+        }
         boolean brapiEnabled = preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false);
         updateServerSectionsVisibility(brapiEnabled);
         refreshServerCards();
@@ -203,11 +213,10 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
 
         card.setOnLogOut(this::logOutAccount);
         card.setOnAuthorize(this::authorizeAccount);
-        card.setOnEnable(this::enableAccount);
+        card.setOnEnable(this::enableAccount); // still wired for backward compat
         card.setOnCheckCompatibility(this::checkServerCompatibility);
         card.setOnShareSettings(this::shareAccountSettings);
         card.setOnEdit(this::editAccount);
-        card.setOnRemove(this::removeAccount);
 
         return card;
     }
@@ -216,10 +225,34 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
 
     private @NotNull Unit logOutAccount(Account account) {
         AccountManager am = AccountManager.get(context);
+        String displayName = am.getUserData(account, BrapiAuthenticator.KEY_DISPLAY_NAME);
+        if (displayName == null) displayName = account.name;
+        final String finalDisplayName = displayName;
+
+        new AlertDialog.Builder(context, R.style.AppAlertDialog)
+                .setTitle(R.string.brapi_revoke_auth)
+                .setMessage(getString(R.string.brapi_logout_remove_message, finalDisplayName))
+                .setPositiveButton(R.string.brapi_logout_and_remove, (d, w) -> {
+                    pendingRemoveAfterLogout = true;
+                    doLogout(account);
+                })
+                .setNeutralButton(R.string.brapi_logout_only, (d, w) -> {
+                    pendingRemoveAfterLogout = false;
+                    doLogout(account);
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+        return null;
+    }
+
+    private void doLogout(Account account) {
+        AccountManager am = AccountManager.get(context);
         String idToken = am.getUserData(account, BrapiAuthenticator.KEY_ID_TOKEN);
 
         if (idToken != null) {
             Toast.makeText(context, R.string.logging_out_please_wait, Toast.LENGTH_SHORT).show();
+            pendingAuthAccount = account;
+            String accountOidcUrl = am.getUserData(account, BrapiAuthenticator.KEY_OIDC_URL);
             authUtil.getAuthServiceConfiguration((config, ex) -> {
                 EndSessionRequest endSessionRequest =
                         new EndSessionRequest.Builder(config)
@@ -228,24 +261,26 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
                                 .build();
                 AuthorizationService authService = new AuthorizationService(context);
                 Intent endSessionIntent = authService.getEndSessionRequestIntent(endSessionRequest);
-                String serverUrl = am.getUserData(account, BrapiAuthenticator.KEY_SERVER_URL);
-                pendingAuthAccount = account;
                 startActivityForResult(endSessionIntent, BrapiAuthActivity.END_SESSION_REQUEST_CODE);
                 return null;
-            });
+            }, accountOidcUrl);
         } else {
             String serverUrl = am.getUserData(account, BrapiAuthenticator.KEY_SERVER_URL);
             accountHelper.clearToken(serverUrl != null ? serverUrl : "");
 
-            // If active account was logged out, clear BRAPI_BASE_URL and field/trait cache
             String activeUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
             if (serverUrl != null && serverUrl.equals(activeUrl)) {
                 preferences.edit().putString(PreferenceKeys.BRAPI_BASE_URL, "").apply();
                 BrapiFilterCache.Companion.delete(context, true);
             }
+            if (pendingRemoveAfterLogout) {
+                pendingRemoveAfterLogout = false;
+                if (serverUrl != null) {
+                    accountHelper.removeAccount(serverUrl);
+                }
+            }
             refreshServerCards();
         }
-        return null;
     }
 
     private @NotNull Unit enableAccount(Account account) {
@@ -308,12 +343,14 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
     }
 
     private @NotNull Unit checkServerCompatibility(Account account) {
-        // Ensure this account is set active temporarily for the compatibility check
+        // Temporarily sync this account's prefs so BrAPIServiceFactory targets the right server.
+        // Save the current active URL so onResume can restore it without switching the active server.
         AccountManager am = AccountManager.get(context);
         String serverUrl = am.getUserData(account, BrapiAuthenticator.KEY_SERVER_URL);
-        String previousActiveUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
+        String currentActiveUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
 
-        if (serverUrl != null && !serverUrl.equals(previousActiveUrl)) {
+        if (serverUrl != null && !serverUrl.equals(currentActiveUrl)) {
+            compatCheckPreviousUrl = currentActiveUrl;
             syncActiveAccountPrefs(account);
         }
 
@@ -472,6 +509,12 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
                 if (serverUrl != null && serverUrl.equals(activeUrl)) {
                     preferences.edit().putString(PreferenceKeys.BRAPI_BASE_URL, "").apply();
                     BrapiFilterCache.Companion.delete(context, true);
+                }
+                if (pendingRemoveAfterLogout) {
+                    pendingRemoveAfterLogout = false;
+                    if (serverUrl != null) {
+                        accountHelper.removeAccount(serverUrl);
+                    }
                 }
                 pendingAuthAccount = null;
             }

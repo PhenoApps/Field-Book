@@ -64,6 +64,18 @@ class BrapiAccountHelper @Inject constructor(
     }
 
     /**
+     * Returns true if BrAPI is enabled and an active server account exists, regardless of
+     * whether that account has been authenticated. Use this when authentication is not
+     * required to show BrAPI as an option (e.g. import field/trait dialogs).
+     */
+    fun hasActiveServer(): Boolean {
+        if (!preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false)) return false
+        val activeUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "") ?: ""
+        if (activeUrl.isEmpty()) return false
+        return getAccountByUrl(activeUrl) != null
+    }
+
+    /**
      * Retrieves the BrAPI access token from AccountManager for the current server.
      * Returns null if no account or no token is found.
      */
