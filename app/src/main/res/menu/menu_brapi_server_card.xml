@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/brapi_card_menu_check_compatibility"
+        android:title="@string/brapi_card_check_compatibility" />
+
+    <item
+        android:id="@+id/brapi_card_menu_share_settings"
+        android:title="@string/brapi_card_share_settings" />
+
+    <item
+        android:id="@+id/brapi_card_menu_edit"
+        android:title="@string/brapi_card_edit" />
+
+    <item
+        android:id="@+id/brapi_card_menu_remove"
+        android:title="@string/brapi_card_remove" />
+
+</menu>

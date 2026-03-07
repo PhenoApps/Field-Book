@@ -1342,6 +1342,26 @@
     <string name="brapi_save_authorize">Authorize</string>
     <string name="brapi_display_name">Display Name</string>
     <string name="brapi_revoke_auth">Log Out</string>
+
+    <!-- Multi-account management -->
+    <string name="brapi_add_account_title">Add Account</string>
+    <string name="brapi_add_account_manual_entry">Manual Entry</string>
+    <string name="brapi_add_account_scan_config">Scan Configuration Code</string>
+    <string name="brapi_card_enable">Enable</string>
+    <string name="brapi_card_disable">Disable</string>
+    <string name="brapi_card_status_connected">Connected</string>
+    <string name="brapi_card_status_authorized">Authorized</string>
+    <string name="brapi_card_check_compatibility">Check Compatibility</string>
+    <string name="brapi_card_share_settings">Share Settings</string>
+    <string name="brapi_card_edit">Edit</string>
+    <string name="brapi_card_remove">Remove</string>
+    <string name="brapi_card_status_unauthenticated">Unauthenticated</string>
+    <string name="brapi_card_authorize">Authorize</string>
+    <string name="brapi_section_active_server">Active Server</string>
+    <string name="brapi_section_available_servers">Available Servers</string>
+    <string name="brapi_add_account">Add Account</string>
+    <string name="brapi_advanced_settings">Advanced Settings</string>
+    <string name="menu_overflow">More options</string>
     <string name="brapi_auth_btn">Log In to Site</string>
     <string name="brapi_auth_success">BrAPI Authorization Successful</string>
     <string name="brapi_auth_deny">BrAPI Authorization Denied</string>

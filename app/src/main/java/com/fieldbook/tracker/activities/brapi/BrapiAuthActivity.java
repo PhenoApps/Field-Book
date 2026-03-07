@@ -51,6 +51,14 @@ public class BrapiAuthActivity extends ThemedActivity {
 
     public static String REDIRECT_URI = "fieldbook://app/auth";
 
+    // Intent extras for per-account config (set by BrapiManualAccountDialogFragment)
+    public static final String EXTRA_SERVER_URL = "brapi_extra_server_url";
+    public static final String EXTRA_OIDC_URL = "brapi_extra_oidc_url";
+    public static final String EXTRA_OIDC_FLOW = "brapi_extra_oidc_flow";
+    public static final String EXTRA_OIDC_CLIENT_ID = "brapi_extra_oidc_client_id";
+    public static final String EXTRA_OIDC_SCOPE = "brapi_extra_oidc_scope";
+    public static final String EXTRA_BRAPI_VERSION = "brapi_extra_brapi_version";
+
     @Inject
     BrapiAccountHelper accountHelper;
 
@@ -84,7 +92,11 @@ public class BrapiAuthActivity extends ThemedActivity {
         // Start our login process
         //when coming back from deep link this check keeps app from auto-re-authenticating
         if (getIntent() != null && getIntent().getData() == null) {
-            String flow = preferences.getString(PreferenceKeys.BRAPI_OIDC_FLOW, "");
+            // Prefer per-account OIDC flow from Intent extras
+            String flow = getIntent().hasExtra(EXTRA_OIDC_FLOW)
+                    ? getIntent().getStringExtra(EXTRA_OIDC_FLOW)
+                    : preferences.getString(PreferenceKeys.BRAPI_OIDC_FLOW, "");
+            if (flow == null) flow = "";
             if (flow.equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
                 authorizeBrAPI_OLD(preferences, this);
             } else {
@@ -143,13 +155,28 @@ public class BrapiAuthActivity extends ThemedActivity {
         editor.putString(PreferenceKeys.BRAPI_TOKEN, null);
         editor.apply();
 
-        String flow = sharedPreferences.getString(PreferenceKeys.BRAPI_OIDC_FLOW, "");
+        // Prefer per-account config from Intent extras; fall back to SharedPreferences
+        Intent extras = getIntent();
+        String flow = extras != null && extras.hasExtra(EXTRA_OIDC_FLOW)
+                ? extras.getStringExtra(EXTRA_OIDC_FLOW)
+                : sharedPreferences.getString(PreferenceKeys.BRAPI_OIDC_FLOW, "");
+        if (flow == null) flow = "";
+
         final String responseType = flow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)) ?
                 ResponseTypeValues.TOKEN : ResponseTypeValues.CODE;
 
         try {
-            String clientId = sharedPreferences.getString(PreferenceKeys.BRAPI_OIDC_CLIENT_ID, "fieldbook");
-            String scope = sharedPreferences.getString(PreferenceKeys.BRAPI_OIDC_SCOPE, "");
+            String clientId = extras != null && extras.hasExtra(EXTRA_OIDC_CLIENT_ID)
+                    ? extras.getStringExtra(EXTRA_OIDC_CLIENT_ID)
+                    : sharedPreferences.getString(PreferenceKeys.BRAPI_OIDC_CLIENT_ID, "fieldbook");
+            if (clientId == null || clientId.isEmpty()) clientId = "fieldbook";
+            final String finalClientId = clientId;
+
+            String scope = extras != null && extras.hasExtra(EXTRA_OIDC_SCOPE)
+                    ? extras.getStringExtra(EXTRA_OIDC_SCOPE)
+                    : sharedPreferences.getString(PreferenceKeys.BRAPI_OIDC_SCOPE, "");
+            if (scope == null) scope = "";
+            final String finalScope = scope;
 
             // Authorization code flow works better with custom URL scheme fieldbook://app/auth
             // https://github.com/openid/AppAuth-Android/issues?q=is%3Aissue+intent+null
@@ -167,7 +194,7 @@ public class BrapiAuthActivity extends ThemedActivity {
 
                 try {
 
-                    requestAuthorization(authorizationServiceConfiguration, clientId, responseType, redirectURI, scope, context);
+                    requestAuthorization(authorizationServiceConfiguration, finalClientId, responseType, redirectURI, finalScope, context);
 
                 } catch (IllegalArgumentException e) {
 
@@ -268,8 +295,12 @@ public class BrapiAuthActivity extends ThemedActivity {
         editor.putString(PreferenceKeys.BRAPI_ID_TOKEN, idToken).apply();
         editor.apply();
 
-        // Store token in AccountManager so other apps can share it
-        String serverUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
+        // Prefer server URL from Intent extras (set by BrapiManualAccountDialogFragment)
+        String serverUrl = getIntent() != null && getIntent().hasExtra(EXTRA_SERVER_URL)
+                ? getIntent().getStringExtra(EXTRA_SERVER_URL)
+                : preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
+        if (serverUrl == null) serverUrl = "";
+
         if (!serverUrl.isEmpty()) {
             accountHelper.storeToken(serverUrl, accessToken, idToken);
         }

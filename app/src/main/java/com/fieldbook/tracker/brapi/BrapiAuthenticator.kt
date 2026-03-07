@@ -8,14 +8,22 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity
+import com.fieldbook.tracker.activities.brapi.BrapiAddAccountActivity
 
 class BrapiAuthenticator(private val context: Context) : AbstractAccountAuthenticator(context) {
 
     companion object {
         const val ACCOUNT_TYPE = "org.phenoapps.brapi"
         const val AUTH_TOKEN_TYPE = "access_token"
+        const val READ_TOKEN_PERMISSION = "org.phenoapps.brapi.READ_TOKEN"
         const val KEY_ID_TOKEN = "id_token"
+        const val KEY_SERVER_URL = "server_url"
+        const val KEY_DISPLAY_NAME = "display_name"
+        const val KEY_OIDC_URL = "oidc_url"
+        const val KEY_OIDC_FLOW = "oidc_flow"
+        const val KEY_OIDC_CLIENT_ID = "oidc_client_id"
+        const val KEY_OIDC_SCOPE = "oidc_scope"
+        const val KEY_BRAPI_VERSION = "brapi_version"
     }
 
     override fun addAccount(
@@ -25,7 +33,7 @@ class BrapiAuthenticator(private val context: Context) : AbstractAccountAuthenti
         requiredFeatures: Array<out String>?,
         options: Bundle
     ): Bundle {
-        val intent = Intent(context, BrapiAuthActivity::class.java).apply {
+        val intent = Intent(context, BrapiAddAccountActivity::class.java).apply {
             putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response)
         }
         return Bundle().apply {
@@ -39,6 +47,13 @@ class BrapiAuthenticator(private val context: Context) : AbstractAccountAuthenti
         authTokenType: String,
         options: Bundle
     ): Bundle {
+        // Enforce that callers hold the org.phenoapps.brapi.READ_TOKEN permission
+        if (context.checkCallingOrSelfPermission(READ_TOKEN_PERMISSION) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            return Bundle().apply {
+                putInt(AccountManager.KEY_ERROR_CODE, AccountManager.ERROR_CODE_INVALID_RESPONSE)
+                putString(AccountManager.KEY_ERROR_MESSAGE, "Caller does not hold $READ_TOKEN_PERMISSION")
+            }
+        }
         val am = AccountManager.get(context)
         val token = am.peekAuthToken(account, authTokenType)
         if (!token.isNullOrEmpty()) {
@@ -49,7 +64,7 @@ class BrapiAuthenticator(private val context: Context) : AbstractAccountAuthenti
             }
         }
         // Token not cached — launch re-authentication
-        val intent = Intent(context, BrapiAuthActivity::class.java).apply {
+        val intent = Intent(context, BrapiAddAccountActivity::class.java).apply {
             putExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE, response)
             putExtra(AccountManager.KEY_ACCOUNT_NAME, account.name)
             putExtra(AccountManager.KEY_ACCOUNT_TYPE, account.type)

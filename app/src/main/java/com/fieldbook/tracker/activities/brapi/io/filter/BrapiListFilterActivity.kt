@@ -241,14 +241,15 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
     open suspend fun loadData() {
 
         try {
-            toggleProgressBar(View.VISIBLE)
+            trialModels.clear()
 
+            progressBar.isIndeterminate = true
             progressBar.visibility = View.VISIBLE
 
             queryTrialsJob = queryTrials()
             queryTrialsJob?.join()
 
-            progressBar.visibility = View.VISIBLE
+            progressBar.isIndeterminate = false
             progressBar.progress = 0
 
             queryStudiesJob = queryStudies()
@@ -436,10 +437,9 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
         cache.clear()
 
-        submitAdapterItems(cache)
-
-        resetFilterCountDisplay()
-
+        // Don't clear the adapter here — keep showing the previous list while the progress bar
+        // indicates loading. restoreModels() will reload from the server and update everything
+        // (adapter + hint) once the fresh data arrives.
         restoreModels()
     }
 

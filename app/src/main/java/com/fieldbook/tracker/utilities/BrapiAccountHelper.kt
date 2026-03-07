@@ -15,21 +15,52 @@ class BrapiAccountHelper @Inject constructor(
     private val preferences: SharedPreferences
 ){
 
-    companion object {
-        private const val KEY_SERVER_URL = "server_url"
+    /**
+     * Returns all BrAPI accounts stored in AccountManager.
+     */
+    fun getAllAccounts(): List<Account> =
+        AccountManager.get(context).getAccountsByType(BrapiAuthenticator.ACCOUNT_TYPE).toList()
+
+    /**
+     * Returns the AccountManager account matching the given server URL, or null.
+     */
+    fun getAccountByUrl(serverUrl: String): Account? {
+        val am = AccountManager.get(context)
+        return am.getAccountsByType(BrapiAuthenticator.ACCOUNT_TYPE)
+            .firstOrNull {
+                am.getUserData(it, BrapiAuthenticator.KEY_SERVER_URL) == serverUrl
+                        || it.name == serverUrl
+            }
     }
 
     /**
-     * Returns the AccountManager account matching the given server URL.
-     * Matches by the "server_url" user-data key (new accounts), or by account name as a
-     * fallback for accounts created before this naming scheme was introduced.
+     * Returns the AccountManager account matching the active server URL (BRAPI_BASE_URL pref).
      */
     fun findAccount(): Account? {
-        val am = AccountManager.get(context)
-        val serverUrl = PreferenceManager.getDefaultSharedPreferences(context)
-            .getString(PreferenceKeys.BRAPI_BASE_URL, "") ?: ""
-        return am.getAccountsByType(BrapiAuthenticator.ACCOUNT_TYPE)
-            .firstOrNull { am.getUserData(it, KEY_SERVER_URL) == serverUrl || it.name == serverUrl }
+        val serverUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "") ?: ""
+        return getAccountByUrl(serverUrl)
+    }
+
+    /**
+     * Sets the given server URL as the active BrAPI server by writing BRAPI_BASE_URL.
+     */
+    fun setActiveAccount(serverUrl: String) {
+        preferences.edit().putString(PreferenceKeys.BRAPI_BASE_URL, serverUrl).apply()
+    }
+
+    /**
+     * Returns true if BrAPI is enabled, there is a saved account for the active server URL,
+     * and that account has a valid (non-null) token. A 401 will cause the token to be
+     * invalidated via AccountManager.invalidateAuthToken(), causing this to return false
+     * until the user re-authorizes.
+     */
+    fun hasActiveAccount(): Boolean {
+        if (!preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false)) return false
+        val activeUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "") ?: ""
+        if (activeUrl.isEmpty()) return false
+        val account = getAccountByUrl(activeUrl) ?: return false
+        val token = AccountManager.get(context).peekAuthToken(account, BrapiAuthenticator.AUTH_TOKEN_TYPE)
+        return !token.isNullOrEmpty()
     }
 
     /**
@@ -43,6 +74,14 @@ class BrapiAccountHelper @Inject constructor(
     }
 
     /**
+     * Retrieves the BrAPI access token for a specific account.
+     */
+    fun peekTokenForAccount(account: Account): String? {
+        val am = AccountManager.get(context)
+        return am.peekAuthToken(account, BrapiAuthenticator.AUTH_TOKEN_TYPE)
+    }
+
+    /**
      * Retrieves the OIDC ID token stored as user data for the current server's account.
      */
     fun peekIdToken(): String? {
@@ -52,27 +91,92 @@ class BrapiAccountHelper @Inject constructor(
     }
 
     /**
+     * Retrieves the OIDC ID token for a specific account.
+     */
+    fun peekIdTokenForAccount(account: Account): String? =
+        AccountManager.get(context).getUserData(account, BrapiAuthenticator.KEY_ID_TOKEN)
+
+    /**
+     * Reads a user-data value for the given account.
+     */
+    fun getUserData(account: Account, key: String): String? =
+        AccountManager.get(context).getUserData(account, key)
+
+    /**
+     * Writes a user-data value for the given account.
+     */
+    fun setUserData(account: Account, key: String, value: String) =
+        AccountManager.get(context).setUserData(account, key, value)
+
+    /**
+     * Creates an AccountManager entry for a new server without yet storing a token.
+     * All per-account settings (OIDC URL, flow, version, etc.) are persisted as user data.
+     * Returns the created or updated Account.
+     */
+    fun addAccountConfig(
+        serverUrl: String,
+        displayName: String,
+        oidcUrl: String = "",
+        oidcFlow: String = "",
+        oidcClientId: String = "",
+        oidcScope: String = "",
+        brapiVersion: String = "V2"
+    ): Account {
+        val am = AccountManager.get(context)
+        val normUrl = normalizeUrl(serverUrl)
+        val name = displayName.ifEmpty { extractHostname(normUrl) }
+
+        val existing = getAccountByUrl(normUrl)
+        val account = existing ?: Account(name, BrapiAuthenticator.ACCOUNT_TYPE).also {
+            am.addAccountExplicitly(it, null, null)
+        }
+
+        am.setUserData(account, BrapiAuthenticator.KEY_SERVER_URL, normUrl)
+        am.setUserData(account, BrapiAuthenticator.KEY_DISPLAY_NAME, name)
+        am.setUserData(account, BrapiAuthenticator.KEY_OIDC_URL, oidcUrl)
+        am.setUserData(account, BrapiAuthenticator.KEY_OIDC_FLOW, oidcFlow)
+        am.setUserData(account, BrapiAuthenticator.KEY_OIDC_CLIENT_ID, oidcClientId)
+        am.setUserData(account, BrapiAuthenticator.KEY_OIDC_SCOPE, oidcScope)
+        am.setUserData(account, BrapiAuthenticator.KEY_BRAPI_VERSION, brapiVersion)
+
+        return account
+    }
+
+    /**
      * Stores the access token (and optionally the ID token) in AccountManager.
      * The account is created with the server's display name as the visible account name.
      * The server URL is stored as user data so accounts can be matched by URL across app restarts.
      */
     fun storeToken(serverUrl: String, accessToken: String, idToken: String?) {
         val am = AccountManager.get(context)
-        val displayName = preferences.getString(PreferenceKeys.BRAPI_DISPLAY_NAME, serverUrl)
-            ?.takeIf { it.isNotEmpty() } ?: serverUrl
+        val normUrl = normalizeUrl(serverUrl)
+        val displayName = preferences.getString(PreferenceKeys.BRAPI_DISPLAY_NAME, normUrl)
+            ?.takeIf { it.isNotEmpty() } ?: normUrl
 
-        // Find an existing account for this server URL (by user data), or create a new one
-        val account = am.getAccountsByType(BrapiAuthenticator.ACCOUNT_TYPE)
-            .firstOrNull { am.getUserData(it, KEY_SERVER_URL) == serverUrl }
+        val account = getAccountByUrl(normUrl)
             ?: Account(displayName, BrapiAuthenticator.ACCOUNT_TYPE).also {
                 am.addAccountExplicitly(it, null, null)
             }
 
-        am.setUserData(account, KEY_SERVER_URL, serverUrl)
+        am.setUserData(account, BrapiAuthenticator.KEY_SERVER_URL, normUrl)
         am.setAuthToken(account, BrapiAuthenticator.AUTH_TOKEN_TYPE, accessToken)
         if (idToken != null) {
             am.setUserData(account, BrapiAuthenticator.KEY_ID_TOKEN, idToken)
         }
+    }
+
+    /**
+     * Clears only the token for the given account, leaving the account config intact.
+     * The account will still appear in Available Servers but show "Authorized" status lost.
+     */
+    fun clearToken(serverUrl: String) {
+        val am = AccountManager.get(context)
+        val account = getAccountByUrl(serverUrl) ?: return
+        val token = am.peekAuthToken(account, BrapiAuthenticator.AUTH_TOKEN_TYPE)
+        if (token != null) {
+            am.invalidateAuthToken(BrapiAuthenticator.ACCOUNT_TYPE, token)
+        }
+        am.setUserData(account, BrapiAuthenticator.KEY_ID_TOKEN, null)
     }
 
     /**
@@ -81,7 +185,10 @@ class BrapiAccountHelper @Inject constructor(
     fun removeAccount(serverUrl: String) {
         val am = AccountManager.get(context)
         am.getAccountsByType(BrapiAuthenticator.ACCOUNT_TYPE)
-            .filter { am.getUserData(it, KEY_SERVER_URL) == serverUrl || it.name == serverUrl }
+            .filter {
+                am.getUserData(it, BrapiAuthenticator.KEY_SERVER_URL) == serverUrl
+                        || it.name == serverUrl
+            }
             .forEach { am.removeAccountExplicitly(it) }
     }
 
@@ -96,5 +203,28 @@ class BrapiAccountHelper @Inject constructor(
         if (findAccount() != null) return // already migrated
         val idToken = preferences.getString(PreferenceKeys.BRAPI_ID_TOKEN, null)
         storeToken(serverUrl, existingToken, idToken)
+    }
+
+    /**
+     * Prepends https:// if no scheme is present in the URL.
+     */
+    fun normalizeUrl(url: String): String {
+        val trimmed = url.trim()
+        return if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+            trimmed
+        } else {
+            "https://$trimmed"
+        }
+    }
+
+    /**
+     * Extracts the hostname from a URL for use as a default display name.
+     */
+    private fun extractHostname(url: String): String {
+        return try {
+            java.net.URL(url).host.ifEmpty { url }
+        } catch (e: Exception) {
+            url
+        }
     }
 }

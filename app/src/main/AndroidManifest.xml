@@ -3,6 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.fieldbook.tracker">
 
+    <!-- Custom permission allowing other Phenoapps apps to request BrAPI tokens from AccountManager -->
+    <permission
+        android:name="org.phenoapps.brapi.READ_TOKEN"
+        android:protectionLevel="dangerous" />
+
+    <uses-permission android:name="org.phenoapps.brapi.READ_TOKEN" />
+
     <application
         android:name=".application.FieldBook"
         android:hardwareAccelerated="true"
@@ -170,6 +177,12 @@
         <activity
             android:name=".activities.brapi.BrapiTraitActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.brapi.BrapiAddAccountActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:exported="false"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
         <activity

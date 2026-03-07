@@ -136,6 +136,8 @@ public interface BrAPIService {
             case UNAUTHORIZED:
                 toastMsg = context.getString(R.string.brapi_auth_deny);
                 returnVal = true;
+                // Invalidate the cached token so hasActiveAccount() returns false until re-auth
+                invalidateActiveToken(context);
                 break;
             case FORBIDDEN:
                 toastMsg = context.getString(R.string.brapi_auth_permission_deny);
@@ -152,6 +154,30 @@ public interface BrAPIService {
         });
 
         return returnVal;
+    }
+
+    /**
+     * Invalidates the cached auth token for the active BrAPI account in AccountManager,
+     * so that subsequent hasActiveAccount() checks (which require a valid token) return false.
+     */
+    static void invalidateActiveToken(Context context) {
+        try {
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+            com.fieldbook.tracker.utilities.BrapiAccountHelper helper =
+                    new com.fieldbook.tracker.utilities.BrapiAccountHelper(context, prefs);
+            android.accounts.Account active = helper.findAccount();
+            if (active != null) {
+                android.accounts.AccountManager am = android.accounts.AccountManager.get(context);
+                String token = am.peekAuthToken(active, com.fieldbook.tracker.brapi.BrapiAuthenticator.AUTH_TOKEN_TYPE);
+                if (token != null) {
+                    am.invalidateAuthToken(com.fieldbook.tracker.brapi.BrapiAuthenticator.ACCOUNT_TYPE, token);
+                }
+            }
+            // Also clear SharedPreferences token for legacy compatibility
+            prefs.edit().remove(com.fieldbook.tracker.preferences.PreferenceKeys.BRAPI_TOKEN).apply();
+        } catch (Exception e) {
+            Log.e("BrAPIService", "Error invalidating token", e);
+        }
     }
 
     void postImageMetaData(FieldBookImage image, final Function<FieldBookImage, Void> function, final Function<Integer, Void> failFunction);

@@ -41,6 +41,7 @@ import com.fieldbook.tracker.objects.FieldFileObject
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
+import com.fieldbook.tracker.utilities.BrapiAccountHelper
 import com.fieldbook.tracker.utilities.SnackbarUtils
 import com.fieldbook.tracker.utilities.TapTargetUtil
 import com.fieldbook.tracker.utilities.Utils
@@ -56,6 +57,7 @@ import java.util.LinkedHashMap
 import java.util.NoSuchElementException
 import java.util.StringJoiner
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import java.util.Locale
 import androidx.core.content.edit
 import androidx.core.net.toUri
@@ -67,6 +69,9 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
         private const val TAG = "FieldEditor"
         private const val PERMISSIONS_REQUEST_STORAGE = 998
     }
+
+    @Inject
+    lateinit var brapiAccountHelper: BrapiAccountHelper
 
     private lateinit var fieldFile: FieldFileObject.FieldFileBase
     private lateinit var unique: Spinner
@@ -460,22 +465,18 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
     }
 
     private fun showFileDialog() {
-        val importArray = arrayOfNulls<String>(
-            if (mPrefs.getBoolean(
-                    PreferenceKeys.BRAPI_ENABLED,
-                    false
-                )
-            ) 4 else 3
-        )
+        val hasBrapi = brapiAccountHelper.hasActiveAccount()
+        val importArray = arrayOfNulls<String>(if (hasBrapi) 4 else 3)
         importArray[0] = getString(R.string.import_source_local)
         importArray[1] = getString(R.string.import_source_cloud)
         importArray[2] = getString(R.string.fields_new_create_field)
 
-        if (mPrefs.getBoolean(PreferenceKeys.BRAPI_ENABLED, false)) {
-            val displayName = mPrefs.getString(
-                PreferenceKeys.BRAPI_DISPLAY_NAME,
-                getString(R.string.brapi_edit_display_name_default)
-            )
+        if (hasBrapi) {
+            val activeAccount = brapiAccountHelper.findAccount()
+            val displayName = activeAccount?.let {
+                brapiAccountHelper.getUserData(it, com.fieldbook.tracker.brapi.BrapiAuthenticator.KEY_DISPLAY_NAME)
+                    ?.takeIf { name -> name.isNotEmpty() }
+            } ?: getString(R.string.brapi_edit_display_name_default)
             importArray[3] = displayName
         }
 
