@@ -15,12 +15,16 @@
         android:orientation="vertical"
         android:padding="12dp">
 
-        <!-- Header row: radio button + name/url + status icon -->
+        <!-- Header row: logo + name/url + status icon + chevron -->
         <LinearLayout
+            android:id="@+id/brapi_card_header_row"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true">
 
             <ImageView
                 android:id="@+id/brapi_card_logo"
@@ -63,6 +67,13 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginStart="8dp" />
+
+            <ImageView
+                android:id="@+id/brapi_card_chevron"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/ic_chevron_down"
+                android:contentDescription="@null" />
 
         </LinearLayout>
 
@@ -128,6 +139,20 @@
                 app:chipBackgroundColor="?attr/selectableChipBackground"
                 app:chipStrokeColor="?attr/selectableChipStroke"
                 app:chipStrokeWidth="2dp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/brapi_card_chip_remove"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checkable="false"
+                app:chipIcon="@drawable/ic_pref_brapi_logout"
+                app:chipIconSize="20dp"
+                app:ensureMinTouchTargetSize="false"
+                app:closeIconVisible="false"
+                app:chipBackgroundColor="?attr/selectableChipBackground"
+                app:chipStrokeColor="?attr/selectableChipStroke"
+                app:chipStrokeWidth="2dp"
+                android:text="@string/brapi_chip_remove" />
 
         </com.google.android.material.chip.ChipGroup>
 

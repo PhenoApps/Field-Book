@@ -208,6 +208,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
         BrapiServerCardPreference card = new BrapiServerCardPreference(context);
         card.setAccount(account);
         card.setActive(isActive);
+        card.setExpanded(isActive); // active card starts expanded; inactive cards start collapsed
         card.setKey(account.name + "_" + (isActive ? "active" : "available"));
         card.setOrder(0);
 
@@ -217,6 +218,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
         card.setOnCheckCompatibility(this::checkServerCompatibility);
         card.setOnShareSettings(this::shareAccountSettings);
         card.setOnEdit(this::editAccount);
+        card.setOnRemove(this::removeAccount);
 
         return card;
     }

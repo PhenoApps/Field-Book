@@ -8,14 +8,18 @@ import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.util.AttributeSet
+import android.view.View
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.brapi.BrapiAuthenticator
 import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 
 /**
  * Custom Preference that displays a BrAPI server card.
@@ -25,6 +29,9 @@ import com.google.android.material.chip.Chip
  * The radio button in the header acts as the server selector: tapping it on an inactive server
  * activates it (or triggers auth if unauthenticated).
  * Action chips: Compatibility, Share, Edit, and Logout/Authorize.
+ *
+ * Tapping anywhere in the header row (except the logo) collapses/expands the chips and
+ * auth status icon. Active cards start expanded; inactive cards start collapsed.
  *
  * Bind [account], [isActive], and the various action listeners before attaching to a
  * PreferenceCategory.
@@ -41,12 +48,16 @@ class BrapiServerCardPreference @JvmOverloads constructor(
     var isActive: Boolean = false
         set(value) { field = value; notifyChanged() }
 
+    /** Whether the card's chips and status icon are currently shown. */
+    var isExpanded: Boolean = false
+
     var onLogOut: ((Account) -> Unit)? = null
     var onAuthorize: ((Account) -> Unit)? = null
     var onEnable: ((Account) -> Unit)? = null
     var onCheckCompatibility: ((Account) -> Unit)? = null
     var onShareSettings: ((Account) -> Unit)? = null
     var onEdit: ((Account) -> Unit)? = null
+    var onRemove: ((Account) -> Unit)? = null
 
     init {
         layoutResource = R.layout.preference_brapi_server_card
@@ -63,14 +74,18 @@ class BrapiServerCardPreference @JvmOverloads constructor(
         val acct = account ?: return
         val am = AccountManager.get(context)
 
+        val headerRow = holder.findViewById(R.id.brapi_card_header_row) as? LinearLayout
         val displayNameTv = holder.findViewById(R.id.brapi_card_display_name) as? TextView
         val urlTv = holder.findViewById(R.id.brapi_card_url) as? TextView
         val statusIcon = holder.findViewById(R.id.brapi_card_status_icon) as? ImageView
+        val chevron = holder.findViewById(R.id.brapi_card_chevron) as? ImageView
         val logoView = holder.findViewById(R.id.brapi_card_logo) as? ImageView
+        val chipGroup = holder.findViewById(R.id.brapi_card_chip_group) as? ChipGroup
         val chipCompat = holder.findViewById(R.id.brapi_card_chip_compat) as? Chip
         val chipShare = holder.findViewById(R.id.brapi_card_chip_share) as? Chip
         val chipEdit = holder.findViewById(R.id.brapi_card_chip_edit) as? Chip
         val chipAuth = holder.findViewById(R.id.brapi_card_chip_auth) as? Chip
+        val chipRemove = holder.findViewById(R.id.brapi_card_chip_remove) as? Chip
 
         val displayName = am.getUserData(acct, BrapiAuthenticator.KEY_DISPLAY_NAME)
             ?.takeIf { it.isNotEmpty() } ?: acct.name
@@ -138,11 +153,40 @@ class BrapiServerCardPreference @JvmOverloads constructor(
             chipAuth?.text = context.getString(R.string.brapi_chip_logout)
             chipAuth?.chipIcon = ContextCompat.getDrawable(context, R.drawable.ic_pref_brapi_logout)
             chipAuth?.setOnClickListener { onLogOut?.invoke(acct) }
+            chipRemove?.visibility = View.GONE
         } else {
             chipAuth?.text = context.getString(R.string.brapi_chip_authorize)
             chipAuth?.chipIcon = ContextCompat.getDrawable(context, R.drawable.key)
             chipAuth?.setOnClickListener { onAuthorize?.invoke(acct) }
+            chipRemove?.visibility = View.VISIBLE
+            chipRemove?.setOnClickListener { onRemove?.invoke(acct) }
         }
 
+        // ── Expand / collapse ──────────────────────────────────────────────
+        applyExpansionState(chipGroup, statusIcon, chevron, animated = false)
+
+        headerRow?.setOnClickListener {
+            isExpanded = !isExpanded
+            applyExpansionState(chipGroup, statusIcon, chevron, animated = true)
+        }
+    }
+
+    private fun applyExpansionState(
+        chipGroup: ChipGroup?,
+        statusIcon: ImageView?,
+        chevron: ImageView?,
+        animated: Boolean
+    ) {
+        chipGroup?.visibility = if (isExpanded) View.VISIBLE else View.GONE
+        // Status icon is always visible
+        statusIcon?.visibility = View.VISIBLE
+
+        // ic_chevron_down at 0° = pointing down (collapsed); 180° = pointing up (expanded)
+        val targetRotation = if (isExpanded) 180f else 0f
+        if (animated && chevron != null) {
+            ViewCompat.animate(chevron).rotation(targetRotation).setDuration(200).start()
+        } else {
+            chevron?.rotation = targetRotation
+        }
     }
 }

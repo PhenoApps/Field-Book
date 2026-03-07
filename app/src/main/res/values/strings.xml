@@ -1366,6 +1366,7 @@
     <string name="brapi_chip_edit">Edit</string>
     <string name="brapi_chip_logout">Logout</string>
     <string name="brapi_chip_authorize">Authorize</string>
+    <string name="brapi_chip_remove">Remove</string>
     <string name="brapi_auth_required_title">Authentication Required</string>
     <string name="brapi_auth_required_message">Your session has expired. Would you like to re-authorize?</string>
     <string name="brapi_logout_remove_message">Would you also like to remove \"%1$s\" from your server list?</string>
