@@ -4,6 +4,7 @@ import android.accounts.Account
 import android.accounts.AccountManager
 import android.app.AlertDialog
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
@@ -136,11 +137,19 @@ class BrapiServerCardPreference @JvmOverloads constructor(
             }
             hasToken -> {
                 statusIcon?.setImageResource(R.drawable.ic_tb_lock)
-                statusIcon?.colorFilter = PorterDuffColorFilter(Color.parseColor("#2196F3"), PorterDuff.Mode.SRC_IN)
+                statusIcon?.colorFilter = PorterDuffColorFilter(Color.parseColor("#454545"), PorterDuff.Mode.SRC_IN)
             }
             else -> {
                 statusIcon?.setImageResource(R.drawable.ic_tb_unlock)
-                statusIcon?.colorFilter = PorterDuffColorFilter(Color.parseColor("#F44336"), PorterDuff.Mode.SRC_IN)
+                statusIcon?.colorFilter = PorterDuffColorFilter(Color.parseColor("#454545"), PorterDuff.Mode.SRC_IN)
+            }
+        }
+
+        // ── Chip stroke color for available servers ──────────────────────
+        if (!isActive) {
+            val availableStroke = ColorStateList.valueOf(Color.parseColor("#454545"))
+            listOf(chipCompat, chipShare, chipEdit, chipAuth, chipRemove).forEach { chip ->
+                chip?.chipStrokeColor = availableStroke
             }
         }
 

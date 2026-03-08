@@ -1317,14 +1317,14 @@
         <item>Default Test Server</item>
     </string-array>
     <string-array name="community_servers_urls">
-        <item>https://www.cassavabase.org</item>
+        <item>https://cassavabase.org</item>
         <item>https://wheat-sandbox.triticeaetoolbox.org</item>
         <item>https://oat-sandbox.triticeaetoolbox.org</item>
         <item>https://barley-sandbox.triticeaetoolbox.org</item>
         <item>https://test-server.brapi.org</item>
     </string-array>
     <string-array name="community_servers_oidc_urls">
-        <item>https://www.cassavabase.org/.well-known/openid-configuration</item>
+        <item>https://cassavabase.org/.well-known/openid-configuration</item>
         <item>https://wheat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
         <item>https://oat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
         <item>https://barley-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
