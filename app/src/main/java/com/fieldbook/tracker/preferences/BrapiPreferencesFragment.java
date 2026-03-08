@@ -30,6 +30,7 @@ import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.CameraActivity;
 import com.fieldbook.tracker.activities.PreferencesActivity;
 import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity;
 import com.fieldbook.tracker.brapi.BrapiAuthenticator;
@@ -46,8 +47,6 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
 
 import android.widget.ImageView;
 

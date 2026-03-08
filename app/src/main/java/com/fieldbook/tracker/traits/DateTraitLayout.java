@@ -305,9 +305,7 @@ public class DateTraitLayout extends BaseTraitLayout {
             if (dateVal instanceof DateJsonCoder.DateJson) {
 
                 DateJsonCoder.DateJson dateJson = (DateJsonCoder.DateJson) dateVal;
-                // updating the date object will lead to add/minus buttons
-                // use the saved observation instead of preview date
-                // date = dateJson.getFormattedDate();
+                date = dateJson.getFormattedDate();
 
                 log();
 
@@ -449,6 +447,8 @@ public class DateTraitLayout extends BaseTraitLayout {
             setDateText(getMonthForInt(calendar.get(Calendar.MONTH)),
                     String.format(Locale.getDefault(), "%02d", calendar.get(Calendar.DAY_OF_MONTH)));
         }
+
+        updatePreviewDate(calendar);
     }
 
     private void setDateText(String dayOfYear) {

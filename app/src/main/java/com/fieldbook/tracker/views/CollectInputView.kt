@@ -6,9 +6,11 @@ import android.util.AttributeSet
 import android.widget.EditText
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.database.models.ObservationModel
+import com.fieldbook.tracker.preferences.PreferenceKeys
 
 /**
  * View that contains the default fb edit text and the repeated values view feature.
@@ -27,12 +29,19 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
 
     val repeatView: RepeatedValuesView
 
+    private val timestampTextView: TextView
+
     init {
 
         inflate(context, R.layout.view_collect_input, this)
 
         originalEditText = findViewById(R.id.view_collect_input_edit_text)
         repeatView = findViewById(R.id.view_collect_input_repeat_view)
+        timestampTextView = findViewById(R.id.view_collect_input_timestamp_tv)
+
+        timestampTextView.setOnClickListener {
+            (context as? CollectActivity)?.showObservationMetadataDialog()
+        }
     }
 
     /**
@@ -50,6 +59,8 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
             text = ""
             markObservationEdited()
         }
+
+        updateTimestampDisplay(null)
     }
 
     fun prepareObservationsExistMode(models: List<ObservationModel>) {
@@ -59,6 +70,38 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
         repeatView.prepareModeNonEmpty()
 
         markObservationSaved()
+
+        updateTimestampDisplay(models.maxByOrNull { it.rep.toInt() }?.observation_time_stamp)
+    }
+
+    /**
+     * Re-fetches the current observation from the activity and refreshes the timestamp display.
+     * Pass [null] as observation value guard: only shows the timestamp if the observation has
+     * a non-empty value (hides for new empty reps).
+     */
+    fun refreshTimestamp() {
+        val obs = (context as? CollectActivity)?.getCurrentObservation()
+        val timestamp = if (obs != null && obs.value.isNotEmpty()) obs.observation_time_stamp else null
+        updateTimestampDisplay(timestamp)
+    }
+
+    /**
+     * Shows a small timestamp label below the input when the preference is enabled.
+     * Hides the label when [timestamp] is null/empty or the preference is disabled.
+     */
+    fun updateTimestampDisplay(timestamp: String?) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val show = prefs.getBoolean(PreferenceKeys.SHOW_OBSERVATION_TIMESTAMP, false)
+        when {
+            !show -> timestampTextView.visibility = GONE
+            timestamp.isNullOrEmpty() -> timestampTextView.visibility = INVISIBLE
+            else -> {
+                // Trim to "yyyy-MM-dd HH:mm:ss" by taking the first 19 characters
+                val display = if (timestamp.length >= 19) timestamp.substring(0, 19) else timestamp
+                timestampTextView.text = display
+                timestampTextView.visibility = VISIBLE
+            }
+        }
     }
 
     fun initialize(models: List<ObservationModel>) {

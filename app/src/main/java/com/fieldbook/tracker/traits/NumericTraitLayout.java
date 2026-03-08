@@ -247,10 +247,13 @@ public class NumericTraitLayout extends BaseTraitLayout {
                 if (view.getId() == R.id.k16) {        // Backspace Key Pressed
                     triggerTts(backspaceTts);
                     final int length = curText.length();
-                    if (length > 0) {
+                    if (length > 1) {
                         value = curText.substring(0, length - 1);
                         getCollectInputView().setText(value);
                         updateObservation(getCurrentTrait(), value);
+                    } else {
+                        getCollectInputView().setText("");
+                        removeTrait(getCurrentTrait());
                     }
                 } else if (numberButtons.containsKey(view.getId())) {
                     value = curText + numberButtons.get(view.getId()).getText().toString();
