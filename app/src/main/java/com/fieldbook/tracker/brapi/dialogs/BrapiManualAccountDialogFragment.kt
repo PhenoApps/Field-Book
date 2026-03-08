@@ -20,7 +20,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.activities.ScannerActivity
 import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity
 import com.fieldbook.tracker.brapi.BrapiAuthenticator
 import com.fieldbook.tracker.objects.BrAPIConfig
@@ -30,8 +29,7 @@ import com.fieldbook.tracker.utilities.JsonUtil
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.gson.Gson
-import com.google.zxing.integration.android.IntentIntegrator
-import com.google.zxing.integration.android.IntentResult
+import com.fieldbook.tracker.activities.CameraActivity
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -94,7 +92,6 @@ class BrapiManualAccountDialogFragment : DialogFragment() {
     private lateinit var oidcFlowSpinner: AutoCompleteTextView
     private lateinit var versionSpinner: AutoCompleteTextView
 
-    private var mlkitEnabled = false
     private var isEditMode = false
 
     /** True when the OIDC URL was set by the user (directly or via scan), suppressing auto-derive. */
@@ -106,9 +103,6 @@ class BrapiManualAccountDialogFragment : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         authResponse = arguments?.getParcelable(ARG_AUTH_RESPONSE)
         isEditMode = arguments?.getBoolean(ARG_EDIT_MODE, false) == true
-        mlkitEnabled = androidx.preference.PreferenceManager
-            .getDefaultSharedPreferences(requireContext())
-            .getBoolean(PreferenceKeys.MLKIT_PREFERENCE_KEY, false)
 
         val view = LayoutInflater.from(requireContext())
             .inflate(R.layout.dialog_brapi_manual_account, null)
@@ -260,15 +254,9 @@ class BrapiManualAccountDialogFragment : DialogFragment() {
     }
 
     private fun startScan(requestCode: Int) {
-        if (mlkitEnabled) {
-            with(ScannerActivity) { requireActivity().requestCameraAndStartScanner(requestCode, null, null, null) }
-        } else {
-            IntentIntegrator(requireActivity())
-                .setPrompt(getString(R.string.barcode_scanner_text))
-                .setBeepEnabled(true)
-                .setRequestCode(requestCode)
-                .initiateScan()
-        }
+        val intent = Intent(requireContext(), CameraActivity::class.java)
+        intent.putExtra(CameraActivity.EXTRA_MODE, CameraActivity.MODE_BARCODE)
+        startActivityForResult(intent, requestCode)
     }
 
     /**
@@ -397,12 +385,7 @@ class BrapiManualAccountDialogFragment : DialogFragment() {
     }
 
     private fun extractScanned(data: Intent?): String? {
-        return if (mlkitEnabled) {
-            data?.getStringExtra("barcode")
-        } else {
-            val result: IntentResult? = IntentIntegrator.parseActivityResult(Activity.RESULT_OK, data)
-            result?.contents
-        }
+        return data?.getStringExtra(CameraActivity.EXTRA_BARCODE)
     }
 
     private fun applyConfig(config: BrAPIConfig) {

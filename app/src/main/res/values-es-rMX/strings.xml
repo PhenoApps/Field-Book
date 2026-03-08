@@ -1026,7 +1026,6 @@
     <string name="preferences_brapi_barcode_config_share">Compartir ajustes actuales</string>
     <string name="preferences_brapi_barcode_config_dialog_title">Configuración de BrAPI Escaneable</string>
     <string name="qr_code_share_choose_action_title">Elegir Acción</string>
-    <string name="menu_action_brapi_pref_title">Autorizar BrAPI</string>
     <string name="act_brapi_auth_http_warning_title">Advertencia HTTP</string>
     <string name="act_brapi_auth_http_warning_message">Ha introducido una url de http. No hay garantía de que esta conexión sea segura.</string>
     <string name="brapi_base_url">URL base</string>
@@ -1061,10 +1060,7 @@
     <string name="preferences_appearance_collect_labelval_customize_description">Mostrar valores o etiquetas de categorias en la pantalla de captura</string>
     <string name="preferences_appearance_collect_labelval_customize_value">Valor</string>
     <string name="preferences_appearance_collect_labelval_customize_label">Etiqueta</string>
-    <string name="preferences_brapi_servers_title">Servidores Comunitarios</string>
-    <string name="preferences_brapi_server_barcode">Escanear código de barras del servidor</string>
     <string name="preferences_brapi_server_scan_error">Error al Escanear</string>
-    <string name="preferences_brapi_server_add">Enviar un servidor</string>
     <!-- Brapi Server Info -->
     <string name="brapi_server_info_pref">Verificar Compatibilidad</string>
     <string name="brapi_server_info_pref_summary">Ver las llamadas BrAPI y la información del servidor</string>
@@ -1085,35 +1081,6 @@
     <string name="brapi_server_info_call">Llamar</string>
     <string name="brapi_server_info_server">Servidor</string>
     <string name="brapi_server_info_field_book">Field Book</string>
-    <!-- Community Servers -->
-    <string-array name="community_servers_names">
-        <item>CassavaBase</item>
-        <item>T3/Wheat</item>
-        <item>T3/Oat</item>
-        <item>T3/Barley</item>
-        <item>Servidor de Prueba por Defecto</item>
-    </string-array>
-    <string-array name="community_servers_urls">
-        <item>https://www.cassavabase.org</item>
-        <item>https://wheat-sandbox.triticeaetoolbox.org</item>
-        <item>https://oat-sandbox.triticeaetoolbox.org</item>
-        <item>https://barley-sandbox.triticeaetoolbox.org</item>
-        <item>https://test-server.brapi.org</item>
-    </string-array>
-    <string-array name="community_servers_oidc_urls">
-        <item>https://www.cassavabase.org/.well-known/openid-configuration</item>
-        <item>https://wheat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
-        <item>https://oat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
-        <item>https://barley-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
-        <item>https://test-server.brapi.org/.well-known/openid-configuration</item>
-    </string-array>
-    <string-array name="community_servers_grant_types">
-        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
-        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
-        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
-        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
-        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
-    </string-array>
     <!-- Authorization -->
     <string name="brapi_save_authorize">Autorizar</string>
     <string name="brapi_display_name">Mostrar Nombre</string>

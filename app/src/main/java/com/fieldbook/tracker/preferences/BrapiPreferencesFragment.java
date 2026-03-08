@@ -15,9 +15,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.WindowMetrics;
 import android.widget.Toast;
 
@@ -64,14 +61,6 @@ import kotlin.Unit;
 
 /**
  * Multi-account BrAPI preferences screen.
- *
- * Displays:
- *  - Enable BrAPI checkbox
- *  - Add Account preference
- *  - Advanced Settings preference (navigates to BrapiAdvancedPreferencesFragment)
- *  - Active Server category (one BrapiServerCardPreference for the connected account)
- *  - Available Servers category (one BrapiServerCardPreference per additional account)
- *
  * Accounts are stored in Android AccountManager with type "org.phenoapps.brapi".
  * The active account URL is persisted in BRAPI_BASE_URL SharedPreference.
  */
@@ -94,7 +83,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
     private Context context;
     private PreferenceCategory activeServerCategory;
     private PreferenceCategory availableServersCategory;
-    private boolean mlkitEnabled;
 
     // Tracks which account triggered the auth flow for re-auth
     private Account pendingAuthAccount = null;
@@ -111,10 +99,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.preferences_brapi, rootKey);
-
-        mlkitEnabled = androidx.preference.PreferenceManager
-                .getDefaultSharedPreferences(requireContext())
-                .getBoolean(PreferenceKeys.MLKIT_PREFERENCE_KEY, false);
 
         CheckBoxPreference brapiEnabledPref = findPreference(PreferenceKeys.BRAPI_ENABLED);
         if (brapiEnabledPref != null) {
@@ -152,8 +136,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
                 (key, result) -> refreshServerCards()
         );
 
-        setupToolbar();
-        setHasOptionsMenu(true);
     }
 
     @Override
@@ -452,16 +434,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
     // ─── Barcode scanning ───────────────────────────────────────────────────────
 
     private void startBarcodeScan(int requestCode) {
-        if (mlkitEnabled) {
-            com.fieldbook.tracker.activities.ScannerActivity.Companion.requestCameraAndStartScanner(
-                    getActivity(), requestCode, null, null, null);
-        } else {
-            new IntentIntegrator(getActivity())
-                    .setPrompt(getString(R.string.barcode_scanner_text))
-                    .setBeepEnabled(true)
-                    .setRequestCode(requestCode)
-                    .initiateScan();
-        }
+        Intent intent = new Intent(requireActivity(), CameraActivity.class);
+        intent.putExtra(CameraActivity.EXTRA_MODE, CameraActivity.MODE_BARCODE);
+        startActivityForResult(intent, requestCode);
     }
 
     @Override
@@ -470,13 +445,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
         if (resultCode != RESULT_OK) return;
 
         if (requestCode == REQUEST_BARCODE_SCAN_CONFIG) {
-            String scanned;
-            if (mlkitEnabled) {
-                scanned = data.getStringExtra("barcode");
-            } else {
-                IntentResult result = IntentIntegrator.parseActivityResult(resultCode, data);
-                scanned = result != null ? result.getContents() : null;
-            }
+            String scanned = data.getStringExtra(CameraActivity.EXTRA_BARCODE);
             if (scanned != null) {
                 BrAPIConfig config = null;
                 if (JsonUtil.Companion.isJsonValid(scanned)) {
@@ -535,71 +504,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
             if (availableServersCategory != null) availableServersCategory.setVisible(false);
         }
 
-        // Update toolbar auth menu item visibility
-        if (mMenu != null) {
-            MenuItem authItem = mMenu.findItem(R.id.action_menu_brapi_auto_configure);
-            if (authItem != null) authItem.setVisible(brapiEnabled);
-        }
     }
 
     // ─── Toolbar ────────────────────────────────────────────────────────────────
-
-    private Menu mMenu;
-
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        menu.clear();
-        inflater.inflate(R.menu.menu_brapi_pref, menu);
-        mMenu = menu;
-        boolean brapiEnabled = preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false);
-        MenuItem authItem = menu.findItem(R.id.action_menu_brapi_auto_configure);
-        if (authItem != null) authItem.setVisible(brapiEnabled);
-        MenuItem brapiPrefAuthItem = menu.findItem(R.id.action_menu_brapi_pref_auth);
-        if (brapiPrefAuthItem != null) brapiPrefAuthItem.setVisible(false); // auth is now per-card
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_menu_brapi_auto_configure) {
-            showCommunityServerListDialog();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    private void showCommunityServerListDialog() {
-        String[] serverNames = getResources().getStringArray(R.array.community_servers_names);
-        String[] serverUrls = getResources().getStringArray(R.array.community_servers_urls);
-        String[] serverOidcUrls = getResources().getStringArray(R.array.community_servers_oidc_urls);
-        String[] serverGrantTypes = getResources().getStringArray(R.array.community_servers_grant_types);
-
-        String[] extendedNames = new String[serverNames.length + 1];
-        System.arraycopy(serverNames, 0, extendedNames, 0, serverNames.length);
-        extendedNames[serverNames.length] = getString(R.string.preferences_brapi_server_add);
-
-        new AlertDialog.Builder(context, R.style.AppAlertDialog)
-                .setTitle(R.string.preferences_brapi_servers_title)
-                .setItems(extendedNames, (dialog, which) -> {
-                    if (which == serverNames.length) {
-                        Intent browserIntent = new Intent(Intent.ACTION_VIEW,
-                                Uri.parse("https://github.com/PhenoApps/Field-Book/issues/new?assignees=&labels=enhancement,feature+request&template=feature_request.md&title=[REQUEST]"));
-                        startActivity(browserIntent);
-                    } else {
-                        // Pre-fill a new account dialog with community server info
-                        BrAPIConfig config = new BrAPIConfig();
-                        config.setUrl(serverUrls[which]);
-                        config.setName(serverNames[which]);
-                        config.setOidcUrl(serverOidcUrls[which]);
-                        config.setAuthFlow(serverGrantTypes[which]);
-                        BrapiManualAccountDialogFragment frag =
-                                BrapiManualAccountDialogFragment.Companion.newInstance(null, false, config, false);
-                        frag.show(getParentFragmentManager(), BrapiManualAccountDialogFragment.TAG);
-                    }
-                })
-                .setNegativeButton(android.R.string.cancel, null)
-                .create().show();
-    }
 
     private void setupToolbar() {
         Activity act = getActivity();
