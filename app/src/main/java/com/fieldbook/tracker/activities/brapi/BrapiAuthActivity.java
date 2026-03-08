@@ -47,7 +47,7 @@ import kotlin.jvm.functions.Function2;
 public class BrapiAuthActivity extends ThemedActivity {
 
     //first number that came to Pete's head --IRRI hackathon '25
-    public static int END_SESSION_REQUEST_CODE = 456;
+    public static final int END_SESSION_REQUEST_CODE = 456;
 
     public static String REDIRECT_URI = "fieldbook://app/auth";
 
@@ -151,10 +151,6 @@ public class BrapiAuthActivity extends ThemedActivity {
     }
 
     public void authorizeBrAPI(SharedPreferences sharedPreferences, Context context) {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(PreferenceKeys.BRAPI_TOKEN, null);
-        editor.apply();
-
         // Prefer per-account config from Intent extras; fall back to SharedPreferences
         Intent extras = getIntent();
         String flow = extras != null && extras.hasExtra(EXTRA_OIDC_FLOW)
@@ -260,10 +256,6 @@ public class BrapiAuthActivity extends ThemedActivity {
     }
 
     public void authorizeBrAPI_OLD(SharedPreferences sharedPreferences, Context context) {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(PreferenceKeys.BRAPI_TOKEN, null);
-        editor.apply();
-
         try {
             String url = sharedPreferences.getString(PreferenceKeys.BRAPI_BASE_URL, "") + "/brapi/authorize?display_name=Field Book&return_url=fieldbook://";
             try {
@@ -296,11 +288,6 @@ public class BrapiAuthActivity extends ThemedActivity {
     }
 
     private void authSuccess(String accessToken, @Nullable String idToken) {
-
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putString(PreferenceKeys.BRAPI_TOKEN, accessToken);
-        editor.putString(PreferenceKeys.BRAPI_ID_TOKEN, idToken).apply();
-        editor.apply();
 
         // Prefer server URL from Intent extras (set by BrapiManualAccountDialogFragment)
         String serverUrl = getIntent() != null && getIntent().hasExtra(EXTRA_SERVER_URL)

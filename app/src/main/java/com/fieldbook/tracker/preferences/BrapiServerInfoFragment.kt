@@ -20,6 +20,20 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class BrapiServerInfoFragment : Fragment() {
 
+    companion object {
+        /**
+         * Creates an instance targeting a specific server URL for the compatibility check.
+         * The URL is read by [BrapiServerInfoViewModel] via SavedStateHandle, so the global
+         * active-server preference is never mutated for this check.
+         */
+        fun newInstance(serverUrl: String): BrapiServerInfoFragment =
+            BrapiServerInfoFragment().apply {
+                arguments = Bundle().apply {
+                    putString(BrapiServerInfoViewModel.ARG_SERVER_URL, serverUrl)
+                }
+            }
+    }
+
     private val viewModel: BrapiServerInfoViewModel by viewModels()
 
     override fun onCreateView(

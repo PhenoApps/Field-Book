@@ -24,6 +24,7 @@ import com.fieldbook.tracker.activities.ScannerActivity
 import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity
 import com.fieldbook.tracker.brapi.BrapiAuthenticator
 import com.fieldbook.tracker.objects.BrAPIConfig
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.BrapiAccountHelper
 import com.fieldbook.tracker.utilities.JsonUtil
 import com.google.android.material.textfield.TextInputEditText
@@ -31,8 +32,12 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.gson.Gson
 import com.google.zxing.integration.android.IntentIntegrator
 import com.google.zxing.integration.android.IntentResult
+import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Dialog for manually entering a new BrAPI server configuration.
@@ -45,10 +50,12 @@ class BrapiManualAccountDialogFragment : DialogFragment() {
 
     companion object {
         const val TAG = "BrapiManualAccountDialog"
+        const val REQUEST_KEY_EDIT_SAVED = "brapi_edit_account_saved"
 
         private const val ARG_AUTH_RESPONSE = "auth_response"
         private const val ARG_START_SCAN = "start_scan"
         private const val ARG_PREFILL_CONFIG = "prefill_config"
+        private const val ARG_EDIT_MODE = "edit_mode"
 
         private const val REQUEST_SCAN_BASE_URL = 201
         private const val REQUEST_SCAN_OIDC_URL = 202
@@ -58,12 +65,14 @@ class BrapiManualAccountDialogFragment : DialogFragment() {
         fun newInstance(
             authResponse: AccountAuthenticatorResponse? = null,
             startScan: Boolean = false,
-            prefillConfig: BrAPIConfig? = null
+            prefillConfig: BrAPIConfig? = null,
+            editMode: Boolean = false
         ): BrapiManualAccountDialogFragment {
             return BrapiManualAccountDialogFragment().apply {
                 arguments = Bundle().apply {
                     putParcelable(ARG_AUTH_RESPONSE, authResponse)
                     putBoolean(ARG_START_SCAN, startScan)
+                    putBoolean(ARG_EDIT_MODE, editMode)
                     if (prefillConfig != null) {
                         putString(ARG_PREFILL_CONFIG, Gson().toJson(prefillConfig))
                     }
@@ -86,6 +95,7 @@ class BrapiManualAccountDialogFragment : DialogFragment() {
     private lateinit var versionSpinner: AutoCompleteTextView
 
     private var mlkitEnabled = false
+    private var isEditMode = false
 
     /** True when the OIDC URL was set by the user (directly or via scan), suppressing auto-derive. */
     private var oidcUrlExplicitlySet = false
@@ -95,6 +105,10 @@ class BrapiManualAccountDialogFragment : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         authResponse = arguments?.getParcelable(ARG_AUTH_RESPONSE)
+        isEditMode = arguments?.getBoolean(ARG_EDIT_MODE, false) == true
+        mlkitEnabled = androidx.preference.PreferenceManager
+            .getDefaultSharedPreferences(requireContext())
+            .getBoolean(PreferenceKeys.MLKIT_PREFERENCE_KEY, false)
 
         val view = LayoutInflater.from(requireContext())
             .inflate(R.layout.dialog_brapi_manual_account, null)
@@ -212,13 +226,17 @@ class BrapiManualAccountDialogFragment : DialogFragment() {
         }
 
         val dialog = AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
-            .setTitle(R.string.brapi_add_account_title)
+            .setTitle(if (isEditMode) R.string.brapi_edit_account_title else R.string.brapi_add_account_title)
             .setView(view)
             .create()
 
         // Wire embedded buttons
-        view.findViewById<View>(R.id.brapi_btn_authorize).setOnClickListener {
-            onAuthorize(dialog)
+        val authorizeBtn = view.findViewById<android.widget.Button>(R.id.brapi_btn_authorize)
+        if (isEditMode) {
+            authorizeBtn.setText(R.string.dialog_save)
+            authorizeBtn.setOnClickListener { onSaveEdit(dialog) }
+        } else {
+            authorizeBtn.setOnClickListener { onAuthorize(dialog) }
         }
         view.findViewById<View>(R.id.brapi_btn_cancel).setOnClickListener {
             onCancelled()
@@ -230,10 +248,6 @@ class BrapiManualAccountDialogFragment : DialogFragment() {
         }
 
         return dialog
-    }
-
-    override fun onStart() {
-        super.onStart()
     }
 
     override fun onResume() {
@@ -255,6 +269,39 @@ class BrapiManualAccountDialogFragment : DialogFragment() {
                 .setRequestCode(requestCode)
                 .initiateScan()
         }
+    }
+
+    /**
+     * Edit-mode save: persists config changes to AccountManager without launching re-auth.
+     * Notifies the parent fragment via FragmentResult so it can refresh the server cards.
+     */
+    private fun onSaveEdit(dialog: AlertDialog) {
+        val url = accountHelper.normalizeUrl(urlEdit.text?.toString()?.trim() ?: "")
+        if (url.isEmpty() || url == "https://") {
+            Toast.makeText(requireContext(), R.string.brapi_base_url, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val displayName = displayNameEdit.text?.toString()?.trim()
+            ?.takeIf { it.isNotEmpty() } ?: url
+        val oidcFlow = oidcFlowSpinner.text?.toString() ?: ""
+        val oidcUrl = oidcUrlEdit.text?.toString()?.trim() ?: ""
+        val oidcClientId = oidcClientIdEdit.text?.toString()?.trim() ?: ""
+        val oidcScope = oidcScopeEdit.text?.toString()?.trim() ?: ""
+        val brapiVersion = versionSpinner.text?.toString() ?: "V2"
+
+        accountHelper.addAccountConfig(
+            serverUrl = url,
+            displayName = displayName,
+            oidcUrl = oidcUrl,
+            oidcFlow = oidcFlow,
+            oidcClientId = oidcClientId,
+            oidcScope = oidcScope,
+            brapiVersion = brapiVersion
+        )
+
+        parentFragmentManager.setFragmentResult(REQUEST_KEY_EDIT_SAVED, Bundle.EMPTY)
+        dialog.dismiss()
     }
 
     private fun onAuthorize(dialog: AlertDialog) {
@@ -402,33 +449,33 @@ class BrapiManualAccountDialogFragment : DialogFragment() {
     }
 
     /**
-     * Fetches the server's display name from the BrAPI v2 /serverinfo endpoint on a background
-     * thread. Falls back to the URL hostname if the request fails or returns no name.
+     * Fetches the server's display name from the BrAPI v2 /serverinfo endpoint.
+     * Falls back to the URL hostname if the request fails or returns no name.
      */
     private fun fetchDisplayName(baseUrl: String) {
-        Thread {
-            val serverName = try {
-                val serverinfoUrl = baseUrl.trimEnd('/') + "/brapi/v2/serverinfo"
-                val conn = java.net.URL(serverinfoUrl).openConnection() as java.net.HttpURLConnection
-                conn.connectTimeout = 5000
-                conn.readTimeout = 5000
-                if (conn.responseCode == 200) {
-                    val body = conn.inputStream.bufferedReader().readText()
-                    org.json.JSONObject(body)
-                        .optJSONObject("result")
-                        ?.optString("serverName")
-                        ?.takeIf { it.isNotEmpty() }
-                } else null
-            } catch (e: Exception) { null }
+        lifecycleScope.launch {
+            val serverName = withContext(Dispatchers.IO) {
+                try {
+                    val serverinfoUrl = baseUrl.trimEnd('/') + "/brapi/v2/serverinfo"
+                    val conn = java.net.URL(serverinfoUrl).openConnection() as java.net.HttpURLConnection
+                    conn.connectTimeout = 5000
+                    conn.readTimeout = 5000
+                    if (conn.responseCode == 200) {
+                        val body = conn.inputStream.bufferedReader().readText()
+                        org.json.JSONObject(body)
+                            .optJSONObject("result")
+                            ?.optString("serverName")
+                            ?.takeIf { it.isNotEmpty() }
+                    } else null
+                } catch (e: Exception) { null }
+            }
 
             val displayText = serverName
                 ?: try { java.net.URL(baseUrl).host } catch (e: Exception) { "" }
 
-            activity?.runOnUiThread {
-                if (isAdded && displayText.isNotEmpty()) {
-                    displayNameEdit.setText(displayText)
-                }
+            if (isAdded && displayText.isNotEmpty()) {
+                displayNameEdit.setText(displayText)
             }
-        }.start()
+        }
     }
 }

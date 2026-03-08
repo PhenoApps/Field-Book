@@ -12,6 +12,7 @@ import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.ApiError;
+import com.fieldbook.tracker.utilities.BrapiAccountHelper;
 import com.fieldbook.tracker.brapi.ApiErrorCode;
 import com.fieldbook.tracker.brapi.BrapiControllerResponse;
 import com.fieldbook.tracker.brapi.model.BrapiObservationLevel;
@@ -45,10 +46,9 @@ public interface BrAPIService {
 
     // Helper functions for brapi configurations
     static Boolean isLoggedIn(Context context) {
-
-        String token = getPreferences(context).getString(PreferenceKeys.BRAPI_TOKEN, "");
-
-        return token != null && token != "";
+        SharedPreferences prefs = getPreferences(context);
+        BrapiAccountHelper helper = new BrapiAccountHelper(context, prefs);
+        return helper.hasActiveAccount();
     }
 
     static Boolean hasValidBaseUrl(Context context) {

@@ -38,7 +38,7 @@ import eu.wewox.lazytable.lazyTablePinConfiguration
 
 @Composable
 fun ServerCallsTable(calls: List<ServiceComparison>) {
-    val headerBackgroundColor = AppTheme.colors.primaryDark
+    val headerBackgroundColor = AppTheme.colors.primary
     val cellBorderColor = AppTheme.colors.dataVisualization.dataGrid.tableBorder
     val cellTextStyle = AppTheme.typography.bodyStyle
 

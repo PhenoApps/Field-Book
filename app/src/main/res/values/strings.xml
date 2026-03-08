@@ -1345,6 +1345,7 @@
 
     <!-- Multi-account management -->
     <string name="brapi_add_account_title">Add Account</string>
+    <string name="brapi_edit_account_title">Edit Account</string>
     <string name="brapi_add_account_manual_entry">Manual Entry</string>
     <string name="brapi_add_account_scan_config">Scan Configuration Code</string>
     <string name="brapi_card_enable">Enable</string>
@@ -1376,7 +1377,7 @@
     <string name="brapi_section_active_server">Active Server</string>
     <string name="brapi_section_available_servers">Available Servers</string>
     <string name="brapi_add_account">Add Account</string>
-    <string name="brapi_advanced_settings">Transfer Settings</string>
+    <string name="brapi_advanced_settings">Transmission Settings</string>
     <string name="menu_overflow">More options</string>
     <string name="brapi_auth_btn">Log In to Site</string>
     <string name="brapi_auth_success">BrAPI Authorization Successful</string>

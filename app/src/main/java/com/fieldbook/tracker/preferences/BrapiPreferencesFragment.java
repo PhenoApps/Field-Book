@@ -103,9 +103,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
     // Tracks whether to remove the account after logout completes
     private boolean pendingRemoveAfterLogout = false;
 
-    // Saves the active server URL before a temporary compatibility-check sync, so it can be restored on resume
-    private String compatCheckPreviousUrl = null;
-
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
@@ -149,6 +146,13 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
         activeServerCategory = findPreference("brapi_active_server_category");
         availableServersCategory = findPreference("brapi_available_servers_category");
 
+        // Refresh cards when an account edit is saved from BrapiManualAccountDialogFragment
+        getParentFragmentManager().setFragmentResultListener(
+                BrapiManualAccountDialogFragment.REQUEST_KEY_EDIT_SAVED,
+                this,
+                (key, result) -> refreshServerCards()
+        );
+
         setupToolbar();
         setHasOptionsMenu(true);
     }
@@ -157,10 +161,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
     public void onResume() {
         super.onResume();
         setupToolbar();
-        if (compatCheckPreviousUrl != null) {
-            preferences.edit().putString(PreferenceKeys.BRAPI_BASE_URL, compatCheckPreviousUrl).apply();
-            compatCheckPreviousUrl = null;
-        }
         boolean brapiEnabled = preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false);
         updateServerSectionsVisibility(brapiEnabled);
         refreshServerCards();
@@ -174,8 +174,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
         activeServerCategory.removeAll();
         availableServersCategory.removeAll();
 
-        String activeUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "") != null
-                ? preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "") : "";
+        String activeUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
 
         List<Account> accounts = accountHelper.getAllAccounts();
         boolean hasActive = false;
@@ -200,7 +199,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
             activeServerCategory.setVisible(hasActive);
         }
         if (availableServersCategory != null) {
-            availableServersCategory.setVisible(!accounts.isEmpty());
+            availableServersCategory.setVisible(availableServersCategory.getPreferenceCount() > 0);
         }
     }
 
@@ -244,7 +243,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
                 })
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
-        return null;
+        return Unit.INSTANCE;
     }
 
     private void doLogout(Account account) {
@@ -295,7 +294,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
         // Invalidate cached field/trait data so the new server's data is loaded fresh
         BrapiFilterCache.Companion.delete(context, true);
         refreshServerCards();
-        return null;
+        return Unit.INSTANCE;
     }
 
     private @NotNull Unit authorizeAccount(Account account) {
@@ -316,7 +315,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
         authIntent.putExtra(BrapiAuthActivity.EXTRA_OIDC_SCOPE,
                 am.getUserData(account, BrapiAuthenticator.KEY_OIDC_SCOPE));
         startActivityForResult(authIntent, AUTH_REQUEST_CODE);
-        return null;
+        return Unit.INSTANCE;
     }
 
     /**
@@ -345,30 +344,23 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
     }
 
     private @NotNull Unit checkServerCompatibility(Account account) {
-        // Temporarily sync this account's prefs so BrAPIServiceFactory targets the right server.
-        // Save the current active URL so onResume can restore it without switching the active server.
         AccountManager am = AccountManager.get(context);
         String serverUrl = am.getUserData(account, BrapiAuthenticator.KEY_SERVER_URL);
-        String currentActiveUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
-
-        if (serverUrl != null && !serverUrl.equals(currentActiveUrl)) {
-            compatCheckPreviousUrl = currentActiveUrl;
-            syncActiveAccountPrefs(account);
-        }
+        if (serverUrl == null) serverUrl = account.name;
 
         FragmentActivity act = getActivity();
         if (act != null) {
             if (Utils.isConnected(act)) {
                 act.getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.prefs_container, new BrapiServerInfoFragment())
+                        .replace(R.id.prefs_container, BrapiServerInfoFragment.Companion.newInstance(serverUrl))
                         .addToBackStack(null)
                         .commit();
             } else {
                 Toast.makeText(act, R.string.device_offline_warning, Toast.LENGTH_SHORT).show();
             }
         }
-        return null;
+        return Unit.INSTANCE;
     }
 
     private @NotNull Unit shareAccountSettings(Account account) {
@@ -395,7 +387,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
         } catch (Exception e) {
             Toast.makeText(context, R.string.preferences_brapi_server_scan_error, Toast.LENGTH_SHORT).show();
         }
-        return null;
+        return Unit.INSTANCE;
     }
 
     private @NotNull Unit editAccount(Account account) {
@@ -410,10 +402,10 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
         config.setScope(am.getUserData(account, BrapiAuthenticator.KEY_OIDC_SCOPE));
 
         BrapiManualAccountDialogFragment frag = BrapiManualAccountDialogFragment.Companion.newInstance(
-                null, false, config
+                null, false, config, true
         );
         frag.show(getParentFragmentManager(), BrapiManualAccountDialogFragment.TAG);
-        return null;
+        return Unit.INSTANCE;
     }
 
     private @NotNull Unit removeAccount(Account account) {
@@ -435,7 +427,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
                 })
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
-        return null;
+        return Unit.INSTANCE;
     }
 
     // ─── Add Account ────────────────────────────────────────────────────────────
@@ -446,7 +438,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
             @Override
             public void onManualEntry(android.accounts.AccountAuthenticatorResponse authResponse) {
                 BrapiManualAccountDialogFragment frag =
-                        BrapiManualAccountDialogFragment.Companion.newInstance(null, false, null);
+                        BrapiManualAccountDialogFragment.Companion.newInstance(null, false, null, false);
                 frag.show(getParentFragmentManager(), BrapiManualAccountDialogFragment.TAG);
             }
 
@@ -494,7 +486,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
                     } catch (Exception e) { /* fall through */ }
                 }
                 BrapiManualAccountDialogFragment frag =
-                        BrapiManualAccountDialogFragment.Companion.newInstance(null, false, config);
+                        BrapiManualAccountDialogFragment.Companion.newInstance(null, false, config, false);
                 frag.show(getParentFragmentManager(), BrapiManualAccountDialogFragment.TAG);
             }
         } else if (requestCode == AUTH_REQUEST_CODE) {
@@ -602,7 +594,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
                         config.setOidcUrl(serverOidcUrls[which]);
                         config.setAuthFlow(serverGrantTypes[which]);
                         BrapiManualAccountDialogFragment frag =
-                                BrapiManualAccountDialogFragment.Companion.newInstance(null, false, config);
+                                BrapiManualAccountDialogFragment.Companion.newInstance(null, false, config, false);
                         frag.show(getParentFragmentManager(), BrapiManualAccountDialogFragment.TAG);
                     }
                 })

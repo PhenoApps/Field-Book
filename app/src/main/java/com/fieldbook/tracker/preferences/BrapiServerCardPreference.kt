@@ -9,6 +9,7 @@ import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -67,6 +68,8 @@ class BrapiServerCardPreference @JvmOverloads constructor(
             Preference::class.java.getDeclaredField("mAllowDividerBelow")
                 .also { it.isAccessible = true }
                 .setBoolean(this, false)
+        }.onFailure {
+            Log.w("BrapiServerCard", "Could not suppress divider via reflection; dividers may appear between cards", it)
         }
     }
 
