@@ -75,6 +75,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
     protected var selected: Int = 0
     protected var state: State = State.Spectral
+    private var displayedFrameCount: Int = 0
 
     protected val hapticFeedback by lazy {
         controller.getVibrator()
@@ -185,13 +186,11 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
                 if (firstLoad) {
 
-                    val index = spectralDataList.size - 1
-
-                    selected = index
+                    selected = spectralDataList.size - 1
 
                     listOf(recycler, colorRecycler).forEachIndexed { i, r ->
                         r?.postDelayed({
-                            r.scrollToPosition(index)
+                            r.scrollToPosition(0)
                         }, i*50L)
                     }
                 }
@@ -265,7 +264,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
             listOf(recycler, colorRecycler).forEachIndexed { i, r ->
                 r?.postDelayed({
-                    r.scrollToPosition(index)
+                    r.scrollToPosition(0)
                 }, i*50L)
             }
 
@@ -452,12 +451,14 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
     }
 
     private fun submitLinesList(frames: List<SpectralFrame>) {
-        val lineData = frames
+        displayedFrameCount = frames.size
+        val reversedFrames = frames.reversed()
+        val lineData = reversedFrames
             .mapIndexed { index, data ->
                 if (data.traitId.isEmpty()) LineGraphSelectableAdapter.LineColorData.placeholder()
                 else LineGraphSelectableAdapter.LineColorData(
                     index,
-                    if (index == selected) getColor(R.attr.fb_graph_item_selected_color) else getColor(
+                    if (frames.size - 1 - index == selected) getColor(R.attr.fb_graph_item_selected_color) else getColor(
                         R.attr.fb_graph_item_unselected_color
                     ),
                     data.timestamp
@@ -502,11 +503,9 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
             if (submitPlaceholder) {
 
-                val index = frames.size - 1
-
                 listOf(recycler, colorRecycler).forEachIndexed { i, r ->
                     r?.postDelayed({
-                        r.scrollToPosition(index)
+                        r.scrollToPosition(0)
                     }, i*50L)
                 }
             }
@@ -805,7 +804,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
     }
 
     override fun onItemSelected(position: Int, onSelect: (() -> Unit)?) {
-        selected = position
+        selected = displayedFrameCount - 1 - position
         submitList()
     }
 
@@ -819,11 +818,12 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
             builder.setTitle(R.string.spectral_trait_insert_note_message)
             val input = EditText(context)
             builder.setView(input)
-            input.setText(spectralDataList[position]?.comment ?: "")
+            val mappedPosition = displayedFrameCount - 1 - position
+            input.setText(spectralDataList[mappedPosition]?.comment ?: "")
             builder.setPositiveButton(android.R.string.ok) { _, _ ->
                 input.text.toString()
                 runCatching {
-                    val fact = spectralDataList[position]
+                    val fact = spectralDataList[mappedPosition]
                     fact?.let {
                         it.comment = input.text.toString()
                         updateDatabaseNote(it)
@@ -913,8 +913,11 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
     protected open fun spectralUiMode() {
         state = State.Spectral
-        lineChart?.visibility = VISIBLE
-        recycler?.visibility = VISIBLE
+        // Only show the chart/recycler if data is already loaded; submit list will show them
+        // once the async load completes, preventing a brief "no chart data available" flash.
+        val hasData = spectralDataList.isNotEmpty()
+        lineChart?.visibility = if (hasData) VISIBLE else GONE
+        recycler?.visibility = if (hasData) VISIBLE else GONE
         colorRecycler?.visibility = GONE
     }
 

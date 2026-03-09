@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="@dimen/fb_trait_line_graph_selector_size"
     android:background="@drawable/cell"
     android:layout_marginTop="8dp"
     android:layout_marginBottom="8dp"
@@ -54,8 +54,8 @@
 
     <View
         android:background="@drawable/cell"
-        android:layout_width="@dimen/fb_trait_line_graph_selector_size"
-        android:layout_height="@dimen/fb_trait_line_graph_selector_size"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:id="@+id/line_selector_color"
         tools:backgroundTint="?fb_color_primary"
         app:layout_constraintTop_toTopOf="parent"

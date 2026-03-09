@@ -624,7 +624,7 @@ class GreenSeekerTraitLayout : BaseTraitLayout, LineGraphSelectableAdapter.Liste
             submitList()
 
             recyclerView?.postDelayed({
-                recyclerView?.scrollToPosition(index)
+                recyclerView?.scrollToPosition(0)
             }, 500L)
 
             soundFeedback.playCelebrate()

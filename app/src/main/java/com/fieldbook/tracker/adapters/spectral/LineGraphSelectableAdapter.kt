@@ -57,9 +57,15 @@ class LineGraphSelectableAdapter(private val listener: Listener? = null) : ListA
                 holder.progressBar.visibility = View.GONE
                 holder.imageView.visibility = View.GONE
                 holder.colorView.visibility = View.VISIBLE
-                // Extract time portion from timestamp (format: "MM-dd-yy HH:mm:ss")
+                // Extract time portion from timestamp (format: "yyyy-MM-dd HH:mm:ss.SSSZZZZZ")
                 val timeLabel = if (timestamp.contains(" ")) {
-                    timestamp.split(" ").getOrNull(1) ?: (position + 1).toString()
+                    // Split by space and get the time part, then extract only HH:mm:ss
+                    val timePart = timestamp.split(" ").getOrNull(1) ?: ""
+                    if (timePart.contains(".")) {
+                        timePart.substringBefore(".")
+                    } else {
+                        timePart
+                    }.ifEmpty { (position + 1).toString() }
                 } else {
                     (position + 1).toString()
                 }
