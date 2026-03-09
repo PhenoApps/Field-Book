@@ -11,7 +11,6 @@ import android.os.Build
 import android.util.AttributeSet
 import android.util.Log
 import android.util.TypedValue
-import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import androidx.core.content.edit
@@ -19,7 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.adapters.spectral.LineGraphSelectableAdapter
-import com.fieldbook.tracker.database.basicTimeFormatter
+import com.fieldbook.tracker.database.internalTimeFormatter
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.database.models.spectral.SpectralFact
 import com.fieldbook.tracker.database.saver.SpectralSaver
@@ -516,7 +515,7 @@ class GreenSeekerTraitLayout : BaseTraitLayout, LineGraphSelectableAdapter.Liste
         val frame = SpectralFrame(
             color = average,
             timestamp = OffsetDateTime.now().format(
-                basicTimeFormatter
+                internalTimeFormatter
             ),
             entryId = entryId,
             traitId = traitId
@@ -577,7 +576,7 @@ class GreenSeekerTraitLayout : BaseTraitLayout, LineGraphSelectableAdapter.Liste
         val person = (context as? CollectActivity)?.person
         val location = (context as? CollectActivity)?.locationByPreferences
         val comment = null
-        val createdAt = OffsetDateTime.now().format(basicTimeFormatter)
+        val createdAt = OffsetDateTime.now().format(internalTimeFormatter)
 
         scope.launch(Dispatchers.IO) {
 

@@ -27,7 +27,7 @@ import com.ISCSDK.ISCNIRScanSDK.SharedPreferencesKeys
 import com.ISCSDK.ISCNIRScanSDK.getStringPref
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.database.basicTimeFormatter
+import com.fieldbook.tracker.database.internalTimeFormatter
 import com.fieldbook.tracker.devices.spectrometers.Device
 import com.fieldbook.tracker.devices.spectrometers.SpectralFrame
 import com.fieldbook.tracker.devices.spectrometers.Spectrometer
@@ -43,6 +43,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.threeten.bp.OffsetDateTime
 import java.util.UUID
+import kotlin.jvm.java
 
 class InnoSpectraTraitLayout : SpectralTraitLayout {
 
@@ -286,7 +287,7 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
 
         val values = frame.rawData.joinToString(" ") { it.toString() }
         val wavelengths = frame.data.joinToString(" ") { it.toString() }
-        val timestamp = OffsetDateTime.now().format(basicTimeFormatter)
+        val timestamp = OffsetDateTime.now().format(internalTimeFormatter)
 
         // Build SpectralFrame
         val spectralFrame = SpectralFrame(
@@ -735,7 +736,7 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
         val person = (context as? CollectActivity)?.person
         val location = (context as? CollectActivity)?.locationByPreferences
         val comment: String? = null
-        val createdAt = OffsetDateTime.now().format(basicTimeFormatter)
+        val createdAt = OffsetDateTime.now().format(internalTimeFormatter)
 
         background.launch {
 
