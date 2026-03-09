@@ -41,9 +41,9 @@ data class ObservationUnitModel(val map: Row) {
 
             val geoJson = Gson().fromJson(geo_coordinates, GeoJsonUtil.GeoJSON::class.java)
 
-            location.latitude = geoJson.geometry.coordinates[1].toDouble()
+            location.latitude = geoJson.geometry.coordinates[1]
 
-            location.longitude = geoJson.geometry.coordinates[0].toDouble()
+            location.longitude = geoJson.geometry.coordinates[0]
 
         } catch (e: Exception) {  //could be a NPE, number format exception, index out of bounds or json syntax exception,
 
@@ -68,14 +68,13 @@ data class ObservationUnitModel(val map: Row) {
 
                         failed = false
 
-                    } catch (e: NumberFormatException) {
+                    } catch (_: NumberFormatException) {
 
                         failed = true
 
                     }
                 }
             }
-
         }
 
         return if (!failed) location

@@ -159,8 +159,63 @@ Saved values are colored red and displayed in normal font.
 
 #### Bottom toolbar
 
-The bottom toolbar contains three buttons for data input:
+The bottom toolbar contains three buttons:
 
-- <img class="icon" src="_static/icons/collect/barcode-scan.png"> enters data by scanning a barcode.
-- <img class="icon" src="_static/icons/collect/not-applicable.png"> enters NA for when a phenotype is not available.
+- <img class="icon" src="_static/icons/collect/star-four-points-circle-outline.png"> navigates to entries via barcode, records data values from barcodes, or attaches media.
+- <img class="icon" src="_static/icons/collect/not-applicable.png"> enters NA if a phenotype is not available.
 - <img class="icon" src="_static/icons/collect/delete-outline.png"> deletes the observation.
+
+##### Barcode scanning
+
+When a barcode is first scanned, users will be presented with different options for how the barcode should be interpreted.
+Barcodes can be used to 1) move to a specific entry, 2) record the value as a phenotype, 3) record the value as a phenotype if the barcode is not an entry ID, or 4) be presented with an option every time for how to interpret the barcode.
+The selected option can be changed in the Behavior settings.
+
+<figure class="image">
+  <div style="display:flex;gap:8px;align-items:flex-start;">
+    <img class="screenshot" src="_static/images/collect/bottom_toolbar/scanning_barcode_example.png" alt="Camera scanning a barcode" width="350px;height:auto;">
+    <img class="screenshot" src="_static/images/collect/bottom_toolbar/barcode_scanning_options_dialog.png" alt="Barcode scanning options dialog" width="350px;height:auto;">
+  </div>
+  <figcaption class="screenshot-caption"><i>Scanning a barcode and setting an option.</i></figcaption>
+</figure>
+
+By default, a detected barcode will automatically be processed which can limit how a user might interact with it.
+To disable automatic processing, disable the `Always use detected barcode` setting in the Behavior settings.
+When this option is disabled, users must click the detection box to use the barcode for data input or navigation.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/collect/bottom_toolbar/prioritize_barcode_setting.png" alt="Setting to prioritise barcode input" width="350px">
+  <figcaption class="screenshot-caption"><i>Setting to prioritize barcode input when scanning</i></figcaption>
+</figure>
+
+##### Attaching media
+
+Each trait can optionally attach a photo, video, or audio file to an individual phenotypic observation.
+Each observation can have a single attached media for each type.
+
+<figure class="image">
+  <div style="display:flex;gap:8px;align-items:flex-start;">
+    <img class="screenshot" src="_static/images/collect/bottom_toolbar/height_trait_details.png" alt="Height trait example" style="width:350px;height:auto;">
+    <img class="screenshot" src="_static/images/collect/bottom_toolbar/attach_media_example_parameters.png" alt="Attach media parameters dialog showing optional metadata fields" style="width:350px;height:auto;">
+  </div>
+  <figcaption class="screenshot-caption"><i>Setting attached media types for individual traits</i></figcaption>
+</figure>
+
+To attach media, tap the <img class="icon" src="_static/icons/collect/star-four-points-circle-outline.png"> icon to open the media capture screen.
+Media files are linked to a specific observation, so an observation must exist before attaching media.
+If multiple attach media types have been selected, a toggle at the bottom of the media capture screen can be used to navigate between them.
+
+<figure class="image">
+  <div style="display:flex;gap:8px;align-items:flex-start;">
+    <img class="screenshot" src="_static/images/collect/bottom_toolbar/attach_media_carrots_example.png" alt="Attach carrot photo" width="350px;height:auto;">
+    <img class="screenshot" src="_static/images/collect/bottom_toolbar/main_collect_screen.png" alt="Collect screen" style="width:350px;height:auto;">
+  </div>
+  <figcaption class="screenshot-caption"><i>Attach media</i></figcaption>
+</figure>
+
+Long-pressing the <img class="icon" src="_static/icons/collect/star-four-points-circle-outline.png"> icon in Collect, or pressing the <img class="icon" src="_static/icons/collect/multimedia.png"> button on the attached media screen will open the media viewer where attached media can be viewed or deleted.
+
+<figure class="image">
+  <img class="screenshot" src="_static/images/collect/bottom_toolbar/attach_media_view_carrots.png" alt="Media viewer showing attached media" width="350px">
+  <figcaption class="screenshot-caption"><i>Media viewer with delete options and media controls</i></figcaption>
+</figure>

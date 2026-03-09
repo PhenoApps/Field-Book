@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.ui.theme.colors
 
+import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 
@@ -31,6 +32,10 @@ data class AppColors(
     val stepper: StepperColors,
 
     val crop: CropColors,
+
+    val toggle: ToggleColors,
+
+    val topAppBarColors: TopAppBarColors
 )
 
 @Immutable
@@ -159,4 +164,12 @@ data class SurfaceColors(
     val preferencesHorizontalBreak: Color,
     val iconTint: Color,
     val iconFillTint: Color,
+)
+
+@Immutable
+data class ToggleColors(
+    val track: Color,
+    val indicator: Color,
+    val icon: Color,
+    val iconUnselected: Color,
 )

@@ -322,6 +322,7 @@
     <string name="traits_format_boolean">booleano</string>
     <string name="traits_format_text">Testo</string>
     <string name="traits_format_photo">Foto</string>
+    <string name="traits_format_camera">Fotocamera</string>
     <string name="traits_format_audio">Audio</string>
     <string name="traits_format_multicategorical">Multi cat</string>
     <string name="traits_format_location">Posizione</string>
@@ -363,6 +364,8 @@
     <string name="trait_parameter_decimal_places">Posizioni Decimali</string>
     <string name="trait_parameter_decimal_places_hint">Numero di decimali (-1 per illimitati, 0 per interi)</string>
     <string name="trait_parameter_decimal_places_error">Il valore deve essere compreso tra -1 e 10</string>
+    <string name="traits_attach_media_photo_label">Foto</string>
+    <string name="traits_attach_media_audio_label">Audio</string>
     <string name="traits_create_warning_name_blank">Il nome del carattere non può essere vuoto</string>
     <string name="traits_create_warning_duplicate">Il carattere esiste già</string>
     <string name="traits_create_warning_numeric_required">Predefinito, minimo e massimo sono richiesti e deve essere numerico</string>
@@ -647,7 +650,6 @@
     <string name="menu_collect_repeated_values_indicator">Mostra il numero di valori ripetuti.</string>
     <string name="dialog_multi_measure_delete_no_observations">Nessuna osservazione esistente.</string>
     <string name="dialog_multi_measure_delete_title">Osservazioni</string>
-    <string name="dialog_multi_measure_confirm_delete_title">Tutte le osservazioni per questo carattere verranno eliminate definitivamente.</string>
     <string name="dialog_multi_measure_delete">Elimina</string>
     <string name="dialog_multi_measure_select_all">Seleziona tutti</string>
     <!--- GeoNav -->
@@ -1309,7 +1311,8 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="trait_camera_connect_content_description">Avvia una connessione del dispositivo.</string>
     <string name="trait_camera_preview_content_description">Questo visualizza l\'anteprima del scherno della fotocamera.</string>
     <string name="trait_camera_capture_content_description">Cattura una foto</string>
-    <string name="delete_local_photo">Elimina Foto</string>
+    <!-- Video recording messages -->
+    <!-- Audio pause not supported message -->
     <string name="trait_system_photo_settings_title">Impostazioni delle Foto di Sistema</string>
     <string name="trait_photos_no_settings">Questo carattere non ha impostazioni.</string>
     <string name="view_trait_photo_settings_preview_title">Anteprima</string>
@@ -1420,8 +1423,6 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="pref_alpha_brapi_import_title">Nuova UI Di Importazione BrAPI</string>
     <string name="opening_brapi_no_network_error">La rete deve essere abilitata per utilizzare le funzionalità BrAPI.</string>
     <string name="act_brapi_list_filter_reset_selection_message">Questo cancellerà la lista in esecuzione degli elementi selezionati.</string>
-    <string name="pref_alpha_media_keycode_events_summary">Abilita per utilizzare i comandi multimediali per interazioni app</string>
-    <string name="pref_alpha_media_keycode_events_title">Abilita Comandi Media</string>
     <string name="pref_geonav_distance_threshold_summary">GeoNav si ferma automaticamente quando la distanza da tutti le parcelle supera questo valore in chilometri.</string>
     <string name="pref_geonav_distance_threshold_title">Controllo Di Prossimità</string>
     <string name="activity_collect_proximity_warning">GeoNav Fermo, al di fuori delle coordinate</string>
@@ -1439,8 +1440,6 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="failed_to_fetch_observation_levels">Recupero dei livelli di osservazione fallito</string>
     <string name="traits_sort_default">Impostazioni predefinite</string>
     <string name="traits_crop_image_parameter">Ritaglia</string>
-    <string name="dialog_crop_title">Imposta Regione Di Ritaglio</string>
-    <string name="dialog_crop_message">Definire una regione di ritaglio che sarà applicata a tutte le immagini future per questo carattere.</string>
     <string name="view_trait_photo_settings_crop">Imposta Regione Ritaglio</string>
     <string name="crop_image_clip_data_label">Dati della regione di retaglio del Field Book</string>
     <string name="quick_goto_swap_content_description">attiva/disattiva tipo d\'input</string>
@@ -1535,6 +1534,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="device_settings_dialog_unknown_name">Dispositivo Bluetooth Sconosciuto</string>
     <string name="device_settings_dialog_title">Impostazioni Dispositivo Bluetooth</string>
     <string name="no_data_captured">Nessun dato catturato.</string>
+    <string name="delete">Elimina</string>
     <string name="failed_to_find_file_name">Impossibile recuperare il nome del file.</string>
     <string name="act_brapi_export_starting">Avvio esportazione</string>
     <string name="act_brapi_export_success">Esportazione eseguita con successo</string>
@@ -1606,4 +1606,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="there_are_unuploaded_observations_or_images_do_you_want_to_upload_them_before_downloading">Ci sono osservazioni o immagini non caricate. Vuoi caricarle prima di scaricare?</string>
     <string name="upload_first">Caricare</string>
     <string name="download_anyway">Scarica</string>
+    <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
+    <!-- Preference: Attach media barcode prioritize -->
+    <string name="edit">Modifica</string>
 </resources>

@@ -80,6 +80,8 @@
     <string name="traits_create_true">Dhugaa</string>
     <string name="traits_create_false">Soba</string>
     <string name="traits_create_categories_text">Wantooota kanaan adda baasi a /</string>
+    <string name="traits_attach_media_photo_label">Footoo</string>
+    <string name="traits_attach_media_audio_label">Sagalee</string>
     <string name="traits_create_warning_name_blank">Maqaan amalaa duwaa hin ta\'u</string>
     <string name="traits_create_warning_duplicate">Amalichi jira</string>
     <string name="traits_create_warning_numeric_required">Xiqaani fi guddaan lakkoofsa ta\'uu qaba</string>
@@ -215,6 +217,8 @@
     <string name="act_brapi_filter_import">kara biraatii galchuu</string>
     <string name="act_brapi_filter_clear">Balleessi</string>
     <!-- base camera strings -->
+    <!-- Video recording messages -->
+    <!-- Audio pause not supported message -->
     <string name="view_trait_photo_settings_camera_custom">Akkuma jirutti</string>
     <!-- usb camera trait -->
     <!-- gopro -->
@@ -225,4 +229,6 @@
     <!--  NearbyShare  -->
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="save">Olkaa\'i</string>
+    <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
+    <!-- Preference: Attach media barcode prioritize -->
 </resources>

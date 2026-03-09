@@ -15,10 +15,13 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.charts.HorizontalBarChartHelper
 import com.fieldbook.tracker.charts.HistogramChartHelper
 import com.fieldbook.tracker.charts.PieChartHelper
+import com.fieldbook.tracker.traits.formats.feature.ChartableData
+import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.HorizontalBarChart
 import com.github.mikephil.charting.charts.PieChart
+import com.mikepenz.fastadapter.adapters.ItemAdapter.items
 import java.math.BigDecimal
 
 class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : RecyclerView.Adapter<FieldDetailAdapter.ViewHolder>() {
@@ -57,7 +60,8 @@ class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : Recy
             chartTextSize
         )
 
-        val nonChartableFormats = setOf("audio", "gnss", "gopro", "location", "photo", "text", "usb camera")
+        val nonChartableFormats = Formats.entries.filter { it.getTraitFormatDefinition() !is ChartableData }.map { it.getDatabaseName() }.toTypedArray()
+        //val nonChartableFormats = setOf("audio", "gnss", "gopro", "location", "photo", "text", "usb camera")
 
         holder.collapsibleHeader.setOnClickListener {
             toggleCollapse(holder)

@@ -88,6 +88,14 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
         pager.adapter = RepeatedValuesPagerAdapter(context)
 
+        pager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
+            override fun onPageSelected(position: Int) {
+                (context as? CollectActivity)?.getCollectInputView()?.refreshTimestamp()
+            }
+            override fun onPageScrollStateChanged(state: Int) {}
+        })
+
         if (!SharedPreferenceUtils.isHighContrastTheme(prefs)) {
             pager.setPageTransformer(true, SimplePageTransformer())
         }

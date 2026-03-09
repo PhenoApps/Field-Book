@@ -171,6 +171,16 @@
       "details": "degrees",
       "isVisible": true,
       "realPosition": 15
+    },
+    {
+      "name": "video",
+      "alias": "video",
+      "synonyms": ["video"],
+      "format": "video",
+      "defaultValue": "",
+      "details": "",
+      "isVisible": true,
+      "realPosition": 16
     }
   ]
 }

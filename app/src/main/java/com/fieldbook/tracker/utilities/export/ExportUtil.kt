@@ -55,6 +55,7 @@ class ExportUtil @Inject constructor(
         private const val PERMISSIONS_REQUEST_EXPORT_DATA = 9990
         private const val PERMISSIONS_REQUEST_TRAIT_DATA = 9950
         const val TAG = "ExportUtil"
+        private const val BUNDLE_MEDIA_WARNING_THRESHOLD = 100
     }
 
     private var fieldIds: List<Int> = listOf()
@@ -245,18 +246,34 @@ class ExportUtil @Inject constructor(
 
             val repeatedMeasuresEnabled = preferences.getBoolean(PreferenceKeys.REPEATED_VALUES_PREFERENCE_KEY, false)
 
-            //show a warning if table is selected and repeated measures is enabled
-            if (checkTable.isChecked && repeatedMeasuresEnabled) {
+            fun proceedWithExport() {
+                //show a warning if table is selected and repeated measures is enabled
+                if (checkTable.isChecked && repeatedMeasuresEnabled) {
+                    AlertDialog.Builder(context, R.style.AppAlertDialog)
+                        .setTitle(R.string.export_util_repeated_measures_table_warning_title)
+                        .setMessage(R.string.export_util_repeated_measures_table_warning_message)
+                        .setPositiveButton(android.R.string.ok) { _, _ ->
+                            onOkExportClicked()
+                        }
+                        .show()
+                } else onOkExportClicked()
+            }
 
-                AlertDialog.Builder(context, R.style.AppAlertDialog)
-                    .setTitle(R.string.export_util_repeated_measures_table_warning_title)
-                    .setMessage(R.string.export_util_repeated_measures_table_warning_message)
-                    .setPositiveButton(android.R.string.ok) { _, _ ->
-                        onOkExportClicked()
-                    }
-                    .show()
-
-            } else onOkExportClicked()
+            // show a warning if bundling is checked and media file count exceeds threshold
+            if (checkBundle.isChecked) {
+                val useActiveTraits = activeTraits?.isChecked == true
+                val mediaFileCount = countMediaFiles(fields, useActiveTraits)
+                if (mediaFileCount > BUNDLE_MEDIA_WARNING_THRESHOLD) {
+                    AlertDialog.Builder(context, R.style.AppAlertDialog)
+                        .setTitle(R.string.export_util_bundle_media_warning_title)
+                        .setMessage(context.getString(R.string.export_util_bundle_media_warning_message, mediaFileCount))
+                        .setPositiveButton(R.string.export_util_bundle_media_warning_continue) { _, _ ->
+                            proceedWithExport()
+                        }
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .show()
+                } else proceedWithExport()
+            } else proceedWithExport()
         }
     }
 
@@ -413,6 +430,29 @@ class ExportUtil @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun countMediaFiles(fields: List<FieldObject>, useActiveTraits: Boolean): Int {
+        val traits = database.allTraitObjects
+        val traitNames = if (useActiveTraits) {
+            traits.filter { it.visible }.map { FileUtil.sanitizeFileName(it.name) }
+        } else {
+            traits.map { FileUtil.sanitizeFileName(it.name) }
+        }
+
+        var count = 0
+        for (field in fields) {
+            val mediaDir = BaseDocumentTreeUtil.getFile(context, R.string.dir_plot_data, field.name)
+            if (mediaDir != null && mediaDir.exists() && mediaDir.isDirectory) {
+                mediaDir.listFiles().forEach { traitDir ->
+                    val traitDirName = traitDir.name ?: ""
+                    if (traitDir.isDirectory && traitNames.contains(traitDirName)) {
+                        count += traitDir.listFiles().count { it.isFile }
+                    }
+                }
+            }
+        }
+        return count
     }
 
     private fun handleBundledFiles(fieldId: Int) {

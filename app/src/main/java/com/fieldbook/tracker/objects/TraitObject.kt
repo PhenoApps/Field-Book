@@ -7,6 +7,7 @@ import com.fieldbook.tracker.database.models.AttributeDefinition
 import com.fieldbook.tracker.database.models.TraitAttributes
 import com.fieldbook.tracker.utilities.SynonymsUtil.deserializeSynonyms
 import com.fieldbook.tracker.utilities.SynonymsUtil.serializeSynonyms
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
 import java.util.*
@@ -108,6 +109,43 @@ class TraitObject {
         get() = attributeValues.getBoolean(TraitAttributes.ALLOW_OTHER)
         set(value) = attributeValues.setValue(TraitAttributes.ALLOW_OTHER, value.toString())
 
+    companion object {
+
+        fun fromJson(json: TraitJson, maxPosition: Int, originalFileName: String) = TraitObject().apply {
+            name = json.name
+            alias = json.alias ?: json.name
+            synonyms = json.synonyms.ifEmpty { listOf(name) }
+            format = json.format
+            defaultValue = json.defaultValue
+            details = json.details
+            visible = json.visible
+            realPosition = maxPosition + json.position
+            traitDataSource = originalFileName
+
+            json.attributes?.forEach { (key, value) ->
+                val primitive = value as? JsonPrimitive
+                val stringValue = primitive?.content ?: value.toString()
+                val def =
+                    TraitAttributes.byKey(key)
+                if (def != null) {
+                    setAttributeValue(def, stringValue)
+                }
+            }
+        }
+    }
+
+    var attachPhoto: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.MULTI_MEDIA_PHOTO)
+        set(value) = attributeValues.setValue(TraitAttributes.MULTI_MEDIA_PHOTO, value.toString())
+
+    var attachVideo: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.MULTI_MEDIA_VIDEO)
+        set(value) = attributeValues.setValue(TraitAttributes.MULTI_MEDIA_VIDEO, value.toString())
+
+    var attachAudio: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.MULTI_MEDIA_AUDIO)
+        set(value) = attributeValues.setValue(TraitAttributes.MULTI_MEDIA_AUDIO, value.toString())
+
     fun loadAttributeAndValues() {
         attributeValues.traitId = id
         attributeValues.load()
@@ -153,6 +191,9 @@ class TraitObject {
                 autoSwitchPlot == that.autoSwitchPlot &&
                 unit == that.unit &&
                 invalidValues == that.invalidValues &&
+                attachAudio == that.attachAudio &&
+                attachPhoto == that.attachPhoto &&
+                attachVideo == that.attachVideo &&
                 allowOther == that.allowOther
     }
 
@@ -163,7 +204,8 @@ class TraitObject {
             additionalInfo, observationLevelNames, closeKeyboardOnOpen, cropImage,
             saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms,
             maxDecimalPlaces, mathSymbolsEnabled, allowMulticat, repeatedMeasures,
-            autoSwitchPlot, unit, invalidValues, allowOther
+            autoSwitchPlot, unit, invalidValues, attachAudio, attachPhoto, attachVideo,
+            allowOther
         )
     }
 
@@ -198,6 +240,9 @@ class TraitObject {
         t.autoSwitchPlot = this.autoSwitchPlot
         t.unit = this.unit
         t.invalidValues = this.invalidValues
+        t.attachAudio = this.attachAudio
+        t.attachPhoto = this.attachPhoto
+        t.attachVideo = this.attachVideo
         t.allowOther = this.allowOther
 
         return t
@@ -238,7 +283,7 @@ class TraitObject {
         traitDataSource = cursor.getString(traitDataSourceIndex) ?: ""
         _synonyms = cursor.getString(synonymsIndex) ?: ""
 
-        // loadAttributeAndValues()
+        loadAttributeAndValues()
     }
 
     fun setAttributeValue(attribute: AttributeDefinition, value: String) {

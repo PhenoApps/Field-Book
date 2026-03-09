@@ -274,17 +274,21 @@ class NewTraitDialog(
     }
 
     private fun show() {
-        // a match will be found if format was not empty
-        // if match was found, showFormatParameters
+        if (initialTraitObject == null) {
+            showFormatLayouts(Formats.getMainFormats())
+        } else {
+            // a match will be found if format was not empty
+            // if match was found, showFormatParameters
+            val existingFormat = Formats.entries.firstOrNull {
+                initialTraitObject?.format == it.getDatabaseName()
+            }
 
-        // if no match found (empty format)
-        // copy certain trait properties (defined in repo.changeTraitFormat)
-        // or if initialTraitObject is null
-        // let the user select format first
-        Formats.entries.firstOrNull {
-            initialTraitObject?.format == it.getDatabaseName()
-        }?.let { showFormatParameters(it) }
-            ?: showFormatLayouts(Formats.getMainFormats())
+            // if no match found (empty format)
+            // copy certain trait properties (defined in repo.changeTraitFormat)
+            // and let the user select format first
+            if (existingFormat == null) showFormatLayouts(Formats.getMainFormats())
+            else showFormatParameters(existingFormat)
+        }
     }
 
     private fun getSelectedFormat(): Formats? =
