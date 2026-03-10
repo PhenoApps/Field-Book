@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,8 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fieldbook.tracker.R
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.semantics.Role
+import com.fieldbook.tracker.ui.theme.AppTheme
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.layout.offset
@@ -60,9 +59,9 @@ fun BottomToolbar(
     mediaCount: Int = 0,
     deleteValueButtonEnabled: Boolean = true,
 ) {
-    val bg = colorResource(id = R.color.main_primary)
+    val bg = AppTheme.colors.topAppBarColors.containerColor
 
-    val iconColor = colorResource(id = R.color.collect_bottom_toolbar_icon_color)
+    val iconColor = AppTheme.colors.topAppBarColors.actionIconContentColor
 
     Surface(
         color = bg,
@@ -173,7 +172,7 @@ fun bindBottomToolbar(
     deleteValueButtonEnabled: Boolean = true,
 ) {
     composeView.setContent {
-        MaterialTheme {
+        AppTheme {
             BottomToolbar(listener, isAudioRecording, isMediaEnabled, mediaCount, deleteValueButtonEnabled)
         }
     }
