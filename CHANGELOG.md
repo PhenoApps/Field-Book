@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Categorical traits now have an option that allows new categories to be defined during collection (https://github.com/PhenoApps/Field-Book/pull/1411)
 
 ### Changed
+- Disease severity scale is now created and managed within Field Book (https://github.com/PhenoApps/Field-Book/pull/1416)
 - Delete field dialog now includes an archive option (https://github.com/PhenoApps/Field-Book/pull/1413)
 
 ### Fixed
