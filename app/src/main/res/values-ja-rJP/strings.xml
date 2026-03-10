@@ -118,6 +118,8 @@
     <string name="traits_create_true">真</string>
     <string name="traits_create_false">偽</string>
     <string name="traits_create_categories_text">項目の区切りは「/」を使用</string>
+    <string name="traits_attach_media_photo_label">写真</string>
+    <string name="traits_attach_media_audio_label">音声</string>
     <string name="traits_create_warning_name_blank">形質名は空欄不可</string>
     <string name="traits_create_warning_duplicate">形質は既に存在</string>
     <string name="traits_create_warning_numeric_required">初期値、最小値、最大値は数値で入力</string>
@@ -402,6 +404,8 @@
     <string name="act_brapi_filter_import">インポート</string>
     <string name="act_brapi_filter_clear">消去</string>
     <!-- base camera strings -->
+    <!-- Video recording messages -->
+    <!-- Audio pause not supported message -->
     <string name="view_trait_photo_settings_camera_custom">初期値</string>
     <!-- usb camera trait -->
     <!-- gopro -->
@@ -413,8 +417,12 @@
     <!--  NearbyShare  -->
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="save">保存</string>
+    <string name="delete">削除</string>
     <string name="new_images">新しい画像</string>
     <string name="edited_images">編集した画像</string>
     <string name="synced_images">同期した画像</string>
     <string name="local">ローカル</string>
+    <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
+    <!-- Preference: Attach media barcode prioritize -->
+    <string name="edit">編集</string>
 </resources>

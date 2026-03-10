@@ -3,11 +3,16 @@ package com.fieldbook.tracker.traits.formats
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.traits.formats.coders.CategoricalJsonCoder
 import com.fieldbook.tracker.traits.formats.coders.StringCoder
+import com.fieldbook.tracker.traits.formats.feature.ChartableData
+import com.fieldbook.tracker.traits.formats.feature.DisplayValue
+import com.fieldbook.tracker.traits.formats.feature.Scannable
 import com.fieldbook.tracker.traits.formats.parameters.AutoSwitchPlotParameter
 import com.fieldbook.tracker.traits.formats.parameters.CategoriesParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
 import com.fieldbook.tracker.traits.formats.parameters.DisplayValueParameter
+import com.fieldbook.tracker.traits.formats.parameters.AllowOtherParameter
+import com.fieldbook.tracker.traits.formats.parameters.AttachMediaParameter
 import com.fieldbook.tracker.traits.formats.parameters.MultipleCategoriesParameter
 import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
@@ -30,12 +35,14 @@ class CategoricalFormat : TraitFormat(
     DetailsParameter(),
     CategoriesParameter(),
     MultipleCategoriesParameter(),
+    AllowOtherParameter(),
     DisplayValueParameter(),
     UnitParameter(),
     AutoSwitchPlotParameter(),
     RepeatedMeasureParameter(),
-    ResourceFileParameter()
+    ResourceFileParameter(),
+    AttachMediaParameter()
 ),
     StringCoder by CategoricalJsonCoder(),
     ValuePresenter by CategoricalValuePresenter(),
-    Scannable
+    Scannable, ChartableData, DisplayValue

@@ -45,7 +45,6 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     private AdapterCallback callback;
     private final FieldGroupController fieldGroupController;
     private OnFieldActionListener listener;
-    private String filterText = "";
     private final List<FieldObject> fullFieldList = new ArrayList<>();
     private final SharedPreferences preferences;
     private final boolean isArchivedFieldsActivity;
@@ -617,11 +616,15 @@ public class FieldAdapter extends ListAdapter<FieldAdapter.FieldViewItem, Recycl
     }
 
     public void setTextFilter(String filter) {
-        this.filterText = filter;
         List<FieldObject> filteredFields = new ArrayList<>(fullFieldList);
-        for (FieldObject field : fullFieldList) {
-            if (!filter.isEmpty() && !field.getName().toLowerCase().contains(filter.toLowerCase())) {
-                filteredFields.remove(field);
+        if (!filter.isEmpty()) {
+            for (FieldObject field : fullFieldList) {
+                String lowerFilter = filter.toLowerCase();
+                boolean matchesName = field.getName().toLowerCase().contains(lowerFilter);
+                boolean matchesAlias = field.getAlias().toLowerCase().contains(lowerFilter);
+                if (!matchesName && !matchesAlias) {
+                    filteredFields.remove(field);
+                }
             }
         }
         submitFieldsList(filteredFields);

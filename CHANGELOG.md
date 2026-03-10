@@ -8,10 +8,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Entry progress bar is now scrollable for navigation (https://github.com/PhenoApps/Field-Book/pull/1414)
+- Categorical traits now have an option that allows new categories to be defined during collection (https://github.com/PhenoApps/Field-Book/pull/1411)
 
 ### Changed
+- Delete field dialog now includes an archive option (https://github.com/PhenoApps/Field-Book/pull/1413)
 
 ### Fixed
+
+## [v7.1.2] - 2026-02-24
+
+### Added
+- External scanners can now be used on numeric and percent traits (https://github.com/PhenoApps/Field-Book/pull/1410)
+
+### Changed
+- Bundling more than 100 media items now warns users that it will slow down the app (https://github.com/PhenoApps/Field-Book/pull/1407)
+
+### Fixed
+- Both names and aliases now display in the field search results (https://github.com/PhenoApps/Field-Book/pull/1408)
+- BrAPI observation timestamps now update correctly when edited (https://github.com/PhenoApps/Field-Book/pull/1432)
+
+## [v7.1.1] - 2026-02-19
+
+### Fixed
+- Bug fixes and enhancements (https://github.com/PhenoApps/Field-Book/pull/1418)
+
+## [v7.1.0] - 2026-02-18
+
+### Added
+- Bottom toolbar in Collect can now be used for barcode navigation (https://github.com/PhenoApps/Field-Book/pull/1390)
+- Photos, videos, and audio files can now be attached to individual observations (https://github.com/PhenoApps/Field-Book/pull/1390)
+- Timestamp can now be optionally displayed under phenotypes in Collect (https://github.com/PhenoApps/Field-Book/pull/1409)
+- New video trait format (https://github.com/PhenoApps/Field-Book/pull/1390)
+
+### Changed
+- Nearest field finder now searches across all location data (https://github.com/PhenoApps/Field-Book/pull/1399)
+
+### Fixed
+- Camera previews no longer reload when navigating between entries (https://github.com/PhenoApps/Field-Book/pull/1405)
+- GeoNav popup no longer causes a crash when navigating (https://github.com/PhenoApps/Field-Book/pull/1415)
+- Correct value is now displayed for saved dates (https://github.com/PhenoApps/Field-Book/pull/1404)
 
 ## [v7.0.2] - 2026-02-10
 
@@ -872,3 +908,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v7.0.0]: https://github.com/PhenoApps/Field-Book/releases/tag/7.0.0
 [v7.0.1]: https://github.com/PhenoApps/Field-Book/releases/tag/7.0.1
 [v7.0.2]: https://github.com/PhenoApps/Field-Book/releases/tag/7.0.2
+
+[v7.1.0]: https://github.com/PhenoApps/Field-Book/releases/tag/7.1.0
+[v7.1.1]: https://github.com/PhenoApps/Field-Book/releases/tag/7.1.1
+[v7.1.2]: https://github.com/PhenoApps/Field-Book/releases/tag/7.1.2

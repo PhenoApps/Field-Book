@@ -117,6 +117,8 @@
     <string name="traits_create_true">صح</string>
     <string name="traits_create_false">خطأ</string>
     <string name="traits_create_categories_text">افصل العناصر باستخدام /</string>
+    <string name="traits_attach_media_photo_label">صورة</string>
+    <string name="traits_attach_media_audio_label">الصوت</string>
     <string name="traits_create_warning_name_blank">لا يمكن أن يكون اسم السمة فارغ</string>
     <string name="traits_create_warning_duplicate">السمة موجودة مسبقا</string>
     <string name="traits_create_warning_numeric_required">القيمة الافتراضية والدنيا والقصوى يجب أن تكون عددية</string>
@@ -399,6 +401,8 @@
     <string name="act_brapi_filter_import">إستيراد</string>
     <string name="act_brapi_filter_clear">إزالة</string>
     <!-- base camera strings -->
+    <!-- Video recording messages -->
+    <!-- Audio pause not supported message -->
     <string name="view_trait_photo_settings_camera_custom">افتراضي</string>
     <!-- usb camera trait -->
     <!-- gopro -->
@@ -410,8 +414,12 @@
     <!--  NearbyShare  -->
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="save">حفظ</string>
+    <string name="delete">حذف</string>
     <string name="new_images">صور جديدة</string>
     <string name="edited_images">الصور المعدلة</string>
     <string name="synced_images">الصور المتزامنة</string>
     <string name="local">محلي</string>
+    <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
+    <!-- Preference: Attach media barcode prioritize -->
+    <string name="edit">تعديل</string>
 </resources>

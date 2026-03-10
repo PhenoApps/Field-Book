@@ -83,6 +83,8 @@
     <string name="traits_create_true">Правильно</string>
     <string name="traits_create_false">Не правильно</string>
     <string name="traits_create_categories_text">Отделить элементы перечня наклонной чертой /</string>
+    <string name="traits_attach_media_photo_label">Фото</string>
+    <string name="traits_attach_media_audio_label">Звук</string>
     <string name="traits_create_warning_name_blank">Название признака не введено</string>
     <string name="traits_create_warning_duplicate">Название показателя уже существует</string>
     <string name="traits_create_warning_numeric_required">Значение по умолчанию, минимальное и максимальное должны быть числовыми</string>
@@ -219,6 +221,8 @@
     <string name="act_brapi_filter_import">Импорт</string>
     <string name="act_brapi_filter_clear">Удалить</string>
     <!-- base camera strings -->
+    <!-- Video recording messages -->
+    <!-- Audio pause not supported message -->
     <string name="view_trait_photo_settings_camera_custom">значение по умолчанию</string>
     <!-- usb camera trait -->
     <!-- gopro -->
@@ -229,4 +233,6 @@
     <!--  NearbyShare  -->
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="save">Сохранить</string>
+    <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
+    <!-- Preference: Attach media barcode prioritize -->
 </resources>

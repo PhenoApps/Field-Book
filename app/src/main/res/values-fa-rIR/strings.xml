@@ -94,10 +94,14 @@
     <!-- APP INTRO  -->
     <!-- TUTORIAL -->
     <!-- base camera strings -->
+    <!-- Video recording messages -->
+    <!-- Audio pause not supported message -->
     <!-- usb camera trait -->
     <!-- gopro -->
     <!-- canon camera strings -->
     <!-- spectral trait strings -->
     <!--  NearbyShare  -->
     <!-- Stop Watch Trait Button content descriptions-->
+    <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
+    <!-- Preference: Attach media barcode prioritize -->
 </resources>
