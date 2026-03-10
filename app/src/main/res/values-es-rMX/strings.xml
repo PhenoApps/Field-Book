@@ -473,6 +473,7 @@
     <string name="trait_detail_chip_transfer_images">Transferir imágenes</string>
     <string name="trait_detail_chip_invalid_value">Valores atipicos</string>
     <string name="trait_parameter_allow_multicat">Selección de Múltiples Categorías</string>
+    <string name="trait_other_button">Otro</string>
     <string name="trait_parameter_display_value">Mostrar Valor</string>
     <string name="trait_parameter_resource_file">Archivo de Recurso</string>
     <string name="trait_parameter_use_day_of_year">Usar Día del Año</string>
