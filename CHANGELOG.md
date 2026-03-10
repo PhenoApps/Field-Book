@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Entry progress bar is now scrollable for navigation (https://github.com/PhenoApps/Field-Book/pull/1414)
 - Categorical traits now have an option that allows new categories to be defined during collection (https://github.com/PhenoApps/Field-Book/pull/1411)
 
 ### Changed
