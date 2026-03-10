@@ -323,6 +323,7 @@
     <string name="traits_format_text">Testo</string>
     <string name="traits_format_photo">Foto</string>
     <string name="traits_format_camera">Fotocamera</string>
+    <string name="traits_format_video">Video</string>
     <string name="traits_format_audio">Audio</string>
     <string name="traits_format_multicategorical">Multi cat</string>
     <string name="traits_format_location">Posizione</string>
@@ -364,8 +365,10 @@
     <string name="trait_parameter_decimal_places">Posizioni Decimali</string>
     <string name="trait_parameter_decimal_places_hint">Numero di decimali (-1 per illimitati, 0 per interi)</string>
     <string name="trait_parameter_decimal_places_error">Il valore deve essere compreso tra -1 e 10</string>
+    <string name="traits_attach_media_title">Allega Media</string>
     <string name="traits_attach_media_photo_label">Foto</string>
     <string name="traits_attach_media_audio_label">Audio</string>
+    <string name="traits_attach_media_video_label">Video</string>
     <string name="traits_create_warning_name_blank">Il nome del carattere non può essere vuoto</string>
     <string name="traits_create_warning_duplicate">Il carattere esiste già</string>
     <string name="traits_create_warning_numeric_required">Predefinito, minimo e massimo sono richiesti e deve essere numerico</string>
@@ -470,6 +473,7 @@
     <string name="trait_detail_chip_transfer_images">Trasferire immagini</string>
     <string name="trait_detail_chip_invalid_value">Valori anomali</string>
     <string name="trait_parameter_allow_multicat">Selezione Categoria Multiple</string>
+    <string name="trait_other_button">Altro</string>
     <string name="trait_parameter_display_value">Mostra Valore</string>
     <string name="trait_parameter_resource_file">File di Risorsa</string>
     <string name="trait_parameter_use_day_of_year">Usa Giorno Dell\'Anno</string>
@@ -816,6 +820,8 @@
     <string name="preferences_appearance_range_progress_bar_description">Mostra la tua posizione corrente nel campo</string>
     <string name="preferences_appearance_traits_progress_bar">Barra di progresso dei caratteri</string>
     <string name="preferences_appearance_traits_progress_bar_description">Mostra se i caratteri attive hanno dati ed evidenzia il carattere corrente</string>
+    <string name="preferences_appearance_observation_timestamp">Timestamp dell\'osservazione</string>
+    <string name="preferences_appearance_observation_timestamp_description">Mostra il timestamp dell\'osservazione salvata sotto il valore</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamento</string>
     <string name="preferences_behavior_movement_title">Movimento</string>
@@ -1278,6 +1284,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="trait_camera_connect_content_description">Avvia una connessione del dispositivo.</string>
     <string name="trait_camera_preview_content_description">Questo visualizza l\'anteprima del scherno della fotocamera.</string>
     <string name="trait_camera_capture_content_description">Cattura una foto</string>
+    <string name="trait_camera_view_media_content_description">Visualizza media</string>
     <!-- Video recording messages -->
     <!-- Audio pause not supported message -->
     <string name="trait_system_photo_settings_title">Impostazioni delle Foto di Sistema</string>
@@ -1390,6 +1397,8 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="pref_alpha_brapi_import_title">Nuova UI Di Importazione BrAPI</string>
     <string name="opening_brapi_no_network_error">La rete deve essere abilitata per utilizzare le funzionalità BrAPI.</string>
     <string name="act_brapi_list_filter_reset_selection_message">Questo cancellerà la lista in esecuzione degli elementi selezionati.</string>
+    <string name="pref_experimental_generate_sample_data_title">Genera Campo di Esempio</string>
+    <string name="pref_experimental_generate_sample_data_confirm_title">Generare Campo di Esempio?</string>
     <string name="pref_geonav_distance_threshold_summary">GeoNav si ferma automaticamente quando la distanza da tutti le parcelle supera questo valore in chilometri.</string>
     <string name="pref_geonav_distance_threshold_title">Controllo Di Prossimità</string>
     <string name="activity_collect_proximity_warning">GeoNav Fermo, al di fuori delle coordinate</string>
@@ -1501,6 +1510,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="device_settings_dialog_unknown_name">Dispositivo Bluetooth Sconosciuto</string>
     <string name="device_settings_dialog_title">Impostazioni Dispositivo Bluetooth</string>
     <string name="no_data_captured">Nessun dato catturato.</string>
+    <string name="media_viewer">Visualizzatore Media</string>
     <string name="delete">Elimina</string>
     <string name="failed_to_find_file_name">Impossibile recuperare il nome del file.</string>
     <string name="act_brapi_export_starting">Avvio esportazione</string>
@@ -1573,6 +1583,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="there_are_unuploaded_observations_or_images_do_you_want_to_upload_them_before_downloading">Ci sono osservazioni o immagini non caricate. Vuoi caricarle prima di scaricare?</string>
     <string name="upload_first">Caricare</string>
     <string name="download_anyway">Scarica</string>
+    <string name="attach">Allega</string>
     <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
     <!-- Preference: Attach media barcode prioritize -->
     <string name="edit">Modifica</string>

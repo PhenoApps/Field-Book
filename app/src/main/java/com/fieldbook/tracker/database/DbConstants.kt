@@ -81,5 +81,5 @@ object ObservationVariableAttributeDetailsView {
     const val ATTACH_PHOTO = "attachPhoto"
     const val ATTACH_VIDEO = "attachVideo"
     const val ATTACH_AUDIO = "attachAudio"
-
+    const val ALLOW_OTHER = "allowOther"
 }

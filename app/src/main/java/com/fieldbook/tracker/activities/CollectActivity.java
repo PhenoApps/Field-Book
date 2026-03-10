@@ -50,10 +50,13 @@ import com.fieldbook.tracker.database.dao.spectral.DeviceDao;
 import com.fieldbook.tracker.database.dao.spectral.ProtocolDao;
 import com.fieldbook.tracker.database.dao.spectral.SpectralDao;
 import com.fieldbook.tracker.database.dao.spectral.UriDao;
+import com.fieldbook.tracker.database.factory.CollectViewModelFactory;
 import com.fieldbook.tracker.database.factory.SpectralViewModelFactory;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.database.repository.SpectralRepository;
+import com.fieldbook.tracker.database.repository.TraitRepository;
+import com.fieldbook.tracker.database.viewmodels.CollectViewModel;
 import com.fieldbook.tracker.database.viewmodels.SpectralViewModel;
 import com.fieldbook.tracker.devices.camera.UsbCameraApi;
 import com.fieldbook.tracker.devices.camera.GoProApi;
@@ -278,6 +281,10 @@ public class CollectActivity extends ThemedActivity
     @Inject
     FuzzySearch fuzzySearch;
 
+    @Inject
+    TraitRepository traitRepository;
+
+    private CollectViewModel collectViewModel;
     private SpectralViewModel spectralViewModel;
 
     //used to track rotation relative to device
@@ -392,6 +399,9 @@ public class CollectActivity extends ThemedActivity
 
         spectralViewModel = new SpectralViewModelFactory(new SpectralRepository(spectralDao, protocolDao, deviceDao, uriDao))
                 .create(SpectralViewModel.class);
+
+        collectViewModel = new CollectViewModelFactory(traitRepository)
+                .create(CollectViewModel.class);
     }
 
     @Override
@@ -3764,5 +3774,11 @@ public class CollectActivity extends ThemedActivity
         } catch (Exception e) {
             Log.w(TAG, "Invalid uri string: " + uriString, e);
         }
+    }
+
+    @NonNull
+    @Override
+    public CollectViewModel getViewModel() {
+        return collectViewModel;
     }
 }
