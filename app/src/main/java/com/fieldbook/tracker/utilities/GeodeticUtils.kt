@@ -305,7 +305,7 @@ class GeodeticUtils {
         fun parseGeoCoordinate(latLng: String?): Location? {
 
             val coords =
-                (if (latLng == null || latLng.isBlank()) ""
+                (if (latLng.isNullOrBlank()) ""
                 else latLng)
 
             val location = Location("search")
@@ -318,9 +318,9 @@ class GeodeticUtils {
 
                 val geoJson = Gson().fromJson(coords, GeoJsonUtil.GeoJSON::class.java)
 
-                location.latitude = geoJson.geometry.coordinates[1].toDouble()
+                location.latitude = geoJson.geometry.coordinates[1]
 
-                location.longitude = geoJson.geometry.coordinates[0].toDouble()
+                location.longitude = geoJson.geometry.coordinates[0]
 
                 geoJson.properties?.get("fix")?.let { fix ->
 

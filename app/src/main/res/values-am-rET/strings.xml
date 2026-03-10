@@ -83,6 +83,8 @@
     <string name="traits_create_true">እዉነት</string>
     <string name="traits_create_false">ዉሸት</string>
     <string name="traits_create_categories_text">ሁኔታዎችን በ አ ለይ</string>
+    <string name="traits_attach_media_photo_label">ፎቶ፤</string>
+    <string name="traits_attach_media_audio_label">ድምጽ፤</string>
     <string name="traits_create_warning_name_blank">ያጸባይ ስም ባዶ ልሆን አይችልም</string>
     <string name="traits_create_warning_duplicate">በፊት የነበራ ጸባይ</string>
     <string name="traits_create_warning_numeric_required">የነበረው ትንሹና ትልቁ ቁጥር ብቻ መሆን አለባቸው</string>
@@ -219,6 +221,8 @@
     <string name="act_brapi_filter_import">ማስገባት፤</string>
     <string name="act_brapi_filter_clear">ንጹህ አርገዉ enter የምለዉን ንካዉ፤</string>
     <!-- base camera strings -->
+    <!-- Video recording messages -->
+    <!-- Audio pause not supported message -->
     <string name="view_trait_photo_settings_camera_custom">እንደነበረ</string>
     <!-- usb camera trait -->
     <!-- gopro -->
@@ -229,4 +233,6 @@
     <!--  NearbyShare  -->
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="save">አስቀምጥ</string>
+    <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
+    <!-- Preference: Attach media barcode prioritize -->
 </resources>

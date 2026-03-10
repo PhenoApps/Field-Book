@@ -51,9 +51,23 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/view_collect_input_timestamp_tv"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/view_collect_input_repeat_view" />
+
+    <TextView
+        android:id="@+id/view_collect_input_timestamp_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/text_size_small"
+        android:textStyle="italic"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/act_collect_guideline_et_bottom"
+        tools:text="2024-01-15 10:30:00"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

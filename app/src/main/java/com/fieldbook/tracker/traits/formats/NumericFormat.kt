@@ -4,6 +4,9 @@ import android.content.Context
 import android.view.View
 import android.widget.TextView
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.traits.formats.feature.ChartableData
+import com.fieldbook.tracker.traits.formats.feature.DisplayValue
+import com.fieldbook.tracker.traits.formats.feature.Scannable
 import com.fieldbook.tracker.traits.formats.parameters.BaseFormatParameter
 import com.fieldbook.tracker.traits.formats.parameters.DecimalPlacesParameter
 import com.fieldbook.tracker.traits.formats.parameters.DefaultNumericParameter
@@ -13,6 +16,7 @@ import com.fieldbook.tracker.traits.formats.parameters.InvalidValueParameter
 import com.fieldbook.tracker.traits.formats.parameters.MathSymbolsParameter
 import com.fieldbook.tracker.traits.formats.parameters.MaximumParameter
 import com.fieldbook.tracker.traits.formats.parameters.MinimumParameter
+import com.fieldbook.tracker.traits.formats.parameters.AttachMediaParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
 import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
@@ -39,7 +43,8 @@ open class NumericFormat(
             DetailsParameter(),
             UnitParameter(),
             RepeatedMeasureParameter(),
-            ResourceFileParameter()
+            ResourceFileParameter(),
+            AttachMediaParameter()
         )
 ) : TraitFormat(
     format = format,
@@ -50,7 +55,7 @@ open class NumericFormat(
     iconDrawableResourceId = iconDrawableResourceId,
     stringNameAux = null,
     *parameters
-), Scannable {
+), DisplayValue, Scannable, ChartableData {
 
     override fun validate(
         context: Context,

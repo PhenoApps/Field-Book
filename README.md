@@ -27,6 +27,7 @@ Development of Field Book is possible because of the support received from the f
 - USAID [No. 7200AA‐19LE‐00005](https://ilci.cornell.edu/)
 - USDA NIFA SCRI [No. 2022-51181-38449](https://portal.nifa.usda.gov/lmd4/recent_awards)
 - USDA NIFA AG2PI [No. 2022-70412-38454](https://www.ag2pi.org/resources/ag2pi-funded-seed-grants/)
+- Gates Foundation
 
 ## ✨ Contributors
 This project follows the [all-contributors](https://allcontributors.org/) specification. Contributions of any kind are welcome!

@@ -31,12 +31,11 @@ import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceScreen;
 
 import com.fieldbook.tracker.R;
+import com.fieldbook.tracker.activities.CameraActivity;
 import com.fieldbook.tracker.activities.PreferencesActivity;
-import com.fieldbook.tracker.activities.ScannerActivity;
 import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity;
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache;
 import com.fieldbook.tracker.objects.BrAPIConfig;
@@ -48,8 +47,6 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
 
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.EndSessionRequest;
@@ -107,7 +104,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
 
     //alert dialog displays messages when oidc or brapi urls have http
     private AlertDialog mBrapiHttpWarningDialog = null;
-    private boolean mlkitEnabled;
 
     private Preference brapiServerInfoButton;
 
@@ -234,12 +230,10 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             });
         }
 
-        //set barcode click listener to start zxing intent
-        mlkitEnabled = PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean(PreferenceKeys.MLKIT_PREFERENCE_KEY, false);
         Preference brapiServerBarcode = findPreference("brapi_server_barcode");
         if (brapiServerBarcode != null) {
             brapiServerBarcode.setOnPreferenceClickListener(preference -> {
-                startBarcodeScan(IntentIntegrator.REQUEST_CODE);
+                startBarcodeScan(REQUEST_BARCODE_SCAN_BRAPI_CONFIG);
                 return true;
             });
         }
@@ -322,16 +316,12 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     }
 
     private void startBarcodeScan(int requestCode) {
-        if (mlkitEnabled) {
-            if (getActivity() != null) {
-                ScannerActivity.Companion.requestCameraAndStartScanner(getActivity(), requestCode, null, null, null);
-            }
-        } else {
-            new IntentIntegrator(getActivity())
-                    .setPrompt(getString(R.string.barcode_scanner_text))
-                    .setBeepEnabled(true)
-                    .setRequestCode(requestCode)
-                    .initiateScan();
+        try {
+            Intent intent = new Intent(getActivity(), CameraActivity.class);
+            intent.putExtra(CameraActivity.EXTRA_MODE, CameraActivity.MODE_BARCODE);
+            startActivityForResult(intent, requestCode);
+        } catch (Exception e) {
+            Log.e(TAG, "Unable to open camera", e);
         }
     }
 
@@ -839,14 +829,8 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             // Check if the result is from a barcode scan
             if (requestCode == REQUEST_BARCODE_SCAN_BASE_URL ||
                     requestCode == REQUEST_BARCODE_SCAN_OIDC_URL ||
-                    requestCode == REQUEST_BARCODE_SCAN_BRAPI_CONFIG ||
-                    requestCode == IntentIntegrator.REQUEST_CODE) {
-                if (mlkitEnabled) {
-                    scannedData = data.getStringExtra("barcode");
-                } else {
-                    IntentResult result = IntentIntegrator.parseActivityResult(resultCode, data);
-                    scannedData = result.getContents();
-                }
+                    requestCode == REQUEST_BARCODE_SCAN_BRAPI_CONFIG) {
+                scannedData = data.getStringExtra(CameraActivity.EXTRA_BARCODE);
             } else if (requestCode == BrapiAuthActivity.END_SESSION_REQUEST_CODE) {
                 preferences.edit().remove(PreferenceKeys.BRAPI_ID_TOKEN).apply();
                 preferences.edit().remove(PreferenceKeys.BRAPI_TOKEN).apply();
@@ -866,7 +850,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
                     brapiOIDCURLPreference.setText(scannedData);
                     break;
                 case REQUEST_BARCODE_SCAN_BRAPI_CONFIG:
-                case IntentIntegrator.REQUEST_CODE:
                     handleScannedData(scannedData);
                     break;
                 case AUTH_REQUEST_CODE:

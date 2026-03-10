@@ -269,6 +269,9 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
         val pageSize = prefs.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
 
+        if (brapiService is BrAPIServiceV1)
+            return@launch
+
         (brapiService as BrAPIServiceV2).studyService.fetchAll(
             StudyQueryParams().also {
                 it.pageSize(pageSize)
@@ -317,6 +320,9 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
     private suspend fun queryTrials() = async(Dispatchers.IO) {
 
         val pageSize = prefs.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
+
+        if (brapiService is BrAPIServiceV1)
+            return@async
 
         (brapiService as BrAPIServiceV2).trialService.fetchAll(
             TrialQueryParams().also {

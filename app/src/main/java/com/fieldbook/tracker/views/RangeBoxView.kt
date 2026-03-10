@@ -9,7 +9,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.widget.ImageView
-import android.widget.ProgressBar
+import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -52,7 +52,7 @@ class RangeBoxView : ConstraintLayout {
     private var rangeLeft: ImageView
     private var rangeRight: ImageView
 
-    private var plotsProgressBar: ProgressBar
+    private var plotsProgressBar: ThumbOnlySeekBar
 
     private var repeatHandler: Handler? = null
 
@@ -66,8 +66,6 @@ class RangeBoxView : ConstraintLayout {
     private var count = 1
 
     private var exportDataCursor: Cursor? = null
-
-    private val studyId: Int
 
     init {
 
@@ -83,7 +81,7 @@ class RangeBoxView : ConstraintLayout {
 
         this.controller = context as CollectRangeController
 
-        studyId = controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+        val studyId: Int = controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
 
         rangeID = this.controller.getDatabase().getAllRangeID(studyId)
         cRange = RangeObject()
@@ -164,6 +162,25 @@ class RangeBoxView : ConstraintLayout {
 
         // Go to next range
         rangeRight.setOnClickListener { moveEntryRight() }
+
+        // Allow dragging the progress bar thumb to seek to any entry
+        plotsProgressBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                if (fromUser && rangeID.isNotEmpty() && progress in rangeID.indices) {
+                    paging = progress + 1
+                    updateCurrentRange(rangeID[progress])
+                    saveLastPlotAndTrait()
+                    display()
+                    // Update the top info toolbar to reflect the new plot
+                    (controller.getContext() as CollectActivity).refreshInfoBarAdapter()
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar) {
+                controller.initWidgets(true)
+            }
+        })
 
         setName()
 
@@ -510,6 +527,7 @@ class RangeBoxView : ConstraintLayout {
     }
 
     fun setAllRangeID() {
+        val studyId: Int = controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
         rangeID = controller.getDatabase().getAllRangeID(studyId)
     }
 
@@ -628,6 +646,7 @@ class RangeBoxView : ConstraintLayout {
 
     private fun moveToNextUncollectedObs(currentPos: Int, direction: Int, traits: ArrayList<TraitObject>): Int {
 
+        val studyId: Int = controller.getPreferences().getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
         val uniqueName = controller.getPreferences().getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
         val exportDataCursor = controller.getDatabase().getExportTableDataShort(studyId, uniqueName, traits)
         val traitNames = traits.map { it.name }

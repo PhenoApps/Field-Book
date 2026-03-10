@@ -34,6 +34,7 @@ import org.brapi.v2.model.core.BrAPIStudy
 import org.brapi.v2.model.pheno.BrAPIObservationVariable
 import javax.inject.Inject
 import androidx.core.content.edit
+import com.fieldbook.tracker.brapi.service.BrAPIServiceV1
 
 @AndroidEntryPoint
 class BrapiTraitFilterActivity(
@@ -212,6 +213,9 @@ class BrapiTraitFilterActivity(
             var count = 0
 
             queried = true
+
+            if (brapiService is BrAPIServiceV1)
+                return@launch
 
             (brapiService as BrAPIServiceV2).observationVariableService.fetchAll(
                 VariableQueryParams().also {

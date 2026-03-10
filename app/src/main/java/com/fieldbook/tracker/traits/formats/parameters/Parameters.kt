@@ -10,7 +10,10 @@ enum class Parameters {
     REPEATED_MEASURES,
     AUTO_SWITCH_PLOT,
     UNIT,
-    INVALID_VALUE;
+    INVALID_VALUE,
+    SEVERITIES,
+    ATTACH_MEDIA,
+    ALLOW_OTHER;
 
     companion object {
 
@@ -20,6 +23,8 @@ enum class Parameters {
             "category",
             "closeKeyboardOnOpen",
             "cropImage",
+            "attachMedia",
+            "allowOther"
         )
     }
 }

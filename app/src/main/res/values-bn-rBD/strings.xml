@@ -98,6 +98,8 @@
     <string name="traits_create_true">সঠিক</string>
     <string name="traits_create_false">মিথ্যা</string>
     <string name="traits_create_categories_text">শ্রেনিসমুহকে আলাদা কারুন</string>
+    <string name="traits_attach_media_photo_label">ছবি</string>
+    <string name="traits_attach_media_audio_label">শ্রবণ সংক্রান্ত</string>
     <string name="traits_create_warning_name_blank">বৈশিষ্ট্যের নাম ফাকা থাকতে পারে না</string>
     <string name="traits_create_warning_duplicate">বৈশিষ্ট্যটি আগে থেকেই উপাস্থিত</string>
     <string name="traits_create_warning_numeric_required">নির্দিষ্টতা, সর্বনিম্ন, এবং সরবুচ্চ এগুলো অবশ্যই নম্বর হতে হবে</string>
@@ -250,6 +252,8 @@
     <string name="act_brapi_filter_import">প্রবেশ করানো</string>
     <string name="act_brapi_filter_clear">পরিষ্কার করুন</string>
     <!-- base camera strings -->
+    <!-- Video recording messages -->
+    <!-- Audio pause not supported message -->
     <string name="view_trait_photo_settings_camera_custom">নির্দিষ্ট</string>
     <!-- usb camera trait -->
     <!-- gopro -->
@@ -261,4 +265,7 @@
     <!--  NearbyShare  -->
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="save">সঞ্চিত করা</string>
+    <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
+    <!-- Preference: Attach media barcode prioritize -->
+    <string name="edit">সংস্করণ</string>
 </resources>

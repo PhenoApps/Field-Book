@@ -18,10 +18,6 @@
         <activity
             android:name=".activities.StatisticsActivity"
             android:exported="false" />
-        <activity
-            android:name=".activities.ScannerActivity"
-            android:exported="false" />
-
         <!-- The Main Page activity that lists all other activities -->
         <activity
             android:name=".activities.ConfigActivity"
@@ -255,6 +251,9 @@
         <!-- AppIntroActivity uses the AppIntro package -->
         <activity android:name=".activities.AppIntroActivity"
             android:label="My Custom AppIntro" />
+
+        <activity android:name=".ui.MediaViewerActivity"
+            android:label="Media View"/>
 
         <provider
             android:name=".provider.GenericFileProvider"

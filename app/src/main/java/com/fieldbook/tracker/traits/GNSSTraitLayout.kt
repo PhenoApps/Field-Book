@@ -359,13 +359,6 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
             val studyDbId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
 
-            //geo json object : elevation (stored in obs. units, used in navigation)
-            //geo json has properties map for additional info
-            val geoJson = GeoJsonUtil.GeoJSON(
-                geometry = GeoJsonUtil.Geometry(coordinates = arrayOf(longitude, latitude)),
-                properties = mapOf("altitude" to elevation, "fix" to precision)
-            )
-
             //save fix length to truncate the average later if needed
             val latLength = latitude.length
             val lngLength = longitude.length
@@ -373,6 +366,13 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
             //temporary variables to also update obs if obs units are averaged
             val newLat = latitude.toDouble()
             val newLng = longitude.toDouble()
+
+            //geo json object : elevation (stored in obs. units, used in navigation)
+            //geo json has properties map for additional info
+            val geoJson = GeoJsonUtil.GeoJSON(
+                geometry = GeoJsonUtil.Geometry(coordinates = arrayOf(newLng, newLat)),
+                properties = mapOf("altitude" to elevation, "fix" to precision)
+            )
 
             val units = database.getAllObservationUnits(studyDbId.toInt())
                 .filter { it.observation_unit_db_id == currentRange.uniqueId }
@@ -532,7 +532,7 @@ class GNSSTraitLayout : BaseTraitLayout, GPSTracker.GPSTrackerListener {
 
         val averageJson = GeoJsonUtil.GeoJSON(
             geometry = GeoJsonUtil.Geometry(
-                coordinates = arrayOf(avgPoint.second.toString(), avgPoint.first.toString())
+                coordinates = arrayOf(avgPoint.second, avgPoint.first)
             ),
             properties = mapOf(
                 "altitude" to (location?.altitude?.toString() ?: ""),

@@ -356,10 +356,14 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
             }
 
             unit.additionalInfo?.entrySet()?.forEach { (key, value) ->
-                value?.takeIf { it.isJsonPrimitive || it.isJsonArray }
-                     ?.asString
-                     ?.takeIf { it.isNotEmpty() }
-                     ?.let { attributes[key] = it }
+                try {
+                    value?.takeIf { it.isJsonPrimitive || it.isJsonArray }
+                        ?.asString
+                        ?.takeIf { it.isNotEmpty() }
+                        ?.let { attributes[key] = it }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed loading additionalInfo $key, $value", e)
+                }
             }
 
             val position = unit.observationUnitPosition
@@ -638,8 +642,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         attributesTable?.get(study.studyDbId)?.let { studyAttributes ->
 
             observationUnits[study.studyDbId]?.filter {
-                if (it.observationUnitPosition?.entryType?.name == "TEST") true
-                else it.observationUnitPosition.observationLevel.levelName.equals(level.observationLevelName, ignoreCase = true)
+                it.observationUnitPosition.observationLevel.levelName.equals(level.observationLevelName, ignoreCase = true)
             }
                 ?.let { units ->
 

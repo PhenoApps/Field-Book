@@ -1,6 +1,8 @@
 package com.fieldbook.tracker.traits.formats
 
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.traits.formats.feature.DisplayValue
+import com.fieldbook.tracker.traits.formats.parameters.AttachMediaParameter
 import com.fieldbook.tracker.traits.formats.parameters.AutoSwitchPlotParameter
 import com.fieldbook.tracker.traits.formats.parameters.DefaultValueParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
@@ -22,4 +24,5 @@ class GreenSeekerFormat : TraitFormat(
     AutoSwitchPlotParameter(),
     RepeatedMeasureParameter(),
     ResourceFileParameter(),
-)
+    AttachMediaParameter()
+), DisplayValue
