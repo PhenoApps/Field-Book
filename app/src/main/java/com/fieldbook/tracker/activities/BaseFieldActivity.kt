@@ -192,17 +192,29 @@ abstract class BaseFieldActivity : ThemedActivity(), FieldAdapterController, Fie
             android.text.Html.fromHtml(message)
         }
 
-        AlertDialog.Builder(this, R.style.AppAlertDialog)
+        val builder = AlertDialog.Builder(this, R.style.AppAlertDialog)
             .setTitle(getString(R.string.fields_delete_study))
             .setMessage(formattedMessage)
             .setPositiveButton(getString(R.string.dialog_yes)) { _, _ ->
-                deleteFields(fieldIds)
-                if (isFromDetailFragment) { supportFragmentManager.popBackStack() }
+                if (!isArchivedMode()) {
+                    showPermanentDeleteWarningDialog(fieldIds, isFromDetailFragment)
+                } else {
+                    deleteFields(fieldIds)
+                    if (isFromDetailFragment) { supportFragmentManager.popBackStack() }
+                }
             }
             .setNegativeButton(getString(R.string.dialog_no)) { dialog, _ ->
                 dialog.dismiss()
             }
-            .show()
+
+        if (!isArchivedMode()) {
+            builder.setNeutralButton(getString(R.string.fields_archive)) { _, _ ->
+                archiveFields(fieldIds)
+                if (isFromDetailFragment) { supportFragmentManager.popBackStack() }
+            }
+        }
+
+        builder.show()
     }
 
     protected fun getFieldNames(fieldIds: List<Int>): String {
@@ -212,6 +224,31 @@ abstract class BaseFieldActivity : ThemedActivity(), FieldAdapterController, Fie
         }
 
         return android.text.TextUtils.join(", ", fieldNames)
+    }
+
+    private fun showPermanentDeleteWarningDialog(fieldIds: List<Int>, isFromDetailFragment: Boolean) {
+        AlertDialog.Builder(this, R.style.AppAlertDialog)
+            .setTitle(getString(R.string.fields_delete_study))
+            .setMessage(getString(R.string.fields_delete_permanent_warning))
+            .setPositiveButton(getString(R.string.fields_delete)) { _, _ ->
+                deleteFields(fieldIds)
+                if (isFromDetailFragment) { supportFragmentManager.popBackStack() }
+            }
+            .setNegativeButton(getString(R.string.fields_archive)) { _, _ ->
+                archiveFields(fieldIds)
+                if (isFromDetailFragment) { supportFragmentManager.popBackStack() }
+            }
+            .show()
+    }
+
+    protected open fun archiveFields(fieldIds: List<Int>) {
+        for (fieldId in fieldIds) {
+            db.setIsArchived(fieldId, true)
+        }
+        resetActiveField(fieldIds)
+        queryAndLoadFields()
+        mAdapter.exitSelectionMode()
+        invalidateOptionsMenu()
     }
 
     protected fun deleteFields(fieldIds: List<Int>) {

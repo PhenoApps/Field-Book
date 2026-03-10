@@ -168,6 +168,8 @@
     <string name="fields_delete">Delete</string>
     <string name="fields_delete_study">Delete field</string>
     <string name="fields_delete_study_confirmation">Are you sure you want to delete this field? This will delete all data from this field.</string>
+    <string name="fields_delete_archive_instead">Archive instead</string>
+    <string name="fields_delete_permanent_warning">Deleting a field is permanent and cannot be undone. Would you like to archive it instead?</string>
 
     <plurals name="fields_delete_confirmation">
         <item quantity="one">Are you sure you want to delete the field "%s"?</item>
