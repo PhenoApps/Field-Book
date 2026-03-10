@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.fieldbook.tracker.traits.DiseaseRatingTraitLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/diseaseLayout"
     android:layout_width="match_parent"
@@ -9,163 +10,16 @@
     tools:ignore="HardcodedText"
     tools:visibility="visible">
 
-    <GridLayout
-        android:layout_width="wrap_content"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/severityGrid"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:columnCount="6"
-        android:gravity="center_horizontal"
-        android:orientation="horizontal"
-        android:paddingTop="2dp">
-
-        <Button
-            android:id="@+id/rust0"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="@dimen/button_width_disease"
-            android:text="0" />
-
-        <Button
-            android:id="@+id/rust5"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="@dimen/button_width_disease"
-            android:text="5" />
-
-        <Button
-            android:id="@+id/rust10"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="@dimen/button_width_disease"
-            android:text="10" />
-
-        <Button
-            android:id="@+id/rust15"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="@dimen/button_width_disease"
-            android:text="15" />
-
-        <Button
-            android:id="@+id/rust20"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="@dimen/button_width_disease"
-            android:text="20" />
-
-        <Button
-            android:id="@+id/rust25"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="@dimen/button_width_disease"
-            android:text="25" />
-
-        <Button
-            android:id="@+id/rust30"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="@dimen/button_width_disease"
-            android:text="30" />
-
-        <Button
-            android:id="@+id/rust35"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="@dimen/button_width_disease"
-            android:text="35" />
-
-        <Button
-            android:id="@+id/rust40"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="@dimen/button_width_disease"
-            android:text="40" />
-
-        <Button
-            android:id="@+id/rust45"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="@dimen/button_width_disease"
-            android:text="45" />
-
-        <Button
-            android:id="@+id/rust50"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="@dimen/button_width_disease"
-            android:text="50" />
-
-        <Button
-            android:id="@+id/rust55"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="@dimen/button_width_disease"
-            android:text="55" />
-
-        <Button
-            android:id="@+id/rust60"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="@dimen/button_width_disease"
-            android:text="60" />
-
-        <Button
-            android:id="@+id/rust65"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="@dimen/button_width_disease"
-            android:text="65" />
-
-        <Button
-            android:id="@+id/rust70"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="@dimen/button_width_disease"
-            android:text="70" />
-
-        <Button
-            android:id="@+id/rust75"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="@dimen/button_width_disease"
-            android:text="75" />
-
-        <Button
-            android:id="@+id/rust80"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="@dimen/button_width_disease"
-            android:text="80" />
-
-        <Button
-            android:id="@+id/rust85"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="@dimen/button_width_disease"
-            android:text="85" />
-
-        <Button
-            android:id="@+id/rust90"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="@dimen/button_width_disease"
-            android:text="90" />
-
-        <Button
-            android:id="@+id/rust95"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="@dimen/button_width_disease"
-            android:text="95" />
-
-        <Button
-            android:id="@+id/rust100"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="@dimen/button_width_disease"
-            android:text="100" />
-
-    </GridLayout>
+        android:paddingTop="2dp"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:spanCount="6"
+        tools:itemCount="21"
+        tools:listitem="@layout/trait_category_button" />
 
     <LinearLayout
         android:layout_width="match_parent"

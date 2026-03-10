@@ -11,6 +11,7 @@ enum class Parameters {
     AUTO_SWITCH_PLOT,
     UNIT,
     INVALID_VALUE,
+    SEVERITIES,
     ATTACH_MEDIA,
     ALLOW_OTHER;
 
