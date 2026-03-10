@@ -30,6 +30,7 @@ import com.fieldbook.tracker.traits.formats.parameters.DefaultToggleParameter
 import com.fieldbook.tracker.traits.formats.parameters.InvalidValueParameter
 import com.fieldbook.tracker.traits.formats.parameters.MathSymbolsParameter
 import com.fieldbook.tracker.traits.formats.parameters.AttachMediaParameter
+import com.fieldbook.tracker.traits.formats.parameters.AllowOtherParameter
 import com.fieldbook.tracker.traits.formats.parameters.MultipleCategoriesParameter
 import com.fieldbook.tracker.traits.formats.parameters.Parameters
 import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
@@ -146,7 +147,10 @@ fun TraitOptionsSection(
             formatDefinition?.let { definition ->
 
                 val displayableParams =
-                    definition.parameters.filter { it.parameter !in excludedParams }
+                    definition.parameters.filter { param ->
+                        param.parameter !in excludedParams &&
+                        !(param is AllowOtherParameter && isBrapiTrait)
+                    }
 
                 displayableParams.forEach { param ->
                     Chip(
@@ -209,6 +213,7 @@ private fun getParamIcon(param: BaseFormatParameter, trait: TraitObject): Int {
                 is InvalidValueParameter -> if (isEnabled) R.drawable.ic_outlier else R.drawable.ic_outlier_off
                 is MathSymbolsParameter -> if (isEnabled) R.drawable.ic_symbol else R.drawable.ic_symbol_off
                 is MultipleCategoriesParameter -> if (isEnabled) R.drawable.ic_multicat else R.drawable.ic_single_cat
+                is AllowOtherParameter -> if (isEnabled) R.drawable.ic_categorical_other else R.drawable.ic_categorical_other_off
                 is RepeatedMeasureParameter -> if (isEnabled) R.drawable.ic_repeated_measures else R.drawable.ic_repeated_measures_off
                 is SaveImageParameter -> if (isEnabled) R.drawable.ic_transfer else R.drawable.ic_transfer_off
                 else -> R.drawable.ic_tag_edit

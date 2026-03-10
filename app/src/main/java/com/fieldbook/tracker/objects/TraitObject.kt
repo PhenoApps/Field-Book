@@ -105,6 +105,10 @@ class TraitObject {
         get() = attributeValues.getBoolean(TraitAttributes.INVALID_VALUES)
         set(value) = attributeValues.setValue(TraitAttributes.INVALID_VALUES, value.toString())
 
+    var allowOther: Boolean
+        get() = attributeValues.getBoolean(TraitAttributes.ALLOW_OTHER)
+        set(value) = attributeValues.setValue(TraitAttributes.ALLOW_OTHER, value.toString())
+
     companion object {
 
         fun fromJson(json: TraitJson, maxPosition: Int, originalFileName: String) = TraitObject().apply {
@@ -129,7 +133,7 @@ class TraitObject {
             }
         }
     }
-    
+
     var attachPhoto: Boolean
         get() = attributeValues.getBoolean(TraitAttributes.MULTI_MEDIA_PHOTO)
         set(value) = attributeValues.setValue(TraitAttributes.MULTI_MEDIA_PHOTO, value.toString())
@@ -189,7 +193,8 @@ class TraitObject {
                 invalidValues == that.invalidValues &&
                 attachAudio == that.attachAudio &&
                 attachPhoto == that.attachPhoto &&
-                attachVideo == that.attachVideo
+                attachVideo == that.attachVideo &&
+                allowOther == that.allowOther
     }
 
     override fun hashCode(): Int {
@@ -199,7 +204,8 @@ class TraitObject {
             additionalInfo, observationLevelNames, closeKeyboardOnOpen, cropImage,
             saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms,
             maxDecimalPlaces, mathSymbolsEnabled, allowMulticat, repeatedMeasures,
-            autoSwitchPlot, unit, invalidValues, attachAudio, attachPhoto, attachVideo
+            autoSwitchPlot, unit, invalidValues, attachAudio, attachPhoto, attachVideo,
+            allowOther
         )
     }
 
@@ -237,6 +243,7 @@ class TraitObject {
         t.attachAudio = this.attachAudio
         t.attachPhoto = this.attachPhoto
         t.attachVideo = this.attachVideo
+        t.allowOther = this.allowOther
 
         return t
     }
@@ -309,5 +316,9 @@ class TraitObject {
         }
 
         return map
+    }
+
+    fun isLocalTrait(): Boolean {
+        return traitDataSource.isEmpty() || traitDataSource == "local"
     }
 }
