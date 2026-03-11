@@ -150,6 +150,15 @@ val BlueAppColors = DefaultAppColors.copy(
         tertiary = BlueThemeOverrides.TextLight,
     ),
 
+    topAppBarColors = TopAppBarColors(
+        containerColor = BlueThemeOverrides.Primary,
+        scrolledContainerColor = BlueThemeOverrides.PrimaryTransparent,
+        navigationIconContentColor = BlueThemeOverrides.IconFillTint,
+        titleContentColor = BlueThemeOverrides.TextLight,
+        actionIconContentColor = BlueThemeOverrides.IconFillTint,
+        subtitleContentColor = BlueThemeOverrides.TextLight,
+    ),
+
     button = DefaultAppColors.button.copy(
         pressed = BlueThemeOverrides.ButtonColorPressed,
         categoricalSelected = BlueThemeOverrides.CategoricalButtonSelected
@@ -217,6 +226,15 @@ val HighContrastAppColors = DefaultAppColors.copy(
     accent = HighContrastOverrides.Accent,
     primaryTransparent = HighContrastOverrides.PrimaryTransparent,
     lightGray = HighContrastOverrides.LightGrayColor,
+
+    topAppBarColors = TopAppBarColors(
+        containerColor = HighContrastOverrides.Primary,
+        scrolledContainerColor = HighContrastOverrides.PrimaryTransparent,
+        navigationIconContentColor = BaseColors.IconTint,
+        titleContentColor = BaseColors.TextDark,
+        actionIconContentColor = BaseColors.IconTint,
+        subtitleContentColor = BaseColors.TextDark,
+    ),
 
     surface = DefaultAppColors.surface.copy(
         iconFillTint = HighContrastOverrides.IconFillTint,
