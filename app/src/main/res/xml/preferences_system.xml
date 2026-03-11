@@ -50,8 +50,14 @@
 
     <PreferenceCategory
         android:key="crashlytics_category"
-        android:title="@string/preferences_profile_crashlytics"
+        android:title="@string/preferences_system_debugging_title"
         app:iconSpaceReserved="false">
+
+        <Preference
+            android:icon="@drawable/ic_trait_disease_rating"
+            android:key="pref_debug_application"
+            android:summary="@string/pref_debug_application_summary"
+            android:title="@string/pref_debug_application_title" />
 
         <CheckBoxPreference
             android:defaultValue="false"

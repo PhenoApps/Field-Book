@@ -4,14 +4,20 @@ import android.app.AlertDialog
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.preference.CheckBoxPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.PreferencesActivity
+import com.fieldbook.tracker.fragments.ExportDatabaseFragment
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import dagger.hilt.android.AndroidEntryPoint
+import org.phenoapps.utils.BaseDocumentTreeUtil
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
 
@@ -53,6 +59,33 @@ class SystemPreferencesFragment : PreferenceFragmentCompat(),
                 .setNegativeButton(android.R.string.cancel, null)
                 .show()
             true
+        }
+
+        val debugApplicationPref = findPreference<Preference>("pref_debug_application")
+        debugApplicationPref?.onPreferenceClickListener = Preference.OnPreferenceClickListener {
+            if (checkDirectory()) {
+                val timestamp = SimpleDateFormat("yyyy-MM-dd-hh-mm-ss", Locale.getDefault())
+                    .format(Calendar.getInstance().time)
+                val args = Bundle().apply {
+                    putString(ExportDatabaseFragment.EXTRA_FILE_NAME, "debug_$timestamp")
+                }
+                val exportFragment = ExportDatabaseFragment().apply { arguments = args }
+                childFragmentManager.beginTransaction()
+                    .add(exportFragment, ExportDatabaseFragment.TAG)
+                    .addToBackStack(null)
+                    .commit()
+            }
+            true
+        }
+    }
+
+    private fun checkDirectory(): Boolean {
+        val ctx = context ?: return false
+        return if (BaseDocumentTreeUtil.getDirectory(ctx, R.string.dir_database) != null) {
+            true
+        } else {
+            Toast.makeText(ctx, R.string.error_storage_directory, Toast.LENGTH_LONG).show()
+            false
         }
     }
 

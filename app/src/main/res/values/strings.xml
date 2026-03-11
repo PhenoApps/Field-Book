@@ -890,6 +890,9 @@
     <string name="preferences_profile_device_name_default_format">Default: %s</string>
 
     <string name="preferences_profile_crashlytics" translatable="false">Crashlytics</string>
+    <string name="preferences_system_debugging_title">Debugging</string>
+    <string name="pref_debug_application_title">Debug Application</string>
+    <string name="pref_debug_application_summary">Obtain a file to help developers debug issues in the app</string>
     <string name="pref_profile_crashlytics_user_id_enabled">Unique ID</string>
     <string name="pref_profile_crashlytics_user_id_enabled_summary">Include an anonymous, unique ID in crash logs to help the development team fix bugs</string>
     <string name="pref_profile_crashlytics_refresh_title">Refresh ID</string>
