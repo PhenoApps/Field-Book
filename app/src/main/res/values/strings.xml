@@ -1655,6 +1655,22 @@
     <string name="delete_color_message">This will permanently delete the observation</string>
     <string name="nix_device_connecting">Device is connecting.</string>
 
+    <!-- inno spectra -->
+    <string name="inno_spectra_save_failed">Save failed</string>
+    <string name="inno_spectra_hardware_incompatible">Hardware incompatible</string>
+    <string name="inno_spectra_function_locked">Function locked</string>
+    <string name="header_temperature">Temperature</string>
+    <string name="header_humidity">Humidity</string>
+    <string name="header_firmware">Firmware</string>
+    <string name="header_total_lamp_time">Total Lamp Time</string>
+    <string name="header_battery">Battery</string>
+    <string name="header_software_version">Software Version</string>
+    <string name="header_hardware_version">Hardware Version</string>
+    <string name="header_device_id">Device ID</string>
+    <string name="header_serial_id">Serial ID</string>
+    <string name="header_uuid">UUID</string>
+    <string name="delete_spectral_data_plot">Delete Spectral Data</string>
+
     <string name="brapi_studies_filter_title">Studies</string>
     <string name="brapi_trials_filter_title">Trials</string>
     <string name="brapi_filter_dialog_title">Filter By</string>
@@ -1957,4 +1973,12 @@
     <string name="edit">Edit</string>
 
     <string name="trait_categorical_other_btn_description">Add a new category</string>
+
+    <!-- InnoSpectra settings layout -->
+    <string name="view_trait_innospectra_device_name_label">Name</string>
+    <string name="view_trait_innospectra_mac_label">MAC</string>
+    <string name="view_trait_innospectra_unknown">Unknown</string>
+    <string name="view_trait_innospectra_na">N/A</string>
+    <string name="unknown">Unknown</string>
+
 </resources>
