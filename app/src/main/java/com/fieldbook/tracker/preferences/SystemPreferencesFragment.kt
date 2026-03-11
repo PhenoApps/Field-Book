@@ -81,10 +81,7 @@ class SystemPreferencesFragment : PreferenceFragmentCompat(),
 
     private fun checkDirectory(): Boolean {
         val ctx = context ?: return false
-        return if (BaseDocumentTreeUtil.getRoot(ctx) != null
-            && BaseDocumentTreeUtil.isEnabled(ctx)
-            && BaseDocumentTreeUtil.getDirectory(ctx, R.string.dir_database) != null
-        ) {
+        return if (BaseDocumentTreeUtil.getDirectory(ctx, R.string.dir_database) != null) {
             true
         } else {
             Toast.makeText(ctx, R.string.error_storage_directory, Toast.LENGTH_LONG).show()
