@@ -396,6 +396,7 @@ Phenotypes et essais créés manuellement ou importés via CSV devront être exp
     <!-- gopro -->
     <!-- canon camera strings -->
     <!-- spectral trait strings -->
+    <!-- inno spectra -->
     <string name="brapi_traits_filter_title">caractères</string>
     <string name="dialog_quick_goto_title">Raccourci rapide</string>
     <string name="traits_sort_default">défaut</string>
@@ -409,4 +410,5 @@ Phenotypes et essais créés manuellement ou importés via CSV devront être exp
     <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
     <!-- Preference: Attach media barcode prioritize -->
     <string name="edit">Modifier</string>
+    <!-- InnoSpectra settings layout -->
 </resources>
