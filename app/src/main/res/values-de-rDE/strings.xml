@@ -217,6 +217,7 @@
     <!-- gopro -->
     <!-- canon camera strings -->
     <!-- spectral trait strings -->
+    <!-- inno spectra -->
     <string name="brapi_traits_filter_title">Merkmale</string>
     <string name="traits_sort_default">Vorgegeben</string>
     <!--  NearbyShare  -->
@@ -224,4 +225,5 @@
     <string name="save">Speichern</string>
     <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
     <!-- Preference: Attach media barcode prioritize -->
+    <!-- InnoSpectra settings layout -->
 </resources>
