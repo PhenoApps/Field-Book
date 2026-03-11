@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- New Innospectra trait format (https://github.com/PhenoApps/Field-Book/pull/1392)
 - Simpler debugging now in system settings (https://github.com/PhenoApps/Field-Book/pull/1438)
 - Entry progress bar is now scrollable for navigation (https://github.com/PhenoApps/Field-Book/pull/1414)
 - Categorical traits now have an option that allows new categories to be defined during collection (https://github.com/PhenoApps/Field-Book/pull/1411)
