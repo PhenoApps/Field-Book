@@ -1382,6 +1382,12 @@
     <string name="delete_color_message">Isto irá excluir permanentemente a observação</string>
     <string name="nix_device_connecting">Dispositivo está conectando.</string>
     <!-- inno spectra -->
+    <string name="header_battery">Bateria</string>
+    <string name="header_software_version">Versão do Software</string>
+    <string name="header_hardware_version">Versão de Hardware</string>
+    <string name="header_device_id">ID do Dispositivo</string>
+    <string name="header_uuid">UUID</string>
+    <string name="delete_spectral_data_plot">Excluir Dados Espectrais</string>
     <string name="brapi_studies_filter_title">Estudos</string>
     <string name="brapi_trials_filter_title">Estudos</string>
     <string name="brapi_filter_dialog_title">Filtrar Por</string>
@@ -1665,6 +1671,11 @@
     <string name="preferences_behavior_attach_media_barcode_prioritize">Sempre usar código de barras detectado</string>
     <string name="preferences_behavior_attach_media_barcode_prioritize_description">Quando um código de barras é detectado, o Field Book analisará automaticamente o código de barras sem a interação do usuário.</string>
     <string name="edit">Editar</string>
+    <string name="trait_categorical_other_btn_description">Adicionar uma nova categoria</string>
     <!-- InnoSpectra settings layout -->
     <string name="view_trait_innospectra_device_name_label">Nome</string>
+    <string name="view_trait_innospectra_mac_label">MAC</string>
+    <string name="view_trait_innospectra_unknown">Desconhecido</string>
+    <string name="view_trait_innospectra_na">N/A</string>
+    <string name="unknown">Desconhecido</string>
 </resources>
