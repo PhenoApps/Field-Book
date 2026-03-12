@@ -700,7 +700,7 @@
     <string name="observation_info_trait_name">Nombre del Rasgo</string>
     <string name="observation_info_trait_alias">Alias de Rasgo</string>
     <string name="observation_info_value">Valor</string>
-    <string name="observation_info_timestamp">Timestamp de la Observación</string>
+    <string name="observation_info_timestamp">Marca de Tiempo de la Observación</string>
     <string name="observation_info_collector">Colector</string>
     <string name="observations_info_geo_coordinates">Geo Coordenadas</string>
     <string name="observation_info_last_synced_time">Última sincronización</string>
@@ -833,8 +833,8 @@
     <string name="preferences_appearance_range_progress_bar_description">Muestra su posición actual en el campo</string>
     <string name="preferences_appearance_traits_progress_bar">Barra de progreso de rasgos</string>
     <string name="preferences_appearance_traits_progress_bar_description">Muestra si los rasgos activos tienen datos y resalta el rasgo actual</string>
-    <string name="preferences_appearance_observation_timestamp">Timestamp de la Observación</string>
-    <string name="preferences_appearance_observation_timestamp_description">Muestra el timestamp de la observación guardada por debajo del valor</string>
+    <string name="preferences_appearance_observation_timestamp">Marca de tiempo de la observación</string>
+    <string name="preferences_appearance_observation_timestamp_description">Muestra la marca de tiempo de la observación guardada por debajo del valor</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamiento</string>
     <string name="preferences_behavior_movement_title">Movimiento</string>
@@ -964,7 +964,7 @@
     <string name="trait_audio_playing_warning">El audio a nivel de rasgo se está reproduciendo. Deténgalo primero.</string>
     <string name="field_audio_zip_error">Error al crear archivo zip</string>
     <string name="trait_audio_placeholder_filename">Archivo de Audio Grabado</string>
-    <string name="trait_audio_timestamp">Timestamp: </string>
+    <string name="trait_audio_timestamp">Marca de tiempo: </string>
     <string name="trait_audio_duration">Duración: </string>
     <string name="trait_audio_file_size">Tamaño de Archivo</string>
     <string name="pref_beta_enable_individual_field_page_title">Activar Páginas de Campos Individuales</string>
@@ -1472,7 +1472,7 @@
     <string name="opening_brapi_no_network_error">La red debe estar activada para usar funcionalidad BrAPI.</string>
     <string name="act_brapi_list_filter_reset_selection_message">Esto limpiará la lista en ejecución de los elementos seleccionados.</string>
     <string name="pref_experimental_generate_sample_data_title">Generar Campo de Ejemplo</string>
-    <string name="pref_experimental_generate_sample_data_summary">Crea un campo de ejemplo con observaciones artificiales para todos los rasgos cargados. Los timestamps son aleatorizados durante los últimos tres meses.</string>
+    <string name="pref_experimental_generate_sample_data_summary">Crea un campo de ejemplo con observaciones artificiales para todos los rasgos cargados. Las masrcas de tiempo son aleatorizadas durante los últimos tres meses.</string>
     <string name="pref_experimental_generate_sample_data_confirm_title">¿Generar Campo de Ejemplo?</string>
     <string name="pref_experimental_generate_sample_data_confirm_message">Esto creará o rellenará un campo llamado \"field_sample\" con observaciones artificiales. Los rasgos de ejemplo se cargarán automáticamente si ninguno está presente.</string>
     <string name="pref_experimental_generate_sample_data_success">Campo de ejemplo creado exitosamente.</string>
