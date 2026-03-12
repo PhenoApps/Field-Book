@@ -143,6 +143,8 @@
     <string name="fields_delete">Excluir</string>
     <string name="fields_delete_study">Excluir campo</string>
     <string name="fields_delete_study_confirmation">Tem certeza que deseja excluir este campo? Isto irá excluir todos os dados deste campo.</string>
+    <string name="fields_delete_archive_instead">Arquivar em vez de</string>
+    <string name="fields_delete_permanent_warning">A exclusão de um campo é permanente e não pode ser desfeita. Gostaria de arquivá-lo em vez disso?</string>
     <plurals name="fields_delete_confirmation">
         <item quantity="one">Tem certeza que deseja excluir este campo \"%s\"?</item>
         <item quantity="other">Tem certeza que deseja excluir estes campos: %s?</item>
@@ -353,6 +355,7 @@
     <string name="traits_create_unit">Unidade</string>
     <string name="traits_create_optional">Opcional</string>
     <string name="traits_create_categories_title">Categorias</string>
+    <string name="traits_create_severities_title">Severidades</string>
     <string name="traits_create_photo_maximum">Número máximo de fotos</string>
     <string name="traits_create_true">Verdadeiro</string>
     <string name="traits_create_false">Falso</string>
@@ -472,8 +475,14 @@
     <string name="trait_detail_chip_format_date">Formato: %s</string>
     <string name="trait_detail_chip_transfer_images">Transferir imagens</string>
     <string name="trait_detail_chip_invalid_value">Valores atípicos</string>
+    <string name="trait_detail_chip_severities">Severidades</string>
     <string name="trait_parameter_allow_multicat">Seleção de Múltiplas Categorias</string>
+    <string name="trait_parameter_allow_other">Permitir Outra Categoria</string>
     <string name="trait_other_button">Outros</string>
+    <string name="trait_other_dialog_title">Adicionar Nova Categoria</string>
+    <string name="trait_other_dialog_hint">Nome da categoria</string>
+    <string name="trait_other_duplicate">Categoria já existe</string>
+    <string name="trait_other_empty">Nome da categoria não pode estar vazio</string>
     <string name="trait_parameter_display_value">Exibir Valor</string>
     <string name="trait_parameter_resource_file">Arquivo de Recurso</string>
     <string name="trait_parameter_use_day_of_year">Usar Dia do Ano</string>
@@ -765,6 +774,9 @@
     <string name="preferences_profile_device_name_dialog_title">Definir Nome do Dispositivo</string>
     <string name="preferences_profile_device_name_error">Este campo não pode ficar em branco</string>
     <string name="preferences_profile_device_name_default_format">Padrão: %s</string>
+    <string name="preferences_system_debugging_title">Depurando</string>
+    <string name="pref_debug_application_title">Depurar Aplicativo</string>
+    <string name="pref_debug_application_summary">Obter um arquivo para ajudar os desenvolvedores a depurar problemas no app</string>
     <string name="pref_profile_crashlytics_user_id_enabled">ID Único</string>
     <string name="pref_profile_crashlytics_user_id_enabled_summary">Incluir uma ID anônima e única nos logs de erro para ajudar a equipe de desenvolvimento a corrigir bugs</string>
     <string name="pref_profile_crashlytics_refresh_title">Atualizar ID</string>
@@ -1382,10 +1394,18 @@
     <string name="delete_color_message">Isto irá excluir permanentemente a observação</string>
     <string name="nix_device_connecting">Dispositivo está conectando.</string>
     <!-- inno spectra -->
+    <string name="inno_spectra_save_failed">Salvar falhou</string>
+    <string name="inno_spectra_hardware_incompatible">Hardware incompatível</string>
+    <string name="inno_spectra_function_locked">Função bloqueada</string>
+    <string name="header_temperature">Temperatura</string>
+    <string name="header_humidity">Umidade</string>
+    <string name="header_firmware">Firmware</string>
+    <string name="header_total_lamp_time">Tempo Total de Lâmpada</string>
     <string name="header_battery">Bateria</string>
     <string name="header_software_version">Versão do Software</string>
     <string name="header_hardware_version">Versão de Hardware</string>
     <string name="header_device_id">ID do Dispositivo</string>
+    <string name="header_serial_id">ID Serial</string>
     <string name="header_uuid">UUID</string>
     <string name="delete_spectral_data_plot">Excluir Dados Espectrais</string>
     <string name="brapi_studies_filter_title">Estudos</string>
