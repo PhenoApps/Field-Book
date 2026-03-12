@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Red band (low) -->
+    <path
+        android:fillColor="#F44336"
+        android:pathData="M2,4 L9,4 L9,20 L2,20 Z" />
+    <!-- Yellow band (mid) -->
+    <path
+        android:fillColor="#FFEB3B"
+        android:pathData="M9,4 L15,4 L15,20 L9,20 Z" />
+    <!-- Green band (high) -->
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M15,4 L22,4 L22,20 L15,20 Z" />
+    <!-- Border outline -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#757575"
+        android:strokeWidth="1"
+        android:pathData="M2,4 L22,4 L22,20 L2,20 Z" />
+</vector>

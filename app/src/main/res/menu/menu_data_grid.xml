@@ -23,4 +23,9 @@
         android:icon="@drawable/ic_view_split_vertical"
         app:showAsAction="always"
         android:title="@string/menu_action_header_view_data_grid_title" />
+    <item
+        android:id="@+id/menu_data_grid_action_heatmap"
+        android:icon="@drawable/ic_tb_heatmap"
+        app:showAsAction="always"
+        android:title="@string/menu_action_heatmap_data_grid_title" />
 </menu>

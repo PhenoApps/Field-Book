@@ -79,6 +79,15 @@ class DataGridViewModel @Inject constructor(
         preferences.edit().putBoolean(GeneralKeys.DATAGRID_WRAP_CONTENT, newValue).apply()
     }
 
+    private val _heatmapEnabled = MutableStateFlow(preferences.getBoolean(GeneralKeys.DATAGRID_HEATMAP, false))
+    val heatmapEnabled: StateFlow<Boolean> = _heatmapEnabled.asStateFlow()
+
+    fun toggleHeatmap() {
+        val newValue = !_heatmapEnabled.value
+        _heatmapEnabled.value = newValue
+        preferences.edit().putBoolean(GeneralKeys.DATAGRID_HEATMAP, newValue).apply()
+    }
+
     fun sortByColumn(columnIndex: Int) {
         val cur = _sortState.value
         _sortState.value = if (cur.columnIndex == columnIndex) SortState(columnIndex, !cur.ascending)

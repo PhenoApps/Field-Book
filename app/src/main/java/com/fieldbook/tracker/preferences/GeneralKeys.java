@@ -154,6 +154,7 @@ public class GeneralKeys {
     public static final String DATAGRID_PREFIX_TRAIT = "com.fieldbook.tracker.datagrid.DATAGRID_PREFIX_TRAIT";
     public static final String DATAGRID_COLUMN_LOCKED = "com.fieldbook.tracker.datagrid.DATAGRID_COLUMN_LOCKED";
     public static final String DATAGRID_WRAP_CONTENT = "com.fieldbook.tracker.datagrid.DATAGRID_WRAP_CONTENT";
+    public static final String DATAGRID_HEATMAP = "com.fieldbook.tracker.datagrid.DATAGRID_HEATMAP";
 
     //summary filter
     public static final String SUMMARY_FILTER_ATTRIBUTES = "com.fieldbook.tracker.summary.SUMMARY_FILTER_ATTRIBUTES";

@@ -631,6 +631,7 @@
     <string name="menu_action_lock_column_data_grid_title">Lock First Column</string>
     <string name="menu_action_reset_sort_data_grid_title">Reset Sort</string>
     <string name="menu_action_wrap_content_data_grid_title">Wrap Content</string>
+    <string name="menu_action_heatmap_data_grid_title">Heatmap</string>
 
     <!--- Lock -->
     <string name="activity_collect_locked_state">Locked - data entry, modification and deletion are disabled</string>

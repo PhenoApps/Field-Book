@@ -128,6 +128,7 @@ class DataGridActivity : ThemedActivity() {
             val columnLocked by viewModel.columnLocked.collectAsState()
             val sortState by viewModel.sortState.collectAsState()
             val wrapContent by viewModel.wrapContent.collectAsState()
+            val heatmapEnabled by viewModel.heatmapEnabled.collectAsState()
 
             LaunchedEffect(columnLocked) {
                 invalidateOptionsMenu()
@@ -138,6 +139,10 @@ class DataGridActivity : ThemedActivity() {
             }
 
             LaunchedEffect(wrapContent) {
+                invalidateOptionsMenu()
+            }
+
+            LaunchedEffect(heatmapEnabled) {
                 invalidateOptionsMenu()
             }
 
@@ -155,7 +160,7 @@ class DataGridActivity : ThemedActivity() {
                             if (activePlotIdString == null && activePlotId != null) {
                                 activePlotIdString = viewModel.rawPlotIds.getOrNull(activePlotId!! - 1)
                             }
-                            DataGridTable(state, columnLocked, sortState, wrapContent)
+                            DataGridTable(state, columnLocked, sortState, wrapContent, heatmapEnabled)
                         }
                         is DataGridViewModel.UiState.Empty,
                         is DataGridViewModel.UiState.Error -> {
@@ -191,6 +196,9 @@ class DataGridActivity : ThemedActivity() {
             R.id.menu_data_grid_action_reset_sort -> {
                 viewModel.resetSort()
             }
+            R.id.menu_data_grid_action_heatmap -> {
+                viewModel.toggleHeatmap()
+            }
         }
         return super.onOptionsItemSelected(item)
     }
@@ -204,6 +212,13 @@ class DataGridActivity : ThemedActivity() {
         val wrapItem = menu.findItem(R.id.menu_data_grid_action_wrap_content)
         val isWrapped = viewModel.wrapContent.value
         wrapItem?.setIcon(if (isWrapped) R.drawable.ic_arrow_collapse_all else R.drawable.ic_arrow_expand_all)
+        val heatmapItem = menu.findItem(R.id.menu_data_grid_action_heatmap)
+        val isHeatmap = viewModel.heatmapEnabled.value
+        if (isHeatmap) {
+            heatmapItem?.icon?.setTint(getColor(R.color.main_primary_dark))
+        } else {
+            heatmapItem?.icon?.setTintList(null)
+        }
         return super.onPrepareOptionsMenu(menu)
     }
 
@@ -233,7 +248,8 @@ class DataGridActivity : ThemedActivity() {
         state: DataGridViewModel.UiState.Loaded,
         columnLocked: Boolean = true,
         sortState: DataGridViewModel.SortState = DataGridViewModel.SortState(),
-        wrapContent: Boolean = false
+        wrapContent: Boolean = false,
+        heatmapEnabled: Boolean = false
     ) {
         val traits = state.traits
         val rowHeaders = state.rowHeaders
@@ -292,6 +308,15 @@ class DataGridActivity : ThemedActivity() {
                     ceil(textLen.toFloat() / charsPerLine).toInt().coerceAtLeast(1)
                 }
                 (maxLines * 20 + 16).dp.coerceAtLeast(48.dp)
+            }
+        }
+
+        // Pre-compute per-column numeric min/max for heatmap
+        val columnHeatmapRanges: List<Pair<Double, Double>?> = remember(state, heatmapEnabled) {
+            if (!heatmapEnabled) List(traits.size) { null }
+            else traits.indices.map { colIdx ->
+                val nums = gridData.mapNotNull { row -> row.getOrNull(colIdx)?.value?.toHeatmapDouble() }
+                if (nums.size < 2) null else Pair(nums.min(), nums.max())
             }
         }
 
@@ -366,9 +391,19 @@ class DataGridActivity : ThemedActivity() {
                                 gridData[row][columnIndex]
                             else null
 
+                        val heatmapColor: Color? = run {
+                            val range = columnHeatmapRanges.getOrNull(columnIndex)
+                            val numVal = cellData?.value?.toHeatmapDouble()
+                            if (range != null && numVal != null && range.first != range.second) {
+                                val t = ((numVal - range.first) / (range.second - range.first)).toFloat().coerceIn(0f, 1f)
+                                lerpHeatmapColor(t)
+                            } else null
+                        }
+
                         DataCell(
                             value = cellData?.value ?: "",
                             isHighlighted = (plotIds.getOrNull(row) == activePlotIdString && columnIndex + 1 == activeTrait),
+                            heatmapColor = heatmapColor,
                             wrapContent = wrapContent
                         ) {
                             if (cellData != null && row < plotIds.size) {
@@ -424,9 +459,10 @@ class DataGridActivity : ThemedActivity() {
     }
 
     @Composable
-    fun DataCell(value: String, isHighlighted: Boolean = false, wrapContent: Boolean = false, onClick: () -> Unit = {}) {
+    fun DataCell(value: String, isHighlighted: Boolean = false, heatmapColor: Color? = null, wrapContent: Boolean = false, onClick: () -> Unit = {}) {
         val backgroundColor = when {
             isHighlighted -> Color(activeCellBgColor)
+            heatmapColor != null -> heatmapColor
             value.isNotBlank() -> Color(filledCellBgColor)
             else -> Color(emptyCellBgColor)
         }
@@ -573,6 +609,44 @@ class DataGridActivity : ThemedActivity() {
                     viewModel.loadGrid(columns[which])
                     dialog.dismiss()
                 }.create().show()
+        }
+    }
+
+    /**
+     * Converts a cell value string to a Double for heatmap computation.
+     * Returns null for NA, blank, "...", or any non-numeric/non-boolean value.
+     */
+    private fun String.toHeatmapDouble(): Double? {
+        if (isBlank() || equals("NA", ignoreCase = true) || this == "...") return null
+        toDoubleOrNull()?.let { return it }
+        return when (lowercase()) {
+            "true", "yes" -> 1.0
+            "false", "no" -> 0.0
+            else -> null
+        }
+    }
+
+    /** Interpolates red (low) → yellow (mid) → green (high) for the heatmap gradient. */
+    private fun lerpHeatmapColor(t: Float): Color {
+        val low    = Color(0xFFF44336.toInt()) // Material Red 500
+        val mid    = Color(0xFFFFEB3B.toInt()) // Material Yellow 500
+        val high   = Color(0xFF4CAF50.toInt()) // Material Green 500
+        return if (t < 0.5f) {
+            val s = t * 2f
+            Color(
+                red   = low.red   + (mid.red   - low.red)   * s,
+                green = low.green + (mid.green - low.green) * s,
+                blue  = low.blue  + (mid.blue  - low.blue)  * s,
+                alpha = 1f
+            )
+        } else {
+            val s = (t - 0.5f) * 2f
+            Color(
+                red   = mid.red   + (high.red   - mid.red)   * s,
+                green = mid.green + (high.green - mid.green) * s,
+                blue  = mid.blue  + (high.blue  - mid.blue)  * s,
+                alpha = 1f
+            )
         }
     }
 }
