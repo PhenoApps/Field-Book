@@ -14,6 +14,11 @@
         app:showAsAction="ifRoom"
         android:title="@string/menu_action_reset_sort_data_grid_title" />
     <item
+        android:id="@+id/menu_data_grid_action_wrap_content"
+        android:icon="@drawable/ic_arrow_expand_all"
+        app:showAsAction="always"
+        android:title="@string/menu_action_wrap_content_data_grid_title" />
+    <item
         android:id="@+id/menu_data_grid_action_header_view"
         android:icon="@drawable/ic_view_split_vertical"
         app:showAsAction="always"

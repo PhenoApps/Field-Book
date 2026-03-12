@@ -68,6 +68,13 @@ class DataGridViewModel @Inject constructor(
         _columnLocked.value = !_columnLocked.value
     }
 
+    private val _wrapContent = MutableStateFlow(false)
+    val wrapContent: StateFlow<Boolean> = _wrapContent.asStateFlow()
+
+    fun toggleWrapContent() {
+        _wrapContent.value = !_wrapContent.value
+    }
+
     fun sortByColumn(columnIndex: Int) {
         val cur = _sortState.value
         _sortState.value = if (cur.columnIndex == columnIndex) SortState(columnIndex, !cur.ascending)

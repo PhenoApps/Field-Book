@@ -29,12 +29,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlin.math.ceil
 import androidx.core.content.edit
 import androidx.databinding.DataBindingUtil
 import com.fieldbook.tracker.R
@@ -125,12 +127,17 @@ class DataGridActivity : ThemedActivity() {
             val uiState by viewModel.uiState.collectAsState()
             val columnLocked by viewModel.columnLocked.collectAsState()
             val sortState by viewModel.sortState.collectAsState()
+            val wrapContent by viewModel.wrapContent.collectAsState()
 
             LaunchedEffect(columnLocked) {
                 invalidateOptionsMenu()
             }
 
             LaunchedEffect(sortState) {
+                invalidateOptionsMenu()
+            }
+
+            LaunchedEffect(wrapContent) {
                 invalidateOptionsMenu()
             }
 
@@ -148,7 +155,7 @@ class DataGridActivity : ThemedActivity() {
                             if (activePlotIdString == null && activePlotId != null) {
                                 activePlotIdString = viewModel.rawPlotIds.getOrNull(activePlotId!! - 1)
                             }
-                            DataGridTable(state, columnLocked, sortState)
+                            DataGridTable(state, columnLocked, sortState, wrapContent)
                         }
                         is DataGridViewModel.UiState.Empty,
                         is DataGridViewModel.UiState.Error -> {
@@ -175,6 +182,9 @@ class DataGridActivity : ThemedActivity() {
             R.id.menu_data_grid_action_lock_column -> {
                 viewModel.toggleColumnLock()
             }
+            R.id.menu_data_grid_action_wrap_content -> {
+                viewModel.toggleWrapContent()
+            }
             R.id.menu_data_grid_action_header_view -> {
                 showHeaderPickerDialog()
             }
@@ -191,6 +201,9 @@ class DataGridActivity : ThemedActivity() {
         lockItem?.setIcon(if (isLocked) R.drawable.ic_tb_lock else R.drawable.ic_tb_unlock)
         val resetSortItem = menu.findItem(R.id.menu_data_grid_action_reset_sort)
         resetSortItem?.isVisible = viewModel.sortState.value.columnIndex >= 0
+        val wrapItem = menu.findItem(R.id.menu_data_grid_action_wrap_content)
+        val isWrapped = viewModel.wrapContent.value
+        wrapItem?.setIcon(if (isWrapped) R.drawable.ic_arrow_collapse_all else R.drawable.ic_arrow_expand_all)
         return super.onPrepareOptionsMenu(menu)
     }
 
@@ -219,7 +232,8 @@ class DataGridActivity : ThemedActivity() {
     fun DataGridTable(
         state: DataGridViewModel.UiState.Loaded,
         columnLocked: Boolean = true,
-        sortState: DataGridViewModel.SortState = DataGridViewModel.SortState()
+        sortState: DataGridViewModel.SortState = DataGridViewModel.SortState(),
+        wrapContent: Boolean = false
     ) {
         val traits = state.traits
         val rowHeaders = state.rowHeaders
@@ -247,17 +261,52 @@ class DataGridActivity : ThemedActivity() {
             }
         }
 
+        val rowHeaderName = getCurrentRowHeader()
+
+        // Pre-compute per-column widths based on max content length when wrapping is enabled
+        val columnWidths: List<Dp> = remember(state, wrapContent, rowHeaderName) {
+            if (!wrapContent) emptyList()
+            else (0 until columnCount).map { col ->
+                val headerLen = if (col == 0) rowHeaderName.length
+                                else (traits.getOrNull(col - 1)?.alias?.length ?: 0)
+                val maxDataLen = if (col == 0) rowHeaders.maxOfOrNull { it.name.length } ?: 0
+                                 else gridData.maxOfOrNull { row -> row.getOrNull(col - 1)?.value?.length ?: 0 } ?: 0
+                val maxLen = maxOf(headerLen, maxDataLen).coerceAtLeast(1)
+                (maxLen * 10f + 16f).dp.coerceAtLeast(60.dp)
+            }
+        }
+
+        // Pre-compute per-row heights based on how many lines each cell needs at its column width
+        val rowHeights: List<Dp> = remember(state, wrapContent, columnWidths) {
+            if (!wrapContent) emptyList()
+            else (0 until rowCount).map { row ->
+                val maxLines = (0 until columnCount).maxOf { col ->
+                    val colWidthPx = (columnWidths.getOrNull(col) ?: 100.dp).value
+                    val charsPerLine = ((colWidthPx - 16f) / 10f).toInt().coerceAtLeast(1)
+                    val textLen = when {
+                        row == 0 -> if (col == 0) rowHeaderName.length
+                                    else traits.getOrNull(col - 1)?.alias?.length ?: 0
+                        col == 0 -> rowHeaders.getOrNull(row - 1)?.name?.length ?: 0
+                        else -> gridData.getOrNull(row - 1)?.getOrNull(col - 1)?.value?.length ?: 0
+                    }.coerceAtLeast(1)
+                    ceil(textLen.toFloat() / charsPerLine).toInt().coerceAtLeast(1)
+                }
+                (maxLines * 20 + 16).dp.coerceAtLeast(48.dp)
+            }
+        }
+
         Box(modifier = Modifier.fillMaxWidth()) {
             LazyTable(
                 state = lazyTableState,
                 dimensions = lazyTableDimensions(
                     columnSize = { col ->
-                        when (col) {
-                            0 -> 120.dp
-                            else -> 100.dp
-                        }
+                        if (wrapContent) columnWidths.getOrNull(col) ?: 100.dp
+                        else when (col) { 0 -> 120.dp; else -> 100.dp }
                     },
-                    rowSize = { 48.dp }
+                    rowSize = { row ->
+                        if (wrapContent) rowHeights.getOrNull(row) ?: 48.dp
+                        else 48.dp
+                    }
                 ),
                 contentPadding = PaddingValues(0.dp),
                 pinConfiguration = lazyTablePinConfiguration(
@@ -277,16 +326,18 @@ class DataGridActivity : ThemedActivity() {
                     }
                     if (index == 0) {
                         HeaderCell(
-                            text = getCurrentRowHeader(),
+                            text = rowHeaderName,
                             sortIconRes = sortIcon,
-                            onClick = { viewModel.sortByColumn(0) }
+                            onClick = { viewModel.sortByColumn(0) },
+                            wrapContent = wrapContent
                         )
                     } else {
                         val traitIndex = index - 1
                         HeaderCell(
                             text = if (traitIndex < traits.size) traits[traitIndex].alias else "",
                             sortIconRes = sortIcon,
-                            onClick = { viewModel.sortByColumn(index) }
+                            onClick = { viewModel.sortByColumn(index) },
+                            wrapContent = wrapContent
                         )
                     }
                 }
@@ -304,7 +355,10 @@ class DataGridActivity : ThemedActivity() {
                     val column = index % columnCount
 
                     if (column == 0) {
-                        RowHeaderCell(text = if (row < rowHeaders.size) rowHeaders[row].name else "")
+                        RowHeaderCell(
+                            text = if (row < rowHeaders.size) rowHeaders[row].name else "",
+                            wrapContent = wrapContent
+                        )
                     } else {
                         val columnIndex = column - 1
                         val cellData =
@@ -314,7 +368,8 @@ class DataGridActivity : ThemedActivity() {
 
                         DataCell(
                             value = cellData?.value ?: "",
-                            isHighlighted = (plotIds.getOrNull(row) == activePlotIdString && columnIndex + 1 == activeTrait)
+                            isHighlighted = (plotIds.getOrNull(row) == activePlotIdString && columnIndex + 1 == activeTrait),
+                            wrapContent = wrapContent
                         ) {
                             if (cellData != null && row < plotIds.size) {
                                 onCellClicked(row, columnIndex, traits, plotIds)
@@ -327,7 +382,7 @@ class DataGridActivity : ThemedActivity() {
     }
 
     @Composable
-    fun HeaderCell(text: String, sortIconRes: Int? = null, onClick: (() -> Unit)? = null) {
+    fun HeaderCell(text: String, sortIconRes: Int? = null, onClick: (() -> Unit)? = null, wrapContent: Boolean = false) {
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
@@ -359,16 +414,17 @@ class DataGridActivity : ThemedActivity() {
     }
 
     @Composable
-    fun RowHeaderCell(text: String) {
+    fun RowHeaderCell(text: String, wrapContent: Boolean = false) {
         TableCell(
             text = text,
             backgroundColor = Color.White,
-            textColor = Color(cellTextColor)
+            textColor = Color(cellTextColor),
+            wrapContent = wrapContent
         )
     }
 
     @Composable
-    fun DataCell(value: String, isHighlighted: Boolean = false, onClick: () -> Unit = {}) {
+    fun DataCell(value: String, isHighlighted: Boolean = false, wrapContent: Boolean = false, onClick: () -> Unit = {}) {
         val backgroundColor = when {
             isHighlighted -> Color(activeCellBgColor)
             value.isNotBlank() -> Color(filledCellBgColor)
@@ -382,7 +438,8 @@ class DataGridActivity : ThemedActivity() {
             backgroundColor = backgroundColor,
             textColor = textColor,
             onClick = onClick,
-            isClickable = true
+            isClickable = true,
+            wrapContent = wrapContent
         )
     }
 
@@ -392,7 +449,8 @@ class DataGridActivity : ThemedActivity() {
         backgroundColor: Color,
         textColor: Color,
         onClick: () -> Unit = {},
-        isClickable: Boolean = false
+        isClickable: Boolean = false,
+        wrapContent: Boolean = false
     ) {
         Box(
             contentAlignment = Alignment.Center,
