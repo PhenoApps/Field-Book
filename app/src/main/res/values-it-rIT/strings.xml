@@ -1393,6 +1393,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="delete_color_message">Questo eliminerà definitivamente l\'osservazione</string>
     <string name="nix_device_connecting">Il dispositivo si sta connettendo.</string>
     <!-- inno spectra -->
+    <string name="inno_spectra_save_failed">Salvataggio fallito</string>
     <string name="inno_spectra_hardware_incompatible">Hardware incompatibile</string>
     <string name="inno_spectra_function_locked">Funzione Bloccata</string>
     <string name="header_temperature">Temperatura</string>
@@ -1470,8 +1471,13 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="opening_brapi_no_network_error">La rete deve essere abilitata per utilizzare le funzionalità BrAPI.</string>
     <string name="act_brapi_list_filter_reset_selection_message">Questo cancellerà la lista in esecuzione degli elementi selezionati.</string>
     <string name="pref_experimental_generate_sample_data_title">Genera Campo di Esempio</string>
+    <string name="pref_experimental_generate_sample_data_summary">Crea un campo di esempio con osservazioni artificiali per tutti i caratteri caricati. I timestamp vengono randomizzati negli ultimi tre mesi.</string>
     <string name="pref_experimental_generate_sample_data_confirm_title">Generare Campo di Esempio?</string>
     <string name="pref_experimental_generate_sample_data_confirm_message">Questo creerà o popolerà un campo chiamato \"field_sample\" con osservazioni artificiali. I caratteri di esempio saranno caricate automaticamente se non sono presenti.</string>
+    <string name="pref_experimental_generate_sample_data_success">Campo di esempio creato con successo.</string>
+    <string name="pref_experimental_generate_sample_data_failure">Impossibile generare il campo di esempio. Controllare che l\'archiviazione sia configurata correttamente.</string>
+    <string name="pref_alpha_media_keycode_events_summary">La traccia successiva/precedente naviga i entrati, il volume su/giù si muove attraverso i caratteri, la chiamata catturerà le foto</string>
+    <string name="pref_alpha_media_keycode_events_title">Naviga Tramite Comandi Multimediali dell\'Hardware</string>
     <string name="pref_geonav_distance_threshold_summary">GeoNav si ferma automaticamente quando la distanza da tutti le parcelle supera questo valore in chilometri.</string>
     <string name="pref_geonav_distance_threshold_title">Controllo Di Prossimità</string>
     <string name="activity_collect_proximity_warning">GeoNav Fermo, al di fuori delle coordinate</string>
@@ -1588,6 +1594,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="media_photo">Stato foto</string>
     <string name="media_video">Stato video</string>
     <string name="media_audio">Stato audio</string>
+    <string name="no_observation">I dati devono essere raccolti prima che i media possano essere allegati.</string>
     <string name="preferences_behavior_barcode_scanning_title">Scansione del Codice a Barre della Barra degli Strumenti</string>
     <string name="barcode_ask_enter">Inserisci Valore</string>
     <string name="barcode_ask_move">Muovi</string>
@@ -1595,9 +1602,14 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="barcode_ask_title">Scegli un\'opzione</string>
     <string name="no_media_found">Nessun media %1$s trovato</string>
     <string name="media_viewer">Visualizzatore Media</string>
+    <string name="unable_to_load_image">Impossibile caricare l\'immagine</string>
     <string name="delete">Elimina</string>
     <string name="confirm_delete">Vuoi eliminare definitivamente questo elemento multimediale?</string>
     <string name="audio_permission_required">Autorizzazione audio richiesta</string>
+    <string name="back_button">Torna all\'attività precedente</string>
+    <string name="na_placeholder">Segnaposto immagine non disponibile</string>
+    <string name="confirm_replace_media_message">Vuoi sostituire i media attuali per questa osservazione?</string>
+    <string name="confirm_replace_media_title">Sostituisci I Media Esistenti</string>
     <string name="failed_to_find_file_name">Impossibile recuperare il nome del file.</string>
     <string name="act_brapi_export_starting">Avvio esportazione</string>
     <string name="act_brapi_export_success">Esportazione eseguita con successo</string>
@@ -1675,6 +1687,8 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
     <string name="alert_jump_to_plot_bottom_toolbar_message">La barra degli strumenti inferiore è stata aggiornata per supportare la navigazione della entrata tramite codice a barre.</string>
     <!-- Preference: Attach media barcode prioritize -->
+    <string name="preferences_behavior_attach_media_barcode_prioritize">Usa sempre il codice a barre rilevato</string>
+    <string name="preferences_behavior_attach_media_barcode_prioritize_description">Quando viene rilevato un codice a barre, il Field Book analizzerà automaticamente il codice a barre senza l\'interazione dell\'utente.</string>
     <string name="edit">Modifica</string>
     <string name="trait_categorical_other_btn_description">Aggiungi una nuova categoria</string>
     <!-- InnoSpectra settings layout -->
