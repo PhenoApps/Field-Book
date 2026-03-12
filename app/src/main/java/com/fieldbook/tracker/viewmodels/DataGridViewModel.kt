@@ -12,8 +12,11 @@ import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -41,8 +44,22 @@ class DataGridViewModel @Inject constructor(
         object Error : UiState()
     }
 
-    private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
-    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+    data class SortState(
+        val columnIndex: Int = -1, // -1 = default DB order; 0 = row-header; 1+ = trait col (traitIdx = columnIndex-1)
+        val ascending: Boolean = true
+    )
+
+    private val _rawUiState = MutableStateFlow<UiState>(UiState.Loading)
+    private val _sortState = MutableStateFlow(SortState())
+    val sortState: StateFlow<SortState> = _sortState.asStateFlow()
+
+    val uiState: StateFlow<UiState> = combine(_rawUiState, _sortState) { raw, sort ->
+        applySorting(raw, sort)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, UiState.Loading)
+
+    /** The plot IDs in original DB order — used to resolve the incoming activePlotId integer index. */
+    val rawPlotIds: List<String>
+        get() = (_rawUiState.value as? UiState.Loaded)?.plotIds ?: emptyList()
 
     private val _columnLocked = MutableStateFlow(true)
     val columnLocked: StateFlow<Boolean> = _columnLocked.asStateFlow()
@@ -51,13 +68,48 @@ class DataGridViewModel @Inject constructor(
         _columnLocked.value = !_columnLocked.value
     }
 
+    fun sortByColumn(columnIndex: Int) {
+        val cur = _sortState.value
+        _sortState.value = if (cur.columnIndex == columnIndex) SortState(columnIndex, !cur.ascending)
+                           else SortState(columnIndex, true)
+    }
+
+    fun resetSort() {
+        _sortState.value = SortState()
+    }
+
+    private fun applySorting(raw: UiState, sort: SortState): UiState {
+        if (sort.columnIndex < 0 || raw !is UiState.Loaded) return raw
+        val comparator = Comparator<Int> { a, b ->
+            val aStr = if (sort.columnIndex == 0) raw.rowHeaders[a].name
+                       else raw.gridData.getOrNull(a)?.getOrNull(sort.columnIndex - 1)?.value ?: ""
+            val bStr = if (sort.columnIndex == 0) raw.rowHeaders[b].name
+                       else raw.gridData.getOrNull(b)?.getOrNull(sort.columnIndex - 1)?.value ?: ""
+            numericAwareCompare(aStr, bStr)
+        }
+        val indices = raw.rowHeaders.indices.sortedWith(if (sort.ascending) comparator else comparator.reversed())
+        return UiState.Loaded(
+            traits     = raw.traits,
+            rowHeaders = indices.map { raw.rowHeaders[it] },
+            plotIds    = indices.map { raw.plotIds[it] },
+            gridData   = indices.map { raw.gridData[it] }
+        )
+    }
+
+    private fun numericAwareCompare(a: String, b: String): Int {
+        val aNum = a.toDoubleOrNull()
+        val bNum = b.toDoubleOrNull()
+        return if (aNum != null && bNum != null) aNum.compareTo(bNum)
+        else a.compareTo(b, ignoreCase = true)
+    }
+
     fun loadGrid(rowHeader: String) {
         if (rowHeader.isBlank()) {
-            _uiState.value = UiState.Empty
+            _rawUiState.value = UiState.Empty
             return
         }
 
-        _uiState.value = UiState.Loading
+        _rawUiState.value = UiState.Loading
 
         val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
         val uniqueHeader = preferences.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
@@ -77,7 +129,7 @@ class DataGridViewModel @Inject constructor(
                     val currentCount = database.getObservationCount(studyId.toString())
                     if (currentCount == snapshot.observationCount) {
                         Log.d(TAG, "Cache hit. Serving ${snapshot.rowHeaders.size} rows from cache.")
-                        _uiState.value = UiState.Loaded(
+                        _rawUiState.value = UiState.Loaded(
                             traits = snapshot.traits,
                             rowHeaders = snapshot.rowHeaders,
                             plotIds = snapshot.plotIds,
@@ -96,7 +148,7 @@ class DataGridViewModel @Inject constructor(
 
                 if (cursor == null || !cursor.moveToFirst()) {
                     cursor?.close()
-                    _uiState.value = UiState.Empty
+                    _rawUiState.value = UiState.Empty
                     return@launch
                 }
 
@@ -106,7 +158,7 @@ class DataGridViewModel @Inject constructor(
 
                 if (uniqueIndex < 0) {
                     cursor.close()
-                    _uiState.value = UiState.Empty
+                    _rawUiState.value = UiState.Empty
                     return@launch
                 }
 
@@ -158,7 +210,7 @@ class DataGridViewModel @Inject constructor(
 
                         // Progressive emit: show grid after first batch so user sees data quickly
                         if (gridData.size % PROGRESSIVE_BATCH_SIZE == 0) {
-                            _uiState.value = UiState.Loaded(
+                            _rawUiState.value = UiState.Loaded(
                                 traits = visibleTraits,
                                 rowHeaders = rowHeaders.toList(),
                                 plotIds = plotIds.toList(),
@@ -190,7 +242,7 @@ class DataGridViewModel @Inject constructor(
                 )
 
                 // Final state with all rows
-                _uiState.value = UiState.Loaded(
+                _rawUiState.value = UiState.Loaded(
                     traits = visibleTraits,
                     rowHeaders = rowHeaders,
                     plotIds = plotIds,
@@ -199,7 +251,7 @@ class DataGridViewModel @Inject constructor(
 
             } catch (e: Exception) {
                 e.printStackTrace()
-                _uiState.value = UiState.Error
+                _rawUiState.value = UiState.Error
             }
         }
     }

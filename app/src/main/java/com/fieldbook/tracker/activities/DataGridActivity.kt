@@ -16,11 +16,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.Text
+import androidx.compose.ui.res.painterResource
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -73,6 +77,7 @@ class DataGridActivity : ThemedActivity() {
     // for active highlighted cell
     private var activePlotId: Int? = null
     private var activeTrait: Int? = null
+    private var activePlotIdString: String? = null
 
     private var activeCellBgColor: Int = 0
     private var filledCellBgColor: Int = 0
@@ -119,8 +124,13 @@ class DataGridActivity : ThemedActivity() {
         binding.composeView.setContent {
             val uiState by viewModel.uiState.collectAsState()
             val columnLocked by viewModel.columnLocked.collectAsState()
+            val sortState by viewModel.sortState.collectAsState()
 
             LaunchedEffect(columnLocked) {
+                invalidateOptionsMenu()
+            }
+
+            LaunchedEffect(sortState) {
                 invalidateOptionsMenu()
             }
 
@@ -135,7 +145,10 @@ class DataGridActivity : ThemedActivity() {
                             CircularProgressIndicator(color = Color(activeCellBgColor))
                         }
                         is DataGridViewModel.UiState.Loaded -> {
-                            DataGridTable(state, columnLocked)
+                            if (activePlotIdString == null && activePlotId != null) {
+                                activePlotIdString = viewModel.rawPlotIds.getOrNull(activePlotId!! - 1)
+                            }
+                            DataGridTable(state, columnLocked, sortState)
                         }
                         is DataGridViewModel.UiState.Empty,
                         is DataGridViewModel.UiState.Error -> {
@@ -165,6 +178,9 @@ class DataGridActivity : ThemedActivity() {
             R.id.menu_data_grid_action_header_view -> {
                 showHeaderPickerDialog()
             }
+            R.id.menu_data_grid_action_reset_sort -> {
+                viewModel.resetSort()
+            }
         }
         return super.onOptionsItemSelected(item)
     }
@@ -173,6 +189,8 @@ class DataGridActivity : ThemedActivity() {
         val lockItem = menu.findItem(R.id.menu_data_grid_action_lock_column)
         val isLocked = viewModel.columnLocked.value
         lockItem?.setIcon(if (isLocked) R.drawable.ic_tb_lock else R.drawable.ic_tb_unlock)
+        val resetSortItem = menu.findItem(R.id.menu_data_grid_action_reset_sort)
+        resetSortItem?.isVisible = viewModel.sortState.value.columnIndex >= 0
         return super.onPrepareOptionsMenu(menu)
     }
 
@@ -198,7 +216,11 @@ class DataGridActivity : ThemedActivity() {
     }
 
     @Composable
-    fun DataGridTable(state: DataGridViewModel.UiState.Loaded, columnLocked: Boolean = true) {
+    fun DataGridTable(
+        state: DataGridViewModel.UiState.Loaded,
+        columnLocked: Boolean = true,
+        sortState: DataGridViewModel.SortState = DataGridViewModel.SortState()
+    ) {
         val traits = state.traits
         val rowHeaders = state.rowHeaders
         val plotIds = state.plotIds
@@ -247,11 +269,25 @@ class DataGridActivity : ThemedActivity() {
                 items(
                     count = columnCount,
                     layoutInfo = { LazyTableItem(column = it, row = 0) }) { index ->
+                    val isSorted = sortState.columnIndex == index
+                    val sortIcon = when {
+                        !isSorted -> null
+                        sortState.ascending -> R.drawable.ic_chevron_up
+                        else -> R.drawable.ic_chevron_down
+                    }
                     if (index == 0) {
-                        HeaderCell(text = getCurrentRowHeader())
+                        HeaderCell(
+                            text = getCurrentRowHeader(),
+                            sortIconRes = sortIcon,
+                            onClick = { viewModel.sortByColumn(0) }
+                        )
                     } else {
                         val traitIndex = index - 1
-                        HeaderCell(text = if (traitIndex < traits.size) traits[traitIndex].alias else "")
+                        HeaderCell(
+                            text = if (traitIndex < traits.size) traits[traitIndex].alias else "",
+                            sortIconRes = sortIcon,
+                            onClick = { viewModel.sortByColumn(index) }
+                        )
                     }
                 }
 
@@ -278,7 +314,7 @@ class DataGridActivity : ThemedActivity() {
 
                         DataCell(
                             value = cellData?.value ?: "",
-                            isHighlighted = (row + 1 == activePlotId && columnIndex + 1 == activeTrait)
+                            isHighlighted = (plotIds.getOrNull(row) == activePlotIdString && columnIndex + 1 == activeTrait)
                         ) {
                             if (cellData != null && row < plotIds.size) {
                                 onCellClicked(row, columnIndex, traits, plotIds)
@@ -291,12 +327,35 @@ class DataGridActivity : ThemedActivity() {
     }
 
     @Composable
-    fun HeaderCell(text: String) {
-        TableCell(
-            text = text,
-            backgroundColor = Color.White,
-            textColor = Color(cellTextColor)
-        )
+    fun HeaderCell(text: String, sortIconRes: Int? = null, onClick: (() -> Unit)? = null) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .background(Color.White)
+                .border(Dp.Hairline, Color(cellTextColor))
+                .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                Text(
+                    text = text,
+                    color = Color(cellTextColor),
+                    textAlign = TextAlign.Center,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                )
+                if (sortIconRes != null) {
+                    Icon(
+                        painter = painterResource(id = sortIconRes),
+                        contentDescription = null,
+                        tint = Color(cellTextColor),
+                        modifier = Modifier.size(14.dp)
+                    )
+                }
+            }
+        }
     }
 
     @Composable
