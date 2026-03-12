@@ -61,18 +61,22 @@ class DataGridViewModel @Inject constructor(
     val rawPlotIds: List<String>
         get() = (_rawUiState.value as? UiState.Loaded)?.plotIds ?: emptyList()
 
-    private val _columnLocked = MutableStateFlow(true)
+    private val _columnLocked = MutableStateFlow(preferences.getBoolean(GeneralKeys.DATAGRID_COLUMN_LOCKED, true))
     val columnLocked: StateFlow<Boolean> = _columnLocked.asStateFlow()
 
     fun toggleColumnLock() {
-        _columnLocked.value = !_columnLocked.value
+        val newValue = !_columnLocked.value
+        _columnLocked.value = newValue
+        preferences.edit().putBoolean(GeneralKeys.DATAGRID_COLUMN_LOCKED, newValue).apply()
     }
 
-    private val _wrapContent = MutableStateFlow(false)
+    private val _wrapContent = MutableStateFlow(preferences.getBoolean(GeneralKeys.DATAGRID_WRAP_CONTENT, false))
     val wrapContent: StateFlow<Boolean> = _wrapContent.asStateFlow()
 
     fun toggleWrapContent() {
-        _wrapContent.value = !_wrapContent.value
+        val newValue = !_wrapContent.value
+        _wrapContent.value = newValue
+        preferences.edit().putBoolean(GeneralKeys.DATAGRID_WRAP_CONTENT, newValue).apply()
     }
 
     fun sortByColumn(columnIndex: Int) {
