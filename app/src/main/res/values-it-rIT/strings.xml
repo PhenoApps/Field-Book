@@ -37,7 +37,7 @@
     <string name="app_intro_intro_summary_slide2">I dati vengono inseriti su Field Book con disposizione dei caratteri che sono progettate per semplificare l\'input dei dati e minimizzare gli errori. \n\n Per impostazione predefinita, i dati raccolti vengono archiviati localmente, ma Field Book supporta la Breeding-API che permette l\'invio di dati a sistemi compatibili con BrAPI.</string>
     <string name="app_intro_required_setup_title">Impostazione Richiesta</string>
     <string name="app_intro_required_setup_summary">Per iniziare a usare Field Book, concedi i permessi necessari all\'applicazione e scegli una cartella in cui salvare i tuoi dati.</string>
-    <string name="app_intro_permissions_title">Permessi</string>
+    <string name="app_intro_permissions_title">Autorizzazioni</string>
     <string name="app_intro_permissions_warning">Si prega di concedere le autorizzazioni necessarie</string>
     <string name="app_intro_storage_title">Definisci Archiviazione</string>
     <string name="app_intro_storage_summary">Definisci una cartella in cui verranno archiviati i tuoi dati.</string>
@@ -143,6 +143,8 @@
     <string name="fields_delete">Elimina</string>
     <string name="fields_delete_study">Elimina campo</string>
     <string name="fields_delete_study_confirmation">Sei sicuro di voler eliminare questo campo? Questo eliminerà tutti i dati da questo campo.</string>
+    <string name="fields_delete_archive_instead">Archivia invece</string>
+    <string name="fields_delete_permanent_warning">L\'eliminazione di un campo è permanente e non può essere annullata. Archiviarlo invece?</string>
     <plurals name="fields_delete_confirmation">
         <item quantity="one">Sei sicuro di voler eliminare il campo \"%s\"?</item>
         <item quantity="other">Sei sicuro di voler eliminare questi campi: %s?</item>
@@ -277,7 +279,7 @@
     <string name="traits_sort_import_order">Ordine d\'importazione</string>
     <string name="traits_sort_visibility">Visibilità</string>
     <string name="traits_sort_format">Formato</string>
-    <string name="warning_traits_missing_modify">Crea un carattere prima di poterlo modificare.</string>
+    <string name="warning_traits_missing_modify">Crea caratteri prima di modificarli.</string>
     <!-- Trait import/export -->
     <string name="traits_new_dialog_title">Nuovo/i Carattere/i</string>
     <string name="traits_dialog_create">Crea un nuovo carattere</string>
@@ -353,6 +355,7 @@
     <string name="traits_create_unit">Unità</string>
     <string name="traits_create_optional">Opzionale</string>
     <string name="traits_create_categories_title">Categorie</string>
+    <string name="traits_create_severities_title">Severità</string>
     <string name="traits_create_photo_maximum">Numero massimo di foto</string>
     <string name="traits_create_true">Vero</string>
     <string name="traits_create_false">Falso</string>
@@ -472,8 +475,14 @@
     <string name="trait_detail_chip_format_date">Formato: %s</string>
     <string name="trait_detail_chip_transfer_images">Trasferire immagini</string>
     <string name="trait_detail_chip_invalid_value">Valori anomali</string>
+    <string name="trait_detail_chip_severities">Severità</string>
     <string name="trait_parameter_allow_multicat">Selezione Categoria Multiple</string>
+    <string name="trait_parameter_allow_other">Consenti Altra Categoria</string>
     <string name="trait_other_button">Altro</string>
+    <string name="trait_other_dialog_title">Aggiungi Nuova Categoria</string>
+    <string name="trait_other_dialog_hint">Nome categoria</string>
+    <string name="trait_other_duplicate">Categoria già esistente</string>
+    <string name="trait_other_empty">Nome categoria non può essere vuoto</string>
     <string name="trait_parameter_display_value">Mostra Valore</string>
     <string name="trait_parameter_resource_file">File di Risorsa</string>
     <string name="trait_parameter_use_day_of_year">Usa Giorno Dell\'Anno</string>
@@ -654,6 +663,7 @@
     <string name="menu_collect_repeated_values_indicator">Mostra il numero di valori ripetuti.</string>
     <string name="dialog_multi_measure_delete_no_observations">Nessuna osservazione esistente.</string>
     <string name="dialog_multi_measure_delete_title">Osservazioni</string>
+    <string name="dialog_multi_measure_confirm_delete_title">Le osservazioni selezionate e i media allegati per questo carattere verranno eliminati definitivamente.</string>
     <string name="dialog_multi_measure_delete">Elimina</string>
     <string name="dialog_multi_measure_select_all">Seleziona tutti</string>
     <!--- GeoNav -->
@@ -764,6 +774,9 @@
     <string name="preferences_profile_device_name_dialog_title">Imposta Nome Del Dispositivo</string>
     <string name="preferences_profile_device_name_error">Questo campo non può essere vuoto</string>
     <string name="preferences_profile_device_name_default_format">Predefinito: %s</string>
+    <string name="preferences_system_debugging_title">Debugging</string>
+    <string name="pref_debug_application_title">Debug Applicazione</string>
+    <string name="pref_debug_application_summary">Ottieni un file per aiutare gli sviluppatori a risolvere i problemi nell\'app</string>
     <string name="pref_profile_crashlytics_user_id_enabled">ID Univoco</string>
     <string name="pref_profile_crashlytics_user_id_enabled_summary">Includi un ID anonimo e univoco nei crash log per aiutare il team di sviluppo a correggere i bug</string>
     <string name="pref_profile_crashlytics_refresh_title">Aggiorna ID</string>
@@ -854,6 +867,10 @@
     <string name="preferences_behavior_return_character_next_trait">Il tasto di ritorno fa avanzare il carattere</string>
     <string name="preferences_general_use_day_number">Usa Giorno Dell\'Anno</string>
     <string name="preferences_general_use_day_number_description">Usa il giorno dell\'anno per la raccolta dei dati anziché la data</string>
+    <string name="preferences_behavior_barcode_scanning_move_to_entry">Muovi alla entrata</string>
+    <string name="preferences_behavior_barcode_scanning_record_value">Registra valore</string>
+    <string name="preferences_behavior_barcode_scanning_enter_if_not_id">Registra il valore se non l\'ID della entrata</string>
+    <string name="preferences_behavior_barcode_scanning_ask">Chiedi ogni volta</string>
     <!-- Location -->
     <string name="preferences_location_title">Posizione</string>
     <string name="preferences_location_defaults_title">GeoCoordinates</string>
@@ -1311,6 +1328,9 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="repeated_values_left_button_content_description">sinistra</string>
     <string name="export_util_repeated_measures_table_warning_title">Tabella Delle Misure Ripetute</string>
     <string name="export_util_repeated_measures_table_warning_message">Solo il valore delle ultime misure ripetute sarà esportato in formato tabella.</string>
+    <string name="export_util_bundle_media_warning_title">Pacchetto Multimediale Grande</string>
+    <string name="export_util_bundle_media_warning_message">Questa esportazione contiene %d file multimediali. Il raggruppamento di un gran numero di file potrebbe essere lento e causare il blocco del dispositivo. Continuare?</string>
+    <string name="export_util_bundle_media_warning_continue">Continuare</string>
     <string name="activity_file_explorer_up_directory_name">Su</string>
     <string name="file_explorer_select_file_title">Seleziona File</string>
     <!-- base camera strings -->
@@ -1318,8 +1338,13 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="trait_camera_preview_content_description">Questo visualizza l\'anteprima del scherno della fotocamera.</string>
     <string name="trait_camera_capture_content_description">Cattura una foto</string>
     <string name="trait_camera_view_media_content_description">Visualizza media</string>
+    <string name="trait_camera_switch_content_description">Cambia fotocamera</string>
     <!-- Video recording messages -->
+    <string name="video_recording_started">Registrazione video avviata</string>
+    <string name="video_recording_saved">Registrazione video salvato</string>
     <!-- Audio pause not supported message -->
+    <string name="field_audio_pause_not_supported">La funzione pausa/ripresa non è supportata su questo dispositivo</string>
+    <string name="delete_local_photo">Sei sicuro di voler eliminare questo elemento?</string>
     <string name="trait_system_photo_settings_title">Impostazioni delle Foto di Sistema</string>
     <string name="trait_photos_no_settings">Questo carattere non ha impostazioni.</string>
     <string name="view_trait_photo_settings_preview_title">Anteprima</string>
@@ -1368,6 +1393,19 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="delete_color_message">Questo eliminerà definitivamente l\'osservazione</string>
     <string name="nix_device_connecting">Il dispositivo si sta connettendo.</string>
     <!-- inno spectra -->
+    <string name="inno_spectra_hardware_incompatible">Hardware incompatibile</string>
+    <string name="inno_spectra_function_locked">Funzione Bloccata</string>
+    <string name="header_temperature">Temperatura</string>
+    <string name="header_humidity">Umidità</string>
+    <string name="header_firmware">Firmware</string>
+    <string name="header_total_lamp_time">Tempo Totale Della Lampada</string>
+    <string name="header_battery">Batteria</string>
+    <string name="header_software_version">Versione Software</string>
+    <string name="header_hardware_version">Versione Hardware</string>
+    <string name="header_device_id">ID Dispositivo</string>
+    <string name="header_serial_id">ID Seriale</string>
+    <string name="header_uuid">UUID</string>
+    <string name="delete_spectral_data_plot">Elimina Dati Spettrali</string>
     <string name="brapi_studies_filter_title">Studi</string>
     <string name="brapi_trials_filter_title">Prove</string>
     <string name="brapi_filter_dialog_title">Filtra per</string>
@@ -1433,6 +1471,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="act_brapi_list_filter_reset_selection_message">Questo cancellerà la lista in esecuzione degli elementi selezionati.</string>
     <string name="pref_experimental_generate_sample_data_title">Genera Campo di Esempio</string>
     <string name="pref_experimental_generate_sample_data_confirm_title">Generare Campo di Esempio?</string>
+    <string name="pref_experimental_generate_sample_data_confirm_message">Questo creerà o popolerà un campo chiamato \"field_sample\" con osservazioni artificiali. I caratteri di esempio saranno caricate automaticamente se non sono presenti.</string>
     <string name="pref_geonav_distance_threshold_summary">GeoNav si ferma automaticamente quando la distanza da tutti le parcelle supera questo valore in chilometri.</string>
     <string name="pref_geonav_distance_threshold_title">Controllo Di Prossimità</string>
     <string name="activity_collect_proximity_warning">GeoNav Fermo, al di fuori delle coordinate</string>
@@ -1450,6 +1489,8 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="failed_to_fetch_observation_levels">Recupero dei livelli di osservazione fallito</string>
     <string name="traits_sort_default">Impostazioni predefinite</string>
     <string name="traits_crop_image_parameter">Ritaglia</string>
+    <string name="dialog_crop_title">Definisci Regione Di Ritaglio</string>
+    <string name="dialog_crop_message">Vuoi ritagliare le immagini catturate per questo carattere?</string>
     <string name="view_trait_photo_settings_crop">Imposta Regione Ritaglio</string>
     <string name="crop_image_clip_data_label">Dati della regione di retaglio del Field Book</string>
     <string name="quick_goto_swap_content_description">attiva/disattiva tipo d\'input</string>
@@ -1544,8 +1585,19 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="device_settings_dialog_unknown_name">Dispositivo Bluetooth Sconosciuto</string>
     <string name="device_settings_dialog_title">Impostazioni Dispositivo Bluetooth</string>
     <string name="no_data_captured">Nessun dato catturato.</string>
+    <string name="media_photo">Stato foto</string>
+    <string name="media_video">Stato video</string>
+    <string name="media_audio">Stato audio</string>
+    <string name="preferences_behavior_barcode_scanning_title">Scansione del Codice a Barre della Barra degli Strumenti</string>
+    <string name="barcode_ask_enter">Inserisci Valore</string>
+    <string name="barcode_ask_move">Muovi</string>
+    <string name="barcode_ask_message">Scansionato: %s</string>
+    <string name="barcode_ask_title">Scegli un\'opzione</string>
+    <string name="no_media_found">Nessun media %1$s trovato</string>
     <string name="media_viewer">Visualizzatore Media</string>
     <string name="delete">Elimina</string>
+    <string name="confirm_delete">Vuoi eliminare definitivamente questo elemento multimediale?</string>
+    <string name="audio_permission_required">Autorizzazione audio richiesta</string>
     <string name="failed_to_find_file_name">Impossibile recuperare il nome del file.</string>
     <string name="act_brapi_export_starting">Avvio esportazione</string>
     <string name="act_brapi_export_success">Esportazione eseguita con successo</string>
@@ -1617,10 +1669,18 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="there_are_unuploaded_observations_or_images_do_you_want_to_upload_them_before_downloading">Ci sono osservazioni o immagini non caricate. Vuoi caricarle prima di scaricare?</string>
     <string name="upload_first">Caricare</string>
     <string name="download_anyway">Scarica</string>
+    <string name="confirm_delete_with_media_title">Elimina osservazione</string>
+    <string name="confirm_delete_with_media_message">L\'eliminazione di questa osservazione eliminerà anche tutti i contenuti multimediali allegati. Sei sicuro di voler eliminare questa osservazione?</string>
     <string name="attach">Allega</string>
     <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
+    <string name="alert_jump_to_plot_bottom_toolbar_message">La barra degli strumenti inferiore è stata aggiornata per supportare la navigazione della entrata tramite codice a barre.</string>
     <!-- Preference: Attach media barcode prioritize -->
     <string name="edit">Modifica</string>
+    <string name="trait_categorical_other_btn_description">Aggiungi una nuova categoria</string>
     <!-- InnoSpectra settings layout -->
     <string name="view_trait_innospectra_device_name_label">Nome</string>
+    <string name="view_trait_innospectra_mac_label">MAC</string>
+    <string name="view_trait_innospectra_unknown">Sconosciuto</string>
+    <string name="view_trait_innospectra_na">N/A</string>
+    <string name="unknown">Sconosciuto</string>
 </resources>
