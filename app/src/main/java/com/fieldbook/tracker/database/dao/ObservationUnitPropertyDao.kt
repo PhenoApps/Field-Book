@@ -300,6 +300,53 @@ class ObservationUnitPropertyDao {
         }
 
         /**
+         * Lightweight variant of getExportTableData for use by DataGridActivity only.
+         *
+         * Returns the raw SQLite cursor directly, skipping the MatrixCursor copy and the
+         * ValueProcessorFormatAdapter pass (which calls getTraitByName() per cell).
+         * This eliminates O(rows × traits) extra DB queries that the export path requires for
+         * value formatting, but which the DataGrid doesn't need.
+         *
+         * The caller is responsible for closing the returned cursor.
+         */
+        fun getDataGridTableData(
+            context: Context,
+            studyId: Int,
+            traits: ArrayList<TraitObject>
+        ): Cursor? = withDatabase { db ->
+            val headers = ObservationUnitAttributeDao.getAllNames(studyId)
+
+            val selectAttributes = headers.joinToString(", ") { attributeName ->
+                "MAX(CASE WHEN attr.observation_unit_attribute_name = '$attributeName' THEN vals.observation_unit_value_name ELSE NULL END) AS \"$attributeName\""
+            }
+
+            val selectObservations = traits.joinToString(", ") { trait ->
+                val traitName = DataHelper.replaceIdentifiers(trait.name)
+                "MAX(CASE WHEN vars.internal_id_observation_variable='${trait.id}' THEN obs.value ELSE NULL END) AS \"$traitName\""
+            }
+
+            val combinedSelection = listOf(selectAttributes, selectObservations)
+                .filter { it.isNotEmpty() }
+                .joinToString(", ")
+
+            val orderByClause = getSortOrderClause(context, studyId.toString())
+
+            val query = """
+                SELECT $combinedSelection
+                FROM observation_units AS units
+                LEFT JOIN observation_units_values AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
+                LEFT JOIN observation_units_attributes AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
+                LEFT JOIN observations AS obs ON units.observation_unit_db_id = obs.observation_unit_id AND obs.study_id = $studyId
+                LEFT JOIN observation_variables AS vars ON vars.${ObservationVariable.PK} = obs.${ObservationVariable.FK}
+                WHERE units.study_id = $studyId
+                GROUP BY units.internal_id_observation_unit
+                $orderByClause
+            """.trimIndent()
+
+            db.rawQuery(query, null)
+        }
+
+        /**
          * Same as table export function above, but filters all all attribute columns other than the unique id
          * (The other attributes need to be retrieved for sorting, but can then be discarded)
          */

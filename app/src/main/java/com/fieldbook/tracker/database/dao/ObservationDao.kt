@@ -873,5 +873,47 @@ class ObservationDao {
             }
 
         } ?: 0
+
+        /**
+         * Returns a map of (plotId, traitDbId) -> repeat count for all (plot, trait) pairs in a
+         * study that have more than one observation. Used by DataGridActivity to avoid per-cell
+         * repeated-value queries.
+         */
+        fun getRepeatCountsForStudy(studyId: String): Map<Pair<String, String>, Int> =
+            withDatabase { db ->
+                val map = mutableMapOf<Pair<String, String>, Int>()
+                val cursor = db.rawQuery(
+                    """
+                    SELECT observation_unit_id, observation_variable_db_id, COUNT(*) AS cnt
+                    FROM observations
+                    WHERE study_id = ?
+                    GROUP BY observation_unit_id, observation_variable_db_id
+                    HAVING COUNT(*) > 1
+                    """.trimIndent(),
+                    arrayOf(studyId)
+                )
+                cursor.use {
+                    while (it.moveToNext()) {
+                        val plotId = it.getString(0)
+                        val traitId = it.getString(1)
+                        val count = it.getInt(2)
+                        map[Pair(plotId, traitId)] = count
+                    }
+                }
+                map
+            } ?: emptyMap()
+
+        /**
+         * Returns the total number of observations for a study. Used by DataGridActivity as a
+         * lightweight cache staleness check.
+         */
+        fun getObservationCount(studyId: String): Int = withDatabase { db ->
+            db.rawQuery(
+                "SELECT COUNT(*) FROM observations WHERE study_id = ?",
+                arrayOf(studyId)
+            ).use { cursor ->
+                if (cursor.moveToFirst()) cursor.getInt(0) else 0
+            }
+        } ?: 0
     }
 }
