@@ -52,7 +52,12 @@ class DataGridViewModel @Inject constructor(
     )
 
     private val _rawUiState = MutableStateFlow<UiState>(UiState.Loading)
-    private val _sortState = MutableStateFlow(SortState())
+    private val _sortState = MutableStateFlow(
+        SortState(
+            columnIndex = preferences.getInt(GeneralKeys.DATAGRID_SORT_COLUMN, -1),
+            ascending = preferences.getBoolean(GeneralKeys.DATAGRID_SORT_ASCENDING, true)
+        )
+    )
     val sortState: StateFlow<SortState> = _sortState.asStateFlow()
 
     val uiState: StateFlow<UiState> = combine(_rawUiState, _sortState) { raw, sort ->
@@ -96,12 +101,21 @@ class DataGridViewModel @Inject constructor(
 
     fun sortByColumn(columnIndex: Int) {
         val cur = _sortState.value
-        _sortState.value = if (cur.columnIndex == columnIndex) SortState(columnIndex, !cur.ascending)
-                           else SortState(columnIndex, true)
+        val newState = if (cur.columnIndex == columnIndex) SortState(columnIndex, !cur.ascending)
+                       else SortState(columnIndex, true)
+        _sortState.value = newState
+        preferences.edit()
+            .putInt(GeneralKeys.DATAGRID_SORT_COLUMN, newState.columnIndex)
+            .putBoolean(GeneralKeys.DATAGRID_SORT_ASCENDING, newState.ascending)
+            .apply()
     }
 
     fun resetSort() {
         _sortState.value = SortState()
+        preferences.edit()
+            .putInt(GeneralKeys.DATAGRID_SORT_COLUMN, -1)
+            .putBoolean(GeneralKeys.DATAGRID_SORT_ASCENDING, true)
+            .apply()
     }
 
     private fun applySorting(raw: UiState, sort: SortState): UiState {

@@ -317,8 +317,8 @@ class ObservationUnitPropertyDao {
         ): Cursor? = withDatabase { db ->
             // Use only the requested attributes (unique id + row header + extra headers).
             // Fall back to all attributes only if none were specified (e.g. legacy callers).
-            val headers = if (requiredAttributes.isNotEmpty()) requiredAttributes
-                          else ObservationUnitAttributeDao.getAllNames(studyId)
+            val headers: List<String> = if (requiredAttributes.isNotEmpty()) requiredAttributes
+                          else ObservationUnitAttributeDao.getAllNames(studyId).toList()
 
             val selectAttributes = headers.joinToString(", ") { attributeName ->
                 "MAX(CASE WHEN attr.observation_unit_attribute_name = '$attributeName' THEN vals.observation_unit_value_name ELSE NULL END) AS \"$attributeName\""
