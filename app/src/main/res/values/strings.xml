@@ -625,6 +625,7 @@
 
     <!--- Datagrid -->
     <string name="act_data_grid_cursor_failed">Data grid failed to load your data.</string>
+    <string name="data_grid_empty">No data to display.</string>
     <string name="dialog_data_grid_header_picker_title">Choose Row Headers</string>
     <string name="dialog_data_grid_repeated_measures_title">Choose Observation</string>
     <string name="menu_action_header_view_data_grid_title">Update Row Headers</string>

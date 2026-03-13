@@ -92,7 +92,6 @@ class DataGridViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        dataGridCache.invalidate()
     }
 
     fun sortByColumn(columnIndex: Int) {

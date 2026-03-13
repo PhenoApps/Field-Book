@@ -31,6 +31,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
@@ -172,9 +173,15 @@ class DataGridActivity : ThemedActivity() {
                             }
                             DataGridTable(state, columnLocked, sortState, wrapContent, heatmapEnabled)
                         }
-                        is DataGridViewModel.UiState.Empty,
+                        is DataGridViewModel.UiState.Empty -> {
+                            Text(
+                                text = getString(R.string.data_grid_empty),
+                                color = Color(cellTextColor),
+                                textAlign = TextAlign.Center
+                            )
+                        }
                         is DataGridViewModel.UiState.Error -> {
-                            // Nothing to show; finish was called in the old version on error
+                            finish()
                         }
                     }
                 }
@@ -282,12 +289,14 @@ class DataGridActivity : ThemedActivity() {
         val targetColumn = extraCount + (activeTrait ?: 1) - 1
         val targetRow = activePlotId ?: 1
 
-        LaunchedEffect(traits) {
-            // Triggers once per load (traits identity is stable across progressive batches)
+        var hasScrolled by rememberSaveable { mutableStateOf(false) }
+
+        LaunchedEffect(rowHeaders.size) {
             Log.d("DataGridActivity", "Data loaded: ${traits.size} traits, ${rowHeaders.size} rows")
-            if (traits.isNotEmpty() && rowHeaders.isNotEmpty()
+            if (!hasScrolled && traits.isNotEmpty() && rowHeaders.isNotEmpty()
                 && targetColumn < columnCount && targetRow <= rowHeaders.size) {
                 lazyTableState.animateToCell(column = targetColumn, row = targetRow)
+                hasScrolled = true
             }
         }
 
