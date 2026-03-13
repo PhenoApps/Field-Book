@@ -211,7 +211,7 @@ class DataGridActivity : ThemedActivity() {
         resetSortItem?.isVisible = viewModel.sortState.value.columnIndex >= 0
         val wrapItem = menu.findItem(R.id.menu_data_grid_action_wrap_content)
         val isWrapped = viewModel.wrapContent.value
-        wrapItem?.setIcon(if (isWrapped) R.drawable.ic_arrow_collapse_all else R.drawable.ic_arrow_expand_all)
+        wrapItem?.setIcon(if (isWrapped) R.drawable.arrow_collapse_horizontal else R.drawable.arrow_expand_horizontal)
         val heatmapItem = menu.findItem(R.id.menu_data_grid_action_heatmap)
         val isHeatmap = viewModel.heatmapEnabled.value
         if (isHeatmap) {

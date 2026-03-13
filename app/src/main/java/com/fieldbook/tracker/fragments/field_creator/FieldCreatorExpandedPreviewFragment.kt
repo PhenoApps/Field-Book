@@ -107,13 +107,13 @@ class FieldCreatorExpandedPreviewFragment : FieldCreatorBaseFragment() {
             titleText.visibility = View.GONE
             fieldSummaryTv.visibility = View.GONE
             warningCard.visibility = View.GONE
-            collapseViewFab.setImageResource(R.drawable.arrow_collapse_horizontal)
+            collapseViewFab.setImageResource(R.drawable.ic_arrow_collapse_all)
         } else { // collapsed view
             titleText.visibility = View.VISIBLE
             fieldSummaryTv.visibility = View.VISIBLE
             val state = fieldCreatorViewModel.fieldConfig.value
             warningCard.visibility = if (state?.isLargeField == true) View.VISIBLE else View.GONE
-            collapseViewFab.setImageResource(R.drawable.arrow_expand_horizontal)
+            collapseViewFab.setImageResource(R.drawable.ic_arrow_expand_all)
         }
     }
 }

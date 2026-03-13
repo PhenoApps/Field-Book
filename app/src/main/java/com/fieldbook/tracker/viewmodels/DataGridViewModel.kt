@@ -119,8 +119,12 @@ class DataGridViewModel @Inject constructor(
     private fun numericAwareCompare(a: String, b: String): Int {
         val aNum = a.toDoubleOrNull()
         val bNum = b.toDoubleOrNull()
-        return if (aNum != null && bNum != null) aNum.compareTo(bNum)
-        else a.compareTo(b, ignoreCase = true)
+        return when {
+            aNum != null && bNum != null -> aNum.compareTo(bNum)
+            aNum != null && bNum == null -> 1   // NA (b) sorts before numeric (a)
+            aNum == null && bNum != null -> -1  // NA (a) sorts before numeric (b)
+            else -> a.compareTo(b, ignoreCase = true)
+        }
     }
 
     fun loadGrid(rowHeader: String) {
