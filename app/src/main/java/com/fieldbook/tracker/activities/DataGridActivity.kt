@@ -285,8 +285,13 @@ class DataGridActivity : ThemedActivity() {
         val columnCount = traits.size + extraCount // display header columns + trait columns
         val rowCount = rowHeaders.size + 1 // +1 for column headers
 
-        // activeTrait is 1-based trait index; display header columns occupy indices 0..extraCount-1
-        val targetColumn = extraCount + (activeTrait ?: 1) - 1
+        // Resolve activeTrait (a DB realPosition value) to a 0-based visible-trait index.
+        // Using a lookup is more robust than arithmetic because realPosition values may be
+        // 0-based, 1-based, or non-consecutive depending on how traits were imported.
+        val activeTraitIdx: Int = activeTrait?.let { pos ->
+            traits.indexOfFirst { it.realPosition == pos }
+        }?.takeIf { it >= 0 } ?: 0
+        val targetColumn = extraCount + activeTraitIdx
         val targetRow = activePlotId ?: 1
 
         var hasScrolled by rememberSaveable { mutableStateOf(false) }
@@ -429,7 +434,7 @@ class DataGridActivity : ThemedActivity() {
 
                         DataCell(
                             value = cellData?.value ?: "",
-                            isHighlighted = (plotIds.getOrNull(row) == activePlotIdString && columnIndex + 1 == activeTrait),
+                            isHighlighted = (plotIds.getOrNull(row) == activePlotIdString && columnIndex == activeTraitIdx),
                             heatmapColor = heatmapColor,
                             wrapContent = wrapContent
                         ) {
