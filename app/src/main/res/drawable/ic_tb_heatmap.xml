@@ -1,25 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
+<!-- drawable/gradient_vertical.xml -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
-    <!-- Red band (low) -->
     <path
-        android:fillColor="#F44336"
-        android:pathData="M2,4 L9,4 L9,20 L2,20 Z" />
-    <!-- Yellow band (mid) -->
-    <path
-        android:fillColor="#FFEB3B"
-        android:pathData="M9,4 L15,4 L15,20 L9,20 Z" />
-    <!-- Green band (high) -->
-    <path
-        android:fillColor="#4CAF50"
-        android:pathData="M15,4 L22,4 L22,20 L15,20 Z" />
-    <!-- Border outline -->
-    <path
-        android:fillColor="#00000000"
-        android:strokeColor="#757575"
-        android:strokeWidth="1"
-        android:pathData="M2,4 L22,4 L22,20 L2,20 Z" />
+        android:fillColor="#000000"
+        android:pathData="M11,9H13V11H11V9M9,11H11V13H9V11M13,11H15V13H13V11M15,9H17V11H15V9M7,9H9V11H7V9M19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M9,18H7V16H9V18M13,18H11V16H13V18M17,18H15V16H17V18M19,11H17V13H19V15H17V13H15V15H13V13H11V15H9V13H7V15H5V13H7V11H5V5H19V11Z" />
 </vector>

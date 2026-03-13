@@ -15,7 +15,7 @@
         android:title="@string/menu_action_reset_sort_data_grid_title" />
     <item
         android:id="@+id/menu_data_grid_action_wrap_content"
-        android:icon="@drawable/ic_arrow_expand_all"
+        android:icon="@drawable/arrow_expand_horizontal"
         app:showAsAction="always"
         android:title="@string/menu_action_wrap_content_data_grid_title" />
     <item
