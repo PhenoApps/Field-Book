@@ -642,11 +642,11 @@ public class DataHelper {
      * Lightweight DataGrid-specific query: same SQL as getExportTableData but returns the raw
      * cursor without value processing. Avoids O(rows × traits) getTraitByName() DB calls.
      */
-    public Cursor getDataGridTableData(int fieldId, ArrayList<TraitObject> traits) {
+    public Cursor getDataGridTableData(int fieldId, ArrayList<TraitObject> traits, List<String> requiredAttributes) {
 
         open();
 
-        return ObservationUnitPropertyDao.Companion.getDataGridTableData(context, fieldId, traits);
+        return ObservationUnitPropertyDao.Companion.getDataGridTableData(context, fieldId, traits, requiredAttributes);
 
     }
 

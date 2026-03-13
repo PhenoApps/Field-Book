@@ -153,9 +153,6 @@ class DataGridViewModel @Inject constructor(
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val rowHeaderIndex = database.getAllObservationUnitAttributeNames(studyId)
-                    .indexOf(rowHeader).takeIf { it >= 0 } ?: 0
-
                 val allTraitObjects = database.allTraitObjects
                 val visibleTraits = allTraitObjects.filter { it.visible }
                 val traitIds = visibleTraits.map { it.id }.sorted()
@@ -182,8 +179,11 @@ class DataGridViewModel @Inject constructor(
                 // Full reload: single batch query for repeated-value counts
                 val repeatCounts = database.getBatchRepeatCounts(studyId.toString())
 
+                // Only pivot the attribute columns the grid actually displays.
+                val requiredAttributes = (listOf(uniqueHeader, rowHeader) + extraHeaders).distinct()
+
                 // Use the lightweight DataGrid query (no ValueProcessorFormatAdapter overhead)
-                val cursor = database.getDataGridTableData(studyId, ArrayList(visibleTraits))
+                val cursor = database.getDataGridTableData(studyId, ArrayList(visibleTraits), requiredAttributes)
 
                 if (cursor == null || !cursor.moveToFirst()) {
                     cursor?.close()
@@ -194,6 +194,7 @@ class DataGridViewModel @Inject constructor(
                 // Build column-index map once (outside the row loop) to avoid repeated indexOf calls
                 val columns = (0 until cursor.columnCount).map { cursor.getColumnName(it) }
                 val uniqueIndex = columns.indexOf(uniqueHeader)
+                val rowHeaderIndex = columns.indexOf(rowHeader)
 
                 if (uniqueIndex < 0) {
                     cursor.close()
