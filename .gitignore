@@ -29,22 +29,12 @@ gradle.properties
 *.log
 
 # Android Studio
-.idea
-.idea/libraries/
-.idea/workspace.xml
-.idea/tasks.xml
-.idea/.name
-.idea/compiler.xml
-.idea/copyright/profiles_settings.xml
-.idea/encodings.xml
-.idea/misc.xml
-.idea/modules.xml
-.idea/scopes/scope_settings.xml
-.idea/vcs.xml
+.idea/
 *.iml
 
 # Other
 **/ApiKeys.java
+.claude/
 
 # Git orig files
 *.orig
@@ -56,7 +46,6 @@ gradle.properties
 !.github/workflows/
 
 # Keystore files
-# Uncomment the following lines if you do not want to check your keystore files in.
 *.jks
 *.keystore
 keystore.config

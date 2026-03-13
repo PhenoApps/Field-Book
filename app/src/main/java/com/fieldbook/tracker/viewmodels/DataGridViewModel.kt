@@ -38,7 +38,9 @@ class DataGridViewModel @Inject constructor(
             val traits: List<TraitObject>,
             val rowHeaders: List<DataGridCache.HeaderData>,
             val plotIds: List<String>,
-            val gridData: List<List<DataGridCache.CellData>>
+            val gridData: List<List<DataGridCache.CellData>>,
+            val extraHeaderNames: List<String> = emptyList(),
+            val extraHeaderData: List<List<String>> = emptyList()
         ) : UiState()
         object Empty : UiState()
         object Error : UiState()
@@ -100,19 +102,26 @@ class DataGridViewModel @Inject constructor(
 
     private fun applySorting(raw: UiState, sort: SortState): UiState {
         if (sort.columnIndex < 0 || raw !is UiState.Loaded) return raw
+        val extraCount = raw.extraHeaderNames.size
         val comparator = Comparator<Int> { a, b ->
-            val aStr = if (sort.columnIndex == 0) raw.rowHeaders[a].name
-                       else raw.gridData.getOrNull(a)?.getOrNull(sort.columnIndex - 1)?.value ?: ""
-            val bStr = if (sort.columnIndex == 0) raw.rowHeaders[b].name
-                       else raw.gridData.getOrNull(b)?.getOrNull(sort.columnIndex - 1)?.value ?: ""
+            val aStr = when {
+                sort.columnIndex < extraCount -> raw.extraHeaderData.getOrNull(a)?.getOrNull(sort.columnIndex) ?: ""
+                else -> raw.gridData.getOrNull(a)?.getOrNull(sort.columnIndex - extraCount)?.value ?: ""
+            }
+            val bStr = when {
+                sort.columnIndex < extraCount -> raw.extraHeaderData.getOrNull(b)?.getOrNull(sort.columnIndex) ?: ""
+                else -> raw.gridData.getOrNull(b)?.getOrNull(sort.columnIndex - extraCount)?.value ?: ""
+            }
             numericAwareCompare(aStr, bStr)
         }
         val indices = raw.rowHeaders.indices.sortedWith(if (sort.ascending) comparator else comparator.reversed())
         return UiState.Loaded(
-            traits     = raw.traits,
-            rowHeaders = indices.map { raw.rowHeaders[it] },
-            plotIds    = indices.map { raw.plotIds[it] },
-            gridData   = indices.map { raw.gridData[it] }
+            traits           = raw.traits,
+            rowHeaders       = indices.map { raw.rowHeaders[it] },
+            plotIds          = indices.map { raw.plotIds[it] },
+            gridData         = indices.map { raw.gridData[it] },
+            extraHeaderNames = raw.extraHeaderNames,
+            extraHeaderData  = indices.map { raw.extraHeaderData.getOrNull(it) ?: emptyList() }
         )
     }
 
@@ -127,7 +136,7 @@ class DataGridViewModel @Inject constructor(
         }
     }
 
-    fun loadGrid(rowHeader: String) {
+    fun loadGrid(rowHeader: String, extraHeaders: List<String> = emptyList()) {
         if (rowHeader.isBlank()) {
             _rawUiState.value = UiState.Empty
             return
@@ -148,7 +157,7 @@ class DataGridViewModel @Inject constructor(
                 val traitIds = visibleTraits.map { it.id }.sorted()
 
                 // Cache check
-                val snapshot = dataGridCache.get(studyId, traitIds, rowHeader)
+                val snapshot = dataGridCache.get(studyId, traitIds, rowHeader, extraHeaders)
                 if (snapshot != null) {
                     val currentCount = database.getObservationCount(studyId.toString())
                     if (currentCount == snapshot.observationCount) {
@@ -157,7 +166,9 @@ class DataGridViewModel @Inject constructor(
                             traits = snapshot.traits,
                             rowHeaders = snapshot.rowHeaders,
                             plotIds = snapshot.plotIds,
-                            gridData = snapshot.gridData
+                            gridData = snapshot.gridData,
+                            extraHeaderNames = snapshot.extraHeaders,
+                            extraHeaderData = snapshot.extraHeaderData
                         )
                         return@launch
                     }
@@ -191,9 +202,13 @@ class DataGridViewModel @Inject constructor(
                     columns.indexOf(DataHelper.replaceIdentifiers(variable.name))
                 }
 
+                // Pre-compute cursor column indices for extra headers
+                val extraHeaderColumnIndices = extraHeaders.map { name -> columns.indexOf(name) }
+
                 val rowHeaders = mutableListOf<DataGridCache.HeaderData>()
                 val plotIds = mutableListOf<String>()
                 val gridData = mutableListOf<List<DataGridCache.CellData>>()
+                val extraHeaderDataList = mutableListOf<List<String>>()
 
                 Log.d(TAG, "Query executed. Row count: ${cursor.count}")
 
@@ -204,6 +219,12 @@ class DataGridViewModel @Inject constructor(
 
                         rowHeaders.add(DataGridCache.HeaderData(header, header))
                         plotIds.add(id)
+
+                        val extraData = extraHeaders.indices.map { idx ->
+                            val colIdx = extraHeaderColumnIndices[idx]
+                            if (colIdx >= 0) cursor.getString(colIdx) ?: "" else ""
+                        }
+                        extraHeaderDataList.add(extraData)
 
                         val dataList = visibleTraits.mapIndexed { traitIdx, variable ->
                             val colIdx = traitColumnIndices[traitIdx]
@@ -238,7 +259,9 @@ class DataGridViewModel @Inject constructor(
                                 traits = visibleTraits,
                                 rowHeaders = rowHeaders.toList(),
                                 plotIds = plotIds.toList(),
-                                gridData = gridData.toList()
+                                gridData = gridData.toList(),
+                                extraHeaderNames = extraHeaders,
+                                extraHeaderData = extraHeaderDataList.toList()
                             )
                         }
 
@@ -257,11 +280,13 @@ class DataGridViewModel @Inject constructor(
                         studyId = studyId,
                         traitIds = traitIds,
                         rowHeader = rowHeader,
+                        extraHeaders = extraHeaders,
                         observationCount = obsCount,
                         traits = visibleTraits,
                         rowHeaders = rowHeaders,
                         plotIds = plotIds,
-                        gridData = gridData
+                        gridData = gridData,
+                        extraHeaderData = extraHeaderDataList
                     )
                 )
 
@@ -270,7 +295,9 @@ class DataGridViewModel @Inject constructor(
                     traits = visibleTraits,
                     rowHeaders = rowHeaders,
                     plotIds = plotIds,
-                    gridData = gridData
+                    gridData = gridData,
+                    extraHeaderNames = extraHeaders,
+                    extraHeaderData = extraHeaderDataList
                 )
 
             } catch (e: Exception) {

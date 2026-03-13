@@ -120,7 +120,7 @@ class DataGridActivity : ThemedActivity() {
         // Trigger grid load — ViewModel survives rotation so this is a no-op on re-creation
         // if the grid is already loaded
         if (viewModel.uiState.value is DataGridViewModel.UiState.Loading) {
-            viewModel.loadGrid(getCurrentRowHeader())
+            viewModel.loadGrid(getCurrentRowHeader(), getDisplayHeaders())
         }
 
         binding.composeView.setContent {
@@ -255,6 +255,9 @@ class DataGridActivity : ThemedActivity() {
         val rowHeaders = state.rowHeaders
         val plotIds = state.plotIds
         val gridData = state.gridData
+        val extraHeaderNames = state.extraHeaderNames
+        val extraHeaderData = state.extraHeaderData
+        val extraCount = extraHeaderNames.size
 
         if (traits.isEmpty() || rowHeaders.isEmpty()) {
             return
@@ -262,31 +265,34 @@ class DataGridActivity : ThemedActivity() {
 
         val lazyTableState = rememberSaveableLazyTableState()
 
-        val columnCount = traits.size + 1 // +1 for rowHeader column
-        val rowCount = rowHeaders.size + 1 // +1 for column headers (traits)
+        val columnCount = traits.size + extraCount // display header columns + trait columns
+        val rowCount = rowHeaders.size + 1 // +1 for column headers
 
-        val targetColumn = activeTrait ?: 1
+        // activeTrait is 1-based trait index; display header columns occupy indices 0..extraCount-1
+        val targetColumn = extraCount + (activeTrait ?: 1) - 1
         val targetRow = activePlotId ?: 1
 
         LaunchedEffect(traits) {
             // Triggers once per load (traits identity is stable across progressive batches)
             Log.d("DataGridActivity", "Data loaded: ${traits.size} traits, ${rowHeaders.size} rows")
             if (traits.isNotEmpty() && rowHeaders.isNotEmpty()
-                && targetColumn <= traits.size && targetRow <= rowHeaders.size) {
+                && targetColumn < columnCount && targetRow <= rowHeaders.size) {
                 lazyTableState.animateToCell(column = targetColumn, row = targetRow)
             }
         }
 
-        val rowHeaderName = getCurrentRowHeader()
-
         // Pre-compute per-column widths based on max content length when wrapping is enabled
-        val columnWidths: List<Dp> = remember(state, wrapContent, rowHeaderName) {
+        val columnWidths: List<Dp> = remember(state, wrapContent) {
             if (!wrapContent) emptyList()
             else (0 until columnCount).map { col ->
-                val headerLen = if (col == 0) rowHeaderName.length
-                                else (traits.getOrNull(col - 1)?.alias?.length ?: 0)
-                val maxDataLen = if (col == 0) rowHeaders.maxOfOrNull { it.name.length } ?: 0
-                                 else gridData.maxOfOrNull { row -> row.getOrNull(col - 1)?.value?.length ?: 0 } ?: 0
+                val headerLen = when {
+                    col < extraCount -> extraHeaderNames[col].length
+                    else -> traits.getOrNull(col - extraCount)?.alias?.length ?: 0
+                }
+                val maxDataLen = when {
+                    col < extraCount -> extraHeaderData.maxOfOrNull { it.getOrNull(col)?.length ?: 0 } ?: 0
+                    else -> gridData.maxOfOrNull { row -> row.getOrNull(col - extraCount)?.value?.length ?: 0 } ?: 0
+                }
                 val maxLen = maxOf(headerLen, maxDataLen).coerceAtLeast(1)
                 (maxLen * 10f + 16f).dp.coerceAtLeast(60.dp)
             }
@@ -300,10 +306,12 @@ class DataGridActivity : ThemedActivity() {
                     val colWidthPx = (columnWidths.getOrNull(col) ?: 100.dp).value
                     val charsPerLine = ((colWidthPx - 16f) / 10f).toInt().coerceAtLeast(1)
                     val textLen = when {
-                        row == 0 -> if (col == 0) rowHeaderName.length
-                                    else traits.getOrNull(col - 1)?.alias?.length ?: 0
-                        col == 0 -> rowHeaders.getOrNull(row - 1)?.name?.length ?: 0
-                        else -> gridData.getOrNull(row - 1)?.getOrNull(col - 1)?.value?.length ?: 0
+                        row == 0 -> when {
+                            col < extraCount -> extraHeaderNames[col].length
+                            else -> traits.getOrNull(col - extraCount)?.alias?.length ?: 0
+                        }
+                        col < extraCount -> extraHeaderData.getOrNull(row - 1)?.getOrNull(col)?.length ?: 0
+                        else -> gridData.getOrNull(row - 1)?.getOrNull(col - extraCount)?.value?.length ?: 0
                     }.coerceAtLeast(1)
                     ceil(textLen.toFloat() / charsPerLine).toInt().coerceAtLeast(1)
                 }
@@ -326,7 +334,7 @@ class DataGridActivity : ThemedActivity() {
                 dimensions = lazyTableDimensions(
                     columnSize = { col ->
                         if (wrapContent) columnWidths.getOrNull(col) ?: 100.dp
-                        else when (col) { 0 -> 120.dp; else -> 100.dp }
+                        else if (col < extraCount) 120.dp else 100.dp
                     },
                     rowSize = { row ->
                         if (wrapContent) rowHeights.getOrNull(row) ?: 48.dp
@@ -335,7 +343,7 @@ class DataGridActivity : ThemedActivity() {
                 ),
                 contentPadding = PaddingValues(0.dp),
                 pinConfiguration = lazyTablePinConfiguration(
-                    columns = if (columnLocked) 1 else 0,
+                    columns = if (columnLocked) extraCount else 0,
                     rows = 1
                 )
             ) {
@@ -349,15 +357,15 @@ class DataGridActivity : ThemedActivity() {
                         sortState.ascending -> R.drawable.ic_chevron_up
                         else -> R.drawable.ic_chevron_down
                     }
-                    if (index == 0) {
+                    if (index < extraCount) {
                         HeaderCell(
-                            text = rowHeaderName,
+                            text = extraHeaderNames[index],
                             sortIconRes = sortIcon,
-                            onClick = { viewModel.sortByColumn(0) },
+                            onClick = { viewModel.sortByColumn(index) },
                             wrapContent = wrapContent
                         )
                     } else {
-                        val traitIndex = index - 1
+                        val traitIndex = index - extraCount
                         HeaderCell(
                             text = if (traitIndex < traits.size) traits[traitIndex].alias else "",
                             sortIconRes = sortIcon,
@@ -379,13 +387,13 @@ class DataGridActivity : ThemedActivity() {
                     val row = (index / columnCount)
                     val column = index % columnCount
 
-                    if (column == 0) {
+                    if (column < extraCount) {
                         RowHeaderCell(
-                            text = if (row < rowHeaders.size) rowHeaders[row].name else "",
+                            text = extraHeaderData.getOrNull(row)?.getOrNull(column) ?: "",
                             wrapContent = wrapContent
                         )
                     } else {
-                        val columnIndex = column - 1
+                        val columnIndex = column - extraCount
                         val cellData =
                             if (row < gridData.size && columnIndex < gridData[row].size)
                                 gridData[row][columnIndex]
@@ -506,19 +514,28 @@ class DataGridActivity : ThemedActivity() {
     }
 
     /**
-     * Determines the current row header from preferences.
+     * Returns the unique ID attribute name, used internally as the primary row key.
      */
     private fun getCurrentRowHeader(): String {
-        val uniqueHeader = preferences.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
-        val rowHeader = preferences.getString(GeneralKeys.DATAGRID_PREFIX_TRAIT, uniqueHeader) ?: ""
+        return preferences.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
+    }
+
+    /**
+     * Returns the ordered list of unit attribute columns to display in the grid.
+     * Defaults to [uniqueHeader] if the user has never opened the picker dialog.
+     * Ordered by their position in the study's unit attribute list.
+     */
+    private fun getDisplayHeaders(): List<String> {
+        val uniqueHeader = getCurrentRowHeader()
         val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
         val unitAttributes = database.getAllObservationUnitAttributeNames(studyId)
-        return if (rowHeader in unitAttributes) {
-            Log.d("DataGridActivity", "Using saved row header from preferences: $rowHeader")
-            rowHeader
+        val savedHeaders = preferences.getStringSet(GeneralKeys.DATAGRID_EXTRA_HEADERS, null)
+        return if (savedHeaders == null) {
+            listOf(uniqueHeader).filter { it in unitAttributes }
         } else {
-            Log.d("DataGridActivity", "Saved row header invalid. Falling back to unique header: $uniqueHeader")
-            uniqueHeader
+            // Always put unique ID first, then remaining selected attributes in attribute list order
+            val others = unitAttributes.filter { it in savedHeaders && it != uniqueHeader }
+            if (uniqueHeader in savedHeaders) listOf(uniqueHeader) + others else others
         }
     }
 
@@ -592,24 +609,43 @@ class DataGridActivity : ThemedActivity() {
     }
 
     /**
-     * Shows dialog to choose a prefix trait to be displayed.
+     * Shows a multi-select checkbox dialog to choose which unit attributes are displayed as row
+     * header columns. The unique ID is always listed first and selected by default.
      */
     private fun showHeaderPickerDialog() {
         val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
-        val columns = database.getAllObservationUnitAttributeNames(studyId)
+        val uniqueHeader = preferences.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
+        val allAttributes = database.getAllObservationUnitAttributeNames(studyId)
 
-        if (columns.isNotEmpty()) {
-            val rowHeader = getCurrentRowHeader()
-            val rowHeaderIndex = columns.indexOf(rowHeader).takeIf { it >= 0 } ?: 0
+        if (allAttributes.isEmpty()) return
 
-            AlertDialog.Builder(this, R.style.AppAlertDialog)
-                .setTitle(R.string.dialog_data_grid_header_picker_title)
-                .setSingleChoiceItems(columns, rowHeaderIndex) { dialog, which ->
-                    preferences.edit { putString(GeneralKeys.DATAGRID_PREFIX_TRAIT, columns[which]) }
-                    viewModel.loadGrid(columns[which])
-                    dialog.dismiss()
-                }.create().show()
+        // null = never saved before; default to unique ID checked
+        val savedHeaders = preferences.getStringSet(GeneralKeys.DATAGRID_EXTRA_HEADERS, null)
+
+        // Unique ID always first; remaining attributes follow in their natural order
+        val otherAttributes = allAttributes.filter { it != uniqueHeader }
+        val displayItems = (if (uniqueHeader in allAttributes) listOf(uniqueHeader) else emptyList()) + otherAttributes
+
+        if (displayItems.isEmpty()) return
+
+        val checkedItems = BooleanArray(displayItems.size) { idx ->
+            if (savedHeaders == null) idx == 0  // first open: default to unique ID only
+            else displayItems[idx] in savedHeaders
         }
+
+        AlertDialog.Builder(this, R.style.AppAlertDialog)
+            .setTitle(R.string.dialog_data_grid_header_picker_title)
+            .setMultiChoiceItems(displayItems.toTypedArray(), checkedItems) { _, which, isChecked ->
+                checkedItems[which] = isChecked
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                val newSelected = displayItems.filterIndexed { idx, _ -> checkedItems[idx] }.toSet()
+                preferences.edit { putStringSet(GeneralKeys.DATAGRID_EXTRA_HEADERS, newSelected) }
+                val orderedDisplay = displayItems.filter { it in newSelected }
+                viewModel.loadGrid(getCurrentRowHeader(), orderedDisplay)
+            }
+            .create().show()
     }
 
     /**

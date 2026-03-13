@@ -26,12 +26,14 @@ class DataGridCache @Inject constructor() {
         /** Sorted list of visible trait DB IDs — part of the cache key. */
         val traitIds: List<String>,
         val rowHeader: String,
+        val extraHeaders: List<String> = emptyList(),
         /** COUNT(*) of observations at the time the snapshot was built, used for staleness checks. */
         val observationCount: Int,
         val traits: List<TraitObject>,
         val rowHeaders: List<HeaderData>,
         val plotIds: List<String>,
-        val gridData: List<List<CellData>>
+        val gridData: List<List<CellData>>,
+        val extraHeaderData: List<List<String>> = emptyList()
     )
 
     @Volatile
@@ -40,9 +42,9 @@ class DataGridCache @Inject constructor() {
     /**
      * Returns the cached snapshot if the cache key matches, or null on a miss.
      */
-    fun get(studyId: Int, traitIds: List<String>, rowHeader: String): GridSnapshot? {
+    fun get(studyId: Int, traitIds: List<String>, rowHeader: String, extraHeaders: List<String> = emptyList()): GridSnapshot? {
         val s = snapshot ?: return null
-        return if (s.studyId == studyId && s.traitIds == traitIds && s.rowHeader == rowHeader) s
+        return if (s.studyId == studyId && s.traitIds == traitIds && s.rowHeader == rowHeader && s.extraHeaders == extraHeaders) s
         else null
     }
 
