@@ -95,6 +95,21 @@ class DataGridViewModel @Inject constructor(
         preferences.edit().putBoolean(GeneralKeys.DATAGRID_HEATMAP, newValue).apply()
     }
 
+    private val _zoomLevel = MutableStateFlow(preferences.getFloat(GeneralKeys.DATAGRID_ZOOM, 1f))
+    val zoomLevel: StateFlow<Float> = _zoomLevel.asStateFlow()
+
+    fun zoomIn() {
+        val newValue = (_zoomLevel.value + 0.25f).coerceAtMost(2f)
+        _zoomLevel.value = newValue
+        preferences.edit().putFloat(GeneralKeys.DATAGRID_ZOOM, newValue).apply()
+    }
+
+    fun zoomOut() {
+        val newValue = (_zoomLevel.value - 0.25f).coerceAtLeast(0.5f)
+        _zoomLevel.value = newValue
+        preferences.edit().putFloat(GeneralKeys.DATAGRID_ZOOM, newValue).apply()
+    }
+
     override fun onCleared() {
         super.onCleared()
     }

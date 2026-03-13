@@ -19,9 +19,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.Text
 import androidx.compose.ui.res.painterResource
@@ -43,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlin.math.ceil
 import androidx.core.content.edit
 import androidx.databinding.DataBindingUtil
@@ -139,6 +142,7 @@ class DataGridActivity : ThemedActivity() {
             val sortState by viewModel.sortState.collectAsState()
             val wrapContent by viewModel.wrapContent.collectAsState()
             val heatmapEnabled by viewModel.heatmapEnabled.collectAsState()
+            val zoomLevel by viewModel.zoomLevel.collectAsState()
 
             LaunchedEffect(columnLocked) {
                 invalidateOptionsMenu()
@@ -171,7 +175,7 @@ class DataGridActivity : ThemedActivity() {
                                 // activePlotId is 1-based (sent by CollectActivity); subtract 1 to index rawPlotIds
                                 activePlotIdString = viewModel.rawPlotIds.getOrNull(activePlotId!! - 1)
                             }
-                            DataGridTable(state, columnLocked, sortState, wrapContent, heatmapEnabled)
+                            DataGridTable(state, columnLocked, sortState, wrapContent, heatmapEnabled, zoomLevel)
                         }
                         is DataGridViewModel.UiState.Empty -> {
                             Text(
@@ -266,7 +270,8 @@ class DataGridActivity : ThemedActivity() {
         columnLocked: Boolean = true,
         sortState: DataGridViewModel.SortState = DataGridViewModel.SortState(),
         wrapContent: Boolean = false,
-        heatmapEnabled: Boolean = false
+        heatmapEnabled: Boolean = false,
+        zoom: Float = 1f
     ) {
         val traits = state.traits
         val rowHeaders = state.rowHeaders
@@ -352,17 +357,17 @@ class DataGridActivity : ThemedActivity() {
             }
         }
 
-        Box(modifier = Modifier.fillMaxWidth()) {
+        Box(modifier = Modifier.fillMaxSize()) {
             LazyTable(
                 state = lazyTableState,
                 dimensions = lazyTableDimensions(
                     columnSize = { col ->
-                        if (wrapContent) columnWidths.getOrNull(col) ?: 100.dp
-                        else if (col < extraCount) 120.dp else 100.dp
+                        if (wrapContent) (columnWidths.getOrNull(col) ?: 100.dp) * zoom
+                        else if (col < extraCount) 120.dp * zoom else 100.dp * zoom
                     },
                     rowSize = { row ->
-                        if (wrapContent) rowHeights.getOrNull(row) ?: 48.dp
-                        else 48.dp
+                        if (wrapContent) (rowHeights.getOrNull(row) ?: 48.dp) * zoom
+                        else 48.dp * zoom
                     }
                 ),
                 contentPadding = PaddingValues(0.dp),
@@ -386,7 +391,8 @@ class DataGridActivity : ThemedActivity() {
                             text = extraHeaderNames[index],
                             sortIconRes = sortIcon,
                             onClick = { viewModel.sortByColumn(index) },
-                            wrapContent = wrapContent
+                            wrapContent = wrapContent,
+                            zoom = zoom
                         )
                     } else {
                         val traitIndex = index - extraCount
@@ -394,7 +400,8 @@ class DataGridActivity : ThemedActivity() {
                             text = if (traitIndex < traits.size) traits[traitIndex].alias else "",
                             sortIconRes = sortIcon,
                             onClick = { viewModel.sortByColumn(index) },
-                            wrapContent = wrapContent
+                            wrapContent = wrapContent,
+                            zoom = zoom
                         )
                     }
                 }
@@ -414,7 +421,8 @@ class DataGridActivity : ThemedActivity() {
                     if (column < extraCount) {
                         RowHeaderCell(
                             text = extraHeaderData.getOrNull(row)?.getOrNull(column) ?: "",
-                            wrapContent = wrapContent
+                            wrapContent = wrapContent,
+                            zoom = zoom
                         )
                     } else {
                         val columnIndex = column - extraCount
@@ -436,7 +444,8 @@ class DataGridActivity : ThemedActivity() {
                             value = cellData?.value ?: "",
                             isHighlighted = (plotIds.getOrNull(row) == activePlotIdString && columnIndex == activeTraitIdx),
                             heatmapColor = heatmapColor,
-                            wrapContent = wrapContent
+                            wrapContent = wrapContent,
+                            zoom = zoom
                         ) {
                             if (cellData != null && row < plotIds.size) {
                                 onCellClicked(row, columnIndex, traits, plotIds)
@@ -445,11 +454,33 @@ class DataGridActivity : ThemedActivity() {
                     }
                 }
             }
+
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                SmallFloatingActionButton(
+                    onClick = { viewModel.zoomIn() },
+                    containerColor = Color(activeCellBgColor),
+                    contentColor = Color(activeCellTextColor)
+                ) {
+                    Text("+", fontSize = 18.sp, color = Color(activeCellTextColor))
+                }
+                SmallFloatingActionButton(
+                    onClick = { viewModel.zoomOut() },
+                    containerColor = Color(activeCellBgColor),
+                    contentColor = Color(activeCellTextColor)
+                ) {
+                    Text("−", fontSize = 18.sp, color = Color(activeCellTextColor))
+                }
+            }
         }
     }
 
     @Composable
-    fun HeaderCell(text: String, sortIconRes: Int? = null, onClick: (() -> Unit)? = null, wrapContent: Boolean = false) {
+    fun HeaderCell(text: String, sortIconRes: Int? = null, onClick: (() -> Unit)? = null, wrapContent: Boolean = false, zoom: Float = 1f) {
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
@@ -465,6 +496,7 @@ class DataGridActivity : ThemedActivity() {
                     text = text,
                     color = Color(cellTextColor),
                     textAlign = TextAlign.Center,
+                    fontSize = (13 * zoom).sp,
                     overflow = if (wrapContent) TextOverflow.Clip else TextOverflow.Ellipsis,
                     maxLines = if (wrapContent) Int.MAX_VALUE else 1,
                     softWrap = wrapContent,
@@ -482,17 +514,18 @@ class DataGridActivity : ThemedActivity() {
     }
 
     @Composable
-    fun RowHeaderCell(text: String, wrapContent: Boolean = false) {
+    fun RowHeaderCell(text: String, wrapContent: Boolean = false, zoom: Float = 1f) {
         TableCell(
             text = text,
             backgroundColor = Color.White,
             textColor = Color(cellTextColor),
-            wrapContent = wrapContent
+            wrapContent = wrapContent,
+            zoom = zoom
         )
     }
 
     @Composable
-    fun DataCell(value: String, isHighlighted: Boolean = false, heatmapColor: Color? = null, wrapContent: Boolean = false, onClick: () -> Unit = {}) {
+    fun DataCell(value: String, isHighlighted: Boolean = false, heatmapColor: Color? = null, wrapContent: Boolean = false, zoom: Float = 1f, onClick: () -> Unit = {}) {
         val backgroundColor = when {
             isHighlighted -> Color(activeCellBgColor)
             heatmapColor != null -> heatmapColor
@@ -508,7 +541,8 @@ class DataGridActivity : ThemedActivity() {
             textColor = textColor,
             onClick = onClick,
             isClickable = true,
-            wrapContent = wrapContent
+            wrapContent = wrapContent,
+            zoom = zoom
         )
     }
 
@@ -519,7 +553,8 @@ class DataGridActivity : ThemedActivity() {
         textColor: Color,
         onClick: () -> Unit = {},
         isClickable: Boolean = false,
-        wrapContent: Boolean = false
+        wrapContent: Boolean = false,
+        zoom: Float = 1f
     ) {
         Box(
             contentAlignment = Alignment.Center,
@@ -532,6 +567,7 @@ class DataGridActivity : ThemedActivity() {
                 text = text,
                 color = textColor,
                 textAlign = TextAlign.Center,
+                fontSize = (14 * zoom).sp,
                 overflow = if (wrapContent) TextOverflow.Clip else TextOverflow.Ellipsis,
                 maxLines = if (wrapContent) Int.MAX_VALUE else 1,
                 softWrap = wrapContent,
