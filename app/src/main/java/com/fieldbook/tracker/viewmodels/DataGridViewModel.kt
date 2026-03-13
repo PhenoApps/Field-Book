@@ -90,6 +90,11 @@ class DataGridViewModel @Inject constructor(
         preferences.edit().putBoolean(GeneralKeys.DATAGRID_HEATMAP, newValue).apply()
     }
 
+    override fun onCleared() {
+        super.onCleared()
+        dataGridCache.invalidate()
+    }
+
     fun sortByColumn(columnIndex: Int) {
         val cur = _sortState.value
         _sortState.value = if (cur.columnIndex == columnIndex) SortState(columnIndex, !cur.ascending)
@@ -130,8 +135,8 @@ class DataGridViewModel @Inject constructor(
         val bNum = b.toDoubleOrNull()
         return when {
             aNum != null && bNum != null -> aNum.compareTo(bNum)
-            aNum != null && bNum == null -> 1   // NA (b) sorts before numeric (a)
-            aNum == null && bNum != null -> -1  // NA (a) sorts before numeric (b)
+            aNum != null && bNum == null -> 1   // numeric (a) sorts before NA (b)
+            aNum == null && bNum != null -> -1  // NA (a) sorts after numeric (b)
             else -> a.compareTo(b, ignoreCase = true)
         }
     }
@@ -217,7 +222,7 @@ class DataGridViewModel @Inject constructor(
                         val id = cursor.getString(uniqueIndex) ?: ""
                         val header = cursor.getString(rowHeaderIndex) ?: ""
 
-                        rowHeaders.add(DataGridCache.HeaderData(header, header))
+                        rowHeaders.add(DataGridCache.HeaderData(header))
                         plotIds.add(id)
 
                         val extraData = extraHeaders.indices.map { idx ->
@@ -269,6 +274,8 @@ class DataGridViewModel @Inject constructor(
 
                 } catch (e: IllegalStateException) {
                     e.printStackTrace()
+                    _rawUiState.value = UiState.Error
+                    return@launch
                 } finally {
                     cursor.close()
                 }
@@ -283,10 +290,10 @@ class DataGridViewModel @Inject constructor(
                         extraHeaders = extraHeaders,
                         observationCount = obsCount,
                         traits = visibleTraits,
-                        rowHeaders = rowHeaders,
-                        plotIds = plotIds,
-                        gridData = gridData,
-                        extraHeaderData = extraHeaderDataList
+                        rowHeaders = rowHeaders.toList(),
+                        plotIds = plotIds.toList(),
+                        gridData = gridData.toList(),
+                        extraHeaderData = extraHeaderDataList.toList()
                     )
                 )
 

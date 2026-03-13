@@ -29,7 +29,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -79,7 +85,7 @@ class DataGridActivity : ThemedActivity() {
     // for active highlighted cell
     private var activePlotId: Int? = null
     private var activeTrait: Int? = null
-    private var activePlotIdString: String? = null
+    private var activePlotIdString: String? by mutableStateOf(null)
 
     private var activeCellBgColor: Int = 0
     private var filledCellBgColor: Int = 0
@@ -120,7 +126,10 @@ class DataGridActivity : ThemedActivity() {
         // Trigger grid load — ViewModel survives rotation so this is a no-op on re-creation
         // if the grid is already loaded
         if (viewModel.uiState.value is DataGridViewModel.UiState.Loading) {
-            viewModel.loadGrid(getCurrentRowHeader(), getDisplayHeaders())
+            lifecycleScope.launch {
+                val headers = withContext(Dispatchers.IO) { getDisplayHeaders() }
+                viewModel.loadGrid(getCurrentRowHeader(), headers)
+            }
         }
 
         binding.composeView.setContent {
@@ -158,6 +167,7 @@ class DataGridActivity : ThemedActivity() {
                         }
                         is DataGridViewModel.UiState.Loaded -> {
                             if (activePlotIdString == null && activePlotId != null) {
+                                // activePlotId is 1-based (sent by CollectActivity); subtract 1 to index rawPlotIds
                                 activePlotIdString = viewModel.rawPlotIds.getOrNull(activePlotId!! - 1)
                             }
                             DataGridTable(state, columnLocked, sortState, wrapContent, heatmapEnabled)
@@ -441,8 +451,9 @@ class DataGridActivity : ThemedActivity() {
                     text = text,
                     color = Color(cellTextColor),
                     textAlign = TextAlign.Center,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1,
+                    overflow = if (wrapContent) TextOverflow.Clip else TextOverflow.Ellipsis,
+                    maxLines = if (wrapContent) Int.MAX_VALUE else 1,
+                    softWrap = wrapContent,
                 )
                 if (sortIconRes != null) {
                     Icon(
@@ -507,8 +518,9 @@ class DataGridActivity : ThemedActivity() {
                 text = text,
                 color = textColor,
                 textAlign = TextAlign.Center,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
+                overflow = if (wrapContent) TextOverflow.Clip else TextOverflow.Ellipsis,
+                maxLines = if (wrapContent) Int.MAX_VALUE else 1,
+                softWrap = wrapContent,
             )
         }
     }
@@ -557,7 +569,7 @@ class DataGridActivity : ThemedActivity() {
                 showRepeatedValuesNavigatorDialog(trait, repeatedValues, traits)
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error occurred while trying to navigate: " + e.printStackTrace())
+            Log.e(TAG, "Error occurred while trying to navigate", e)
             FirebaseCrashlytics.getInstance().recordException(e)
         }
     }
@@ -615,37 +627,46 @@ class DataGridActivity : ThemedActivity() {
     private fun showHeaderPickerDialog() {
         val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
         val uniqueHeader = preferences.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
-        val allAttributes = database.getAllObservationUnitAttributeNames(studyId)
 
-        if (allAttributes.isEmpty()) return
+        lifecycleScope.launch {
+            val allAttributes = withContext(Dispatchers.IO) {
+                database.getAllObservationUnitAttributeNames(studyId)
+            }
 
-        // null = never saved before; default to unique ID checked
-        val savedHeaders = preferences.getStringSet(GeneralKeys.DATAGRID_EXTRA_HEADERS, null)
+            if (allAttributes.isEmpty()) return@launch
 
-        // Unique ID always first; remaining attributes follow in their natural order
-        val otherAttributes = allAttributes.filter { it != uniqueHeader }
-        val displayItems = (if (uniqueHeader in allAttributes) listOf(uniqueHeader) else emptyList()) + otherAttributes
+            // null = never saved before; default to unique ID checked
+            val savedHeaders = preferences.getStringSet(GeneralKeys.DATAGRID_EXTRA_HEADERS, null)
 
-        if (displayItems.isEmpty()) return
+            // Unique ID always first; remaining attributes follow in their natural order
+            val otherAttributes = allAttributes.filter { it != uniqueHeader }
+            val displayItems = (if (uniqueHeader in allAttributes) listOf(uniqueHeader) else emptyList()) + otherAttributes
 
-        val checkedItems = BooleanArray(displayItems.size) { idx ->
-            if (savedHeaders == null) idx == 0  // first open: default to unique ID only
-            else displayItems[idx] in savedHeaders
+            if (displayItems.isEmpty()) return@launch
+
+            val checkedItems = BooleanArray(displayItems.size) { idx ->
+                if (savedHeaders == null) idx == 0  // first open: default to unique ID only
+                else displayItems[idx] in savedHeaders
+            }
+
+            AlertDialog.Builder(this@DataGridActivity, R.style.AppAlertDialog)
+                .setTitle(R.string.dialog_data_grid_header_picker_title)
+                .setMultiChoiceItems(displayItems.toTypedArray(), checkedItems) { _, which, isChecked ->
+                    checkedItems[which] = isChecked
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(android.R.string.ok) { _, _ ->
+                    val newSelected = displayItems.filterIndexed { idx, _ -> checkedItems[idx] }.toSet()
+                    preferences.edit { putStringSet(GeneralKeys.DATAGRID_EXTRA_HEADERS, newSelected) }
+                    val orderedDisplay = displayItems.filter { it in newSelected }
+                    val currentHeaders = (viewModel.uiState.value as? DataGridViewModel.UiState.Loaded)
+                        ?.extraHeaderNames
+                    if (orderedDisplay != currentHeaders) {
+                        viewModel.loadGrid(getCurrentRowHeader(), orderedDisplay)
+                    }
+                }
+                .create().show()
         }
-
-        AlertDialog.Builder(this, R.style.AppAlertDialog)
-            .setTitle(R.string.dialog_data_grid_header_picker_title)
-            .setMultiChoiceItems(displayItems.toTypedArray(), checkedItems) { _, which, isChecked ->
-                checkedItems[which] = isChecked
-            }
-            .setNegativeButton(android.R.string.cancel, null)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                val newSelected = displayItems.filterIndexed { idx, _ -> checkedItems[idx] }.toSet()
-                preferences.edit { putStringSet(GeneralKeys.DATAGRID_EXTRA_HEADERS, newSelected) }
-                val orderedDisplay = displayItems.filter { it in newSelected }
-                viewModel.loadGrid(getCurrentRowHeader(), orderedDisplay)
-            }
-            .create().show()
     }
 
     /**

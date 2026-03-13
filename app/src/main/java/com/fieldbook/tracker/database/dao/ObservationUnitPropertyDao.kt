@@ -336,14 +336,14 @@ class ObservationUnitPropertyDao {
                 FROM observation_units AS units
                 LEFT JOIN observation_units_values AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
                 LEFT JOIN observation_units_attributes AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
-                LEFT JOIN observations AS obs ON units.observation_unit_db_id = obs.observation_unit_id AND obs.study_id = $studyId
+                LEFT JOIN observations AS obs ON units.observation_unit_db_id = obs.observation_unit_id AND obs.study_id = ?
                 LEFT JOIN observation_variables AS vars ON vars.${ObservationVariable.PK} = obs.${ObservationVariable.FK}
-                WHERE units.study_id = $studyId
+                WHERE units.study_id = ?
                 GROUP BY units.internal_id_observation_unit
                 $orderByClause
             """.trimIndent()
 
-            db.rawQuery(query, null)
+            db.rawQuery(query, arrayOf(studyId.toString(), studyId.toString()))
         }
 
         /**

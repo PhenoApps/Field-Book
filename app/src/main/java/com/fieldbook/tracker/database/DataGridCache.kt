@@ -16,10 +16,10 @@ import javax.inject.Singleton
 class DataGridCache @Inject constructor() {
 
     @Immutable
-    data class HeaderData(val name: String, val code: String)
+    data class HeaderData(val name: String)
 
     @Immutable
-    data class CellData(val value: String?, val code: String, val color: Int = android.graphics.Color.GREEN)
+    data class CellData(val value: String?, val code: String)
 
     data class GridSnapshot(
         val studyId: Int,
@@ -36,23 +36,24 @@ class DataGridCache @Inject constructor() {
         val extraHeaderData: List<List<String>> = emptyList()
     )
 
-    @Volatile
+    private val lock = Any()
     private var snapshot: GridSnapshot? = null
 
     /**
      * Returns the cached snapshot if the cache key matches, or null on a miss.
      */
-    fun get(studyId: Int, traitIds: List<String>, rowHeader: String, extraHeaders: List<String> = emptyList()): GridSnapshot? {
-        val s = snapshot ?: return null
-        return if (s.studyId == studyId && s.traitIds == traitIds && s.rowHeader == rowHeader && s.extraHeaders == extraHeaders) s
-        else null
-    }
+    fun get(studyId: Int, traitIds: List<String>, rowHeader: String, extraHeaders: List<String> = emptyList()): GridSnapshot? =
+        synchronized(lock) {
+            val s = snapshot ?: return null
+            if (s.studyId == studyId && s.traitIds == traitIds && s.rowHeader == rowHeader && s.extraHeaders == extraHeaders) s
+            else null
+        }
 
     fun put(snapshot: GridSnapshot) {
-        this.snapshot = snapshot
+        synchronized(lock) { this.snapshot = snapshot }
     }
 
     fun invalidate() {
-        snapshot = null
+        synchronized(lock) { snapshot = null }
     }
 }

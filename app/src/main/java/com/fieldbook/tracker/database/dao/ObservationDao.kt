@@ -465,32 +465,33 @@ class ObservationDao {
             }
             
             // Build a query to count all observation units in these studies
-            val studyIdList = studiesWithObservations.joinToString(",") { "'$it'" }
-            
+            val placeholders = studiesWithObservations.joinToString(",") { "?" }
+            val studyArgs = studiesWithObservations.toTypedArray()
+
             // Count total observation units in these studies
             val totalUnitsQuery = """
-                SELECT COUNT(*) as total_units 
-                FROM ${ObservationUnit.tableName} 
-                WHERE ${Study.FK} IN ($studyIdList)
+                SELECT COUNT(*) as total_units
+                FROM ${ObservationUnit.tableName}
+                WHERE ${Study.FK} IN ($placeholders)
             """
-            
-            val totalUnits = db.rawQuery(totalUnitsQuery, null).use { cursor ->
+
+            val totalUnits = db.rawQuery(totalUnitsQuery, studyArgs).use { cursor ->
                 if (cursor.moveToFirst()) {
                     cursor.getInt(cursor.getColumnIndexOrThrow("total_units"))
                 } else {
                     0
                 }
             }
-            
+
             // Count observation units that already have observations for this trait
             val observedUnitsQuery = """
-                SELECT COUNT(DISTINCT ${ObservationUnit.FK}) as observed_units 
-                FROM ${Observation.tableName} 
-                WHERE ${Study.FK} IN ($studyIdList) 
+                SELECT COUNT(DISTINCT ${ObservationUnit.FK}) as observed_units
+                FROM ${Observation.tableName}
+                WHERE ${Study.FK} IN ($placeholders)
                 AND ${ObservationVariable.FK} = ?
             """
-            
-            val observedUnits = db.rawQuery(observedUnitsQuery, arrayOf(traitDbId)).use { cursor ->
+
+            val observedUnits = db.rawQuery(observedUnitsQuery, studyArgs + traitDbId).use { cursor ->
                 if (cursor.moveToFirst()) {
                     cursor.getInt(cursor.getColumnIndexOrThrow("observed_units"))
                 } else {
