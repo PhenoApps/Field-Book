@@ -397,6 +397,8 @@
     <string name="traits_format_green_seeker">GreenSeeker</string>
     <string name="traits_format_scale">Scale</string>
     <string name="traits_format_stop_watch">Stopwatch</string>
+    <string name="traits_format_custom">Custom</string>
+    <string name="traits_format_hardware">Hardware</string>
 
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Trait Format</string>
