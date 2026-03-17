@@ -9,8 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - New Innospectra trait format (https://github.com/PhenoApps/Field-Book/pull/1392)
-- Simpler debugging now in system settings (https://github.com/PhenoApps/Field-Book/pull/1438)
 - Entry progress bar is now scrollable for navigation (https://github.com/PhenoApps/Field-Book/pull/1414)
+- Simpler debugging now in system settings (https://github.com/PhenoApps/Field-Book/pull/1438)
 - Categorical traits now have an option that allows new categories to be defined during collection (https://github.com/PhenoApps/Field-Book/pull/1411)
 
 ### Changed
@@ -21,8 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Delete field dialog now includes an archive option (https://github.com/PhenoApps/Field-Book/pull/1413)
 
 ### Fixed
-- Trait files from BreedBase are now correctly imported (https://github.com/PhenoApps/Field-Book/pull/1442)
 - Toolbars now use the correct themes (https://github.com/PhenoApps/Field-Book/pull/1437)
+- Trait files from BreedBase are now correctly imported (https://github.com/PhenoApps/Field-Book/pull/1442)
 
 ## [v7.1.2] - 2026-02-24
 
