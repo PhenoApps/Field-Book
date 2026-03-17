@@ -20,6 +20,7 @@ import com.fieldbook.tracker.database.withDatabase
 import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.traits.formats.presenters.UriPresenter
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter
 
@@ -141,7 +142,7 @@ class ObservationUnitPropertyDao {
 
                 Log.d("getExportDbData", "Final Query: $query")
                 val table = db.rawQuery(query, null).toTable()
-
+                val attachedMediaUriPresenter = UriPresenter()
                 table.forEach { row ->
                     cursor.addRow(fieldList.map { row[it] } + traitRequiredFields.map {
                         when (it) {
@@ -158,9 +159,9 @@ class ObservationUnitPropertyDao {
                             "person" -> row["collector"]
                             "location" -> row["geo_coordinates"]
                             "rep" -> row["rep"]
-                            "photo_uri" -> row["photo_uri"]
-                            "video_uri" -> row["video_uri"]
-                            "audio_uri" -> row["audio_uri"]
+                            "photo_uri" -> (row["photo_uri"] as? String)?.takeIf { it.isNotEmpty() }?.let { attachedMediaUriPresenter.represent(context, it) } ?: ""
+                            "video_uri" -> (row["video_uri"] as? String)?.takeIf { it.isNotEmpty() }?.let { attachedMediaUriPresenter.represent(context, it) } ?: ""
+                            "audio_uri" -> (row["audio_uri"] as? String)?.takeIf { it.isNotEmpty() }?.let { attachedMediaUriPresenter.represent(context, it) } ?: ""
                             else -> String()
                         }
                     })

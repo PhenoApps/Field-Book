@@ -23,7 +23,6 @@ gradlew.bat
 
 # Local configuration file (sdk path, etc)
 local.properties
-gradle.properties
 
 # Log Files
 *.log

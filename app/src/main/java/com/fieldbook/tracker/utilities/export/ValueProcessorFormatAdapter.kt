@@ -22,23 +22,23 @@ class ValueProcessorFormatAdapter @Inject constructor(
     }
 
     fun processValue(value: String, trait: TraitObject): String? {
-        return when (trait.format) {
+        return when {
 
-            in setOf(Formats.DATE.getDatabaseName()) -> {
+            trait.format in setOf(Formats.DATE.getDatabaseName()) -> {
 
                 val dateValue = DateJsonUtil.decode(value)
 
                 return (Formats.DATE.getTraitFormatDefinition() as ValuePresenter).represent(context, dateValue, trait)
             }
 
-            in CategoricalTraitLayout.POSSIBLE_VALUES -> return CategoryJsonUtil.processValue(
+            trait.format in CategoricalTraitLayout.POSSIBLE_VALUES -> return CategoryJsonUtil.processValue(
                 buildMap {
                     put("value", value)
                     put("observation_variable_field_book_format", trait.format)
                     put("categoryDisplayValue", trait.categoryDisplayValue)
                 })
 
-            in Formats.getSpectralFormats().map { it.getDatabaseName() } -> {
+            trait.format in Formats.getSpectralFormats().map { it.getDatabaseName() } -> {
                 spectralFileProcessor.processValue(value)
                     .onSuccess { value ->
                         val presentable = UriPresenter().represent(context, value)
@@ -50,6 +50,10 @@ class ValueProcessorFormatAdapter @Inject constructor(
 
                         return ""
                     }
+            }
+
+            Formats.isCameraTrait(trait.format) -> {
+                if (value.isEmpty()) "" else UriPresenter().represent(context, value, trait)
             }
 
             else -> value
