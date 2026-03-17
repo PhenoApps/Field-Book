@@ -264,8 +264,39 @@
     <string name="brapi_choice_to_make_default_negative">Annuler</string>
     <string name="brapi_choice_to_make_default_positive">enregistrer</string>
     <!-- Brapi Server Info -->
+    <string name="brapi_server_name_label">%1$s</string>
+    <string name="brapi_organization_name_label">%1$s</string>
+    <string name="brapi_server_description_label">%1$s</string>
     <string name="brapi_server_info_field_book">Carnet d\'essai</string>
     <!-- Community Servers -->
+    <string-array name="community_servers_names">
+        <item>CassavaBase</item>
+        <item>T3/Wheat</item>
+        <item>T3/Oat</item>
+        <item>T3/Barley</item>
+        <item>Default Test Server</item>
+    </string-array>
+    <string-array name="community_servers_urls">
+        <item>https://www.cassavabase.org</item>
+        <item>https://wheat-sandbox.triticeaetoolbox.org</item>
+        <item>https://oat-sandbox.triticeaetoolbox.org</item>
+        <item>https://barley-sandbox.triticeaetoolbox.org</item>
+        <item>https://test-server.brapi.org</item>
+    </string-array>
+    <string-array name="community_servers_oidc_urls">
+        <item>https://www.cassavabase.org/.well-known/openid-configuration</item>
+        <item>https://wheat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
+        <item>https://oat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
+        <item>https://barley-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
+        <item>https://test-server.brapi.org/.well-known/openid-configuration</item>
+    </string-array>
+    <string-array name="community_servers_grant_types">
+        <item>Brapi_oidc_flow_oauth_oauth_implicite</item>
+        <item>Brapi_oidc_flow_oauth_oauth_implicite</item>
+        <item>Brapi_oidc_flow_oauth_oauth_implicite</item>
+        <item>Brapi_oidc_flow_oauth_oauth_implicite</item>
+        <item>Brapi_oidc_flow_oauth_oauth_implicite</item>
+    </string-array>
     <!-- Authorization -->
     <string name="brapi_save_authorize">Sauvegarder et autoriser</string>
     <string name="brapi_revoke_auth">Se déconnecter</string>
@@ -401,6 +432,7 @@ Phenotypes et essais créés manuellement ou importés via CSV devront être exp
     <string name="dialog_quick_goto_title">Raccourci rapide</string>
     <string name="traits_sort_default">défaut</string>
     <!--  NearbyShare  -->
+    <string name="usb_device_description">USB</string>
     <!-- Stop Watch Trait Button content descriptions-->
     <string name="save">enregistrer</string>
     <string name="delete">Effacer</string>
