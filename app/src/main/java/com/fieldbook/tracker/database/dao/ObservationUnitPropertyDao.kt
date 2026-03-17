@@ -159,9 +159,9 @@ class ObservationUnitPropertyDao {
                             "person" -> row["collector"]
                             "location" -> row["geo_coordinates"]
                             "rep" -> row["rep"]
-                            "photo_uri" -> attachedMediaUriPresenter.represent(context, row["photo_uri"].toString())
-                            "video_uri" -> attachedMediaUriPresenter.represent(context, row["video_uri"].toString())
-                            "audio_uri" -> attachedMediaUriPresenter.represent(context, row["audio_uri"].toString())
+                            "photo_uri" -> (row["photo_uri"] as? String)?.takeIf { it.isNotEmpty() }?.let { attachedMediaUriPresenter.represent(context, it) } ?: ""
+                            "video_uri" -> (row["video_uri"] as? String)?.takeIf { it.isNotEmpty() }?.let { attachedMediaUriPresenter.represent(context, it) } ?: ""
+                            "audio_uri" -> (row["audio_uri"] as? String)?.takeIf { it.isNotEmpty() }?.let { attachedMediaUriPresenter.represent(context, it) } ?: ""
                             else -> String()
                         }
                     })

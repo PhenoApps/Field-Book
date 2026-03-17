@@ -53,7 +53,7 @@ class ValueProcessorFormatAdapter @Inject constructor(
             }
 
             Formats.isCameraTrait(trait.format) -> {
-                UriPresenter().represent(context, value, trait)
+                if (value.isEmpty()) "" else UriPresenter().represent(context, value, trait)
             }
 
             else -> value
