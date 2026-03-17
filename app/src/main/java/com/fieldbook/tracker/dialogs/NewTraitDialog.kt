@@ -146,8 +146,7 @@ class NewTraitDialog(
 
             neutralBtn?.setText(R.string.dialog_back)
             neutralBtn?.setOnClickListener {
-                isShowingCameraOptions = false
-                isShowingSpectralOptions = false
+                isShowingSubFormat = false
                 traitFormatsRv.adapter = null
                 showFormatLayouts(Formats.getMainFormats())
             }
@@ -213,9 +212,21 @@ class NewTraitDialog(
 
                     if (format in Formats.getCameraFormats()) {
 
-                        isShowingCameraOptions = true
+                        isShowingSubFormat = true
 
                         showFormatLayouts(Formats.getCameraFormats(), showBack = true)
+
+                    } else if (format in Formats.getHardwareFormats()) {
+
+                        isShowingSubFormat = true
+
+                        showFormatLayouts(Formats.getHardwareFormats(), showBack = true)
+
+                    } else if (format in Formats.getCustomFormats()) {
+
+                        isShowingSubFormat = true
+
+                        showFormatLayouts(Formats.getCustomFormats(), showBack = true)
 
                     } else {
 
@@ -545,26 +556,23 @@ class NewTraitDialog(
         }
     }
 
-    private var isShowingCameraOptions = false
-    private var isShowingSpectralOptions = false
+    private var isShowingSubFormat = false
 
     override fun onSelected(format: Formats) {
 
-        if (format == Formats.BASE_PHOTO && !isShowingCameraOptions) {
+        if (format in Formats.getBaseFormats() && !isShowingSubFormat) {
 
-            isShowingCameraOptions = true
-
-            traitFormatsRv.adapter = null
-
-            showFormatLayouts(Formats.getCameraFormats(), showBack = true)
-
-        } else if (format == Formats.BASE_SPECTRAL && !isShowingSpectralOptions) {
-
-            isShowingSpectralOptions = true
+            isShowingSubFormat = true
 
             traitFormatsRv.adapter = null
 
-            showFormatLayouts(Formats.getSpectralFormats(), showBack = true)
+            showFormatLayouts(when (format) {
+                Formats.BASE_PHOTO -> Formats.getCameraFormats()
+                Formats.BASE_SPECTRAL -> Formats.getSpectralFormats()
+                Formats.HARDWARE -> Formats.getHardwareFormats()
+                Formats.CUSTOM -> Formats.getCustomFormats()
+                else -> Formats.getMainFormats()
+            }, showBack = true)
 
         } else {
 
