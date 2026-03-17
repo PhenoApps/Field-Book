@@ -341,6 +341,7 @@
     <string name="traits_format_green_seeker">GreenSeeker</string>
     <string name="traits_format_scale">Escala</string>
     <string name="traits_format_stop_watch">Cronómetro</string>
+    <string name="traits_format_custom">Personalizado</string>
     <string name="traits_format_hardware">Hardware</string>
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Formato de Rasgo</string>
