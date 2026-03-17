@@ -99,40 +99,6 @@
       "realPosition": 8
     },
     {
-      "name": "type",
-      "alias": "type",
-      "synonyms": ["type"],
-      "format": "categorical",
-      "defaultValue": "",
-      "details": "",
-      "isVisible": true,
-      "realPosition": 9,
-      "attributes": {
-        "category": "Yellow/Purple/Axil/Terminal/Long/Short/Round/Wrinkled/Green",
-        "allowMulticat": true
-      }
-    },
-    {
-      "name": "rust score",
-      "alias": "rust score",
-      "synonyms": ["rust score"],
-      "format": "disease rating",
-      "defaultValue": "",
-      "details": "",
-      "isVisible": true,
-      "realPosition": 10
-    },
-    {
-      "name": "audio",
-      "alias": "audio",
-      "synonyms": ["audio"],
-      "format": "audio",
-      "defaultValue": "",
-      "details": "",
-      "isVisible": true,
-      "realPosition": 11
-    },
-    {
       "name": "location",
       "alias": "location",
       "synonyms": ["location"],
@@ -140,27 +106,7 @@
       "defaultValue": "",
       "details": "",
       "isVisible": true,
-      "realPosition": 12
-    },
-    {
-      "name": "gnss",
-      "alias": "gnss",
-      "synonyms": ["gnss"],
-      "format": "gnss",
-      "defaultValue": "",
-      "details": "",
-      "isVisible": true,
-      "realPosition": 13
-    },
-    {
-      "name": "GoPro",
-      "alias": "GoPro",
-      "synonyms": ["GoPro"],
-      "format": "gopro",
-      "defaultValue": "",
-      "details": "",
-      "isVisible": true,
-      "realPosition": 14
+      "realPosition": 9
     },
     {
       "name": "angle",
@@ -170,17 +116,7 @@
       "defaultValue": "",
       "details": "degrees",
       "isVisible": true,
-      "realPosition": 15
-    },
-    {
-      "name": "video",
-      "alias": "video",
-      "synonyms": ["video"],
-      "format": "video",
-      "defaultValue": "",
-      "details": "",
-      "isVisible": true,
-      "realPosition": 16
+      "realPosition": 10
     }
   ]
 }
