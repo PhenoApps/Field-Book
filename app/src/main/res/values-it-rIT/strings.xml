@@ -341,6 +341,7 @@
     <string name="traits_format_green_seeker">GreenSeeker</string>
     <string name="traits_format_scale">Scala</string>
     <string name="traits_format_stop_watch">Cronometro</string>
+    <string name="traits_format_hardware">Hardware</string>
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Formati di Carattere</string>
     <string name="trait_creator_title_layout">Disposizione dei Caratteri</string>
