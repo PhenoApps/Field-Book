@@ -17,7 +17,7 @@ object TraitImportFileUtil {
                 val firstLine = it.readLine()?.trim().orEmpty()
                 when {
                     firstLine.startsWith("{") || firstLine.startsWith("[") -> FileFormat.JSON
-                    firstLine.contains("\"trait\"") -> FileFormat.CSV
+                    firstLine.contains("\"trait\"") || firstLine.startsWith("trait,", ignoreCase = true) -> FileFormat.CSV
                     else -> FileFormat.UNKNOWN
                 }
             } ?: FileFormat.UNKNOWN

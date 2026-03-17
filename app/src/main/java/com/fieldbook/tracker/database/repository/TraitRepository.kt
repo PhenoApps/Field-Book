@@ -305,11 +305,12 @@ class TraitRepository @Inject constructor(
                         val fmt = row.getOrNull(1)
 
                         if (name != null && fmt != null) {
+                            val fmtLower = fmt.lowercase()
                             val t = TraitObject().apply {
                                 this.name = name
                                 alias = name
                                 synonyms = listOf(name)
-                                format = fmt
+                                format = fmtLower
                                 defaultValue = row.getOrNull(2) ?: ""
                                 minimum = row.getOrNull(3) ?: ""
                                 maximum = row.getOrNull(4) ?: ""
@@ -320,7 +321,7 @@ class TraitRepository @Inject constructor(
                                 realPosition = maxPosition + (row.getOrNull(8)?.toIntOrNull() ?: 0)
                                 traitDataSource = originalFileName
 
-                                if (fmt == "multicat") {
+                                if (fmtLower == "multicat") {
                                     this.format = "categorical"
                                     allowMulticat = true
                                 }
