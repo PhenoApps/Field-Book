@@ -143,6 +143,8 @@
     <string name="fields_delete">Eliminar</string>
     <string name="fields_delete_study">Eliminar campo</string>
     <string name="fields_delete_study_confirmation">¿Estás seguro(a) de que quieres eliminar este campo? Esto eliminará todos los datos de este campo.</string>
+    <string name="fields_delete_archive_instead">Archivar en su lugar</string>
+    <string name="fields_delete_permanent_warning">Eliminar un campo es permanente y no se puede deshacer. ¿Desea archivarlo en su lugar?</string>
     <plurals name="fields_delete_confirmation">
         <item quantity="one">¿Estás seguro(a) de que quieres eliminar el campo: \"%s\"?</item>
         <item quantity="other">¿Estás seguro de que deseas eliminar los campos: \"%s\"?</item>
@@ -163,14 +165,14 @@
     <string name="import_error_unique">La columna de identificador único contiene duplicados o ya se ha usado en un archivo diferente</string>
     <string name="import_error_format_field">Solo los archivos CSV y XLS se pueden importar como campo</string>
     <string name="act_field_editor_no_suitable_columns_error">El archivo a importar no tiene columnas adecuadas entre las que elegir.</string>
-    <string name="import_runnable_db_failed_to_switch">La base de datos no pudo cambiar los campos.</string>
-    <string name="import_runnable_create_field_data_failed">Error al crear datos del campo para la línea %d en el archivo.</string>
+    <string name="import_runnable_db_failed_to_switch">La base de datos falló al cambiar los campos.</string>
+    <string name="import_runnable_create_field_data_failed">Fallo al crear datos de campo para la línea %d en el archivo.</string>
     <string name="import_runnable_duplicates_skipped">Se han encontrado columnas duplicadas, solo se usará la primera instancia.</string>
-    <string name="fields_study_exists_message">Esta campo ya existe</string>
-    <string name="fields_study_and_obs_exists_message">Este Campo ya está importado en este nivel de observación.</string>
+    <string name="fields_study_exists_message">Este campo ya existe.</string>
+    <string name="fields_study_and_obs_exists_message">Este campo ya está importado en este nivel de observación.</string>
     <string name="act_field_editor_failed_to_read_columns">Field Book no pudo cargar el archivo.</string>
     <string name="act_field_editor_load_file_failed">Ocurrió un error durante la carga del archivo.</string>
-    <string name="act_field_editor_file_open_failed">Error al abrir el archivo.</string>
+    <string name="act_field_editor_file_open_failed">Fallo al abrir el archivo.</string>
     <!-- Field Creator  -->
     <string name="field_creator_activity_toolbar_title">Crear Nuevo Campo</string>
     <string name="field_creator_size_title">Detalle del Campo</string>
@@ -185,12 +187,12 @@
     <string name="field_creator_size_rows_hint">Filas</string>
     <string name="field_creator_size_columns_hint">Columnas</string>
     <string name="field_name_required_error">Nombre del campo es obligatorio</string>
-    <string name="field_name_exists_error">El nombre del Campo ya existe</string>
+    <string name="field_name_exists_error">Nombre del campo ya existe</string>
     <string name="field_creator_positive_number_error">Debe ser un número positivo</string>
     <string name="field_creator_rows_exceeded_error">No puede exceder %s</string>
     <string name="field_creator_cols_exceeded_error">No puede exceder %s</string>
     <string name="field_creator_total_plots_exceeded_error">Total de parcelas no pueden exceder %1$s. Total actual: %2$s</string>
-    <string name="field_creation_failed_error">Error al crear el campo</string>
+    <string name="field_creation_failed_error">Fallo al crear el campo</string>
     <string name="field_creator_start_point_instruction">Pulsa una esquina para seleccionar el punto de inicio</string>
     <string name="field_dimensions_format">Campo: %d × %d</string>
     <string name="field_creator_pattern_linear">Lineal</string>
@@ -289,7 +291,7 @@
     <string name="trait_import_successful">Rasgos importados con éxito</string>
     <string name="traits_export_check">¿Exportar lista de rasgos actual?</string>
     <string name="traits_dialog_export">Exportar</string>
-    <string name="dialog_delete_traits_message">¿Quieres eliminar todos los rasgos actuales? Eliminar un rasgo también elimina los datos que se han recopilado para ese rasgo.</string>
+    <string name="dialog_delete_traits_message">¿Desea eliminar todos los rasgos actuales? Eliminar un rasgo también elimina los datos que se han recopilado para ese rasgo.</string>
     <string name="traits_toolbar_delete_all">Eliminar todos los rasgos</string>
     <string name="act_trait_editor_no_traits_exist">No existen rasgos.</string>
     <string name="export_dialog_traits_exporting">Exportando rasgos…</string>
@@ -339,6 +341,7 @@
     <string name="traits_format_green_seeker">GreenSeeker</string>
     <string name="traits_format_scale">Escala</string>
     <string name="traits_format_stop_watch">Cronómetro</string>
+    <string name="traits_format_hardware">Hardware</string>
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Formato de Rasgo</string>
     <string name="trait_creator_title_layout">Diseño del Rasgo</string>
@@ -353,6 +356,7 @@
     <string name="traits_create_unit">Unidad</string>
     <string name="traits_create_optional">Opcional</string>
     <string name="traits_create_categories_title">Categorías</string>
+    <string name="traits_create_severities_title">Severidades</string>
     <string name="traits_create_photo_maximum">Número máximo de fotos</string>
     <string name="traits_create_true">Verdadero</string>
     <string name="traits_create_false">Falso</string>
@@ -461,7 +465,7 @@
     <string name="trait_add_synonym_new_dialog">Agregar Nuevo Sinónimo</string>
     <string name="trait_synonym">Sinónimo</string>
     <string name="trait_add_synonym_new_dialog_blank">Sinónimo no puede estar vacío</string>
-    <string name="trait_add_synonym_already_exists">Ya existe este sinónimo</string>
+    <string name="trait_add_synonym_already_exists">Este sinónimo ya existe</string>
     <string name="trait_parameter_enabled">%s activado</string>
     <string name="trait_parameter_disabled">%s desactivado</string>
     <string name="trait_detail_chip_rename">Renombrar</string>
@@ -472,8 +476,14 @@
     <string name="trait_detail_chip_format_date">Formato: %s</string>
     <string name="trait_detail_chip_transfer_images">Transferir imágenes</string>
     <string name="trait_detail_chip_invalid_value">Valores atipicos</string>
+    <string name="trait_detail_chip_severities">Severidades</string>
     <string name="trait_parameter_allow_multicat">Selección de Múltiples Categorías</string>
+    <string name="trait_parameter_allow_other">Permitir Otra Categoría</string>
     <string name="trait_other_button">Otro</string>
+    <string name="trait_other_dialog_title">Agregar Nueva Categoría</string>
+    <string name="trait_other_dialog_hint">Nombre de la categoría</string>
+    <string name="trait_other_duplicate">Categoría ya existe</string>
+    <string name="trait_other_empty">Nombre de la categoria no puede estar vacío</string>
     <string name="trait_parameter_display_value">Mostrar Valor</string>
     <string name="trait_parameter_resource_file">Archivo de Recurso</string>
     <string name="trait_parameter_use_day_of_year">Usar Día del Año</string>
@@ -691,7 +701,7 @@
     <string name="observation_info_trait_name">Nombre del Rasgo</string>
     <string name="observation_info_trait_alias">Alias de Rasgo</string>
     <string name="observation_info_value">Valor</string>
-    <string name="observation_info_timestamp">Timestamp de la Observación</string>
+    <string name="observation_info_timestamp">Marca de Tiempo de la Observación</string>
     <string name="observation_info_collector">Colector</string>
     <string name="observations_info_geo_coordinates">Geo Coordenadas</string>
     <string name="observation_info_last_synced_time">Última sincronización</string>
@@ -765,6 +775,9 @@
     <string name="preferences_profile_device_name_dialog_title">Definir Nombre del Dispositivo</string>
     <string name="preferences_profile_device_name_error">Este campo no puede estar en blanco</string>
     <string name="preferences_profile_device_name_default_format">Predeterminado: %s</string>
+    <string name="preferences_system_debugging_title">Depurando</string>
+    <string name="pref_debug_application_title">Depurar la Aplicación</string>
+    <string name="pref_debug_application_summary">Obtener un archivo para ayudar a los desarrolladores a depurar problemas en la aplicación</string>
     <string name="pref_profile_crashlytics_user_id_enabled">ID Único</string>
     <string name="pref_profile_crashlytics_user_id_enabled_summary">Incluye un ID único y anónimo en los registros de fallos para ayudar al equipo de desarrollo a corregir errores</string>
     <string name="pref_profile_crashlytics_refresh_title">Refrescar ID</string>
@@ -821,8 +834,8 @@
     <string name="preferences_appearance_range_progress_bar_description">Muestra su posición actual en el campo</string>
     <string name="preferences_appearance_traits_progress_bar">Barra de progreso de rasgos</string>
     <string name="preferences_appearance_traits_progress_bar_description">Muestra si los rasgos activos tienen datos y resalta el rasgo actual</string>
-    <string name="preferences_appearance_observation_timestamp">Timestamp de la Observación</string>
-    <string name="preferences_appearance_observation_timestamp_description">Muestra el timestamp de la observación guardada por debajo del valor</string>
+    <string name="preferences_appearance_observation_timestamp">Marca de tiempo de la observación</string>
+    <string name="preferences_appearance_observation_timestamp_description">Muestra la marca de tiempo de la observación guardada por debajo del valor</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">Comportamiento</string>
     <string name="preferences_behavior_movement_title">Movimiento</string>
@@ -952,7 +965,7 @@
     <string name="trait_audio_playing_warning">El audio a nivel de rasgo se está reproduciendo. Deténgalo primero.</string>
     <string name="field_audio_zip_error">Error al crear archivo zip</string>
     <string name="trait_audio_placeholder_filename">Archivo de Audio Grabado</string>
-    <string name="trait_audio_timestamp">Timestamp: </string>
+    <string name="trait_audio_timestamp">Marca de tiempo: </string>
     <string name="trait_audio_duration">Duración: </string>
     <string name="trait_audio_file_size">Tamaño de Archivo</string>
     <string name="pref_beta_enable_individual_field_page_title">Activar Páginas de Campos Individuales</string>
@@ -1092,7 +1105,7 @@
     <string name="brapi_auth_error_starting">Error al iniciar la autenticación BrAPI</string>
     <string name="brapi_auth_permission_deny">ERROR: no tiene los permisos necesarios para el sistema especificado.</string>
     <string name="brapi_auth_needed_title">Se necesita iniciar sesión</string>
-    <string name="brapi_auth_needed">Necesitas estar conectado al sistema con el que estás intentando sincronizar los datos para sincronizar tus datos.\n\n¿Quieres autenticarte ahora?</string>
+    <string name="brapi_auth_needed">Necesita estar conectado al sistema con el que estás intentando sincronizar los datos para sincronizar tus datos.\n\n¿Desea autenticarse ahora?</string>
     <!-- BrAPI Import -->
     <string name="import_dialog_title_brapi_fields">Importar Campo con BrAPI</string>
     <string name="brapi_load_data_button">Cargar Campos</string>
@@ -1137,7 +1150,7 @@
     <string name="brapi_field_non_matching_sources_title">Orígenes No Coinciden</string>
     <string name="brapi_field_non_matching_sources">No se pueden sincronizar datos. Los datos de campo se originan en %1$s, la url de BrAPI  establecida actualmente en %2$s. Los origenes deben coincidir.</string>
     <string name="brapi_enable_before_sync">BRAPI está desactivado. Por favor, actívalo en la configuración antes de usar la sincronización.</string>
-    <string name="brapi_trait_already_exists">El rasgo ya existe: %1$s. No guardado.</string>
+    <string name="brapi_trait_already_exists">Rasgo ya existe: %1$s. No guardado.</string>
     <string name="brapi_error_saving_all_traits">Error al guardar los rasgos. No se guardaron rasgos.</string>
     <string name="brapi_error_saving_some_traits">Error al guardar algunosrasgos. Algunos rasgos no se guardaron</string>
     <string name="brapi_traits_saved_success">Rasgos seleccionados guardados exitosamente.</string>
@@ -1197,7 +1210,7 @@
     </string>
     <string name="brapi_na">NA</string>
     <!-- APP INTRO  -->
-    <string name="intro_tutorial_title">¿Quieres activar el tutorial?</string>
+    <string name="intro_tutorial_title">¿Desea activar el tutorial?</string>
     <string name="intro_tutorial_description">Esta configuración se puede cambiar en los Ajustes</string>
     <string name="intro_tutorial_radio_item_yes">Sí</string>
     <string name="intro_tutorial_radio_item_no">No</string>
@@ -1348,6 +1361,21 @@
     <string name="delete_color">Eliminar Observación Color</string>
     <string name="delete_color_message">Esto eliminará permanentemente la observación</string>
     <string name="nix_device_connecting">El dispositivo se está conectando.</string>
+    <!-- inno spectra -->
+    <string name="inno_spectra_save_failed">Fallo al guardar</string>
+    <string name="inno_spectra_hardware_incompatible">Hardware incompatible</string>
+    <string name="inno_spectra_function_locked">Función bloqueada</string>
+    <string name="header_temperature">Temperatura</string>
+    <string name="header_humidity">Humedad</string>
+    <string name="header_firmware">Firmware</string>
+    <string name="header_total_lamp_time">Tiempo Total de la Lámpara</string>
+    <string name="header_battery">Batería</string>
+    <string name="header_software_version">Versión del Software</string>
+    <string name="header_hardware_version">Versión del Hardware,</string>
+    <string name="header_device_id">ID del Dispositivo</string>
+    <string name="header_serial_id">ID Serial</string>
+    <string name="header_uuid">UUID</string>
+    <string name="delete_spectral_data_plot">Eliminar Datos Espectrales</string>
     <string name="brapi_studies_filter_title">Estudios</string>
     <string name="brapi_trials_filter_title">Ensayos</string>
     <string name="brapi_filter_dialog_title">Filtrar por</string>
@@ -1412,7 +1440,7 @@
     <string name="opening_brapi_no_network_error">La red debe estar activada para usar funcionalidad BrAPI.</string>
     <string name="act_brapi_list_filter_reset_selection_message">Esto limpiará la lista en ejecución de los elementos seleccionados.</string>
     <string name="pref_experimental_generate_sample_data_title">Generar Campo de Ejemplo</string>
-    <string name="pref_experimental_generate_sample_data_summary">Crea un campo de ejemplo con observaciones artificiales para todos los rasgos cargados. Los timestamps son aleatorizados durante los últimos tres meses.</string>
+    <string name="pref_experimental_generate_sample_data_summary">Crea un campo de ejemplo con observaciones artificiales para todos los rasgos cargados. Las masrcas de tiempo son aleatorizadas durante los últimos tres meses.</string>
     <string name="pref_experimental_generate_sample_data_confirm_title">¿Generar Campo de Ejemplo?</string>
     <string name="pref_experimental_generate_sample_data_confirm_message">Esto creará o rellenará un campo llamado \"field_sample\" con observaciones artificiales. Los rasgos de ejemplo se cargarán automáticamente si ninguno está presente.</string>
     <string name="pref_experimental_generate_sample_data_success">Campo de ejemplo creado exitosamente.</string>
@@ -1516,7 +1544,7 @@
     <string name="list_item_color_placeholder_content_description">Marcador de posición para un nuevo escaneo</string>
     <string name="loading">Cargando</string>
     <string name="nix_error_no_network">Nix puede necesitar internet para funcionar correctamente.</string>
-    <string name="import_runnable_field_name_exists">El nombre del Campo ya existe.</string>
+    <string name="import_runnable_field_name_exists">Nombre del campo ya existe.</string>
     <string name="enabled">activado</string>
     <string name="disabled">desactivado</string>
     <string name="logging_out_please_wait">Cerrando sesión, por favor espere.</string>
@@ -1631,4 +1659,11 @@
     <string name="preferences_behavior_attach_media_barcode_prioritize">Usar siempre código de barras detectado</string>
     <string name="preferences_behavior_attach_media_barcode_prioritize_description">Cuando se detecta un código de barras, Field Book analizará automáticamente el código de barras sin la interacción del usuario.</string>
     <string name="edit">Editar</string>
+    <string name="trait_categorical_other_btn_description">Agregar nueva categoría</string>
+    <!-- InnoSpectra settings layout -->
+    <string name="view_trait_innospectra_device_name_label">Nombre</string>
+    <string name="view_trait_innospectra_mac_label">MAC</string>
+    <string name="view_trait_innospectra_unknown">Desconocido</string>
+    <string name="view_trait_innospectra_na">N/A</string>
+    <string name="unknown">Desconocido</string>
 </resources>

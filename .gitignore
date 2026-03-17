@@ -44,6 +44,7 @@ local.properties
 
 # Other
 **/ApiKeys.java
+.claude/
 
 # Git orig files
 *.orig

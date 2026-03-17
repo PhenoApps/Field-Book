@@ -11,7 +11,7 @@ import android.widget.Toast
 import androidx.core.content.edit
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.database.basicTimeFormatter
+import com.fieldbook.tracker.database.internalTimeFormatter
 import com.fieldbook.tracker.database.saver.SpectralSaver
 import com.fieldbook.tracker.devices.spectrometers.Device
 import com.fieldbook.tracker.devices.spectrometers.SpectralFrame
@@ -139,7 +139,7 @@ class NixTraitLayout : SpectralTraitLayout {
         val person = (context as? CollectActivity)?.person
         val location = (context as? CollectActivity)?.locationByPreferences
         val comment = null
-        val createdAt = OffsetDateTime.now().format(basicTimeFormatter)
+        val createdAt = OffsetDateTime.now().format(internalTimeFormatter)
 
         background.launch {
 
@@ -484,7 +484,7 @@ class NixTraitLayout : SpectralTraitLayout {
                     val frame = SpectralFrame(
                         color = color,
                         timestamp = OffsetDateTime.now().format(
-                            basicTimeFormatter
+                            internalTimeFormatter
                         ),
                         entryId = entryId,
                         traitId = traitId

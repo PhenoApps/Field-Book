@@ -397,6 +397,8 @@
     <string name="traits_format_green_seeker">GreenSeeker</string>
     <string name="traits_format_scale">Scale</string>
     <string name="traits_format_stop_watch">Stopwatch</string>
+    <string name="traits_format_custom">Custom</string>
+    <string name="traits_format_hardware">Hardware</string>
 
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Trait Format</string>
@@ -890,6 +892,9 @@
     <string name="preferences_profile_device_name_default_format">Default: %s</string>
 
     <string name="preferences_profile_crashlytics" translatable="false">Crashlytics</string>
+    <string name="preferences_system_debugging_title">Debugging</string>
+    <string name="pref_debug_application_title">Debug Application</string>
+    <string name="pref_debug_application_summary">Obtain a file to help developers debug issues in the app</string>
     <string name="pref_profile_crashlytics_user_id_enabled">Unique ID</string>
     <string name="pref_profile_crashlytics_user_id_enabled_summary">Include an anonymous, unique ID in crash logs to help the development team fix bugs</string>
     <string name="pref_profile_crashlytics_refresh_title">Refresh ID</string>
@@ -1656,6 +1661,22 @@
     <string name="delete_color_message">This will permanently delete the observation</string>
     <string name="nix_device_connecting">Device is connecting.</string>
 
+    <!-- inno spectra -->
+    <string name="inno_spectra_save_failed">Save failed</string>
+    <string name="inno_spectra_hardware_incompatible">Hardware incompatible</string>
+    <string name="inno_spectra_function_locked">Function locked</string>
+    <string name="header_temperature">Temperature</string>
+    <string name="header_humidity">Humidity</string>
+    <string name="header_firmware">Firmware</string>
+    <string name="header_total_lamp_time">Total Lamp Time</string>
+    <string name="header_battery">Battery</string>
+    <string name="header_software_version">Software Version</string>
+    <string name="header_hardware_version">Hardware Version</string>
+    <string name="header_device_id">Device ID</string>
+    <string name="header_serial_id">Serial ID</string>
+    <string name="header_uuid">UUID</string>
+    <string name="delete_spectral_data_plot">Delete Spectral Data</string>
+
     <string name="brapi_studies_filter_title">Studies</string>
     <string name="brapi_trials_filter_title">Trials</string>
     <string name="brapi_filter_dialog_title">Filter By</string>
@@ -1959,4 +1980,12 @@
     <string name="edit">Edit</string>
 
     <string name="trait_categorical_other_btn_description">Add a new category</string>
+
+    <!-- InnoSpectra settings layout -->
+    <string name="view_trait_innospectra_device_name_label">Name</string>
+    <string name="view_trait_innospectra_mac_label">MAC</string>
+    <string name="view_trait_innospectra_unknown">Unknown</string>
+    <string name="view_trait_innospectra_na">N/A</string>
+    <string name="unknown">Unknown</string>
+
 </resources>

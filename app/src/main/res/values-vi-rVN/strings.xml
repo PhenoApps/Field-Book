@@ -408,6 +408,7 @@ Các tính trạng và ruộng được tạo thủ công hoặc được nhập
     <!-- gopro -->
     <!-- canon camera strings -->
     <!-- spectral trait strings -->
+    <!-- inno spectra -->
     <string name="brapi_traits_filter_title">(Các) Tính trạng</string>
     <string name="dialog_quick_goto_title">Đi đến (nghiệm thức) nhanh</string>
     <string name="traits_sort_default">Mặc định</string>
@@ -422,4 +423,5 @@ Các tính trạng và ruộng được tạo thủ công hoặc được nhập
     <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
     <!-- Preference: Attach media barcode prioritize -->
     <string name="edit">Chỉnh sửa</string>
+    <!-- InnoSpectra settings layout -->
 </resources>

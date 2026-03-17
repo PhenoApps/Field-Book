@@ -2,31 +2,37 @@ package com.fieldbook.tracker.traits.formats
 
 import android.content.Context
 
-enum class Formats(val type: Types = Types.SYSTEM, val isCamera: Boolean = false) {
+enum class Formats {
 
     //SYSTEM formats
-    AUDIO, BOOLEAN, CAMERA(isCamera = true), CATEGORICAL, COUNTER, DATE, LOCATION, NUMERIC, PERCENT, TEXT, ANGLE, BASE_SPECTRAL,
-
-    //CUSTOM formats
-    DISEASE_RATING(Types.CUSTOM), GNSS(Types.CUSTOM), STOP_WATCH(Types.CUSTOM),
-    BASE_PHOTO(Types.CUSTOM), VIDEO(Types.CUSTOM, isCamera = true),
-    USB_CAMERA(Types.CUSTOM, isCamera = true), GO_PRO(Types.CUSTOM, isCamera = true), CANON(Types.CUSTOM, isCamera = true),
-    NIX(Types.CUSTOM), GREEN_SEEKER(Types.CUSTOM), SCALE(Types.CUSTOM),
-    LABEL_PRINT(Types.CUSTOM);
+    ANGLE, AUDIO, BOOLEAN,
+    BASE_PHOTO, CAMERA, VIDEO, USB_CAMERA, GO_PRO, CANON,
+    CATEGORICAL, COUNTER, DATE,
+    HARDWARE, SCALE, LABEL_PRINT,
+    LOCATION, GNSS, NUMERIC, PERCENT, STOP_WATCH,
+    BASE_SPECTRAL, NIX, INNO_SPECTRA_SENSOR, GREEN_SEEKER,
+    TEXT,
+    CUSTOM, DISEASE_RATING;
 
     companion object {
 
         fun isSpectralFormat(format: String) = format in setOf("inno_spectra", "nix")
 
-        fun isCameraTrait(format: String) = format in setOf("photo", "usb camera", "gopro", "canon", "video")
+        fun isCameraTrait(format: String) = format in getCameraFormats().map { it.getDatabaseName() }
 
         fun isExternalCameraTrait(format: String) = format in setOf("usb camera", "gopro", "canon")
 
-        fun getSpectralFormats() = entries.filter { it in setOf(NIX, GREEN_SEEKER) }
+        fun getHardwareFormats() = entries.filter { it in setOf(SCALE, LABEL_PRINT) }
+        
+        fun getCustomFormats() = entries.filter { it in setOf(DISEASE_RATING) }
+        
+        fun getSpectralFormats() = entries.filter { it in setOf(NIX, GREEN_SEEKER, INNO_SPECTRA_SENSOR) }
 
-        fun getCameraFormats() = entries.filter { it.isCamera }
+        fun getCameraFormats() = entries.filter { it in setOf(CAMERA, USB_CAMERA, GO_PRO, CANON, VIDEO) }
 
-        fun getMainFormats() = entries - getCameraFormats().toSet() - getSpectralFormats().toSet()
+        fun getMainFormats() = entries - getCameraFormats().toSet() - getSpectralFormats().toSet() - getHardwareFormats().toSet() - getCustomFormats().toSet()
+
+        fun getBaseFormats() = setOf(BASE_PHOTO, BASE_SPECTRAL, HARDWARE, CUSTOM)
 
         fun findTrait(format: String) = entries.find { it.getDatabaseName() == format }?.getTraitFormatDefinition()
 
@@ -57,6 +63,9 @@ enum class Formats(val type: Types = Types.SYSTEM, val isCamera: Boolean = false
         GREEN_SEEKER -> GreenSeekerFormat()
         SCALE -> ScaleFormat()
         VIDEO -> VideoFormat()
+        INNO_SPECTRA_SENSOR -> InnoSpectraSensorFormat()
+        CUSTOM -> CustomFormat()
+        HARDWARE -> HardwareFormat()
         else -> TextFormat()
     }
 

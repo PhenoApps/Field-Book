@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -58,20 +57,30 @@ class LineGraphSelectableAdapter(private val listener: Listener? = null) : ListA
                 holder.progressBar.visibility = View.GONE
                 holder.imageView.visibility = View.GONE
                 holder.colorView.visibility = View.VISIBLE
-                //val (day, time) = timestamp.split(" ")
+                // Extract time portion from timestamp (format: "yyyy-MM-dd HH:mm:ss.SSSZZZZZ")
+                val timeLabel = if (timestamp.contains(" ")) {
+                    // Split by space and get the time part, then extract only HH:mm:ss
+                    val timePart = timestamp.split(" ").getOrNull(1) ?: ""
+                    if (timePart.contains(".")) {
+                        timePart.substringBefore(".")
+                    } else {
+                        timePart
+                    }.ifEmpty { (position + 1).toString() }
+                } else {
+                    (position + 1).toString()
+                }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     holder.colorView.tooltipText = timestamp
                 }
                 holder.colorView.setOnLongClickListener {
                     listener?.onItemLongClick(position)
-                    //Toast.makeText(holder.itemView.context, timestamp, Toast.LENGTH_SHORT).show()
                     true
                 }
                 holder.colorView.setBackgroundColor(color)
                 holder.colorView.setOnClickListener {
                     listener?.onItemSelected(position)
                 }
-                holder.textView.text = (position + 1).toString()
+                holder.textView.text = timeLabel
             }
         }
     }

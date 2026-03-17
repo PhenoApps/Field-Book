@@ -1,21 +1,69 @@
 package com.fieldbook.tracker.traits
 
+import android.Manifest
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
+import android.bluetooth.le.BluetoothLeScanner
+import android.bluetooth.le.ScanCallback
+import android.bluetooth.le.ScanResult
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
+import android.content.pm.PackageManager
+import android.os.Build
+import android.os.IBinder
 import android.util.AttributeSet
+import android.util.Log
+import androidx.core.app.ActivityCompat
+import androidx.core.content.edit
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
+import androidx.preference.PreferenceManager
+import com.ISCSDK.ISCNIRScanSDK
+import com.ISCSDK.ISCNIRScanSDK.NanoDevice
+import com.ISCSDK.ISCNIRScanSDK.SharedPreferencesKeys
+import com.ISCSDK.ISCNIRScanSDK.getStringPref
+import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.CollectActivity
+import com.fieldbook.tracker.database.internalTimeFormatter
 import com.fieldbook.tracker.devices.spectrometers.Device
 import com.fieldbook.tracker.devices.spectrometers.SpectralFrame
-import com.fieldbook.tracker.devices.spectrometers.Spectrometer.ResultCallback
+import com.fieldbook.tracker.devices.spectrometers.Spectrometer
+import com.fieldbook.tracker.devices.spectrometers.innospectra.InnoSpectraBase
+import com.fieldbook.tracker.devices.spectrometers.innospectra.interfaces.NanoEventListener
+import com.fieldbook.tracker.devices.spectrometers.innospectra.models.Frame
+import com.fieldbook.tracker.database.saver.SpectralSaver
+import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.traits.formats.Formats
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.threeten.bp.OffsetDateTime
+import java.util.UUID
+import kotlin.jvm.java
 
-/**
- * TODO
- * Temporary class that shows the inheritance of the base spectral trait
- * Later this will be filled with inno spectra specific code
- */
 class InnoSpectraTraitLayout : SpectralTraitLayout {
 
     companion object {
-        const val TAG = "InnoSpectraLayout"
+        const val TAG = "SpectralTraitLayout"
     }
+
+    private var bluetoothManager: BluetoothManager? = null
+    private var bluetoothDevice: BluetoothDevice? = null
+    private var connectedNanoDevice: NanoDevice? = null
+    private var deviceList: MutableList<Pair<BluetoothDevice, NanoDevice>> = mutableListOf()
+    private var nanoReceiver: InnoSpectraBase? = null
+    private var isStarting = false
+
+    private var deviceConnectionJob: kotlinx.coroutines.Job? = null
+    private var deviceSearchJob: kotlinx.coroutines.Job? = null
+
+    private var connection: ServiceConnection? = null
+
+    private val nanoSaver = SpectralSaver(database)
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
@@ -23,32 +71,655 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
         context, attrs, defStyleAttr
     )
 
+    private fun <T> LiveData<T>.observeOnce(lifecycleOwner: LifecycleOwner, observer: Observer<T?>) {
+        observe(lifecycleOwner, object : Observer<T?> {
+            override fun onChanged(value: T?) {
+                observer.onChanged(value)
+                removeObserver(this)
+            }
+        })
+    }
+
+    override fun type(): String {
+        return Formats.INNO_SPECTRA_SENSOR.getDatabaseName()
+    }
+
+    private var lastProcessedFrameHash: String = "-1"
+    private var hardwareButtonObserver: Observer<Frame?>? = null
+
+    private fun observeHardwareButtonScans() {
+        val activity = (context as? CollectActivity) ?: return
+        val viewModel = activity.innoSpectraViewModel ?: return
+
+        // Only set up observer once
+        if (hardwareButtonObserver != null) {
+            return
+        }
+
+        // Create observer that only saves new frames from hardware button
+        hardwareButtonObserver = Observer { frame ->
+            if (frame != null && !isLocked && !viewModel.isUiScan()) {
+                //avoid duplication
+                val frameId = UUID.randomUUID().toString()
+
+                // Only save if this is a new frame (different hash from last processed)
+                if (frameId != lastProcessedFrameHash) {
+                    val entryId = currentRange?.uniqueId
+                    val traitId = currentTrait?.id
+
+                    if (entryId != null && traitId != null) {
+                        saveSpectralFrame(frame, entryId, traitId)
+                        lastProcessedFrameHash = frameId
+
+                        // Hide progress bar after hardware scan completes
+                        toggleProgressBar(false)
+                    }
+                }
+            } else if (frame == null) {
+                lastProcessedFrameHash = "-1"
+            }
+        }
+
+        // Register observer only once
+        hardwareButtonObserver?.let { observer ->
+            viewModel.getSpectralData().observe(activity, observer)
+        }
+    }
+
+    private fun setupScanStartedListener() {
+        val activity = (context as? CollectActivity) ?: return
+        val viewModel = activity.innoSpectraViewModel ?: return
+
+        viewModel.setScanStartedListener {
+            // Show progress bar when any scan starts (hardware or software)
+            toggleProgressBar(true)
+        }
+    }
+
+    private fun NanoDevice.toDevice() = Device(this).also {
+        it.displayableName = this.nanoName
+    }
+
+    override fun colorUiMode() { /* only spectral line graphing mode */ }
+
+    override fun loadLayout() {
+        super.loadLayout()
+        spectralUiMode()
+
+        // Observe spectral data from hardware button scans and auto-save them
+        observeHardwareButtonScans()
+
+        // Set up listener to show progress bar when any scan starts
+        setupScanStartedListener()
+    }
+
+    override fun setupConnectUi() {
+        // Cancel any ongoing device search
+        deviceSearchJob?.cancel()
+        deviceSearchJob = null
+
+        // Reset connection state
+        isStarting = false
+
+        // Set up UI for disconnected state
+        background.launch(Dispatchers.Main) {
+            connectButton?.visibility = VISIBLE
+            captureButton?.visibility = GONE
+            disconnectButton?.visibility = GONE
+            settingsButton?.visibility = GONE
+            toggleProgressBar(false)
+            startDeviceSearch()
+            setupConnectButton()
+        }
+    }
+
     override fun establishConnection(): Boolean {
-        TODO("Not yet implemented")
+        val connected = (context as CollectActivity).innoSpectraViewModel?.isConnected() == true
+
+        if (connected) {
+            connectedNanoDevice?.let { nano ->
+                enableCapture(nano.toDevice())
+            }
+        }
+
+        return connected
     }
 
     override fun startDeviceSearch() {
-        TODO("Not yet implemented")
+
+        val deviceId = controller.getPreferences().getString(GeneralKeys.INNOSPECTRA_NANO_DEVICE_ID, "") ?: ""
+        val deviceName = controller.getPreferences().getString(GeneralKeys.INNOSPECTRA_NANO_DEVICE_NAME, "") ?: ""
+
+        if (deviceId.isNotBlank() && deviceName.isNotBlank()) {
+
+            setupDeviceSearch()
+
+            scheduleDeviceSearch(deviceName, deviceId) { data ->
+
+                val device = data.first as BluetoothDevice
+                val nanoDevice = data.second as NanoDevice
+
+                // wrap as Device so it can be handled by connectDevice(Device)
+                connectDevice(Device(device to nanoDevice))
+            }
+
+        }
+        else {
+
+            setupDeviceSearch()
+        }
     }
 
-    override fun getDeviceList(): List<Device> {
-        TODO("Not yet implemented")
+    private fun setupDeviceSearch() {
+
+        background.launch {
+            scanForDevices()
+        }
+
+        //schedule a checker to see when device info is found
+        scheduleDeviceInfoCheck {
+
+            withContext(Dispatchers.Main) {
+
+                // create a Device wrapper from connected pieces if available
+                bluetoothDevice?.let { bt ->
+                    connectedNanoDevice?.let { nano ->
+                        enableCapture(Device(bt to nano))
+                    } ?: run {
+                        // fallback: try to enable without a concrete device (graceful)
+                        // If enableCapture requires a device, we skip until device connected
+                        Log.d(TAG, "Connected nano device not yet available")
+                    }
+                }
+
+            }
+        }
+    }
+
+    override fun capture(
+        device: Device,
+        entryId: String,
+        traitId: String,
+        callback: Spectrometer.ResultCallback
+    ) {
+
+        if (!isLocked) {
+
+            val viewLifecycleOwner = (context as CollectActivity)
+
+            (context as CollectActivity).innoSpectraViewModel?.scan(context, false)?.observeOnce(viewLifecycleOwner) {
+
+                it?.let { frames ->
+                    Log.d(TAG, "Frames: $frames")
+                    for (f in frames) {
+
+                        Log.d(TAG, "Frame: ${f.rawData}")
+
+                        saveSpectralFrame(f, entryId, traitId)
+
+                        Log.d(TAG, "Spectral Data queued for save")
+                    }
+
+                    // Re-enable capture and hide progress bar
+                    enableCapture(device)
+
+                    // Notify callback that capture completed successfully
+                    callback.onResult(true)
+                } ?: run {
+                    // Scan failed or returned null
+                    enableCapture(device)
+                    callback.onResult(false)
+                }
+            }
+        } else {
+            // If locked, immediately callback with failure
+            enableCapture(device)
+            callback.onResult(false)
+        }
+
+        (context as CollectActivity).innoSpectraViewModel?.setEventListener {
+            Log.d(TAG, "Event listener called")
+        }
+    }
+
+
+    private fun saveSpectralFrame(frame: Frame, entryId: String, traitId: String) {
+
+        val values = frame.rawData.joinToString(" ") { it.toString() }
+        val wavelengths = frame.data.joinToString(" ") { it.toString() }
+        val timestamp = OffsetDateTime.now().format(internalTimeFormatter)
+
+        // Build SpectralFrame
+        val spectralFrame = SpectralFrame(
+            values = values,
+            wavelengths = wavelengths,
+            color = "",
+            timestamp = timestamp,
+            entryId = entryId,
+            traitId = traitId
+        )
+
+        val deviceAddress = connectedNanoDevice?.nanoMac ?: return
+
+        // Write to file and database
+        writeSpectralDataToFile("inno_spectra_$deviceAddress", spectralFrame, true)?.let { spectralUri ->
+            writeSpectralDataToDatabase(spectralFrame, "", spectralUri, entryId, traitId)
+        }
+    }
+
+    private fun scheduleDeviceInfoCheck(onInfoReceived: suspend () -> Unit) {
+        background.launch {
+            while (true) {
+                val config = (context as CollectActivity).innoSpectraViewModel?.getActiveConfig()
+                if (config != null) {
+                    onInfoReceived()
+                    break
+                }
+                delay(500L)
+            }
+        }
+    }
+
+    private fun scheduleDeviceConnection() {
+        // Cancel any existing job first
+        deviceConnectionJob?.cancel()
+
+        deviceConnectionJob = background.launch {
+            while (true) {
+                val connected = (context as CollectActivity).innoSpectraViewModel?.isConnected()
+                if (connected == false) {
+                    // Hardware disconnect detected - perform proper cleanup
+                    withContext(Dispatchers.Main) {
+                        if (!isLocked) {
+                            isStarting = false
+                            endConnection()
+
+                            connectButton?.visibility = VISIBLE
+                            captureButton?.visibility = GONE
+                            progressBar?.visibility = GONE
+                            settingsButton?.visibility = GONE
+                        }
+                    }
+                    break
+                }
+                delay(250L)
+            }
+        }
+    }
+
+    private fun scheduleDeviceSearch(deviceName: String, macAddress: String, onDeviceFound: suspend (Pair<*, *>) -> Unit) {
+        // Cancel any existing search job to prevent duplicates
+        deviceSearchJob?.cancel()
+
+        deviceSearchJob = background.launch {
+            while (true) {
+                // Check if already starting to prevent race conditions
+                if (isStarting) {
+                    Log.d(TAG, "scheduleDeviceSearch: connection already starting, stopping search")
+                    break
+                }
+
+                val device = deviceList.firstOrNull { deviceData ->
+                    deviceData.second.nanoMac == macAddress && deviceData.second.nanoName == deviceName
+                }
+                if (device != null) {
+                    onDeviceFound(device)
+                    break
+                }
+                delay(500L)
+            }
+        }
+    }
+
+    override fun showSettings() {
+        var dialog: android.app.AlertDialog? = null
+
+        // if we have a connected nano device, show device info in settings
+        connectedNanoDevice?.let { nano ->
+
+            // Get device info and status from ViewModel
+            val viewModel = (context as CollectActivity).innoSpectraViewModel
+            val deviceInfo = viewModel?.getDeviceInfo()
+            val deviceStatus = viewModel?.getDeviceStatusObject()
+
+            val firmwareVersion = deviceInfo?.softwareVersion ?: context.getString(R.string.unknown)
+            val batteryLevel = deviceStatus?.battery ?: context.getString(R.string.unknown)
+
+            // create settings view using the new InnoSpectra settings view
+            val settingsView = com.fieldbook.tracker.views.InnoSpectraSettingsView(context, nano, firmwareVersion, batteryLevel) {
+                // onDisconnect callback
+                if (isLocked) {
+                    return@InnoSpectraSettingsView
+                }
+
+                // perform disconnect and erase saved device
+                disconnectAndEraseDevice(Device(nano))
+
+                setupConnectUi()
+
+                dialog?.dismiss()
+            }
+
+            dialog = android.app.AlertDialog.Builder(context, R.style.AppAlertDialog)
+                .setTitle(context.getString(R.string.traits_format_inno_spectra))
+                .setView(settingsView)
+                .setPositiveButton(android.R.string.ok) { d, _ ->
+                    onSettingsChanged()
+                    d.dismiss()
+                }
+                .create()
+
+            dialog?.show()
+        }
     }
 
     override fun connectDevice(device: Device) {
-        TODO("Not yet implemented")
+
+        // deviceImplementation is expected to be Pair<BluetoothDevice, NanoDevice>
+        val deviceData = device.deviceImplementation as? Pair<*, *>
+
+        val bt = deviceData?.first as? BluetoothDevice
+        val nano = deviceData?.second as? NanoDevice
+
+        if (bt == null || nano == null) {
+            Log.e(TAG, "connectDevice: invalid device payload")
+            return
+        }
+
+        // If already in the process of connecting, prevent duplicate attempts
+        if (isStarting) {
+            Log.w(TAG, "connectDevice: connection already in progress, ignoring duplicate attempt")
+            return
+        }
+
+        // persist selection
+        controller.getPreferences().edit {
+            putString(GeneralKeys.INNOSPECTRA_NANO_DEVICE_ID, nano.nanoMac)
+            putString(GeneralKeys.INNOSPECTRA_NANO_DEVICE_NAME, nano.nanoName)
+        }
+
+        // save references for later use
+        bluetoothDevice = bt
+        connectedNanoDevice = nano
+
+        background.launch {
+            withContext(Dispatchers.Main) {
+                controller.getSecurityChecker().withNearby {
+                    nano.let {
+                        progressBar?.visibility = VISIBLE
+                        connectButton?.visibility = GONE
+                        (context as CollectActivity).innoSpectraViewModel?.setBluetoothDevice(context, bt)
+
+                        beginConnection(it)
+                    }
+                }
+            }
+        }
     }
 
-    override fun disconnectAndEraseDevice(device: Device) {
-        TODO("Not yet implemented")
+    private fun beginConnection(device: NanoDevice) {
+
+        // Ensure previous service connection is cleaned up before starting new one
+        try {
+            if (connection != null) {
+                context?.unbindService(connection!!)
+                Log.d(TAG, "beginConnection: cleaned up previous service connection")
+            }
+        } catch (e: Exception) {
+            Log.d(TAG, "beginConnection: no previous connection to clean up - ${e.message}")
+        }
+
+        connection = buildInnoSpectraServiceConnection { sdk ->
+
+            if (sdk.connect(device.nanoMac)) {
+                Log.d(TAG, "SDK connection initiated for device: ${device.nanoMac}")
+
+                val configIndex = PreferenceManager.getDefaultSharedPreferences(context)
+                    .getInt(GeneralKeys.INNOSPECTRA_NANO_CONFIG_INDEX, 0)
+
+                ISCNIRScanSDK.SetActiveConfig(byteArrayOf(configIndex.toByte(), (configIndex/256).toByte()))
+            } else {
+                Log.e(TAG, "SDK failed to initiate connection for device: ${device.nanoMac}")
+                // Reset state on connection failure
+                isStarting = false
+                background.launch(Dispatchers.Main) {
+                    setupConnectUi()
+                }
+            }
+        }
+
+        if (!isStarting) {
+            isStarting = true
+            Log.d(TAG, "beginConnection: binding to GATT service for device ${device.nanoMac}")
+
+            try {
+                val gattService = Intent(context, ISCNIRScanSDK::class.java)
+                context.bindService(gattService, connection!!, Context.BIND_AUTO_CREATE)
+
+                ((context as CollectActivity).innoSpectraViewModel as? NanoEventListener)?.let { listener ->
+                    nanoReceiver = InnoSpectraBase(listener).also {
+                        it.register(context)
+                        Log.d(TAG, "beginConnection: registered InnoSpectraBase receiver")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "beginConnection: failed to bind service - ${e.message}")
+                isStarting = false
+                background.launch(Dispatchers.Main) {
+                    setupConnectUi()
+                }
+            }
+        } else {
+            Log.w(TAG, "beginConnection: connection already starting, ignoring duplicate attempt")
+        }
+    }
+
+    private fun endConnection() {
+        // Cancel ongoing device search to prevent reconnection attempts
+        deviceSearchJob?.cancel()
+        deviceSearchJob = null
+
+        // Reset connection state
+        isStarting = false
+
+        try {
+            // Unregister the broadcast receiver to prevent stale listeners
+            nanoReceiver?.unregister(context)
+            nanoReceiver = null
+        } catch (e: Exception) {
+            Log.d(TAG, "Error unregistering nanoReceiver: ${e.message}")
+        }
+
+        try {
+            connection?.let { context?.unbindService(it) }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        connection = null
+        bluetoothDevice = null
+        connectedNanoDevice = null
+
+        (context as CollectActivity).innoSpectraViewModel?.disconnect(context)
     }
 
     override fun saveDevice(device: Device) {
-        TODO("Not yet implemented")
+        // persist device info in preferences so it can be auto-reconnected
+        val deviceData = device.deviceImplementation as? Pair<*, *>
+        val nano = deviceData?.second as? NanoDevice
+        nano?.let {
+            controller.getPreferences().edit {
+                putString(GeneralKeys.INNOSPECTRA_NANO_DEVICE_ID, it.nanoMac)
+                putString(GeneralKeys.INNOSPECTRA_NANO_DEVICE_NAME, it.nanoName)
+            }
+        }
     }
 
-    override fun capture(device: Device, entryId: String, traitId: String, callback: ResultCallback) {
-        TODO("Not yet implemented")
+    override fun enableCapture(device: Device) {
+        super.enableCapture(device)
+        scheduleDeviceConnection()
+    }
+
+    override fun disconnectAndEraseDevice(device: Device) {
+        if (!isLocked) {
+            // Cancel the connection monitoring job to prevent race conditions
+            deviceConnectionJob?.cancel()
+            deviceConnectionJob = null
+
+            isStarting = false
+            endConnection()
+            controller.getPreferences().edit {
+                remove(GeneralKeys.INNOSPECTRA_NANO_DEVICE_ID)
+                remove(GeneralKeys.INNOSPECTRA_NANO_DEVICE_NAME)
+            }
+
+            background.launch(Dispatchers.Main) {
+                connectButton?.visibility = VISIBLE
+                captureButton?.visibility = GONE
+                disconnectButton?.visibility = GONE
+                settingsButton?.visibility = GONE
+                setupConnectButton()
+            }
+        }
+    }
+
+    private fun scanForDevices() {
+
+        bluetoothManager =
+            context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        val adapter = bluetoothManager?.adapter
+        val scanner = adapter?.bluetoothLeScanner
+
+        val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            arrayOf(
+                Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.BLUETOOTH_CONNECT,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.BLUETOOTH_ADVERTISE,
+                Manifest.permission.NEARBY_WIFI_DEVICES
+            )
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            // Request both SCAN and CONNECT on Android S+ because some secure helpers
+            // (withNearby/withPermission) may access bonded devices which require
+            // BLUETOOTH_CONNECT at runtime. Requesting both prevents SecurityException.
+            arrayOf(
+                Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.BLUETOOTH_CONNECT,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.BLUETOOTH_ADVERTISE,
+            )
+        } else {
+            arrayOf(
+                Manifest.permission.BLUETOOTH,
+                Manifest.permission.BLUETOOTH_ADMIN,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION)
+        }
+
+        controller.getSecurityChecker().withPermission(permissions) {
+
+            scanner?.let { s ->
+                startScan(s)
+            }
+        }
+    }
+
+    private fun parseScanDeviceResult(result: ScanResult, device: BluetoothDevice) {
+
+        val nanoName = getStringPref(
+            context,
+            SharedPreferencesKeys.DeviceFilter,
+            "NIR"
+        )
+
+        result.scanRecord?.deviceName?.let { name ->
+
+            if (name.contains(nanoName)) {
+
+                result.scanRecord?.let { record ->
+
+                    val nanoDevice = NanoDevice(
+                        device,
+                        result.rssi,
+                        record.bytes,
+                        nanoName
+                    )
+
+                    if (!deviceList.map { it.second.nanoMac }.contains(nanoDevice.nanoMac)) {
+
+                        deviceList.add(device to nanoDevice)
+
+                    }
+                }
+            }
+        }
+    }
+
+    private fun startScan(scanner: BluetoothLeScanner) {
+
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_SCAN
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return
+        }
+
+        scanner.startScan(object : ScanCallback() {
+
+            override fun onScanResult(callbackType: Int, result: ScanResult?) {
+                super.onScanResult(callbackType, result)
+
+                try {
+
+                    result?.device?.let { device ->
+
+                        parseScanDeviceResult(result, device)
+                    }
+
+                } catch (e: SecurityException) {
+
+                    e.printStackTrace()
+
+                }
+            }
+        })
+    }
+
+    private fun buildInnoSpectraServiceConnection(onSdkInitialized: (ISCNIRScanSDK) -> Unit): ServiceConnection =
+        object : ServiceConnection {
+
+            override fun onServiceConnected(name: ComponentName, service: IBinder) {
+
+                (service as? ISCNIRScanSDK.LocalBinder)?.service?.let { sdk ->
+
+                    sdk.initialize()
+
+                    onSdkInitialized(sdk)
+
+                }
+            }
+
+            override fun onServiceDisconnected(name: ComponentName?) {
+
+            }
+        }
+
+    override fun getDeviceList(): List<Device> {
+        return deviceList.map { pair ->
+            Device(pair).also {
+                it.displayableName = "${pair.second.nanoName} (${pair.second.nanoMac})"
+            }
+        }
     }
 
     override fun writeSpectralDataToDatabase(
@@ -58,6 +729,38 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
         entryId: String,
         traitId: String
     ) {
-        TODO("Not yet implemented")
+
+        val deviceAddress = controller.getPreferences().getString("nano_device_id", "") ?: ""
+        val deviceName = controller.getPreferences().getString("nano_device_name", "") ?: ""
+        val studyId = collectActivity.studyId
+        val person = (context as? CollectActivity)?.person
+        val location = (context as? CollectActivity)?.locationByPreferences
+        val comment: String? = null
+        val createdAt = OffsetDateTime.now().format(internalTimeFormatter)
+
+        background.launch {
+
+            nanoSaver.saveData(
+                SpectralSaver.RequiredData(
+                    viewModel = controller.getSpectralViewModel(),
+                    deviceAddress = deviceAddress,
+                    deviceName = deviceName,
+                    studyId = studyId,
+                    person = person.toString(),
+                    location = location.toString(),
+                    comment = comment,
+                    createdAt = createdAt,
+                    frame = frame,
+                    color = color,
+                    uri = uri,
+                    entryId = entryId,
+                    traitId = traitId
+                )
+            ).onSuccess { fact ->
+                submitNewSpectralFact(fact)
+            }.onFailure { exception ->
+                Log.e(TAG, "Failed to save spectral data", exception)
+            }
+        }
     }
 }
