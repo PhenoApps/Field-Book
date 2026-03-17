@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Fixed
+
+## [v7.2.0] - 2026-03-17
+
+### Added
 - New Innospectra trait format (https://github.com/PhenoApps/Field-Book/pull/1392)
 - Entry progress bar is now scrollable for navigation (https://github.com/PhenoApps/Field-Book/pull/1414)
 - Simpler debugging now in system settings (https://github.com/PhenoApps/Field-Book/pull/1438)
@@ -920,3 +928,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v7.1.0]: https://github.com/PhenoApps/Field-Book/releases/tag/7.1.0
 [v7.1.1]: https://github.com/PhenoApps/Field-Book/releases/tag/7.1.1
 [v7.1.2]: https://github.com/PhenoApps/Field-Book/releases/tag/7.1.2
+
+[v7.2.0]: https://github.com/PhenoApps/Field-Book/releases/tag/7.2.0
