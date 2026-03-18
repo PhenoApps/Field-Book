@@ -101,10 +101,16 @@
     <string name="traits_format_boolean">booléen</string>
     <string name="traits_format_text">texte</string>
     <string name="traits_format_photo">photo</string>
+    <string name="traits_format_camera">Caméra</string>
+    <string name="traits_format_video">Vidéo</string>
+    <string name="traits_format_audio">Audio</string>
     <string name="traits_format_multicategorical">Multicategorie</string>
     <string name="traits_format_location">Lieu</string>
+    <string name="traits_format_gnss">GNSS</string>
     <string name="traits_format_barcode">Code-barres</string>
     <string name="traits_format_labelprint">Imprimer l\'étiquette Zébra</string>
+    <string name="traits_format_usb_camera">Caméra USB</string>
+    <string name="traits_format_go_pro_camera">GoPro</string>
     <!-- Trait Creation Dialog -->
     <string name="traits_create_name">Nom</string>
     <string name="traits_create_format">format</string>
@@ -119,10 +125,13 @@
     <string name="traits_create_false">faux</string>
     <string name="traits_create_categories_text">séparer les catégories par un /</string>
     <string name="traits_attach_media_photo_label">photo</string>
+    <string name="traits_attach_media_audio_label">Audio</string>
+    <string name="traits_attach_media_video_label">Vidéo</string>
     <string name="traits_create_warning_name_blank">le nom du caractère ne peut pas être vide</string>
-    <string name="traits_create_warning_duplicate">le caractère existe déjà</string>
+    <string name="traits_create_warning_duplicate">Le caractère existe déjà</string>
     <string name="traits_create_warning_numeric_required">défaut, minimum, et maximum doivent être numériques</string>
     <!-- Decimal Places Radio Options -->
+    <string name="trait_parameter_decimal_places_custom_hint">1–10</string>
     <string name="edit_traits">Modifier</string>
     <!-- Trait Editor -->
     <!-- Trait Detail -->
@@ -426,10 +435,19 @@ Phenotypes et essais créés manuellement ou importés via CSV devront être exp
     <!-- base camera strings -->
     <!-- Video recording messages -->
     <!-- Audio pause not supported message -->
+    <string name="view_trait_photo_settings_system_title">Caméra Système</string>
+    <string name="trait_name_alt_photo_system">Système</string>
+    <string name="trait_name_alt_usb">USB</string>
     <string name="view_trait_photo_settings_camera_custom">défaut</string>
+    <string name="view_trait_photo_settings_camera_system">Android</string>
     <!-- usb camera trait -->
     <!-- gopro -->
+    <string name="go_pro_trait_settings_title">Paramètres GoPro</string>
     <!-- canon camera strings -->
+    <string name="traits_format_canon">Canon</string>
+    <string name="preferences_canon_title">Canon</string>
+    <string name="trait_usb_photo_settings_title">Paramètres de Photo USB</string>
+    <string name="canon_trait_settings_title">Paramètres de Canon</string>
     <!-- spectral trait strings -->
     <!-- inno spectra -->
     <string name="brapi_traits_filter_title">Caractères</string>
