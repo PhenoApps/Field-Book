@@ -16,10 +16,12 @@
     <string name="dialog_save">enregistrer</string>
     <string name="dialog_delete">Effacer</string>
     <!-- Toolbar -->
+    <string name="appbar_more_options">Plus d\'Options</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">Données tests</string>
     <string name="startup_sample_data_message">Charger les données tests ?</string>
     <!-- App Intro -->
+    <string name="app_intro_permissions_title">Permissions</string>
     <string name="app_intro_tutorial_title">tutoriel</string>
     <!-- Storage Definer -->
     <!-- Permissions  -->
@@ -32,6 +34,8 @@
     <string name="settings_collect">Collecter</string>
     <string name="settings_export">exporter</string>
     <string name="settings_advanced">paramètres avancés</string>
+    <string name="settings_profile">Profil</string>
+    <string name="settings_statistics">Statistiques</string>
     <!-- Config Activity Fuzzy Search  -->
     <!-- File manager  -->
     <string name="import_source_local">Sauvegarde locale</string>
@@ -45,13 +49,18 @@
     <!-- Changelog -->
     <string name="changelog_title">journal des modifications</string>
     <!--  Field Grouping  -->
+    <string name="group_archived_value">Archivée</string>
+    <string name="group_archive">Archiver</string>
     <string name="dialog_group_name">Nom du Groupe</string>
+    <string name="menu_archive">Archiver</string>
     <!-- FIELDS -->
     <!-- General -->
     <string name="fields_sort_by_name">Nom</string>
     <!-- Sort -->
     <!-- Modify -->
+    <string name="fields_rename_study">Renommer</string>
     <string name="fields_export">exporter</string>
+    <string name="fields_archive">Archiver</string>
     <!-- Delete -->
     <string name="fields_delete">Effacer</string>
     <string name="fields_delete_study">Effacer cet essai</string>
@@ -135,6 +144,7 @@
     <string name="edit_traits">Modifier</string>
     <!-- Trait Editor -->
     <!-- Trait Detail -->
+    <string name="trait_detail_chip_rename">Renommer</string>
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">la valeur est inférieure au minimum qui a été défini</string>
@@ -222,6 +232,7 @@
     <!-- SETTINGS -->
     <!-- General -->
     <!-- Profile -->
+    <string name="preferences_profile_title">Profil</string>
     <!-- Features -->
     <!-- Appearance -->
     <string name="preferences_appearance_title">Apparence</string>
