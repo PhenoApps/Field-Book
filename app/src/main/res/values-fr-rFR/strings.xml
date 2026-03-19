@@ -21,6 +21,7 @@
     <string name="startup_sample_data_title">Données tests</string>
     <string name="startup_sample_data_message">Charger les données tests ?</string>
     <!-- App Intro -->
+    <string name="app_intro_intro_title_slide1">Bienvenue dans Field Book !</string>
     <string name="app_intro_permissions_title">Permissions</string>
     <string name="app_intro_tutorial_title">tutoriel</string>
     <!-- Storage Definer -->
@@ -51,8 +52,16 @@
     <!--  Field Grouping  -->
     <string name="group_archived_value">Archivée</string>
     <string name="group_archive">Archiver</string>
+    <string name="group_remove">Retirer du groupe</string>
     <string name="dialog_group_name">Nom du Groupe</string>
     <string name="menu_archive">Archiver</string>
+    <string name="archived_fields">Champs Archivés</string>
+    <string name="menu_unarchive">Retirer des archives</string>
+    <string name="archive_active_field_title">Archiver le Champ Actif ?</string>
+    <string name="archive_active_field_message">Vous avez sélectionné le champ actif à archiver. Si vous continuez, il n\'y aura pas de champ actif. Voulez-vous continuer?</string>
+    <string name="archive_others">Archiver les Autres</string>
+    <string name="dialog_unarchive_field_title">Désarchiver le Champ ?</string>
+    <string name="dialog_unarchive_field_message">Ce champ est actuellement archivé. Si vous continuez, ce champ sera désarchivé et deviendra le champ actif. Voulez-vous continuer?</string>
     <!-- FIELDS -->
     <!-- General -->
     <string name="fields_sort_by_name">Nom</string>
@@ -65,6 +74,8 @@
     <string name="fields_delete">Effacer</string>
     <string name="fields_delete_study">Effacer cet essai</string>
     <string name="fields_delete_study_confirmation">Êtes-vous certain de vouloir supprimer cet essai ? Cette action entraînera  la perte de toutes les données de cet essai.</string>
+    <string name="fields_delete_archive_instead">Archiver à la place</string>
+    <string name="fields_delete_permanent_warning">La suppression d\'un champ est permanente et ne peut pas être annulée. Voulez-vous l\'archiver à la place?</string>
     <!-- Import -->
     <string name="import_dialog_unique">identifiant unique</string>
     <string name="import_dialog_primary">premier ordre</string>
