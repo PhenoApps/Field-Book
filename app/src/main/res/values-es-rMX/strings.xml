@@ -1186,7 +1186,7 @@
     <string name="brapi_enable_before_sync">BRAPI está desactivado. Por favor, actívalo en la configuración antes de usar la sincronización.</string>
     <string name="brapi_trait_already_exists">Rasgo ya existe: %1$s. No guardado.</string>
     <string name="brapi_error_saving_all_traits">Error al guardar los rasgos. No se guardaron rasgos.</string>
-    <string name="brapi_error_saving_some_traits">Error al guardar algunosrasgos. Algunos rasgos no se guardaron</string>
+    <string name="brapi_error_saving_some_traits">Error al guardar algunos rasgos. Algunos rasgos no se guardaron</string>
     <string name="brapi_traits_saved_success">Rasgos seleccionados guardados exitosamente.</string>
     <string name="brapi_obs_sync_menu_name">Sincronizar</string>
     <string name="brapi_obs_header_name">Descargando Observaciones para Estudio:</string>
