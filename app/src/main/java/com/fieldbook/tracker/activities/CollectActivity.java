@@ -2116,7 +2116,11 @@ public class CollectActivity extends ThemedActivity
             enableDataEntry();
         } else {
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_lock_clock);
-            if (collectInputView.getText().isEmpty()) {
+            // For repeated measures, never block the overlay at the plot level.
+            // Lock state is managed per-observation via isLocked in each trait layout.
+            // Use isObservationSaved (not getText) so traits like counter that display
+            // a placeholder "0" before any real data is entered are not incorrectly frozen.
+            if (collectInputView.isRepeatEnabled() || !collectInputView.getIsObservationSaved()) {
                 enableDataEntry();
             } else disableDataEntry(R.string.activity_collect_frozen_state);
         }
@@ -2136,7 +2140,11 @@ public class CollectActivity extends ThemedActivity
             enableDataEntry();
         } else {
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_lock_clock);
-            if (collectInputView.getText().isEmpty()) {
+            // For repeated measures, never block the overlay at the plot level.
+            // Lock state is managed per-observation via isLocked in each trait layout.
+            // Use isObservationSaved (not getText) so traits like counter that display
+            // a placeholder "0" before any real data is entered are not incorrectly frozen.
+            if (collectInputView.isRepeatEnabled() || !collectInputView.getIsObservationSaved()) {
                 enableDataEntry();
             } else disableDataEntry(R.string.activity_collect_frozen_state);
         }
@@ -2914,7 +2922,7 @@ public class CollectActivity extends ThemedActivity
      */
     public boolean isDataLocked() {
         return (dataLocked == LOCKED)
-                || (!collectInputView.getText().isEmpty() && dataLocked == FROZEN);
+                || (collectInputView.getIsObservationSaved() && dataLocked == FROZEN);
     }
 
     public boolean isFrozen() {

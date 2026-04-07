@@ -93,6 +93,13 @@ public abstract class BaseTraitLayout extends LinearLayout {
      */
     public void refreshLayout(Boolean onNew) {
 
+        // When frozen with repeated measures, update isLocked per-observation so
+        // existing rep values stay read-only while new empty reps remain editable.
+        CollectActivity act = (CollectActivity) getContext();
+        if (act.isFrozen() && getCollectInputView().isRepeatEnabled()) {
+            isLocked = !getCollectInputView().getText().isEmpty();
+        }
+
         getCollectInputView().getRepeatView().refresh();
 
     }

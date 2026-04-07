@@ -197,6 +197,8 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
         forceInitialRep = -1
     }
 
+    fun getIsObservationSaved(): Boolean = isObservationSaved
+
     fun markObservationEdited() {
         isObservationSaved = false
         updateCurrentValueETStyle()
