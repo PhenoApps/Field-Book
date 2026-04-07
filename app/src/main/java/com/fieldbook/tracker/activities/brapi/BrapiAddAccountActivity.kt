@@ -2,9 +2,10 @@ package com.fieldbook.tracker.activities.brapi
 
 import android.accounts.AccountManager
 import android.os.Bundle
-import com.fieldbook.tracker.R
+import androidx.activity.compose.setContent
 import com.fieldbook.tracker.activities.ThemedActivity
 import com.fieldbook.tracker.brapi.dialogs.BrapiAddAccountDialogFragment
+import com.fieldbook.tracker.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -17,7 +18,7 @@ class BrapiAddAccountActivity : ThemedActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_brapi_add_account)
+        setContent { AppTheme { } }
 
         if (savedInstanceState == null) {
             val fragment = BrapiAddAccountDialogFragment.newInstance(

@@ -11,6 +11,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Typeface;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.StyleSpan;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -194,16 +198,27 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
 
         card.setOnLogOut(this::logOutAccount);
         card.setOnAuthorize(this::authorizeAccount);
-        card.setOnEnable(this::enableAccount); // still wired for backward compat
+        card.setOnEnable(this::enableAccount);
         card.setOnCheckCompatibility(this::checkServerCompatibility);
         card.setOnShareSettings(this::shareAccountSettings);
         card.setOnEdit(this::editAccount);
         card.setOnRemove(this::removeAccount);
+        card.setOnSwitchServer(this::showSwitchServerDialog);
 
         return card;
     }
 
     // ─── Account actions ────────────────────────────────────────────────────────
+
+    private @NotNull Unit showSwitchServerDialog(Account account) {
+        new AlertDialog.Builder(context, R.style.AppAlertDialog)
+                .setTitle(R.string.brapi_switch_server_title)
+                .setMessage(R.string.brapi_switch_server_unauthenticated_message)
+                .setPositiveButton(R.string.dialog_yes, (d, w) -> authorizeAccount(account))
+                .setNegativeButton(R.string.dialog_no, (d, w) -> enableAccount(account))
+                .show();
+        return Unit.INSTANCE;
+    }
 
     private @NotNull Unit logOutAccount(Account account) {
         AccountManager am = AccountManager.get(context);
@@ -211,15 +226,24 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
         if (displayName == null) displayName = account.name;
         final String finalDisplayName = displayName;
 
+        String messageTemplate = getString(R.string.brapi_logout_manage_message, finalDisplayName);
+        SpannableString styledMessage = new SpannableString(messageTemplate);
+        int nameStart = messageTemplate.indexOf(finalDisplayName);
+        if (nameStart >= 0) {
+            styledMessage.setSpan(new StyleSpan(Typeface.BOLD),
+                    nameStart, nameStart + finalDisplayName.length(),
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
         new AlertDialog.Builder(context, R.style.AppAlertDialog)
-                .setTitle(R.string.brapi_revoke_auth)
-                .setMessage(getString(R.string.brapi_logout_remove_message, finalDisplayName))
-                .setPositiveButton(R.string.brapi_logout_and_remove, (d, w) -> {
-                    pendingRemoveAfterLogout = true;
-                    doLogout(account);
-                })
+                .setTitle(R.string.brapi_logout_manage_title)
+                .setMessage(styledMessage)
                 .setNeutralButton(R.string.brapi_logout_only, (d, w) -> {
                     pendingRemoveAfterLogout = false;
+                    doLogout(account);
+                })
+                .setPositiveButton(R.string.brapi_logout_and_remove, (d, w) -> {
+                    pendingRemoveAfterLogout = true;
                     doLogout(account);
                 })
                 .setNegativeButton(android.R.string.cancel, null)
@@ -347,7 +371,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
     private @NotNull Unit shareAccountSettings(Account account) {
         AccountManager am = AccountManager.get(context);
         Activity act = getActivity();
-        if (act == null) return null;
+        if (act == null) return Unit.INSTANCE;
 
         try {
             BrAPIConfig config = new BrAPIConfig();
@@ -392,11 +416,22 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
     private @NotNull Unit removeAccount(Account account) {
         AccountManager am = AccountManager.get(context);
         String serverUrl = am.getUserData(account, BrapiAuthenticator.KEY_SERVER_URL);
+        String displayName = am.getUserData(account, BrapiAuthenticator.KEY_DISPLAY_NAME);
+        if (displayName == null) displayName = account.name;
+
+        String removeMessageTemplate = getString(R.string.brapi_logout_manage_message, displayName);
+        SpannableString removeStyledMessage = new SpannableString(removeMessageTemplate);
+        int removeNameStart = removeMessageTemplate.indexOf(displayName);
+        if (removeNameStart >= 0) {
+            removeStyledMessage.setSpan(new StyleSpan(Typeface.BOLD),
+                    removeNameStart, removeNameStart + displayName.length(),
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
 
         new AlertDialog.Builder(context, R.style.AppAlertDialog)
-                .setTitle(R.string.brapi_card_remove)
-                .setMessage(account.name)
-                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                .setTitle(R.string.brapi_logout_manage_title)
+                .setMessage(removeStyledMessage)
+                .setPositiveButton(R.string.brapi_logout_and_remove, (dialog, which) -> {
                     if (serverUrl != null) {
                         accountHelper.removeAccount(serverUrl);
                         String activeUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
@@ -417,10 +452,10 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
         BrapiAddAccountDialogFragment dialog = BrapiAddAccountDialogFragment.Companion.newInstance(null);
         dialog.setListener(new BrapiAddAccountDialogFragment.Listener() {
             @Override
-            public void onManualEntry(android.accounts.AccountAuthenticatorResponse authResponse) {
-                BrapiManualAccountDialogFragment frag =
-                        BrapiManualAccountDialogFragment.Companion.newInstance(null, false, null, false);
-                frag.show(getParentFragmentManager(), BrapiManualAccountDialogFragment.TAG);
+            public void onGuidedSetup(android.accounts.AccountAuthenticatorResponse authResponse) {
+                com.fieldbook.tracker.brapi.dialogs.BrapiStepperAccountDialogFragment frag =
+                        com.fieldbook.tracker.brapi.dialogs.BrapiStepperAccountDialogFragment.Companion.newInstance(null);
+                frag.show(getParentFragmentManager(), com.fieldbook.tracker.brapi.dialogs.BrapiStepperAccountDialogFragment.TAG);
             }
 
             @Override

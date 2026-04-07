@@ -19,6 +19,7 @@
     <string name="dialog_go">Go</string>
     <string name="dialog_save_error_title">Save Error</string>
     <string name="dialog_back">Back</string>
+    <string name="dialog_next">Next</string>
     <string name="dialog_scan">Scan</string>
     <string name="dialog_sort_by">Sort By</string>
     <string name="dialog_enable">Enable</string>
@@ -1245,6 +1246,7 @@
 
     <!-- BrAPI preferences -->
     <string name="preferences_brapi" translatable="false">BrAPI</string>
+    <string name="preferences_brapi_title">Configuration</string>
     <string name="brapi_info_title">Breeding API</string>
 
     <string name="preferences_brapi_enable_title">Enable BrAPI</string>
@@ -1263,6 +1265,7 @@
     <string name="brapi_base_url">Base URL</string>
     <string name="brapi_base_url_desc">The base URL for the connected BrAPI server</string>
     <string name="brapi_base_url_default" translatable="false">https://test-server.brapi.org</string>
+    <string name="brapi_invalid_url">Please enter a valid server URL (e.g. https://server.example.org)</string>
 
     <string name="brapi_choice_to_make_default_dialog_title">Make this BrAPI server the default:</string>
     <string name="brapi_choice_to_make_default_import">Import Source</string>
@@ -1342,34 +1345,22 @@
     <!-- Multi-account management -->
     <string name="brapi_add_account_title">Add Account</string>
     <string name="brapi_edit_account_title">Edit Account</string>
-    <string name="brapi_add_account_manual_entry">Manual Entry</string>
+    <string name="brapi_add_account_guided_setup">Manual Input</string>
     <string name="brapi_add_account_scan_config">Scan Configuration Code</string>
-    <string name="brapi_card_enable">Enable</string>
     <string name="brapi_switch_server_title">Switch Server</string>
-    <string name="brapi_switch_server_unauthenticated_message">This server has not been authenticated. Would you like to authenticate before switching, or use it as is?</string>
-    <string name="brapi_authenticate">Authenticate</string>
-    <string name="brapi_use_as_is">Use as is</string>
-    <string name="brapi_card_disable">Disable</string>
-    <string name="brapi_card_status_connected">Connected</string>
-    <string name="brapi_card_status_authorized">Authorized</string>
-    <string name="brapi_card_check_compatibility">Check Compatibility</string>
-    <string name="brapi_card_share_settings">Share Settings</string>
-    <string name="brapi_card_edit">Edit</string>
-    <string name="brapi_card_remove">Remove</string>
-    <string name="brapi_card_status_unauthenticated">Unauthenticated</string>
-    <string name="brapi_card_authorize">Authorize</string>
+    <string name="brapi_switch_server_unauthenticated_message">Would you like to authenticate before switching to this server?</string>
     <string name="brapi_chip_compatibility">Compatibility</string>
     <string name="brapi_chip_share">Share</string>
     <string name="brapi_chip_edit">Edit</string>
-    <string name="brapi_chip_logout">Logout</string>
+    <string name="brapi_chip_logout">Log out</string>
     <string name="brapi_chip_authorize">Authorize</string>
     <string name="brapi_chip_remove">Remove</string>
     <string name="brapi_auth_required_title">Authentication Required</string>
     <string name="brapi_auth_required_message">Your session has expired. Would you like to re-authorize?</string>
-    <string name="brapi_logout_remove_message">Would you also like to remove \"%1$s\" from your server list?</string>
-    <string name="brapi_logout_and_remove">Log Out &amp; Remove</string>
-    <string name="brapi_logout_only">Log Out Only</string>
-    <string name="brapi_server_needs_reauth">This server\'s token has expired. Please re-authorize.</string>
+    <string name="brapi_logout_manage_title">Manage Server</string>
+    <string name="brapi_logout_manage_message">Choose an action for %1$s.</string>
+    <string name="brapi_logout_and_remove">Remove</string>
+    <string name="brapi_logout_only">Logout</string>
     <string name="brapi_section_active_server">Active Server</string>
     <string name="brapi_section_available_servers">Available Servers</string>
     <string name="brapi_add_account">Add Account</string>

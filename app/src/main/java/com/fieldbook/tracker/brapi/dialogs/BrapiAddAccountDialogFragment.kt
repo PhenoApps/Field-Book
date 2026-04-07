@@ -36,7 +36,7 @@ class BrapiAddAccountDialogFragment : DialogFragment() {
     private var listener: Listener? = null
 
     interface Listener {
-        fun onManualEntry(authResponse: AccountAuthenticatorResponse?)
+        fun onGuidedSetup(authResponse: AccountAuthenticatorResponse?)
         fun onScanConfig(authResponse: AccountAuthenticatorResponse?)
     }
 
@@ -49,7 +49,7 @@ class BrapiAddAccountDialogFragment : DialogFragment() {
             arguments?.getParcelable(ARG_AUTH_RESPONSE)
 
         val options = arrayOf(
-            getString(R.string.brapi_add_account_manual_entry),
+            getString(R.string.brapi_add_account_guided_setup),
             getString(R.string.brapi_add_account_scan_config)
         )
 
@@ -58,8 +58,8 @@ class BrapiAddAccountDialogFragment : DialogFragment() {
             .setItems(options) { _, which ->
                 when (which) {
                     0 -> {
-                        listener?.onManualEntry(authResponse)
-                            ?: openManualEntry(authResponse)
+                        listener?.onGuidedSetup(authResponse)
+                            ?: openGuidedSetup(authResponse)
                     }
                     1 -> {
                         listener?.onScanConfig(authResponse)
@@ -87,9 +87,9 @@ class BrapiAddAccountDialogFragment : DialogFragment() {
         dismiss()
     }
 
-    private fun openManualEntry(authResponse: AccountAuthenticatorResponse?) {
-        val frag = BrapiManualAccountDialogFragment.newInstance(authResponse = authResponse)
-        frag.show(parentFragmentManager, BrapiManualAccountDialogFragment.TAG)
+    private fun openGuidedSetup(authResponse: AccountAuthenticatorResponse?) {
+        val frag = BrapiStepperAccountDialogFragment.newInstance(authResponse = authResponse)
+        frag.show(parentFragmentManager, BrapiStepperAccountDialogFragment.TAG)
         dismiss()
     }
 

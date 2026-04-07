@@ -2,12 +2,16 @@ package com.fieldbook.tracker.preferences
 
 import android.content.Context
 import android.util.AttributeSet
-import android.widget.ImageView
-import androidx.core.view.ViewCompat
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceViewHolder
-import com.fieldbook.tracker.R
+import com.fieldbook.tracker.preferences.composables.CollapsibleCategoryHeader
+import com.fieldbook.tracker.ui.theme.AppTheme
 
 /**
  * A [PreferenceCategory] whose children can be shown or hidden by tapping the header.
@@ -18,26 +22,36 @@ class CollapsiblePreferenceCategory @JvmOverloads constructor(
     attrs: AttributeSet? = null
 ) : PreferenceCategory(context, attrs) {
 
-    var isExpanded: Boolean = false
-        private set
+    private var _isExpanded by mutableStateOf(false)
+
+    var isExpanded: Boolean
+        get() = _isExpanded
+        private set(value) { _isExpanded = value }
 
     init {
-        layoutResource = R.layout.preference_category_collapsible
+        layoutResource = com.fieldbook.tracker.R.layout.preference_category_collapsible
     }
 
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
 
-        val chevron = holder.itemView.findViewById<ImageView>(R.id.category_chevron)
-        chevron?.rotation = if (isExpanded) 180f else 0f
-
-        holder.itemView.isClickable = true
-        holder.itemView.isFocusable = true
-        holder.itemView.setOnClickListener {
-            isExpanded = !isExpanded
-            val targetRotation = if (isExpanded) 180f else 0f
-            ViewCompat.animate(chevron!!).rotation(targetRotation).setDuration(200).start()
-            applyExpansionState()
+        val composeView = holder.itemView as? ComposeView ?: return
+        composeView.apply {
+            setViewCompositionStrategy(
+                ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool
+            )
+            setContent {
+                AppTheme {
+                    CollapsibleCategoryHeader(
+                        title = title?.toString() ?: "",
+                        isExpanded = isExpanded,
+                        onClick = {
+                            _isExpanded = !_isExpanded
+                            applyExpansionState()
+                        },
+                    )
+                }
+            }
         }
     }
 
