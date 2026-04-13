@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -27,7 +26,6 @@ import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.traits.formats.Formats;
 import com.fieldbook.tracker.traits.formats.feature.DisplayValue;
 import com.fieldbook.tracker.views.CollectInputView;
-import com.fieldbook.tracker.views.RepeatedValuesView;
 
 import java.util.Arrays;
 import java.util.List;
@@ -230,20 +228,29 @@ public abstract class BaseTraitLayout extends LinearLayout {
      * If this feature is enabled, the list will be modified and updated.
      */
     public void deleteTraitListener() {
-        CollectInputView inputView = getCollectInputView();
-        if (inputView.isRepeatEnabled()) {
-            inputView.getRepeatView().userDeleteCurrentRep();
-        }
-        //check if sound on delete is enabled in preferences and play sound
-        if (getPrefs().getBoolean(PreferenceKeys.DELETE_OBSERVATION_SOUND, false)) {
-            controller.getSoundHelper().playDelete();
+        if (!isLocked) {
+            CollectInputView inputView = getCollectInputView();
+            if (inputView.isRepeatEnabled()) {
+                inputView.getRepeatView().userDeleteCurrentRep();
+            }
+            //check if sound on delete is enabled in preferences and play sound
+            if (getPrefs().getBoolean(PreferenceKeys.DELETE_OBSERVATION_SOUND, false)) {
+                controller.getSoundHelper().playDelete();
+            }
         }
     }
 
     public abstract void setNaTraitsText();
 
     public void refreshLock() {
-        //((CollectActivity) getContext()).traitLockData();
+
+        if (getCurrentObservation() != null) {
+            // If there is an existing observation for the current rep, lock if frozen or locked
+            isLocked = getCollectActivity().isFrozen() || getCollectActivity().isLocked();
+        } else {
+            // If there is no existing observation, only lock if locked (not frozen)
+            isLocked = getCollectActivity().isLocked();
+        }
     }
 
     public TraitObject getCurrentTrait() {

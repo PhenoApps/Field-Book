@@ -52,6 +52,8 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
 
         if (isRepeatEnabled()) {
 
+            markObservationUnsaved();
+
             repeatView.prepareModeEmpty()
 
         } else {
@@ -197,7 +199,17 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
         forceInitialRep = -1
     }
 
-    fun getIsObservationSaved(): Boolean = isObservationSaved
+    fun getIsObservationSaved(): Boolean {
+        return if (isRepeatEnabled()) {
+            repeatView.isSelectedSaved()
+        } else isObservationSaved
+    }
+
+    fun getSavedIds(): List<Int> = repeatView.getSavedIds()
+
+    fun markObservationUnsaved() {
+        isObservationSaved = false
+    }
 
     fun markObservationEdited() {
         isObservationSaved = false
