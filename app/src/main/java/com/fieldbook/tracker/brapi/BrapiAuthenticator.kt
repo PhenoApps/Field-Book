@@ -58,8 +58,8 @@ class BrapiAuthenticator(private val context: Context) : AbstractAccountAuthenti
         authTokenType: String,
         options: Bundle
     ): Bundle {
-        // Cross-app access is gated by getAccountVisibilityForPackage() — only packages in
-        // ALLOWED_PACKAGES can discover this account type and call getAuthToken() on it.
+        // Cross-app access is gated by setAccountVisibility() called in BrapiAccountHelper —
+        // only packages in ALLOWED_PACKAGES can discover this account type and call getAuthToken().
         val am = AccountManager.get(context)
         val token = am.peekAuthToken(account, authTokenType)
         if (!token.isNullOrEmpty()) {
@@ -107,18 +107,4 @@ class BrapiAuthenticator(private val context: Context) : AbstractAccountAuthenti
         features: Array<out String>
     ): Bundle = Bundle().apply { putBoolean(AccountManager.KEY_BOOLEAN_RESULT, false) }
 
-    /**
-     * Controls which apps can discover org.phenoapps.brapi accounts on Android 8+.
-     * Apps in ALLOWED_PACKAGES are granted full visibility; all others see nothing.
-     * This is the primary cross-app access gate — paired with READ_TOKEN permission
-     * declared in those apps' manifests, it lets PhenoApps family apps call
-     * AccountManager.getAuthToken() to retrieve shared BrAPI tokens.
-     */
-    override fun getAccountVisibilityForPackage(packageName: String): Int {
-        return if (packageName in ALLOWED_PACKAGES) {
-            AccountManager.VISIBILITY_VISIBLE
-        } else {
-            AccountManager.VISIBILITY_NOT_VISIBLE
-        }
-    }
 }

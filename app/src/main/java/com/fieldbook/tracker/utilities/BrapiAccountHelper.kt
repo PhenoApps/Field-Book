@@ -4,6 +4,7 @@ import android.accounts.Account
 import android.accounts.AccountManager
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Build
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.brapi.BrapiAuthenticator
 import com.fieldbook.tracker.preferences.PreferenceKeys
@@ -163,6 +164,7 @@ class BrapiAccountHelper @Inject constructor(
         val existing = getAccountByUrl(normUrl)
         val account = existing ?: Account(name, BrapiAuthenticator.ACCOUNT_TYPE).also {
             am.addAccountExplicitly(it, null, null)
+            grantVisibilityToAllowedPackages(am, it)
         }
 
         am.setUserData(account, BrapiAuthenticator.KEY_SERVER_URL, normUrl)
@@ -190,6 +192,7 @@ class BrapiAccountHelper @Inject constructor(
         val account = getAccountByUrl(normUrl)
             ?: Account(displayName, BrapiAuthenticator.ACCOUNT_TYPE).also {
                 am.addAccountExplicitly(it, null, null)
+                grantVisibilityToAllowedPackages(am, it)
             }
 
         am.setUserData(account, BrapiAuthenticator.KEY_SERVER_URL, normUrl)
@@ -259,6 +262,19 @@ class BrapiAccountHelper @Inject constructor(
             java.net.URL(url).host.ifEmpty { url }
         } catch (e: Exception) {
             url
+        }
+    }
+
+    /**
+     * Grants full account visibility to each package in ALLOWED_PACKAGES (API 26+).
+     * This replaces the non-existent AbstractAccountAuthenticator.getAccountVisibilityForPackage()
+     * override — visibility must be set explicitly after addAccountExplicitly().
+     */
+    private fun grantVisibilityToAllowedPackages(am: AccountManager, account: Account) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            for (pkg in BrapiAuthenticator.ALLOWED_PACKAGES) {
+                am.setAccountVisibility(account, pkg, AccountManager.VISIBILITY_VISIBLE)
+            }
         }
     }
 }

@@ -140,6 +140,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
                 (key, result) -> refreshServerCards()
         );
 
+        // Set initial visibility before the view is shown to avoid a flash of hidden preferences
+        boolean brapiEnabled = preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false);
+        updateServerSectionsVisibility(brapiEnabled);
     }
 
     @Override
@@ -148,7 +151,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
         setupToolbar();
         boolean brapiEnabled = preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false);
         updateServerSectionsVisibility(brapiEnabled);
-        refreshServerCards();
     }
 
     // ─── Account cards ──────────────────────────────────────────────────────────
