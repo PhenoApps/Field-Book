@@ -8,23 +8,28 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.compose.runtime.mutableStateOf
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.CameraActivity
 import com.fieldbook.tracker.brapi.dialogs.composables.BrapiManualAccountForm
 import com.fieldbook.tracker.objects.BrAPIConfig
+import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.JsonUtil
 import com.google.gson.Gson
-import com.fieldbook.tracker.activities.CameraActivity
 import dagger.hilt.android.AndroidEntryPoint
-import com.fieldbook.tracker.ui.theme.AppTheme
 
 /**
  * Dialog for manually entering a new BrAPI server configuration.
- * Can be pre-populated from a scanned BrAPIConfig QR code.
+ * Can be pre-populated from a scanned BrAPIConfig QR code or an existing account in edit mode.
  *
- * On "Authorize", stores the account config in AccountManager and launches BrapiAuthActivity.
+ * All form state lives in [BrapiAccountViewModel], which is activity-scoped and survives
+ * configuration changes. QR scan results and edit saves are handled here; navigation events
+ * (authorize, cancel) are delegated to the base class via [observeEvents].
  */
 @AndroidEntryPoint
 class BrapiManualAccountDialogFragment : BaseBrapiAccountDialogFragment() {
@@ -38,13 +43,11 @@ class BrapiManualAccountDialogFragment : BaseBrapiAccountDialogFragment() {
         private const val ARG_PREFILL_CONFIG = "prefill_config"
         private const val ARG_EDIT_MODE = "edit_mode"
 
-        private const val REQUEST_SCAN_CONFIG = 203
-
         fun newInstance(
             authResponse: AccountAuthenticatorResponse? = null,
             startScan: Boolean = false,
             prefillConfig: BrAPIConfig? = null,
-            editMode: Boolean = false
+            editMode: Boolean = false,
         ): BrapiManualAccountDialogFragment {
             return BrapiManualAccountDialogFragment().apply {
                 arguments = Bundle().apply {
@@ -61,43 +64,48 @@ class BrapiManualAccountDialogFragment : BaseBrapiAccountDialogFragment() {
 
     private var isEditMode = false
 
-    // ── Form state ────────────────────────────────────────────────────────────
-
-    override val urlState = mutableStateOf("")
-    override val displayNameState = mutableStateOf("")
-    override val oidcUrlState = mutableStateOf("")
-    override val oidcClientIdState = mutableStateOf("")
-    override val oidcScopeState = mutableStateOf("")
-    override val oidcFlowState = mutableStateOf("")
-    override val brapiVersionState = mutableStateOf("V2")
-    private val oidcUrlExplicitlySetState = mutableStateOf(false)
+    private val scanLauncher: ActivityResultLauncher<Intent> =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
+            val scanned = result.data?.getStringExtra(CameraActivity.EXTRA_BARCODE)
+                ?: return@registerForActivityResult
+            if (JsonUtil.isJsonValid(scanned)) {
+                try {
+                    viewModel.applyConfig(Gson().fromJson(scanned, BrAPIConfig::class.java))
+                } catch (_: Exception) {
+                    Toast.makeText(
+                        requireContext(),
+                        R.string.preferences_brapi_server_scan_error,
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }
+            } else {
+                viewModel.updateUrl(scanned)
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Use a clean dialog style that does NOT have windowFullscreen=true or
-        // transparent background — both of which break Compose keyboard input
-        // and popup positioning.
         setStyle(STYLE_NO_FRAME, R.style.BrapiComposeDialog)
 
         authResponse = arguments?.getParcelable(ARG_AUTH_RESPONSE)
         isEditMode = arguments?.getBoolean(ARG_EDIT_MODE, false) == true
 
-        initDefaultDropdownValues()
-
-        // Pre-fill if a BrAPIConfig was passed
-        val prefillJson = arguments?.getString(ARG_PREFILL_CONFIG)
-        if (prefillJson != null) {
-            try {
-                val config = Gson().fromJson(prefillJson, BrAPIConfig::class.java)
-                applyConfig(config)
-            } catch (e: Exception) { /* ignore */ }
+        // Apply pre-fill only on first creation; ViewModel retains state on rotation.
+        if (savedInstanceState == null) {
+            val prefillJson = arguments?.getString(ARG_PREFILL_CONFIG)
+            if (prefillJson != null) {
+                try {
+                    viewModel.applyConfig(Gson().fromJson(prefillJson, BrAPIConfig::class.java))
+                } catch (_: Exception) { /* ignore malformed JSON */ }
+            }
         }
     }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
-        savedInstanceState: Bundle?
+        savedInstanceState: Bundle?,
     ): View {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(
@@ -105,113 +113,51 @@ class BrapiManualAccountDialogFragment : BaseBrapiAccountDialogFragment() {
             )
             setContent {
                 AppTheme {
+                    val uiState by viewModel.uiState.collectAsState()
                     BrapiManualAccountForm(
                         title = getString(
                             if (isEditMode) R.string.brapi_edit_account_title
                             else R.string.brapi_add_account_title
                         ),
-                        urlState = urlState,
-                        displayNameState = displayNameState,
-                        oidcUrlState = oidcUrlState,
-                        oidcClientIdState = oidcClientIdState,
-                        oidcScopeState = oidcScopeState,
-                        oidcFlowState = oidcFlowState,
-                        brapiVersionState = brapiVersionState,
-                        oidcUrlExplicitlySetState = oidcUrlExplicitlySetState,
+                        uiState = uiState,
+                        onUrlChange = viewModel::updateUrl,
+                        onDisplayNameChange = viewModel::updateDisplayName,
+                        onOidcUrlChange = viewModel::updateOidcUrl,
+                        onOidcClientIdChange = viewModel::updateOidcClientId,
+                        onOidcScopeChange = viewModel::updateOidcScope,
+                        onOidcFlowChange = viewModel::updateOidcFlow,
+                        onBrapiVersionChange = viewModel::updateBrapiVersion,
                         isEditMode = isEditMode,
-                        onFetchDisplayName = { url ->
-                            val normalized = try { accountHelper.normalizeUrl(url) } catch (e: Exception) { "" }
-                            if (normalized.isNotEmpty() && normalized != "https://") fetchDisplayName(normalized)
-                        },
                         onCancel = { onCancelled() },
-                        onConfirm = { if (isEditMode) onSaveEdit() else onAuthorize() },
+                        onConfirm = {
+                            if (isEditMode) viewModel.onSaveEdit() else viewModel.onAuthorize()
+                        },
                     )
                 }
             }
         }
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        observeEvents()
+    }
+
     override fun onResume() {
         super.onResume()
-        // Start barcode scan immediately if requested (Scan Configuration Code flow)
+        // Start barcode scan immediately if requested (Scan Configuration Code flow).
         if (arguments?.getBoolean(ARG_START_SCAN, false) == true) {
             arguments?.putBoolean(ARG_START_SCAN, false)
-            startScan(REQUEST_SCAN_CONFIG)
+            startScan(scanLauncher)
         }
     }
 
-    /**
-     * Edit-mode save: persists config changes to AccountManager without launching re-auth.
-     * Notifies the parent fragment via FragmentResult so it can refresh the server cards.
-     */
-    private fun onSaveEdit() {
-        val url = try { accountHelper.normalizeUrl(urlState.value.trim()) } catch (e: Exception) { "" }
-        if (url.isEmpty() || !isValidUrl(url)) {
-            Toast.makeText(requireContext(), R.string.brapi_invalid_url, Toast.LENGTH_LONG).show()
+    override fun handleEvent(event: BrapiAccountEvent) {
+        if (event is BrapiAccountEvent.EditSaved) {
+            parentFragmentManager.setFragmentResult(REQUEST_KEY_EDIT_SAVED, Bundle.EMPTY)
+            dismiss()
             return
         }
-
-        val displayName = displayNameState.value.trim().takeIf { it.isNotEmpty() } ?: url
-
-        accountHelper.addAccountConfig(
-            serverUrl = url,
-            displayName = displayName,
-            oidcUrl = oidcUrlState.value.trim(),
-            oidcFlow = oidcFlowState.value,
-            oidcClientId = oidcClientIdState.value.trim(),
-            oidcScope = oidcScopeState.value.trim(),
-            brapiVersion = brapiVersionState.value,
-        )
-
-        parentFragmentManager.setFragmentResult(REQUEST_KEY_EDIT_SAVED, Bundle.EMPTY)
-        dismiss()
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data) // handles REQUEST_AUTH
-        if (resultCode != Activity.RESULT_OK) return
-
-        if (requestCode == REQUEST_SCAN_CONFIG) {
-            val scanned = data?.getStringExtra(CameraActivity.EXTRA_BARCODE) ?: return
-            if (JsonUtil.isJsonValid(scanned)) {
-                try {
-                    val config = Gson().fromJson(scanned, BrAPIConfig::class.java)
-                    applyConfig(config)
-                } catch (e: Exception) {
-                    Toast.makeText(requireContext(), R.string.preferences_brapi_server_scan_error, Toast.LENGTH_SHORT).show()
-                }
-            } else {
-                urlState.value = scanned
-            }
-        }
-    }
-
-    private fun applyConfig(config: BrAPIConfig) {
-        // If config provides an explicit OIDC URL, lock it in before setting the base URL
-        // (so the auto-derive LaunchedEffect doesn't overwrite it).
-        if (!config.oidcUrl.isNullOrEmpty()) {
-            oidcUrlExplicitlySetState.value = true
-        }
-        config.url?.let { urlState.value = it }
-        config.name?.let { displayNameState.value = it }
-        config.oidcUrl?.let { oidcUrlState.value = it }
-        config.clientId?.let { oidcClientIdState.value = it }
-        config.scope?.let { oidcScopeState.value = it }
-
-        // Set OIDC flow
-        val oidcFlowOptions = resources.getStringArray(R.array.pref_brapi_oidc_flow)
-        val flowMatch = oidcFlowOptions.indexOfFirst {
-            it.equals(config.authFlow, ignoreCase = true)
-        }
-        if (flowMatch >= 0) oidcFlowState.value = oidcFlowOptions[flowMatch]
-
-        // Set version
-        val versionOptions = resources.getStringArray(R.array.pref_brapi_version)
-        val versionStr = when {
-            "v1".equals(config.version, ignoreCase = true) -> "V1"
-            else -> "V2"
-        }
-        val versionMatch = versionOptions.indexOfFirst { it.equals(versionStr, ignoreCase = true) }
-        if (versionMatch >= 0) brapiVersionState.value = versionOptions[versionMatch]
+        super.handleEvent(event)
     }
 }

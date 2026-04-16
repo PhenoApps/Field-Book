@@ -43,8 +43,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
@@ -62,20 +60,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.flow.drop
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.brapi.dialogs.BrapiAccountUiState
 import com.fieldbook.tracker.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BrapiStepperAccountForm(
-    currentStepState: MutableState<Int>,
-    urlState: MutableState<String>,
-    displayNameState: MutableState<String>,
-    oidcUrlState: MutableState<String>,
-    oidcClientIdState: MutableState<String>,
-    oidcScopeState: MutableState<String>,
-    oidcFlowState: MutableState<String>,
-    brapiVersionState: MutableState<String>,
-    oidcUrlExplicitlySetState: MutableState<Boolean>,
+    uiState: BrapiAccountUiState,
+    onUrlChange: (String) -> Unit,
+    onDisplayNameChange: (String) -> Unit,
+    /** Called for every OIDC URL change. [isUserEdit] = true marks it as user-initiated,
+     *  locking out future auto-derivation from the base URL. */
+    onOidcUrlChange: (url: String, isUserEdit: Boolean) -> Unit,
+    onOidcClientIdChange: (String) -> Unit,
+    onOidcScopeChange: (String) -> Unit,
+    onOidcFlowChange: (String) -> Unit,
+    onBrapiVersionChange: (String) -> Unit,
     onScanBaseUrl: () -> Unit,
     onScanConfig: () -> Unit,
     onNext: () -> Unit,
@@ -88,78 +88,73 @@ fun BrapiStepperAccountForm(
 
     // TextFieldState gives the new Foundation text engine, which properly auto-scrolls
     // the visible text when a cursor handle is dragged to either edge.
-    val urlFieldState = rememberTextFieldState(urlState.value)
-    val displayNameFieldState = rememberTextFieldState(displayNameState.value)
-    val oidcUrlFieldState = rememberTextFieldState(oidcUrlState.value)
-    val oidcClientIdFieldState = rememberTextFieldState(oidcClientIdState.value)
-    val oidcScopeFieldState = rememberTextFieldState(oidcScopeState.value)
+    val urlFieldState = rememberTextFieldState(uiState.url)
+    val displayNameFieldState = rememberTextFieldState(uiState.displayName)
+    val oidcUrlFieldState = rememberTextFieldState(uiState.oidcUrl)
+    val oidcClientIdFieldState = rememberTextFieldState(uiState.oidcClientId)
+    val oidcScopeFieldState = rememberTextFieldState(uiState.oidcScope)
 
+    // When the OIDC URL field is updated programmatically (ViewModel derived or external state
+    // change) we store the expected value here so the snapshotFlow collector can distinguish
+    // that update from genuine user typing and pass isUserEdit = false.
     val suppressOidcFlagFor = remember { mutableStateOf<String?>(null) }
 
-    // ── Field → MutableState (user typing) ───────────────────────────────
+    // ── Field → ViewModel (user typing) ──────────────────────────────────────
     LaunchedEffect(urlFieldState) {
         snapshotFlow { urlFieldState.text.toString() }
-            .collect { urlState.value = it }
+            .collect { onUrlChange(it) }
     }
     LaunchedEffect(displayNameFieldState) {
         snapshotFlow { displayNameFieldState.text.toString() }
-            .collect { displayNameState.value = it }
+            .collect { onDisplayNameChange(it) }
     }
     LaunchedEffect(oidcClientIdFieldState) {
         snapshotFlow { oidcClientIdFieldState.text.toString() }
-            .collect { oidcClientIdState.value = it }
+            .collect { onOidcClientIdChange(it) }
     }
     LaunchedEffect(oidcScopeFieldState) {
         snapshotFlow { oidcScopeFieldState.text.toString() }
-            .collect { oidcScopeState.value = it }
+            .collect { onOidcScopeChange(it) }
     }
     LaunchedEffect(oidcUrlFieldState) {
         snapshotFlow { oidcUrlFieldState.text.toString() }
             .drop(1)
             .collect { newVal ->
-                if (newVal != suppressOidcFlagFor.value) {
-                    oidcUrlExplicitlySetState.value = true
-                }
+                val isUserEdit = newVal != suppressOidcFlagFor.value
                 suppressOidcFlagFor.value = null
-                oidcUrlState.value = newVal
+                onOidcUrlChange(newVal, isUserEdit)
             }
     }
 
-    // ── MutableState → Field (external / programmatic updates) ────────────
-    LaunchedEffect(urlState.value) {
-        if (urlFieldState.text.toString() != urlState.value) {
-            urlFieldState.edit { replace(0, length, urlState.value) }
-        }
-        val raw = urlState.value.trim()
-        if (!oidcUrlExplicitlySetState.value && raw.isNotEmpty() && raw != "https://") {
-            val derived = raw.trimEnd('/') + "/.well-known/openid-configuration"
-            suppressOidcFlagFor.value = derived
-            oidcUrlState.value = derived
+    // ── ViewModel → Field (programmatic / external updates) ───────────────────
+    LaunchedEffect(uiState.url) {
+        if (urlFieldState.text.toString() != uiState.url) {
+            urlFieldState.edit { replace(0, length, uiState.url) }
         }
     }
-    LaunchedEffect(displayNameState.value) {
-        if (displayNameFieldState.text.toString() != displayNameState.value) {
-            displayNameFieldState.edit { replace(0, length, displayNameState.value) }
+    LaunchedEffect(uiState.displayName) {
+        if (displayNameFieldState.text.toString() != uiState.displayName) {
+            displayNameFieldState.edit { replace(0, length, uiState.displayName) }
         }
     }
-    LaunchedEffect(oidcUrlState.value) {
-        if (oidcUrlFieldState.text.toString() != oidcUrlState.value) {
-            suppressOidcFlagFor.value = oidcUrlState.value
-            oidcUrlFieldState.edit { replace(0, length, oidcUrlState.value) }
+    LaunchedEffect(uiState.oidcUrl) {
+        if (oidcUrlFieldState.text.toString() != uiState.oidcUrl) {
+            suppressOidcFlagFor.value = uiState.oidcUrl
+            oidcUrlFieldState.edit { replace(0, length, uiState.oidcUrl) }
         }
     }
-    LaunchedEffect(oidcClientIdState.value) {
-        if (oidcClientIdFieldState.text.toString() != oidcClientIdState.value) {
-            oidcClientIdFieldState.edit { replace(0, length, oidcClientIdState.value) }
+    LaunchedEffect(uiState.oidcClientId) {
+        if (oidcClientIdFieldState.text.toString() != uiState.oidcClientId) {
+            oidcClientIdFieldState.edit { replace(0, length, uiState.oidcClientId) }
         }
     }
-    LaunchedEffect(oidcScopeState.value) {
-        if (oidcScopeFieldState.text.toString() != oidcScopeState.value) {
-            oidcScopeFieldState.edit { replace(0, length, oidcScopeState.value) }
+    LaunchedEffect(uiState.oidcScope) {
+        if (oidcScopeFieldState.text.toString() != uiState.oidcScope) {
+            oidcScopeFieldState.edit { replace(0, length, uiState.oidcScope) }
         }
     }
 
-    val currentStep = currentStepState.value
+    val currentStep = uiState.currentStep
 
     // BoxWithConstraints lets us read maxHeight, which shrinks when the keyboard is open
     // (because imePadding() reduces the available content area). We use it to constrain
@@ -172,7 +167,7 @@ fun BrapiStepperAccountForm(
             .clickable { onCancel() },
         contentAlignment = Alignment.Center,
     ) {
-        // Reserve space for title (~56dp) + step indicator (~60dp) + buttons (~48dp) + card padding (~32dp)
+        // Reserve space for title (~56dp) + step indicator (~60dp) + buttons (~48dp) + card padding (~32dp).
         val scrollAreaMaxHeight = (maxHeight - 196.dp).coerceAtLeast(120.dp)
 
     Card(
@@ -275,7 +270,6 @@ fun BrapiStepperAccountForm(
                     }
                     2 -> {
                         // Step 3: Configuration details
-                        // Display Name
                         OutlinedTextField(
                             state = displayNameFieldState,
                             lineLimits = TextFieldLineLimits.SingleLine,
@@ -285,10 +279,9 @@ fun BrapiStepperAccountForm(
                                 .padding(bottom = 8.dp),
                         )
 
-                        // BrAPI Version picker
                         RadioPickerField(
-                            value = brapiVersionState.value,
-                            onValueChange = { brapiVersionState.value = it },
+                            value = uiState.brapiVersion,
+                            onValueChange = onBrapiVersionChange,
                             label = stringResource(R.string.preferences_brapi_version),
                             options = versionOptions,
                             modifier = Modifier
@@ -296,10 +289,9 @@ fun BrapiStepperAccountForm(
                                 .padding(bottom = 8.dp),
                         )
 
-                        // OIDC Flow picker
                         RadioPickerField(
-                            value = oidcFlowState.value,
-                            onValueChange = { oidcFlowState.value = it },
+                            value = uiState.oidcFlow,
+                            onValueChange = onOidcFlowChange,
                             label = stringResource(R.string.preferences_brapi_oidc_flow),
                             options = oidcFlowOptions,
                             modifier = Modifier
@@ -307,7 +299,6 @@ fun BrapiStepperAccountForm(
                                 .padding(bottom = 8.dp),
                         )
 
-                        // OIDC Discovery URL
                         OutlinedTextField(
                             state = oidcUrlFieldState,
                             lineLimits = TextFieldLineLimits.SingleLine,
@@ -317,7 +308,6 @@ fun BrapiStepperAccountForm(
                                 .padding(bottom = 8.dp),
                         )
 
-                        // OIDC Client ID
                         OutlinedTextField(
                             state = oidcClientIdFieldState,
                             lineLimits = TextFieldLineLimits.SingleLine,
@@ -328,7 +318,6 @@ fun BrapiStepperAccountForm(
                                 .padding(bottom = 8.dp),
                         )
 
-                        // OIDC Scope
                         OutlinedTextField(
                             state = oidcScopeFieldState,
                             lineLimits = TextFieldLineLimits.SingleLine,
@@ -448,15 +437,14 @@ private fun StepIndicator(
 private fun BrapiStepperAccountFormStep0Preview() {
     AppTheme {
         BrapiStepperAccountForm(
-            currentStepState = remember { mutableStateOf(0) },
-            urlState = remember { mutableStateOf("") },
-            displayNameState = remember { mutableStateOf("") },
-            oidcUrlState = remember { mutableStateOf("") },
-            oidcClientIdState = remember { mutableStateOf("") },
-            oidcScopeState = remember { mutableStateOf("") },
-            oidcFlowState = remember { mutableStateOf("Implicit") },
-            brapiVersionState = remember { mutableStateOf("V2") },
-            oidcUrlExplicitlySetState = remember { mutableStateOf(false) },
+            uiState = BrapiAccountUiState(currentStep = 0),
+            onUrlChange = {},
+            onDisplayNameChange = {},
+            onOidcUrlChange = { _, _ -> },
+            onOidcClientIdChange = {},
+            onOidcScopeChange = {},
+            onOidcFlowChange = {},
+            onBrapiVersionChange = {},
             onScanBaseUrl = {},
             onScanConfig = {},
             onNext = {},
@@ -472,15 +460,18 @@ private fun BrapiStepperAccountFormStep0Preview() {
 private fun BrapiStepperAccountFormStep1Preview() {
     AppTheme {
         BrapiStepperAccountForm(
-            currentStepState = remember { mutableStateOf(1) },
-            urlState = remember { mutableStateOf("https://test.brapi.org") },
-            displayNameState = remember { mutableStateOf("") },
-            oidcUrlState = remember { mutableStateOf("https://test.brapi.org/.well-known/openid-configuration") },
-            oidcClientIdState = remember { mutableStateOf("") },
-            oidcScopeState = remember { mutableStateOf("") },
-            oidcFlowState = remember { mutableStateOf("Implicit") },
-            brapiVersionState = remember { mutableStateOf("V2") },
-            oidcUrlExplicitlySetState = remember { mutableStateOf(false) },
+            uiState = BrapiAccountUiState(
+                currentStep = 1,
+                url = "https://test.brapi.org",
+                oidcUrl = "https://test.brapi.org/.well-known/openid-configuration",
+            ),
+            onUrlChange = {},
+            onDisplayNameChange = {},
+            onOidcUrlChange = { _, _ -> },
+            onOidcClientIdChange = {},
+            onOidcScopeChange = {},
+            onOidcFlowChange = {},
+            onBrapiVersionChange = {},
             onScanBaseUrl = {},
             onScanConfig = {},
             onNext = {},
@@ -496,15 +487,21 @@ private fun BrapiStepperAccountFormStep1Preview() {
 private fun BrapiStepperAccountFormStep2Preview() {
     AppTheme {
         BrapiStepperAccountForm(
-            currentStepState = remember { mutableStateOf(2) },
-            urlState = remember { mutableStateOf("https://test.brapi.org") },
-            displayNameState = remember { mutableStateOf("Test BrAPI Server") },
-            oidcUrlState = remember { mutableStateOf("https://test.brapi.org/.well-known/openid-configuration") },
-            oidcClientIdState = remember { mutableStateOf("") },
-            oidcScopeState = remember { mutableStateOf("") },
-            oidcFlowState = remember { mutableStateOf("Implicit") },
-            brapiVersionState = remember { mutableStateOf("V2") },
-            oidcUrlExplicitlySetState = remember { mutableStateOf(false) },
+            uiState = BrapiAccountUiState(
+                currentStep = 2,
+                url = "https://test.brapi.org",
+                displayName = "Test BrAPI Server",
+                oidcUrl = "https://test.brapi.org/.well-known/openid-configuration",
+                oidcFlow = "Implicit",
+                brapiVersion = "V2",
+            ),
+            onUrlChange = {},
+            onDisplayNameChange = {},
+            onOidcUrlChange = { _, _ -> },
+            onOidcClientIdChange = {},
+            onOidcScopeChange = {},
+            onOidcFlowChange = {},
+            onBrapiVersionChange = {},
             onScanBaseUrl = {},
             onScanConfig = {},
             onNext = {},
