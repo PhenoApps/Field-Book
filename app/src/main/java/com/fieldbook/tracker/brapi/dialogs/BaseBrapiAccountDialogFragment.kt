@@ -158,7 +158,8 @@ abstract class BaseBrapiAccountDialogFragment : DialogFragment() {
             }
         }
         startActivityForResult(intent, REQUEST_AUTH)
-        dismiss()
+        // Do NOT dismiss here — the fragment must stay attached so onActivityResult is delivered.
+        // The dialog will be invisible behind BrapiAuthActivity; dismiss happens in onActivityResult.
     }
 
     // ── Result handling ───────────────────────────────────────────────────────
@@ -172,6 +173,7 @@ abstract class BaseBrapiAccountDialogFragment : DialogFragment() {
         if (requestCode != REQUEST_AUTH) return
 
         if (resultCode != Activity.RESULT_OK) {
+            dismiss()
             if (authResponse != null) activity?.finish()
             return
         }
@@ -180,9 +182,9 @@ abstract class BaseBrapiAccountDialogFragment : DialogFragment() {
             putString(AccountManager.KEY_ACCOUNT_NAME, urlState.value)
             putString(AccountManager.KEY_ACCOUNT_TYPE, BrapiAuthenticator.ACCOUNT_TYPE)
         })
+        dismiss()
         activity?.setResult(Activity.RESULT_OK)
         activity?.finish()
-        dismiss()
     }
 
     // ── Utilities ─────────────────────────────────────────────────────────────
