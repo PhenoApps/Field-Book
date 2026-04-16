@@ -31,12 +31,11 @@ import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.activities.CameraActivity;
 import com.fieldbook.tracker.activities.PreferencesActivity;
 import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity;
 import com.fieldbook.tracker.brapi.BrapiAuthenticator;
-import com.fieldbook.tracker.brapi.dialogs.BrapiAddAccountDialogFragment;
 import com.fieldbook.tracker.brapi.dialogs.BrapiManualAccountDialogFragment;
+import com.fieldbook.tracker.brapi.dialogs.BrapiStepperAccountDialogFragment;
 import com.fieldbook.tracker.objects.BrAPIConfig;
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache;
 import com.fieldbook.tracker.utilities.BrapiAccountHelper;
@@ -81,7 +80,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
     OpenAuthConfigurationUtil authUtil;
 
     private static final String TAG = BrapiPreferencesFragment.class.getSimpleName();
-    private static final int REQUEST_BARCODE_SCAN_CONFIG = 97;
     private static final int AUTH_REQUEST_CODE = 123;
 
     private Context context;
@@ -451,29 +449,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
     // ─── Add Account ────────────────────────────────────────────────────────────
 
     private void showAddAccountDialog() {
-        BrapiAddAccountDialogFragment dialog = BrapiAddAccountDialogFragment.Companion.newInstance(null);
-        dialog.setListener(new BrapiAddAccountDialogFragment.Listener() {
-            @Override
-            public void onGuidedSetup(android.accounts.AccountAuthenticatorResponse authResponse) {
-                com.fieldbook.tracker.brapi.dialogs.BrapiStepperAccountDialogFragment frag =
-                        com.fieldbook.tracker.brapi.dialogs.BrapiStepperAccountDialogFragment.Companion.newInstance(null);
-                frag.show(getParentFragmentManager(), com.fieldbook.tracker.brapi.dialogs.BrapiStepperAccountDialogFragment.TAG);
-            }
-
-            @Override
-            public void onScanConfig(android.accounts.AccountAuthenticatorResponse authResponse) {
-                startBarcodeScan(REQUEST_BARCODE_SCAN_CONFIG);
-            }
-        });
-        dialog.show(getParentFragmentManager(), BrapiAddAccountDialogFragment.TAG);
-    }
-
-    // ─── Barcode scanning ───────────────────────────────────────────────────────
-
-    private void startBarcodeScan(int requestCode) {
-        Intent intent = new Intent(requireActivity(), CameraActivity.class);
-        intent.putExtra(CameraActivity.EXTRA_MODE, CameraActivity.MODE_BARCODE);
-        startActivityForResult(intent, requestCode);
+        BrapiStepperAccountDialogFragment frag =
+                BrapiStepperAccountDialogFragment.Companion.newInstance(null);
+        frag.show(getParentFragmentManager(), BrapiStepperAccountDialogFragment.TAG);
     }
 
     @Override
@@ -481,20 +459,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode != RESULT_OK) return;
 
-        if (requestCode == REQUEST_BARCODE_SCAN_CONFIG) {
-            String scanned = data.getStringExtra(CameraActivity.EXTRA_BARCODE);
-            if (scanned != null) {
-                BrAPIConfig config = null;
-                if (JsonUtil.Companion.isJsonValid(scanned)) {
-                    try {
-                        config = new Gson().fromJson(scanned, BrAPIConfig.class);
-                    } catch (Exception e) { /* fall through */ }
-                }
-                BrapiManualAccountDialogFragment frag =
-                        BrapiManualAccountDialogFragment.Companion.newInstance(null, false, config, false);
-                frag.show(getParentFragmentManager(), BrapiManualAccountDialogFragment.TAG);
-            }
-        } else if (requestCode == AUTH_REQUEST_CODE) {
+        if (requestCode == AUTH_REQUEST_CODE) {
             // Re-authorization completed — refresh cards to reflect new token state
             pendingAuthAccount = null;
             refreshServerCards();

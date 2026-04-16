@@ -77,6 +77,7 @@ fun BrapiStepperAccountForm(
     brapiVersionState: MutableState<String>,
     oidcUrlExplicitlySetState: MutableState<Boolean>,
     onScanBaseUrl: () -> Unit,
+    onScanConfig: () -> Unit,
     onNext: () -> Unit,
     onBack: () -> Unit,
     onCancel: () -> Unit,
@@ -193,7 +194,7 @@ fun BrapiStepperAccountForm(
         // Step indicator
         StepIndicator(
             currentStep = currentStep,
-            stepLabels = listOf("", ""),
+            stepLabels = listOf("", "", ""),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp, vertical = 8.dp),
@@ -219,7 +220,38 @@ fun BrapiStepperAccountForm(
             ) {
                 when (step) {
                     0 -> {
-                        // Step 1: Server URL
+                        // Step 1: Input method selection
+                        val outline = MaterialTheme.colorScheme.outline
+                        val options = listOf(
+                            stringResource(R.string.brapi_add_account_guided_setup) to onNext,
+                            stringResource(R.string.brapi_add_account_scan_config) to onScanConfig,
+                        )
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            options.forEach { (label, action) ->
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .border(1.dp, outline, RoundedCornerShape(8.dp))
+                                        .clickable { action() }
+                                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                                ) {
+                                    Text(
+                                        text = label,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    1 -> {
+                        // Step 2: Server URL
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
@@ -241,8 +273,8 @@ fun BrapiStepperAccountForm(
                             }
                         }
                     }
-                    1 -> {
-                        // Step 2: Configuration details
+                    2 -> {
+                        // Step 3: Configuration details
                         // Display Name
                         OutlinedTextField(
                             state = displayNameFieldState,
@@ -323,11 +355,16 @@ fun BrapiStepperAccountForm(
                     TextButton(onClick = onCancel) {
                         Text(stringResource(R.string.dialog_cancel))
                     }
+                }
+                1 -> {
+                    TextButton(onClick = onBack) {
+                        Text(stringResource(R.string.dialog_back))
+                    }
                     TextButton(onClick = onNext) {
                         Text(stringResource(R.string.dialog_next))
                     }
                 }
-                1 -> {
+                2 -> {
                     TextButton(onClick = onBack) {
                         Text(stringResource(R.string.dialog_back))
                     }
@@ -421,6 +458,7 @@ private fun BrapiStepperAccountFormStep0Preview() {
             brapiVersionState = remember { mutableStateOf("V2") },
             oidcUrlExplicitlySetState = remember { mutableStateOf(false) },
             onScanBaseUrl = {},
+            onScanConfig = {},
             onNext = {},
             onBack = {},
             onCancel = {},
@@ -436,6 +474,30 @@ private fun BrapiStepperAccountFormStep1Preview() {
         BrapiStepperAccountForm(
             currentStepState = remember { mutableStateOf(1) },
             urlState = remember { mutableStateOf("https://test.brapi.org") },
+            displayNameState = remember { mutableStateOf("") },
+            oidcUrlState = remember { mutableStateOf("https://test.brapi.org/.well-known/openid-configuration") },
+            oidcClientIdState = remember { mutableStateOf("") },
+            oidcScopeState = remember { mutableStateOf("") },
+            oidcFlowState = remember { mutableStateOf("Implicit") },
+            brapiVersionState = remember { mutableStateOf("V2") },
+            oidcUrlExplicitlySetState = remember { mutableStateOf(false) },
+            onScanBaseUrl = {},
+            onScanConfig = {},
+            onNext = {},
+            onBack = {},
+            onCancel = {},
+            onAuthorize = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BrapiStepperAccountFormStep2Preview() {
+    AppTheme {
+        BrapiStepperAccountForm(
+            currentStepState = remember { mutableStateOf(2) },
+            urlState = remember { mutableStateOf("https://test.brapi.org") },
             displayNameState = remember { mutableStateOf("Test BrAPI Server") },
             oidcUrlState = remember { mutableStateOf("https://test.brapi.org/.well-known/openid-configuration") },
             oidcClientIdState = remember { mutableStateOf("") },
@@ -444,6 +506,7 @@ private fun BrapiStepperAccountFormStep1Preview() {
             brapiVersionState = remember { mutableStateOf("V2") },
             oidcUrlExplicitlySetState = remember { mutableStateOf(false) },
             onScanBaseUrl = {},
+            onScanConfig = {},
             onNext = {},
             onBack = {},
             onCancel = {},

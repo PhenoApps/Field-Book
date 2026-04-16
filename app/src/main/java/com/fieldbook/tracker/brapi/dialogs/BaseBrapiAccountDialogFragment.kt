@@ -183,8 +183,10 @@ abstract class BaseBrapiAccountDialogFragment : DialogFragment() {
             putString(AccountManager.KEY_ACCOUNT_TYPE, BrapiAuthenticator.ACCOUNT_TYPE)
         })
         dismiss()
-        activity?.setResult(Activity.RESULT_OK)
-        activity?.finish()
+        if (authResponse != null) {
+            activity?.setResult(Activity.RESULT_OK)
+            activity?.finish()
+        }
     }
 
     // ── Utilities ─────────────────────────────────────────────────────────────

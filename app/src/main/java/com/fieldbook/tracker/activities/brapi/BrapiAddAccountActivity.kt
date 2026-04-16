@@ -4,7 +4,7 @@ import android.accounts.AccountManager
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import com.fieldbook.tracker.activities.ThemedActivity
-import com.fieldbook.tracker.brapi.dialogs.BrapiAddAccountDialogFragment
+import com.fieldbook.tracker.brapi.dialogs.BrapiStepperAccountDialogFragment
 import com.fieldbook.tracker.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -21,10 +21,10 @@ class BrapiAddAccountActivity : ThemedActivity() {
         setContent { AppTheme { } }
 
         if (savedInstanceState == null) {
-            val fragment = BrapiAddAccountDialogFragment.newInstance(
-                authenticatorResponse = intent.getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)
+            val fragment = BrapiStepperAccountDialogFragment.newInstance(
+                authResponse = intent.getParcelableExtra(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)
             )
-            fragment.show(supportFragmentManager, BrapiAddAccountDialogFragment.TAG)
+            fragment.show(supportFragmentManager, BrapiStepperAccountDialogFragment.TAG)
         }
     }
 }
