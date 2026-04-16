@@ -188,8 +188,12 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     @Override
     public void authorizeClient() {
         try {
+            // This lambda is invoked by OkHttp on a background thread for each request,
+            // so blockingGetAuthToken() is safe here. It routes through the authenticator
+            // and can retrieve tokens stored by other PhenoApps apps (same account type
+            // and signing certificate), unlike peekToken() which only reads the local cache.
             apiClient.authenticate(t -> {
-                String token = accountHelper.peekToken();
+                String token = accountHelper.getTokenBlocking();
                 if (token == null) {
                     token = preferences.getString(PreferenceKeys.BRAPI_TOKEN, null);
                 }

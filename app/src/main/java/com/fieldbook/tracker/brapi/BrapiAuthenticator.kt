@@ -24,6 +24,17 @@ class BrapiAuthenticator(private val context: Context) : AbstractAccountAuthenti
         const val KEY_OIDC_CLIENT_ID = "oidc_client_id"
         const val KEY_OIDC_SCOPE = "oidc_scope"
         const val KEY_BRAPI_VERSION = "brapi_version"
+
+        /**
+         * PhenoApps package names that are allowed to see and retrieve BrAPI accounts.
+         * On Android 8+, AccountManager hides accounts from apps not granted visibility.
+         * Add new PhenoApps packages here as they adopt shared BrAPI token support.
+         */
+        val ALLOWED_PACKAGES = setOf(
+            "com.fieldbook.tracker",
+            "org.wheatgenetics.coordinate",
+            "org.phenoapps.intercross"
+        )
     }
 
     override fun addAccount(
@@ -47,13 +58,8 @@ class BrapiAuthenticator(private val context: Context) : AbstractAccountAuthenti
         authTokenType: String,
         options: Bundle
     ): Bundle {
-        // Enforce that callers hold the org.phenoapps.brapi.READ_TOKEN permission
-        if (context.checkCallingOrSelfPermission(READ_TOKEN_PERMISSION) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-            return Bundle().apply {
-                putInt(AccountManager.KEY_ERROR_CODE, AccountManager.ERROR_CODE_INVALID_RESPONSE)
-                putString(AccountManager.KEY_ERROR_MESSAGE, "Caller does not hold $READ_TOKEN_PERMISSION")
-            }
-        }
+        // Cross-app access is gated by getAccountVisibilityForPackage() — only packages in
+        // ALLOWED_PACKAGES can discover this account type and call getAuthToken() on it.
         val am = AccountManager.get(context)
         val token = am.peekAuthToken(account, authTokenType)
         if (!token.isNullOrEmpty()) {
@@ -100,4 +106,19 @@ class BrapiAuthenticator(private val context: Context) : AbstractAccountAuthenti
         account: Account,
         features: Array<out String>
     ): Bundle = Bundle().apply { putBoolean(AccountManager.KEY_BOOLEAN_RESULT, false) }
+
+    /**
+     * Controls which apps can discover org.phenoapps.brapi accounts on Android 8+.
+     * Apps in ALLOWED_PACKAGES are granted full visibility; all others see nothing.
+     * This is the primary cross-app access gate — paired with READ_TOKEN permission
+     * declared in those apps' manifests, it lets PhenoApps family apps call
+     * AccountManager.getAuthToken() to retrieve shared BrAPI tokens.
+     */
+    override fun getAccountVisibilityForPackage(packageName: String): Int {
+        return if (packageName in ALLOWED_PACKAGES) {
+            AccountManager.VISIBILITY_VISIBLE
+        } else {
+            AccountManager.VISIBILITY_NOT_VISIBLE
+        }
+    }
 }

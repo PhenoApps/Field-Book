@@ -86,6 +86,28 @@ class BrapiAccountHelper @Inject constructor(
     }
 
     /**
+     * Retrieves the BrAPI access token via AccountManager.getAuthToken() (blocking).
+     *
+     * Unlike [peekToken], this routes through the authenticator and can surface tokens
+     * that were stored by other PhenoApps apps (which share the same account type and
+     * signing certificate). Must be called from a background thread.
+     *
+     * Returns null silently if no token is available or on any AccountManager error.
+     */
+    fun getTokenBlocking(): String? {
+        val account = findAccount() ?: return null
+        return try {
+            AccountManager.get(context).blockingGetAuthToken(
+                account,
+                BrapiAuthenticator.AUTH_TOKEN_TYPE,
+                false // notifyAuthFailure=false: don't launch re-auth UI from background
+            )
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /**
      * Retrieves the BrAPI access token for a specific account.
      */
     fun peekTokenForAccount(account: Account): String? {

@@ -3,10 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.fieldbook.tracker">
 
-    <!-- Custom permission allowing other Phenoapps apps to request BrAPI tokens from AccountManager -->
+    <!-- Custom permission allowing other PhenoApps to request BrAPI tokens via AccountManager.
+         Normal protection: any app that declares uses-permission is granted it without a user
+         prompt. Account visibility is controlled per-package in BrapiAuthenticator. -->
     <permission
         android:name="org.phenoapps.brapi.READ_TOKEN"
-        android:protectionLevel="dangerous" />
+        android:protectionLevel="normal" />
 
     <uses-permission android:name="org.phenoapps.brapi.READ_TOKEN" />
 
