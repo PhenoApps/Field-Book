@@ -218,6 +218,7 @@ class BrapiAccountHelper @Inject constructor(
 
     /**
      * Removes the AccountManager account associated with the given server URL (if present).
+     * Also clears BRAPI_BASE_URL if it currently points to the removed server.
      */
     fun removeAccount(serverUrl: String) {
         val am = AccountManager.get(context)
@@ -227,6 +228,10 @@ class BrapiAccountHelper @Inject constructor(
                         || it.name == serverUrl
             }
             .forEach { am.removeAccountExplicitly(it) }
+        val activeUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "") ?: ""
+        if (activeUrl == serverUrl) {
+            preferences.edit().remove(PreferenceKeys.BRAPI_BASE_URL).apply()
+        }
     }
 
     /**

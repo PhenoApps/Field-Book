@@ -3,6 +3,8 @@ package com.fieldbook.tracker.brapi.dialogs
 import android.accounts.AccountAuthenticatorResponse
 import android.accounts.AccountManager
 import android.app.Activity
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.view.WindowManager
@@ -15,6 +17,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CameraActivity
 import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity
 import com.fieldbook.tracker.brapi.BrapiAuthenticator
@@ -42,8 +45,27 @@ abstract class BaseBrapiAccountDialogFragment : DialogFragment() {
     private val authLauncher: ActivityResultLauncher<Intent> =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode != Activity.RESULT_OK) {
-                dismiss()
-                if (authResponse != null) activity?.finish()
+                if (viewModel.accountWasNew) {
+                    val state = viewModel.uiState.value
+                    val serverName = state.displayName.trim().ifEmpty { state.url }
+                    AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
+                        .setTitle(R.string.brapi_auth_failed_keep_title)
+                        .setMessage(getString(R.string.brapi_auth_failed_keep_message, serverName))
+                        .setPositiveButton(R.string.brapi_auth_failed_keep) { _: DialogInterface, _: Int ->
+                            dismiss()
+                            if (authResponse != null) activity?.finish()
+                        }
+                        .setNegativeButton(R.string.brapi_auth_failed_remove) { _: DialogInterface, _: Int ->
+                            viewModel.removeNewAccount()
+                            dismiss()
+                            if (authResponse != null) activity?.finish()
+                        }
+                        .setCancelable(false)
+                        .show()
+                } else {
+                    dismiss()
+                    if (authResponse != null) activity?.finish()
+                }
                 return@registerForActivityResult
             }
             authResponse?.onResult(Bundle().apply {

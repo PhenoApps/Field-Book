@@ -90,6 +90,13 @@ class BrapiStepperAccountDialogFragment : BaseBrapiAccountDialogFragment() {
         super.onCreate(savedInstanceState)
         setStyle(STYLE_NO_FRAME, R.style.BrapiComposeDialog)
         authResponse = arguments?.getParcelable(ARG_AUTH_RESPONSE)
+
+        // On first creation: reset the ViewModel to a blank state (clears any leftover data from
+        // a previous dialog session in the same activity).
+        // On rotation: savedInstanceState is non-null, so we skip this and keep existing state.
+        if (savedInstanceState == null) {
+            viewModel.reset()
+        }
     }
 
     override fun onCreateView(

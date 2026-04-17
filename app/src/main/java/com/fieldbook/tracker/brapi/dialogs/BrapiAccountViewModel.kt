@@ -51,6 +51,13 @@ class BrapiAccountViewModel @Inject constructor(
     // request on every character. The stepper calls fetchDisplayName() directly on Next.
     private val _urlForFetch = MutableStateFlow("")
 
+    /**
+     * Set to true in [onAuthorize] when the account did not exist before being added.
+     * Used by the fragment to decide whether to offer removal on auth failure.
+     */
+    var accountWasNew: Boolean = false
+        private set
+
     init {
         initDefaults()
         @OptIn(FlowPreview::class)
@@ -63,7 +70,13 @@ class BrapiAccountViewModel @Inject constructor(
 
     // ── Initialization ────────────────────────────────────────────────────────
 
-    private fun initDefaults() {
+    /**
+     * Resets all form state to a clean baseline with default dropdown values.
+     * Call from a fragment's [onCreate] when [savedInstanceState] is null — i.e. on first
+     * creation, but not on rotation (where savedInstanceState is non-null and the existing
+     * ViewModel state should be preserved).
+     */
+    fun reset() {
         val oidcFlowOptions = context.resources.getStringArray(R.array.pref_brapi_oidc_flow)
         val implicitOption = context.getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)
         val implicitIndex = oidcFlowOptions.indexOfFirst { it.equals(implicitOption, ignoreCase = true) }
@@ -74,8 +87,12 @@ class BrapiAccountViewModel @Inject constructor(
         val v2Index = versionOptions.indexOfFirst { it.equals("V2", ignoreCase = true) }
         val defaultVersion = if (v2Index >= 0) versionOptions[v2Index] else "V2"
 
-        _uiState.value = _uiState.value.copy(oidcFlow = defaultFlow, brapiVersion = defaultVersion)
+        _uiState.value = BrapiAccountUiState(oidcFlow = defaultFlow, brapiVersion = defaultVersion)
+        _urlForFetch.value = ""
+        accountWasNew = false
     }
+
+    private fun initDefaults() = reset()
 
     // ── Field updates ─────────────────────────────────────────────────────────
 
@@ -179,6 +196,7 @@ class BrapiAccountViewModel @Inject constructor(
             viewModelScope.launch { _events.emit(BrapiAccountEvent.ShowError(R.string.brapi_invalid_url)) }
             return
         }
+        accountWasNew = accountHelper.getAccountByUrl(url) == null
         val displayName = state.displayName.trim().takeIf { it.isNotEmpty() } ?: url
         accountHelper.addAccountConfig(
             serverUrl = url,
@@ -231,6 +249,15 @@ class BrapiAccountViewModel @Inject constructor(
 
     fun onCancelled() {
         viewModelScope.launch { _events.emit(BrapiAccountEvent.Dismissed) }
+    }
+
+    /**
+     * Removes the account that was just added in [onAuthorize] (if it was new).
+     * Call this when the user declines to keep an unauthorized server.
+     */
+    fun removeNewAccount() {
+        val url = try { accountHelper.normalizeUrl(_uiState.value.url.trim()) } catch (_: Exception) { "" }
+        if (url.isNotEmpty()) accountHelper.removeAccount(url)
     }
 
     // ── Utilities ─────────────────────────────────────────────────────────────

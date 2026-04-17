@@ -91,8 +91,11 @@ class BrapiManualAccountDialogFragment : BaseBrapiAccountDialogFragment() {
         authResponse = arguments?.getParcelable(ARG_AUTH_RESPONSE)
         isEditMode = arguments?.getBoolean(ARG_EDIT_MODE, false) == true
 
-        // Apply pre-fill only on first creation; ViewModel retains state on rotation.
+        // On first creation: reset the ViewModel to a blank state (clears any leftover data from
+        // a previous dialog session in the same activity), then apply any pre-fill config.
+        // On rotation: savedInstanceState is non-null, so we skip this and keep existing state.
         if (savedInstanceState == null) {
+            viewModel.reset()
             val prefillJson = arguments?.getString(ARG_PREFILL_CONFIG)
             if (prefillJson != null) {
                 try {
