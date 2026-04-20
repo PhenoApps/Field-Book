@@ -88,7 +88,7 @@ class KmpHostActivity : ComponentActivity() {
 
                 KmpHostScreenType.STORAGE_DEFINER -> {
                     StorageDefinerScreen(
-                        onBack = { currentScreen.value = KmpHostScreenType.PREFERENCES }
+                        onBack = { currentScreen.value = KmpHostScreenType.STORAGE_PREFERENCES }
                     )
                 }
 
