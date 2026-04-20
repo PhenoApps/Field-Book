@@ -2,10 +2,12 @@ package com.fieldbook.shared.screens.export
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.fieldbook.shared.database.repository.StudyRepository
 import com.fieldbook.shared.export.ExportOptions
 import com.fieldbook.shared.export.ExportResult
+import com.fieldbook.shared.preferences.GeneralKeys
 import com.fieldbook.shared.utilities.ExportUtil
-import com.fieldbook.shared.utilities.nowMillis
+import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -13,7 +15,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class ExportScreenViewModel(
-    private val exportUtil: ExportUtil = ExportUtil()
+    private val exportUtil: ExportUtil = ExportUtil(),
+    private val studyRepository: StudyRepository = StudyRepository(),
+    private val settings: Settings = Settings()
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ExportUiState())
@@ -26,18 +30,21 @@ class ExportScreenViewModel(
         _uiState.value = _uiState.value.transform()
     }
 
-    fun loadDefaults(multipleFields: Boolean) {
+    fun loadDefaults(fieldIds: List<Int>) {
+        val resolvedFieldIds = resolveFieldIds(fieldIds)
+        val multipleFields = resolvedFieldIds.size > 1
+        val fileName = buildDefaultFileName(resolvedFieldIds)
         update {
             copy(
-                formatDb = true,
-                formatTable = true,
-                onlyUnique = true,
-                allColumns = false,
-                activeTraits = true,
-                allTraits = false,
-                bundleMedia = false,
-                overwrite = false,
-                fileName = "${nowMillis()}_export",
+                formatDb = settings.getBoolean(GeneralKeys.EXPORT_FORMAT_DATABASE.key, false),
+                formatTable = settings.getBoolean(GeneralKeys.EXPORT_FORMAT_TABLE.key, false),
+                onlyUnique = settings.getBoolean(GeneralKeys.EXPORT_COLUMNS_UNIQUE.key, false),
+                allColumns = settings.getBoolean(GeneralKeys.EXPORT_COLUMNS_ALL.key, false),
+                activeTraits = settings.getBoolean(GeneralKeys.EXPORT_TRAITS_ACTIVE.key, false),
+                allTraits = settings.getBoolean(GeneralKeys.EXPORT_TRAITS_ALL.key, false),
+                bundleMedia = settings.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED.key, false),
+                overwrite = settings.getBoolean(GeneralKeys.EXPORT_OVERWRITE.key, false),
+                fileName = fileName,
                 multipleFields = multipleFields
             )
         }
@@ -95,6 +102,21 @@ class ExportScreenViewModel(
                 }
             }
         }
+    }
+
+    private fun buildDefaultFileName(fieldIds: List<Int>): String {
+        val suffix = if (fieldIds.size > 1) {
+            "multiple_fields"
+        } else {
+            studyRepository.getById(fieldIds.firstOrNull() ?: -1).exp_name.removeSuffix(".csv").ifBlank { "export" }
+        }
+        return "${exportUtil.defaultTimestampString()}_$suffix"
+    }
+
+    private fun resolveFieldIds(fieldIds: List<Int>): List<Int> {
+        if (fieldIds.isNotEmpty()) return fieldIds
+        val activeFieldId = settings.getInt(GeneralKeys.SELECTED_FIELD_ID.key, -1)
+        return if (activeFieldId >= 0) listOf(activeFieldId) else emptyList()
     }
 }
 

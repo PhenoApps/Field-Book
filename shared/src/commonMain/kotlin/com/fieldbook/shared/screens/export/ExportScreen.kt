@@ -15,8 +15,10 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
@@ -26,6 +28,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -48,9 +54,11 @@ import com.fieldbook.shared.generated.resources.export_format_database
 import com.fieldbook.shared.generated.resources.export_format_table
 import com.fieldbook.shared.generated.resources.export_multiple_fields_message
 import com.fieldbook.shared.generated.resources.export_overwrite
+import com.fieldbook.shared.generated.resources.export_progress
 import com.fieldbook.shared.generated.resources.settings_export
 import com.fieldbook.shared.generated.resources.settings_traits
 import com.fieldbook.shared.generated.resources.traits_create_format
+import kotlinx.coroutines.flow.collectLatest
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -60,9 +68,31 @@ fun ExportScreen(
     onBack: () -> Unit
 ) {
     val uiState = viewModel.uiState.collectAsState().value
+    var isExporting by remember { mutableStateOf(false) }
+    var dialogMessage by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
-        viewModel.loadDefaults(fieldIds.size > 1)
+        viewModel.loadDefaults(fieldIds)
+    }
+
+    LaunchedEffect(viewModel) {
+        viewModel.events.collectLatest { event ->
+            when (event) {
+                is ExportEvent.ShowMessage -> dialogMessage = event.message
+                ExportEvent.ShowProgress -> {
+                    dialogMessage = null
+                    isExporting = true
+                }
+                is ExportEvent.Completed -> {
+                    isExporting = false
+                    onBack()
+                }
+                is ExportEvent.Failed -> {
+                    isExporting = false
+                    dialogMessage = event.message
+                }
+            }
+        }
     }
 
     val content: @Composable () -> Unit = {
@@ -96,6 +126,43 @@ fun ExportScreen(
         ) {
             content()
         }
+    }
+
+    if (isExporting) {
+        Dialog(
+            onDismissRequest = {},
+            properties = DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
+        ) {
+            Surface(
+                shape = MaterialTheme.shapes.medium,
+                tonalElevation = 6.dp
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 2.dp
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(stringResource(Res.string.export_progress))
+                }
+            }
+        }
+    }
+
+    dialogMessage?.let { message ->
+        AlertDialog(
+            onDismissRequest = { dialogMessage = null },
+            title = { Text(stringResource(Res.string.settings_export)) },
+            text = { Text(message) },
+            confirmButton = {
+                TextButton(onClick = { dialogMessage = null }) {
+                    Text(stringResource(Res.string.dialog_cancel))
+                }
+            }
+        )
     }
 }
 

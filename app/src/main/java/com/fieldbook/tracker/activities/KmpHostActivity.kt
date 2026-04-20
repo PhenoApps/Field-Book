@@ -96,7 +96,7 @@ class KmpHostActivity : ComponentActivity() {
 
                     KmpHostScreenType.EXPORT -> {
                         ExportScreen(
-                            fieldIds = listOf(), // placeholder empty selection
+                            fieldIds = emptyList(),
                             onBack = { currentScreen.value = KmpHostScreenType.CONFIG }
                         )
                     }

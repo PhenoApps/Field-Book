@@ -60,7 +60,7 @@ fun MainViewController(driverFactory: DriverFactory) = ComposeUIViewController {
 
             KmpHostScreenType.EXPORT -> {
                 ExportScreen(
-                    fieldIds = listOf(), // placeholder empty selection
+                    fieldIds = emptyList(),
                     onBack = { currentScreen = KmpHostScreenType.CONFIG }
                 )
             }
