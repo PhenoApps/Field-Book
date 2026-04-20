@@ -49,6 +49,20 @@ fun PhotoTrait(
     modifier: Modifier = Modifier,
     controller: CollectScreenController,
 ) {
+    fun sanitizeFileName(name: String): String = name.replace(Regex("[|\\?\\*<\"\\\\:>'\";]"), "_")
+
+    fun buildPhotoFileName(): String {
+        val now = Clock.System.now()
+        val timestamp = now.toString().replace('T', ' ')
+        val plotId = controller.units.getOrNull(controller.currentUnitIndex)?.observation_unit_db_id
+            ?.takeIf { it.isNotBlank() }
+            ?: "photo"
+        val traitName = controller.traits.getOrNull(controller.currentTraitIndex)?.name
+            ?.takeIf { it.isNotBlank() }
+            ?: "photo"
+        return "${plotId}_${sanitizeFileName(traitName)}_${sanitizeFileName(timestamp)}.jpg"
+    }
+
     fun normalizeStoredPhotoRef(raw: String): String {
         val trimmed = raw.trim()
         if (trimmed.isBlank()) return ""
@@ -157,8 +171,7 @@ fun PhotoTrait(
                     cameraController?.let { cameraController ->
                         when (val result = cameraController.takePicture()) {
                             is ImageCaptureResult.Success -> {
-                                val fileName =
-                                    "Photo_${Clock.System.now().toEpochMilliseconds()}.jpg"
+                                val fileName = buildPhotoFileName()
 
                                 val dir = DocumentTreeUtil.getFieldMediaDirectory(controller.traits[controller.currentTraitIndex].name)
                                 dir?.let {
