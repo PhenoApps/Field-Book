@@ -36,7 +36,6 @@ import com.fieldbook.shared.generated.resources.ic_nav_drawer_statistics
 import com.fieldbook.shared.generated.resources.ic_nav_drawer_traits
 import com.fieldbook.shared.generated.resources.ic_tb_info
 import com.fieldbook.shared.generated.resources.trait_date_save
-import com.fieldbook.shared.theme.MainTheme
 import org.jetbrains.compose.resources.painterResource
 
 
@@ -47,84 +46,82 @@ fun ConfigScreen(
     onBack: (() -> Unit)? = null,
     onNavigate: ((KmpHostScreenType) -> Unit)? = null
 ) {
-    MainTheme {
-        val configItems = listOf(
-            "Fields",
-            "Traits",
-            "Collect",
-            "Export",
-            "Settings",
-            "Statistics",
-            "About",
-        )
-        val configIcons = listOf(
-            Res.drawable.ic_nav_drawer_fields,
-            Res.drawable.ic_nav_drawer_traits,
-            Res.drawable.ic_nav_drawer_collect_data,
-            Res.drawable.trait_date_save,
-            Res.drawable.ic_nav_drawer_settings,
-            Res.drawable.ic_nav_drawer_statistics,
-            Res.drawable.ic_tb_info,
-        )
-        Surface(modifier = Modifier.fillMaxSize()) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                TopAppBar(
-                    title = { Text(text = "KMP Module") },
-                    navigationIcon = {
-                        if (onBack != null) {
-                            IconButton(onClick = onBack) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = "Back"
-                                )
-                            }
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                        navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                )
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    itemsIndexed(configItems) { index, item ->
-                        val isEnabled = item == "Fields" || item == "Collect" || item == "Settings" || item == "Traits" || item == "Export"
-                        val rowModifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                            .let { mod ->
-                                if (isEnabled && onNavigate != null) {
-                                    mod.clickable {
-                                        when (item) {
-                                            "Fields" -> onNavigate(KmpHostScreenType.FIELD_EDITOR)
-                                            "Collect" -> onNavigate(KmpHostScreenType.COLLECT)
-                                            "Settings" -> onNavigate(KmpHostScreenType.PREFERENCES)
-                                            "Traits" -> onNavigate(KmpHostScreenType.TRAIT_EDITOR)
-                                            "Export" -> onNavigate(KmpHostScreenType.EXPORT)
-                                        }
-                                    }
-                                } else {
-                                    mod
-                                }
-                            }
-                            .graphicsLayer { alpha = if (isEnabled) 1f else 0.4f }
-
-                        Row(
-                            modifier = rowModifier,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+    val configItems = listOf(
+        "Fields",
+        "Traits",
+        "Collect",
+        "Export",
+        "Settings",
+        "Statistics",
+        "About",
+    )
+    val configIcons = listOf(
+        Res.drawable.ic_nav_drawer_fields,
+        Res.drawable.ic_nav_drawer_traits,
+        Res.drawable.ic_nav_drawer_collect_data,
+        Res.drawable.trait_date_save,
+        Res.drawable.ic_nav_drawer_settings,
+        Res.drawable.ic_nav_drawer_statistics,
+        Res.drawable.ic_tb_info,
+    )
+    Surface(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            TopAppBar(
+                title = { Text(text = "KMP Module") },
+                navigationIcon = {
+                    if (onBack != null) {
+                        IconButton(onClick = onBack) {
                             Icon(
-                                painter = painterResource(configIcons[index]),
-                                contentDescription = item,
-                                modifier = Modifier.padding(end = 16.dp).size(24.dp)
-                            )
-                            Text(
-                                text = item,
-                                style = MaterialTheme.typography.bodyLarge
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back"
                             )
                         }
-                        HorizontalDivider()
                     }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            )
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                itemsIndexed(configItems) { index, item ->
+                    val isEnabled = item == "Fields" || item == "Collect" || item == "Settings" || item == "Traits" || item == "Export"
+                    val rowModifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .let { mod ->
+                            if (isEnabled && onNavigate != null) {
+                                mod.clickable {
+                                    when (item) {
+                                        "Fields" -> onNavigate(KmpHostScreenType.FIELD_EDITOR)
+                                        "Collect" -> onNavigate(KmpHostScreenType.COLLECT)
+                                        "Settings" -> onNavigate(KmpHostScreenType.PREFERENCES)
+                                        "Traits" -> onNavigate(KmpHostScreenType.TRAIT_EDITOR)
+                                        "Export" -> onNavigate(KmpHostScreenType.EXPORT)
+                                    }
+                                }
+                            } else {
+                                mod
+                            }
+                        }
+                        .graphicsLayer { alpha = if (isEnabled) 1f else 0.4f }
+
+                    Row(
+                        modifier = rowModifier,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(configIcons[index]),
+                            contentDescription = item,
+                            modifier = Modifier.padding(end = 16.dp).size(24.dp)
+                        )
+                        Text(
+                            text = item,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                    HorizontalDivider()
                 }
             }
         }

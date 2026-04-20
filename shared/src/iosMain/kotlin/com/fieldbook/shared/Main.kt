@@ -14,57 +14,60 @@ import com.fieldbook.shared.screens.preferences.StorageDefinerScreen
 import com.fieldbook.shared.screens.preferences.StoragePreferencesScreen
 import com.fieldbook.shared.screens.trait.TraitEditorScreen
 import com.fieldbook.shared.sqldelight.DriverFactory
+import com.fieldbook.shared.theme.MainTheme
 
 fun MainViewController(driverFactory: DriverFactory) = ComposeUIViewController {
     AppContext.init(driverFactory)
 
     var currentScreen by remember { mutableStateOf(KmpHostScreenType.CONFIG) }
 
-    when (currentScreen) {
-        KmpHostScreenType.CONFIG -> ConfigScreen(
-            onNavigate = { target -> currentScreen = target },
-            onBack = { currentScreen = KmpHostScreenType.CONFIG }
-        )
-
-        KmpHostScreenType.FIELD_EDITOR -> FieldEditorScreen(
-            onBack = { currentScreen = KmpHostScreenType.CONFIG }
-        )
-
-        KmpHostScreenType.COLLECT -> CollectScreen(
-            onBack = { currentScreen = KmpHostScreenType.CONFIG }
-        )
-
-        KmpHostScreenType.PREFERENCES -> PreferencesScreen(
-            onBack = { currentScreen = KmpHostScreenType.CONFIG },
-            onNavigate = { target -> currentScreen = target }
-        )
-
-        KmpHostScreenType.STORAGE_PREFERENCES -> StoragePreferencesScreen(
-            onBack = { currentScreen = KmpHostScreenType.PREFERENCES },
-            onNavigate = { target -> currentScreen = target }
-        )
-
-        KmpHostScreenType.STORAGE_DEFINER -> StorageDefinerScreen(
-            onBack = { currentScreen = KmpHostScreenType.STORAGE_PREFERENCES }
-        )
-
-        KmpHostScreenType.SCANNER -> {
-            // TODO: Implement scanner screen or fallback UI
-        }
-
-        KmpHostScreenType.TRAIT_EDITOR -> TraitEditorScreen(
-            onBack = { currentScreen = KmpHostScreenType.CONFIG }
-        )
-
-        KmpHostScreenType.EXPORT -> {
-            ExportScreen(
-                fieldIds = listOf(), // placeholder empty selection
+    MainTheme {
+        when (currentScreen) {
+            KmpHostScreenType.CONFIG -> ConfigScreen(
+                onNavigate = { target -> currentScreen = target },
                 onBack = { currentScreen = KmpHostScreenType.CONFIG }
             )
-        }
 
-        else -> {
-            // fallback for future enum values
+            KmpHostScreenType.FIELD_EDITOR -> FieldEditorScreen(
+                onBack = { currentScreen = KmpHostScreenType.CONFIG }
+            )
+
+            KmpHostScreenType.COLLECT -> CollectScreen(
+                onBack = { currentScreen = KmpHostScreenType.CONFIG }
+            )
+
+            KmpHostScreenType.PREFERENCES -> PreferencesScreen(
+                onBack = { currentScreen = KmpHostScreenType.CONFIG },
+                onNavigate = { target -> currentScreen = target }
+            )
+
+            KmpHostScreenType.STORAGE_PREFERENCES -> StoragePreferencesScreen(
+                onBack = { currentScreen = KmpHostScreenType.PREFERENCES },
+                onNavigate = { target -> currentScreen = target }
+            )
+
+            KmpHostScreenType.STORAGE_DEFINER -> StorageDefinerScreen(
+                onBack = { currentScreen = KmpHostScreenType.STORAGE_PREFERENCES }
+            )
+
+            KmpHostScreenType.SCANNER -> {
+                // TODO: Implement scanner screen or fallback UI
+            }
+
+            KmpHostScreenType.TRAIT_EDITOR -> TraitEditorScreen(
+                onBack = { currentScreen = KmpHostScreenType.CONFIG }
+            )
+
+            KmpHostScreenType.EXPORT -> {
+                ExportScreen(
+                    fieldIds = listOf(), // placeholder empty selection
+                    onBack = { currentScreen = KmpHostScreenType.CONFIG }
+                )
+            }
+
+            else -> {
+                // fallback for future enum values
+            }
         }
     }
 }

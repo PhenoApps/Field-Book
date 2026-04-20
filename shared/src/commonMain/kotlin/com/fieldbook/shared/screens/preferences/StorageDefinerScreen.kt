@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.preferences_storage_files_base_directory_title
 import com.fieldbook.shared.preferences.GeneralKeys
-import com.fieldbook.shared.theme.MainTheme
 import com.russhwolf.settings.Settings
 import io.github.vinceglb.filekit.compose.rememberDirectoryPickerLauncher
 import org.jetbrains.compose.resources.stringResource
@@ -34,62 +33,60 @@ import org.jetbrains.compose.resources.stringResource
 fun StorageDefinerScreen(
     onBack: (() -> Unit)? = null
 ) {
-    MainTheme {
-        val preferences: Settings = Settings()
-        var currentDirectory by remember {
-            mutableStateOf(
-                preferences.getString(
-                    GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY.key,
-                    ""
+    val preferences: Settings = Settings()
+    var currentDirectory by remember {
+        mutableStateOf(
+            preferences.getString(
+                GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY.key,
+                ""
+            )
+        )
+    }
+
+    val launcher = rememberDirectoryPickerLauncher(
+        title = "Directory picker",
+        initialDirectory = currentDirectory.ifEmpty { null }
+    ) { directory ->
+        directory?.let {
+            val value = it.path ?: ""
+            preferences.putString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY.key, value)
+            currentDirectory = value
+        }
+    }
+
+    Surface(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(
+                            Res.string.preferences_storage_files_base_directory_title
+                        )
+                    )
+                },
+                navigationIcon = {
+                    if (onBack != null) {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back"
+                            )
+                        }
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
-        }
-
-        val launcher = rememberDirectoryPickerLauncher(
-            title = "Directory picker",
-            initialDirectory = currentDirectory.ifEmpty { null }
-        ) { directory ->
-            directory?.let {
-                val value = it.path ?: ""
-                preferences.putString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY.key, value)
-                currentDirectory = value
-            }
-        }
-
-        Surface(modifier = Modifier.fillMaxSize()) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = stringResource(
-                                Res.string.preferences_storage_files_base_directory_title
-                            )
-                        )
-                    },
-                    navigationIcon = {
-                        if (onBack != null) {
-                            IconButton(onClick = onBack) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = "Back"
-                                )
-                            }
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                        navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                )
-                Text(
-                    text = "Current directory: $currentDirectory",
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(16.dp)
-                )
-                Button(onClick = { launcher.launch() }, modifier = Modifier.padding(16.dp)) {
-                    Text("Choose Directory")
-                }
+            Text(
+                text = "Current directory: $currentDirectory",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(16.dp)
+            )
+            Button(onClick = { launcher.launch() }, modifier = Modifier.padding(16.dp)) {
+                Text("Choose Directory")
             }
         }
     }

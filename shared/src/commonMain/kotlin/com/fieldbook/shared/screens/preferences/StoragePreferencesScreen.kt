@@ -50,7 +50,6 @@ import com.fieldbook.shared.generated.resources.preferences_storage_files_base_d
 import com.fieldbook.shared.generated.resources.preferences_storage_files_base_directory_title
 import com.fieldbook.shared.generated.resources.preferences_storage_storage_title
 import com.fieldbook.shared.generated.resources.preferences_storage_title
-import com.fieldbook.shared.theme.MainTheme
 import com.fieldbook.shared.utilities.selectFirstField
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
@@ -71,59 +70,58 @@ fun StoragePreferencesScreen(
     onBack: (() -> Unit)? = null,
     onNavigate: ((com.fieldbook.shared.KmpHostScreenType) -> Unit)? = null
 ) {
-    MainTheme {
-        var showImportDialog by remember { mutableStateOf(false) }
-        var isImporting by remember { mutableStateOf(false) }
-        var importResult by remember { mutableStateOf<String?>(null) }
-        var showSuccessSnackbar by remember { mutableStateOf(false) }
-        val coroutineScope = rememberCoroutineScope()
-        val snackbarHostState = remember { SnackbarHostState() }
+    var showImportDialog by remember { mutableStateOf(false) }
+    var isImporting by remember { mutableStateOf(false) }
+    var importResult by remember { mutableStateOf<String?>(null) }
+    var showSuccessSnackbar by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
-        val storageItems = listOf(
-            StoragePreferenceItem(
-                icon = Res.drawable.ic_pref_general_root_directory,
-                title = Res.string.preferences_storage_files_base_directory_title,
-                summary = Res.string.preferences_storage_files_base_directory_description,
-                key = "DEFAULT_STORAGE_LOCATION_PREFERENCE"
-            )
+    val storageItems = listOf(
+        StoragePreferenceItem(
+            icon = Res.drawable.ic_pref_general_root_directory,
+            title = Res.string.preferences_storage_files_base_directory_title,
+            summary = Res.string.preferences_storage_files_base_directory_description,
+            key = "DEFAULT_STORAGE_LOCATION_PREFERENCE"
         )
-        val databaseItems = listOf(
-            StoragePreferenceItem(
-                icon = Res.drawable.ic_pref_database_import,
-                title = Res.string.database_import,
-                key = "pref_database_import"
-            ),
-            StoragePreferenceItem(
-                icon = Res.drawable.ic_pref_database_export,
-                title = Res.string.database_export,
-                key = "pref_database_export"
-            ),
-            StoragePreferenceItem(
-                icon = Res.drawable.ic_pref_database_delete,
-                title = Res.string.database_reset,
-                key = "pref_database_delete"
-            )
+    )
+    val databaseItems = listOf(
+        StoragePreferenceItem(
+            icon = Res.drawable.ic_pref_database_import,
+            title = Res.string.database_import,
+            key = "pref_database_import"
+        ),
+        StoragePreferenceItem(
+            icon = Res.drawable.ic_pref_database_export,
+            title = Res.string.database_export,
+            key = "pref_database_export"
+        ),
+        StoragePreferenceItem(
+            icon = Res.drawable.ic_pref_database_delete,
+            title = Res.string.database_reset,
+            key = "pref_database_delete"
         )
-        Surface(modifier = Modifier.fillMaxSize()) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                TopAppBar(
-                    title = { Text(text = stringResource(Res.string.preferences_storage_title)) },
-                    navigationIcon = {
-                        if (onBack != null) {
-                            IconButton(onClick = onBack) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = "Back"
-                                )
-                            }
+    )
+    Surface(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            TopAppBar(
+                title = { Text(text = stringResource(Res.string.preferences_storage_title)) },
+                navigationIcon = {
+                    if (onBack != null) {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back"
+                            )
                         }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        titleContentColor = MaterialTheme.colorScheme.onPrimary
-                    )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary
                 )
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
+            )
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
                     item {
                         Text(
                             text = stringResource(Res.string.preferences_storage_storage_title),
@@ -194,66 +192,65 @@ fun StoragePreferencesScreen(
                         }
                         Divider()
                     }
-                }
-                if (showImportDialog) {
-                    AlertDialog(
-                        onDismissRequest = {
-                            showImportDialog = false
-                            isImporting = false
-                            importResult = null
-                        },
-                        title = { Text(text = stringResource(Res.string.database_import)) },
-                        text = {
-                            Column {
-                                if (!isImporting && importResult == null) {
-                                    TextButton(
-                                        onClick = {
-                                            coroutineScope.launch {
-                                                isImporting = true
-                                                importResult = null
-                                                try {
-                                                    importDatabaseFromBundled(
-                                                        DATABASE_NAME
-                                                    )
-                                                    selectFirstField()
-                                                    showImportDialog = false
-                                                    showSuccessSnackbar = true
-                                                } catch (e: Exception) {
-                                                    importResult =
-                                                        "Failed to import sample database: ${'$'}{e.message}"
-                                                } finally {
-                                                    isImporting = false
-                                                }
+            }
+            if (showImportDialog) {
+                AlertDialog(
+                    onDismissRequest = {
+                        showImportDialog = false
+                        isImporting = false
+                        importResult = null
+                    },
+                    title = { Text(text = stringResource(Res.string.database_import)) },
+                    text = {
+                        Column {
+                            if (!isImporting && importResult == null) {
+                                TextButton(
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            isImporting = true
+                                            importResult = null
+                                            try {
+                                                importDatabaseFromBundled(
+                                                    DATABASE_NAME
+                                                )
+                                                selectFirstField()
+                                                showImportDialog = false
+                                                showSuccessSnackbar = true
+                                            } catch (e: Exception) {
+                                                importResult =
+                                                    "Failed to import sample database: ${'$'}{e.message}"
+                                            } finally {
+                                                isImporting = false
                                             }
-                                        },
-                                        enabled = !isImporting
-                                    ) {
-                                        Text("sample_db")
-                                    }
+                                        }
+                                    },
+                                    enabled = !isImporting
+                                ) {
+                                    Text("sample_db")
                                 }
-                            }
-                        },
-                        confirmButton = {
-                            Button(
-                                onClick = {
-                                    showImportDialog = false
-                                    isImporting = false
-                                    importResult = null
-                                }
-                            ) {
-                                Text("Cancel")
                             }
                         }
-                    )
-                }
-                if (showSuccessSnackbar) {
-                    LaunchedEffect(showSuccessSnackbar) {
-                        snackbarHostState.showSnackbar("Sample database imported successfully.")
-                        showSuccessSnackbar = false
+                    },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                showImportDialog = false
+                                isImporting = false
+                                importResult = null
+                            }
+                        ) {
+                            Text("Cancel")
+                        }
                     }
-                }
-                SnackbarHost(hostState = snackbarHostState)
+                )
             }
+            if (showSuccessSnackbar) {
+                LaunchedEffect(showSuccessSnackbar) {
+                    snackbarHostState.showSnackbar("Sample database imported successfully.")
+                    showSuccessSnackbar = false
+                }
+            }
+            SnackbarHost(hostState = snackbarHostState)
         }
     }
 }
