@@ -90,6 +90,8 @@ class ExportScreenViewModel(
             multipleFields = s.multipleFields
         )
 
+        persistOptions(options)
+
         viewModelScope.launch {
             _events.emit(ExportEvent.ShowProgress)
             exportUtil.exportLocalWithOptions(fieldIds, options) { result ->
@@ -102,6 +104,17 @@ class ExportScreenViewModel(
                 }
             }
         }
+    }
+
+    private fun persistOptions(options: ExportOptions) {
+        settings.putBoolean(GeneralKeys.EXPORT_FORMAT_DATABASE.key, options.formatDb)
+        settings.putBoolean(GeneralKeys.EXPORT_FORMAT_TABLE.key, options.formatTable)
+        settings.putBoolean(GeneralKeys.EXPORT_COLUMNS_UNIQUE.key, options.onlyUnique)
+        settings.putBoolean(GeneralKeys.EXPORT_COLUMNS_ALL.key, options.allColumns)
+        settings.putBoolean(GeneralKeys.EXPORT_TRAITS_ACTIVE.key, options.activeTraits)
+        settings.putBoolean(GeneralKeys.EXPORT_TRAITS_ALL.key, options.allTraits)
+        settings.putBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED.key, options.bundleMedia)
+        settings.putBoolean(GeneralKeys.EXPORT_OVERWRITE.key, options.overwrite)
     }
 
     private fun buildDefaultFileName(fieldIds: List<Int>): String {

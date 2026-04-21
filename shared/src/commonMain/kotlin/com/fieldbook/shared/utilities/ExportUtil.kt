@@ -78,12 +78,12 @@ class ExportUtil : CoroutineScope by MainScope() {
         this.fieldIds = resolvedFieldIds
         this.multipleFields = resolvedFieldIds.size > 1
         val defaultOptions = ExportOptions(
-            formatDb = true,
-            formatTable = true,
-            onlyUnique = true,
-            allColumns = false,
-            activeTraits = true,
-            allTraits = false,
+            formatDb = prefs.getBoolean(GeneralKeys.EXPORT_FORMAT_DATABASE.key, true),
+            formatTable = prefs.getBoolean(GeneralKeys.EXPORT_FORMAT_TABLE.key, true),
+            onlyUnique = prefs.getBoolean(GeneralKeys.EXPORT_COLUMNS_UNIQUE.key, true),
+            allColumns = prefs.getBoolean(GeneralKeys.EXPORT_COLUMNS_ALL.key, false),
+            activeTraits = prefs.getBoolean(GeneralKeys.EXPORT_TRAITS_ACTIVE.key, true),
+            allTraits = prefs.getBoolean(GeneralKeys.EXPORT_TRAITS_ALL.key, false),
             bundleMedia = prefs.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED.key, false),
             overwrite = prefs.getBoolean(GeneralKeys.EXPORT_OVERWRITE.key, false),
             fileName = defaultExportFileName(resolvedFieldIds),
@@ -100,7 +100,19 @@ class ExportUtil : CoroutineScope by MainScope() {
         val resolvedFieldIds = resolveFieldIds(fieldIds)
         this.fieldIds = resolvedFieldIds
         this.multipleFields = resolvedFieldIds.size > 1
+        persistOptions(options)
         startExportTasks(options, onComplete)
+    }
+
+    private fun persistOptions(options: ExportOptions) {
+        prefs.putBoolean(GeneralKeys.EXPORT_FORMAT_DATABASE.key, options.formatDb)
+        prefs.putBoolean(GeneralKeys.EXPORT_FORMAT_TABLE.key, options.formatTable)
+        prefs.putBoolean(GeneralKeys.EXPORT_COLUMNS_UNIQUE.key, options.onlyUnique)
+        prefs.putBoolean(GeneralKeys.EXPORT_COLUMNS_ALL.key, options.allColumns)
+        prefs.putBoolean(GeneralKeys.EXPORT_TRAITS_ACTIVE.key, options.activeTraits)
+        prefs.putBoolean(GeneralKeys.EXPORT_TRAITS_ALL.key, options.allTraits)
+        prefs.putBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED.key, options.bundleMedia)
+        prefs.putBoolean(GeneralKeys.EXPORT_OVERWRITE.key, options.overwrite)
     }
 
     private fun startExportTasks(
