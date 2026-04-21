@@ -65,6 +65,8 @@
     <!-- FIELDS -->
     <!-- General -->
     <string name="fields_sort_by_name">Nom</string>
+    <string name="selected_count">%1$d sélectionné</string>
+    <string name="field_observation_count_format">%1$s %2$s</string>
     <!-- Sort -->
     <!-- Modify -->
     <string name="fields_rename_study">Renommer</string>
@@ -138,6 +140,7 @@
     <string name="traits_create_value_minimum">minimum</string>
     <string name="traits_create_value_maximum">maximum</string>
     <string name="traits_create_details">détails</string>
+    <string name="traits_create_unit">Unité</string>
     <string name="traits_create_optional">optionnel</string>
     <string name="traits_create_categories_title">catégories</string>
     <string name="traits_create_photo_maximum">nombre maximum de photos</string>
