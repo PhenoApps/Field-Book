@@ -77,8 +77,8 @@ class MediaViewerActivity : ComponentActivity() {
         const val EXTRA_OBS_UNIT = "extra_observation_unit"
         const val EXTRA_TRAIT_DB_ID = "extra_trait_db_id"
 
-        // EXPERIMENT: lowered to 360dp for phone testing. Restore to 800dp for tablets.
-        private const val TABLET_ROTATION_MIN_SW_DP = 360
+        // Tablets: allow rotation when system auto-rotate is enabled.
+        private const val TABLET_ROTATION_MIN_SW_DP = 800
     }
 
     private fun applyTabletRotationPolicy() {

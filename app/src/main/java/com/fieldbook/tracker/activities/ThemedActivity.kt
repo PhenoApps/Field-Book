@@ -25,8 +25,8 @@ open class ThemedActivity: AppCompatActivity() {
     companion object {
 
         val TAG = ThemedActivity::class.simpleName
-        // EXPERIMENT: lowered to 360dp for phone testing. Restore to 800dp for tablets.
-        private const val TABLET_ROTATION_MIN_SW_DP = 360
+        // Tablets: allow rotation when system auto-rotate is enabled.
+        private const val TABLET_ROTATION_MIN_SW_DP = 800
 
         private data class ThemePair(val color: Int, val size: Int)
 
