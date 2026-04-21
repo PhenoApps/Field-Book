@@ -67,6 +67,7 @@ fun TraitEditorScreen(
 
     var traitToDelete by remember { mutableStateOf<TraitObject?>(null) }
     var showCreator by remember { mutableStateOf(false) }
+    var traitToEdit by remember { mutableStateOf<TraitObject?>(null) }
 
     val lazyListState = rememberLazyListState()
     val reorderState = rememberReorderableLazyListState(lazyListState) { from, to ->
@@ -153,6 +154,9 @@ fun TraitEditorScreen(
                                             .fillMaxWidth()
                                             .padding(horizontal = 8.dp)
                                             .height(40.dp),
+                                        onEditClick = {
+                                            traitToEdit = viewModel.getTraitForEdit(it.id)
+                                        },
                                         onCopyClick = { viewModel.copyTrait(it) },
                                         onDeleteClick = { traitToDelete = it }
                                     )
@@ -189,9 +193,18 @@ fun TraitEditorScreen(
             }
 
             if (showCreator) {
-                TraitCreatorDialog(onDismiss = { showCreator = false }, onSuccess = {
-                    showCreator = false
-                })
+                TraitCreatorDialog(
+                    onDismiss = { showCreator = false },
+                    onSuccess = { showCreator = false }
+                )
+            }
+
+            if (traitToEdit != null) {
+                TraitCreatorDialog(
+                    initialTrait = traitToEdit,
+                    onDismiss = { traitToEdit = null },
+                    onSuccess = { traitToEdit = null }
+                )
             }
         }
     }
@@ -202,6 +215,7 @@ fun TraitListItem(
     trait: TraitObject,
     onToggleVisible: (Boolean) -> Unit,
     dragModifier: Modifier = Modifier,
+    onEditClick: (TraitObject) -> Unit = {},
     onCopyClick: (TraitObject) -> Unit = {},
     onDeleteClick: (TraitObject) -> Unit = {},
     modifier: Modifier = Modifier
@@ -249,6 +263,10 @@ fun TraitListItem(
                 expanded = menuOpen,
                 onDismissRequest = { menuOpen = false }
             ) {
+                DropdownMenuItem(text = { Text("Edit") }, onClick = {
+                    menuOpen = false
+                    onEditClick(trait)
+                })
                 DropdownMenuItem(text = { Text("Copy") }, onClick = {
                     menuOpen = false
                     onCopyClick(trait)

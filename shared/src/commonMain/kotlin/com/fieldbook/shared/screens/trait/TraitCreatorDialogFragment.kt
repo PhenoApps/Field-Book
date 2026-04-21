@@ -44,14 +44,24 @@ private enum class TraitCreatorStep {
 
 @Composable
 fun TraitCreatorDialog(
+    initialTrait: TraitObject? = null,
     onDismiss: () -> Unit,
     onSuccess: (TraitObject) -> Unit,
     viewModel: TraitEditorScreenViewModel = viewModel()
 ) {
-    var currentStep by remember { mutableStateOf(TraitCreatorStep.ChooseFormat) }
-    var selectedFormat by remember { mutableStateOf<Formats?>(null) }
-    var traitName by remember { mutableStateOf("") }
-    var traitDetails by remember { mutableStateOf("") }
+    val isEditing = initialTrait != null
+    var currentStep by remember(initialTrait?.id) {
+        mutableStateOf(if (isEditing) TraitCreatorStep.NameDetails else TraitCreatorStep.ChooseFormat)
+    }
+    var selectedFormat by remember(initialTrait?.id) {
+        mutableStateOf(
+            initialTrait?.format?.let { format ->
+                Formats.supportedFormats().firstOrNull { it.databaseName == format }
+            }
+        )
+    }
+    var traitName by remember(initialTrait?.id) { mutableStateOf(initialTrait?.name ?: "") }
+    var traitDetails by remember(initialTrait?.id) { mutableStateOf(initialTrait?.details ?: "") }
 
     when (currentStep) {
         TraitCreatorStep.ChooseFormat -> {
@@ -111,13 +121,13 @@ fun TraitCreatorDialog(
         }
 
         TraitCreatorStep.NameDetails -> {
-            val traitState = remember {
-                TraitObject().apply {
+            val traitState = remember(initialTrait?.id, selectedFormat) {
+                (initialTrait?.copy() ?: TraitObject()).apply {
                     name = traitName
                     details = traitDetails
                     format = selectedFormat?.databaseName
-                    visible = "true"
-                    traitDataSource = "local"
+                    visible = visible ?: "true"
+                    traitDataSource = traitDataSource ?: "local"
                 }
             }
 
@@ -179,10 +189,12 @@ fun TraitCreatorDialog(
                                 horizontalArrangement = Arrangement.End
                             ) {
                                 Row {
-                                    TextButton(onClick = {
-                                        currentStep = TraitCreatorStep.ChooseFormat
-                                    }) {
-                                        Text("Back")
+                                    if (!isEditing) {
+                                        TextButton(onClick = {
+                                            currentStep = TraitCreatorStep.ChooseFormat
+                                        }) {
+                                            Text("Back")
+                                        }
                                     }
 
                                     TextButton(onClick = onDismiss) {
@@ -190,7 +202,11 @@ fun TraitCreatorDialog(
                                     }
 
                                     Button(onClick = {
-                                        viewModel.insertTrait(traitState)
+                                        if (isEditing) {
+                                            viewModel.updateTrait(traitState)
+                                        } else {
+                                            viewModel.insertTrait(traitState)
+                                        }
                                         onSuccess(traitState)
                                     }, enabled = traitName.isNotBlank() && paramError.isBlank()) {
                                         Text("Save")

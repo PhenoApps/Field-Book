@@ -108,9 +108,24 @@ class TraitEditorScreenViewModel(
 
     fun insertTrait(trait: TraitObject) {
         viewModelScope.launch {
+            trait.realPosition = traitRepository.getMaxPositionFromTraits() + 1
+            trait.visible = trait.visible ?: "true"
+            trait.traitDataSource = trait.traitDataSource ?: "local"
             traitRepository.insertTrait(trait)
             loadTraits()
         }
+    }
+
+    fun updateTrait(trait: TraitObject) {
+        viewModelScope.launch {
+            traitRepository.updateTrait(trait)
+            loadTraits()
+        }
+    }
+
+    fun getTraitForEdit(traitId: Long?): TraitObject? {
+        if (traitId == null) return null
+        return traitRepository.getTraitWithAttributes(traitId)
     }
 
     fun refresh() {
