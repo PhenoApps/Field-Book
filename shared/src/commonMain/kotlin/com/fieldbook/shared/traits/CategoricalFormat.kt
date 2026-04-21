@@ -14,6 +14,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,12 +39,22 @@ class CategoricalFormat : TraitFormat(
     iconDrawableResource = Res.drawable.ic_trait_categorical,
 ) {
 
+    private data class CategoryItem(
+        val id: Int,
+        val value: String
+    )
+
     @Composable
     override fun ParametersEditor(trait: TraitObject, onTraitChange: (TraitObject) -> Unit) {
         val initialList = CategoryJsonUtil.decodeDefinition(trait.categories)
             .map { it.label ?: it.value ?: "" }
             .filter { it.isNotEmpty() }
-        val items = remember { mutableStateListOf<String>().apply { addAll(initialList) } }
+        val items = remember {
+            mutableStateListOf<CategoryItem>().apply {
+                addAll(initialList.mapIndexed { index, value -> CategoryItem(id = index, value = value) })
+            }
+        }
+        var nextId by remember(items) { mutableStateOf(items.size) }
         var input by remember { mutableStateOf("") }
         var error by remember { mutableStateOf("") }
 
@@ -62,7 +73,7 @@ class CategoricalFormat : TraitFormat(
                 FilledIconButton(onClick = {
                     val v = input.trim()
                     if (v.isNotEmpty()) {
-                        items.add(v)
+                        items.add(CategoryItem(id = nextId++, value = v))
                         input = ""
                         error = ""
                         trait.categories = encode(items)
@@ -85,42 +96,45 @@ class CategoricalFormat : TraitFormat(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            items.forEachIndexed { idx, value ->
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    var v by remember { mutableStateOf(value) }
-                    OutlinedTextField(
-                        value = v,
-                        onValueChange = {
-                            v = it
-                            items[idx] = it
+            items.forEach { item ->
+                key(item.id) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedTextField(
+                            value = item.value,
+                            onValueChange = { updatedValue ->
+                                val itemIndex = items.indexOfFirst { it.id == item.id }
+                                if (itemIndex >= 0) {
+                                    items[itemIndex] = item.copy(value = updatedValue)
+                                    trait.categories = encode(items)
+                                    onTraitChange(trait)
+                                }
+                            },
+                            modifier = Modifier.weight(1f),
+                            label = { Text("Category") }
+                        )
+
+                        FilledIconButton(onClick = {
+                            items.removeAll { it.id == item.id }
                             trait.categories = encode(items)
                             onTraitChange(trait)
-                        },
-                        modifier = Modifier.weight(1f),
-                        label = { Text("Category") }
-                    )
-
-                    FilledIconButton(onClick = {
-                        items.removeAt(idx)
-                        trait.categories = encode(items)
-                        onTraitChange(trait)
-                    }) {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_tb_delete),
-                            contentDescription = "Delete"
-                        )
+                        }) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_tb_delete),
+                                contentDescription = "Delete"
+                            )
+                        }
                     }
                 }
             }
         }
     }
 
-    private fun encode(items: SnapshotStateList<String>): String = CategoryJsonUtil.encode(
-        ArrayList(items.map { BrAPIScaleValidValuesCategories(label = it, value = it) })
+    private fun encode(items: SnapshotStateList<CategoryItem>): String = CategoryJsonUtil.encode(
+        ArrayList(items.map { BrAPIScaleValidValuesCategories(label = it.value, value = it.value) })
     )
 
 }
