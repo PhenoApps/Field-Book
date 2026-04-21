@@ -3,7 +3,6 @@ package com.fieldbook.tracker.activities
 import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -15,6 +14,7 @@ import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.preferences.PreferenceKeys
+import com.fieldbook.tracker.utilities.RotationPolicy
 import com.fieldbook.tracker.utilities.SharedPreferenceUtils
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -25,8 +25,6 @@ open class ThemedActivity: AppCompatActivity() {
     companion object {
 
         val TAG = ThemedActivity::class.simpleName
-        // Tablets: allow rotation when system auto-rotate is enabled.
-        private const val TABLET_ROTATION_MIN_SW_DP = 800
 
         private data class ThemePair(val color: Int, val size: Int)
 
@@ -208,7 +206,7 @@ open class ThemedActivity: AppCompatActivity() {
         applyTheme(this)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        applyTabletRotationPolicy()
+        RotationPolicy.apply(this)
     }
 
     override fun onResume() {
@@ -271,14 +269,4 @@ open class ThemedActivity: AppCompatActivity() {
         super.startActivity(intent)
     }
 
-    private fun applyTabletRotationPolicy() {
-        val swDp = resources.configuration.smallestScreenWidthDp
-        if (swDp >= TABLET_ROTATION_MIN_SW_DP) {
-            // Respect system auto-rotate: allow landscape only if user enabled rotation.
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_USER
-        } else {
-            // Keep the app portrait-locked on smaller devices.
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        }
-    }
 }
