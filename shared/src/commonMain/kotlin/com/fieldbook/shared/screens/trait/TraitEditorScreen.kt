@@ -50,7 +50,6 @@ import com.fieldbook.shared.database.models.TraitObject
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.ic_more_vert
 import com.fieldbook.shared.generated.resources.ic_reorder
-import com.fieldbook.shared.theme.MainTheme
 import com.fieldbook.shared.traits.Formats
 import org.jetbrains.compose.resources.painterResource
 import sh.calvin.reorderable.ReorderableItem
@@ -62,140 +61,137 @@ fun TraitEditorScreen(
     onBack: (() -> Unit)? = null,
     viewModel: TraitEditorScreenViewModel = viewModel()
 ) {
-    MainTheme {
-        val traits by viewModel.traits.collectAsState()
-        val loading by viewModel.loading.collectAsState()
-        val error by viewModel.error.collectAsState()
+    val traits by viewModel.traits.collectAsState()
+    val loading by viewModel.loading.collectAsState()
+    val error by viewModel.error.collectAsState()
 
-        var traitToDelete by remember { mutableStateOf<TraitObject?>(null) }
-        var showCreator by remember { mutableStateOf(false) }
+    var traitToDelete by remember { mutableStateOf<TraitObject?>(null) }
+    var showCreator by remember { mutableStateOf(false) }
 
-        val lazyListState = rememberLazyListState()
-        val reorderState = rememberReorderableLazyListState(lazyListState) { from, to ->
-            viewModel.moveTrait(from.index, to.index)
-        }
+    val lazyListState = rememberLazyListState()
+    val reorderState = rememberReorderableLazyListState(lazyListState) { from, to ->
+        viewModel.moveTrait(from.index, to.index)
+    }
 
-        androidx.compose.material3.Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("Traits") },
-                    navigationIcon = {
-                        if (onBack != null) {
-                            IconButton(onClick = onBack) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = "Back"
-                                )
-                            }
+    androidx.compose.material3.Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Traits") },
+                navigationIcon = {
+                    if (onBack != null) {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back"
+                            )
                         }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                        navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
-                    )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
-            },
-            floatingActionButton = {
-                FloatingActionButton(
-                    onClick = { showCreator = true },
-                    shape = CircleShape
-                ) {
-                    Icon(imageVector = Icons.Filled.Add, contentDescription = "Add")
-                }
-            }
-        ) { innerPadding ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .background(MaterialTheme.colorScheme.background)
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showCreator = true },
+                shape = CircleShape
             ) {
+                Icon(imageVector = Icons.Filled.Add, contentDescription = "Add")
+            }
+        }
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .background(MaterialTheme.colorScheme.background)
+        ) {
+            when {
+                loading -> {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
 
-                when {
-                    loading -> {
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                    }
+                error != null -> {
+                    Text(
+                        text = "Error: ${error}",
+                        modifier = Modifier.align(Alignment.Center),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
 
-                    error != null -> {
-                        Text(
-                            text = "Error: ${error}",
-                            modifier = Modifier.align(Alignment.Center),
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
+                traits.isEmpty() -> {
+                    Text(text = "No traits", modifier = Modifier.align(Alignment.Center))
+                }
 
-                    traits.isEmpty() -> {
-                        Text(text = "No traits", modifier = Modifier.align(Alignment.Center))
-                    }
-
-                    else -> {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            state = lazyListState,
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(traits, key = { it.id ?: it.name }) { trait ->
-                                ReorderableItem(
-                                    reorderState,
-                                    key = trait.id ?: trait.name
-                                ) { isDragging ->
-                                    val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
-                                    androidx.compose.material3.Surface(shadowElevation = elevation) {
-                                        val dragModifier = with(this) { Modifier.draggableHandle() }
-                                        TraitListItem(
-                                            trait = trait,
-                                            onToggleVisible = { visible ->
-                                                viewModel.toggleVisibility(
-                                                    trait.id,
-                                                    visible
-                                                )
-                                            },
-                                            dragModifier = dragModifier,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(horizontal = 8.dp)
-                                                .height(40.dp),
-                                            onCopyClick = { viewModel.copyTrait(it) },
-                                            onDeleteClick = { traitToDelete = it }
-                                        )
-                                    }
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        state = lazyListState,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(traits, key = { it.id ?: it.name }) { trait ->
+                            ReorderableItem(
+                                reorderState,
+                                key = trait.id ?: trait.name
+                            ) { isDragging ->
+                                val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
+                                androidx.compose.material3.Surface(shadowElevation = elevation) {
+                                    val dragModifier = with(this) { Modifier.draggableHandle() }
+                                    TraitListItem(
+                                        trait = trait,
+                                        onToggleVisible = { visible ->
+                                            viewModel.toggleVisibility(
+                                                trait.id,
+                                                visible
+                                            )
+                                        },
+                                        dragModifier = dragModifier,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 8.dp)
+                                            .height(40.dp),
+                                        onCopyClick = { viewModel.copyTrait(it) },
+                                        onDeleteClick = { traitToDelete = it }
+                                    )
                                 }
                             }
                         }
                     }
                 }
+            }
 
-                // Delete confirmation dialog
-                if (traitToDelete != null) {
-                    val trait = traitToDelete!!
-                    AlertDialog(
-                        onDismissRequest = { traitToDelete = null },
-                        title = { Text("Delete trait") },
-                        text = { Text("Are you sure you want to delete '${trait.name}'?") },
-                        confirmButton = {
-                            androidx.compose.material3.TextButton(onClick = {
-                                viewModel.deleteTrait(trait.id)
-                                traitToDelete = null
-                            }) {
-                                Text("Delete", color = MaterialTheme.colorScheme.error)
-                            }
-                        },
-                        dismissButton = {
-                            androidx.compose.material3.TextButton(onClick = {
-                                traitToDelete = null
-                            }) {
-                                Text("Cancel")
-                            }
+            // Delete confirmation dialog
+            if (traitToDelete != null) {
+                val trait = traitToDelete!!
+                AlertDialog(
+                    onDismissRequest = { traitToDelete = null },
+                    title = { Text("Delete trait") },
+                    text = { Text("Are you sure you want to delete '${trait.name}'?") },
+                    confirmButton = {
+                        androidx.compose.material3.TextButton(onClick = {
+                            viewModel.deleteTrait(trait.id)
+                            traitToDelete = null
+                        }) {
+                            Text("Delete", color = MaterialTheme.colorScheme.error)
                         }
-                    )
-                }
+                    },
+                    dismissButton = {
+                        androidx.compose.material3.TextButton(onClick = {
+                            traitToDelete = null
+                        }) {
+                            Text("Cancel")
+                        }
+                    }
+                )
+            }
 
-                if (showCreator) {
-                    TraitCreatorDialog(onDismiss = { showCreator = false }, onSuccess = {
-                        showCreator = false
-                    })
-                }
+            if (showCreator) {
+                TraitCreatorDialog(onDismiss = { showCreator = false }, onSuccess = {
+                    showCreator = false
+                })
             }
         }
     }

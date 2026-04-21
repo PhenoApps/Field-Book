@@ -46,7 +46,6 @@ import com.fieldbook.shared.generated.resources.preferences_sounds
 import com.fieldbook.shared.generated.resources.preferences_storage_title
 import com.fieldbook.shared.generated.resources.preferences_system_title
 import com.fieldbook.shared.generated.resources.settings_profile
-import com.fieldbook.shared.theme.MainTheme
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
@@ -65,106 +64,104 @@ fun PreferencesScreen(
     onBack: (() -> Unit)? = null,
     onNavigate: ((KmpHostScreenType) -> Unit)? = null
 ) {
-    MainTheme {
-        val preferenceItems = listOf(
-            PreferenceItem(
-                icon = Res.drawable.ic_pref_profile_person,
-                title = Res.string.settings_profile,
-                key = "pref_key_profile_settings"
-            ),
-            PreferenceItem(
-                icon = Res.drawable.ic_star_circle_outline,
-                title = Res.string.preferences_features_title,
-                key = "pref_key_feature_settings"
-            ),
-            PreferenceItem(
-                icon = Res.drawable.ic_pref_appearance,
-                title = Res.string.preferences_appearance_title,
-                key = "pref_key_ui_settings"
-            ),
-            PreferenceItem(
-                icon = Res.drawable.ic_pref_navigation,
-                title = Res.string.preferences_behavior_title,
-                key = "pref_key_ux_settings"
-            ),
-            PreferenceItem(
-                icon = Res.drawable.ic_map_search,
-                title = Res.string.preferences_location_title,
-                key = "pref_key_location_settings"
-            ),
-            PreferenceItem(
-                icon = Res.drawable.ic_pref_sounds,
-                title = Res.string.preferences_sounds,
-                key = "pref_key_sounds_settings"
-            ),
-            PreferenceItem(
-                icon = Res.drawable.ic_adv_brapi,
-                title = Res.string.preferences_brapi,
-                key = "pref_key_brapi_settings"
-            ),
-            PreferenceItem(
-                icon = Res.drawable.ic_pref_system,
-                title = Res.string.preferences_system_title,
-                key = "pref_key_system_settings"
-            ),
-            PreferenceItem(
-                icon = Res.drawable.ic_database_cog,
-                title = Res.string.preferences_storage_title,
-                key = "pref_key_storage_settings",
-                isImplemented = true
-            ),
-            PreferenceItem(
-                icon = Res.drawable.ic_experimental,
-                title = Res.string.preferences_experimental_title,
-                key = "pref_key_experimental_settings"
-            )
+    val preferenceItems = listOf(
+        PreferenceItem(
+            icon = Res.drawable.ic_pref_profile_person,
+            title = Res.string.settings_profile,
+            key = "pref_key_profile_settings"
+        ),
+        PreferenceItem(
+            icon = Res.drawable.ic_star_circle_outline,
+            title = Res.string.preferences_features_title,
+            key = "pref_key_feature_settings"
+        ),
+        PreferenceItem(
+            icon = Res.drawable.ic_pref_appearance,
+            title = Res.string.preferences_appearance_title,
+            key = "pref_key_ui_settings"
+        ),
+        PreferenceItem(
+            icon = Res.drawable.ic_pref_navigation,
+            title = Res.string.preferences_behavior_title,
+            key = "pref_key_ux_settings"
+        ),
+        PreferenceItem(
+            icon = Res.drawable.ic_map_search,
+            title = Res.string.preferences_location_title,
+            key = "pref_key_location_settings"
+        ),
+        PreferenceItem(
+            icon = Res.drawable.ic_pref_sounds,
+            title = Res.string.preferences_sounds,
+            key = "pref_key_sounds_settings"
+        ),
+        PreferenceItem(
+            icon = Res.drawable.ic_adv_brapi,
+            title = Res.string.preferences_brapi,
+            key = "pref_key_brapi_settings"
+        ),
+        PreferenceItem(
+            icon = Res.drawable.ic_pref_system,
+            title = Res.string.preferences_system_title,
+            key = "pref_key_system_settings"
+        ),
+        PreferenceItem(
+            icon = Res.drawable.ic_database_cog,
+            title = Res.string.preferences_storage_title,
+            key = "pref_key_storage_settings",
+            isImplemented = true
+        ),
+        PreferenceItem(
+            icon = Res.drawable.ic_experimental,
+            title = Res.string.preferences_experimental_title,
+            key = "pref_key_experimental_settings"
         )
-        Surface(modifier = Modifier.fillMaxSize()) {
-            androidx.compose.foundation.layout.Column(modifier = Modifier.fillMaxSize()) {
-                TopAppBar(
-                    title = { Text(text = "Preferences") },
-                    navigationIcon = {
-                        if (onBack != null) {
-                            IconButton(onClick = onBack) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = "Back"
-                                )
-                            }
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        titleContentColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                )
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(preferenceItems) { item ->
-                        val isImplemented = item.isImplemented == true
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp)
-                                .let { mod ->
-                                    if (isImplemented && onNavigate != null) {
-                                        mod.clickable { onNavigate(KmpHostScreenType.STORAGE_PREFERENCES) }
-                                    } else mod
-                                }
-                                .graphicsLayer { alpha = if (isImplemented) 1f else 0.4f },
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+    )
+    Surface(modifier = Modifier.fillMaxSize()) {
+        androidx.compose.foundation.layout.Column(modifier = Modifier.fillMaxSize()) {
+            TopAppBar(
+                title = { Text(text = "Preferences") },
+                navigationIcon = {
+                    if (onBack != null) {
+                        IconButton(onClick = onBack) {
                             Icon(
-                                painter = painterResource(item.icon),
-                                contentDescription = item.key,
-                                modifier = Modifier.padding(end = 16.dp).size(24.dp)
-                            )
-                            Text(
-                                text = stringResource(item.title),
-                                style = MaterialTheme.typography.bodyLarge
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back"
                             )
                         }
-                        HorizontalDivider()
                     }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            )
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                items(preferenceItems) { item ->
+                    val isImplemented = item.isImplemented == true
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .let { mod ->
+                                if (isImplemented && onNavigate != null) {
+                                    mod.clickable { onNavigate(KmpHostScreenType.STORAGE_PREFERENCES) }
+                                } else mod
+                            }
+                            .graphicsLayer { alpha = if (isImplemented) 1f else 0.4f },
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(item.icon),
+                            contentDescription = item.key,
+                            modifier = Modifier.padding(end = 16.dp).size(24.dp)
+                        )
+                        Text(
+                            text = stringResource(item.title),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                    HorizontalDivider()
                 }
             }
         }

@@ -6,6 +6,7 @@ enum class KmpHostScreenType(val value: String) {
     FIELD_EDITOR("field_editor"),
     TRAIT_EDITOR("trait_editor"),
     COLLECT("collect"),
+    EXPORT("export"),
     PREFERENCES("preferences"),
     STORAGE_PREFERENCES("storage_preferences"),
     STORAGE_DEFINER("storage_definer");

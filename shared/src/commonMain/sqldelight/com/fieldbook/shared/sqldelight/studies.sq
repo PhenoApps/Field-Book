@@ -87,6 +87,11 @@ SELECT internal_id_study FROM studies WHERE observation_levels = ? AND study_db_
 getLastInsertedId:
 SELECT last_insert_rowid();
 
+updateExportDate:
+UPDATE studies
+SET date_export = ?
+WHERE internal_id_study = ?;
+
 insert:
 INSERT INTO studies (
   study_db_id,

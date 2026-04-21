@@ -4,33 +4,36 @@ import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.dir_plot_data
 import com.fieldbook.shared.preferences.GeneralKeys
 import com.russhwolf.settings.Settings
+import kotlinx.coroutines.runBlocking
+import org.jetbrains.compose.resources.getString
 
 class DocumentTreeUtil {
-    /**
-     * Static functions to be used to handle exports.
-     * These functions will attempt to create these directories if they do not exist.
-     */
     companion object {
+        private fun plotDataDirectoryName(): String = runBlocking {
+            getString(Res.string.dir_plot_data)
+        }
+
         fun getFieldMediaDirectory(traitName: String?): DocumentFile? {
             if (traitName == null) return null
             val prefs = Settings()
             val field = prefs.getString(GeneralKeys.FIELD_FILE.key, "")
-            if (field.isNotBlank()) {
-                val plotDataDirName = Res.string.dir_plot_data.key
-                val fieldDir = createDir(plotDataDirName, field)
-                if (fieldDir != null) {
-                    var traitDir = fieldDir.findFile(traitName)
-                    if (traitDir == null || !traitDir.exists()) {
-                        fieldDir.createDirectory(traitName)
-                    }
-                    traitDir = fieldDir.findFile(traitName)
-                    if (traitDir != null && traitDir.findFile(".nomedia")?.exists() != true) {
-                        traitDir.createFile("*/*", ".nomedia")
-                    }
-                    return traitDir
-                }
+            if (field.isBlank()) return null
+
+            val fieldDir = createDir(plotDataDirectoryName(), field) ?: return null
+            var traitDir = fieldDir.findFile(traitName)
+            if (traitDir == null || !traitDir.exists()) {
+                fieldDir.createDirectory(traitName)
             }
-            return null
+            traitDir = fieldDir.findFile(traitName)
+            if (traitDir != null && traitDir.findFile(".nomedia")?.exists() != true) {
+                traitDir.createFile("*/*", ".nomedia")
+            }
+            return traitDir
+        }
+
+        fun getStudyMediaDirectory(studyName: String?): DocumentFile? {
+            if (studyName.isNullOrBlank()) return null
+            return createDir(plotDataDirectoryName(), studyName)
         }
     }
 }

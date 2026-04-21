@@ -325,4 +325,8 @@ class StudyRepository(
             )
         } ?: FieldObject()
     }
+
+    fun updateExportDate(fieldId: Int, timestamp: String) {
+        db.studiesQueries.updateExportDate(timestamp, fieldId.toLong())
+    }
 }

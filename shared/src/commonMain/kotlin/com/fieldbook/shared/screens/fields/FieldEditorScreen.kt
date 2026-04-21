@@ -53,7 +53,6 @@ import com.fieldbook.shared.generated.resources.ic_file_csv
 import com.fieldbook.shared.generated.resources.tutorial_fields_add_title
 import com.fieldbook.shared.objects.ImportFormat
 import com.fieldbook.shared.preferences.GeneralKeys
-import com.fieldbook.shared.theme.MainTheme
 import com.fieldbook.shared.utilities.FieldSwitchImpl
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -70,103 +69,101 @@ fun FieldEditorScreen(
         factory = fieldEditorViewModelFactory()
     )
 ) {
-    MainTheme {
-        val showFieldCreatorDialog = remember { mutableStateOf(false) }
-        val coroutineScope = rememberCoroutineScope()
+    val showFieldCreatorDialog = remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
-        // Observe state from the ViewModel
-        val fieldsState by viewModel.fields.collectAsState(initial = null)
-        val errorState by viewModel.error.collectAsState(initial = null)
-        val loadingState by viewModel.loading.collectAsState(initial = true)
+    // Observe state from the ViewModel
+    val fieldsState by viewModel.fields.collectAsState(initial = null)
+    val errorState by viewModel.error.collectAsState(initial = null)
+    val loadingState by viewModel.loading.collectAsState(initial = true)
 
-        // load fields when the screen appears
-        LaunchedEffect(Unit) {
-            viewModel.loadFields()
-        }
+    // load fields when the screen appears
+    LaunchedEffect(Unit) {
+        viewModel.loadFields()
+    }
 
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("Fields") },
-                    navigationIcon = {
-                        if (onBack != null) {
-                            IconButton(onClick = onBack) {
-                                Icon(
-                                    imageVector = Icons.Filled.ArrowBack,
-                                    contentDescription = "Back"
-                                )
-                            }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Fields") },
+                navigationIcon = {
+                    if (onBack != null) {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                imageVector = Icons.Filled.ArrowBack,
+                                contentDescription = "Back"
+                            )
                         }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                        navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                )
-            },
-            floatingActionButton = {
-                FloatingActionButton(
-                    onClick = { showFieldCreatorDialog.value = true },
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    shape = CircleShape
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = Res.string.tutorial_fields_add_title.key
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showFieldCreatorDialog.value = true },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = CircleShape
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = Res.string.tutorial_fields_add_title.key
+                )
+            }
+        }
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .background(MaterialTheme.colorScheme.background)
+        ) {
+            when {
+                loadingState -> {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
+
+                errorState != null -> {
+                    Text(
+                        text = "Error: ${errorState}",
+                        modifier = Modifier.align(Alignment.Center),
+                        color = MaterialTheme.colorScheme.error
                     )
+                }
+
+                fieldsState.isNullOrEmpty() -> {
+                    Text(
+                        text = "No fields found.",
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+
+                else -> {
+                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                        items(fieldsState!!) { field ->
+                            FieldListItem(field = field, viewModel)
+                            HorizontalDivider()
+                        }
+                    }
                 }
             }
-        ) { innerPadding ->
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .background(MaterialTheme.colorScheme.background)
-            ) {
-                when {
-                    loadingState -> {
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                    }
 
-                    errorState != null -> {
-                        Text(
-                            text = "Error: ${errorState}",
-                            modifier = Modifier.align(Alignment.Center),
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-
-                    fieldsState.isNullOrEmpty() -> {
-                        Text(
-                            text = "No fields found.",
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
-
-                    else -> {
-                        LazyColumn(modifier = Modifier.fillMaxSize()) {
-                            items(fieldsState!!) { field ->
-                                FieldListItem(field = field, viewModel)
-                                HorizontalDivider()
-                            }
+            if (showFieldCreatorDialog.value) {
+                FieldCreatorDialogFragment(
+                    onDismiss = { showFieldCreatorDialog.value = false },
+                    onSuccess = { fieldId ->
+                        showFieldCreatorDialog.value = false
+                        coroutineScope.launch {
+                            viewModel.loadFields()
+                            viewModel.switchField(fieldId)
                         }
                     }
-                }
-
-                if (showFieldCreatorDialog.value) {
-                    FieldCreatorDialogFragment(
-                        onDismiss = { showFieldCreatorDialog.value = false },
-                        onSuccess = { fieldId ->
-                            showFieldCreatorDialog.value = false
-                            coroutineScope.launch {
-                                viewModel.loadFields()
-                                viewModel.switchField(fieldId)
-                            }
-                        }
-                    )
-                }
+                )
             }
         }
     }
