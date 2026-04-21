@@ -22,7 +22,7 @@
 | Delete trait            | :white_check_mark: |         |
 | Disable trait           | :white_check_mark: |         |
 | Reorder                 |                    |         |
-| Edit trait              |                    |         |
+| Edit trait              | :white_check_mark: |         |
 | Export                  |                    |         |
 | Sort                    |                    |         |
 | Select all              |                    |         |
