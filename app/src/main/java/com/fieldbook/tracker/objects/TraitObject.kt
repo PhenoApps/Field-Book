@@ -7,7 +7,6 @@ import com.fieldbook.tracker.database.models.AttributeDefinition
 import com.fieldbook.tracker.database.models.TraitAttributes
 import com.fieldbook.tracker.utilities.SynonymsUtil.deserializeSynonyms
 import com.fieldbook.tracker.utilities.SynonymsUtil.serializeSynonyms
-import android.net.Uri
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
@@ -114,48 +113,39 @@ class TraitObject {
 
         private const val RESOURCE_PREFIX = "resources/"
 
-        private fun normalizeResourceFileValue(value: String): String {
+        private fun normalizeResourcesPrefix(value: String): String {
             val trimmed = value.trim()
             if (trimmed.isEmpty()) return ""
-            if (trimmed.startsWith(RESOURCE_PREFIX, ignoreCase = true)) {
-                // canonicalize to lowercase prefix
-                return RESOURCE_PREFIX + trimmed.substringAfter(RESOURCE_PREFIX, "")
-            }
-
-            // Attempt to convert legacy SAF URIs that point inside resources/ into resources/<name>
-            val fileName = extractFileNameFromResourceUri(trimmed) ?: return trimmed
-            return RESOURCE_PREFIX + fileName
+            if (!trimmed.startsWith(RESOURCE_PREFIX, ignoreCase = true)) return trimmed
+            // canonicalize to lowercase prefix
+            return RESOURCE_PREFIX + trimmed.substringAfter(RESOURCE_PREFIX, "")
         }
 
-        private fun extractFileNameFromResourceUri(raw: String): String? {
-            // Best-effort, context-free extraction. We only convert URIs that clearly include /resources/.
+        private fun tryExtractResourcesFileName(value: String): String? {
+            val raw = value.trim()
+            if (raw.isEmpty()) return null
             val lower = raw.lowercase(Locale.ROOT)
-            if (!lower.contains("resources")) return null
 
-            // Try URI parsing first (covers e.g. file://.../resources/name.png)
-            runCatching {
-                val uri = Uri.parse(raw)
-                val path = uri.path ?: return@runCatching
-                val idx = path.lowercase(Locale.ROOT).lastIndexOf("/resources/")
-                if (idx >= 0) {
-                    val tail = path.substring(idx + "/resources/".length)
-                    val name = tail.substringAfterLast('/')
-                    if (name.isNotBlank()) return name
+            // Best-effort, context-free extraction from legacy URI strings.
+            val (idx, tokenLen) =
+                when {
+                    lower.contains("resources%2f") ->
+                        lower.lastIndexOf("resources%2f") to "resources%2f".length
+                    lower.contains("/resources/") ->
+                        lower.lastIndexOf("/resources/") to "/resources/".length
+                    else -> return null
                 }
-            }
 
-            // Fallback for SAF encoded doc IDs: ...resources%2Fname.png or ...resources/name.png
-            val candidates = listOf("resources%2f", "resources/")
-            for (token in candidates) {
-                val tokenIdx = lower.lastIndexOf(token)
-                if (tokenIdx >= 0) {
-                    val tail = raw.substring(tokenIdx + token.length)
-                    val name = tail.substringAfterLast("%2F", tail).substringAfterLast('/', tail)
-                    val cleaned = name.substringBefore('?').substringBefore('#')
-                    if (cleaned.isNotBlank()) return cleaned
-                }
-            }
-            return null
+            if (idx < 0) return null
+
+            var tail = raw.substring(idx + tokenLen)
+            tail = tail.substringBefore('?').substringBefore('#')
+            val name =
+                tail.substringAfterLast("%2F", tail)
+                    .substringAfterLast('/', tail)
+                    .trim()
+
+            return name.ifBlank { null }
         }
 
         fun fromJson(json: TraitJson, maxPosition: Int, originalFileName: String) = TraitObject().apply {
@@ -175,10 +165,11 @@ class TraitObject {
                 val def =
                     TraitAttributes.byKey(key)
                 if (def != null) {
-                    val normalized =
-                        if (def == TraitAttributes.RESOURCE_FILE) normalizeResourceFileValue(stringValue)
-                        else stringValue
-                    setAttributeValue(def, normalized)
+                    if (def == TraitAttributes.RESOURCE_FILE) {
+                        setAttributeValue(def, normalizeResourcesPrefix(stringValue))
+                    } else {
+                        setAttributeValue(def, stringValue)
+                    }
                 }
             }
         }
@@ -360,9 +351,13 @@ class TraitObject {
 
         for (def in TraitAttributes.ALL) {
             val rawValue = attributeValues.getString(def)
-            val value =
-                if (def == TraitAttributes.RESOURCE_FILE) normalizeResourceFileValue(rawValue)
-                else rawValue
+            val value = if (def == TraitAttributes.RESOURCE_FILE) {
+                val normalized = normalizeResourcesPrefix(rawValue)
+                if (normalized.startsWith(RESOURCE_PREFIX)) normalized
+                else tryExtractResourcesFileName(normalized)?.let { RESOURCE_PREFIX + it } ?: normalized
+            } else {
+                rawValue
+            }
             if (value.isNotEmpty() && value != def.defaultValue) {
                 map[def.key] = JsonPrimitive(value)
             }

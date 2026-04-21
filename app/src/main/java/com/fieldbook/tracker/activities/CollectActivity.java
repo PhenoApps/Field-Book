@@ -1737,7 +1737,6 @@ public class CollectActivity extends ThemedActivity
 
         // Legacy: treat as URI
         Uri legacyUri = Uri.parse(trimmed);
-        if (legacyUri == null) return null;
 
         // If this is a legacy SAF URI that points into resources/, allow fallback resolution.
         if ("content".equalsIgnoreCase(legacyUri.getScheme())) {
