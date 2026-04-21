@@ -25,7 +25,7 @@ open class ThemedActivity: AppCompatActivity() {
     companion object {
 
         val TAG = ThemedActivity::class.simpleName
-        private const val TABLET_ROTATION_MIN_SW_DP = 800
+        private const val TABLET_ROTATION_MIN_SW_DP = 360
 
         private data class ThemePair(val color: Int, val size: Int)
 

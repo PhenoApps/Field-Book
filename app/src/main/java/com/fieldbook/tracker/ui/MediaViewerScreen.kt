@@ -77,7 +77,7 @@ class MediaViewerActivity : ComponentActivity() {
         const val EXTRA_OBS_UNIT = "extra_observation_unit"
         const val EXTRA_TRAIT_DB_ID = "extra_trait_db_id"
 
-        private const val TABLET_ROTATION_MIN_SW_DP = 800
+        private const val TABLET_ROTATION_MIN_SW_DP = 360
     }
 
     private fun applyTabletRotationPolicy() {
