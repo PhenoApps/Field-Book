@@ -25,6 +25,7 @@ open class ThemedActivity: AppCompatActivity() {
     companion object {
 
         val TAG = ThemedActivity::class.simpleName
+        // EXPERIMENT: lowered to 360dp for phone testing. Restore to 800dp for tablets.
         private const val TABLET_ROTATION_MIN_SW_DP = 360
 
         private data class ThemePair(val color: Int, val size: Int)
@@ -273,7 +274,11 @@ open class ThemedActivity: AppCompatActivity() {
     private fun applyTabletRotationPolicy() {
         val swDp = resources.configuration.smallestScreenWidthDp
         if (swDp >= TABLET_ROTATION_MIN_SW_DP) {
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+            // Respect system auto-rotate: allow landscape only if user enabled rotation.
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_USER
+        } else {
+            // Keep the app portrait-locked on smaller devices.
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
     }
 }

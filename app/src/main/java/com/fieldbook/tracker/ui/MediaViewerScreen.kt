@@ -77,13 +77,18 @@ class MediaViewerActivity : ComponentActivity() {
         const val EXTRA_OBS_UNIT = "extra_observation_unit"
         const val EXTRA_TRAIT_DB_ID = "extra_trait_db_id"
 
+        // EXPERIMENT: lowered to 360dp for phone testing. Restore to 800dp for tablets.
         private const val TABLET_ROTATION_MIN_SW_DP = 360
     }
 
     private fun applyTabletRotationPolicy() {
         val swDp = resources.configuration.smallestScreenWidthDp
         if (swDp >= TABLET_ROTATION_MIN_SW_DP) {
-            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+            // Respect system auto-rotate: allow landscape only if user enabled rotation.
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_USER
+        } else {
+            // Keep the app portrait-locked on smaller devices.
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
     }
 }
