@@ -40,12 +40,9 @@ class CategoricalFormat : TraitFormat(
 
     @Composable
     override fun ParametersEditor(trait: TraitObject, onTraitChange: (TraitObject) -> Unit) {
-        val decoded = CategoryJsonUtil.decode(trait.categories ?: "")
-        val initialList = if (decoded.isNotEmpty()) {
-            decoded.map { it.label ?: it.value ?: "" }.filter { it.isNotEmpty() }
-        } else {
-            trait.categories?.split(',')?.map { it.trim() }?.filter { it.isNotEmpty() } ?: emptyList()
-        }
+        val initialList = CategoryJsonUtil.decodeDefinition(trait.categories)
+            .map { it.label ?: it.value ?: "" }
+            .filter { it.isNotEmpty() }
         val items = remember { mutableStateListOf<String>().apply { addAll(initialList) } }
         var input by remember { mutableStateOf("") }
         var error by remember { mutableStateOf("") }
