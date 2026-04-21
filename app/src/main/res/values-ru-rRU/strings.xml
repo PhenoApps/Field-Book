@@ -255,7 +255,7 @@
     <string name="dialog_att_chooser_unique_attributes">Уникальные атрибуты</string>
     <string name="search_attribute_apply_to_all">Применить выбор ко всем подходящим полям</string>
     <string name="search_attribute_updated">Атрибут поиска обновлён</string>
-    <string name="search_attribute_updated_all">Атрибут поиска обновлён для %1$d поля(ей)</string>
+    <string name="search_attribute_updated_all">Атрибут поиска обновлён для %1$d полей</string>
     <string name="search_multiple_matches_found">Найдено %1$d совпадающих делянок. Показана первая.</string>
     <!--    <string name="field_default_sort_order">import order</string>-->
     <string name="field_data_title">Данные</string>
@@ -501,7 +501,7 @@
     <string name="dialog_invalid_value_title">Некорректное значение</string>
     <string name="dialog_save_invalid_value_message">Сохранить это значение всё равно?</string>
     <string name="trait_error_disease_severity">Такая степень уже сохранена</string>
-    <string name="act_collect_study_names_empty">В выбранном исследовании не заполнены уникальный, первичный или вторичный идентификаторы.</string>
+    <string name="act_collect_study_names_empty">В выбранном исследовании не заполнены уникальное, первичное или вторичное имя.</string>
     <!-- Toolbar -->
     <string name="main_toolbar_resources">Ресурсы</string>
     <string name="main_trait_details">Описываемый признак</string>
@@ -723,7 +723,7 @@
     <string name="export_format_table">Таблица</string>
     <string name="export_file_name">Название файла</string>
     <string name="export_content_columns_title">Столбцы поля</string>
-    <string name="export_content_columns_all">Все рядки делянки</string>
+    <string name="export_content_columns_all">Все столбцы делянки</string>
     <string name="export_content_columns_unique">Только уникальный идентификатор</string>
     <string name="export_content_traits_all">Все признаки</string>
     <string name="export_content_traits_active">Только активные признаки</string>
@@ -731,8 +731,8 @@
     <string name="error_storage_directory">Папка хранения отсутствует или повреждена.</string>
     <string name="export_error_data_missing">данные для экспорта не найдены</string>
     <string name="export_complete">Экспорт завершён</string>
-    <string name="export_progress">Идет экспорт данных</string>
-    <string name="export_error_missing_format">Тип экспорта должен быть выбран</string>
+    <string name="export_progress">Идёт экспорт данных</string>
+    <string name="export_error_missing_format">Нужно выбрать тип экспорта</string>
     <string name="export_error_missing_column">Нужно выбрать тип столбца поля</string>
     <string name="export_error_missing_trait">Нужно выбрать тип признаков</string>
     <string name="export_overwrite">Перезаписать предыдущий экспорт</string>
@@ -1027,7 +1027,7 @@
     <string name="stat_data_toast_message">наблюдений собрано</string>
     <string name="stat_hours_toast_message">часов потрачено на фенотипирование</string>
     <string name="stat_photos_toast_message">фото сделано</string>
-    <string name="stat_busiest_toast_message">наблюдений собрано </string>
+    <string name="stat_busiest_toast_message">наблюдений собрано</string>
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">О программе</string>
@@ -1285,7 +1285,7 @@
     <string name="intro_tutorial_warning">Пожалуйста, сделайте выбор</string>
     <!-- TUTORIAL -->
     <string name="tutorial_dialog_title">Обучение</string>
-    <string name="tutorial_dialog_description">Включить обучение? Эта Настройка может быть изменена в меню Дополнительные настройки</string>
+    <string name="tutorial_dialog_description">Включить обучение? Эту настройку можно изменить в настройках.</string>
     <string name="tutorial_main_infobars_title">Инфопанели</string>
     <string name="tutorial_main_infobars_description">Инфопанели показывают дополнительные данные для каждой записи и настраиваются через выпадающие меню.</string>
     <string name="tutorial_main_traits_title">Признаки</string>
@@ -1462,7 +1462,7 @@
     <string name="act_brapi_study_import_fetch_levels">Загрузка уровней наблюдений…</string>
     <string name="act_brapi_study_import_fetch_variables">Загрузка переменных для %s…</string>
     <string name="act_brapi_study_import_fetch_units">Загрузка единиц наблюдений для %s…</string>
-    <string name="act_brapi_study_import_fetch_germplasm">Загрузка генплазмы для %s…</string>
+    <string name="act_brapi_study_import_fetch_germplasm">Получение гермоплазмы для %s…</string>
     <string name="act_brapi_list_filter_loading_trials">Загрузка испытаний, подождите.</string>
     <string name="act_brapi_list_filter_loading_studies">Загрузка исследований, подождите.</string>
     <string name="act_brapi_list_filter_loading_variables">Загрузка переменных, подождите.</string>
@@ -1560,7 +1560,7 @@
     <string name="nearby_share_failed_discovery">Не удалось начать поиск: %s</string>
     <string name="nearby_share_failed_advertising">Ошибка при ожидании устройств: %s</string>
     <string name="nearby_share_failed_transfer">Не удалось начать передачу: %s</string>
-    <string name="nearby_share_failed_payload">Не удалось создать файловую нагрузку</string>
+    <string name="nearby_share_failed_payload">Не удалось подготовить файл для передачи</string>
     <string name="nearby_share_failed_request">Не удалось запросить соединение: %s</string>
     <string name="nearby_share_failed_handle_file">Не удалось обработать файл: %s</string>
     <string name="nearby_share_generating_file">Подготовка файла к передаче</string>
