@@ -3,6 +3,7 @@ package com.fieldbook.tracker.activities
 import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -24,6 +25,7 @@ open class ThemedActivity: AppCompatActivity() {
     companion object {
 
         val TAG = ThemedActivity::class.simpleName
+        private const val TABLET_ROTATION_MIN_SW_DP = 800
 
         private data class ThemePair(val color: Int, val size: Int)
 
@@ -205,6 +207,7 @@ open class ThemedActivity: AppCompatActivity() {
         applyTheme(this)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        applyTabletRotationPolicy()
     }
 
     override fun onResume() {
@@ -265,5 +268,12 @@ open class ThemedActivity: AppCompatActivity() {
             intent?.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
         }
         super.startActivity(intent)
+    }
+
+    private fun applyTabletRotationPolicy() {
+        val swDp = resources.configuration.smallestScreenWidthDp
+        if (swDp >= TABLET_ROTATION_MIN_SW_DP) {
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        }
     }
 }

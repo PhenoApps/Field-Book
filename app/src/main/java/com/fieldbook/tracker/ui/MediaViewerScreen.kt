@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.ui
 
 import android.app.Activity
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -51,6 +52,8 @@ class MediaViewerActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        applyTabletRotationPolicy()
+
         val studyId = intent.getStringExtra(EXTRA_STUDY_ID) ?: "0"
         val obsUnit = intent.getStringExtra(EXTRA_OBS_UNIT) ?: ""
         val traitDbId = intent.getStringExtra(EXTRA_TRAIT_DB_ID) ?: ""
@@ -73,6 +76,15 @@ class MediaViewerActivity : ComponentActivity() {
         const val EXTRA_STUDY_ID = "extra_study_id"
         const val EXTRA_OBS_UNIT = "extra_observation_unit"
         const val EXTRA_TRAIT_DB_ID = "extra_trait_db_id"
+
+        private const val TABLET_ROTATION_MIN_SW_DP = 800
+    }
+
+    private fun applyTabletRotationPolicy() {
+        val swDp = resources.configuration.smallestScreenWidthDp
+        if (swDp >= TABLET_ROTATION_MIN_SW_DP) {
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        }
     }
 }
 
