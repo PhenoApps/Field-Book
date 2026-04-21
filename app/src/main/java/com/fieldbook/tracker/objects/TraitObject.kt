@@ -7,6 +7,7 @@ import com.fieldbook.tracker.database.models.AttributeDefinition
 import com.fieldbook.tracker.database.models.TraitAttributes
 import com.fieldbook.tracker.utilities.SynonymsUtil.deserializeSynonyms
 import com.fieldbook.tracker.utilities.SynonymsUtil.serializeSynonyms
+import android.net.Uri
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
@@ -111,6 +112,52 @@ class TraitObject {
 
     companion object {
 
+        private const val RESOURCE_PREFIX = "resources/"
+
+        private fun normalizeResourceFileValue(value: String): String {
+            val trimmed = value.trim()
+            if (trimmed.isEmpty()) return ""
+            if (trimmed.startsWith(RESOURCE_PREFIX, ignoreCase = true)) {
+                // canonicalize to lowercase prefix
+                return RESOURCE_PREFIX + trimmed.substringAfter(RESOURCE_PREFIX, "")
+            }
+
+            // Attempt to convert legacy SAF URIs that point inside resources/ into resources/<name>
+            val fileName = extractFileNameFromResourceUri(trimmed) ?: return trimmed
+            return RESOURCE_PREFIX + fileName
+        }
+
+        private fun extractFileNameFromResourceUri(raw: String): String? {
+            // Best-effort, context-free extraction. We only convert URIs that clearly include /resources/.
+            val lower = raw.lowercase(Locale.ROOT)
+            if (!lower.contains("resources")) return null
+
+            // Try URI parsing first (covers e.g. file://.../resources/name.png)
+            runCatching {
+                val uri = Uri.parse(raw)
+                val path = uri.path ?: return@runCatching
+                val idx = path.lowercase(Locale.ROOT).lastIndexOf("/resources/")
+                if (idx >= 0) {
+                    val tail = path.substring(idx + "/resources/".length)
+                    val name = tail.substringAfterLast('/')
+                    if (name.isNotBlank()) return name
+                }
+            }
+
+            // Fallback for SAF encoded doc IDs: ...resources%2Fname.png or ...resources/name.png
+            val candidates = listOf("resources%2f", "resources/")
+            for (token in candidates) {
+                val tokenIdx = lower.lastIndexOf(token)
+                if (tokenIdx >= 0) {
+                    val tail = raw.substring(tokenIdx + token.length)
+                    val name = tail.substringAfterLast("%2F", tail).substringAfterLast('/', tail)
+                    val cleaned = name.substringBefore('?').substringBefore('#')
+                    if (cleaned.isNotBlank()) return cleaned
+                }
+            }
+            return null
+        }
+
         fun fromJson(json: TraitJson, maxPosition: Int, originalFileName: String) = TraitObject().apply {
             name = json.name
             alias = json.alias ?: json.name
@@ -128,7 +175,10 @@ class TraitObject {
                 val def =
                     TraitAttributes.byKey(key)
                 if (def != null) {
-                    setAttributeValue(def, stringValue)
+                    val normalized =
+                        if (def == TraitAttributes.RESOURCE_FILE) normalizeResourceFileValue(stringValue)
+                        else stringValue
+                    setAttributeValue(def, normalized)
                 }
             }
         }
@@ -309,7 +359,10 @@ class TraitObject {
         val map = mutableMapOf<String, JsonElement>()
 
         for (def in TraitAttributes.ALL) {
-            val value = attributeValues.getString(def)
+            val rawValue = attributeValues.getString(def)
+            val value =
+                if (def == TraitAttributes.RESOURCE_FILE) normalizeResourceFileValue(rawValue)
+                else rawValue
             if (value.isNotEmpty() && value != def.defaultValue) {
                 map[def.key] = JsonPrimitive(value)
             }

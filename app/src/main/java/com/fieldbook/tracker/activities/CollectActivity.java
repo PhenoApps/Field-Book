@@ -1694,9 +1694,23 @@ public class CollectActivity extends ThemedActivity
         Log.d(TAG, "fileString after selection: " + fileString);
         if (!fileString.isEmpty()) {
             try {
-                Uri resultUri = Uri.parse(fileString);
-                String suffix = fileString.substring(fileString.lastIndexOf('.') + 1).toLowerCase();
-                String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(suffix);
+                Uri resultUri = resolveResourceFileUri(fileString);
+                if (resultUri == null) {
+                    Utils.makeToast(this, getString(R.string.act_file_explorer_no_file_error));
+                    return;
+                }
+
+                String mime = null;
+                if ("content".equalsIgnoreCase(resultUri.getScheme())) {
+                    try {
+                        mime = getContentResolver().getType(resultUri);
+                    } catch (Exception ignore) {
+                    }
+                }
+                if (mime == null) {
+                    String suffix = fileString.substring(fileString.lastIndexOf('.') + 1).toLowerCase();
+                    mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(suffix);
+                }
 
                 Intent open = new Intent(Intent.ACTION_VIEW);
                 open.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -1707,6 +1721,79 @@ public class CollectActivity extends ThemedActivity
             }
         } else {
             Utils.makeToast(this, "No file preference saved, select a file with a short press");
+        }
+    }
+
+    private Uri resolveResourceFileUri(String resourceFileValue) {
+        if (resourceFileValue == null) return null;
+        final String trimmed = resourceFileValue.trim();
+        if (trimmed.isEmpty()) return null;
+
+        // Portable form: resources/<relative-path>
+        if (trimmed.regionMatches(true, 0, "resources/", 0, "resources/".length())) {
+            final String relPath = trimmed.substring("resources/".length());
+            return resolveFromResourcesDir(relPath);
+        }
+
+        // Legacy: treat as URI
+        Uri legacyUri = Uri.parse(trimmed);
+        if (legacyUri == null) return null;
+
+        // If this is a legacy SAF URI that points into resources/, allow fallback resolution.
+        if ("content".equalsIgnoreCase(legacyUri.getScheme())) {
+            String name = tryExtractResourceFileName(trimmed);
+            if (name != null) {
+                Uri resolved = resolveFromResourcesDir(name);
+                if (resolved != null) return resolved;
+            }
+        }
+
+        return legacyUri;
+    }
+
+    private Uri resolveFromResourcesDir(String relPath) {
+        try {
+            DocumentFile resDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_resources);
+            if (resDir == null || !resDir.exists()) return null;
+
+            String[] parts = relPath.split("/");
+            DocumentFile current = resDir;
+            for (String part : parts) {
+                if (part == null || part.isEmpty()) continue;
+                DocumentFile next = current.findFile(part);
+                if (next == null || !next.exists()) return null;
+                current = next;
+            }
+            return current.getUri();
+        } catch (Exception e) {
+            Log.e(TAG, "Failed resolving resources path: " + relPath, e);
+            return null;
+        }
+    }
+
+    private String tryExtractResourceFileName(String uriString) {
+        try {
+            String lower = uriString.toLowerCase(java.util.Locale.ROOT);
+            int idx = lower.lastIndexOf("resources%2f");
+            int tokenLen = "resources%2f".length();
+            if (idx < 0) {
+                idx = lower.lastIndexOf("/resources/");
+                tokenLen = "/resources/".length();
+            }
+            if (idx < 0) return null;
+
+            String tail = uriString.substring(idx + tokenLen);
+            String name = tail;
+            int q = name.indexOf('?');
+            if (q >= 0) name = name.substring(0, q);
+            int h = name.indexOf('#');
+            if (h >= 0) name = name.substring(0, h);
+            name = name.substring(name.lastIndexOf("%2F") >= 0 ? name.lastIndexOf("%2F") + 3 : 0);
+            name = name.substring(name.lastIndexOf('/') >= 0 ? name.lastIndexOf('/') + 1 : 0);
+            name = name.trim();
+            return name.isEmpty() ? null : name;
+        } catch (Exception ignore) {
+            return null;
         }
     }
 
