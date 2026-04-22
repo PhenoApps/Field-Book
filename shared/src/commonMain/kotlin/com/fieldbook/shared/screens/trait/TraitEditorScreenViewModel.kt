@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fieldbook.shared.database.models.TraitObject
 import com.fieldbook.shared.database.repository.TraitRepository
-import com.fieldbook.shared.utilities.TraitImportUtil
+import com.fieldbook.shared.utilities.CSVUtil
 import io.github.vinceglb.filekit.core.PlatformFile
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -152,7 +152,7 @@ class TraitEditorScreenViewModel(
             _importing.value = true
             try {
                 val positionOffset = traitRepository.getMaxPositionFromTraits() + 1
-                val importedTraits = TraitImportUtil.parseTraits(
+                val importedTraits = CSVUtil.parseTraits(
                     bytes = file.readBytes(),
                     positionOffset = positionOffset
                 )

@@ -10,6 +10,7 @@ filekit = "0.8.8" # compatible with compileSdk = 34
 ktor = "3.3.3"
 coil = "3.0.0" # compatible with compileSdk = 34
 reorderable = "3.0.0"
+kotlin-csv = "1.10.0"
 
 [libraries]
 multiplatform-settings = { module = "com.russhwolf:multiplatform-settings-no-arg", version.ref = "multiplatform-settings" }
@@ -24,6 +25,7 @@ ktor-client = { module = "io.ktor:ktor-client", version.ref = "ktor" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
+kotlin-csv = { module = "com.jsoizo:kotlin-csv", version.ref = "kotlin-csv" }
 
 [plugins]
 app-cash-sqldelight = { id = "app.cash.sqldelight", version = "2.1.0" }
