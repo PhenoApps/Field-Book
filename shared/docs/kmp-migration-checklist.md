@@ -29,9 +29,9 @@
 | Disable trait           | :white_check_mark: | :white_check_mark: |
 | Reorder                 |                    |                    |
 | Edit trait              | :white_check_mark: | :white_check_mark: |
-| Export                  |                    |                    |
-| Sort                    |                    |                    |
-| Select all              |                    |                    |
+| Export                  | :white_check_mark: |                    |
+| Sort                    | :white_check_mark: | :white_check_mark: |
+| Select all              | :white_check_mark: | :white_check_mark: |
 | Import from file        | :white_check_mark: |                    |
 |                         |                    |                    |
 | ...                     |                    |                    |
