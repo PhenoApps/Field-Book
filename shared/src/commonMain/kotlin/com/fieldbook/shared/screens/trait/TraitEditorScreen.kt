@@ -52,10 +52,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.fieldbook.shared.components.AppListItem
 import com.fieldbook.shared.database.models.TraitObject
 import com.fieldbook.shared.generated.resources.Res
+import com.fieldbook.shared.generated.resources.ic_file_cloud
+import com.fieldbook.shared.generated.resources.ic_file_csv
+import com.fieldbook.shared.generated.resources.ic_file_generic
 import com.fieldbook.shared.generated.resources.ic_more_vert
 import com.fieldbook.shared.generated.resources.ic_reorder
+import com.fieldbook.shared.generated.resources.ic_ruler
 import com.fieldbook.shared.traits.Formats
 import com.fieldbook.shared.utilities.DocumentFile
 import com.fieldbook.shared.utilities.getTraitDirectory
@@ -310,15 +315,17 @@ private fun AddTraitDialog(
         onDismissRequest = onDismiss,
         title = { Text("New Trait(s)") },
         text = {
-            androidx.compose.foundation.layout.Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                TextButton(onClick = onCreateNew, modifier = Modifier.fillMaxWidth()) {
-                    Text("Create new trait")
-                }
-                TextButton(onClick = onImportFromFile, modifier = Modifier.fillMaxWidth()) {
-                    Text("Import from file")
-                }
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                AppListItem(
+                    text = "Create new trait",
+                    icon = Res.drawable.ic_ruler,
+                    rowModifier = Modifier.clickable(onClick = onCreateNew)
+                )
+                AppListItem(
+                    text = "Import from file",
+                    icon = Res.drawable.ic_file_csv,
+                    rowModifier = Modifier.clickable(onClick = onImportFromFile)
+                )
             }
         },
         confirmButton = {},
@@ -343,9 +350,7 @@ private fun TraitImportDialog(
         },
         title = { Text("Import from file") },
         text = {
-            androidx.compose.foundation.layout.Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 if (importing) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -355,12 +360,16 @@ private fun TraitImportDialog(
                         Text("Please wait...")
                     }
                 } else {
-                    TextButton(onClick = onPickLocal, modifier = Modifier.fillMaxWidth()) {
-                        Text("Local storage")
-                    }
-                    TextButton(onClick = onPickCloud, modifier = Modifier.fillMaxWidth()) {
-                        Text("Cloud storage")
-                    }
+                    AppListItem(
+                        text = "Local storage",
+                        icon = Res.drawable.ic_file_generic,
+                        rowModifier = Modifier.clickable(onClick = onPickLocal)
+                    )
+                    AppListItem(
+                        text = "Cloud storage",
+                        icon = Res.drawable.ic_file_cloud,
+                        rowModifier = Modifier.clickable(onClick = onPickCloud),
+                    )
                 }
             }
         },
@@ -399,12 +408,11 @@ private fun LocalTraitFilesDialog(
                     Text("No trait files found")
                 } else {
                     files.forEach { file ->
-                        TextButton(
-                            onClick = { onImportFile(file) },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(file.name().orEmpty())
-                        }
+                        AppListItem(
+                            text = file.name().orEmpty(),
+                            icon = Res.drawable.ic_file_csv,
+                            rowModifier = Modifier.clickable { onImportFile(file) }
+                        )
                     }
                 }
             }
