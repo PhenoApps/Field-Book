@@ -73,8 +73,8 @@
 | Delete                  |                    |                    |
 |                         |                    |                    |
 | **Export**              |                    |                    |
-| Basic export all opts   | :white_check_mark: | :white_check_mark: |
-| Share zip file          | :white_check_mark: | :white_check_mark: |
+| Basic export all opts   | :white_check_mark: |                    |
+| Share zip file          | :white_check_mark: |                    |
 |                         |                    |                    |
 |                         |                    |                    |
 | **Settings**            |                    |                    |
