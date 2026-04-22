@@ -67,7 +67,7 @@ fun ConfigScreen(
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             TopAppBar(
-                title = { Text(text = "KMP Module") },
+                title = {},
                 navigationIcon = {
                     if (onBack != null) {
                         IconButton(onClick = onBack) {
@@ -86,7 +86,8 @@ fun ConfigScreen(
             )
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 itemsIndexed(configItems) { index, item ->
-                    val isEnabled = item == "Fields" || item == "Collect" || item == "Settings" || item == "Traits" || item == "Export"
+                    val isEnabled =
+                        item == "Fields" || item == "Collect" || item == "Settings" || item == "Traits" || item == "Export"
                     val rowModifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp)
