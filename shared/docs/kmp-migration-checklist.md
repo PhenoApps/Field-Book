@@ -32,7 +32,7 @@
 | Export                  |                    |                    |
 | Sort                    |                    |                    |
 | Select all              |                    |                    |
-| Import from file        |                    |                    |
+| Import from file        | :white_check_mark: |                    |
 |                         |                    |                    |
 | ...                     |                    |                    |
 |                         |                    |                    |
