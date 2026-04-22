@@ -104,7 +104,7 @@ class TraitEditorScreenViewModel(
                 }
             }
 
-            val pos = traitRepository.getMaxPositionFromTraits() + 1
+            val pos = nextCreatedTraitPosition()
 
             val newTrait = trait.copy()
             newTrait.name = newName
@@ -119,7 +119,7 @@ class TraitEditorScreenViewModel(
 
     fun insertTrait(trait: TraitObject) {
         viewModelScope.launch {
-            trait.realPosition = traitRepository.getMaxPositionFromTraits() + 1
+            trait.realPosition = nextCreatedTraitPosition()
             trait.visible = trait.visible ?: "true"
             trait.traitDataSource = trait.traitDataSource ?: "local"
             traitRepository.insertTrait(trait)
@@ -210,5 +210,9 @@ class TraitEditorScreenViewModel(
                 "Imported ${importedTraits.size} trait(s)"
             }
         )
+    }
+
+    private fun nextCreatedTraitPosition(): Int {
+        return maxOf(1, traitRepository.getMaxPositionFromTraits() + 1)
     }
 }
