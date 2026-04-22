@@ -54,6 +54,7 @@ enum class GeneralKeys(val key: String) {
     VERIFY_USER("VerifyUserEvery24Hours"),
     TRAITS_EXPORTED("TraitsExported"),
     ALL_TRAITS_VISIBLE("allTraitsVisible"),
+    TRAITS_LIST_SORT_ORDER("com.fieldbook.tracker.traits_list_sort_order"),
     LAST_USED_TRAIT("com.fieldbook.tracker.LAST_USED_TRAIT"),
     LAST_USED_RESOURCE_FILE("com.fieldbook.tracker.LAST_USED_RESOURCE_FILE"),
 

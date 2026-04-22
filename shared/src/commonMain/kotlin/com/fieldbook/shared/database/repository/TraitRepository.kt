@@ -109,7 +109,15 @@ class TraitRepository() {
     }
 
     fun deleteTrait(id: Long) {
+        db.observation_variablesQueries.deleteObservationVariableValuesByTraitId(id)
         db.observation_variablesQueries.deleteTrait(id)
+    }
+
+    fun deleteAllTraits() {
+        getAllTraits().forEach { trait ->
+            trait.id?.let { db.observation_variablesQueries.deleteObservationVariableValuesByTraitId(it) }
+        }
+        db.observation_variablesQueries.deleteAllTraits()
     }
 
     fun getAllTraitNames(): List<String> {

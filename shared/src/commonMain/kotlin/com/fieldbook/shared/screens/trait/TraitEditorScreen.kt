@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
@@ -33,6 +34,8 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -55,12 +58,24 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fieldbook.shared.components.AppListItem
 import com.fieldbook.shared.database.models.TraitObject
 import com.fieldbook.shared.generated.resources.Res
+import com.fieldbook.shared.generated.resources.dialog_cancel
+import com.fieldbook.shared.generated.resources.dialog_delete_traits_message
+import com.fieldbook.shared.generated.resources.dialog_save
 import com.fieldbook.shared.generated.resources.ic_file_cloud
 import com.fieldbook.shared.generated.resources.ic_file_csv
 import com.fieldbook.shared.generated.resources.ic_file_generic
 import com.fieldbook.shared.generated.resources.ic_more_vert
 import com.fieldbook.shared.generated.resources.ic_reorder
 import com.fieldbook.shared.generated.resources.ic_ruler
+import com.fieldbook.shared.generated.resources.ic_sort
+import com.fieldbook.shared.generated.resources.ic_tb_toggle_all
+import com.fieldbook.shared.generated.resources.traits_dialog_export
+import com.fieldbook.shared.generated.resources.traits_sort_default
+import com.fieldbook.shared.generated.resources.traits_sort_format
+import com.fieldbook.shared.generated.resources.traits_sort_import_order
+import com.fieldbook.shared.generated.resources.traits_sort_name
+import com.fieldbook.shared.generated.resources.traits_sort_visibility
+import com.fieldbook.shared.generated.resources.traits_toolbar_delete_all
 import com.fieldbook.shared.traits.Formats
 import com.fieldbook.shared.utilities.DocumentFile
 import com.fieldbook.shared.utilities.getTraitDirectory
@@ -70,7 +85,11 @@ import io.github.vinceglb.filekit.core.PickerType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
@@ -84,6 +103,7 @@ fun TraitEditorScreen(
     val loading by viewModel.loading.collectAsState()
     val error by viewModel.error.collectAsState()
     val importing by viewModel.importing.collectAsState()
+    val sortOption by viewModel.sortOption.collectAsState()
 
     var traitToDelete by remember { mutableStateOf<TraitObject?>(null) }
     var showAddTraitDialog by remember { mutableStateOf(false) }
@@ -92,6 +112,11 @@ fun TraitEditorScreen(
     var showCreator by remember { mutableStateOf(false) }
     var traitToEdit by remember { mutableStateOf<TraitObject?>(null) }
     var localTraitFiles by remember { mutableStateOf<List<DocumentFile>>(emptyList()) }
+    var showSortDialog by remember { mutableStateOf(false) }
+    var showDeleteAllDialog by remember { mutableStateOf(false) }
+    var showExportDialog by remember { mutableStateOf(false) }
+    var topBarMenuExpanded by remember { mutableStateOf(false) }
+    var exportFileName by remember { mutableStateOf(defaultTraitExportName()) }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -144,10 +169,53 @@ fun TraitEditorScreen(
                         }
                     }
                 },
+                actions = {
+                    IconButton(onClick = { viewModel.toggleAllVisibility() }) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_tb_toggle_all),
+                            contentDescription = stringResource(Res.string.traits_sort_visibility)
+                        )
+                    }
+                    IconButton(onClick = { showSortDialog = true }) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_sort),
+                            contentDescription = stringResource(Res.string.traits_sort_default)
+                        )
+                    }
+                    Box {
+                        IconButton(onClick = { topBarMenuExpanded = true }) {
+                            Icon(
+                                imageVector = Icons.Filled.MoreVert,
+                                contentDescription = "More actions"
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = topBarMenuExpanded,
+                            onDismissRequest = { topBarMenuExpanded = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(Res.string.traits_toolbar_delete_all)) },
+                                onClick = {
+                                    topBarMenuExpanded = false
+                                    showDeleteAllDialog = true
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(Res.string.traits_dialog_export)) },
+                                onClick = {
+                                    topBarMenuExpanded = false
+                                    exportFileName = defaultTraitExportName()
+                                    showExportDialog = true
+                                }
+                            )
+                        }
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         },
@@ -301,8 +369,128 @@ fun TraitEditorScreen(
                     onSuccess = { traitToEdit = null }
                 )
             }
+
+            if (showSortDialog) {
+                TraitSortDialog(
+                    selectedOption = sortOption,
+                    onDismiss = { showSortDialog = false },
+                    onSelect = {
+                        viewModel.setSortOption(it)
+                        showSortDialog = false
+                    }
+                )
+            }
+
+            if (showDeleteAllDialog) {
+                AlertDialog(
+                    onDismissRequest = { showDeleteAllDialog = false },
+                    title = { Text(stringResource(Res.string.traits_toolbar_delete_all)) },
+                    text = { Text(stringResource(Res.string.dialog_delete_traits_message)) },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            viewModel.deleteAllTraits()
+                            showDeleteAllDialog = false
+                        }) {
+                            Text(stringResource(Res.string.traits_toolbar_delete_all))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDeleteAllDialog = false }) {
+                            Text(stringResource(Res.string.dialog_cancel))
+                        }
+                    }
+                )
+            }
+
+            if (showExportDialog) {
+                TraitExportDialog(
+                    defaultFileName = exportFileName,
+                    onDismiss = { showExportDialog = false },
+                    onExport = { fileName ->
+                        viewModel.exportTraits(fileName)
+                        showExportDialog = false
+                    }
+                )
+            }
         }
     }
+}
+
+@Composable
+private fun TraitSortDialog(
+    selectedOption: TraitEditorScreenViewModel.TraitSortOption,
+    onDismiss: () -> Unit,
+    onSelect: (TraitEditorScreenViewModel.TraitSortOption) -> Unit
+) {
+    val options = listOf(
+        TraitEditorScreenViewModel.TraitSortOption.DEFAULT to stringResource(Res.string.traits_sort_default),
+        TraitEditorScreenViewModel.TraitSortOption.NAME to stringResource(Res.string.traits_sort_name),
+        TraitEditorScreenViewModel.TraitSortOption.FORMAT to stringResource(Res.string.traits_sort_format),
+        TraitEditorScreenViewModel.TraitSortOption.IMPORT_ORDER to stringResource(Res.string.traits_sort_import_order),
+        TraitEditorScreenViewModel.TraitSortOption.VISIBILITY to stringResource(Res.string.traits_sort_visibility)
+    )
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Sort by") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                options.forEach { (option, label) ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onSelect(option) },
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = option == selectedOption,
+                            onClick = { onSelect(option) }
+                        )
+                        Text(label)
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(Res.string.dialog_cancel))
+            }
+        }
+    )
+}
+
+@Composable
+private fun TraitExportDialog(
+    defaultFileName: String,
+    onDismiss: () -> Unit,
+    onExport: (String) -> Unit
+) {
+    var fileName by remember(defaultFileName) { mutableStateOf(defaultFileName) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(Res.string.traits_dialog_export)) },
+        text = {
+            OutlinedTextField(
+                value = fileName,
+                onValueChange = { fileName = it },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                label = { Text("File name") }
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = { onExport(fileName) }) {
+                Text(stringResource(Res.string.dialog_save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(Res.string.dialog_cancel))
+            }
+        }
+    )
 }
 
 @Composable
@@ -447,6 +635,18 @@ private fun uniqueTraitFileName(directory: DocumentFile, originalName: String): 
         if (candidate !in existingNames) return candidate
         index++
     }
+}
+
+private fun defaultTraitExportName(): String {
+    val local = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+    return "trait_export_%04d-%02d-%02d-%02d-%02d-%02d.trt".format(
+        local.year,
+        local.monthNumber,
+        local.dayOfMonth,
+        local.hour,
+        local.minute,
+        local.second
+    )
 }
 
 @Composable
