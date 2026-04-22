@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -44,6 +45,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,8 +57,14 @@ import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.ic_more_vert
 import com.fieldbook.shared.generated.resources.ic_reorder
 import com.fieldbook.shared.traits.Formats
+import com.fieldbook.shared.utilities.DocumentFile
+import com.fieldbook.shared.utilities.getTraitDirectory
+import com.fieldbook.shared.utilities.listFiles
 import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.core.PickerType
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.painterResource
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
@@ -75,16 +83,27 @@ fun TraitEditorScreen(
     var traitToDelete by remember { mutableStateOf<TraitObject?>(null) }
     var showAddTraitDialog by remember { mutableStateOf(false) }
     var showImportDialog by remember { mutableStateOf(false) }
+    var showLocalFilesDialog by remember { mutableStateOf(false) }
     var showCreator by remember { mutableStateOf(false) }
     var traitToEdit by remember { mutableStateOf<TraitObject?>(null) }
+    var localTraitFiles by remember { mutableStateOf<List<DocumentFile>>(emptyList()) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     val importFilePicker = rememberFilePickerLauncher(
         type = PickerType.File(extensions = listOf("trt")),
         title = "Import trait file"
     ) { file ->
         if (file != null) {
-            viewModel.importTraitsFromFile(file)
+            scope.launch {
+                val bytes = file.readBytes()
+                val traitDir = getTraitDirectory()
+                if (traitDir != null) {
+                    val targetName = uniqueTraitFileName(traitDir, file.name)
+                    traitDir.createFile("*/*", targetName)?.writeBytes(bytes)
+                }
+                viewModel.importTraitsFromBytes(bytes)
+            }
         }
         showImportDialog = false
     }
@@ -92,6 +111,12 @@ fun TraitEditorScreen(
     LaunchedEffect(viewModel) {
         viewModel.messages.collect { message ->
             snackbarHostState.showSnackbar(message)
+        }
+    }
+
+    LaunchedEffect(showLocalFilesDialog) {
+        if (showLocalFilesDialog) {
+            localTraitFiles = withContext(Dispatchers.Default) { loadLocalTraitFiles() }
         }
     }
 
@@ -237,8 +262,23 @@ fun TraitEditorScreen(
                 TraitImportDialog(
                     importing = importing,
                     onDismiss = { showImportDialog = false },
-                    onPickLocal = { importFilePicker.launch() },
+                    onPickLocal = {
+                        showImportDialog = false
+                        showLocalFilesDialog = true
+                    },
                     onPickCloud = { importFilePicker.launch() }
+                )
+            }
+
+            if (showLocalFilesDialog) {
+                LocalTraitFilesDialog(
+                    files = localTraitFiles,
+                    importing = importing,
+                    onDismiss = { showLocalFilesDialog = false },
+                    onImportFile = { file ->
+                        showLocalFilesDialog = false
+                        viewModel.importTraitsFromDocumentFile(file)
+                    }
                 )
             }
 
@@ -331,6 +371,74 @@ private fun TraitImportDialog(
             }
         }
     )
+}
+
+@Composable
+private fun LocalTraitFilesDialog(
+    files: List<DocumentFile>,
+    importing: Boolean,
+    onDismiss: () -> Unit,
+    onImportFile: (DocumentFile) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = {
+            if (!importing) onDismiss()
+        },
+        title = { Text("Import") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (importing) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                        Text("Please wait...")
+                    }
+                } else if (files.isEmpty()) {
+                    Text("No trait files found")
+                } else {
+                    files.forEach { file ->
+                        TextButton(
+                            onClick = { onImportFile(file) },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(file.name().orEmpty())
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss, enabled = !importing) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+private fun loadLocalTraitFiles(): List<DocumentFile> {
+    val traitDir = getTraitDirectory() ?: return emptyList()
+    return listFiles(traitDir)
+        .filter { !it.isDirectory() && it.name()?.endsWith(".trt", ignoreCase = true) == true }
+        .sortedBy { it.name()?.lowercase().orEmpty() }
+}
+
+private fun uniqueTraitFileName(directory: DocumentFile, originalName: String): String {
+    val existingNames = listFiles(directory).mapNotNull { it.name() }.toSet()
+    if (originalName !in existingNames) return originalName
+
+    val dotIndex = originalName.lastIndexOf('.')
+    val baseName = if (dotIndex >= 0) originalName.substring(0, dotIndex) else originalName
+    val extension = if (dotIndex >= 0) originalName.substring(dotIndex) else ""
+
+    var index = 1
+    while (true) {
+        val candidate = "${baseName}_$index$extension"
+        if (candidate !in existingNames) return candidate
+        index++
+    }
 }
 
 @Composable

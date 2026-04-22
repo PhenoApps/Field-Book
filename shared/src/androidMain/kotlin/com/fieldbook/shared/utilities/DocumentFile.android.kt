@@ -6,6 +6,7 @@ import com.fieldbook.shared.AndroidAppContextHolder
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.dir_archive
 import com.fieldbook.shared.generated.resources.dir_field_export
+import com.fieldbook.shared.generated.resources.dir_trait
 import org.phenoapps.utils.BaseDocumentTreeUtil
 import java.io.BufferedInputStream
 import java.util.zip.ZipEntry
@@ -31,6 +32,12 @@ class AndroidDocumentFile(val file: AndroidXDocumentFile) : DocumentFile {
     override fun exists(): Boolean = file.exists()
     override fun isDirectory(): Boolean = file.isDirectory
     override fun uri(): String = file.uri.toString()
+
+    override fun readBytes(): ByteArray {
+        return AndroidAppContextHolder.context.contentResolver.openInputStream(file.uri)
+            ?.use { it.readBytes() }
+            ?: ByteArray(0)
+    }
 
     override fun writeBytes(byteArray: ByteArray) {
         AndroidAppContextHolder.context.contentResolver.openOutputStream(file.uri)
@@ -63,6 +70,15 @@ actual fun getArchiveDirectory(): DocumentFile? {
         ctx.resources.getIdentifier(Res.string.dir_archive.key, "string", ctx.packageName)
     )
     return archiveDir?.let { AndroidDocumentFile(it) }
+}
+
+actual fun getTraitDirectory(): DocumentFile? {
+    val ctx = AndroidAppContextHolder.context
+    val traitDir = BaseDocumentTreeUtil.getDirectory(
+        ctx,
+        ctx.resources.getIdentifier(Res.string.dir_trait.key, "string", ctx.packageName)
+    )
+    return traitDir?.let { AndroidDocumentFile(it) }
 }
 
 actual fun listFiles(dir: DocumentFile): List<DocumentFile> {

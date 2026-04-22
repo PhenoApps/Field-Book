@@ -7,6 +7,7 @@ private class IosDocumentFile : DocumentFile {
     override fun exists(): Boolean = TODO("Not yet implemented")
     override fun isDirectory(): Boolean = TODO("Not yet implemented")
     override fun uri(): String = TODO("Not yet implemented")
+    override fun readBytes(): ByteArray = TODO("Not yet implemented")
     override fun writeBytes(byteArray: ByteArray) = TODO("Not yet implemented")
     override fun name(): String? = TODO("Not yet implemented")
 }
@@ -14,6 +15,7 @@ private class IosDocumentFile : DocumentFile {
 actual fun createDir(parent: String, child: String): DocumentFile? = TODO("Not yet implemented")
 actual fun getExportDirectory(): DocumentFile? = TODO("Not yet implemented")
 actual fun getArchiveDirectory(): DocumentFile? = TODO("Not yet implemented")
+actual fun getTraitDirectory(): DocumentFile? = TODO("Not yet implemented")
 actual fun listFiles(dir: DocumentFile): List<DocumentFile> = TODO("Not yet implemented")
 actual fun copyFileToDirectory(source: DocumentFile, destinationDir: DocumentFile, newFileName: String): DocumentFile? =
     TODO("Not yet implemented")

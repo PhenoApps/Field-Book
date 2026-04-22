@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.fieldbook.shared.database.models.TraitObject
 import com.fieldbook.shared.database.repository.TraitRepository
 import com.fieldbook.shared.utilities.CSVUtil
+import com.fieldbook.shared.utilities.DocumentFile
 import io.github.vinceglb.filekit.core.PlatformFile
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -151,27 +152,63 @@ class TraitEditorScreenViewModel(
 
             _importing.value = true
             try {
-                val positionOffset = traitRepository.getMaxPositionFromTraits() + 1
-                val importedTraits = CSVUtil.parseTraits(
-                    bytes = file.readBytes(),
-                    positionOffset = positionOffset
-                )
-
-                importedTraits.forEach(traitRepository::insertTrait)
-                loadTraits()
-
-                _messages.emit(
-                    if (importedTraits.isEmpty()) {
-                        "No traits were imported"
-                    } else {
-                        "Imported ${importedTraits.size} trait(s)"
-                    }
-                )
+                performTraitImport(file.readBytes())
             } catch (e: Exception) {
                 _messages.emit(e.message ?: "Error importing")
             } finally {
                 _importing.value = false
             }
         }
+    }
+
+    fun importTraitsFromDocumentFile(file: DocumentFile) {
+        viewModelScope.launch {
+            val name = file.name().orEmpty()
+            if (!name.endsWith(".trt", ignoreCase = true)) {
+                _messages.emit("Only TRT files can be imported as a trait list")
+                return@launch
+            }
+
+            _importing.value = true
+            try {
+                performTraitImport(file.readBytes())
+            } catch (e: Exception) {
+                _messages.emit(e.message ?: "Error importing")
+            } finally {
+                _importing.value = false
+            }
+        }
+    }
+
+    fun importTraitsFromBytes(bytes: ByteArray) {
+        viewModelScope.launch {
+            _importing.value = true
+            try {
+                performTraitImport(bytes)
+            } catch (e: Exception) {
+                _messages.emit(e.message ?: "Error importing")
+            } finally {
+                _importing.value = false
+            }
+        }
+    }
+
+    private suspend fun performTraitImport(bytes: ByteArray) {
+        val positionOffset = traitRepository.getMaxPositionFromTraits() + 1
+        val importedTraits = CSVUtil.parseTraits(
+            bytes = bytes,
+            positionOffset = positionOffset
+        )
+
+        importedTraits.forEach(traitRepository::insertTrait)
+        loadTraits()
+
+        _messages.emit(
+            if (importedTraits.isEmpty()) {
+                "No traits were imported"
+            } else {
+                "Imported ${importedTraits.size} trait(s)"
+            }
+        )
     }
 }
