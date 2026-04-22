@@ -71,8 +71,9 @@ kotlin {
                 implementation(libs.filekit.core)
                 implementation(libs.filekit.compose)
                 implementation(libs.kotlinx.serialization.json)
-                implementation(libs.ktor.client)
-                implementation(libs.ktor.client.cio)
+                implementation(libs.ktor.client.core)
+                implementation(libs.ktor.client.content.negotiation)
+                implementation(libs.ktor.serialization.kotlinx.json)
                 implementation(libs.coil.compose)
                 implementation(libs.reorderable)
             }
@@ -91,6 +92,7 @@ kotlin {
                 // dependencies declared in commonMain.
                 implementation("app.cash.sqldelight:android-driver:2.1.0")
                 implementation(libs.lifecycle.viewmodel.compose)
+                implementation(libs.ktor.client.okhttp)
                 implementation("com.github.phenoapps:phenolib:v0.9.53")
             }
         }
@@ -110,6 +112,7 @@ kotlin {
                 // part of KMP’s default source set hierarchy. Note that this source set depends
                 // on common by default and will correctly pull the iOS artifacts of any
                 // KMP dependencies declared in commonMain.
+                implementation(libs.ktor.client.darwin)
                 implementation("app.cash.sqldelight:native-driver:2.1.0")
             }
         }
