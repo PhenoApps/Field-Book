@@ -4,8 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fieldbook.shared.database.models.TraitObject
 import com.fieldbook.shared.database.repository.TraitRepository
+import com.fieldbook.shared.utilities.TraitImportUtil
+import io.github.vinceglb.filekit.core.PlatformFile
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
@@ -21,6 +25,12 @@ class TraitEditorScreenViewModel(
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
+
+    private val _importing = MutableStateFlow(false)
+    val importing: StateFlow<Boolean> = _importing.asStateFlow()
+
+    private val _messages = MutableSharedFlow<String>()
+    val messages = _messages.asSharedFlow()
 
     init {
         loadTraits()
@@ -130,5 +140,38 @@ class TraitEditorScreenViewModel(
 
     fun refresh() {
         loadTraits()
+    }
+
+    fun importTraitsFromFile(file: PlatformFile) {
+        viewModelScope.launch {
+            if (!file.name.endsWith(".trt", ignoreCase = true)) {
+                _messages.emit("Only TRT files can be imported as a trait list")
+                return@launch
+            }
+
+            _importing.value = true
+            try {
+                val positionOffset = traitRepository.getMaxPositionFromTraits() + 1
+                val importedTraits = TraitImportUtil.parseTraits(
+                    bytes = file.readBytes(),
+                    positionOffset = positionOffset
+                )
+
+                importedTraits.forEach(traitRepository::insertTrait)
+                loadTraits()
+
+                _messages.emit(
+                    if (importedTraits.isEmpty()) {
+                        "No traits were imported"
+                    } else {
+                        "Imported ${importedTraits.size} trait(s)"
+                    }
+                )
+            } catch (e: Exception) {
+                _messages.emit(e.message ?: "Error importing")
+            } finally {
+                _importing.value = false
+            }
+        }
     }
 }

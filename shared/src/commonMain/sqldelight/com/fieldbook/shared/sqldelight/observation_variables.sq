@@ -106,6 +106,12 @@ INSERT INTO observation_variables(
 getTraitByName:
 SELECT * FROM observation_variables WHERE observation_variable_name = ?;
 
+getTraitByNameAndPosition:
+SELECT * FROM observation_variables
+WHERE observation_variable_name = ? AND position = ?
+ORDER BY internal_id_observation_variable DESC
+LIMIT 1;
+
 getAttributeIdByName:
 SELECT internal_id_observation_variable_attribute FROM observation_variable_attributes WHERE observation_variable_attribute_name = ?;
 

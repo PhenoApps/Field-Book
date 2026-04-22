@@ -32,10 +32,14 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,6 +55,8 @@ import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.ic_more_vert
 import com.fieldbook.shared.generated.resources.ic_reorder
 import com.fieldbook.shared.traits.Formats
+import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
+import io.github.vinceglb.filekit.core.PickerType
 import org.jetbrains.compose.resources.painterResource
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
@@ -64,10 +70,30 @@ fun TraitEditorScreen(
     val traits by viewModel.traits.collectAsState()
     val loading by viewModel.loading.collectAsState()
     val error by viewModel.error.collectAsState()
+    val importing by viewModel.importing.collectAsState()
 
     var traitToDelete by remember { mutableStateOf<TraitObject?>(null) }
+    var showAddTraitDialog by remember { mutableStateOf(false) }
+    var showImportDialog by remember { mutableStateOf(false) }
     var showCreator by remember { mutableStateOf(false) }
     var traitToEdit by remember { mutableStateOf<TraitObject?>(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    val importFilePicker = rememberFilePickerLauncher(
+        type = PickerType.File(extensions = listOf("trt")),
+        title = "Import trait file"
+    ) { file ->
+        if (file != null) {
+            viewModel.importTraitsFromFile(file)
+        }
+        showImportDialog = false
+    }
+
+    LaunchedEffect(viewModel) {
+        viewModel.messages.collect { message ->
+            snackbarHostState.showSnackbar(message)
+        }
+    }
 
     val lazyListState = rememberLazyListState()
     val reorderState = rememberReorderableLazyListState(lazyListState) { from, to ->
@@ -97,12 +123,13 @@ fun TraitEditorScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { showCreator = true },
+                onClick = { showAddTraitDialog = true },
                 shape = CircleShape
             ) {
                 Icon(imageVector = Icons.Filled.Add, contentDescription = "Add")
             }
-        }
+        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
         Box(
             modifier = Modifier
@@ -192,6 +219,29 @@ fun TraitEditorScreen(
                 )
             }
 
+            if (showAddTraitDialog) {
+                AddTraitDialog(
+                    onDismiss = { showAddTraitDialog = false },
+                    onCreateNew = {
+                        showAddTraitDialog = false
+                        showCreator = true
+                    },
+                    onImportFromFile = {
+                        showAddTraitDialog = false
+                        showImportDialog = true
+                    }
+                )
+            }
+
+            if (showImportDialog) {
+                TraitImportDialog(
+                    importing = importing,
+                    onDismiss = { showImportDialog = false },
+                    onPickLocal = { importFilePicker.launch() },
+                    onPickCloud = { importFilePicker.launch() }
+                )
+            }
+
             if (showCreator) {
                 TraitCreatorDialog(
                     onDismiss = { showCreator = false },
@@ -208,6 +258,79 @@ fun TraitEditorScreen(
             }
         }
     }
+}
+
+@Composable
+private fun AddTraitDialog(
+    onDismiss: () -> Unit,
+    onCreateNew: () -> Unit,
+    onImportFromFile: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("New Trait(s)") },
+        text = {
+            androidx.compose.foundation.layout.Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                TextButton(onClick = onCreateNew, modifier = Modifier.fillMaxWidth()) {
+                    Text("Create new trait")
+                }
+                TextButton(onClick = onImportFromFile, modifier = Modifier.fillMaxWidth()) {
+                    Text("Import from file")
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+private fun TraitImportDialog(
+    importing: Boolean,
+    onDismiss: () -> Unit,
+    onPickLocal: () -> Unit,
+    onPickCloud: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = {
+            if (!importing) onDismiss()
+        },
+        title = { Text("Import from file") },
+        text = {
+            androidx.compose.foundation.layout.Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                if (importing) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                        Text("Please wait...")
+                    }
+                } else {
+                    TextButton(onClick = onPickLocal, modifier = Modifier.fillMaxWidth()) {
+                        Text("Local storage")
+                    }
+                    TextButton(onClick = onPickCloud, modifier = Modifier.fillMaxWidth()) {
+                        Text("Cloud storage")
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss, enabled = !importing) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 @Composable

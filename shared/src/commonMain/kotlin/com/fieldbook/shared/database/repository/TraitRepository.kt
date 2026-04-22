@@ -140,7 +140,10 @@ class TraitRepository() {
             trait.details
         )
 
-        val insertedRow = db.observation_variablesQueries.getTraitByName(trait.name).executeAsOneOrNull()
+        val insertedRow = db.observation_variablesQueries.getTraitByNameAndPosition(
+            trait.name,
+            trait.realPosition.toLong()
+        ).executeAsOneOrNull()
         val insertedId = insertedRow?.internal_id_observation_variable ?: return
 
         val attrs: Map<String, String> = mapOf(
