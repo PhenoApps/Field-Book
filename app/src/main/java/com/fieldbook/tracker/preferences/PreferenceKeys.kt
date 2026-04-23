@@ -24,8 +24,15 @@ class PreferenceKeys {
         const val DATAGRID_SETTING = "DataGrid"
         const val HIDE_ENTRIES_WITH_DATA_TOOLBAR = "com.fieldbook.tracker.HIDE_ENTRIES_WITH_DATA_TOOLBAR"
         const val MOVE_TO_UNIQUE_ID = "com.fieldbook.tracker.MOVE_TO_UNIQUE_ID"
+        const val ALLOW_HIDE_FIELD_NAV_ARROWS = "com.fieldbook.tracker.ALLOW_HIDE_FIELD_NAV_ARROWS"
 
-        private val featurePreferenceKeys = setOf(TIPS, DATAGRID_SETTING, HIDE_ENTRIES_WITH_DATA_TOOLBAR, MOVE_TO_UNIQUE_ID)
+        private val featurePreferenceKeys = setOf(
+            TIPS,
+            DATAGRID_SETTING,
+            HIDE_ENTRIES_WITH_DATA_TOOLBAR,
+            MOVE_TO_UNIQUE_ID,
+            ALLOW_HIDE_FIELD_NAV_ARROWS
+        )
 
         // APPEARANCE
         const val TOOLBAR_CUSTOMIZE = "TOOLBAR_CUSTOMIZE"

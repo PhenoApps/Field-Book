@@ -66,3 +66,7 @@ keystore.config
 
 # python cache files
 __pycache__/
+
+# Cursor / local tooling
+.cursor/
+.android-sdk/

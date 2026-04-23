@@ -366,6 +366,9 @@ public class CollectActivity extends ThemedActivity
 
     private Boolean deleteValueButtonEnabled = true;
 
+    // Runtime-only state (resets on activity recreate)
+    private boolean arrowsHidden = false;
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -774,6 +777,18 @@ public class CollectActivity extends ThemedActivity
         String barcodeTts = getString(R.string.act_collect_barcode_btn_tts);
         String deleteTts = getString(R.string.act_collect_delete_btn_tts);
 
+        final boolean allowHideArrows = preferences.getBoolean(PreferenceKeys.ALLOW_HIDE_FIELD_NAV_ARROWS, false);
+        if (!allowHideArrows) {
+            arrowsHidden = false; // keep exact current behavior when feature is off
+        }
+
+        // Apply current state to the field navigation cluster
+        try {
+            if (rangeBox != null) {
+                rangeBox.setFieldNavClusterHidden(allowHideArrows && arrowsHidden);
+            }
+        } catch (Exception ignored) {}
+
         // Bind Compose bottom toolbar (pass current audio recording state so label toggles)
         androidx.compose.ui.platform.ComposeView composeView = findViewById(R.id.toolbarBottomCompose);
         com.fieldbook.tracker.ui.BottomToolbarListener toolbarListener = new com.fieldbook.tracker.ui.BottomToolbarListener() {
@@ -888,6 +903,22 @@ public class CollectActivity extends ThemedActivity
                  break;
                 }
             }
+
+            @Override
+            public void onToggleHideFieldNavArrows() {
+                if (!allowHideArrows) return;
+
+                arrowsHidden = !arrowsHidden;
+
+                try {
+                    if (rangeBox != null) {
+                        rangeBox.setFieldNavClusterHidden(arrowsHidden);
+                    }
+                } catch (Exception ignored) {}
+
+                // Rebind compose toolbar so icon/description updates immediately
+                initToolbars();
+            }
         };
 
         // bind the compose view with current state
@@ -906,7 +937,16 @@ public class CollectActivity extends ThemedActivity
                 }
             } catch (Exception ignored) {}
 
-            com.fieldbook.tracker.ui.BottomToolbarBindingsKt.bindBottomToolbar(composeView, toolbarListener, fieldAudioHelper.isRecording(), isMediaEnabled, numMultiMedia, deleteValueButtonEnabled);
+            com.fieldbook.tracker.ui.BottomToolbarBindingsKt.bindBottomToolbar(
+                    composeView,
+                    toolbarListener,
+                    fieldAudioHelper.isRecording(),
+                    isMediaEnabled,
+                    numMultiMedia,
+                    deleteValueButtonEnabled,
+                    allowHideArrows,
+                    arrowsHidden
+            );
 
             // Create runtime anchor Views under the ComposeView to be used by TapTarget
             try {

@@ -25,6 +25,14 @@
 
         <CheckBoxPreference
             android:defaultValue="false"
+            android:icon="@drawable/ic_eye_off"
+            android:key="com.fieldbook.tracker.ALLOW_HIDE_FIELD_NAV_ARROWS"
+            android:summary="@string/preferences_features_allow_hide_field_nav_arrows_summary"
+            android:title="@string/preferences_features_allow_hide_field_nav_arrows_title"
+            app:allowDividerBelow="true" />
+
+        <CheckBoxPreference
+            android:defaultValue="false"
             android:icon="@drawable/ic_tb_datagrid"
             android:key="DataGrid"
             android:summary="@string/preferences_general_feature_datagrid_description"
