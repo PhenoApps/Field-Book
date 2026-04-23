@@ -639,14 +639,10 @@ private fun uniqueTraitFileName(directory: DocumentFile, originalName: String): 
 
 private fun defaultTraitExportName(): String {
     val local = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-    return "trait_export_%04d-%02d-%02d-%02d-%02d-%02d.trt".format(
-        local.year,
-        local.monthNumber,
-        local.dayOfMonth,
-        local.hour,
-        local.minute,
-        local.second
-    )
+    fun Int.twoDigits(): String = toString().padStart(2, '0')
+
+    return "trait_export_${local.year}-${local.monthNumber.twoDigits()}-${local.dayOfMonth.twoDigits()}" +
+        "-${local.hour.twoDigits()}-${local.minute.twoDigits()}-${local.second.twoDigits()}.trt"
 }
 
 @Composable
