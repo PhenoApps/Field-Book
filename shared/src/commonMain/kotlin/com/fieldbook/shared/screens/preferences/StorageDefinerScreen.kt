@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.preferences_storage_files_base_directory_title
 import com.fieldbook.shared.preferences.GeneralKeys
+import com.fieldbook.shared.utilities.configurePickedStorageDirectory
 import com.russhwolf.settings.Settings
 import io.github.vinceglb.filekit.compose.rememberDirectoryPickerLauncher
 import org.jetbrains.compose.resources.stringResource
@@ -44,13 +45,15 @@ fun StorageDefinerScreen(
     }
 
     val launcher = rememberDirectoryPickerLauncher(
-        title = "Directory picker",
-        initialDirectory = currentDirectory.ifEmpty { null }
+        title = "Directory picker"
     ) { directory ->
         directory?.let {
-            val value = it.path ?: ""
-            preferences.putString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY.key, value)
-            currentDirectory = value
+            val configuredDirectory = configurePickedStorageDirectory(it) ?: return@rememberDirectoryPickerLauncher
+            preferences.putString(
+                GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY.key,
+                configuredDirectory
+            )
+            currentDirectory = configuredDirectory
         }
     }
 

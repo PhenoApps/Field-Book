@@ -34,6 +34,7 @@ class KmpHostActivity : ComponentActivity() {
 
         setContent {
             val currentScreen = remember { mutableStateOf(hostScreenType) }
+
             MainTheme {
                 when (currentScreen.value) {
                     KmpHostScreenType.CONFIG -> ConfigScreen(

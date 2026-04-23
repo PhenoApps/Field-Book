@@ -61,7 +61,15 @@ enum class GeneralKeys(val key: String) {
     // themes
     SAVED_DATA_COLOR("SAVED_DATA_COLOR"),
     THEME_FLAG("key_preferences_theme_theme_flag"),
+
+    /** Native Android app is opened for the first time */
     FIRST_RUN("FirstRun"),
+    /**
+     * KPM module is opened for the first time inside main android app
+     * or as a standalone app
+     * */
+    FIRST_RUN_KMP("FirstRunKMP"),
+
     UPDATE_VERSION("UpdateVersion"),
     REGION("region"),
     TIPS_CONFIGURED("TipsConfigured"),
