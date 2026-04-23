@@ -3,6 +3,7 @@ package com.fieldbook.shared.screens.collect.traits
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -95,7 +96,10 @@ fun PhotoTrait(
             modifier = Modifier
                 .fillMaxWidth()
                 // FIXME looks good on emulator, find the right setting
-                .fillMaxHeight(0.7f)
+                .fillMaxHeight(0.7f),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+            verticalAlignment = Alignment.CenterVertically,
+            contentPadding = PaddingValues(horizontal = 8.dp)
         ) {
             val width = 230.dp
 
@@ -109,7 +113,6 @@ fun PhotoTrait(
 
                     Box(
                         modifier = Modifier
-                            .padding(8.dp)
                             .fillMaxHeight(),
                         contentAlignment = Alignment.Center
                     ) {
@@ -144,7 +147,6 @@ fun PhotoTrait(
             item {
                 Box(
                     modifier = Modifier
-                        .padding(8.dp)
                         .fillMaxHeight(),
                     contentAlignment = Alignment.Center
                 ) {
@@ -224,7 +226,7 @@ fun PhotoTrait(
                 }
             },
             modifier = Modifier
-                .padding(top = 24.dp)
+                .padding(top = 16.dp)
                 .size(64.dp),
             shape = MainFloatingActionButtonShape,
         ) {

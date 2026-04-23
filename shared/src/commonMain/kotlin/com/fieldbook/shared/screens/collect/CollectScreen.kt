@@ -65,6 +65,7 @@ fun CollectScreen(
                 Column(
                     Modifier
                         .fillMaxWidth()
+                        .weight(1f)
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -77,7 +78,10 @@ fun CollectScreen(
                     )
                     Spacer(Modifier.height(8.dp))
                     RangeBox(controller = controller)
-                    CollectInput(controller = controller)
+                    CollectInput(
+                        controller = controller,
+                        modifier = Modifier.weight(1f)
+                    )
                 }
             }
         }

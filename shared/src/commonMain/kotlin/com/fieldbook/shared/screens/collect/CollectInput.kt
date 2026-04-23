@@ -1,14 +1,17 @@
 package com.fieldbook.shared.screens.collect
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,6 +39,7 @@ import com.fieldbook.shared.utilities.dateFormatMonthDay
 @Composable
 fun CollectInput(
     controller: CollectScreenController,
+    modifier: Modifier = Modifier,
 ) {
     val trait = controller.traits.getOrNull(controller.currentTraitIndex)
     val values = trait?.let { controller.traitValues[it.id] } ?: emptyList()
@@ -54,6 +58,8 @@ fun CollectInput(
     val formatEnum = trait?.format?.let { formatStr ->
         Formats.entries.find { it.databaseName.equals(formatStr, ignoreCase = true) }
     }
+    val usesLazyVerticalInput =
+        formatEnum == Formats.CATEGORICAL || formatEnum == Formats.MULTI_CATEGORICAL
 
     val displayValue = when (formatEnum) {
         Formats.CATEGORICAL -> {
@@ -88,7 +94,7 @@ fun CollectInput(
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+        modifier = modifier.fillMaxWidth(),
     ) {
         Spacer(Modifier.height(16.dp))
 
@@ -105,12 +111,21 @@ fun CollectInput(
                 color = fontColor,
             )
         } else if (formatEnum?.isCamera == true) {
-            TraitInputHost(
-                controller = controller,
-                trait = trait,
-                values = values,
-                onEdited = { isEdited = true }
-            )
+            TraitInputContainer(
+                usesLazyVerticalInput = false,
+                scrollable = false,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                TraitInputHost(
+                    controller = controller,
+                    trait = trait,
+                    values = values,
+                    onEdited = { isEdited = true },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         } else {
             Text(
                 text = displayValue,
@@ -127,12 +142,51 @@ fun CollectInput(
                     .padding(8.dp)
                     .background(androidx.compose.material3.MaterialTheme.colorScheme.primary)
             )
-            TraitInputHost(
-                controller = controller,
-                trait = trait,
-                values = values,
-                onEdited = { isEdited = true }
-            )
+            TraitInputContainer(
+                usesLazyVerticalInput = usesLazyVerticalInput,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                TraitInputHost(
+                    controller = controller,
+                    trait = trait,
+                    values = values,
+                    onEdited = { isEdited = true },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TraitInputContainer(
+    usesLazyVerticalInput: Boolean,
+    scrollable: Boolean = true,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    Box(
+        modifier = modifier.then(
+            if (usesLazyVerticalInput || !scrollable) {
+                Modifier
+            } else {
+                Modifier.verticalScroll(rememberScrollState())
+            }
+        ),
+        contentAlignment = if (scrollable) Alignment.TopCenter else Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = if (scrollable) Arrangement.Top else Arrangement.Center,
+            modifier = if (usesLazyVerticalInput || !scrollable) {
+                Modifier.fillMaxSize()
+            } else {
+                Modifier.fillMaxWidth()
+            }
+        ) {
+            content()
         }
     }
 }

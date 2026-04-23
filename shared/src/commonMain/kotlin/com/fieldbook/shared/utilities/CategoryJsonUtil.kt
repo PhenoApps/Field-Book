@@ -34,6 +34,21 @@ class CategoryJsonUtil {
             return Json.decodeFromString(json)
         }
 
+        fun decodeDefinition(jsonOrLegacy: String?): ArrayList<BrAPIScaleValidValuesCategories> {
+            if (jsonOrLegacy.isNullOrBlank()) return arrayListOf()
+
+            return try {
+                decodeCategories(jsonOrLegacy)
+            } catch (_: Exception) {
+                ArrayList(
+                    jsonOrLegacy.split("/")
+                        .map { it.trim() }
+                        .filter { it.isNotEmpty() }
+                        .map { BrAPIScaleValidValuesCategories(label = it, value = it) }
+                )
+            }
+        }
+
         /**
          * Takes an array of BrAPIScaleValidValuesCategories and returns a printable version.
          * JSON is currently stored in the backend to keep record of label/value pairs, the actual exported value

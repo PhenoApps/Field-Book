@@ -55,6 +55,7 @@ private class IosDocumentFile(internal val path: String) : DocumentFile {
 
     override fun uri(): String = NSURL.fileURLWithPath(path).absoluteString ?: "file://$path"
 
+    override fun readBytes(): ByteArray = TODO("Not yet implemented")
     override fun writeBytes(byteArray: ByteArray) {
         val outputPath = path.toPath()
         outputPath.parent?.let { FileSystem.SYSTEM.createDirectories(it) }
@@ -133,6 +134,7 @@ actual fun createDir(
 
 actual fun getExportDirectory(): DocumentFile? = TODO("Not yet implemented")
 actual fun getArchiveDirectory(): DocumentFile? = TODO("Not yet implemented")
+actual fun getTraitDirectory(): DocumentFile? = TODO("Not yet implemented")
 actual fun listFiles(dir: DocumentFile): List<DocumentFile> = TODO("Not yet implemented")
 actual fun copyFileToDirectory(source: DocumentFile, destinationDir: DocumentFile, newFileName: String): DocumentFile? =
     TODO("Not yet implemented")

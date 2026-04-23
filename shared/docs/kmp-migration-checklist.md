@@ -5,6 +5,12 @@
 | Feature                 | KMP Android        | KMP iOS            |
 |-------------------------|--------------------|--------------------|
 |                         |                    |                    |
+| **Onboarding**          |                    |                    |
+| Initialize storage      |                    |                    |
+| Permissions             |                    |                    |
+| Load samples            |                    |                    |
+| Tutorial                |                    |                    |
+|                         |                    |                    |
 | **Fields**              |                    |                    |
 | View fields             | :white_check_mark: | :white_check_mark: |
 | Create new field        | :white_check_mark: | :white_check_mark: |
@@ -22,11 +28,11 @@
 | Delete trait            | :white_check_mark: | :white_check_mark: |
 | Disable trait           | :white_check_mark: | :white_check_mark: |
 | Reorder                 |                    |                    |
-| Edit trait              |                    |                    |
-| Export                  |                    |                    |
-| Sort                    |                    |                    |
-| Select all              |                    |                    |
-| Import from file        |                    |                    |
+| Edit trait              | :white_check_mark: | :white_check_mark: |
+| Export                  | :white_check_mark: |                    |
+| Sort                    | :white_check_mark: | :white_check_mark: |
+| Select all              | :white_check_mark: | :white_check_mark: |
+| Import from file        | :white_check_mark: |                    |
 |                         |                    |                    |
 | ...                     |                    |                    |
 |                         |                    |                    |

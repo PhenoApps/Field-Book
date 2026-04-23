@@ -26,14 +26,8 @@ fun CategoricalTrait(
     println("CategoricalTrait: trait=$trait, value=$value, multi=$multi")
 
     // Parse the trait's category definition. Try JSON first, then fall back to legacy slash-separated format.
-    val categories: ArrayList<BrAPIScaleValidValuesCategories> = try {
-        CategoryJsonUtil.decodeCategories(trait?.categories ?: "[]")
-    } catch (_: Exception) {
-        val fallback = trait?.categories?.split("/")?.map {
-            BrAPIScaleValidValuesCategories(label = it, value = it)
-        } ?: emptyList()
-        ArrayList(fallback)
-    }
+    val categories: ArrayList<BrAPIScaleValidValuesCategories> =
+        CategoryJsonUtil.decodeDefinition(trait?.categories)
 
     // Compute the displayed values from the stored value (which may be JSON or legacy raw)
     val displayedValues: List<String> = try {
