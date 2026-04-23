@@ -71,6 +71,7 @@ kotlin {
                 implementation(libs.filekit.core)
                 implementation(libs.filekit.compose)
                 implementation(libs.kotlinx.serialization.json)
+                implementation(libs.kotlin.csv)
                 implementation(libs.ktor.client.core)
                 implementation(libs.ktor.client.content.negotiation)
                 implementation(libs.ktor.serialization.kotlinx.json)
@@ -163,13 +164,23 @@ val unzipSampleDb by tasks.registering(Sync::class) {
     includeEmptyDirs = false
 }
 
+val copyTraitAssets by tasks.registering(Sync::class) {
+    from(layout.projectDirectory.dir("../app/src/main/assets/trait"))
+    into(layout.projectDirectory.dir("./src/commonMain/composeResources/files/trait"))
+    includeEmptyDirs = false
+}
+
 // Ensure resource-copy tasks that may consume the generated files depend on this task.
 // This avoids the Gradle warning about using a task output without declaring a dependency.
 tasks.matching { it.name == "copyNonXmlValueResourcesForCommonMain" }
     .configureEach {
         dependsOn(unzipSampleDb)
+        dependsOn(copyTraitAssets)
     }
 
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>()
-    .configureEach { dependsOn(unzipSampleDb) }
+    .configureEach {
+        dependsOn(unzipSampleDb)
+        dependsOn(copyTraitAssets)
+    }

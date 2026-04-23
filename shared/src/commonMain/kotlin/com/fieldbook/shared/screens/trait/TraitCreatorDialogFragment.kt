@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,7 +16,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -44,14 +47,24 @@ private enum class TraitCreatorStep {
 
 @Composable
 fun TraitCreatorDialog(
+    initialTrait: TraitObject? = null,
     onDismiss: () -> Unit,
     onSuccess: (TraitObject) -> Unit,
     viewModel: TraitEditorScreenViewModel = viewModel()
 ) {
-    var currentStep by remember { mutableStateOf(TraitCreatorStep.ChooseFormat) }
-    var selectedFormat by remember { mutableStateOf<Formats?>(null) }
-    var traitName by remember { mutableStateOf("") }
-    var traitDetails by remember { mutableStateOf("") }
+    val isEditing = initialTrait != null
+    var currentStep by remember(initialTrait?.id) {
+        mutableStateOf(if (isEditing) TraitCreatorStep.NameDetails else TraitCreatorStep.ChooseFormat)
+    }
+    var selectedFormat by remember(initialTrait?.id) {
+        mutableStateOf(
+            initialTrait?.format?.let { format ->
+                Formats.supportedFormats().firstOrNull { it.databaseName == format }
+            }
+        )
+    }
+    var traitName by remember(initialTrait?.id) { mutableStateOf(initialTrait?.name ?: "") }
+    var traitDetails by remember(initialTrait?.id) { mutableStateOf(initialTrait?.details ?: "") }
 
     when (currentStep) {
         TraitCreatorStep.ChooseFormat -> {
@@ -111,17 +124,18 @@ fun TraitCreatorDialog(
         }
 
         TraitCreatorStep.NameDetails -> {
-            val traitState = remember {
-                TraitObject().apply {
+            val traitState = remember(initialTrait?.id, selectedFormat) {
+                (initialTrait?.copy() ?: TraitObject()).apply {
                     name = traitName
                     details = traitDetails
                     format = selectedFormat?.databaseName
-                    visible = "true"
-                    traitDataSource = "local"
+                    visible = visible ?: "true"
+                    traitDataSource = traitDataSource ?: "local"
                 }
             }
 
             var paramError by remember { mutableStateOf("") }
+            val scrollState = rememberScrollState()
 
             Dialog(
                 onDismissRequest = onDismiss,
@@ -134,12 +148,16 @@ fun TraitCreatorDialog(
                     contentAlignment = Alignment.Center
                 ) {
                     Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight(0.9f),
                         shape = RoundedCornerShape(12.dp),
                         tonalElevation = 4.dp
                     ) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .verticalScroll(scrollState)
                                 .padding(12.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
@@ -179,10 +197,12 @@ fun TraitCreatorDialog(
                                 horizontalArrangement = Arrangement.End
                             ) {
                                 Row {
-                                    TextButton(onClick = {
-                                        currentStep = TraitCreatorStep.ChooseFormat
-                                    }) {
-                                        Text("Back")
+                                    if (!isEditing) {
+                                        TextButton(onClick = {
+                                            currentStep = TraitCreatorStep.ChooseFormat
+                                        }) {
+                                            Text("Back")
+                                        }
                                     }
 
                                     TextButton(onClick = onDismiss) {
@@ -190,7 +210,11 @@ fun TraitCreatorDialog(
                                     }
 
                                     Button(onClick = {
-                                        viewModel.insertTrait(traitState)
+                                        if (isEditing) {
+                                            viewModel.updateTrait(traitState)
+                                        } else {
+                                            viewModel.insertTrait(traitState)
+                                        }
                                         onSuccess(traitState)
                                     }, enabled = traitName.isNotBlank() && paramError.isBlank()) {
                                         Text("Save")
