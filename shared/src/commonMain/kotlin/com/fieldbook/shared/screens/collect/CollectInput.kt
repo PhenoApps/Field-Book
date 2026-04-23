@@ -1,6 +1,7 @@
 package com.fieldbook.shared.screens.collect
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -112,6 +113,7 @@ fun CollectInput(
         } else if (formatEnum?.isCamera == true) {
             TraitInputContainer(
                 usesLazyVerticalInput = false,
+                scrollable = false,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
@@ -161,22 +163,24 @@ fun CollectInput(
 @Composable
 private fun TraitInputContainer(
     usesLazyVerticalInput: Boolean,
+    scrollable: Boolean = true,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
     Box(
         modifier = modifier.then(
-            if (usesLazyVerticalInput) {
+            if (usesLazyVerticalInput || !scrollable) {
                 Modifier
             } else {
                 Modifier.verticalScroll(rememberScrollState())
             }
         ),
-        contentAlignment = Alignment.TopCenter
+        contentAlignment = if (scrollable) Alignment.TopCenter else Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = if (usesLazyVerticalInput) {
+            verticalArrangement = if (scrollable) Arrangement.Top else Arrangement.Center,
+            modifier = if (usesLazyVerticalInput || !scrollable) {
                 Modifier.fillMaxSize()
             } else {
                 Modifier.fillMaxWidth()
