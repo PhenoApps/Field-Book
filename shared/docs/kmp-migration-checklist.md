@@ -15,17 +15,17 @@
 | View fields             | :white_check_mark: | :white_check_mark: |
 | Create new field        | :white_check_mark: | :white_check_mark: |
 | Edit field              |                    |                    |
-| Switch field            | :white_check_mark: | :white_check_mark: |                    
+| Switch field            | :white_check_mark: | :white_check_mark: |
 | Delete field            |                    |                    |
 | Import from file        |                    |                    |
 |                         |                    |                    |
 | ...                     |                    |                    |
 |                         |                    |                    |
 | **Traits**              |                    |                    |
-| View traits             | :white_check_mark: | :white_check_mark: |                    
+| View traits             | :white_check_mark: | :white_check_mark: |
 | Create new trait        | :white_check_mark: | :white_check_mark: |
-| Copy trait              | :white_check_mark: | :white_check_mark: |                    
-| Delete trait            | :white_check_mark: | :white_check_mark: |                    
+| Copy trait              | :white_check_mark: | :white_check_mark: |
+| Delete trait            | :white_check_mark: | :white_check_mark: |
 | Disable trait           | :white_check_mark: | :white_check_mark: |
 | Reorder                 |                    |                    |
 | Edit trait              | :white_check_mark: | :white_check_mark: |
@@ -38,15 +38,15 @@
 |                         |                    |                    |
 | **Trait formats**       |                    |                    |
 | Audio                   |                    |                    |
-| Boolean                 | :white_check_mark: | :white_check_mark: |                    
-| Categorical             | :white_check_mark: | :white_check_mark: |                    
+| Boolean                 | :white_check_mark: | :white_check_mark: |
+| Categorical             | :white_check_mark: | :white_check_mark: |
 | Multicategorial         | :white_check_mark: | :white_check_mark: |
 | Counter                 | :white_check_mark: | :white_check_mark: |
 | Date                    | :white_check_mark: | :white_check_mark: |
 | Location                |                    |                    |
 | Numeric                 | :white_check_mark: | :white_check_mark: |
-| Percent                 | :white_check_mark: | :white_check_mark: |                    
-| Text                    | :white_check_mark: | :white_check_mark: |                    
+| Percent                 | :white_check_mark: | :white_check_mark: |
+| Text                    | :white_check_mark: | :white_check_mark: |
 | Angle                   |                    |                    |
 | Disease rating          |                    |                    |
 | GNSS                    |                    |                    |
@@ -89,7 +89,7 @@
 |                         |                    |                    |
 | **Settings/Storage**    |                    |                    |
 | Define storage location | :white_check_mark: | :white_check_mark: |
-| Import db (sample)      | :white_check_mark: | :white_check_mark: |                    
+| Import db (sample)      | :white_check_mark: | :white_check_mark: |
 | Import db (other file)  |                    |                    |
 | Export db               |                    |                    |
 | Delete db               |                    |                    |
