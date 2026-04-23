@@ -20,6 +20,6 @@ actual fun listFiles(dir: DocumentFile): List<DocumentFile> = TODO("Not yet impl
 actual fun copyFileToDirectory(source: DocumentFile, destinationDir: DocumentFile, newFileName: String): DocumentFile? =
     TODO("Not yet implemented")
 actual fun zipFiles(files: List<DocumentFile>, zipFileName: String): DocumentFile? = TODO("Not yet implemented")
-actual fun shareFile(file: DocumentFile) = TODO("Not yet implemented")
-actual fun deleteFile(file: DocumentFile) = TODO("Not yet implemented")
+actual fun shareFile(file: DocumentFile): Unit = TODO("Not yet implemented")
+actual fun deleteFile(file: DocumentFile): Unit = TODO("Not yet implemented")
 actual fun exportDeviceName(): String = "iOS"
