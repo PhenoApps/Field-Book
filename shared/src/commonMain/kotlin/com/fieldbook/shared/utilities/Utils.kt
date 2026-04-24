@@ -1,6 +1,7 @@
 package com.fieldbook.shared.utilities
 
 import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 
 fun localDateToEpochMillis(date: LocalDate): Long {
@@ -27,4 +28,45 @@ fun dateFormatMonthDay(date: String): String {
     return dateFormatMonthDay(localDate)
 }
 
-fun nowMillis(): Long = Clock.System.now().toEpochMilliseconds()
+fun relativeTimeText(date: String?): String? {
+    val raw = date?.takeIf { it.isNotBlank() } ?: return null
+    val instant = tryParseInstant(raw) ?: return null
+    val diffMillis = Clock.System.now().toEpochMilliseconds() - instant.toEpochMilliseconds()
+    if (diffMillis < 0) return null
+
+    val dayMillis = 24L * 60L * 60L * 1000L
+    val days = diffMillis / dayMillis
+    return when {
+        days >= 365 -> {
+            val years = days / 365
+            if (years == 1L) "1 year ago" else "$years years ago"
+        }
+        days >= 30 -> {
+            val months = days / 30
+            if (months == 1L) "1 month ago" else "$months months ago"
+        }
+        days >= 1 -> {
+            if (days == 1L) "1 day ago" else "$days days ago"
+        }
+        else -> "Today"
+    }
+}
+
+private fun tryParseInstant(raw: String): Instant? {
+    val candidates = buildList {
+        add(raw)
+        add(raw.replace(' ', 'T'))
+
+        val normalized = raw.replace(' ', 'T')
+        if (normalized.length >= 5) {
+            val offset = normalized.takeLast(5)
+            if ((offset.startsWith("+") || offset.startsWith("-")) && offset.drop(1).all(Char::isDigit)) {
+                add(normalized.dropLast(5) + offset.take(3) + ":" + offset.drop(3))
+            }
+        }
+    }
+
+    return candidates.firstNotNullOfOrNull { candidate ->
+        runCatching { Instant.parse(candidate) }.getOrNull()
+    }
+}

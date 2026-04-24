@@ -347,9 +347,6 @@ class ExportUtil : CoroutineScope by MainScope() {
         }
     }
 
-    private fun sanitizeFileName(name: String): String =
-        name.replace(Regex("[|\\?\\*<\"\\\\:>'\";]"), "_")
-
     private fun defaultExportFileName(fieldIds: List<Int>): String {
         val suffix = if (fieldIds.size > 1) {
             "multiple_fields"

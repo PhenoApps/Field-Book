@@ -1,5 +1,6 @@
 package com.fieldbook.shared.database.repository
 
+import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import com.fieldbook.shared.AppContext
 import com.fieldbook.shared.database.Migrator
@@ -29,12 +30,12 @@ class StudyRepository(
                         secondary_id = r.study_secondary_id_name.orEmpty(),
                         date_import = r.date_import ?: "",
                         date_edit = r.date_edit,
-                        date_export = null,
-                        date_sync = null,
+                        date_export = r.date_export,
+                        date_sync = r.date_sync,
                         import_format = r.import_format,
-                        exp_source = null,
-                        count = null,
-                        observation_level = null,
+                        exp_source = r.study_source,
+                        count = r.count,
+                        observation_level = r.observation_levels,
                         attribute_count = r.attribute_count.toString(),
                         trait_count = r.trait_count.toString(),
                         observation_count = r.observation_count.toString(),
@@ -54,12 +55,12 @@ class StudyRepository(
                         secondary_id = r.study_secondary_id_name.orEmpty(),
                         date_import = r.date_import ?: "",
                         date_edit = r.date_edit,
-                        date_export = null,
-                        date_sync = null,
-                        import_format = null,
-                        exp_source = null,
-                        count = null,
-                        observation_level = null,
+                        date_export = r.date_export,
+                        date_sync = r.date_sync,
+                        import_format = r.import_format,
+                        exp_source = r.study_source,
+                        count = r.count,
+                        observation_level = r.observation_levels,
                         attribute_count = r.attribute_count.toString(),
                         trait_count = r.trait_count.toString(),
                         observation_count = r.observation_count.toString(),
@@ -79,12 +80,12 @@ class StudyRepository(
                         secondary_id = r.study_secondary_id_name.orEmpty(),
                         date_import = r.date_import ?: "",
                         date_edit = r.date_edit,
-                        date_export = null,
-                        date_sync = null,
-                        import_format = null,
-                        exp_source = null,
-                        count = null,
-                        observation_level = null,
+                        date_export = r.date_export,
+                        date_sync = r.date_sync,
+                        import_format = r.import_format,
+                        exp_source = r.study_source,
+                        count = r.count,
+                        observation_level = r.observation_levels,
                         attribute_count = r.attribute_count.toString(),
                         trait_count = r.trait_count.toString(),
                         observation_count = r.observation_count.toString(),
@@ -306,27 +307,186 @@ class StudyRepository(
                 exp_id = r.internal_id_study.toInt(),
                 exp_name = r.study_name.orEmpty(),
                 exp_alias = r.study_alias.orEmpty(),
+                exp_sort = r.study_sort_name,
                 unique_id = r.study_unique_id_name.orEmpty(),
                 primary_id = r.study_primary_id_name.orEmpty(),
                 secondary_id = r.study_secondary_id_name.orEmpty(),
                 date_import = r.date_import ?: "",
                 date_edit = r.date_edit,
-                date_export = null,
-                date_sync = null,
+                date_export = r.date_export,
+                date_sync = r.date_sync,
                 import_format = r.import_format,
-                exp_source = null,
-                count = null,
-                observation_level = null,
+                exp_source = r.study_source,
+                count = r.count,
+                observation_level = r.observation_levels,
                 attribute_count = r.attribute_count.toString(),
                 trait_count = r.trait_count.toString(),
                 observation_count = r.observation_count.toString(),
                 trial_name = null,
-                        search_attribute = null
+                search_attribute = getSearchAttribute(fieldId)
             )
         } ?: FieldObject()
     }
 
+    fun updateStudyAlias(studyId: Int, newName: String) {
+        driver.execute(
+            identifier = null,
+            sql = "UPDATE studies SET study_alias = ? WHERE internal_id_study = ?",
+            parameters = 2
+        ) {
+            bindString(0, newName)
+            bindLong(1, studyId.toLong())
+        }
+    }
+
+    fun updateStudySort(sort: String?, studyId: Int) {
+        driver.execute(
+            identifier = null,
+            sql = "UPDATE studies SET study_sort_name = ? WHERE internal_id_study = ?",
+            parameters = 2
+        ) {
+            if (sort == null) {
+                bindString(0, null)
+            } else {
+                bindString(0, sort)
+            }
+            bindLong(1, studyId.toLong())
+        }
+    }
+
+    fun getPossibleUniqueAttributes(studyId: Int): List<String> {
+        val result: QueryResult<List<String>> = driver.executeQuery(
+            identifier = null,
+            sql = """
+                SELECT observation_unit_attribute_name
+                FROM observation_units_attributes
+                WHERE internal_id_observation_unit_attribute IN (
+                    SELECT observation_unit_attribute_db_id
+                    FROM observation_units_values
+                    WHERE study_id = ?
+                    GROUP BY observation_unit_attribute_db_id
+                    HAVING COUNT(DISTINCT observation_unit_value_name) = COUNT(observation_unit_value_name)
+                )
+            """.trimIndent(),
+            mapper = { cursor ->
+                val attributes = mutableListOf<String>()
+                while (cursor.next().value) {
+                    cursor.getString(0)?.let(attributes::add)
+                }
+                QueryResult.Value(attributes)
+            },
+            parameters = 1
+        ) {
+            bindLong(0, studyId.toLong())
+        }
+
+        return result.value
+    }
+
+    fun updateSearchAttribute(studyId: Int, newSearchAttribute: String) {
+        driver.execute(
+            identifier = null,
+            sql = "UPDATE studies SET observation_unit_search_attribute = ? WHERE internal_id_study = ?",
+            parameters = 2
+        ) {
+            bindString(0, newSearchAttribute)
+            bindLong(1, studyId.toLong())
+        }
+    }
+
+    fun updateSearchAttributeForAllFields(newSearchAttribute: String): Int {
+        val studyIds: QueryResult<List<Int>> = driver.executeQuery(
+            identifier = null,
+            sql = """
+                SELECT DISTINCT study_id
+                FROM observation_units_attributes
+                WHERE observation_unit_attribute_name = ?
+            """.trimIndent(),
+            mapper = { cursor ->
+                val ids = mutableListOf<Int>()
+                while (cursor.next().value) {
+                    cursor.getLong(0)?.toInt()?.let(ids::add)
+                }
+                QueryResult.Value(ids)
+            },
+            parameters = 1
+        ) {
+            bindString(0, newSearchAttribute)
+        }
+
+        studyIds.value.forEach { updateSearchAttribute(it, newSearchAttribute) }
+        return studyIds.value.size
+    }
+
+    fun deleteField(studyId: Int) {
+        db.transaction {
+            driver.execute(
+                identifier = null,
+                sql = "DELETE FROM observations WHERE study_id = ?",
+                parameters = 1
+            ) {
+                bindLong(0, studyId.toLong())
+            }
+            driver.execute(
+                identifier = null,
+                sql = "DELETE FROM observation_units_values WHERE study_id = ?",
+                parameters = 1
+            ) {
+                bindLong(0, studyId.toLong())
+            }
+            driver.execute(
+                identifier = null,
+                sql = "DELETE FROM observation_units_attributes WHERE study_id = ?",
+                parameters = 1
+            ) {
+                bindLong(0, studyId.toLong())
+            }
+            driver.execute(
+                identifier = null,
+                sql = "DELETE FROM plot_attributes WHERE exp_id = ?",
+                parameters = 1
+            ) {
+                bindLong(0, studyId.toLong())
+            }
+            driver.execute(
+                identifier = null,
+                sql = "DELETE FROM observation_units WHERE study_id = ?",
+                parameters = 1
+            ) {
+                bindLong(0, studyId.toLong())
+            }
+            driver.execute(
+                identifier = null,
+                sql = "DELETE FROM studies WHERE internal_id_study = ?",
+                parameters = 1
+            ) {
+                bindLong(0, studyId.toLong())
+            }
+        }
+    }
+
     fun updateExportDate(fieldId: Int, timestamp: String) {
         db.studiesQueries.updateExportDate(timestamp, fieldId.toLong())
+    }
+
+    private fun getSearchAttribute(fieldId: Int): String? {
+        val result: QueryResult<String?> = driver.executeQuery(
+            identifier = null,
+            sql = """
+                SELECT observation_unit_search_attribute
+                FROM studies
+                WHERE internal_id_study = ?
+                LIMIT 1
+            """.trimIndent(),
+            mapper = { cursor ->
+                val value = if (cursor.next().value) cursor.getString(0) else null
+                QueryResult.Value(value)
+            },
+            parameters = 1
+        ) {
+            bindLong(0, fieldId.toLong())
+        }
+
+        return result.value
     }
 }

@@ -74,8 +74,8 @@
     <string name="settings_kmp">Open KMP</string>
 
     <!-- Config Activity Fuzzy Search  -->
-    <string name="act_config_fuzzy_search_failed">Database could not retrieve a field or plot with code: %s</string>
-    <string name="act_config_fuzzy_search_error">Something went wrong when searching for %s</string>
+    <string name="act_config_fuzzy_search_failed">Database could not retrieve a field or plot with code: %1$s</string>
+    <string name="act_config_fuzzy_search_error">Something went wrong when searching for %1$s</string>
     <string name="act_config_search_fab_content_description">Search all plots and fields to load/navigate to the barcoded item.</string>
 
     <!-- File manager  -->
@@ -138,8 +138,8 @@
     <string name="fields_delete_study_confirmation">Are you sure you want to delete this field? This will delete all data from this field.</string>
 
     <plurals name="fields_delete_confirmation">
-        <item quantity="one">Are you sure you want to delete the field "%s"?</item>
-        <item quantity="other">Are you sure you want to delete these fields: %s?</item>
+        <item quantity="one">Are you sure you want to delete the field "%1$s"?</item>
+        <item quantity="other">Are you sure you want to delete these fields: %1$s?</item>
     </plurals>
 
     <!-- Import -->
@@ -159,7 +159,7 @@
     <string name="import_error_format_field">Only CSV and XLS files can be imported as a field</string>
     <string name="act_field_editor_no_suitable_columns_error">Import file has no suitable columns to choose from.</string>
     <string name="import_runnable_db_failed_to_switch">Database failed to switch fields.</string>
-    <string name="import_runnable_create_field_data_failed">Failed to create field data for line %d in file.</string>
+    <string name="import_runnable_create_field_data_failed">Failed to create field data for line %1$d in file.</string>
     <string name="import_runnable_duplicates_skipped">Duplicate columns found, only first instance will be used.</string>
     <string name="fields_study_exists_message">This field already exists.</string>
     <string name="fields_study_and_obs_exists_message">This field is already imported at this observation level.</string>
@@ -192,7 +192,7 @@
     <!-- Geo-Navigate to Field -->
     <string name="menu_fields_plot_by_distance_title">Select nearest field</string>
     <string name="activity_field_editor_no_field_found">No coordinates could be found.</string>
-    <string name="activity_field_editor_switch_field">"Switch to field %s"</string>
+    <string name="activity_field_editor_switch_field">"Switch to field %1$s"</string>
     <string name="activity_field_editor_switch_field_action">Switch</string>
     <string name="activity_field_editor_no_location_yet">No location found yet.</string>
     <string name="activity_field_editor_switch_field_same">Closest field already selected.</string>
@@ -217,7 +217,7 @@
 <!--    <string name="field_default_sort_order">import order</string>-->
 
     <string name="field_data_title">Data</string>
-    <string name="field_trait_observation_total">"%d" observations</string>
+    <string name="field_trait_observation_total">"%1$d" observations</string>
 
     <!-- Field Detail Charts -->
     <string name="field_trait_chart_no_data">No data to chart</string>
@@ -228,8 +228,8 @@
     <string name="today">Today</string>
     <string name="yesterday">Yesterday</string>
     <plurals name="years_ago">
-        <item quantity="one">%d year ago</item>
-        <item quantity="other">%d years ago</item>
+        <item quantity="one">%1$d year ago</item>
+        <item quantity="other">%1$d years ago</item>
     </plurals>
     <string name="no_activity">No activity</string>
     <string name="invalid_date">Invalid date</string>
@@ -289,7 +289,7 @@
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Trait Format</string>
     <string name="trait_creator_title_layout">Trait Layout</string>
-    <string name="trait_creator_parameters_title">%s Parameters</string>
+    <string name="trait_creator_parameters_title">%1$s Parameters</string>
 
     <string name="activity_traits_new_button_content_description">Add a new trait.</string>
 
@@ -321,7 +321,7 @@
     <string name="dialog_trait_parameters_title">Trait Parameters</string>
     <string name="traits_create_warning_percent_magnitude_relation">Magnitude relation error</string>
     <string name="trait_parameter_default_value_number_format_error">Must be a number</string>
-    <string name="traits_create_unknown_error">Unknown error occurred: %s</string>
+    <string name="traits_create_unknown_error">Unknown error occurred: %1$s</string>
     <string name="trait_creator_parameter_warning_infinite">Number cannot be infinite</string>
     <string name="trait_creator_parameter_warning_nan">Number cannot be NaN</string>
     <string name="trait_creator_parameter_warning_negative">Number must not be negative</string>
@@ -359,14 +359,14 @@
     <string name="dialog_att_chooser_traits">Traits</string>
     <string name="dialog_att_chooser_other">Other</string>
     <string name="dialog_att_chooser_customize">Customize</string>
-    <string name="dialog_infobar_att_chooser_title">Infobar %d</string>
+    <string name="dialog_infobar_att_chooser_title">Infobar %1$d</string>
     <string name="infobars_attribute_placeholder">Select</string>
     <string name="field_name_attribute">field_name</string>
-    <string name="infobar_word_wrap_enabled">Word wrap enabled for Infobar %s</string>
-    <string name="infobar_word_wrap_disabled">Word wrap disabled for Infobar %s</string>
+    <string name="infobar_word_wrap_enabled">Word wrap enabled for Infobar %1$s</string>
+    <string name="infobar_word_wrap_disabled">Word wrap disabled for Infobar %1$s</string>
 
     <!-- ID/Barcode Search -->
-    <string name="act_collect_barcode_search_exists_in_other_field">This ID is in %s</string>
+    <string name="act_collect_barcode_search_exists_in_other_field">This ID is in %1$s</string>
     <string name="main_toolbar_moveto_no_match">No matching value</string>
     <string name="main_toolbar_moveto">Go to ID</string>
     <string name="main_toolbar_barcode_scan">Scan barcode</string>
@@ -450,7 +450,7 @@
     <string name="trait_go_pro_await_ble_title">Awaiting GoPro BLE Connection</string>
     <string name="trait_go_pro_await_ble_message">Communicating with GoPro BLE, this may take a minute.</string>
     <string name="trait_go_pro_await_ap_title">Awaiting GoPro AP</string>
-    <string name="trait_go_pro_await_ap_message">Connecting to network, this may take a minute. \n SSID: %s \n Pass: %s</string>
+    <string name="trait_go_pro_await_ap_message">Connecting to network, this may take a minute. \n SSID: %1$s \n Pass: %2$s</string>
     <string name="trait_go_pro_await_ap_neutral">Manual Connect</string>
     <string name="trait_go_pro_camera_delete_photo_title">Delete Photo</string>
     <string name="go_pro_layout_black_11_not_detected">This trait was made for a GoPro Black 11, please contact developers to implement your GoPro model.\n</string>
@@ -504,7 +504,7 @@
     <string name="trait_photo_tts_fail">Picture trait failed.</string>
     <string name="trait_print_label_success">Printing label.</string>
     <string name="trait_gnss_internal_tts">Internal GPS</string>
-    <string name="trait_gnss_external_device_tts">External device %s chosen.</string>
+    <string name="trait_gnss_external_device_tts">External device %1$s chosen.</string>
     <string name="act_collect_na_btn_tts">Not applicable</string>
     <string name="act_collect_barcode_btn_tts">Opening barcode scanner</string>
     <string name="act_collect_delete_btn_tts">Value has been deleted.</string>
@@ -658,7 +658,7 @@
     <string name="preferences_profile_set_device_name">Device Name</string>
     <string name="preferences_profile_device_name_dialog_title">Set Device Name</string>
     <string name="preferences_profile_device_name_error">This field cannot be blank</string>
-    <string name="preferences_profile_device_name_default_format">Default: %s</string>
+    <string name="preferences_profile_device_name_default_format">Default: %1$s</string>
 
     <string name="preferences_profile_crashlytics" translatable="false">Crashlytics</string>
     <string name="pref_profile_crashlytics_user_id_enabled">Unique ID</string>
@@ -815,16 +815,16 @@
     <string name="pref_geonav_enable_summary">Navigate fields using device location</string>
 
     <string name="pref_geonav_search_method_title">Search Method</string>
-    <string name="pref_geonav_search_method_summary">The %s method used to search for plots in GeoNav</string>
+    <string name="pref_geonav_search_method_summary">The %1$s method used to search for plots in GeoNav</string>
     <string name="pref_geonav_method_distance">Distance</string>
     <string name="pref_geonav_method_trapezoid">Trapezoidal</string>
 
     <string name="pref_behavior_geonav_parameters_category_title">Parameters</string>
     <string name="pref_geonav_search_trapezoid_d1_title">Trapezoid Base (km)</string>
-    <string name="pref_geonav_search_trapezoid_d1_summary">The shorter base of the trapezoid is %s km</string>
+    <string name="pref_geonav_search_trapezoid_d1_summary">The shorter base of the trapezoid is %1$s km</string>
     <string name="pref_geonav_search_trapezoid_d2_title">Trapezoid Distance (km)</string>
-    <string name="pref_geonav_search_trapezoid_d2_summary">The distance from the user to the opposite end of the trapezoid is %s km</string>
-    <string name="pref_geonav_search_angle_summary">GeoNav creates a trapezoid in front of the user, the angle closest to the user is defined as %s°</string>
+    <string name="pref_geonav_search_trapezoid_d2_summary">The distance from the user to the opposite end of the trapezoid is %1$s km</string>
+    <string name="pref_geonav_search_angle_summary">GeoNav creates a trapezoid in front of the user, the angle closest to the user is defined as %1$s°</string>
     <string name="pref_geonav_search_angle_title">GeoNav Search Angle (degrees)</string>
 
     <string name="pref_geonav_log">GeoNav Log</string>
@@ -838,7 +838,7 @@
     <string name="pref_geonav_log_both_description">Both: Logging all location updates and algorithm steps to storage/geonav/log.txt, closest entry to storage/geonav/limited_log.txt</string>
 
     <string name="pref_geonav_update_interval_title">Update Interval (s)</string>
-    <string name="pref_geonav_update_interval_summary">The time between location updates is %ss</string>
+    <string name="pref_geonav_update_interval_summary">The time between location updates is %1$ss</string>
 
     <string name="pref_geonav_pair">Location Provider</string>
     <string name="pref_behavior_geonav_internal_gps_choice">Internal GPS</string>
@@ -1361,17 +1361,17 @@
     <string name="brapi_filter_type_trial">Trial</string>
     <string name="brapi_filter_type_crop">Crop</string>
     <string name="brapi_importer_search_hint">Search Text</string>
-    <string name="act_brapi_filter_by_title">Filter By: %s</string>
+    <string name="act_brapi_filter_by_title">Filter By: %1$s</string>
     <string name="check_all">Check All Filters</string>
     <string name="menu_action_brapi_filter_clear_all">Clear all filters</string>
-    <string name="brapi_filter_error">Something went wrong querying for %s</string>
+    <string name="brapi_filter_error">Something went wrong querying for %1$s</string>
     <string name="brapi_importer_fetch_data">Fetching data, the first run may take a minute.</string>
     <string name="menu_filter_brapi_reset_cache_title">Reset Cache</string>
     <string name="brapi_filter_bottom_sheet_delete_all_description">clear all filters</string>
     <string name="act_brapi_study_import_fetch_levels">Fetching observation levels...</string>
-    <string name="act_brapi_study_import_fetch_variables">Fetching variables for %s...</string>
-    <string name="act_brapi_study_import_fetch_units">Fetching observation units for %s...</string>
-    <string name="act_brapi_study_import_fetch_germplasm">Fetching germplasm for %s...</string>
+    <string name="act_brapi_study_import_fetch_variables">Fetching variables for %1$s...</string>
+    <string name="act_brapi_study_import_fetch_units">Fetching observation units for %1$s...</string>
+    <string name="act_brapi_study_import_fetch_germplasm">Fetching germplasm for %1$s...</string>
     <string name="act_brapi_list_filter_loading_trials">Loading trials, please wait.</string>
     <string name="act_brapi_list_filter_loading_studies">Loading studies, please wait.</string>
     <string name="act_brapi_list_filter_loading_variables">Loading variables, please wait.</string>
@@ -1383,7 +1383,7 @@
     <string name="results">results</string>
     <string name="failed_to_fetch_observation_units">Failed to fetch observation units</string>
     <string name="preferences_brapi_cache_invalidate_dialog_title">Invalidate Cache Interval Choices</string>
-    <string name="preferences_brapi_cache_invalidate_summary">%s</string>
+    <string name="preferences_brapi_cache_invalidate_summary">%1$s</string>
     <string name="preferences_brapi_cache_invalidate_title">Cache Invalidation</string>
     <string name="brapi_v1_is_not_compatible">BrAPI V1 is not compatible.</string>
     <string name="no_programdbid_provided">No programDbId provided</string>
@@ -1391,7 +1391,7 @@
     <string name="act_brapi_list_api_exception">Unknown error. Please check BrAPI preferences or contact developers.</string>
     <string name="act_brapi_list_filter_reset_cache_title">Confirm Reset</string>
     <string name="act_brapi_list_filter_reset_cache_message">This will delete local BrAPI data used for searching and importing.</string>
-    <string name="search_bar_hint">Searching… %s</string>
+    <string name="search_bar_hint">Searching… %1$s</string>
     <string name="menu_filter_brapi_clear_filters">Clear Filters</string>
     <string name="menu_filter_brapi_clear_selection">Clear Selection</string>
     <string name="level">Level</string>
@@ -1404,15 +1404,15 @@
     <string name="act_brapi_trait_preprocess_title">Field Book Format Chooser</string>
     <string name="act_brapi_trait_import_title">Choose Formats</string>
     <plurals name="act_brapi_list_filter">
-        <item quantity="one">%s result</item>
-        <item quantity="other">%s results</item>
+        <item quantity="one">%1$s result</item>
+        <item quantity="other">%1$s results</item>
     </plurals>
 
-    <string name="brapi_filter_type_program_count">Program (%s)</string>
-    <string name="brapi_filter_type_season_count">Season (%s)</string>
-    <string name="brapi_filter_type_trial_count">Trial (%s)</string>
-    <string name="brapi_filter_type_crop_count">Crop (%s)</string>
-    <string name="brapi_filter_type_study_count">Study (%s)</string>
+    <string name="brapi_filter_type_program_count">Program (%1$s)</string>
+    <string name="brapi_filter_type_season_count">Season (%1$s)</string>
+    <string name="brapi_filter_type_trial_count">Trial (%1$s)</string>
+    <string name="brapi_filter_type_crop_count">Crop (%1$s)</string>
+    <string name="brapi_filter_type_study_count">Study (%1$s)</string>
     <string name="pref_alpha_enhanced_brapi_import_summary">When enabled, a new BrAPI import UI will be used for studies and traits.</string>
     <string name="pref_alpha_brapi_import_title">New BrAPI Import UI</string>
     <string name="opening_brapi_no_network_error">Networking must be enabled to use BrAPI features.</string>
@@ -1454,30 +1454,30 @@
     <string name="nearby_share_transfer_cancelled">Transfer cancelled</string>
     <string name="nearby_share_devices_disconnected">Devices Disconnected</string>
     <string name="nearby_share_receiving_file">Receiving file…</string>
-    <string name="nearby_share_starting_transfer">Transferring File %s…</string>
+    <string name="nearby_share_starting_transfer">Transferring File %1$s…</string>
     <string name="nearby_share_waiting_for_receivers">Waiting for receivers to connect…</string>
     <string name="nearby_share_searching_for_senders">Searching for nearby devices…</string>
     <string name="nearby_share_already_waiting_for_receivers">Already waiting for receivers to connect…</string>
     <string name="nearby_share_already_searching_for_sender">Already searching for sender…</string>
     <string name="nearby_share_no_devices_found">No devices found yet</string>
     <string name="nearby_share_permissions_required">Nearby Devices Permissions Required</string>
-    <string name="nearby_share_failed_discovery">Failed to start discovery: %s</string>
-    <string name="nearby_share_failed_advertising">Error while waiting for devices: %s</string>
-    <string name="nearby_share_failed_transfer">Failed to start transfer: %s</string>
+    <string name="nearby_share_failed_discovery">Failed to start discovery: %1$s</string>
+    <string name="nearby_share_failed_advertising">Error while waiting for devices: %1$s</string>
+    <string name="nearby_share_failed_transfer">Failed to start transfer: %1$s</string>
     <string name="nearby_share_failed_payload">Failed to create file payload</string>
-    <string name="nearby_share_failed_request">Failed to request connection: %s</string>
-    <string name="nearby_share_failed_handle_file">Failed to handle file: %s</string>
+    <string name="nearby_share_failed_request">Failed to request connection: %1$s</string>
+    <string name="nearby_share_failed_handle_file">Failed to handle file: %1$s</string>
     <string name="nearby_share_generating_file">Getting the file ready for transfer</string>
-    <string name="nearby_share_failed_import">Failed to import file: %s</string>
-    <string name="nearby_share_failed_export_generation_message">Error generating file for sharing: %s</string>
+    <string name="nearby_share_failed_import">Failed to import file: %1$s</string>
+    <string name="nearby_share_failed_export_generation_message">Error generating file for sharing: %1$s</string>
     <string name="nearby_share_failed_export_generation">Error generating file for sharing</string>
-    <string name="nearby_share_file_imported_successfully">%s imported successfully</string>
+    <string name="nearby_share_file_imported_successfully">%1$s imported successfully</string>
 
-    <string name="nearby_share_authenticating_connection">Authenticating connection with %s…</string>
+    <string name="nearby_share_authenticating_connection">Authenticating connection with %1$s…</string>
 
     <string name="dialog_device_selection_title">Select a device</string>
-    <string name="dialog_nearby_authentication_title">Accept Connection to %s</string>
-    <string name="dialog_nearby_authentication_summary">Confirm the code matches on both devices: %s</string>
+    <string name="dialog_nearby_authentication_title">Accept Connection to %1$s</string>
+    <string name="dialog_nearby_authentication_summary">Confirm the code matches on both devices: %1$s</string>
 
     <string name="preferences_preferences_title">Preferences</string>
     <string name="nearby_share_export_preferences">Export Preferences</string>
