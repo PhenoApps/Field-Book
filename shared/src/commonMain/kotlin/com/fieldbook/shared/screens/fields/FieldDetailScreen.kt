@@ -69,12 +69,12 @@ import com.fieldbook.shared.generated.resources.fields_delete
 import com.fieldbook.shared.generated.resources.fields_delete_confirmation
 import com.fieldbook.shared.generated.resources.fields_rename_study
 import com.fieldbook.shared.generated.resources.ic_dots_grid
-import com.fieldbook.shared.generated.resources.ic_field
-import com.fieldbook.shared.generated.resources.ic_file_csv
 import com.fieldbook.shared.generated.resources.ic_information_outline
+import com.fieldbook.shared.generated.resources.ic_land_fields
 import com.fieldbook.shared.generated.resources.ic_rename
 import com.fieldbook.shared.generated.resources.ic_reorder
 import com.fieldbook.shared.generated.resources.ic_sort
+import com.fieldbook.shared.generated.resources.ic_table_arrow_right
 import com.fieldbook.shared.generated.resources.ic_tb_add_circle
 import com.fieldbook.shared.generated.resources.ic_tb_barcode
 import com.fieldbook.shared.generated.resources.ic_tb_delete
@@ -190,8 +190,15 @@ fun FieldDetailScreen(
             val displayName = currentField.exp_alias.ifBlank { currentField.exp_name }
             val searchId = currentField.search_attribute ?: currentField.unique_id
             val importFormat = ImportFormat.fromString(currentField.import_format)
-            val headerIcon =
-                if (importFormat == ImportFormat.CSV) Res.drawable.ic_file_csv else Res.drawable.ic_field
+            val headerIcon = Res.drawable.ic_land_fields
+            val sourceIcon = Res.drawable.ic_table_arrow_right
+            val sourceText = currentField.exp_source
+                ?.takeIf { it.isNotBlank() }
+                ?: if (importFormat == ImportFormat.CSV) {
+                    "${currentField.exp_name}.csv"
+                } else {
+                    currentField.exp_name
+                }
 
             LazyColumn(
                 modifier = Modifier
@@ -248,9 +255,8 @@ fun FieldDetailScreen(
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 DetailChip(
-                                    icon = headerIcon,
-                                    text = currentField.exp_name.takeIf { it.isNotBlank() }
-                                        ?: currentField.exp_source.orEmpty()
+                                    icon = sourceIcon,
+                                    text = sourceText
                                 )
                                 DetailChip(
                                     icon = Res.drawable.ic_dots_grid,

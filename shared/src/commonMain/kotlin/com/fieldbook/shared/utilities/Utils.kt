@@ -32,7 +32,7 @@ fun nowMillis(): Long = Clock.System.now().toEpochMilliseconds()
 
 fun relativeTimeText(dateImport: String?): String? {
     val raw = dateImport?.takeIf { it.isNotBlank() } ?: return null
-    val instant = runCatching { Instant.parse(raw) }.getOrNull() ?: return null
+    val instant = parseImportInstant(raw) ?: return null
     val diffMillis = kotlinx.datetime.Clock.System.now().toEpochMilliseconds() - instant.toEpochMilliseconds()
     if (diffMillis < 0) return null
 
@@ -51,5 +51,24 @@ fun relativeTimeText(dateImport: String?): String? {
             if (days == 1L) "1 day ago" else "$days days ago"
         }
         else -> "Today"
+    }
+}
+
+private fun parseImportInstant(raw: String): Instant? {
+    val candidates = buildList {
+        add(raw)
+        add(raw.replace(' ', 'T'))
+
+        val normalized = raw.replace(' ', 'T')
+        if (normalized.length >= 5) {
+            val offset = normalized.takeLast(5)
+            if ((offset.startsWith("+") || offset.startsWith("-")) && offset.drop(1).all(Char::isDigit)) {
+                add(normalized.dropLast(5) + offset.take(3) + ":" + offset.drop(3))
+            }
+        }
+    }
+
+    return candidates.firstNotNullOfOrNull { candidate ->
+        runCatching { Instant.parse(candidate) }.getOrNull()
     }
 }
