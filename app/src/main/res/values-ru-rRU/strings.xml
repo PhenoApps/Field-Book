@@ -18,6 +18,7 @@
     <!-- Startup  -->
     <!-- App Intro -->
     <string name="app_intro_tutorial_title">Обучение</string>
+    <string name="app_intro_high_contrast_title">Высококонтрастная тема</string>
     <!-- Storage Definer -->
     <!-- Permissions  -->
     <!-- Config Activity  -->
