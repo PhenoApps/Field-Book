@@ -2,6 +2,8 @@ package com.fieldbook.shared.screens.trait
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.fieldbook.shared.database.models.TraitObject
 import com.fieldbook.shared.database.repository.TraitRepository
 import com.fieldbook.shared.preferences.GeneralKeys
@@ -371,5 +373,14 @@ class TraitEditorScreenViewModel(
             }
         )
         append('\n')
+    }
+}
+
+fun traitEditorScreenViewModelFactory() = viewModelFactory {
+    initializer {
+        TraitEditorScreenViewModel(
+            traitRepository = TraitRepository(),
+            settings = Settings()
+        )
     }
 }
