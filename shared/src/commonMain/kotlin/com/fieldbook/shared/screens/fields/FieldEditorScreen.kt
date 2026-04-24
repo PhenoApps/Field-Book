@@ -2,6 +2,7 @@ package com.fieldbook.shared.screens.fields
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -55,8 +56,11 @@ import com.fieldbook.shared.objects.ImportFormat
 import com.fieldbook.shared.preferences.GeneralKeys
 import com.fieldbook.shared.utilities.FieldSwitchImpl
 import com.russhwolf.settings.Settings
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -71,6 +75,7 @@ fun FieldEditorScreen(
 ) {
     val showFieldCreatorDialog = remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+    val selectedFieldId = remember { mutableStateOf<Int?>(null) }
 
     // Observe state from the ViewModel
     val fieldsState by viewModel.fields.collectAsState(initial = null)
@@ -80,6 +85,19 @@ fun FieldEditorScreen(
     // load fields when the screen appears
     LaunchedEffect(Unit) {
         viewModel.loadFields()
+    }
+
+    if (selectedFieldId.value != null) {
+        FieldDetailScreen(
+            fieldId = selectedFieldId.value!!,
+            viewModel = viewModel,
+            onBack = { selectedFieldId.value = null },
+            onDeleted = {
+                selectedFieldId.value = null
+                viewModel.clearFieldDetail()
+            }
+        )
+        return
     }
 
     Scaffold(
@@ -146,7 +164,13 @@ fun FieldEditorScreen(
                 else -> {
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
                         items(fieldsState!!) { field ->
-                            FieldListItem(field = field, viewModel)
+                            FieldListItem(
+                                field = field,
+                                viewModel = viewModel,
+                                onOpenDetails = {
+                                    field.exp_id?.let { selectedFieldId.value = it }
+                                }
+                            )
                             HorizontalDivider()
                         }
                     }
@@ -172,7 +196,8 @@ fun FieldEditorScreen(
 @Composable
 private fun FieldListItem(
     field: FieldObject,
-    viewModel: FieldEditorScreenViewModel
+    viewModel: FieldEditorScreenViewModel,
+    onOpenDetails: () -> Unit
 ) {
     val activeStudyId by viewModel.activeFieldId.collectAsState()
     val importFormat = ImportFormat.fromString(field.import_format)
@@ -183,6 +208,7 @@ private fun FieldListItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable(onClick = onOpenDetails)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -216,6 +242,11 @@ private fun FieldListItem(
                 text = if (field.exp_alias.isNotEmpty()) field.exp_alias else field.exp_name,
                 style = MaterialTheme.typography.bodyLarge
             )
+            Text(
+                text = field.exp_name,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -241,6 +272,21 @@ class FieldEditorScreenViewModel(
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
+
+    private val _fieldDetail = MutableStateFlow<FieldObject?>(null)
+    val fieldDetail: StateFlow<FieldObject?> = _fieldDetail.asStateFlow()
+
+    private val _fieldDetailLoading = MutableStateFlow(false)
+    val fieldDetailLoading: StateFlow<Boolean> = _fieldDetailLoading.asStateFlow()
+
+    private val _fieldAttributes = MutableStateFlow<List<String>>(emptyList())
+    val fieldAttributes: StateFlow<List<String>> = _fieldAttributes.asStateFlow()
+
+    private val _messages = MutableSharedFlow<String>()
+    val messages: SharedFlow<String> = _messages.asSharedFlow()
+
+    private val _sortAscending = MutableStateFlow(true)
+    val sortAscending: StateFlow<Boolean> = _sortAscending.asStateFlow()
 
     fun switchField(field: FieldObject) {
         fieldSwitchImpl.switchField(field)
@@ -273,6 +319,100 @@ class FieldEditorScreenViewModel(
             }
         }
     }
+
+    fun loadFieldDetail(fieldId: Int) {
+        viewModelScope.launch {
+            _fieldDetailLoading.value = true
+            try {
+                _fieldDetail.value = studyRepository.getById(fieldId)
+                _fieldAttributes.value = observationUnitAttributeRepository
+                    .getAllNames(fieldId.toLong())
+                    .filter { it != "geo_coordinates" }
+                _sortAscending.value =
+                    settings.getString("${GeneralKeys.SORT_ORDER.key}.$fieldId", "ASC") == "ASC"
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _error.value = e.message ?: "Unknown error"
+            } finally {
+                _fieldDetailLoading.value = false
+            }
+        }
+    }
+
+    fun clearFieldDetail() {
+        _fieldDetail.value = null
+        _fieldAttributes.value = emptyList()
+    }
+
+    suspend fun validateFieldName(newName: String, currentFieldId: Int): NameCheckResult {
+        val conflict = studyRepository.getAllFields().firstOrNull { field ->
+            field.exp_id != currentFieldId && (field.exp_name == newName || field.exp_alias == newName)
+        }
+
+        return if (conflict == null) {
+            NameCheckResult(isUnique = true)
+        } else {
+            NameCheckResult(
+                isUnique = false,
+                conflictType = if (conflict.exp_name == newName) "name" else "alias"
+            )
+        }
+    }
+
+    fun renameField(fieldId: Int, newName: String) {
+        viewModelScope.launch {
+            studyRepository.updateStudyAlias(fieldId, newName)
+            refreshFieldData(fieldId)
+        }
+    }
+
+    fun updateFieldSort(fieldId: Int, sortAttributes: List<String>, ascending: Boolean) {
+        viewModelScope.launch {
+            studyRepository.updateStudySort(sortAttributes.joinToString(",").ifBlank { null }, fieldId)
+            settings.putString("${GeneralKeys.SORT_ORDER.key}.$fieldId", if (ascending) "ASC" else "DESC")
+            _sortAscending.value = ascending
+            refreshFieldData(fieldId)
+            _messages.emit("Sorting updated")
+        }
+    }
+
+    fun getPossibleUniqueAttributes(fieldId: Int): List<String> {
+        return studyRepository.getPossibleUniqueAttributes(fieldId)
+    }
+
+    fun updateSearchAttribute(fieldId: Int, attribute: String, applyToAll: Boolean) {
+        viewModelScope.launch {
+            if (applyToAll) {
+                val updatedCount = studyRepository.updateSearchAttributeForAllFields(attribute)
+                _messages.emit("Search attribute updated for $updatedCount field(s)")
+            } else {
+                studyRepository.updateSearchAttribute(fieldId, attribute)
+                _messages.emit("Search attribute updated")
+            }
+            refreshFieldData(fieldId)
+        }
+    }
+
+    fun deleteField(fieldId: Int) {
+        viewModelScope.launch {
+            studyRepository.deleteField(fieldId)
+            if (_activeFieldId.value == fieldId) {
+                val remainingFields = studyRepository.getAllFields()
+                val nextFieldId = remainingFields.firstOrNull()?.exp_id ?: 0
+                settings.putInt(GeneralKeys.SELECTED_FIELD_ID.key, nextFieldId)
+                _activeFieldId.value = nextFieldId
+            }
+            clearFieldDetail()
+            loadFields()
+        }
+    }
+
+    private suspend fun refreshFieldData(fieldId: Int) {
+        _fieldDetail.value = studyRepository.getById(fieldId)
+        _fields.value = studyRepository.getAllFields()
+    }
+
+    data class NameCheckResult(val isUnique: Boolean, val conflictType: String? = null)
 }
 
 fun fieldEditorViewModelFactory() = viewModelFactory {
