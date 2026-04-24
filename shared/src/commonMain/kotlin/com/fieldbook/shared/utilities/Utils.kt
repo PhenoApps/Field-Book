@@ -28,12 +28,10 @@ fun dateFormatMonthDay(date: String): String {
     return dateFormatMonthDay(localDate)
 }
 
-fun nowMillis(): Long = Clock.System.now().toEpochMilliseconds()
-
-fun relativeTimeText(dateImport: String?): String? {
-    val raw = dateImport?.takeIf { it.isNotBlank() } ?: return null
-    val instant = parseImportInstant(raw) ?: return null
-    val diffMillis = kotlinx.datetime.Clock.System.now().toEpochMilliseconds() - instant.toEpochMilliseconds()
+fun relativeTimeText(date: String?): String? {
+    val raw = date?.takeIf { it.isNotBlank() } ?: return null
+    val instant = tryParseInstant(raw) ?: return null
+    val diffMillis = Clock.System.now().toEpochMilliseconds() - instant.toEpochMilliseconds()
     if (diffMillis < 0) return null
 
     val dayMillis = 24L * 60L * 60L * 1000L
@@ -54,7 +52,7 @@ fun relativeTimeText(dateImport: String?): String? {
     }
 }
 
-private fun parseImportInstant(raw: String): Instant? {
+private fun tryParseInstant(raw: String): Instant? {
     val candidates = buildList {
         add(raw)
         add(raw.replace(' ', 'T'))
