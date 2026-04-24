@@ -83,6 +83,7 @@ class KmpHostActivity : ComponentActivity() {
                     KmpHostScreenType.STORAGE_PREFERENCES -> {
                         StoragePreferencesScreen(
                             onNavigate = { target -> currentScreen.value = target },
+                            onExit = { finishAffinity() },
                             onBack = {
                                 currentScreen.value = KmpHostScreenType.PREFERENCES
 
