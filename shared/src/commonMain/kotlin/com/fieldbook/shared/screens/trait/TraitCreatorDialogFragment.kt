@@ -50,7 +50,9 @@ fun TraitCreatorDialog(
     initialTrait: TraitObject? = null,
     onDismiss: () -> Unit,
     onSuccess: (TraitObject) -> Unit,
-    viewModel: TraitEditorScreenViewModel = viewModel()
+    viewModel: TraitEditorScreenViewModel = viewModel(
+        factory = traitEditorScreenViewModelFactory()
+    )
 ) {
     val isEditing = initialTrait != null
     var currentStep by remember(initialTrait?.id) {
