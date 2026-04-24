@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.preferences_storage_files_base_directory_title
 import com.fieldbook.shared.preferences.GeneralKeys
+import com.fieldbook.shared.utilities.normalizeStorageDirectoryPath
 import com.russhwolf.settings.Settings
 import io.github.vinceglb.filekit.compose.rememberDirectoryPickerLauncher
 import org.jetbrains.compose.resources.stringResource
@@ -36,9 +37,11 @@ fun StorageDefinerScreen(
     val preferences: Settings = Settings()
     var currentDirectory by remember {
         mutableStateOf(
-            preferences.getString(
+            normalizeStorageDirectoryPath(
+                preferences.getString(
                 GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY.key,
                 ""
+            )
             )
         )
     }
@@ -48,7 +51,7 @@ fun StorageDefinerScreen(
         initialDirectory = currentDirectory.ifEmpty { null }
     ) { directory ->
         directory?.let {
-            val value = it.path ?: ""
+            val value = normalizeStorageDirectoryPath(it.path ?: "")
             preferences.putString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY.key, value)
             currentDirectory = value
         }
