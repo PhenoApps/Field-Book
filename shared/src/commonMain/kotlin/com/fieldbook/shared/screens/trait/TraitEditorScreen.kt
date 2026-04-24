@@ -97,7 +97,9 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 @Composable
 fun TraitEditorScreen(
     onBack: (() -> Unit)? = null,
-    viewModel: TraitEditorScreenViewModel = viewModel()
+    viewModel: TraitEditorScreenViewModel = viewModel(
+        factory = traitEditorScreenViewModelFactory()
+    )
 ) {
     val traits by viewModel.traits.collectAsState()
     val loading by viewModel.loading.collectAsState()
