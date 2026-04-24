@@ -1,11 +1,15 @@
 package com.fieldbook.shared.screens.fields
 
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -13,6 +17,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
@@ -28,9 +34,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -52,6 +56,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import com.fieldbook.shared.components.CircleActionButton
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.dialog_cancel
 import com.fieldbook.shared.generated.resources.dialog_delete
@@ -67,7 +73,9 @@ import com.fieldbook.shared.generated.resources.ic_field
 import com.fieldbook.shared.generated.resources.ic_file_csv
 import com.fieldbook.shared.generated.resources.ic_information_outline
 import com.fieldbook.shared.generated.resources.ic_rename
+import com.fieldbook.shared.generated.resources.ic_reorder
 import com.fieldbook.shared.generated.resources.ic_sort
+import com.fieldbook.shared.generated.resources.ic_tb_add_circle
 import com.fieldbook.shared.generated.resources.ic_tb_barcode
 import com.fieldbook.shared.generated.resources.ic_tb_delete
 import com.fieldbook.shared.generated.resources.name_cannot_be_empty
@@ -75,6 +83,8 @@ import com.fieldbook.shared.generated.resources.name_conflict_display_name
 import com.fieldbook.shared.generated.resources.name_conflict_import_name
 import com.fieldbook.shared.generated.resources.search_attribute_apply_to_all
 import com.fieldbook.shared.generated.resources.search_attribute_dialog_title
+import com.fieldbook.shared.generated.resources.sort_ascending
+import com.fieldbook.shared.generated.resources.sort_descending
 import com.fieldbook.shared.objects.ImportFormat
 import com.fieldbook.shared.utilities.checkForIllegalCharacters
 import com.fieldbook.shared.utilities.relativeTimeText
@@ -84,6 +94,8 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -96,6 +108,7 @@ fun FieldDetailScreen(
     val field by viewModel.fieldDetail.collectAsState()
     val loading by viewModel.fieldDetailLoading.collectAsState()
     val attributes by viewModel.fieldAttributes.collectAsState()
+    val sortAscending by viewModel.sortAscending.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     var showRenameDialog by remember { mutableStateOf(false) }
@@ -286,10 +299,11 @@ fun FieldDetailScreen(
             if (showSortDialog) {
                 SortFieldDialog(
                     currentSort = currentField.exp_sort,
+                    ascending = sortAscending,
                     availableAttributes = attributes,
                     onDismiss = { showSortDialog = false },
-                    onSave = { newSort ->
-                        viewModel.updateFieldSort(currentField.exp_id!!, newSort)
+                    onSave = { newSort, ascending ->
+                        viewModel.updateFieldSort(currentField.exp_id!!, newSort, ascending)
                         showSortDialog = false
                     }
                 )
@@ -425,9 +439,10 @@ private fun RenameFieldDialog(
 @Composable
 private fun SortFieldDialog(
     currentSort: String?,
+    ascending: Boolean,
     availableAttributes: List<String>,
     onDismiss: () -> Unit,
-    onSave: (List<String>) -> Unit
+    onSave: (List<String>, Boolean) -> Unit
 ) {
     var sortItems by remember(currentSort) {
         mutableStateOf(
@@ -438,68 +453,112 @@ private fun SortFieldDialog(
                 .orEmpty()
         )
     }
+    var isAscending by remember(ascending) { mutableStateOf(ascending) }
     var addExpanded by remember { mutableStateOf(false) }
     val remainingAttributes = availableAttributes.filterNot { it in sortItems }
+    val lazyListState = rememberLazyListState()
+    val reorderState = rememberReorderableLazyListState(lazyListState) { from, to ->
+        val updated = sortItems.toMutableList()
+        val item = updated.removeAt(from.index)
+        updated.add(to.index, item)
+        sortItems = updated.toList()
+    }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(Res.string.field_sort_entries)) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                if (sortItems.isEmpty()) {
-                    Text(
-                        text = "No sort attributes selected.",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                } else {
-                    sortItems.forEachIndexed { index, attribute ->
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            shape = RoundedCornerShape(4.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = stringResource(Res.string.field_sort_entries),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                )
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(220.dp),
+                    state = lazyListState
+                ) {
+                    if (sortItems.isEmpty()) {
+                        item {
                             Text(
-                                text = "${index + 1}. $attribute",
-                                modifier = Modifier.weight(1f)
+                                text = "No sort attributes selected.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(12.dp)
                             )
-                            TextButton(
-                                onClick = {
-                                    if (index > 0) {
-                                        val updated = sortItems.toMutableList()
-                                        val temp = updated[index - 1]
-                                        updated[index - 1] = updated[index]
-                                        updated[index] = temp
-                                        sortItems = updated
+                        }
+                    } else {
+                        items(sortItems, key = { it }) { attribute ->
+                            ReorderableItem(reorderState, key = attribute) { isDragging ->
+                                val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
+                                androidx.compose.material3.Surface(shadowElevation = elevation) {
+                                    val dragModifier = with(this) { Modifier.draggableHandle() }
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 4.dp, vertical = 2.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(Res.drawable.ic_reorder),
+                                            contentDescription = null,
+                                            modifier = dragModifier.size(22.dp),
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Text(
+                                            text = attribute,
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .padding(start = 10.dp),
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        IconButton(onClick = { sortItems = sortItems - attribute }) {
+                                            Icon(
+                                                painter = painterResource(Res.drawable.ic_tb_delete),
+                                                contentDescription = stringResource(Res.string.fields_delete)
+                                            )
+                                        }
                                     }
                                 }
-                            ) {
-                                Text("Up")
-                            }
-                            TextButton(
-                                onClick = {
-                                    if (index < sortItems.lastIndex) {
-                                        val updated = sortItems.toMutableList()
-                                        val temp = updated[index + 1]
-                                        updated[index + 1] = updated[index]
-                                        updated[index] = temp
-                                        sortItems = updated
-                                    }
-                                }
-                            ) {
-                                Text("Down")
-                            }
-                            TextButton(onClick = { sortItems = sortItems - attribute }) {
-                                Text(stringResource(Res.string.fields_delete))
                             }
                         }
                     }
                 }
 
-                if (remainingAttributes.isNotEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    CircleActionButton(
+                        icon = Res.drawable.ic_tb_delete,
+                        onClick = { sortItems = emptyList() }
+                    )
+                    CircleActionButton(
+                        icon = if (isAscending) {
+                            Res.drawable.sort_ascending
+                        } else {
+                            Res.drawable.sort_descending
+                        },
+                        onClick = { isAscending = !isAscending }
+                    )
                     Column {
-                        OutlinedButton(onClick = { addExpanded = true }) {
-                            Text("Add attribute")
-                        }
+                        CircleActionButton(
+                            icon = Res.drawable.ic_tb_add_circle,
+                            onClick = { addExpanded = true }
+                        )
                         DropdownMenu(
                             expanded = addExpanded,
                             onDismissRequest = { addExpanded = false }
@@ -516,19 +575,21 @@ private fun SortFieldDialog(
                         }
                     }
                 }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = { onSave(sortItems) }) {
-                Text(stringResource(Res.string.dialog_save))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(Res.string.dialog_cancel))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = onDismiss) {
+                        Text(stringResource(Res.string.dialog_cancel))
+                    }
+                    TextButton(onClick = { onSave(sortItems, isAscending) }) {
+                        Text("OK")
+                    }
+                }
             }
         }
-    )
+    }
 }
 
 @Composable
@@ -545,29 +606,48 @@ private fun SearchAttributeDialog(
     }
     var applyToAll by remember { mutableStateOf(false) }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(Res.string.search_attribute_dialog_title)) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            shape = RoundedCornerShape(4.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = stringResource(Res.string.search_attribute_dialog_title),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = "UNIQUE ATTRIBUTES",
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+                Spacer(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .fillMaxWidth(0.55f)
+                        .height(1.dp)
+                        .background(Color(0xFF8E5A4A))
+                )
+
                 if (options.isEmpty()) {
                     Text("No unique attributes available.")
                 } else {
-                    LazyColumn(modifier = Modifier.height(220.dp)) {
-                        items(options) { option ->
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                RadioButton(
-                                    selected = selected == option,
-                                    onClick = { selected = option }
-                                )
-                                Text(
-                                    text = option,
-                                    modifier = Modifier.padding(start = 8.dp)
-                                )
-                            }
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        options.forEach { option ->
+                            SearchAttributeOption(
+                                text = option,
+                                selected = selected == option,
+                                onClick = {
+                                    selected = option
+                                    onSave(option, applyToAll)
+                                }
+                            )
                         }
                     }
                     Row(
@@ -584,22 +664,18 @@ private fun SearchAttributeDialog(
                         )
                     }
                 }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                enabled = selected.isNotBlank(),
-                onClick = { onSave(selected, applyToAll) }
-            ) {
-                Text(stringResource(Res.string.dialog_save))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(Res.string.dialog_cancel))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = onDismiss) {
+                        Text(stringResource(Res.string.dialog_cancel))
+                    }
+                }
             }
         }
-    )
+    }
 }
 
 @Composable
@@ -680,4 +756,30 @@ private fun ActionChip(
             borderColor = MaterialTheme.colorScheme.primary
         )
     )
+}
+
+@Composable
+private fun SearchAttributeOption(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                color = if (selected) MaterialTheme.colorScheme.primary else Color.Black,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 8.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.SemiBold
+        )
+    }
 }

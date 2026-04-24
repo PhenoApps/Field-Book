@@ -285,6 +285,9 @@ class FieldEditorScreenViewModel(
     private val _messages = MutableSharedFlow<String>()
     val messages: SharedFlow<String> = _messages.asSharedFlow()
 
+    private val _sortAscending = MutableStateFlow(true)
+    val sortAscending: StateFlow<Boolean> = _sortAscending.asStateFlow()
+
     fun switchField(field: FieldObject) {
         fieldSwitchImpl.switchField(field)
         viewModelScope.launch {
@@ -325,6 +328,8 @@ class FieldEditorScreenViewModel(
                 _fieldAttributes.value = observationUnitAttributeRepository
                     .getAllNames(fieldId.toLong())
                     .filter { it != "geo_coordinates" }
+                _sortAscending.value =
+                    settings.getString("${GeneralKeys.SORT_ORDER.key}.$fieldId", "ASC") == "ASC"
             } catch (e: Exception) {
                 e.printStackTrace()
                 _error.value = e.message ?: "Unknown error"
@@ -361,9 +366,11 @@ class FieldEditorScreenViewModel(
         }
     }
 
-    fun updateFieldSort(fieldId: Int, sortAttributes: List<String>) {
+    fun updateFieldSort(fieldId: Int, sortAttributes: List<String>, ascending: Boolean) {
         viewModelScope.launch {
             studyRepository.updateStudySort(sortAttributes.joinToString(",").ifBlank { null }, fieldId)
+            settings.putString("${GeneralKeys.SORT_ORDER.key}.$fieldId", if (ascending) "ASC" else "DESC")
+            _sortAscending.value = ascending
             refreshFieldData(fieldId)
             _messages.emit("Sorting updated")
         }
