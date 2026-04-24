@@ -61,7 +61,6 @@ import com.fieldbook.shared.generated.resources.preferences_storage_title
 import com.fieldbook.shared.screens.export.ExportScreen
 import com.fieldbook.shared.utilities.resetLocalDatabaseAndPreferences
 import com.fieldbook.shared.utilities.selectFirstField
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
@@ -301,10 +300,6 @@ fun StoragePreferencesScreen(
                                     }.getOrDefault(false)
 
                                     if (resetSucceeded) {
-                                        snackbarHostState.showSnackbar(
-                                            deleteSuccessMessage
-                                        )
-                                        delay(300)
                                         onExit?.invoke() ?: onBack?.invoke()
                                     } else {
                                         snackbarHostState.showSnackbar(deleteFailureMessage)
