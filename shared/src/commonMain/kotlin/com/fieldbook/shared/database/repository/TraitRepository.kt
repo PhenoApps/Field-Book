@@ -6,7 +6,8 @@ import com.fieldbook.shared.sqldelight.Observation_variables
 import com.fieldbook.shared.sqldelight.createDatabase
 
 class TraitRepository() {
-    private val db: FieldbookDatabase = createDatabase()
+    private val db: FieldbookDatabase
+        get() = createDatabase()
 
     private fun Observation_variables.toTraitObject(): TraitObject {
         return TraitObject(
