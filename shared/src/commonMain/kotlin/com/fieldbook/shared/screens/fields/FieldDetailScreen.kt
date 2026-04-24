@@ -1,24 +1,30 @@
 package com.fieldbook.shared.screens.fields
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,7 +48,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.dialog_cancel
@@ -54,13 +62,22 @@ import com.fieldbook.shared.generated.resources.field_sort_entries
 import com.fieldbook.shared.generated.resources.fields_delete
 import com.fieldbook.shared.generated.resources.fields_delete_confirmation
 import com.fieldbook.shared.generated.resources.fields_rename_study
+import com.fieldbook.shared.generated.resources.ic_dots_grid
+import com.fieldbook.shared.generated.resources.ic_field
+import com.fieldbook.shared.generated.resources.ic_file_csv
+import com.fieldbook.shared.generated.resources.ic_information_outline
+import com.fieldbook.shared.generated.resources.ic_rename
+import com.fieldbook.shared.generated.resources.ic_sort
+import com.fieldbook.shared.generated.resources.ic_tb_barcode
 import com.fieldbook.shared.generated.resources.ic_tb_delete
 import com.fieldbook.shared.generated.resources.name_cannot_be_empty
 import com.fieldbook.shared.generated.resources.name_conflict_display_name
 import com.fieldbook.shared.generated.resources.name_conflict_import_name
 import com.fieldbook.shared.generated.resources.search_attribute_apply_to_all
 import com.fieldbook.shared.generated.resources.search_attribute_dialog_title
+import com.fieldbook.shared.objects.ImportFormat
 import com.fieldbook.shared.utilities.checkForIllegalCharacters
+import com.fieldbook.shared.utilities.relativeTimeText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -68,7 +85,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun FieldDetailScreen(
     fieldId: Int,
@@ -159,56 +176,98 @@ fun FieldDetailScreen(
             val currentField = field!!
             val displayName = currentField.exp_alias.ifBlank { currentField.exp_name }
             val searchId = currentField.search_attribute ?: currentField.unique_id
+            val importFormat = ImportFormat.fromString(currentField.import_format)
+            val headerIcon =
+                if (importFormat == ImportFormat.CSV) Res.drawable.ic_file_csv else Res.drawable.ic_field
 
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
+                    .background(Color(0xFFF6F5F2))
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 item {
-                    Card(modifier = Modifier.fillMaxWidth()) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(16.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Text(
-                                text = displayName,
-                                style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            DetailRow(label = "Imported name", value = currentField.exp_name)
-                            DetailRow(label = "Entries", value = currentField.count.orEmpty())
-                            DetailRow(label = "Attributes", value = currentField.attribute_count.orEmpty())
-                            DetailRow(label = "Search ID", value = searchId)
-                            currentField.exp_sort
-                                ?.takeIf { it.isNotBlank() }
-                                ?.let { DetailRow(label = "Sort", value = it) }
-
-                            HorizontalDivider()
-
-                            OutlinedButton(
-                                onClick = { showRenameDialog = true },
-                                modifier = Modifier.fillMaxWidth()
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.Top
                             ) {
-                                Text(stringResource(Res.string.fields_rename_study))
+                                Icon(
+                                    painter = painterResource(headerIcon),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .padding(top = 2.dp, end = 10.dp)
+                                        .size(28.dp),
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = displayName,
+                                        style = MaterialTheme.typography.headlineSmall,
+                                        fontWeight = FontWeight.SemiBold,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    relativeTimeText(currentField.date_import)?.let { relativeTime ->
+                                        Text(
+                                            text = relativeTime,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
                             }
 
-                            OutlinedButton(
-                                onClick = { showSortDialog = true },
-                                modifier = Modifier.fillMaxWidth()
+                            FlowRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Text(stringResource(Res.string.field_sort_entries))
+                                DetailChip(
+                                    icon = headerIcon,
+                                    text = currentField.exp_name.takeIf { it.isNotBlank() }
+                                        ?: currentField.exp_source.orEmpty()
+                                )
+                                DetailChip(
+                                    icon = Res.drawable.ic_dots_grid,
+                                    text = currentField.count.orEmpty()
+                                )
+                                DetailChip(
+                                    icon = Res.drawable.ic_information_outline,
+                                    text = currentField.attribute_count.orEmpty()
+                                )
                             }
 
-                            OutlinedButton(
-                                onClick = { showSearchDialog = true },
-                                modifier = Modifier.fillMaxWidth()
+                            FlowRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Text(stringResource(Res.string.search_attribute_dialog_title))
+                                ActionChip(
+                                    label = stringResource(Res.string.fields_rename_study),
+                                    icon = Res.drawable.ic_rename,
+                                    onClick = { showRenameDialog = true }
+                                )
+                                ActionChip(
+                                    label = stringResource(Res.string.field_sort_entries),
+                                    icon = Res.drawable.ic_sort,
+                                    onClick = { showSortDialog = true }
+                                )
+                                ActionChip(
+                                    label = searchId,
+                                    icon = Res.drawable.ic_tb_barcode,
+                                    onClick = { showSearchDialog = true }
+                                )
                             }
                         }
                     }
@@ -556,4 +615,69 @@ private fun DetailRow(label: String, value: String) {
             style = MaterialTheme.typography.bodyLarge
         )
     }
+}
+
+@Composable
+private fun DetailChip(
+    icon: org.jetbrains.compose.resources.DrawableResource,
+    text: String
+) {
+    AssistChip(
+        onClick = {},
+        enabled = false,
+        label = {
+            Text(
+                text = text,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
+        leadingIcon = {
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = null,
+                modifier = Modifier.size(18.dp)
+            )
+        },
+        colors = AssistChipDefaults.assistChipColors(
+            disabledContainerColor = Color(0xFFE2F0C9),
+            disabledLabelColor = MaterialTheme.colorScheme.onSurface,
+            disabledLeadingIconContentColor = MaterialTheme.colorScheme.onSurface
+        ),
+        border = null
+    )
+}
+
+@Composable
+private fun ActionChip(
+    label: String,
+    icon: org.jetbrains.compose.resources.DrawableResource,
+    onClick: () -> Unit
+) {
+    AssistChip(
+        onClick = onClick,
+        label = {
+            Text(
+                text = label,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
+        leadingIcon = {
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = null,
+                modifier = Modifier.size(18.dp)
+            )
+        },
+        colors = AssistChipDefaults.assistChipColors(
+            containerColor = Color.White,
+            labelColor = MaterialTheme.colorScheme.onSurface,
+            leadingIconContentColor = MaterialTheme.colorScheme.onSurface
+        ),
+        border = AssistChipDefaults.assistChipBorder(
+            enabled = true,
+            borderColor = MaterialTheme.colorScheme.primary
+        )
+    )
 }
