@@ -128,7 +128,9 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Get local.properties from secrets
-        run: echo "${{secrets.LOCAL_PROPERTIES }}" > $GITHUB_WORKSPACE/local.properties
+        env:
+          LOCAL_PROPERTIES: ${{ secrets.LOCAL_PROPERTIES }}
+        run: printenv LOCAL_PROPERTIES > $GITHUB_WORKSPACE/local.properties
 
       - name: Build APK
         run: ./gradlew app:assembleRelease
