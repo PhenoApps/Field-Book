@@ -6,6 +6,7 @@ import com.fieldbook.shared.AndroidAppContextHolder
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.dir_archive
 import com.fieldbook.shared.generated.resources.dir_field_export
+import com.fieldbook.shared.generated.resources.dir_field_import
 import com.fieldbook.shared.generated.resources.dir_trait
 import org.phenoapps.utils.BaseDocumentTreeUtil
 import java.io.BufferedInputStream
@@ -79,6 +80,15 @@ actual fun getTraitDirectory(): DocumentFile? {
         ctx.resources.getIdentifier(Res.string.dir_trait.key, "string", ctx.packageName)
     )
     return traitDir?.let { AndroidDocumentFile(it) }
+}
+
+actual fun getFieldImportDirectory(): DocumentFile? {
+    val ctx = AndroidAppContextHolder.context
+    val fieldImportDir = BaseDocumentTreeUtil.getDirectory(
+        ctx,
+        ctx.resources.getIdentifier(Res.string.dir_field_import.key, "string", ctx.packageName)
+    )
+    return fieldImportDir?.let { AndroidDocumentFile(it) }
 }
 
 actual fun listFiles(dir: DocumentFile): List<DocumentFile> {

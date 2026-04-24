@@ -18,6 +18,7 @@ expect fun createDir(parent: String, child: String): DocumentFile?
 expect fun getExportDirectory(): DocumentFile?
 expect fun getArchiveDirectory(): DocumentFile?
 expect fun getTraitDirectory(): DocumentFile?
+expect fun getFieldImportDirectory(): DocumentFile?
 expect fun listFiles(dir: DocumentFile): List<DocumentFile>
 expect fun copyFileToDirectory(source: DocumentFile, destinationDir: DocumentFile, newFileName: String): DocumentFile?
 expect fun zipFiles(files: List<DocumentFile>, zipFileName: String): DocumentFile?

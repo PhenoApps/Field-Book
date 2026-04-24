@@ -16,6 +16,7 @@ actual fun createDir(parent: String, child: String): DocumentFile? = TODO("Not y
 actual fun getExportDirectory(): DocumentFile? = TODO("Not yet implemented")
 actual fun getArchiveDirectory(): DocumentFile? = TODO("Not yet implemented")
 actual fun getTraitDirectory(): DocumentFile? = TODO("Not yet implemented")
+actual fun getFieldImportDirectory(): DocumentFile? = null
 actual fun listFiles(dir: DocumentFile): List<DocumentFile> = TODO("Not yet implemented")
 actual fun copyFileToDirectory(source: DocumentFile, destinationDir: DocumentFile, newFileName: String): DocumentFile? =
     TODO("Not yet implemented")
