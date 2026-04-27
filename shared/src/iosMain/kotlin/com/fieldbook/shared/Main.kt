@@ -9,6 +9,7 @@ import com.fieldbook.shared.screens.ConfigScreen
 import com.fieldbook.shared.screens.collect.CollectScreen
 import com.fieldbook.shared.screens.export.ExportScreen
 import com.fieldbook.shared.screens.fields.FieldEditorScreen
+import com.fieldbook.shared.screens.preferences.BrapiPreferencesScreen
 import com.fieldbook.shared.screens.preferences.PreferencesScreen
 import com.fieldbook.shared.screens.preferences.StorageDefinerScreen
 import com.fieldbook.shared.screens.preferences.StoragePreferencesScreen
@@ -39,6 +40,10 @@ fun MainViewController(driverFactory: DriverFactory) = ComposeUIViewController {
             KmpHostScreenType.PREFERENCES -> PreferencesScreen(
                 onBack = { currentScreen = KmpHostScreenType.CONFIG },
                 onNavigate = { target -> currentScreen = target }
+            )
+
+            KmpHostScreenType.BRAPI_PREFERENCES -> BrapiPreferencesScreen(
+                onBack = { currentScreen = KmpHostScreenType.PREFERENCES }
             )
 
             KmpHostScreenType.STORAGE_PREFERENCES -> StoragePreferencesScreen(

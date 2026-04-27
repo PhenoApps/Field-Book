@@ -55,7 +55,7 @@ private data class PreferenceItem(
     val icon: DrawableResource,
     val title: StringResource,
     val key: String,
-    val isImplemented: Boolean? = null
+    val destination: KmpHostScreenType? = null
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -98,7 +98,8 @@ fun PreferencesScreen(
         PreferenceItem(
             icon = Res.drawable.ic_adv_brapi,
             title = Res.string.preferences_brapi,
-            key = "pref_key_brapi_settings"
+            key = "pref_key_brapi_settings",
+            destination = KmpHostScreenType.BRAPI_PREFERENCES
         ),
         PreferenceItem(
             icon = Res.drawable.ic_pref_system,
@@ -109,7 +110,7 @@ fun PreferencesScreen(
             icon = Res.drawable.ic_database_cog,
             title = Res.string.preferences_storage_title,
             key = "pref_key_storage_settings",
-            isImplemented = true
+            destination = KmpHostScreenType.STORAGE_PREFERENCES
         ),
         PreferenceItem(
             icon = Res.drawable.ic_experimental,
@@ -138,14 +139,14 @@ fun PreferencesScreen(
             )
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(preferenceItems) { item ->
-                    val isImplemented = item.isImplemented == true
+                    val isImplemented = item.destination != null
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp)
                             .let { mod ->
                                 if (isImplemented && onNavigate != null) {
-                                    mod.clickable { onNavigate(KmpHostScreenType.STORAGE_PREFERENCES) }
+                                    mod.clickable { onNavigate(item.destination!!) }
                                 } else mod
                             }
                             .graphicsLayer { alpha = if (isImplemented) 1f else 0.4f },
