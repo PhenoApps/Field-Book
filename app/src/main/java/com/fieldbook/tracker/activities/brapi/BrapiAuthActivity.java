@@ -70,6 +70,13 @@ public class BrapiAuthActivity extends ThemedActivity {
 
     private boolean activityStarting = false;
 
+    private String launchServerUrl;
+    private String launchOidcUrl;
+    private String launchOidcFlow;
+    private String launchOidcClientId;
+    private String launchOidcScope;
+    private String launchBrapiVersion;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,15 +96,36 @@ public class BrapiAuthActivity extends ThemedActivity {
 
         activityStarting = true;
 
+        // Capture launch-time config before onNewIntent() can replace getIntent() with the OAuth
+        // callback intent (which carries no extras), causing authSuccess() and onResume() to fall
+        // back to stale SharedPreferences instead of the per-account values passed by the caller.
+        if (savedInstanceState != null) {
+            launchServerUrl    = savedInstanceState.getString(EXTRA_SERVER_URL, "");
+            launchOidcUrl      = savedInstanceState.getString(EXTRA_OIDC_URL, "");
+            launchOidcFlow     = savedInstanceState.getString(EXTRA_OIDC_FLOW, "");
+            launchOidcClientId = savedInstanceState.getString(EXTRA_OIDC_CLIENT_ID, "");
+            launchOidcScope    = savedInstanceState.getString(EXTRA_OIDC_SCOPE, "");
+            launchBrapiVersion = savedInstanceState.getString(EXTRA_BRAPI_VERSION, "");
+        } else {
+            Intent i = getIntent();
+            launchServerUrl    = i.hasExtra(EXTRA_SERVER_URL)     ? i.getStringExtra(EXTRA_SERVER_URL)     : preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
+            launchOidcUrl      = i.hasExtra(EXTRA_OIDC_URL)       ? i.getStringExtra(EXTRA_OIDC_URL)       : preferences.getString(PreferenceKeys.BRAPI_OIDC_URL, "");
+            launchOidcFlow     = i.hasExtra(EXTRA_OIDC_FLOW)      ? i.getStringExtra(EXTRA_OIDC_FLOW)      : preferences.getString(PreferenceKeys.BRAPI_OIDC_FLOW, "");
+            launchOidcClientId = i.hasExtra(EXTRA_OIDC_CLIENT_ID) ? i.getStringExtra(EXTRA_OIDC_CLIENT_ID) : preferences.getString(PreferenceKeys.BRAPI_OIDC_CLIENT_ID, "fieldbook");
+            launchOidcScope    = i.hasExtra(EXTRA_OIDC_SCOPE)     ? i.getStringExtra(EXTRA_OIDC_SCOPE)     : preferences.getString(PreferenceKeys.BRAPI_OIDC_SCOPE, "");
+            launchBrapiVersion = i.hasExtra(EXTRA_BRAPI_VERSION)  ? i.getStringExtra(EXTRA_BRAPI_VERSION)  : "";
+        }
+        if (launchServerUrl    == null) launchServerUrl    = "";
+        if (launchOidcUrl      == null) launchOidcUrl      = "";
+        if (launchOidcFlow     == null) launchOidcFlow     = "";
+        if (launchOidcClientId == null || launchOidcClientId.isEmpty()) launchOidcClientId = "fieldbook";
+        if (launchOidcScope    == null) launchOidcScope    = "";
+        if (launchBrapiVersion == null) launchBrapiVersion = "";
+
         // Start our login process
         //when coming back from deep link this check keeps app from auto-re-authenticating
         if (getIntent() != null && getIntent().getData() == null) {
-            // Prefer per-account OIDC flow from Intent extras
-            String flow = getIntent().hasExtra(EXTRA_OIDC_FLOW)
-                    ? getIntent().getStringExtra(EXTRA_OIDC_FLOW)
-                    : preferences.getString(PreferenceKeys.BRAPI_OIDC_FLOW, "");
-            if (flow == null) flow = "";
-            if (flow.equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
+            if (launchOidcFlow.equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
                 authorizeBrAPI_OLD(preferences, this);
             } else {
                 authorizeBrAPI(preferences, this);
@@ -115,6 +143,17 @@ public class BrapiAuthActivity extends ThemedActivity {
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(EXTRA_SERVER_URL,     launchServerUrl);
+        outState.putString(EXTRA_OIDC_URL,       launchOidcUrl);
+        outState.putString(EXTRA_OIDC_FLOW,      launchOidcFlow);
+        outState.putString(EXTRA_OIDC_CLIENT_ID, launchOidcClientId);
+        outState.putString(EXTRA_OIDC_SCOPE,     launchOidcScope);
+        outState.putString(EXTRA_BRAPI_VERSION,  launchBrapiVersion);
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
 
@@ -127,8 +166,7 @@ public class BrapiAuthActivity extends ThemedActivity {
 
             if (data != null) {
                 // authorization completed
-                String flow = preferences.getString(PreferenceKeys.BRAPI_OIDC_FLOW, "");
-                if (flow.equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
+                if (launchOidcFlow.equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
                     checkBrapiAuth_OLD(data);
                 } else {
                     checkBrapiAuth(data);
@@ -151,40 +189,17 @@ public class BrapiAuthActivity extends ThemedActivity {
     }
 
     public void authorizeBrAPI(SharedPreferences sharedPreferences, Context context) {
-        // Prefer per-account config from Intent extras; fall back to SharedPreferences
-        Intent extras = getIntent();
-        String flow = extras != null && extras.hasExtra(EXTRA_OIDC_FLOW)
-                ? extras.getStringExtra(EXTRA_OIDC_FLOW)
-                : sharedPreferences.getString(PreferenceKeys.BRAPI_OIDC_FLOW, "");
-        if (flow == null) flow = "";
-
-        final String responseType = flow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)) ?
-                ResponseTypeValues.TOKEN : ResponseTypeValues.CODE;
+        final String responseType = launchOidcFlow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))
+                ? ResponseTypeValues.TOKEN : ResponseTypeValues.CODE;
 
         try {
-            String clientId = extras != null && extras.hasExtra(EXTRA_OIDC_CLIENT_ID)
-                    ? extras.getStringExtra(EXTRA_OIDC_CLIENT_ID)
-                    : sharedPreferences.getString(PreferenceKeys.BRAPI_OIDC_CLIENT_ID, "fieldbook");
-            if (clientId == null || clientId.isEmpty()) clientId = "fieldbook";
-            final String finalClientId = clientId;
-
-            String scope = extras != null && extras.hasExtra(EXTRA_OIDC_SCOPE)
-                    ? extras.getStringExtra(EXTRA_OIDC_SCOPE)
-                    : sharedPreferences.getString(PreferenceKeys.BRAPI_OIDC_SCOPE, "");
-            if (scope == null) scope = "";
-            final String finalScope = scope;
+            final String finalClientId = launchOidcClientId;
+            final String finalScope    = launchOidcScope;
 
             // Authorization code flow works better with custom URL scheme fieldbook://app/auth
             // https://github.com/openid/AppAuth-Android/issues?q=is%3Aissue+intent+null
-            Uri redirectURI = flow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)) ?
-                    Uri.parse("https://phenoapps.org/field-book") : Uri.parse("fieldbook://app/auth");
-
-            // Prefer per-account OIDC discovery URL from Intent extras
-            String oidcUrl = extras != null && extras.hasExtra(EXTRA_OIDC_URL)
-                    ? extras.getStringExtra(EXTRA_OIDC_URL)
-                    : sharedPreferences.getString(PreferenceKeys.BRAPI_OIDC_URL, "");
-            if (oidcUrl == null) oidcUrl = "";
-            final String finalOidcUrl = oidcUrl;
+            Uri redirectURI = launchOidcFlow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))
+                    ? Uri.parse("https://phenoapps.org/field-book") : Uri.parse("fieldbook://app/auth");
 
             authUtil.getAuthServiceConfiguration((authorizationServiceConfiguration, ex) -> {
 
@@ -209,7 +224,7 @@ public class BrapiAuthActivity extends ThemedActivity {
                 }
 
                 return null;
-            }, finalOidcUrl);
+            }, launchOidcUrl);
 
         } catch (Exception ex) {
 
@@ -289,11 +304,7 @@ public class BrapiAuthActivity extends ThemedActivity {
 
     private void authSuccess(String accessToken, @Nullable String idToken) {
 
-        // Prefer server URL from Intent extras (set by BrapiManualAccountDialogFragment)
-        String serverUrl = getIntent() != null && getIntent().hasExtra(EXTRA_SERVER_URL)
-                ? getIntent().getStringExtra(EXTRA_SERVER_URL)
-                : preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
-        if (serverUrl == null) serverUrl = "";
+        String serverUrl = launchServerUrl;
 
         if (!serverUrl.isEmpty()) {
             accountHelper.storeToken(serverUrl, accessToken, idToken);
