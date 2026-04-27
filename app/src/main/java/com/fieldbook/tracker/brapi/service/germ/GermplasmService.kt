@@ -54,7 +54,7 @@ interface GermplasmService {
                     override fun onFailure(
                         error: ApiException,
                         statusCode: Int,
-                        responseHeaders: Map<String, List<String>>
+                        responseHeaders: Map<String, List<String>>?
                     ) {
                         onFail(error.code)
                     }
