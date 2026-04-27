@@ -8,10 +8,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 
 object CSVUtil {
-    fun readRows(bytes: ByteArray): List<List<String>> {
-        return parseCsvRows(bytes.decodeToString())
-    }
-
     @OptIn(ExperimentalSerializationApi::class)
     fun parseTraits(bytes: ByteArray, positionOffset: Int = 0): List<TraitObject> {
         val csv = bytes.decodeToString()
@@ -37,65 +33,6 @@ object CSVUtil {
                 traitDataSource = "local"
             )
         }
-    }
-
-    private fun parseCsvRows(input: String): List<List<String>> {
-        val rows = mutableListOf<List<String>>()
-        val row = mutableListOf<String>()
-        val value = StringBuilder()
-        var index = 0
-        var inQuotes = false
-
-        fun endValue() {
-            row.add(value.toString())
-            value.clear()
-        }
-
-        fun endRow() {
-            endValue()
-            if (row.any { it.isNotEmpty() }) {
-                rows.add(row.toList())
-            }
-            row.clear()
-        }
-
-        while (index < input.length) {
-            val char = input[index]
-
-            when {
-                char == '"' && inQuotes && input.getOrNull(index + 1) == '"' -> {
-                    value.append('"')
-                    index++
-                }
-
-                char == '"' -> {
-                    inQuotes = !inQuotes
-                }
-
-                char == ',' && !inQuotes -> {
-                    endValue()
-                }
-
-                (char == '\n' || char == '\r') && !inQuotes -> {
-                    endRow()
-                    if (char == '\r' && input.getOrNull(index + 1) == '\n') {
-                        index++
-                    }
-                }
-
-                else -> {
-                    value.append(char)
-                }
-            }
-
-            index++
-        }
-
-        if (value.isNotEmpty() || row.isNotEmpty()) {
-            endRow()
-        }
-
-        return rows
     }
 }
 
