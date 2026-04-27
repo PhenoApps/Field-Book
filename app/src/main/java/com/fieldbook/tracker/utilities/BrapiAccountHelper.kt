@@ -147,6 +147,10 @@ class BrapiAccountHelper @Inject constructor(
      * Creates an AccountManager entry for a new server without yet storing a token.
      * All per-account settings (OIDC URL, flow, version, etc.) are persisted as user data.
      * Returns the created or updated Account.
+     *
+     * [originalServerUrl] — when editing an existing account, pass the URL it was originally
+     * saved under so the lookup uses the old URL rather than the (possibly changed) new one.
+     * This prevents URL edits from creating orphaned duplicate accounts.
      */
     fun addAccountConfig(
         serverUrl: String,
@@ -155,16 +159,32 @@ class BrapiAccountHelper @Inject constructor(
         oidcFlow: String = "",
         oidcClientId: String = "",
         oidcScope: String = "",
-        brapiVersion: String = "V2"
+        brapiVersion: String = "V2",
+        originalServerUrl: String? = null,
     ): Account {
         val am = AccountManager.get(context)
         val normUrl = normalizeUrl(serverUrl)
+        val lookupUrl = originalServerUrl?.let { normalizeUrl(it) } ?: normUrl
         val name = displayName.ifEmpty { extractHostname(normUrl) }
 
-        val existing = getAccountByUrl(normUrl)
-        val account = existing ?: Account(name, BrapiAuthenticator.ACCOUNT_TYPE).also {
-            am.addAccountExplicitly(it, null, null)
-            grantVisibilityToAllowedPackages(am, it)
+        val existing = getAccountByUrl(lookupUrl)
+        val account = existing ?: run {
+            // Guard against duplicate Account.name values: if another account already has
+            // this display name (with a different URL), addAccountExplicitly would return
+            // false and subsequent setUserData calls would silently corrupt that account's
+            // data. Deduplicate by appending a numeric suffix.
+            val existingNames = am.getAccountsByType(BrapiAuthenticator.ACCOUNT_TYPE)
+                .map { it.name }.toSet()
+            var uniqueName = name
+            var suffix = 2
+            while (uniqueName in existingNames) {
+                uniqueName = "$name ($suffix)"
+                suffix++
+            }
+            Account(uniqueName, BrapiAuthenticator.ACCOUNT_TYPE).also {
+                am.addAccountExplicitly(it, null, null)
+                grantVisibilityToAllowedPackages(am, it)
+            }
         }
 
         am.setUserData(account, BrapiAuthenticator.KEY_SERVER_URL, normUrl)
@@ -190,9 +210,19 @@ class BrapiAccountHelper @Inject constructor(
             ?.takeIf { it.isNotEmpty() } ?: normUrl
 
         val account = getAccountByUrl(normUrl)
-            ?: Account(displayName, BrapiAuthenticator.ACCOUNT_TYPE).also {
-                am.addAccountExplicitly(it, null, null)
-                grantVisibilityToAllowedPackages(am, it)
+            ?: run {
+                val existingNames = am.getAccountsByType(BrapiAuthenticator.ACCOUNT_TYPE)
+                    .map { it.name }.toSet()
+                var uniqueName = displayName
+                var suffix = 2
+                while (uniqueName in existingNames) {
+                    uniqueName = "$displayName ($suffix)"
+                    suffix++
+                }
+                Account(uniqueName, BrapiAuthenticator.ACCOUNT_TYPE).also {
+                    am.addAccountExplicitly(it, null, null)
+                    grantVisibilityToAllowedPackages(am, it)
+                }
             }
 
         am.setUserData(account, BrapiAuthenticator.KEY_SERVER_URL, normUrl)

@@ -58,6 +58,13 @@ class BrapiAccountViewModel @Inject constructor(
     var accountWasNew: Boolean = false
         private set
 
+    /**
+     * The server URL the account was originally saved under, captured at the start of an edit
+     * session. Passed to [BrapiAccountHelper.addAccountConfig] so the existing account is found
+     * by its old URL even if the user changes the URL field during editing.
+     */
+    private var editOriginalUrl: String? = null
+
     init {
         initDefaults()
         @OptIn(FlowPreview::class)
@@ -90,6 +97,12 @@ class BrapiAccountViewModel @Inject constructor(
         _uiState.value = BrapiAccountUiState(oidcFlow = defaultFlow, brapiVersion = defaultVersion)
         _urlForFetch.value = ""
         accountWasNew = false
+        editOriginalUrl = null
+    }
+
+    /** Records the URL the account is currently stored under before the user edits it. */
+    fun setEditOriginalUrl(url: String) {
+        editOriginalUrl = url
     }
 
     private fun initDefaults() = reset()
@@ -243,6 +256,7 @@ class BrapiAccountViewModel @Inject constructor(
             oidcClientId = state.oidcClientId.trim(),
             oidcScope = state.oidcScope.trim(),
             brapiVersion = state.brapiVersion,
+            originalServerUrl = editOriginalUrl,
         )
         viewModelScope.launch { _events.emit(BrapiAccountEvent.EditSaved) }
     }

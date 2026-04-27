@@ -99,7 +99,11 @@ class BrapiManualAccountDialogFragment : BaseBrapiAccountDialogFragment() {
             val prefillJson = arguments?.getString(ARG_PREFILL_CONFIG)
             if (prefillJson != null) {
                 try {
-                    viewModel.applyConfig(Gson().fromJson(prefillJson, BrAPIConfig::class.java))
+                    val config = Gson().fromJson(prefillJson, BrAPIConfig::class.java)
+                    viewModel.applyConfig(config)
+                    if (isEditMode) {
+                        config.url?.let { viewModel.setEditOriginalUrl(it) }
+                    }
                 } catch (_: Exception) { /* ignore malformed JSON */ }
             }
         }

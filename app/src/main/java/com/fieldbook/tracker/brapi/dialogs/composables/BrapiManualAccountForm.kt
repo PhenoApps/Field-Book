@@ -78,6 +78,7 @@ fun BrapiManualAccountForm(
     // ── Field → ViewModel (user typing) ──────────────────────────────────────
     LaunchedEffect(urlFieldState) {
         snapshotFlow { urlFieldState.text.toString() }
+            .drop(1) // skip initial emission to avoid spurious updateUrl/fetchDisplayName on open
             .collect { onUrlChange(it) }
     }
     LaunchedEffect(displayNameFieldState) {
