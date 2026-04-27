@@ -1708,6 +1708,10 @@
     <string name="no_programdbid_provided">No programDbId provided</string>
     <string name="no_studydbids_provided">No studyDbIds provided</string>
     <string name="act_brapi_list_api_exception">Unknown error. Please check BrAPI preferences or contact developers.</string>
+    <string name="brapi_error_unauthorized">Authentication required. Please log in and try again.</string>
+    <string name="brapi_error_forbidden">Access denied. You may not have permission to use this server.</string>
+    <string name="brapi_error_not_found">This server does not appear to support the /serverinfo endpoint.</string>
+    <string name="brapi_error_network">Could not reach the server. Please check your connection and server URL.</string>
     <string name="act_brapi_list_filter_reset_cache_title">Confirm Reset</string>
     <string name="act_brapi_list_filter_reset_cache_message">This will delete local BrAPI data used for searching and importing.</string>
     <string name="search_bar_hint">Searching… %s</string>

@@ -1,7 +1,5 @@
 package com.fieldbook.tracker.brapi.service;
 
-import android.util.Log;
-
 import org.brapi.client.v2.ApiCallback;
 import org.brapi.client.v2.model.exceptions.ApiException;
 
@@ -11,9 +9,7 @@ import java.util.Map;
 public abstract class BrapiV2ApiCallBack<T> implements ApiCallback<T> {
 
     @Override
-    public void onFailure(ApiException error, int i, Map<String, List<String>> map) {
-        Log.e("error-of", error.toString());
-    }
+    public abstract void onFailure(ApiException error, int statusCode, Map<String, List<String>> responseHeaders);
 
     @Override
     public void onUploadProgress(long l, long l1, boolean b) {

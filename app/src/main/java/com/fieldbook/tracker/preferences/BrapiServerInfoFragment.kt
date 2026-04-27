@@ -67,7 +67,14 @@ class BrapiServerInfoFragment : Fragment() {
             }
 
             if (uiState.hasApiException) {
-                showToast(getString(R.string.act_brapi_list_api_exception))
+                val message = when (uiState.apiExceptionCode) {
+                    401 -> getString(R.string.brapi_error_unauthorized)
+                    403 -> getString(R.string.brapi_error_forbidden)
+                    404 -> getString(R.string.brapi_error_not_found)
+                    0 -> getString(R.string.brapi_error_network)
+                    else -> getString(R.string.act_brapi_list_api_exception)
+                }
+                showToast(message)
             }
         }
 

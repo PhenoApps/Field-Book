@@ -47,6 +47,7 @@ class BrapiServerInfoViewModel @Inject constructor(
         val errorMessage: String? = null,
         val isBrapiV1Incompatible: Boolean = false,
         val hasApiException: Boolean = false,
+        val apiExceptionCode: Int = 0,
     )
 
     private val _uiState = MutableLiveData(ServerInfoUiState())
@@ -80,8 +81,8 @@ class BrapiServerInfoViewModel @Inject constructor(
                     handleServerInfoSuccess(response)
                     null
                 },
-                onFail = { _ ->
-                    handleServerInfoError()
+                onFail = { errorCode ->
+                    handleServerInfoError(errorCode)
                     null
                 }
             )
@@ -102,7 +103,7 @@ class BrapiServerInfoViewModel @Inject constructor(
                 null
             },
             onFail = { errorCode ->
-                handleServerInfoError()
+                handleServerInfoError(errorCode)
                 null
             }
         )
@@ -127,11 +128,12 @@ class BrapiServerInfoViewModel @Inject constructor(
         } ?: handleEmptyResponse()
     }
 
-    private fun handleServerInfoError() {
+    private fun handleServerInfoError(errorCode: Int = 0) {
         _uiState.postValue(
             _uiState.value?.copy(
                 isLoading = false,
-                hasApiException = true
+                hasApiException = true,
+                apiExceptionCode = errorCode
             )
         )
     }
@@ -150,6 +152,7 @@ class BrapiServerInfoViewModel @Inject constructor(
             _uiState.value?.copy(
                 errorMessage = null,
                 hasApiException = false,
+                apiExceptionCode = 0,
                 isBrapiV1Incompatible = false,
             )
         )
