@@ -17,10 +17,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.viewpager.widget.ViewPager
+    <com.fieldbook.tracker.views.WrapContentViewPager
         android:id="@+id/repeated_values_view_pager"
         android:layout_width="0dp"
-        android:layout_height="48dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:clipToPadding="false"
         android:gravity="center"
