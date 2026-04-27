@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- Repeated measures can now still be collected when data input is frozen (https://github.com/PhenoApps/Field-Book/pull/1459)
 - Nix trait now works correctly in public builds (https://github.com/PhenoApps/Field-Book/pull/1465)
 - Canon trait now works correctly with EOS 6D Mark II (https://github.com/PhenoApps/Field-Book/pull/1463)
 
