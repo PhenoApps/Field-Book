@@ -4,6 +4,8 @@ import com.fieldbook.shared.database.models.FieldObject
 import com.fieldbook.shared.database.repository.StudyRepository
 import com.fieldbook.shared.database.utils.internalTimeFormatter
 import com.fieldbook.shared.objects.ImportFormat
+import com.fieldbook.shared.sqldelight.FieldbookDatabase
+import com.fieldbook.shared.sqldelight.createDatabase
 import com.fieldbook.shared.utilities.CSVUtil
 import kotlinx.datetime.Clock
 import kotlinx.datetime.format
@@ -26,6 +28,9 @@ data class FieldImportResult(
 
 object FieldImportSupport {
     private val reservedColumns = setOf("id")
+
+    private val db: FieldbookDatabase
+        get() = createDatabase()
 
     fun parseCsvImport(fileName: String, bytes: ByteArray): PendingFieldImport {
         if (!fileName.endsWith(".csv", ignoreCase = true)) {
@@ -80,6 +85,7 @@ object FieldImportSupport {
         uniqueColumn: String,
         studyRepository: StudyRepository
     ): FieldImportResult {
+
         val uniqueColumnIndex = pending.distinctColumns
             .firstOrNull { it.value == uniqueColumn }
             ?.index
@@ -121,10 +127,10 @@ object FieldImportSupport {
         }
 
         var fieldId = -1
-        studyRepository.db.transaction {
+        db.transaction {
             fieldId = studyRepository.createField(field, timestamp)
             pending.distinctColumns.forEach { indexedColumn ->
-                studyRepository.db.observation_units_attributesQueries.insertObservationUnitAttribute(
+                db.observation_units_attributesQueries.insertObservationUnitAttribute(
                     indexedColumn.value,
                     fieldId.toLong()
                 )
