@@ -71,7 +71,7 @@ kotlin {
                 implementation(libs.filekit.core)
                 implementation(libs.filekit.compose)
                 implementation(libs.kotlinx.serialization.json)
-                implementation(libs.kotlin.csv)
+                implementation(libs.kotlinx.serialization.csv)
                 implementation(libs.ktor.client.core)
                 implementation(libs.ktor.client.content.negotiation)
                 implementation(libs.ktor.serialization.kotlinx.json)

@@ -97,7 +97,9 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 @Composable
 fun TraitEditorScreen(
     onBack: (() -> Unit)? = null,
-    viewModel: TraitEditorScreenViewModel = viewModel()
+    viewModel: TraitEditorScreenViewModel = viewModel(
+        factory = traitEditorScreenViewModelFactory()
+    )
 ) {
     val traits by viewModel.traits.collectAsState()
     val loading by viewModel.loading.collectAsState()
@@ -639,14 +641,10 @@ private fun uniqueTraitFileName(directory: DocumentFile, originalName: String): 
 
 private fun defaultTraitExportName(): String {
     val local = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-    return "trait_export_%04d-%02d-%02d-%02d-%02d-%02d.trt".format(
-        local.year,
-        local.monthNumber,
-        local.dayOfMonth,
-        local.hour,
-        local.minute,
-        local.second
-    )
+    fun Int.twoDigits(): String = toString().padStart(2, '0')
+
+    return "trait_export_${local.year}-${local.monthNumber.twoDigits()}-${local.dayOfMonth.twoDigits()}" +
+        "-${local.hour.twoDigits()}-${local.minute.twoDigits()}-${local.second.twoDigits()}.trt"
 }
 
 @Composable

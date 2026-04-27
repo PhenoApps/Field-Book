@@ -41,14 +41,21 @@ class ExportUtil : CoroutineScope by MainScope() {
             0 -> 12
             else -> hour
         }
-        return "%04d-%02d-%02d-%02d-%02d-%02d".format(
-            local.year,
-            local.monthNumber,
-            local.dayOfMonth,
-            hour12,
-            local.minute,
-            local.second
-        )
+        fun Int.pad(width: Int): String = toString().padStart(width, '0')
+
+        return buildString {
+            append(local.year.pad(4))
+            append('-')
+            append(local.monthNumber.pad(2))
+            append('-')
+            append(local.dayOfMonth.pad(2))
+            append('-')
+            append(hour12.pad(2))
+            append('-')
+            append(local.minute.pad(2))
+            append('-')
+            append(local.second.pad(2))
+        }
     }
 
     fun defaultTimestampString(): String = timestampString()

@@ -2,6 +2,8 @@ package com.fieldbook.shared.screens.export
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.fieldbook.shared.database.repository.StudyRepository
 import com.fieldbook.shared.export.ExportOptions
 import com.fieldbook.shared.export.ExportResult
@@ -152,3 +154,13 @@ data class ExportUiState(
     val fileName: String = "",
     val multipleFields: Boolean = false
 )
+
+fun exportScreenViewModelFactory() = viewModelFactory {
+    initializer {
+        ExportScreenViewModel(
+            exportUtil = ExportUtil(),
+            studyRepository = StudyRepository(),
+            settings = Settings()
+        )
+    }
+}
