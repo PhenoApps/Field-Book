@@ -57,6 +57,7 @@ import com.fieldbook.shared.database.models.FieldObject
 import com.fieldbook.shared.database.repository.ObservationUnitAttributeRepository
 import com.fieldbook.shared.database.repository.StudyRepository
 import com.fieldbook.shared.generated.resources.Res
+import com.fieldbook.shared.generated.resources.dir_field_import
 import com.fieldbook.shared.generated.resources.ic_field
 import com.fieldbook.shared.generated.resources.ic_file_cloud
 import com.fieldbook.shared.generated.resources.ic_file_csv
@@ -66,7 +67,7 @@ import com.fieldbook.shared.objects.ImportFormat
 import com.fieldbook.shared.preferences.GeneralKeys
 import com.fieldbook.shared.utilities.DocumentFile
 import com.fieldbook.shared.utilities.FieldSwitchImpl
-import com.fieldbook.shared.utilities.getFieldImportDirectory
+import com.fieldbook.shared.utilities.getDirectory
 import com.fieldbook.shared.utilities.listFiles
 import com.russhwolf.settings.Settings
 import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
@@ -248,7 +249,7 @@ fun FieldEditorScreen(
                     onDismiss = { showImportDialog = false },
                     onPickLocal = {
                         showImportDialog = false
-                        if (getFieldImportDirectory() != null) {
+                        if (getDirectory(Res.string.dir_field_import) != null) {
                             showLocalFilesDialog = true
                         } else {
                             importFilePicker.launch()
@@ -543,14 +544,14 @@ private fun FieldListItem(
 }
 
 private fun loadLocalFieldFiles(): List<DocumentFile> {
-    val fieldDir = getFieldImportDirectory() ?: return emptyList()
+    val fieldDir = getDirectory(Res.string.dir_field_import) ?: return emptyList()
     return listFiles(fieldDir)
         .filter { !it.isDirectory() && it.name()?.endsWith(".csv", ignoreCase = true) == true }
         .sortedBy { it.name()?.lowercase().orEmpty() }
 }
 
 private fun saveCloudFieldImportFile(fileName: String, bytes: ByteArray) {
-    val fieldDir = getFieldImportDirectory() ?: return
+    val fieldDir = getDirectory(Res.string.dir_field_import) ?: return
     val targetName = uniqueFieldFileName(fieldDir, fileName)
     fieldDir.createFile("*/*", targetName)?.writeBytes(bytes)
 }

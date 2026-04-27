@@ -1,5 +1,7 @@
 package com.fieldbook.shared.utilities
 
+import org.jetbrains.compose.resources.StringResource
+
 interface DocumentFile {
     fun createDirectory(name: String): DocumentFile?
     fun createFile(mimeType: String, name: String): DocumentFile?
@@ -15,10 +17,7 @@ interface DocumentFile {
 
 expect fun createDir(parent: String, child: String): DocumentFile?
 
-expect fun getExportDirectory(): DocumentFile?
-expect fun getArchiveDirectory(): DocumentFile?
-expect fun getTraitDirectory(): DocumentFile?
-expect fun getFieldImportDirectory(): DocumentFile?
+expect fun getDirectory(directory: StringResource): DocumentFile?
 expect fun listFiles(dir: DocumentFile): List<DocumentFile>
 expect fun copyFileToDirectory(source: DocumentFile, destinationDir: DocumentFile, newFileName: String): DocumentFile?
 expect fun zipFiles(files: List<DocumentFile>, zipFileName: String): DocumentFile?
