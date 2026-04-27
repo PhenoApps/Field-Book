@@ -1744,6 +1744,9 @@
     <string name="pref_experimental_generate_sample_data_confirm_message">This will create or populate a field named \"field_sample\" with artificial observations. Sample traits will be loaded automatically if none are present.</string>
     <string name="pref_experimental_generate_sample_data_success">Sample field created successfully.</string>
     <string name="pref_experimental_generate_sample_data_failure">Failed to generate sample field. Check that storage is configured correctly.</string>
+    <string name="traits_format_experimental">Experimental</string>
+    <string name="pref_experimental_traits_category_title">Experimental Traits</string>
+    <string name="pref_experimental_traits_category_summary">Show an experimental traits category in the trait type selector</string>
 
     <string name="pref_alpha_media_keycode_events_summary">Next/previous track navigates entries, Up/down volume moves through traits, Call will capture photos</string>
     <string name="pref_alpha_media_keycode_events_title">Navigate With Hardware Media Commands</string>
