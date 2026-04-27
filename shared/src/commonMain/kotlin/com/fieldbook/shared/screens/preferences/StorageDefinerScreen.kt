@@ -5,25 +5,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.preferences_storage_files_base_directory_title
 import com.fieldbook.shared.preferences.GeneralKeys
+import com.fieldbook.shared.utilities.normalizeStorageDirectoryPath
 import com.russhwolf.settings.Settings
 import io.github.vinceglb.filekit.compose.rememberDirectoryPickerLauncher
 import org.jetbrains.compose.resources.stringResource
@@ -36,9 +25,11 @@ fun StorageDefinerScreen(
     val preferences: Settings = Settings()
     var currentDirectory by remember {
         mutableStateOf(
-            preferences.getString(
+            normalizeStorageDirectoryPath(
+                preferences.getString(
                 GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY.key,
                 ""
+            )
             )
         )
     }
@@ -48,7 +39,7 @@ fun StorageDefinerScreen(
         initialDirectory = currentDirectory.ifEmpty { null }
     ) { directory ->
         directory?.let {
-            val value = it.path ?: ""
+            val value = normalizeStorageDirectoryPath(it.path ?: "")
             preferences.putString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY.key, value)
             currentDirectory = value
         }
