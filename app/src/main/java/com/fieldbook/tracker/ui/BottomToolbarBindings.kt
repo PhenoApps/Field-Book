@@ -143,16 +143,17 @@ fun BottomToolbar(
                 }
 
                 // Delete button: support click and long-press (long triggers onDeleteLong)
-                IconButton(
-                    onClick = { listener?.onDelete() },
-                    enabled = deleteValueButtonEnabled,
-                    modifier = Modifier.pointerInput(Unit) {
-                        detectTapGestures(
-                            onLongPress = {
-                                listener?.onDeleteLong()
-                            }
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .combinedClickable(
+                            onClick = { listener?.onDelete() },
+                            onLongClick = { listener?.onDeleteLong() },
+                            enabled = deleteValueButtonEnabled,
+                            role = Role.Button
                         )
-                    }
+                        .padding(8.dp),
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(painter = painterResource(id = R.drawable.main_ic_delete_forever),
                         contentDescription = null,

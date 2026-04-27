@@ -121,7 +121,6 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
                     act.traitLayoutRefresh()
 
                 }
-
             }
         }
 
@@ -347,6 +346,20 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
 
     fun setTextColor(color: Int) {
         getEditText()?.setTextColor(color)
+    }
+
+    fun getSavedIds(): List<Int> {
+
+        return mValues.filter { it.model.study_id.toInt() >= 0 }.map { it.model.internal_id_observation }
+    }
+
+    fun isSelectedSaved(): Boolean {
+
+        return try {
+            mValues[pager.currentItem].model.internal_id_observation > 0
+        } catch (_: Exception) {
+            false
+        }
     }
 
     private fun getSelectedModel(): ObservationModel? {

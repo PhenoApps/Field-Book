@@ -137,6 +137,13 @@ public class PercentTraitLayout extends BaseTraitLayout {
 
         ObservationModel model = getCurrentObservation();
         if (model != null) {
+            // When frozen with repeated measures, update isLocked per-observation
+            // so existing rep values stay read-only while new empty reps remain editable.
+            CollectActivity act = (CollectActivity) getContext();
+            if (act.isFrozen() && getCollectInputView().isRepeatEnabled()) {
+                isLocked = !model.getValue().isEmpty();
+                seekBar.setEnabled(!isLocked);
+            }
             if (model.getValue().equals("NA")) {
                 getCollectInputView().setText("NA");
                 getSeekBar().setProgress(0);
