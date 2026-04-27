@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- Nix trait now works correctly in public builds (https://github.com/PhenoApps/Field-Book/pull/1465)
 
 ## [v7.2.0] - 2026-03-17
 
