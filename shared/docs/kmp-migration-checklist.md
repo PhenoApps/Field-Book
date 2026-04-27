@@ -16,7 +16,7 @@
 | Create new field        | :white_check_mark: | :white_check_mark: |
 | Edit field              | :white_check_mark: | :white_check_mark: |
 | Switch field            | :white_check_mark: | :white_check_mark: |
-| Delete field            |                    |                    |
+| Delete field            | :white_check_mark: |                    |
 | Import from file        | :white_check_mark: |                    |
 |                         |                    |                    |
 | **Field Details**       |                    |                    |
