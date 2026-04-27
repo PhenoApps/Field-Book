@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Nix trait now works correctly in public builds (https://github.com/PhenoApps/Field-Book/pull/1465)
+- Canon trait now works correctly with EOS 6D Mark II (https://github.com/PhenoApps/Field-Book/pull/1463)
 
 ## [v7.2.0] - 2026-03-17
 
