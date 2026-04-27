@@ -61,6 +61,7 @@ import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.dialog_cancel
 import com.fieldbook.shared.generated.resources.dialog_delete_traits_message
 import com.fieldbook.shared.generated.resources.dialog_save
+import com.fieldbook.shared.generated.resources.dir_trait
 import com.fieldbook.shared.generated.resources.ic_file_cloud
 import com.fieldbook.shared.generated.resources.ic_file_csv
 import com.fieldbook.shared.generated.resources.ic_file_generic
@@ -78,7 +79,7 @@ import com.fieldbook.shared.generated.resources.traits_sort_visibility
 import com.fieldbook.shared.generated.resources.traits_toolbar_delete_all
 import com.fieldbook.shared.traits.Formats
 import com.fieldbook.shared.utilities.DocumentFile
-import com.fieldbook.shared.utilities.getTraitDirectory
+import com.fieldbook.shared.utilities.getDirectory
 import com.fieldbook.shared.utilities.listFiles
 import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.core.PickerType
@@ -97,7 +98,9 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 @Composable
 fun TraitEditorScreen(
     onBack: (() -> Unit)? = null,
-    viewModel: TraitEditorScreenViewModel = viewModel()
+    viewModel: TraitEditorScreenViewModel = viewModel(
+        factory = traitEditorScreenViewModelFactory()
+    )
 ) {
     val traits by viewModel.traits.collectAsState()
     val loading by viewModel.loading.collectAsState()
@@ -127,7 +130,7 @@ fun TraitEditorScreen(
         if (file != null) {
             scope.launch {
                 val bytes = file.readBytes()
-                val traitDir = getTraitDirectory()
+                val traitDir = getDirectory(Res.string.dir_trait)
                 if (traitDir != null) {
                     val targetName = uniqueTraitFileName(traitDir, file.name)
                     traitDir.createFile("*/*", targetName)?.writeBytes(bytes)
@@ -615,7 +618,7 @@ private fun LocalTraitFilesDialog(
 }
 
 private fun loadLocalTraitFiles(): List<DocumentFile> {
-    val traitDir = getTraitDirectory() ?: return emptyList()
+    val traitDir = getDirectory(Res.string.dir_trait) ?: return emptyList()
     return listFiles(traitDir)
         .filter { !it.isDirectory() && it.name()?.endsWith(".trt", ignoreCase = true) == true }
         .sortedBy { it.name()?.lowercase().orEmpty() }
@@ -639,14 +642,10 @@ private fun uniqueTraitFileName(directory: DocumentFile, originalName: String): 
 
 private fun defaultTraitExportName(): String {
     val local = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-    return "trait_export_%04d-%02d-%02d-%02d-%02d-%02d.trt".format(
-        local.year,
-        local.monthNumber,
-        local.dayOfMonth,
-        local.hour,
-        local.minute,
-        local.second
-    )
+    fun Int.twoDigits(): String = toString().padStart(2, '0')
+
+    return "trait_export_${local.year}-${local.monthNumber.twoDigits()}-${local.dayOfMonth.twoDigits()}" +
+        "-${local.hour.twoDigits()}-${local.minute.twoDigits()}-${local.second.twoDigits()}.trt"
 }
 
 @Composable

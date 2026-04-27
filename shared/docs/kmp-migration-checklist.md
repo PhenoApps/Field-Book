@@ -14,10 +14,17 @@
 | **Fields**              |                    |                    |
 | View fields             | :white_check_mark: | :white_check_mark: |
 | Create new field        | :white_check_mark: | :white_check_mark: |
-| Edit field              |                    |                    |
+| Edit field              | :white_check_mark: | :white_check_mark: |
 | Switch field            | :white_check_mark: | :white_check_mark: |
 | Delete field            |                    |                    |
-| Import from file        |                    |                    |
+| Import from file        | :white_check_mark: |                    |
+|                         |                    |                    |
+| **Field Details**       |                    |                    |
+| Edit field              | :white_check_mark: | :white_check_mark: |
+| Delete field            | :white_check_mark: | :white_check_mark: |
+| Collect                 |                    |                    |
+| Export                  |                    |                    |
+| Data                    |                    |                    |
 |                         |                    |                    |
 | ...                     |                    |                    |
 |                         |                    |                    |

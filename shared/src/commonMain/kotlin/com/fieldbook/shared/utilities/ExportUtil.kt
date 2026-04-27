@@ -8,6 +8,9 @@ import com.fieldbook.shared.database.repository.StudyRepository
 import com.fieldbook.shared.database.repository.TraitRepository
 import com.fieldbook.shared.export.ExportOptions
 import com.fieldbook.shared.export.ExportResult
+import com.fieldbook.shared.generated.resources.Res
+import com.fieldbook.shared.generated.resources.dir_archive
+import com.fieldbook.shared.generated.resources.dir_field_export
 import com.fieldbook.shared.preferences.GeneralKeys
 import com.fieldbook.shared.sqldelight.FieldbookDatabase
 import com.fieldbook.shared.sqldelight.createDatabase
@@ -44,14 +47,21 @@ class ExportUtil : CoroutineScope by MainScope() {
             0 -> 12
             else -> hour
         }
-        return "%04d-%02d-%02d-%02d-%02d-%02d".format(
-            local.year,
-            local.monthNumber,
-            local.dayOfMonth,
-            hour12,
-            local.minute,
-            local.second
-        )
+        fun Int.pad(width: Int): String = toString().padStart(width, '0')
+
+        return buildString {
+            append(local.year.pad(4))
+            append('-')
+            append(local.monthNumber.pad(2))
+            append('-')
+            append(local.dayOfMonth.pad(2))
+            append('-')
+            append(hour12.pad(2))
+            append('-')
+            append(local.minute.pad(2))
+            append('-')
+            append(local.second.pad(2))
+        }
     }
 
     fun defaultTimestampString(): String = timestampString()
@@ -250,7 +260,7 @@ class ExportUtil : CoroutineScope by MainScope() {
 
     private fun createCsvExportFile(fileName: String, header: List<String>, rows: List<List<String?>>): DocumentFile? {
         if (rows.isEmpty()) return null
-        val exportDir = getExportDirectory() ?: return null
+        val exportDir = getDirectory(Res.string.dir_field_export) ?: return null
         val file = exportDir.createFile("text/csv", fileName) ?: return null
         val contents = buildString {
             appendCsvRow(header)
@@ -334,8 +344,8 @@ class ExportUtil : CoroutineScope by MainScope() {
     }
 
     private fun archivePreviousExports(newFile: DocumentFile) {
-        val exportDir = getExportDirectory() ?: return
-        val archiveDir = getArchiveDirectory() ?: return
+        val exportDir = getDirectory(Res.string.dir_field_export) ?: return
+        val archiveDir = getDirectory(Res.string.dir_archive) ?: return
         val newFileName = newFile.name() ?: return
         val truncatedNewFileName = newFileName.substringAfter("_", newFileName)
 
@@ -349,9 +359,6 @@ class ExportUtil : CoroutineScope by MainScope() {
             }
         }
     }
-
-    private fun sanitizeFileName(name: String): String =
-        name.replace(Regex("[|\\?\\*<\"\\\\:>'\";]"), "_")
 
     private fun defaultExportFileName(fieldIds: List<Int>): String {
         val suffix = if (fieldIds.size > 1) {

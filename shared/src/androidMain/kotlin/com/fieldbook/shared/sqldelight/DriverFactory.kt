@@ -12,13 +12,27 @@ actual class DriverFactory(private val context: Context) {
         val existing = cached
         if (existing != null) return existing
 
-        val created = AndroidSqliteDriver(FieldbookDatabase.Schema, context, DATABASE_NAME)
-        cached = created
-        return created
+        return synchronized(this) {
+            val rechecked = cached
+            if (rechecked != null) {
+                rechecked
+            } else {
+                AndroidSqliteDriver(FieldbookDatabase.Schema, context, DATABASE_NAME).also { driver ->
+                    try {
+                        driver.execute(null, "PRAGMA busy_timeout=5000;", 0, null)
+                    } catch (_: Throwable) {
+                    }
+                    cached = driver
+                }
+            }
+        }
     }
 
     actual fun close() {
-        cached?.close()
-        cached = null
+        synchronized(this) {
+            cached?.close()
+            cached = null
+        }
     }
 }
+

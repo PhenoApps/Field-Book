@@ -29,6 +29,7 @@ import com.fieldbook.shared.generated.resources.camera_24px
 import com.fieldbook.shared.screens.collect.CollectScreenController
 import com.fieldbook.shared.theme.MainFloatingActionButtonShape
 import com.fieldbook.shared.utilities.DocumentTreeUtil
+import com.fieldbook.shared.utilities.sanitizeFileName
 import com.kashif.cameraK.controller.CameraController
 import com.kashif.cameraK.enums.CameraLens
 import com.kashif.cameraK.enums.Directory
@@ -50,8 +51,6 @@ fun PhotoTrait(
     modifier: Modifier = Modifier,
     controller: CollectScreenController,
 ) {
-    fun sanitizeFileName(name: String): String = name.replace(Regex("[|\\?\\*<\"\\\\:>'\";]"), "_")
-
     fun buildPhotoFileName(): String {
         val now = Clock.System.now()
         val timestamp = now.toString().replace('T', ' ')
