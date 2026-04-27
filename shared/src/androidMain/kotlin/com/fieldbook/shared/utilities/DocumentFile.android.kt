@@ -4,9 +4,8 @@ import android.content.Intent
 import android.os.Build
 import com.fieldbook.shared.AndroidAppContextHolder
 import com.fieldbook.shared.generated.resources.Res
-import com.fieldbook.shared.generated.resources.dir_archive
 import com.fieldbook.shared.generated.resources.dir_field_export
-import com.fieldbook.shared.generated.resources.dir_trait
+import org.jetbrains.compose.resources.StringResource
 import org.phenoapps.utils.BaseDocumentTreeUtil
 import java.io.BufferedInputStream
 import java.util.zip.ZipEntry
@@ -54,31 +53,13 @@ actual fun createDir(parent: String, child: String): DocumentFile? {
     return dir?.let { AndroidDocumentFile(it) }
 }
 
-actual fun getExportDirectory(): DocumentFile? {
+actual fun getDirectory(directory: StringResource): DocumentFile? {
     val ctx = AndroidAppContextHolder.context
-    val exportDir = BaseDocumentTreeUtil.getDirectory(
+    val dir = BaseDocumentTreeUtil.getDirectory(
         ctx,
-        ctx.resources.getIdentifier(Res.string.dir_field_export.key, "string", ctx.packageName)
+        ctx.resources.getIdentifier(directory.key, "string", ctx.packageName)
     )
-    return exportDir?.let { AndroidDocumentFile(it) }
-}
-
-actual fun getArchiveDirectory(): DocumentFile? {
-    val ctx = AndroidAppContextHolder.context
-    val archiveDir = BaseDocumentTreeUtil.getDirectory(
-        ctx,
-        ctx.resources.getIdentifier(Res.string.dir_archive.key, "string", ctx.packageName)
-    )
-    return archiveDir?.let { AndroidDocumentFile(it) }
-}
-
-actual fun getTraitDirectory(): DocumentFile? {
-    val ctx = AndroidAppContextHolder.context
-    val traitDir = BaseDocumentTreeUtil.getDirectory(
-        ctx,
-        ctx.resources.getIdentifier(Res.string.dir_trait.key, "string", ctx.packageName)
-    )
-    return traitDir?.let { AndroidDocumentFile(it) }
+    return dir?.let { AndroidDocumentFile(it) }
 }
 
 actual fun listFiles(dir: DocumentFile): List<DocumentFile> {
@@ -109,7 +90,7 @@ actual fun copyFileToDirectory(source: DocumentFile, destinationDir: DocumentFil
 
 actual fun zipFiles(files: List<DocumentFile>, zipFileName: String): DocumentFile? {
     val ctx = AndroidAppContextHolder.context
-    val exportDir = getExportDirectory() as? AndroidDocumentFile ?: return null
+    val exportDir = getDirectory(Res.string.dir_field_export) as? AndroidDocumentFile ?: return null
     val zipFile = exportDir.file.createFile("application/zip", "$zipFileName.zip") ?: return null
 
     ctx.contentResolver.openOutputStream(zipFile.uri)?.use { outputStream ->

@@ -2,12 +2,22 @@
 
 package com.fieldbook.shared.utilities
 
+import com.fieldbook.shared.generated.resources.Res
+import com.fieldbook.shared.generated.resources.dir_field_export
 import com.fieldbook.shared.preferences.GeneralKeys
 import com.russhwolf.settings.Settings
 import kotlinx.cinterop.BetaInteropApi
 import okio.FileSystem
 import okio.Path.Companion.toPath
-import platform.Foundation.*
+import org.jetbrains.compose.resources.StringResource
+import platform.Foundation.NSApplicationSupportDirectory
+import platform.Foundation.NSArray
+import platform.Foundation.NSFileManager
+import platform.Foundation.NSFileType
+import platform.Foundation.NSFileTypeDirectory
+import platform.Foundation.NSURL
+import platform.Foundation.NSUserDomainMask
+import platform.Foundation.firstObject
 import platform.UIKit.UIActivityViewController
 import platform.UIKit.UIApplication
 import platform.UIKit.UIViewController
@@ -111,6 +121,7 @@ private fun resolveDirectoryName(name: String): String = when (name) {
     "dir_field_export" -> "field_export"
     "dir_archive" -> "archive"
     "dir_trait" -> "trait"
+    "dir_field_import" -> "field_import"
     else -> name
 }
 
@@ -156,14 +167,8 @@ actual fun createDir(
     return directoryPath.takeIf { ensureDirectoryExists(it) }?.let(::IosDocumentFile)
 }
 
-actual fun getExportDirectory(): DocumentFile? =
-    IosDocumentFile(directoryPath("dir_field_export"))
-
-actual fun getArchiveDirectory(): DocumentFile? =
-    IosDocumentFile(directoryPath("dir_archive"))
-
-actual fun getTraitDirectory(): DocumentFile? =
-    IosDocumentFile(directoryPath("dir_trait"))
+actual fun getDirectory(directory: StringResource): DocumentFile? =
+    IosDocumentFile(directoryPath(directory.key))
 
 actual fun listFiles(dir: DocumentFile): List<DocumentFile> {
     val iosDir = dir as? IosDocumentFile ?: return emptyList()
@@ -198,7 +203,7 @@ actual fun copyFileToDirectory(source: DocumentFile, destinationDir: DocumentFil
 }
 
 actual fun zipFiles(files: List<DocumentFile>, zipFileName: String): DocumentFile? {
-    val exportDir = getExportDirectory() ?: return null
+    val exportDir = getDirectory(Res.string.dir_field_export) ?: return null
     val bundleDir = exportDir.createDirectory("$zipFileName.export") ?: return null
     files.forEach { file ->
         val name = file.name() ?: return@forEach

@@ -8,6 +8,9 @@ import com.fieldbook.shared.database.repository.StudyRepository
 import com.fieldbook.shared.database.repository.TraitRepository
 import com.fieldbook.shared.export.ExportOptions
 import com.fieldbook.shared.export.ExportResult
+import com.fieldbook.shared.generated.resources.Res
+import com.fieldbook.shared.generated.resources.dir_archive
+import com.fieldbook.shared.generated.resources.dir_field_export
 import com.fieldbook.shared.preferences.GeneralKeys
 import com.fieldbook.shared.sqldelight.createDatabase
 import com.russhwolf.settings.Settings
@@ -254,7 +257,7 @@ class ExportUtil : CoroutineScope by MainScope() {
 
     private fun createCsvExportFile(fileName: String, header: List<String>, rows: List<List<String?>>): DocumentFile? {
         if (rows.isEmpty()) return null
-        val exportDir = getExportDirectory() ?: return null
+        val exportDir = getDirectory(Res.string.dir_field_export) ?: return null
         val file = exportDir.createFile("text/csv", fileName) ?: return null
         val contents = buildString {
             appendCsvRow(header)
@@ -338,8 +341,8 @@ class ExportUtil : CoroutineScope by MainScope() {
     }
 
     private fun archivePreviousExports(newFile: DocumentFile) {
-        val exportDir = getExportDirectory() ?: return
-        val archiveDir = getArchiveDirectory() ?: return
+        val exportDir = getDirectory(Res.string.dir_field_export) ?: return
+        val archiveDir = getDirectory(Res.string.dir_archive) ?: return
         val newFileName = newFile.name() ?: return
         val truncatedNewFileName = newFileName.substringAfter("_", newFileName)
 

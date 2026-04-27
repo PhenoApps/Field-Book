@@ -6,11 +6,21 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.fieldbook.shared.database.models.TraitObject
 import com.fieldbook.shared.database.repository.TraitRepository
+import com.fieldbook.shared.generated.resources.Res
+import com.fieldbook.shared.generated.resources.dir_trait
 import com.fieldbook.shared.preferences.GeneralKeys
-import com.fieldbook.shared.utilities.*
+import com.fieldbook.shared.utilities.CSVUtil
+import com.fieldbook.shared.utilities.DocumentFile
+import com.fieldbook.shared.utilities.getDirectory
+import com.fieldbook.shared.utilities.listFiles
+import com.fieldbook.shared.utilities.shareFile
 import com.russhwolf.settings.Settings
 import io.github.vinceglb.filekit.core.PlatformFile
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class TraitEditorScreenViewModel(
@@ -212,7 +222,7 @@ class TraitEditorScreenViewModel(
                 return@launch
             }
 
-            val traitDir = getTraitDirectory()
+            val traitDir = getDirectory(Res.string.dir_trait)
             if (traitDir == null || !traitDir.exists()) {
                 _messages.emit("Trait storage directory is unavailable")
                 return@launch
