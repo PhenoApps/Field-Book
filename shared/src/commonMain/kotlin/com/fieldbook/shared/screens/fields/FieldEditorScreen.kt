@@ -82,6 +82,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -182,7 +183,7 @@ fun FieldEditorScreen(
             ) {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    contentDescription = Res.string.tutorial_fields_add_title.key
+                    contentDescription = stringResource(Res.string.tutorial_fields_add_title)
                 )
             }
         }

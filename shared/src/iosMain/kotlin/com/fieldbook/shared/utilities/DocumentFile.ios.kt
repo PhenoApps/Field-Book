@@ -7,9 +7,11 @@ import com.fieldbook.shared.generated.resources.dir_field_export
 import com.fieldbook.shared.preferences.GeneralKeys
 import com.russhwolf.settings.Settings
 import kotlinx.cinterop.BetaInteropApi
+import kotlinx.coroutines.runBlocking
 import okio.FileSystem
 import okio.Path.Companion.toPath
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.getString
 import platform.Foundation.NSApplicationSupportDirectory
 import platform.Foundation.NSArray
 import platform.Foundation.NSFileManager
@@ -30,7 +32,7 @@ private enum class PathType {
     Directory
 }
 
-private class IosDocumentFile(internal val path: String) : DocumentFile {
+private class IosDocumentFile(val path: String) : DocumentFile {
 
     override fun createDirectory(name: String): DocumentFile? {
         val directoryPath = joinPath(path, name)
@@ -82,7 +84,7 @@ private class IosDocumentFile(internal val path: String) : DocumentFile {
         }
     }
 
-    override fun name(): String? = path.toPath().name
+    override fun name(): String = path.toPath().name
 
 }
 
@@ -117,17 +119,8 @@ private fun ensureDirectoryExists(path: String): Boolean {
     return pathType(path) == PathType.Directory
 }
 
-private fun resolveDirectoryName(name: String): String = when (name) {
-    "dir_field_export" -> "field_export"
-    "dir_archive" -> "archive"
-    "dir_trait" -> "trait"
-    "dir_field_import" -> "field_import"
-    else -> name
-}
-
-private fun directoryPath(name: String): String {
-    val resolvedName = resolveDirectoryName(name)
-    val path = joinPath(storageBasePath(), resolvedName)
+private fun directoryPath(name: StringResource): String {
+    val path = joinPath(storageBasePath(), runBlocking { getString(name) })
     ensureDirectoryExists(path)
     return path
 }
@@ -163,18 +156,18 @@ actual fun createDir(
     parent: String,
     child: String
 ): DocumentFile? {
-    val directoryPath = joinPath(joinPath(storageBasePath(), resolveDirectoryName(parent)), child)
+    val directoryPath = joinPath(joinPath(storageBasePath(), parent), child)
     return directoryPath.takeIf { ensureDirectoryExists(it) }?.let(::IosDocumentFile)
 }
 
 actual fun getDirectory(directory: StringResource): DocumentFile? =
-    IosDocumentFile(directoryPath(directory.key))
+    IosDocumentFile(directoryPath(directory))
 
 actual fun listFiles(dir: DocumentFile): List<DocumentFile> {
     val iosDir = dir as? IosDocumentFile ?: return emptyList()
     if (!iosDir.isDirectory()) return emptyList()
 
-    val contents = fileManager.contentsOfDirectoryAtPath(iosDir.path, error = null) as? List<*>
+    val contents = fileManager.contentsOfDirectoryAtPath(iosDir.path, error = null)
         ?: return emptyList()
 
     return contents.mapNotNull { entry ->
