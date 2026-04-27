@@ -7,7 +7,6 @@ import com.russhwolf.settings.Settings
 import kotlinx.cinterop.BetaInteropApi
 import okio.FileSystem
 import okio.Path.Companion.toPath
-import okio.SYSTEM
 import platform.Foundation.*
 import platform.UIKit.UIActivityViewController
 import platform.UIKit.UIApplication

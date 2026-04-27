@@ -7,18 +7,10 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.fieldbook.shared.database.models.TraitObject
 import com.fieldbook.shared.database.repository.TraitRepository
 import com.fieldbook.shared.preferences.GeneralKeys
-import com.fieldbook.shared.utilities.CSVUtil
-import com.fieldbook.shared.utilities.DocumentFile
-import com.fieldbook.shared.utilities.getTraitDirectory
-import com.fieldbook.shared.utilities.listFiles
-import com.fieldbook.shared.utilities.shareFile
+import com.fieldbook.shared.utilities.*
 import com.russhwolf.settings.Settings
 import io.github.vinceglb.filekit.core.PlatformFile
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class TraitEditorScreenViewModel(
