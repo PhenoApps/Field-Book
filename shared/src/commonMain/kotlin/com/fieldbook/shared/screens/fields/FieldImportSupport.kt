@@ -123,6 +123,12 @@ object FieldImportSupport {
         var fieldId = -1
         studyRepository.db.transaction {
             fieldId = studyRepository.createField(field, timestamp)
+            pending.distinctColumns.forEach { indexedColumn ->
+                studyRepository.db.observation_units_attributesQueries.insertObservationUnitAttribute(
+                    indexedColumn.value,
+                    fieldId.toLong()
+                )
+            }
 
             importedRows.forEach { row ->
                 val rowData = pending.distinctColumns.map { indexed ->
