@@ -16,7 +16,6 @@ import dagger.hilt.android.qualifiers.ActivityContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import okhttp3.internal.toImmutableList
-import java.io.IOException
 import javax.inject.Inject
 
 class NixSensorHelper @Inject constructor(@ActivityContext val context: Context) {
@@ -66,7 +65,7 @@ class NixSensorHelper @Inject constructor(@ActivityContext val context: Context)
         return try {
             val jsonString = BuildConfig.NIX_LICENSE
             Json.decodeFromString<NixLicense>(jsonString)
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             e.printStackTrace()
             null
         }
