@@ -18,6 +18,9 @@ targets:
       path: Info.plist
       properties:
         CADisableMinimumFrameDurationOnPhone: true
+        NSCameraUsageDescription: Field Book uses the camera to capture photos while collecting field observations.
+        NSLocationWhenInUseUsageDescription: Field Book uses location access to attach coordinates to field observations.
+        NSMicrophoneUsageDescription: Field Book uses the microphone to record audio notes while collecting field observations.
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
