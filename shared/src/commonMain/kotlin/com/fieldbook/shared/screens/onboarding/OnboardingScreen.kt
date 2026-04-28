@@ -343,7 +343,7 @@ private fun RequiredSetupPage(
             done = permissionsGranted,
             actionLabel = "Grant Permissions",
             onAction = onRequestPermissions,
-            enabled = true
+            enabled = !permissionsGranted
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -354,7 +354,7 @@ private fun RequiredSetupPage(
             done = storageConfigured,
             actionLabel = "Choose Folder",
             onAction = onChooseDirectory,
-            enabled = true
+            enabled = !storageConfigured
         )
     }
 }
