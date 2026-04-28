@@ -51,7 +51,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
-private data class PreferenceItem(
+private data class PreferenceSectionItem(
     val icon: DrawableResource,
     val title: StringResource,
     val key: String,
@@ -64,55 +64,55 @@ fun PreferencesScreen(
     onBack: (() -> Unit)? = null,
     onNavigate: ((KmpHostScreenType) -> Unit)? = null
 ) {
-    val preferenceItems = listOf(
-        PreferenceItem(
+    val preferenceSectionItems = listOf(
+        PreferenceSectionItem(
             icon = Res.drawable.ic_pref_profile_person,
             title = Res.string.settings_profile,
             key = "pref_key_profile_settings"
         ),
-        PreferenceItem(
+        PreferenceSectionItem(
             icon = Res.drawable.ic_star_circle_outline,
             title = Res.string.preferences_features_title,
             key = "pref_key_feature_settings"
         ),
-        PreferenceItem(
+        PreferenceSectionItem(
             icon = Res.drawable.ic_pref_appearance,
             title = Res.string.preferences_appearance_title,
             key = "pref_key_ui_settings"
         ),
-        PreferenceItem(
+        PreferenceSectionItem(
             icon = Res.drawable.ic_pref_navigation,
             title = Res.string.preferences_behavior_title,
             key = "pref_key_ux_settings"
         ),
-        PreferenceItem(
+        PreferenceSectionItem(
             icon = Res.drawable.ic_map_search,
             title = Res.string.preferences_location_title,
             key = "pref_key_location_settings"
         ),
-        PreferenceItem(
+        PreferenceSectionItem(
             icon = Res.drawable.ic_pref_sounds,
             title = Res.string.preferences_sounds,
             key = "pref_key_sounds_settings"
         ),
-        PreferenceItem(
+        PreferenceSectionItem(
             icon = Res.drawable.ic_adv_brapi,
             title = Res.string.preferences_brapi,
             key = "pref_key_brapi_settings",
             destination = KmpHostScreenType.BRAPI_PREFERENCES
         ),
-        PreferenceItem(
+        PreferenceSectionItem(
             icon = Res.drawable.ic_pref_system,
             title = Res.string.preferences_system_title,
             key = "pref_key_system_settings"
         ),
-        PreferenceItem(
+        PreferenceSectionItem(
             icon = Res.drawable.ic_database_cog,
             title = Res.string.preferences_storage_title,
             key = "pref_key_storage_settings",
             destination = KmpHostScreenType.STORAGE_PREFERENCES
         ),
-        PreferenceItem(
+        PreferenceSectionItem(
             icon = Res.drawable.ic_experimental,
             title = Res.string.preferences_experimental_title,
             key = "pref_key_experimental_settings"
@@ -138,7 +138,7 @@ fun PreferencesScreen(
                 )
             )
             LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(preferenceItems) { item ->
+                items(preferenceSectionItems) { item ->
                     val isImplemented = item.destination != null
                     Row(
                         modifier = Modifier
