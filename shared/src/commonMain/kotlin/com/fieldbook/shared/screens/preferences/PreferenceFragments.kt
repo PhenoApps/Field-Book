@@ -98,12 +98,12 @@ fun PreferenceToggleRow(
 @Composable
 fun PreferenceRow(
     item: PreferenceItem,
-    onClick: @Composable () -> Unit
+    onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            // .clickable(onClick = onClick) FIXME
+            .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

@@ -296,97 +296,100 @@ fun BrapiPreferencesScreen(
                             )
                         }
                         items(section.items) { item ->
+                            val dialogTitle = stringResource(item.dialogTitle)
+                            val dialogSummary = item.summary?.let { stringResource(it) }
+
                             PreferenceRow(
                                 item = item,
                                 onClick = {
                                     dialogState = when (item.title) {
                                         Res.string.brapi_base_url -> PreferenceDialogState(
-                                            title = stringResource(item.dialogTitle),
-                                            summary = item.summary?.let { stringResource(it) },
+                                            title = dialogTitle,
+                                            summary = dialogSummary,
                                             type = item.dialogType,
                                             value = baseUrl,
                                             onSave = { baseUrl = it }
                                         )
                                         Res.string.brapi_display_name -> PreferenceDialogState(
-                                            title = stringResource(item.dialogTitle),
+                                            title = dialogTitle,
                                             type = item.dialogType,
                                             value = displayName,
                                             onSave = { displayName = it }
                                         )
                                         Res.string.preferences_brapi_barcode_config_title -> PreferenceDialogState(
-                                            title = stringResource(item.dialogTitle),
-                                            summary = item.summary?.let { stringResource(it) },
+                                            title = dialogTitle,
+                                            summary = dialogSummary,
                                             type = item.dialogType,
                                             options = item.options
                                         )
                                         Res.string.brapi_revoke_auth -> PreferenceDialogState(
-                                            title = stringResource(item.dialogTitle),
+                                            title = dialogTitle,
                                             summary = "Layout placeholder only. Log out is not implemented yet.",
                                             type = item.dialogType
                                         )
                                         Res.string.preferences_brapi_oidc_flow -> PreferenceDialogState(
-                                            title = stringResource(item.dialogTitle),
+                                            title = dialogTitle,
                                             type = item.dialogType,
                                             options = item.options,
                                             value = oidcFlow,
                                             onOptionSelected = { oidcFlow = it }
                                         )
                                         Res.string.brapi_oidc_url -> PreferenceDialogState(
-                                            title = stringResource(item.dialogTitle),
-                                            summary = item.summary?.let { stringResource(it) },
+                                            title = dialogTitle,
+                                            summary = dialogSummary,
                                             type = item.dialogType,
                                             value = oidcUrl,
                                             onSave = { oidcUrl = it }
                                         )
                                         Res.string.brapi_oidc_clientid -> PreferenceDialogState(
-                                            title = stringResource(item.dialogTitle),
-                                            summary = item.summary?.let { stringResource(it) },
+                                            title = dialogTitle,
+                                            summary = dialogSummary,
                                             type = item.dialogType,
                                             value = oidcClientId,
                                             onSave = { oidcClientId = it }
                                         )
                                         Res.string.brapi_oidc_scope -> PreferenceDialogState(
-                                            title = stringResource(item.dialogTitle),
-                                            summary = item.summary?.let { stringResource(it) },
+                                            title = dialogTitle,
+                                            summary = dialogSummary,
                                             type = item.dialogType,
                                             value = oidcScope,
                                             onSave = { oidcScope = it }
                                         )
                                         Res.string.preferences_brapi_version -> PreferenceDialogState(
-                                            title = stringResource(item.dialogTitle),
+                                            title = dialogTitle,
                                             type = item.dialogType,
                                             options = item.options,
                                             value = brapiVersion,
                                             onOptionSelected = { brapiVersion = it }
                                         )
                                         Res.string.brapi_pagination -> PreferenceDialogState(
-                                            title = stringResource(item.dialogTitle),
+                                            title = dialogTitle,
                                             type = item.dialogType,
                                             value = pageSize,
                                             onSave = { pageSize = it }
                                         )
                                         Res.string.brapi_chunk_size -> PreferenceDialogState(
-                                            title = stringResource(item.dialogTitle),
+                                            title = dialogTitle,
                                             type = item.dialogType,
                                             value = chunkSize,
                                             onSave = { chunkSize = it }
                                         )
                                         Res.string.brapi_timeout -> PreferenceDialogState(
-                                            title = stringResource(item.dialogTitle),
+                                            title = dialogTitle,
                                             type = item.dialogType,
                                             value = timeout,
                                             onSave = { timeout = it }
                                         )
                                         Res.string.preferences_brapi_cache_invalidate_title -> PreferenceDialogState(
-                                            title = stringResource(item.dialogTitle),
+                                            title = dialogTitle,
                                             type = item.dialogType,
                                             options = item.options,
                                             value = cacheInvalidation,
                                             onOptionSelected = { cacheInvalidation = it }
                                         )
                                         else -> PreferenceDialogState(
-                                            title = stringResource(item.dialogTitle),
-                                            summary = item.summary?.let { stringResource(it) },
+                                            title = dialogTitle,
+                                            summary = dialogSummary,
                                             type = item.dialogType,
                                             options = item.options,
                                             value = valueDisplayMode,
@@ -420,4 +423,3 @@ fun BrapiPreferencesScreen(
         }
     }
 }
-
