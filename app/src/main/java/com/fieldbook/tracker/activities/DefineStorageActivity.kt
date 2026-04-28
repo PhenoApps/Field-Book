@@ -1,9 +1,8 @@
 package com.fieldbook.tracker.activities
 
-import android.app.Activity
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.utilities.ManufacturerUtil
 import org.phenoapps.utils.BaseDocumentTreeUtil
 
 class DefineStorageActivity: ThemedActivity() {
@@ -13,18 +12,20 @@ class DefineStorageActivity: ThemedActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_define_storage)
+        setupBackCallback()
     }
 
-    override fun onBackPressed() {
-
-        if (mBackButtonEnabled) {
-            super.onBackPressed()
-            setResult(if (BaseDocumentTreeUtil.isEnabled(this)) {
-                Activity.RESULT_OK
-            } else Activity.RESULT_CANCELED)
-
-            finish()
+    private fun setupBackCallback() {
+        val backCallback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (mBackButtonEnabled) {
+                    val result = if (BaseDocumentTreeUtil.isEnabled(this@DefineStorageActivity)) RESULT_OK else RESULT_CANCELED
+                    setResult(result)
+                    finish()
+                }
+            }
         }
+        onBackPressedDispatcher.addCallback(this, backCallback)
     }
 
     fun enableBackButton(enable: Boolean) {

@@ -1,11 +1,8 @@
 package com.fieldbook.tracker.utilities
 
-import android.content.SharedPreferences
 import android.view.KeyEvent
 import com.fieldbook.tracker.interfaces.CollectController
-import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
-import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.views.TraitBoxView
 
 class MediaKeyCodeActionHelper {
@@ -58,11 +55,12 @@ class MediaKeyCodeActionHelper {
                     when (volumeNavEnabled) {
                         VolumeNavigation.DISABLED -> {
                             if (mediaControlEnabled) {
-                                collector.getTraitBox().moveTrait("right")
+                                collector.getTraitBox().moveTrait(TraitBoxView.MoveDirection.RIGHT)
                             }
                         }
                         VolumeNavigation.TRAIT_NAVIGATION-> collector.getRangeBox().moveEntryRight()
-                        VolumeNavigation.RANGE_NAVIGATION -> collector.getTraitBox().moveTrait("right")
+                        VolumeNavigation.RANGE_NAVIGATION -> collector.getTraitBox().moveTrait(
+                            TraitBoxView.MoveDirection.RIGHT)
                     }
                     true
                 }
@@ -70,11 +68,12 @@ class MediaKeyCodeActionHelper {
                     when (volumeNavEnabled) {
                         VolumeNavigation.DISABLED -> {
                             if (mediaControlEnabled) {
-                                collector.getTraitBox().moveTrait("left")
+                                collector.getTraitBox().moveTrait(TraitBoxView.MoveDirection.LEFT)
                             }
                         }
                         VolumeNavigation.TRAIT_NAVIGATION-> collector.getRangeBox().moveEntryLeft()
-                        VolumeNavigation.RANGE_NAVIGATION -> collector.getTraitBox().moveTrait("left")
+                        VolumeNavigation.RANGE_NAVIGATION -> collector.getTraitBox().moveTrait(
+                            TraitBoxView.MoveDirection.LEFT)
                     }
                     true
                 }
@@ -85,7 +84,8 @@ class MediaKeyCodeActionHelper {
                                 collector.getRangeBox().moveEntryRight()
                             }
                         }
-                        VolumeNavigation.TRAIT_NAVIGATION-> collector.getTraitBox().moveTrait("right")
+                        VolumeNavigation.TRAIT_NAVIGATION-> collector.getTraitBox().moveTrait(
+                            TraitBoxView.MoveDirection.RIGHT)
                         VolumeNavigation.RANGE_NAVIGATION -> collector.getRangeBox().moveEntryRight()
                     }
                     true
@@ -97,7 +97,8 @@ class MediaKeyCodeActionHelper {
                                 collector.getRangeBox().moveEntryLeft()
                             }
                         }
-                        VolumeNavigation.TRAIT_NAVIGATION -> collector.getTraitBox().moveTrait("left")
+                        VolumeNavigation.TRAIT_NAVIGATION -> collector.getTraitBox().moveTrait(
+                            TraitBoxView.MoveDirection.LEFT)
                         VolumeNavigation.RANGE_NAVIGATION -> collector.getRangeBox().moveEntryLeft()
                     }
                     true

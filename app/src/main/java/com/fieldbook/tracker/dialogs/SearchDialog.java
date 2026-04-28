@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
+import com.fieldbook.tracker.adapters.AttributeAdapter;
 import com.fieldbook.tracker.adapters.SearchAdapter;
 import com.fieldbook.tracker.adapters.SearchResultsAdapter;
 import com.fieldbook.tracker.database.models.ObservationModel;
@@ -133,14 +134,16 @@ public class SearchDialog extends DialogFragment implements AttributeChooserDial
     }
 
     public void createAttributeChooserDialog() {
-        AttributeChooserDialog attributeChooserDialog = new AttributeChooserDialog();
+        AttributeChooserDialog attributeChooserDialog = new AttributeChooserDialog(
+                true, true, false
+        );
         attributeChooserDialog.setOnAttributeSelectedListener(this);
         attributeChooserDialog.show(originActivity.getSupportFragmentManager(), "attributeChooserDialog");
     }
 
     @Override
-    public void onAttributeSelected(String selectedAttribute) {
-        dataSet.add(new SearchDialogDataModel(selectedAttribute, R.drawable.ic_tb_equal, ""));
+    public void onAttributeSelected(@NonNull AttributeAdapter.AttributeModel model) {
+        dataSet.add(new SearchDialogDataModel(model, R.drawable.ic_tb_equal, ""));
         searchAdapter.notifyItemInserted(dataSet.size() - 1);
     }
 
@@ -164,7 +167,7 @@ public class SearchDialog extends DialogFragment implements AttributeChooserDial
     }
 
     public void createSearchResultsDialog () {
-        String searchQuery = originActivity.getDatabase().getSearchQuery(originActivity, dataSet);
+        String searchQuery = originActivity.getDatabase().getSearchQuery(dataSet);
         final SearchData[] data = originActivity.getDatabase().getRangeBySql(searchQuery);
 
         if (data != null) {
@@ -178,7 +181,7 @@ public class SearchDialog extends DialogFragment implements AttributeChooserDial
 
             for (int i = 0; i < dataSet.size(); i++) {
 
-                String c = dataSet.get(i).getAttribute();
+                String c = dataSet.get(i).getAttribute().getLabel();
 
                 if (!columnsList.contains(c)) {
                     columnsList.add(c);
@@ -202,7 +205,7 @@ public class SearchDialog extends DialogFragment implements AttributeChooserDial
                     // If column is a trait
                     if (traitObject != null) {
                         for (ObservationModel observation : observations) {
-                            if (observation.getObservation_variable_name().equals(column) && observation.getObservation_unit_id().equals(searchdata.unique)) {
+                            if (String.valueOf(observation.getObservation_variable_db_id()).equals(traitObject.getId()) && observation.getObservation_unit_id().equals(searchdata.unique)) {
                                 // If trait is categorical, format the data before adding it to the array
                                 if (traitObject.getFormat().equals("categorical") || traitObject.getFormat().equals("multicat") || traitObject.getFormat().equals("qualitative")) {
                                     temp.add(decodeCategorical(observation.getValue()));

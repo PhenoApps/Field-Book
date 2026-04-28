@@ -13,6 +13,103 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [v6.3.6] - 2025-12-02
+
+### Added
+
+### Changed
+
+### Fixed
+- BrAPI authorization redirect link updated
+
+## [v6.3.5] - 2025-12-02
+
+### Added
+
+### Changed
+
+### Fixed
+- BrAPI now redirects and opens Field Book when authorizing
+
+## [v6.3.4] - 2025-11-17
+
+### Added
+
+### Changed
+- New BrAPI import now only displays active trials and studies
+
+### Fixed
+- GoPro no longer disconnects after image capture
+- BMS studies now correctly import via BrAPI (observation level and additional info fixes)
+- Numerous bug fixes and enhancements
+
+## [v6.3.3] - 2025-11-03
+
+### Added
+
+### Changed
+
+### Fixed
+- GoPro preview is no longer blank on certain devices
+
+## [v6.3.2] - 2025-10-20
+
+### Added
+
+### Changed
+
+### Fixed
+- GoPro Hero 13 no longer causes a crash
+- Reduced installer size by using a different ffmpeg library
+
+## [v6.3.1] - 2025-10-13
+
+### Added
+
+### Changed
+- Field Book now supports 16 KB page sizes
+
+### Fixed
+- Bug fixes and enhancements
+
+## [v6.3.0] - 2025-10-08
+
+### Added
+- Fields can now be grouped and archived
+- New trait formats: Stopwatch, Nix, Greenseeker, Scales
+- Trait name wrapping in Collect can now be toggled with a long-press
+- GoPro cameras can now optionally send just the image name instead of transferring the entire image
+
+### Changed
+- Field Book now targets Android SDK 36
+- Field Creator updated with new workflow and UI
+- Trait arrows are now hidden if only one trait is active
+- Boolean traits now have an unset state
+
+### Fixed
+- Improved workflow for logging out of BrAPI
+- Settings are no longer reset on restart
+- New traits from BrAPI now appear at the end of the trait list
+- Long pressing image and spectral thumbnails now displays metadata dialog
+- Importing traits from BrAPI without trait details no longer leads to a crash
+- Repeated measures no longer ignore trait limits
+- Keyboard backspace no longer moves cursor to the end of the current value in text traits
+- Field name is no longer an option in the Collect Search dialog
+- Exif user comment tag no longer populated by incorrect data
+- Return character setting is now interpreted correctly
+- Observation Variable Name is now searchable in the BrAPI trait importer
+- Image file name sanitation now removes or replaces more characters
+
+## [v6.2.5] - 2025-06-23
+
+### Added
+
+### Changed
+
+### Fixed
+- BrAPI Sync improved to avoid observation miscounts and other failures
+- 0x00 character now removed from pasted text values
+
 ## [v6.2.4] - 2025-06-09
 
 ### Added
@@ -708,8 +805,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v6.1.1]: https://github.com/PhenoApps/Field-Book/releases/tag/6.1.1
 [v6.1.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.1.2
 
+
 [v6.2.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.0
 [v6.2.1]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.1
 [v6.2.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.2
 [v6.2.3]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.3
 [v6.2.4]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.4
+[v6.2.5]: https://github.com/PhenoApps/Field-Book/releases/tag/6.2.5
+
+
+
+
+[v6.3.0]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.0
+[v6.3.1]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.1
+
+
+[v6.3.2]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.2
+[v6.3.3]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.3
+
+
+[v6.3.4]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.4
+[v6.3.5]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.5
+
+[v6.3.6]: https://github.com/PhenoApps/Field-Book/releases/tag/6.3.6

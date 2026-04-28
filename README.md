@@ -87,6 +87,7 @@ This project follows the [all-contributors](https://allcontributors.org/) specif
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/akshat22"><img src="https://avatars.githubusercontent.com/u/50794731?v=4?s=100" width="100px;" alt="Akshat Savla"/><br /><sub><b>Akshat Savla</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=akshat22" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/jpietragalla"><img src="https://avatars.githubusercontent.com/u/78973920?v=4?s=100" width="100px;" alt="jpietragalla"/><br /><sub><b>jpietragalla</b></sub></a><br /><a href="#translation-jpietragalla" title="Translation">🌍</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/rmcp"><img src="https://avatars.githubusercontent.com/u/5850588?v=4?s=100" width="100px;" alt="Renier Pestana"/><br /><sub><b>Renier Pestana</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=rmcp" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/alexismanin"><img src="https://avatars.githubusercontent.com/u/44767131?v=4?s=100" width="100px;" alt="Alexis Manin"/><br /><sub><b>Alexis Manin</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=alexismanin" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>

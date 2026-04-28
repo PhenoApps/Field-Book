@@ -323,9 +323,9 @@ class PhotoTraitLayout : CameraTrait {
             val data = stream.readBytes()
 
             saveJpegToStorage(
-                currentTrait.format,
                 data,
                 currentRange,
+                currentTrait,
                 FileUtil.sanitizeFileName(OffsetDateTime.now().format(internalTimeFormatter)),
                 SaveState.SINGLE_SHOT
             )

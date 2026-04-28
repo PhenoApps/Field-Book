@@ -8,6 +8,9 @@
 # Java class files
 *.class
 
+# Kotlin
+.kotlin
+
 # Generated files
 bin/
 gen/
@@ -61,4 +64,5 @@ local.properties
 *.keystore
 keystore.config
 
-.kotlin
+# VS Code files
+.vscode/settings.json

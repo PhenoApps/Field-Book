@@ -9,7 +9,6 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fitsSystemWindows="true"
         android:minHeight="?attr/actionBarSize" />
 
 
@@ -394,9 +393,11 @@
     </LinearLayout>
 
     <LinearLayout
+        android:layout_margin="16dp"
+        android:background="@drawable/cell"
         android:id="@+id/saving_panel"
-        android:layout_width="wrap_content"
-        android:layout_height="100dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:layout_centerHorizontal="true"
         android:orientation="vertical"
