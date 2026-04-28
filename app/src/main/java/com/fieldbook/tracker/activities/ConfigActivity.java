@@ -36,15 +36,15 @@ import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.AppLanguageUtil;
-import com.fieldbook.tracker.utilities.InsetHandler;
-import com.fieldbook.tracker.utilities.export.ExportUtil;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
+import com.fieldbook.tracker.utilities.InsetHandler;
 import com.fieldbook.tracker.utilities.OldPhotosMigrator;
 import com.fieldbook.tracker.utilities.PersonNameManager;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.VerifyPersonHelper;
+import com.fieldbook.tracker.utilities.export.ExportUtil;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.getkeepsafe.taptargetview.TapTargetView;
@@ -57,7 +57,6 @@ import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
 import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.checkerframework.checker.units.qual.K;
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 
 import java.util.ArrayList;
@@ -278,7 +277,7 @@ public class ConfigActivity extends ThemedActivity {
         };
 
         if (useKmp) {
-            configList = concat(configList, new String[]{getString(R.string.settings_kmp)});
+            configList = ArrayUtils.add(configList, getString(R.string.settings_kmp));
         }
 
         Integer[] image_id = {
