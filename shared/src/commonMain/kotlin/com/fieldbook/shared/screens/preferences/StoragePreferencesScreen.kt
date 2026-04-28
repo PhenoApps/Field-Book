@@ -41,6 +41,14 @@ import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.database_export
 import com.fieldbook.shared.generated.resources.database_import
 import com.fieldbook.shared.generated.resources.database_reset
+import com.fieldbook.shared.generated.resources.database_reset_message
+import com.fieldbook.shared.generated.resources.database_reset_warning1
+import com.fieldbook.shared.generated.resources.database_reset_warning2
+import com.fieldbook.shared.generated.resources.dialog_cancel
+import com.fieldbook.shared.generated.resources.dialog_delete
+import com.fieldbook.shared.generated.resources.dialog_no
+import com.fieldbook.shared.generated.resources.dialog_warning
+import com.fieldbook.shared.generated.resources.dialog_yes
 import com.fieldbook.shared.generated.resources.ic_pref_database_delete
 import com.fieldbook.shared.generated.resources.ic_pref_database_export
 import com.fieldbook.shared.generated.resources.ic_pref_database_import
@@ -50,6 +58,8 @@ import com.fieldbook.shared.generated.resources.preferences_storage_files_base_d
 import com.fieldbook.shared.generated.resources.preferences_storage_files_base_directory_title
 import com.fieldbook.shared.generated.resources.preferences_storage_storage_title
 import com.fieldbook.shared.generated.resources.preferences_storage_title
+import com.fieldbook.shared.screens.export.ExportScreen
+import com.fieldbook.shared.utilities.resetLocalDatabaseAndPreferences
 import com.fieldbook.shared.utilities.selectFirstField
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
@@ -68,14 +78,20 @@ private data class StoragePreferenceItem(
 @Composable
 fun StoragePreferencesScreen(
     onBack: (() -> Unit)? = null,
-    onNavigate: ((com.fieldbook.shared.KmpHostScreenType) -> Unit)? = null
+    onNavigate: ((com.fieldbook.shared.KmpHostScreenType) -> Unit)? = null,
+    onExit: (() -> Unit)? = null
 ) {
     var showImportDialog by remember { mutableStateOf(false) }
+    var showExportDialog by remember { mutableStateOf(false) }
+    var showDeleteWarning1 by remember { mutableStateOf(false) }
+    var showDeleteWarning2 by remember { mutableStateOf(false) }
     var isImporting by remember { mutableStateOf(false) }
     var importResult by remember { mutableStateOf<String?>(null) }
     var showSuccessSnackbar by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    val deleteSuccessMessage = stringResource(Res.string.database_reset_message)
+    val deleteFailureMessage = "Failed to delete database."
 
     val storageItems = listOf(
         StoragePreferenceItem(
@@ -170,13 +186,16 @@ fun StoragePreferencesScreen(
                         )
                     }
                     items(databaseItems) { item ->
-                        val isImport = item.key == "pref_database_import"
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(16.dp)
-                                .let { mod ->
-                                    if (isImport) mod.clickable { showImportDialog = true } else mod
+                                .clickable {
+                                    when (item.key) {
+                                        "pref_database_import" -> showImportDialog = true
+                                        "pref_database_export" -> showExportDialog = true
+                                        "pref_database_delete" -> showDeleteWarning1 = true
+                                    }
                                 },
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -239,7 +258,61 @@ fun StoragePreferencesScreen(
                                 importResult = null
                             }
                         ) {
-                            Text("Cancel")
+                            Text(stringResource(Res.string.dialog_cancel))
+                        }
+                    }
+                )
+            }
+            if (showDeleteWarning1) {
+                AlertDialog(
+                    onDismissRequest = { showDeleteWarning1 = false },
+                    title = { Text(stringResource(Res.string.dialog_warning)) },
+                    text = { Text(stringResource(Res.string.database_reset_warning1)) },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                showDeleteWarning1 = false
+                                showDeleteWarning2 = true
+                            }
+                        ) {
+                            Text(stringResource(Res.string.dialog_delete))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDeleteWarning1 = false }) {
+                            Text(stringResource(Res.string.dialog_cancel))
+                        }
+                    }
+                )
+            }
+            if (showDeleteWarning2) {
+                AlertDialog(
+                    onDismissRequest = { showDeleteWarning2 = false },
+                    title = { Text(stringResource(Res.string.dialog_warning)) },
+                    text = { Text(stringResource(Res.string.database_reset_warning2)) },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                showDeleteWarning2 = false
+                                coroutineScope.launch {
+                                    val resetSucceeded = runCatching {
+                                        resetLocalDatabaseAndPreferences()
+                                    }.getOrDefault(false)
+
+                                    if (resetSucceeded) {
+                                        onExit?.invoke() ?: onBack?.invoke()
+                                    } else {
+                                        snackbarHostState.showSnackbar(deleteFailureMessage)
+                                    }
+                                }
+                            }
+                        ) {
+                            Text(stringResource(Res.string.dialog_yes))
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDeleteWarning2 = false }) {
+                            Text(stringResource(Res.string.dialog_no))
                         }
                     }
                 )
@@ -252,5 +325,12 @@ fun StoragePreferencesScreen(
             }
             SnackbarHost(hostState = snackbarHostState)
         }
+    }
+
+    if (showExportDialog) {
+        ExportScreen(
+            fieldIds = emptyList(),
+            onBack = { showExportDialog = false }
+        )
     }
 }

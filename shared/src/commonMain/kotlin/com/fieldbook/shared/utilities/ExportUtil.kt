@@ -12,6 +12,7 @@ import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.dir_archive
 import com.fieldbook.shared.generated.resources.dir_field_export
 import com.fieldbook.shared.preferences.GeneralKeys
+import com.fieldbook.shared.sqldelight.FieldbookDatabase
 import com.fieldbook.shared.sqldelight.createDatabase
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.CoroutineScope
@@ -28,8 +29,10 @@ import org.jetbrains.compose.resources.getString
 class ExportUtil : CoroutineScope by MainScope() {
     private val studyRepo = StudyRepository()
     private val traitRepo = TraitRepository()
-    private val db = createDatabase()
-    private val driver: SqlDriver = AppContext.driverFactory().getDriver()
+    private val db: FieldbookDatabase
+        get() = createDatabase()
+    private val driver: SqlDriver
+        get() = AppContext.driverFactory().getDriver()
     private val prefs = Settings()
 
     private var fieldIds: List<Int> = emptyList()

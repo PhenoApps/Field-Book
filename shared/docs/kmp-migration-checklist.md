@@ -6,9 +6,9 @@
 |-------------------------|--------------------|--------------------|
 |                         |                    |                    |
 | **Onboarding**          |                    |                    |
-| Initialize storage      |                    |                    |
-| Permissions             |                    |                    |
-| Load samples            |                    |                    |
+| Initialize storage      | :white_check_mark: |                    |
+| Permissions             | :white_check_mark: | :white_check_mark: |
+| Load samples            | :white_check_mark: |                    |
 | Tutorial                |                    |                    |
 |                         |                    |                    |
 | **Fields**              |                    |                    |
@@ -99,7 +99,7 @@
 | Import db (sample)      | :white_check_mark: | :white_check_mark: |
 | Import db (other file)  |                    |                    |
 | Export db               |                    |                    |
-| Delete db               |                    |                    |
+| Delete db               | :white_check_mark: |                    |
 |                         |                    |                    |
 | ...                     |                    |                    |
 |                         |                    |                    |
