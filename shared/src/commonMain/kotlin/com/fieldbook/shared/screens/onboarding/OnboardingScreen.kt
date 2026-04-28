@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -24,6 +25,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -60,6 +62,11 @@ import com.fieldbook.shared.utilities.configurePickedStorageDirectory
 import com.fieldbook.shared.utilities.isStorageDirectoryConfigured
 import com.fieldbook.shared.utilities.selectFirstField
 import com.russhwolf.settings.Settings
+import dev.icerock.moko.permissions.Permission
+import dev.icerock.moko.permissions.camera.CAMERA
+import dev.icerock.moko.permissions.location.COARSE_LOCATION
+import dev.icerock.moko.permissions.location.LOCATION
+import dev.icerock.moko.permissions.microphone.RECORD_AUDIO
 import io.github.vinceglb.filekit.compose.rememberDirectoryPickerLauncher
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
@@ -69,7 +76,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun OnboardingScreen(
     hasPermissions: Boolean,
-    onRequestPermissions: suspend () -> Boolean,
+    onRequestPermissions: suspend () -> OnboardingPermissionRequestResult,
     onComplete: () -> Unit,
 ) {
     val pagerState = rememberPagerState(pageCount = { 4 })
@@ -80,6 +87,7 @@ fun OnboardingScreen(
     var permissionsGranted by remember { mutableStateOf(hasPermissions) }
     var storageConfigured by remember { mutableStateOf(isStorageDirectoryConfigured()) }
     var importInProgress by remember { mutableStateOf(false) }
+    var permissionsToEnableInSettings by remember { mutableStateOf<List<Permission>>(emptyList()) }
 
     LaunchedEffect(hasPermissions) {
         permissionsGranted = hasPermissions
@@ -127,9 +135,13 @@ fun OnboardingScreen(
                         storageConfigured = storageConfigured,
                         onRequestPermissions = {
                             coroutineScope.launch {
-                                permissionsGranted = onRequestPermissions()
+                                val result = onRequestPermissions()
+                                permissionsGranted = result.granted
+                                permissionsToEnableInSettings = result.permissionsToEnableInSettings()
                                 if (!permissionsGranted) {
-                                    snackbarHostState.showSnackbar("Please grant the required permissions.")
+                                    if (permissionsToEnableInSettings.isEmpty()) {
+                                        snackbarHostState.showSnackbar("Please grant the required permissions.")
+                                    }
                                 }
                             }
                         },
@@ -186,6 +198,63 @@ fun OnboardingScreen(
                 modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp)
             )
         }
+
+        if (permissionsToEnableInSettings.isNotEmpty()) {
+            PermissionSettingsDialog(
+                permissions = permissionsToEnableInSettings,
+                onDismiss = { permissionsToEnableInSettings = emptyList() }
+            )
+        }
+    }
+}
+
+@Composable
+private fun PermissionSettingsDialog(
+    permissions: List<Permission>,
+    onDismiss: () -> Unit,
+) {
+    val permissionLabel = if (permissions.size == 1) "permission" else "permissions"
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Permission required") },
+        text = {
+            Column {
+                Text("Enable the following $permissionLabel for Field Book in system settings to continue:")
+                Spacer(modifier = Modifier.height(8.dp))
+                permissions.forEach { permission ->
+                    Text("- ${permission.settingsLabel()}")
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("OK")
+            }
+        }
+    )
+}
+
+private fun OnboardingPermissionRequestResult.permissionsToEnableInSettings(): List<Permission> {
+    return buildList {
+        if (permissions[Permission.CAMERA] == false) {
+            add(Permission.CAMERA)
+        }
+        if (permissions[Permission.RECORD_AUDIO] == false) {
+            add(Permission.RECORD_AUDIO)
+        }
+        if (permissions[Permission.LOCATION] == false && permissions[Permission.COARSE_LOCATION] == false) {
+            add(Permission.LOCATION)
+        }
+    }
+}
+
+private fun Permission.settingsLabel(): String {
+    return when (this) {
+        Permission.CAMERA -> "Camera"
+        Permission.RECORD_AUDIO -> "Microphone"
+        Permission.LOCATION, Permission.COARSE_LOCATION -> "Location"
+        else -> "Required access"
     }
 }
 
