@@ -71,6 +71,7 @@ import com.fieldbook.shared.generated.resources.preferences_brapi_enable_title
 import com.fieldbook.shared.generated.resources.preferences_brapi_oidc_flow
 import com.fieldbook.shared.generated.resources.preferences_brapi_oidc_flow_oauth_code
 import com.fieldbook.shared.generated.resources.preferences_brapi_oidc_flow_oauth_implicit
+import com.fieldbook.shared.generated.resources.preferences_brapi_oidc_flow_old_custom
 import com.fieldbook.shared.generated.resources.preferences_brapi_server_title
 import com.fieldbook.shared.generated.resources.preferences_brapi_traits_title
 import com.fieldbook.shared.generated.resources.preferences_brapi_version
@@ -81,37 +82,45 @@ import com.fieldbook.shared.generated.resources.prefs_brapi_cache_invalidate_cho
 import com.fieldbook.shared.generated.resources.prefs_brapi_cache_invalidate_choice_none
 import com.fieldbook.shared.generated.resources.prefs_brapi_cache_invalidate_choice_weekly
 import com.fieldbook.shared.generated.resources.qr_code_share_choose_action_title
+import com.russhwolf.settings.Settings
 import org.jetbrains.compose.resources.stringResource
+
+private object BrapiPreferenceKeys {
+    const val BRAPI_ENABLED = "BRAPI_ENABLED"
+    const val BRAPI_BASE_URL = "BRAPI_BASE_URL"
+    const val BRAPI_OIDC_URL = "BRAPI_OIDC_URL"
+    const val BRAPI_OIDC_FLOW = "BRAPI_OIDC_FLOW"
+    const val BRAPI_OIDC_CLIENT_ID = "BRAPI_OIDC_CLIENT_ID"
+    const val BRAPI_OIDC_SCOPE = "BRAPI_OIDC_SCOPE"
+    const val BRAPI_EXPLICIT_OIDC_URL = "BRAPI_EXPLICIT_OIDC_URL"
+    const val BRAPI_TOKEN = "BRAPI_TOKEN"
+    const val BRAPI_VERSION = "BRAPI_VERSION"
+    const val BRAPI_PAGE_SIZE = "BRAPI_PAGE_SIZE"
+    const val BRAPI_TIMEOUT = "BRAPI_TIMEOUT"
+    const val BRAPI_CHUNK_SIZE = "BRAPI_CHUNK_SIZE"
+    const val BRAPI_DISPLAY_NAME = "BRAPI_DISPLAY_NAME"
+    const val BRAPI_INVALIDATE_CACHE_INTERVAL = "BRAPI_CACHE_INVALIDATE_INTERVAL"
+    const val LABELVAL_CUSTOMIZE = "LABELVAL_CUSTOMIZE"
+    const val IMPORT_SOURCE_DEFAULT = "IMPORT_SOURCE_DEFAULT"
+    const val EXPORT_SOURCE_DEFAULT = "EXPORT_SOURCE_DEFAULT"
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BrapiPreferencesScreen(
     onBack: (() -> Unit)? = null
 ) {
+    val preferences = remember { Settings() }
     val defaultBaseUrl = stringResource(Res.string.brapi_base_url_default)
     val defaultDisplayName = stringResource(Res.string.brapi_edit_display_name_default)
     val defaultOidcFlow = stringResource(Res.string.preferences_brapi_oidc_flow_oauth_implicit)
+    val oldCustomOidcFlow = stringResource(Res.string.preferences_brapi_oidc_flow_old_custom)
     val defaultOidcUrl = stringResource(Res.string.brapi_oidc_url_default)
     val defaultOidcClientId = stringResource(Res.string.brapi_oidc_clientid_default)
     val defaultOidcScope = stringResource(Res.string.brapi_oidc_scope_default)
     val defaultBrapiVersion = stringResource(Res.string.preferences_brapi_version_v2)
     val defaultCacheInvalidation = stringResource(Res.string.prefs_brapi_cache_invalidate_choice_each_time)
     val defaultValueDisplayMode = stringResource(Res.string.preferences_appearance_collect_labelval_customize_value)
-
-    var brapiEnabled by remember { mutableStateOf(false) }
-    var baseUrl by remember(defaultBaseUrl) { mutableStateOf(defaultBaseUrl) }
-    var displayName by remember(defaultDisplayName) { mutableStateOf(defaultDisplayName) }
-    var oidcFlow by remember(defaultOidcFlow) { mutableStateOf(defaultOidcFlow) }
-    var oidcUrl by remember(defaultOidcUrl) { mutableStateOf(defaultOidcUrl) }
-    var oidcClientId by remember(defaultOidcClientId) { mutableStateOf(defaultOidcClientId) }
-    var oidcScope by remember(defaultOidcScope) { mutableStateOf(defaultOidcScope) }
-    var brapiVersion by remember(defaultBrapiVersion) { mutableStateOf(defaultBrapiVersion) }
-    var pageSize by remember { mutableStateOf("50") }
-    var chunkSize by remember { mutableStateOf("500") }
-    var timeout by remember { mutableStateOf("120") }
-    var cacheInvalidation by remember(defaultCacheInvalidation) { mutableStateOf(defaultCacheInvalidation) }
-    var valueDisplayMode by remember(defaultValueDisplayMode) { mutableStateOf(defaultValueDisplayMode) }
-    var dialogState by remember { mutableStateOf<PreferenceDialogState?>(null) }
 
     val oidcFlowOptions = listOf(
         stringResource(Res.string.preferences_brapi_oidc_flow_oauth_code),
@@ -131,10 +140,62 @@ fun BrapiPreferencesScreen(
         stringResource(Res.string.prefs_brapi_cache_invalidate_choice_weekly),
         stringResource(Res.string.prefs_brapi_cache_invalidate_choice_none)
     )
+    val cacheInvalidationValues = listOf("0", "1", "2", "3")
     val valueDisplayOptions = listOf(
         stringResource(Res.string.preferences_appearance_collect_labelval_customize_value),
         stringResource(Res.string.preferences_appearance_collect_labelval_customize_label)
     )
+    val valueDisplayValues = listOf("value", "label")
+
+    var brapiEnabled by remember {
+        mutableStateOf(preferences.getBoolean(BrapiPreferenceKeys.BRAPI_ENABLED, false))
+    }
+    var baseUrl by remember(defaultBaseUrl) {
+        mutableStateOf(preferences.getString(BrapiPreferenceKeys.BRAPI_BASE_URL, defaultBaseUrl))
+    }
+    var oldBaseUrl by remember(defaultBaseUrl) { mutableStateOf(baseUrl) }
+    var displayName by remember(defaultDisplayName) {
+        mutableStateOf(preferences.getString(BrapiPreferenceKeys.BRAPI_DISPLAY_NAME, defaultDisplayName))
+    }
+    var oidcFlow by remember(defaultOidcFlow, oldCustomOidcFlow) {
+        val storedOidcFlow = preferences.getString(BrapiPreferenceKeys.BRAPI_OIDC_FLOW, defaultOidcFlow)
+        if (storedOidcFlow == oldCustomOidcFlow) {
+            preferences.putString(BrapiPreferenceKeys.BRAPI_OIDC_FLOW, defaultOidcFlow)
+        }
+        mutableStateOf(if (storedOidcFlow == oldCustomOidcFlow) defaultOidcFlow else storedOidcFlow)
+    }
+    var oidcUrl by remember(defaultOidcUrl) {
+        mutableStateOf(preferences.getString(BrapiPreferenceKeys.BRAPI_OIDC_URL, defaultOidcUrl))
+    }
+    var oidcClientId by remember(defaultOidcClientId) {
+        mutableStateOf(preferences.getString(BrapiPreferenceKeys.BRAPI_OIDC_CLIENT_ID, defaultOidcClientId))
+    }
+    var oidcScope by remember(defaultOidcScope) {
+        mutableStateOf(preferences.getString(BrapiPreferenceKeys.BRAPI_OIDC_SCOPE, defaultOidcScope))
+    }
+    var brapiVersion by remember(defaultBrapiVersion) {
+        mutableStateOf(preferences.getString(BrapiPreferenceKeys.BRAPI_VERSION, defaultBrapiVersion))
+    }
+    var pageSize by remember {
+        mutableStateOf(preferences.getString(BrapiPreferenceKeys.BRAPI_PAGE_SIZE, "50"))
+    }
+    var chunkSize by remember {
+        mutableStateOf(preferences.getString(BrapiPreferenceKeys.BRAPI_CHUNK_SIZE, "500"))
+    }
+    var timeout by remember {
+        mutableStateOf(preferences.getString(BrapiPreferenceKeys.BRAPI_TIMEOUT, "120"))
+    }
+    var cacheInvalidation by remember(defaultCacheInvalidation) {
+        val storedValue = preferences.getString(BrapiPreferenceKeys.BRAPI_INVALIDATE_CACHE_INTERVAL, "0")
+        val selectedIndex = cacheInvalidationValues.indexOf(storedValue).takeIf { it >= 0 } ?: 0
+        mutableStateOf(cacheInvalidationOptions[selectedIndex])
+    }
+    var valueDisplayMode by remember(defaultValueDisplayMode) {
+        val storedValue = preferences.getString(BrapiPreferenceKeys.LABELVAL_CUSTOMIZE, "value")
+        val selectedIndex = valueDisplayValues.indexOf(storedValue).takeIf { it >= 0 } ?: 0
+        mutableStateOf(valueDisplayOptions[selectedIndex])
+    }
+    var dialogState by remember { mutableStateOf<PreferenceDialogState?>(null) }
 
     val sections = listOf(
         PreferenceSection(
@@ -281,7 +342,19 @@ fun BrapiPreferencesScreen(
                         title = stringResource(Res.string.preferences_brapi_enable_title),
                         summary = stringResource(Res.string.preferences_brapi_enable_summary),
                         checked = brapiEnabled,
-                        onCheckedChange = { brapiEnabled = it }
+                        onCheckedChange = { isEnabled ->
+                            brapiEnabled = isEnabled
+                            preferences.putBoolean(BrapiPreferenceKeys.BRAPI_ENABLED, isEnabled)
+                            if (!isEnabled) {
+                                if (preferences.getString(BrapiPreferenceKeys.IMPORT_SOURCE_DEFAULT, "") == "brapi") {
+                                    preferences.putString(BrapiPreferenceKeys.IMPORT_SOURCE_DEFAULT, "ask")
+                                }
+                                if (preferences.getString(BrapiPreferenceKeys.EXPORT_SOURCE_DEFAULT, "") == "brapi") {
+                                    preferences.putString(BrapiPreferenceKeys.EXPORT_SOURCE_DEFAULT, "ask")
+                                }
+                                preferences.remove(BrapiPreferenceKeys.BRAPI_TOKEN)
+                            }
+                        }
                     )
                     HorizontalDivider()
                 }
@@ -308,13 +381,32 @@ fun BrapiPreferencesScreen(
                                             summary = dialogSummary,
                                             type = item.dialogType,
                                             value = baseUrl,
-                                            onSave = { baseUrl = it }
+                                            onSave = { value ->
+                                                baseUrl = value
+                                                preferences.putString(BrapiPreferenceKeys.BRAPI_BASE_URL, value)
+                                                if (!preferences.getBoolean(BrapiPreferenceKeys.BRAPI_EXPLICIT_OIDC_URL, false)) {
+                                                    val newOidcUrl = oidcUrl.replaceFirst(oldBaseUrl, value)
+                                                    val newDisplayName = value.replace(
+                                                        Regex("https?://(?:www\\.)?(.*?)(?:/.*)?$"),
+                                                        "$1"
+                                                    )
+                                                    oidcUrl = newOidcUrl
+                                                    displayName = newDisplayName
+                                                    preferences.putString(BrapiPreferenceKeys.BRAPI_OIDC_URL, newOidcUrl)
+                                                    preferences.putString(BrapiPreferenceKeys.BRAPI_DISPLAY_NAME, newDisplayName)
+                                                }
+                                                oldBaseUrl = value
+                                            }
                                         )
                                         Res.string.brapi_display_name -> PreferenceDialogState(
                                             title = dialogTitle,
                                             type = item.dialogType,
                                             value = displayName,
-                                            onSave = { displayName = it }
+                                            onSave = { value ->
+                                                val savedValue = value.ifEmpty { defaultDisplayName }
+                                                displayName = savedValue
+                                                preferences.putString(BrapiPreferenceKeys.BRAPI_DISPLAY_NAME, savedValue)
+                                            }
                                         )
                                         Res.string.preferences_brapi_barcode_config_title -> PreferenceDialogState(
                                             title = dialogTitle,
@@ -324,68 +416,102 @@ fun BrapiPreferencesScreen(
                                         )
                                         Res.string.brapi_revoke_auth -> PreferenceDialogState(
                                             title = dialogTitle,
-                                            summary = "Layout placeholder only. Log out is not implemented yet.",
+                                            summary = "BrAPI authentication token cleared.",
                                             type = item.dialogType
-                                        )
+                                        ).also {
+                                            preferences.remove(BrapiPreferenceKeys.BRAPI_TOKEN)
+                                        }
                                         Res.string.preferences_brapi_oidc_flow -> PreferenceDialogState(
                                             title = dialogTitle,
                                             type = item.dialogType,
                                             options = item.options,
                                             value = oidcFlow,
-                                            onOptionSelected = { oidcFlow = it }
+                                            onOptionSelected = { value ->
+                                                oidcFlow = value
+                                                preferences.putString(BrapiPreferenceKeys.BRAPI_OIDC_FLOW, value)
+                                            }
                                         )
                                         Res.string.brapi_oidc_url -> PreferenceDialogState(
                                             title = dialogTitle,
                                             summary = dialogSummary,
                                             type = item.dialogType,
                                             value = oidcUrl,
-                                            onSave = { oidcUrl = it }
+                                            onSave = { value ->
+                                                oidcUrl = value
+                                                preferences.putString(BrapiPreferenceKeys.BRAPI_OIDC_URL, value)
+                                                preferences.putBoolean(BrapiPreferenceKeys.BRAPI_EXPLICIT_OIDC_URL, true)
+                                            }
                                         )
                                         Res.string.brapi_oidc_clientid -> PreferenceDialogState(
                                             title = dialogTitle,
                                             summary = dialogSummary,
                                             type = item.dialogType,
                                             value = oidcClientId,
-                                            onSave = { oidcClientId = it }
+                                            onSave = { value ->
+                                                oidcClientId = value
+                                                preferences.putString(BrapiPreferenceKeys.BRAPI_OIDC_CLIENT_ID, value)
+                                            }
                                         )
                                         Res.string.brapi_oidc_scope -> PreferenceDialogState(
                                             title = dialogTitle,
                                             summary = dialogSummary,
                                             type = item.dialogType,
                                             value = oidcScope,
-                                            onSave = { oidcScope = it }
+                                            onSave = { value ->
+                                                oidcScope = value
+                                                preferences.putString(BrapiPreferenceKeys.BRAPI_OIDC_SCOPE, value)
+                                            }
                                         )
                                         Res.string.preferences_brapi_version -> PreferenceDialogState(
                                             title = dialogTitle,
                                             type = item.dialogType,
                                             options = item.options,
                                             value = brapiVersion,
-                                            onOptionSelected = { brapiVersion = it }
+                                            onOptionSelected = { value ->
+                                                brapiVersion = value
+                                                preferences.putString(BrapiPreferenceKeys.BRAPI_VERSION, value)
+                                            }
                                         )
                                         Res.string.brapi_pagination -> PreferenceDialogState(
                                             title = dialogTitle,
                                             type = item.dialogType,
                                             value = pageSize,
-                                            onSave = { pageSize = it }
+                                            onSave = { value ->
+                                                pageSize = value
+                                                preferences.putString(BrapiPreferenceKeys.BRAPI_PAGE_SIZE, value)
+                                            }
                                         )
                                         Res.string.brapi_chunk_size -> PreferenceDialogState(
                                             title = dialogTitle,
                                             type = item.dialogType,
                                             value = chunkSize,
-                                            onSave = { chunkSize = it }
+                                            onSave = { value ->
+                                                chunkSize = value
+                                                preferences.putString(BrapiPreferenceKeys.BRAPI_CHUNK_SIZE, value)
+                                            }
                                         )
                                         Res.string.brapi_timeout -> PreferenceDialogState(
                                             title = dialogTitle,
                                             type = item.dialogType,
                                             value = timeout,
-                                            onSave = { timeout = it }
+                                            onSave = { value ->
+                                                timeout = value
+                                                preferences.putString(BrapiPreferenceKeys.BRAPI_TIMEOUT, value)
+                                            }
                                         )
                                         Res.string.preferences_brapi_cache_invalidate_title -> PreferenceDialogState(
                                             title = dialogTitle,
                                             type = item.dialogType,
                                             options = item.options,
                                             value = cacheInvalidation,
-                                            onOptionSelected = { cacheInvalidation = it }
+                                            onOptionSelected = { value ->
+                                                val selectedIndex = cacheInvalidationOptions.indexOf(value).takeIf { it >= 0 } ?: 0
+                                                cacheInvalidation = value
+                                                preferences.putString(
+                                                    BrapiPreferenceKeys.BRAPI_INVALIDATE_CACHE_INTERVAL,
+                                                    cacheInvalidationValues[selectedIndex]
+                                                )
+                                            }
                                         )
                                         else -> PreferenceDialogState(
                                             title = dialogTitle,
@@ -393,7 +519,14 @@ fun BrapiPreferencesScreen(
                                             type = item.dialogType,
                                             options = item.options,
                                             value = valueDisplayMode,
-                                            onOptionSelected = { valueDisplayMode = it }
+                                            onOptionSelected = { value ->
+                                                val selectedIndex = valueDisplayOptions.indexOf(value).takeIf { it >= 0 } ?: 0
+                                                valueDisplayMode = value
+                                                preferences.putString(
+                                                    BrapiPreferenceKeys.LABELVAL_CUSTOMIZE,
+                                                    valueDisplayValues[selectedIndex]
+                                                )
+                                            }
                                         )
                                     }
                                 }
