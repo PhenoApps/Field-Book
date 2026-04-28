@@ -24,6 +24,7 @@ import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.traits.formats.TraitFormatParametersAdapter
 import com.fieldbook.tracker.traits.formats.ValidationResult
+import com.fieldbook.tracker.traits.formats.parameters.CanopySensitivityParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 import com.fieldbook.tracker.traits.formats.ui.ParameterScrollView
 import com.fieldbook.tracker.utilities.SoundHelperImpl
@@ -334,6 +335,12 @@ class NewTraitDialog(
 
             }
 
+            if (parameter is CanopySensitivityParameter) {
+
+                parameter.setActivity(activity)
+
+            }
+
             parameter.createViewHolder(parametersSv)?.let { holder ->
 
                 holder.bind(parameter, initialTraitObject)
@@ -565,6 +572,10 @@ class NewTraitDialog(
 
     private var isShowingSubFormat = false
     private var topLevelFormats: List<Formats> = emptyList()
+
+    fun onTestCaptureResult() {
+        parametersSv.findHolder<CanopySensitivityParameter.ViewHolder>()?.onTestCaptureResult()
+    }
 
     override fun onSelected(format: Formats) {
 

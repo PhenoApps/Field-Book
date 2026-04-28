@@ -288,7 +288,7 @@ open class PhotoTraitLayout : CameraTrait {
         }
     }
 
-    protected fun awaitPreviewHolder(callback: () -> Unit) {
+    protected open fun awaitPreviewHolder(callback: () -> Unit) {
 
         previewHolder = getPreviewViewHolder()
 
@@ -334,7 +334,7 @@ open class PhotoTraitLayout : CameraTrait {
         bindCameraForInformation()
     }
 
-    fun makeImage(currentTrait: TraitObject) {
+    open fun makeImage(currentTrait: TraitObject) {
 
         val file = File(context.cacheDir, TEMPORARY_IMAGE_NAME)
 

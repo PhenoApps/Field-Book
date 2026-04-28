@@ -1745,6 +1745,18 @@
     <string name="pref_experimental_generate_sample_data_success">Sample field created successfully.</string>
     <string name="pref_experimental_generate_sample_data_failure">Failed to generate sample field. Check that storage is configured correctly.</string>
     <string name="traits_format_experimental">Experimental</string>
+    <string name="traits_format_canopy_coverage">Canopy Coverage</string>
+    <string name="trait_canopy_sensitivity_label">Sensitivity</string>
+    <string name="canopy_coverage_preview_description">Captured image with green canopy overlay</string>
+    <string name="canopy_coverage_capture_description">Capture image for canopy coverage analysis</string>
+    <string name="canopy_coverage_embiggen_description">Expand captured image to full screen</string>
+    <string name="canopy_coverage_overwrite_title">Overwrite canopy image?</string>
+    <string name="canopy_coverage_overwrite_message">Capturing a new image will replace the current canopy image and value for this observation.</string>
+    <string name="canopy_coverage_overwrite_positive">Overwrite</string>
+    <string name="canopy_param_test_capture">Test Capture</string>
+    <string name="canopy_param_test">Test</string>
+    <string name="canopy_param_threshold_format">Threshold: %.2f</string>
+    <string name="canopy_param_output_format">Output value: %.1f</string>
     <string name="pref_experimental_traits_category_title">Experimental Traits</string>
     <string name="pref_experimental_traits_category_summary">Show an experimental traits category in the trait type selector</string>
 

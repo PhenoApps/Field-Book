@@ -31,6 +31,7 @@ import com.fieldbook.tracker.traits.formats.parameters.InvalidValueParameter
 import com.fieldbook.tracker.traits.formats.parameters.MathSymbolsParameter
 import com.fieldbook.tracker.traits.formats.parameters.AttachMediaParameter
 import com.fieldbook.tracker.traits.formats.parameters.AllowOtherParameter
+import com.fieldbook.tracker.traits.formats.parameters.CanopySensitivityParameter
 import com.fieldbook.tracker.traits.formats.parameters.MultipleCategoriesParameter
 import com.fieldbook.tracker.traits.formats.parameters.Parameters
 import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
@@ -227,6 +228,7 @@ private fun getParamIcon(param: BaseFormatParameter, trait: TraitObject): Int {
         is UnitParameter -> R.drawable.ic_tag_edit
         is ResourceFileParameter -> R.drawable.ic_tb_folder
         is AttachMediaParameter -> R.drawable.multimedia
+        is CanopySensitivityParameter -> R.drawable.tune_variant
         else -> R.drawable.ic_tag_edit
     }
 }

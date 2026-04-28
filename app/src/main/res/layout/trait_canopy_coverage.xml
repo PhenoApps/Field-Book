@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.fieldbook.tracker.traits.CanopyCoverageTraitLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/canopyCoverageLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:visibility="gone">
+
+    <!-- Portrait preview frame: live PreviewView until capture, then captured ImageView -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/canopy_frame_card"
+        android:layout_width="@dimen/camera_preview_portrait_width"
+        android:layout_height="@dimen/camera_preview_portrait_height"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="8dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="0dp">
+
+        <FrameLayout
+            android:id="@+id/canopy_frame"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#E0E0E0">
+
+            <androidx.camera.view.PreviewView
+                android:id="@+id/canopy_preview_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:contentDescription="@string/canopy_coverage_preview_description"
+                app:implementationMode="compatible" />
+
+            <ImageView
+                android:id="@+id/canopy_captured_iv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                android:contentDescription="@string/canopy_coverage_preview_description"
+                android:visibility="gone" />
+
+            <!-- Embiggen FAB: top-right corner, shown when an image is captured -->
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/canopy_embiggen_btn"
+                style="@style/FloatingActionButtonStyle.SmallTraitButtons"
+                android:layout_width="@dimen/fb_trait_fab_size_small"
+                android:layout_height="@dimen/fb_trait_fab_size_small"
+                android:layout_gravity="top|end"
+                android:layout_margin="8dp"
+                android:contentDescription="@string/canopy_coverage_embiggen_description"
+                android:visibility="gone"
+                app:srcCompat="@drawable/ic_fullscreen" />
+
+        </FrameLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- Bottom row: settings FAB (left) + capture FAB (centre) -->
+    <!-- IDs match what AbstractCameraTrait.init() looks for so settingsButton/shutterButton are auto-wired -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/camera_fragment_settings_btn"
+            style="@style/FloatingActionButtonStyle.SmallTraitButtons"
+            android:layout_width="@dimen/fb_trait_fab_size_small"
+            android:layout_height="@dimen/fb_trait_fab_size_small"
+            android:layout_margin="8dp"
+            android:contentDescription="@string/trait_camera_capture_content_description"
+            android:visibility="gone"
+            app:srcCompat="@drawable/ic_nav_drawer_settings"
+            app:layout_constraintTop_toTopOf="@id/camera_fragment_capture_btn"
+            app:layout_constraintBottom_toBottomOf="@id/camera_fragment_capture_btn"
+            app:layout_constraintEnd_toStartOf="@id/camera_fragment_capture_btn"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/camera_fragment_capture_btn"
+            style="@style/FloatingActionButtonStyle.TraitButtons"
+            android:layout_width="@dimen/fb_trait_fab_size"
+            android:layout_height="@dimen/fb_trait_fab_size"
+            android:layout_margin="8dp"
+            android:contentDescription="@string/canopy_coverage_capture_description"
+            android:visibility="gone"
+            app:srcCompat="@drawable/ic_trait_camera"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.fieldbook.tracker.traits.CanopyCoverageTraitLayout>

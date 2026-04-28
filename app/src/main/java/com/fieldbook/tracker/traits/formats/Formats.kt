@@ -13,7 +13,7 @@ enum class Formats {
     BASE_SPECTRAL, NIX, INNO_SPECTRA_SENSOR, GREEN_SEEKER,
     TEXT,
     CUSTOM, DISEASE_RATING,
-    BASE_EXPERIMENTAL;
+    BASE_EXPERIMENTAL, CANOPY_COVERAGE;
 
     companion object {
 
@@ -31,10 +31,11 @@ enum class Formats {
 
         fun getCameraFormats() = entries.filter { it in setOf(CAMERA, USB_CAMERA, GO_PRO, CANON, VIDEO) }
 
-        fun getExperimentalFormats() = entries.filter { it in setOf<Formats>() }
+        fun getExperimentalFormats() = entries.filter { it in setOf(CANOPY_COVERAGE) }
 
         fun getMainFormats() = entries - getCameraFormats().toSet() - getSpectralFormats().toSet() -
-            getHardwareFormats().toSet() - getCustomFormats().toSet() - setOf(BASE_EXPERIMENTAL)
+            getHardwareFormats().toSet() - getCustomFormats().toSet() - getExperimentalFormats().toSet() -
+            setOf(BASE_EXPERIMENTAL)
 
         fun getBaseFormats() = setOf(BASE_PHOTO, BASE_SPECTRAL, HARDWARE, CUSTOM, BASE_EXPERIMENTAL)
 
@@ -71,6 +72,7 @@ enum class Formats {
         CUSTOM -> CustomFormat()
         HARDWARE -> HardwareFormat()
         BASE_EXPERIMENTAL -> BaseExperimentalFormat()
+        CANOPY_COVERAGE -> CanopyCoverageFormat()
         else -> TextFormat()
     }
 
