@@ -19,10 +19,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.getString
 
 class ExportUtil : CoroutineScope by MainScope() {
     private val studyRepo = StudyRepository()
@@ -197,7 +199,8 @@ class ExportUtil : CoroutineScope by MainScope() {
 
             if (options.bundleMedia) {
                 DocumentTreeUtil.getStudyMediaDirectory(field.exp_name)?.let { studyMediaDir ->
-                    val tempDir = createDir("dir_field_export", "temp_export_${timestampString()}")
+                    val tempDir = createDir(runBlocking { getString(Res.string.dir_field_export) },
+                        "temp_export_${timestampString()}")
                     val studyDir = tempDir?.createDirectory(field.exp_name)
 
                     if (studyDir != null) {
