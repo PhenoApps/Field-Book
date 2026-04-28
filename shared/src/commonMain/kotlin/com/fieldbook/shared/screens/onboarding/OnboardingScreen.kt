@@ -75,22 +75,21 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun OnboardingScreen(
-    hasPermissions: Boolean,
-    onRequestPermissions: suspend () -> OnboardingPermissionRequestResult,
     onComplete: () -> Unit,
 ) {
     val pagerState = rememberPagerState(pageCount = { 4 })
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val settings = remember { Settings() }
+    val permissionHandler = rememberOnboardingPermissionHandler()
 
-    var permissionsGranted by remember { mutableStateOf(hasPermissions) }
+    var permissionsGranted by remember { mutableStateOf(false) }
     var storageConfigured by remember { mutableStateOf(isStorageDirectoryConfigured()) }
     var importInProgress by remember { mutableStateOf(false) }
     var permissionsToEnableInSettings by remember { mutableStateOf<List<Permission>>(emptyList()) }
 
-    LaunchedEffect(hasPermissions) {
-        permissionsGranted = hasPermissions
+    LaunchedEffect(permissionHandler) {
+        permissionsGranted = permissionHandler.checkPermissions()
     }
 
     val directoryLauncher = rememberDirectoryPickerLauncher(
@@ -135,7 +134,7 @@ fun OnboardingScreen(
                         storageConfigured = storageConfigured,
                         onRequestPermissions = {
                             coroutineScope.launch {
-                                val result = onRequestPermissions()
+                                val result = permissionHandler.requestPermissions()
                                 permissionsGranted = result.granted
                                 permissionsToEnableInSettings = result.permissionsToEnableInSettings()
                                 if (!permissionsGranted) {

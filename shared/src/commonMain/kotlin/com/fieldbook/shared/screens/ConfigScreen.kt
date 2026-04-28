@@ -16,7 +16,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,7 +36,6 @@ import com.fieldbook.shared.generated.resources.ic_tb_info
 import com.fieldbook.shared.generated.resources.trait_date_save
 import com.fieldbook.shared.preferences.GeneralKeys
 import com.fieldbook.shared.screens.onboarding.OnboardingScreen
-import com.fieldbook.shared.screens.onboarding.rememberOnboardingPermissionHandler
 import com.russhwolf.settings.Settings
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,28 +46,14 @@ fun ConfigScreen(
     onNavigate: ((KmpHostScreenType) -> Unit)? = null,
 ) {
     val settings = remember { Settings() }
-    val permissionHandler = rememberOnboardingPermissionHandler()
     var showOnboarding by remember {
         mutableStateOf(
             settings.getBoolean(GeneralKeys.FIRST_RUN_KMP.key, true)
         )
     }
-    var hasOnboardingPermissions by remember { mutableStateOf(false) }
-
-    LaunchedEffect(showOnboarding, permissionHandler) {
-        if (showOnboarding) {
-            hasOnboardingPermissions = permissionHandler.checkPermissions()
-        }
-    }
 
     if (showOnboarding) {
         OnboardingScreen(
-            hasPermissions = hasOnboardingPermissions,
-            onRequestPermissions = {
-                permissionHandler.requestPermissions().also { granted ->
-                    hasOnboardingPermissions = granted
-                }
-            },
             onComplete = {
                 showOnboarding = false
             }
