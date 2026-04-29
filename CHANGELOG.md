@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- New Experimental Traits setting to show traits under development (https://github.com/PhenoApps/Field-Book/pull/1469)
 
 ### Changed
 
