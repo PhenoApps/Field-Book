@@ -152,6 +152,13 @@ public class GeneralKeys {
 
     //Data grid
     public static final String DATAGRID_PREFIX_TRAIT = "com.fieldbook.tracker.datagrid.DATAGRID_PREFIX_TRAIT";
+    public static final String DATAGRID_COLUMN_LOCKED = "com.fieldbook.tracker.datagrid.DATAGRID_COLUMN_LOCKED";
+    public static final String DATAGRID_WRAP_CONTENT = "com.fieldbook.tracker.datagrid.DATAGRID_WRAP_CONTENT";
+    public static final String DATAGRID_HEATMAP = "com.fieldbook.tracker.datagrid.DATAGRID_HEATMAP";
+    public static final String DATAGRID_EXTRA_HEADERS = "com.fieldbook.tracker.datagrid.DATAGRID_EXTRA_HEADERS";
+    public static final String DATAGRID_SORT_COLUMN = "com.fieldbook.tracker.datagrid.DATAGRID_SORT_COLUMN";
+    public static final String DATAGRID_SORT_ASCENDING = "com.fieldbook.tracker.datagrid.DATAGRID_SORT_ASCENDING";
+    public static final String DATAGRID_ZOOM = "com.fieldbook.tracker.datagrid.DATAGRID_ZOOM";
 
     //summary filter
     public static final String SUMMARY_FILTER_ATTRIBUTES = "com.fieldbook.tracker.summary.SUMMARY_FILTER_ATTRIBUTES";
