@@ -1,0 +1,16 @@
+-- Migration: upgrade from DB version 13 -> 14
+-- Add groups table and study grouping/archive columns.
+
+CREATE TABLE IF NOT EXISTS groups (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    group_name TEXT UNIQUE NOT NULL,
+    group_type TEXT NOT NULL,
+    is_expanded TEXT DEFAULT 'true' NOT NULL
+);
+
+ALTER TABLE studies ADD COLUMN is_archived TEXT DEFAULT 'false' NOT NULL;
+ALTER TABLE studies ADD COLUMN group_id INTEGER DEFAULT NULL REFERENCES groups(id) ON DELETE SET NULL;
+
+CREATE INDEX IF NOT EXISTS idx_group_studies_name ON groups(group_name);
+CREATE INDEX IF NOT EXISTS idx_studies_group_id ON studies(group_id);
+CREATE INDEX IF NOT EXISTS idx_studies_archived ON studies(is_archived);

@@ -7,7 +7,6 @@ import okio.Path.Companion.toPath
 import okio.SYSTEM
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 
-const val DATABASE_VERSION: Long = 12
 const val DATABASE_NAME = "fieldbook.db"
 
 interface PlatformPaths {

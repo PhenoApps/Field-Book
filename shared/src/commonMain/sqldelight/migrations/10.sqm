@@ -1,0 +1,19 @@
+-- Migration: upgrade from DB version 10 -> 11
+-- Add study import metadata and backfill it from native helper logic.
+
+ALTER TABLE studies ADD COLUMN import_format TEXT;
+ALTER TABLE studies ADD COLUMN date_sync TEXT;
+
+UPDATE studies
+SET import_format = CASE
+    WHEN study_source IS NULL OR study_source = 'csv' OR study_source LIKE '%.csv' THEN 'csv'
+    WHEN study_source = 'excel' OR study_source LIKE '%.xls' THEN 'xls'
+    WHEN study_source LIKE '%.xlsx' THEN 'xlsx'
+    ELSE 'brapi'
+END;
+
+UPDATE studies
+SET
+    study_db_id = study_alias,
+    study_alias = study_name
+WHERE import_format = 'brapi';
