@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<account-authenticator
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accountType="org.phenoapps.brapi"
+    android:icon="@drawable/brapi_logo"
+    android:smallIcon="@drawable/brapi_logo"
+    android:label="@string/brapi_info_title" />

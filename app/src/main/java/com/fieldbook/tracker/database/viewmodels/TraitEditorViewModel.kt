@@ -12,6 +12,7 @@ import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.database.repository.TraitRepository
+import com.fieldbook.tracker.utilities.BrapiAccountHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,6 +38,7 @@ import javax.inject.Inject
 class TraitEditorViewModel @Inject constructor(
     private val repo: TraitRepository,
     private val prefs: SharedPreferences,
+    private val brapiAccountHelper: BrapiAccountHelper,
 ) : ViewModel() {
 
     companion object {
@@ -68,12 +70,15 @@ class TraitEditorViewModel @Inject constructor(
 
     fun isTutorialEnabled() = prefs.getBoolean(PreferenceKeys.TIPS, false)
 
-    fun isBrapiEnabled() = prefs.getBoolean(PreferenceKeys.BRAPI_ENABLED, false)
+    fun isBrapiEnabled() = brapiAccountHelper.hasActiveServer()
 
     fun isBrapiNewUi() = prefs.getBoolean(PreferenceKeys.EXPERIMENTAL_NEW_BRAPI_UI, true)
 
-    fun getBrapiDisplayName(default: String) =
-        prefs.getString(PreferenceKeys.BRAPI_DISPLAY_NAME, default) ?: default
+    fun getBrapiDisplayName(default: String): String {
+        val account = brapiAccountHelper.findAccount() ?: return default
+        return brapiAccountHelper.getUserData(account, com.fieldbook.tracker.brapi.BrapiAuthenticator.KEY_DISPLAY_NAME)
+            ?.takeIf { it.isNotEmpty() } ?: default
+    }
 
     fun previouslyExported() = prefs.getBoolean(GeneralKeys.TRAITS_EXPORTED, false)
 

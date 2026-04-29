@@ -2,6 +2,7 @@ package com.fieldbook.tracker.brapi.service;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.util.Pair;
 
@@ -35,6 +36,7 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
+import com.fieldbook.tracker.utilities.BrapiAccountHelper;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.FailureFunction;
 import com.fieldbook.tracker.utilities.SuccessFunction;
@@ -149,6 +151,9 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     public final GermplasmService germplasmService;
     public final ServerInfoService serverInfoService;
 
+    private final SharedPreferences preferences;
+    private final BrapiAccountHelper accountHelper;
+
     public BrAPIServiceV2(Context context) {
         this.context = context;
         // Make timeout longer. Set it to 60 seconds for now
@@ -175,13 +180,25 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         this.observationUnitService = new ObservationUnitService.Default(this.observationUnitsApi);
         this.germplasmService = new GermplasmService.Default(this.germplasmApi);
         this.serverInfoService = new ServerInfoService.Default(this.serverInfoApi);
+
+        this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        this.accountHelper = new BrapiAccountHelper(context, preferences);
     }
 
     @Override
     public void authorizeClient() {
         try {
-            apiClient.authenticate(t -> PreferenceManager.getDefaultSharedPreferences(context)
-                    .getString(PreferenceKeys.BRAPI_TOKEN, null));
+            // This lambda is invoked by OkHttp on a background thread for each request,
+            // so blockingGetAuthToken() is safe here. It routes through the authenticator
+            // and can retrieve tokens stored by other PhenoApps apps (same account type
+            // and signing certificate), unlike peekToken() which only reads the local cache.
+            apiClient.authenticate(t -> {
+                String token = accountHelper.getTokenBlocking();
+                if (token == null) {
+                    token = preferences.getString(PreferenceKeys.BRAPI_TOKEN, null);
+                }
+                return token;
+            });
         } catch (ApiException error) {
             Log.e("BrAPIServiceV2", "API Exception", error);
         }
@@ -544,8 +561,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                                BrapiObservationLevel observationLevel, final Function<BrapiStudyDetails, Void> function,
                                final Function<Integer, Void> failFunction) {
         try {
-            final Integer pageSize = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context)
-                    .getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50"));
+            final Integer pageSize = Integer.parseInt(preferences.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50"));
             final BrapiStudyDetails study = new BrapiStudyDetails();
             study.setAttributes(new ArrayList<>());
             study.setValues(new ArrayList<>());
@@ -746,8 +762,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     }
 
     public Map<String, BrAPIGermplasm> getGermplasmDetails(List<String> allGermplasmDbIds, final Function<Integer, Void> failFunction) {
-        final Integer pageSize = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context)
-                .getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50"));
+        final Integer pageSize = Integer.parseInt(preferences.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50"));
         BrAPIGermplasmSearchRequest germplasmBody = new BrAPIGermplasmSearchRequest();
         List<String> doubledGermplasmDbIds = new ArrayList<>(allGermplasmDbIds);
         doubledGermplasmDbIds.addAll(allGermplasmDbIds);

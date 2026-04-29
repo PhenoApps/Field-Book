@@ -54,6 +54,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.ui.dialogs.builder.AppAlertDialog
+import com.fieldbook.tracker.ui.theme.AppTheme
 
 // File-level enum for global toggle state used in PendingConflictsList
 private enum class GlobalChoice { NONE, SERVER, LOCAL }
@@ -271,7 +272,7 @@ fun BrapiSyncScreen(
                                     R.string.last_checked,
                                     uiState.lastCheckedDownloadText
                                 ),
-                                style = MaterialTheme.typography.bodySmall,
+                                style = AppTheme.typography.subheadingStyle,
                                 modifier = Modifier.padding(bottom = 8.dp)
                             )
                         }
@@ -386,7 +387,7 @@ fun BrapiSyncScreen(
                     if (!hasObservationsToUpload) {
                         Text(
                             text = stringResource(R.string.no_observations_to_upload),
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = AppTheme.typography.bodyStyle,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
                     }
@@ -444,7 +445,7 @@ fun InfoCard(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = AppTheme.typography.titleStyle,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -560,7 +561,7 @@ private fun ResultRow(text: String, icon: Painter, tint: Color) {
             tint = tint
         )
         Spacer(modifier = Modifier.width(12.dp))
-        Text(text = text, style = MaterialTheme.typography.bodyLarge)
+        Text(text = text, style = AppTheme.typography.bodyStyle)
     }
 }
 
@@ -573,11 +574,11 @@ fun CountRow(label: String, count: Int) {
         ) {
             Text(
                 text = "$count",
-                style = MaterialTheme.typography.bodyLarge,
+                style = AppTheme.typography.bodyStyle,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.width(48.dp)
             )
-            Text(text = label, style = MaterialTheme.typography.bodyLarge)
+            Text(text = label, style = AppTheme.typography.bodyStyle)
         }
     }
 }
@@ -644,7 +645,7 @@ fun ExportProgressIndicator(
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = progressState.message,
-            style = MaterialTheme.typography.bodyMedium,
+            style = AppTheme.typography.bodyStyle,
             color = MaterialTheme.colorScheme.onSurface
         )
     }
@@ -772,7 +773,7 @@ fun PendingConflictsList(
                         text = stringResource(R.string.server),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.bodySmall
+                        style = AppTheme.typography.subheadingStyle
                     )
                 }
             }
@@ -808,7 +809,7 @@ fun PendingConflictsList(
                         text = stringResource(R.string.local),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.bodySmall
+                        style = AppTheme.typography.subheadingStyle
                     )
                 }
             }
@@ -834,7 +835,7 @@ fun PendingConflictsList(
                         // brapi id row (left-justified)
                         Text(
                             text = id,
-                            style = MaterialTheme.typography.titleSmall,
+                            style = AppTheme.typography.subheadingStyle,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(start = 8.dp)

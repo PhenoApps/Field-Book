@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.fieldbook.tracker.preferences.BetterEditTextPreference
+        android:defaultValue="50"
+        android:icon="@drawable/ic_pref_brapi_pagination"
+        android:inputType="number"
+        android:key="BRAPI_PAGE_SIZE"
+        android:selectAllOnFocus="true"
+        android:summary="%s"
+        android:title="@string/brapi_pagination" />
+
+    <com.fieldbook.tracker.preferences.BetterEditTextPreference
+        android:defaultValue="500"
+        android:icon="@drawable/ic_transfer"
+        android:inputType="number"
+        android:key="BRAPI_CHUNK_SIZE"
+        android:selectAllOnFocus="true"
+        android:summary="%s"
+        android:title="@string/brapi_chunk_size" />
+
+    <com.fieldbook.tracker.preferences.BetterEditTextPreference
+        android:defaultValue="120"
+        android:icon="@drawable/ic_pref_brapi_timeout"
+        android:inputType="number"
+        android:key="BRAPI_TIMEOUT"
+        android:selectAllOnFocus="true"
+        android:summary="%s"
+        android:title="@string/brapi_timeout" />
+
+    <com.fieldbook.tracker.preferences.BetterEditTextPreference
+        android:defaultValue="5"
+        android:icon="@drawable/image_multiple_outline"
+        android:inputType="number"
+        android:key="BRAPI_MAX_CONCURRENT_IMAGE_CONTENT"
+        android:selectAllOnFocus="true"
+        android:summary="%s"
+        android:title="@string/brapi_max_concurrent_image_content" />
+
+    <com.fieldbook.tracker.preferences.BetterEditTextPreference
+        android:defaultValue="5"
+        android:icon="@drawable/transfer_down"
+        android:inputType="number"
+        android:key="BRAPI_MAX_CONCURRENT_OBSERVATION_TRANSFER"
+        android:selectAllOnFocus="true"
+        android:summary="%s"
+        android:title="@string/brapi_max_concurrent_observation_transfer" />
+
+    <ListPreference
+        android:defaultValue="value"
+        android:dialogTitle="@string/preferences_brapi_cache_invalidate_dialog_title"
+        android:entries="@array/pref_brapi_cache_invalidate_entries"
+        android:entryValues="@array/pref_brapi_cache_invalidate_values"
+        android:icon="@drawable/ic_tb_changelog"
+        android:key="BRAPI_CACHE_INVALIDATE_INTERVAL"
+        android:summary="@string/preferences_brapi_cache_invalidate_summary"
+        android:title="@string/preferences_brapi_cache_invalidate_title" />
+
+</PreferenceScreen>
