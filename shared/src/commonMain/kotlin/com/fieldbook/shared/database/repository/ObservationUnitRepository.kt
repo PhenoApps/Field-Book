@@ -6,7 +6,8 @@ import com.fieldbook.shared.sqldelight.Observation_units
 import com.fieldbook.shared.sqldelight.createDatabase
 
 class ObservationUnitRepository() {
-    private val db: FieldbookDatabase = createDatabase()
+    private val db: FieldbookDatabase
+        get() = createDatabase()
 
     private fun Observation_units.toMap(): Map<String, Any?> {
         return mapOf(
@@ -15,15 +16,7 @@ class ObservationUnitRepository() {
             "observation_unit_db_id" to observation_unit_db_id,
             "primary_id" to primary_id,
             "secondary_id" to secondary_id,
-            "geo_coordinates" to geo_coordinates,
-            "additional_info" to additional_info,
-            "germplasm_db_id" to germplasm_db_id,
-            "germplasm_name" to germplasm_name,
-            "observation_level" to observation_level,
-            "position_coordinate_x" to position_coordinate_x,
-            "position_coordinate_x_type" to position_coordinate_x_type,
-            "position_coordinate_y" to position_coordinate_y,
-            "position_coordinate_y_type" to position_coordinate_y_type
+            "geo_coordinates" to geo_coordinates
         )
     }
 

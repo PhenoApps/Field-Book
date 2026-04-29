@@ -17,6 +17,7 @@ class CropImageActivity: ThemedActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_crop_image)
         if (savedInstanceState == null) {
 
@@ -30,5 +31,7 @@ class CropImageActivity: ThemedActivity() {
                 add<CropImageFragment>(R.id.fragment_container_view, args = bundle)
             }
         }
+
+        onBackPressedDispatcher.addCallback(this, standardBackCallback())
     }
 }

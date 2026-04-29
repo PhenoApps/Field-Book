@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.brapi.io.BrapiCacheModel
@@ -50,6 +51,20 @@ class BrapiStudyFilterActivity(
         CROP
     }
 
+    private val studyImportLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val resultIntent = Intent()
+
+                result.data?.extras?.let { resultIntent.putExtras(it) }
+
+                setResult(RESULT_OK, resultIntent)
+                finish()
+            } else if (result.resultCode == RESULT_CANCELED) {
+                restoreModels()
+            }
+        }
+
     @Inject
     lateinit var database: DataHelper
 
@@ -83,7 +98,7 @@ class BrapiStudyFilterActivity(
     }
 
     override fun List<CheckboxListAdapter.Model>.filterExists(): List<CheckboxListAdapter.Model> {
-        val brapiIds = database.allFieldObjects.filter { it.exp_id >= 0 }.map { it.study_db_id }
+        val brapiIds = database.allFieldObjects.filter { it.studyId >= 0 }.map { it.studyDbId }
         return filter { it.id !in brapiIds }
     }
 
@@ -136,6 +151,7 @@ class BrapiStudyFilterActivity(
 
         fetchDescriptionTv.text = getString(R.string.act_brapi_list_filter_loading_studies)
 
+        onBackPressedDispatcher.addCallback(this, standardBackCallback())
     }
 
     override fun showNextButton(): Boolean {
@@ -163,7 +179,7 @@ class BrapiStudyFilterActivity(
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == android.R.id.home) {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed();
             return true
         } else if (item.itemId == R.id.action_brapi_filter) {
             showFilterChoiceDialog()
@@ -183,7 +199,7 @@ class BrapiStudyFilterActivity(
         }
 
         if (programDbIds.isNotEmpty()) {
-            intentLauncher.launch(BrapiStudyImportActivity.getIntent(this).also { intent ->
+            studyImportLauncher.launch(BrapiStudyImportActivity.getIntent(this).also { intent ->
                 intent.putExtra(
                     BrapiStudyImportActivity.EXTRA_STUDY_DB_IDS,
                     models.map { it.study.studyDbId }.toTypedArray()

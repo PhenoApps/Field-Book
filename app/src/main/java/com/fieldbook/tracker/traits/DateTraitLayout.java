@@ -31,6 +31,8 @@ import java.util.Locale;
 public class DateTraitLayout extends BaseTraitLayout {
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private final SimpleDateFormat previewFormat = new SimpleDateFormat("MMM dd", Locale.getDefault());
+
     FloatingActionButton addDayBtn;
     FloatingActionButton minusDayBtn;
     FloatingActionButton saveDayBtn;
@@ -427,6 +429,10 @@ public class DateTraitLayout extends BaseTraitLayout {
             }
             return true;
         } catch (Exception e) {
+            try {
+                Date d = previewFormat.parse(data);
+                return true;
+            } catch (Exception ignore) {}
             return false;
         }
     }

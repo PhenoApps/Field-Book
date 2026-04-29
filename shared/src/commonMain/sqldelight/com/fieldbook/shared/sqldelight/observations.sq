@@ -1,19 +1,17 @@
 CREATE TABLE observations (
     internal_id_observation INTEGER PRIMARY KEY,
     study_id INTEGER REFERENCES studies(internal_id_study) NOT NULL,
-    observation_variable_name TEXT,
     observation_variable_db_id INTEGER REFERENCES observation_variables(internal_id_observation_variable) NOT NULL,
     observation_unit_id TEXT NOT NULL REFERENCES observation_units(internal_id_observation_unit),
     value TEXT,
     observation_time_stamp TEXT,
     collector TEXT,
-    geoCoordinates TEXT,
+    geo_coordinates TEXT,
     observation_db_id TEXT,
     last_synced_time TEXT,
     additional_info TEXT,
     rep TEXT,
     notes TEXT,
-    observation_variable_field_book_format TEXT,
     UNIQUE (study_id, observation_unit_id, observation_variable_db_id)
  );
 
@@ -31,16 +29,14 @@ INSERT INTO observations (
   study_id,
   observation_unit_id,
   observation_variable_db_id,
-  observation_variable_name,
-  observation_variable_field_book_format,
   value,
   observation_time_stamp,
   last_synced_time,
   collector,
-  geoCoordinates,
+  geo_coordinates,
   rep,
   notes
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 countObservations:
 SELECT COUNT(*)
@@ -50,4 +46,12 @@ WHERE study_id = ? AND observation_unit_id = ? AND observation_variable_db_id = 
 getObservation:
 SELECT * FROM observations
 WHERE study_id = ? AND observation_unit_id = ? AND observation_variable_db_id = ?
+LIMIT 1;
+
+getObservationWithTrait:
+SELECT o.*, ov.observation_variable_name
+FROM observations o
+JOIN observation_variables ov
+  ON ov.internal_id_observation_variable = o.observation_variable_db_id
+WHERE o.study_id = ? AND o.observation_unit_id = ? AND o.observation_variable_db_id = ?
 LIMIT 1;

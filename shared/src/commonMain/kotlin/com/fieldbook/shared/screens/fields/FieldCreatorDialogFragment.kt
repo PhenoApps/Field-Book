@@ -412,9 +412,12 @@ private fun ReviewGroupDialog(
 }
 
 class FieldCreatorDialogFragmentViewModel : ViewModel() {
-    val db: FieldbookDatabase = createDatabase()
-    val studyRepository = StudyRepository(db)
-    val observationUnitPropertyRepository = ObservationUnitAttributeRepository(db)
+    private val db: FieldbookDatabase
+        get() = createDatabase()
+    private val studyRepository: StudyRepository
+        get() = StudyRepository()
+    private val observationUnitPropertyRepository: ObservationUnitAttributeRepository
+        get() = ObservationUnitAttributeRepository()
 
     suspend fun insertBasicField(
         name: String,

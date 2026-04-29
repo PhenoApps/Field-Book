@@ -6,7 +6,8 @@ import com.fieldbook.shared.sqldelight.Observation_variables
 import com.fieldbook.shared.sqldelight.createDatabase
 
 class TraitRepository() {
-    private val db: FieldbookDatabase = createDatabase()
+    private val db: FieldbookDatabase
+        get() = createDatabase()
 
     private fun Observation_variables.toTraitObject(): TraitObject {
         return TraitObject(
@@ -22,7 +23,6 @@ class TraitRepository() {
             commonCropName = common_crop_name,
             language = language,
             dataType = data_type,
-            observationVariableDbId = observation_variable_db_id,
             ontologyDbId = ontology_db_id,
             ontologyName = ontology_name,
             details = observation_variable_details
@@ -60,7 +60,31 @@ class TraitRepository() {
                 commonCropName = it.common_crop_name,
                 language = it.language,
                 dataType = it.data_type,
-                observationVariableDbId = it.observation_variable_db_id,
+                ontologyDbId = it.ontology_db_id,
+                ontologyName = it.ontology_name,
+                details = it.observation_variable_details
+            )
+        }
+    }
+
+    fun getVisibleTraitsWithAttributes(): List<TraitObject> {
+        return db.observation_variablesQueries.getVisibleTraitsWithAttributes().executeAsList().map {
+            TraitObject(
+                id = it.internal_id_observation_variable,
+                name = it.observation_variable_name ?: "",
+                format = it.observation_variable_field_book_format,
+                defaultValue = it.default_value,
+                minimum = it.minimum,
+                maximum = it.maximum,
+                categories = it.categories,
+                visible = it.visible,
+                realPosition = it.position?.toInt() ?: 0,
+                externalDbId = it.external_db_id,
+                traitDataSource = it.trait_data_source,
+                additionalInfo = it.additional_info,
+                commonCropName = it.common_crop_name,
+                language = it.language,
+                dataType = it.data_type,
                 ontologyDbId = it.ontology_db_id,
                 ontologyName = it.ontology_name,
                 details = it.observation_variable_details
@@ -91,7 +115,6 @@ class TraitRepository() {
                 commonCropName = it.common_crop_name,
                 language = it.language,
                 dataType = it.data_type,
-                observationVariableDbId = it.observation_variable_db_id,
                 ontologyDbId = it.ontology_db_id,
                 ontologyName = it.ontology_name,
                 details = it.observation_variable_details
@@ -142,7 +165,6 @@ class TraitRepository() {
             trait.commonCropName,
             trait.language,
             trait.dataType,
-            trait.observationVariableDbId,
             trait.ontologyDbId,
             trait.ontologyName,
             trait.details

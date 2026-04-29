@@ -47,3 +47,11 @@ The layout and process of capturing images from external cameras is the same as 
   <img class="screenshot" src="_static/images/traits/formats/collect_gopro_framed.png" width="350px"> 
   <figcaption class="screenshot-caption"><i>Photo trait collection interface (GoPro)</i></figcaption> 
 </figure>
+
+### GoPro Cameras
+
+GoPros can be used to capture images via Bluetooth.
+Field Book can either copy the full image to the Android device or save the name of the image stored in the GoPro memory.
+If photos are copied to the Android device, they are stored in `.jpg` format, and named with entry's unique_id, the trait name, the photo number, and a timestamp.
+The resulting files are stored in a gopro folder within a field-specific subfolder of `plot_data`.
+An example photo filepath would be `plot_data/FIELD_NAME/gopro/PHOTO_FILE_NAME.jpg`.

@@ -1,40 +1,33 @@
-CREATE TABLE plot_attributes (
-  attribute_id INTEGER NOT NULL PRIMARY KEY,
-  attribute_name TEXT NOT NULL,
-  exp_id INTEGER NOT NULL REFERENCES studies(internal_id_study)
-);
-
 CREATE TABLE observation_units_attributes (
   internal_id_observation_unit_attribute INTEGER NOT NULL PRIMARY KEY,
-  study_id INTEGER NOT NULL REFERENCES studies(internal_id_study),
   observation_unit_attribute_name TEXT NOT NULL
 );
 
 getAllNamesByStudyId:
-SELECT observation_unit_attribute_name
-FROM observation_units_attributes
-WHERE study_id = ?;
+SELECT DISTINCT a.observation_unit_attribute_name
+FROM observation_units_attributes a
+JOIN observation_units_values v
+  ON v.observation_unit_attribute_db_id = a.internal_id_observation_unit_attribute
+WHERE v.study_id = ?
+ORDER BY a.observation_unit_attribute_name;
 
 getAllIdsByStudyId:
-SELECT internal_id_observation_unit_attribute, observation_unit_attribute_name
-FROM observation_units_attributes
-WHERE study_id = ?;
+SELECT DISTINCT a.internal_id_observation_unit_attribute, a.observation_unit_attribute_name
+FROM observation_units_attributes a
+JOIN observation_units_values v
+  ON v.observation_unit_attribute_db_id = a.internal_id_observation_unit_attribute
+WHERE v.study_id = ?;
 
-insertOrReplaceFromPlotAttributes:
-INSERT OR REPLACE INTO observation_units_attributes (
-  internal_id_observation_unit_attribute,
-  observation_unit_attribute_name,
-  study_id
-)
-SELECT
-  attribute_id AS internal_id_observation_unit_attribute,
-  attribute_name AS observation_unit_attribute_name,
-  exp_id AS study_id
-FROM plot_attributes
-WHERE exp_id = ?;
+getIdByName:
+SELECT internal_id_observation_unit_attribute
+FROM observation_units_attributes
+WHERE observation_unit_attribute_name = ?
+LIMIT 1;
+
+getLastInsertedId:
+SELECT last_insert_rowid();
 
 insertObservationUnitAttribute:
 INSERT OR IGNORE INTO observation_units_attributes (
-  observation_unit_attribute_name,
-  study_id
-) VALUES (?, ?);
+  observation_unit_attribute_name
+) VALUES (?);

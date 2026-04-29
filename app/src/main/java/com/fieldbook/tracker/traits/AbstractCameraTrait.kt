@@ -25,7 +25,9 @@ import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.adapters.ImageAdapter
 import com.fieldbook.tracker.database.internalTimeFormatter
 import com.fieldbook.tracker.database.models.ObservationModel
+import com.fieldbook.tracker.devices.camera.GoProApi
 import com.fieldbook.tracker.objects.RangeObject
+import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.provider.GenericFileProvider
 import com.fieldbook.tracker.traits.formats.Formats
@@ -46,6 +48,7 @@ import java.io.File
 import java.io.IOException
 import java.io.RandomAccessFile
 import javax.inject.Inject
+import androidx.core.net.toUri
 
 @AndroidEntryPoint
 abstract class AbstractCameraTrait :
@@ -165,7 +168,7 @@ abstract class AbstractCameraTrait :
         }
     }
 
-    protected fun isCropRequired() = (currentTrait?.cropImage ?: false)
+    protected fun isCropRequired() = (currentTrait?.saveImage ?: true) && (currentTrait?.cropImage ?: false)
 
     protected fun isCropExist() = (preferences.getString(GeneralKeys.getCropCoordinatesKey(currentTrait?.id?.toInt() ?: -1), "") ?: "").isNotEmpty()
 
@@ -176,15 +179,16 @@ abstract class AbstractCameraTrait :
     }
 
     protected fun saveJpegToStorage(
-        format: String,
         data: ByteArray,
         obsUnit: RangeObject,
+        traitObj: TraitObject,
         saveTime: String,
         saveState: SaveState,
-        offset: Int? = null
+        offset: Int? = null,
+        goProImage: GoProApi.GoProImage? = null,
     ) {
 
-        saveToStorage(format, obsUnit, saveTime, saveState) { uri ->
+        saveToStorage(obsUnit, traitObj, saveTime, saveState, data.isEmpty()) { uri ->
 
             if (saveState != SaveState.SINGLE_SHOT) {
 
@@ -205,8 +209,24 @@ abstract class AbstractCameraTrait :
 
             } else {
 
-                saveSingleShot(uri, data)
+                if (uri == Uri.EMPTY && goProImage != null) {
 
+                    val studyId = collectActivity.studyId
+
+                    val rep = database.getNextRep(studyId, obsUnit.uniqueId, currentTrait.id)
+
+                    (context as? CollectActivity)?.updateObservation(traitObj, goProImage.fileName, rep)
+
+                    ui.launch {
+
+                        notifyItemInserted(goProImage.fileName.toUri())
+
+                        (context as CollectActivity).refreshRepeatedValuesToolbarIndicator()
+
+                    }
+                } else {
+                    saveSingleShot(uri, data)
+                }
             }
         }
     }
@@ -244,10 +264,10 @@ abstract class AbstractCameraTrait :
         }
     }
 
-    protected fun saveBitmapToStorage(format: String, bmp: Bitmap, obsUnit: RangeObject) {
+    protected fun saveBitmapToStorage(bmp: Bitmap, obsUnit: RangeObject, traitObj: TraitObject) {
 
         saveToStorage(
-            format, obsUnit, saveTime = FileUtil.sanitizeFileName(
+            obsUnit, traitObj, saveTime = FileUtil.sanitizeFileName(
                 OffsetDateTime.now().format(
                     internalTimeFormatter
                 )
@@ -262,7 +282,7 @@ abstract class AbstractCameraTrait :
         }
     }
 
-    private fun writeExif(file: DocumentFile, studyId: String, timestamp: String) {
+    private fun writeExif(file: DocumentFile, studyId: String, entryId: String, traitId: String, timestamp: String) {
 
         //if sdk > 24, can write exif information to the image
         //goal is to encode observation variable model into the user comments
@@ -273,8 +293,8 @@ abstract class AbstractCameraTrait :
                 (controller.getContext() as CollectActivity).person,
                 timestamp,
                 database.getStudyById(studyId),
-                database.getObservationUnitById(currentRange.uniqueId),
-                database.getObservationVariableById(currentTrait.id),
+                database.getObservationUnitById(entryId),
+                database.getObservationVariableById(traitId),
                 file.uri,
                 controller.getRotationRelativeToDevice()
             )
@@ -282,14 +302,21 @@ abstract class AbstractCameraTrait :
     }
 
     private fun saveToStorage(
-        format: String,
         obsUnit: RangeObject,
+        traitObj: TraitObject,
         saveTime: String,
         saveState: SaveState,
+        isEmpty: Boolean = false,
         saver: (Uri) -> Unit
     ) {
 
+        if (isEmpty) {
+            saver.invoke(Uri.EMPTY)
+            return
+        }
+
         val plot = obsUnit.uniqueId
+        val traitId = traitObj.id.toString()
         val studyId = collectActivity.studyId
         val person = (activity as? CollectActivity)?.person
         val location = (activity as? CollectActivity)?.locationByPreferences
@@ -298,7 +325,7 @@ abstract class AbstractCameraTrait :
         background.launch {
 
             //get current trait's trait name, use it as a plot_media directory
-            currentTrait.name?.let { traitName ->
+            currentTrait.name.let { traitName ->
 
                 val sanitizedTraitName = FileUtil.sanitizeFileName(traitName)
 
@@ -317,9 +344,10 @@ abstract class AbstractCameraTrait :
                             saver.invoke(file.uri)
 
                             database.insertObservation(
-                                plot, traitDbId, format, file.uri.toString(),
+                                plot, traitDbId, file.uri.toString(),
                                 person,
                                 location, "", studyId,
+                                null,
                                 null,
                                 null,
                                 rep
@@ -327,7 +355,7 @@ abstract class AbstractCameraTrait :
 
                             if (saveState == SaveState.SINGLE_SHOT) {
 
-                                writeExif(file, studyId, saveTime)
+                                writeExif(file, studyId, plot, traitId, saveTime)
 
                                 notifyItemInserted(file.uri)
                             }
@@ -347,7 +375,7 @@ abstract class AbstractCameraTrait :
 
                                 saver.invoke(file.uri)
 
-                                writeExif(file, studyId, saveTime)
+                                writeExif(file, studyId, plot, traitId, saveTime)
 
                                 notifyItemInserted(file.uri)
 
@@ -455,7 +483,7 @@ abstract class AbstractCameraTrait :
 
             val imageView = ImageView(context)
 
-            if (model.uri == "NA") {
+            if (model.uri == "NA" || model.uri?.contains("content://") != true) {
                 val data = context.resources.assets.open("na_placeholder.jpg").readBytes()
                 BitmapFactory.decodeByteArray(data, 0, data.size).also { bmp ->
                     imageView.setImageBitmap(bmp)
@@ -622,12 +650,12 @@ abstract class AbstractCameraTrait :
         database.insertObservation(
             currentRange.uniqueId,
             currentTrait.id,
-            currentTrait.format,
             "NA",
             (activity as? CollectActivity)?.person,
             (activity as? CollectActivity)?.locationByPreferences,
             "",
             (activity as? CollectActivity)?.studyId,
+            null,
             null,
             null,
             (activity as? CollectActivity)?.rep
@@ -649,29 +677,18 @@ abstract class AbstractCameraTrait :
 
         val traitDbId = currentTrait.id
 
-        val result = image.delete()
-
-        if (result) {
-
-            database.deleteTraitByValue(
-                studyId,
-                plot,
-                traitDbId,
-                image.uri.toString()
-            )
-
-        } else {
-
-            collectActivity.runOnUiThread {
-
-                Toast.makeText(
-                    context,
-                    R.string.photo_failed_to_delete,
-                    Toast.LENGTH_SHORT
-                ).show()
-
-            }
+        try {
+            image.delete()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
+
+        database.deleteTraitByValue(
+            studyId,
+            plot,
+            traitDbId,
+            image.uri.toString()
+        )
     }
 
     private fun deleteItem(model: ImageAdapter.Model, setNa: Boolean) {
@@ -757,6 +774,10 @@ abstract class AbstractCameraTrait :
     override fun onItemDeleted(model: ImageAdapter.Model) {
 
         showDeleteImageDialog(model, false)
+    }
+
+    override fun onItemLongClicked(model: ImageAdapter.Model) {
+        (context as CollectActivity).showObservationMetadataDialog(model.id)
     }
 
     override fun refreshLock() {

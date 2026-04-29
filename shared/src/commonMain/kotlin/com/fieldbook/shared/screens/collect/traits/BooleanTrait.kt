@@ -20,7 +20,7 @@ fun BooleanTrait(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var current by remember { mutableStateOf(value) }
+    var current by remember(value) { mutableStateOf(value) }
     Row(modifier = modifier, horizontalArrangement = Arrangement.Center) {
         Button(
             onClick = {

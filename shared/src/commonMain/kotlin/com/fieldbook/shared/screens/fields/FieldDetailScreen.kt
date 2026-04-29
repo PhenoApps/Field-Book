@@ -6,8 +6,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -97,7 +95,7 @@ import org.jetbrains.compose.resources.stringResource
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FieldDetailScreen(
     fieldId: Int,
@@ -250,9 +248,8 @@ fun FieldDetailScreen(
                                 }
                             }
 
-                            FlowRow(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 DetailChip(
                                     icon = sourceIcon,
@@ -268,9 +265,8 @@ fun FieldDetailScreen(
                                 )
                             }
 
-                            FlowRow(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 ActionChip(
                                     label = stringResource(Res.string.fields_rename_study),

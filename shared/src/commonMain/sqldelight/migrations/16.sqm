@@ -1,0 +1,6 @@
+-- Migration: upgrade from DB version 16 -> 17
+-- Add field creator configuration columns to studies.
+
+ALTER TABLE studies ADD COLUMN start_corner TEXT;
+ALTER TABLE studies ADD COLUMN walking_direction TEXT;
+ALTER TABLE studies ADD COLUMN walking_pattern TEXT;

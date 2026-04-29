@@ -15,12 +15,10 @@ import com.fieldbook.tracker.R
  * https://developer.android.com/guide/topics/ui/layout/recyclerview
  */
 class SummaryAdapter(private val controller: SummaryController) :
-    ListAdapter<SummaryAdapter.SummaryListModel, SummaryAdapter.ViewHolder>(DiffCallback()) {
-
-    data class SummaryListModel(val key: String, val value: String, val isTrait: Boolean)
+    ListAdapter<AttributeAdapter.AttributeModel, SummaryAdapter.ViewHolder>(AttributeAdapter.DiffCallback()) {
 
     interface SummaryController {
-        fun onAttributeClicked(attribute: String)
+        fun onAttributeClicked(attribute: AttributeAdapter.AttributeModel)
     }
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -30,7 +28,7 @@ class SummaryAdapter(private val controller: SummaryController) :
 
         init {
             view.setOnClickListener {
-                controller.onAttributeClicked(keyTextView.text.toString())
+                controller.onAttributeClicked(view.tag as AttributeAdapter.AttributeModel)
             }
         }
     }
@@ -50,27 +48,14 @@ class SummaryAdapter(private val controller: SummaryController) :
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
         with(currentList[position]) {
-            viewHolder.keyTextView.text = key
+            viewHolder.itemView.tag = this
+            viewHolder.keyTextView.text = label
             viewHolder.valueTextView.text = value
-            viewHolder.navButton.visibility = if (isTrait) View.VISIBLE else View.INVISIBLE
+            viewHolder.navButton.visibility = if (trait != null) View.VISIBLE else View.INVISIBLE
         }
     }
 
     // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount() = currentList.size
 
-    class DiffCallback : DiffUtil.ItemCallback<SummaryListModel>() {
-
-        override fun areItemsTheSame(
-            oldItem: SummaryListModel, newItem: SummaryListModel
-        ): Boolean {
-            return oldItem == newItem
-        }
-
-        override fun areContentsTheSame(
-            oldItem: SummaryListModel, newItem: SummaryListModel
-        ): Boolean {
-            return oldItem == newItem
-        }
-    }
 }

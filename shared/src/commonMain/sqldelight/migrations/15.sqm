@@ -1,0 +1,44 @@
+-- Migration: upgrade from DB version 15 -> 16
+-- Add spectral data schema.
+
+DROP TABLE IF EXISTS spectral_dim_protocol;
+DROP TABLE IF EXISTS spectral_dim_device;
+DROP TABLE IF EXISTS spectral_dim_uri;
+DROP TABLE IF EXISTS facts_spectral;
+
+CREATE TABLE IF NOT EXISTS spectral_dim_protocol (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    external_id TEXT NOT NULL UNIQUE,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    wave_start REAL NOT NULL,
+    wave_end REAL NOT NULL,
+    wave_step REAL NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS spectral_dim_device (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    address TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS spectral_dim_uri (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    uri TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS facts_spectral (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    protocol_id INTEGER NOT NULL,
+    uri_id INTEGER NOT NULL,
+    device_id INTEGER NOT NULL,
+    observation_id INTEGER NOT NULL,
+    color TEXT NOT NULL,
+    data BLOB NOT NULL,
+    comment TEXT,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (observation_id) REFERENCES observations(internal_id_observation) ON DELETE CASCADE,
+    FOREIGN KEY (protocol_id) REFERENCES spectral_dim_protocol(id),
+    FOREIGN KEY (uri_id) REFERENCES spectral_dim_uri(id),
+    FOREIGN KEY (device_id) REFERENCES spectral_dim_device(id)
+);
