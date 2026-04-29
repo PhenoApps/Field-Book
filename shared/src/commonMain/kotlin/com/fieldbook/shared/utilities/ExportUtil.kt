@@ -394,12 +394,18 @@ class ExportUtil : CoroutineScope by MainScope() {
             "value",
             "observation_time_stamp",
             "collector",
-            "geoCoordinates",
+            "geo_coordinates",
             "rep"
         )
         val selectClause = buildList {
             if (unitSelectAttributes.isNotEmpty()) add(unitSelectAttributes)
-            addAll(observationColumns.map { "obs.${sqlIdentifier(it)} AS ${sqlIdentifier(it)}" })
+            add("vars.observation_variable_name AS observation_variable_name")
+            add("vars.observation_variable_field_book_format AS observation_variable_field_book_format")
+            add("obs.value AS value")
+            add("obs.observation_time_stamp AS observation_time_stamp")
+            add("obs.collector AS collector")
+            add("obs.geo_coordinates AS geo_coordinates")
+            add("obs.rep AS rep")
         }.joinToString(", ")
         val placeholders = List(traitNames.size) { "?" }.joinToString(", ")
         val query = """
@@ -408,8 +414,9 @@ class ExportUtil : CoroutineScope by MainScope() {
             LEFT JOIN observation_units AS units ON units.observation_unit_db_id = obs.observation_unit_id
             LEFT JOIN observation_units_values AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
             LEFT JOIN observation_units_attributes AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
+            LEFT JOIN observation_variables AS vars ON vars.internal_id_observation_variable = obs.observation_variable_db_id
             WHERE obs.study_id = ?
-              AND obs.observation_variable_name IN ($placeholders)
+              AND vars.observation_variable_name IN ($placeholders)
             GROUP BY obs.internal_id_observation
             ${getSortOrderClause(fieldId)}
         """.trimIndent()
@@ -430,7 +437,7 @@ class ExportUtil : CoroutineScope by MainScope() {
             )
             row["timestamp"] = row["observation_time_stamp"]
             row["person"] = row["collector"]
-            row["location"] = row["geoCoordinates"]
+            row["location"] = row["geo_coordinates"]
             row["number"] = row["rep"]
             row
         }
@@ -445,7 +452,7 @@ class ExportUtil : CoroutineScope by MainScope() {
             "MAX(CASE WHEN attr.observation_unit_attribute_name = ${sqlString(attributeName)} THEN vals.observation_unit_value_name ELSE NULL END) AS ${sqlIdentifier(attributeName)}"
         }
         val selectObservations = traitNames.joinToString(", ") { traitName ->
-            "MAX(CASE WHEN obs.observation_variable_name = ${sqlString(traitName)} THEN obs.value ELSE NULL END) AS ${sqlIdentifier(traitName)}"
+            "MAX(CASE WHEN vars.observation_variable_name = ${sqlString(traitName)} THEN obs.value ELSE NULL END) AS ${sqlIdentifier(traitName)}"
         }
         val combinedSelection = listOf(selectAttributes, selectObservations).filter { it.isNotBlank() }.joinToString(", ")
         if (combinedSelection.isBlank()) return emptyList()
@@ -456,6 +463,7 @@ class ExportUtil : CoroutineScope by MainScope() {
             LEFT JOIN observation_units_values AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
             LEFT JOIN observation_units_attributes AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
             LEFT JOIN observations AS obs ON units.observation_unit_db_id = obs.observation_unit_id AND obs.study_id = $fieldId
+            LEFT JOIN observation_variables AS vars ON vars.internal_id_observation_variable = obs.observation_variable_db_id
             WHERE units.study_id = $fieldId
             GROUP BY units.internal_id_observation_unit
             ${getSortOrderClause(fieldId)}

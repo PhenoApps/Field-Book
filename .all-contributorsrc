@@ -395,6 +395,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "alexismanin",
+      "name": "Alexis Manin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/44767131?v=4",
+      "profile": "https://github.com/alexismanin",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,

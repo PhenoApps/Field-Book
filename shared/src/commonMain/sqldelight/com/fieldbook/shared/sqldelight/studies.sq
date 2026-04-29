@@ -24,16 +24,28 @@ CREATE TABLE studies (
 getById:
 SELECT
   s.*,
-  (SELECT COUNT(*) FROM observation_units_attributes a WHERE a.study_id = s.internal_id_study) AS attribute_count,
-  (SELECT COUNT(DISTINCT o.observation_variable_name) FROM observations o WHERE o.study_id = s.internal_id_study AND o.observation_variable_db_id > 0) AS trait_count,
+  (SELECT COUNT(DISTINCT a.observation_unit_attribute_name)
+    FROM observation_units_attributes a
+    JOIN observation_units_values v ON v.observation_unit_attribute_db_id = a.internal_id_observation_unit_attribute
+    WHERE v.study_id = s.internal_id_study) AS attribute_count,
+  (SELECT COUNT(DISTINCT ov.observation_variable_name)
+    FROM observations o
+    JOIN observation_variables ov ON ov.internal_id_observation_variable = o.observation_variable_db_id
+    WHERE o.study_id = s.internal_id_study AND o.observation_variable_db_id > 0) AS trait_count,
   (SELECT COUNT(*) FROM observations o WHERE o.study_id = s.internal_id_study AND o.observation_variable_db_id > 0) AS observation_count
 FROM studies s WHERE internal_id_study = ? LIMIT 1;
 
 allByDateDesc:
 SELECT
   s.*,
-  (SELECT COUNT(*) FROM observation_units_attributes a WHERE a.study_id = s.internal_id_study) AS attribute_count,
-  (SELECT COUNT(DISTINCT o.observation_variable_name) FROM observations o WHERE o.study_id = s.internal_id_study AND o.observation_variable_db_id > 0) AS trait_count,
+  (SELECT COUNT(DISTINCT a.observation_unit_attribute_name)
+    FROM observation_units_attributes a
+    JOIN observation_units_values v ON v.observation_unit_attribute_db_id = a.internal_id_observation_unit_attribute
+    WHERE v.study_id = s.internal_id_study) AS attribute_count,
+  (SELECT COUNT(DISTINCT ov.observation_variable_name)
+    FROM observations o
+    JOIN observation_variables ov ON ov.internal_id_observation_variable = o.observation_variable_db_id
+    WHERE o.study_id = s.internal_id_study AND o.observation_variable_db_id > 0) AS trait_count,
   (SELECT COUNT(*) FROM observations o WHERE o.study_id = s.internal_id_study AND o.observation_variable_db_id > 0) AS observation_count
 FROM studies s
 ORDER BY date_import COLLATE NOCASE DESC;
@@ -41,8 +53,14 @@ ORDER BY date_import COLLATE NOCASE DESC;
 allByVisibleAsc:
 SELECT
   s.*,
-  (SELECT COUNT(*) FROM observation_units_attributes a WHERE a.study_id = s.internal_id_study) AS attribute_count,
-  (SELECT COUNT(DISTINCT o.observation_variable_name) FROM observations o WHERE o.study_id = s.internal_id_study AND o.observation_variable_db_id > 0) AS trait_count,
+  (SELECT COUNT(DISTINCT a.observation_unit_attribute_name)
+    FROM observation_units_attributes a
+    JOIN observation_units_values v ON v.observation_unit_attribute_db_id = a.internal_id_observation_unit_attribute
+    WHERE v.study_id = s.internal_id_study) AS attribute_count,
+  (SELECT COUNT(DISTINCT ov2.observation_variable_name)
+    FROM observations o2
+    JOIN observation_variables ov2 ON ov2.internal_id_observation_variable = o2.observation_variable_db_id
+    WHERE o2.study_id = s.internal_id_study AND o2.observation_variable_db_id > 0) AS trait_count,
   (SELECT COUNT(*) FROM observations o WHERE o.study_id = s.internal_id_study AND o.observation_variable_db_id > 0) AS observation_count
 FROM studies s
 LEFT JOIN observations o ON o.study_id = s.internal_id_study
@@ -52,8 +70,14 @@ ORDER BY ov.position COLLATE NOCASE ASC;
 allByNameAsc:
 SELECT
   s.*,
-  (SELECT COUNT(*) FROM observation_units_attributes a WHERE a.study_id = s.internal_id_study) AS attribute_count,
-  (SELECT COUNT(DISTINCT o.observation_variable_name) FROM observations o WHERE o.study_id = s.internal_id_study AND o.observation_variable_db_id > 0) AS trait_count,
+  (SELECT COUNT(DISTINCT a.observation_unit_attribute_name)
+    FROM observation_units_attributes a
+    JOIN observation_units_values v ON v.observation_unit_attribute_db_id = a.internal_id_observation_unit_attribute
+    WHERE v.study_id = s.internal_id_study) AS attribute_count,
+  (SELECT COUNT(DISTINCT ov.observation_variable_name)
+    FROM observations o
+    JOIN observation_variables ov ON ov.internal_id_observation_variable = o.observation_variable_db_id
+    WHERE o.study_id = s.internal_id_study AND o.observation_variable_db_id > 0) AS trait_count,
   (SELECT COUNT(*) FROM observations o WHERE o.study_id = s.internal_id_study AND o.observation_variable_db_id > 0) AS observation_count
 FROM studies s
 ORDER BY study_name COLLATE NOCASE ASC;

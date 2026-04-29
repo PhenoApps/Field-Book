@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/field_creator_graph"
+    app:startDestination="@id/field_size_fragment">
+
+    <fragment android:id="@+id/field_size_fragment"
+        android:name="com.fieldbook.tracker.fragments.field_creator.FieldCreatorSizeFragment"
+        android:label="Field Size">
+        <action android:id="@+id/action_from_size_to_start_corner"
+            app:destination="@+id/start_point_fragment">
+        </action>
+    </fragment>
+
+    <fragment android:id="@+id/start_point_fragment"
+        android:name="com.fieldbook.tracker.fragments.field_creator.FieldCreatorStartCornerFragment"
+        android:label="Start Point">
+        <action android:id="@+id/action_from_start_point_to_direction"
+            app:destination="@+id/direction_fragment">
+        </action>
+    </fragment>
+
+    <fragment android:id="@+id/direction_fragment"
+        android:name="com.fieldbook.tracker.fragments.field_creator.FieldCreatorDirectionFragment"
+        android:label="Direction">
+        <action android:id="@+id/action_from_direction_to_pattern"
+            app:destination="@+id/pattern_type_fragment">
+        </action>
+    </fragment>
+
+    <fragment android:id="@+id/pattern_type_fragment"
+        android:name="com.fieldbook.tracker.fragments.field_creator.FieldCreatorPatternTypeFragment"
+        android:label="Pattern Type">
+        <action android:id="@+id/action_from_pattern_type_to_preview"
+            app:destination="@+id/preview_fragment">
+        </action>
+    </fragment>
+
+    <fragment android:id="@+id/preview_fragment"
+        android:name="com.fieldbook.tracker.fragments.field_creator.FieldCreatorPreviewFragment"
+        android:label="Preview">
+        <action android:id="@+id/action_field_created"
+            app:popUpTo="@id/field_creator_graph"
+            app:popUpToInclusive="true"/>
+        <action android:id="@+id/action_from_preview_to_expanded_preview"
+            app:destination="@+id/expanded_preview_fragment"/>
+    </fragment>
+
+    <fragment android:id="@+id/expanded_preview_fragment"
+        android:name="com.fieldbook.tracker.fragments.field_creator.FieldCreatorExpandedPreviewFragment"
+        android:label="Expanded Preview">
+    </fragment>
+
+</navigation>

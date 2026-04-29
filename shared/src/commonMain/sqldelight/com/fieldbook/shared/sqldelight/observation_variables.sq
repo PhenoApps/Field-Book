@@ -13,7 +13,6 @@ CREATE TABLE observation_variables (
   common_crop_name TEXT,
   language TEXT,
   data_type TEXT,
-  observation_variable_db_id TEXT,
   ontology_db_id TEXT,
   ontology_name TEXT,
   observation_variable_details TEXT
@@ -114,11 +113,10 @@ INSERT INTO observation_variables(
   common_crop_name,
   language,
   data_type,
-  observation_variable_db_id,
   ontology_db_id,
   ontology_name,
   observation_variable_details
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 getTraitByName:
 SELECT * FROM observation_variables WHERE observation_variable_name = ?;

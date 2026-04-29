@@ -1,6 +1,5 @@
 package com.fieldbook.tracker.adapters
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
@@ -9,18 +8,24 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.objects.TraitObject
 
 /**
  * Reference:
  * https://developer.android.com/guide/topics/ui/layout/recyclerview
  */
-
-class AttributeAdapter(private val controller: AttributeAdapterController, private val selected: String?) :
-    ListAdapter<String, AttributeAdapter.ViewHolder>(DiffCallback()) {
+class AttributeAdapter(private val controller: AttributeAdapterController, private val selected: AttributeModel?) :
+    ListAdapter<AttributeAdapter.AttributeModel, AttributeAdapter.ViewHolder>(DiffCallback()) {
 
     interface AttributeAdapterController {
-        fun onAttributeClicked(label: String, position: Int)
+        fun onAttributeClicked(model: AttributeModel, position: Int)
     }
+
+    data class AttributeModel(
+        val label: String,
+        val value: String? = null,
+        val trait: TraitObject? = null
+    )
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val v = LayoutInflater.from(parent.context)
@@ -31,12 +36,12 @@ class AttributeAdapter(private val controller: AttributeAdapterController, priva
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
         holder.itemView.setOnClickListener {
-            controller.onAttributeClicked(holder.itemView.tag as String, position)
+            controller.onAttributeClicked(holder.itemView.tag as AttributeModel, position)
         }
 
         with (currentList[position]) {
             holder.itemView.tag = this
-            setViewHolderText(holder, this)
+            setViewHolderText(holder, this.label)
 
             holder.attributeTv.setBackgroundResource(
                 if (selected == this) R.drawable.table_cell_selected else R.drawable.cell)
@@ -59,13 +64,13 @@ class AttributeAdapter(private val controller: AttributeAdapterController, priva
 
     }
 
-    class DiffCallback : DiffUtil.ItemCallback<String>() {
+    class DiffCallback : DiffUtil.ItemCallback<AttributeModel>() {
 
-        override fun areItemsTheSame(oldItem: String, newItem: String): Boolean {
+        override fun areItemsTheSame(oldItem: AttributeModel, newItem: AttributeModel): Boolean {
             return oldItem == newItem
         }
 
-        override fun areContentsTheSame(oldItem: String, newItem: String): Boolean {
+        override fun areContentsTheSame(oldItem: AttributeModel, newItem: AttributeModel): Boolean {
             return oldItem == newItem
         }
     }

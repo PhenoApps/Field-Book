@@ -1,5 +1,62 @@
 <changelog>
 
+    <release date="2025-12-02" versionCode="60306" versionName="v6.3.6">
+        <bugfix>BrAPI authorization redirect link updated</bugfix>
+    </release>
+
+    <release date="2025-12-02" versionCode="60305" versionName="v6.3.5">
+        <bugfix>BrAPI now redirects and opens Field Book when authorizing</bugfix>
+    </release>
+
+    <release date="2025-11-17" versionCode="60304" versionName="v6.3.4">
+        <info>New BrAPI import now only displays active trials and studies</info>
+        <bugfix>GoPro no longer disconnects after image capture</bugfix>
+        <bugfix>BMS studies now correctly import via BrAPI</bugfix>
+        <bugfix>Numerous bug fixes and enhancements</bugfix>
+    </release>
+
+    <release date="2025-11-03" versionCode="60303" versionName="v6.3.3">
+        <bugfix>GoPro preview is no longer blank on certain devices</bugfix>
+    </release>
+
+    <release date="2025-10-20" versionCode="60302" versionName="v6.3.2">
+        <bugfix>GoPro Hero 13 no longer causes a crash</bugfix>
+        <bugfix>Reduced installer size by using a different ffmpeg library</bugfix>
+    </release>
+
+    <release date="2025-10-13" versionCode="60301" versionName="v6.3.1">
+        <info>Field Book now supports 16 KB page sizes</info>
+        <bugfix>Bug fixes and enhancements</bugfix>
+    </release>
+
+    <release date="2025-10-08" versionCode="60300" versionName="v6.3.0">
+        <new>Fields can now be grouped and archived</new>
+        <new>New trait formats: Stopwatch, Nix, Greenseeker, Scales</new>
+        <new>Trait name wrapping in Collect can now be toggled with a long-press</new>
+        <new>GoPro cameras can now optionally send just the image name instead of transferring the entire image</new>
+        <info>Field Book now targets Android SDK 36</info>
+        <info>Field Creator updated with new workflow and UI</info>
+        <info>Trait arrows are now hidden if only one trait is active</info>
+        <info>Boolean traits now have an unset state</info>
+        <bugfix>Improved workflow for logging out of BrAPI</bugfix>
+        <bugfix>Settings are no longer reset on restart</bugfix>
+        <bugfix>New traits from BrAPI now appear at the end of the trait list</bugfix>
+        <bugfix>Long pressing image and spectral thumbnails now displays metadata dialog</bugfix>
+        <bugfix>Importing traits from BrAPI without trait details no longer leads to a crash</bugfix>
+        <bugfix>Repeated measures no longer ignore trait limits</bugfix>
+        <bugfix>Keyboard backspace no longer moves cursor to the end of the current value in text traits</bugfix>
+        <bugfix>Field name is no longer an option in the Collect Search dialog</bugfix>
+        <bugfix>Exif user comment tag no longer populated by incorrect data</bugfix>
+        <bugfix>Return character setting is now interpreted correctly</bugfix>
+        <bugfix>Observation Variable Name is now searchable in the BrAPI trait importer</bugfix>
+        <bugfix>Image file name sanitation now removes or replaces more characters</bugfix>
+    </release>
+
+    <release date="2025-06-23" versionCode="60205" versionName="v6.2.5">
+        <bugfix>BrAPI Sync improved to avoid observation miscounts and other failures</bugfix>
+        <bugfix>0x00 character now removed from pasted text values</bugfix>
+    </release>
+
     <release date="2025-06-09" versionCode="60204" versionName="v6.2.4">
     </release>
 

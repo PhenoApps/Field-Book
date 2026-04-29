@@ -4,15 +4,7 @@ CREATE TABLE observation_units (
     observation_unit_db_id TEXT,
     primary_id TEXT,
     secondary_id TEXT,
-    geo_coordinates TEXT,
-    additional_info TEXT,
-    germplasm_db_id TEXT,
-    germplasm_name TEXT,
-    observation_level TEXT,
-    position_coordinate_x TEXT,
-    position_coordinate_x_type TEXT,
-    position_coordinate_y TEXT,
-    position_coordinate_y_type TEXT
+    geo_coordinates TEXT
 );
 
 -- Select all observation units
@@ -34,15 +26,7 @@ INSERT INTO observation_units (
     observation_unit_db_id,
     primary_id,
     secondary_id,
-    geo_coordinates,
-    additional_info,
-    germplasm_db_id,
-    germplasm_name,
-    observation_level,
-    position_coordinate_x,
-    position_coordinate_x_type,
-    position_coordinate_y,
-    position_coordinate_y_type
+    geo_coordinates
 ) VALUES (
-    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+    ?, ?, ?, ?, ?
 );

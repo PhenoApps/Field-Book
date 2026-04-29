@@ -19,6 +19,10 @@
   * [GNSS](traits/trait-gnss.md)
   * [Photo](traits/trait-photo.md)
   * [Zebra Label Print](traits/trait-zebra.md)
+  * [Spectral](traits/trait-spectral.md)
+  * [Scales](traits/trait-scales.md)
+  * [Greenseeker](traits/trait-greenseeker.md)
+  * [Stopwatch](traits/trait-stopwatch.md)
 * Function
   * [Collect](collect.md)
   * [Export](export.md)

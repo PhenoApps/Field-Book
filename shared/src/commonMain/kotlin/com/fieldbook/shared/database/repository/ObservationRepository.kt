@@ -70,15 +70,12 @@ class ObservationRepository() {
             study_id = studyId,
             observation_unit_id = plotId,
             observation_variable_db_id = traitDbId,
-            observation_variable_name = trait.observation_variable_name,
-            observation_variable_field_book_format = traitFormat
-                ?: trait.observation_variable_field_book_format,
             value_ = value,
             observation_time_stamp = timestamp,
             last_synced_time = lastSyncedTime?.format(internalTimeFormatter)
                 ?: observation?.last_synced_time,
             collector = person ?: observation?.collector,
-            geoCoordinates = location ?: observation?.geoCoordinates,
+            geo_coordinates = location ?: observation?.geo_coordinates,
             rep = rep,
             notes = notes ?: observation?.notes,
         )
@@ -106,21 +103,18 @@ class ObservationRepository() {
             study_id = studyId,
             observation_unit_id = plotId,
             observation_variable_db_id = traitDbId,
-            observation_variable_name = trait.observation_variable_name,
-            observation_variable_field_book_format = traitFormat
-                ?: trait.observation_variable_field_book_format,
             value_ = value,
             observation_time_stamp = timestamp,
             last_synced_time = lastSyncedTime?.format(internalTimeFormatter),
             collector = person,
-            geoCoordinates = location,
+            geo_coordinates = location,
             rep = rep,
             notes = notes,
         )
     }
 
     fun getObservation(studyId: Long, plotId: String, traitId: Long): ObservationObject? {
-        val row = db.observationsQueries.getObservation(
+        val row = db.observationsQueries.getObservationWithTrait(
             study_id = studyId,
             observation_unit_id = plotId,
             observation_variable_db_id = traitId

@@ -9,6 +9,7 @@ import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import dagger.hilt.android.qualifiers.ActivityContext
 import javax.inject.Inject
+import androidx.core.content.edit
 
 /**
  * Field Switcher implementation allows an object with context to switch currently selected field.
@@ -39,15 +40,15 @@ class FieldSwitchImpl @Inject constructor(@ActivityContext private val context: 
 
     override fun switchField(field: FieldObject?) {
 
-        if (field != null && field.exp_id != -1 && field.date_import != null && field.date_import.isNotBlank()) {
+        if (field != null && field.studyId != -1 && field.dateImport != null && field.dateImport.isNotBlank()) {
 
-            database.switchField(field.exp_id)
+            database.switchField(field.studyId)
 
             //get all entry props from field
-            val entryProps = database.getAllObservationUnitAttributeNames(field.exp_id).toMutableList()
+            val entryProps = database.getAllObservationUnitAttributeNames(field.studyId).toMutableList()
 
             //remove unique id as a choice for the initial primary/secondary ids
-            val uniqueId = field.unique_id
+            val uniqueId = field.uniqueId
             entryProps.remove(uniqueId)
 
             //attempt to automatically select based on previous selections
@@ -60,7 +61,7 @@ class FieldSwitchImpl @Inject constructor(@ActivityContext private val context: 
             val hasRange = entryProps.indexOfFirst { it.equals("range", true) }
             val hasBlock = entryProps.indexOfFirst { it.equals("block", true) }
 
-            val primary = if (field.primary_id == "null" || field.primary_id == null || field.primary_id.isEmpty()) {
+            val primary = if (field.primaryId == "null" || field.primaryId == null || field.primaryId.isEmpty()) {
                 if (hasPrimary != -1) {
                     entryProps.removeAt(hasPrimary)
                 } else if (hasRow != -1) {
@@ -70,13 +71,13 @@ class FieldSwitchImpl @Inject constructor(@ActivityContext private val context: 
                 } else if (hasBlock != -1) {
                     entryProps.removeAt(hasBlock)
                 } else if (entryProps.isNotEmpty()) entryProps.removeAt(0) else ""
-            } else field.primary_id
+            } else field.primaryId
 
             val hasSecondary = entryProps.indexOfFirst { it.equals(secondaryName, true) }
             val hasCol = entryProps.indexOfFirst { it.lowercase() in POSSIBLE_COLUMN_IDS }
             val hasPlot = entryProps.indexOfFirst { it.equals("plot", true) }
 
-            val secondary = if (field.secondary_id == "null" || field.secondary_id == null || field.secondary_id.isEmpty()) {
+            val secondary = if (field.secondaryId == "null" || field.secondaryId == null || field.secondaryId.isEmpty()) {
                 if (hasSecondary != -1) {
                     entryProps.removeAt(hasSecondary)
                 } else if (hasCol != -1) {
@@ -84,21 +85,22 @@ class FieldSwitchImpl @Inject constructor(@ActivityContext private val context: 
                 } else if (hasPlot != -1) {
                     entryProps.removeAt(hasPlot)
                 } else if (entryProps.isNotEmpty()) entryProps.removeAt(0) else ""
-            } else field.secondary_id
+            } else field.secondaryId
 
-            Log.d(TAG, "Field Switched: ${field.exp_id}\tUnique: $uniqueId\tPrimary: $primary\tSecondary: $secondary")
+            Log.d(TAG, "Field Switched: ${field.studyId}\tUnique: $uniqueId\tPrimary: $primary\tSecondary: $secondary")
 
             //clear field selection after updates
-            preferences.edit().putInt(GeneralKeys.SELECTED_FIELD_ID, field.exp_id)
-                .putString(GeneralKeys.FIELD_FILE, field.exp_name)
-                .putString(GeneralKeys.FIELD_ALIAS, field.exp_alias)
-                .putString(GeneralKeys.FIELD_OBS_LEVEL, field.observation_level)
-                .putString(GeneralKeys.UNIQUE_NAME, field.unique_id)
-                .putString(GeneralKeys.PRIMARY_NAME, primary)
-                .putString(GeneralKeys.SECONDARY_NAME, secondary)
-                .putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, true)
-                .putString(GeneralKeys.LAST_PLOT, null).apply()
-
+            preferences.edit {
+                putInt(GeneralKeys.SELECTED_FIELD_ID, field.studyId)
+                    .putString(GeneralKeys.FIELD_FILE, field.name)
+                    .putString(GeneralKeys.FIELD_ALIAS, field.alias)
+                    .putString(GeneralKeys.FIELD_OBS_LEVEL, field.observationLevel)
+                    .putString(GeneralKeys.UNIQUE_NAME, field.uniqueId)
+                    .putString(GeneralKeys.PRIMARY_NAME, primary)
+                    .putString(GeneralKeys.SECONDARY_NAME, secondary)
+                    .putBoolean(GeneralKeys.IMPORT_FIELD_FINISHED, true)
+                    .putString(GeneralKeys.LAST_PLOT, null)
+            }
         }
     }
 }

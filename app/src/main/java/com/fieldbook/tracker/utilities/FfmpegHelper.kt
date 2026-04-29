@@ -8,8 +8,6 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.fieldbook.tracker.devices.camera.gopro.GoProHelper
-import java.lang.Exception
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
@@ -17,6 +15,13 @@ import java.net.InetSocketAddress
 import javax.inject.Inject
 
 class FfmpegHelper @Inject constructor() {
+
+    companion object {
+        const val TAG = "FFMPEG"
+
+        const val KEEP_ALIVE_MESSAGE_PACKET_DELAY = 5000L
+        const val UDP_SOCKET_TIMEOUT = 60000L
+    }
 
     private val scope = MainScope()
 
@@ -27,15 +32,40 @@ class FfmpegHelper @Inject constructor() {
 
     fun cancel() {
 
-        ffmpegJob?.cancel()
+        try {
+            ffmpegJob?.cancel()
+            ffmpegJob = null
+        } catch (_: Exception) {}
 
-        keepAliveJob?.cancel()
+        try {
+            keepAliveJob?.cancel()
+            keepAliveJob = null
+        } catch (_: Exception) {}
 
-        udpSocket?.disconnect()
+        udpSocket?.let {
+            try {
+                // allow reuse (best-effort)
+                it.reuseAddress = true
+            } catch (_: Exception) {}
+            try {
+                it.disconnect()
+            } catch (e: Exception) {
+                Log.w(TAG, "Error disconnecting UDP socket: ${e.message}")
+            }
+            try {
+                it.close()
+            } catch (e: Exception) {
+                Log.w(TAG, "Error closing UDP socket: ${e.message}")
+            }
+        }
 
-        udpSocket?.close()
+        udpSocket = null
 
-        FFmpegKit.cancel()
+        try {
+            FFmpegKit.cancel()
+        } catch (e: Exception) {
+            Log.w(TAG, "Error during cancel: ${e.message}")
+        }
     }
 
     /**
@@ -54,11 +84,12 @@ class FfmpegHelper @Inject constructor() {
             try {
 
                 udpSocket?.disconnect()
+                udpSocket?.close()
 
                 if (udpSocket == null) {
                     udpSocket = DatagramSocket().also {
                         it.reuseAddress = true
-                        it.soTimeout = GoProHelper.UDP_SOCKET_TIMEOUT.toInt()
+                        it.soTimeout = UDP_SOCKET_TIMEOUT.toInt()
                     }
                 }
 
@@ -86,7 +117,7 @@ class FfmpegHelper @Inject constructor() {
 
                             udpSocket?.send(keepStreamAlivePacket)
 
-                            Log.i(GoProHelper.TAG, "Keep Alive sent")
+                            Log.i(TAG, "Keep Alive sent")
 
                         } catch (e: Exception) {
 
@@ -94,12 +125,12 @@ class FfmpegHelper @Inject constructor() {
 
                         }
 
-                        delay(GoProHelper.KEEP_ALIVE_MESSAGE_PACKET_DELAY)
+                        delay(KEEP_ALIVE_MESSAGE_PACKET_DELAY)
                     }
                 }
             }
 
-            Log.i(GoProHelper.TAG, "requestTimer init successfully")
+            Log.i(TAG, "requestTimer init successfully")
 
         } catch (e: Exception) {
 
@@ -109,10 +140,13 @@ class FfmpegHelper @Inject constructor() {
     }
 
     fun stop() {
-
-        ffmpegJob?.cancel()
-
-        FFmpegKit.cancel()
+        try {
+            ffmpegJob?.cancel()
+            ffmpegJob = null
+            FFmpegKit.cancel()
+        } catch (e: Exception) {
+            Log.w(TAG, "Error stopping FFMPEG: ${e.message}")
+        }
     }
 
     /**
@@ -122,7 +156,7 @@ class FfmpegHelper @Inject constructor() {
 
         stop()
 
-        scope.launch {
+        ffmpegJob = scope.launch {
 
             withContext(Dispatchers.IO) {
 
@@ -131,7 +165,7 @@ class FfmpegHelper @Inject constructor() {
                 val command =
                     "-fflags nobuffer -flags low_delay -f:v mpegts -an -probesize 100000 -i $streamInputUri -f mpegts -vcodec copy udp://localhost:8555?pkt_size=1316" // -probesize 100000 is minimum for Hero 10
 
-                Log.d(GoProHelper.TAG, "Executing FFMPEG Kit: $command")
+                Log.d(TAG, "Executing FFMPEG Kit: $command")
 
                 FFmpegKit.execute(command)
 

@@ -11,7 +11,6 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fitsSystemWindows="true"
         android:minHeight="?attr/actionBarSize"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -151,6 +150,20 @@
                             android:clickable="false"
                             android:focusable="false"
                             app:chipIcon="@drawable/ic_trial"
+                            app:chipIconSize="24dp"
+                            app:ensureMinTouchTargetSize="false"
+                            app:closeIconVisible="false"
+                            app:chipBackgroundColor="?attr/defaultChipBackground" />
+
+                        <com.google.android.material.chip.Chip
+                            tools:visibility="visible"
+                            android:visibility="gone"
+                            android:id="@+id/studyGroupName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:clickable="false"
+                            android:focusable="false"
+                            app:chipIcon="@drawable/ic_existing_group"
                             app:chipIconSize="24dp"
                             app:ensureMinTouchTargetSize="false"
                             app:closeIconVisible="false"

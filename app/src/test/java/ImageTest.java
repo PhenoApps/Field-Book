@@ -25,7 +25,7 @@ public class ImageTest {
         Context context = mock(Context.class);
         Bitmap.Config conf = Bitmap.Config.ARGB_8888;
         Bitmap bmp = Bitmap.createBitmap(100, 100, conf);
-        image = new FieldBookImage(context, filePath, bmp);
+        image = new FieldBookImage(context, filePath, "trait1", bmp);
         image.loadImage(context);
     }
 

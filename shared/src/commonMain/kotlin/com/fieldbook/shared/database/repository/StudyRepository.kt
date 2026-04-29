@@ -101,20 +101,10 @@ class StudyRepository(
     }
 
     /**
-     * Ensures observation_units_attributes is synchronized with plot attributes for the given study.
-     * This is a type-safe version of fixPlotAttributes from StudyDao.
-     */
-    private fun fixPlotAttributes(studyId: Int) {
-        db.observation_units_attributesQueries.insertOrReplaceFromPlotAttributes(studyId.toLong())
-    }
-
-    /**
      * Transpose observation unit attribute/values into a table for the selected study.
      * This mimics the switchField logic from StudyDao.
      */
     fun switchField(studyId: Int) {
-        fixPlotAttributes(studyId)
-
         val attributeNames =
             db.observation_units_attributesQueries.getAllNamesByStudyId(studyId.toLong())
                 .executeAsList()
@@ -143,7 +133,6 @@ class StudyRepository(
             FROM ${Migrator.ObservationUnit.tableName} AS units
             LEFT JOIN ${Migrator.ObservationUnitValue.tableName} AS vals ON units.${Migrator.ObservationUnit.PK} = vals.${Migrator.ObservationUnit.FK}
             LEFT JOIN ${Migrator.ObservationUnitAttribute.tableName} AS attr on vals.${Migrator.ObservationUnitAttribute.FK} = attr.${Migrator.ObservationUnitAttribute.PK}
-            LEFT JOIN plot_attributes as a on vals.observation_unit_attribute_db_id = a.attribute_id
             WHERE units.${Migrator.Study.FK} = $studyId
             GROUP BY units.${Migrator.ObservationUnit.PK}
         """.trimIndent()
@@ -208,12 +197,7 @@ class StudyRepository(
                 e.exp_sort?.takeIf { it.isNotBlank() }?.let { cols.add(it) }
                 e.unique_id.takeIf { it.isNotBlank() }?.let { cols.add(it) }
 
-                cols.distinct().forEach { colName ->
-                    db.observation_units_attributesQueries.insertObservationUnitAttribute(
-                        colName,
-                        id.toLong()
-                    )
-                }
+                cols.distinct().forEach { colName -> getOrCreateObservationUnitAttributeId(colName) }
 
                 id
             }
@@ -270,39 +254,32 @@ class StudyRepository(
             observation_unit_db_id = observationUnitDbId,
             primary_id = primaryId,
             secondary_id = secondaryId,
-            geo_coordinates = geoCoordinates,
-            additional_info = null,
-            germplasm_db_id = null,
-            germplasm_name = null,
-            observation_level = null,
-            position_coordinate_x = null,
-            position_coordinate_x_type = null,
-            position_coordinate_y = null,
-            position_coordinate_y_type = null
+            geo_coordinates = geoCoordinates
         )
 
         val observation_unit_id =
             db.observation_unitsQueries.getLastInsertedId().executeAsOne()
 
-        val attributesMap =
-            db.observation_units_attributesQueries.getAllIdsByStudyId(studyId).executeAsList()
-                .associate { it.observation_unit_attribute_name to it.internal_id_observation_unit_attribute }
-
         // Insert attribute values for this observation unit
         columns.forEachIndexed { index, colName ->
             if (colName != "geo_coordinates") {
-                val attrId: Long? = attributesMap[colName]
-                // Only insert if attribute exists
-                if (attrId != null) {
-                    db.observation_units_valuesQueries.insert(
-                        study_id = studyId,
-                        observation_unit_id = observation_unit_id,
-                        observation_unit_attribute_db_id = attrId,
-                        observation_unit_value_name = actualData[index]
-                    )
-                }
+                val attrId = getOrCreateObservationUnitAttributeId(colName)
+                db.observation_units_valuesQueries.insert(
+                    study_id = studyId,
+                    observation_unit_id = observation_unit_id,
+                    observation_unit_attribute_db_id = attrId,
+                    observation_unit_value_name = actualData[index]
+                )
             }
         }
+    }
+
+    private fun getOrCreateObservationUnitAttributeId(name: String): Long {
+        db.observation_units_attributesQueries.getIdByName(name).executeAsOneOrNull()
+            ?.let { return it }
+
+        db.observation_units_attributesQueries.insertObservationUnitAttribute(name)
+        return db.observation_units_attributesQueries.getLastInsertedId().executeAsOne()
     }
 
     fun getById(fieldId: Int): FieldObject {
@@ -402,9 +379,11 @@ class StudyRepository(
         val studyIds: QueryResult<List<Int>> = driver.executeQuery(
             identifier = null,
             sql = """
-                SELECT DISTINCT study_id
-                FROM observation_units_attributes
-                WHERE observation_unit_attribute_name = ?
+                SELECT DISTINCT V.study_id
+                FROM observation_units_attributes AS A
+                JOIN observation_units_values AS V
+                    ON A.internal_id_observation_unit_attribute = V.observation_unit_attribute_db_id
+                WHERE A.observation_unit_attribute_name = ?
             """.trimIndent(),
             mapper = { cursor ->
                 val ids = mutableListOf<Int>()
@@ -434,20 +413,6 @@ class StudyRepository(
             driver.execute(
                 identifier = null,
                 sql = "DELETE FROM observation_units_values WHERE study_id = ?",
-                parameters = 1
-            ) {
-                bindLong(0, studyId.toLong())
-            }
-            driver.execute(
-                identifier = null,
-                sql = "DELETE FROM observation_units_attributes WHERE study_id = ?",
-                parameters = 1
-            ) {
-                bindLong(0, studyId.toLong())
-            }
-            driver.execute(
-                identifier = null,
-                sql = "DELETE FROM plot_attributes WHERE exp_id = ?",
                 parameters = 1
             ) {
                 bindLong(0, studyId.toLong())

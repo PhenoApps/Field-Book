@@ -27,9 +27,7 @@ class ObservationVariableValueDao {
 
         }
 
-        fun insertAttributeValue(attrName: String, value: String, id: String) = withDatabase { db ->
-
-            val attrId = ObservationVariableAttributeDao.getAttributeIdByName(attrName)
+        fun insertAttributeValue(attrId: String, value: String, id: String) = withDatabase { db ->
 
             db.insert(ObservationVariableValue.tableName, null, contentValuesOf(
 

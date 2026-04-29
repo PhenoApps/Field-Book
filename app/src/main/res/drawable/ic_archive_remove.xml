@@ -1,0 +1,1 @@
+<!-- drawable/archive_arrow_up.xml --><vector xmlns:android="http://schemas.android.com/apk/res/android" android:height="24dp" android:width="24dp" android:viewportWidth="24" android:viewportHeight="24"><path android:fillColor="#000000" android:pathData="M4 21H20V8H4M14 15V18H10V15H7L12 10L17 15M3 3H21V7H3" /></vector>

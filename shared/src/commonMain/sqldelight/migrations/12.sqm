@@ -1,0 +1,343 @@
+-- Migration: upgrade from DB version 12 -> 13
+-- Refactor migrated native tables and remove legacy pre-KMP tables.
+
+DROP VIEW IF EXISTS VisibleObservationVariable;
+DROP VIEW IF EXISTS NonImageObservations;
+DROP VIEW IF EXISTS LocalImageObservations;
+DROP VIEW IF EXISTS RemoteImageObservationsView;
+
+INSERT OR REPLACE INTO observation_units_attributes (
+    internal_id_observation_unit_attribute,
+    observation_unit_attribute_name,
+    study_id
+)
+SELECT
+    attribute_id,
+    attribute_name,
+    exp_id
+FROM plot_attributes;
+
+DROP TABLE IF EXISTS exp_id;
+DROP TABLE IF EXISTS plot_attributes;
+DROP TABLE IF EXISTS plot_values;
+DROP TABLE IF EXISTS plots;
+DROP TABLE IF EXISTS `range`;
+DROP TABLE IF EXISTS user_traits;
+DROP TABLE IF EXISTS traits;
+
+CREATE TABLE observation_units_temp (
+    internal_id_observation_unit INTEGER PRIMARY KEY AUTOINCREMENT,
+    study_id INTEGER REFERENCES studies(internal_id_study) ON DELETE CASCADE,
+    observation_unit_db_id TEXT,
+    primary_id TEXT,
+    secondary_id TEXT,
+    geo_coordinates TEXT
+);
+
+INSERT INTO observation_units_temp (
+    internal_id_observation_unit,
+    study_id,
+    observation_unit_db_id,
+    primary_id,
+    secondary_id,
+    geo_coordinates
+)
+SELECT
+    internal_id_observation_unit,
+    study_id,
+    observation_unit_db_id,
+    primary_id,
+    secondary_id,
+    geo_coordinates
+FROM observation_units;
+
+DROP TABLE observation_units;
+ALTER TABLE observation_units_temp RENAME TO observation_units;
+
+WITH attribute_ids AS (
+    SELECT
+        MIN(A.internal_id_observation_unit_attribute) AS first_id,
+        A.observation_unit_attribute_name AS name
+    FROM observation_units_attributes AS A
+    JOIN observation_units_values AS V
+        ON A.internal_id_observation_unit_attribute = V.observation_unit_attribute_db_id
+    GROUP BY A.observation_unit_attribute_name
+)
+UPDATE observation_units_values
+SET observation_unit_attribute_db_id = (
+    SELECT I.first_id
+    FROM attribute_ids AS I
+    JOIN observation_units_attributes AS A
+        ON A.internal_id_observation_unit_attribute = observation_units_values.observation_unit_attribute_db_id
+    WHERE I.name = A.observation_unit_attribute_name
+);
+
+DELETE FROM observation_units_attributes
+WHERE internal_id_observation_unit_attribute IN (
+    SELECT internal_id_observation_unit_attribute
+    FROM observation_units_attributes
+    WHERE internal_id_observation_unit_attribute NOT IN (
+        SELECT internal_id_observation_unit_attribute
+        FROM observation_units_values AS V
+        JOIN observation_units_attributes AS A
+            ON A.internal_id_observation_unit_attribute = V.observation_unit_attribute_db_id
+    )
+);
+
+CREATE TABLE observation_units_attributes_temp (
+    internal_id_observation_unit_attribute INTEGER PRIMARY KEY AUTOINCREMENT,
+    observation_unit_attribute_name TEXT
+);
+
+INSERT INTO observation_units_attributes_temp (
+    internal_id_observation_unit_attribute,
+    observation_unit_attribute_name
+)
+SELECT
+    internal_id_observation_unit_attribute,
+    observation_unit_attribute_name
+FROM observation_units_attributes;
+
+DROP TABLE observation_units_attributes;
+ALTER TABLE observation_units_attributes_temp RENAME TO observation_units_attributes;
+
+CREATE TABLE observation_variables_temp (
+    internal_id_observation_variable INTEGER PRIMARY KEY AUTOINCREMENT,
+    observation_variable_name TEXT,
+    observation_variable_field_book_format TEXT,
+    default_value TEXT,
+    visible TEXT,
+    position INTEGER,
+    external_db_id TEXT,
+    trait_data_source TEXT,
+    additional_info TEXT,
+    common_crop_name TEXT,
+    language TEXT,
+    data_type TEXT,
+    ontology_db_id TEXT,
+    ontology_name TEXT,
+    observation_variable_details TEXT
+);
+
+INSERT INTO observation_variables_temp (
+    internal_id_observation_variable,
+    observation_variable_name,
+    observation_variable_field_book_format,
+    default_value,
+    visible,
+    position,
+    external_db_id,
+    trait_data_source,
+    additional_info,
+    common_crop_name,
+    language,
+    data_type,
+    ontology_db_id,
+    ontology_name,
+    observation_variable_details
+)
+SELECT
+    internal_id_observation_variable,
+    observation_variable_name,
+    observation_variable_field_book_format,
+    default_value,
+    visible,
+    position,
+    external_db_id,
+    trait_data_source,
+    additional_info,
+    common_crop_name,
+    language,
+    data_type,
+    ontology_db_id,
+    ontology_name,
+    observation_variable_details
+FROM observation_variables;
+
+DROP TABLE observation_variables;
+ALTER TABLE observation_variables_temp RENAME TO observation_variables;
+
+CREATE TABLE studies_temp (
+    internal_id_study INTEGER PRIMARY KEY AUTOINCREMENT,
+    study_name TEXT,
+    study_db_id TEXT,
+    study_alias TEXT,
+    study_unique_id_name TEXT,
+    study_primary_id_name TEXT,
+    study_secondary_id_name TEXT,
+    experimental_design TEXT,
+    common_crop_name TEXT,
+    study_sort_name TEXT,
+    date_import TEXT,
+    date_edit TEXT,
+    date_export TEXT,
+    date_sync TEXT,
+    additional_info TEXT,
+    study_source TEXT,
+    observation_levels TEXT,
+    seasons TEXT,
+    trial_db_id TEXT,
+    trial_name TEXT,
+    count INTEGER,
+    import_format TEXT,
+    observation_unit_search_attribute TEXT
+);
+
+INSERT INTO studies_temp (
+    internal_id_study,
+    study_name,
+    study_db_id,
+    study_alias,
+    study_unique_id_name,
+    study_primary_id_name,
+    study_secondary_id_name,
+    experimental_design,
+    common_crop_name,
+    study_sort_name,
+    date_import,
+    date_edit,
+    date_export,
+    date_sync,
+    study_source,
+    additional_info,
+    observation_levels,
+    seasons,
+    trial_db_id,
+    trial_name,
+    count,
+    import_format,
+    observation_unit_search_attribute
+)
+SELECT
+    internal_id_study,
+    study_name,
+    study_db_id,
+    study_alias,
+    study_unique_id_name,
+    study_primary_id_name,
+    study_secondary_id_name,
+    experimental_design,
+    common_crop_name,
+    study_sort_name,
+    date_import,
+    date_edit,
+    date_export,
+    date_sync,
+    study_source,
+    additional_info,
+    observation_levels,
+    seasons,
+    trial_db_id,
+    trial_name,
+    count,
+    import_format,
+    observation_unit_search_attribute
+FROM studies;
+
+DROP TABLE studies;
+ALTER TABLE studies_temp RENAME TO studies;
+
+CREATE TABLE observations_temp (
+    internal_id_observation INTEGER PRIMARY KEY AUTOINCREMENT,
+    observation_unit_id TEXT,
+    observation_variable_db_id INTEGER,
+    study_id INTEGER,
+    observation_db_id TEXT,
+    value TEXT,
+    observation_time_stamp TEXT,
+    collector TEXT,
+    geo_coordinates TEXT,
+    last_synced_time TEXT,
+    additional_info TEXT,
+    rep TEXT,
+    notes TEXT
+);
+
+INSERT INTO observations_temp (
+    internal_id_observation,
+    observation_unit_id,
+    observation_variable_db_id,
+    study_id,
+    value,
+    observation_time_stamp,
+    collector,
+    geo_coordinates,
+    last_synced_time,
+    additional_info,
+    rep,
+    notes
+)
+SELECT
+    internal_id_observation,
+    observation_unit_id,
+    observation_variable_db_id,
+    study_id,
+    value,
+    observation_time_stamp,
+    collector,
+    geoCoordinates,
+    last_synced_time,
+    additional_info,
+    rep,
+    notes
+FROM observations;
+
+DROP TABLE observations;
+ALTER TABLE observations_temp RENAME TO observations;
+
+CREATE VIEW IF NOT EXISTS VisibleObservationVariable AS
+    SELECT
+        internal_id_observation_variable,
+        observation_variable_name,
+        observation_variable_field_book_format,
+        observation_variable_details,
+        default_value,
+        position
+    FROM observation_variables
+    WHERE visible LIKE "true"
+    ORDER BY position;
+
+CREATE VIEW IF NOT EXISTS NonImageObservations AS
+    SELECT
+        observations.internal_id_observation AS id,
+        observations.value AS value,
+        studies.internal_id_study AS study_db_id,
+        observation_variables.trait_data_source
+    FROM observations
+    JOIN observation_variables
+        ON observations.observation_variable_db_id = observation_variables.internal_id_observation_variable
+    JOIN studies
+        ON observations.study_id = studies.internal_id_study
+    WHERE observation_variables.observation_variable_field_book_format <> 'photo';
+
+CREATE VIEW IF NOT EXISTS LocalImageObservations AS
+    SELECT
+        observations.internal_id_observation AS id,
+        observations.value AS value,
+        studies.internal_id_study AS study_id,
+        observation_variables.observation_variable_name AS observation_variable_name
+    FROM observations
+    JOIN observation_variables
+        ON observations.observation_variable_db_id = observation_variables.internal_id_observation_variable
+    JOIN studies
+        ON observations.study_id = studies.internal_id_study
+    WHERE (observation_variables.trait_data_source = 'local' OR observation_variables.trait_data_source IS NULL)
+        AND observation_variables.observation_variable_field_book_format = 'photo';
+
+CREATE VIEW IF NOT EXISTS RemoteImageObservationsView AS
+    SELECT
+        observations.internal_id_observation AS id,
+        observations.value AS value,
+        studies.internal_id_study AS study_id,
+        observation_variables.trait_data_source AS trait_data_source,
+        observation_variables.observation_variable_field_book_format,
+        observation_variables.observation_variable_name
+    FROM observations
+    JOIN observation_variables
+        ON observations.observation_variable_db_id = observation_variables.internal_id_observation_variable
+    JOIN studies
+        ON observations.study_id = studies.internal_id_study
+    WHERE studies.study_source IS NOT NULL
+        AND observation_variables.trait_data_source <> 'local'
+        AND observation_variables.trait_data_source IS NOT NULL
+        AND observation_variables.observation_variable_field_book_format = 'photo';

@@ -6,6 +6,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.models.ObservationUnitModel
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
+import com.fieldbook.tracker.utilities.StringUtil.escape
 import com.google.gson.Gson
 import math.geom2d.Point2D
 import math.geom2d.line.Line2D
@@ -125,8 +126,6 @@ class GeodeticUtils {
                 } catch (io: IOException) { }
             }
         }
-
-        private fun String?.escape() = this?.replace("\"", "\"\"")
 
         private const val NOT_CLOSEST = 0
         private const val CLOSEST_UPDATE = 1
