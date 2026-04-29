@@ -24,7 +24,7 @@ fun DiseaseRatingTrait(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var current by remember { mutableStateOf(value.toIntOrNull() ?: 0) }
+    var current by remember(value) { mutableStateOf(value.toIntOrNull() ?: 0) }
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
             for (i in 1..5) {

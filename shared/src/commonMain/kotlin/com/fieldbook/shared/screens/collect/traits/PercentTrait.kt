@@ -38,7 +38,7 @@ fun PercentTrait(
         else -> value.toIntOrNull()?.coerceIn(min, max) ?: defaultInt.coerceIn(min, max)
     }
 
-    var sliderFloat by remember {
+    var sliderFloat by remember(value, min, max, defaultInt) {
         mutableStateOf(parsedFromValue.toFloat())
     }
 
