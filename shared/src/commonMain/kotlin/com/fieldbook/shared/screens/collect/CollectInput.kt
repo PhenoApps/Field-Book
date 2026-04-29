@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -44,6 +45,10 @@ fun CollectInput(
     val trait = controller.traits.getOrNull(controller.currentTraitIndex)
     val values = trait?.let { controller.traitValues[it.id] } ?: emptyList()
     val value = values.firstOrNull() ?: ""
+    val currentPlotId = controller.units
+        .getOrNull(controller.currentUnitIndex)
+        ?.observation_unit_db_id
+    val currentTraitId = trait?.id
 
     var isEdited by remember(
         controller.currentTraitIndex,
@@ -99,17 +104,19 @@ fun CollectInput(
         Spacer(Modifier.height(16.dp))
 
         if (formatEnum == Formats.TEXT) {
-            EditableValueText(
-                value = value,
-                onValueChange = {
-                    controller.updateCurrentTraitValue(it)
-                    isEdited = true
-                },
-                modifier = Modifier.fillMaxWidth().padding(8.dp),
-                fontWeight = fontWeight,
-                fontStyle = fontStyle,
-                color = fontColor,
-            )
+            key(currentPlotId, currentTraitId) {
+                EditableValueText(
+                    value = value,
+                    onValueChange = {
+                        controller.updateCurrentTraitValue(it)
+                        isEdited = true
+                    },
+                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    fontWeight = fontWeight,
+                    fontStyle = fontStyle,
+                    color = fontColor,
+                )
+            }
         } else if (formatEnum?.isCamera == true) {
             TraitInputContainer(
                 usesLazyVerticalInput = false,
@@ -118,13 +125,15 @@ fun CollectInput(
                     .fillMaxWidth()
                     .weight(1f)
             ) {
-                TraitInputHost(
-                    controller = controller,
-                    trait = trait,
-                    values = values,
-                    onEdited = { isEdited = true },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                key(currentPlotId, currentTraitId) {
+                    TraitInputHost(
+                        controller = controller,
+                        trait = trait,
+                        values = values,
+                        onEdited = { isEdited = true },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
         } else {
             Text(
@@ -148,13 +157,15 @@ fun CollectInput(
                     .fillMaxWidth()
                     .weight(1f)
             ) {
-                TraitInputHost(
-                    controller = controller,
-                    trait = trait,
-                    values = values,
-                    onEdited = { isEdited = true },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                key(currentPlotId, currentTraitId) {
+                    TraitInputHost(
+                        controller = controller,
+                        trait = trait,
+                        values = values,
+                        onEdited = { isEdited = true },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
         }
     }
@@ -342,7 +353,7 @@ fun EditableValueText(
     fontStyle: FontStyle = FontStyle.Italic,
     color: androidx.compose.ui.graphics.Color,
 ) {
-    var text by remember { mutableStateOf(value) }
+    var text by remember(value) { mutableStateOf(value) }
     BasicTextField(
         value = text,
         onValueChange = {
