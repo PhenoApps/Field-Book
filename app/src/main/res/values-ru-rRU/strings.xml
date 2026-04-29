@@ -1485,6 +1485,7 @@
     <string name="pref_experimental_generate_sample_data_confirm_message">Будет создано или заполнено поле «field_sample» искусственными наблюдениями. Если признаков нет, примерные признаки будут загружены автоматически.</string>
     <string name="pref_experimental_generate_sample_data_success">Пример поля успешно создан.</string>
     <string name="pref_experimental_generate_sample_data_failure">Не удалось создать пример поля. Проверьте, что хранилище настроено правильно.</string>
+    <string name="traits_format_experimental">Экспериментальные</string>
     <string name="pref_alpha_media_keycode_events_summary">След./пред. трек переключает записи, громкость вверх/вниз переключает признаки, кнопка вызова делает фото</string>
     <string name="pref_alpha_media_keycode_events_title">Навигация аппаратными мультимедиа‑кнопками</string>
     <string name="pref_geonav_distance_threshold_summary">GeoNav автоматически остановится, если расстояние до всех делянок превысит это значение (км).</string>
