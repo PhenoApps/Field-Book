@@ -353,7 +353,7 @@ private fun RequiredSetupPage(
             done = storageConfigured,
             actionLabel = "Choose Folder",
             onAction = onChooseDirectory,
-            enabled = !storageConfigured
+            enabled = true
         )
     }
 }
