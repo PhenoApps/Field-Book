@@ -15,7 +15,7 @@ fun TextTrait(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var local by remember { mutableStateOf(value) }
+    var local by remember(value) { mutableStateOf(value) }
 
     OutlinedTextField(
         value = local,
