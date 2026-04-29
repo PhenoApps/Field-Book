@@ -85,7 +85,6 @@ class TraitRepository() {
                 commonCropName = it.common_crop_name,
                 language = it.language,
                 dataType = it.data_type,
-                observationVariableDbId = it.observation_variable_db_id,
                 ontologyDbId = it.ontology_db_id,
                 ontologyName = it.ontology_name,
                 details = it.observation_variable_details
