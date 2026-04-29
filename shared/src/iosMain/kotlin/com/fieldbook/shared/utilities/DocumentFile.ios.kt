@@ -22,7 +22,9 @@ import platform.Foundation.NSUserDomainMask
 import platform.Foundation.firstObject
 import platform.UIKit.UIActivityViewController
 import platform.UIKit.UIApplication
+import platform.UIKit.UIModalPresentationPopover
 import platform.UIKit.UIViewController
+import platform.UIKit.popoverPresentationController
 import platform.darwin.dispatch_async
 import platform.darwin.dispatch_get_main_queue
 
@@ -214,8 +216,18 @@ actual fun shareFile(file: DocumentFile) {
             activityItems = listOf(fileUrl),
             applicationActivities = null
         )
+        activityViewController.modalPresentationStyle = UIModalPresentationPopover
 
-        topViewController()?.presentViewController(
+        val presenter = topViewController()
+        val sourceView = presenter?.view
+
+        if (sourceView != null) {
+            val popoverController = activityViewController.popoverPresentationController
+            popoverController?.sourceView = sourceView
+            popoverController?.sourceRect = sourceView.bounds
+        }
+
+        presenter?.presentViewController(
             viewControllerToPresent = activityViewController,
             animated = true,
             completion = null
