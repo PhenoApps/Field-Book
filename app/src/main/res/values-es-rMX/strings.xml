@@ -1479,6 +1479,7 @@
     <string name="pref_experimental_generate_sample_data_confirm_message">Esto creará o rellenará un campo llamado \"field_sample\" con observaciones artificiales. Los rasgos de ejemplo se cargarán automáticamente si ninguno está presente.</string>
     <string name="pref_experimental_generate_sample_data_success">Campo de ejemplo creado exitosamente.</string>
     <string name="pref_experimental_generate_sample_data_failure">Error al generar el campo de muestra. Compruebe que el almacenamiento está configurado correctamente.</string>
+    <string name="traits_format_experimental">Experimental</string>
     <string name="pref_alpha_media_keycode_events_summary">Siguiente/anterior pista navega entradas, el volumen de arriba o abajo se mueve a través de rasgos, la llamada capturará fotos</string>
     <string name="pref_alpha_media_keycode_events_title">Navegar con Comandos Multimedia del Hardware</string>
     <string name="pref_geonav_distance_threshold_summary">GeoNav se detiene automáticamente cuando la distancia de todas las parcelas excede este valor en kilómetros.</string>
