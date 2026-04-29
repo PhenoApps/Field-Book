@@ -6,9 +6,9 @@
 |-------------------------|--------------------|--------------------|
 |                         |                    |                    |
 | **Onboarding**          |                    |                    |
-| Initialize storage      | :white_check_mark: |                    |
+| Initialize storage      | :white_check_mark: | :white_check_mark: |
 | Permissions             | :white_check_mark: | :white_check_mark: |
-| Load samples            | :white_check_mark: |                    |
+| Load samples            | :white_check_mark: | :white_check_mark: |
 | Tutorial                |                    |                    |
 |                         |                    |                    |
 | **Fields**              |                    |                    |
@@ -34,7 +34,7 @@
 | Copy trait              | :white_check_mark: | :white_check_mark: |
 | Delete trait            | :white_check_mark: | :white_check_mark: |
 | Disable trait           | :white_check_mark: | :white_check_mark: |
-| Reorder                 |                    |                    |
+| Reorder                 | :white_check_mark: | :white_check_mark: |
 | Edit trait              | :white_check_mark: | :white_check_mark: |
 | Export                  | :white_check_mark: |                    |
 | Sort                    | :white_check_mark: | :white_check_mark: |
@@ -86,8 +86,8 @@
 | Delete                  |                    |                    |
 |                         |                    |                    |
 | **Export**              |                    |                    |
-| Basic export all opts   | :white_check_mark: |                    |
-| Share zip file          | :white_check_mark: |                    |
+| Basic export all opts   | :white_check_mark: | :white_check_mark: |
+| Share zip file          | :white_check_mark: | :white_check_mark: |
 |                         |                    |                    |
 |                         |                    |                    |
 | **Settings**            |                    |                    |
@@ -99,7 +99,7 @@
 | Import db (sample)      | :white_check_mark: | :white_check_mark: |
 | Import db (other file)  |                    |                    |
 | Export db               |                    |                    |
-| Delete db               | :white_check_mark: |                    |
+| Delete db               | :white_check_mark: | :white_check_mark: |
 |                         |                    |                    |
 | ...                     |                    |                    |
 |                         |                    |                    |
