@@ -239,7 +239,7 @@
     <!-- Geo-Navigate to Field -->
     <string name="menu_fields_plot_by_distance_title">Выбрать ближайшее поле</string>
     <string name="activity_field_editor_no_field_found">Не удалось найти координаты.</string>
-    <string name="activity_field_editor_switch_field">"&quot;Переключиться на поле %s&quot;"</string>
+    <string name="activity_field_editor_switch_field">"Переключиться на поле %s"</string>
     <string name="activity_field_editor_switch_field_action">Переключить</string>
     <string name="activity_field_editor_no_location_yet">Местоположение пока не определено.</string>
     <string name="activity_field_editor_switch_field_same">Ближайшее поле уже выбрано.</string>
@@ -248,7 +248,7 @@
     <string name="field_edit_display_name">Изменить отображаемое название поля</string>
     <string name="name_cannot_be_empty">Название не может быть пустым.</string>
     <string name="illegal_characters_message">Обнаружены недопустимые символы: %1$s</string>
-    <string name="name_conflict_message">&quot;%1$s&quot; уже используется как %2$s для другого поля.</string>
+    <string name="name_conflict_message">\"%1$s\" уже используется как %2$s для другого поля.</string>
     <string name="name_conflict_import_name">импортируемое имя</string>
     <string name="name_conflict_display_name">отображаемое имя</string>
     <string name="dialog_att_chooser_title_default">Выберите атрибут</string>
@@ -260,7 +260,7 @@
     <string name="search_multiple_matches_found">Найдено %1$d совпадающих делянок. Показана первая.</string>
     <!--    <string name="field_default_sort_order">import order</string>-->
     <string name="field_data_title">Данные</string>
-    <string name="field_trait_observation_total">&quot;%d&quot; наблюдений</string>
+    <string name="field_trait_observation_total">\"%d\" наблюдений</string>
     <!-- Field Detail Charts -->
     <string name="chart_no_data">Нет данных для построения графика</string>
     <string name="chart_incompatible_format">Для этого формата признака график недоступен</string>
@@ -1562,7 +1562,7 @@
     <string name="nix_trait_settings_title">Настройки %s</string>
     <string name="disconnect">Отключить</string>
     <string name="nix_device_incompatible">Устройство несовместимо: данные уже сохранены для другого типа устройства.</string>
-    <string name="nix_error_unknown">"&quot;Произошла неизвестная ошибка Nix.&quot;"</string>
+    <string name="nix_error_unknown">"Произошла неизвестная ошибка Nix."</string>
     <string name="nix_error_license">Проблема с лицензией Nix или интернет‑подключением.</string>
     <string name="nix_error_ambient_light">Слишком яркий внешний свет.</string>
     <string name="nix_error_timeout">Произошла ошибка тайм‑аута.</string>
