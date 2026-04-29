@@ -66,6 +66,20 @@ LEFT JOIN observation_variable_values ovv ON ov.internal_id_observation_variable
 LEFT JOIN observation_variable_attributes ova ON ovv.observation_variable_attribute_db_id = ova.internal_id_observation_variable_attribute
 GROUP BY ov.internal_id_observation_variable;
 
+getVisibleTraitsWithAttributes:
+SELECT ov.*,
+  MIN(CASE WHEN ova.observation_variable_attribute_name = 'validValuesMin' THEN ovv.observation_variable_attribute_value END) AS minimum,
+  MAX(CASE WHEN ova.observation_variable_attribute_name = 'validValuesMax' THEN ovv.observation_variable_attribute_value END) AS maximum,
+  GROUP_CONCAT(CASE WHEN ova.observation_variable_attribute_name = 'category' THEN ovv.observation_variable_attribute_value END) AS categories,
+  MAX(CASE WHEN ova.observation_variable_attribute_name = 'closeKeyboardOnOpen' THEN ovv.observation_variable_attribute_value END) AS closeKeyboardOnOpen,
+  MAX(CASE WHEN ova.observation_variable_attribute_name = 'cropImage' THEN ovv.observation_variable_attribute_value END) AS cropImage
+FROM observation_variables ov
+LEFT JOIN observation_variable_values ovv ON ov.internal_id_observation_variable = ovv.observation_variable_db_id
+LEFT JOIN observation_variable_attributes ova ON ovv.observation_variable_attribute_db_id = ova.internal_id_observation_variable_attribute
+WHERE ov.visible IS NULL OR LOWER(ov.visible) = 'true'
+GROUP BY ov.internal_id_observation_variable
+ORDER BY ov.position ASC;
+
 updateTraitVisibility:
 UPDATE observation_variables SET visible = ? WHERE internal_id_observation_variable = ?;
 
