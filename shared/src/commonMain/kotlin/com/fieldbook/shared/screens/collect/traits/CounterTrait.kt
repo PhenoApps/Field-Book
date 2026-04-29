@@ -27,7 +27,7 @@ fun CounterTrait(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var count by remember { mutableStateOf(value.toIntOrNull() ?: 0) }
+    var count by remember(value) { mutableStateOf(value.toIntOrNull() ?: 0) }
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
