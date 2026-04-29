@@ -23,7 +23,6 @@ class TraitRepository() {
             commonCropName = common_crop_name,
             language = language,
             dataType = data_type,
-            observationVariableDbId = observation_variable_db_id,
             ontologyDbId = ontology_db_id,
             ontologyName = ontology_name,
             details = observation_variable_details
@@ -61,7 +60,6 @@ class TraitRepository() {
                 commonCropName = it.common_crop_name,
                 language = it.language,
                 dataType = it.data_type,
-                observationVariableDbId = it.observation_variable_db_id,
                 ontologyDbId = it.ontology_db_id,
                 ontologyName = it.ontology_name,
                 details = it.observation_variable_details
@@ -92,7 +90,6 @@ class TraitRepository() {
                 commonCropName = it.common_crop_name,
                 language = it.language,
                 dataType = it.data_type,
-                observationVariableDbId = it.observation_variable_db_id,
                 ontologyDbId = it.ontology_db_id,
                 ontologyName = it.ontology_name,
                 details = it.observation_variable_details
@@ -143,7 +140,6 @@ class TraitRepository() {
             trait.commonCropName,
             trait.language,
             trait.dataType,
-            trait.observationVariableDbId,
             trait.ontologyDbId,
             trait.ontologyName,
             trait.details
