@@ -69,6 +69,32 @@ class TraitRepository() {
         }
     }
 
+    fun getVisibleTraitsWithAttributes(): List<TraitObject> {
+        return db.observation_variablesQueries.getVisibleTraitsWithAttributes().executeAsList().map {
+            TraitObject(
+                id = it.internal_id_observation_variable,
+                name = it.observation_variable_name ?: "",
+                format = it.observation_variable_field_book_format,
+                defaultValue = it.default_value,
+                minimum = it.minimum,
+                maximum = it.maximum,
+                categories = it.categories,
+                visible = it.visible,
+                realPosition = it.position?.toInt() ?: 0,
+                externalDbId = it.external_db_id,
+                traitDataSource = it.trait_data_source,
+                additionalInfo = it.additional_info,
+                commonCropName = it.common_crop_name,
+                language = it.language,
+                dataType = it.data_type,
+                observationVariableDbId = it.observation_variable_db_id,
+                ontologyDbId = it.ontology_db_id,
+                ontologyName = it.ontology_name,
+                details = it.observation_variable_details
+            )
+        }
+    }
+
     fun getAllTraitsOrdered(): List<TraitObject> {
         return db.observation_variablesQueries.getAllTraitsOrdered().executeAsList()
             .map { it.toTraitObject() }
