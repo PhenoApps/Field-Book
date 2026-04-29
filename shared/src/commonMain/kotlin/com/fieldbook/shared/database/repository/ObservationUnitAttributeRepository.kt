@@ -4,8 +4,11 @@ import com.fieldbook.shared.sqldelight.FieldbookDatabase
 import com.fieldbook.shared.sqldelight.createDatabase
 
 class ObservationUnitAttributeRepository(
-    private val db: FieldbookDatabase = createDatabase()
+    private val dbProvider: () -> FieldbookDatabase = { createDatabase() }
 ) {
+    private val db: FieldbookDatabase
+        get() = dbProvider()
+
 
     /**
      * Returns all observation unit attribute names for the given study id.

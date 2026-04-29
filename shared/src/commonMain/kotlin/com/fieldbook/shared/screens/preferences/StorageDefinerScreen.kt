@@ -5,8 +5,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.fieldbook.shared.generated.resources.Res
@@ -27,16 +39,15 @@ fun StorageDefinerScreen(
         mutableStateOf(
             normalizeStorageDirectoryPath(
                 preferences.getString(
-                GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY.key,
-                ""
-            )
+                    GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY.key,
+                    ""
+                )
             )
         )
     }
 
     val launcher = rememberDirectoryPickerLauncher(
-        title = "Directory picker",
-        initialDirectory = currentDirectory.ifEmpty { null }
+        title = "Directory picker"
     ) { directory ->
         directory?.let {
             val value = normalizeStorageDirectoryPath(it.path ?: "")

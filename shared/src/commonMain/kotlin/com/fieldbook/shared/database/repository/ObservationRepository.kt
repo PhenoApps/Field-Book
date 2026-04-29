@@ -10,7 +10,8 @@ import kotlinx.datetime.format
 import kotlinx.datetime.format.FormatStringsInDatetimeFormats
 
 class ObservationRepository() {
-    private val db: FieldbookDatabase = createDatabase()
+    private val db: FieldbookDatabase
+        get() = createDatabase()
 
     /**
      * Returns a map of observation_variable_db_id to list of values for the given studyId and plotId.

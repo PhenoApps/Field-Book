@@ -9,11 +9,15 @@ import com.fieldbook.shared.database.models.FieldObject
 import com.fieldbook.shared.sqldelight.FieldbookDatabase
 
 class StudyRepository(
-    val db: FieldbookDatabase = FieldbookDatabase(
-        AppContext.driverFactory().getDriver()
-    )
+    private val dbProvider: () -> FieldbookDatabase = {
+        FieldbookDatabase(AppContext.driverFactory().getDriver())
+    }
 ) {
-    private val driver: SqlDriver = AppContext.driverFactory().getDriver()
+    private val db: FieldbookDatabase
+        get() = dbProvider()
+
+    private val driver: SqlDriver
+        get() = AppContext.driverFactory().getDriver()
 
     enum class SortOrder { DateImport, Visible, Name }
 

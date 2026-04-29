@@ -6,7 +6,8 @@ import com.fieldbook.shared.sqldelight.Observation_units
 import com.fieldbook.shared.sqldelight.createDatabase
 
 class ObservationUnitRepository() {
-    private val db: FieldbookDatabase = createDatabase()
+    private val db: FieldbookDatabase
+        get() = createDatabase()
 
     private fun Observation_units.toMap(): Map<String, Any?> {
         return mapOf(

@@ -34,6 +34,7 @@ class KmpHostActivity : ComponentActivity() {
 
         setContent {
             val currentScreen = remember { mutableStateOf(hostScreenType) }
+
             MainTheme {
                 when (currentScreen.value) {
                     KmpHostScreenType.CONFIG -> ConfigScreen(
@@ -82,6 +83,7 @@ class KmpHostActivity : ComponentActivity() {
                     KmpHostScreenType.STORAGE_PREFERENCES -> {
                         StoragePreferencesScreen(
                             onNavigate = { target -> currentScreen.value = target },
+                            onExit = { finishAffinity() },
                             onBack = {
                                 currentScreen.value = KmpHostScreenType.PREFERENCES
 
