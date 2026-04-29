@@ -20,9 +20,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.fieldbook.shared.brapi.BrapiOAuthResult
+import com.fieldbook.shared.brapi.authorizeBrapiImplicit
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.brapi_base_url
 import com.fieldbook.shared.generated.resources.brapi_base_url_default
@@ -41,6 +44,7 @@ import com.fieldbook.shared.generated.resources.brapi_oidc_url_default
 import com.fieldbook.shared.generated.resources.brapi_oidc_url_desc
 import com.fieldbook.shared.generated.resources.brapi_pagination
 import com.fieldbook.shared.generated.resources.brapi_revoke_auth
+import com.fieldbook.shared.generated.resources.brapi_save_authorize
 import com.fieldbook.shared.generated.resources.brapi_timeout
 import com.fieldbook.shared.generated.resources.ic_adv_brapi_base
 import com.fieldbook.shared.generated.resources.ic_pref_brapi_client_id
@@ -84,6 +88,7 @@ import com.fieldbook.shared.generated.resources.prefs_brapi_cache_invalidate_cho
 import com.fieldbook.shared.generated.resources.qr_code_share_choose_action_title
 import com.fieldbook.shared.preferences.PreferenceKeys
 import com.russhwolf.settings.Settings
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -92,6 +97,8 @@ fun BrapiPreferencesScreen(
     onBack: (() -> Unit)? = null
 ) {
     val preferences = remember { Settings() }
+    val coroutineScope = rememberCoroutineScope()
+    val authorizeText = stringResource(Res.string.brapi_save_authorize)
     val defaultBaseUrl = stringResource(Res.string.brapi_base_url_default)
     val defaultDisplayName = stringResource(Res.string.brapi_edit_display_name_default)
     val defaultOidcFlow = stringResource(Res.string.preferences_brapi_oidc_flow_oauth_implicit)
@@ -130,6 +137,9 @@ fun BrapiPreferencesScreen(
 
     var brapiEnabled by remember {
         mutableStateOf(preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false))
+    }
+    var brapiToken by remember {
+        mutableStateOf(preferences.getStringOrNull(PreferenceKeys.BRAPI_TOKEN))
     }
     var baseUrl by remember(defaultBaseUrl) {
         mutableStateOf(preferences.getString(PreferenceKeys.BRAPI_BASE_URL, defaultBaseUrl))
@@ -176,12 +186,66 @@ fun BrapiPreferencesScreen(
         val selectedIndex = valueDisplayValues.indexOf(storedValue).takeIf { it >= 0 } ?: 0
         mutableStateOf(valueDisplayOptions[selectedIndex])
     }
+    var authInProgress by remember { mutableStateOf(false) }
     var dialogState by remember { mutableStateOf<PreferenceDialogState?>(null) }
+
+    fun saveBaseUrl(value: String) {
+        baseUrl = value
+        preferences.putString(PreferenceKeys.BRAPI_BASE_URL, value)
+        if (!preferences.getBoolean(PreferenceKeys.BRAPI_EXPLICIT_OIDC_URL, false)) {
+            val newOidcUrl = oidcUrl.replaceFirst(oldBaseUrl, value)
+            val newDisplayName = value.replace(
+                Regex("https?://(?:www\\.)?(.*?)(?:/.*)?$"),
+                "$1"
+            )
+            oidcUrl = newOidcUrl
+            displayName = newDisplayName
+            preferences.putString(PreferenceKeys.BRAPI_OIDC_URL, newOidcUrl)
+            preferences.putString(PreferenceKeys.BRAPI_DISPLAY_NAME, newDisplayName)
+        }
+        oldBaseUrl = value
+    }
+
+    fun authorizeBrapi() {
+        if (authInProgress) return
+
+        if (oidcFlow != defaultOidcFlow) {
+            dialogState = PreferenceDialogState(
+                title = authorizeText,
+                summary = "Authorization code flow is not available in the shared KMP BrAPI screen yet.",
+                type = PreferenceDialogType.INFO
+            )
+            return
+        }
+
+        authInProgress = true
+        coroutineScope.launch {
+            when (val result = authorizeBrapiImplicit(preferences)) {
+                BrapiOAuthResult.Success -> {
+                    brapiToken = preferences.getStringOrNull(PreferenceKeys.BRAPI_TOKEN)
+                    dialogState = PreferenceDialogState(
+                        title = authorizeText,
+                        summary = "BrAPI Authorization Successful",
+                        type = PreferenceDialogType.INFO
+                    )
+                }
+                is BrapiOAuthResult.Error -> {
+                    brapiToken = null
+                    dialogState = PreferenceDialogState(
+                        title = authorizeText,
+                        summary = result.message,
+                        type = PreferenceDialogType.INFO
+                    )
+                }
+            }
+            authInProgress = false
+        }
+    }
 
     val sections = listOf(
         PreferenceSection(
             title = Res.string.preferences_brapi_server_title,
-            items = listOf(
+            items = listOfNotNull(
                 PreferenceItem(
                     icon = Res.drawable.ic_adv_brapi_base,
                     title = Res.string.brapi_base_url,
@@ -208,7 +272,7 @@ fun BrapiPreferencesScreen(
                     title = Res.string.brapi_revoke_auth,
                     dialogType = PreferenceDialogType.INFO,
                     isDestructive = true
-                )
+                ).takeIf { brapiToken != null }
             )
         ),
         PreferenceSection(
@@ -363,20 +427,13 @@ fun BrapiPreferencesScreen(
                                             type = item.dialogType,
                                             value = baseUrl,
                                             onSave = { value ->
-                                                baseUrl = value
-                                                preferences.putString(PreferenceKeys.BRAPI_BASE_URL, value)
-                                                if (!preferences.getBoolean(PreferenceKeys.BRAPI_EXPLICIT_OIDC_URL, false)) {
-                                                    val newOidcUrl = oidcUrl.replaceFirst(oldBaseUrl, value)
-                                                    val newDisplayName = value.replace(
-                                                        Regex("https?://(?:www\\.)?(.*?)(?:/.*)?$"),
-                                                        "$1"
-                                                    )
-                                                    oidcUrl = newOidcUrl
-                                                    displayName = newDisplayName
-                                                    preferences.putString(PreferenceKeys.BRAPI_OIDC_URL, newOidcUrl)
-                                                    preferences.putString(PreferenceKeys.BRAPI_DISPLAY_NAME, newDisplayName)
-                                                }
-                                                oldBaseUrl = value
+                                                saveBaseUrl(value)
+                                            },
+                                            extraButtonText = authorizeText,
+                                            onExtraButtonClick = {
+                                                brapiToken = null
+                                                preferences.remove(PreferenceKeys.BRAPI_TOKEN)
+                                                authorizeBrapi()
                                             }
                                         )
                                         Res.string.brapi_display_name -> PreferenceDialogState(
@@ -401,6 +458,7 @@ fun BrapiPreferencesScreen(
                                             type = item.dialogType
                                         ).also {
                                             preferences.remove(PreferenceKeys.BRAPI_TOKEN)
+                                            brapiToken = null
                                         }
                                         Res.string.preferences_brapi_oidc_flow -> PreferenceDialogState(
                                             title = dialogTitle,

@@ -58,7 +58,9 @@ data class PreferenceDialogState(
     val options: List<String> = emptyList(),
     val value: String = "",
     val onSave: (String) -> Unit = {},
-    val onOptionSelected: (String) -> Unit = {}
+    val onOptionSelected: (String) -> Unit = {},
+    val extraButtonText: String? = null,
+    val onExtraButtonClick: (String) -> Unit = {}
 )
 
 @Composable
@@ -177,8 +179,21 @@ fun PreferenceTextDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
+            Row {
+                state.extraButtonText?.let { buttonText ->
+                    TextButton(
+                        onClick = {
+                            state.onSave(text)
+                            onDismiss()
+                            state.onExtraButtonClick(text)
+                        }
+                    ) {
+                        Text(buttonText)
+                    }
+                }
+                TextButton(onClick = onDismiss) {
+                    Text("Cancel")
+                }
             }
         }
     )
