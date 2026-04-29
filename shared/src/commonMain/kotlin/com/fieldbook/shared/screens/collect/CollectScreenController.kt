@@ -99,7 +99,7 @@ class CollectScreenController {
 
     private fun loadTraits() {
         try {
-            traits = traitRepository.getAllTraitsWithAttributes()
+            traits = traitRepository.getVisibleTraitsWithAttributes()
             traitLoading = false
         } catch (e: Exception) {
             e.printStackTrace()
