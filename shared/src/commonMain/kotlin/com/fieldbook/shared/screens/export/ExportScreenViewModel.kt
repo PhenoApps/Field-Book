@@ -4,10 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.fieldbook.shared.brapi.BrAPIServiceV2
+import com.fieldbook.shared.brapi.BrapiResult
 import com.fieldbook.shared.database.repository.StudyRepository
 import com.fieldbook.shared.export.ExportOptions
 import com.fieldbook.shared.export.ExportResult
 import com.fieldbook.shared.preferences.GeneralKeys
+import com.fieldbook.shared.preferences.PreferenceKeys
 import com.fieldbook.shared.utilities.ExportUtil
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -18,6 +21,7 @@ import kotlinx.coroutines.launch
 
 class ExportScreenViewModel(
     private val exportUtil: ExportUtil = ExportUtil(),
+    private val brapiExportSupport: BrapiExportSupport = BrapiExportSupport(),
     private val studyRepository: StudyRepository = StudyRepository(),
     private val settings: Settings = Settings()
 ) : ViewModel() {
@@ -32,10 +36,24 @@ class ExportScreenViewModel(
         _uiState.value = _uiState.value.transform()
     }
 
-    fun loadDefaults(fieldIds: List<Int>) {
+    fun loadDefaults(fieldIds: List<Int>, defaultBrapiBaseUrl: String = "") {
         val resolvedFieldIds = resolveFieldIds(fieldIds)
         val multipleFields = resolvedFieldIds.size > 1
         val fileName = buildDefaultFileName(resolvedFieldIds)
+        val brapiBaseUrl = settings.getString(PreferenceKeys.BRAPI_BASE_URL, defaultBrapiBaseUrl)
+        val brapiHost = brapiBaseUrl.hostForDisplay()
+        val brapiEnabled = settings.getBoolean(PreferenceKeys.BRAPI_ENABLED, false)
+        val brapiPreview = if (brapiEnabled && resolvedFieldIds.isNotEmpty() && brapiHost.isNotBlank()) {
+            brapiExportSupport.preview(resolvedFieldIds, brapiHost)
+        } else {
+            null
+        }
+        val canExportBrapi = brapiPreview?.canExport == true
+        val exportMode = when {
+            !canExportBrapi || settings.getString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, "") == "local" -> ExportMode.LOCAL
+            settings.getString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, "") == "brapi" -> ExportMode.BRAPI
+            else -> ExportMode.CHOOSE
+        }
         update {
             copy(
                 formatDb = settings.getBoolean(GeneralKeys.EXPORT_FORMAT_DATABASE.key, false),
@@ -47,7 +65,11 @@ class ExportScreenViewModel(
                 bundleMedia = settings.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED.key, false),
                 overwrite = settings.getBoolean(GeneralKeys.EXPORT_OVERWRITE.key, false),
                 fileName = fileName,
-                multipleFields = multipleFields
+                multipleFields = multipleFields,
+                exportMode = exportMode,
+                brapiPreview = brapiPreview,
+                brapiHost = brapiHost,
+                brapiBaseUrl = brapiBaseUrl,
             )
         }
     }
@@ -61,6 +83,8 @@ class ExportScreenViewModel(
     fun onToggleBundle() = update { copy(bundleMedia = !bundleMedia) }
     fun onToggleOverwrite() = update { copy(overwrite = !overwrite) }
     fun onFileNameChange(value: String) = update { copy(fileName = value) }
+    fun onSelectLocalExport() = update { copy(exportMode = ExportMode.LOCAL) }
+    fun onSelectBrapiExport() = update { copy(exportMode = ExportMode.BRAPI) }
 
     fun onSave(fieldIds: List<Int>) {
         val s = _uiState.value
@@ -108,6 +132,39 @@ class ExportScreenViewModel(
         }
     }
 
+    fun onSaveBrapi(fieldIds: List<Int>) {
+        val s = _uiState.value
+        val preview = s.brapiPreview
+
+        if (preview == null || !preview.canExport) {
+            viewModelScope.launch { _events.emit(ExportEvent.Failed(preview?.message ?: "BrAPI export is unavailable")) }
+            return
+        }
+
+        if (preview.newObservations + preview.editedObservations == 0) {
+            viewModelScope.launch { _events.emit(ExportEvent.Failed("Nothing to sync")) }
+            return
+        }
+
+        viewModelScope.launch {
+            _events.emit(ExportEvent.ShowProgress)
+            val service = BrAPIServiceV2(
+                baseUrl = s.brapiBaseUrl,
+                bearerToken = settings.getStringOrNull(PreferenceKeys.BRAPI_TOKEN),
+            )
+            when (val result = brapiExportSupport.export(resolveFieldIds(fieldIds), s.brapiHost, service)) {
+                is BrapiResult.Failure -> _events.emit(
+                    ExportEvent.Failed(result.message ?: result.statusCode?.let { "BrAPI export failed: $it" } ?: "BrAPI export failed")
+                )
+                is BrapiResult.Success -> _events.emit(
+                    ExportEvent.Completed(
+                        "BrAPI export complete: ${result.value.created} new, ${result.value.updated} edited"
+                    )
+                )
+            }
+        }
+    }
+
     private fun persistOptions(options: ExportOptions) {
         settings.putBoolean(GeneralKeys.EXPORT_FORMAT_DATABASE.key, options.formatDb)
         settings.putBoolean(GeneralKeys.EXPORT_FORMAT_TABLE.key, options.formatTable)
@@ -133,6 +190,13 @@ class ExportScreenViewModel(
         val activeFieldId = settings.getInt(GeneralKeys.SELECTED_FIELD_ID.key, -1)
         return if (activeFieldId >= 0) listOf(activeFieldId) else emptyList()
     }
+
+    private fun String.hostForDisplay(): String {
+        return trim()
+            .removePrefix("https://")
+            .removePrefix("http://")
+            .substringBefore("/")
+    }
 }
 
 sealed class ExportEvent {
@@ -152,13 +216,24 @@ data class ExportUiState(
     val bundleMedia: Boolean = false,
     val overwrite: Boolean = false,
     val fileName: String = "",
-    val multipleFields: Boolean = false
+    val multipleFields: Boolean = false,
+    val exportMode: ExportMode = ExportMode.LOCAL,
+    val brapiPreview: BrapiExportPreview? = null,
+    val brapiHost: String = "",
+    val brapiBaseUrl: String = "",
 )
+
+enum class ExportMode {
+    CHOOSE,
+    LOCAL,
+    BRAPI
+}
 
 fun exportScreenViewModelFactory() = viewModelFactory {
     initializer {
         ExportScreenViewModel(
             exportUtil = ExportUtil(),
+            brapiExportSupport = BrapiExportSupport(),
             studyRepository = StudyRepository(),
             settings = Settings()
         )

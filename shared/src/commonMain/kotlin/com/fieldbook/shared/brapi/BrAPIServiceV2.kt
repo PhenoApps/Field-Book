@@ -1,11 +1,16 @@
 package com.fieldbook.shared.brapi
 
 import com.fieldbook.shared.brapi.model.v2.core.BrapiStudyDetails
+import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiObservationExport
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiObservationUnitDetails
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiTraitDetails
 import com.fieldbook.shared.generated.brapi.v2.core.api.StudiesApi
 import com.fieldbook.shared.generated.brapi.v2.phenotyping.api.ObservationUnitsApi
 import com.fieldbook.shared.generated.brapi.v2.phenotyping.api.ObservationVariablesApi
+import com.fieldbook.shared.generated.brapi.v2.phenotyping.api.ObservationsApi
+import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.ExternalReferencesInner
+import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.Observation
+import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.ObservationNewRequest
 import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.ObservationUnit
 import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.ObservationVariable
 import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.ObservationVariableScale
@@ -20,6 +25,9 @@ class BrAPIServiceV2(
     private val observationUnitsApi: ObservationUnitsApi = ObservationUnitsApi(
         baseUrl = normalizeV2BaseUrl(baseUrl)
     ),
+    private val observationsApi: ObservationsApi = ObservationsApi(
+        baseUrl = normalizeV2BaseUrl(baseUrl)
+    ),
 ) : BrAPIService {
 
     init {
@@ -27,6 +35,7 @@ class BrAPIServiceV2(
             studiesApi.setBearerToken(bearerToken)
             observationVariablesApi.setBearerToken(bearerToken)
             observationUnitsApi.setBearerToken(bearerToken)
+            observationsApi.setBearerToken(bearerToken)
         }
     }
 
@@ -142,8 +151,54 @@ class BrAPIServiceV2(
         }
     }
 
+    override suspend fun createObservations(
+        observations: List<BrapiObservationExport>,
+    ): BrapiResult<List<BrapiObservationExport>> {
+        if (observations.isEmpty()) return BrapiResult.Success(emptyList())
+
+        return try {
+            val response = observationsApi.observationsPost(
+                observationNewRequest = observations.map { it.toNewRequest() }
+            )
+
+            if (!response.success) {
+                return BrapiResult.Failure(statusCode = response.status)
+            }
+
+            BrapiResult.Success(response.body().result.data.map(::mapObservation))
+        } catch (error: Exception) {
+            BrapiResult.Failure(message = error.message)
+        }
+    }
+
+    override suspend fun updateObservations(
+        observations: List<BrapiObservationExport>,
+    ): BrapiResult<List<BrapiObservationExport>> {
+        if (observations.isEmpty()) return BrapiResult.Success(emptyList())
+
+        return try {
+            val request = observations
+                .mapNotNull { observation ->
+                    val observationDbId = observation.observationDbId?.takeIf { it.isNotBlank() }
+                    observationDbId?.let { it to observation.toNewRequest() }
+                }
+                .toMap()
+
+            val response = observationsApi.observationsPut(requestBody = request)
+
+            if (!response.success) {
+                return BrapiResult.Failure(statusCode = response.status)
+            }
+
+            BrapiResult.Success(response.body().result.data.map(::mapObservation))
+        } catch (error: Exception) {
+            BrapiResult.Failure(message = error.message)
+        }
+    }
+
     companion object {
         private const val BRAPI_V2_PATH = "/brapi/v2"
+        private const val FIELD_BOOK_REFERENCE_SOURCE = "Field Book Upload"
 
         fun normalizeV2BaseUrl(baseUrl: String): String {
             val trimmedBaseUrl = baseUrl.trim().trimEnd('/')
@@ -196,6 +251,46 @@ class BrAPIServiceV2(
                 ObservationVariableScale.DataType.TEXT,
                 null -> "text"
             }
+        }
+
+        @Suppress("DEPRECATION")
+        private fun BrapiObservationExport.toNewRequest(): ObservationNewRequest {
+            return ObservationNewRequest(
+                collector = collector?.trim(),
+                externalReferences = listOf(
+                    ExternalReferencesInner(
+                        referenceID = fieldBookDbId,
+                        referenceId = fieldBookDbId,
+                        referenceSource = FIELD_BOOK_REFERENCE_SOURCE,
+                    )
+                ),
+                observationTimeStamp = observationTimeStamp,
+                observationUnitDbId = observationUnitDbId,
+                observationVariableDbId = observationVariableDbId,
+                observationVariableName = observationVariableName,
+                studyDbId = studyDbId,
+                value = value,
+            )
+        }
+
+        @Suppress("DEPRECATION")
+        private fun mapObservation(observation: Observation): BrapiObservationExport {
+            val fieldBookDbId = observation.externalReferences
+                ?.firstOrNull { it.referenceSource == FIELD_BOOK_REFERENCE_SOURCE }
+                ?.let { it.referenceId ?: it.referenceID }
+                .orEmpty()
+
+            return BrapiObservationExport(
+                fieldBookDbId = fieldBookDbId,
+                observationDbId = observation.observationDbId,
+                observationUnitDbId = observation.observationUnitDbId.orEmpty(),
+                observationVariableDbId = observation.observationVariableDbId.orEmpty(),
+                observationVariableName = observation.observationVariableName,
+                studyDbId = observation.studyDbId.orEmpty(),
+                value = observation.`value`.orEmpty(),
+                observationTimeStamp = observation.observationTimeStamp,
+                collector = observation.collector,
+            )
         }
     }
 }

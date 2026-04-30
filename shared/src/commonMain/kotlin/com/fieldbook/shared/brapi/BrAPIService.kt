@@ -1,6 +1,7 @@
 package com.fieldbook.shared.brapi
 
 import com.fieldbook.shared.brapi.model.v2.core.BrapiStudyDetails
+import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiObservationExport
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiObservationUnitDetails
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiTraitDetails
 
@@ -20,6 +21,14 @@ interface BrAPIService {
         studyDbId: String,
         pageSize: Int = BrapiPaginationManager.DEFAULT_PAGE_SIZE,
     ): BrapiResult<List<BrapiObservationUnitDetails>>
+
+    suspend fun createObservations(
+        observations: List<BrapiObservationExport>,
+    ): BrapiResult<List<BrapiObservationExport>>
+
+    suspend fun updateObservations(
+        observations: List<BrapiObservationExport>,
+    ): BrapiResult<List<BrapiObservationExport>>
 }
 
 sealed interface BrapiResult<out T> {

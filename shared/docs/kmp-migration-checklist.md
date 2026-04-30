@@ -130,6 +130,11 @@
 | Import from BrAPI                | :white_check_mark: |                    |
 | ...                              |                    |                    |
 |                                  |                    |                    |
+| **Export**                       |                    |                    |
+| Export to BrAPI                  |                    |                    |
+|                                  |                    |                    |
+| ...                              |                    |                    |
+|                                  |                    |                    |
 | **Settings/BrAPI**               |                    |                    |
 | Enable                           | :white_check_mark: | :white_check_mark: |
 |                                  |                    |                    |
