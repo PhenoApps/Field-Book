@@ -8,9 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- New Experimental Traits setting to show traits under development (https://github.com/PhenoApps/Field-Book/pull/1469)
 
 ### Changed
+
+### Fixed
+
+## [v7.2.1] - 2026-04-30
+
+### Added
+- New Experimental Traits setting to show traits under development (https://github.com/PhenoApps/Field-Book/pull/1469)
 
 ### Fixed
 - Large values now fit correctly in the repeated values view (https://github.com/PhenoApps/Field-Book/pull/1468)
@@ -936,3 +942,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v7.1.2]: https://github.com/PhenoApps/Field-Book/releases/tag/7.1.2
 
 [v7.2.0]: https://github.com/PhenoApps/Field-Book/releases/tag/7.2.0
+
+[v7.2.1]: https://github.com/PhenoApps/Field-Book/releases/tag/7.2.1
