@@ -97,6 +97,74 @@ fun patchOptionalWrappedRequestBodies(value: Any?) {
     }
 }
 
+/**
+ * BrAPI describes `additionalInfo` as arbitrary JSON, but some schemas constrain
+ * it to `Map<String, String>`. Real servers return arrays/objects in that map,
+ * which breaks generated kotlinx serializers. We do not consume additionalInfo
+ * in the shared prototype, so remove it from generated models and let
+ * ignoreUnknownKeys skip it in responses.
+ */
+fun removeAdditionalInfoProperties(value: Any?) {
+    when (value) {
+        is Map<*, *> -> {
+            (value as? MutableMap<String, Any?>)?.let { mutableValue ->
+                val properties = mutableValue["properties"] as? MutableMap<String, Any?>
+                properties?.remove("additionalInfo")
+            }
+
+            value.values.forEach(::removeAdditionalInfoProperties)
+        }
+
+        is Iterable<*> -> value.forEach(::removeAdditionalInfoProperties)
+    }
+}
+
+/**
+ * Ontology references are present in several BrAPI responses, but real servers
+ * can return null IDs/names or omit them entirely. Keep these fields nullable
+ * and optional so generated serializers do not reject otherwise usable records.
+ */
+fun relaxOntologyReferenceFields(value: Any?) {
+    when (value) {
+        is Map<*, *> -> {
+            (value as? MutableMap<String, Any?>)?.let { mutableValue ->
+                val properties = mutableValue["properties"] as? MutableMap<String, Any?>
+                listOf("ontologyDbId", "ontologyName").forEach { propertyName ->
+                    (properties?.get(propertyName) as? MutableMap<String, Any?>)?.set("nullable", true)
+                }
+
+                val required = mutableValue["required"] as? MutableList<Any?>
+                required?.removeAll(listOf("ontologyDbId", "ontologyName"))
+                if (required?.isEmpty() == true) {
+                    mutableValue.remove("required")
+                }
+            }
+
+            value.values.forEach(::relaxOntologyReferenceFields)
+        }
+
+        is Iterable<*> -> value.forEach(::relaxOntologyReferenceFields)
+    }
+}
+
+/**
+ * BrAPI defines observationUnitPosition.entryType as CHECK/TEST/FILLER, but
+ * servers may return local labels. Generate entryType as a plain string so any
+ * server-provided value can be decoded.
+ */
+fun relaxObservationUnitEntryTypeEnums(value: Any?) {
+    when (value) {
+        is Map<*, *> -> {
+            val entryType = (value as? MutableMap<String, Any?>)?.get("entryType") as? MutableMap<String, Any?>
+            entryType?.remove("enum")
+
+            value.values.forEach(::relaxObservationUnitEntryTypeEnums)
+        }
+
+        is Iterable<*> -> value.forEach(::relaxObservationUnitEntryTypeEnums)
+    }
+}
+
 val patchOpenApiSpecTasks = brapiOpenApiSpecs.map { spec ->
     val patchedSpecFile = patchedOpenApiSpecFiles.getValue(spec.name)
 
@@ -110,6 +178,9 @@ val patchOpenApiSpecTasks = brapiOpenApiSpecs.map { spec ->
         doLast {
             val parsedSpec = JsonSlurper().parse(URI(spec.inputSpec).toURL()) as MutableMap<String, Any?>
             patchOptionalWrappedRequestBodies(parsedSpec)
+            removeAdditionalInfoProperties(parsedSpec)
+            relaxOntologyReferenceFields(parsedSpec)
+            relaxObservationUnitEntryTypeEnums(parsedSpec)
 
             val outputFile = patchedSpecFile.get().asFile
             outputFile.parentFile.mkdirs()
