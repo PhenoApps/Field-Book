@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.preferences.PreferenceKeys
+import com.fieldbook.tracker.utilities.RotationPolicy
 import com.fieldbook.tracker.utilities.SharedPreferenceUtils
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -205,6 +206,7 @@ open class ThemedActivity: AppCompatActivity() {
         applyTheme(this)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        RotationPolicy.apply(this)
     }
 
     override fun onResume() {
@@ -266,4 +268,5 @@ open class ThemedActivity: AppCompatActivity() {
         }
         super.startActivity(intent)
     }
+
 }

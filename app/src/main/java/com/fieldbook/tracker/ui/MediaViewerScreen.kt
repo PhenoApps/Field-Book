@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.ui.components.appBar.AppBar
 import com.fieldbook.tracker.ui.theme.AppTheme
+import com.fieldbook.tracker.utilities.RotationPolicy
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -50,6 +51,8 @@ class MediaViewerActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        RotationPolicy.apply(this)
 
         val studyId = intent.getStringExtra(EXTRA_STUDY_ID) ?: "0"
         val obsUnit = intent.getStringExtra(EXTRA_OBS_UNIT) ?: ""
