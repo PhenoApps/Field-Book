@@ -1480,6 +1480,8 @@
     <string name="pref_experimental_generate_sample_data_success">Campo de exemplo criado com sucesso.</string>
     <string name="pref_experimental_generate_sample_data_failure">Falha ao gerar o campo de exemplo. Verifique se o armazenamento está configurado corretamente.</string>
     <string name="traits_format_experimental">Experimental</string>
+    <string name="pref_experimental_traits_category_title">Características Experimentais</string>
+    <string name="pref_experimental_traits_category_summary">Mostrar uma categoria de características experimentais no seletor de tipo de característica</string>
     <string name="pref_alpha_media_keycode_events_summary">Seguinte/anterior navega pelas entradas, o botão de aumentar/diminuir o volume alterna entre as características e a função \"Ligar\" captura fotos</string>
     <string name="pref_alpha_media_keycode_events_title">Navegar Com Comandos de Mídia de Hardware</string>
     <string name="pref_geonav_distance_threshold_summary">GeoNav automaticamente para quando a distância de todos os lotes exceder esse valor em quilômetros.</string>
