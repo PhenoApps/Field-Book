@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- Large values now fit correctly in the repeated values view (https://github.com/PhenoApps/Field-Book/pull/1468)
 - InfoBars no longer disappear when attempting to display trait data (https://github.com/PhenoApps/Field-Book/pull/1458)
 - Repeated measures can now still be collected when data input is frozen (https://github.com/PhenoApps/Field-Book/pull/1459)
 - Nix trait now works correctly in public builds (https://github.com/PhenoApps/Field-Book/pull/1465)
