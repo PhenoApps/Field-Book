@@ -111,6 +111,43 @@ class TraitObject {
 
     companion object {
 
+        private const val RESOURCE_PREFIX = "resources/"
+
+        private fun normalizeResourcesPrefix(value: String): String {
+            val trimmed = value.trim()
+            if (trimmed.isEmpty()) return ""
+            if (!trimmed.startsWith(RESOURCE_PREFIX, ignoreCase = true)) return trimmed
+            // canonicalize to lowercase prefix
+            return RESOURCE_PREFIX + trimmed.substringAfter(RESOURCE_PREFIX, "")
+        }
+
+        private fun tryExtractResourcesFileName(value: String): String? {
+            val raw = value.trim()
+            if (raw.isEmpty()) return null
+            val lower = raw.lowercase(Locale.ROOT)
+
+            // Best-effort, context-free extraction from legacy URI strings.
+            val (idx, tokenLen) =
+                when {
+                    lower.contains("resources%2f") ->
+                        lower.lastIndexOf("resources%2f") to "resources%2f".length
+                    lower.contains("/resources/") ->
+                        lower.lastIndexOf("/resources/") to "/resources/".length
+                    else -> return null
+                }
+
+            if (idx < 0) return null
+
+            var tail = raw.substring(idx + tokenLen)
+            tail = tail.substringBefore('?').substringBefore('#')
+            val name =
+                tail.substringAfterLast("%2F", tail)
+                    .substringAfterLast('/', tail)
+                    .trim()
+
+            return name.ifBlank { null }
+        }
+
         fun fromJson(json: TraitJson, maxPosition: Int, originalFileName: String) = TraitObject().apply {
             name = json.name
             alias = json.alias ?: json.name
@@ -128,7 +165,11 @@ class TraitObject {
                 val def =
                     TraitAttributes.byKey(key)
                 if (def != null) {
-                    setAttributeValue(def, stringValue)
+                    if (def == TraitAttributes.RESOURCE_FILE) {
+                        setAttributeValue(def, normalizeResourcesPrefix(stringValue))
+                    } else {
+                        setAttributeValue(def, stringValue)
+                    }
                 }
             }
         }
@@ -309,7 +350,14 @@ class TraitObject {
         val map = mutableMapOf<String, JsonElement>()
 
         for (def in TraitAttributes.ALL) {
-            val value = attributeValues.getString(def)
+            val rawValue = attributeValues.getString(def)
+            val value = if (def == TraitAttributes.RESOURCE_FILE) {
+                val normalized = normalizeResourcesPrefix(rawValue)
+                if (normalized.startsWith(RESOURCE_PREFIX)) normalized
+                else tryExtractResourcesFileName(normalized)?.let { RESOURCE_PREFIX + it } ?: normalized
+            } else {
+                rawValue
+            }
             if (value.isNotEmpty() && value != def.defaultValue) {
                 map[def.key] = JsonPrimitive(value)
             }
