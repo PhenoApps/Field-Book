@@ -6,6 +6,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.window.ComposeUIViewController
 import com.fieldbook.shared.screens.ConfigScreen
+import com.fieldbook.shared.screens.brapi.BrapiStudyScreen
 import com.fieldbook.shared.screens.collect.CollectScreen
 import com.fieldbook.shared.screens.export.ExportScreen
 import com.fieldbook.shared.screens.fields.FieldEditorScreen
@@ -44,6 +45,10 @@ fun MainViewController(driverFactory: DriverFactory) = ComposeUIViewController {
 
             KmpHostScreenType.BRAPI_PREFERENCES -> BrapiPreferencesScreen(
                 onBack = { currentScreen = KmpHostScreenType.PREFERENCES }
+            )
+
+            KmpHostScreenType.BRAPI_STUDIES -> BrapiStudyScreen(
+                onBack = { currentScreen = KmpHostScreenType.CONFIG }
             )
 
             KmpHostScreenType.STORAGE_PREFERENCES -> StoragePreferencesScreen(
