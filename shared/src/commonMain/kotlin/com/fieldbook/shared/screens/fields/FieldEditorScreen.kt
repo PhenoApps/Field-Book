@@ -52,11 +52,17 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.fieldbook.shared.brapi.BrAPIServiceV2
+import com.fieldbook.shared.brapi.model.v2.core.BrapiStudyDetails
+import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiObservationUnitDetails
+import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiTraitDetails
 import com.fieldbook.shared.components.AppListItem
 import com.fieldbook.shared.database.models.FieldObject
 import com.fieldbook.shared.database.repository.ObservationUnitAttributeRepository
 import com.fieldbook.shared.database.repository.StudyRepository
+import com.fieldbook.shared.database.repository.TraitRepository
 import com.fieldbook.shared.generated.resources.Res
+import com.fieldbook.shared.generated.resources.brapi_base_url_default
 import com.fieldbook.shared.generated.resources.dir_field_import
 import com.fieldbook.shared.generated.resources.ic_field
 import com.fieldbook.shared.generated.resources.ic_file_cloud
@@ -65,6 +71,10 @@ import com.fieldbook.shared.generated.resources.ic_file_generic
 import com.fieldbook.shared.generated.resources.tutorial_fields_add_title
 import com.fieldbook.shared.objects.ImportFormat
 import com.fieldbook.shared.preferences.GeneralKeys
+import com.fieldbook.shared.preferences.PreferenceKeys
+import com.fieldbook.shared.screens.brapi.BrapiFieldImportSupport
+import com.fieldbook.shared.screens.brapi.BrapiStudyPreviewScreen
+import com.fieldbook.shared.screens.brapi.BrapiStudyScreen
 import com.fieldbook.shared.utilities.DocumentFile
 import com.fieldbook.shared.utilities.FieldSwitchImpl
 import com.fieldbook.shared.utilities.getDirectory
@@ -96,10 +106,24 @@ fun FieldEditorScreen(
     var showImportDialog by remember { mutableStateOf(false) }
     var showLocalFilesDialog by remember { mutableStateOf(false) }
     var showFieldCreatorDialog by remember { mutableStateOf(false) }
+    var showBrapiStudies by remember { mutableStateOf(false) }
+    var previewBrapiStudy by remember { mutableStateOf<BrapiStudyDetails?>(null) }
     val coroutineScope = rememberCoroutineScope()
     val selectedFieldId = remember { mutableStateOf<Int?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
     var localFieldFiles by remember { mutableStateOf<List<DocumentFile>>(emptyList()) }
+    val preferences = remember { Settings() }
+    val brapiEnabled = remember { preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false) }
+    val defaultBrapiBaseUrl = stringResource(Res.string.brapi_base_url_default)
+    val brapiBaseUrl = remember(defaultBrapiBaseUrl) {
+        preferences.getString(PreferenceKeys.BRAPI_BASE_URL, defaultBrapiBaseUrl)
+    }
+    val brapiService = remember(brapiBaseUrl) {
+        BrAPIServiceV2(
+            baseUrl = brapiBaseUrl,
+            bearerToken = preferences.getStringOrNull(PreferenceKeys.BRAPI_TOKEN),
+        )
+    }
 
     // Observe state from the ViewModel
     val fieldsState by viewModel.fields.collectAsState(initial = null)
@@ -131,6 +155,38 @@ fun FieldEditorScreen(
                 selectedFieldId.value = null
                 viewModel.clearFieldDetail()
             }
+        )
+        return
+    }
+
+    if (showBrapiStudies) {
+        BrapiStudyScreen(
+            onBack = { showBrapiStudies = false },
+            onStudySelected = { study ->
+                previewBrapiStudy = study
+                showBrapiStudies = false
+            },
+        )
+        return
+    }
+
+    previewBrapiStudy?.let { study ->
+        BrapiStudyPreviewScreen(
+            study = study,
+            service = brapiService,
+            onBack = {
+                previewBrapiStudy = null
+                showBrapiStudies = true
+            },
+            onSave = { selectedStudy, observationUnits, traits ->
+                viewModel.importBrapiStudy(
+                    study = selectedStudy,
+                    observationUnits = observationUnits,
+                    traits = traits,
+                    sourceUrl = brapiBaseUrl,
+                )
+                previewBrapiStudy = null
+            },
         )
         return
     }
@@ -232,6 +288,7 @@ fun FieldEditorScreen(
 
             if (showAddFieldDialog) {
                 AddFieldDialog(
+                    brapiEnabled = brapiEnabled,
                     onDismiss = { showAddFieldDialog = false },
                     onCreateNew = {
                         showAddFieldDialog = false
@@ -240,6 +297,10 @@ fun FieldEditorScreen(
                     onImportFromFile = {
                         showAddFieldDialog = false
                         showImportDialog = true
+                    },
+                    onImportFromBrapi = {
+                        showAddFieldDialog = false
+                        showBrapiStudies = true
                     }
                 )
             }
@@ -309,9 +370,11 @@ fun FieldEditorScreen(
 
 @Composable
 private fun AddFieldDialog(
+    brapiEnabled: Boolean,
     onDismiss: () -> Unit,
     onCreateNew: () -> Unit,
-    onImportFromFile: () -> Unit
+    onImportFromFile: () -> Unit,
+    onImportFromBrapi: () -> Unit,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -328,6 +391,13 @@ private fun AddFieldDialog(
                     icon = Res.drawable.ic_file_csv,
                     rowModifier = Modifier.clickable(onClick = onImportFromFile)
                 )
+                if (brapiEnabled) {
+                    AppListItem(
+                        text = "Import from BrAPI",
+                        icon = Res.drawable.ic_file_cloud,
+                        rowModifier = Modifier.clickable(onClick = onImportFromBrapi)
+                    )
+                }
             }
         },
         confirmButton = {},
@@ -576,6 +646,7 @@ private fun uniqueFieldFileName(directory: DocumentFile, originalName: String): 
 class FieldEditorScreenViewModel(
     private val observationUnitAttributeRepository: ObservationUnitAttributeRepository,
     private val studyRepository: StudyRepository,
+    private val traitRepository: TraitRepository,
     private val fieldSwitchImpl: FieldSwitchImpl = FieldSwitchImpl(
         observationUnitAttributeRepository,
         studyRepository
@@ -782,6 +853,37 @@ class FieldEditorScreenViewModel(
         }
     }
 
+    fun importBrapiStudy(
+        study: BrapiStudyDetails,
+        observationUnits: List<BrapiObservationUnitDetails>,
+        traits: List<BrapiTraitDetails>,
+        sourceUrl: String,
+    ) {
+        viewModelScope.launch {
+            _importing.value = true
+            try {
+                val result = BrapiFieldImportSupport.importStudy(
+                    study = study,
+                    observationUnits = observationUnits,
+                    traits = traits,
+                    studyRepository = studyRepository,
+                    traitRepository = traitRepository,
+                    sourceUrl = sourceUrl,
+                )
+
+                fieldSwitchImpl.switchField(result.fieldId)
+                settings.putInt(GeneralKeys.SELECTED_FIELD_ID.key, result.fieldId)
+                _activeFieldId.value = result.fieldId
+                _fields.value = studyRepository.getAllFields()
+                _messages.emit("Imported ${study.studyName ?: study.studyDbId} with ${result.importedTraitCount} trait(s)")
+            } catch (e: Exception) {
+                _messages.emit(e.message ?: "Error importing BrAPI study")
+            } finally {
+                _importing.value = false
+            }
+        }
+    }
+
     private suspend fun refreshFieldData(fieldId: Int) {
         _fieldDetail.value = studyRepository.getById(fieldId)
         _fields.value = studyRepository.getAllFields()
@@ -794,7 +896,8 @@ fun fieldEditorViewModelFactory() = viewModelFactory {
     initializer {
         FieldEditorScreenViewModel(
             observationUnitAttributeRepository = ObservationUnitAttributeRepository(),
-            studyRepository = StudyRepository()
+            studyRepository = StudyRepository(),
+            traitRepository = TraitRepository(),
         )
     }
 }

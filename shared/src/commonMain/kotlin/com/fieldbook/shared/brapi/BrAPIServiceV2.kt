@@ -1,17 +1,32 @@
 package com.fieldbook.shared.brapi
 
 import com.fieldbook.shared.brapi.model.v2.core.BrapiStudyDetails
+import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiObservationUnitDetails
+import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiTraitDetails
 import com.fieldbook.shared.generated.brapi.v2.core.api.StudiesApi
+import com.fieldbook.shared.generated.brapi.v2.phenotyping.api.ObservationUnitsApi
+import com.fieldbook.shared.generated.brapi.v2.phenotyping.api.ObservationVariablesApi
+import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.ObservationUnit
+import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.ObservationVariable
+import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.ObservationVariableScale
 
 class BrAPIServiceV2(
     baseUrl: String,
     bearerToken: String? = null,
     private val studiesApi: StudiesApi = StudiesApi(baseUrl = normalizeV2BaseUrl(baseUrl)),
+    private val observationVariablesApi: ObservationVariablesApi = ObservationVariablesApi(
+        baseUrl = normalizeV2BaseUrl(baseUrl)
+    ),
+    private val observationUnitsApi: ObservationUnitsApi = ObservationUnitsApi(
+        baseUrl = normalizeV2BaseUrl(baseUrl)
+    ),
 ) : BrAPIService {
 
     init {
         if (!bearerToken.isNullOrBlank()) {
             studiesApi.setBearerToken(bearerToken)
+            observationVariablesApi.setBearerToken(bearerToken)
+            observationUnitsApi.setBearerToken(bearerToken)
         }
     }
 
@@ -52,11 +67,76 @@ class BrAPIServiceV2(
                         studyName = study.studyName,
                         studyDescription = study.studyDescription,
                         locationName = study.locationName,
+                        commonCropName = study.commonCropName,
                         trialDbId = study.trialDbId,
                         trialName = study.trialName,
                     )
                 }
             )
+        } catch (error: Exception) {
+            BrapiResult.Failure(message = error.message)
+        }
+    }
+
+    override suspend fun getStudyObservationUnits(
+        studyDbId: String,
+        pageSize: Int,
+    ): BrapiResult<List<BrapiObservationUnitDetails>> {
+        return try {
+            val units = mutableListOf<BrapiObservationUnitDetails>()
+            var page = 0
+            var totalPages = 1
+
+            do {
+                val response = observationUnitsApi.observationunitsGet(
+                    studyDbId = studyDbId,
+                    page = page,
+                    pageSize = pageSize,
+                )
+
+                if (!response.success) {
+                    return BrapiResult.Failure(statusCode = response.status)
+                }
+
+                val body = response.body()
+                units += body.result.data.mapNotNull(::mapObservationUnit)
+                totalPages = body.metadata.pagination?.totalPages ?: 1
+                page++
+            } while (page < totalPages)
+
+            BrapiResult.Success(units)
+        } catch (error: Exception) {
+            BrapiResult.Failure(message = error.message)
+        }
+    }
+
+    override suspend fun getStudyTraits(
+        studyDbId: String,
+        pageSize: Int,
+    ): BrapiResult<List<BrapiTraitDetails>> {
+        return try {
+            val traits = mutableListOf<BrapiTraitDetails>()
+            var page = 0
+            var totalPages = 1
+
+            do {
+                val response = observationVariablesApi.variablesGet(
+                    studyDbId = studyDbId,
+                    page = page,
+                    pageSize = pageSize,
+                )
+
+                if (!response.success) {
+                    return BrapiResult.Failure(statusCode = response.status)
+                }
+
+                val body = response.body()
+                traits += body.result.data.map(::mapTrait)
+                totalPages = body.metadata.pagination?.totalPages ?: 1
+                page++
+            } while (page < totalPages)
+
+            BrapiResult.Success(traits)
         } catch (error: Exception) {
             BrapiResult.Failure(message = error.message)
         }
@@ -71,6 +151,50 @@ class BrAPIServiceV2(
                 trimmedBaseUrl
             } else {
                 "$trimmedBaseUrl$BRAPI_V2_PATH"
+            }
+        }
+
+        private fun mapTrait(variable: ObservationVariable): BrapiTraitDetails {
+            val validValues = variable.scale.validValues
+            return BrapiTraitDetails(
+                observationVariableDbId = variable.observationVariableDbId,
+                observationVariableName = variable.observationVariableName,
+                format = variable.scale.dataType.toFieldBookFormat(),
+                defaultValue = variable.defaultValue,
+                minimum = validValues?.minimumValue ?: validValues?.min?.toString(),
+                maximum = validValues?.maximumValue ?: validValues?.max?.toString(),
+                categories = validValues?.categories
+                    ?.mapNotNull { category -> category.value ?: category.label }
+                    ?.joinToString(","),
+                details = variable.trait.traitDescription,
+                commonCropName = variable.commonCropName,
+                language = variable.language,
+                dataType = variable.scale.dataType?.value,
+                ontologyDbId = variable.ontologyReference?.ontologyDbId,
+                ontologyName = variable.ontologyReference?.ontologyName,
+            )
+        }
+
+        private fun mapObservationUnit(unit: ObservationUnit): BrapiObservationUnitDetails? {
+            val unitDbId = unit.observationUnitDbId?.takeIf { it.isNotBlank() } ?: return null
+            return BrapiObservationUnitDetails(
+                observationUnitDbId = unitDbId,
+                observationUnitName = unit.observationUnitName,
+                germplasmDbId = unit.germplasmDbId,
+                germplasmName = unit.germplasmName,
+            )
+        }
+
+        private fun ObservationVariableScale.DataType?.toFieldBookFormat(): String {
+            return when (this) {
+                ObservationVariableScale.DataType.NUMERICAL -> "numeric"
+                ObservationVariableScale.DataType.DATE -> "date"
+                ObservationVariableScale.DataType.NOMINAL,
+                ObservationVariableScale.DataType.ORDINAL -> "categorical"
+                ObservationVariableScale.DataType.CODE,
+                ObservationVariableScale.DataType.DURATION,
+                ObservationVariableScale.DataType.TEXT,
+                null -> "text"
             }
         }
     }

@@ -56,6 +56,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun BrapiStudyScreen(
     onBack: (() -> Unit)? = null,
+    onStudySelected: ((BrapiStudyDetails) -> Unit)? = null,
 ) {
     val preferences = remember { Settings() }
     val defaultBaseUrl = stringResource(Res.string.brapi_base_url_default)
@@ -202,7 +203,20 @@ fun BrapiStudyScreen(
                     .fillMaxWidth()
                     .padding(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.End),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
+                if (onStudySelected != null) {
+                    Button(
+                        enabled = !isLoading && selectedStudyDbId != null,
+                        onClick = {
+                            studies.firstOrNull { it.studyDbId == selectedStudyDbId }
+                                ?.let(onStudySelected)
+                        },
+                    ) {
+                        Text("Import")
+                    }
+                }
+
                 OutlinedButton(
                     enabled = !isLoading && canMovePrevious,
                     onClick = {
