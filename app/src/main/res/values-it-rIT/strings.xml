@@ -1479,6 +1479,8 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="pref_experimental_generate_sample_data_success">Campo di esempio creato con successo.</string>
     <string name="pref_experimental_generate_sample_data_failure">Impossibile generare il campo di esempio. Controllare che l\'archiviazione sia configurata correttamente.</string>
     <string name="traits_format_experimental">Sperimentale</string>
+    <string name="pref_experimental_traits_category_title">Caratteri Sperimentali</string>
+    <string name="pref_experimental_traits_category_summary">Mostra una categoria di caratteri sperimentali nel selettore del tipo di carattere</string>
     <string name="pref_alpha_media_keycode_events_summary">La traccia successiva/precedente naviga i entrati, il volume su/giù si muove attraverso i caratteri, la chiamata catturerà le foto</string>
     <string name="pref_alpha_media_keycode_events_title">Naviga Tramite Comandi Multimediali dell\'Hardware</string>
     <string name="pref_geonav_distance_threshold_summary">GeoNav si ferma automaticamente quando la distanza da tutti le parcelle supera questo valore in chilometri.</string>
