@@ -59,6 +59,9 @@ import com.fieldbook.shared.generated.resources.field_book_mini_percent
 import com.fieldbook.shared.generated.resources.other_ic_field_book
 import com.fieldbook.shared.preferences.GeneralKeys
 import com.fieldbook.shared.utilities.configurePickedStorageDirectory
+import com.fieldbook.shared.utilities.detectStorageProviderLabel
+import com.fieldbook.shared.utilities.detectStorageProviderType
+import com.fieldbook.shared.utilities.displayStorageDirectoryPath
 import com.fieldbook.shared.utilities.isStorageDirectoryConfigured
 import com.fieldbook.shared.utilities.selectFirstField
 import com.russhwolf.settings.Settings
@@ -87,6 +90,15 @@ fun OnboardingScreen(
     var storageConfigured by remember { mutableStateOf(isStorageDirectoryConfigured()) }
     var importInProgress by remember { mutableStateOf(false) }
     var permissionsToEnableInSettings by remember { mutableStateOf<List<Permission>>(emptyList()) }
+    var storageDisplayPath by remember {
+        mutableStateOf(
+            displayStorageDirectoryPath(
+                settings.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY.key, ""),
+                settings.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_TYPE.key, ""),
+                settings.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_LABEL.key, "")
+            )
+        )
+    }
 
     LaunchedEffect(permissionHandler) {
         permissionsGranted = permissionHandler.checkPermissions()
@@ -98,7 +110,20 @@ fun OnboardingScreen(
         val configuredDirectory = directory?.let(::configurePickedStorageDirectory)
         if (configuredDirectory != null) {
             settings.putString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY.key, configuredDirectory)
+            settings.putString(
+                GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_TYPE.key,
+                detectStorageProviderType(configuredDirectory).name
+            )
+            settings.putString(
+                GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_LABEL.key,
+                detectStorageProviderLabel(configuredDirectory)
+            )
             storageConfigured = true
+            storageDisplayPath = displayStorageDirectoryPath(
+                configuredDirectory,
+                settings.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_TYPE.key, ""),
+                settings.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_LABEL.key, "")
+            )
         } else if (directory != null) {
             coroutineScope.launch {
                 snackbarHostState.showSnackbar("Failed to configure the selected folder.")
@@ -132,6 +157,7 @@ fun OnboardingScreen(
                     2 -> RequiredSetupPage(
                         permissionsGranted = permissionsGranted,
                         storageConfigured = storageConfigured,
+                        storageDisplayPath = storageDisplayPath,
                         onRequestPermissions = {
                             coroutineScope.launch {
                                 val result = permissionHandler.requestPermissions()
@@ -314,6 +340,7 @@ private fun IntroPage(
 private fun RequiredSetupPage(
     permissionsGranted: Boolean,
     storageConfigured: Boolean,
+    storageDisplayPath: String,
     onRequestPermissions: () -> Unit,
     onChooseDirectory: () -> Unit,
 ) {
@@ -349,7 +376,11 @@ private fun RequiredSetupPage(
 
         SetupActionCard(
             title = stringResource(Res.string.app_intro_storage_title),
-            summary = if (storageConfigured) "Folder selected and initialized" else "Choose a folder for Field Book data",
+            summary = if (storageConfigured) {
+                storageDisplayPath.ifBlank { "Folder selected and initialized" }
+            } else {
+                "Choose a folder for Field Book data"
+            },
             done = storageConfigured,
             actionLabel = "Choose Folder",
             onAction = onChooseDirectory,
