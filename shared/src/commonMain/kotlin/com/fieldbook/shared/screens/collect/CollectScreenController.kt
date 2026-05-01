@@ -175,6 +175,33 @@ class CollectScreenController {
         }
     }
 
+    /**
+     * Remove one stored value for the current trait and unit.
+     */
+    fun deleteCurrentTraitValue(value: String) {
+        val trait = traits.getOrNull(currentTraitIndex)
+        val unit = units.getOrNull(currentUnitIndex)
+        val plotId = unit?.observation_unit_db_id
+
+        if (plotId != null && trait?.id != null) {
+            observationRepository.deleteObservationValue(
+                plotId = plotId,
+                traitDbId = trait.id!!,
+                value = value,
+                studyId = studyId.toLong()
+            )
+            traitValues = traitValues.toMutableMap().apply {
+                val currentList = get(trait.id!!).orEmpty().toMutableList()
+                currentList.remove(value)
+                if (currentList.isEmpty()) {
+                    remove(trait.id!!)
+                } else {
+                    put(trait.id!!, currentList)
+                }
+            }
+        }
+    }
+
     fun getDisplayColor(): Color {
         val defaultArgb = AppColors.fb_value_saved_color.argb
         var storedArgb = settings.getInt(GeneralKeys.SAVED_DATA_COLOR.key, defaultArgb)
