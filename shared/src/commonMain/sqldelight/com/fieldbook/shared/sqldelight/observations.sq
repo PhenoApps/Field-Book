@@ -11,8 +11,7 @@ CREATE TABLE observations (
     last_synced_time TEXT,
     additional_info TEXT,
     rep TEXT,
-    notes TEXT,
-    UNIQUE (study_id, observation_unit_id, observation_variable_db_id)
+    notes TEXT
  );
 
 getUserDetail:
@@ -23,6 +22,10 @@ WHERE study_id = ? AND observation_unit_id = ?;
 deleteTrait:
 DELETE FROM observations
 WHERE study_id = ? AND observation_variable_db_id = ? AND observation_unit_id = ?;
+
+deleteTraitValue:
+DELETE FROM observations
+WHERE study_id = ? AND observation_variable_db_id = ? AND observation_unit_id = ? AND value = ?;
 
 insertObservation:
 INSERT INTO observations (
