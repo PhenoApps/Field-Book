@@ -296,8 +296,12 @@ fun TraitInputHost(
         Formats.CAMERA -> {
             PhotoTrait(
                 values = values,
-                onValueChange = {
+                onPhotoCaptured = {
                     controller.addCurrentTraitValue(it)
+                    onEdited()
+                },
+                onPhotoDeleted = {
+                    controller.deleteCurrentTraitValue(it)
                     onEdited()
                 },
                 modifier = modifier.fillMaxWidth().padding(8.dp),
