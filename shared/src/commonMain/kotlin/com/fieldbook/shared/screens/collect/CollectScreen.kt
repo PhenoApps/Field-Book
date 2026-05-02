@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,6 +43,17 @@ fun CollectScreen(
 ) {
     val controller = remember { CollectScreenController() }
     var isCameraFullscreen by remember { mutableStateOf(false) }
+    val handleBack: () -> Unit = {
+        controller.persistCurrentSelection()
+        onBack?.invoke()
+    }
+
+    DisposableEffect(controller) {
+        onDispose {
+            controller.persistCurrentSelection()
+        }
+    }
+
     val currentTrait = controller.traits.getOrNull(controller.currentTraitIndex)
     val currentValues = currentTrait?.let { controller.traitValues[it.id] } ?: emptyList()
     val currentFormat = currentTrait?.format?.let { formatStr ->
@@ -70,7 +82,7 @@ fun CollectScreen(
                 title = { Text(text = "Collect Data") },
                 navigationIcon = {
                     if (onBack != null) {
-                        IconButton(onClick = { onBack() }) {
+                        IconButton(onClick = handleBack) {
                             Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
                         }
                     }
