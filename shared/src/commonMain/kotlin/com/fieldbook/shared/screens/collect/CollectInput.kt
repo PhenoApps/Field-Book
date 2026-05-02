@@ -41,6 +41,7 @@ import com.fieldbook.shared.utilities.dateFormatMonthDay
 fun CollectInput(
     controller: CollectScreenController,
     modifier: Modifier = Modifier,
+    onExpandPhotoTrait: () -> Unit = {},
 ) {
     val trait = controller.traits.getOrNull(controller.currentTraitIndex)
     val values = trait?.let { controller.traitValues[it.id] } ?: emptyList()
@@ -131,7 +132,8 @@ fun CollectInput(
                         trait = trait,
                         values = values,
                         onEdited = { isEdited = true },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        onExpandPhotoTrait = onExpandPhotoTrait
                     )
                 }
             }
@@ -163,7 +165,8 @@ fun CollectInput(
                         trait = trait,
                         values = values,
                         onEdited = { isEdited = true },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        onExpandPhotoTrait = onExpandPhotoTrait
                     )
                 }
             }
@@ -209,6 +212,7 @@ fun TraitInputHost(
     values: List<String>,
     onEdited: () -> Unit,
     modifier: Modifier = Modifier,
+    onExpandPhotoTrait: () -> Unit = {},
 ) {
     val value = values.firstOrNull() ?: ""
     val formatEnum = trait?.format?.let { formatStr ->
@@ -305,7 +309,8 @@ fun TraitInputHost(
                     onEdited()
                 },
                 modifier = modifier.fillMaxWidth().padding(8.dp),
-                controller
+                controller = controller,
+                onExpandRequest = onExpandPhotoTrait
             )
         }
 
