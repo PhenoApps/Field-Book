@@ -107,6 +107,7 @@ fun FieldDetailScreen(
     val loading by viewModel.fieldDetailLoading.collectAsState()
     val attributes by viewModel.fieldAttributes.collectAsState()
     val sortAscending by viewModel.sortAscending.collectAsState()
+    val activeFieldId by viewModel.activeFieldId.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     var showRenameDialog by remember { mutableStateOf(false) }
@@ -185,6 +186,7 @@ fun FieldDetailScreen(
             }
         } else {
             val currentField = field!!
+            val isActiveField = currentField.exp_id == activeFieldId
             val displayName = currentField.exp_alias.ifBlank { currentField.exp_name }
             val searchId = currentField.search_attribute ?: currentField.unique_id
             val importFormat = ImportFormat.fromString(currentField.import_format)
@@ -268,6 +270,14 @@ fun FieldDetailScreen(
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
+                                ActionChip(
+                                    label = if (isActiveField) "Active field" else "Set active field",
+                                    icon = Res.drawable.ic_land_fields,
+                                    onClick = {
+                                        currentField.exp_id?.let(viewModel::switchField)
+                                    },
+                                    enabled = !isActiveField
+                                )
                                 ActionChip(
                                     label = stringResource(Res.string.fields_rename_study),
                                     icon = Res.drawable.ic_rename,
@@ -730,10 +740,12 @@ private fun DetailChip(
 private fun ActionChip(
     label: String,
     icon: org.jetbrains.compose.resources.DrawableResource,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    enabled: Boolean = true
 ) {
     AssistChip(
         onClick = onClick,
+        enabled = enabled,
         label = {
             Text(
                 text = label,
@@ -751,10 +763,13 @@ private fun ActionChip(
         colors = AssistChipDefaults.assistChipColors(
             containerColor = Color.White,
             labelColor = MaterialTheme.colorScheme.onSurface,
-            leadingIconContentColor = MaterialTheme.colorScheme.onSurface
+            leadingIconContentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContainerColor = Color(0xFFE2F0C9),
+            disabledLabelColor = MaterialTheme.colorScheme.onSurface,
+            disabledLeadingIconContentColor = MaterialTheme.colorScheme.onSurface
         ),
         border = AssistChipDefaults.assistChipBorder(
-            enabled = true,
+            enabled = enabled,
             borderColor = MaterialTheme.colorScheme.primary
         )
     )
