@@ -5,14 +5,19 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,8 +25,11 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -33,6 +41,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.fieldbook.shared.generated.resources.Res
+import com.fieldbook.shared.generated.resources.arrow_expand
+import com.fieldbook.shared.generated.resources.arrow_left
 import com.fieldbook.shared.generated.resources.camera_24px
 import com.fieldbook.shared.generated.resources.close
 import com.fieldbook.shared.screens.collect.CollectScreenController
@@ -48,7 +58,9 @@ import com.kashif.cameraK.enums.ImageFormat
 import com.kashif.cameraK.result.ImageCaptureResult
 import com.kashif.cameraK.ui.CameraPreview
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetAt
 import kotlinx.datetime.toLocalDateTime
@@ -59,6 +71,11 @@ import kotlin.math.absoluteValue
 private const val PHOTO_VALUE_SEPARATOR = "\n"
 private const val PHOTO_DIRECTORY_NAME = "picture"
 
+enum class PhotoTraitDisplayMode {
+    INLINE,
+    FULLSCREEN
+}
+
 @OptIn(ExperimentalResourceApi::class)
 @Composable
 fun PhotoTrait(
@@ -67,6 +84,9 @@ fun PhotoTrait(
     onPhotoDeleted: (String) -> Unit,
     modifier: Modifier = Modifier,
     controller: CollectScreenController,
+    displayMode: PhotoTraitDisplayMode = PhotoTraitDisplayMode.INLINE,
+    onExpandRequest: () -> Unit = {},
+    onCollapseRequest: () -> Unit = {},
 ) {
     fun Int.twoDigits(): String = toString().padStart(2, '0')
 
@@ -95,7 +115,7 @@ fun PhotoTrait(
             append("_")
             append(local.second.twoDigits())
             append(".")
-            append(local.nanosecond / 1_000_000)
+            append((local.nanosecond / 1_000_000).toString().padStart(3, '0'))
             append(
                 if (offsetHours >= 0) "+" else "-"
             )
@@ -131,6 +151,7 @@ fun PhotoTrait(
         val initial = decodeStoredPhotoRefs(values)
         mutableStateOf(initial)
     }
+    val listState = rememberLazyListState()
 
     fun extractPhotoFileName(photoRef: String): String {
         return normalizeStoredPhotoRef(photoRef)
@@ -168,8 +189,17 @@ fun PhotoTrait(
         }
     }
 
-    var cameraController by remember { mutableStateOf<CameraController?>(null) }
+    var cameraController by remember(displayMode) { mutableStateOf<CameraController?>(null) }
+    var previewSessionKey by remember(displayMode) { mutableStateOf(0) }
+    var captureInProgress by remember(displayMode) { mutableStateOf(false) }
+    var lastCaptureFinishedAt by remember(displayMode) { mutableStateOf<Instant?>(null) }
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(displayMode, photoUris.value.size) {
+        if (displayMode == PhotoTraitDisplayMode.INLINE) {
+            listState.scrollToItem(photoUris.value.size)
+        }
+    }
 
     fun saveCapturedPhoto(byteArray: ByteArray): String? {
         val dir = DocumentTreeUtil.getFieldMediaDirectory(PHOTO_DIRECTORY_NAME)
@@ -198,6 +228,17 @@ fun PhotoTrait(
     }
 
     fun capturePhoto() {
+        if (captureInProgress) {
+            return
+        }
+
+        val now = Clock.System.now()
+        val lastFinished = lastCaptureFinishedAt
+        if (lastFinished != null && now.minus(lastFinished).inWholeMilliseconds < 750) {
+            return
+        }
+
+        captureInProgress = true
         scope.launch {
             val captureResult = try {
                 cameraController?.takePicture()
@@ -212,6 +253,16 @@ fun PhotoTrait(
                     if (photoUri != null) {
                         photoUris.value = photoUris.value + photoUri
                         onPhotoCaptured(photoUri)
+                        if (displayMode == PhotoTraitDisplayMode.INLINE) {
+                            cameraController = null
+                            previewSessionKey += 1
+                            scope.launch {
+                                listState.animateScrollToItem(photoUris.value.size)
+                            }
+                        } else {
+                            cameraController = null
+                            previewSessionKey += 1
+                        }
                     }
                 }
 
@@ -223,7 +274,81 @@ fun PhotoTrait(
                     println("CameraK Error: camera controller is not ready")
                 }
             }
+
+            delay(750)
+            lastCaptureFinishedAt = Clock.System.now()
+            captureInProgress = false
         }
+    }
+
+    if (displayMode == PhotoTraitDisplayMode.FULLSCREEN) {
+        Surface(
+            modifier = modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.scrim
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                key(previewSessionKey) {
+                    CameraPreviewTile(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(3f / 4f)
+                            .align(Alignment.Center),
+                        onControllerReady = { controller ->
+                            cameraController = controller
+                            captureInProgress = false
+                        }
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(horizontal = 16.dp, vertical = 28.dp)
+                        .align(Alignment.BottomCenter)
+                ) {
+                    FloatingActionButton(
+                        onClick = { if (!captureInProgress) capturePhoto() },
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .size(92.dp),
+                        shape = CircleShape,
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.camera_24px),
+                            contentDescription = "Capture Photo",
+                            modifier = Modifier.size(38.dp)
+                        )
+                    }
+
+                    IconButton(
+                        onClick = onCollapseRequest,
+                        modifier = Modifier
+                            .align(Alignment.CenterStart)
+                            .size(64.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+                                shape = CircleShape
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                shape = CircleShape
+                            )
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.arrow_left),
+                            contentDescription = "Back to collector",
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+                }
+            }
+        }
+        return
     }
 
     Column(
@@ -233,6 +358,7 @@ fun PhotoTrait(
     ) {
         // Carousel for captured images and the live collapsed camera preview.
         LazyRow(
+            state = listState,
             modifier = Modifier
                 .fillMaxWidth()
                 // FIXME looks good on emulator, find the right setting
@@ -267,7 +393,6 @@ fun PhotoTrait(
                             ),
                         contentScale = ContentScale.Crop,
                         onError = { error ->
-                            // Log loading errors for debugging
                             println(
                                 "PhotoTrait: error loading image $displayUri : ${error.result.throwable.message}"
                             )
@@ -319,24 +444,44 @@ fun PhotoTrait(
                         .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center
                 ) {
-                    CameraPreview(
-                        modifier = Modifier.fillMaxSize(),
-                        cameraConfiguration = {
-                            setCameraLens(CameraLens.BACK)
-                            setFlashMode(FlashMode.OFF)
-                            setImageFormat(ImageFormat.JPEG)
-                            setDirectory(Directory.PICTURES)
-                        },
-                        onCameraControllerReady = { controller ->
-                            cameraController = controller
-                        }
-                    )
+                    key(previewSessionKey) {
+                        CameraPreviewTile(
+                            modifier = Modifier.fillMaxSize(),
+                            onControllerReady = { controller ->
+                                cameraController = controller
+                                captureInProgress = false
+                            }
+                        )
+                    }
+
+                    IconButton(
+                        onClick = onExpandRequest,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(12.dp)
+                            .size(64.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+                                shape = CircleShape
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                shape = CircleShape
+                            )
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.arrow_expand),
+                            contentDescription = "Expand camera preview",
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
                 }
             }
         }
 
         FloatingActionButton(
-            onClick = { capturePhoto() },
+            onClick = { if (!captureInProgress) capturePhoto() },
             modifier = Modifier
                 .padding(top = 16.dp)
                 .size(72.dp),
@@ -348,4 +493,21 @@ fun PhotoTrait(
             )
         }
     }
+}
+
+@Composable
+private fun CameraPreviewTile(
+    modifier: Modifier = Modifier,
+    onControllerReady: (CameraController) -> Unit,
+) {
+    CameraPreview(
+        modifier = modifier,
+        cameraConfiguration = {
+            setCameraLens(CameraLens.BACK)
+            setFlashMode(FlashMode.OFF)
+            setImageFormat(ImageFormat.JPEG)
+            setDirectory(Directory.PICTURES)
+        },
+        onCameraControllerReady = onControllerReady
+    )
 }
