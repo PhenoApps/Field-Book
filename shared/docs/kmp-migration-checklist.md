@@ -36,7 +36,7 @@
 | Disable trait           | :white_check_mark: | :white_check_mark: |
 | Reorder                 | :white_check_mark: | :white_check_mark: |
 | Edit trait              | :white_check_mark: | :white_check_mark: |
-| Export                  | :white_check_mark: |                    |
+| Export                  | :white_check_mark: | :white_check_mark: |
 | Sort                    | :white_check_mark: | :white_check_mark: |
 | Select all              | :white_check_mark: | :white_check_mark: |
 | Import from file        | :white_check_mark: |                    |
@@ -62,7 +62,7 @@
 | ...                     |                    |                    |
 |                         |                    |                    |
 | **Photo formats**       |                    |                    |
-| System                  | :white_check_mark: |                    |
+| System                  | :white_check_mark: | :white_check_mark: |
 | USB                     |                    |                    |
 | GoPro                   |                    |                    |
 | Canon                   |                    |                    |
