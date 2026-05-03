@@ -52,17 +52,20 @@ abstract class BaseBrapiAccountDialogFragment : DialogFragment() {
                         .setTitle(R.string.brapi_auth_failed_keep_title)
                         .setMessage(getString(R.string.brapi_auth_failed_keep_message, serverName))
                         .setPositiveButton(R.string.brapi_auth_failed_keep) { _: DialogInterface, _: Int ->
+                            authResponse?.onError(AccountManager.ERROR_CODE_CANCELED, "cancelled")
                             dismiss()
                             if (authResponse != null) activity?.finish()
                         }
                         .setNegativeButton(R.string.brapi_auth_failed_remove) { _: DialogInterface, _: Int ->
                             viewModel.removeNewAccount()
+                            authResponse?.onError(AccountManager.ERROR_CODE_CANCELED, "cancelled")
                             dismiss()
                             if (authResponse != null) activity?.finish()
                         }
                         .setCancelable(false)
                         .show()
                 } else {
+                    authResponse?.onError(AccountManager.ERROR_CODE_CANCELED, "cancelled")
                     dismiss()
                     if (authResponse != null) activity?.finish()
                 }
@@ -154,6 +157,7 @@ abstract class BaseBrapiAccountDialogFragment : DialogFragment() {
             }
             is BrapiAccountEvent.Dismissed -> {
                 if (authResponse != null) {
+                    authResponse?.onError(AccountManager.ERROR_CODE_CANCELED, "cancelled")
                     activity?.setResult(Activity.RESULT_CANCELED)
                     activity?.finish()
                 }
