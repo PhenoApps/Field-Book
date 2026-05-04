@@ -191,6 +191,20 @@ fun relaxObservationUnitEntryTypeEnums(value: Any?) {
     }
 }
 
+/**
+ * BrAPI Genotyping 2.1 declares both `alternateBases` and deprecated
+ * `alternate_bases` on Variant. OpenAPI Generator normalizes both names to the
+ * same Kotlin property (`alternateBases`), so drop the deprecated alias.
+ */
+fun removeDeprecatedVariantAlternateBases(parsedSpec: MutableMap<String, Any?>) {
+    val components = parsedSpec["components"] as? Map<*, *> ?: return
+    val schemas = components["schemas"] as? Map<*, *> ?: return
+    val variant = schemas["Variant"] as? MutableMap<String, Any?> ?: return
+    val properties = variant["properties"] as? MutableMap<String, Any?> ?: return
+
+    properties.remove("alternate_bases")
+}
+
 val patchOpenApiSpecTasks = brapiOpenApiSpecs.map { spec ->
     val patchedSpecFile = patchedOpenApiSpecFiles.getValue(spec.name)
 
@@ -207,6 +221,9 @@ val patchOpenApiSpecTasks = brapiOpenApiSpecs.map { spec ->
             removeAdditionalInfoProperties(parsedSpec)
             relaxOntologyReferenceFields(parsedSpec)
             relaxObservationUnitEntryTypeEnums(parsedSpec)
+            if (spec.name == "brapiGenotyping") {
+                removeDeprecatedVariantAlternateBases(parsedSpec)
+            }
 
             val outputFile = patchedSpecFile.get().asFile
             outputFile.parentFile.mkdirs()
