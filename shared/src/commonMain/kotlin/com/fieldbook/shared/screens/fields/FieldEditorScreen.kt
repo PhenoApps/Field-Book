@@ -53,6 +53,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.fieldbook.shared.brapi.BrAPIServiceFactory
+import com.fieldbook.shared.brapi.BrapiResult
 import com.fieldbook.shared.brapi.model.v2.core.BrapiStudyDetails
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiObservationUnitDetails
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiTraitDetails
@@ -651,6 +652,10 @@ class FieldEditorScreenViewModel(
     private val observationUnitAttributeRepository: ObservationUnitAttributeRepository,
     private val studyRepository: StudyRepository,
     private val traitRepository: TraitRepository,
+    private val brapiObservationSyncSupport: BrapiObservationSyncSupport = BrapiObservationSyncSupport(
+        studyRepository = studyRepository,
+        traitRepository = traitRepository,
+    ),
     private val fieldSwitchImpl: FieldSwitchImpl = FieldSwitchImpl(
         observationUnitAttributeRepository,
         studyRepository
@@ -690,6 +695,15 @@ class FieldEditorScreenViewModel(
 
     private val _sortAscending = MutableStateFlow(true)
     val sortAscending: StateFlow<Boolean> = _sortAscending.asStateFlow()
+
+    private val _brapiSyncPreview = MutableStateFlow<BrapiObservationSyncPreview?>(null)
+    val brapiSyncPreview: StateFlow<BrapiObservationSyncPreview?> = _brapiSyncPreview.asStateFlow()
+
+    private val _brapiSyncLoading = MutableStateFlow(false)
+    val brapiSyncLoading: StateFlow<Boolean> = _brapiSyncLoading.asStateFlow()
+
+    private val _brapiSyncSaving = MutableStateFlow(false)
+    val brapiSyncSaving: StateFlow<Boolean> = _brapiSyncSaving.asStateFlow()
 
     fun switchField(field: FieldObject) {
         fieldSwitchImpl.switchField(field)
@@ -889,10 +903,73 @@ class FieldEditorScreenViewModel(
         }
     }
 
+    fun prepareBrapiObservationSync(fieldId: Int, defaultBrapiBaseUrl: String) {
+        viewModelScope.launch {
+            _brapiSyncPreview.value = null
+            _brapiSyncLoading.value = true
+            try {
+                when (val result = brapiObservationSyncSupport.loadPreview(
+                    fieldId = fieldId,
+                    service = createBrapiService(defaultBrapiBaseUrl),
+                    pageSize = getBrapiPageSize(),
+                )) {
+                    is BrapiResult.Failure -> _messages.emit(
+                        result.message ?: "Error loading BrAPI observations"
+                    )
+                    is BrapiResult.Success -> _brapiSyncPreview.value = result.value
+                }
+            } finally {
+                _brapiSyncLoading.value = false
+            }
+        }
+    }
+
+    fun syncBrapiObservations(fieldId: Int, defaultBrapiBaseUrl: String) {
+        viewModelScope.launch {
+            _brapiSyncSaving.value = true
+            try {
+                when (val result = brapiObservationSyncSupport.sync(
+                    fieldId = fieldId,
+                    service = createBrapiService(defaultBrapiBaseUrl),
+                    pageSize = getBrapiPageSize(),
+                )) {
+                    is BrapiResult.Failure -> _messages.emit(
+                        result.message ?: "Error syncing BrAPI observations"
+                    )
+                    is BrapiResult.Success -> {
+                        refreshFieldData(fieldId)
+                        _brapiSyncPreview.value = null
+                        _messages.emit(
+                            "Synced ${result.value.savedObservations} observation(s), skipped ${result.value.skippedObservations}"
+                        )
+                    }
+                }
+            } finally {
+                _brapiSyncSaving.value = false
+            }
+        }
+    }
+
+    fun clearBrapiObservationSync() {
+        _brapiSyncPreview.value = null
+        _brapiSyncLoading.value = false
+        _brapiSyncSaving.value = false
+    }
+
     private suspend fun refreshFieldData(fieldId: Int) {
         _fieldDetail.value = studyRepository.getById(fieldId)
         _fields.value = studyRepository.getAllFields()
     }
+
+    private fun getBrapiPageSize(): Int {
+        return settings.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50").toIntOrNull() ?: 50
+    }
+
+    private fun createBrapiService(defaultBrapiBaseUrl: String) = BrAPIServiceFactory.create(
+        baseUrl = settings.getString(PreferenceKeys.BRAPI_BASE_URL, defaultBrapiBaseUrl),
+        bearerToken = settings.getStringOrNull(PreferenceKeys.BRAPI_TOKEN),
+        version = settings.getString(PreferenceKeys.BRAPI_VERSION, BrAPIServiceFactory.VERSION_V2),
+    )
 
     data class NameCheckResult(val isUnique: Boolean, val conflictType: String? = null)
 }

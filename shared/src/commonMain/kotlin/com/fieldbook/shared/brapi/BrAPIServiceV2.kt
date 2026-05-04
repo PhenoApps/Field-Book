@@ -2,6 +2,7 @@ package com.fieldbook.shared.brapi
 
 import com.fieldbook.shared.brapi.model.v2.core.BrapiStudyDetails
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiObservationExport
+import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiObservationImport
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiObservationUnitDetails
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiTraitDetails
 import com.fieldbook.shared.generated.brapi.v2.core.api.StudiesApi
@@ -160,6 +161,48 @@ class BrAPIServiceV2(
             } while (page < totalPages)
 
             BrapiResult.Success(traits)
+        } catch (error: Exception) {
+            BrapiResult.Failure(message = error.message)
+        }
+    }
+
+    override suspend fun getStudyObservations(
+        studyDbId: String,
+        observationVariableDbIds: List<String>,
+        pageSize: Int,
+    ): BrapiResult<List<BrapiObservationImport>> {
+        return try {
+            val observations = mutableListOf<BrapiObservationImport>()
+            val variableFilters: List<String?> = if (observationVariableDbIds.isEmpty()) {
+                listOf(null)
+            } else {
+                observationVariableDbIds
+            }
+
+            for (variableDbId in variableFilters) {
+                var page = 0
+                var totalPages = 1
+
+                do {
+                    val response = observationsApi.observationsGet(
+                        studyDbId = studyDbId,
+                        observationVariableDbId = variableDbId,
+                        page = page,
+                        pageSize = pageSize,
+                    )
+
+                    if (!response.success) {
+                        return BrapiResult.Failure(statusCode = response.status)
+                    }
+
+                    val body = response.body()
+                    observations += body.result.data.map(::mapObservationImport)
+                    totalPages = body.metadata.pagination?.totalPages ?: 1
+                    page++
+                } while (page < totalPages)
+            }
+
+            BrapiResult.Success(observations)
         } catch (error: Exception) {
             BrapiResult.Failure(message = error.message)
         }
@@ -414,6 +457,19 @@ class BrAPIServiceV2(
                 observationVariableName = observation.observationVariableName,
                 studyDbId = observation.studyDbId.orEmpty(),
                 value = observation.`value`.orEmpty(),
+                observationTimeStamp = observation.observationTimeStamp,
+                collector = observation.collector,
+            )
+        }
+
+        private fun mapObservationImport(observation: Observation): BrapiObservationImport {
+            return BrapiObservationImport(
+                observationDbId = observation.observationDbId,
+                observationUnitDbId = observation.observationUnitDbId,
+                observationVariableDbId = observation.observationVariableDbId,
+                observationVariableName = observation.observationVariableName,
+                studyDbId = observation.studyDbId,
+                value = observation.value,
                 observationTimeStamp = observation.observationTimeStamp,
                 collector = observation.collector,
             )

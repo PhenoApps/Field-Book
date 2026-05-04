@@ -27,6 +27,7 @@ class StudyRepository(
                 db.studiesQueries.allByDateDesc().executeAsList().map { r ->
                     FieldObject(
                         exp_id = r.internal_id_study.toInt(),
+                        study_db_id = r.study_db_id.orEmpty(),
                         exp_name = r.study_name.orEmpty(),
                         exp_alias = r.study_alias.orEmpty(),
                         unique_id = r.study_unique_id_name.orEmpty(),
@@ -52,6 +53,7 @@ class StudyRepository(
                 db.studiesQueries.allByVisibleAsc().executeAsList().map { r ->
                     FieldObject(
                         exp_id = r.internal_id_study.toInt(),
+                        study_db_id = r.study_db_id.orEmpty(),
                         exp_name = r.study_name.orEmpty(),
                         exp_alias = r.study_alias.orEmpty(),
                         unique_id = r.study_unique_id_name.orEmpty(),
@@ -77,6 +79,7 @@ class StudyRepository(
                 db.studiesQueries.allByNameAsc().executeAsList().map { r ->
                     FieldObject(
                         exp_id = r.internal_id_study.toInt(),
+                        study_db_id = r.study_db_id.orEmpty(),
                         exp_name = r.study_name.orEmpty(),
                         exp_alias = r.study_alias.orEmpty(),
                         unique_id = r.study_unique_id_name.orEmpty(),
@@ -286,6 +289,7 @@ class StudyRepository(
         return db.studiesQueries.getById(fieldId.toLong()).executeAsOneOrNull()?.let { r ->
             FieldObject(
                 exp_id = r.internal_id_study.toInt(),
+                study_db_id = r.study_db_id.orEmpty(),
                 exp_name = r.study_name.orEmpty(),
                 exp_alias = r.study_alias.orEmpty(),
                 exp_sort = r.study_sort_name,
@@ -436,6 +440,17 @@ class StudyRepository(
 
     fun updateExportDate(fieldId: Int, timestamp: String) {
         db.studiesQueries.updateExportDate(timestamp, fieldId.toLong())
+    }
+
+    fun updateSyncDate(fieldId: Int, timestamp: String) {
+        driver.execute(
+            identifier = null,
+            sql = "UPDATE studies SET date_sync = ? WHERE internal_id_study = ?",
+            parameters = 2
+        ) {
+            bindString(0, timestamp)
+            bindLong(1, fieldId.toLong())
+        }
     }
 
     private fun getSearchAttribute(fieldId: Int): String? {
