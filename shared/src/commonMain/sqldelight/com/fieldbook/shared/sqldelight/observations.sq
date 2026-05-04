@@ -23,7 +23,7 @@ deleteTrait:
 DELETE FROM observations
 WHERE study_id = ? AND observation_variable_db_id = ? AND observation_unit_id = ?;
 
-deleteTraitValue:
+deleteTraitByValue:
 DELETE FROM observations
 WHERE study_id = ? AND observation_variable_db_id = ? AND observation_unit_id = ? AND value = ?;
 

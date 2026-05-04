@@ -34,13 +34,13 @@ class ObservationRepository() {
         ).executeAsOne().toInt()
     }
 
-    fun deleteObservationValue(
+    fun deleteTraitByValue(
         studyId: Long,
         plotId: String,
         traitDbId: Long,
         value: String,
     ) {
-        db.observationsQueries.deleteTraitValue(
+        db.observationsQueries.deleteTraitByValue(
             study_id = studyId,
             observation_unit_id = plotId,
             observation_variable_db_id = traitDbId,

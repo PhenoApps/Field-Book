@@ -191,7 +191,7 @@ class CollectScreenController {
         val plotId = unit?.observation_unit_db_id
 
         if (plotId != null && trait?.id != null) {
-            observationRepository.deleteObservationValue(
+            observationRepository.deleteTraitByValue(
                 plotId = plotId,
                 traitDbId = trait.id!!,
                 value = value,
