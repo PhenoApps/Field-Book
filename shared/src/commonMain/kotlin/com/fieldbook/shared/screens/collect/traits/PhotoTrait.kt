@@ -45,10 +45,13 @@ import com.fieldbook.shared.generated.resources.arrow_expand
 import com.fieldbook.shared.generated.resources.arrow_left
 import com.fieldbook.shared.generated.resources.camera_24px
 import com.fieldbook.shared.generated.resources.close
+import com.fieldbook.shared.database.utils.internalTimeFormatter
 import com.fieldbook.shared.screens.collect.CollectScreenController
 import com.fieldbook.shared.theme.MainFloatingActionButtonShape
+import com.fieldbook.shared.utilities.DocumentFile
 import com.fieldbook.shared.utilities.DocumentTreeUtil
 import com.fieldbook.shared.utilities.deleteFile
+import com.fieldbook.shared.utilities.listFiles
 import com.fieldbook.shared.utilities.sanitizeFileName
 import com.kashif.cameraK.controller.CameraController
 import com.kashif.cameraK.enums.CameraLens
@@ -61,12 +64,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.offsetAt
-import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.format
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
-import kotlin.math.absoluteValue
 
 private const val PHOTO_VALUE_SEPARATOR = "\n"
 private const val PHOTO_DIRECTORY_NAME = "picture"
@@ -88,42 +88,29 @@ fun PhotoTrait(
     onExpandRequest: () -> Unit = {},
     onCollapseRequest: () -> Unit = {},
 ) {
-    fun Int.twoDigits(): String = toString().padStart(2, '0')
+    fun currentTraitName(): String {
+        return controller.traits
+            .getOrNull(controller.currentTraitIndex)
+            ?.name
+            ?.takeIf { it.isNotBlank() }
+            ?: PHOTO_DIRECTORY_NAME
+    }
+
+    fun currentTraitDirectory(): DocumentFile? {
+        return DocumentTreeUtil.getFieldMediaDirectory(currentTraitName())
+    }
+
+    fun legacyPictureDirectory(): DocumentFile? {
+        return DocumentTreeUtil.getFieldMediaDirectory(PHOTO_DIRECTORY_NAME)
+    }
 
     fun buildPhotoFileName(): String {
-        val now = Clock.System.now()
         val plotId = controller.units.getOrNull(controller.currentUnitIndex)?.observation_unit_db_id
             ?.takeIf { it.isNotBlank() }
             ?: "photo"
-        val timeZone = TimeZone.currentSystemDefault()
-        val local = now.toLocalDateTime(timeZone)
-
-        val offset = timeZone.offsetAt(now)
-
-        val offsetHours = (offset.totalSeconds / 3600)
-        val offsetMinutes = ((offset.totalSeconds % 3600) / 60).absoluteValue
-        val timestamp = buildString {
-            append(local.year)
-            append("-")
-            append(local.monthNumber.twoDigits())
-            append("-")
-            append(local.dayOfMonth.twoDigits())
-            append("T")
-            append(local.hour.twoDigits())
-            append("_")
-            append(local.minute.twoDigits())
-            append("_")
-            append(local.second.twoDigits())
-            append(".")
-            append((local.nanosecond / 1_000_000).toString().padStart(3, '0'))
-            append(
-                if (offsetHours >= 0) "+" else "-"
-            )
-            append(offsetHours.absoluteValue.twoDigits())
-            append("_")
-            append(offsetMinutes.twoDigits())
-        }
-        return "${sanitizeFileName(plotId)}_picture_$timestamp.jpg"
+        val traitName = sanitizeFileName(currentTraitName())
+        val timestamp = sanitizeFileName(Clock.System.now().format(internalTimeFormatter))
+        return "${sanitizeFileName(plotId)}_${traitName}_$timestamp.jpg"
     }
 
     fun normalizeStoredPhotoRef(raw: String): String {
@@ -160,30 +147,43 @@ fun PhotoTrait(
             .replace("%20", " ")
     }
 
-    fun resolvePhotoDisplayUri(photoRef: String): String {
+    fun findStoredPhotoFile(photoRef: String): DocumentFile? {
         val normalizedPhotoRef = normalizeStoredPhotoRef(photoRef)
         val fileName = extractPhotoFileName(normalizedPhotoRef)
-        return fileName
-            .takeIf { it.isNotBlank() }
-            ?.let {
-                DocumentTreeUtil.getFieldMediaDirectory(PHOTO_DIRECTORY_NAME)?.findFile(it)
-                    ?: DocumentTreeUtil.getPlotDataDirectory()?.findFile(it)
-            }
-            ?.takeIf { it.exists() }
-            ?.uri()
-            ?: normalizedPhotoRef
+        if (fileName.isBlank()) return null
+
+        val candidateDirectories = listOfNotNull(
+            currentTraitDirectory(),
+            legacyPictureDirectory(),
+            DocumentTreeUtil.getPlotDataDirectory()
+        ).distinctBy { it.uri() }
+
+        candidateDirectories.forEach { directory ->
+            directory.findFile(fileName)
+                ?.takeIf { it.exists() }
+                ?.let { return it }
+
+            listFiles(directory)
+                .firstOrNull { storedFile ->
+                    storedFile.exists() && (
+                        storedFile.uri() == normalizedPhotoRef ||
+                            storedFile.name() == fileName
+                        )
+                }
+                ?.let { return it }
+        }
+
+        return null
+    }
+
+    fun resolvePhotoDisplayUri(photoRef: String): String {
+        val normalizedPhotoRef = normalizeStoredPhotoRef(photoRef)
+        return findStoredPhotoFile(normalizedPhotoRef)?.uri() ?: normalizedPhotoRef
     }
 
     fun deleteStoredPhoto(photoRef: String) {
         try {
-            val fileName = extractPhotoFileName(photoRef)
-            if (fileName.isBlank()) return
-
-            (
-                DocumentTreeUtil.getFieldMediaDirectory(PHOTO_DIRECTORY_NAME)?.findFile(fileName)
-                    ?: DocumentTreeUtil.getPlotDataDirectory()?.findFile(fileName)
-                )
-                ?.let(::deleteFile)
+            findStoredPhotoFile(photoRef)?.let(::deleteFile)
         } catch (error: Throwable) {
             println("PhotoTrait: unable to delete photo file: ${error.message}")
         }
@@ -202,9 +202,9 @@ fun PhotoTrait(
     }
 
     fun saveCapturedPhoto(byteArray: ByteArray): String? {
-        val dir = DocumentTreeUtil.getFieldMediaDirectory(PHOTO_DIRECTORY_NAME)
+        val dir = currentTraitDirectory()
         if (dir == null) {
-            println("PhotoTrait: unable to resolve field picture directory")
+            println("PhotoTrait: unable to resolve field media directory for trait ${currentTraitName()}")
             return null
         }
 
@@ -220,7 +220,7 @@ fun PhotoTrait(
 
         return try {
             createdFile.writeBytes(byteArray)
-            fileName
+            createdFile.uri()
         } catch (error: Throwable) {
             println("PhotoTrait: unable to save photo: ${error.message}")
             null
