@@ -34,7 +34,23 @@ fun brapiV2Spec(
     modulePackage = modulePackage,
 )
 
+fun brapiV1Spec(
+    name: String,
+    inputSpec: String,
+    modulePackage: String,
+) = OpenApiSpec(
+    name = name,
+    inputSpec = inputSpec,
+    versionPackage = "v1",
+    modulePackage = modulePackage,
+)
+
 val brapiOpenApiSpecs = listOf(
+    brapiV1Spec(
+        name = "brapi",
+        inputSpec = "https://api.swaggerhub.com/apis/PlantBreedingAPI/BrAPI/1.3/swagger.json",
+        modulePackage = "brapi",
+    ),
     brapiV2Spec(
         name = "brapiCore",
         inputSpec = "https://api.swaggerhub.com/apis/PlantBreedingAPI/BrAPI-Core/2.1/swagger.json",

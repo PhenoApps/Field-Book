@@ -52,7 +52,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.fieldbook.shared.brapi.BrAPIServiceV2
+import com.fieldbook.shared.brapi.BrAPIServiceFactory
 import com.fieldbook.shared.brapi.model.v2.core.BrapiStudyDetails
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiObservationUnitDetails
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiTraitDetails
@@ -118,10 +118,14 @@ fun FieldEditorScreen(
     val brapiBaseUrl = remember(defaultBrapiBaseUrl) {
         preferences.getString(PreferenceKeys.BRAPI_BASE_URL, defaultBrapiBaseUrl)
     }
-    val brapiService = remember(brapiBaseUrl) {
-        BrAPIServiceV2(
+    val brapiVersion = remember {
+        preferences.getString(PreferenceKeys.BRAPI_VERSION, BrAPIServiceFactory.VERSION_V2)
+    }
+    val brapiService = remember(brapiBaseUrl, brapiVersion) {
+        BrAPIServiceFactory.create(
             baseUrl = brapiBaseUrl,
             bearerToken = preferences.getStringOrNull(PreferenceKeys.BRAPI_TOKEN),
+            version = brapiVersion,
         )
     }
 

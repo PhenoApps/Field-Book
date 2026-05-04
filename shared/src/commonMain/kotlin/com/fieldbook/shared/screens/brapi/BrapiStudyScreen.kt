@@ -36,7 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.fieldbook.shared.brapi.BrAPIService
-import com.fieldbook.shared.brapi.BrAPIServiceV2
+import com.fieldbook.shared.brapi.BrAPIServiceFactory
 import com.fieldbook.shared.brapi.BrapiPaginationManager
 import com.fieldbook.shared.brapi.BrapiResult
 import com.fieldbook.shared.brapi.model.v2.core.BrapiStudyDetails
@@ -64,11 +64,15 @@ fun BrapiStudyScreen(
         preferences.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50").toIntOrNull()
             ?: BrapiPaginationManager.DEFAULT_PAGE_SIZE
     }
+    val brapiVersion = remember {
+        preferences.getString(PreferenceKeys.BRAPI_VERSION, BrAPIServiceFactory.VERSION_V2)
+    }
     val paginationManager = remember { BrapiPaginationManager(initialPageSize = pageSize) }
-    val service = remember(defaultBaseUrl) {
+    val service = remember(defaultBaseUrl, brapiVersion) {
         buildBrapiService(
             baseUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, defaultBaseUrl),
             bearerToken = preferences.getStringOrNull(PreferenceKeys.BRAPI_TOKEN),
+            brapiVersion = brapiVersion,
         )
     }
     val coroutineScope = rememberCoroutineScope()
@@ -246,9 +250,11 @@ fun BrapiStudyScreen(
 private fun buildBrapiService(
     baseUrl: String,
     bearerToken: String?,
+    brapiVersion: String?,
 ): BrAPIService {
-    return BrAPIServiceV2(
+    return BrAPIServiceFactory.create(
         baseUrl = baseUrl,
         bearerToken = bearerToken,
+        version = brapiVersion,
     )
 }

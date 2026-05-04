@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.fieldbook.shared.brapi.BrAPIServiceV2
+import com.fieldbook.shared.brapi.BrAPIServiceFactory
 import com.fieldbook.shared.brapi.BrapiResult
 import com.fieldbook.shared.database.repository.StudyRepository
 import com.fieldbook.shared.export.ExportOptions
@@ -148,9 +148,10 @@ class ExportScreenViewModel(
 
         viewModelScope.launch {
             _events.emit(ExportEvent.ShowProgress)
-            val service = BrAPIServiceV2(
+            val service = BrAPIServiceFactory.create(
                 baseUrl = s.brapiBaseUrl,
                 bearerToken = settings.getStringOrNull(PreferenceKeys.BRAPI_TOKEN),
+                version = settings.getString(PreferenceKeys.BRAPI_VERSION, BrAPIServiceFactory.VERSION_V2),
             )
             when (val result = brapiExportSupport.export(resolveFieldIds(fieldIds), s.brapiHost, service)) {
                 is BrapiResult.Failure -> _events.emit(
