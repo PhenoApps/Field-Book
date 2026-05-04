@@ -5,6 +5,8 @@ import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiObservationExport
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiObservationUnitDetails
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiTraitDetails
 import com.fieldbook.shared.generated.brapi.v2.core.api.StudiesApi
+import com.fieldbook.shared.generated.brapi.v2.germplasm.api.GermplasmApi
+import com.fieldbook.shared.generated.brapi.v2.germplasm.model.Germplasm
 import com.fieldbook.shared.generated.brapi.v2.phenotyping.api.ObservationUnitsApi
 import com.fieldbook.shared.generated.brapi.v2.phenotyping.api.ObservationVariablesApi
 import com.fieldbook.shared.generated.brapi.v2.phenotyping.api.ObservationsApi
@@ -14,18 +16,6 @@ import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.ObservationNewR
 import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.ObservationUnit
 import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.ObservationVariable
 import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.ObservationVariableScale
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.request.get
-import io.ktor.client.request.header
-import io.ktor.client.request.parameter
-import io.ktor.http.HttpHeaders
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.intOrNull
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 
 class BrAPIServiceV2(
     baseUrl: String,
@@ -40,9 +30,8 @@ class BrAPIServiceV2(
     private val observationsApi: ObservationsApi = ObservationsApi(
         baseUrl = normalizeV2BaseUrl(baseUrl)
     ),
+    private val germplasmApi: GermplasmApi = GermplasmApi(baseUrl = normalizeV2BaseUrl(baseUrl)),
 ) : BrAPIService {
-    private val normalizedBaseUrl = normalizeV2BaseUrl(baseUrl)
-
     private data class BrapiGermplasmDetails(
         val accessionNumber: String? = null,
         val pedigree: String? = null,
@@ -55,6 +44,7 @@ class BrAPIServiceV2(
             observationVariablesApi.setBearerToken(bearerToken)
             observationUnitsApi.setBearerToken(bearerToken)
             observationsApi.setBearerToken(bearerToken)
+            germplasmApi.setBearerToken(bearerToken)
         }
     }
 
@@ -224,7 +214,6 @@ class BrAPIServiceV2(
         studyDbId: String,
         pageSize: Int,
     ): Map<String, BrapiGermplasmDetails> {
-        val client = HttpClient()
         val germplasm = linkedMapOf<String, BrapiGermplasmDetails>()
 
         return try {
@@ -232,55 +221,28 @@ class BrAPIServiceV2(
             var totalPages = 1
 
             do {
-                val responseText = client.get("$normalizedBaseUrl/germplasm") {
-                    parameter("studyDbId", studyDbId)
-                    parameter("page", page)
-                    parameter("pageSize", pageSize)
-                    bearerToken?.takeIf { it.isNotBlank() }?.let { token ->
-                        header(HttpHeaders.Authorization, "Bearer $token")
-                    }
-                }.body<String>()
+                val response = germplasmApi.germplasmGet(
+                    studyDbId = studyDbId,
+                    page = page,
+                    pageSize = pageSize,
+                )
 
-                val responseJson = Json.parseToJsonElement(responseText).jsonObject
-                val result = responseJson["result"]?.jsonObject
-                result?.get("data")?.jsonArray.orEmpty().forEach { item ->
-                    val model = item.jsonObject
-                    val germplasmDbId = model["germplasmDbId"]
-                        ?.jsonPrimitive
-                        ?.contentOrNull
-                        ?.takeIf { it.isNotBlank() }
-                        ?: return@forEach
-
-                    val synonyms = model["synonyms"]?.jsonArray
-                        ?.mapNotNull { synonym ->
-                            synonym.jsonObject["synonym"]?.jsonPrimitive?.contentOrNull
-                        }
-                        ?.filter { it.isNotBlank() }
-                        ?.joinToString("; ") { it.replace("\"", "\"\"") }
-
-                    germplasm[germplasmDbId] = BrapiGermplasmDetails(
-                        accessionNumber = model["accessionNumber"]?.jsonPrimitive?.contentOrNull,
-                        pedigree = model["pedigree"]?.jsonPrimitive?.contentOrNull,
-                        synonyms = synonyms,
-                    )
+                if (!response.success) {
+                    return germplasm
                 }
 
-                totalPages = responseJson["metadata"]
-                    ?.jsonObject
-                    ?.get("pagination")
-                    ?.jsonObject
-                    ?.get("totalPages")
-                    ?.jsonPrimitive
-                    ?.intOrNull
-                    ?: 1
+                val body = response.body()
+                body.result.data.forEach { model ->
+                    germplasm[model.germplasmDbId] = model.toDetails()
+                }
+
+                totalPages = body.metadata.pagination?.totalPages ?: 1
                 page++
             } while (page < totalPages)
 
             germplasm
         } catch (_: Exception) {
             emptyMap()
-        } finally {
-            client.close()
         }
     }
 
@@ -329,6 +291,19 @@ class BrAPIServiceV2(
                 germplasmDbId = unit.germplasmDbId,
                 germplasmName = unit.germplasmName,
                 attributes = unit.toImportAttributes(germplasm),
+            )
+        }
+
+        private fun Germplasm.toDetails(): BrapiGermplasmDetails {
+            val synonyms = synonyms
+                ?.mapNotNull { synonym -> synonym.synonym?.replace("\"", "\"\"") }
+                ?.filter { it.isNotBlank() }
+                ?.joinToString("; ")
+
+            return BrapiGermplasmDetails(
+                accessionNumber = accessionNumber,
+                pedigree = pedigree,
+                synonyms = synonyms,
             )
         }
 
