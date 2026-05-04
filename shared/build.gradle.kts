@@ -61,6 +61,16 @@ val brapiOpenApiSpecs = listOf(
         inputSpec = "https://api.swaggerhub.com/apis/PlantBreedingAPI/BrAPI-Phenotyping/2.1/swagger.json",
         modulePackage = "phenotyping",
     ),
+    brapiV2Spec(
+        name = "brapiGenotyping",
+        inputSpec = "https://api.swaggerhub.com/apis/PlantBreedingAPI/BrAPI-Genotyping/2.1/swagger.json",
+        modulePackage = "genotyping",
+    ),
+    brapiV2Spec(
+        name = "brapiGermplasm",
+        inputSpec = "https://api.swaggerhub.com/apis/PlantBreedingAPI/BrAPI-Germplasm/2.1/swagger.json",
+        modulePackage = "germplasm",
+    ),
 )
 
 val generatedOpenApiSourceDirs = brapiOpenApiSpecs.associate { spec ->
