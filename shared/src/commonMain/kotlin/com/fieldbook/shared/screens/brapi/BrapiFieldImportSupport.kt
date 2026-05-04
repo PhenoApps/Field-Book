@@ -20,14 +20,12 @@ data class BrapiFieldImportResult(
 )
 
 object BrapiFieldImportSupport {
-    private const val OBSERVATION_UNIT_DB_ID = "observationUnitDbId"
-    private const val OBSERVATION_UNIT_NAME = "observationUnitName"
-    private val OBSERVATION_UNIT_COLUMNS = listOf(
-        OBSERVATION_UNIT_DB_ID,
-        OBSERVATION_UNIT_NAME,
-        "germplasmDbId",
-        "germplasmName",
-    )
+    private const val ACCESSION_NUMBER = "AccessionNumber"
+    private const val OBSERVATION_UNIT_DB_ID = "ObservationUnitDbId"
+    private const val OBSERVATION_UNIT_NAME = "ObservationUnitName"
+    private const val PLOT = "Plot"
+    private val PRIMARY_ID_CANDIDATES = listOf(ACCESSION_NUMBER, "Row", "Germplasm", OBSERVATION_UNIT_NAME)
+    private val SECONDARY_ID_CANDIDATES = listOf(PLOT, "Column")
 
     private val db: FieldbookDatabase
         get() = createDatabase()
@@ -52,6 +50,11 @@ object BrapiFieldImportSupport {
             error("This BrAPI study has already been imported.")
         }
 
+        val importRows = observationUnits.map { unit -> unit.toImportAttributes() }
+        val importColumns = importRows
+            .flatMap { row -> row.keys }
+            .distinct()
+
         val field = FieldObject().apply {
             study_db_id = study.studyDbId
             exp_name = study.studyName ?: study.studyDbId
@@ -62,7 +65,9 @@ object BrapiFieldImportSupport {
             observation_level = "Plot"
             exp_species = study.commonCropName
             unique_id = OBSERVATION_UNIT_DB_ID
-            primary_id = OBSERVATION_UNIT_NAME
+            primary_id = importColumns.firstMatching(PRIMARY_ID_CANDIDATES) ?: OBSERVATION_UNIT_NAME
+            secondary_id = importColumns.firstMatching(SECONDARY_ID_CANDIDATES).orEmpty()
+            exp_sort = importColumns.firstMatching(listOf(PLOT))
         }
 
         var fieldId = -1
@@ -73,16 +78,11 @@ object BrapiFieldImportSupport {
                 fromBrapi = true,
             )
 
-            observationUnits.forEach { unit ->
+            importRows.forEach { row ->
                 studyRepository.createFieldData(
                     studyId = fieldId.toLong(),
-                    columns = OBSERVATION_UNIT_COLUMNS,
-                    data = listOf(
-                        unit.observationUnitDbId,
-                        unit.observationUnitName.orEmpty(),
-                        unit.germplasmDbId.orEmpty(),
-                        unit.germplasmName.orEmpty(),
-                    ),
+                    columns = importColumns,
+                    data = importColumns.map { column -> row[column].orEmpty() },
                 )
             }
 
@@ -117,6 +117,28 @@ object BrapiFieldImportSupport {
             ontologyName = ontologyName,
             details = details,
         )
+    }
+
+    private fun BrapiObservationUnitDetails.toImportAttributes(): Map<String, String> {
+        val row = linkedMapOf<String, String>()
+        attributes.forEach { (name, value) ->
+            if (name.isNotBlank() && value.isNotBlank()) {
+                row[name] = value
+            }
+        }
+
+        germplasmName?.takeIf { it.isNotBlank() }?.let { row.putIfAbsent("Germplasm", it) }
+        germplasmDbId?.takeIf { it.isNotBlank() }?.let { row.putIfAbsent("germplasmDbId", it) }
+        observationUnitDbId.takeIf { it.isNotBlank() }?.let { row[OBSERVATION_UNIT_DB_ID] = it }
+        observationUnitName?.takeIf { it.isNotBlank() }?.let { row[OBSERVATION_UNIT_NAME] = it }
+
+        return row
+    }
+
+    private fun List<String>.firstMatching(candidates: List<String>): String? {
+        return candidates.firstNotNullOfOrNull { candidate ->
+            firstOrNull { it.equals(candidate, ignoreCase = true) }
+        }
     }
 
     private fun String.hostForDisplay(): String {

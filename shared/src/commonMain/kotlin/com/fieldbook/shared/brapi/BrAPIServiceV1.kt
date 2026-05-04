@@ -233,7 +233,47 @@ class BrAPIServiceV1(
                 observationUnitName = unit.observationUnitName,
                 germplasmDbId = unit.germplasmDbId,
                 germplasmName = unit.germplasmName,
+                attributes = unit.toImportAttributes(),
             )
+        }
+
+        private fun ObservationUnit.toImportAttributes(): Map<String, String> {
+            val attributes = linkedMapOf<String, String>()
+
+            germplasmName?.takeIf { it.isNotBlank() }?.let { attributes["Germplasm"] = it }
+            locationName?.takeIf { it.isNotBlank() }?.let { attributes["Location"] = it }
+            pedigree?.takeIf { it.isNotBlank() }?.let { attributes["Pedigree"] = it }
+            blockNumber?.takeIf { it.isNotBlank() }?.let { attributes["Block"] = it }
+            entryNumber?.takeIf { it.isNotBlank() }?.let { attributes["Entry"] = it }
+            plotNumber?.takeIf { it.isNotBlank() }?.let { attributes["Plot"] = it }
+            plantNumber?.takeIf { it.isNotBlank() }?.let { attributes["Plant"] = it }
+            replicate?.takeIf { it.isNotBlank() }?.let { attributes["Rep"] = it }
+
+            positionCoordinateX?.takeIf { it.isNotBlank() }?.let { x ->
+                attributes[positionCoordinateXType?.name.toRowColName() ?: "Row"] = x
+            }
+
+            positionCoordinateY?.takeIf { it.isNotBlank() }?.let { y ->
+                attributes[positionCoordinateYType?.name.toRowColName() ?: "Column"] = y
+            }
+
+            entryType?.takeIf { it.isNotBlank() }?.let { attributes["EntryType"] = it }
+            observationUnitDbId?.takeIf { it.isNotBlank() }?.let { attributes["ObservationUnitDbId"] = it }
+            observationUnitName?.takeIf { it.isNotBlank() }?.let { attributes["ObservationUnitName"] = it }
+
+            return attributes
+        }
+
+        private fun String?.toRowColName(): String? {
+            return when (this) {
+                "PLANTED_INDIVIDUAL",
+                "GRID_COL",
+                "MEASURED_COL" -> "Column"
+                "PLANTED_ROW",
+                "GRID_ROW",
+                "MEASURED_ROW" -> "Row"
+                else -> null
+            }
         }
 
         private fun TraitDataType?.toFieldBookFormat(): String {

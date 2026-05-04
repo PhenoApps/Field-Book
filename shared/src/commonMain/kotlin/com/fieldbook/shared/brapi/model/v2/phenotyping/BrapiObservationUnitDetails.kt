@@ -5,4 +5,5 @@ data class BrapiObservationUnitDetails(
     val observationUnitName: String?,
     val germplasmDbId: String? = null,
     val germplasmName: String? = null,
+    val attributes: Map<String, String> = emptyMap(),
 )

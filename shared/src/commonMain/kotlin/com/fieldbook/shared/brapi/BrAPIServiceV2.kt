@@ -14,10 +14,22 @@ import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.ObservationNewR
 import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.ObservationUnit
 import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.ObservationVariable
 import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.ObservationVariableScale
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.request.parameter
+import io.ktor.http.HttpHeaders
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 class BrAPIServiceV2(
     baseUrl: String,
-    bearerToken: String? = null,
+    private val bearerToken: String? = null,
     private val studiesApi: StudiesApi = StudiesApi(baseUrl = normalizeV2BaseUrl(baseUrl)),
     private val observationVariablesApi: ObservationVariablesApi = ObservationVariablesApi(
         baseUrl = normalizeV2BaseUrl(baseUrl)
@@ -29,6 +41,13 @@ class BrAPIServiceV2(
         baseUrl = normalizeV2BaseUrl(baseUrl)
     ),
 ) : BrAPIService {
+    private val normalizedBaseUrl = normalizeV2BaseUrl(baseUrl)
+
+    private data class BrapiGermplasmDetails(
+        val accessionNumber: String? = null,
+        val pedigree: String? = null,
+        val synonyms: String? = null,
+    )
 
     init {
         if (!bearerToken.isNullOrBlank()) {
@@ -92,7 +111,7 @@ class BrAPIServiceV2(
         pageSize: Int,
     ): BrapiResult<List<BrapiObservationUnitDetails>> {
         return try {
-            val units = mutableListOf<BrapiObservationUnitDetails>()
+            val nativeUnits = mutableListOf<ObservationUnit>()
             var page = 0
             var totalPages = 1
 
@@ -108,10 +127,15 @@ class BrAPIServiceV2(
                 }
 
                 val body = response.body()
-                units += body.result.data.mapNotNull(::mapObservationUnit)
+                nativeUnits += body.result.data
                 totalPages = body.metadata.pagination?.totalPages ?: 1
                 page++
             } while (page < totalPages)
+
+            val germplasm = fetchStudyGermplasm(studyDbId, pageSize)
+            val units = nativeUnits.mapNotNull { unit ->
+                mapObservationUnit(unit, germplasm[unit.germplasmDbId])
+            }
 
             BrapiResult.Success(units)
         } catch (error: Exception) {
@@ -196,6 +220,70 @@ class BrAPIServiceV2(
         }
     }
 
+    private suspend fun fetchStudyGermplasm(
+        studyDbId: String,
+        pageSize: Int,
+    ): Map<String, BrapiGermplasmDetails> {
+        val client = HttpClient()
+        val germplasm = linkedMapOf<String, BrapiGermplasmDetails>()
+
+        return try {
+            var page = 0
+            var totalPages = 1
+
+            do {
+                val responseText = client.get("$normalizedBaseUrl/germplasm") {
+                    parameter("studyDbId", studyDbId)
+                    parameter("page", page)
+                    parameter("pageSize", pageSize)
+                    bearerToken?.takeIf { it.isNotBlank() }?.let { token ->
+                        header(HttpHeaders.Authorization, "Bearer $token")
+                    }
+                }.body<String>()
+
+                val responseJson = Json.parseToJsonElement(responseText).jsonObject
+                val result = responseJson["result"]?.jsonObject
+                result?.get("data")?.jsonArray.orEmpty().forEach { item ->
+                    val model = item.jsonObject
+                    val germplasmDbId = model["germplasmDbId"]
+                        ?.jsonPrimitive
+                        ?.contentOrNull
+                        ?.takeIf { it.isNotBlank() }
+                        ?: return@forEach
+
+                    val synonyms = model["synonyms"]?.jsonArray
+                        ?.mapNotNull { synonym ->
+                            synonym.jsonObject["synonym"]?.jsonPrimitive?.contentOrNull
+                        }
+                        ?.filter { it.isNotBlank() }
+                        ?.joinToString("; ") { it.replace("\"", "\"\"") }
+
+                    germplasm[germplasmDbId] = BrapiGermplasmDetails(
+                        accessionNumber = model["accessionNumber"]?.jsonPrimitive?.contentOrNull,
+                        pedigree = model["pedigree"]?.jsonPrimitive?.contentOrNull,
+                        synonyms = synonyms,
+                    )
+                }
+
+                totalPages = responseJson["metadata"]
+                    ?.jsonObject
+                    ?.get("pagination")
+                    ?.jsonObject
+                    ?.get("totalPages")
+                    ?.jsonPrimitive
+                    ?.intOrNull
+                    ?: 1
+                page++
+            } while (page < totalPages)
+
+            germplasm
+        } catch (_: Exception) {
+            emptyMap()
+        } finally {
+            client.close()
+        }
+    }
+
     companion object {
         private const val BRAPI_V2_PATH = "/brapi/v2"
         private const val FIELD_BOOK_REFERENCE_SOURCE = "Field Book Upload"
@@ -230,14 +318,77 @@ class BrAPIServiceV2(
             )
         }
 
-        private fun mapObservationUnit(unit: ObservationUnit): BrapiObservationUnitDetails? {
+        private fun mapObservationUnit(
+            unit: ObservationUnit,
+            germplasm: BrapiGermplasmDetails?,
+        ): BrapiObservationUnitDetails? {
             val unitDbId = unit.observationUnitDbId?.takeIf { it.isNotBlank() } ?: return null
             return BrapiObservationUnitDetails(
                 observationUnitDbId = unitDbId,
                 observationUnitName = unit.observationUnitName,
                 germplasmDbId = unit.germplasmDbId,
                 germplasmName = unit.germplasmName,
+                attributes = unit.toImportAttributes(germplasm),
             )
+        }
+
+        private fun ObservationUnit.toImportAttributes(germplasm: BrapiGermplasmDetails?): Map<String, String> {
+            val attributes = linkedMapOf<String, String>()
+
+            germplasmName?.takeIf { it.isNotBlank() }?.let { attributes["Germplasm"] = it }
+            locationName?.takeIf { it.isNotBlank() }?.let { attributes["Location"] = it }
+
+            observationUnitPosition?.let { position ->
+                position.observationLevelRelationships.orEmpty().forEach { level ->
+                    level.levelName?.toAttributeName()?.let { attributeName ->
+                        level.levelCode?.takeIf { it.isNotBlank() }?.let { attributes[attributeName] = it }
+                    }
+                }
+
+                position.observationLevel?.let { level ->
+                    level.levelName?.toAttributeName()?.let { attributeName ->
+                        level.levelCode
+                            ?.takeIf { it.isNotBlank() }
+                            ?.let { attributes.putIfAbsent(attributeName, it) }
+                    }
+                }
+
+                position.positionCoordinateX?.takeIf { it.isNotBlank() }?.let { x ->
+                    attributes[position.positionCoordinateXType?.name.toRowColName() ?: "Row"] = x
+                }
+
+                position.positionCoordinateY?.takeIf { it.isNotBlank() }?.let { y ->
+                    attributes[position.positionCoordinateYType?.name.toRowColName() ?: "Column"] = y
+                }
+
+                position.entryType?.takeIf { it.isNotBlank() }?.let { attributes["EntryType"] = it }
+            }
+
+            germplasm?.accessionNumber?.takeIf { it.isNotBlank() }?.let { attributes["AccessionNumber"] = it }
+            germplasm?.pedigree?.takeIf { it.isNotBlank() }?.let { attributes["Pedigree"] = it }
+            germplasm?.synonyms?.takeIf { it.isNotBlank() }?.let { attributes["Synonyms"] = it }
+            observationUnitDbId?.takeIf { it.isNotBlank() }?.let { attributes["ObservationUnitDbId"] = it }
+            observationUnitName?.takeIf { it.isNotBlank() }?.let { attributes["ObservationUnitName"] = it }
+
+            return attributes
+        }
+
+        private fun String.toAttributeName(): String {
+            return replaceFirstChar { char ->
+                if (char.isLowerCase()) char.titlecase() else char.toString()
+            }
+        }
+
+        private fun String?.toRowColName(): String? {
+            return when (this) {
+                "PLANTED_INDIVIDUAL",
+                "GRID_COL",
+                "MEASURED_COL" -> "Column"
+                "PLANTED_ROW",
+                "GRID_ROW",
+                "MEASURED_ROW" -> "Row"
+                else -> null
+            }
         }
 
         private fun ObservationVariableScale.DataType?.toFieldBookFormat(): String {
