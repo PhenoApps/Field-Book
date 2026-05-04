@@ -1,9 +1,9 @@
 package com.fieldbook.shared.database.repository
 
 import com.fieldbook.shared.database.models.ObservationObject
-import com.fieldbook.shared.database.utils.internalTimeFormatter
 import com.fieldbook.shared.sqldelight.FieldbookDatabase
 import com.fieldbook.shared.sqldelight.createDatabase
+import com.fieldbook.shared.utilities.internalTimeFormatter
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.format

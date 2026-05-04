@@ -5,7 +5,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -14,11 +13,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FloatingActionButton
@@ -49,6 +47,7 @@ import com.fieldbook.shared.screens.collect.CollectScreenController
 import com.fieldbook.shared.theme.MainFloatingActionButtonShape
 import com.fieldbook.shared.utilities.DocumentFile
 import com.fieldbook.shared.utilities.DocumentTreeUtil
+import com.fieldbook.shared.utilities.currentLocalInternalTimestamp
 import com.fieldbook.shared.utilities.deleteFile
 import com.fieldbook.shared.utilities.listFiles
 import com.fieldbook.shared.utilities.sanitizeFileName
@@ -59,16 +58,12 @@ import com.kashif.cameraK.enums.FlashMode
 import com.kashif.cameraK.enums.ImageFormat
 import com.kashif.cameraK.result.ImageCaptureResult
 import com.kashif.cameraK.ui.CameraPreview
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.offsetAt
-import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
-import kotlin.math.absoluteValue
 
 private const val PHOTO_VALUE_SEPARATOR = "\n"
 private const val PHOTO_DIRECTORY_NAME = "picture"
@@ -111,31 +106,7 @@ fun PhotoTrait(
             ?.takeIf { it.isNotBlank() }
             ?: "photo"
         val traitName = sanitizeFileName(currentTraitName())
-        val now = Clock.System.now()
-        val timeZone = TimeZone.currentSystemDefault()
-        val local = now.toLocalDateTime(timeZone)
-        val offset = timeZone.offsetAt(now)
-        val offsetHours = offset.totalSeconds / 3600
-        val offsetMinutes = ((offset.totalSeconds % 3600) / 60).absoluteValue
-        val timestamp = buildString {
-            append(local.year)
-            append("-")
-            append(local.monthNumber.toString().padStart(2, '0'))
-            append("-")
-            append(local.dayOfMonth.toString().padStart(2, '0'))
-            append("T")
-            append(local.hour.toString().padStart(2, '0'))
-            append("_")
-            append(local.minute.toString().padStart(2, '0'))
-            append("_")
-            append(local.second.toString().padStart(2, '0'))
-            append(".")
-            append((local.nanosecond / 1_000_000).toString().padStart(3, '0'))
-            append(if (offsetHours >= 0) "+" else "-")
-            append(offsetHours.absoluteValue.toString().padStart(2, '0'))
-            append("_")
-            append(offsetMinutes.toString().padStart(2, '0'))
-        }
+        val timestamp = sanitizeFileName(currentLocalInternalTimestamp())
         return "${sanitizeFileName(plotId)}_${traitName}_$timestamp.jpg"
     }
 

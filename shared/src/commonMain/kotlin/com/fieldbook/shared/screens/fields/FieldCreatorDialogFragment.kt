@@ -31,7 +31,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fieldbook.shared.database.models.FieldObject
 import com.fieldbook.shared.database.repository.ObservationUnitAttributeRepository
 import com.fieldbook.shared.database.repository.StudyRepository
-import com.fieldbook.shared.database.utils.internalTimeFormatter
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.dialog_field_creator_ask_pattern
 import com.fieldbook.shared.generated.resources.dialog_field_creator_ask_size
@@ -48,6 +47,7 @@ import com.fieldbook.shared.generated.resources.ic_plot_pattern_zigzag
 import com.fieldbook.shared.objects.ImportFormat
 import com.fieldbook.shared.sqldelight.FieldbookDatabase
 import com.fieldbook.shared.sqldelight.createDatabase
+import com.fieldbook.shared.utilities.internalTimeFormatter
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.format

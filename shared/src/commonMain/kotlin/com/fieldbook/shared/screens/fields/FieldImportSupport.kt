@@ -2,11 +2,11 @@ package com.fieldbook.shared.screens.fields
 
 import com.fieldbook.shared.database.models.FieldObject
 import com.fieldbook.shared.database.repository.StudyRepository
-import com.fieldbook.shared.database.utils.internalTimeFormatter
 import com.fieldbook.shared.objects.ImportFormat
 import com.fieldbook.shared.sqldelight.FieldbookDatabase
 import com.fieldbook.shared.sqldelight.createDatabase
 import com.fieldbook.shared.utilities.CSVUtil
+import com.fieldbook.shared.utilities.internalTimeFormatter
 import kotlinx.datetime.Clock
 import kotlinx.datetime.format
 
