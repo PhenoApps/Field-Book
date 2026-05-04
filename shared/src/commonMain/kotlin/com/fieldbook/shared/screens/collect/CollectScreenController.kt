@@ -57,6 +57,8 @@ class CollectScreenController {
     var traitValuesLoading by mutableStateOf(true)
         private set
     private var lastUnitId: String? = null
+    private var restoredUnitSelection = false
+    private var restoredTraitSelection = false
 
     val primaryId = settings.getString(GeneralKeys.PRIMARY_NAME.key, "")
     val secondaryId = settings.getString(GeneralKeys.SECONDARY_NAME.key, "")
@@ -89,6 +91,7 @@ class CollectScreenController {
         try {
             units = observationUnitRepository.getAllObservationUnits(studyId.toLong())
             rangeID = observationUnitPropertyRepository.allRangeID(studyId)
+            restoreLastUnitSelection()
             unitLoading = false
         } catch (e: Exception) {
             e.printStackTrace()
@@ -100,6 +103,7 @@ class CollectScreenController {
     private fun loadTraits() {
         try {
             traits = traitRepository.getVisibleTraitsWithAttributes()
+            restoreLastTraitSelection()
             traitLoading = false
         } catch (e: Exception) {
             e.printStackTrace()
@@ -111,6 +115,8 @@ class CollectScreenController {
     fun updateCurrentUnitIndex(index: Int) {
         if (index in units.indices) {
             currentUnitIndex = index
+            rangeID.getOrNull(index)?.let(::updateCurrentRange)
+            persistCurrentSelection()
             loadTraitValues()
         }
     }
@@ -118,6 +124,7 @@ class CollectScreenController {
     fun updateCurrentTraitIndex(index: Int) {
         if (index in traits.indices) {
             currentTraitIndex = index
+            persistCurrentSelection()
         }
     }
 
@@ -175,6 +182,33 @@ class CollectScreenController {
         }
     }
 
+    /**
+     * Remove one stored value for the current trait and unit.
+     */
+    fun deleteCurrentTraitValue(value: String) {
+        val trait = traits.getOrNull(currentTraitIndex)
+        val unit = units.getOrNull(currentUnitIndex)
+        val plotId = unit?.observation_unit_db_id
+
+        if (plotId != null && trait?.id != null) {
+            observationRepository.deleteTraitByValue(
+                plotId = plotId,
+                traitDbId = trait.id!!,
+                value = value,
+                studyId = studyId.toLong()
+            )
+            traitValues = traitValues.toMutableMap().apply {
+                val currentList = get(trait.id!!).orEmpty().toMutableList()
+                currentList.remove(value)
+                if (currentList.isEmpty()) {
+                    remove(trait.id!!)
+                } else {
+                    put(trait.id!!, currentList)
+                }
+            }
+        }
+    }
+
     fun getDisplayColor(): Color {
         val defaultArgb = AppColors.fb_value_saved_color.argb
         var storedArgb = settings.getInt(GeneralKeys.SAVED_DATA_COLOR.key, defaultArgb)
@@ -188,4 +222,77 @@ class CollectScreenController {
 
         return Color(storedArgb)
     }
+
+    fun persistCurrentSelection() {
+        currentRangeUniqueId()?.let {
+            settings.putString(lastPlotKey(), it)
+            settings.putString(GeneralKeys.LAST_PLOT.key, it)
+        }
+        traits.getOrNull(currentTraitIndex)?.id?.let {
+            val traitId = it.toString()
+            settings.putString(lastTraitKey(), traitId)
+            settings.putString(GeneralKeys.LAST_USED_TRAIT.key, traitId)
+        }
+    }
+
+    private fun restoreLastUnitSelection() {
+        if (restoredUnitSelection || rangeID.isEmpty()) return
+        restoredUnitSelection = true
+
+        val lastPlot = settings.getString(lastPlotKey(), "").trim()
+            .ifEmpty { settings.getString(GeneralKeys.LAST_PLOT.key, "").trim() }
+        if (lastPlot.isEmpty()) {
+            rangeID.firstOrNull()?.let(::updateCurrentRange)
+            return
+        }
+
+        val restoredIndex = rangeID.indexOfFirst { rangeDbId ->
+            try {
+                observationUnitPropertyRepository.getRangeFromId(
+                    rangeDbId.toLong(),
+                    primaryId,
+                    secondaryId,
+                    uniqueId
+                ).uniqueId == lastPlot
+            } catch (_: Exception) {
+                false
+            }
+        }
+
+        currentUnitIndex = if (restoredIndex >= 0) restoredIndex else 0
+        rangeID.getOrNull(currentUnitIndex)?.let(::updateCurrentRange)
+    }
+
+    private fun restoreLastTraitSelection() {
+        if (restoredTraitSelection || traits.isEmpty()) return
+        restoredTraitSelection = true
+
+        val lastTraitId = settings.getString(lastTraitKey(), "").trim()
+            .ifEmpty { settings.getString(GeneralKeys.LAST_USED_TRAIT.key, "").trim() }
+        if (lastTraitId.isEmpty()) {
+            currentTraitIndex = 0
+            return
+        }
+
+        val restoredIndex = traits.indexOfFirst { it.id?.toString() == lastTraitId }
+        currentTraitIndex = if (restoredIndex >= 0) restoredIndex else 0
+    }
+
+    private fun currentRangeUniqueId(): String? {
+        val rangeDbId = rangeID.getOrNull(currentUnitIndex) ?: return null
+        return try {
+            observationUnitPropertyRepository.getRangeFromId(
+                rangeDbId.toLong(),
+                primaryId,
+                secondaryId,
+                uniqueId
+            ).uniqueId
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    private fun lastPlotKey(): String = "${GeneralKeys.LAST_PLOT.key}_$studyId"
+
+    private fun lastTraitKey(): String = "${GeneralKeys.LAST_USED_TRAIT.key}_$studyId"
 }

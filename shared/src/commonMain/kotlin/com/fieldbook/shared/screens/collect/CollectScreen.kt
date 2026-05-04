@@ -19,10 +19,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.fieldbook.shared.screens.collect.traits.PhotoTrait
+import com.fieldbook.shared.screens.collect.traits.PhotoTraitDisplayMode
+import com.fieldbook.shared.traits.Formats
 
 /**
  * KMP version of CollectActivity main screen logic.
@@ -35,6 +42,39 @@ fun CollectScreen(
     onBack: (() -> Unit)? = null,
 ) {
     val controller = remember { CollectScreenController() }
+    var isCameraFullscreen by remember { mutableStateOf(false) }
+    val handleBack: () -> Unit = {
+        controller.persistCurrentSelection()
+        onBack?.invoke()
+    }
+
+    DisposableEffect(controller) {
+        onDispose {
+            controller.persistCurrentSelection()
+        }
+    }
+
+    val currentTrait = controller.traits.getOrNull(controller.currentTraitIndex)
+    val currentValues = currentTrait?.let { controller.traitValues[it.id] } ?: emptyList()
+    val currentFormat = currentTrait?.format?.let { formatStr ->
+        Formats.entries.find { it.databaseName.equals(formatStr, ignoreCase = true) }
+    }
+    val isCurrentTraitCamera = currentFormat?.isCamera == true
+
+    if (isCameraFullscreen && isCurrentTraitCamera) {
+        Surface(modifier = modifier.fillMaxSize()) {
+            PhotoTrait(
+                values = currentValues,
+                onPhotoCaptured = { controller.addCurrentTraitValue(it) },
+                onPhotoDeleted = { controller.deleteCurrentTraitValue(it) },
+                modifier = Modifier.fillMaxSize(),
+                controller = controller,
+                displayMode = PhotoTraitDisplayMode.FULLSCREEN,
+                onCollapseRequest = { isCameraFullscreen = false }
+            )
+        }
+        return
+    }
 
     Surface(modifier = modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -42,7 +82,7 @@ fun CollectScreen(
                 title = { Text(text = "Collect Data") },
                 navigationIcon = {
                     if (onBack != null) {
-                        IconButton(onClick = { onBack() }) {
+                        IconButton(onClick = handleBack) {
                             Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
                         }
                     }
@@ -80,7 +120,8 @@ fun CollectScreen(
                     RangeBox(controller = controller)
                     CollectInput(
                         controller = controller,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        onExpandPhotoTrait = { isCameraFullscreen = true }
                     )
                 }
             }

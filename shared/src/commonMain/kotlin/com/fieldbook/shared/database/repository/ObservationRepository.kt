@@ -34,6 +34,20 @@ class ObservationRepository() {
         ).executeAsOne().toInt()
     }
 
+    fun deleteTraitByValue(
+        studyId: Long,
+        plotId: String,
+        traitDbId: Long,
+        value: String,
+    ) {
+        db.observationsQueries.deleteTraitByValue(
+            study_id = studyId,
+            observation_unit_id = plotId,
+            observation_variable_db_id = traitDbId,
+            value_ = value
+        )
+    }
+
     @OptIn(FormatStringsInDatetimeFormats::class)
     fun upsertObservation(
         studyId: Long,

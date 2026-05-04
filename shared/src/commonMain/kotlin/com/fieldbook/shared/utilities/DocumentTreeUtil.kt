@@ -13,10 +13,18 @@ class DocumentTreeUtil {
             getString(Res.string.dir_plot_data)
         }
 
+        fun getPlotDataDirectory(): DocumentFile? =
+            getDirectory(Res.string.dir_plot_data)
+
         fun getFieldMediaDirectory(traitName: String?): DocumentFile? {
-            if (traitName == null) return null
             val prefs = Settings()
             val field = prefs.getString(GeneralKeys.FIELD_FILE.key, "")
+            return getFieldMediaDirectory(field, traitName)
+        }
+
+        fun getFieldMediaDirectory(fieldName: String?, traitName: String?): DocumentFile? {
+            if (traitName == null) return null
+            val field = fieldName.orEmpty()
             if (field.isBlank()) return null
 
             val fieldDir = createDir(plotDataDirectoryName(), field) ?: return null

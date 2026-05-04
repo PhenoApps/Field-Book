@@ -24,6 +24,10 @@ import androidx.compose.ui.unit.dp
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.preferences_storage_files_base_directory_title
 import com.fieldbook.shared.preferences.GeneralKeys
+import com.fieldbook.shared.utilities.configurePickedStorageDirectory
+import com.fieldbook.shared.utilities.detectStorageProviderLabel
+import com.fieldbook.shared.utilities.detectStorageProviderType
+import com.fieldbook.shared.utilities.displayStorageDirectoryPath
 import com.fieldbook.shared.utilities.normalizeStorageDirectoryPath
 import com.russhwolf.settings.Settings
 import io.github.vinceglb.filekit.compose.rememberDirectoryPickerLauncher
@@ -45,14 +49,44 @@ fun StorageDefinerScreen(
             )
         )
     }
+    var currentProviderType by remember {
+        mutableStateOf(
+            preferences.getString(
+                GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_TYPE.key,
+                ""
+            )
+        )
+    }
+    var currentProviderLabel by remember {
+        mutableStateOf(
+            preferences.getString(
+                GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_LABEL.key,
+                ""
+            )
+        )
+    }
 
     val launcher = rememberDirectoryPickerLauncher(
         title = "Directory picker"
     ) { directory ->
         directory?.let {
-            val value = normalizeStorageDirectoryPath(it.path ?: "")
-            preferences.putString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY.key, value)
-            currentDirectory = value
+            val configuredDirectory = configurePickedStorageDirectory(it)
+            if (configuredDirectory != null) {
+                preferences.putString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY.key, configuredDirectory)
+                preferences.putString(GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_TYPE.key,
+                    detectStorageProviderType(configuredDirectory).name
+                )
+                preferences.putString(GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_LABEL.key,
+                    detectStorageProviderLabel(configuredDirectory)
+                )
+                currentDirectory = configuredDirectory
+                currentProviderType = preferences.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_TYPE.key,
+                    ""
+                )
+                currentProviderLabel = preferences.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_LABEL.key,
+                    ""
+                )
+            }
         }
     }
 
@@ -83,7 +117,13 @@ fun StorageDefinerScreen(
                 )
             )
             Text(
-                text = "Current directory: $currentDirectory",
+                text = "Current directory: ${
+                    displayStorageDirectoryPath(
+                        currentDirectory,
+                        currentProviderType,
+                        currentProviderLabel
+                    )
+                }",
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(16.dp)
             )

@@ -17,12 +17,32 @@ fun resetLocalDatabaseAndPreferences(): Boolean {
         GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY.key,
         ""
     )
+    val configuredStorageProviderType = settings.getString(
+        GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_TYPE.key,
+        ""
+    )
+    val configuredStorageProviderLabel = settings.getString(
+        GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_LABEL.key,
+        ""
+    )
 
     settings.clear()
     if (configuredStorageDirectory.isNotBlank()) {
         settings.putString(
             GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY.key,
             configuredStorageDirectory
+        )
+    }
+    if (configuredStorageProviderType.isNotBlank()) {
+        settings.putString(
+            GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_TYPE.key,
+            configuredStorageProviderType
+        )
+    }
+    if (configuredStorageProviderLabel.isNotBlank()) {
+        settings.putString(
+            GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_LABEL.key,
+            configuredStorageProviderLabel
         )
     }
 
