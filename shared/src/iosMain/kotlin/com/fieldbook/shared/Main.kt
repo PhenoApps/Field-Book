@@ -53,7 +53,8 @@ fun MainViewController(driverFactory: DriverFactory) = ComposeUIViewController {
 
             KmpHostScreenType.STORAGE_PREFERENCES -> StoragePreferencesScreen(
                 onBack = { currentScreen = KmpHostScreenType.PREFERENCES },
-                onNavigate = { target -> currentScreen = target }
+                onNavigate = { target -> currentScreen = target },
+                onExit = { currentScreen = KmpHostScreenType.CONFIG }
             )
 
             KmpHostScreenType.STORAGE_DEFINER -> StorageDefinerScreen(

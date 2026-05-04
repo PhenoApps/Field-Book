@@ -37,6 +37,7 @@ private enum class PathType {
 private class IosDocumentFile(val path: String) : DocumentFile {
 
     override fun createDirectory(name: String): DocumentFile? {
+        accessConfiguredStorageForPath(path)
         val directoryPath = joinPath(path, name)
         return when (pathType(directoryPath)) {
             PathType.Directory -> IosDocumentFile(directoryPath)
@@ -46,6 +47,7 @@ private class IosDocumentFile(val path: String) : DocumentFile {
     }
 
     override fun createFile(mimeType: String, name: String): DocumentFile? {
+        accessConfiguredStorageForPath(path)
         val filePath = joinPath(path, name)
         val parentPath = filePath.toPath().parent?.toString()
         if (parentPath != null && !ensureDirectoryExists(parentPath)) {
@@ -64,21 +66,32 @@ private class IosDocumentFile(val path: String) : DocumentFile {
     }
 
     override fun findFile(name: String): DocumentFile? {
+        accessConfiguredStorageForPath(path)
         val filePath = joinPath(path, name)
         return filePath.takeIf(fileManager::fileExistsAtPath)?.let(::IosDocumentFile)
     }
 
-    override fun exists(): Boolean = pathType(path) != PathType.Missing
+    override fun exists(): Boolean {
+        accessConfiguredStorageForPath(path)
+        return pathType(path) != PathType.Missing
+    }
 
-    override fun isDirectory(): Boolean = pathType(path) == PathType.Directory
+    override fun isDirectory(): Boolean {
+        accessConfiguredStorageForPath(path)
+        return pathType(path) == PathType.Directory
+    }
 
     override fun uri(): String = NSURL.fileURLWithPath(path).absoluteString ?: "file://$path"
 
-    override fun readBytes(): ByteArray = FileSystem.SYSTEM.read(path.toPath()) {
-        readByteArray()
+    override fun readBytes(): ByteArray {
+        accessConfiguredStorageForPath(path)
+        return FileSystem.SYSTEM.read(path.toPath()) {
+            readByteArray()
+        }
     }
 
     override fun writeBytes(byteArray: ByteArray) {
+        accessConfiguredStorageForPath(path)
         val outputPath = path.toPath()
         outputPath.parent?.let { FileSystem.SYSTEM.createDirectories(it) }
         FileSystem.SYSTEM.write(outputPath) {
@@ -147,8 +160,11 @@ private fun storageBasePath(): String {
         .trim()
     )
 
-    if (configuredPath.isNotEmpty() && pathType(configuredPath) == PathType.Directory) {
-        return configuredPath
+    if (configuredPath.isNotEmpty()) {
+        accessStorageDirectoryPath(configuredPath)
+        if (pathType(configuredPath) == PathType.Directory) {
+            return configuredPath
+        }
     }
 
     return defaultStorageBasePath()
@@ -167,6 +183,7 @@ actual fun getDirectory(directory: StringResource): DocumentFile? =
 
 actual fun listFiles(dir: DocumentFile): List<DocumentFile> {
     val iosDir = dir as? IosDocumentFile ?: return emptyList()
+    accessConfiguredStorageForPath(iosDir.path)
     if (!iosDir.isDirectory()) return emptyList()
 
     val contents = fileManager.contentsOfDirectoryAtPath(iosDir.path, error = null)
@@ -237,6 +254,7 @@ actual fun shareFile(file: DocumentFile) {
 
 actual fun deleteFile(file: DocumentFile) {
     val iosFile = file as? IosDocumentFile ?: return
+    accessConfiguredStorageForPath(iosFile.path)
     if (!fileManager.fileExistsAtPath(iosFile.path)) {
         return
     }

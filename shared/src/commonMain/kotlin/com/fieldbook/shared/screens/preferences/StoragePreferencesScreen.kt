@@ -58,9 +58,12 @@ import com.fieldbook.shared.generated.resources.preferences_storage_files_base_d
 import com.fieldbook.shared.generated.resources.preferences_storage_files_base_directory_title
 import com.fieldbook.shared.generated.resources.preferences_storage_storage_title
 import com.fieldbook.shared.generated.resources.preferences_storage_title
+import com.fieldbook.shared.preferences.GeneralKeys
 import com.fieldbook.shared.screens.export.ExportScreen
+import com.fieldbook.shared.utilities.displayStorageDirectoryPath
 import com.fieldbook.shared.utilities.resetLocalDatabaseAndPreferences
 import com.fieldbook.shared.utilities.selectFirstField
+import com.russhwolf.settings.Settings
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
@@ -90,6 +93,12 @@ fun StoragePreferencesScreen(
     var showSuccessSnackbar by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    val settings = remember { Settings() }
+    val storageDirectorySummary = displayStorageDirectoryPath(
+        settings.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY.key, ""),
+        settings.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_TYPE.key, ""),
+        settings.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_LABEL.key, "")
+    )
     val deleteSuccessMessage = stringResource(Res.string.database_reset_message)
     val deleteFailureMessage = "Failed to delete database."
 
@@ -167,9 +176,16 @@ fun StoragePreferencesScreen(
                                     text = stringResource(item.title),
                                     style = MaterialTheme.typography.bodyLarge
                                 )
-                                item.summary?.let { summaryRes ->
+                                val summaryText = when {
+                                    item.key == "DEFAULT_STORAGE_LOCATION_PREFERENCE" &&
+                                        storageDirectorySummary.isNotBlank() -> storageDirectorySummary
+                                    item.summary != null -> stringResource(item.summary)
+                                    else -> null
+                                }
+
+                                summaryText?.let { summary ->
                                     Text(
-                                        text = stringResource(summaryRes),
+                                        text = summary,
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )

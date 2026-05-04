@@ -712,6 +712,7 @@ class FieldEditorScreenViewModel(
             _loading.value = true
             _error.value = null
             try {
+                _activeFieldId.value = settings.getInt(GeneralKeys.SELECTED_FIELD_ID.key, 0)
                 _fields.value = studyRepository.getAllFields()
             } catch (e: Exception) {
                 e.printStackTrace()
