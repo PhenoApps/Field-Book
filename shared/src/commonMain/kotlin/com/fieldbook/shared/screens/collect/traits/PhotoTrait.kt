@@ -45,7 +45,6 @@ import com.fieldbook.shared.generated.resources.arrow_expand
 import com.fieldbook.shared.generated.resources.arrow_left
 import com.fieldbook.shared.generated.resources.camera_24px
 import com.fieldbook.shared.generated.resources.close
-import com.fieldbook.shared.database.utils.internalTimeFormatter
 import com.fieldbook.shared.screens.collect.CollectScreenController
 import com.fieldbook.shared.theme.MainFloatingActionButtonShape
 import com.fieldbook.shared.utilities.DocumentFile
@@ -64,9 +63,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import kotlinx.datetime.format
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.offsetAt
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
+import kotlin.math.absoluteValue
 
 private const val PHOTO_VALUE_SEPARATOR = "\n"
 private const val PHOTO_DIRECTORY_NAME = "picture"
@@ -109,7 +111,31 @@ fun PhotoTrait(
             ?.takeIf { it.isNotBlank() }
             ?: "photo"
         val traitName = sanitizeFileName(currentTraitName())
-        val timestamp = sanitizeFileName(Clock.System.now().format(internalTimeFormatter))
+        val now = Clock.System.now()
+        val timeZone = TimeZone.currentSystemDefault()
+        val local = now.toLocalDateTime(timeZone)
+        val offset = timeZone.offsetAt(now)
+        val offsetHours = offset.totalSeconds / 3600
+        val offsetMinutes = ((offset.totalSeconds % 3600) / 60).absoluteValue
+        val timestamp = buildString {
+            append(local.year)
+            append("-")
+            append(local.monthNumber.toString().padStart(2, '0'))
+            append("-")
+            append(local.dayOfMonth.toString().padStart(2, '0'))
+            append("T")
+            append(local.hour.toString().padStart(2, '0'))
+            append("_")
+            append(local.minute.toString().padStart(2, '0'))
+            append("_")
+            append(local.second.toString().padStart(2, '0'))
+            append(".")
+            append((local.nanosecond / 1_000_000).toString().padStart(3, '0'))
+            append(if (offsetHours >= 0) "+" else "-")
+            append(offsetHours.absoluteValue.toString().padStart(2, '0'))
+            append("_")
+            append(offsetMinutes.toString().padStart(2, '0'))
+        }
         return "${sanitizeFileName(plotId)}_${traitName}_$timestamp.jpg"
     }
 
