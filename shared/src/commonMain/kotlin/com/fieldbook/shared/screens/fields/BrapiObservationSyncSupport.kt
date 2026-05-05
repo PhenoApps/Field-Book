@@ -1,11 +1,10 @@
 package com.fieldbook.shared.screens.fields
 
-import app.cash.sqldelight.db.QueryResult
-import app.cash.sqldelight.db.SqlDriver
-import com.fieldbook.shared.AppContext
 import com.fieldbook.shared.brapi.BrAPIService
 import com.fieldbook.shared.brapi.BrapiResult
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiObservationImport
+import com.fieldbook.shared.database.repository.ExistingBrapiObservation
+import com.fieldbook.shared.database.repository.ObservationRepository
 import com.fieldbook.shared.database.repository.StudyRepository
 import com.fieldbook.shared.database.repository.TraitRepository
 import com.fieldbook.shared.utilities.currentLocalInternalTimestamp
@@ -23,10 +22,8 @@ data class BrapiObservationSyncResult(
 class BrapiObservationSyncSupport(
     private val studyRepository: StudyRepository = StudyRepository(),
     private val traitRepository: TraitRepository = TraitRepository(),
+    private val observationRepository: ObservationRepository = ObservationRepository(),
 ) {
-    private val driver: SqlDriver
-        get() = AppContext.driverFactory().getDriver()
-
     suspend fun loadPreview(
         fieldId: Int,
         service: BrAPIService,
@@ -148,33 +145,17 @@ class BrapiObservationSyncSupport(
         lastSyncedTime: String,
         rep: String,
     ) {
-        driver.execute(
-            identifier = null,
-            sql = """
-                INSERT INTO observations (
-                    study_id,
-                    observation_unit_id,
-                    observation_variable_db_id,
-                    value,
-                    observation_time_stamp,
-                    collector,
-                    observation_db_id,
-                    last_synced_time,
-                    rep
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """.trimIndent(),
-            parameters = 9,
-        ) {
-            bindLong(0, fieldId.toLong())
-            bindString(1, observation.observationUnitDbId)
-            bindLong(2, traitId)
-            bindString(3, observation.value)
-            bindString(4, observationTimeStamp)
-            bindString(5, observation.collector.orEmpty())
-            bindString(6, observation.observationDbId)
-            bindString(7, lastSyncedTime)
-            bindString(8, rep)
-        }
+        observationRepository.insertBrapiObservation(
+            studyId = fieldId.toLong(),
+            plotId = observation.observationUnitDbId.orEmpty(),
+            traitDbId = traitId,
+            value = observation.value,
+            observationTimeStamp = observationTimeStamp,
+            collector = observation.collector.orEmpty(),
+            observationDbId = observation.observationDbId,
+            lastSyncedTime = lastSyncedTime,
+            rep = rep,
+        )
     }
 
     private fun hasObservation(
@@ -183,71 +164,17 @@ class BrapiObservationSyncSupport(
         traitId: Long,
         rep: String,
     ): Boolean {
-        val result = driver.executeQuery(
-            identifier = null,
-            sql = """
-                SELECT COUNT(*)
-                FROM observations
-                WHERE study_id = ?
-                  AND observation_unit_id = ?
-                  AND observation_variable_db_id = ?
-                  AND rep = ?
-            """.trimIndent(),
-            mapper = { cursor ->
-                cursor.next().value
-                QueryResult.Value((cursor.getLong(0) ?: 0L) > 0L)
-            },
-            parameters = 4,
-        ) {
-            bindLong(0, fieldId.toLong())
-            bindString(1, observationUnitDbId)
-            bindLong(2, traitId)
-            bindString(3, rep)
-        }
-
-        return result.value
+        return observationRepository.hasObservationWithRep(
+            studyId = fieldId.toLong(),
+            plotId = observationUnitDbId,
+            traitDbId = traitId,
+            rep = rep,
+        )
     }
 
     private fun getExistingObservations(fieldId: Int): List<ExistingBrapiObservation> {
-        val result = driver.executeQuery(
-            identifier = null,
-            sql = """
-                SELECT obs.observation_db_id,
-                       obs.observation_unit_id,
-                       vars.external_db_id,
-                       obs.observation_time_stamp
-                FROM observations AS obs
-                JOIN observation_variables AS vars
-                  ON obs.observation_variable_db_id = vars.internal_id_observation_variable
-                WHERE obs.study_id = ?
-                  AND vars.external_db_id IS NOT NULL
-            """.trimIndent(),
-            mapper = { cursor ->
-                val rows = mutableListOf<ExistingBrapiObservation>()
-                while (cursor.next().value) {
-                    rows += ExistingBrapiObservation(
-                        observationDbId = cursor.getString(0),
-                        observationUnitDbId = cursor.getString(1),
-                        externalTraitDbId = cursor.getString(2),
-                        timestamp = cursor.getString(3),
-                    )
-                }
-                QueryResult.Value(rows)
-            },
-            parameters = 1,
-        ) {
-            bindLong(0, fieldId.toLong())
-        }
-
-        return result.value
+        return observationRepository.getExistingBrapiObservations(fieldId.toLong())
     }
-
-    private data class ExistingBrapiObservation(
-        val observationDbId: String?,
-        val observationUnitDbId: String?,
-        val externalTraitDbId: String?,
-        val timestamp: String?,
-    )
 
     private val BrapiObservationImport.canImport: Boolean
         get() = !observationUnitDbId.isNullOrBlank() &&
