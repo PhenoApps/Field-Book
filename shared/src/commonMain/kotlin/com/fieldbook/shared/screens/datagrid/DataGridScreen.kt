@@ -81,7 +81,7 @@ fun DataGridScreen(
     Surface(modifier = modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             TopAppBar(
-                title = { Text("Data Grid") },
+                title = {},
                 navigationIcon = {
                     if (onBack != null) {
                         IconButton(onClick = onBack) {
