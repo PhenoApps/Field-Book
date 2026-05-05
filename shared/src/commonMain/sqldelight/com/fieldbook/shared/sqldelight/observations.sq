@@ -19,6 +19,15 @@ SELECT observation_variable_db_id, value
 FROM observations
 WHERE study_id = ? AND observation_unit_id = ?;
 
+getDataGridObservations:
+SELECT observation_unit_id,
+       observation_variable_db_id,
+       MIN(value) AS cell_value,
+       COUNT(*) AS repeated_count
+FROM observations
+WHERE study_id = ?
+GROUP BY observation_unit_id, observation_variable_db_id;
+
 deleteTrait:
 DELETE FROM observations
 WHERE study_id = ? AND observation_variable_db_id = ? AND observation_unit_id = ?;

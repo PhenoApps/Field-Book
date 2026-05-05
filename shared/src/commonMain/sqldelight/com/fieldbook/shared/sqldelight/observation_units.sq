@@ -12,6 +12,20 @@ selectAll:
 SELECT * FROM observation_units
 WHERE study_id = ?;
 
+selectDataGridUnits:
+SELECT ou.internal_id_observation_unit,
+       ou.observation_unit_db_id,
+       ouv.observation_unit_value_name AS header_value
+FROM observation_units ou
+LEFT JOIN observation_units_attributes oua
+  ON oua.observation_unit_attribute_name = ?
+LEFT JOIN observation_units_values ouv
+  ON ouv.observation_unit_id = ou.internal_id_observation_unit
+ AND ouv.observation_unit_attribute_db_id = oua.internal_id_observation_unit_attribute
+ AND ouv.study_id = ou.study_id
+WHERE ou.study_id = ?
+ORDER BY ou.internal_id_observation_unit ASC;
+
 -- Select observation unit by observation_unit_db_id
 selectById:
 SELECT * FROM observation_units WHERE observation_unit_db_id = ?

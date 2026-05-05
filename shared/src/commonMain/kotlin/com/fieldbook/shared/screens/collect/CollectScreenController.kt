@@ -14,6 +14,7 @@ import com.fieldbook.shared.database.repository.StudyRepository
 import com.fieldbook.shared.database.repository.TraitRepository
 import com.fieldbook.shared.objects.RangeObject
 import com.fieldbook.shared.preferences.GeneralKeys
+import com.fieldbook.shared.screens.datagrid.DataGridSelection
 import com.fieldbook.shared.theme.AppColors
 import com.russhwolf.settings.Settings
 
@@ -126,6 +127,21 @@ class CollectScreenController {
             currentTraitIndex = index
             persistCurrentSelection()
         }
+    }
+
+    fun applyDataGridSelection(selection: DataGridSelection): Boolean {
+        val unitIndex = units.indexOfFirst { it.observation_unit_db_id == selection.plotId }
+        val traitIndex = selection.traitId
+            ?.let { selectedTraitId -> traits.indexOfFirst { it.id == selectedTraitId } }
+            ?.takeIf { it >= 0 }
+            ?: traits.getOrNull(selection.traitIndex)?.let { selection.traitIndex }
+            ?: -1
+
+        if (unitIndex < 0 || traitIndex < 0) return false
+
+        updateCurrentUnitIndex(unitIndex)
+        updateCurrentTraitIndex(traitIndex)
+        return true
     }
 
     private fun loadTraitValues() {
