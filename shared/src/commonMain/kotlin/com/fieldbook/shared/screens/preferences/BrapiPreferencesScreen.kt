@@ -25,7 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.fieldbook.shared.brapi.BrapiOAuthResult
-import com.fieldbook.shared.brapi.authorizeBrapiImplicit
+import com.fieldbook.shared.brapi.authorizeBrapi
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.brapi_base_url
 import com.fieldbook.shared.generated.resources.brapi_base_url_default
@@ -112,6 +112,7 @@ fun BrapiPreferencesScreen(
     val defaultBrapiVersion = stringResource(Res.string.preferences_brapi_version_v2)
     val defaultCacheInvalidation = stringResource(Res.string.prefs_brapi_cache_invalidate_choice_each_time)
     val defaultValueDisplayMode = stringResource(Res.string.preferences_appearance_collect_labelval_customize_value)
+    val authorizationCodeFlowOption = stringResource(Res.string.preferences_brapi_oidc_flow_oauth_code)
 
     val oidcFlowOptions = listOf(
         stringResource(Res.string.preferences_brapi_oidc_flow_oauth_code),
@@ -212,18 +213,14 @@ fun BrapiPreferencesScreen(
     fun authorizeBrapi() {
         if (authInProgress) return
 
-        if (oidcFlow != defaultOidcFlow) {
-            dialogState = PreferenceDialogState(
-                title = authorizeText,
-                summary = "Authorization code flow is not available in the shared KMP BrAPI screen yet.",
-                type = PreferenceDialogType.INFO
-            )
-            return
-        }
-
         authInProgress = true
         coroutineScope.launch {
-            when (val result = authorizeBrapiImplicit(preferences)) {
+            when (
+                val result = authorizeBrapi(
+                    useAuthorizationCodeFlow = oidcFlow == authorizationCodeFlowOption,
+                    settings = preferences
+                )
+            ) {
                 BrapiOAuthResult.Success -> {
                     brapiToken = preferences.getStringOrNull(PreferenceKeys.BRAPI_TOKEN)
                     dialogState = PreferenceDialogState(
@@ -416,6 +413,7 @@ fun BrapiPreferencesScreen(
                                     preferences.putString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, "ask")
                                 }
                                 preferences.remove(PreferenceKeys.BRAPI_TOKEN)
+                                preferences.remove(PreferenceKeys.BRAPI_ID_TOKEN)
                             }
                         }
                     )
@@ -451,6 +449,7 @@ fun BrapiPreferencesScreen(
                                             onExtraButtonClick = {
                                                 brapiToken = null
                                                 preferences.remove(PreferenceKeys.BRAPI_TOKEN)
+                                                preferences.remove(PreferenceKeys.BRAPI_ID_TOKEN)
                                                 authorizeBrapi()
                                             }
                                         )
@@ -476,6 +475,7 @@ fun BrapiPreferencesScreen(
                                             type = item.dialogType
                                         ).also {
                                             preferences.remove(PreferenceKeys.BRAPI_TOKEN)
+                                            preferences.remove(PreferenceKeys.BRAPI_ID_TOKEN)
                                             brapiToken = null
                                         }
                                         Res.string.preferences_brapi_oidc_flow -> PreferenceDialogState(
