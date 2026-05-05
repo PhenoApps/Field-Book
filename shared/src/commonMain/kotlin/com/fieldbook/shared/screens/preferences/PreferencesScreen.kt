@@ -78,7 +78,8 @@ fun PreferencesScreen(
         PreferenceSectionItem(
             icon = Res.drawable.ic_pref_appearance,
             title = Res.string.preferences_appearance_title,
-            key = "pref_key_ui_settings"
+            key = "pref_key_ui_settings",
+            destination = KmpHostScreenType.APPEARANCE_PREFERENCES
         ),
         PreferenceSectionItem(
             icon = Res.drawable.ic_pref_navigation,
