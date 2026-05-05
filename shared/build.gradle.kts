@@ -1,4 +1,8 @@
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
+import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+import java.net.URI
 
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
@@ -7,6 +11,267 @@ plugins {
     alias(libs.plugins.compose)
     alias(libs.plugins.app.cash.sqldelight)
     alias(libs.plugins.kotlinx.serialization)
+    alias(libs.plugins.openapi.generator)
+}
+
+data class OpenApiSpec(
+    val name: String,
+    val inputSpec: String,
+    val versionPackage: String,
+    val modulePackage: String,
+) {
+    val packageName = "com.fieldbook.shared.generated.brapi.$versionPackage.$modulePackage"
+}
+
+fun brapiV2Spec(
+    name: String,
+    inputSpec: String,
+    modulePackage: String,
+) = OpenApiSpec(
+    name = name,
+    inputSpec = inputSpec,
+    versionPackage = "v2",
+    modulePackage = modulePackage,
+)
+
+fun brapiV1Spec(
+    name: String,
+    inputSpec: String,
+    modulePackage: String,
+) = OpenApiSpec(
+    name = name,
+    inputSpec = inputSpec,
+    versionPackage = "v1",
+    modulePackage = modulePackage,
+)
+
+val brapiOpenApiSpecs = listOf(
+    brapiV1Spec(
+        name = "brapi",
+        inputSpec = "https://api.swaggerhub.com/apis/PlantBreedingAPI/BrAPI/1.3/swagger.json",
+        modulePackage = "brapi",
+    ),
+    brapiV2Spec(
+        name = "brapiCore",
+        inputSpec = "https://api.swaggerhub.com/apis/PlantBreedingAPI/BrAPI-Core/2.1/swagger.json",
+        modulePackage = "core",
+    ),
+    brapiV2Spec(
+        name = "brapiPhenotyping",
+        inputSpec = "https://api.swaggerhub.com/apis/PlantBreedingAPI/BrAPI-Phenotyping/2.1/swagger.json",
+        modulePackage = "phenotyping",
+    ),
+    brapiV2Spec(
+        name = "brapiGenotyping",
+        inputSpec = "https://api.swaggerhub.com/apis/PlantBreedingAPI/BrAPI-Genotyping/2.1/swagger.json",
+        modulePackage = "genotyping",
+    ),
+    brapiV2Spec(
+        name = "brapiGermplasm",
+        inputSpec = "https://api.swaggerhub.com/apis/PlantBreedingAPI/BrAPI-Germplasm/2.1/swagger.json",
+        modulePackage = "germplasm",
+    ),
+)
+
+val generatedOpenApiSourceDirs = brapiOpenApiSpecs.associate { spec ->
+    spec.name to layout.buildDirectory.dir("generated/openapi/${spec.versionPackage}/${spec.name}/src/commonMain/kotlin")
+}
+
+val patchedOpenApiSpecFiles = brapiOpenApiSpecs.associate { spec ->
+    spec.name to layout.buildDirectory.file("openapi/specs/${spec.versionPackage}/${spec.name}.patched.json")
+}
+
+fun schemaRequiresSerializationWrapper(schema: Map<*, *>): Boolean {
+    return schema["type"] == "array" ||
+        (schema["type"] == "object" && schema["additionalProperties"] is Map<*, *>)
+}
+
+/**
+ * Marks top-level array/map request bodies as required before code generation.
+ *
+ * OpenAPI Generator's Kotlin multiplatform client wraps top-level array/map
+ * request bodies in generated serializers. When those request bodies are
+ * optional, the generated API method accepts a nullable value but the wrapper
+ * constructor expects a non-null value, which does not compile. BrAPI POST/PUT
+ * collection bodies are semantically required, so this patches the generated
+ * spec before the Kotlin client is generated.
+ *
+ * Example generated code:
+ *  before `RequestWrapper(requestBody: Map<String, X>?)`;
+ *  after  `RequestWrapper(requestBody: Map<String, X>)`.
+ */
+fun patchOptionalWrappedRequestBodies(value: Any?) {
+    when (value) {
+        is Map<*, *> -> {
+            val mutableValue = value as? MutableMap<String, Any?>
+            val content = mutableValue?.get("content") as? Map<*, *>
+            val hasWrappedRequestBody = content
+                ?.values
+                ?.filterIsInstance<Map<*, *>>()
+                ?.mapNotNull { it["schema"] as? Map<*, *> }
+                ?.any(::schemaRequiresSerializationWrapper)
+                ?: false
+
+            if (hasWrappedRequestBody && mutableValue?.containsKey("required") == false) {
+                mutableValue["required"] = true
+            }
+
+            value.values.forEach(::patchOptionalWrappedRequestBodies)
+        }
+
+        is Iterable<*> -> value.forEach(::patchOptionalWrappedRequestBodies)
+    }
+}
+
+/**
+ * BrAPI describes `additionalInfo` as arbitrary JSON, but some schemas constrain
+ * it to `Map<String, String>`. Real servers return arrays/objects in that map,
+ * which breaks generated kotlinx serializers. We do not consume additionalInfo
+ * in the shared prototype, so remove it from generated models and let
+ * ignoreUnknownKeys skip it in responses.
+ */
+fun removeAdditionalInfoProperties(value: Any?) {
+    when (value) {
+        is Map<*, *> -> {
+            (value as? MutableMap<String, Any?>)?.let { mutableValue ->
+                val properties = mutableValue["properties"] as? MutableMap<String, Any?>
+                properties?.remove("additionalInfo")
+            }
+
+            value.values.forEach(::removeAdditionalInfoProperties)
+        }
+
+        is Iterable<*> -> value.forEach(::removeAdditionalInfoProperties)
+    }
+}
+
+/**
+ * Ontology references are present in several BrAPI responses, but real servers
+ * can return null IDs/names or omit them entirely. Keep these fields nullable
+ * and optional so generated serializers do not reject otherwise usable records.
+ */
+fun relaxOntologyReferenceFields(value: Any?) {
+    when (value) {
+        is Map<*, *> -> {
+            (value as? MutableMap<String, Any?>)?.let { mutableValue ->
+                val properties = mutableValue["properties"] as? MutableMap<String, Any?>
+                listOf("ontologyDbId", "ontologyName").forEach { propertyName ->
+                    (properties?.get(propertyName) as? MutableMap<String, Any?>)?.set("nullable", true)
+                }
+
+                val required = mutableValue["required"] as? MutableList<Any?>
+                required?.removeAll(listOf("ontologyDbId", "ontologyName"))
+                if (required?.isEmpty() == true) {
+                    mutableValue.remove("required")
+                }
+            }
+
+            value.values.forEach(::relaxOntologyReferenceFields)
+        }
+
+        is Iterable<*> -> value.forEach(::relaxOntologyReferenceFields)
+    }
+}
+
+/**
+ * BrAPI defines observationUnitPosition.entryType as CHECK/TEST/FILLER, but
+ * servers may return local labels. Generate entryType as a plain string so any
+ * server-provided value can be decoded.
+ */
+fun relaxObservationUnitEntryTypeEnums(value: Any?) {
+    when (value) {
+        is Map<*, *> -> {
+            val entryType = (value as? MutableMap<String, Any?>)?.get("entryType") as? MutableMap<String, Any?>
+            entryType?.remove("enum")
+
+            value.values.forEach(::relaxObservationUnitEntryTypeEnums)
+        }
+
+        is Iterable<*> -> value.forEach(::relaxObservationUnitEntryTypeEnums)
+    }
+}
+
+/**
+ * BrAPI Genotyping 2.1 declares both `alternateBases` and deprecated
+ * `alternate_bases` on Variant. OpenAPI Generator normalizes both names to the
+ * same Kotlin property (`alternateBases`), so drop the deprecated alias.
+ */
+fun removeDeprecatedVariantAlternateBases(parsedSpec: MutableMap<String, Any?>) {
+    val components = parsedSpec["components"] as? Map<*, *> ?: return
+    val schemas = components["schemas"] as? Map<*, *> ?: return
+    val variant = schemas["Variant"] as? MutableMap<String, Any?> ?: return
+    val properties = variant["properties"] as? MutableMap<String, Any?> ?: return
+
+    properties.remove("alternate_bases")
+}
+
+val patchOpenApiSpecTasks = brapiOpenApiSpecs.map { spec ->
+    val patchedSpecFile = patchedOpenApiSpecFiles.getValue(spec.name)
+
+    tasks.register("patch${spec.name.replaceFirstChar { it.uppercase() }}OpenApiSpec") {
+        group = "openapi tools"
+        description = "Downloads and patches the OpenAPI spec for ${spec.name}."
+
+        inputs.property("inputSpec", spec.inputSpec)
+        outputs.file(patchedSpecFile)
+
+        doLast {
+            val parsedSpec = JsonSlurper().parse(URI(spec.inputSpec).toURL()) as MutableMap<String, Any?>
+            patchOptionalWrappedRequestBodies(parsedSpec)
+            removeAdditionalInfoProperties(parsedSpec)
+            relaxOntologyReferenceFields(parsedSpec)
+            relaxObservationUnitEntryTypeEnums(parsedSpec)
+            if (spec.name == "brapiGenotyping") {
+                removeDeprecatedVariantAlternateBases(parsedSpec)
+            }
+
+            val outputFile = patchedSpecFile.get().asFile
+            outputFile.parentFile.mkdirs()
+            outputFile.writeText(JsonOutput.prettyPrint(JsonOutput.toJson(parsedSpec)))
+        }
+    }
+}
+
+val generatedOpenApiTasks = brapiOpenApiSpecs.map { spec ->
+    val generatedDir = layout.buildDirectory.dir("generated/openapi/${spec.versionPackage}/${spec.name}")
+    val patchedSpecFile = patchedOpenApiSpecFiles.getValue(spec.name)
+    val patchSpecTask = patchOpenApiSpecTasks.single { it.name == "patch${spec.name.replaceFirstChar { char -> char.uppercase() }}OpenApiSpec" }
+
+    tasks.register<GenerateTask>("generate${spec.name.replaceFirstChar { it.uppercase() }}OpenApiClient") {
+        group = "openapi tools"
+        description = "Generates the Kotlin Multiplatform client for ${spec.name}."
+        dependsOn(patchSpecTask)
+
+        generatorName.set("kotlin")
+        library.set("multiplatform")
+        inputSpec.set(patchedSpecFile)
+        outputDir.set(generatedDir.get().asFile.absolutePath)
+        packageName.set(spec.packageName)
+        apiPackage.set("${spec.packageName}.api")
+        modelPackage.set("${spec.packageName}.model")
+
+        doFirst {
+            delete(generatedDir)
+        }
+
+        configOptions.set(
+            mapOf(
+                "dateLibrary" to "string",
+                "enumPropertyNaming" to "UPPERCASE",
+                "generateOneOfAnyOfWrappers" to "true",
+                "sourceFolder" to "src/commonMain/kotlin",
+            )
+        )
+
+        globalProperties.set(
+            mapOf(
+                "apiDocs" to "false",
+                "modelDocs" to "false",
+                "apiTests" to "false",
+                "modelTests" to "false",
+            )
+        )
+    }
 }
 
 kotlin {
@@ -55,6 +320,10 @@ kotlin {
     // See: https://kotlinlang.org/docs/multiplatform-hierarchy.html
     sourceSets {
         commonMain {
+            brapiOpenApiSpecs.forEach { spec ->
+                kotlin.srcDir(generatedOpenApiSourceDirs.getValue(spec.name))
+            }
+
             dependencies {
                 implementation(compose.runtime)
                 implementation(compose.foundation)
@@ -185,6 +454,12 @@ tasks.matching { it.name == "copyNonXmlValueResourcesForCommonMain" }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>()
     .configureEach {
+        dependsOn(generatedOpenApiTasks)
         dependsOn(unzipSampleDb)
         dependsOn(copyTraitAssets)
+    }
+
+tasks.matching { it.name.startsWith("compile") && it.name.contains("Kotlin") }
+    .configureEach {
+        dependsOn(generatedOpenApiTasks)
     }

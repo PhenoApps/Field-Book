@@ -1,12 +1,37 @@
 package com.fieldbook.shared.screens.export
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -15,7 +40,28 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.fieldbook.shared.generated.resources.*
+import com.fieldbook.shared.generated.resources.Res
+import com.fieldbook.shared.generated.resources.brapi_base_url_default
+import com.fieldbook.shared.generated.resources.dialog_cancel
+import com.fieldbook.shared.generated.resources.dialog_export_bundle_data_cb_text
+import com.fieldbook.shared.generated.resources.dialog_save
+import com.fieldbook.shared.generated.resources.export_content_columns_all
+import com.fieldbook.shared.generated.resources.export_content_columns_title
+import com.fieldbook.shared.generated.resources.export_content_columns_unique
+import com.fieldbook.shared.generated.resources.export_content_traits_active
+import com.fieldbook.shared.generated.resources.export_content_traits_all
+import com.fieldbook.shared.generated.resources.export_dialog_title
+import com.fieldbook.shared.generated.resources.export_file_name
+import com.fieldbook.shared.generated.resources.export_format_database
+import com.fieldbook.shared.generated.resources.export_format_table
+import com.fieldbook.shared.generated.resources.export_multiple_fields_message
+import com.fieldbook.shared.generated.resources.export_overwrite
+import com.fieldbook.shared.generated.resources.export_progress
+import com.fieldbook.shared.generated.resources.export_source_brapi
+import com.fieldbook.shared.generated.resources.export_source_local
+import com.fieldbook.shared.generated.resources.settings_export
+import com.fieldbook.shared.generated.resources.settings_traits
+import com.fieldbook.shared.generated.resources.traits_create_format
 import kotlinx.coroutines.flow.collectLatest
 import org.jetbrains.compose.resources.stringResource
 
@@ -30,9 +76,10 @@ fun ExportScreen(
     val uiState = viewModel.uiState.collectAsState().value
     var isExporting by remember { mutableStateOf(false) }
     var dialogMessage by remember { mutableStateOf<String?>(null) }
+    val defaultBrapiBaseUrl = stringResource(Res.string.brapi_base_url_default)
 
-    LaunchedEffect(Unit) {
-        viewModel.loadDefaults(fieldIds)
+    LaunchedEffect(defaultBrapiBaseUrl) {
+        viewModel.loadDefaults(fieldIds, defaultBrapiBaseUrl)
     }
 
     LaunchedEffect(viewModel) {
@@ -56,36 +103,63 @@ fun ExportScreen(
     }
 
     val content: @Composable () -> Unit = {
-        ExportContent(
-            uiState = uiState,
-            onToggleFormatDb = viewModel::onToggleFormatDb,
-            onToggleFormatTable = viewModel::onToggleFormatTable,
-            onSelectOnlyUnique = viewModel::onSelectOnlyUnique,
-            onSelectAllColumns = viewModel::onSelectAllColumns,
-            onSelectActiveTraits = viewModel::onSelectActiveTraits,
-            onSelectAllTraits = viewModel::onSelectAllTraits,
-            onToggleBundle = viewModel::onToggleBundle,
-            onToggleOverwrite = viewModel::onToggleOverwrite,
-            onFileNameChange = viewModel::onFileNameChange,
-            onDismiss = onBack,
-            onSave = { viewModel.onSave(fieldIds) }
-        )
+        when (uiState.exportMode) {
+            ExportMode.BRAPI -> BrapiExportContent(
+                uiState = uiState,
+                onDismiss = onBack,
+                onSave = { viewModel.onSaveBrapi(fieldIds) },
+            )
+            else -> ExportContent(
+                uiState = uiState,
+                onToggleFormatDb = viewModel::onToggleFormatDb,
+                onToggleFormatTable = viewModel::onToggleFormatTable,
+                onSelectOnlyUnique = viewModel::onSelectOnlyUnique,
+                onSelectAllColumns = viewModel::onSelectAllColumns,
+                onSelectActiveTraits = viewModel::onSelectActiveTraits,
+                onSelectAllTraits = viewModel::onSelectAllTraits,
+                onToggleBundle = viewModel::onToggleBundle,
+                onToggleOverwrite = viewModel::onToggleOverwrite,
+                onFileNameChange = viewModel::onFileNameChange,
+                onDismiss = onBack,
+                onSave = { viewModel.onSave(fieldIds) }
+            )
+        }
     }
 
-    Dialog(
-        onDismissRequest = onBack,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
-    ) {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth(0.88f)
-                .widthIn(max = 420.dp),
-            shape = MaterialTheme.shapes.large,
-            tonalElevation = 6.dp,
-            shadowElevation = 8.dp
+    if (uiState.exportMode != ExportMode.CHOOSE) {
+        Dialog(
+            onDismissRequest = onBack,
+            properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
-            content()
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth(0.88f)
+                    .widthIn(max = 420.dp),
+                shape = MaterialTheme.shapes.large,
+                tonalElevation = 6.dp,
+                shadowElevation = 8.dp
+            ) {
+                content()
+            }
         }
+    }
+
+    if (uiState.exportMode == ExportMode.CHOOSE) {
+        AlertDialog(
+            onDismissRequest = onBack,
+            title = { Text(stringResource(Res.string.export_dialog_title)) },
+            text = { Text("Choose where to export this BrAPI field data.") },
+            confirmButton = {
+                TextButton(onClick = viewModel::onSelectBrapiExport) {
+                    Text(stringResource(Res.string.export_source_brapi))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = viewModel::onSelectLocalExport) {
+                    Text(stringResource(Res.string.export_source_local))
+                }
+            }
+        )
     }
 
     if (isExporting) {
@@ -122,6 +196,89 @@ fun ExportScreen(
                     Text(stringResource(Res.string.dialog_cancel))
                 }
             }
+        )
+    }
+}
+
+@Composable
+private fun BrapiExportContent(
+    uiState: ExportUiState,
+    onDismiss: () -> Unit,
+    onSave: () -> Unit,
+) {
+    val preview = uiState.brapiPreview
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 20.dp)
+    ) {
+        Text(
+            text = stringResource(Res.string.export_source_brapi),
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.SemiBold
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(
+            text = uiState.brapiHost,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if (preview?.message != null) {
+            Text(
+                text = preview.message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        BrapiCountRow("New", preview?.newObservations ?: 0)
+        BrapiCountRow("Synced", preview?.syncedObservations ?: 0)
+        BrapiCountRow("Edited", preview?.editedObservations ?: 0)
+        BrapiCountRow("Local-only", preview?.localObservations ?: 0)
+        BrapiCountRow("Wrong source", preview?.wrongSourceObservations ?: 0)
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(Res.string.dialog_cancel))
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Button(
+                onClick = onSave,
+                enabled = preview?.let { it.canExport && (it.newObservations + it.editedObservations) > 0 } == true,
+            ) {
+                Text(stringResource(Res.string.settings_export))
+            }
+        }
+    }
+}
+
+@Composable
+private fun BrapiCountRow(label: String, count: Int) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(label, style = MaterialTheme.typography.bodyLarge)
+        Text(
+            count.toString(),
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.SemiBold
         )
     }
 }

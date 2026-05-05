@@ -8,6 +8,8 @@ enum class KmpHostScreenType(val value: String) {
     COLLECT("collect"),
     EXPORT("export"),
     PREFERENCES("preferences"),
+    BRAPI_STUDIES("brapi_studies"),
+    BRAPI_PREFERENCES("brapi_preferences"),
     STORAGE_PREFERENCES("storage_preferences"),
     STORAGE_DEFINER("storage_definer");
 

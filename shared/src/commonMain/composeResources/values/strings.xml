@@ -1385,6 +1385,10 @@
     <string name="preferences_brapi_cache_invalidate_dialog_title">Invalidate Cache Interval Choices</string>
     <string name="preferences_brapi_cache_invalidate_summary">%1$s</string>
     <string name="preferences_brapi_cache_invalidate_title">Cache Invalidation</string>
+    <string name="prefs_brapi_cache_invalidate_choice_each_time">Every time BrAPI import is opened</string>
+    <string name="prefs_brapi_cache_invalidate_choice_daily">Daily</string>
+    <string name="prefs_brapi_cache_invalidate_choice_weekly">Weekly</string>
+    <string name="prefs_brapi_cache_invalidate_choice_none">Never</string>
     <string name="brapi_v1_is_not_compatible">BrAPI V1 is not compatible.</string>
     <string name="no_programdbid_provided">No programDbId provided</string>
     <string name="no_studydbids_provided">No studyDbIds provided</string>

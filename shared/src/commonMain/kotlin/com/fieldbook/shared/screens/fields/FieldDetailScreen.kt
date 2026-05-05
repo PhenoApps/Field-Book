@@ -57,6 +57,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.fieldbook.shared.components.CircleActionButton
 import com.fieldbook.shared.generated.resources.Res
+import com.fieldbook.shared.generated.resources.brapi_base_url_default
+import com.fieldbook.shared.generated.resources.brapi_enable_before_sync
+import com.fieldbook.shared.generated.resources.brapi_field_non_matching_sources
+import com.fieldbook.shared.generated.resources.brapi_obs_header_name
+import com.fieldbook.shared.generated.resources.brapi_obs_sync_menu_name
 import com.fieldbook.shared.generated.resources.dialog_cancel
 import com.fieldbook.shared.generated.resources.dialog_delete
 import com.fieldbook.shared.generated.resources.dialog_save
@@ -67,6 +72,7 @@ import com.fieldbook.shared.generated.resources.fields_delete
 import com.fieldbook.shared.generated.resources.fields_delete_confirmation
 import com.fieldbook.shared.generated.resources.fields_rename_study
 import com.fieldbook.shared.generated.resources.ic_dots_grid
+import com.fieldbook.shared.generated.resources.ic_field_sync
 import com.fieldbook.shared.generated.resources.ic_information_outline
 import com.fieldbook.shared.generated.resources.ic_land_fields
 import com.fieldbook.shared.generated.resources.ic_rename
@@ -84,8 +90,10 @@ import com.fieldbook.shared.generated.resources.search_attribute_dialog_title
 import com.fieldbook.shared.generated.resources.sort_ascending
 import com.fieldbook.shared.generated.resources.sort_descending
 import com.fieldbook.shared.objects.ImportFormat
+import com.fieldbook.shared.preferences.PreferenceKeys
 import com.fieldbook.shared.utilities.checkForIllegalCharacters
 import com.fieldbook.shared.utilities.relativeTimeText
+import com.russhwolf.settings.Settings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -108,12 +116,29 @@ fun FieldDetailScreen(
     val attributes by viewModel.fieldAttributes.collectAsState()
     val sortAscending by viewModel.sortAscending.collectAsState()
     val activeFieldId by viewModel.activeFieldId.collectAsState()
+    val brapiSyncPreview by viewModel.brapiSyncPreview.collectAsState()
+    val brapiSyncLoading by viewModel.brapiSyncLoading.collectAsState()
+    val brapiSyncSaving by viewModel.brapiSyncSaving.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val preferences = remember { Settings() }
+    val defaultBrapiBaseUrl = stringResource(Res.string.brapi_base_url_default)
+    val brapiBaseUrl = remember(defaultBrapiBaseUrl) {
+        preferences.getString(PreferenceKeys.BRAPI_BASE_URL, defaultBrapiBaseUrl)
+    }
+    val brapiHost = remember(brapiBaseUrl) { brapiBaseUrl.hostForDisplay() }
+    val brapiDisabledMessage = stringResource(Res.string.brapi_enable_before_sync)
+    val wrongSourceMessage = stringResource(
+        Res.string.brapi_field_non_matching_sources,
+        field?.exp_source.orEmpty(),
+        brapiHost,
+    )
 
     var showRenameDialog by remember { mutableStateOf(false) }
     var showSortDialog by remember { mutableStateOf(false) }
     var showSearchDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showBrapiSyncDialog by remember { mutableStateOf(false) }
     var searchAttributeOptions by remember { mutableStateOf<List<String>>(emptyList()) }
 
     LaunchedEffect(fieldId) {
@@ -297,6 +322,66 @@ fun FieldDetailScreen(
                         }
                     }
                 }
+
+                if (importFormat == ImportFormat.BRAPI) {
+                    item {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    when {
+                                        !preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false) -> {
+                                            scope.launch { snackbarHostState.showSnackbar(brapiDisabledMessage) }
+                                        }
+
+                                        !currentField.exp_source.equals(brapiHost, ignoreCase = true) -> {
+                                            scope.launch { snackbarHostState.showSnackbar(wrongSourceMessage) }
+                                        }
+
+                                        else -> {
+                                            showBrapiSyncDialog = true
+                                            currentField.exp_id?.let {
+                                                viewModel.prepareBrapiObservationSync(
+                                                    fieldId = it,
+                                                    defaultBrapiBaseUrl = defaultBrapiBaseUrl,
+                                                )
+                                            }
+                                        }
+                                    }
+                                },
+                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    painter = painterResource(Res.drawable.ic_field_sync),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .padding(end = 12.dp)
+                                        .size(28.dp),
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = stringResource(Res.string.brapi_obs_sync_menu_name),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                    Text(
+                                        text = relativeTimeText(currentField.date_sync) ?: "No activity",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             if (showRenameDialog) {
@@ -364,8 +449,85 @@ fun FieldDetailScreen(
                     }
                 )
             }
+
+            if (showBrapiSyncDialog) {
+                BrapiObservationSyncDialog(
+                    fieldName = currentField.exp_name,
+                    loading = brapiSyncLoading,
+                    saving = brapiSyncSaving,
+                    preview = brapiSyncPreview,
+                    onDismiss = {
+                        showBrapiSyncDialog = false
+                        viewModel.clearBrapiObservationSync()
+                    },
+                    onSave = {
+                        currentField.exp_id?.let {
+                            viewModel.syncBrapiObservations(
+                                fieldId = it,
+                                defaultBrapiBaseUrl = defaultBrapiBaseUrl,
+                            )
+                        }
+                        showBrapiSyncDialog = false
+                    }
+                )
+            }
         }
     }
+}
+
+@Composable
+private fun BrapiObservationSyncDialog(
+    fieldName: String,
+    loading: Boolean,
+    saving: Boolean,
+    preview: BrapiObservationSyncPreview?,
+    onDismiss: () -> Unit,
+    onSave: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(Res.string.brapi_obs_header_name)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(fieldName)
+                if (loading || saving) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        Text(if (saving) "Saving observations..." else "Loading observations...")
+                    }
+                } else {
+                    Text("Traits: ${preview?.traitCount ?: 0}")
+                    Text("Observations: ${preview?.observationCount ?: 0}")
+                    if ((preview?.observationCount ?: 0) == 0) {
+                        Text("No observations were downloaded.")
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                enabled = !loading && !saving && (preview?.observationCount ?: 0) > 0,
+                onClick = onSave
+            ) {
+                Text(stringResource(Res.string.dialog_save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(Res.string.dialog_cancel))
+            }
+        }
+    )
+}
+
+private fun String.hostForDisplay(): String {
+    return trim()
+        .removePrefix("https://")
+        .removePrefix("http://")
+        .substringBefore("/")
 }
 
 @Composable

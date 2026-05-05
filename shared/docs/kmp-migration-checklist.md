@@ -2,6 +2,11 @@
 
 *(incomplete list)*
 
+- [Core features](#core-features)
+- [BrAPI Workflow](#brapi-workflow)
+
+## Core features
+
 | Feature                 | KMP Android        | KMP iOS            |
 |-------------------------|--------------------|--------------------|
 |                         |                    |                    |
@@ -103,10 +108,6 @@
 |                         |                    |                    |
 | ...                     |                    |                    |
 |                         |                    |                    |
-| **Settings/BrAPI**      |                    |                    |
-|                         |                    |                    |
-| ...                     |                    |                    |
-|                         |                    |                    |
 | **Statistics**          |                    |                    |
 |                         |                    |                    |
 | ...                     |                    |                    |
@@ -116,6 +117,52 @@
 | ...                     |                    |                    |
 |                         |                    |                    |
 | **Scan barcode**        |                    |                    |
+| Scan plot main page     | :white_check_mark: |                    |
 |                         |                    |                    |
 | ...                     |                    |                    |
 
+## BrAPI Workflow
+
+| Feature                          | KMP Android        | KMP iOS            |
+|----------------------------------|--------------------|--------------------|
+|                                  |                    |                    |
+| **Fields**                       |                    |                    |
+| Import from BrAPI                | :white_check_mark: |                    |
+| ...                              |                    |                    |
+|                                  |                    |                    |
+| **Export**                       |                    |                    |
+| Export to BrAPI                  |                    |                    |
+|                                  |                    |                    |
+| ...                              |                    |                    |
+|                                  |                    |                    |
+| **Settings/BrAPI**               |                    |                    |
+| Enable                           | :white_check_mark: | :white_check_mark: |
+|                                  |                    |                    |
+| **Settings/BrAPI/Navbar**        |                    |                    |
+| Scan barcode                     |                    |                    |
+| Authorize                        |                    |                    |
+|                                  |                    |                    |
+| **Settings/BrAPI/Server**        |                    |                    |
+| Base URL                         | :white_check_mark: | :white_check_mark: |
+| Authorize                        | :white_check_mark: |                    |
+| Display name                     |                    |                    |
+| Auto-configure                   |                    |                    |
+| Logout                           |                    |                    |
+|                                  |                    |                    |
+| **Settings/BrAPI/Authorization** |                    |                    |
+| OIDC Flow / Implicit Grant       | :white_check_mark: |                    |
+| OIDC Flow / Authorization Code   |                    |                    |
+| OIDC Discovery URL               | :white_check_mark: | :white_check_mark: |
+| OIDC Client ID                   | :white_check_mark: | :white_check_mark: |
+| OIDC Scope                       |                    |                    |
+|                                  |                    |                    |
+| **Settings/BrAPI/Advanced**      |                    |                    |
+| BrAPI version / V1               |                    |                    |
+| BrAPI version / V2               | :white_check_mark: |                    |
+| Page size                        |                    |                    |
+| Chunk size                       |                    |                    |
+| Server timeout                   |                    |                    |
+| Cache invalidation               |                    |                    |
+|                                  |                    |                    |
+| **Settings/BrAPI/Preferences**   |                    |                    |
+| Value vs Label display           |                    |                    |

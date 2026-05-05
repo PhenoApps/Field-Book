@@ -1,13 +1,20 @@
 package com.fieldbook.shared.database.repository
 
 import com.fieldbook.shared.database.models.ObservationObject
-import com.fieldbook.shared.database.utils.internalTimeFormatter
 import com.fieldbook.shared.sqldelight.FieldbookDatabase
 import com.fieldbook.shared.sqldelight.createDatabase
+import com.fieldbook.shared.utilities.internalTimeFormatter
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.format
 import kotlinx.datetime.format.FormatStringsInDatetimeFormats
+
+data class ExistingBrapiObservation(
+    val observationDbId: String?,
+    val observationUnitDbId: String?,
+    val externalTraitDbId: String?,
+    val timestamp: String?,
+)
 
 class ObservationRepository() {
     private val db: FieldbookDatabase
@@ -32,6 +39,20 @@ class ObservationRepository() {
             observation_unit_id = plotId,
             observation_variable_db_id = traitId
         ).executeAsOne().toInt()
+    }
+
+    fun hasObservationWithRep(
+        studyId: Long,
+        plotId: String,
+        traitDbId: Long,
+        rep: String,
+    ): Boolean {
+        return db.observationsQueries.hasObservationWithRep(
+            study_id = studyId,
+            observation_unit_id = plotId,
+            observation_variable_db_id = traitDbId,
+            rep = rep
+        ).executeAsOne() > 0L
     }
 
     fun deleteTraitByValue(
@@ -125,6 +146,43 @@ class ObservationRepository() {
             rep = rep,
             notes = notes,
         )
+    }
+
+    fun insertBrapiObservation(
+        studyId: Long,
+        plotId: String,
+        traitDbId: Long,
+        value: String?,
+        observationTimeStamp: String?,
+        collector: String,
+        observationDbId: String?,
+        lastSyncedTime: String,
+        rep: String,
+    ) {
+        db.observationsQueries.insertBrapiObservation(
+            study_id = studyId,
+            observation_unit_id = plotId,
+            observation_variable_db_id = traitDbId,
+            value_ = value,
+            observation_time_stamp = observationTimeStamp,
+            collector = collector,
+            observation_db_id = observationDbId,
+            last_synced_time = lastSyncedTime,
+            rep = rep,
+        )
+    }
+
+    fun getExistingBrapiObservations(studyId: Long): List<ExistingBrapiObservation> {
+        return db.observationsQueries.getExistingBrapiObservations(studyId)
+            .executeAsList()
+            .map { row ->
+                ExistingBrapiObservation(
+                    observationDbId = row.observation_db_id,
+                    observationUnitDbId = row.observation_unit_id,
+                    externalTraitDbId = row.external_db_id,
+                    timestamp = row.observation_time_stamp,
+                )
+            }
     }
 
     fun getObservation(studyId: Long, plotId: String, traitId: Long): ObservationObject? {

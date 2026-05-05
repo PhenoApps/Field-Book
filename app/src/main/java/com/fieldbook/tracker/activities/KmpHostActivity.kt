@@ -11,9 +11,11 @@ import com.fieldbook.shared.AppContext
 import com.fieldbook.shared.KmpHostScreenType
 import com.fieldbook.shared.screens.ConfigScreen
 import com.fieldbook.shared.screens.ScannerScreen
+import com.fieldbook.shared.screens.brapi.BrapiStudyScreen
 import com.fieldbook.shared.screens.collect.CollectScreen
 import com.fieldbook.shared.screens.export.ExportScreen
 import com.fieldbook.shared.screens.fields.FieldEditorScreen
+import com.fieldbook.shared.screens.preferences.BrapiPreferencesScreen
 import com.fieldbook.shared.screens.preferences.PreferencesScreen
 import com.fieldbook.shared.screens.preferences.StorageDefinerScreen
 import com.fieldbook.shared.screens.preferences.StoragePreferencesScreen
@@ -77,6 +79,18 @@ class KmpHostActivity : ComponentActivity() {
                         PreferencesScreen(
                             onBack = { currentScreen.value = KmpHostScreenType.CONFIG },
                             onNavigate = { target -> currentScreen.value = target }
+                        )
+                    }
+
+                    KmpHostScreenType.BRAPI_PREFERENCES -> {
+                        BrapiPreferencesScreen(
+                            onBack = { currentScreen.value = KmpHostScreenType.PREFERENCES }
+                        )
+                    }
+
+                    KmpHostScreenType.BRAPI_STUDIES -> {
+                        BrapiStudyScreen(
+                            onBack = { currentScreen.value = KmpHostScreenType.CONFIG }
                         )
                     }
 
