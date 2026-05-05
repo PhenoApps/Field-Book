@@ -5,6 +5,7 @@ import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiObservationExport
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiObservationImport
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiObservationUnitDetails
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiTraitDetails
+import com.fieldbook.shared.utilities.CategoryJsonUtil
 import com.fieldbook.shared.generated.brapi.v2.core.api.StudiesApi
 import com.fieldbook.shared.generated.brapi.v2.germplasm.api.GermplasmApi
 import com.fieldbook.shared.generated.brapi.v2.germplasm.model.Germplasm
@@ -17,6 +18,7 @@ import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.ObservationNewR
 import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.ObservationUnit
 import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.ObservationVariable
 import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.ObservationVariableScale
+import com.fieldbook.shared.utilities.BrAPIScaleValidValuesCategories
 
 class BrAPIServiceV2(
     baseUrl: String,
@@ -312,8 +314,13 @@ class BrAPIServiceV2(
                 minimum = validValues?.minimumValue ?: validValues?.min?.toString(),
                 maximum = validValues?.maximumValue ?: validValues?.max?.toString(),
                 categories = validValues?.categories
-                    ?.mapNotNull { category -> category.value ?: category.label }
-                    ?.joinToString(","),
+                    ?.map { category ->
+                        BrAPIScaleValidValuesCategories(
+                            label = category.label ?: category.value,
+                            value = category.value ?: category.label
+                        )
+                    }
+                    ?.let(CategoryJsonUtil.Companion::buildCategoryList),
                 details = variable.trait.traitDescription,
                 commonCropName = variable.commonCropName,
                 language = variable.language,
@@ -367,7 +374,11 @@ class BrAPIServiceV2(
                     level.levelName?.toAttributeName()?.let { attributeName ->
                         level.levelCode
                             ?.takeIf { it.isNotBlank() }
-                            ?.let { attributes.putIfAbsent(attributeName, it) }
+                            ?.let { levelCode ->
+                                if (attributeName !in attributes) {
+                                    attributes[attributeName] = levelCode
+                                }
+                            }
                     }
                 }
 
