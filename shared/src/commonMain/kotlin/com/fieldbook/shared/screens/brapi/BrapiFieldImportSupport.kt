@@ -127,8 +127,16 @@ object BrapiFieldImportSupport {
             }
         }
 
-        germplasmName?.takeIf { it.isNotBlank() }?.let { row.putIfAbsent("Germplasm", it) }
-        germplasmDbId?.takeIf { it.isNotBlank() }?.let { row.putIfAbsent("germplasmDbId", it) }
+        germplasmName?.takeIf { it.isNotBlank() }?.let {
+            if ("Germplasm" !in row) {
+                row["Germplasm"] = it
+            }
+        }
+        germplasmDbId?.takeIf { it.isNotBlank() }?.let {
+            if ("germplasmDbId" !in row) {
+                row["germplasmDbId"] = it
+            }
+        }
         observationUnitDbId.takeIf { it.isNotBlank() }?.let { row[OBSERVATION_UNIT_DB_ID] = it }
         observationUnitName?.takeIf { it.isNotBlank() }?.let { row[OBSERVATION_UNIT_NAME] = it }
 
