@@ -17,6 +17,8 @@ import com.fieldbook.shared.generated.brapi.v1.brapi.model.PhenotypesRequestData
 import com.fieldbook.shared.generated.brapi.v1.brapi.model.PhenotypesRequestObservation
 import com.fieldbook.shared.generated.brapi.v1.brapi.model.StudySummary
 import com.fieldbook.shared.generated.brapi.v1.brapi.model.TraitDataType
+import com.fieldbook.shared.utilities.BrAPIScaleValidValuesCategories
+import com.fieldbook.shared.utilities.CategoryJsonUtil
 
 class BrAPIServiceV1(
     baseUrl: String,
@@ -252,7 +254,15 @@ class BrAPIServiceV1(
                 defaultValue = variable.defaultValue,
                 minimum = validValues?.min?.toString(),
                 maximum = validValues?.max?.toString(),
-                categories = validValues?.categories?.joinToString(","),
+                categories = validValues?.categories
+                    ?.map { value: String ->
+                        val trimmed = value.trim()
+                        BrAPIScaleValidValuesCategories(
+                            label = trimmed,
+                            value = trimmed
+                        )
+                    }
+                    ?.let(CategoryJsonUtil.Companion::buildCategoryList),
                 details = variable.trait.description,
                 commonCropName = variable.crop,
                 language = variable.language,
