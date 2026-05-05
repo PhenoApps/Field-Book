@@ -13,6 +13,7 @@ coil = "3.0.0" # compatible with compileSdk = 34
 reorderable = "3.0.0"
 kotlinx-serialization-csv = "0.0.21"
 openapi-generator = "7.22.0"
+lazytable = "1.10.0"
 
 [libraries]
 multiplatform-settings = { module = "com.russhwolf:multiplatform-settings-no-arg", version.ref = "multiplatform-settings" }
@@ -35,6 +36,7 @@ ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "kto
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 kotlinx-serialization-csv = { module = "app.softwork:kotlinx-serialization-csv", version.ref = "kotlinx-serialization-csv" }
+lazytable = { module = "io.github.oleksandrbalan:lazytable", version.ref = "lazytable" }
 
 [plugins]
 app-cash-sqldelight = { id = "app.cash.sqldelight", version = "2.1.0" }

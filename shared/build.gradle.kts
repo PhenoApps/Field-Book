@@ -350,6 +350,7 @@ kotlin {
                 implementation(libs.ktor.serialization.kotlinx.json)
                 implementation(libs.coil.compose)
                 implementation(libs.reorderable)
+                implementation(libs.lazytable)
             }
         }
 

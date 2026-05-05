@@ -27,9 +27,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.fieldbook.shared.generated.resources.Res
+import com.fieldbook.shared.generated.resources.ic_field
 import com.fieldbook.shared.screens.collect.traits.PhotoTrait
 import com.fieldbook.shared.screens.collect.traits.PhotoTraitDisplayMode
+import com.fieldbook.shared.screens.datagrid.DataGridScreen
 import com.fieldbook.shared.traits.Formats
+import org.jetbrains.compose.resources.painterResource
 
 /**
  * KMP version of CollectActivity main screen logic.
@@ -39,10 +43,11 @@ import com.fieldbook.shared.traits.Formats
 @Composable
 fun CollectScreen(
     modifier: Modifier = Modifier,
+    controller: CollectScreenController = remember { CollectScreenController() },
     onBack: (() -> Unit)? = null,
 ) {
-    val controller = remember { CollectScreenController() }
     var isCameraFullscreen by remember { mutableStateOf(false) }
+    var showDataGrid by remember { mutableStateOf(false) }
     val handleBack: () -> Unit = {
         controller.persistCurrentSelection()
         onBack?.invoke()
@@ -76,6 +81,20 @@ fun CollectScreen(
         return
     }
 
+    if (showDataGrid) {
+        DataGridScreen(
+            modifier = modifier,
+            activePlotIndex = controller.currentUnitIndex + 1,
+            activeTraitIndex = controller.currentTraitIndex + 1,
+            onBack = { showDataGrid = false },
+            onSelection = { selection ->
+                controller.applyDataGridSelection(selection)
+                showDataGrid = false
+            }
+        )
+        return
+    }
+
     Surface(modifier = modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             TopAppBar(
@@ -87,10 +106,19 @@ fun CollectScreen(
                         }
                     }
                 },
+                actions = {
+                    IconButton(onClick = { showDataGrid = true }) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_field),
+                            contentDescription = "Data Grid"
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
             if (controller.unitLoading || controller.traitLoading) {
