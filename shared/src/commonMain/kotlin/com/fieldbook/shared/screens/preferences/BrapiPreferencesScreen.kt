@@ -57,6 +57,8 @@ import com.fieldbook.shared.generated.resources.ic_pref_brapi_version
 import com.fieldbook.shared.generated.resources.ic_tb_changelog
 import com.fieldbook.shared.generated.resources.ic_transfer
 import com.fieldbook.shared.generated.resources.ic_view_list_black_24dp
+import com.fieldbook.shared.generated.resources.lock_reset
+import com.fieldbook.shared.generated.resources.menu_action_brapi_pref_title
 import com.fieldbook.shared.generated.resources.preferences_appearance_collect_labelval_customize
 import com.fieldbook.shared.generated.resources.preferences_appearance_collect_labelval_customize_description
 import com.fieldbook.shared.generated.resources.preferences_appearance_collect_labelval_customize_label
@@ -89,6 +91,7 @@ import com.fieldbook.shared.generated.resources.qr_code_share_choose_action_titl
 import com.fieldbook.shared.preferences.PreferenceKeys
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -375,9 +378,24 @@ fun BrapiPreferencesScreen(
                         }
                     }
                 },
+                actions = {
+                    if (brapiEnabled) {
+                        IconButton(
+                            onClick = { authorizeBrapi() },
+                            enabled = !authInProgress
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.lock_reset),
+                                contentDescription = stringResource(Res.string.menu_action_brapi_pref_title)
+                            )
+                        }
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
 
