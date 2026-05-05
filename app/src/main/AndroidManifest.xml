@@ -184,6 +184,10 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".activities.brapi.BrapiAccessConfirmActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.Light.Dialog.Alert" />
+        <activity
             android:name=".activities.brapi.BrapiAuthActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:exported="true"
@@ -198,7 +202,7 @@
 
                 <data
                     android:host=""
-                    android:scheme="fieldbook"
+                    android:scheme="${appAuthRedirectScheme}"
                     tools:ignore="AppLinkUrlError" /> <!-- https://stackoverflow.com/questions/48093833/deeplink-empty-path-error-androidpath-cannot-be-empty -->
             </intent-filter>
             <intent-filter>
@@ -229,7 +233,7 @@
                 <data
                     android:host="app"
                     android:path="/auth"
-                    android:scheme="fieldbook" />
+                    android:scheme="${appAuthRedirectScheme}" />
             </intent-filter>
         </activity>
         <activity android:name=".activities.CropImageActivity"
@@ -286,7 +290,8 @@
         <!-- BrAPI AccountManager authenticator service -->
         <service
             android:name=".brapi.BrapiAuthenticatorService"
-            android:exported="true">
+            android:exported="true"
+            android:permission="android.permission.AUTHENTICATE_ACCOUNTS">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>

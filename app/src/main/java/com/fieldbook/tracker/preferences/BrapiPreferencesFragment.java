@@ -54,6 +54,7 @@ import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.EndSessionRequest;
 
 import org.jetbrains.annotations.NotNull;
+import org.phenoapps.brapi.BrapiAccountConstants;
 
 import java.util.List;
 
@@ -81,16 +82,21 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
 
     private static final String TAG = BrapiPreferencesFragment.class.getSimpleName();
     private static final int AUTH_REQUEST_CODE = 123;
+    private static final int CHOOSE_ACCOUNT_REQUEST_CODE = 124;
 
     private Context context;
     private PreferenceCategory activeServerCategory;
     private PreferenceCategory availableServersCategory;
+    private PreferenceCategory sharedAccountsCategory;
 
     // Tracks which account triggered the auth flow for re-auth
     private Account pendingAuthAccount = null;
 
     // Tracks whether to remove the account after logout completes
     private boolean pendingRemoveAfterLogout = false;
+
+    // Tracks the shared account awaiting explicit user selection in AccountManager.
+    private Account pendingChooseAccount = null;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -128,8 +134,19 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
             });
         }
 
+        Preference sharedServersPref = findPreference("brapi_shared_servers");
+        if (sharedServersPref != null) {
+            sharedServersPref.setOnPreferenceClickListener(pref -> {
+                showSharedServersChooser();
+                return true;
+            });
+        }
+
+        accountHelper.migrateFromPrefsIfNeeded();
+
         activeServerCategory = findPreference("brapi_active_server_category");
         availableServersCategory = findPreference("brapi_available_servers_category");
+        sharedAccountsCategory = findPreference("brapi_shared_accounts_category");
 
         // Refresh cards when an account edit is saved from BrapiManualAccountDialogFragment
         getParentFragmentManager().setFragmentResultListener(
@@ -147,6 +164,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
     public void onResume() {
         super.onResume();
         setupToolbar();
+        accountHelper.refreshOwnedAccountVisibility();
         boolean brapiEnabled = preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false);
         updateServerSectionsVisibility(brapiEnabled);
     }
@@ -158,16 +176,30 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
 
         activeServerCategory.removeAll();
         availableServersCategory.removeAll();
+        if (sharedAccountsCategory != null) sharedAccountsCategory.removeAll();
 
         String activeUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
 
-        List<Account> accounts = accountHelper.getAllAccounts();
+        AccountManager am = AccountManager.get(context);
+        List<Account> allAccounts = accountHelper.getAllAccounts();
         boolean hasActive = false;
 
-        for (Account account : accounts) {
-            AccountManager am = AccountManager.get(context);
+        for (Account account : allAccounts) {
             String serverUrl = am.getUserData(account, BrapiAuthenticator.KEY_SERVER_URL);
+            String ownerPkg = am.getUserData(account, BrapiAuthenticator.KEY_OWNER_PACKAGE);
+            boolean isOwnAccount = context.getPackageName().equals(ownerPkg);
             boolean isActive = activeUrl.equals(serverUrl);
+
+            if (!isOwnAccount) {
+                BrapiServerCardPreference card = buildSharedCard(account, isActive);
+                if (isActive) {
+                    activeServerCategory.addPreference(card);
+                    hasActive = true;
+                } else if (sharedAccountsCategory != null) {
+                    sharedAccountsCategory.addPreference(card);
+                }
+                continue;
+            }
 
             BrapiServerCardPreference card = buildCard(account, isActive);
 
@@ -186,6 +218,30 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
         if (availableServersCategory != null) {
             availableServersCategory.setVisible(availableServersCategory.getPreferenceCount() > 0);
         }
+        if (sharedAccountsCategory != null) {
+            sharedAccountsCategory.setVisible(sharedAccountsCategory.getPreferenceCount() > 0);
+        }
+    }
+
+    private BrapiServerCardPreference buildSharedCard(Account account, boolean isActive) {
+        AccountManager am = AccountManager.get(context);
+        String ownerPkg = am.getUserData(account, BrapiAuthenticator.KEY_OWNER_PACKAGE);
+        String ownerName = BrapiAccountConstants.INSTANCE.displayNameForPackage(ownerPkg);
+        String ownerLabel = ownerName.isEmpty()
+                ? ""
+                : getString(org.phenoapps.brapi.R.string.pheno_brapi_shared_account_from, ownerName);
+
+        BrapiServerCardPreference card = new BrapiServerCardPreference(context);
+        card.setAccount(account);
+        card.setActive(isActive);
+        card.setExpanded(isActive);
+        card.setKey("shared_" + account.name + "_" + (isActive ? "active" : "available"));
+        card.setOrder(0);
+        final String label = ownerLabel;
+        card.setOwnerLabel(label);
+        card.setHasToken(accountHelper.peekTokenForAccount(account) != null);
+        configureCardActions(card);
+        return card;
     }
 
     private BrapiServerCardPreference buildCard(Account account, boolean isActive) {
@@ -195,7 +251,14 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
         card.setExpanded(isActive); // active card starts expanded; inactive cards start collapsed
         card.setKey(account.name + "_" + (isActive ? "active" : "available"));
         card.setOrder(0);
+        card.setHasToken(accountHelper.peekTokenForAccount(account) != null);
 
+        configureCardActions(card);
+
+        return card;
+    }
+
+    private void configureCardActions(BrapiServerCardPreference card) {
         card.setOnLogOut(this::logOutAccount);
         card.setOnAuthorize(this::authorizeAccount);
         card.setOnEnable(this::enableAccount);
@@ -204,8 +267,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
         card.setOnEdit(this::editAccount);
         card.setOnRemove(this::removeAccount);
         card.setOnSwitchServer(this::showSwitchServerDialog);
-
-        return card;
     }
 
     // ─── Account actions ────────────────────────────────────────────────────────
@@ -290,6 +351,17 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
     }
 
     private @NotNull Unit enableAccount(Account account) {
+        if (!accountHelper.canUseToken(account)) {
+            pendingChooseAccount = account;
+            startActivityForResult(accountHelper.buildChooseAccountIntent(account), CHOOSE_ACCOUNT_REQUEST_CODE);
+            return Unit.INSTANCE;
+        }
+
+        activateAccount(account);
+        return Unit.INSTANCE;
+    }
+
+    private void activateAccount(Account account) {
         AccountManager am = AccountManager.get(context);
         String serverUrl = am.getUserData(account, BrapiAuthenticator.KEY_SERVER_URL);
         if (serverUrl == null) serverUrl = account.name;
@@ -299,7 +371,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
         // Invalidate cached field/trait data so the new server's data is loaded fresh
         BrapiFilterCache.Companion.delete(context, true);
         refreshServerCards();
-        return Unit.INSTANCE;
     }
 
     private @NotNull Unit authorizeAccount(Account account) {
@@ -454,9 +525,44 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
         frag.show(getParentFragmentManager(), BrapiStepperAccountDialogFragment.TAG);
     }
 
+    private void showSharedServersChooser() {
+        pendingChooseAccount = null;
+        startActivityForResult(accountHelper.buildChooseAccountIntent(null), CHOOSE_ACCOUNT_REQUEST_CODE);
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == CHOOSE_ACCOUNT_REQUEST_CODE) {
+            Account pending = pendingChooseAccount;
+            pendingChooseAccount = null;
+            if (resultCode == RESULT_OK && pending != null && data != null) {
+                String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+                String accountType = data.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE);
+                if (pending.name.equals(accountName) &&
+                        pending.type.equals(accountType) &&
+                        accountHelper.canAccessAccount(pending)) {
+                    accountHelper.grantSelectedAccount(pending);
+                    if (accountHelper.canUseToken(pending)) {
+                        activateAccount(pending);
+                    }
+                }
+            } else if (resultCode == RESULT_OK && data != null) {
+                String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+                String accountType = data.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE);
+                if (accountName != null && BrapiAuthenticator.ACCOUNT_TYPE.equals(accountType)) {
+                    Account selected = new Account(accountName, accountType);
+                    if (accountHelper.canAccessAccount(selected)) {
+                        accountHelper.grantSelectedAccount(selected);
+                        if (accountHelper.canUseToken(selected)) {
+                            activateAccount(selected);
+                        }
+                    }
+                }
+            }
+            return;
+        }
+
         if (resultCode != RESULT_OK) return;
 
         if (requestCode == AUTH_REQUEST_CODE) {
@@ -494,9 +600,11 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
 
     private void updateServerSectionsVisibility(boolean brapiEnabled) {
         Preference addAccount = findPreference("brapi_add_account");
+        Preference sharedServers = findPreference("brapi_shared_servers");
         Preference advancedSettings = findPreference("brapi_advanced_settings");
 
         if (addAccount != null) addAccount.setVisible(brapiEnabled);
+        if (sharedServers != null) sharedServers.setVisible(brapiEnabled);
         if (advancedSettings != null) advancedSettings.setVisible(brapiEnabled);
 
         if (brapiEnabled) {
@@ -504,6 +612,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
         } else {
             if (activeServerCategory != null) activeServerCategory.setVisible(false);
             if (availableServersCategory != null) availableServersCategory.setVisible(false);
+            if (sharedAccountsCategory != null) sharedAccountsCategory.setVisible(false);
         }
 
     }

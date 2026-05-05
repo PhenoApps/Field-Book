@@ -49,7 +49,7 @@ public class BrapiAuthActivity extends ThemedActivity {
     //first number that came to Pete's head --IRRI hackathon '25
     public static final int END_SESSION_REQUEST_CODE = 456;
 
-    public static String REDIRECT_URI = "fieldbook://app/auth";
+    public static String REDIRECT_URI = null; // initialized in onCreate from R.string.brapi_redirect_uri
 
     // Intent extras for per-account config (set by BrapiManualAccountDialogFragment)
     public static final String EXTRA_SERVER_URL = "brapi_extra_server_url";
@@ -94,6 +94,7 @@ public class BrapiAuthActivity extends ThemedActivity {
         View rootView = findViewById(android.R.id.content);
         InsetHandler.INSTANCE.setupStandardInsets(rootView, toolbar);
 
+        REDIRECT_URI = getString(R.string.brapi_redirect_uri);
         activityStarting = true;
 
         // Capture launch-time config before onNewIntent() can replace getIntent() with the OAuth
@@ -111,7 +112,7 @@ public class BrapiAuthActivity extends ThemedActivity {
             launchServerUrl    = i.hasExtra(EXTRA_SERVER_URL)     ? i.getStringExtra(EXTRA_SERVER_URL)     : preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
             launchOidcUrl      = i.hasExtra(EXTRA_OIDC_URL)       ? i.getStringExtra(EXTRA_OIDC_URL)       : preferences.getString(PreferenceKeys.BRAPI_OIDC_URL, "");
             launchOidcFlow     = i.hasExtra(EXTRA_OIDC_FLOW)      ? i.getStringExtra(EXTRA_OIDC_FLOW)      : preferences.getString(PreferenceKeys.BRAPI_OIDC_FLOW, "");
-            launchOidcClientId = i.hasExtra(EXTRA_OIDC_CLIENT_ID) ? i.getStringExtra(EXTRA_OIDC_CLIENT_ID) : preferences.getString(PreferenceKeys.BRAPI_OIDC_CLIENT_ID, "fieldbook");
+            launchOidcClientId = i.hasExtra(EXTRA_OIDC_CLIENT_ID) ? i.getStringExtra(EXTRA_OIDC_CLIENT_ID) : preferences.getString(PreferenceKeys.BRAPI_OIDC_CLIENT_ID, getString(R.string.brapi_oidc_clientid_default));
             launchOidcScope    = i.hasExtra(EXTRA_OIDC_SCOPE)     ? i.getStringExtra(EXTRA_OIDC_SCOPE)     : preferences.getString(PreferenceKeys.BRAPI_OIDC_SCOPE, "");
             launchBrapiVersion = i.hasExtra(EXTRA_BRAPI_VERSION)  ? i.getStringExtra(EXTRA_BRAPI_VERSION)  : "";
         }
@@ -196,10 +197,11 @@ public class BrapiAuthActivity extends ThemedActivity {
             final String finalClientId = launchOidcClientId;
             final String finalScope    = launchOidcScope;
 
-            // Authorization code flow works better with custom URL scheme fieldbook://app/auth
+            // Authorization code flow works better with custom URL scheme (e.g. fieldbook://app/auth)
             // https://github.com/openid/AppAuth-Android/issues?q=is%3Aissue+intent+null
             Uri redirectURI = launchOidcFlow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))
-                    ? Uri.parse("https://phenoapps.org/field-book") : Uri.parse("fieldbook://app/auth");
+                    ? Uri.parse(getString(R.string.brapi_implicit_redirect_uri))
+                    : Uri.parse(getString(R.string.brapi_redirect_uri));
 
             authUtil.getAuthServiceConfiguration((authorizationServiceConfiguration, ex) -> {
 

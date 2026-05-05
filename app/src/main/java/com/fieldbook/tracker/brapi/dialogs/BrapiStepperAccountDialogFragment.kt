@@ -16,12 +16,12 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CameraActivity
-import com.fieldbook.tracker.brapi.dialogs.composables.BrapiStepperAccountForm
 import com.fieldbook.tracker.objects.BrAPIConfig
 import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.JsonUtil
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
+import org.phenoapps.brapi.ui.BrapiStepperAccountForm
 
 /**
  * Guided multi-step dialog for adding a new BrAPI server configuration.
@@ -88,7 +88,7 @@ class BrapiStepperAccountDialogFragment : BaseBrapiAccountDialogFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(STYLE_NO_FRAME, R.style.BrapiComposeDialog)
+        setStyle(STYLE_NO_FRAME, org.phenoapps.brapi.R.style.PhenoBrapiComposeDialog)
         authResponse = arguments?.getParcelable(ARG_AUTH_RESPONSE)
 
         // On first creation: reset the ViewModel to a blank state (clears any leftover data from
@@ -112,7 +112,7 @@ class BrapiStepperAccountDialogFragment : BaseBrapiAccountDialogFragment() {
                 AppTheme {
                     val uiState by viewModel.uiState.collectAsState()
                     BrapiStepperAccountForm(
-                        uiState = uiState,
+                        uiState = uiState.toProviderState(),
                         onUrlChange = viewModel::updateUrl,
                         onDisplayNameChange = viewModel::updateDisplayName,
                         onOidcUrlChange = viewModel::updateOidcUrl,

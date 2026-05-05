@@ -12,9 +12,14 @@
 
     <!-- Add Account -->
     <Preference
-        android:icon="@drawable/ic_tb_add_circle"
+        android:icon="@drawable/pheno_brapi_ic_key"
         android:key="brapi_add_account"
-        android:title="@string/brapi_add_account" />
+        android:title="@string/pheno_brapi_add_account" />
+
+    <Preference
+        android:icon="@drawable/pheno_brapi_ic_share"
+        android:key="brapi_shared_servers"
+        android:title="@string/pheno_brapi_shared_servers" />
 
     <!-- Advanced Settings (navigates to sub-screen) -->
     <Preference
@@ -35,6 +40,12 @@
     <PreferenceCategory
         android:key="brapi_available_servers_category"
         android:title="@string/brapi_section_available_servers"
+        app:iconSpaceReserved="false" />
+
+    <!-- Shared accounts from other PhenoApps — hidden when none are present -->
+    <PreferenceCategory
+        android:key="brapi_shared_accounts_category"
+        android:title="@string/pheno_brapi_section_shared_accounts"
         app:iconSpaceReserved="false" />
 
 </PreferenceScreen>

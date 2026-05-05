@@ -188,10 +188,12 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     @Override
     public void authorizeClient() {
         try {
-            // authenticate() calls the lambda synchronously on the calling thread (main thread),
-            // so use peekToken() which reads the local AccountManager cache without any IPC.
+            // Prefer the local cache; shared accounts may need AccountManager to resolve the token.
             apiClient.authenticate(t -> {
                 String token = accountHelper.peekToken();
+                if (token == null) {
+                    token = accountHelper.getTokenBlocking();
+                }
                 if (token == null) {
                     token = preferences.getString(PreferenceKeys.BRAPI_TOKEN, null);
                 }

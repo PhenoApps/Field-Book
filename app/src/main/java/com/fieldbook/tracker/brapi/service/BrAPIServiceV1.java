@@ -145,6 +145,9 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
     private String getBrapiToken() {
         String token = accountHelper.peekToken();
         if (token == null) {
+            token = accountHelper.getTokenBlocking();
+        }
+        if (token == null) {
             token = preferences.getString(PreferenceKeys.BRAPI_TOKEN, "");
         }
         return "Bearer " + token;

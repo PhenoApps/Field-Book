@@ -2,6 +2,6 @@
 <account-authenticator
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:accountType="org.phenoapps.brapi"
-    android:icon="@drawable/brapi_logo"
-    android:smallIcon="@drawable/brapi_logo"
-    android:label="@string/brapi_info_title" />
+    android:icon="@drawable/pheno_brapi_logo"
+    android:smallIcon="@drawable/pheno_brapi_logo"
+    android:label="@string/pheno_brapi_account_label" />

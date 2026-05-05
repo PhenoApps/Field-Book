@@ -1966,6 +1966,13 @@
     <string name="upload_first">Upload</string>
     <string name="download_anyway">Download</string>
     <string name="brapi_auth_token_label">BrAPI Access Token</string>
+    <string name="brapi_add_account_in_app_only">Please add BrAPI accounts from within the app.</string>
+    <string name="brapi_access_confirm_title">BrAPI Account Access</string>
+    <string name="brapi_access_confirm_message">%1$s would like to access your "%2$s" BrAPI account.</string>
+    <string name="brapi_access_confirm_allow">Allow</string>
+    <string name="brapi_access_confirm_deny">Deny</string>
+    <string name="brapi_redirect_uri" translatable="false">fieldbook://app/auth</string>
+    <string name="brapi_implicit_redirect_uri" translatable="false">https://phenoapps.org/field-book</string>
     <string name="confirm_delete_with_media_title">Delete observation</string>
     <string name="confirm_delete_with_media_message">Deleting this observation will also delete any attached media. Are you sure you want to delete this observation?</string>
     <string name="attach">Attach</string>
