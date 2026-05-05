@@ -16,12 +16,15 @@ import com.fieldbook.shared.screens.collect.CollectScreen
 import com.fieldbook.shared.screens.export.ExportScreen
 import com.fieldbook.shared.screens.fields.FieldEditorScreen
 import com.fieldbook.shared.screens.preferences.BrapiPreferencesScreen
+import com.fieldbook.shared.screens.preferences.AppearancePreferencesScreen
+import com.fieldbook.shared.screens.preferences.LanguageScreen
 import com.fieldbook.shared.screens.preferences.PreferencesScreen
 import com.fieldbook.shared.screens.preferences.StorageDefinerScreen
 import com.fieldbook.shared.screens.preferences.StoragePreferencesScreen
 import com.fieldbook.shared.screens.trait.TraitEditorScreen
 import com.fieldbook.shared.sqldelight.DriverFactory
 import com.fieldbook.shared.theme.MainTheme
+import com.fieldbook.tracker.utilities.AppLanguageUtil
 import io.github.vinceglb.filekit.core.FileKit
 
 class KmpHostActivity : ComponentActivity() {
@@ -91,6 +94,23 @@ class KmpHostActivity : ComponentActivity() {
                     KmpHostScreenType.BRAPI_STUDIES -> {
                         BrapiStudyScreen(
                             onBack = { currentScreen.value = KmpHostScreenType.CONFIG }
+                        )
+                    }
+
+                    KmpHostScreenType.APPEARANCE_PREFERENCES -> {
+                        AppearancePreferencesScreen(
+                            onBack = { currentScreen.value = KmpHostScreenType.PREFERENCES },
+                            onNavigate = { target -> currentScreen.value = target }
+                        )
+                    }
+
+                    KmpHostScreenType.LANGUAGE_PREFERENCES -> {
+                        LanguageScreen(
+                            onBack = { currentScreen.value = KmpHostScreenType.APPEARANCE_PREFERENCES },
+                            onLanguageChanged = {
+                                AppLanguageUtil.refreshAppText(this)
+                                currentScreen.value = KmpHostScreenType.APPEARANCE_PREFERENCES
+                            }
                         )
                     }
 
