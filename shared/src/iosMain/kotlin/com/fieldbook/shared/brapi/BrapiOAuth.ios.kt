@@ -1,6 +1,7 @@
 package com.fieldbook.shared.brapi
 
 import kotlinx.coroutines.suspendCancellableCoroutine
+import platform.Foundation.NSError
 import platform.AuthenticationServices.ASPresentationAnchor
 import platform.AuthenticationServices.ASWebAuthenticationPresentationContextProvidingProtocol
 import platform.AuthenticationServices.ASWebAuthenticationSession
@@ -23,9 +24,9 @@ actual suspend fun openBrapiAuthorizationUrl(authUrl: String, redirectUri: Strin
         }
 
         val session = ASWebAuthenticationSession(
-            URL = url,
-            callbackURLScheme = callbackScheme
-        ) { callbackUrl, _ ->
+            url,
+            callbackScheme
+        ) { callbackUrl: NSURL?, _: NSError? ->
             activeSession = null
             if (continuation.isActive) {
                 continuation.resume(callbackUrl?.absoluteString)
