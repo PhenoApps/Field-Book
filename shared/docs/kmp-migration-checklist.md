@@ -89,7 +89,7 @@
 | Scan                             |                    |                    |
 | Set NA                           |                    |                    |
 | Delete                           |                    |                    |
-| Data grid               | :white_check_mark: | :white_check_mark: |
+| Data grid                        | :white_check_mark: | :white_check_mark: |
 |                                  |                    |                    |
 | **Export**                       |                    |                    |
 | Basic export all opts            | :white_check_mark: | :white_check_mark: |
