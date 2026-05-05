@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- GENERAL -->
+    <!-- App -->
+    <string name="field_book">FieldBook</string>
+    <!-- Dialog -->
+    <string name="dialog_cancel">Avbryt</string>
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_yes">Ja</string>
+    <string name="dialog_no">Nej</string>
+    <string name="dialog_clear">Rensa</string>
+    <string name="dialog_close">Stäng</string>
+    <string name="dialog_confirm">Är du säker?</string>
+    <string name="dialog_import">Importera</string>
+    <string name="dialog_warning">Varning</string>
+    <string name="dialog_save">Spara</string>
+    <string name="dialog_save_error_title">Fel vid sparande</string>
+    <string name="dialog_back">Bakåt</string>
+    <string name="dialog_scan">Scanna</string>
+    <string name="dialog_sort_by">Sortera efter</string>
+    <string name="dialog_enable">Slå på</string>
+    <string name="dialog_delete">Radera</string>
+    <string name="dialog_accept">Godkänn</string>
+    <string name="barcode_scanner_text">Skanna en streckkod</string>
+    <!-- Startup  -->
+    <string name="startup_sample_data_title">Exempeldata</string>
+    <string name="startup_sample_data_message">Ladda exempeldata?</string>
+    <!-- App Intro -->
+    <string name="app_intro_intro_title_slide1">Välkommen till Field Book!</string>
+    <string name="app_intro_intro_summary_slide1">Att samla in data i fält har traditionellt krävt att man skriver och transkriberar från papper. Field Book skapades som en digital lösning för datainsamling som möjliggör ökad insamlingshastighet med ökad dataintegritet.</string>
+    <string name="app_intro_intro_title_slide2">Funktioner och anpassning</string>
+    <string name="app_intro_intro_summary_slide2">Data matas in i Field Book som specialanpassade karaktärer, utformade för att förenkla datainmatning och minimera misstag.\n\n Som standard sparas insamlade data lokalt, men Field Book stödjer Breeding API, som gör det möjligt att skicka data till BrAPI-kompatibla system.</string>
+    <string name="app_intro_required_setup_summary">För att komma igång med Field Book, ge appen nödvändiga behörigheter och definiera sedan en mapp där dina data kommer att lagras.</string>
+    <string name="app_intro_permissions_title">Behörigheter</string>
+    <string name="app_intro_permissions_warning">Godkänn nödvändiga behörigheter</string>
+    <string name="app_intro_storage_title">Definiera lagring</string>
+    <string name="app_intro_storage_summary">Definiera en mapp där dina data kommer att lagras.</string>
+    <string name="app_intro_storage_warning">Ange lagringsplats</string>
+    <string name="app_intro_required_optional_title">Valfri inställning</string>
+    <string name="app_intro_required_optional_summary">Dessa valfria inställningar anpassa Field Book, och kan justeras i sinställningarna.</string>
+    <string name="app_intro_load_sample_data_title">Ladda exempeldata</string>
+    <string name="app_intro_tutorial_title">Vägledning</string>
+    <string name="app_intro_tutorial_summary">Lägg till en hjälpikon i det översta verktygsfältet som beskriver funktioner i appen.</string>
+    <string name="app_intro_high_contrast_title">Högkontrasttema</string>
+    <string name="app_intro_high_contrast_summary">Aktivera ett tema med hög kontrast för bättre synbarhet på eInk-enheter.</string>
+    <!-- Storage Definer -->
+    <string name="storage_definer_summary">Välj eller skapa en mapp som Field Book kan använda för att lagra appdata.</string>
+    <!-- Permissions  -->
+    <string name="permission_rationale_storage_import">För att importera filer krävs åtkomst till enhetens filer.</string>
+    <string name="permission_rationale_storage_export">För att exportera data krävs åtkomst till enhetens filer.</string>
+    <string name="permission_rationale_trait_features">För att samla data krävs åtkomst till enhetens filer, mikrofon och kamera.</string>
+    <!-- Config Activity  -->
+    <string name="settings_fields">Fält</string>
+    <string name="settings_traits">Karaktärer</string>
+    <string name="settings_collect">Samla in</string>
+    <string name="settings_export">Exportera </string>
+    <string name="settings_advanced">Inställningar </string>
+    <string name="settings_profile">Profil</string>
+    <!-- Config Activity Fuzzy Search  -->
+    <string name="act_config_fuzzy_search_error">Något gick fel vid sökning efter %s</string>
+    <string name="act_config_search_fab_content_description">Sök i alla parceller och fält för att ladda/navigera till det streckkodade objekt.</string>
+    <!-- File manager  -->
+    <string name="import_source_local">Lokal lagring</string>
+    <string name="import_source_cloud">Molnlagring</string>
+    <!-- Warnings/Catches -->
+    <string name="warning_field_missing">Inget fält är laddat. Ladda ett fält innan du samlar in data.</string>
+    <string name="warning_traits_missing">Det finns inga karaktärer. Skapa karaktärerinnan du samlar in data.</string>
+    <!-- Changelog -->
+    <string name="changelog_title">Ändringslogg</string>
+    <!--  Field Grouping  -->
+    <!-- FIELDS -->
+    <!-- General -->
+    <!-- Sort -->
+    <!-- Modify -->
+    <string name="fields_export">Exportera </string>
+    <!-- Delete -->
+    <string name="fields_delete">Radera</string>
+    <string name="fields_delete_study">Ta bort fält</string>
+    <string name="fields_delete_study_confirmation">Är du säker på att du vill ta bort fältet? Detta kommer ta bort all fältets data.</string>
+    <!-- Import -->
+    <string name="fields_study_exists_message">Fältet finns redan.</string>
+    <!-- Field Creator  -->
+    <string name="dialog_field_creator_top_left">Överst till vänster</string>
+    <string name="dialog_field_creator_bottom_left">Nederst till vänster</string>
+    <string name="dialog_field_creator_top_right">Överst till höger</string>
+    <string name="dialog_field_creator_bottom_right">Nederst till höger</string>
+    <!-- Geo-Navigate to Field -->
+    <string name="menu_fields_plot_by_distance_title">Välj närmaste fält</string>
+    <string name="activity_field_editor_no_field_found">Inga koordinater kunde hittas.</string>
+    <string name="activity_field_editor_switch_field">"Växla till fält %s"</string>
+    <string name="activity_field_editor_switch_field_action">Växla</string>
+    <!-- Field Details -->
+    <string name="field_detail_title">Fältdetalj</string>
+    <string name="name_cannot_be_empty">Du måste ange ett namn.</string>
+    <string name="illegal_characters_message">Otillåtna tecken hittade: %1$s</string>
+    <string name="name_conflict_message">\"%1$s\" används redan som %2$s för ett annat fält.</string>
+    <string name="name_conflict_import_name">ii%1$s\" används redan som %2$s för ett annat fält.</string>
+    <string name="dialog_att_chooser_title_default">Välj ett attribut</string>
+    <string name="search_attribute_dialog_title">Ange sök-ID</string>
+    <string name="dialog_att_chooser_unique_attributes">Unika egenskaper</string>
+    <!--    <string name="field_default_sort_order">import order</string>-->
+    <!-- Field Detail Charts -->
+    <!-- Semantic dates -->
+    <!-- TRAITS -->
+    <!-- Sort -->
+    <string name="traits_sort_name">Namn</string>
+    <string name="traits_sort_visibility">Synlighet</string>
+    <string name="traits_sort_format">Formattera</string>
+    <!-- Trait import/export -->
+    <string name="traits_dialog_import">Importera</string>
+    <string name="traits_export_check">Exportera vald karaktärslista?</string>
+    <string name="traits_dialog_export">Exportera </string>
+    <string name="traits_toolbar_delete_all">Ta bort alla karaktärer</string>
+    <!-- Trait item menu -->
+    <string name="traits_options_copy">Kopiera</string>
+    <string name="traits_options_edit">Redigera</string>
+    <string name="traits_options_delete">Ta bort</string>
+    <string name="traits_options_delete_title">Ta bort karaktär</string>
+    <string name="traits_warning_delete">Om du tar bort en karaktär tas även data som samlats på karaktären bort. Är du säker på att du vill ta bort karaktären?</string>
+    <!-- Trait formats -->
+    <string name="traits_format_numeric">Numerisk</string>
+    <string name="traits_format_categorical">Kategorisk</string>
+    <string name="traits_format_date">Datum</string>
+    <string name="traits_format_percent">Procent</string>
+    <string name="traits_format_counter">Räknare</string>
+    <string name="traits_format_disease_rating">Sjukdomsgradering</string>
+    <string name="traits_format_boolean">Booleansk</string>
+    <string name="traits_format_photo">Foto</string>
+    <string name="traits_format_audio">Ljud</string>
+    <string name="traits_format_multicategorical">Flerkategorisk</string>
+    <string name="traits_format_location">Plats</string>
+    <string name="traits_format_barcode">Streckkod</string>
+    <string name="traits_format_labelprint">Skriv Zebra-etikett</string>
+    <!-- Trait Creation Dialog -->
+    <string name="traits_create_format">Formattera</string>
+    <string name="traits_create_value_default">Standard</string>
+    <string name="traits_create_value_minimum">Minsta</string>
+    <string name="traits_create_value_maximum">Största</string>
+    <string name="traits_create_details">Detaljer</string>
+    <string name="traits_create_optional">Valbar</string>
+    <string name="traits_create_categories_title">Kategorier</string>
+    <string name="traits_create_photo_maximum">Högsta antal bilder</string>
+    <string name="traits_create_true">Sant</string>
+    <string name="traits_create_false">Falskt </string>
+    <string name="traits_create_categories_text">Använd / för att separera kategorier</string>
+    <string name="traits_create_warning_name_blank">Karaktärsnamn får inte vara tomt</string>
+    <string name="traits_create_warning_duplicate">Karaktären finns redan </string>
+    <string name="traits_create_warning_numeric_required">Standardvärde samt minsta och största krävs och måste vara tal.</string>
+    <string name="edit_traits">Redigera</string>
+    <!-- COLLECT -->
+    <!-- Validation -->
+    <string name="trait_error_minimum_value">Värdet är mindre än det minsta tillåtna</string>
+    <string name="trait_error_maximum_value">Värdet är större än det största tillåtna </string>
+    <string name="trait_error_disease_severity">Allvarligheten är redan sparad</string>
+    <!-- Toolbar -->
+    <string name="main_toolbar_resources">Resurser</string>
+    <string name="main_trait_details">Karaktärsdetaljer</string>
+    <string name="main_infobar_data_missing">Ingen data</string>
+    <string name="main_toolbar_next_entry_no_data">Nästa post utan data</string>
+    <!-- InfoBars -->
+    <string name="dialog_att_chooser_traits">Karaktärer</string>
+    <!-- ID/Barcode Search -->
+    <string name="main_toolbar_moveto_no_match">Inget värde matchar</string>
+    <string name="main_toolbar_moveto">Gå till ID</string>
+    <string name="main_toolbar_barcode_scan">Scanna streckkod</string>
+    <string name="main_toolbar_moveto_scan">Scanna</string>
+    <!-- Search  -->
+    <string name="main_toolbar_search">Sök</string>
+    <string name="search_dialog_search">Sök</string>
+    <!--- Profile -->
+    <string name="activity_collect_dialog_verify_no_button">Nej</string>
+    <string name="activity_collect_dialog_verify_yes_button">Ja</string>
+    <!--- Datagrid -->
+    <!--- Lock -->
+    <!-- Trait Layout: Photo -->
+    <string name="trait_error_hardware_missing">Din enhet saknar nödvändig hårdvara för denna funktion.</string>
+    <string name="trait_delete_warning_photo">Är su säker på att du vill ta bort bilden?</string>
+    <!-- Trait Layout: GNSS -->
+    <!-- Trait Layout: Date -->
+    <!-- Trait Layout: Boolean -->
+    <!-- Trait Layout: GoPro -->
+    <!-- Trait Layout: USB Camera -->
+    <!--- Trait Layout: Zebra label print -->
+    <string name="trait_layout_data_stored">Sparat</string>
+    <string name="trait_layout_print_label_size_title">Storlek:</string>
+    <string name="trait_layout_print_barcode_field_title">Streckkod:</string>
+    <string name="trait_layout_print_label_copies_title">Kopior:</string>
+    <!--- Trait Layout: Counter -->
+    <!--- Trait Layout: Location -->
+    <!--- Text to Speech Strings -->
+    <!--- Summary -->
+    <!--- Repeated measures -->
+    <string name="dialog_multi_measure_delete">Radera</string>
+    <!--- GeoNav -->
+    <!--- Content Descriptions -->
+    <!-- Observation Info -->
+    <!-- Skip Entries -->
+    <!-- EXPORT -->
+    <!-- Export dialog -->
+    <string name="export_format_database">Databas</string>
+    <string name="export_format_table">Tabell</string>
+    <string name="export_file_name">Filnamn </string>
+    <string name="export_content_columns_title">Fältets kolumner</string>
+    <string name="export_content_columns_all">Alla importerade kolumner</string>
+    <string name="export_content_columns_unique">Endast unikt ID</string>
+    <string name="export_content_traits_all">Alla karaktärer</string>
+    <string name="export_content_traits_active">Endast aktiva karaktärer</string>
+    <string name="export_error_general">Fel vid export</string>
+    <string name="export_error_data_missing">Det finns ingen data att exportera</string>
+    <string name="export_complete">Exporten är klar</string>
+    <string name="export_progress">Exporterar...</string>
+    <string name="export_error_missing_format">Typ av export måste väljas </string>
+    <string name="export_error_missing_column">Fältkolumn måste väljas </string>
+    <string name="export_error_missing_trait">Typ av karaktär måste väljas </string>
+    <string name="export_overwrite">Skriv över tidigare export</string>
+    <!-- Citation -->
+    <!-- SETTINGS -->
+    <!-- General -->
+    <!-- Profile -->
+    <string name="preferences_profile_title">Profil</string>
+    <!-- Features -->
+    <!-- Appearance -->
+    <string name="preferences_appearance_title">Utseende</string>
+    <string name="preferences_appearance_theme_title">Tema</string>
+    <string name="theme_default">Standard</string>
+    <string name="preferences_appearance_language">Språk</string>
+    <string name="preferences_appearance_language_description">Systemets språk</string>
+    <string name="preferences_appearance_toolbar_customize_search">Sök</string>
+    <string name="preferences_appearance_toolbar_customize_resources">Resurser</string>
+    <string name="preferences_appearance_toolbar_customize_summary">Sammanfattning </string>
+    <string name="preferences_appearance_toolbar_customize_lock">Lås</string>
+    <string name="preferences_general_feature_datagrid">Tabell</string>
+    <string name="preferences_appearance_infobar_number_description">Justera antal InfoBars som visas i huvudvyn</string>
+    <string name="preferences_appearance_quickgoto">Snabbhopp</string>
+    <!-- Behavior -->
+    <string name="preferences_behavior_title">Beteende</string>
+    <string name="preferences_behavior_return_character_do_nothing">Gör ingenting</string>
+    <string name="preferences_general_use_day_number_description">Använd dig på året istället för datum vid registrering</string>
+    <!-- Location -->
+    <string name="preferences_location_title">Plats</string>
+    <string name="pref_geonav_log_both">Båda</string>
+    <!-- Sounds -->
+    <string name="preferences_sounds">Ljud</string>
+    <!-- BrAPI preferences are in the BrAPI section below -->
+    <!-- Storage -->
+    <string name="preferences_storage_database_title">Databas</string>
+    <string name="database_dialog_title">Databas</string>
+    <string name="database_reset_warning1">All data kommer raderas. Är du säker på att du vill återställa databasen?</string>
+    <string name="database_reset_warning2">En databasåterställning kan inte ångras. Appen kommer stängas efter att databasen tömts. Är du verkligen säker på att du vill förtsätta?</string>
+    <string name="database_reset_message">Databasen har tagits bort.</string>
+    <string name="preferences_storage_settings_title">Inställningar </string>
+    <!-- Experimental -->
+    <!-- STATISTICS -->
+    <string name="stat_title_fields">Fält</string>
+    <string name="stat_title_entries">Poster </string>
+    <!-- ABOUT -->
+    <!-- App  -->
+    <string name="about_title">Om</string>
+    <!-- Lead  -->
+    <string name="about_project_lead_title">Projektledare</string>
+    <!-- Support  -->
+    <string name="about_contributors_funding_title">Finansiering</string>
+    <!-- PhenoApps  -->
+    <!-- Technical  -->
+    <string name="about_technical_title">Technical Details1</string>
+    <!-- Update -->
+    <!-- BRAPI -->
+    <!-- BrAPI preferences -->
+    <string name="brapi_info_title">Information om BrAPI-synkning</string>
+    <string name="brapi_choice_to_make_default_negative">Avbryt</string>
+    <string name="brapi_choice_to_make_default_positive">Spara</string>
+    <!-- Community Servers -->
+    <!-- Authorization -->
+    <string name="brapi_auth_btn">Logga in på sida</string>
+    <string name="brapi_auth_needed_title">Inloggning krävs</string>
+    <!-- BrAPI Import -->
+    <string name="brapi_study_location">Plats</string>
+    <!-- BrAPI Export -->
+    <string name="brapi_export_button">Exportera </string>
+    <string name="brapi_close_button">Stäng</string>
+    <!-- Pagination -->
+    <string name="prev">Föreg.</string>
+    <string name="page_one_of_one">Sida 1 av 1</string>
+    <!-- General -->
+    <string name="brapi_info_message">Karaktärer och fält som importerats via BrAPI kommer kunna exportera sina observationer via BrAPI-exportfunktionen. 
+Karaktärer och fält som skapats manuellt eller importerats via CSV kommer behöva exporteras via CSV.</string>
+    <!-- APP INTRO  -->
+    <string name="intro_tutorial_radio_item_yes">Ja</string>
+    <string name="intro_tutorial_radio_item_no">Nej</string>
+    <!-- TUTORIAL -->
+    <string name="tutorial_dialog_title">Vägledning</string>
+    <string name="tutorial_dialog_description">Vill du ha igång vägledningen? Inställningen kan ändras i inställningsmenyn.</string>
+    <string name="tutorial_main_infobars_description">InfoBars visar extra data för respektive post och kan ändras med rullgardinsmenyerna.</string>
+    <string name="tutorial_main_traits_title">Karaktär</string>
+    <string name="tutorial_main_traits_description">De små gröna pilarna bläddrar mellan karaktärer.</string>
+    <string name="tutorial_main_traitlist_title">Karaktärer</string>
+    <string name="tutorial_main_traitlist_description">Karaktären som samlas in. En lista med aktiva karaktärer visas när du klicksr på den aktiva karaktären.</string>
+    <string name="tutorial_main_entries_title">Poster </string>
+    <string name="tutorial_main_entries_description">De stora, svarta pilarna bläddrar mellan poster.</string>
+    <string name="tutorial_main_navinfo_title">Sortera kolumner</string>
+    <string name="tutorial_main_navinfo_description">Här visar första och andra ordningen</string>
+    <string name="tutorial_main_datacollect_title">Datainmatning</string>
+    <string name="tutorial_main_datacollect_description">Data matas in i skärmens nedre del. Olika typer av karaktärer har olika layout.</string>
+    <string name="tutorial_main_na_title">Saknad data</string>
+    <string name="tutorial_main_na_description">NA-knappen används för att markera saknade värden.</string>
+    <string name="tutorial_main_delete_title">Radera data</string>
+    <string name="tutorial_main_delete_description">Med denna knapp raderas data</string>
+    <string name="tutorial_main_search_title">Sök</string>
+    <string name="tutorial_main_search_description">Sökikonen tillåter databasfrågor</string>
+    <string name="tutorial_main_resources_title">Resurser</string>
+    <string name="tutorial_fields_add_title">Lägg till fält </string>
+    <string name="tutorial_fields_add_description">Importera en fältfil</string>
+    <string name="tutorial_main_resources_description">Detta visar en lista med filer i resursmappen.</string>
+    <string name="tutorial_main_summary_title">Sammanfattning </string>
+    <string name="tutorial_main_summary_description">Detta visar en sammanfattning av all data för den aktuella posten.</string>
+    <string name="tutorial_main_lockdata_title">Lås data</string>
+    <string name="tutorial_main_lockdata_description">Detta låser datainmatningen </string>
+    <string name="tutorial_settings_fields_title">Fält</string>
+    <string name="tutorial_settings_fields_description">Låter dig importera och hantera fält</string>
+    <string name="tutorial_settings_fields_import">Importera först en fältfil för att börja använda FieldBook.</string>
+    <string name="tutorial_settings_traits_title">Karaktärer </string>
+    <string name="tutorial_settings_traits_description">Låter dig lägga till, importera och hantera karaktärer</string>
+    <string name="tutorial_settings_collect_title">Registrera</string>
+    <string name="tutorial_settings_collect_description">Låter dig registrera fenotypisk data</string>
+    <string name="tutorial_settings_settings_title">Inställningar </string>
+    <string name="tutorial_settings_settings_description">Tillåter ytterligare konfigurering av datainsamlingen </string>
+    <string name="tutorial_settings_export_title">Export </string>
+    <string name="tutorial_settings_export_description">Data kan exporteras i två format: databas och tabell.</string>
+    <string name="tutorial_fields_file_description">Filer måste innehålla tre kolumner: ID, första ordning och andra ordning. Första och andra ordningen används för navigering i fältet.</string>
+    <string name="tutorial_fields_select_title">Aktivt fält </string>
+    <string name="tutorial_fields_select_description">Ett fält väljs för datainsamling efter att ha importerats.</string>
+    <string name="tutorial_fields_delete_title">Ta bort fält</string>
+    <string name="tutorial_main_datagrid_title">Tabell</string>
+    <string name="act_brapi_filter_import">Importera</string>
+    <!-- base camera strings -->
+    <string name="view_trait_photo_settings_camera_custom">Standard</string>
+    <!-- usb camera trait -->
+    <!-- gopro -->
+    <!-- canon camera strings -->
+    <!-- spectral trait strings -->
+    <string name="brapi_traits_filter_title">Karaktärer</string>
+    <string name="dialog_quick_goto_title">Snabbhopp</string>
+    <string name="traits_sort_default">Standard</string>
+    <!--  NearbyShare  -->
+    <!-- Stop Watch Trait Button content descriptions-->
+    <string name="save">Spara</string>
+</resources>

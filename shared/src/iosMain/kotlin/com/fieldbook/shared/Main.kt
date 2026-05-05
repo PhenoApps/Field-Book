@@ -11,6 +11,8 @@ import com.fieldbook.shared.screens.collect.CollectScreen
 import com.fieldbook.shared.screens.export.ExportScreen
 import com.fieldbook.shared.screens.fields.FieldEditorScreen
 import com.fieldbook.shared.screens.preferences.BrapiPreferencesScreen
+import com.fieldbook.shared.screens.preferences.AppearancePreferencesScreen
+import com.fieldbook.shared.screens.preferences.LanguageScreen
 import com.fieldbook.shared.screens.preferences.PreferencesScreen
 import com.fieldbook.shared.screens.preferences.StorageDefinerScreen
 import com.fieldbook.shared.screens.preferences.StoragePreferencesScreen
@@ -50,6 +52,17 @@ fun MainViewController(driverFactory: DriverFactory) = ComposeUIViewController {
             KmpHostScreenType.BRAPI_STUDIES -> BrapiStudyScreen(
                 onBack = { currentScreen = KmpHostScreenType.CONFIG }
             )
+
+            KmpHostScreenType.APPEARANCE_PREFERENCES -> AppearancePreferencesScreen(
+                onBack = { currentScreen = KmpHostScreenType.PREFERENCES },
+                onNavigate = { target -> currentScreen = target }
+            )
+
+            KmpHostScreenType.LANGUAGE_PREFERENCES -> LanguageScreen(
+                onBack = { currentScreen = KmpHostScreenType.APPEARANCE_PREFERENCES },
+                onLanguageChanged = { currentScreen = KmpHostScreenType.APPEARANCE_PREFERENCES }
+            )
+
 
             KmpHostScreenType.STORAGE_PREFERENCES -> StoragePreferencesScreen(
                 onBack = { currentScreen = KmpHostScreenType.PREFERENCES },
