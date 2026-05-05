@@ -335,6 +335,7 @@ kotlin {
                 implementation(libs.multiplatform.settings)
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.lifecycle.viewmodel.compose)
+                implementation(libs.navigation.compose)
                 implementation(libs.okio)
                 implementation(libs.permissions)
                 implementation(libs.permissions.camera)

@@ -92,7 +92,6 @@ private data class LanguageItem(
 @Composable
 fun LanguageScreen(
     onBack: (() -> Unit)? = null,
-    onLanguageChanged: (() -> Unit)? = null
 ) {
     val settings = remember { Settings() }
     val languages = listOf(
@@ -205,7 +204,7 @@ fun LanguageScreen(
                 TextButton(
                     onClick = {
                         showWarning = false
-                        onLanguageChanged?.invoke()
+                        // onLanguageChanged?.invoke()
                     }
                 ) {
                     Text(stringResource(Res.string.dialog_ok))
