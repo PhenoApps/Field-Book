@@ -10,6 +10,7 @@ import com.fieldbook.shared.KmpApp
 import com.fieldbook.shared.KmpHostScreenType
 import com.fieldbook.shared.sqldelight.DriverFactory
 import com.fieldbook.shared.theme.MainTheme
+import com.fieldbook.tracker.utilities.AppLanguageUtil
 import io.github.vinceglb.filekit.core.FileKit
 
 class KmpHostActivity : ComponentActivity() {
