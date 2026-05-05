@@ -110,7 +110,7 @@ class BrapiObservationSyncSupport(
                 }
 
                 val repKey = observationUnitDbId to externalTraitDbId
-                val nextRep = repBase.getOrDefault(repKey, 0) + 1
+                val nextRep = (repBase[repKey] ?: 0) + 1
                 repBase[repKey] = nextRep
 
                 if (hasObservation(fieldId, observationUnitDbId, traitId, nextRep.toString())) {
