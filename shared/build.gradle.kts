@@ -369,6 +369,8 @@ kotlin {
                 implementation("app.cash.sqldelight:android-driver:2.1.0")
                 implementation(libs.lifecycle.viewmodel.compose)
                 implementation(libs.ktor.client.okhttp)
+                implementation("androidx.appcompat:appcompat:1.7.1")
+                implementation("androidx.core:core-ktx:1.17.0")
                 implementation("com.github.phenoapps:phenolib:v0.9.53")
             }
         }
