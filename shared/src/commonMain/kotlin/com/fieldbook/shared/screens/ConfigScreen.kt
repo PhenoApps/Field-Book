@@ -137,7 +137,8 @@ fun ConfigScreen(
         ),
         ConfigItem(
             title = Res.string.about_title,
-            icon = Res.drawable.ic_tb_info
+            icon = Res.drawable.ic_tb_info,
+            destination = KmpHostScreenType.ABOUT
         ),
     )
     Surface(modifier = Modifier.fillMaxSize()) {
