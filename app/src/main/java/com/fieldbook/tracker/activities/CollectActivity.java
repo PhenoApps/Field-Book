@@ -60,9 +60,9 @@ import com.fieldbook.tracker.database.repository.SpectralRepository;
 import com.fieldbook.tracker.database.repository.TraitRepository;
 import com.fieldbook.tracker.database.viewmodels.CollectViewModel;
 import com.fieldbook.tracker.database.viewmodels.SpectralViewModel;
-import com.fieldbook.tracker.devices.camera.UsbCameraApi;
-import com.fieldbook.tracker.devices.camera.GoProApi;
 import com.fieldbook.tracker.devices.camera.CanonApi;
+import com.fieldbook.tracker.devices.camera.GoProApi;
+import com.fieldbook.tracker.devices.camera.UsbCameraApi;
 import com.fieldbook.tracker.devices.spectrometers.innospectra.InnoSpectraViewModel;
 import com.fieldbook.tracker.dialogs.GeoNavCollectDialog;
 import com.fieldbook.tracker.dialogs.InvalidValueDialog;
@@ -79,27 +79,27 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.InfoBarModel;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.TraitObject;
-import com.fieldbook.tracker.preferences.PreferenceKeys;
-import com.fieldbook.tracker.preferences.models.ReturnCharacterMode;
-import com.fieldbook.tracker.preferences.enums.BarcodeScanningOptions;
-import com.fieldbook.tracker.traits.AbstractCameraTrait;
-import com.fieldbook.tracker.traits.InnoSpectraTraitLayout;
-import com.fieldbook.tracker.traits.SpectralTraitLayout;
-import com.fieldbook.tracker.traits.formats.Formats;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.PreferenceKeys;
+import com.fieldbook.tracker.preferences.enums.BarcodeScanningOptions;
+import com.fieldbook.tracker.preferences.models.ReturnCharacterMode;
+import com.fieldbook.tracker.traits.AbstractCameraTrait;
 import com.fieldbook.tracker.traits.AudioTraitLayout;
 import com.fieldbook.tracker.traits.BaseTraitLayout;
 import com.fieldbook.tracker.traits.CanonTraitLayout;
 import com.fieldbook.tracker.traits.GNSSTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
-import com.fieldbook.tracker.traits.formats.feature.Scannable;
+import com.fieldbook.tracker.traits.SpectralTraitLayout;
+import com.fieldbook.tracker.traits.formats.Formats;
 import com.fieldbook.tracker.traits.formats.TraitFormat;
 import com.fieldbook.tracker.traits.formats.coders.StringCoder;
+import com.fieldbook.tracker.traits.formats.feature.Scannable;
 import com.fieldbook.tracker.traits.formats.presenters.ValuePresenter;
 import com.fieldbook.tracker.utilities.CameraXFacade;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.DocumentTreeUtil;
+import com.fieldbook.tracker.utilities.ExifUtil;
 import com.fieldbook.tracker.utilities.FfmpegHelper;
 import com.fieldbook.tracker.utilities.FieldAudioHelper;
 import com.fieldbook.tracker.utilities.FieldSwitchImpl;
@@ -119,7 +119,6 @@ import com.fieldbook.tracker.utilities.SensorHelper;
 import com.fieldbook.tracker.utilities.SnackbarUtils;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
-import com.fieldbook.tracker.utilities.ExifUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.VerifyPersonHelper;
 import com.fieldbook.tracker.utilities.VibrateUtil;
@@ -146,11 +145,11 @@ import org.threeten.bp.OffsetDateTime;
 import org.threeten.bp.format.DateTimeFormatter;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -794,17 +793,20 @@ public class CollectActivity extends ThemedActivity
         com.fieldbook.tracker.ui.BottomToolbarListener toolbarListener = new com.fieldbook.tracker.ui.BottomToolbarListener() {
             @Override
             public void onMissing() {
-                triggerTts(naTts);
-                TraitObject currentTrait = traitBox.getCurrentTrait();
-                if (currentTrait != null) {
-                    String format = currentTrait.getFormat();
-                    if (Formats.Companion.isCameraTrait(format)) {
-                        ((AbstractCameraTrait) traitLayouts.getTraitLayout(format)).setImageNa();
-                    } else if (Formats.Companion.isSpectralFormat(format)) {
-                        ((SpectralTraitLayout) traitLayouts.getTraitLayout(format)).setNa();
-                    } else {
-                        updateObservation(currentTrait, "NA", null);
-                        setNaText();
+
+                if (!isDataLocked()) {
+                    triggerTts(naTts);
+                    TraitObject currentTrait = traitBox.getCurrentTrait();
+                    if (currentTrait != null) {
+                        String format = currentTrait.getFormat();
+                        if (Formats.Companion.isCameraTrait(format)) {
+                            ((AbstractCameraTrait) traitLayouts.getTraitLayout(format)).setImageNa();
+                        } else if (Formats.Companion.isSpectralFormat(format)) {
+                            ((SpectralTraitLayout) traitLayouts.getTraitLayout(format)).setNa();
+                        } else {
+                            updateObservation(currentTrait, "NA", null);
+                            setNaText();
+                        }
                     }
                 }
             }
@@ -818,47 +820,63 @@ public class CollectActivity extends ThemedActivity
 
             @Override
             public void onDelete() {
-                // check for attached media on the current observation
-                ObservationModel obs = null;
-                try {
-                    obs = getCurrentObservation();
-                } catch (Exception ignored) {}
 
-                if (obs != null) {
-                    boolean hasMedia = obs.getAttachedMediaCount() > 0;
+                if (!isDataLocked()) {
+                    // check for attached media on the current observation
+                    ObservationModel obs = null;
+                    try {
+                        obs = getCurrentObservation();
+                    } catch (Exception ignored) {}
 
-                    if (hasMedia) {
-                        // Warn the user that attached media will also be removed
-                        ObservationModel finalObs = obs;
-                        new AlertDialog.Builder(CollectActivity.this, R.style.AppAlertDialog)
-                                .setTitle(R.string.confirm_delete_with_media_title)
-                                .setMessage(getString(R.string.confirm_delete_with_media_message))
-                                .setPositiveButton(R.string.delete, (dialog, which) -> {
-                                    // delete attached media files
-                                    try {
-                                        deleteMediaUrisForObservation(finalObs);
-                                    } catch (Exception e) {
-                                        Log.e(TAG, "Error deleting attached media", e);
-                                    }
+                    if (obs != null) {
+                        boolean hasMedia = obs.getAttachedMediaCount() > 0;
 
-                                    // proceed with existing delete behavior
-                                    performTraitDeleteAfterMediaCheck();
-                                })
-                                .setNegativeButton(android.R.string.cancel, null)
-                                .show();
-                        return;
+                        if (hasMedia) {
+                            // Warn the user that attached media will also be removed
+                            ObservationModel finalObs = obs;
+                            new AlertDialog.Builder(CollectActivity.this, R.style.AppAlertDialog)
+                                    .setTitle(R.string.confirm_delete_with_media_title)
+                                    .setMessage(getString(R.string.confirm_delete_with_media_message))
+                                    .setPositiveButton(R.string.delete, (dialog, which) -> {
+                                        // delete attached media files
+                                        try {
+                                            deleteMediaUrisForObservation(finalObs);
+                                        } catch (Exception e) {
+                                            Log.e(TAG, "Error deleting attached media", e);
+                                        }
+
+                                        // proceed with existing delete behavior
+                                        performTraitDeleteAfterMediaCheck();
+                                    })
+                                    .setNegativeButton(android.R.string.cancel, null)
+                                    .show();
+                            return;
+                        }
                     }
-                }
 
-                // If no media or no current observation, proceed with original behavior
-                performTraitDeleteAfterMediaCheck();
+                    // If no media or no current observation, proceed with original behavior
+                    performTraitDeleteAfterMediaCheck();
+                }
             }
 
             @Override
             public void onDeleteLong() {
-                ObservationModel[] models = database.getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId());
-                if (models.length > 0) {
-                    showConfirmMultiMeasureDeleteDialog(java.util.List.of(models));
+
+                List<Integer> savedIds = collectInputView.getSavedIds();
+
+                if (!isDataLocked()) {
+                    ObservationModel[] models = database.getRepeatedValues(getStudyId(), getObservationUnit(), getTraitDbId());
+                    ArrayList<ObservationModel> deleteable = new ArrayList<>();
+                    for (ObservationModel m : models) {
+                        if (dataLocked == LOCKED || dataLocked == FROZEN) {
+                            if (!savedIds.contains(m.getInternal_id_observation())) {
+                                deleteable.add(m);
+                            }
+                        } else deleteable.add(m);
+                    }
+                    if (!deleteable.isEmpty()) {
+                        showConfirmMultiMeasureDeleteDialog(deleteable);
+                    }
                 }
             }
 
@@ -1972,7 +1990,10 @@ public class CollectActivity extends ThemedActivity
 
             return true;
         } else if (itemId == R.id.action_act_collect_repeated_values_indicator) {
-            showRepeatedMeasuresDeleteDialog();
+
+            if (!isDataLocked()) {
+                showRepeatedMeasuresDeleteDialog();
+            }
 
             return true;
         }
@@ -1986,9 +2007,17 @@ public class CollectActivity extends ThemedActivity
 
         ArrayList<String> is = new ArrayList<>();
         ArrayList<ObservationModel> observations = new ArrayList<>();
+        List<Integer> savedIds = collectInputView.getSavedIds();
 
         for (ObservationModel m: values) {
             if (!m.getValue().isEmpty()) {
+
+                if (dataLocked == LOCKED || dataLocked == FROZEN) {
+                    if (savedIds.contains(m.getInternal_id_observation())) {
+                        continue;
+                    }
+                }
+
                 TraitObject trait = database.getTraitById(String.valueOf(m.getObservation_variable_db_id()));
                 String format = m.getObservation_variable_field_book_format();
                 if (format != null) {
@@ -2156,7 +2185,8 @@ public class CollectActivity extends ThemedActivity
             enableDataEntry();
         } else {
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_lock_clock);
-            if (collectInputView.getText().isEmpty()) {
+            // For repeated measures, never block the add new repeated measure or navigation buttons.
+            if (collectInputView.isRepeatEnabled() || !collectInputView.getIsObservationSaved()) {
                 enableDataEntry();
             } else disableDataEntry(R.string.activity_collect_frozen_state);
         }
@@ -2176,7 +2206,8 @@ public class CollectActivity extends ThemedActivity
             enableDataEntry();
         } else {
             systemMenu.findItem(R.id.lockData).setIcon(R.drawable.ic_lock_clock);
-            if (collectInputView.getText().isEmpty()) {
+            // For repeated measures, never block the add new repeated measure or navigation buttons.
+            if (collectInputView.isRepeatEnabled() || !collectInputView.getIsObservationSaved()) {
                 enableDataEntry();
             } else disableDataEntry(R.string.activity_collect_frozen_state);
         }
@@ -2954,7 +2985,7 @@ public class CollectActivity extends ThemedActivity
      */
     public boolean isDataLocked() {
         return (dataLocked == LOCKED)
-                || (!collectInputView.getText().isEmpty() && dataLocked == FROZEN);
+                || (collectInputView.getIsObservationSaved() && dataLocked == FROZEN);
     }
 
     public boolean isFrozen() {
