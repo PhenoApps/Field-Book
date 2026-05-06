@@ -73,7 +73,8 @@ fun PreferencesScreen(
         PreferenceSectionItem(
             icon = Res.drawable.ic_star_circle_outline,
             title = Res.string.preferences_features_title,
-            key = "pref_key_feature_settings"
+            key = "pref_key_feature_settings",
+            destination = KmpHostScreenType.FEATURE_PREFERENCES
         ),
         PreferenceSectionItem(
             icon = Res.drawable.ic_pref_appearance,

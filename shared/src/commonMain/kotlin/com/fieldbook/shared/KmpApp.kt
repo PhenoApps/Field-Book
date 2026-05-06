@@ -14,6 +14,7 @@ import com.fieldbook.shared.screens.export.ExportScreen
 import com.fieldbook.shared.screens.fields.FieldEditorScreen
 import com.fieldbook.shared.screens.preferences.AppearancePreferencesScreen
 import com.fieldbook.shared.screens.preferences.BrapiPreferencesScreen
+import com.fieldbook.shared.screens.preferences.FeaturePreferenceScreen
 import com.fieldbook.shared.screens.preferences.LanguageScreen
 import com.fieldbook.shared.screens.preferences.PreferencesScreen
 import com.fieldbook.shared.screens.preferences.StorageDefinerScreen
@@ -85,6 +86,12 @@ fun KmpApp(
 
         composable(KmpHostScreenType.BRAPI_STUDIES.route) {
             BrapiStudyScreen(
+                onBack = { navController.navigateBackOrExit(onExit) },
+            )
+        }
+
+        composable(KmpHostScreenType.FEATURE_PREFERENCES.route) {
+            FeaturePreferenceScreen(
                 onBack = { navController.navigateBackOrExit(onExit) },
             )
         }

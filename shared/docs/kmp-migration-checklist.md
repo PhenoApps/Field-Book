@@ -135,7 +135,7 @@
 | ...                              |                    |                    |
 |                                  |                    |                    |
 | **Export**                       |                    |                    |
-| Export to BrAPI                  |                    |                    |
+| Export to BrAPI                  | :white_check_mark: |                    |
 |                                  |                    |                    |
 | ...                              |                    |                    |
 |                                  |                    |                    |
@@ -144,14 +144,14 @@
 |                                  |                    |                    |
 | **Settings/BrAPI/Navbar**        |                    |                    |
 | Scan barcode                     |                    |                    |
-| Authorize                        |                    |                    |
+| Authorize                        | :white_check_mark: |                    |
 |                                  |                    |                    |
 | **Settings/BrAPI/Server**        |                    |                    |
 | Base URL                         | :white_check_mark: | :white_check_mark: |
 | Authorize                        | :white_check_mark: |                    |
 | Display name                     |                    |                    |
 | Auto-configure                   |                    |                    |
-| Logout                           |                    |                    |
+| Logout                           | :white_check_mark: |                    |
 |                                  |                    |                    |
 | **Settings/BrAPI/Authorization** |                    |                    |
 | OIDC Flow / Implicit Grant       | :white_check_mark: |                    |
@@ -161,7 +161,7 @@
 | OIDC Scope                       |                    |                    |
 |                                  |                    |                    |
 | **Settings/BrAPI/Advanced**      |                    |                    |
-| BrAPI version / V1               |                    |                    |
+| BrAPI version / V1               | :white_check_mark: |                    |
 | BrAPI version / V2               | :white_check_mark: |                    |
 | Page size                        |                    |                    |
 | Chunk size                       |                    |                    |
