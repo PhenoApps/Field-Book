@@ -111,6 +111,16 @@ class TraitObject {
 
     companion object {
 
+        private const val RESOURCE_PREFIX = "resources/"
+
+        private fun normalizeResourcesPrefix(value: String): String {
+            val trimmed = value.trim()
+            if (trimmed.isEmpty()) return ""
+            if (!trimmed.startsWith(RESOURCE_PREFIX, ignoreCase = true)) return trimmed
+            // canonicalize to lowercase prefix
+            return RESOURCE_PREFIX + trimmed.substringAfter(RESOURCE_PREFIX, "")
+        }
+
         fun fromJson(json: TraitJson, maxPosition: Int, originalFileName: String) = TraitObject().apply {
             name = json.name
             alias = json.alias ?: json.name
@@ -128,7 +138,11 @@ class TraitObject {
                 val def =
                     TraitAttributes.byKey(key)
                 if (def != null) {
-                    setAttributeValue(def, stringValue)
+                    if (def == TraitAttributes.RESOURCE_FILE) {
+                        setAttributeValue(def, normalizeResourcesPrefix(stringValue))
+                    } else {
+                        setAttributeValue(def, stringValue)
+                    }
                 }
             }
         }
@@ -309,7 +323,13 @@ class TraitObject {
         val map = mutableMapOf<String, JsonElement>()
 
         for (def in TraitAttributes.ALL) {
-            val value = attributeValues.getString(def)
+            val rawValue = attributeValues.getString(def)
+            val value = if (def == TraitAttributes.RESOURCE_FILE) {
+                // Keep legacy values intact; only normalize the canonical portable prefix.
+                normalizeResourcesPrefix(rawValue)
+            } else {
+                rawValue
+            }
             if (value.isNotEmpty() && value != def.defaultValue) {
                 map[def.key] = JsonPrimitive(value)
             }
