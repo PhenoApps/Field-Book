@@ -9,7 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import org.phenoapps.brapi.BrapiAccountConstants
 
-class BrapiAccountRepository(
+open class BrapiAccountRepository(
     private val context: Context,
     private val preferences: SharedPreferences,
     private val preferenceKeys: BrapiPreferenceKeys,

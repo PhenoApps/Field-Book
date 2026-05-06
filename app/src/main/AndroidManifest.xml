@@ -184,10 +184,6 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activities.brapi.BrapiAccessConfirmActivity"
-            android:exported="true"
-            android:theme="@style/Theme.AppCompat.Light.Dialog.Alert" />
-        <activity
             android:name=".activities.brapi.BrapiAuthActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:exported="true"

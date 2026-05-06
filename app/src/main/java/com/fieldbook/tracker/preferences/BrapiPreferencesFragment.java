@@ -36,10 +36,8 @@ import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity;
 import com.fieldbook.tracker.brapi.BrapiAuthenticator;
 import com.fieldbook.tracker.brapi.dialogs.BrapiManualAccountDialogFragment;
 import com.fieldbook.tracker.brapi.dialogs.BrapiStepperAccountDialogFragment;
-import com.fieldbook.tracker.objects.BrAPIConfig;
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache;
 import com.fieldbook.tracker.utilities.BrapiAccountHelper;
-import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.OpenAuthConfigurationUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.google.gson.Gson;
@@ -55,6 +53,7 @@ import net.openid.appauth.EndSessionRequest;
 
 import org.jetbrains.annotations.NotNull;
 import org.phenoapps.brapi.BrapiAccountConstants;
+import org.phenoapps.brapi.ui.BrapiAccountConfig;
 
 import java.util.List;
 
@@ -445,18 +444,18 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
         if (act == null) return Unit.INSTANCE;
 
         try {
-            BrAPIConfig config = new BrAPIConfig();
-            config.setUrl(am.getUserData(account, BrapiAuthenticator.KEY_SERVER_URL));
-            config.setName(am.getUserData(account, BrapiAuthenticator.KEY_DISPLAY_NAME));
-            config.setVersion(am.getUserData(account, BrapiAuthenticator.KEY_BRAPI_VERSION));
-            config.setAuthFlow(am.getUserData(account, BrapiAuthenticator.KEY_OIDC_FLOW));
-            config.setOidcUrl(am.getUserData(account, BrapiAuthenticator.KEY_OIDC_URL));
-            config.setClientId(am.getUserData(account, BrapiAuthenticator.KEY_OIDC_CLIENT_ID));
-            config.setScope(am.getUserData(account, BrapiAuthenticator.KEY_OIDC_SCOPE));
-            // Advanced settings from global prefs
-            config.setPageSize(preferences.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50"));
-            config.setChunkSize(preferences.getString(PreferenceKeys.BRAPI_CHUNK_SIZE, "500"));
-            config.setServerTimeoutMilli(preferences.getString(PreferenceKeys.BRAPI_TIMEOUT, "120"));
+            BrapiAccountConfig config = new BrapiAccountConfig(
+                    am.getUserData(account, BrapiAuthenticator.KEY_SERVER_URL),
+                    am.getUserData(account, BrapiAuthenticator.KEY_DISPLAY_NAME),
+                    am.getUserData(account, BrapiAuthenticator.KEY_BRAPI_VERSION),
+                    am.getUserData(account, BrapiAuthenticator.KEY_OIDC_FLOW),
+                    am.getUserData(account, BrapiAuthenticator.KEY_OIDC_URL),
+                    am.getUserData(account, BrapiAuthenticator.KEY_OIDC_CLIENT_ID),
+                    am.getUserData(account, BrapiAuthenticator.KEY_OIDC_SCOPE),
+                    preferences.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50"),
+                    preferences.getString(PreferenceKeys.BRAPI_CHUNK_SIZE, "500"),
+                    preferences.getString(PreferenceKeys.BRAPI_TIMEOUT, "120")
+            );
 
             String jsonConfig = new Gson().toJson(config);
             generateQRCode(act, jsonConfig);
@@ -468,14 +467,18 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
 
     private @NotNull Unit editAccount(Account account) {
         AccountManager am = AccountManager.get(context);
-        BrAPIConfig config = new BrAPIConfig();
-        config.setUrl(am.getUserData(account, BrapiAuthenticator.KEY_SERVER_URL));
-        config.setName(am.getUserData(account, BrapiAuthenticator.KEY_DISPLAY_NAME));
-        config.setVersion(am.getUserData(account, BrapiAuthenticator.KEY_BRAPI_VERSION));
-        config.setAuthFlow(am.getUserData(account, BrapiAuthenticator.KEY_OIDC_FLOW));
-        config.setOidcUrl(am.getUserData(account, BrapiAuthenticator.KEY_OIDC_URL));
-        config.setClientId(am.getUserData(account, BrapiAuthenticator.KEY_OIDC_CLIENT_ID));
-        config.setScope(am.getUserData(account, BrapiAuthenticator.KEY_OIDC_SCOPE));
+        BrapiAccountConfig config = new BrapiAccountConfig(
+                am.getUserData(account, BrapiAuthenticator.KEY_SERVER_URL),
+                am.getUserData(account, BrapiAuthenticator.KEY_DISPLAY_NAME),
+                am.getUserData(account, BrapiAuthenticator.KEY_BRAPI_VERSION),
+                am.getUserData(account, BrapiAuthenticator.KEY_OIDC_FLOW),
+                am.getUserData(account, BrapiAuthenticator.KEY_OIDC_URL),
+                am.getUserData(account, BrapiAuthenticator.KEY_OIDC_CLIENT_ID),
+                am.getUserData(account, BrapiAuthenticator.KEY_OIDC_SCOPE),
+                null,
+                null,
+                null
+        );
 
         BrapiManualAccountDialogFragment frag = BrapiManualAccountDialogFragment.Companion.newInstance(
                 null, false, config, true

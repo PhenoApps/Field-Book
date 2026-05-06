@@ -12,4 +12,11 @@
         <package android:name="org.phenoapps.intercross.debug" />
     </queries>
 
+    <application>
+        <activity
+            android:name="org.phenoapps.brapi.account.BrapiAccessConfirmActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.Light.Dialog.Alert" />
+    </application>
+
 </manifest>

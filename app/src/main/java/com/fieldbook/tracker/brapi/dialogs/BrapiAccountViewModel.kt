@@ -5,7 +5,6 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.objects.BrAPIConfig
 import com.fieldbook.tracker.utilities.BrapiAccountHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -20,6 +19,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.phenoapps.brapi.ui.BrapiAccountConfig
+import org.phenoapps.brapi.ui.BrapiAccountUiState
+import org.phenoapps.brapi.ui.defaultBrapiAccountState
+import org.phenoapps.brapi.ui.isValidBrapiUrl
+import org.phenoapps.brapi.ui.withConfig
+import org.phenoapps.brapi.ui.withUrlUpdate
 import javax.inject.Inject
 
 /**
@@ -84,17 +89,10 @@ class BrapiAccountViewModel @Inject constructor(
      * ViewModel state should be preserved).
      */
     fun reset() {
-        val oidcFlowOptions = context.resources.getStringArray(R.array.pref_brapi_oidc_flow)
-        val implicitOption = context.getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)
-        val implicitIndex = oidcFlowOptions.indexOfFirst { it.equals(implicitOption, ignoreCase = true) }
-        val defaultFlow = if (implicitIndex >= 0) oidcFlowOptions[implicitIndex]
-                          else oidcFlowOptions.firstOrNull() ?: ""
-
-        val versionOptions = context.resources.getStringArray(R.array.pref_brapi_version)
-        val v2Index = versionOptions.indexOfFirst { it.equals("V2", ignoreCase = true) }
-        val defaultVersion = if (v2Index >= 0) versionOptions[v2Index] else "V2"
-
-        _uiState.value = BrapiAccountUiState(oidcFlow = defaultFlow, brapiVersion = defaultVersion)
+        _uiState.value = defaultBrapiAccountState(
+            context,
+            context.getString(R.string.brapi_oidc_clientid_default),
+        )
         _urlForFetch.value = ""
         accountWasNew = false
         editOriginalUrl = null
@@ -110,14 +108,7 @@ class BrapiAccountViewModel @Inject constructor(
     // ── Field updates ─────────────────────────────────────────────────────────
 
     fun updateUrl(url: String) {
-        _uiState.value = _uiState.value.let { state ->
-            val derivedOidcUrl = if (!state.oidcUrlExplicitlySet && url.isNotEmpty() && url != "https://") {
-                url.trimEnd('/') + "/.well-known/openid-configuration"
-            } else {
-                state.oidcUrl
-            }
-            state.copy(url = url, oidcUrl = derivedOidcUrl)
-        }
+        _uiState.value = _uiState.value.withUrlUpdate(url)
         val normalized = try { accountHelper.normalizeUrl(url) } catch (_: Exception) { "" }
         if (normalized.isNotEmpty() && normalized != "https://") {
             _urlForFetch.value = normalized
@@ -150,28 +141,8 @@ class BrapiAccountViewModel @Inject constructor(
 
     // ── Config from QR scan ───────────────────────────────────────────────────
 
-    fun applyConfig(config: BrAPIConfig) {
-        val oidcFlowOptions = context.resources.getStringArray(R.array.pref_brapi_oidc_flow)
-        val flowMatch = oidcFlowOptions.indexOfFirst { it.equals(config.authFlow, ignoreCase = true) }
-        val newFlow = if (flowMatch >= 0) oidcFlowOptions[flowMatch] else _uiState.value.oidcFlow
-
-        val versionOptions = context.resources.getStringArray(R.array.pref_brapi_version)
-        val versionStr = if ("v1".equals(config.version, ignoreCase = true)) "V1" else "V2"
-        val versionMatch = versionOptions.indexOfFirst { it.equals(versionStr, ignoreCase = true) }
-        val newVersion = if (versionMatch >= 0) versionOptions[versionMatch] else _uiState.value.brapiVersion
-
-        _uiState.value = _uiState.value.let { state ->
-            state.copy(
-                url = config.url ?: state.url,
-                displayName = config.name ?: state.displayName,
-                oidcUrl = config.oidcUrl ?: state.oidcUrl,
-                oidcClientId = config.clientId ?: state.oidcClientId,
-                oidcScope = config.scope ?: state.oidcScope,
-                oidcFlow = newFlow,
-                brapiVersion = newVersion,
-                oidcUrlExplicitlySet = !config.oidcUrl.isNullOrEmpty() || state.oidcUrlExplicitlySet,
-            )
-        }
+    fun applyConfig(config: BrapiAccountConfig) {
+        _uiState.value = _uiState.value.withConfig(config)
     }
 
     // ── Stepper navigation ────────────────────────────────────────────────────
@@ -182,8 +153,8 @@ class BrapiAccountViewModel @Inject constructor(
             0 -> _uiState.value = state.copy(currentStep = 1)
             1 -> {
                 val normalized = try { accountHelper.normalizeUrl(state.url.trim()) } catch (_: Exception) { "" }
-                if (normalized.isEmpty() || !isValidUrl(normalized)) {
-                    viewModelScope.launch { _events.emit(BrapiAccountEvent.ShowError(R.string.brapi_invalid_url)) }
+                if (normalized.isEmpty() || !isValidBrapiUrl(normalized)) {
+                    showInvalidUrlError()
                     return
                 }
                 _uiState.value = state.copy(url = normalized, currentStep = 2)
@@ -205,8 +176,8 @@ class BrapiAccountViewModel @Inject constructor(
     fun onAuthorize() {
         val state = _uiState.value
         val url = try { accountHelper.normalizeUrl(state.url.trim()) } catch (_: Exception) { "" }
-        if (url.isEmpty() || !isValidUrl(url)) {
-            viewModelScope.launch { _events.emit(BrapiAccountEvent.ShowError(R.string.brapi_invalid_url)) }
+        if (url.isEmpty() || !isValidBrapiUrl(url)) {
+            showInvalidUrlError()
             return
         }
         accountWasNew = accountHelper.getAccountByUrl(url) == null
@@ -243,8 +214,8 @@ class BrapiAccountViewModel @Inject constructor(
     fun onSaveEdit() {
         val state = _uiState.value
         val url = try { accountHelper.normalizeUrl(state.url.trim()) } catch (_: Exception) { "" }
-        if (url.isEmpty() || !isValidUrl(url)) {
-            viewModelScope.launch { _events.emit(BrapiAccountEvent.ShowError(R.string.brapi_invalid_url)) }
+        if (url.isEmpty() || !isValidBrapiUrl(url)) {
+            showInvalidUrlError()
             return
         }
         val displayName = state.displayName.trim().takeIf { it.isNotEmpty() } ?: url
@@ -276,21 +247,6 @@ class BrapiAccountViewModel @Inject constructor(
 
     // ── Utilities ─────────────────────────────────────────────────────────────
 
-    private fun isValidUrl(url: String): Boolean {
-        if (url.contains(' ')) return false
-        return try {
-            val parsed = java.net.URL(url)
-            val scheme = parsed.protocol
-            if (scheme != "http" && scheme != "https") return false
-            val host = parsed.host ?: return false
-            if (host.isEmpty()) return false
-            // Accept dotted hostnames or bracketed IPv6 ([::1]). Reject bare single-word hosts.
-            host.contains('.') || host.startsWith('[')
-        } catch (_: Exception) {
-            false
-        }
-    }
-
     private fun fetchDisplayName(baseUrl: String) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isFetchingDisplayName = true)
@@ -318,26 +274,17 @@ class BrapiAccountViewModel @Inject constructor(
             }
         }
     }
+
+    private fun showInvalidUrlError() {
+        viewModelScope.launch {
+            _events.emit(
+                BrapiAccountEvent.ShowError(
+                    org.phenoapps.brapi.R.string.pheno_brapi_invalid_url,
+                ),
+            )
+        }
+    }
 }
-
-// ── UI state ──────────────────────────────────────────────────────────────────
-
-data class BrapiAccountUiState(
-    val url: String = "",
-    val displayName: String = "",
-    val oidcUrl: String = "",
-    val oidcClientId: String = "",
-    val oidcScope: String = "",
-    val oidcFlow: String = "",
-    val brapiVersion: String = "",
-    /** True once the user has manually edited the OIDC URL field or a scanned config provided one.
-     *  Prevents [updateUrl] from auto-deriving and overwriting the user's explicit value. */
-    val oidcUrlExplicitlySet: Boolean = false,
-    /** Active step for the stepper dialog (0–2). Unused by the manual dialog. */
-    val currentStep: Int = 0,
-    /** True while a serverinfo network request is in flight. */
-    val isFetchingDisplayName: Boolean = false,
-)
 
 // ── Events ────────────────────────────────────────────────────────────────────
 

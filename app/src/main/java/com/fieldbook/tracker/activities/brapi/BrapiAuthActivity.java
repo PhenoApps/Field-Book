@@ -123,9 +123,10 @@ public class BrapiAuthActivity extends ThemedActivity {
         if (launchOidcScope    == null) launchOidcScope    = "";
         if (launchBrapiVersion == null) launchBrapiVersion = "";
 
-        // Start our login process
-        //when coming back from deep link this check keeps app from auto-re-authenticating
-        if (getIntent() != null && getIntent().getData() == null) {
+        // Start our login process only for a fresh launch. AppAuth can return via intent extras
+        // without data, so checking only getData() can accidentally start a second auth request
+        // before the first response is handled.
+        if (!hasAuthResult()) {
             if (launchOidcFlow.equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
                 authorizeBrAPI_OLD(preferences, this);
             } else {
@@ -159,33 +160,16 @@ public class BrapiAuthActivity extends ThemedActivity {
         super.onResume();
 
         if(activityStarting) {
-            // If the activity has just started, ignore the onResume code
             activityStarting = false;
-        }else{
-            AuthorizationException ex = AuthorizationException.fromIntent(getIntent());
-            Uri data = getIntent().getData();
+            handleAuthResultIfPresent();
+            return;
+        }
 
-            if (data != null) {
-                // authorization completed
-                if (launchOidcFlow.equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
-                    checkBrapiAuth_OLD(data);
-                } else {
-                    checkBrapiAuth(data);
-                }
-
-            } else if (ex != null) {
-
-                // authorization completed in error
-                authError(ex);
-
-            } else { //returning from deep link with null data should finish activity
-                //otherwise the progress bar hangs
-
-                getIntent().setData(null);
-
-                finish();
-
-            }
+        if (!handleAuthResultIfPresent()) {
+            // Returning from the browser with no deep link/result should finish the activity;
+            // otherwise the progress bar hangs.
+            getIntent().setData(null);
+            finish();
         }
     }
 
@@ -266,10 +250,20 @@ public class BrapiAuthActivity extends ThemedActivity {
 
         Intent responseIntent = new Intent(context, BrapiAuthActivity.class);
         responseIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        responseIntent.putExtra(EXTRA_SERVER_URL,     launchServerUrl);
+        responseIntent.putExtra(EXTRA_OIDC_URL,       launchOidcUrl);
+        responseIntent.putExtra(EXTRA_OIDC_FLOW,      launchOidcFlow);
+        responseIntent.putExtra(EXTRA_OIDC_CLIENT_ID, launchOidcClientId);
+        responseIntent.putExtra(EXTRA_OIDC_SCOPE,     launchOidcScope);
+        responseIntent.putExtra(EXTRA_BRAPI_VERSION,  launchBrapiVersion);
 
         authService.performAuthorizationRequest(
                 authRequest,
-                PendingIntent.getActivity(context, 0, responseIntent, PendingIntent.FLAG_MUTABLE));
+                PendingIntent.getActivity(
+                        context,
+                        0,
+                        responseIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE));
     }
 
     public void authorizeBrAPI_OLD(SharedPreferences sharedPreferences, Context context) {
@@ -357,6 +351,40 @@ public class BrapiAuthActivity extends ThemedActivity {
         return new AuthorizationService(this, builder.build());
     }
 
+    private boolean handleAuthResultIfPresent() {
+        AuthorizationException ex = AuthorizationException.fromIntent(getIntent());
+        AuthorizationResponse response = AuthorizationResponse.fromIntent(getIntent());
+        Uri data = getIntent().getData();
+
+        if (ex != null) {
+            authError(ex);
+            return true;
+        }
+
+        if (response != null || data != null) {
+            if (launchOidcFlow.equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
+                if (data != null) {
+                    checkBrapiAuth_OLD(data);
+                } else {
+                    authError(null);
+                }
+            } else {
+                checkBrapiAuth(data);
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean hasAuthResult() {
+        Intent intent = getIntent();
+        return intent != null &&
+                (intent.getData() != null ||
+                        AuthorizationException.fromIntent(intent) != null ||
+                        AuthorizationResponse.fromIntent(intent) != null);
+    }
+
     public void checkBrapiAuth(Uri data) {
         AuthorizationService authService = getAuthorizationService();
         AuthorizationException ex = AuthorizationException.fromIntent(getIntent());
@@ -385,6 +413,11 @@ public class BrapiAuthActivity extends ThemedActivity {
 
         if (response != null && response.accessToken != null) {
             authSuccess(response.accessToken, null);
+            return;
+        }
+
+        if (data == null) {
+            authError(null);
             return;
         }
 

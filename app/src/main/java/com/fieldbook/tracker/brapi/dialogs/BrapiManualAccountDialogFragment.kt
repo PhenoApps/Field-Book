@@ -7,25 +7,22 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CameraActivity
-import com.fieldbook.tracker.objects.BrAPIConfig
 import com.fieldbook.tracker.ui.theme.AppTheme
-import com.fieldbook.tracker.utilities.JsonUtil
-import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
+import org.phenoapps.brapi.ui.BrapiAccountConfig
 import org.phenoapps.brapi.ui.BrapiManualAccountForm
+import org.phenoapps.brapi.ui.parseBrapiConfig
 
 /**
  * Dialog for manually entering a new BrAPI server configuration.
- * Can be pre-populated from a scanned BrAPIConfig QR code or an existing account in edit mode.
+ * Can be pre-populated from a scanned BrAPI config QR code or an existing account in edit mode.
  *
  * All form state lives in [BrapiAccountViewModel], which is activity-scoped and survives
  * configuration changes. QR scan results and edit saves are handled here; navigation events
@@ -40,13 +37,19 @@ class BrapiManualAccountDialogFragment : BaseBrapiAccountDialogFragment() {
 
         private const val ARG_AUTH_RESPONSE = "auth_response"
         private const val ARG_START_SCAN = "start_scan"
-        private const val ARG_PREFILL_CONFIG = "prefill_config"
         private const val ARG_EDIT_MODE = "edit_mode"
+        private const val ARG_PREFILL_URL = "prefill_url"
+        private const val ARG_PREFILL_NAME = "prefill_name"
+        private const val ARG_PREFILL_VERSION = "prefill_version"
+        private const val ARG_PREFILL_FLOW = "prefill_flow"
+        private const val ARG_PREFILL_OIDC_URL = "prefill_oidc_url"
+        private const val ARG_PREFILL_CLIENT_ID = "prefill_client_id"
+        private const val ARG_PREFILL_SCOPE = "prefill_scope"
 
         fun newInstance(
             authResponse: AccountAuthenticatorResponse? = null,
             startScan: Boolean = false,
-            prefillConfig: BrAPIConfig? = null,
+            prefillConfig: BrapiAccountConfig? = null,
             editMode: Boolean = false,
         ): BrapiManualAccountDialogFragment {
             return BrapiManualAccountDialogFragment().apply {
@@ -55,7 +58,13 @@ class BrapiManualAccountDialogFragment : BaseBrapiAccountDialogFragment() {
                     putBoolean(ARG_START_SCAN, startScan)
                     putBoolean(ARG_EDIT_MODE, editMode)
                     if (prefillConfig != null) {
-                        putString(ARG_PREFILL_CONFIG, Gson().toJson(prefillConfig))
+                        putString(ARG_PREFILL_URL, prefillConfig.url)
+                        putString(ARG_PREFILL_NAME, prefillConfig.name)
+                        putString(ARG_PREFILL_VERSION, prefillConfig.version)
+                        putString(ARG_PREFILL_FLOW, prefillConfig.authFlow)
+                        putString(ARG_PREFILL_OIDC_URL, prefillConfig.oidcUrl)
+                        putString(ARG_PREFILL_CLIENT_ID, prefillConfig.clientId)
+                        putString(ARG_PREFILL_SCOPE, prefillConfig.scope)
                     }
                 }
             }
@@ -69,16 +78,9 @@ class BrapiManualAccountDialogFragment : BaseBrapiAccountDialogFragment() {
             if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
             val scanned = result.data?.getStringExtra(CameraActivity.EXTRA_BARCODE)
                 ?: return@registerForActivityResult
-            if (JsonUtil.isJsonValid(scanned)) {
-                try {
-                    viewModel.applyConfig(Gson().fromJson(scanned, BrAPIConfig::class.java))
-                } catch (_: Exception) {
-                    Toast.makeText(
-                        requireContext(),
-                        R.string.preferences_brapi_server_scan_error,
-                        Toast.LENGTH_SHORT,
-                    ).show()
-                }
+            val config = parseBrapiConfig(scanned)
+            if (config != null) {
+                viewModel.applyConfig(config)
             } else {
                 viewModel.updateUrl(scanned)
             }
@@ -96,15 +98,20 @@ class BrapiManualAccountDialogFragment : BaseBrapiAccountDialogFragment() {
         // On rotation: savedInstanceState is non-null, so we skip this and keep existing state.
         if (savedInstanceState == null) {
             viewModel.reset()
-            val prefillJson = arguments?.getString(ARG_PREFILL_CONFIG)
-            if (prefillJson != null) {
-                try {
-                    val config = Gson().fromJson(prefillJson, BrAPIConfig::class.java)
-                    viewModel.applyConfig(config)
-                    if (isEditMode) {
-                        config.url?.let { viewModel.setEditOriginalUrl(it) }
-                    }
-                } catch (_: Exception) { /* ignore malformed JSON */ }
+            if (isEditMode || arguments?.containsKey(ARG_PREFILL_URL) == true) {
+                val config = BrapiAccountConfig(
+                    url = arguments?.getString(ARG_PREFILL_URL),
+                    name = arguments?.getString(ARG_PREFILL_NAME),
+                    version = arguments?.getString(ARG_PREFILL_VERSION),
+                    authFlow = arguments?.getString(ARG_PREFILL_FLOW),
+                    oidcUrl = arguments?.getString(ARG_PREFILL_OIDC_URL),
+                    clientId = arguments?.getString(ARG_PREFILL_CLIENT_ID),
+                    scope = arguments?.getString(ARG_PREFILL_SCOPE),
+                )
+                viewModel.applyConfig(config)
+                if (isEditMode) {
+                    config.url?.let { viewModel.setEditOriginalUrl(it) }
+                }
             }
         }
     }
@@ -126,7 +133,7 @@ class BrapiManualAccountDialogFragment : BaseBrapiAccountDialogFragment() {
                             if (isEditMode) org.phenoapps.brapi.R.string.pheno_brapi_edit_account_title
                             else org.phenoapps.brapi.R.string.pheno_brapi_add_account_title
                         ),
-                        uiState = uiState.toProviderState(),
+                        uiState = uiState,
                         onUrlChange = viewModel::updateUrl,
                         onDisplayNameChange = viewModel::updateDisplayName,
                         onOidcUrlChange = viewModel::updateOidcUrl,

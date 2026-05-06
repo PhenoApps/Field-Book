@@ -49,9 +49,16 @@ abstract class BaseBrapiAccountDialogFragment : DialogFragment() {
                     val state = viewModel.uiState.value
                     val serverName = state.displayName.trim().ifEmpty { state.url }
                     AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
-                        .setTitle(R.string.brapi_auth_failed_keep_title)
-                        .setMessage(getString(R.string.brapi_auth_failed_keep_message, serverName))
-                        .setPositiveButton(R.string.brapi_auth_failed_keep) { _: DialogInterface, _: Int ->
+                        .setTitle(org.phenoapps.brapi.R.string.pheno_brapi_auth_failed_keep_title)
+                        .setMessage(
+                            getString(
+                                org.phenoapps.brapi.R.string.pheno_brapi_auth_failed_keep_message,
+                                serverName,
+                            ),
+                        )
+                        .setPositiveButton(
+                            org.phenoapps.brapi.R.string.pheno_brapi_auth_failed_keep,
+                        ) { _: DialogInterface, _: Int ->
                             authResponse?.onError(AccountManager.ERROR_CODE_CANCELED, "cancelled")
                             dismiss()
                             if (authResponse != null) activity?.finish()

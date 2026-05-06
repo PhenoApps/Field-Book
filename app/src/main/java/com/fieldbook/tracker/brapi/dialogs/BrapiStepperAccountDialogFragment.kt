@@ -16,12 +16,10 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CameraActivity
-import com.fieldbook.tracker.objects.BrAPIConfig
 import com.fieldbook.tracker.ui.theme.AppTheme
-import com.fieldbook.tracker.utilities.JsonUtil
-import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.brapi.ui.BrapiStepperAccountForm
+import org.phenoapps.brapi.ui.parseBrapiConfig
 
 /**
  * Guided multi-step dialog for adding a new BrAPI server configuration.
@@ -61,24 +59,17 @@ class BrapiStepperAccountDialogFragment : BaseBrapiAccountDialogFragment() {
             viewModel.updateUrl(scanned)
         }
 
-    // Scan for a full BrAPIConfig QR code (from step 0 "Scan Config" option).
+    // Scan for a full BrAPI config QR code (from step 0 "Scan Config" option).
     private val scanConfigLauncher: ActivityResultLauncher<Intent> =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
             val scanned = result.data?.getStringExtra(CameraActivity.EXTRA_BARCODE)
                 ?: return@registerForActivityResult
-            if (JsonUtil.isJsonValid(scanned)) {
-                try {
-                    viewModel.applyConfig(Gson().fromJson(scanned, BrAPIConfig::class.java))
-                    // Full config scanned — skip URL step and go straight to config details.
-                    viewModel.setStep(2)
-                } catch (_: Exception) {
-                    Toast.makeText(
-                        requireContext(),
-                        R.string.preferences_brapi_server_scan_error,
-                        Toast.LENGTH_SHORT,
-                    ).show()
-                }
+            val config = parseBrapiConfig(scanned)
+            if (config != null) {
+                viewModel.applyConfig(config)
+                // Full config scanned — skip URL step and go straight to config details.
+                viewModel.setStep(2)
             } else {
                 // Plain URL scanned — pre-fill and go to URL entry step.
                 viewModel.updateUrl(scanned)
@@ -112,7 +103,7 @@ class BrapiStepperAccountDialogFragment : BaseBrapiAccountDialogFragment() {
                 AppTheme {
                     val uiState by viewModel.uiState.collectAsState()
                     BrapiStepperAccountForm(
-                        uiState = uiState.toProviderState(),
+                        uiState = uiState,
                         onUrlChange = viewModel::updateUrl,
                         onDisplayNameChange = viewModel::updateDisplayName,
                         onOidcUrlChange = viewModel::updateOidcUrl,
