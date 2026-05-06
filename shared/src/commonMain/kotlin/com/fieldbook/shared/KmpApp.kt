@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.fieldbook.shared.screens.AboutScreen
 import com.fieldbook.shared.screens.ConfigScreen
 import com.fieldbook.shared.screens.ScannerScreen
 import com.fieldbook.shared.screens.brapi.BrapiStudyScreen
@@ -126,6 +127,12 @@ fun KmpApp(
         composable(KmpHostScreenType.EXPORT.route) {
             ExportScreen(
                 fieldIds = emptyList(),
+                onBack = { navController.navigateBackOrExit(onExit) },
+            )
+        }
+
+        composable(KmpHostScreenType.ABOUT.route) {
+            AboutScreen(
                 onBack = { navController.navigateBackOrExit(onExit) },
             )
         }
