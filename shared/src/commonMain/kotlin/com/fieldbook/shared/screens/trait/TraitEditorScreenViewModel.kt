@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.fieldbook.shared.database.models.TraitObject
+import com.fieldbook.shared.database.repository.ObservationRepository
 import com.fieldbook.shared.database.repository.TraitRepository
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.dir_trait
@@ -25,6 +26,7 @@ import kotlinx.coroutines.launch
 
 class TraitEditorScreenViewModel(
     private val traitRepository: TraitRepository = TraitRepository(),
+    private val observationRepository: ObservationRepository = ObservationRepository(),
     private val settings: Settings = Settings()
 ) : ViewModel() {
 
@@ -171,6 +173,11 @@ class TraitEditorScreenViewModel(
     fun getTraitForEdit(traitId: Long?): TraitObject? {
         if (traitId == null) return null
         return traitRepository.getTraitWithAttributes(traitId)
+    }
+
+    fun traitHasObservations(traitId: Long?): Boolean {
+        if (traitId == null) return false
+        return observationRepository.hasObservationsForTrait(traitId)
     }
 
     fun refresh() {
