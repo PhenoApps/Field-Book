@@ -49,6 +49,9 @@ fun TraitCreatorDialog(
     }
     var traitName by remember(initialTrait?.id) { mutableStateOf(initialTrait?.name ?: "") }
     var traitDetails by remember(initialTrait?.id) { mutableStateOf(initialTrait?.details ?: "") }
+    val observationsExist = remember(initialTrait?.id) {
+        viewModel.traitHasObservations(initialTrait?.id)
+    }
 
     when (currentStep) {
         TraitCreatorStep.ChooseFormat -> {
@@ -148,6 +151,13 @@ fun TraitCreatorDialog(
                             val title =
                                 selectedFormat?.let { stringResource(it.getTraitFormatDefinition().nameStringResource) }
                             Text("${title ?: ""} Parameters", modifier = Modifier.padding(8.dp))
+
+                            if (observationsExist) {
+                                Text(
+                                    text = "Observations already exist for this trait. Only the following parameters can be edited.",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
 
                             OutlinedTextField(
                                 value = traitName,
