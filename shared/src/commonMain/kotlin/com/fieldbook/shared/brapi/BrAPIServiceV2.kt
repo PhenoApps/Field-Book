@@ -1,24 +1,39 @@
 package com.fieldbook.shared.brapi
 
 import com.fieldbook.shared.brapi.model.v2.core.BrapiStudyDetails
+import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiImageExport
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiObservationExport
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiObservationImport
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiObservationUnitDetails
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiTraitDetails
-import com.fieldbook.shared.utilities.CategoryJsonUtil
 import com.fieldbook.shared.generated.brapi.v2.core.api.StudiesApi
 import com.fieldbook.shared.generated.brapi.v2.germplasm.api.GermplasmApi
 import com.fieldbook.shared.generated.brapi.v2.germplasm.model.Germplasm
+import com.fieldbook.shared.generated.brapi.v2.phenotyping.api.ImagesApi
 import com.fieldbook.shared.generated.brapi.v2.phenotyping.api.ObservationUnitsApi
 import com.fieldbook.shared.generated.brapi.v2.phenotyping.api.ObservationVariablesApi
 import com.fieldbook.shared.generated.brapi.v2.phenotyping.api.ObservationsApi
+import com.fieldbook.shared.generated.brapi.v2.phenotyping.infrastructure.ApiClient
 import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.ExternalReferencesInner
+import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.Image
+import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.ImageNewRequest
+import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.ImageSingleResponse
 import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.Observation
 import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.ObservationNewRequest
 import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.ObservationUnit
 import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.ObservationVariable
 import com.fieldbook.shared.generated.brapi.v2.phenotyping.model.ObservationVariableScale
 import com.fieldbook.shared.utilities.BrAPIScaleValidValuesCategories
+import com.fieldbook.shared.utilities.CategoryJsonUtil
+import io.ktor.client.HttpClient
+import io.ktor.client.request.header
+import io.ktor.client.request.put
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.contentType
+import io.ktor.http.encodeURLQueryComponent
 
 class BrAPIServiceV2(
     baseUrl: String,
@@ -33,8 +48,12 @@ class BrAPIServiceV2(
     private val observationsApi: ObservationsApi = ObservationsApi(
         baseUrl = normalizeV2BaseUrl(baseUrl)
     ),
+    private val imagesApi: ImagesApi = ImagesApi(baseUrl = normalizeV2BaseUrl(baseUrl)),
     private val germplasmApi: GermplasmApi = GermplasmApi(baseUrl = normalizeV2BaseUrl(baseUrl)),
+    private val httpClient: HttpClient = HttpClient(),
 ) : BrAPIService {
+    private val v2BaseUrl = normalizeV2BaseUrl(baseUrl)
+
     private data class BrapiGermplasmDetails(
         val accessionNumber: String? = null,
         val pedigree: String? = null,
@@ -47,6 +66,7 @@ class BrAPIServiceV2(
             observationVariablesApi.setBearerToken(bearerToken)
             observationUnitsApi.setBearerToken(bearerToken)
             observationsApi.setBearerToken(bearerToken)
+            imagesApi.setBearerToken(bearerToken)
             germplasmApi.setBearerToken(bearerToken)
         }
     }
@@ -255,6 +275,84 @@ class BrAPIServiceV2(
         }
     }
 
+    override suspend fun createImages(
+        images: List<BrapiImageExport>,
+    ): BrapiResult<List<BrapiImageExport>> {
+        if (images.isEmpty()) return BrapiResult.Success(emptyList())
+        return exportImages(images, updateMetadata = false)
+    }
+
+    override suspend fun updateImages(
+        images: List<BrapiImageExport>,
+    ): BrapiResult<List<BrapiImageExport>> {
+        if (images.isEmpty()) return BrapiResult.Success(emptyList())
+        return exportImages(images, updateMetadata = true)
+    }
+
+    private suspend fun exportImages(
+        images: List<BrapiImageExport>,
+        updateMetadata: Boolean,
+    ): BrapiResult<List<BrapiImageExport>> {
+        return try {
+            val uploaded = mutableListOf<BrapiImageExport>()
+
+            images.forEach { image ->
+                val metadata = if (updateMetadata) {
+                    val imageDbId = image.imageDbId?.takeIf { it.isNotBlank() }
+                        ?: return BrapiResult.Failure(message = "Image ${image.fileName} is missing imageDbId.")
+                    val response = imagesApi.imagesImageDbIdPut(
+                        imageDbId = imageDbId,
+                        imageNewRequest = image.toNewRequest(),
+                    )
+                    if (!response.success) return BrapiResult.Failure(statusCode = response.status)
+                    response.body().result
+                } else {
+                    val response = imagesApi.imagesPost(
+                        imageNewRequest = listOf(image.toNewRequest()),
+                    )
+                    if (!response.success) return BrapiResult.Failure(statusCode = response.status)
+                    response.body().result.data.firstOrNull()
+                        ?: return BrapiResult.Failure(message = "BrAPI image metadata response was empty.")
+                }
+
+                val imageDbId = metadata.imageDbId
+                val uploadedMetadata = uploadImageContent(
+                    imageDbId = imageDbId,
+                    mimeType = image.mimeType,
+                    content = image.content,
+                ) ?: metadata
+                uploaded += uploadedMetadata.toExport(original = image)
+            }
+
+            BrapiResult.Success(uploaded)
+        } catch (error: Exception) {
+            BrapiResult.Failure(message = error.message)
+        }
+    }
+
+    private suspend fun uploadImageContent(
+        imageDbId: String,
+        mimeType: String,
+        content: ByteArray,
+    ): Image? {
+        val response = httpClient.put("$v2BaseUrl/images/${imageDbId.encodeURLQueryComponent()}/imagecontent") {
+            if (!bearerToken.isNullOrBlank()) {
+                header(HttpHeaders.Authorization, "Bearer $bearerToken")
+            }
+            contentType(ContentType.parse(mimeType))
+            setBody(content)
+        }
+
+        if (response.status.value !in 200..299) {
+            error("BrAPI image content upload failed: ${response.status.value}")
+        }
+
+        val body = response.bodyAsText().takeIf { it.isNotBlank() } ?: return null
+        return runCatching {
+            ApiClient.JSON_DEFAULT.decodeFromString(ImageSingleResponse.serializer(), body).result
+        }.getOrNull()
+    }
+
     private suspend fun fetchStudyGermplasm(
         studyDbId: String,
         pageSize: Int,
@@ -450,6 +548,28 @@ class BrAPIServiceV2(
                 observationVariableName = observationVariableName,
                 studyDbId = studyDbId,
                 value = value,
+            )
+        }
+
+        private fun BrapiImageExport.toNewRequest(): ImageNewRequest {
+            return ImageNewRequest(
+                imageFileName = fileName,
+                imageFileSize = fileSize ?: content.size,
+                imageName = imageName,
+                imageTimeStamp = observationTimeStamp,
+                mimeType = mimeType,
+                observationUnitDbId = observationUnitDbId,
+            )
+        }
+
+        private fun Image.toExport(original: BrapiImageExport): BrapiImageExport {
+            return original.copy(
+                imageDbId = imageDbId,
+                fileName = imageFileName?.takeIf { it.isNotBlank() } ?: original.fileName,
+                imageName = imageName?.takeIf { it.isNotBlank() } ?: original.imageName,
+                mimeType = mimeType?.takeIf { it.isNotBlank() } ?: original.mimeType,
+                fileSize = imageFileSize ?: original.fileSize,
+                observationTimeStamp = imageTimeStamp ?: original.observationTimeStamp,
             )
         }
 
