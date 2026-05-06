@@ -19,6 +19,7 @@
     <string name="dialog_go">Go</string>
     <string name="dialog_save_error_title">Save Error</string>
     <string name="dialog_back">Back</string>
+    <string name="dialog_next">Next</string>
     <string name="dialog_scan">Scan</string>
     <string name="dialog_sort_by">Sort By</string>
     <string name="dialog_enable">Enable</string>
@@ -1245,6 +1246,7 @@
 
     <!-- BrAPI preferences -->
     <string name="preferences_brapi" translatable="false">BrAPI</string>
+    <string name="preferences_brapi_title">Configuration</string>
     <string name="brapi_info_title">Breeding API</string>
 
     <string name="preferences_brapi_enable_title">Enable BrAPI</string>
@@ -1257,7 +1259,6 @@
     <string name="preferences_brapi_barcode_config_dialog_title">Scannable BrAPI Configuration</string>
     <string name="qr_code_share_choose_action_title">Choose Action</string>
 
-    <string name="menu_action_brapi_pref_title">Authorize BrAPI</string>
     <string name="act_brapi_auth_http_warning_title">HTTP Warning</string>
     <string name="act_brapi_auth_http_warning_message">You have entered an http url. There is no guarantee that this connection is secure.</string>
 
@@ -1311,10 +1312,7 @@
     <string name="preferences_appearance_collect_labelval_customize_value">Value</string>
     <string name="preferences_appearance_collect_labelval_customize_label">Label</string>
 
-    <string name="preferences_brapi_servers_title">Community Servers</string>
-    <string name="preferences_brapi_server_barcode">Scan a server barcode</string>
     <string name="preferences_brapi_server_scan_error">Scan Error</string>
-    <string name="preferences_brapi_server_add">Submit a server</string>
 
     <!-- Brapi Server Info -->
     <string name="brapi_server_info_pref">Check Compatibility</string>
@@ -1337,43 +1335,40 @@
     <string name="brapi_server_info_server">Server</string>
     <string name="brapi_server_info_field_book">Field Book</string>
 
-    <!-- Community Servers -->
-    <string-array name="community_servers_names">
-        <item>CassavaBase</item>
-        <item>T3/Wheat</item>
-        <item>T3/Oat</item>
-        <item>T3/Barley</item>
-        <item>Default Test Server</item>
-    </string-array>
-    <string-array name="community_servers_urls">
-        <item>https://www.cassavabase.org</item>
-        <item>https://wheat-sandbox.triticeaetoolbox.org</item>
-        <item>https://oat-sandbox.triticeaetoolbox.org</item>
-        <item>https://barley-sandbox.triticeaetoolbox.org</item>
-        <item>https://test-server.brapi.org</item>
-    </string-array>
-    <string-array name="community_servers_oidc_urls">
-        <item>https://www.cassavabase.org/.well-known/openid-configuration</item>
-        <item>https://wheat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
-        <item>https://oat-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
-        <item>https://barley-sandbox.triticeaetoolbox.org/.well-known/openid-configuration</item>
-        <item>https://test-server.brapi.org/.well-known/openid-configuration</item>
-    </string-array>
-    <string-array name="community_servers_grant_types">
-        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
-        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
-        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
-        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
-        <item>@string/preferences_brapi_oidc_flow_oauth_implicit</item>
-    </string-array>
 
     <!-- Authorization -->
     <string name="brapi_save_authorize">Authorize</string>
     <string name="brapi_display_name">Display Name</string>
     <string name="brapi_revoke_auth">Log Out</string>
+
+    <!-- Multi-account management -->
+    <string name="brapi_add_account_title">Add Account</string>
+    <string name="brapi_edit_account_title">Edit Account</string>
+    <string name="brapi_add_account_guided_setup">Manual Input</string>
+    <string name="brapi_add_account_scan_config">Scan Configuration Code</string>
+    <string name="brapi_switch_server_title">Switch Server</string>
+    <string name="brapi_switch_server_unauthenticated_message">Would you like to authenticate before switching to this server?</string>
+    <string name="brapi_chip_compatibility">Compatibility</string>
+    <string name="brapi_chip_share">Share</string>
+    <string name="brapi_chip_edit">Edit</string>
+    <string name="brapi_chip_logout">Log out</string>
+    <string name="brapi_chip_authorize">Authorize</string>
+    <string name="brapi_chip_remove">Remove</string>
+    <string name="brapi_auth_required_title">Authentication Required</string>
+    <string name="brapi_auth_required_message">Your session has expired. Would you like to re-authorize?</string>
+    <string name="brapi_logout_manage_title">Manage Server</string>
+    <string name="brapi_logout_manage_message">Choose an action for %1$s.</string>
+    <string name="brapi_logout_and_remove">Remove</string>
+    <string name="brapi_logout_only">Logout</string>
+    <string name="brapi_section_active_server">Active Server</string>
+    <string name="brapi_section_available_servers">Available Servers</string>
+    <string name="brapi_add_account">Add Account</string>
+    <string name="brapi_advanced_settings">Transmission Settings</string>
+    <string name="menu_overflow">More options</string>
     <string name="brapi_auth_btn">Log In to Site</string>
     <string name="brapi_auth_success">BrAPI Authorization Successful</string>
     <string name="brapi_auth_deny">BrAPI Authorization Denied</string>
+    <string name="brapi_auth_failed_remove">Remove</string>
     <string name="brapi_auth_error_starting">Error Starting BrAPI Auth</string>
     <string name="brapi_auth_permission_deny">ERROR: You do not have the permissions necessary to perform this action</string>
     <string name="brapi_auth_needed_title">Login Needed</string>
@@ -1709,6 +1704,10 @@
     <string name="no_programdbid_provided">No programDbId provided</string>
     <string name="no_studydbids_provided">No studyDbIds provided</string>
     <string name="act_brapi_list_api_exception">Unknown error. Please check BrAPI preferences or contact developers.</string>
+    <string name="brapi_error_unauthorized">Authentication required. Please log in and try again.</string>
+    <string name="brapi_error_forbidden">Access denied. You may not have permission to use this server.</string>
+    <string name="brapi_error_not_found">This server does not appear to support the /serverinfo endpoint.</string>
+    <string name="brapi_error_network">Could not reach the server. Please check your connection and server URL.</string>
     <string name="act_brapi_list_filter_reset_cache_title">Confirm Reset</string>
     <string name="act_brapi_list_filter_reset_cache_message">This will delete local BrAPI data used for searching and importing.</string>
     <string name="search_bar_hint">Searching… %s</string>
@@ -1965,6 +1964,8 @@
     <string name="there_are_unuploaded_observations_or_images_do_you_want_to_upload_them_before_downloading">There are unuploaded observations or images. Do you want to upload them before downloading?</string>
     <string name="upload_first">Upload</string>
     <string name="download_anyway">Download</string>
+    <string name="brapi_redirect_uri" translatable="false">fieldbook://app/auth</string>
+    <string name="brapi_implicit_redirect_uri" translatable="false">https://phenoapps.org/field-book</string>
     <string name="confirm_delete_with_media_title">Delete observation</string>
     <string name="confirm_delete_with_media_message">Deleting this observation will also delete any attached media. Are you sure you want to delete this observation?</string>
     <string name="attach">Attach</string>

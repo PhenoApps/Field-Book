@@ -2,6 +2,7 @@ package com.fieldbook.tracker.brapi.service;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.util.Pair;
 
@@ -26,6 +27,7 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
+import com.fieldbook.tracker.utilities.BrapiAccountHelper;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.FailureFunction;
 import com.fieldbook.tracker.utilities.SuccessFunction;
@@ -88,6 +90,9 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
     private final ObservationsApi observationsApi;
     private final ObservationVariablesApi traitsApi;
 
+    private final SharedPreferences preferences;
+    private final BrapiAccountHelper accountHelper;
+
     public BrAPIServiceV1(Context context) {
         this.context = context;
         ApiClient apiClient = new ApiClient().setBasePath(BrAPIService.getBrapiUrl(context));
@@ -99,6 +104,9 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
         this.trialsApi = new TrialsApi(apiClient);
         this.traitsApi = new ObservationVariablesApi(apiClient);
         this.observationsApi = new ObservationsApi(apiClient);
+
+        this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        this.accountHelper = new BrapiAccountHelper(context, preferences);
     }
 
     @Override
@@ -135,7 +143,14 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
     }
 
     private String getBrapiToken() {
-        return "Bearer " + PreferenceManager.getDefaultSharedPreferences(context).getString(PreferenceKeys.BRAPI_TOKEN, "");
+        String token = accountHelper.peekToken();
+        if (token == null) {
+            token = accountHelper.getTokenBlocking();
+        }
+        if (token == null) {
+            token = preferences.getString(PreferenceKeys.BRAPI_TOKEN, "");
+        }
+        return "Bearer " + token;
     }
 
     public void postImageMetaData(FieldBookImage image,
@@ -462,7 +477,7 @@ public class BrAPIServiceV1 extends AbstractBrAPIService implements BrAPIService
             final String level = levelName;
 
             final AtomicInteger currentPage = new AtomicInteger(0);
-            final Integer pageSize = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context).getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50"));
+            final Integer pageSize = Integer.parseInt(preferences.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50"));
             final BrapiStudyDetails study = new BrapiStudyDetails();
             study.setValues(new ArrayList<>());
 

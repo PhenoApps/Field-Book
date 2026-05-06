@@ -3,6 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.fieldbook.tracker">
 
+    <!-- Custom permission allowing other PhenoApps to request BrAPI tokens via AccountManager.
+         Normal protection: any app that declares uses-permission is granted it without a user
+         prompt. Account visibility is controlled per-package in BrapiAuthenticator. -->
+    <permission
+        android:name="org.phenoapps.brapi.READ_TOKEN"
+        android:protectionLevel="normal" />
+
+    <uses-permission android:name="org.phenoapps.brapi.READ_TOKEN" />
+
     <application
         android:name=".application.FieldBook"
         android:hardwareAccelerated="true"
@@ -169,6 +178,12 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".activities.brapi.BrapiAddAccountActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:exported="false"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".activities.brapi.BrapiAuthActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:exported="true"
@@ -183,7 +198,7 @@
 
                 <data
                     android:host=""
-                    android:scheme="fieldbook"
+                    android:scheme="${appAuthRedirectScheme}"
                     tools:ignore="AppLinkUrlError" /> <!-- https://stackoverflow.com/questions/48093833/deeplink-empty-path-error-androidpath-cannot-be-empty -->
             </intent-filter>
             <intent-filter>
@@ -214,7 +229,7 @@
                 <data
                     android:host="app"
                     android:path="/auth"
-                    android:scheme="fieldbook" />
+                    android:scheme="${appAuthRedirectScheme}" />
             </intent-filter>
         </activity>
         <activity android:name=".activities.CropImageActivity"
@@ -267,6 +282,19 @@
 
         <!--TODO: Temporarily opt out of forced layout changes in sdk 36. Needs to be addressed before updating to sdk 37 -->
         <property android:name="android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY" android:value="true" />
+
+        <!-- BrAPI AccountManager authenticator service -->
+        <service
+            android:name=".brapi.BrapiAuthenticatorService"
+            android:exported="true"
+            android:permission="android.permission.AUTHENTICATE_ACCOUNTS">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/brapi_authenticator" />
+        </service>
     </application>
 
     <queries>
@@ -326,6 +354,8 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES"/>
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"/>
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
 
     <uses-sdk tools:overrideLibrary="com.google.zxing.client.android,com.binayshaw7777.kotstep" />
 

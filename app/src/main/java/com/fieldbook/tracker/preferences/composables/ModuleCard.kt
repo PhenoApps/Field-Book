@@ -18,7 +18,7 @@ import com.fieldbook.tracker.utilities.ServiceComparison
 fun ModuleCard(moduleInfo: BrapiModuleCalls) {
     CollapsibleSection(
         title = moduleInfo.moduleName,
-        initiallyExpanded = true,
+        initiallyExpanded = false,
         headerContent = {
             Text(
                 text = stringResource(
