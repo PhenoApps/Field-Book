@@ -335,6 +335,7 @@ kotlin {
                 implementation(libs.multiplatform.settings)
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.lifecycle.viewmodel.compose)
+                implementation(libs.navigation.compose)
                 implementation(libs.okio)
                 implementation(libs.permissions)
                 implementation(libs.permissions.camera)
@@ -350,6 +351,7 @@ kotlin {
                 implementation(libs.ktor.serialization.kotlinx.json)
                 implementation(libs.coil.compose)
                 implementation(libs.reorderable)
+                implementation(libs.lazytable)
             }
         }
 

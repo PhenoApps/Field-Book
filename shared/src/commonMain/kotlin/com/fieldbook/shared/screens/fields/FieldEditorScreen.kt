@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -76,6 +75,7 @@ import com.fieldbook.shared.preferences.PreferenceKeys
 import com.fieldbook.shared.screens.brapi.BrapiFieldImportSupport
 import com.fieldbook.shared.screens.brapi.BrapiStudyPreviewScreen
 import com.fieldbook.shared.screens.brapi.BrapiStudyScreen
+import com.fieldbook.shared.theme.AlertDialog
 import com.fieldbook.shared.utilities.DocumentFile
 import com.fieldbook.shared.utilities.FieldSwitchImpl
 import com.fieldbook.shared.utilities.getDirectory

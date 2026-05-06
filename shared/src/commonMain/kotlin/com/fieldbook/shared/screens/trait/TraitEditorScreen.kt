@@ -24,7 +24,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -77,6 +76,7 @@ import com.fieldbook.shared.generated.resources.traits_sort_import_order
 import com.fieldbook.shared.generated.resources.traits_sort_name
 import com.fieldbook.shared.generated.resources.traits_sort_visibility
 import com.fieldbook.shared.generated.resources.traits_toolbar_delete_all
+import com.fieldbook.shared.theme.AlertDialog
 import com.fieldbook.shared.traits.Formats
 import com.fieldbook.shared.utilities.DocumentFile
 import com.fieldbook.shared.utilities.getDirectory
