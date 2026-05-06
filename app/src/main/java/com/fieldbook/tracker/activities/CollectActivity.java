@@ -1753,19 +1753,8 @@ public class CollectActivity extends ThemedActivity
             return resolveFromResourcesDir(relPath);
         }
 
-        // Legacy: treat as URI
-        Uri legacyUri = Uri.parse(trimmed);
-
-        // If this is a legacy SAF URI that points into resources/, allow fallback resolution.
-        if ("content".equalsIgnoreCase(legacyUri.getScheme())) {
-            String name = tryExtractResourceFileName(trimmed);
-            if (name != null) {
-                Uri resolved = resolveFromResourcesDir(name);
-                if (resolved != null) return resolved;
-            }
-        }
-
-        return legacyUri;
+        // Legacy: treat as URI (keep as-is; do not guess/normalize).
+        return Uri.parse(trimmed);
     }
 
     private Uri resolveFromResourcesDir(String relPath) {
@@ -1784,32 +1773,6 @@ public class CollectActivity extends ThemedActivity
             return current.getUri();
         } catch (Exception e) {
             Log.e(TAG, "Failed resolving resources path: " + relPath, e);
-            return null;
-        }
-    }
-
-    private String tryExtractResourceFileName(String uriString) {
-        try {
-            String lower = uriString.toLowerCase(java.util.Locale.ROOT);
-            int idx = lower.lastIndexOf("resources%2f");
-            int tokenLen = "resources%2f".length();
-            if (idx < 0) {
-                idx = lower.lastIndexOf("/resources/");
-                tokenLen = "/resources/".length();
-            }
-            if (idx < 0) return null;
-
-            String tail = uriString.substring(idx + tokenLen);
-            String name = tail;
-            int q = name.indexOf('?');
-            if (q >= 0) name = name.substring(0, q);
-            int h = name.indexOf('#');
-            if (h >= 0) name = name.substring(0, h);
-            name = name.substring(name.lastIndexOf("%2F") >= 0 ? name.lastIndexOf("%2F") + 3 : 0);
-            name = name.substring(name.lastIndexOf('/') >= 0 ? name.lastIndexOf('/') + 1 : 0);
-            name = name.trim();
-            return name.isEmpty() ? null : name;
-        } catch (Exception ignore) {
             return null;
         }
     }
@@ -2394,8 +2357,29 @@ public class CollectActivity extends ThemedActivity
                 if (resultCode == RESULT_OK) {
                     try {
                         String resultString = data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY);
-                        //save most recently used resource file
-                        preferences.edit().putString(GeneralKeys.LAST_USED_RESOURCE_FILE, resultString).apply();
+                        // Save most recently used resource file.
+                        // Prefer storing a portable resources/<relative-path> form when possible.
+                        String storedValue = resultString;
+                        try {
+                            Uri chosenUri = Uri.parse(resultString);
+                            if ("content".equalsIgnoreCase(chosenUri.getScheme())) {
+                                DocumentFile resDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_resources);
+                                if (resDir != null && resDir.exists()) {
+                                    String resUri = resDir.getUri().toString();
+                                    String chosen = chosenUri.toString();
+                                    // If the chosen URI appears to be inside the resources tree, store as resources/<filename>.
+                                    // We intentionally only use the last segment here (minimal behavior).
+                                    if (chosen.startsWith(resUri)) {
+                                        String last = chosenUri.getLastPathSegment();
+                                        if (last != null && !last.trim().isEmpty()) {
+                                            storedValue = "resources/" + last;
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (Exception ignore) {}
+
+                        preferences.edit().putString(GeneralKeys.LAST_USED_RESOURCE_FILE, storedValue).apply();
 
                         Uri resultUri = Uri.parse(resultString);
                         String suffix = resultString.substring(resultString.lastIndexOf('.') + 1).toLowerCase();

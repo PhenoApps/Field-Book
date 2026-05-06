@@ -121,33 +121,6 @@ class TraitObject {
             return RESOURCE_PREFIX + trimmed.substringAfter(RESOURCE_PREFIX, "")
         }
 
-        private fun tryExtractResourcesFileName(value: String): String? {
-            val raw = value.trim()
-            if (raw.isEmpty()) return null
-            val lower = raw.lowercase(Locale.ROOT)
-
-            // Best-effort, context-free extraction from legacy URI strings.
-            val (idx, tokenLen) =
-                when {
-                    lower.contains("resources%2f") ->
-                        lower.lastIndexOf("resources%2f") to "resources%2f".length
-                    lower.contains("/resources/") ->
-                        lower.lastIndexOf("/resources/") to "/resources/".length
-                    else -> return null
-                }
-
-            if (idx < 0) return null
-
-            var tail = raw.substring(idx + tokenLen)
-            tail = tail.substringBefore('?').substringBefore('#')
-            val name =
-                tail.substringAfterLast("%2F", tail)
-                    .substringAfterLast('/', tail)
-                    .trim()
-
-            return name.ifBlank { null }
-        }
-
         fun fromJson(json: TraitJson, maxPosition: Int, originalFileName: String) = TraitObject().apply {
             name = json.name
             alias = json.alias ?: json.name
@@ -352,9 +325,8 @@ class TraitObject {
         for (def in TraitAttributes.ALL) {
             val rawValue = attributeValues.getString(def)
             val value = if (def == TraitAttributes.RESOURCE_FILE) {
-                val normalized = normalizeResourcesPrefix(rawValue)
-                if (normalized.startsWith(RESOURCE_PREFIX)) normalized
-                else tryExtractResourcesFileName(normalized)?.let { RESOURCE_PREFIX + it } ?: normalized
+                // Keep legacy values intact; only normalize the canonical portable prefix.
+                normalizeResourcesPrefix(rawValue)
             } else {
                 rawValue
             }
