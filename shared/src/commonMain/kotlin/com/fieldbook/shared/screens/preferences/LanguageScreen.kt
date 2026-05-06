@@ -74,6 +74,7 @@ import com.fieldbook.shared.preferences.LanguageSelection
 import com.fieldbook.shared.preferences.PreferenceKeys
 import com.fieldbook.shared.preferences.resolveSystemLanguageSelection
 import com.fieldbook.shared.theme.AlertDialog
+import com.fieldbook.shared.utilities.onLanguageChanged
 import com.russhwolf.settings.Settings
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
@@ -204,7 +205,7 @@ fun LanguageScreen(
                 TextButton(
                     onClick = {
                         showWarning = false
-                        // onLanguageChanged?.invoke()
+                        onLanguageChanged()
                     }
                 ) {
                     Text(stringResource(Res.string.dialog_ok))
