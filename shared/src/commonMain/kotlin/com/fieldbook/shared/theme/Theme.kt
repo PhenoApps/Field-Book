@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -13,7 +14,12 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.material3.AlertDialog as MaterialAlertDialog
+import androidx.compose.ui.window.Dialog as ComposeDialog
 
 private val MainLightColors = lightColorScheme(
     primary = Color(0xFF8BC34A),
@@ -110,4 +116,68 @@ fun FilledIconButton(
         ),
         content = content
     )
+}
+
+@Composable
+private fun DialogButtonColorTheme(content: @Composable () -> Unit) {
+    MaterialTheme(
+        colorScheme = MaterialTheme.colorScheme.copy(
+            primary = Color.Black,
+            onPrimary = Color.White
+        ),
+        typography = MaterialTheme.typography,
+        shapes = MaterialTheme.shapes,
+        content = content
+    )
+}
+
+@Composable
+fun Dialog(
+    onDismissRequest: () -> Unit,
+    properties: DialogProperties = DialogProperties(),
+    content: @Composable () -> Unit
+) {
+    ComposeDialog(
+        onDismissRequest = onDismissRequest,
+        properties = properties
+    ) {
+        DialogButtonColorTheme(content = content)
+    }
+}
+
+@Composable
+fun AlertDialog(
+    onDismissRequest: () -> Unit,
+    confirmButton: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    dismissButton: @Composable (() -> Unit)? = null,
+    icon: @Composable (() -> Unit)? = null,
+    title: @Composable (() -> Unit)? = null,
+    text: @Composable (() -> Unit)? = null,
+    shape: Shape = AlertDialogDefaults.shape,
+    containerColor: Color = AlertDialogDefaults.containerColor,
+    iconContentColor: Color = AlertDialogDefaults.iconContentColor,
+    titleContentColor: Color = AlertDialogDefaults.titleContentColor,
+    textContentColor: Color = AlertDialogDefaults.textContentColor,
+    tonalElevation: Dp = AlertDialogDefaults.TonalElevation,
+    properties: DialogProperties = DialogProperties()
+) {
+    DialogButtonColorTheme {
+        MaterialAlertDialog(
+            onDismissRequest = onDismissRequest,
+            confirmButton = confirmButton,
+            modifier = modifier,
+            dismissButton = dismissButton,
+            icon = icon,
+            title = title,
+            text = text,
+            shape = shape,
+            containerColor = containerColor,
+            iconContentColor = iconContentColor,
+            titleContentColor = titleContentColor,
+            textContentColor = textContentColor,
+            tonalElevation = tonalElevation,
+            properties = properties
+        )
+    }
 }

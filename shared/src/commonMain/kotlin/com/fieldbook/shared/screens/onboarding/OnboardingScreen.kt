@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -58,6 +57,7 @@ import com.fieldbook.shared.generated.resources.field_book_intro_brapi
 import com.fieldbook.shared.generated.resources.field_book_mini_percent
 import com.fieldbook.shared.generated.resources.other_ic_field_book
 import com.fieldbook.shared.preferences.GeneralKeys
+import com.fieldbook.shared.theme.AlertDialog
 import com.fieldbook.shared.utilities.configurePickedStorageDirectory
 import com.fieldbook.shared.utilities.detectStorageProviderLabel
 import com.fieldbook.shared.utilities.detectStorageProviderType
