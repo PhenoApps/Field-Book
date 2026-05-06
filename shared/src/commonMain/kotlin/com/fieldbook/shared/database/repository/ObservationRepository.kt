@@ -41,6 +41,12 @@ class ObservationRepository() {
         ).executeAsOne().toInt()
     }
 
+    fun hasObservationsForTrait(traitId: Long): Boolean {
+        return db.observationsQueries.countObservationsForTrait(
+            observation_variable_db_id = traitId
+        ).executeAsOne() > 0L
+    }
+
     fun hasObservationWithRep(
         studyId: Long,
         plotId: String,

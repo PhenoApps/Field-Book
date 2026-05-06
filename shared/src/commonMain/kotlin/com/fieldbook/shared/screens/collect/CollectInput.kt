@@ -32,10 +32,12 @@ import com.fieldbook.shared.screens.collect.traits.DateTrait
 import com.fieldbook.shared.screens.collect.traits.NumericTrait
 import com.fieldbook.shared.screens.collect.traits.PercentTrait
 import com.fieldbook.shared.screens.collect.traits.PhotoTrait
+import com.fieldbook.shared.preferences.PreferenceKeys
 import com.fieldbook.shared.theme.AppColors
 import com.fieldbook.shared.traits.Formats
 import com.fieldbook.shared.utilities.CategoryJsonUtil
 import com.fieldbook.shared.utilities.dateFormatMonthDay
+import com.russhwolf.settings.Settings
 
 @Composable
 fun CollectInput(
@@ -66,12 +68,23 @@ fun CollectInput(
     }
     val usesLazyVerticalInput =
         formatEnum == Formats.CATEGORICAL || formatEnum == Formats.MULTI_CATEGORICAL
+    val labelValPref = remember { Settings() }
+        .getString(PreferenceKeys.LABELVAL_CUSTOMIZE, "value")
+    val showLabel = labelValPref == "label"
 
     val displayValue = when (formatEnum) {
         Formats.CATEGORICAL -> {
             try {
                 val decoded = CategoryJsonUtil.decode(value)
-                if (decoded.isNotEmpty()) decoded[0].value ?: value else value
+                if (decoded.isNotEmpty()) {
+                    if (showLabel) {
+                        decoded[0].label ?: decoded[0].value ?: value
+                    } else {
+                        decoded[0].value ?: decoded[0].label ?: value
+                    }
+                } else {
+                    value
+                }
             } catch (_: Throwable) {
                 // If it's not valid JSON or decode fails, fall back to raw value
                 value
@@ -81,7 +94,9 @@ fun CollectInput(
         Formats.MULTI_CATEGORICAL -> {
             try {
                 val decoded = CategoryJsonUtil.decode(value)
-                decoded.joinToString(":") { it.value ?: "" }
+                decoded.joinToString(":") {
+                    if (showLabel) it.label ?: it.value ?: "" else it.value ?: it.label ?: ""
+                }
             } catch (_: Throwable) {
                 value
             }

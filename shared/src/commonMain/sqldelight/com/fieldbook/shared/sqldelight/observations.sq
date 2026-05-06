@@ -68,6 +68,11 @@ SELECT COUNT(*)
 FROM observations
 WHERE study_id = ? AND observation_unit_id = ? AND observation_variable_db_id = ?;
 
+countObservationsForTrait:
+SELECT COUNT(*)
+FROM observations
+WHERE observation_variable_db_id = ?;
+
 hasObservationWithRep:
 SELECT COUNT(*)
 FROM observations

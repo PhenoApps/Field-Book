@@ -20,6 +20,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -67,6 +68,9 @@ fun TraitCreatorDialog(
     }
     var traitName by remember(initialTrait?.id) { mutableStateOf(initialTrait?.name ?: "") }
     var traitDetails by remember(initialTrait?.id) { mutableStateOf(initialTrait?.details ?: "") }
+    val observationsExist = remember(initialTrait?.id) {
+        viewModel.traitHasObservations(initialTrait?.id)
+    }
 
     when (currentStep) {
         TraitCreatorStep.ChooseFormat -> {
@@ -166,6 +170,13 @@ fun TraitCreatorDialog(
                             val title =
                                 selectedFormat?.let { stringResource(it.getTraitFormatDefinition().nameStringResource) }
                             Text("${title ?: ""} Parameters", modifier = Modifier.padding(8.dp))
+
+                            if (observationsExist) {
+                                Text(
+                                    text = "Observations already exist for this trait. Only the following parameters can be edited.",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
 
                             OutlinedTextField(
                                 value = traitName,
