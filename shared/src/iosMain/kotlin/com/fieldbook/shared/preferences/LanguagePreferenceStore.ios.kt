@@ -4,6 +4,7 @@ import platform.Foundation.NSLocale
 import platform.Foundation.NSLocaleCountryCode
 import platform.Foundation.NSLocaleIdentifier
 import platform.Foundation.NSLocaleLanguageCode
+import platform.Foundation.currentLocale
 
 actual fun resolveSystemLanguageSelection(currentLanguageId: String): LanguageSelection {
     val locale = NSLocale.currentLocale
