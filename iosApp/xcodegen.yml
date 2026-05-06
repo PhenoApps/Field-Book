@@ -1,7 +1,7 @@
 options:
   bundleIdPrefix: com.fieldbook
 
-name: iosApp
+name: "Field Book"
 
 settings:
   CODE_SIGNING_ALLOWED: NO
@@ -14,6 +14,8 @@ targets:
     platform: iOS
     deploymentTarget: "14.0"
     bundleId: com.fieldbook.iosApp
+    settings:
+      PRODUCT_NAME: "Field Book"
     info:
       path: Info.plist
       properties:
@@ -32,6 +34,8 @@ targets:
     sources:
       - path: Sources
         glob: "**/*.swift"
+      - path: Resources
+        buildPhase: resources
       - path: ../shared/build/xcode/compose-resources
         type: folder
         buildPhase: resources
