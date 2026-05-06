@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.webkit.MimeTypeMap;
+import android.provider.DocumentsContract;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -2365,16 +2366,19 @@ public class CollectActivity extends ThemedActivity
                             if ("content".equalsIgnoreCase(chosenUri.getScheme())) {
                                 DocumentFile resDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_resources);
                                 if (resDir != null && resDir.exists()) {
-                                    String resUri = resDir.getUri().toString();
-                                    String chosen = chosenUri.toString();
-                                    // If the chosen URI appears to be inside the resources tree, store as resources/<filename>.
-                                    // We intentionally only use the last segment here (minimal behavior).
-                                    if (chosen.startsWith(resUri)) {
-                                        String last = chosenUri.getLastPathSegment();
-                                        if (last != null && !last.trim().isEmpty()) {
-                                            storedValue = "resources/" + last;
+                                    // SAF provides stable "documentId" strings which we can use to compute a relative path
+                                    // inside a tree. This avoids fragile string matching on URIs or guessing filenames.
+                                    try {
+                                        String treeId = DocumentsContract.getTreeDocumentId(resDir.getUri());
+                                        String docId = DocumentsContract.getDocumentId(chosenUri);
+                                        if (treeId != null && docId != null && docId.startsWith(treeId + "/")) {
+                                            String rel = docId.substring(treeId.length() + 1); // after "treeId/"
+                                            rel = rel.trim();
+                                            if (!rel.isEmpty()) {
+                                                storedValue = "resources/" + rel;
+                                            }
                                         }
-                                    }
+                                    } catch (Exception ignore) {}
                                 }
                             }
                         } catch (Exception ignore) {}
