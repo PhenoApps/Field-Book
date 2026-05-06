@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -74,6 +73,7 @@ import com.fieldbook.shared.generated.resources.preferences_appearance_language
 import com.fieldbook.shared.preferences.LanguageSelection
 import com.fieldbook.shared.preferences.PreferenceKeys
 import com.fieldbook.shared.preferences.resolveSystemLanguageSelection
+import com.fieldbook.shared.theme.AlertDialog
 import com.fieldbook.shared.utilities.onLanguageChanged
 import com.russhwolf.settings.Settings
 import org.jetbrains.compose.resources.DrawableResource

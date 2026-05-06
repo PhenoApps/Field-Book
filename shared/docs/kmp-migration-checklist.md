@@ -97,11 +97,78 @@
 |                                  |                    |                    |
 |                                  |                    |                    |
 | **Settings**                     |                    |                    |
-| ...                              |                    |                    |
+| Search preferences               |                    |                    |
 |                                  |                    |                    |
-| **Settings/Appearance/Language** | :white_check_mark: |                    |
+| **Settings/Share**               |                    |                    |
+| Import preferences               |                    |                    |
+| Export preferences               |                    |                    |
 |                                  |                    |                    |
-| ...                              |                    |                    |
+| **Settings/Profile**             |                    |                    |
+| Person name                      |                    |                    |
+| Verification interval            |                    |                    |
+| Device name                      |                    |                    |
+|                                  |                    |                    |
+| **Settings/Features**            |                    |                    |
+| Tutorial                         |                    |                    |
+| Data grid                        | :white_check_mark: | :white_check_mark: |
+| Next entry with no data          |                    |                    |
+| Move to unique ID                |                    |                    |
+|                                  |                    |                    |
+| **Settings/Appearance**          |                    |                    |
+| Theme                            |                    |                    |
+| Language                         |                    |                    |
+| Toolbar actions                  |                    |                    |
+| Number of infobars               |                    |                    |
+| Hide infobar prefix              |                    |                    |
+| Entries progress bar             |                    |                    |
+| Traits progress bar              |                    |                    |
+|                                  |                    |                    |
+| **Settings/Appearance/Theme**    |                    |                    |
+| Theme                            |                    |                    |
+| Text size                        |                    |                    |
+| Saved data color                 |                    |                    |
+| Restore default                  |                    |                    |
+|                                  |                    |                    |
+| **Settings/Appearance/Language** | :white_check_mark: | :white_check_mark: |
+|                                  |                    |                    |
+| **Settings/Behavior**            |                    |                    |
+| Auto-advance entry               |                    |                    |
+| Auto-reset traits                |                    |                    |
+| Require data to move entry       |                    |                    |
+| Skip entries                     |                    |                    |
+| Swap navigation arrows           |                    |                    |
+| Volume buttons navigate          |                    |                    |
+| Return character action          |                    |                    |
+| Use day number                   |                    |                    |
+|                                  |                    |                    |
+| **Settings/Location**            |                    |                    |
+| Pair Bluetooth                   |                    |                    |
+| Location collection              |                    |                    |
+| Coordinate format                |                    |                    |
+| Enable GeoNav                    |                    |                    |
+| Search method                    |                    |                    |
+| Search trapezoid D1              |                    |                    |
+| Search trapezoid D2              |                    |                    |
+| Search angle                     |                    |                    |
+| Distance threshold               |                    |                    |
+| GeoNav logging mode              |                    |                    |
+| Update interval                  |                    |                    |
+|                                  |                    |                    |
+| **Settings/Sounds**              |                    |                    |
+| Primary order sound              |                    |                    |
+| Entry navigation sound           |                    |                    |
+| Cycle traits sound               |                    |                    |
+| Delete observation sound         |                    |                    |
+| Text-to-speech                   |                    |                    |
+| Text-to-speech language          |                    |                    |
+|                                  |                    |                    |
+| **Settings/System**              |                    |                    |
+| Default import source            |                    |                    |
+| Default export source            |                    |                    |
+| Enable share                     |                    |                    |
+| Reset preferences                |                    |                    |
+| Crashlytics user ID              |                    |                    |
+| Refresh Crashlytics user ID      |                    |                    |
 |                                  |                    |                    |
 | **Settings/Storage**             |                    |                    |
 | Define storage location          | :white_check_mark: | :white_check_mark: |
@@ -110,7 +177,12 @@
 | Export db                        |                    |                    |
 | Delete db                        | :white_check_mark: | :white_check_mark: |
 |                                  |                    |                    |
-| ...                              |                    |                    |
+| **Settings/Experimental**        |                    |                    |
+| Repeated measures                |                    |                    |
+| Field audio                      |                    |                    |
+| MLKit barcode scanner            |                    |                    |
+| Enhanced BrAPI import            |                    |                    |
+| Media keycode events             |                    |                    |
 |                                  |                    |                    |
 | **Statistics**                   |                    |                    |
 |                                  |                    |                    |
@@ -135,7 +207,7 @@
 | ...                              |                    |                    |
 |                                  |                    |                    |
 | **Export**                       |                    |                    |
-| Export to BrAPI                  |                    |                    |
+| Export to BrAPI                  | :white_check_mark: |                    |
 |                                  |                    |                    |
 | ...                              |                    |                    |
 |                                  |                    |                    |
@@ -144,14 +216,14 @@
 |                                  |                    |                    |
 | **Settings/BrAPI/Navbar**        |                    |                    |
 | Scan barcode                     |                    |                    |
-| Authorize                        |                    |                    |
+| Authorize                        | :white_check_mark: |                    |
 |                                  |                    |                    |
 | **Settings/BrAPI/Server**        |                    |                    |
 | Base URL                         | :white_check_mark: | :white_check_mark: |
 | Authorize                        | :white_check_mark: |                    |
 | Display name                     |                    |                    |
 | Auto-configure                   |                    |                    |
-| Logout                           |                    |                    |
+| Logout                           | :white_check_mark: |                    |
 |                                  |                    |                    |
 | **Settings/BrAPI/Authorization** |                    |                    |
 | OIDC Flow / Implicit Grant       | :white_check_mark: |                    |
@@ -161,7 +233,7 @@
 | OIDC Scope                       |                    |                    |
 |                                  |                    |                    |
 | **Settings/BrAPI/Advanced**      |                    |                    |
-| BrAPI version / V1               |                    |                    |
+| BrAPI version / V1               | :white_check_mark: |                    |
 | BrAPI version / V2               | :white_check_mark: |                    |
 | Page size                        |                    |                    |
 | Chunk size                       |                    |                    |

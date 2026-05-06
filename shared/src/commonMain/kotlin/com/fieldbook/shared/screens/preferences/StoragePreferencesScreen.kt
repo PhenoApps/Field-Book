@@ -11,8 +11,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -60,6 +60,7 @@ import com.fieldbook.shared.generated.resources.preferences_storage_storage_titl
 import com.fieldbook.shared.generated.resources.preferences_storage_title
 import com.fieldbook.shared.preferences.GeneralKeys
 import com.fieldbook.shared.screens.export.ExportScreen
+import com.fieldbook.shared.theme.AlertDialog
 import com.fieldbook.shared.utilities.displayStorageDirectoryPath
 import com.fieldbook.shared.utilities.resetLocalDatabaseAndPreferences
 import com.fieldbook.shared.utilities.selectFirstField
@@ -283,13 +284,18 @@ fun StoragePreferencesScreen(
                 AlertDialog(
                     onDismissRequest = { showDeleteWarning1 = false },
                     title = { Text(stringResource(Res.string.dialog_warning)) },
+                    titleContentColor = MaterialTheme.colorScheme.error,
                     text = { Text(stringResource(Res.string.database_reset_warning1)) },
                     confirmButton = {
                         Button(
                             onClick = {
                                 showDeleteWarning1 = false
                                 showDeleteWarning2 = true
-                            }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error,
+                                contentColor = MaterialTheme.colorScheme.onError
+                            )
                         ) {
                             Text(stringResource(Res.string.dialog_delete))
                         }

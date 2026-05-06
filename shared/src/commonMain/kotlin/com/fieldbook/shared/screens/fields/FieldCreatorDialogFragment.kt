@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -47,6 +46,7 @@ import com.fieldbook.shared.generated.resources.ic_plot_pattern_zigzag
 import com.fieldbook.shared.objects.ImportFormat
 import com.fieldbook.shared.sqldelight.FieldbookDatabase
 import com.fieldbook.shared.sqldelight.createDatabase
+import com.fieldbook.shared.theme.AlertDialog
 import com.fieldbook.shared.utilities.internalTimeFormatter
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock

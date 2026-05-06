@@ -29,10 +29,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.ic_field
+import com.fieldbook.shared.preferences.PreferenceKeys
 import com.fieldbook.shared.screens.collect.traits.PhotoTrait
 import com.fieldbook.shared.screens.collect.traits.PhotoTraitDisplayMode
 import com.fieldbook.shared.screens.datagrid.DataGridScreen
 import com.fieldbook.shared.traits.Formats
+import com.russhwolf.settings.Settings
 import org.jetbrains.compose.resources.painterResource
 
 /**
@@ -48,6 +50,10 @@ fun CollectScreen(
 ) {
     var isCameraFullscreen by remember { mutableStateOf(false) }
     var showDataGrid by remember { mutableStateOf(false) }
+    val settings = remember { Settings() }
+    val dataGridEnabled = remember {
+        settings.getBoolean(PreferenceKeys.DATAGRID_SETTING, false)
+    }
     val handleBack: () -> Unit = {
         controller.persistCurrentSelection()
         onBack?.invoke()
@@ -107,11 +113,13 @@ fun CollectScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showDataGrid = true }) {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_field),
-                            contentDescription = "Data Grid"
-                        )
+                    if (dataGridEnabled) {
+                        IconButton(onClick = { showDataGrid = true }) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_field),
+                                contentDescription = "Data Grid"
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

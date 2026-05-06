@@ -2,7 +2,12 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 import org.openapitools.generator.gradle.plugin.tasks.GenerateTask
+import java.io.ByteArrayOutputStream
 import java.net.URI
+import java.time.Instant
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.util.Properties
 
 plugins {
     id("org.jetbrains.kotlin.multiplatform")
@@ -79,6 +84,58 @@ val generatedOpenApiSourceDirs = brapiOpenApiSpecs.associate { spec ->
 
 val patchedOpenApiSpecFiles = brapiOpenApiSpecs.associate { spec ->
     spec.name to layout.buildDirectory.file("openapi/specs/${spec.versionPackage}/${spec.name}.patched.json")
+}
+
+val kmpModuleVersion = "0.0.1"
+val fieldBookVersionProperties = Properties().apply {
+    rootProject.file("version.properties").inputStream().use(::load)
+}
+val baseFieldBookVersion = listOf("majorVersion", "minorVersion", "patchVersion")
+    .joinToString(".") { fieldBookVersionProperties.getProperty(it) }
+val generatedBuildInfoDir = layout.buildDirectory.dir("generated/buildInfo/commonMain/kotlin")
+
+val generateSharedBuildInfo by tasks.registering {
+    val outputFile = generatedBuildInfoDir.map {
+        it.file("com/fieldbook/shared/SharedBuildInfo.kt")
+    }
+
+    outputs.file(outputFile)
+    outputs.upToDateWhen { false }
+
+    doLast {
+        val stdout = ByteArrayOutputStream()
+        val stderr = ByteArrayOutputStream()
+        val result = exec {
+            commandLine("git", "rev-parse", "--short", "HEAD")
+            standardOutput = stdout
+            errorOutput = stderr
+            isIgnoreExitValue = true
+        }
+        val gitShortHash = stdout.toString().trim()
+            .takeIf { result.exitValue == 0 && it.isNotBlank() }
+            ?: "unknown"
+        val buildNumber = DateTimeFormatter
+            .ofPattern("yyyyMMddHHmmss")
+            .withZone(ZoneOffset.UTC)
+            .format(Instant.now())
+
+        val file = outputFile.get().asFile
+        file.parentFile.mkdirs()
+        file.writeText(
+            """
+            package com.fieldbook.shared
+
+            object SharedBuildInfo {
+                const val VERSION = "$kmpModuleVersion"
+                const val GIT_SHORT_HASH = "$gitShortHash"
+                const val BUILD_NUMBER = "$buildNumber"
+                const val BASE_FIELD_BOOK_VERSION = "$baseFieldBookVersion"
+
+                const val DISPLAY_VERSION = "$kmpModuleVersion+$buildNumber.$gitShortHash"
+            }
+            """.trimIndent()
+        )
+    }
 }
 
 fun schemaRequiresSerializationWrapper(schema: Map<*, *>): Boolean {
@@ -320,6 +377,8 @@ kotlin {
     // See: https://kotlinlang.org/docs/multiplatform-hierarchy.html
     sourceSets {
         commonMain {
+            kotlin.srcDir(generatedBuildInfoDir)
+
             brapiOpenApiSpecs.forEach { spec ->
                 kotlin.srcDir(generatedOpenApiSourceDirs.getValue(spec.name))
             }
@@ -458,6 +517,7 @@ tasks.matching { it.name == "copyNonXmlValueResourcesForCommonMain" }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>()
     .configureEach {
+        dependsOn(generateSharedBuildInfo)
         dependsOn(generatedOpenApiTasks)
         dependsOn(unzipSampleDb)
         dependsOn(copyTraitAssets)
@@ -465,5 +525,6 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>()
 
 tasks.matching { it.name.startsWith("compile") && it.name.contains("Kotlin") }
     .configureEach {
+        dependsOn(generateSharedBuildInfo)
         dependsOn(generatedOpenApiTasks)
     }

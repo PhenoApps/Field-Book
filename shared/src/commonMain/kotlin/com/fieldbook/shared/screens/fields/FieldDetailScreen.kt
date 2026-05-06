@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
@@ -54,7 +53,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import com.fieldbook.shared.components.CircleActionButton
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.brapi_base_url_default
@@ -91,6 +89,8 @@ import com.fieldbook.shared.generated.resources.sort_ascending
 import com.fieldbook.shared.generated.resources.sort_descending
 import com.fieldbook.shared.objects.ImportFormat
 import com.fieldbook.shared.preferences.PreferenceKeys
+import com.fieldbook.shared.theme.AlertDialog
+import com.fieldbook.shared.theme.Dialog
 import com.fieldbook.shared.utilities.checkForIllegalCharacters
 import com.fieldbook.shared.utilities.relativeTimeText
 import com.russhwolf.settings.Settings
