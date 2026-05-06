@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fieldbook.tracker.R
@@ -48,6 +49,7 @@ interface BottomToolbarListener {
     fun onDelete()
     fun onDeleteLong()
     fun onMediaOption(option: MediaOption)
+    fun onToggleHideFieldNavArrows()
 }
 
 @Preview
@@ -58,6 +60,8 @@ fun BottomToolbar(
     isMediaEnabled: Boolean = true,
     mediaCount: Int = 0,
     deleteValueButtonEnabled: Boolean = true,
+    showHideArrows: Boolean = false,
+    arrowsHidden: Boolean = false,
 ) {
     val bg = AppTheme.colors.topAppBarColors.containerColor
 
@@ -159,6 +163,24 @@ fun BottomToolbar(
                         contentDescription = null,
                         tint = iconColor)
                 }
+
+                if (showHideArrows) {
+                    val cd = if (arrowsHidden) {
+                        stringResource(id = R.string.collect_toolbar_show_arrows)
+                    } else {
+                        stringResource(id = R.string.collect_toolbar_hide_arrows)
+                    }
+
+                    IconButton(onClick = { listener?.onToggleHideFieldNavArrows() }) {
+                        Icon(
+                            painter = painterResource(
+                                id = if (arrowsHidden) R.drawable.ic_eye else R.drawable.ic_eye_off
+                            ),
+                            contentDescription = cd,
+                            tint = iconColor
+                        )
+                    }
+                }
             }
         }
     }
@@ -171,10 +193,20 @@ fun bindBottomToolbar(
     isMediaEnabled: Boolean = true,
     mediaCount: Int = 0,
     deleteValueButtonEnabled: Boolean = true,
+    showHideArrows: Boolean = false,
+    arrowsHidden: Boolean = false,
 ) {
     composeView.setContent {
         AppTheme {
-            BottomToolbar(listener, isAudioRecording, isMediaEnabled, mediaCount, deleteValueButtonEnabled)
+            BottomToolbar(
+                listener,
+                isAudioRecording,
+                isMediaEnabled,
+                mediaCount,
+                deleteValueButtonEnabled,
+                showHideArrows,
+                arrowsHidden
+            )
         }
     }
 }

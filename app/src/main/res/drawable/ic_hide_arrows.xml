@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- left chevron -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:pathData="M7.5,8.5 L4.5,12 L7.5,15.5"
+        android:strokeColor="#000000"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- right chevron -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:pathData="M16.5,8.5 L19.5,12 L16.5,15.5"
+        android:strokeColor="#000000"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- eye outline -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:pathData="M12,10.1 C9.6,10.1 7.9,11.4 7,12 C7.9,12.6 9.6,13.9 12,13.9 C14.4,13.9 16.1,12.6 17,12 C16.1,11.4 14.4,10.1 12,10.1 Z"
+        android:strokeColor="#000000"
+        android:strokeWidth="1.6"
+        android:strokeLineJoin="round" />
+
+    <!-- pupil (circle approximated with arcs) -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M12,10.8
+                          A1.2,1.2 0 1,1 11.999,10.8
+                          Z" />
+
+    <!-- slash -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:pathData="M9.4,14.6 L14.6,9.4"
+        android:strokeColor="#000000"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round" />
+</vector>
+

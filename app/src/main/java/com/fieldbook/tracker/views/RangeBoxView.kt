@@ -8,6 +8,8 @@ import android.text.TextWatcher
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
+import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
@@ -52,6 +54,9 @@ class RangeBoxView : ConstraintLayout {
     private var rangeLeft: ImageView
     private var rangeRight: ImageView
 
+    private var namesHolderLayout: ViewGroup
+    private var valuesHolderLayout: ViewGroup
+
     private var plotsProgressBar: ThumbOnlySeekBar
 
     private var repeatHandler: Handler? = null
@@ -78,6 +83,8 @@ class RangeBoxView : ConstraintLayout {
         this.primaryNameTv = v.findViewById(R.id.primaryNameTv)
         this.secondaryNameTv = v.findViewById(R.id.secondaryNameTv)
         this.plotsProgressBar = v.findViewById(R.id.plotsProgressBar)
+        this.namesHolderLayout = v.findViewById(R.id.namesHolderLayout)
+        this.valuesHolderLayout = v.findViewById(R.id.valuesHolderLayout)
 
         this.controller = context as CollectRangeController
 
@@ -123,6 +130,20 @@ class RangeBoxView : ConstraintLayout {
     fun toggleNavigation(toggle: Boolean) {
         rangeLeft.isEnabled = toggle
         rangeRight.isEnabled = toggle
+    }
+
+    /**
+     * Collapses/expands the field navigation cluster:
+     * left arrow + row/col labels + row/col values + right arrow.
+     *
+     * Uses GONE to truly remove it from layout ("thin" behavior).
+     */
+    fun setFieldNavClusterHidden(hidden: Boolean) {
+        val visibility = if (hidden) View.GONE else View.VISIBLE
+        rangeLeft.visibility = visibility
+        namesHolderLayout.visibility = visibility
+        valuesHolderLayout.visibility = visibility
+        rangeRight.visibility = visibility
     }
 
     fun getRangeID(): IntArray {

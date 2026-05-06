@@ -952,6 +952,12 @@
 
     <string name="preferences_appearance_tutorial_description">Add a toolbar button throughout the app that opens the tutorial</string>
 
+    <string name="preferences_features_allow_hide_field_nav_arrows_title">Allow to Hide Field Navigation Arrows</string>
+    <string name="preferences_features_allow_hide_field_nav_arrows_summary">Shows a “Hide Arrows” button on the Collect toolbar</string>
+
+    <string name="collect_toolbar_hide_arrows">Hide Arrows</string>
+    <string name="collect_toolbar_show_arrows">Show Arrows</string>
+
     <string name="preferences_appearance_toolbar_customize">Toolbar Actions</string>
     <string name="preferences_appearance_toolbar_customize_description">Toggle the visibility of default features</string>
     <string name="preferences_appearance_toolbar_customize_search">Search</string>
