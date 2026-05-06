@@ -1,5 +1,14 @@
 <changelog>
 
+    <release date="2026-04-30" versionCode="70201" versionName="v7.2.1">
+        <new>New Experimental Traits setting to show traits under development</new>
+        <bugfix>Large values now fit correctly in the repeated values view</bugfix>
+        <bugfix>InfoBars no longer disappear when attempting to display trait data</bugfix>
+        <bugfix>Repeated measures can now still be collected when data input is frozen</bugfix>
+        <bugfix>Nix trait now works correctly in public builds</bugfix>
+        <bugfix>Canon trait now works correctly with EOS 6D Mark II</bugfix>
+    </release>
+
     <release date="2026-03-17" versionCode="70200" versionName="v7.2.0">
         <new>New Innospectra trait format</new>
         <new>Entry progress bar is now scrollable for navigation</new>

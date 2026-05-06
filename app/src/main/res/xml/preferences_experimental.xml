@@ -41,6 +41,13 @@
             android:summary="@string/pref_experimental_generate_sample_data_summary"
             android:title="@string/pref_experimental_generate_sample_data_title" />
 
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_experimental"
+            android:key="com.tracker.fieldbook.preferences.keys.experimental_traits_category"
+            android:summary="@string/pref_experimental_traits_category_summary"
+            android:title="@string/pref_experimental_traits_category_title" />
+
     </PreferenceCategory>
 
 </PreferenceScreen>

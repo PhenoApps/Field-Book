@@ -13,6 +13,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [v7.2.1] - 2026-04-30
+
+### Added
+- New Experimental Traits setting to show traits under development (https://github.com/PhenoApps/Field-Book/pull/1469)
+
+### Fixed
+- Large values now fit correctly in the repeated values view (https://github.com/PhenoApps/Field-Book/pull/1468)
+- InfoBars no longer disappear when attempting to display trait data (https://github.com/PhenoApps/Field-Book/pull/1458)
+- Repeated measures can now still be collected when data input is frozen (https://github.com/PhenoApps/Field-Book/pull/1459)
+- Nix trait now works correctly in public builds (https://github.com/PhenoApps/Field-Book/pull/1465)
+- Canon trait now works correctly with EOS 6D Mark II (https://github.com/PhenoApps/Field-Book/pull/1463)
+
 ## [v7.2.0] - 2026-03-17
 
 ### Added
@@ -930,3 +942,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v7.1.2]: https://github.com/PhenoApps/Field-Book/releases/tag/7.1.2
 
 [v7.2.0]: https://github.com/PhenoApps/Field-Book/releases/tag/7.2.0
+
+[v7.2.1]: https://github.com/PhenoApps/Field-Book/releases/tag/7.2.1

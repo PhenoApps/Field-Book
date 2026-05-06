@@ -227,13 +227,16 @@ class TextTraitLayout : BaseTraitLayout {
     }
 
     override fun refreshLayout(onNew: Boolean) {
-        super.refreshLayout(false)
+        super.refreshLayout(false) // updates isLocked for frozen+repeated measure state
         inputEditText?.removeTextChangedListener(textWatcher)
         inputEditText?.text?.clear()
         if (currentObservation != null) {
             inputEditText?.setText(currentObservation.value)
             inputEditText?.setSelection(currentObservation.value.length)
         }
+        // Re-apply lock state to the edit text after per-rep isLocked update
+        inputEditText?.isEnabled = !isLocked
+        inputEditText?.inputType = if (isLocked) EditorInfo.TYPE_NULL else EditorInfo.TYPE_TEXT_FLAG_NO_SUGGESTIONS
         selectEditText()
     }
 
