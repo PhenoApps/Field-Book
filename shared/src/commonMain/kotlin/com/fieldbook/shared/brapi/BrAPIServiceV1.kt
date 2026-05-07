@@ -109,6 +109,34 @@ class BrAPIServiceV1(
         }
     }
 
+    override suspend fun getTraits(pageSize: Int): BrapiResult<List<BrapiTraitDetails>> {
+        return try {
+            val traits = mutableListOf<BrapiTraitDetails>()
+            var page = 0
+            var totalPages = 1
+
+            do {
+                val response = observationVariablesApi.variablesGet(
+                    page = page,
+                    pageSize = pageSize,
+                )
+
+                if (!response.success) {
+                    return BrapiResult.Failure(statusCode = response.status)
+                }
+
+                val body = response.body()
+                traits += body.result.data.map(::mapTrait)
+                totalPages = body.metadata.pagination?.totalPages ?: 1
+                page++
+            } while (page < totalPages)
+
+            BrapiResult.Success(traits)
+        } catch (error: Exception) {
+            BrapiResult.Failure(message = error.message)
+        }
+    }
+
     override suspend fun getStudyObservationUnits(
         studyDbId: String,
         pageSize: Int,

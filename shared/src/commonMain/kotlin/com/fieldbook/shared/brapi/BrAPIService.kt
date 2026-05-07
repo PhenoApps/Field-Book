@@ -19,6 +19,10 @@ interface BrAPIService {
         pageSize: Int = BrapiPaginationManager.DEFAULT_PAGE_SIZE,
     ): BrapiResult<List<BrapiTraitDetails>>
 
+    suspend fun getTraits(
+        pageSize: Int = BrapiPaginationManager.DEFAULT_PAGE_SIZE,
+    ): BrapiResult<List<BrapiTraitDetails>>
+
     suspend fun getStudyObservationUnits(
         studyDbId: String,
         pageSize: Int = BrapiPaginationManager.DEFAULT_PAGE_SIZE,

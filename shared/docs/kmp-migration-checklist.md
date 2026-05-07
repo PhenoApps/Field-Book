@@ -203,7 +203,19 @@
 |----------------------------------|--------------------|--------------------|
 |                                  |                    |                    |
 | **Fields**                       |                    |                    |
-| Import from BrAPI                | :white_check_mark: |                    |
+| Import from BrAPI w/traits       | :white_check_mark: |                    |
+|                                  |                    |                    |
+| **Field Details**                |                    |                    |
+| Collect                          |                    |                    |
+| Export                           |                    |                    |
+| Sync                             | :white_check_mark: | :white_check_mark: |
+| Data                             |                    |                    |
+|                                  |                    |                    |
+| ...                              |                    |                    |
+|                                  |                    |                    |
+| **Traits**                       |                    |                    |
+| Import from BrAPI                |                    |                    |
+|                                  |                    |                    |
 | ...                              |                    |                    |
 |                                  |                    |                    |
 | **Export**                       |                    |                    |

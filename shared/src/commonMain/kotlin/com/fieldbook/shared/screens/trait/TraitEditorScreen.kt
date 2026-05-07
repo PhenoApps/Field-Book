@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -24,12 +25,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -53,9 +56,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiTraitDetails
 import com.fieldbook.shared.components.AppListItem
 import com.fieldbook.shared.database.models.TraitObject
 import com.fieldbook.shared.generated.resources.Res
+import com.fieldbook.shared.generated.resources.brapi_base_url_default
+import com.fieldbook.shared.generated.resources.brapi_edit_display_name_default
 import com.fieldbook.shared.generated.resources.dialog_cancel
 import com.fieldbook.shared.generated.resources.dialog_delete_traits_message
 import com.fieldbook.shared.generated.resources.dialog_save
@@ -64,10 +70,12 @@ import com.fieldbook.shared.generated.resources.ic_file_cloud
 import com.fieldbook.shared.generated.resources.ic_file_csv
 import com.fieldbook.shared.generated.resources.ic_file_generic
 import com.fieldbook.shared.generated.resources.ic_more_vert
+import com.fieldbook.shared.generated.resources.ic_pref_brapi_server
 import com.fieldbook.shared.generated.resources.ic_reorder
 import com.fieldbook.shared.generated.resources.ic_ruler
 import com.fieldbook.shared.generated.resources.ic_sort
 import com.fieldbook.shared.generated.resources.ic_tb_toggle_all
+import com.fieldbook.shared.generated.resources.import_source_brapi
 import com.fieldbook.shared.generated.resources.traits_dialog_export
 import com.fieldbook.shared.generated.resources.traits_sort_default
 import com.fieldbook.shared.generated.resources.traits_sort_format
@@ -75,12 +83,14 @@ import com.fieldbook.shared.generated.resources.traits_sort_import_order
 import com.fieldbook.shared.generated.resources.traits_sort_name
 import com.fieldbook.shared.generated.resources.traits_sort_visibility
 import com.fieldbook.shared.generated.resources.traits_toolbar_delete_all
+import com.fieldbook.shared.preferences.PreferenceKeys
 import com.fieldbook.shared.theme.AlertDialog
 import com.fieldbook.shared.theme.TextButton
 import com.fieldbook.shared.traits.Formats
 import com.fieldbook.shared.utilities.DocumentFile
 import com.fieldbook.shared.utilities.getDirectory
 import com.fieldbook.shared.utilities.listFiles
+import com.russhwolf.settings.Settings
 import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.core.PickerType
 import kotlinx.coroutines.Dispatchers
@@ -107,10 +117,13 @@ fun TraitEditorScreen(
     val error by viewModel.error.collectAsState()
     val importing by viewModel.importing.collectAsState()
     val sortOption by viewModel.sortOption.collectAsState()
+    val brapiTraits by viewModel.brapiTraits.collectAsState()
+    val brapiLoading by viewModel.brapiLoading.collectAsState()
 
     var traitToDelete by remember { mutableStateOf<TraitObject?>(null) }
     var showAddTraitDialog by remember { mutableStateOf(false) }
     var showImportDialog by remember { mutableStateOf(false) }
+    var showBrapiImportDialog by remember { mutableStateOf(false) }
     var showLocalFilesDialog by remember { mutableStateOf(false) }
     var showCreator by remember { mutableStateOf(false) }
     var traitToEdit by remember { mutableStateOf<TraitObject?>(null) }
@@ -120,6 +133,13 @@ fun TraitEditorScreen(
     var showExportDialog by remember { mutableStateOf(false) }
     var topBarMenuExpanded by remember { mutableStateOf(false) }
     var exportFileName by remember { mutableStateOf(defaultTraitExportName()) }
+    val settings = remember { Settings() }
+    val defaultBrapiBaseUrl = stringResource(Res.string.brapi_base_url_default)
+    val defaultBrapiDisplayName = stringResource(Res.string.brapi_edit_display_name_default)
+    val brapiEnabled = remember { settings.getBoolean(PreferenceKeys.BRAPI_ENABLED, false) }
+    val brapiDisplayName = remember(defaultBrapiDisplayName) {
+        settings.getString(PreferenceKeys.BRAPI_DISPLAY_NAME, defaultBrapiDisplayName)
+    }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -322,6 +342,8 @@ fun TraitEditorScreen(
 
             if (showAddTraitDialog) {
                 AddTraitDialog(
+                    brapiEnabled = brapiEnabled,
+                    brapiDisplayName = brapiDisplayName,
                     onDismiss = { showAddTraitDialog = false },
                     onCreateNew = {
                         showAddTraitDialog = false
@@ -330,6 +352,11 @@ fun TraitEditorScreen(
                     onImportFromFile = {
                         showAddTraitDialog = false
                         showImportDialog = true
+                    },
+                    onImportFromBrapi = {
+                        showAddTraitDialog = false
+                        showBrapiImportDialog = true
+                        viewModel.loadBrapiTraits(defaultBrapiBaseUrl)
                     }
                 )
             }
@@ -343,6 +370,20 @@ fun TraitEditorScreen(
                         showLocalFilesDialog = true
                     },
                     onPickCloud = { importFilePicker.launch() }
+                )
+            }
+
+            if (showBrapiImportDialog) {
+                BrapiTraitImportDialog(
+                    traits = brapiTraits,
+                    loading = brapiLoading,
+                    importing = importing,
+                    onRefresh = { viewModel.loadBrapiTraits(defaultBrapiBaseUrl) },
+                    onDismiss = { showBrapiImportDialog = false },
+                    onImport = { selectedTraits ->
+                        viewModel.importBrapiTraits(selectedTraits, defaultBrapiBaseUrl)
+                        showBrapiImportDialog = false
+                    }
                 )
             }
 
@@ -498,9 +539,12 @@ private fun TraitExportDialog(
 
 @Composable
 private fun AddTraitDialog(
+    brapiEnabled: Boolean,
+    brapiDisplayName: String,
     onDismiss: () -> Unit,
     onCreateNew: () -> Unit,
-    onImportFromFile: () -> Unit
+    onImportFromFile: () -> Unit,
+    onImportFromBrapi: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -517,12 +561,156 @@ private fun AddTraitDialog(
                     icon = Res.drawable.ic_file_csv,
                     rowModifier = Modifier.clickable(onClick = onImportFromFile)
                 )
+                if (brapiEnabled) {
+                    AppListItem(
+                        text = brapiDisplayName.ifBlank { stringResource(Res.string.import_source_brapi) },
+                        icon = Res.drawable.ic_pref_brapi_server,
+                        rowModifier = Modifier.clickable(onClick = onImportFromBrapi)
+                    )
+                }
             }
         },
         confirmButton = {},
         dismissButton = {
             TextButton(onClick = onDismiss) {
                 Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+private fun BrapiTraitImportDialog(
+    traits: List<BrapiTraitDetails>,
+    loading: Boolean,
+    importing: Boolean,
+    onRefresh: () -> Unit,
+    onDismiss: () -> Unit,
+    onImport: (List<BrapiTraitDetails>) -> Unit,
+) {
+    var query by remember { mutableStateOf("") }
+    var selectedIds by remember { mutableStateOf<Set<String>>(emptySet()) }
+    val filteredTraits = remember(traits, query) {
+        val normalizedQuery = query.trim().lowercase()
+        if (normalizedQuery.isBlank()) {
+            traits
+        } else {
+            traits.filter { trait ->
+                trait.observationVariableName.lowercase().contains(normalizedQuery) ||
+                    trait.observationVariableDbId.lowercase().contains(normalizedQuery) ||
+                    trait.commonCropName.orEmpty().lowercase().contains(normalizedQuery)
+            }
+        }
+    }
+
+    AlertDialog(
+        onDismissRequest = {
+            if (!loading && !importing) onDismiss()
+        },
+        title = { Text(stringResource(Res.string.import_source_brapi)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = { query = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    label = { Text("Filter traits") },
+                )
+
+                when {
+                    loading || importing -> {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                        }
+                    }
+
+                    traits.isEmpty() -> {
+                        Text("No BrAPI traits loaded")
+                    }
+
+                    filteredTraits.isEmpty() -> {
+                        Text("No traits match the filter")
+                    }
+
+                    else -> {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 360.dp)
+                        ) {
+                            items(filteredTraits, key = { it.observationVariableDbId }) { trait ->
+                                val selected = trait.observationVariableDbId in selectedIds
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            selectedIds = if (selected) {
+                                                selectedIds - trait.observationVariableDbId
+                                            } else {
+                                                selectedIds + trait.observationVariableDbId
+                                            }
+                                        }
+                                        .padding(vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    Checkbox(
+                                        checked = selected,
+                                        onCheckedChange = { checked ->
+                                            selectedIds = if (checked) {
+                                                selectedIds + trait.observationVariableDbId
+                                            } else {
+                                                selectedIds - trait.observationVariableDbId
+                                            }
+                                        }
+                                    )
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = trait.observationVariableName,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                        )
+                                        val detail = listOfNotNull(
+                                            trait.commonCropName,
+                                            trait.format,
+                                            trait.observationVariableDbId,
+                                        ).joinToString(" - ")
+                                        Text(
+                                            text = detail,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                }
+                                HorizontalDivider()
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                enabled = !loading && !importing && selectedIds.isNotEmpty(),
+                onClick = {
+                    onImport(traits.filter { it.observationVariableDbId in selectedIds })
+                }
+            ) {
+                Text("Import")
+            }
+        },
+        dismissButton = {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextButton(onClick = onRefresh, enabled = !loading && !importing) {
+                    Text("Reload")
+                }
+                TextButton(onClick = onDismiss, enabled = !loading && !importing) {
+                    Text(stringResource(Res.string.dialog_cancel))
+                }
             }
         }
     )
