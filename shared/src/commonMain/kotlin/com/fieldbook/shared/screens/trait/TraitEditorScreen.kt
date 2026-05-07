@@ -38,7 +38,6 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -77,6 +76,7 @@ import com.fieldbook.shared.generated.resources.traits_sort_name
 import com.fieldbook.shared.generated.resources.traits_sort_visibility
 import com.fieldbook.shared.generated.resources.traits_toolbar_delete_all
 import com.fieldbook.shared.theme.AlertDialog
+import com.fieldbook.shared.theme.TextButton
 import com.fieldbook.shared.traits.Formats
 import com.fieldbook.shared.utilities.DocumentFile
 import com.fieldbook.shared.utilities.getDirectory
@@ -303,7 +303,7 @@ fun TraitEditorScreen(
                     title = { Text("Delete trait") },
                     text = { Text("Are you sure you want to delete '${trait.name}'?") },
                     confirmButton = {
-                        androidx.compose.material3.TextButton(onClick = {
+                        TextButton(onClick = {
                             viewModel.deleteTrait(trait.id)
                             traitToDelete = null
                         }) {
@@ -311,7 +311,7 @@ fun TraitEditorScreen(
                         }
                     },
                     dismissButton = {
-                        androidx.compose.material3.TextButton(onClick = {
+                        TextButton(onClick = {
                             traitToDelete = null
                         }) {
                             Text("Cancel")

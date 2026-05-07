@@ -19,7 +19,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -74,6 +73,7 @@ import com.fieldbook.shared.preferences.LanguageSelection
 import com.fieldbook.shared.preferences.PreferenceKeys
 import com.fieldbook.shared.preferences.resolveSystemLanguageSelection
 import com.fieldbook.shared.theme.AlertDialog
+import com.fieldbook.shared.theme.TextButton
 import com.fieldbook.shared.utilities.onLanguageChanged
 import com.russhwolf.settings.Settings
 import org.jetbrains.compose.resources.DrawableResource

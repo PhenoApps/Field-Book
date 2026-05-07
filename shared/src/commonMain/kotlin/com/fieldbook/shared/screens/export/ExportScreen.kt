@@ -23,7 +23,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -62,6 +61,7 @@ import com.fieldbook.shared.generated.resources.settings_traits
 import com.fieldbook.shared.generated.resources.traits_create_format
 import com.fieldbook.shared.theme.AlertDialog
 import com.fieldbook.shared.theme.Dialog
+import com.fieldbook.shared.theme.TextButton
 import kotlinx.coroutines.flow.collectLatest
 import org.jetbrains.compose.resources.stringResource
 

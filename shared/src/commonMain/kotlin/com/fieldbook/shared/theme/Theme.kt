@@ -1,6 +1,9 @@
 package com.fieldbook.shared.theme
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
@@ -8,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.lightColorScheme
@@ -19,6 +23,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.material3.AlertDialog as MaterialAlertDialog
+import androidx.compose.material3.TextButton as MaterialTextButton
 import androidx.compose.ui.window.Dialog as ComposeDialog
 
 private val MainLightColors = lightColorScheme(
@@ -122,7 +127,6 @@ fun FilledIconButton(
 private fun DialogButtonColorTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = MaterialTheme.colorScheme.copy(
-            primary = Color.Black,
             onPrimary = Color.White
         ),
         typography = MaterialTheme.typography,
@@ -143,6 +147,35 @@ fun Dialog(
     ) {
         DialogButtonColorTheme(content = content)
     }
+}
+
+@Composable
+fun TextButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    shape: Shape = ButtonDefaults.textShape,
+    colors: androidx.compose.material3.ButtonColors = ButtonDefaults.textButtonColors(
+        contentColor = Color.Black
+    ),
+    elevation: ButtonElevation? = null,
+    border: BorderStroke? = null,
+    contentPadding: PaddingValues = ButtonDefaults.TextButtonContentPadding,
+    interactionSource: MutableInteractionSource? = null,
+    content: @Composable RowScope.() -> Unit
+) {
+    MaterialTextButton(
+        onClick = onClick,
+        modifier = modifier,
+        enabled = enabled,
+        shape = shape,
+        colors = colors,
+        elevation = elevation,
+        border = border,
+        contentPadding = contentPadding,
+        interactionSource = interactionSource,
+        content = content
+    )
 }
 
 @Composable

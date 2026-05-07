@@ -24,7 +24,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +38,7 @@ import com.fieldbook.shared.database.models.TraitObject
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.dialog_back
 import com.fieldbook.shared.theme.Dialog
+import com.fieldbook.shared.theme.TextButton
 import com.fieldbook.shared.traits.Formats
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
