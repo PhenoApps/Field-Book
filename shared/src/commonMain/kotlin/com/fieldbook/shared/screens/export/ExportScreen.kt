@@ -23,7 +23,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -62,6 +61,7 @@ import com.fieldbook.shared.generated.resources.settings_traits
 import com.fieldbook.shared.generated.resources.traits_create_format
 import com.fieldbook.shared.theme.AlertDialog
 import com.fieldbook.shared.theme.Dialog
+import com.fieldbook.shared.theme.TextButton
 import kotlinx.coroutines.flow.collectLatest
 import org.jetbrains.compose.resources.stringResource
 
@@ -243,6 +243,11 @@ private fun BrapiExportContent(
         BrapiCountRow("Edited", preview?.editedObservations ?: 0)
         BrapiCountRow("Local-only", preview?.localObservations ?: 0)
         BrapiCountRow("Wrong source", preview?.wrongSourceObservations ?: 0)
+        Spacer(modifier = Modifier.height(8.dp))
+        BrapiCountRow("New images", preview?.newImages ?: 0)
+        BrapiCountRow("Synced images", preview?.syncedImages ?: 0)
+        BrapiCountRow("Edited images", preview?.editedImages ?: 0)
+        BrapiCountRow("Missing images", preview?.invalidImages ?: 0)
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -257,7 +262,9 @@ private fun BrapiExportContent(
             Spacer(modifier = Modifier.width(8.dp))
             Button(
                 onClick = onSave,
-                enabled = preview?.let { it.canExport && (it.newObservations + it.editedObservations) > 0 } == true,
+                enabled = preview?.let {
+                    it.canExport && (it.newObservations + it.editedObservations + it.newImages + it.editedImages) > 0
+                } == true,
             ) {
                 Text(stringResource(Res.string.settings_export))
             }

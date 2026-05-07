@@ -141,7 +141,7 @@ class ExportScreenViewModel(
             return
         }
 
-        if (preview.newObservations + preview.editedObservations == 0) {
+        if (preview.newObservations + preview.editedObservations + preview.newImages + preview.editedImages == 0) {
             viewModelScope.launch { _events.emit(ExportEvent.Failed("Nothing to sync")) }
             return
         }
@@ -159,7 +159,7 @@ class ExportScreenViewModel(
                 )
                 is BrapiResult.Success -> _events.emit(
                     ExportEvent.Completed(
-                        "BrAPI export complete: ${result.value.created} new, ${result.value.updated} edited"
+                        "BrAPI export complete: ${result.value.created} new, ${result.value.updated} edited, ${result.value.imagesCreated} images uploaded, ${result.value.imagesUpdated} images updated"
                     )
                 )
             }

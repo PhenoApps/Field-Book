@@ -23,7 +23,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -65,6 +64,7 @@ import com.fieldbook.shared.generated.resources.trait_date_save
 import com.fieldbook.shared.preferences.GeneralKeys
 import com.fieldbook.shared.screens.onboarding.OnboardingScreen
 import com.fieldbook.shared.theme.AlertDialog
+import com.fieldbook.shared.theme.TextButton
 import com.russhwolf.settings.Settings
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource

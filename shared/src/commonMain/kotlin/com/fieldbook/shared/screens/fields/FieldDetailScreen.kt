@@ -36,7 +36,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -91,6 +90,7 @@ import com.fieldbook.shared.objects.ImportFormat
 import com.fieldbook.shared.preferences.PreferenceKeys
 import com.fieldbook.shared.theme.AlertDialog
 import com.fieldbook.shared.theme.Dialog
+import com.fieldbook.shared.theme.TextButton
 import com.fieldbook.shared.utilities.checkForIllegalCharacters
 import com.fieldbook.shared.utilities.relativeTimeText
 import com.russhwolf.settings.Settings

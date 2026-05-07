@@ -1,6 +1,7 @@
 package com.fieldbook.shared.brapi
 
 import com.fieldbook.shared.brapi.model.v2.core.BrapiStudyDetails
+import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiImageExport
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiObservationExport
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiObservationImport
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiObservationUnitDetails
@@ -184,6 +185,26 @@ class BrAPIServiceV1(
         observations: List<BrapiObservationExport>,
     ): BrapiResult<List<BrapiObservationExport>> {
         return exportObservations(observations)
+    }
+
+    override suspend fun createImages(
+        images: List<BrapiImageExport>,
+    ): BrapiResult<List<BrapiImageExport>> {
+        return if (images.isEmpty()) {
+            BrapiResult.Success(emptyList())
+        } else {
+            BrapiResult.Failure(message = "BrAPI image upload requires BrAPI v2.")
+        }
+    }
+
+    override suspend fun updateImages(
+        images: List<BrapiImageExport>,
+    ): BrapiResult<List<BrapiImageExport>> {
+        return if (images.isEmpty()) {
+            BrapiResult.Success(emptyList())
+        } else {
+            BrapiResult.Failure(message = "BrAPI image upload requires BrAPI v2.")
+        }
     }
 
     private suspend fun exportObservations(
