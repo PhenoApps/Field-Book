@@ -16,6 +16,32 @@ data class ExistingBrapiObservation(
     val timestamp: String?,
 )
 
+data class BrapiExportObservationRow(
+    val id: Long,
+    val value: String?,
+    val observationTimeStamp: String?,
+    val observationUnitDbId: String?,
+    val observationDbId: String?,
+    val lastSyncedTime: String?,
+    val collector: String?,
+    val studyDbId: String?,
+    val externalTraitDbId: String?,
+    val observationVariableName: String?,
+    val observationVariableFieldBookFormat: String?,
+)
+
+data class BrapiExportImageRow(
+    val id: Long,
+    val value: String?,
+    val observationTimeStamp: String?,
+    val observationUnitDbId: String?,
+    val imageDbId: String?,
+    val lastSyncedTime: String?,
+    val observationVariableName: String?,
+    val studyAlias: String?,
+    val studyName: String?,
+)
+
 class ObservationRepository() {
     private val db: FieldbookDatabase
         get() = createDatabase()
@@ -189,6 +215,70 @@ class ObservationRepository() {
                     timestamp = row.observation_time_stamp,
                 )
             }
+    }
+
+    fun getBrapiExportObservations(studyId: Long, hostUrl: String): List<BrapiExportObservationRow> {
+        return db.observationsQueries.getBrapiExportObservations(
+            study_id = studyId,
+            trait_data_source = hostUrl,
+        ).executeAsList().map { row ->
+            BrapiExportObservationRow(
+                id = row.id,
+                value = row.value_,
+                observationTimeStamp = row.observation_time_stamp,
+                observationUnitDbId = row.observation_unit_id,
+                observationDbId = row.observation_db_id,
+                lastSyncedTime = row.last_synced_time,
+                collector = row.collector,
+                studyDbId = row.study_db_id,
+                externalTraitDbId = row.external_db_id,
+                observationVariableName = row.observation_variable_name,
+                observationVariableFieldBookFormat = row.observation_variable_field_book_format,
+            )
+        }
+    }
+
+    fun getBrapiExportImages(studyId: Long, hostUrl: String): List<BrapiExportImageRow> {
+        return db.observationsQueries.getBrapiExportImages(
+            study_id = studyId,
+            trait_data_source = hostUrl,
+        ).executeAsList().map { row ->
+            BrapiExportImageRow(
+                id = row.id,
+                value = row.value_,
+                observationTimeStamp = row.observation_time_stamp,
+                observationUnitDbId = row.observation_unit_id,
+                imageDbId = row.observation_db_id,
+                lastSyncedTime = row.last_synced_time,
+                observationVariableName = row.observation_variable_name,
+                studyAlias = row.study_alias,
+                studyName = row.study_name,
+            )
+        }
+    }
+
+    fun countLocalBrapiExportObservations(studyId: Long): Int {
+        return db.observationsQueries.countLocalBrapiExportObservations(studyId)
+            .executeAsOne()
+            .toInt()
+    }
+
+    fun countWrongSourceBrapiExportObservations(hostUrl: String): Int {
+        return db.observationsQueries.countWrongSourceBrapiExportObservations(hostUrl)
+            .executeAsOne()
+            .toInt()
+    }
+
+    fun updateBrapiExportSyncState(
+        observationId: Long,
+        remoteDbId: String,
+        lastSyncedTime: String,
+    ) {
+        db.observationsQueries.updateBrapiExportSyncState(
+            observation_db_id = remoteDbId,
+            last_synced_time = lastSyncedTime,
+            internal_id_observation = observationId,
+        )
     }
 
     fun getObservation(studyId: Long, plotId: String, traitId: Long): ObservationObject? {

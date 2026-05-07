@@ -1,13 +1,12 @@
 package com.fieldbook.shared.screens.export
 
-import app.cash.sqldelight.db.QueryResult
-import app.cash.sqldelight.db.SqlDriver
-import com.fieldbook.shared.AppContext
 import com.fieldbook.shared.brapi.BrAPIService
 import com.fieldbook.shared.brapi.BrapiResult
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiImageExport
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiObservationExport
 import com.fieldbook.shared.database.models.FieldObject
+import com.fieldbook.shared.database.repository.BrapiExportObservationRow
+import com.fieldbook.shared.database.repository.ObservationRepository
 import com.fieldbook.shared.database.repository.StudyRepository
 import com.fieldbook.shared.objects.ImportFormat
 import com.fieldbook.shared.utilities.CategoryJsonUtil
@@ -59,10 +58,8 @@ data class BrapiExportResult(
 
 class BrapiExportSupport(
     private val studyRepository: StudyRepository = StudyRepository(),
+    private val observationRepository: ObservationRepository = ObservationRepository(),
 ) {
-    private val driver: SqlDriver
-        get() = AppContext.driverFactory().getDriver()
-
     fun preview(fieldIds: List<Int>, hostUrl: String): BrapiExportPreview {
         val fields = fieldIds.map { studyRepository.getById(it) }
         val invalidFields = fields.filterNot { it.isBrapiFieldFrom(hostUrl) }
@@ -187,117 +184,40 @@ class BrapiExportSupport(
     }
 
     private fun getBrapiObservations(fieldId: Int, hostUrl: String): List<BrapiObservationExport> {
-        val sql = """
-            SELECT
-                obs.internal_id_observation AS id,
-                obs.value AS value,
-                obs.observation_time_stamp,
-                obs.observation_unit_id,
-                obs.observation_variable_db_id,
-                obs.observation_db_id,
-                obs.last_synced_time,
-                obs.collector,
-                obs.rep,
-                study.study_db_id,
-                vars.external_db_id,
-                vars.observation_variable_name,
-                vars.observation_variable_field_book_format
-            FROM observations AS obs
-            JOIN observation_variables AS vars ON obs.observation_variable_db_id = vars.internal_id_observation_variable
-            JOIN studies AS study ON obs.study_id = study.internal_id_study
-            WHERE obs.study_id = ?
-              AND study.study_source IS NOT NULL
-              AND obs.value <> ''
-              AND vars.trait_data_source = ?
-              AND vars.trait_data_source IS NOT NULL
-              AND vars.observation_variable_field_book_format <> 'photo'
-        """.trimIndent()
-
-        return executeQueryRows(sql, 2, 13) {
-            bindLong(0, fieldId.toLong())
-            bindString(1, hostUrl)
-        }.mapNotNull { values ->
-            val row = listOf(
-                "id",
-                "value",
-                "observation_time_stamp",
-                "observation_unit_id",
-                "observation_variable_db_id",
-                "observation_db_id",
-                "last_synced_time",
-                "collector",
-                "rep",
-                "study_db_id",
-                "external_db_id",
-                "observation_variable_name",
-                "observation_variable_field_book_format",
-            ).zip(values).toMap()
-
-            val value = CategoryJsonUtil.processValue(row)
-            val variableDbId = row["external_db_id"]?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
-            val unitDbId = row["observation_unit_id"]?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
-            val studyDbId = row["study_db_id"]?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
+        return observationRepository.getBrapiExportObservations(
+            studyId = fieldId.toLong(),
+            hostUrl = hostUrl,
+        ).mapNotNull { row ->
+            val value = CategoryJsonUtil.processValue(row.toCategoryValueMap())
+            val variableDbId = row.externalTraitDbId?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
+            val unitDbId = row.observationUnitDbId?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
+            val studyDbId = row.studyDbId?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
 
             BrapiObservationExport(
-                fieldBookDbId = row["id"].orEmpty(),
-                observationDbId = row["observation_db_id"],
+                fieldBookDbId = row.id.toString(),
+                observationDbId = row.observationDbId,
                 observationUnitDbId = unitDbId,
                 observationVariableDbId = variableDbId,
-                observationVariableName = row["observation_variable_name"],
+                observationVariableName = row.observationVariableName,
                 studyDbId = studyDbId,
                 value = value.orEmpty(),
-                observationTimeStamp = row["observation_time_stamp"],
-                lastSyncedTime = row["last_synced_time"],
-                collector = row["collector"],
+                observationTimeStamp = row.observationTimeStamp,
+                lastSyncedTime = row.lastSyncedTime,
+                collector = row.collector,
             )
         }
     }
 
     private fun getBrapiImages(fieldId: Int, hostUrl: String): List<BrapiImageExport> {
-        val sql = """
-            SELECT
-                obs.internal_id_observation AS id,
-                obs.value AS value,
-                obs.observation_time_stamp,
-                obs.observation_unit_id,
-                obs.observation_db_id,
-                obs.last_synced_time,
-                vars.observation_variable_name,
-                study.study_alias,
-                study.study_name
-            FROM observations AS obs
-            JOIN observation_variables AS vars ON obs.observation_variable_db_id = vars.internal_id_observation_variable
-            JOIN studies AS study ON obs.study_id = study.internal_id_study
-            WHERE obs.study_id = ?
-              AND study.study_source IS NOT NULL
-              AND obs.value <> ''
-              AND vars.trait_data_source = ?
-              AND vars.trait_data_source IS NOT NULL
-              AND vars.observation_variable_field_book_format = 'photo'
-        """.trimIndent()
+        return observationRepository.getBrapiExportImages(
+            studyId = fieldId.toLong(),
+            hostUrl = hostUrl,
+        ).flatMap { row ->
+            val unitDbId = row.observationUnitDbId?.takeIf { it.isNotBlank() } ?: return@flatMap emptyList()
+            val traitName = row.observationVariableName?.takeIf { it.isNotBlank() }
+            val fieldName = row.studyAlias?.takeIf { it.isNotBlank() } ?: row.studyName
 
-        return executeQueryRows(sql, 2, 9) {
-            bindLong(0, fieldId.toLong())
-            bindString(1, hostUrl)
-        }.flatMap { values ->
-            val row = listOf(
-                "id",
-                "value",
-                "observation_time_stamp",
-                "observation_unit_id",
-                "observation_db_id",
-                "last_synced_time",
-                "observation_variable_name",
-                "study_alias",
-                "study_name",
-            ).zip(values).toMap()
-
-            val fieldBookDbId = row["id"].orEmpty()
-            val unitDbId = row["observation_unit_id"]?.takeIf { it.isNotBlank() } ?: return@flatMap emptyList()
-            val traitName = row["observation_variable_name"]?.takeIf { it.isNotBlank() }
-            val fieldName = row["study_alias"]?.takeIf { it.isNotBlank() } ?: row["study_name"]
-
-            decodePhotoRefs(row["value"].orEmpty()).mapNotNull { photoRef ->
+            decodePhotoRefs(row.value.orEmpty()).map { photoRef ->
                 val file = findStoredPhotoFile(
                     photoRef = photoRef,
                     fieldName = fieldName,
@@ -308,15 +228,15 @@ class BrapiExportSupport(
                 val mimeType = fileName.toImageMimeType()
 
                 BrapiImageExport(
-                    fieldBookDbId = fieldBookDbId,
-                    imageDbId = row["observation_db_id"],
+                    fieldBookDbId = row.id.toString(),
+                    imageDbId = row.imageDbId,
                     observationUnitDbId = unitDbId,
                     fileName = fileName,
                     imageName = fileName,
                     mimeType = mimeType,
                     fileSize = content.size,
-                    observationTimeStamp = row["observation_time_stamp"],
-                    lastSyncedTime = row["last_synced_time"],
+                    observationTimeStamp = row.observationTimeStamp,
+                    lastSyncedTime = row.lastSyncedTime,
                     content = content,
                 )
             }
@@ -324,53 +244,11 @@ class BrapiExportSupport(
     }
 
     private fun countLocalObservations(fieldId: Int): Int {
-        return countRows(
-            """
-                SELECT COUNT(*)
-                FROM observations AS obs
-                JOIN observation_variables AS vars ON obs.observation_variable_db_id = vars.internal_id_observation_variable
-                WHERE obs.study_id = ?
-                  AND vars.observation_variable_field_book_format <> 'photo'
-                  AND (vars.trait_data_source = 'local' OR vars.trait_data_source IS NULL)
-            """.trimIndent(),
-            fieldId,
-        )
+        return observationRepository.countLocalBrapiExportObservations(fieldId.toLong())
     }
 
     private fun countWrongSourceObservations(hostUrl: String): Int {
-        val result = driver.executeQuery(
-            identifier = null,
-            sql = """
-                SELECT COUNT(*)
-                FROM observations AS obs
-                JOIN observation_variables AS vars ON obs.observation_variable_db_id = vars.internal_id_observation_variable
-                WHERE vars.observation_variable_field_book_format <> 'photo'
-                  AND vars.trait_data_source <> ?
-                  AND vars.trait_data_source <> 'local'
-                  AND vars.trait_data_source IS NOT NULL
-            """.trimIndent(),
-            mapper = { cursor ->
-                cursor.next().value
-                QueryResult.Value(cursor.getLong(0) ?: 0L)
-            },
-            parameters = 1,
-            binders = { bindString(0, hostUrl) }
-        )
-        return result.value.toInt()
-    }
-
-    private fun countRows(sql: String, fieldId: Int): Int {
-        val result = driver.executeQuery(
-            identifier = null,
-            sql = sql,
-            mapper = { cursor ->
-                cursor.next().value
-                QueryResult.Value(cursor.getLong(0) ?: 0L)
-            },
-            parameters = 1,
-            binders = { bindLong(0, fieldId.toLong()) }
-        )
-        return result.value.toInt()
+        return observationRepository.countWrongSourceBrapiExportObservations(hostUrl)
     }
 
     private fun updateLocalSyncState(
@@ -394,15 +272,11 @@ class BrapiExportSupport(
                 ?: original.observationDbId
                 ?: return@forEach
 
-            driver.execute(
-                identifier = null,
-                sql = "UPDATE observations SET observation_db_id = ?, last_synced_time = ? WHERE internal_id_observation = ?",
-                parameters = 3,
-            ) {
-                bindString(0, observationDbId)
-                bindString(1, now)
-                bindLong(2, original.fieldBookDbId.toLong())
-            }
+            observationRepository.updateBrapiExportSyncState(
+                observationId = original.fieldBookDbId.toLong(),
+                remoteDbId = observationDbId,
+                lastSyncedTime = now,
+            )
         }
     }
 
@@ -424,15 +298,11 @@ class BrapiExportSupport(
                 ?: original.imageDbId
                 ?: return@forEach
 
-            driver.execute(
-                identifier = null,
-                sql = "UPDATE observations SET observation_db_id = ?, last_synced_time = ? WHERE internal_id_observation = ?",
-                parameters = 3,
-            ) {
-                bindString(0, imageDbId)
-                bindString(1, now)
-                bindLong(2, original.fieldBookDbId.toLong())
-            }
+            observationRepository.updateBrapiExportSyncState(
+                observationId = original.fieldBookDbId.toLong(),
+                remoteDbId = imageDbId,
+                lastSyncedTime = now,
+            )
         }
     }
 
@@ -515,26 +385,20 @@ class BrapiExportSupport(
         }
     }
 
-    private fun executeQueryRows(
-        sql: String,
-        parameterCount: Int,
-        columnCount: Int,
-        binder: app.cash.sqldelight.db.SqlPreparedStatement.() -> Unit = {},
-    ): List<List<String?>> {
-        val result: QueryResult<List<List<String?>>> = driver.executeQuery(
-            identifier = null,
-            sql = sql,
-            mapper = { cursor ->
-                val rows = mutableListOf<List<String?>>()
-                while (cursor.next().value) {
-                    rows += List(columnCount) { index -> cursor.getString(index) }
-                }
-                QueryResult.Value(rows)
-            },
-            parameters = parameterCount,
-            binders = binder
+    private fun BrapiExportObservationRow.toCategoryValueMap(): Map<String, String?> {
+        return mapOf(
+            "id" to id.toString(),
+            "value" to value,
+            "observation_time_stamp" to observationTimeStamp,
+            "observation_unit_id" to observationUnitDbId,
+            "observation_db_id" to observationDbId,
+            "last_synced_time" to lastSyncedTime,
+            "collector" to collector,
+            "study_db_id" to studyDbId,
+            "external_db_id" to externalTraitDbId,
+            "observation_variable_name" to observationVariableName,
+            "observation_variable_field_book_format" to observationVariableFieldBookFormat,
         )
-        return result.value
     }
 
     private companion object {
