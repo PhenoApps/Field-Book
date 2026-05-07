@@ -2,6 +2,7 @@ package com.fieldbook.shared
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -20,7 +21,10 @@ import com.fieldbook.shared.screens.preferences.LanguageScreen
 import com.fieldbook.shared.screens.preferences.PreferencesScreen
 import com.fieldbook.shared.screens.preferences.StorageDefinerScreen
 import com.fieldbook.shared.screens.preferences.StoragePreferencesScreen
+import com.fieldbook.shared.screens.trait.TraitBrapiScreen
 import com.fieldbook.shared.screens.trait.TraitEditorScreen
+import com.fieldbook.shared.screens.trait.TraitEditorScreenViewModel
+import com.fieldbook.shared.screens.trait.traitEditorScreenViewModelFactory
 
 @Composable
 fun KmpApp(
@@ -35,6 +39,9 @@ fun KmpApp(
     } else {
         KmpHostScreenType.CONFIG
     }
+    val traitEditorViewModel: TraitEditorScreenViewModel = viewModel(
+        factory = traitEditorScreenViewModelFactory()
+    )
 
     NavHost(
         navController = navController,
@@ -63,6 +70,15 @@ fun KmpApp(
         composable(KmpHostScreenType.TRAIT_EDITOR.route) {
             TraitEditorScreen(
                 onBack = { navController.navigateBackOrExit(onExit) },
+                onNavigateToBrapi = { navController.navigateTo(KmpHostScreenType.TRAIT_BRAPI) },
+                viewModel = traitEditorViewModel,
+            )
+        }
+
+        composable(KmpHostScreenType.TRAIT_BRAPI.route) {
+            TraitBrapiScreen(
+                onBack = { navController.navigateBackOrExit(onExit) },
+                viewModel = traitEditorViewModel,
             )
         }
 
