@@ -36,6 +36,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fieldbook.shared.database.models.TraitObject
+import com.fieldbook.shared.generated.resources.Res
+import com.fieldbook.shared.generated.resources.dialog_back
 import com.fieldbook.shared.theme.Dialog
 import com.fieldbook.shared.traits.Formats
 import org.jetbrains.compose.resources.painterResource
@@ -210,11 +212,11 @@ fun TraitCreatorDialog(
                                 horizontalArrangement = Arrangement.End
                             ) {
                                 Row {
-                                    if (!isEditing) {
+                                    if (!isEditing || !observationsExist) {
                                         TextButton(onClick = {
                                             currentStep = TraitCreatorStep.ChooseFormat
                                         }) {
-                                            Text("Back")
+                                            Text(stringResource(Res.string.dialog_back))
                                         }
                                     }
 
