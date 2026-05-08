@@ -2,6 +2,8 @@ package com.fieldbook.shared
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -10,8 +12,13 @@ import androidx.navigation.compose.rememberNavController
 import com.fieldbook.shared.screens.AboutScreen
 import com.fieldbook.shared.screens.ConfigScreen
 import com.fieldbook.shared.screens.ScannerScreen
+import com.fieldbook.shared.screens.brapi.BrapiFilterScreen
+import com.fieldbook.shared.screens.brapi.BrapiImportSharedViewModel
 import com.fieldbook.shared.screens.brapi.BrapiStudyScreen
-import com.fieldbook.shared.screens.brapi.BrapiTraitFilterScreen
+import com.fieldbook.shared.screens.brapi.brapiImportSharedViewModelFactory
+import com.fieldbook.shared.screens.brapi.trait.BrapiTraitImportScreen
+import com.fieldbook.shared.screens.brapi.trait.BrapiTraitImportViewModel
+import com.fieldbook.shared.screens.brapi.trait.brapiTraitImportViewModelFactory
 import com.fieldbook.shared.screens.collect.CollectScreen
 import com.fieldbook.shared.screens.export.ExportScreen
 import com.fieldbook.shared.screens.fields.FieldEditorScreen
@@ -22,7 +29,6 @@ import com.fieldbook.shared.screens.preferences.LanguageScreen
 import com.fieldbook.shared.screens.preferences.PreferencesScreen
 import com.fieldbook.shared.screens.preferences.StorageDefinerScreen
 import com.fieldbook.shared.screens.preferences.StoragePreferencesScreen
-import com.fieldbook.shared.screens.trait.TraitBrapiScreen
 import com.fieldbook.shared.screens.trait.TraitEditorScreen
 import com.fieldbook.shared.screens.trait.TraitEditorScreenViewModel
 import com.fieldbook.shared.screens.trait.traitEditorScreenViewModelFactory
@@ -42,6 +48,12 @@ fun KmpApp(
     }
     val traitEditorViewModel: TraitEditorScreenViewModel = viewModel(
         factory = traitEditorScreenViewModelFactory()
+    )
+    val brapiImportSharedViewModel: BrapiImportSharedViewModel = viewModel(
+        factory = brapiImportSharedViewModelFactory()
+    )
+    val brapiTraitImportViewModel: BrapiTraitImportViewModel = viewModel(
+        factory = brapiTraitImportViewModelFactory()
     )
 
     NavHost(
@@ -77,17 +89,28 @@ fun KmpApp(
         }
 
         composable(KmpHostScreenType.TRAIT_BRAPI.route) {
-            TraitBrapiScreen(
+            BrapiTraitImportScreen(
                 onBack = { navController.navigateBackOrExit(onExit) },
                 onNavigateToFilter = { navController.navigateTo(KmpHostScreenType.BRAPI_FILTER) },
-                viewModel = traitEditorViewModel,
+                onImportComplete = {
+                    traitEditorViewModel.loadTraits()
+                    navController.navigateBackOrExit(onExit)
+                },
+                sharedViewModel = brapiImportSharedViewModel,
+                viewModel = brapiTraitImportViewModel,
             )
         }
 
         composable(KmpHostScreenType.BRAPI_FILTER.route) {
-            BrapiTraitFilterScreen(
+            val filterState by brapiImportSharedViewModel.filterState.collectAsState()
+
+            BrapiFilterScreen(
+                state = filterState,
                 onBack = { navController.navigateBackOrExit(onExit) },
-                viewModel = traitEditorViewModel,
+                onApply = { selectedIds ->
+                    brapiImportSharedViewModel.applyActiveFilterSelection(selectedIds)
+                    navController.navigateBackOrExit(onExit)
+                },
             )
         }
 

@@ -1,5 +1,6 @@
 package com.fieldbook.shared.brapi
 
+import com.fieldbook.shared.brapi.model.v2.core.BrapiStudyDetails
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiTraitDetails
 import com.fieldbook.shared.preferences.PreferenceKeys
 import com.russhwolf.settings.Settings
@@ -12,6 +13,7 @@ private const val JSON_FILE_NAME = "com.fieldbook.shared.brapi.filters.json"
 @Serializable
 data class BrapiFilterCacheModel(
     val sourceUrl: String? = null,
+    val studies: List<BrapiStudyDetails> = emptyList(),
     val traits: Map<String, BrapiTraitDetails> = emptyMap(),
 ) {
     companion object {
@@ -35,6 +37,11 @@ object BrapiFilterCache {
     fun saveTraits(sourceUrl: String, traits: List<BrapiTraitDetails>): Boolean {
         val normalizedSourceUrl = sourceUrl.hostForCache()
         val existing = getStoredModels()
+        val existingStudies = if (existing.sourceUrl == normalizedSourceUrl) {
+            existing.studies
+        } else {
+            emptyList()
+        }
         val mergedTraits = if (existing.sourceUrl == normalizedSourceUrl) {
             existing.traits.toMutableMap()
         } else {
@@ -47,7 +54,26 @@ object BrapiFilterCache {
         return saveToStorage(
             BrapiFilterCacheModel(
                 sourceUrl = normalizedSourceUrl,
+                studies = existingStudies,
                 traits = mergedTraits,
+            )
+        )
+    }
+
+    fun saveStudies(sourceUrl: String, studies: List<BrapiStudyDetails>): Boolean {
+        val normalizedSourceUrl = sourceUrl.hostForCache()
+        val existing = getStoredModels()
+        val existingTraits = if (existing.sourceUrl == normalizedSourceUrl) {
+            existing.traits
+        } else {
+            emptyMap()
+        }
+
+        return saveToStorage(
+            BrapiFilterCacheModel(
+                sourceUrl = normalizedSourceUrl,
+                studies = studies,
+                traits = existingTraits,
             )
         )
     }

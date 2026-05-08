@@ -24,7 +24,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,64 +31,29 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fieldbook.shared.generated.resources.Res
-import com.fieldbook.shared.generated.resources.brapi_filter_type_crop
-import com.fieldbook.shared.generated.resources.brapi_filter_type_study
-import com.fieldbook.shared.generated.resources.brapi_filter_type_trial
+import com.fieldbook.shared.generated.resources.act_brapi_filter_apply
+import com.fieldbook.shared.generated.resources.act_brapi_filter_clear
 import com.fieldbook.shared.generated.resources.dialog_cancel
-import com.fieldbook.shared.screens.trait.BrapiFilterElement
-import com.fieldbook.shared.screens.trait.BrapiTraitFilterType
-import com.fieldbook.shared.screens.trait.TraitEditorScreenViewModel
-import com.fieldbook.shared.screens.trait.traitEditorScreenViewModelFactory
 import com.fieldbook.shared.theme.TextButton
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BrapiTraitFilterScreen(
-    onBack: (() -> Unit)? = null,
-    viewModel: TraitEditorScreenViewModel = viewModel(
-        factory = traitEditorScreenViewModelFactory()
-    ),
-) {
-    val brapiTraits by viewModel.brapiTraits.collectAsState()
-    val filterType by viewModel.brapiTraitFilterType.collectAsState()
-    val selections by viewModel.brapiTraitFilterSelections.collectAsState()
-    val elements = remember(filterType, brapiTraits) {
-        viewModel.getBrapiTraitFilterElements(filterType)
-    }
-
-    BrapiFilterScreen(
-        title = filterType.title(),
-        elements = elements,
-        selectedIds = selections[filterType].orEmpty(),
-        onBack = onBack,
-        onApply = { selectedIds ->
-            viewModel.setBrapiTraitFilterSelection(filterType, selectedIds)
-            onBack?.invoke()
-        },
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
 fun BrapiFilterScreen(
-    title: String,
-    elements: List<BrapiFilterElement>,
-    selectedIds: Set<String>,
+    state: BrapiFilterUiState,
     onBack: (() -> Unit)? = null,
     onApply: (Set<String>) -> Unit,
 ) {
 
-    var query by remember(title) { mutableStateOf("") }
-    var currentSelectedIds by remember(elements, selectedIds) { mutableStateOf(selectedIds) }
-    val filteredElements = remember(elements, query) {
+    var query by remember(state.title) { mutableStateOf("") }
+    var currentSelectedIds by remember(state.elements, state.selectedIds) { mutableStateOf(state.selectedIds) }
+    val filteredElements = remember(state.elements, query) {
         val normalizedQuery = query.trim().lowercase()
         if (normalizedQuery.isBlank()) {
-            elements
+            state.elements
         } else {
-            elements.filter { element ->
+            state.elements.filter { element ->
                 element.label.lowercase().contains(normalizedQuery) ||
                     element.id.lowercase().contains(normalizedQuery)
             }
@@ -99,7 +63,7 @@ fun BrapiFilterScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(title) },
+                title = { Text(state.title) },
                 navigationIcon = {
                     if (onBack != null) {
                         IconButton(onClick = onBack) {
@@ -126,7 +90,7 @@ fun BrapiFilterScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 TextButton(onClick = { currentSelectedIds = emptySet() }) {
-                    Text("Clear")
+                    Text(stringResource(Res.string.act_brapi_filter_clear))
                 }
                 TextButton(onClick = { onBack?.invoke() }) {
                     Text(stringResource(Res.string.dialog_cancel))
@@ -136,7 +100,7 @@ fun BrapiFilterScreen(
                         onApply(currentSelectedIds)
                     }
                 ) {
-                    Text("Apply")
+                    Text(stringResource(Res.string.act_brapi_filter_apply))
                 }
             }
         }
@@ -157,10 +121,10 @@ fun BrapiFilterScreen(
             )
 
             when {
-                elements.isEmpty() -> {
+                state.elements.isEmpty() -> {
                     Box(modifier = Modifier.fillMaxSize()) {
                         Text(
-                            text = "No filter values",
+                            text = state.emptyMessage,
                             modifier = Modifier.align(Alignment.Center),
                         )
                     }
@@ -169,7 +133,7 @@ fun BrapiFilterScreen(
                 filteredElements.isEmpty() -> {
                     Box(modifier = Modifier.fillMaxSize()) {
                         Text(
-                            text = "No filter values match",
+                            text = state.noMatchesMessage,
                             modifier = Modifier.align(Alignment.Center),
                         )
                     }
@@ -227,14 +191,5 @@ private fun BrapiFilterElementRow(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-    }
-}
-
-@Composable
-private fun BrapiTraitFilterType.title(): String {
-    return when (this) {
-        BrapiTraitFilterType.TRIAL -> stringResource(Res.string.brapi_filter_type_trial)
-        BrapiTraitFilterType.STUDY -> stringResource(Res.string.brapi_filter_type_study)
-        BrapiTraitFilterType.CROP -> stringResource(Res.string.brapi_filter_type_crop)
     }
 }

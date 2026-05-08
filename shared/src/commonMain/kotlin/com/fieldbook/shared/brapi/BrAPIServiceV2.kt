@@ -111,6 +111,7 @@ class BrAPIServiceV2(
                         commonCropName = study.commonCropName,
                         trialDbId = study.trialDbId,
                         trialName = study.trialName,
+                        observationVariableDbIds = study.observationVariableDbIds.orEmpty(),
                     )
                 }
             )

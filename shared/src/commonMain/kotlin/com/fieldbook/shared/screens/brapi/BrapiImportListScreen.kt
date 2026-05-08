@@ -1,4 +1,4 @@
-package com.fieldbook.shared.screens.trait
+package com.fieldbook.shared.screens.brapi
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,8 +29,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,69 +36,37 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiTraitDetails
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.act_brapi_list_filter_reset_cache_message
 import com.fieldbook.shared.generated.resources.act_brapi_list_filter_reset_cache_title
-import com.fieldbook.shared.generated.resources.brapi_base_url_default
-import com.fieldbook.shared.generated.resources.brapi_filter_type_crop_count
-import com.fieldbook.shared.generated.resources.brapi_filter_type_study_count
-import com.fieldbook.shared.generated.resources.brapi_filter_type_trial_count
 import com.fieldbook.shared.generated.resources.dialog_brapi_filter_choices_title
 import com.fieldbook.shared.generated.resources.dialog_cancel
 import com.fieldbook.shared.generated.resources.filter_variant
-import com.fieldbook.shared.generated.resources.import_source_brapi
 import com.fieldbook.shared.generated.resources.lock_reset
 import com.fieldbook.shared.generated.resources.menu_filter_brapi_reset_cache_title
 import com.fieldbook.shared.generated.resources.results
 import com.fieldbook.shared.generated.resources.search_bar_hint
 import com.fieldbook.shared.theme.AlertDialog
 import com.fieldbook.shared.theme.TextButton
-import com.fieldbook.shared.traits.Formats
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TraitBrapiScreen(
+fun BrapiImportListScreen(
+    state: BrapiImportListUiState,
+    snackbarHostState: SnackbarHostState,
+    onEvent: (BrapiImportListEvent) -> Unit,
     onBack: (() -> Unit)? = null,
-    onNavigateToFilter: ((BrapiTraitFilterType) -> Unit)? = null,
-    viewModel: TraitEditorScreenViewModel = viewModel(
-        factory = traitEditorScreenViewModelFactory()
-    ),
 ) {
-    val brapiTraits by viewModel.brapiTraits.collectAsState()
-    val loading by viewModel.brapiLoading.collectAsState()
-    val importing by viewModel.importing.collectAsState()
-    val filterSelections by viewModel.brapiTraitFilterSelections.collectAsState()
-    val defaultBrapiBaseUrl = stringResource(Res.string.brapi_base_url_default)
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    var query by remember { mutableStateOf("") }
-    var selectedIds by remember { mutableStateOf<Set<String>>(emptySet()) }
     var showResetCacheDialog by remember { mutableStateOf(false) }
     var showFilterChoiceDialog by remember { mutableStateOf(false) }
-    val filteredTraits = remember(brapiTraits, query, filterSelections) {
-        viewModel.applyBrapiTraitFilters(brapiTraits, query, filterSelections)
-    }
-
-    LaunchedEffect(viewModel) {
-        viewModel.messages.collect { message ->
-            snackbarHostState.showSnackbar(message)
-        }
-    }
-
-    LaunchedEffect(defaultBrapiBaseUrl) {
-        if (brapiTraits.isEmpty()) {
-            viewModel.loadBrapiTraits(defaultBrapiBaseUrl)
-        }
-    }
+    val busy = state.loading || state.importing
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(Res.string.import_source_brapi)) },
+                title = { Text(state.title) },
                 navigationIcon = {
                     if (onBack != null) {
                         IconButton(onClick = onBack) {
@@ -114,7 +80,7 @@ fun TraitBrapiScreen(
                 actions = {
                     IconButton(
                         onClick = { showResetCacheDialog = true },
-                        enabled = !loading && !importing,
+                        enabled = !busy,
                     ) {
                         Icon(
                             painter = painterResource(Res.drawable.lock_reset),
@@ -123,7 +89,7 @@ fun TraitBrapiScreen(
                     }
                     IconButton(
                         onClick = { showFilterChoiceDialog = true },
-                        enabled = !loading && !importing,
+                        enabled = !busy,
                     ) {
                         Icon(
                             painter = painterResource(Res.drawable.filter_variant),
@@ -149,21 +115,15 @@ fun TraitBrapiScreen(
             ) {
                 TextButton(
                     onClick = { onBack?.invoke() },
-                    enabled = !loading && !importing,
+                    enabled = !busy,
                 ) {
                     Text(stringResource(Res.string.dialog_cancel))
                 }
                 Button(
-                    enabled = !loading && !importing && selectedIds.isNotEmpty(),
-                    onClick = {
-                        viewModel.importBrapiTraits(
-                            selectedTraits = brapiTraits.filter { it.observationVariableDbId in selectedIds },
-                            defaultBaseUrl = defaultBrapiBaseUrl,
-                        )
-                        onBack?.invoke()
-                    },
+                    enabled = !busy && state.selectedIds.isNotEmpty(),
+                    onClick = { onEvent(BrapiImportListEvent.ImportClicked) },
                 ) {
-                    Text("Import")
+                    Text(state.importButtonText)
                 }
             }
         },
@@ -175,8 +135,8 @@ fun TraitBrapiScreen(
                 .padding(innerPadding)
         ) {
             OutlinedTextField(
-                value = query,
-                onValueChange = { query = it },
+                value = state.query,
+                onValueChange = { onEvent(BrapiImportListEvent.QueryChanged(it)) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
@@ -185,32 +145,32 @@ fun TraitBrapiScreen(
                     Text(
                         stringResource(
                             Res.string.search_bar_hint,
-                            "${filteredTraits.size} ${stringResource(Res.string.results)}"
+                            "${state.items.size} ${stringResource(Res.string.results)}"
                         )
                     )
                 },
             )
 
             when {
-                loading || importing -> {
+                busy -> {
                     Box(modifier = Modifier.fillMaxSize()) {
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                     }
                 }
 
-                brapiTraits.isEmpty() -> {
+                state.totalItemCount == 0 -> {
                     Box(modifier = Modifier.fillMaxSize()) {
                         Text(
-                            text = "No BrAPI traits loaded",
+                            text = state.emptyMessage,
                             modifier = Modifier.align(Alignment.Center),
                         )
                     }
                 }
 
-                filteredTraits.isEmpty() -> {
+                state.items.isEmpty() -> {
                     Box(modifier = Modifier.fillMaxSize()) {
                         Text(
-                            text = "No traits match the filter",
+                            text = state.noMatchesMessage,
                             modifier = Modifier.align(Alignment.Center),
                         )
                     }
@@ -218,16 +178,12 @@ fun TraitBrapiScreen(
 
                 else -> {
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        items(filteredTraits, key = { it.observationVariableDbId }) { trait ->
-                            BrapiTraitRow(
-                                trait = trait,
-                                selected = trait.observationVariableDbId in selectedIds,
+                        items(state.items, key = { it.id }) { item ->
+                            BrapiSelectableItemRow(
+                                item = item,
+                                selected = item.id in state.selectedIds,
                                 onSelectedChange = { selected ->
-                                    selectedIds = if (selected) {
-                                        selectedIds + trait.observationVariableDbId
-                                    } else {
-                                        selectedIds - trait.observationVariableDbId
-                                    }
+                                    onEvent(BrapiImportListEvent.ItemSelectionChanged(item.id, selected))
                                 }
                             )
                             HorizontalDivider()
@@ -245,7 +201,7 @@ fun TraitBrapiScreen(
                 confirmButton = {
                     TextButton(onClick = {
                         showResetCacheDialog = false
-                        viewModel.resetBrapiTraitCache(defaultBrapiBaseUrl)
+                        onEvent(BrapiImportListEvent.ResetCacheConfirmed)
                     }) {
                         Text(stringResource(Res.string.menu_filter_brapi_reset_cache_title))
                     }
@@ -260,14 +216,11 @@ fun TraitBrapiScreen(
 
         if (showFilterChoiceDialog) {
             BrapiFilterChoiceDialog(
-                trialCount = viewModel.getBrapiTraitFilterElements(BrapiTraitFilterType.TRIAL).size,
-                studyCount = viewModel.getBrapiTraitFilterElements(BrapiTraitFilterType.STUDY).size,
-                cropCount = viewModel.getBrapiTraitFilterElements(BrapiTraitFilterType.CROP).size,
+                choices = state.filterChoices,
                 onDismiss = { showFilterChoiceDialog = false },
-                onSelect = { type ->
+                onSelect = { choice ->
                     showFilterChoiceDialog = false
-                    viewModel.setBrapiTraitFilterType(type)
-                    onNavigateToFilter?.invoke(type)
+                    onEvent(BrapiImportListEvent.FilterChoiceSelected(choice.id))
                 }
             )
         }
@@ -276,38 +229,24 @@ fun TraitBrapiScreen(
 
 @Composable
 private fun BrapiFilterChoiceDialog(
-    trialCount: Int,
-    studyCount: Int,
-    cropCount: Int,
+    choices: List<BrapiFilterChoice>,
     onDismiss: () -> Unit,
-    onSelect: (BrapiTraitFilterType) -> Unit,
+    onSelect: (BrapiFilterChoice) -> Unit,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(Res.string.dialog_brapi_filter_choices_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(
-                    text = stringResource(Res.string.brapi_filter_type_trial_count, trialCount.toString()),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onSelect(BrapiTraitFilterType.TRIAL) }
-                        .padding(vertical = 12.dp),
-                )
-                Text(
-                    text = stringResource(Res.string.brapi_filter_type_study_count, studyCount.toString()),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onSelect(BrapiTraitFilterType.STUDY) }
-                        .padding(vertical = 12.dp),
-                )
-                Text(
-                    text = stringResource(Res.string.brapi_filter_type_crop_count, cropCount.toString()),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onSelect(BrapiTraitFilterType.CROP) }
-                        .padding(vertical = 12.dp),
-                )
+                choices.forEach { choice ->
+                    Text(
+                        text = choice.label,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onSelect(choice) }
+                            .padding(vertical = 12.dp),
+                    )
+                }
             }
         },
         confirmButton = {},
@@ -320,8 +259,8 @@ private fun BrapiFilterChoiceDialog(
 }
 
 @Composable
-private fun BrapiTraitRow(
-    trait: BrapiTraitDetails,
+private fun BrapiSelectableItemRow(
+    item: BrapiSelectableItem,
     selected: Boolean,
     onSelectedChange: (Boolean) -> Unit,
 ) {
@@ -339,23 +278,18 @@ private fun BrapiTraitRow(
         )
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = trait.observationVariableName,
+                text = item.title,
                 style = MaterialTheme.typography.bodyMedium,
             )
-            val detail = listOfNotNull(
-                trait.commonCropName,
-                trait.format,
-                trait.observationVariableDbId,
-            ).joinToString(" - ")
             Text(
-                text = detail,
+                text = item.description,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        Formats.findTrait(trait.format)?.iconDrawableResource?.let { icon ->
+        item.icon?.let { icon ->
             Icon(
-                painter = org.jetbrains.compose.resources.painterResource(icon),
+                painter = painterResource(icon),
                 contentDescription = null,
                 modifier = Modifier.size(24.dp),
             )
