@@ -10,6 +10,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -18,19 +20,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.preferences_storage_files_base_directory_title
 import com.fieldbook.shared.preferences.GeneralKeys
-import com.fieldbook.shared.utilities.configurePickedStorageDirectory
-import com.fieldbook.shared.utilities.detectStorageProviderLabel
-import com.fieldbook.shared.utilities.detectStorageProviderType
+import com.fieldbook.shared.utilities.configureAndPersistStorageDirectory
 import com.fieldbook.shared.utilities.displayStorageDirectoryPath
 import com.fieldbook.shared.utilities.normalizeStorageDirectoryPath
 import com.russhwolf.settings.Settings
 import io.github.vinceglb.filekit.compose.rememberDirectoryPickerLauncher
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,6 +41,8 @@ fun StorageDefinerScreen(
     onBack: (() -> Unit)? = null
 ) {
     val preferences: Settings = Settings()
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
     var currentDirectory by remember {
         mutableStateOf(
             normalizeStorageDirectoryPath(
@@ -70,22 +74,19 @@ fun StorageDefinerScreen(
         title = "Directory picker"
     ) { directory ->
         directory?.let {
-            val configuredDirectory = configurePickedStorageDirectory(it)
-            if (configuredDirectory != null) {
-                preferences.putString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY.key, configuredDirectory)
-                preferences.putString(GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_TYPE.key,
-                    detectStorageProviderType(configuredDirectory).name
-                )
-                preferences.putString(GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_LABEL.key,
-                    detectStorageProviderLabel(configuredDirectory)
-                )
-                currentDirectory = configuredDirectory
-                currentProviderType = preferences.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_TYPE.key,
-                    ""
-                )
-                currentProviderLabel = preferences.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_LABEL.key,
-                    ""
-                )
+            coroutineScope.launch {
+                configureAndPersistStorageDirectory(it, preferences)
+                    .onSuccess { result ->
+                        currentDirectory = result.configuredDirectory
+                        currentProviderType = result.providerTypeName
+                        currentProviderLabel = result.providerLabel
+                        if (result.sampleSeedFailed) {
+                            snackbarHostState.showSnackbar("Storage configured, but sample files could not be prepared.")
+                        }
+                    }
+                    .onFailure {
+                        snackbarHostState.showSnackbar("Failed to configure the selected folder.")
+                    }
             }
         }
     }
@@ -130,6 +131,10 @@ fun StorageDefinerScreen(
             Button(onClick = { launcher.launch() }, modifier = Modifier.padding(16.dp)) {
                 Text("Choose Directory")
             }
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
         }
     }
 }
