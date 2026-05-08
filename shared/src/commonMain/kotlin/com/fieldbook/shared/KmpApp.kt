@@ -11,6 +11,7 @@ import com.fieldbook.shared.screens.AboutScreen
 import com.fieldbook.shared.screens.ConfigScreen
 import com.fieldbook.shared.screens.ScannerScreen
 import com.fieldbook.shared.screens.brapi.BrapiStudyScreen
+import com.fieldbook.shared.screens.brapi.BrapiTraitFilterScreen
 import com.fieldbook.shared.screens.collect.CollectScreen
 import com.fieldbook.shared.screens.export.ExportScreen
 import com.fieldbook.shared.screens.fields.FieldEditorScreen
@@ -77,6 +78,14 @@ fun KmpApp(
 
         composable(KmpHostScreenType.TRAIT_BRAPI.route) {
             TraitBrapiScreen(
+                onBack = { navController.navigateBackOrExit(onExit) },
+                onNavigateToFilter = { navController.navigateTo(KmpHostScreenType.BRAPI_FILTER) },
+                viewModel = traitEditorViewModel,
+            )
+        }
+
+        composable(KmpHostScreenType.BRAPI_FILTER.route) {
+            BrapiTraitFilterScreen(
                 onBack = { navController.navigateBackOrExit(onExit) },
                 viewModel = traitEditorViewModel,
             )

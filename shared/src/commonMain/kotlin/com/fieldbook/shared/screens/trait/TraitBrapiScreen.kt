@@ -41,17 +41,31 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiTraitDetails
 import com.fieldbook.shared.generated.resources.Res
+import com.fieldbook.shared.generated.resources.act_brapi_list_filter_reset_cache_message
+import com.fieldbook.shared.generated.resources.act_brapi_list_filter_reset_cache_title
 import com.fieldbook.shared.generated.resources.brapi_base_url_default
+import com.fieldbook.shared.generated.resources.brapi_filter_type_crop_count
+import com.fieldbook.shared.generated.resources.brapi_filter_type_study_count
+import com.fieldbook.shared.generated.resources.brapi_filter_type_trial_count
+import com.fieldbook.shared.generated.resources.dialog_brapi_filter_choices_title
 import com.fieldbook.shared.generated.resources.dialog_cancel
+import com.fieldbook.shared.generated.resources.filter_variant
 import com.fieldbook.shared.generated.resources.import_source_brapi
+import com.fieldbook.shared.generated.resources.lock_reset
+import com.fieldbook.shared.generated.resources.menu_filter_brapi_reset_cache_title
+import com.fieldbook.shared.generated.resources.results
+import com.fieldbook.shared.generated.resources.search_bar_hint
+import com.fieldbook.shared.theme.AlertDialog
 import com.fieldbook.shared.theme.TextButton
 import com.fieldbook.shared.traits.Formats
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TraitBrapiScreen(
     onBack: (() -> Unit)? = null,
+    onNavigateToFilter: ((BrapiTraitFilterType) -> Unit)? = null,
     viewModel: TraitEditorScreenViewModel = viewModel(
         factory = traitEditorScreenViewModelFactory()
     ),
@@ -59,22 +73,16 @@ fun TraitBrapiScreen(
     val brapiTraits by viewModel.brapiTraits.collectAsState()
     val loading by viewModel.brapiLoading.collectAsState()
     val importing by viewModel.importing.collectAsState()
+    val filterSelections by viewModel.brapiTraitFilterSelections.collectAsState()
     val defaultBrapiBaseUrl = stringResource(Res.string.brapi_base_url_default)
     val snackbarHostState = remember { SnackbarHostState() }
 
     var query by remember { mutableStateOf("") }
     var selectedIds by remember { mutableStateOf<Set<String>>(emptySet()) }
-    val filteredTraits = remember(brapiTraits, query) {
-        val normalizedQuery = query.trim().lowercase()
-        if (normalizedQuery.isBlank()) {
-            brapiTraits
-        } else {
-            brapiTraits.filter { trait ->
-                trait.observationVariableName.lowercase().contains(normalizedQuery) ||
-                    trait.observationVariableDbId.lowercase().contains(normalizedQuery) ||
-                    trait.commonCropName.orEmpty().lowercase().contains(normalizedQuery)
-            }
-        }
+    var showResetCacheDialog by remember { mutableStateOf(false) }
+    var showFilterChoiceDialog by remember { mutableStateOf(false) }
+    val filteredTraits = remember(brapiTraits, query, filterSelections) {
+        viewModel.applyBrapiTraitFilters(brapiTraits, query, filterSelections)
     }
 
     LaunchedEffect(viewModel) {
@@ -104,11 +112,23 @@ fun TraitBrapiScreen(
                     }
                 },
                 actions = {
-                    TextButton(
-                        onClick = { viewModel.loadBrapiTraits(defaultBrapiBaseUrl, forceRefresh = true) },
+                    IconButton(
+                        onClick = { showResetCacheDialog = true },
                         enabled = !loading && !importing,
                     ) {
-                        Text("Reload")
+                        Icon(
+                            painter = painterResource(Res.drawable.lock_reset),
+                            contentDescription = stringResource(Res.string.menu_filter_brapi_reset_cache_title),
+                        )
+                    }
+                    IconButton(
+                        onClick = { showFilterChoiceDialog = true },
+                        enabled = !loading && !importing,
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.filter_variant),
+                            contentDescription = "Filter",
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -161,7 +181,14 @@ fun TraitBrapiScreen(
                     .fillMaxWidth()
                     .padding(16.dp),
                 singleLine = true,
-                label = { Text("Filter traits") },
+                placeholder = {
+                    Text(
+                        stringResource(
+                            Res.string.search_bar_hint,
+                            "${filteredTraits.size} ${stringResource(Res.string.results)}"
+                        )
+                    )
+                },
             )
 
             when {
@@ -209,7 +236,87 @@ fun TraitBrapiScreen(
                 }
             }
         }
+
+        if (showResetCacheDialog) {
+            AlertDialog(
+                onDismissRequest = { showResetCacheDialog = false },
+                title = { Text(stringResource(Res.string.act_brapi_list_filter_reset_cache_title)) },
+                text = { Text(stringResource(Res.string.act_brapi_list_filter_reset_cache_message)) },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showResetCacheDialog = false
+                        viewModel.resetBrapiTraitCache(defaultBrapiBaseUrl)
+                    }) {
+                        Text(stringResource(Res.string.menu_filter_brapi_reset_cache_title))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showResetCacheDialog = false }) {
+                        Text(stringResource(Res.string.dialog_cancel))
+                    }
+                }
+            )
+        }
+
+        if (showFilterChoiceDialog) {
+            BrapiFilterChoiceDialog(
+                trialCount = viewModel.getBrapiTraitFilterElements(BrapiTraitFilterType.TRIAL).size,
+                studyCount = viewModel.getBrapiTraitFilterElements(BrapiTraitFilterType.STUDY).size,
+                cropCount = viewModel.getBrapiTraitFilterElements(BrapiTraitFilterType.CROP).size,
+                onDismiss = { showFilterChoiceDialog = false },
+                onSelect = { type ->
+                    showFilterChoiceDialog = false
+                    viewModel.setBrapiTraitFilterType(type)
+                    onNavigateToFilter?.invoke(type)
+                }
+            )
+        }
     }
+}
+
+@Composable
+private fun BrapiFilterChoiceDialog(
+    trialCount: Int,
+    studyCount: Int,
+    cropCount: Int,
+    onDismiss: () -> Unit,
+    onSelect: (BrapiTraitFilterType) -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(Res.string.dialog_brapi_filter_choices_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = stringResource(Res.string.brapi_filter_type_trial_count, trialCount.toString()),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onSelect(BrapiTraitFilterType.TRIAL) }
+                        .padding(vertical = 12.dp),
+                )
+                Text(
+                    text = stringResource(Res.string.brapi_filter_type_study_count, studyCount.toString()),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onSelect(BrapiTraitFilterType.STUDY) }
+                        .padding(vertical = 12.dp),
+                )
+                Text(
+                    text = stringResource(Res.string.brapi_filter_type_crop_count, cropCount.toString()),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onSelect(BrapiTraitFilterType.CROP) }
+                        .padding(vertical = 12.dp),
+                )
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(Res.string.dialog_cancel))
+            }
+        }
+    )
 }
 
 @Composable

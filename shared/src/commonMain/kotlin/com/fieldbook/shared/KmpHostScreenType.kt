@@ -6,6 +6,7 @@ enum class KmpHostScreenType(val value: String) {
     FIELD_EDITOR("field_editor"),
     TRAIT_EDITOR("trait_editor"),
     TRAIT_BRAPI("trait_brapi"),
+    BRAPI_FILTER("brapi_filter"),
     COLLECT("collect"),
     EXPORT("export"),
     ABOUT("about"),

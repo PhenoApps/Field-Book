@@ -29,7 +29,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+enum class BrapiTraitFilterType {
+    TRIAL,
+    STUDY,
+    CROP
+}
+
+data class BrapiFilterElement(
+    val id: String,
+    val label: String,
+    val count: Int,
+)
 
 class TraitEditorScreenViewModel(
     private val traitRepository: TraitRepository = TraitRepository(),
@@ -68,6 +81,13 @@ class TraitEditorScreenViewModel(
 
     private val _brapiLoading = MutableStateFlow(false)
     val brapiLoading: StateFlow<Boolean> = _brapiLoading.asStateFlow()
+
+    private val _brapiTraitFilterType = MutableStateFlow(BrapiTraitFilterType.CROP)
+    val brapiTraitFilterType: StateFlow<BrapiTraitFilterType> = _brapiTraitFilterType.asStateFlow()
+
+    private val _brapiTraitFilterSelections = MutableStateFlow<Map<BrapiTraitFilterType, Set<String>>>(emptyMap())
+    val brapiTraitFilterSelections: StateFlow<Map<BrapiTraitFilterType, Set<String>>> =
+        _brapiTraitFilterSelections.asStateFlow()
 
     private val _sortOption = MutableStateFlow(
         TraitSortOption.fromPreference(
@@ -361,6 +381,63 @@ class TraitEditorScreenViewModel(
                 _brapiLoading.value = false
             }
         }
+    }
+
+    fun resetBrapiTraitCache(defaultBaseUrl: String) {
+        BrapiFilterCache.delete(clearPreferences = true, settings = settings)
+        _brapiTraits.value = emptyList()
+        _brapiTraitFilterSelections.value = emptyMap()
+        loadBrapiTraits(defaultBaseUrl, forceRefresh = true)
+    }
+
+    fun setBrapiTraitFilterType(type: BrapiTraitFilterType) {
+        _brapiTraitFilterType.value = type
+    }
+
+    fun setBrapiTraitFilterSelection(type: BrapiTraitFilterType, selectedIds: Set<String>) {
+        _brapiTraitFilterSelections.update { current ->
+            if (selectedIds.isEmpty()) {
+                current - type
+            } else {
+                current + (type to selectedIds)
+            }
+        }
+    }
+
+    fun getBrapiTraitFilterElements(type: BrapiTraitFilterType): List<BrapiFilterElement> {
+        return when (type) {
+            BrapiTraitFilterType.CROP -> _brapiTraits.value
+                .mapNotNull { it.commonCropName?.takeIf(String::isNotBlank) }
+                .groupingBy { it }
+                .eachCount()
+                .map { (crop, count) -> BrapiFilterElement(id = crop, label = crop, count = count) }
+                .sortedBy { it.label.lowercase() }
+
+            // Trial and study filters need study/trial cache metadata. The generic screen is ready;
+            // these lists become populated when the cache model stores study/trial relationships.
+            BrapiTraitFilterType.TRIAL,
+            BrapiTraitFilterType.STUDY -> emptyList()
+        }
+    }
+
+    fun applyBrapiTraitFilters(
+        traits: List<BrapiTraitDetails>,
+        query: String,
+        selections: Map<BrapiTraitFilterType, Set<String>>,
+    ): List<BrapiTraitDetails> {
+        val normalizedQuery = query.trim().lowercase()
+        val cropIds = selections[BrapiTraitFilterType.CROP].orEmpty()
+
+        return traits
+            .filter { trait ->
+                cropIds.isEmpty() || trait.commonCropName in cropIds
+            }
+            .filter { trait ->
+                normalizedQuery.isBlank() ||
+                    trait.observationVariableName.lowercase().contains(normalizedQuery) ||
+                    trait.observationVariableDbId.lowercase().contains(normalizedQuery) ||
+                    trait.commonCropName.orEmpty().lowercase().contains(normalizedQuery)
+            }
     }
 
     fun importBrapiTraits(selectedTraits: List<BrapiTraitDetails>, defaultBaseUrl: String) {
