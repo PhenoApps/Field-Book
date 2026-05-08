@@ -2,6 +2,10 @@ package com.fieldbook.shared
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -30,6 +34,7 @@ fun KmpApp(
     onScannerResult: (String) -> Unit = {},
 ) {
     val navController = rememberNavController()
+    var storageResetGeneration by remember { mutableIntStateOf(0) }
     val graphStartScreen = if (startScreen == KmpHostScreenType.SCANNER) {
         KmpHostScreenType.SCANNER
     } else {
@@ -42,6 +47,7 @@ fun KmpApp(
     ) {
         composable(KmpHostScreenType.CONFIG.route) {
             ConfigScreen(
+                resetGeneration = storageResetGeneration,
                 onBack = onExit,
                 onNavigate = navController::navigateTo,
             )
@@ -114,7 +120,11 @@ fun KmpApp(
             StoragePreferencesScreen(
                 onBack = { navController.navigateBackOrExit(onExit) },
                 onNavigate = navController::navigateTo,
-                onExit = onStorageResetExit,
+                onExit = {
+                    storageResetGeneration++
+                    navController.popBackStack(KmpHostScreenType.CONFIG.route, inclusive = false)
+                    onStorageResetExit()
+                },
             )
         }
 
