@@ -27,6 +27,7 @@ fun resetLocalDatabaseAndPreferences(): Boolean {
     )
 
     settings.clear()
+    settings.putBoolean(GeneralKeys.FIRST_RUN_KMP.key, true)
     if (configuredStorageDirectory.isNotBlank()) {
         settings.putString(
             GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY.key,
