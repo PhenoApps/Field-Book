@@ -190,7 +190,8 @@ class StudyRepository(
                     common_crop_name = e.exp_species,
                     study_source = e.exp_source,
                     count = e.count,
-                    observation_levels = e.observation_level
+                    observation_levels = e.observation_level,
+                    observation_unit_search_attribute = e.search_attribute?.ifBlank { e.unique_id } ?: e.unique_id
                 )
                 val id = db.studiesQueries.getLastInsertedId().executeAsOne().toInt()
 
@@ -308,7 +309,7 @@ class StudyRepository(
                 trait_count = r.trait_count.toString(),
                 observation_count = r.observation_count.toString(),
                 trial_name = null,
-                search_attribute = getSearchAttribute(fieldId)
+                search_attribute = r.observation_unit_search_attribute
             )
         } ?: FieldObject()
     }
@@ -451,26 +452,5 @@ class StudyRepository(
             bindString(0, timestamp)
             bindLong(1, fieldId.toLong())
         }
-    }
-
-    private fun getSearchAttribute(fieldId: Int): String? {
-        val result: QueryResult<String?> = driver.executeQuery(
-            identifier = null,
-            sql = """
-                SELECT observation_unit_search_attribute
-                FROM studies
-                WHERE internal_id_study = ?
-                LIMIT 1
-            """.trimIndent(),
-            mapper = { cursor ->
-                val value = if (cursor.next().value) cursor.getString(0) else null
-                QueryResult.Value(value)
-            },
-            parameters = 1
-        ) {
-            bindLong(0, fieldId.toLong())
-        }
-
-        return result.value
     }
 }
