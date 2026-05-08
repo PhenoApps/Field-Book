@@ -105,7 +105,7 @@ fun TraitBrapiScreen(
                 },
                 actions = {
                     TextButton(
-                        onClick = { viewModel.loadBrapiTraits(defaultBrapiBaseUrl) },
+                        onClick = { viewModel.loadBrapiTraits(defaultBrapiBaseUrl, forceRefresh = true) },
                         enabled = !loading && !importing,
                     ) {
                         Text("Reload")

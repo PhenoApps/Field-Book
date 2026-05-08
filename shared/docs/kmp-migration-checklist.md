@@ -203,7 +203,7 @@
 |----------------------------------|--------------------|--------------------|
 |                                  |                    |                    |
 | **Fields**                       |                    |                    |
-| Import from BrAPI w/traits       | :white_check_mark: |                    |
+| Import from BrAPI w/traits       | :white_check_mark: | :white_check_mark: |
 |                                  |                    |                    |
 | **Field Details**                |                    |                    |
 | Collect                          |                    |                    |
@@ -214,12 +214,12 @@
 | ...                              |                    |                    |
 |                                  |                    |                    |
 | **Traits**                       |                    |                    |
-| Import from BrAPI                |                    |                    |
+| Import from BrAPI                | :white_check_mark: |                    |
 |                                  |                    |                    |
 | ...                              |                    |                    |
 |                                  |                    |                    |
 | **Export**                       |                    |                    |
-| Export to BrAPI                  | :white_check_mark: |                    |
+| Export to BrAPI                  | :white_check_mark: | :white_check_mark: |
 |                                  |                    |                    |
 | ...                              |                    |                    |
 |                                  |                    |                    |
@@ -228,11 +228,11 @@
 |                                  |                    |                    |
 | **Settings/BrAPI/Navbar**        |                    |                    |
 | Scan barcode                     |                    |                    |
-| Authorize                        | :white_check_mark: |                    |
+| Authorize                        | :white_check_mark: | :white_check_mark: |
 |                                  |                    |                    |
 | **Settings/BrAPI/Server**        |                    |                    |
 | Base URL                         | :white_check_mark: | :white_check_mark: |
-| Authorize                        | :white_check_mark: |                    |
+| Authorize                        | :white_check_mark: | :white_check_mark: |
 | Display name                     |                    |                    |
 | Auto-configure                   |                    |                    |
 | Logout                           | :white_check_mark: |                    |

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.fieldbook.shared.brapi.BrAPIService
 import com.fieldbook.shared.brapi.BrAPIServiceFactory
+import com.fieldbook.shared.brapi.BrapiFilterCache
 import com.fieldbook.shared.brapi.BrapiPaginationManager
 import com.fieldbook.shared.brapi.BrapiResult
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiTraitDetails
@@ -314,7 +315,7 @@ class TraitEditorScreenViewModel(
         }
     }
 
-    fun loadBrapiTraits(defaultBaseUrl: String) {
+    fun loadBrapiTraits(defaultBaseUrl: String, forceRefresh: Boolean = false) {
         viewModelScope.launch {
             if (!settings.getBoolean(PreferenceKeys.BRAPI_ENABLED, false)) {
                 _messages.emit("BrAPI must be enabled first in the BrAPI settings.")
@@ -323,11 +324,24 @@ class TraitEditorScreenViewModel(
 
             _brapiLoading.value = true
             try {
+                val sourceUrl = settings.getString(PreferenceKeys.BRAPI_BASE_URL, defaultBaseUrl)
+                BrapiFilterCache.checkClearCache(settings)
+
+                if (!forceRefresh) {
+                    val cachedTraits = BrapiFilterCache.getStoredModels(sourceUrl).traits.values
+                        .sortedBy { it.observationVariableName.lowercase() }
+                    if (cachedTraits.isNotEmpty()) {
+                        _brapiTraits.value = cachedTraits
+                        return@launch
+                    }
+                }
+
                 val pageSize = settings.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50").toIntOrNull()
                     ?: BrapiPaginationManager.DEFAULT_PAGE_SIZE
 
                 when (val result = buildBrapiService(defaultBaseUrl).getTraits(pageSize = pageSize)) {
                     is BrapiResult.Success -> {
+                        BrapiFilterCache.saveTraits(sourceUrl, result.value)
                         _brapiTraits.value = result.value.sortedBy { it.observationVariableName.lowercase() }
                         if (result.value.isEmpty()) {
                             _messages.emit("No BrAPI traits were found.")
