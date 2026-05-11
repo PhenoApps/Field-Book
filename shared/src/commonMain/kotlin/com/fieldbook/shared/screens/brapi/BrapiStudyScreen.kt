@@ -60,14 +60,10 @@ fun BrapiStudyScreen(
 ) {
     val preferences = remember { Settings() }
     val defaultBaseUrl = stringResource(Res.string.brapi_base_url_default)
-    val pageSize = remember {
-        preferences.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50").toIntOrNull()
-            ?: BrapiPaginationManager.DEFAULT_PAGE_SIZE
-    }
     val brapiVersion = remember {
         preferences.getString(PreferenceKeys.BRAPI_VERSION, BrAPIServiceFactory.VERSION_V2)
     }
-    val paginationManager = remember { BrapiPaginationManager(initialPageSize = pageSize) }
+    val paginationManager = remember { BrapiPaginationManager.fromSettings(preferences) }
     val service = remember(defaultBaseUrl, brapiVersion) {
         buildBrapiService(
             baseUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, defaultBaseUrl),
@@ -143,7 +139,7 @@ fun BrapiStudyScreen(
                 Button(
                     enabled = !isLoading,
                     onClick = {
-                        paginationManager.reset(pageSize)
+                        paginationManager.reset()
                         pageVersion++
                         loadStudies()
                     }

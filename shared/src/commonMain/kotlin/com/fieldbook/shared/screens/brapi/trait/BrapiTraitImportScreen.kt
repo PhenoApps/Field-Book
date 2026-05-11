@@ -41,6 +41,8 @@ fun BrapiTraitImportScreen(
 ) {
     val brapiTraits by viewModel.brapiTraits.collectAsState()
     val loading by viewModel.loading.collectAsState()
+    val studyFilterLoading by viewModel.studyFilterLoading.collectAsState()
+    val studyFilteredTraits by viewModel.studyFilteredTraits.collectAsState()
     val importing by viewModel.importing.collectAsState()
     val query by viewModel.query.collectAsState()
     val selectedIds by viewModel.selectedIds.collectAsState()
@@ -53,8 +55,8 @@ fun BrapiTraitImportScreen(
     val studyFilterTitle = BrapiFilterType.STUDY.title()
     val cropFilterTitle = BrapiFilterType.CROP.title()
 
-    val filteredTraits = remember(brapiTraits, query, filterSelections) {
-        viewModel.applyFilters(brapiTraits, query, filterSelections, studies)
+    val filteredTraits = remember(brapiTraits, studyFilteredTraits, query, filterSelections, studies) {
+        viewModel.applyFilters(studyFilteredTraits ?: brapiTraits, query, filterSelections, studies)
     }
 
     LaunchedEffect(viewModel) {
@@ -84,6 +86,10 @@ fun BrapiTraitImportScreen(
         }
     }
 
+    LaunchedEffect(defaultBrapiBaseUrl, filterSelections, studies) {
+        viewModel.resolveStudyFilterTraits(defaultBrapiBaseUrl, filterSelections, studies)
+    }
+
     BrapiImportListScreen(
         state = BrapiImportListUiState(
             title = stringResource(Res.string.import_source_brapi),
@@ -91,7 +97,7 @@ fun BrapiTraitImportScreen(
             totalItemCount = brapiTraits.size,
             items = filteredTraits.map(BrapiTraitDetails::toBrapiSelectableItem),
             selectedIds = selectedIds,
-            loading = loading || filterLoading,
+            loading = loading || filterLoading || studyFilterLoading,
             importing = importing,
             filterChoices = listOf(
                 BrapiFilterChoice(

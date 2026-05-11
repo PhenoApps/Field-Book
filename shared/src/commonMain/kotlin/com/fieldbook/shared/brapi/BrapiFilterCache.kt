@@ -15,6 +15,11 @@ data class BrapiFilterCacheModel(
     val sourceUrl: String? = null,
     val studies: List<BrapiStudyDetails> = emptyList(),
     val traits: Map<String, BrapiTraitDetails> = emptyMap(),
+    /**
+     * Study summaries do not reliably include observationVariableDbIds, so keep the
+     * study-to-trait relationship learned from getStudyTraits calls.
+     */
+    val studyTraitIds: Map<String, Set<String>> = emptyMap(),
 ) {
     companion object {
         fun empty() = BrapiFilterCacheModel()
@@ -42,6 +47,11 @@ object BrapiFilterCache {
         } else {
             emptyList()
         }
+        val existingStudyTraitIds = if (existing.sourceUrl == normalizedSourceUrl) {
+            existing.studyTraitIds
+        } else {
+            emptyMap()
+        }
         val mergedTraits = if (existing.sourceUrl == normalizedSourceUrl) {
             existing.traits.toMutableMap()
         } else {
@@ -56,6 +66,48 @@ object BrapiFilterCache {
                 sourceUrl = normalizedSourceUrl,
                 studies = existingStudies,
                 traits = mergedTraits,
+                studyTraitIds = existingStudyTraitIds,
+            )
+        )
+    }
+
+    fun saveStudyTraits(
+        sourceUrl: String,
+        studyTraits: Map<String, List<BrapiTraitDetails>>,
+    ): Boolean {
+        val normalizedSourceUrl = sourceUrl.hostForCache()
+        val existing = getStoredModels()
+        val existingStudies = if (existing.sourceUrl == normalizedSourceUrl) {
+            existing.studies
+        } else {
+            emptyList()
+        }
+        val mergedTraits = if (existing.sourceUrl == normalizedSourceUrl) {
+            existing.traits.toMutableMap()
+        } else {
+            mutableMapOf()
+        }
+        val mergedStudyTraitIds = if (existing.sourceUrl == normalizedSourceUrl) {
+            existing.studyTraitIds.toMutableMap()
+        } else {
+            mutableMapOf()
+        }
+
+        studyTraits.forEach { (studyDbId, traits) ->
+            traits.forEach { trait ->
+                mergedTraits[trait.observationVariableDbId] = trait
+            }
+            mergedStudyTraitIds[studyDbId] = traits
+                .map { it.observationVariableDbId }
+                .toSet()
+        }
+
+        return saveToStorage(
+            BrapiFilterCacheModel(
+                sourceUrl = normalizedSourceUrl,
+                studies = existingStudies,
+                traits = mergedTraits,
+                studyTraitIds = mergedStudyTraitIds,
             )
         )
     }
@@ -68,12 +120,18 @@ object BrapiFilterCache {
         } else {
             emptyMap()
         }
+        val existingStudyTraitIds = if (existing.sourceUrl == normalizedSourceUrl) {
+            existing.studyTraitIds
+        } else {
+            emptyMap()
+        }
 
         return saveToStorage(
             BrapiFilterCacheModel(
                 sourceUrl = normalizedSourceUrl,
                 studies = studies,
                 traits = existingTraits,
+                studyTraitIds = existingStudyTraitIds,
             )
         )
     }

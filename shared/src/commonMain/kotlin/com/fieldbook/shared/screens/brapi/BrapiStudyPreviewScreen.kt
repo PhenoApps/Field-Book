@@ -34,11 +34,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.fieldbook.shared.brapi.BrAPIService
+import com.fieldbook.shared.brapi.BrapiPaginationManager
 import com.fieldbook.shared.brapi.BrapiResult
 import com.fieldbook.shared.brapi.model.v2.core.BrapiStudyDetails
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiObservationUnitDetails
 import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiTraitDetails
-import com.fieldbook.shared.preferences.PreferenceKeys
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.launch
 
@@ -51,9 +51,7 @@ fun BrapiStudyPreviewScreen(
     onSave: (BrapiStudyDetails, List<BrapiObservationUnitDetails>, List<BrapiTraitDetails>) -> Unit,
 ) {
     val preferences = remember { Settings() }
-    val pageSize = remember {
-        preferences.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50").toIntOrNull() ?: 50
-    }
+    val paginationManager = remember { BrapiPaginationManager.fromSettings(preferences) }
     val coroutineScope = rememberCoroutineScope()
 
     var traits by remember(study.studyDbId) { mutableStateOf<List<BrapiTraitDetails>>(emptyList()) }
@@ -70,7 +68,7 @@ fun BrapiStudyPreviewScreen(
             loadingTraits = true
             traitError = null
 
-            when (val result = service.getStudyTraits(study.studyDbId, pageSize)) {
+            when (val result = service.getStudyTraits(study.studyDbId, paginationManager.pageSize)) {
                 is BrapiResult.Success -> traits = result.value
                 is BrapiResult.Failure -> {
                     traitError = result.message ?: result.statusCode?.let { "HTTP $it" }
@@ -87,7 +85,7 @@ fun BrapiStudyPreviewScreen(
             loadingUnits = true
             unitError = null
 
-            when (val result = service.getStudyObservationUnits(study.studyDbId, pageSize)) {
+            when (val result = service.getStudyObservationUnits(study.studyDbId, paginationManager.pageSize)) {
                 is BrapiResult.Success -> observationUnits = result.value
                 is BrapiResult.Failure -> {
                     unitError = result.message ?: result.statusCode?.let { "HTTP $it" }

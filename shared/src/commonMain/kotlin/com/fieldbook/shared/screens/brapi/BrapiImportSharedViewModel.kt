@@ -60,10 +60,7 @@ class BrapiImportSharedViewModel(
                     }
                 }
 
-                val paginationManager = BrapiPaginationManager(
-                    initialPageSize = settings.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50").toIntOrNull()
-                        ?: BrapiPaginationManager.DEFAULT_PAGE_SIZE
-                )
+                val paginationManager = BrapiPaginationManager.fromSettings(settings)
                 val fetchedStudies = mutableListOf<BrapiStudyDetails>()
                 val service = BrAPIServiceFactory.create(
                     baseUrl = settings.getString(PreferenceKeys.BRAPI_BASE_URL, defaultBaseUrl),

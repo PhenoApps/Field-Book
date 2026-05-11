@@ -17,6 +17,7 @@ import com.fieldbook.shared.preferences.GeneralKeys
 import com.fieldbook.shared.preferences.PreferenceKeys
 import com.fieldbook.shared.screens.brapi.BrapiFilterType
 import com.russhwolf.settings.Settings
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,6 +37,12 @@ class BrapiTraitImportViewModel(
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading.asStateFlow()
 
+    private val _studyFilterLoading = MutableStateFlow(false)
+    val studyFilterLoading: StateFlow<Boolean> = _studyFilterLoading.asStateFlow()
+
+    private val _studyFilteredTraits = MutableStateFlow<List<BrapiTraitDetails>?>(null)
+    val studyFilteredTraits: StateFlow<List<BrapiTraitDetails>?> = _studyFilteredTraits.asStateFlow()
+
     private val _importing = MutableStateFlow(false)
     val importing: StateFlow<Boolean> = _importing.asStateFlow()
 
@@ -50,6 +57,9 @@ class BrapiTraitImportViewModel(
 
     private val _importCompleted = MutableSharedFlow<Unit>()
     val importCompleted = _importCompleted.asSharedFlow()
+
+    private var studyFilterTraitsJob: Job? = null
+    private var activeStudyFilterKey: String? = null
 
     fun loadTraits(defaultBaseUrl: String, forceRefresh: Boolean = false) {
         viewModelScope.launch {
@@ -71,10 +81,9 @@ class BrapiTraitImportViewModel(
                     }
                 }
 
-                val pageSize = settings.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50").toIntOrNull()
-                    ?: BrapiPaginationManager.DEFAULT_PAGE_SIZE
+                val paginationManager = BrapiPaginationManager.fromSettings(settings)
 
-                when (val result = buildBrapiService(defaultBaseUrl).getTraits(pageSize = pageSize)) {
+                when (val result = buildBrapiService(defaultBaseUrl).getTraits(pageSize = paginationManager.pageSize)) {
                     is BrapiResult.Success -> {
                         BrapiFilterCache.saveTraits(sourceUrl, result.value)
                         _brapiTraits.value = result.value.sortedBy { it.observationVariableName.lowercase() }
@@ -99,7 +108,11 @@ class BrapiTraitImportViewModel(
     }
 
     fun clearAndReloadTraits(defaultBaseUrl: String) {
+        studyFilterTraitsJob?.cancel()
+        activeStudyFilterKey = null
         _brapiTraits.value = emptyList()
+        _studyFilteredTraits.value = null
+        _studyFilterLoading.value = false
         _selectedIds.value = emptySet()
         loadTraits(defaultBaseUrl, forceRefresh = true)
     }
@@ -118,6 +131,120 @@ class BrapiTraitImportViewModel(
         }
     }
 
+    fun resolveStudyFilterTraits(
+        defaultBaseUrl: String,
+        selections: Map<String, Set<String>>,
+        studies: List<BrapiStudyDetails>,
+    ) {
+        val trialIds = selections[BrapiFilterType.TRIAL.name].orEmpty()
+        val studyIds = selections[BrapiFilterType.STUDY.name].orEmpty()
+        val cropIds = selections[BrapiFilterType.CROP.name].orEmpty()
+        val hasStudyScopeFilters = trialIds.isNotEmpty() || studyIds.isNotEmpty()
+
+        if (!hasStudyScopeFilters) {
+            studyFilterTraitsJob?.cancel()
+            activeStudyFilterKey = null
+            _studyFilteredTraits.value = null
+            _studyFilterLoading.value = false
+            return
+        }
+
+        val matchingStudies = studies
+            .filter { study -> trialIds.isEmpty() || study.trialDbId in trialIds }
+            .filter { study -> studyIds.isEmpty() || study.studyDbId in studyIds }
+            .filter { study -> cropIds.isEmpty() || study.commonCropName in cropIds }
+
+        val filterKey = listOf(
+            trialIds.sorted().joinToString(","),
+            studyIds.sorted().joinToString(","),
+            cropIds.sorted().joinToString(","),
+            matchingStudies.map { it.studyDbId }.sorted().joinToString(","),
+        ).joinToString("|")
+
+        if (filterKey == activeStudyFilterKey) return
+        activeStudyFilterKey = filterKey
+        studyFilterTraitsJob?.cancel()
+
+        studyFilterTraitsJob = viewModelScope.launch {
+            _studyFilterLoading.value = true
+            try {
+                if (matchingStudies.isEmpty()) {
+                    _studyFilteredTraits.value = emptyList()
+                    return@launch
+                }
+
+                val sourceUrl = settings.getString(PreferenceKeys.BRAPI_BASE_URL, defaultBaseUrl)
+                val paginationManager = BrapiPaginationManager.fromSettings(settings)
+                val service = buildBrapiService(defaultBaseUrl)
+                val traitsById = linkedMapOf<String, BrapiTraitDetails>()
+                val fetchedStudyTraits = linkedMapOf<String, List<BrapiTraitDetails>>()
+                val cachedModels = BrapiFilterCache.getStoredModels(sourceUrl)
+                val knownTraits = (_brapiTraits.value + cachedModels.traits.values)
+                    .associateBy { it.observationVariableDbId }
+                var failedStudyCount = 0
+
+                matchingStudies.forEach { study ->
+                    val cachedTraitIds = cachedModels.studyTraitIds[study.studyDbId]
+                    if (cachedTraitIds != null && cachedTraitIds.all { it in knownTraits }) {
+                        cachedTraitIds.forEach { traitId ->
+                            knownTraits[traitId]?.let { trait ->
+                                traitsById[trait.observationVariableDbId] = trait
+                            }
+                        }
+                        return@forEach
+                    }
+
+                    when (val result = service.getStudyTraits(study.studyDbId, paginationManager.pageSize)) {
+                        is BrapiResult.Success -> {
+                            fetchedStudyTraits[study.studyDbId] = result.value
+                            result.value.forEach { trait ->
+                                traitsById[trait.observationVariableDbId] = trait
+                            }
+                        }
+
+                        is BrapiResult.Failure -> {
+                            failedStudyCount++
+                        }
+                    }
+                }
+
+                val resolvedTraits = if (traitsById.isNotEmpty()) {
+                    traitsById.values.toList()
+                } else {
+                    val linkedTraitIds = matchingStudies
+                        .flatMap { it.observationVariableDbIds }
+                        .toSet()
+                    if (linkedTraitIds.isNotEmpty()) {
+                        linkedTraitIds.mapNotNull(knownTraits::get)
+                    } else {
+                        emptyList()
+                    }
+                }.sortedBy { it.observationVariableName.lowercase() }
+
+                if (fetchedStudyTraits.isNotEmpty()) {
+                    BrapiFilterCache.saveStudyTraits(sourceUrl, fetchedStudyTraits)
+                }
+                if (resolvedTraits.isNotEmpty()) {
+                    _brapiTraits.update { current ->
+                        (current + resolvedTraits)
+                            .distinctBy { it.observationVariableDbId }
+                            .sortedBy { it.observationVariableName.lowercase() }
+                    }
+                }
+                _studyFilteredTraits.value = resolvedTraits
+
+                if (failedStudyCount > 0 && resolvedTraits.isEmpty()) {
+                    _messages.emit("No traits were found for the selected BrAPI study filter.")
+                }
+            } catch (e: Exception) {
+                _messages.emit(e.message ?: "Error loading traits for the selected BrAPI study filter.")
+                _studyFilteredTraits.value = emptyList()
+            } finally {
+                _studyFilterLoading.value = false
+            }
+        }
+    }
+
     fun applyFilters(
         traits: List<BrapiTraitDetails>,
         query: String,
@@ -128,20 +255,26 @@ class BrapiTraitImportViewModel(
         val trialIds = selections[BrapiFilterType.TRIAL.name].orEmpty()
         val studyIds = selections[BrapiFilterType.STUDY.name].orEmpty()
         val cropIds = selections[BrapiFilterType.CROP.name].orEmpty()
+        val hasStudyScopeFilters = trialIds.isNotEmpty() || studyIds.isNotEmpty()
+        val hasCropFilters = cropIds.isNotEmpty()
         val filteredStudyTraitIds = studies
             .filter { study -> trialIds.isEmpty() || study.trialDbId in trialIds }
             .filter { study -> studyIds.isEmpty() || study.studyDbId in studyIds }
             .filter { study -> cropIds.isEmpty() || study.commonCropName in cropIds }
             .flatMap { it.observationVariableDbIds }
             .toSet()
-        val hasStudyFilters = trialIds.isNotEmpty() || studyIds.isNotEmpty() || cropIds.isNotEmpty()
 
         return traits
             .filter { trait ->
-                if (hasStudyFilters && filteredStudyTraitIds.isNotEmpty()) {
-                    trait.observationVariableDbId in filteredStudyTraitIds
-                } else {
-                    cropIds.isEmpty() || trait.commonCropName in cropIds
+                when {
+                    hasStudyScopeFilters && filteredStudyTraitIds.isNotEmpty() ->
+                        trait.observationVariableDbId in filteredStudyTraitIds
+                    hasStudyScopeFilters && hasCropFilters -> trait.commonCropName in cropIds
+                    hasStudyScopeFilters -> true
+                    hasCropFilters && filteredStudyTraitIds.isNotEmpty() ->
+                        trait.observationVariableDbId in filteredStudyTraitIds
+                    hasCropFilters -> trait.commonCropName in cropIds
+                    else -> true
                 }
             }
             .filter { trait ->
