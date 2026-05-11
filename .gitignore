@@ -44,7 +44,11 @@ local.properties
 
 # Other
 **/ApiKeys.java
-.claude/
+# Claude Code
+.claude/*
+!.claude/agents/
+!.claude/skills/
+.mcp.json
 
 # Git orig files
 *.orig
