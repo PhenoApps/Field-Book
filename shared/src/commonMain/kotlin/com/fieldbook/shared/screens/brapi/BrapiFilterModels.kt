@@ -24,6 +24,7 @@ data class BrapiFilterElement(
 data class BrapiFilterChoice(
     val id: String,
     val label: String,
+    val selectedElements: List<BrapiFilterElement> = emptyList(),
 )
 
 data class BrapiFilterUiState(
@@ -68,5 +69,7 @@ sealed interface BrapiImportListEvent {
     data class ItemSelectionChanged(val id: String, val selected: Boolean) : BrapiImportListEvent
     data object ImportClicked : BrapiImportListEvent
     data object ResetCacheConfirmed : BrapiImportListEvent
+    data object ClearFiltersClicked : BrapiImportListEvent
+    data class FilterBadgeRemoved(val filterId: String, val elementId: String) : BrapiImportListEvent
     data class FilterChoiceSelected(val id: String) : BrapiImportListEvent
 }

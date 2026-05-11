@@ -106,6 +106,10 @@ fun BrapiTraitImportScreen(
                         Res.string.brapi_filter_type_trial_count,
                         sharedViewModel.getFilterElements(BrapiFilterType.TRIAL).size.toString()
                     ),
+                    selectedElements = sharedViewModel.getSelectedFilterElements(
+                        type = BrapiFilterType.TRIAL,
+                        selections = filterSelections,
+                    ),
                 ),
                 BrapiFilterChoice(
                     id = BrapiFilterType.STUDY.name,
@@ -113,12 +117,20 @@ fun BrapiTraitImportScreen(
                         Res.string.brapi_filter_type_study_count,
                         sharedViewModel.getFilterElements(BrapiFilterType.STUDY).size.toString()
                     ),
+                    selectedElements = sharedViewModel.getSelectedFilterElements(
+                        type = BrapiFilterType.STUDY,
+                        selections = filterSelections,
+                    ),
                 ),
                 BrapiFilterChoice(
                     id = BrapiFilterType.CROP.name,
                     label = stringResource(
                         Res.string.brapi_filter_type_crop_count,
                         sharedViewModel.getFilterElements(BrapiFilterType.CROP).size.toString()
+                    ),
+                    selectedElements = sharedViewModel.getSelectedFilterElements(
+                        type = BrapiFilterType.CROP,
+                        selections = filterSelections,
                     ),
                 ),
             ),
@@ -139,6 +151,14 @@ fun BrapiTraitImportScreen(
                 BrapiImportListEvent.ResetCacheConfirmed -> {
                     sharedViewModel.resetCache(defaultBrapiBaseUrl)
                     viewModel.clearAndReloadTraits(defaultBrapiBaseUrl)
+                }
+
+                BrapiImportListEvent.ClearFiltersClicked -> {
+                    sharedViewModel.clearFilterSelections()
+                }
+
+                is BrapiImportListEvent.FilterBadgeRemoved -> {
+                    sharedViewModel.removeFilterSelection(event.filterId, event.elementId)
                 }
 
                 is BrapiImportListEvent.FilterChoiceSelected -> {

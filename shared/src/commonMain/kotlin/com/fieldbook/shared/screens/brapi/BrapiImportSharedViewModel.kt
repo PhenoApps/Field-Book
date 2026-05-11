@@ -142,6 +142,39 @@ class BrapiImportSharedViewModel(
         }
     }
 
+    fun removeFilterSelection(filterId: String, elementId: String) {
+        _filterSelections.update { current ->
+            val selectedIds = current[filterId].orEmpty() - elementId
+            if (selectedIds.isEmpty()) {
+                current - filterId
+            } else {
+                current + (filterId to selectedIds)
+            }
+        }
+        if (activeFilterId == filterId) {
+            _filterState.update { current ->
+                current.copy(selectedIds = current.selectedIds - elementId)
+            }
+        }
+    }
+
+    fun getSelectedFilterElements(
+        type: BrapiFilterType,
+        selections: Map<String, Set<String>> = _filterSelections.value,
+    ): List<BrapiFilterElement> {
+        val selectedIds = selections[type.name].orEmpty()
+        if (selectedIds.isEmpty()) return emptyList()
+
+        val elementsById = getFilterElements(type).associateBy { it.id }
+        return selectedIds.map { selectedId ->
+            elementsById[selectedId] ?: BrapiFilterElement(
+                id = selectedId,
+                label = selectedId,
+                count = 0,
+            )
+        }
+    }
+
     fun getFilterElements(type: BrapiFilterType): List<BrapiFilterElement> {
         return when (type) {
             BrapiFilterType.TRIAL -> _studies.value
