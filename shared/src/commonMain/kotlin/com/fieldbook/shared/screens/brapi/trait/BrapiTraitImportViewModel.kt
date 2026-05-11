@@ -15,7 +15,7 @@ import com.fieldbook.shared.database.models.TraitObject
 import com.fieldbook.shared.database.repository.TraitRepository
 import com.fieldbook.shared.preferences.GeneralKeys
 import com.fieldbook.shared.preferences.PreferenceKeys
-import com.fieldbook.shared.screens.brapi.BrapiTraitFilterType
+import com.fieldbook.shared.screens.brapi.BrapiFilterType
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -125,9 +125,9 @@ class BrapiTraitImportViewModel(
         studies: List<BrapiStudyDetails>,
     ): List<BrapiTraitDetails> {
         val normalizedQuery = query.trim().lowercase()
-        val trialIds = selections[BrapiTraitFilterType.TRIAL.name].orEmpty()
-        val studyIds = selections[BrapiTraitFilterType.STUDY.name].orEmpty()
-        val cropIds = selections[BrapiTraitFilterType.CROP.name].orEmpty()
+        val trialIds = selections[BrapiFilterType.TRIAL.name].orEmpty()
+        val studyIds = selections[BrapiFilterType.STUDY.name].orEmpty()
+        val cropIds = selections[BrapiFilterType.CROP.name].orEmpty()
         val filteredStudyTraitIds = studies
             .filter { study -> trialIds.isEmpty() || study.trialDbId in trialIds }
             .filter { study -> studyIds.isEmpty() || study.studyDbId in studyIds }

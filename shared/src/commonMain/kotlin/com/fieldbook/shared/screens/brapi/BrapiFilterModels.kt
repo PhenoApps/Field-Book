@@ -34,18 +34,18 @@ data class BrapiFilterUiState(
     val noMatchesMessage: String = "No filter values match",
 )
 
-enum class BrapiTraitFilterType {
+enum class BrapiFilterType {
     TRIAL,
     STUDY,
     CROP
 }
 
 @Composable
-fun BrapiTraitFilterType.title(): String {
+fun BrapiFilterType.title(): String {
     return when (this) {
-        BrapiTraitFilterType.TRIAL -> stringResource(Res.string.brapi_filter_type_trial)
-        BrapiTraitFilterType.STUDY -> stringResource(Res.string.brapi_filter_type_study)
-        BrapiTraitFilterType.CROP -> stringResource(Res.string.brapi_filter_type_crop)
+        BrapiFilterType.TRIAL -> stringResource(Res.string.brapi_filter_type_trial)
+        BrapiFilterType.STUDY -> stringResource(Res.string.brapi_filter_type_study)
+        BrapiFilterType.CROP -> stringResource(Res.string.brapi_filter_type_crop)
     }
 }
 

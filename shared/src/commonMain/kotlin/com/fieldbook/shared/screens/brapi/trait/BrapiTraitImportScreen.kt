@@ -16,12 +16,12 @@ import com.fieldbook.shared.generated.resources.brapi_filter_type_study_count
 import com.fieldbook.shared.generated.resources.brapi_filter_type_trial_count
 import com.fieldbook.shared.generated.resources.import_source_brapi
 import com.fieldbook.shared.screens.brapi.BrapiFilterChoice
+import com.fieldbook.shared.screens.brapi.BrapiFilterType
 import com.fieldbook.shared.screens.brapi.BrapiImportListEvent
 import com.fieldbook.shared.screens.brapi.BrapiImportListScreen
 import com.fieldbook.shared.screens.brapi.BrapiImportListUiState
 import com.fieldbook.shared.screens.brapi.BrapiImportSharedViewModel
 import com.fieldbook.shared.screens.brapi.BrapiSelectableItem
-import com.fieldbook.shared.screens.brapi.BrapiTraitFilterType
 import com.fieldbook.shared.screens.brapi.brapiImportSharedViewModelFactory
 import com.fieldbook.shared.screens.brapi.title
 import com.fieldbook.shared.traits.Formats
@@ -49,9 +49,9 @@ fun BrapiTraitImportScreen(
     val filterSelections by sharedViewModel.filterSelections.collectAsState()
     val defaultBrapiBaseUrl = stringResource(Res.string.brapi_base_url_default)
     val snackbarHostState = remember { SnackbarHostState() }
-    val trialFilterTitle = BrapiTraitFilterType.TRIAL.title()
-    val studyFilterTitle = BrapiTraitFilterType.STUDY.title()
-    val cropFilterTitle = BrapiTraitFilterType.CROP.title()
+    val trialFilterTitle = BrapiFilterType.TRIAL.title()
+    val studyFilterTitle = BrapiFilterType.STUDY.title()
+    val cropFilterTitle = BrapiFilterType.CROP.title()
 
     val filteredTraits = remember(brapiTraits, query, filterSelections) {
         viewModel.applyFilters(brapiTraits, query, filterSelections, studies)
@@ -95,24 +95,24 @@ fun BrapiTraitImportScreen(
             importing = importing,
             filterChoices = listOf(
                 BrapiFilterChoice(
-                    id = BrapiTraitFilterType.TRIAL.name,
+                    id = BrapiFilterType.TRIAL.name,
                     label = stringResource(
                         Res.string.brapi_filter_type_trial_count,
-                        sharedViewModel.getFilterElements(BrapiTraitFilterType.TRIAL).size.toString()
+                        sharedViewModel.getFilterElements(BrapiFilterType.TRIAL).size.toString()
                     ),
                 ),
                 BrapiFilterChoice(
-                    id = BrapiTraitFilterType.STUDY.name,
+                    id = BrapiFilterType.STUDY.name,
                     label = stringResource(
                         Res.string.brapi_filter_type_study_count,
-                        sharedViewModel.getFilterElements(BrapiTraitFilterType.STUDY).size.toString()
+                        sharedViewModel.getFilterElements(BrapiFilterType.STUDY).size.toString()
                     ),
                 ),
                 BrapiFilterChoice(
-                    id = BrapiTraitFilterType.CROP.name,
+                    id = BrapiFilterType.CROP.name,
                     label = stringResource(
                         Res.string.brapi_filter_type_crop_count,
-                        sharedViewModel.getFilterElements(BrapiTraitFilterType.CROP).size.toString()
+                        sharedViewModel.getFilterElements(BrapiFilterType.CROP).size.toString()
                     ),
                 ),
             ),
@@ -136,13 +136,13 @@ fun BrapiTraitImportScreen(
                 }
 
                 is BrapiImportListEvent.FilterChoiceSelected -> {
-                    val filterType = BrapiTraitFilterType.valueOf(event.id)
+                    val filterType = BrapiFilterType.valueOf(event.id)
                     sharedViewModel.setFilterContext(
                         id = filterType.name,
                         title = when (filterType) {
-                            BrapiTraitFilterType.TRIAL -> trialFilterTitle
-                            BrapiTraitFilterType.STUDY -> studyFilterTitle
-                            BrapiTraitFilterType.CROP -> cropFilterTitle
+                            BrapiFilterType.TRIAL -> trialFilterTitle
+                            BrapiFilterType.STUDY -> studyFilterTitle
+                            BrapiFilterType.CROP -> cropFilterTitle
                         },
                         elements = sharedViewModel.getFilterElements(filterType),
                     )

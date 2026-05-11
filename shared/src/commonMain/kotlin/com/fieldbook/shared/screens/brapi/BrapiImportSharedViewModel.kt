@@ -145,9 +145,9 @@ class BrapiImportSharedViewModel(
         }
     }
 
-    fun getFilterElements(type: BrapiTraitFilterType): List<BrapiFilterElement> {
+    fun getFilterElements(type: BrapiFilterType): List<BrapiFilterElement> {
         return when (type) {
-            BrapiTraitFilterType.TRIAL -> _studies.value
+            BrapiFilterType.TRIAL -> _studies.value
                 .mapNotNull { study ->
                     study.trialDbId?.takeIf(String::isNotBlank)?.let { trialDbId ->
                         BrapiFilterElement(
@@ -161,8 +161,8 @@ class BrapiImportSharedViewModel(
                 .map { (_, elements) -> elements.first().copy(count = elements.size) }
                 .sortedBy { it.label.lowercase() }
 
-            BrapiTraitFilterType.STUDY -> {
-                val trialIds = _filterSelections.value[BrapiTraitFilterType.TRIAL.name].orEmpty()
+            BrapiFilterType.STUDY -> {
+                val trialIds = _filterSelections.value[BrapiFilterType.TRIAL.name].orEmpty()
                 _studies.value
                     .filter { study -> trialIds.isEmpty() || study.trialDbId in trialIds }
                     .map { study ->
@@ -176,7 +176,7 @@ class BrapiImportSharedViewModel(
                     .sortedBy { it.label.lowercase() }
             }
 
-            BrapiTraitFilterType.CROP -> _studies.value
+            BrapiFilterType.CROP -> _studies.value
                 .mapNotNull { it.commonCropName?.takeIf(String::isNotBlank) }
                 .groupingBy { it }
                 .eachCount()
