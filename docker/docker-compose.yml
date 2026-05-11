@@ -1,0 +1,11 @@
+services:
+  brapi-light:
+    build:
+      context: ../brapi-light
+    ports:
+      - "38000:8000"
+    volumes:
+      - ./data:/data
+    environment:
+      - DATABASE_URL=sqlite:////data/brapi.db
+    restart: unless-stopped
