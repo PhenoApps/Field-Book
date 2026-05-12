@@ -1,6 +1,5 @@
 package com.fieldbook.shared.screens.brapi.trait
 
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -32,6 +31,7 @@ fun BrapiTraitImportScreen(
     onBack: (() -> Unit)? = null,
     onNavigateToFilter: (() -> Unit)? = null,
     onImportComplete: (() -> Unit)? = null,
+    onSnackbarMessage: (String) -> Unit,
     sharedViewModel: BrapiImportSharedViewModel = viewModel(
         factory = brapiImportSharedViewModelFactory()
     ),
@@ -50,7 +50,6 @@ fun BrapiTraitImportScreen(
     val studies by sharedViewModel.studies.collectAsState()
     val filterSelections by sharedViewModel.filterSelections.collectAsState()
     val defaultBrapiBaseUrl = stringResource(Res.string.brapi_base_url_default)
-    val snackbarHostState = remember { SnackbarHostState() }
     val trialFilterTitle = BrapiFilterType.TRIAL.title()
     val studyFilterTitle = BrapiFilterType.STUDY.title()
     val cropFilterTitle = BrapiFilterType.CROP.title()
@@ -61,7 +60,7 @@ fun BrapiTraitImportScreen(
 
     LaunchedEffect(viewModel) {
         viewModel.messages.collect { message ->
-            snackbarHostState.showSnackbar(message)
+            onSnackbarMessage(message)
         }
     }
 
@@ -73,7 +72,7 @@ fun BrapiTraitImportScreen(
 
     LaunchedEffect(sharedViewModel) {
         sharedViewModel.messages.collect { message ->
-            snackbarHostState.showSnackbar(message)
+            onSnackbarMessage(message)
         }
     }
 
@@ -150,7 +149,6 @@ fun BrapiTraitImportScreen(
             noMatchesMessage = "No traits match the filter",
             importButtonText = stringResource(Res.string.act_brapi_filter_import),
         ),
-        snackbarHostState = snackbarHostState,
         onEvent = onEvent@{ event ->
             when (event) {
                 is BrapiImportListEvent.QueryChanged -> viewModel.setQuery(event.query)

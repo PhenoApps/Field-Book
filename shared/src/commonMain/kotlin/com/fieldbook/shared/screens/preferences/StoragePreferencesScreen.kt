@@ -18,8 +18,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -83,7 +81,8 @@ private data class StoragePreferenceItem(
 fun StoragePreferencesScreen(
     onBack: (() -> Unit)? = null,
     onNavigate: ((com.fieldbook.shared.KmpHostScreenType) -> Unit)? = null,
-    onExit: (() -> Unit)? = null
+    onExit: (() -> Unit)? = null,
+    onSnackbarMessage: (String) -> Unit,
 ) {
     var showImportDialog by remember { mutableStateOf(false) }
     var showExportDialog by remember { mutableStateOf(false) }
@@ -93,7 +92,6 @@ fun StoragePreferencesScreen(
     var importResult by remember { mutableStateOf<String?>(null) }
     var showSuccessSnackbar by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
     val settings = remember { Settings() }
     val storageDirectorySummary = displayStorageDirectoryPath(
         settings.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY.key, ""),
@@ -324,7 +322,7 @@ fun StoragePreferencesScreen(
                                     if (resetSucceeded) {
                                         onExit?.invoke() ?: onBack?.invoke()
                                     } else {
-                                        snackbarHostState.showSnackbar(deleteFailureMessage)
+                                        onSnackbarMessage(deleteFailureMessage)
                                     }
                                 }
                             }
@@ -341,11 +339,10 @@ fun StoragePreferencesScreen(
             }
             if (showSuccessSnackbar) {
                 LaunchedEffect(showSuccessSnackbar) {
-                    snackbarHostState.showSnackbar("Sample database imported successfully.")
+                    onSnackbarMessage("Sample database imported successfully.")
                     showSuccessSnackbar = false
                 }
             }
-            SnackbarHost(hostState = snackbarHostState)
         }
     }
 

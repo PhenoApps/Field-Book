@@ -28,8 +28,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -93,6 +91,7 @@ import org.jetbrains.compose.resources.stringResource
 fun FieldEditorScreen(
     onBack: (() -> Unit)? = null,
     onNavigateToBrapi: (() -> Unit)? = null,
+    onSnackbarMessage: (String) -> Unit,
     viewModel: FieldEditorScreenViewModel = viewModel(
         factory = fieldEditorViewModelFactory()
     )
@@ -103,7 +102,6 @@ fun FieldEditorScreen(
     var showFieldCreatorDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val selectedFieldId = remember { mutableStateOf<Int?>(null) }
-    val snackbarHostState = remember { SnackbarHostState() }
     var localFieldFiles by remember { mutableStateOf<List<DocumentFile>>(emptyList()) }
     val preferences = remember { Settings() }
     val brapiEnabled = remember { preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false) }
@@ -137,7 +135,8 @@ fun FieldEditorScreen(
             onDeleted = {
                 selectedFieldId.value = null
                 viewModel.clearFieldDetail()
-            }
+            },
+            onSnackbarMessage = onSnackbarMessage,
         )
         return
     }
@@ -149,7 +148,7 @@ fun FieldEditorScreen(
 
     LaunchedEffect(viewModel) {
         viewModel.messages.collect { message ->
-            snackbarHostState.showSnackbar(message)
+            onSnackbarMessage(message)
         }
     }
 
@@ -180,7 +179,6 @@ fun FieldEditorScreen(
                 )
             )
         },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showAddFieldDialog = true },

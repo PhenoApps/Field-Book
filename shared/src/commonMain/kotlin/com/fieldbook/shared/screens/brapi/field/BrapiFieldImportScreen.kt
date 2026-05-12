@@ -1,6 +1,5 @@
 package com.fieldbook.shared.screens.brapi.field
 
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -34,6 +33,7 @@ fun BrapiFieldImportScreen(
     onBack: (() -> Unit)? = null,
     onNavigateToFilter: (() -> Unit)? = null,
     onStudySelected: (() -> Unit)? = null,
+    onSnackbarMessage: (String) -> Unit,
     sharedViewModel: BrapiImportSharedViewModel = viewModel(
         factory = brapiImportSharedViewModelFactory()
     ),
@@ -45,7 +45,6 @@ fun BrapiFieldImportScreen(
     val studies by sharedViewModel.studies.collectAsState()
     val filterSelections by sharedViewModel.filterSelections.collectAsState()
     val defaultBrapiBaseUrl = stringResource(Res.string.brapi_base_url_default)
-    val snackbarHostState = remember { SnackbarHostState() }
     val seasonFilterTitle = BrapiFilterType.SEASON.title()
     val trialFilterTitle = BrapiFilterType.TRIAL.title()
     val studyFilterTitle = BrapiFilterType.STUDY.title()
@@ -65,7 +64,7 @@ fun BrapiFieldImportScreen(
 
     LaunchedEffect(sharedViewModel) {
         sharedViewModel.messages.collect { message ->
-            snackbarHostState.showSnackbar(message)
+            onSnackbarMessage(message)
         }
     }
 
@@ -134,7 +133,6 @@ fun BrapiFieldImportScreen(
             noMatchesMessage = "No studies match the filter",
             importButtonText = stringResource(Res.string.act_brapi_filter_import),
         ),
-        snackbarHostState = snackbarHostState,
         onEvent = { event ->
             when (event) {
                 is BrapiImportListEvent.QueryChanged -> query = event.query

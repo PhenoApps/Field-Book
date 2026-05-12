@@ -1,9 +1,14 @@
 package com.fieldbook.shared
 
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -37,6 +42,7 @@ import com.fieldbook.shared.screens.preferences.StoragePreferencesScreen
 import com.fieldbook.shared.screens.trait.TraitEditorScreen
 import com.fieldbook.shared.screens.trait.TraitEditorScreenViewModel
 import com.fieldbook.shared.screens.trait.traitEditorScreenViewModelFactory
+import kotlinx.coroutines.launch
 
 @Composable
 fun KmpApp(
@@ -46,6 +52,16 @@ fun KmpApp(
     onScannerResult: (String) -> Unit = {},
 ) {
     val navController = rememberNavController()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarScope = rememberCoroutineScope()
+    val onSnackbarMessage: (String) -> Unit = remember(snackbarHostState, snackbarScope) {
+        { message ->
+            snackbarScope.launch {
+                snackbarHostState.showSnackbar(message)
+            }
+            Unit
+        }
+    }
     val graphStartScreen = if (startScreen == KmpHostScreenType.SCANNER) {
         KmpHostScreenType.SCANNER
     } else {
@@ -67,154 +83,164 @@ fun KmpApp(
         factory = brapiFieldImportViewModelFactory()
     )
 
-    NavHost(
-        navController = navController,
-        startDestination = graphStartScreen.route,
-    ) {
-        composable(KmpHostScreenType.CONFIG.route) {
-            ConfigScreen(
-                onBack = onExit,
-                onNavigate = navController::navigateTo,
-            )
-        }
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+    ) { _ ->
+        NavHost(
+            navController = navController,
+            startDestination = graphStartScreen.route,
+        ) {
+            composable(KmpHostScreenType.CONFIG.route) {
+                ConfigScreen(
+                    onBack = onExit,
+                    onNavigate = navController::navigateTo,
+                )
+            }
 
-        composable(KmpHostScreenType.SCANNER.route) {
-            ScannerScreen(
-                onBack = { navController.navigateBackOrExit(onExit) },
-                onResult = onScannerResult,
-            )
-        }
+            composable(KmpHostScreenType.SCANNER.route) {
+                ScannerScreen(
+                    onBack = { navController.navigateBackOrExit(onExit) },
+                    onResult = onScannerResult,
+                )
+            }
 
-        composable(KmpHostScreenType.FIELD_EDITOR.route) {
-            FieldEditorScreen(
-                onBack = { navController.navigateBackOrExit(onExit) },
-                onNavigateToBrapi = { navController.navigateTo(KmpHostScreenType.FIELD_BRAPI) },
-                viewModel = fieldEditorViewModel,
-            )
-        }
+            composable(KmpHostScreenType.FIELD_EDITOR.route) {
+                FieldEditorScreen(
+                    onBack = { navController.navigateBackOrExit(onExit) },
+                    onNavigateToBrapi = { navController.navigateTo(KmpHostScreenType.FIELD_BRAPI) },
+                    viewModel = fieldEditorViewModel,
+                    onSnackbarMessage = onSnackbarMessage,
+                )
+            }
 
-        composable(KmpHostScreenType.FIELD_BRAPI.route) {
-            BrapiFieldImportScreen(
-                onBack = { navController.navigateBackOrExit(onExit) },
-                onNavigateToFilter = { navController.navigateTo(KmpHostScreenType.BRAPI_FILTER) },
-                onStudySelected = { navController.navigateTo(KmpHostScreenType.FIELD_BRAPI_PREVIEW) },
-                sharedViewModel = brapiImportSharedViewModel,
-                viewModel = brapiFieldImportViewModel,
-            )
-        }
+            composable(KmpHostScreenType.FIELD_BRAPI.route) {
+                BrapiFieldImportScreen(
+                    onBack = { navController.navigateBackOrExit(onExit) },
+                    onNavigateToFilter = { navController.navigateTo(KmpHostScreenType.BRAPI_FILTER) },
+                    onStudySelected = { navController.navigateTo(KmpHostScreenType.FIELD_BRAPI_PREVIEW) },
+                    sharedViewModel = brapiImportSharedViewModel,
+                    viewModel = brapiFieldImportViewModel,
+                    onSnackbarMessage = onSnackbarMessage,
+                )
+            }
 
-        composable(KmpHostScreenType.FIELD_BRAPI_PREVIEW.route) {
-            BrapiStudyPreviewScreen(
-                importViewModel = brapiFieldImportViewModel,
-                onBack = { navController.navigateBackOrExit(onExit) },
-                onMissingStudy = { navController.navigateBackOrExit(onExit) },
-                onImportComplete = {
-                    fieldEditorViewModel.loadFields()
-                    navController.navigateTo(
-                        screen = KmpHostScreenType.FIELD_EDITOR,
-                        popUpToScreen = KmpHostScreenType.FIELD_EDITOR,
-                    )
-                },
-            )
-        }
+            composable(KmpHostScreenType.FIELD_BRAPI_PREVIEW.route) {
+                BrapiStudyPreviewScreen(
+                    importViewModel = brapiFieldImportViewModel,
+                    onBack = { navController.navigateBackOrExit(onExit) },
+                    onMissingStudy = { navController.navigateBackOrExit(onExit) },
+                    onImportComplete = {
+                        fieldEditorViewModel.loadFields()
+                        navController.navigateTo(
+                            screen = KmpHostScreenType.FIELD_EDITOR,
+                            popUpToScreen = KmpHostScreenType.FIELD_EDITOR,
+                        )
+                    },
+                    onSnackbarMessage = onSnackbarMessage,
+                )
+            }
 
-        composable(KmpHostScreenType.TRAIT_EDITOR.route) {
-            TraitEditorScreen(
-                onBack = { navController.navigateBackOrExit(onExit) },
-                onNavigateToBrapi = { navController.navigateTo(KmpHostScreenType.TRAIT_BRAPI) },
-                viewModel = traitEditorViewModel,
-            )
-        }
+            composable(KmpHostScreenType.TRAIT_EDITOR.route) {
+                TraitEditorScreen(
+                    onBack = { navController.navigateBackOrExit(onExit) },
+                    onNavigateToBrapi = { navController.navigateTo(KmpHostScreenType.TRAIT_BRAPI) },
+                    viewModel = traitEditorViewModel,
+                    onSnackbarMessage = onSnackbarMessage,
+                )
+            }
 
-        composable(KmpHostScreenType.TRAIT_BRAPI.route) {
-            BrapiTraitImportScreen(
-                onBack = { navController.navigateBackOrExit(onExit) },
-                onNavigateToFilter = { navController.navigateTo(KmpHostScreenType.BRAPI_FILTER) },
-                onImportComplete = {
-                    traitEditorViewModel.loadTraits()
-                    navController.navigateBackOrExit(onExit)
-                },
-                sharedViewModel = brapiImportSharedViewModel,
-                viewModel = brapiTraitImportViewModel,
-            )
-        }
+            composable(KmpHostScreenType.TRAIT_BRAPI.route) {
+                BrapiTraitImportScreen(
+                    onBack = { navController.navigateBackOrExit(onExit) },
+                    onNavigateToFilter = { navController.navigateTo(KmpHostScreenType.BRAPI_FILTER) },
+                    onImportComplete = {
+                        traitEditorViewModel.loadTraits()
+                        navController.navigateBackOrExit(onExit)
+                    },
+                    sharedViewModel = brapiImportSharedViewModel,
+                    viewModel = brapiTraitImportViewModel,
+                    onSnackbarMessage = onSnackbarMessage,
+                )
+            }
 
-        composable(KmpHostScreenType.BRAPI_FILTER.route) {
-            val filterState by brapiImportSharedViewModel.filterState.collectAsState()
+            composable(KmpHostScreenType.BRAPI_FILTER.route) {
+                val filterState by brapiImportSharedViewModel.filterState.collectAsState()
 
-            BrapiFilterScreen(
-                state = filterState,
-                onBack = { navController.navigateBackOrExit(onExit) },
-                onApply = { selectedIds ->
-                    brapiImportSharedViewModel.applyActiveFilterSelection(selectedIds)
-                    navController.navigateBackOrExit(onExit)
-                },
-            )
-        }
+                BrapiFilterScreen(
+                    state = filterState,
+                    onBack = { navController.navigateBackOrExit(onExit) },
+                    onApply = { selectedIds ->
+                        brapiImportSharedViewModel.applyActiveFilterSelection(selectedIds)
+                        navController.navigateBackOrExit(onExit)
+                    },
+                )
+            }
 
-        composable(KmpHostScreenType.COLLECT.route) {
-            CollectScreen(
-                onBack = { navController.navigateBackOrExit(onExit) },
-            )
-        }
+            composable(KmpHostScreenType.COLLECT.route) {
+                CollectScreen(
+                    onBack = { navController.navigateBackOrExit(onExit) },
+                )
+            }
 
-        composable(KmpHostScreenType.PREFERENCES.route) {
-            PreferencesScreen(
-                onBack = { navController.navigateBackOrExit(onExit) },
-                onNavigate = navController::navigateTo,
-            )
-        }
+            composable(KmpHostScreenType.PREFERENCES.route) {
+                PreferencesScreen(
+                    onBack = { navController.navigateBackOrExit(onExit) },
+                    onNavigate = navController::navigateTo,
+                )
+            }
 
-        composable(KmpHostScreenType.BRAPI_PREFERENCES.route) {
-            BrapiPreferencesScreen(
-                onBack = { navController.navigateBackOrExit(onExit) },
-            )
-        }
+            composable(KmpHostScreenType.BRAPI_PREFERENCES.route) {
+                BrapiPreferencesScreen(
+                    onBack = { navController.navigateBackOrExit(onExit) },
+                )
+            }
 
-        composable(KmpHostScreenType.FEATURE_PREFERENCES.route) {
-            FeaturePreferenceScreen(
-                onBack = { navController.navigateBackOrExit(onExit) },
-            )
-        }
+            composable(KmpHostScreenType.FEATURE_PREFERENCES.route) {
+                FeaturePreferenceScreen(
+                    onBack = { navController.navigateBackOrExit(onExit) },
+                )
+            }
 
-        composable(KmpHostScreenType.APPEARANCE_PREFERENCES.route) {
-            AppearancePreferencesScreen(
-                onBack = { navController.navigateBackOrExit(onExit) },
-                onNavigate = navController::navigateTo,
-            )
-        }
+            composable(KmpHostScreenType.APPEARANCE_PREFERENCES.route) {
+                AppearancePreferencesScreen(
+                    onBack = { navController.navigateBackOrExit(onExit) },
+                    onNavigate = navController::navigateTo,
+                )
+            }
 
-        composable(KmpHostScreenType.LANGUAGE_PREFERENCES.route) {
-            LanguageScreen(
-                onBack = { navController.navigateBackOrExit(onExit) },
-            )
-        }
+            composable(KmpHostScreenType.LANGUAGE_PREFERENCES.route) {
+                LanguageScreen(
+                    onBack = { navController.navigateBackOrExit(onExit) },
+                )
+            }
 
-        composable(KmpHostScreenType.STORAGE_PREFERENCES.route) {
-            StoragePreferencesScreen(
-                onBack = { navController.navigateBackOrExit(onExit) },
-                onNavigate = navController::navigateTo,
-                onExit = onStorageResetExit,
-            )
-        }
+            composable(KmpHostScreenType.STORAGE_PREFERENCES.route) {
+                StoragePreferencesScreen(
+                    onBack = { navController.navigateBackOrExit(onExit) },
+                    onNavigate = navController::navigateTo,
+                    onExit = onStorageResetExit,
+                    onSnackbarMessage = onSnackbarMessage,
+                )
+            }
 
-        composable(KmpHostScreenType.STORAGE_DEFINER.route) {
-            StorageDefinerScreen(
-                onBack = { navController.navigateBackOrExit(onExit) },
-            )
-        }
+            composable(KmpHostScreenType.STORAGE_DEFINER.route) {
+                StorageDefinerScreen(
+                    onBack = { navController.navigateBackOrExit(onExit) },
+                )
+            }
 
-        composable(KmpHostScreenType.EXPORT.route) {
-            ExportScreen(
-                fieldIds = emptyList(),
-                onBack = { navController.navigateBackOrExit(onExit) },
-            )
-        }
+            composable(KmpHostScreenType.EXPORT.route) {
+                ExportScreen(
+                    fieldIds = emptyList(),
+                    onBack = { navController.navigateBackOrExit(onExit) },
+                )
+            }
 
-        composable(KmpHostScreenType.ABOUT.route) {
-            AboutScreen(
-                onBack = { navController.navigateBackOrExit(onExit) },
-            )
+            composable(KmpHostScreenType.ABOUT.route) {
+                AboutScreen(
+                    onBack = { navController.navigateBackOrExit(onExit) },
+                )
+            }
         }
     }
 

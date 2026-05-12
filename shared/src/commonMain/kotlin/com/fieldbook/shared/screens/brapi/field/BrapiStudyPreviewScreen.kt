@@ -19,8 +19,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -30,7 +28,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -46,6 +43,7 @@ fun BrapiStudyPreviewScreen(
     onBack: () -> Unit,
     onMissingStudy: () -> Unit,
     onImportComplete: () -> Unit,
+    onSnackbarMessage: (String) -> Unit,
     viewModel: BrapiStudyPreviewScreenViewModel = viewModel(
         factory = brapiStudyPreviewScreenViewModelFactory()
     ),
@@ -53,7 +51,6 @@ fun BrapiStudyPreviewScreen(
     val selectedStudy by importViewModel.selectedStudy.collectAsState()
     val state by viewModel.uiState.collectAsState()
     val defaultBrapiBaseUrl = stringResource(Res.string.brapi_base_url_default)
-    val snackbarHostState = remember { SnackbarHostState() }
 
     val study = selectedStudy
     if (study == null) {
@@ -75,13 +72,11 @@ fun BrapiStudyPreviewScreen(
 
     LaunchedEffect(viewModel) {
         viewModel.messages.collect { message ->
-            snackbarHostState.showSnackbar(message)
+            onSnackbarMessage(message)
         }
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-    ) { innerPadding ->
+    Scaffold { innerPadding ->
         Surface(
             modifier = Modifier
                 .fillMaxSize()

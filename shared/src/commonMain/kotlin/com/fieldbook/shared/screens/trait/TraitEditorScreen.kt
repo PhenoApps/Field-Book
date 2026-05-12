@@ -35,8 +35,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -104,6 +102,7 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 fun TraitEditorScreen(
     onBack: (() -> Unit)? = null,
     onNavigateToBrapi: (() -> Unit)? = null,
+    onSnackbarMessage: (String) -> Unit,
     viewModel: TraitEditorScreenViewModel = viewModel(
         factory = traitEditorScreenViewModelFactory()
     )
@@ -132,7 +131,6 @@ fun TraitEditorScreen(
     val brapiDisplayName = remember(defaultBrapiDisplayName) {
         settings.getString(PreferenceKeys.BRAPI_DISPLAY_NAME, defaultBrapiDisplayName)
     }
-    val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
     val importFilePicker = rememberFilePickerLauncher(
@@ -155,7 +153,7 @@ fun TraitEditorScreen(
 
     LaunchedEffect(viewModel) {
         viewModel.messages.collect { message ->
-            snackbarHostState.showSnackbar(message)
+            onSnackbarMessage(message)
         }
     }
 
@@ -241,8 +239,7 @@ fun TraitEditorScreen(
             ) {
                 Icon(imageVector = Icons.Filled.Add, contentDescription = "Add")
             }
-        },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+        }
     ) { innerPadding ->
         Box(
             modifier = Modifier
