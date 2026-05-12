@@ -14,14 +14,19 @@ import com.fieldbook.shared.screens.ConfigScreen
 import com.fieldbook.shared.screens.ScannerScreen
 import com.fieldbook.shared.screens.brapi.BrapiFilterScreen
 import com.fieldbook.shared.screens.brapi.BrapiImportSharedViewModel
-import com.fieldbook.shared.screens.brapi.BrapiStudyScreen
 import com.fieldbook.shared.screens.brapi.brapiImportSharedViewModelFactory
+import com.fieldbook.shared.screens.brapi.field.BrapiFieldImportScreen
+import com.fieldbook.shared.screens.brapi.field.BrapiFieldImportViewModel
+import com.fieldbook.shared.screens.brapi.field.BrapiStudyPreviewScreen
+import com.fieldbook.shared.screens.brapi.field.brapiFieldImportViewModelFactory
 import com.fieldbook.shared.screens.brapi.trait.BrapiTraitImportScreen
 import com.fieldbook.shared.screens.brapi.trait.BrapiTraitImportViewModel
 import com.fieldbook.shared.screens.brapi.trait.brapiTraitImportViewModelFactory
 import com.fieldbook.shared.screens.collect.CollectScreen
 import com.fieldbook.shared.screens.export.ExportScreen
 import com.fieldbook.shared.screens.fields.FieldEditorScreen
+import com.fieldbook.shared.screens.fields.FieldEditorScreenViewModel
+import com.fieldbook.shared.screens.fields.fieldEditorViewModelFactory
 import com.fieldbook.shared.screens.preferences.AppearancePreferencesScreen
 import com.fieldbook.shared.screens.preferences.BrapiPreferencesScreen
 import com.fieldbook.shared.screens.preferences.FeaturePreferenceScreen
@@ -49,11 +54,17 @@ fun KmpApp(
     val traitEditorViewModel: TraitEditorScreenViewModel = viewModel(
         factory = traitEditorScreenViewModelFactory()
     )
+    val fieldEditorViewModel: FieldEditorScreenViewModel = viewModel(
+        factory = fieldEditorViewModelFactory()
+    )
     val brapiImportSharedViewModel: BrapiImportSharedViewModel = viewModel(
         factory = brapiImportSharedViewModelFactory()
     )
     val brapiTraitImportViewModel: BrapiTraitImportViewModel = viewModel(
         factory = brapiTraitImportViewModelFactory()
+    )
+    val brapiFieldImportViewModel: BrapiFieldImportViewModel = viewModel(
+        factory = brapiFieldImportViewModelFactory()
     )
 
     NavHost(
@@ -77,6 +88,33 @@ fun KmpApp(
         composable(KmpHostScreenType.FIELD_EDITOR.route) {
             FieldEditorScreen(
                 onBack = { navController.navigateBackOrExit(onExit) },
+                onNavigateToBrapi = { navController.navigateTo(KmpHostScreenType.FIELD_BRAPI) },
+                viewModel = fieldEditorViewModel,
+            )
+        }
+
+        composable(KmpHostScreenType.FIELD_BRAPI.route) {
+            BrapiFieldImportScreen(
+                onBack = { navController.navigateBackOrExit(onExit) },
+                onNavigateToFilter = { navController.navigateTo(KmpHostScreenType.BRAPI_FILTER) },
+                onStudySelected = { navController.navigateTo(KmpHostScreenType.FIELD_BRAPI_PREVIEW) },
+                sharedViewModel = brapiImportSharedViewModel,
+                viewModel = brapiFieldImportViewModel,
+            )
+        }
+
+        composable(KmpHostScreenType.FIELD_BRAPI_PREVIEW.route) {
+            BrapiStudyPreviewScreen(
+                importViewModel = brapiFieldImportViewModel,
+                onBack = { navController.navigateBackOrExit(onExit) },
+                onMissingStudy = { navController.navigateBackOrExit(onExit) },
+                onImportComplete = {
+                    fieldEditorViewModel.loadFields()
+                    navController.navigateTo(
+                        screen = KmpHostScreenType.FIELD_EDITOR,
+                        popUpToScreen = KmpHostScreenType.FIELD_EDITOR,
+                    )
+                },
             )
         }
 
@@ -129,12 +167,6 @@ fun KmpApp(
 
         composable(KmpHostScreenType.BRAPI_PREFERENCES.route) {
             BrapiPreferencesScreen(
-                onBack = { navController.navigateBackOrExit(onExit) },
-            )
-        }
-
-        composable(KmpHostScreenType.BRAPI_STUDIES.route) {
-            BrapiStudyScreen(
                 onBack = { navController.navigateBackOrExit(onExit) },
             )
         }
@@ -196,8 +228,12 @@ fun KmpApp(
 private val KmpHostScreenType.route: String
     get() = value
 
-private fun NavHostController.navigateTo(screen: KmpHostScreenType) {
+private fun NavHostController.navigateTo(
+    screen: KmpHostScreenType,
+    popUpToScreen: KmpHostScreenType? = null,
+) {
     navigate(screen.route) {
+        popUpToScreen?.let { popUpTo(it.route) }
         launchSingleTop = true
     }
 }
