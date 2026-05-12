@@ -161,11 +161,12 @@ class BrapiImportSharedViewModel(
     fun getSelectedFilterElements(
         type: BrapiFilterType,
         selections: Map<String, Set<String>> = _filterSelections.value,
+        includeSeasonFilters: Boolean = true,
     ): List<BrapiFilterElement> {
         val selectedIds = selections[type.name].orEmpty()
         if (selectedIds.isEmpty()) return emptyList()
 
-        val elementsById = getFilterElements(type).associateBy { it.id }
+        val elementsById = getFilterElements(type, includeSeasonFilters).associateBy { it.id }
         return selectedIds.map { selectedId ->
             elementsById[selectedId] ?: BrapiFilterElement(
                 id = selectedId,
@@ -175,9 +176,32 @@ class BrapiImportSharedViewModel(
         }
     }
 
-    fun getFilterElements(type: BrapiFilterType): List<BrapiFilterElement> {
+    fun getFilterElements(
+        type: BrapiFilterType,
+        includeSeasonFilters: Boolean = true,
+    ): List<BrapiFilterElement> {
         return when (type) {
+            BrapiFilterType.SEASON -> {
+                val trialIds = _filterSelections.value[BrapiFilterType.TRIAL.name].orEmpty()
+                _studies.value
+                    .filter { study -> trialIds.isEmpty() || study.trialDbId in trialIds }
+                    .flatMap { it.seasons }
+                    .filter(String::isNotBlank)
+                    .groupingBy { it }
+                    .eachCount()
+                    .map { (season, count) -> BrapiFilterElement(id = season, label = season, count = count) }
+                    .sortedBy { it.label.lowercase() }
+            }
+
             BrapiFilterType.TRIAL -> _studies.value
+                .filter { study ->
+                    val seasonIds = if (includeSeasonFilters) {
+                        _filterSelections.value[BrapiFilterType.SEASON.name].orEmpty()
+                    } else {
+                        emptySet()
+                    }
+                    seasonIds.isEmpty() || study.seasons.any { it in seasonIds }
+                }
                 .mapNotNull { study ->
                     study.trialDbId?.takeIf(String::isNotBlank)?.let { trialDbId ->
                         BrapiFilterElement(
@@ -193,8 +217,16 @@ class BrapiImportSharedViewModel(
 
             BrapiFilterType.STUDY -> {
                 val trialIds = _filterSelections.value[BrapiFilterType.TRIAL.name].orEmpty()
+                val seasonIds = if (includeSeasonFilters) {
+                    _filterSelections.value[BrapiFilterType.SEASON.name].orEmpty()
+                } else {
+                    emptySet()
+                }
                 _studies.value
-                    .filter { study -> trialIds.isEmpty() || study.trialDbId in trialIds }
+                    .filter { study ->
+                        (trialIds.isEmpty() || study.trialDbId in trialIds) &&
+                            (seasonIds.isEmpty() || study.seasons.any { it in seasonIds })
+                    }
                     .map { study ->
                         BrapiFilterElement(
                             id = study.studyDbId,

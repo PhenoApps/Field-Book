@@ -3,6 +3,7 @@ package com.fieldbook.shared.screens.brapi
 import androidx.compose.runtime.Composable
 import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.brapi_filter_type_crop
+import com.fieldbook.shared.generated.resources.brapi_filter_type_season
 import com.fieldbook.shared.generated.resources.brapi_filter_type_study
 import com.fieldbook.shared.generated.resources.brapi_filter_type_trial
 import org.jetbrains.compose.resources.DrawableResource
@@ -36,6 +37,7 @@ data class BrapiFilterUiState(
 )
 
 enum class BrapiFilterType {
+    SEASON,
     TRIAL,
     STUDY,
     CROP
@@ -44,6 +46,7 @@ enum class BrapiFilterType {
 @Composable
 fun BrapiFilterType.title(): String {
     return when (this) {
+        BrapiFilterType.SEASON -> stringResource(Res.string.brapi_filter_type_season)
         BrapiFilterType.TRIAL -> stringResource(Res.string.brapi_filter_type_trial)
         BrapiFilterType.STUDY -> stringResource(Res.string.brapi_filter_type_study)
         BrapiFilterType.CROP -> stringResource(Res.string.brapi_filter_type_crop)

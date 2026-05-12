@@ -104,33 +104,45 @@ fun BrapiTraitImportScreen(
                     id = BrapiFilterType.TRIAL.name,
                     label = stringResource(
                         Res.string.brapi_filter_type_trial_count,
-                        sharedViewModel.getFilterElements(BrapiFilterType.TRIAL).size.toString()
+                        sharedViewModel.getFilterElements(
+                            type = BrapiFilterType.TRIAL,
+                            includeSeasonFilters = false,
+                        ).size.toString()
                     ),
                     selectedElements = sharedViewModel.getSelectedFilterElements(
                         type = BrapiFilterType.TRIAL,
                         selections = filterSelections,
+                        includeSeasonFilters = false,
                     ),
                 ),
                 BrapiFilterChoice(
                     id = BrapiFilterType.STUDY.name,
                     label = stringResource(
                         Res.string.brapi_filter_type_study_count,
-                        sharedViewModel.getFilterElements(BrapiFilterType.STUDY).size.toString()
+                        sharedViewModel.getFilterElements(
+                            type = BrapiFilterType.STUDY,
+                            includeSeasonFilters = false,
+                        ).size.toString()
                     ),
                     selectedElements = sharedViewModel.getSelectedFilterElements(
                         type = BrapiFilterType.STUDY,
                         selections = filterSelections,
+                        includeSeasonFilters = false,
                     ),
                 ),
                 BrapiFilterChoice(
                     id = BrapiFilterType.CROP.name,
                     label = stringResource(
                         Res.string.brapi_filter_type_crop_count,
-                        sharedViewModel.getFilterElements(BrapiFilterType.CROP).size.toString()
+                        sharedViewModel.getFilterElements(
+                            type = BrapiFilterType.CROP,
+                            includeSeasonFilters = false,
+                        ).size.toString()
                     ),
                     selectedElements = sharedViewModel.getSelectedFilterElements(
                         type = BrapiFilterType.CROP,
                         selections = filterSelections,
+                        includeSeasonFilters = false,
                     ),
                 ),
             ),
@@ -139,7 +151,7 @@ fun BrapiTraitImportScreen(
             importButtonText = stringResource(Res.string.act_brapi_filter_import),
         ),
         snackbarHostState = snackbarHostState,
-        onEvent = { event ->
+        onEvent = onEvent@{ event ->
             when (event) {
                 is BrapiImportListEvent.QueryChanged -> viewModel.setQuery(event.query)
                 is BrapiImportListEvent.ItemSelectionChanged -> viewModel.setItemSelected(event.id, event.selected)
@@ -163,14 +175,19 @@ fun BrapiTraitImportScreen(
 
                 is BrapiImportListEvent.FilterChoiceSelected -> {
                     val filterType = BrapiFilterType.valueOf(event.id)
+                    val filterTitle = when (filterType) {
+                        BrapiFilterType.SEASON -> return@onEvent
+                        BrapiFilterType.TRIAL -> trialFilterTitle
+                        BrapiFilterType.STUDY -> studyFilterTitle
+                        BrapiFilterType.CROP -> cropFilterTitle
+                    }
                     sharedViewModel.setFilterContext(
                         id = filterType.name,
-                        title = when (filterType) {
-                            BrapiFilterType.TRIAL -> trialFilterTitle
-                            BrapiFilterType.STUDY -> studyFilterTitle
-                            BrapiFilterType.CROP -> cropFilterTitle
-                        },
-                        elements = sharedViewModel.getFilterElements(filterType),
+                        title = filterTitle,
+                        elements = sharedViewModel.getFilterElements(
+                            type = filterType,
+                            includeSeasonFilters = false,
+                        ),
                     )
                     onNavigateToFilter?.invoke()
                 }

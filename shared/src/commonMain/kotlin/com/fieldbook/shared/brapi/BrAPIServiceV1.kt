@@ -288,6 +288,11 @@ class BrAPIServiceV1(
                 commonCropName = study.commonCropName,
                 trialDbId = study.trialDbId,
                 trialName = study.trialName,
+                seasons = study.seasons.orEmpty()
+                    .mapNotNull { season ->
+                        season.seasonDbId?.takeIf(String::isNotBlank)
+                            ?: season.season?.takeIf(String::isNotBlank)
+                    },
             )
         }
 

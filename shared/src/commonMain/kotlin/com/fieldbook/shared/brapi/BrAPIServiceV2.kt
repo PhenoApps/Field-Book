@@ -111,6 +111,7 @@ class BrAPIServiceV2(
                         commonCropName = study.commonCropName,
                         trialDbId = study.trialDbId,
                         trialName = study.trialName,
+                        seasons = study.seasons.orEmpty().filter(String::isNotBlank),
                         observationVariableDbIds = study.observationVariableDbIds.orEmpty(),
                     )
                 }

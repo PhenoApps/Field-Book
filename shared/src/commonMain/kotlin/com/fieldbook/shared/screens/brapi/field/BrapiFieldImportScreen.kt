@@ -14,6 +14,7 @@ import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.act_brapi_filter_import
 import com.fieldbook.shared.generated.resources.brapi_base_url_default
 import com.fieldbook.shared.generated.resources.brapi_filter_type_crop_count
+import com.fieldbook.shared.generated.resources.brapi_filter_type_season_count
 import com.fieldbook.shared.generated.resources.brapi_filter_type_study_count
 import com.fieldbook.shared.generated.resources.brapi_filter_type_trial_count
 import com.fieldbook.shared.generated.resources.brapi_studies_filter_title
@@ -45,6 +46,7 @@ fun BrapiFieldImportScreen(
     val filterSelections by sharedViewModel.filterSelections.collectAsState()
     val defaultBrapiBaseUrl = stringResource(Res.string.brapi_base_url_default)
     val snackbarHostState = remember { SnackbarHostState() }
+    val seasonFilterTitle = BrapiFilterType.SEASON.title()
     val trialFilterTitle = BrapiFilterType.TRIAL.title()
     val studyFilterTitle = BrapiFilterType.STUDY.title()
     val cropFilterTitle = BrapiFilterType.CROP.title()
@@ -83,6 +85,17 @@ fun BrapiFieldImportScreen(
             loading = loading,
             importing = false,
             filterChoices = listOf(
+                BrapiFilterChoice(
+                    id = BrapiFilterType.SEASON.name,
+                    label = stringResource(
+                        Res.string.brapi_filter_type_season_count,
+                        sharedViewModel.getFilterElements(BrapiFilterType.SEASON).size.toString()
+                    ),
+                    selectedElements = sharedViewModel.getSelectedFilterElements(
+                        type = BrapiFilterType.SEASON,
+                        selections = filterSelections,
+                    ),
+                ),
                 BrapiFilterChoice(
                     id = BrapiFilterType.TRIAL.name,
                     label = stringResource(
@@ -157,6 +170,7 @@ fun BrapiFieldImportScreen(
                     sharedViewModel.setFilterContext(
                         id = filterType.name,
                         title = when (filterType) {
+                            BrapiFilterType.SEASON -> seasonFilterTitle
                             BrapiFilterType.TRIAL -> trialFilterTitle
                             BrapiFilterType.STUDY -> studyFilterTitle
                             BrapiFilterType.CROP -> cropFilterTitle
@@ -179,11 +193,13 @@ private fun List<BrapiStudyDetails>.applyFieldImportFilters(
     val trialIds = selections[BrapiFilterType.TRIAL.name].orEmpty()
     val studyIds = selections[BrapiFilterType.STUDY.name].orEmpty()
     val cropIds = selections[BrapiFilterType.CROP.name].orEmpty()
+    val seasonIds = selections[BrapiFilterType.SEASON.name].orEmpty()
 
     return filter { study ->
         (trialIds.isEmpty() || study.trialDbId in trialIds) &&
             (studyIds.isEmpty() || study.studyDbId in studyIds) &&
-            (cropIds.isEmpty() || study.commonCropName in cropIds)
+            (cropIds.isEmpty() || study.commonCropName in cropIds) &&
+            (seasonIds.isEmpty() || study.seasons.any { it in seasonIds })
     }.filter { study ->
         normalizedQuery.isBlank() ||
             study.studyName.orEmpty().lowercase().contains(normalizedQuery) ||

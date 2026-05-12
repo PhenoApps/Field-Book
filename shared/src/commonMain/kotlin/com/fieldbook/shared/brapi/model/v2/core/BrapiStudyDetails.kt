@@ -11,5 +11,6 @@ data class BrapiStudyDetails(
     val commonCropName: String? = null,
     val trialDbId: String? = null,
     val trialName: String? = null,
+    val seasons: List<String> = emptyList(),
     val observationVariableDbIds: List<String> = emptyList(),
 )
