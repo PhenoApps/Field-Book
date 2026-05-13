@@ -131,6 +131,7 @@ fun KmpApp(
                     onMissingStudy = { navController.navigateBackOrExit(onExit) },
                     onImportComplete = {
                         fieldEditorViewModel.loadFields()
+                        traitEditorViewModel.loadTraits()
                         navController.navigateTo(
                             screen = KmpHostScreenType.FIELD_EDITOR,
                             popUpToScreen = KmpHostScreenType.FIELD_EDITOR,
