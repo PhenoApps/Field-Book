@@ -66,10 +66,12 @@
         <item name="fb_trait_button_background_tint">@color/light_gray</item>
 
         <item name="fb_categorical_button_selected_color">?attr/fb_color_primary</item>
+        <item name="fb_trait_status_selected_color">@color/main_primary_dark</item>
 
         <!-- these are used in material design components -->
         <item name="android:textColorPrimary">?attr/fb_color_text_dark</item>
         <item name="android:textColorSecondary">?attr/fb_color_text_dark</item>
+        <item name="colorControlNormal">?attr/fb_icon_tint</item>
 
         <!-- widget style declarations (found in styles_widgets.xml)-->
         <item name="floatingActionButtonStyle">@style/FloatingActionButtonStyle</item>
@@ -210,6 +212,7 @@
         <item name="stepper_icon_on_done_bg_color">@color/blue_primary</item>
         <item name="stepper_line_color">@color/GRAY</item>
         <item name="stepper_line_on_done_color">@color/blue_primary</item>
+        <item name="fb_trait_status_selected_color">@color/blue_primary_dark</item>
     </style>
 
     <!-- Soda Dark (palette from buymeasoda/soda-theme Soda Dark 3) -->
@@ -227,8 +230,9 @@
         <item name="fb_color_text_light">@color/soda_dark_text_bright</item>
         <item name="fb_color_hint_text">@color/soda_dark_text_dim</item>
         <item name="fb_color_text_dark">@color/soda_dark_text</item>
-        <item name="fb_icon_tint">@color/soda_dark_text</item>
+        <item name="fb_icon_tint">@color/soda_dark_text_bright</item>
         <item name="fb_icon_fill_tint">@color/soda_dark_text_bright</item>
+        <item name="fb_trait_status_selected_color">@color/soda_dark_accent_bright</item>
         <item name="fb_spinner_focused">@color/soda_dark_accent</item>
         <item name="fb_spinner_selected">@color/soda_dark_primary_transparent</item>
         <item name="fb_trait_percent_background_center_color">@color/soda_dark_trait_percent_center</item>
@@ -254,6 +258,9 @@
         <item name="colorPrimaryVariant">?attr/fb_color_primary_dark</item>
         <item name="colorAccent">?attr/fb_color_accent</item>
         <item name="android:colorAccent">?attr/fb_color_accent</item>
+        <item name="android:textColorPrimary">@color/soda_dark_text_bright</item>
+        <item name="android:textColorSecondary">@color/soda_dark_text</item>
+        <item name="colorControlNormal">@color/soda_dark_text_bright</item>
 
         <item name="fb_first_chip_color">@color/soda_dark_chip_first</item>
         <item name="fb_second_chip_color">@color/soda_dark_chip_second</item>
@@ -431,6 +438,7 @@
         <item name="stepper_icon_on_done_bg_color">@color/BLACK</item>
         <item name="stepper_line_color">@color/BLACK</item>
         <item name="stepper_line_on_done_color">@color/BLACK</item>
+        <item name="fb_trait_status_selected_color">@color/high_contrast_primary_dark</item>
     </style>
 
     <!-- need to define a theme for each type of material component until we can use the new themes -->

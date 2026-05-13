@@ -243,6 +243,9 @@
     <attr format="color" name="fb_icon_tint"/>
     <attr format="color" name="fb_icon_fill_tint"/>
 
+    <!-- collect trait progress bar: selected trait marker (defaults to primary_dark) -->
+    <attr format="color" name="fb_trait_status_selected_color"/>
+
     <!-- color of toolbar titles -->
     <attr format="color" name="fb_title_text_color"/>
     <attr format="color" name="fb_subheading_color"/>

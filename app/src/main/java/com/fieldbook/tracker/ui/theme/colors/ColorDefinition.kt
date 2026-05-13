@@ -238,7 +238,7 @@ val SodaDarkAppColors = DefaultAppColors.copy(
 
     surface = DefaultAppColors.surface.copy(
         border = SodaDarkPalette.Border,
-        iconTint = SodaDarkPalette.Label,
+        iconTint = SodaDarkPalette.TabSelected,
         iconFillTint = SodaDarkPalette.TabSelected,
         preferencesHorizontalBreak = Color.Transparent
     ),
