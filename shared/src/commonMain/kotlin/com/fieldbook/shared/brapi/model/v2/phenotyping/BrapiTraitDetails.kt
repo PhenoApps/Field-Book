@@ -1,5 +1,8 @@
 package com.fieldbook.shared.brapi.model.v2.phenotyping
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class BrapiTraitDetails(
     val observationVariableDbId: String,
     val observationVariableName: String,

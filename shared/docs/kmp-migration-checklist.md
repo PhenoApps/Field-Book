@@ -203,11 +203,23 @@
 |----------------------------------|--------------------|--------------------|
 |                                  |                    |                    |
 | **Fields**                       |                    |                    |
+| Import from BrAPI w/traits       | :white_check_mark: | :white_check_mark: |
+|                                  |                    |                    |
+| **Field Details**                |                    |                    |
+| Collect                          |                    |                    |
+| Export                           |                    |                    |
+| Sync                             | :white_check_mark: | :white_check_mark: |
+| Data                             |                    |                    |
+|                                  |                    |                    |
+| ...                              |                    |                    |
+|                                  |                    |                    |
+| **Traits**                       |                    |                    |
 | Import from BrAPI                | :white_check_mark: |                    |
+|                                  |                    |                    |
 | ...                              |                    |                    |
 |                                  |                    |                    |
 | **Export**                       |                    |                    |
-| Export to BrAPI                  | :white_check_mark: |                    |
+| Export to BrAPI                  | :white_check_mark: | :white_check_mark: |
 |                                  |                    |                    |
 | ...                              |                    |                    |
 |                                  |                    |                    |
@@ -216,11 +228,11 @@
 |                                  |                    |                    |
 | **Settings/BrAPI/Navbar**        |                    |                    |
 | Scan barcode                     |                    |                    |
-| Authorize                        | :white_check_mark: |                    |
+| Authorize                        | :white_check_mark: | :white_check_mark: |
 |                                  |                    |                    |
 | **Settings/BrAPI/Server**        |                    |                    |
 | Base URL                         | :white_check_mark: | :white_check_mark: |
-| Authorize                        | :white_check_mark: |                    |
+| Authorize                        | :white_check_mark: | :white_check_mark: |
 | Display name                     |                    |                    |
 | Auto-configure                   |                    |                    |
 | Logout                           | :white_check_mark: |                    |
@@ -235,10 +247,10 @@
 | **Settings/BrAPI/Advanced**      |                    |                    |
 | BrAPI version / V1               | :white_check_mark: |                    |
 | BrAPI version / V2               | :white_check_mark: |                    |
-| Page size                        |                    |                    |
+| Page size                        | :white_check_mark: |                    |
 | Chunk size                       |                    |                    |
 | Server timeout                   |                    |                    |
-| Cache invalidation               |                    |                    |
+| Cache invalidation               | :white_check_mark: |                    |
 |                                  |                    |                    |
 | **Settings/BrAPI/Preferences**   |                    |                    |
 | Value vs Label display           |                    |                    |

@@ -35,8 +35,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -56,6 +54,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fieldbook.shared.components.AppListItem
 import com.fieldbook.shared.database.models.TraitObject
 import com.fieldbook.shared.generated.resources.Res
+import com.fieldbook.shared.generated.resources.brapi_edit_display_name_default
 import com.fieldbook.shared.generated.resources.dialog_cancel
 import com.fieldbook.shared.generated.resources.dialog_delete_traits_message
 import com.fieldbook.shared.generated.resources.dialog_save
@@ -64,10 +63,12 @@ import com.fieldbook.shared.generated.resources.ic_file_cloud
 import com.fieldbook.shared.generated.resources.ic_file_csv
 import com.fieldbook.shared.generated.resources.ic_file_generic
 import com.fieldbook.shared.generated.resources.ic_more_vert
+import com.fieldbook.shared.generated.resources.ic_pref_brapi_server
 import com.fieldbook.shared.generated.resources.ic_reorder
 import com.fieldbook.shared.generated.resources.ic_ruler
 import com.fieldbook.shared.generated.resources.ic_sort
 import com.fieldbook.shared.generated.resources.ic_tb_toggle_all
+import com.fieldbook.shared.generated.resources.import_source_brapi
 import com.fieldbook.shared.generated.resources.traits_dialog_export
 import com.fieldbook.shared.generated.resources.traits_sort_default
 import com.fieldbook.shared.generated.resources.traits_sort_format
@@ -75,12 +76,14 @@ import com.fieldbook.shared.generated.resources.traits_sort_import_order
 import com.fieldbook.shared.generated.resources.traits_sort_name
 import com.fieldbook.shared.generated.resources.traits_sort_visibility
 import com.fieldbook.shared.generated.resources.traits_toolbar_delete_all
+import com.fieldbook.shared.preferences.PreferenceKeys
 import com.fieldbook.shared.theme.AlertDialog
 import com.fieldbook.shared.theme.TextButton
 import com.fieldbook.shared.traits.Formats
 import com.fieldbook.shared.utilities.DocumentFile
 import com.fieldbook.shared.utilities.getDirectory
 import com.fieldbook.shared.utilities.listFiles
+import com.russhwolf.settings.Settings
 import io.github.vinceglb.filekit.compose.rememberFilePickerLauncher
 import io.github.vinceglb.filekit.core.PickerType
 import kotlinx.coroutines.Dispatchers
@@ -98,6 +101,8 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 @Composable
 fun TraitEditorScreen(
     onBack: (() -> Unit)? = null,
+    onNavigateToBrapi: (() -> Unit)? = null,
+    onSnackbarMessage: (String) -> Unit,
     viewModel: TraitEditorScreenViewModel = viewModel(
         factory = traitEditorScreenViewModelFactory()
     )
@@ -120,7 +125,12 @@ fun TraitEditorScreen(
     var showExportDialog by remember { mutableStateOf(false) }
     var topBarMenuExpanded by remember { mutableStateOf(false) }
     var exportFileName by remember { mutableStateOf(defaultTraitExportName()) }
-    val snackbarHostState = remember { SnackbarHostState() }
+    val settings = remember { Settings() }
+    val defaultBrapiDisplayName = stringResource(Res.string.brapi_edit_display_name_default)
+    val brapiEnabled = remember { settings.getBoolean(PreferenceKeys.BRAPI_ENABLED, false) }
+    val brapiDisplayName = remember(defaultBrapiDisplayName) {
+        settings.getString(PreferenceKeys.BRAPI_DISPLAY_NAME, defaultBrapiDisplayName)
+    }
     val scope = rememberCoroutineScope()
 
     val importFilePicker = rememberFilePickerLauncher(
@@ -143,7 +153,7 @@ fun TraitEditorScreen(
 
     LaunchedEffect(viewModel) {
         viewModel.messages.collect { message ->
-            snackbarHostState.showSnackbar(message)
+            onSnackbarMessage(message)
         }
     }
 
@@ -229,8 +239,7 @@ fun TraitEditorScreen(
             ) {
                 Icon(imageVector = Icons.Filled.Add, contentDescription = "Add")
             }
-        },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+        }
     ) { innerPadding ->
         Box(
             modifier = Modifier
@@ -322,6 +331,8 @@ fun TraitEditorScreen(
 
             if (showAddTraitDialog) {
                 AddTraitDialog(
+                    brapiEnabled = brapiEnabled && onNavigateToBrapi != null,
+                    brapiDisplayName = brapiDisplayName,
                     onDismiss = { showAddTraitDialog = false },
                     onCreateNew = {
                         showAddTraitDialog = false
@@ -330,6 +341,10 @@ fun TraitEditorScreen(
                     onImportFromFile = {
                         showAddTraitDialog = false
                         showImportDialog = true
+                    },
+                    onImportFromBrapi = {
+                        showAddTraitDialog = false
+                        onNavigateToBrapi?.invoke()
                     }
                 )
             }
@@ -498,9 +513,12 @@ private fun TraitExportDialog(
 
 @Composable
 private fun AddTraitDialog(
+    brapiEnabled: Boolean,
+    brapiDisplayName: String,
     onDismiss: () -> Unit,
     onCreateNew: () -> Unit,
-    onImportFromFile: () -> Unit
+    onImportFromFile: () -> Unit,
+    onImportFromBrapi: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -517,6 +535,13 @@ private fun AddTraitDialog(
                     icon = Res.drawable.ic_file_csv,
                     rowModifier = Modifier.clickable(onClick = onImportFromFile)
                 )
+                if (brapiEnabled) {
+                    AppListItem(
+                        text = brapiDisplayName.ifBlank { stringResource(Res.string.import_source_brapi) },
+                        icon = Res.drawable.ic_pref_brapi_server,
+                        rowModifier = Modifier.clickable(onClick = onImportFromBrapi)
+                    )
+                }
             }
         },
         confirmButton = {},

@@ -33,8 +33,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -109,7 +107,8 @@ fun FieldDetailScreen(
     fieldId: Int,
     viewModel: FieldEditorScreenViewModel,
     onBack: () -> Unit,
-    onDeleted: () -> Unit
+    onDeleted: () -> Unit,
+    onSnackbarMessage: (String) -> Unit,
 ) {
     val field by viewModel.fieldDetail.collectAsState()
     val loading by viewModel.fieldDetailLoading.collectAsState()
@@ -119,8 +118,6 @@ fun FieldDetailScreen(
     val brapiSyncPreview by viewModel.brapiSyncPreview.collectAsState()
     val brapiSyncLoading by viewModel.brapiSyncLoading.collectAsState()
     val brapiSyncSaving by viewModel.brapiSyncSaving.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
     val preferences = remember { Settings() }
     val defaultBrapiBaseUrl = stringResource(Res.string.brapi_base_url_default)
     val brapiBaseUrl = remember(defaultBrapiBaseUrl) {
@@ -147,7 +144,7 @@ fun FieldDetailScreen(
 
     LaunchedEffect(viewModel) {
         viewModel.messages.collect { message ->
-            snackbarHostState.showSnackbar(message)
+            onSnackbarMessage(message)
         }
     }
 
@@ -186,8 +183,7 @@ fun FieldDetailScreen(
                     actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
-        },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+        }
     ) { innerPadding ->
         if (loading) {
             Column(
@@ -331,11 +327,11 @@ fun FieldDetailScreen(
                                 .clickable {
                                     when {
                                         !preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false) -> {
-                                            scope.launch { snackbarHostState.showSnackbar(brapiDisabledMessage) }
+                                            onSnackbarMessage(brapiDisabledMessage)
                                         }
 
                                         !currentField.exp_source.equals(brapiHost, ignoreCase = true) -> {
-                                            scope.launch { snackbarHostState.showSnackbar(wrongSourceMessage) }
+                                            onSnackbarMessage(wrongSourceMessage)
                                         }
 
                                         else -> {

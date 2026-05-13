@@ -1,5 +1,8 @@
 package com.fieldbook.shared.brapi
 
+import com.fieldbook.shared.preferences.PreferenceKeys
+import com.russhwolf.settings.Settings
+
 class BrapiPaginationManager(
     initialPage: Int = 0,
     initialPageSize: Int = DEFAULT_PAGE_SIZE,
@@ -48,5 +51,13 @@ class BrapiPaginationManager(
 
     companion object {
         const val DEFAULT_PAGE_SIZE = 50
+
+        fun fromSettings(settings: Settings = Settings()): BrapiPaginationManager {
+            val pageSize = settings.getString(
+                PreferenceKeys.BRAPI_PAGE_SIZE,
+                DEFAULT_PAGE_SIZE.toString()
+            ).toIntOrNull() ?: DEFAULT_PAGE_SIZE
+            return BrapiPaginationManager(initialPageSize = pageSize)
+        }
     }
 }

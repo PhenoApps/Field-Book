@@ -383,6 +383,7 @@ class TraitEditorScreenViewModel(
         )
         append('\n')
     }
+
 }
 
 fun traitEditorScreenViewModelFactory() = viewModelFactory {

@@ -28,8 +28,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -52,16 +50,12 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.fieldbook.shared.brapi.BrAPIServiceFactory
 import com.fieldbook.shared.brapi.BrapiResult
-import com.fieldbook.shared.brapi.model.v2.core.BrapiStudyDetails
-import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiObservationUnitDetails
-import com.fieldbook.shared.brapi.model.v2.phenotyping.BrapiTraitDetails
 import com.fieldbook.shared.components.AppListItem
 import com.fieldbook.shared.database.models.FieldObject
 import com.fieldbook.shared.database.repository.ObservationUnitAttributeRepository
 import com.fieldbook.shared.database.repository.StudyRepository
 import com.fieldbook.shared.database.repository.TraitRepository
 import com.fieldbook.shared.generated.resources.Res
-import com.fieldbook.shared.generated.resources.brapi_base_url_default
 import com.fieldbook.shared.generated.resources.dir_field_import
 import com.fieldbook.shared.generated.resources.ic_field
 import com.fieldbook.shared.generated.resources.ic_file_cloud
@@ -71,9 +65,6 @@ import com.fieldbook.shared.generated.resources.tutorial_fields_add_title
 import com.fieldbook.shared.objects.ImportFormat
 import com.fieldbook.shared.preferences.GeneralKeys
 import com.fieldbook.shared.preferences.PreferenceKeys
-import com.fieldbook.shared.screens.brapi.BrapiFieldImportSupport
-import com.fieldbook.shared.screens.brapi.BrapiStudyPreviewScreen
-import com.fieldbook.shared.screens.brapi.BrapiStudyScreen
 import com.fieldbook.shared.theme.AlertDialog
 import com.fieldbook.shared.theme.TextButton
 import com.fieldbook.shared.utilities.DocumentFile
@@ -99,6 +90,8 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun FieldEditorScreen(
     onBack: (() -> Unit)? = null,
+    onNavigateToBrapi: (() -> Unit)? = null,
+    onSnackbarMessage: (String) -> Unit,
     viewModel: FieldEditorScreenViewModel = viewModel(
         factory = fieldEditorViewModelFactory()
     )
@@ -107,28 +100,11 @@ fun FieldEditorScreen(
     var showImportDialog by remember { mutableStateOf(false) }
     var showLocalFilesDialog by remember { mutableStateOf(false) }
     var showFieldCreatorDialog by remember { mutableStateOf(false) }
-    var showBrapiStudies by remember { mutableStateOf(false) }
-    var previewBrapiStudy by remember { mutableStateOf<BrapiStudyDetails?>(null) }
     val coroutineScope = rememberCoroutineScope()
     val selectedFieldId = remember { mutableStateOf<Int?>(null) }
-    val snackbarHostState = remember { SnackbarHostState() }
     var localFieldFiles by remember { mutableStateOf<List<DocumentFile>>(emptyList()) }
     val preferences = remember { Settings() }
     val brapiEnabled = remember { preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false) }
-    val defaultBrapiBaseUrl = stringResource(Res.string.brapi_base_url_default)
-    val brapiBaseUrl = remember(defaultBrapiBaseUrl) {
-        preferences.getString(PreferenceKeys.BRAPI_BASE_URL, defaultBrapiBaseUrl)
-    }
-    val brapiVersion = remember {
-        preferences.getString(PreferenceKeys.BRAPI_VERSION, BrAPIServiceFactory.VERSION_V2)
-    }
-    val brapiService = remember(brapiBaseUrl, brapiVersion) {
-        BrAPIServiceFactory.create(
-            baseUrl = brapiBaseUrl,
-            bearerToken = preferences.getStringOrNull(PreferenceKeys.BRAPI_TOKEN),
-            version = brapiVersion,
-        )
-    }
 
     // Observe state from the ViewModel
     val fieldsState by viewModel.fields.collectAsState(initial = null)
@@ -159,39 +135,8 @@ fun FieldEditorScreen(
             onDeleted = {
                 selectedFieldId.value = null
                 viewModel.clearFieldDetail()
-            }
-        )
-        return
-    }
-
-    if (showBrapiStudies) {
-        BrapiStudyScreen(
-            onBack = { showBrapiStudies = false },
-            onStudySelected = { study ->
-                previewBrapiStudy = study
-                showBrapiStudies = false
             },
-        )
-        return
-    }
-
-    previewBrapiStudy?.let { study ->
-        BrapiStudyPreviewScreen(
-            study = study,
-            service = brapiService,
-            onBack = {
-                previewBrapiStudy = null
-                showBrapiStudies = true
-            },
-            onSave = { selectedStudy, observationUnits, traits ->
-                viewModel.importBrapiStudy(
-                    study = selectedStudy,
-                    observationUnits = observationUnits,
-                    traits = traits,
-                    sourceUrl = brapiBaseUrl,
-                )
-                previewBrapiStudy = null
-            },
+            onSnackbarMessage = onSnackbarMessage,
         )
         return
     }
@@ -203,7 +148,7 @@ fun FieldEditorScreen(
 
     LaunchedEffect(viewModel) {
         viewModel.messages.collect { message ->
-            snackbarHostState.showSnackbar(message)
+            onSnackbarMessage(message)
         }
     }
 
@@ -234,7 +179,6 @@ fun FieldEditorScreen(
                 )
             )
         },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showAddFieldDialog = true },
@@ -293,7 +237,7 @@ fun FieldEditorScreen(
 
             if (showAddFieldDialog) {
                 AddFieldDialog(
-                    brapiEnabled = brapiEnabled,
+                    brapiEnabled = brapiEnabled && onNavigateToBrapi != null,
                     onDismiss = { showAddFieldDialog = false },
                     onCreateNew = {
                         showAddFieldDialog = false
@@ -305,7 +249,7 @@ fun FieldEditorScreen(
                     },
                     onImportFromBrapi = {
                         showAddFieldDialog = false
-                        showBrapiStudies = true
+                        onNavigateToBrapi?.invoke()
                     }
                 )
             }
@@ -866,37 +810,6 @@ class FieldEditorScreenViewModel(
                 _messages.emit("Imported ${result.importedRowCount} row(s)")
             } catch (e: Exception) {
                 _messages.emit(e.message ?: "Error importing field")
-            } finally {
-                _importing.value = false
-            }
-        }
-    }
-
-    fun importBrapiStudy(
-        study: BrapiStudyDetails,
-        observationUnits: List<BrapiObservationUnitDetails>,
-        traits: List<BrapiTraitDetails>,
-        sourceUrl: String,
-    ) {
-        viewModelScope.launch {
-            _importing.value = true
-            try {
-                val result = BrapiFieldImportSupport.importStudy(
-                    study = study,
-                    observationUnits = observationUnits,
-                    traits = traits,
-                    studyRepository = studyRepository,
-                    traitRepository = traitRepository,
-                    sourceUrl = sourceUrl,
-                )
-
-                fieldSwitchImpl.switchField(result.fieldId)
-                settings.putInt(GeneralKeys.SELECTED_FIELD_ID.key, result.fieldId)
-                _activeFieldId.value = result.fieldId
-                _fields.value = studyRepository.getAllFields()
-                _messages.emit("Imported ${study.studyName ?: study.studyDbId} with ${result.importedTraitCount} trait(s)")
-            } catch (e: Exception) {
-                _messages.emit(e.message ?: "Error importing BrAPI study")
             } finally {
                 _importing.value = false
             }

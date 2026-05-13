@@ -1,5 +1,8 @@
 package com.fieldbook.shared.brapi.model.v2.core
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class BrapiStudyDetails(
     val studyDbId: String,
     val studyName: String?,
@@ -8,4 +11,6 @@ data class BrapiStudyDetails(
     val commonCropName: String? = null,
     val trialDbId: String? = null,
     val trialName: String? = null,
+    val seasons: List<String> = emptyList(),
+    val observationVariableDbIds: List<String> = emptyList(),
 )

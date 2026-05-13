@@ -111,6 +111,8 @@ class BrAPIServiceV2(
                         commonCropName = study.commonCropName,
                         trialDbId = study.trialDbId,
                         trialName = study.trialName,
+                        seasons = study.seasons.orEmpty().filter(String::isNotBlank),
+                        observationVariableDbIds = study.observationVariableDbIds.orEmpty(),
                     )
                 }
             )
@@ -159,6 +161,17 @@ class BrAPIServiceV2(
     override suspend fun getStudyTraits(
         studyDbId: String,
         pageSize: Int,
+    ): BrapiResult<List<BrapiTraitDetails>> {
+        return getTraitsInternal(pageSize = pageSize, studyDbId = studyDbId)
+    }
+
+    override suspend fun getTraits(pageSize: Int): BrapiResult<List<BrapiTraitDetails>> {
+        return getTraitsInternal(pageSize = pageSize, studyDbId = null)
+    }
+
+    private suspend fun getTraitsInternal(
+        pageSize: Int,
+        studyDbId: String?,
     ): BrapiResult<List<BrapiTraitDetails>> {
         return try {
             val traits = mutableListOf<BrapiTraitDetails>()
@@ -335,6 +348,8 @@ class BrAPIServiceV2(
         mimeType: String,
         content: ByteArray,
     ): Image? {
+        // The generated ImagesApi method for this endpoint uses OctetByteArray through jsonRequest,
+        // which serializes the image as JSON/hex instead of sending the raw image/* request body.
         val response = httpClient.put("$v2BaseUrl/images/${imageDbId.encodeURLQueryComponent()}/imagecontent") {
             if (!bearerToken.isNullOrBlank()) {
                 header(HttpHeaders.Authorization, "Bearer $bearerToken")
