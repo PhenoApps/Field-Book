@@ -66,17 +66,18 @@
     </style>
 
     <!-- text views for subheadings -->
-    <style name="TextViewStyle.Sub">
+    <style name="TextViewStyle.Sub" parent="TextViewStyle">
         <item name="android:textSize">?attr/fb_subheading_text_size</item>
+        <item name="android:textColor">?attr/fb_color_text_secondary</item>
     </style>
 
     <!-- bold generic text views -->
-    <style name="TextViewStyle.Bold">
+    <style name="TextViewStyle.Bold" parent="TextViewStyle">
         <item name="android:textStyle">bold</item>
     </style>
 
     <!-- bold title text views -->
-    <style name="TextViewStyle.Bold.Title">
+    <style name="TextViewStyle.Bold.Title" parent="TextViewStyle.Bold">
         <item name="android:textSize">?attr/fb_title_text_size</item>
     </style>
 

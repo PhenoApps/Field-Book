@@ -31,7 +31,8 @@
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp">
+            android:layout_margin="8dp"
+            app:cardBackgroundColor="?attr/fb_color_card_background">
 
             <!-- Card Content -->
             <LinearLayout
@@ -55,7 +56,8 @@
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         android:layout_margin="8dp"
-                        android:src="@drawable/ic_land_fields" />
+                        android:src="@drawable/ic_land_fields"
+                        app:tint="?attr/colorControlNormal" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -82,7 +84,8 @@
                         android:id="@+id/overview_expand_collapse_icon"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
-                        android:src="@drawable/ic_chevron_down" />
+                        android:src="@drawable/ic_chevron_down"
+                        app:tint="?attr/colorControlNormal" />
                 </LinearLayout>
 
                 <!-- Collapsible Content -->
@@ -115,7 +118,9 @@
                             app:chipIconSize="24dp"
                             app:ensureMinTouchTargetSize="false"
                             app:closeIconVisible="false"
-                            app:chipBackgroundColor="?attr/defaultChipBackground" />
+                            app:chipBackgroundColor="?attr/defaultChipBackground"
+                            android:textColor="?attr/fb_color_text_dark"
+                            app:chipIconTint="?attr/fb_color_text_dark" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/entryCountChip"
@@ -127,7 +132,9 @@
                             app:chipIconSize="24dp"
                             app:ensureMinTouchTargetSize="false"
                             app:closeIconVisible="false"
-                            app:chipBackgroundColor="?attr/defaultChipBackground" />
+                            app:chipBackgroundColor="?attr/defaultChipBackground"
+                            android:textColor="?attr/fb_color_text_dark"
+                            app:chipIconTint="?attr/fb_color_text_dark" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/attributeCountChip"
@@ -139,7 +146,9 @@
                             app:chipIconSize="24dp"
                             app:ensureMinTouchTargetSize="false"
                             app:closeIconVisible="false"
-                            app:chipBackgroundColor="?attr/defaultChipBackground" />
+                            app:chipBackgroundColor="?attr/defaultChipBackground"
+                            android:textColor="?attr/fb_color_text_dark"
+                            app:chipIconTint="?attr/fb_color_text_dark" />
 
                         <com.google.android.material.chip.Chip
                             tools:visibility="visible"
@@ -153,7 +162,9 @@
                             app:chipIconSize="24dp"
                             app:ensureMinTouchTargetSize="false"
                             app:closeIconVisible="false"
-                            app:chipBackgroundColor="?attr/defaultChipBackground" />
+                            app:chipBackgroundColor="?attr/defaultChipBackground"
+                            android:textColor="?attr/fb_color_text_dark"
+                            app:chipIconTint="?attr/fb_color_text_dark" />
 
                         <com.google.android.material.chip.Chip
                             tools:visibility="visible"
@@ -167,7 +178,9 @@
                             app:chipIconSize="24dp"
                             app:ensureMinTouchTargetSize="false"
                             app:closeIconVisible="false"
-                            app:chipBackgroundColor="?attr/defaultChipBackground" />
+                            app:chipBackgroundColor="?attr/defaultChipBackground"
+                            android:textColor="?attr/fb_color_text_dark"
+                            app:chipIconTint="?attr/fb_color_text_dark" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/originalNameChip"
@@ -180,7 +193,9 @@
                             app:chipBackgroundColor="?attr/selectableChipBackground"
                             app:chipStartPadding="6dp"
                             app:chipStrokeColor="?attr/selectableChipStroke"
-                            app:chipStrokeWidth="2dp" />
+                            app:chipStrokeWidth="2dp"
+                            android:textColor="?attr/fb_color_text_dark"
+                            app:chipIconTint="?attr/fb_color_text_dark" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/sortOrderChip"
@@ -193,7 +208,9 @@
                             app:chipBackgroundColor="?attr/selectableChipBackground"
                             app:chipStartPadding="6dp"
                             app:chipStrokeColor="?attr/selectableChipStroke"
-                            app:chipStrokeWidth="2dp" />
+                            app:chipStrokeWidth="2dp"
+                            android:textColor="?attr/fb_color_text_dark"
+                            app:chipIconTint="?attr/fb_color_text_dark" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/editUniqueChip"
@@ -206,7 +223,9 @@
                             app:chipBackgroundColor="?attr/selectableChipBackground"
                             app:chipStartPadding="6dp"
                             app:chipStrokeColor="?attr/selectableChipStroke"
-                            app:chipStrokeWidth="2dp" />
+                            app:chipStrokeWidth="2dp"
+                            android:textColor="?attr/fb_color_text_dark"
+                            app:chipIconTint="?attr/fb_color_text_dark" />
 
                     </com.google.android.material.chip.ChipGroup>
 
@@ -226,9 +245,9 @@
             android:layout_margin="8dp"
             android:foreground="?attr/selectableItemBackground"
             app:cardElevation="4dp"
-            app:rippleColor="@color/main_card_color_pressed"
+            app:rippleColor="?attr/colorControlHighlight"
             app:strokeColor="@android:color/transparent"
-            app:cardBackgroundColor="@color/main_color_background">
+            app:cardBackgroundColor="?attr/fb_color_card_background">
 
             <!-- Card Content -->
             <LinearLayout
@@ -249,7 +268,8 @@
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         android:layout_margin="8dp"
-                        android:src="@drawable/ic_nav_drawer_collect_data" />
+                        android:src="@drawable/ic_nav_drawer_collect_data"
+                        app:tint="?attr/colorControlNormal" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -275,7 +295,8 @@
                     <ImageView
                         android:layout_width="30dp"
                         android:layout_height="30dp"
-                        android:src="@drawable/ic_chevron_right" />
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="?attr/colorControlNormal" />
 
                 </LinearLayout>
 
@@ -292,9 +313,9 @@
             android:layout_margin="8dp"
             android:foreground="?attr/selectableItemBackground"
             app:cardElevation="4dp"
-            app:rippleColor="@color/main_card_color_pressed"
+            app:rippleColor="?attr/colorControlHighlight"
             app:strokeColor="@android:color/transparent"
-            app:cardBackgroundColor="@color/main_color_background">
+            app:cardBackgroundColor="?attr/fb_color_card_background">
 
             <!-- Card Content -->
             <LinearLayout
@@ -315,7 +336,8 @@
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         android:layout_margin="8dp"
-                        android:src="@drawable/trait_date_save" />
+                        android:src="@drawable/trait_date_save"
+                        app:tint="?attr/colorControlNormal" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -341,7 +363,8 @@
                     <ImageView
                         android:layout_width="30dp"
                         android:layout_height="30dp"
-                        android:src="@drawable/ic_chevron_right" />
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="?attr/colorControlNormal" />
 
                 </LinearLayout>
 
@@ -358,9 +381,9 @@
             android:layout_margin="8dp"
             android:foreground="?attr/selectableItemBackground"
             app:cardElevation="4dp"
-            app:rippleColor="@color/main_card_color_pressed"
+            app:rippleColor="?attr/colorControlHighlight"
             app:strokeColor="@android:color/transparent"
-            app:cardBackgroundColor="@color/main_color_background">
+            app:cardBackgroundColor="?attr/fb_color_card_background">
 
             <!-- Card Content -->
             <LinearLayout
@@ -381,7 +404,8 @@
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         android:layout_margin="8dp"
-                        android:src="@drawable/ic_field_sync" />
+                        android:src="@drawable/ic_field_sync"
+                        app:tint="?attr/colorControlNormal" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -407,7 +431,8 @@
                     <ImageView
                         android:layout_width="30dp"
                         android:layout_height="30dp"
-                        android:src="@drawable/ic_chevron_right" />
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="?attr/colorControlNormal" />
 
                 </LinearLayout>
 
@@ -418,7 +443,8 @@
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp">
+            android:layout_margin="8dp"
+            app:cardBackgroundColor="?attr/fb_color_card_background">
 
             <!-- Card Content -->
             <LinearLayout
@@ -442,7 +468,8 @@
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         android:layout_margin="8dp"
-                        android:src="@drawable/ic_chart_bar" />
+                        android:src="@drawable/ic_chart_bar"
+                        app:tint="?attr/colorControlNormal" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -479,7 +506,9 @@
                                 app:chipIconSize="24dp"
                                 app:ensureMinTouchTargetSize="false"
                                 app:closeIconVisible="false"
-                                app:chipBackgroundColor="?attr/defaultChipBackground" />
+                                app:chipBackgroundColor="?attr/defaultChipBackground"
+                                android:textColor="?attr/fb_color_text_dark"
+                                app:chipIconTint="?attr/fb_color_text_dark" />
 
                             <com.google.android.material.chip.Chip
                                 android:id="@+id/observationCountChip"
@@ -491,7 +520,9 @@
                                 app:chipIconSize="24dp"
                                 app:ensureMinTouchTargetSize="false"
                                 app:closeIconVisible="false"
-                                app:chipBackgroundColor="?attr/defaultChipBackground" />
+                                app:chipBackgroundColor="?attr/defaultChipBackground"
+                                android:textColor="?attr/fb_color_text_dark"
+                                app:chipIconTint="?attr/fb_color_text_dark" />
                         </com.google.android.material.chip.ChipGroup>
                     </LinearLayout>
 
@@ -500,7 +531,8 @@
                         android:id="@+id/data_expand_collapse_icon"
                         android:layout_width="30dp"
                         android:layout_height="30dp"
-                        android:src="@drawable/ic_chevron_down" />
+                        android:src="@drawable/ic_chevron_down"
+                        app:tint="?attr/colorControlNormal" />
                 </LinearLayout>
 
                 <!-- Collapsible Content -->
