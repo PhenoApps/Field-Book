@@ -190,6 +190,32 @@ docker compose up -d                  # 启动 brapi-light 服务 (端口 38000)
 - 字段级冲突检测（代码已完成，待联调验证）
 - 同步状态通知（已实现 SyncNotifications）
 
+## 汉化 (i18n)
+
+**现状**: 中文翻译覆盖率 20.3%（323/1594），1271 条待翻译。详见 [Issue #1](https://github.com/nwafufhy/Field-Book/issues/1)。
+
+**汉化工作流** — 使用 `.claude/skills/translate-strings/SKILL.md` skill：
+
+```bash
+# 1. 提取待翻译字符串（按模块分组）
+python .claude/skills/translate-strings/scripts/extract_untranslated.py --by-section
+
+# 2. 翻译（遵循 glossary.md 术语表 + SKILL.md 翻译规则）
+
+# 3. 校验占位符/XML 完整性
+python .claude/skills/translate-strings/scripts/validate_xml.py
+```
+
+**参考资源**:
+- Skill: `.claude/skills/translate-strings/SKILL.md` — 汉化工作流与翻译规则
+- 术语表: `.claude/skills/translate-strings/glossary.md` — 农业/育种/UI 术语对照
+- Issue #1: 模块优先级、术语约定、Crowdin 配置
+
+**平台**:
+- Crowdin 已配置 (`fieldbook-android/crowdin.yml`)
+- Android Studio Translations Editor 可辅助编辑
+- 参考高完成度语言: es-MX, it-IT, pt-BR, ru-RU (~1561 条)
+
 ## 当前状态
 
 - **需求基线**: `doc/prd.md` — 5 个特性领域、13 个功能、Gherkin 验收条件
