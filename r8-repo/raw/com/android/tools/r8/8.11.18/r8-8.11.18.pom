@@ -1,0 +1,37 @@
+<project
+    xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.android.tools</groupId>
+  <artifactId>r8</artifactId>
+  <version>8.11.18</version>
+  <name>D8 dexer and R8 shrinker</name>
+  <description>
+  D8 dexer and R8 shrinker.
+  </description>
+  <url>http://r8.googlesource.com/r8</url>
+  <inceptionYear>2016</inceptionYear>
+  <licenses>
+    <license>
+      <name>BSD-3-Clause</name>
+      <url>https://opensource.org/licenses/BSD-3-Clause</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <dependencies>
+  </dependencies>
+  <developers>
+    <developer>
+      <name>The Android Open Source Project</name>
+    </developer>
+  </developers>
+  <scm>
+    <connection>
+      https://r8.googlesource.com/r8.git
+    </connection>
+    <url>
+      https://r8.googlesource.com/r8
+    </url>
+  </scm>
+</project>

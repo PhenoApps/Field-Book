@@ -82,7 +82,11 @@ class BrapiSyncViewModel @Inject constructor(
         )
     }
 
-    data class Conflict(val serverObservation: Observation, val localObservation: Observation)
+    data class Conflict(
+        val serverObservation: Observation,
+        val localObservation: Observation,
+        val fieldDiffs: List<FieldDiff> = emptyList(),
+    )
 
     enum class UploadError {
         NONE,
@@ -523,17 +527,22 @@ class BrapiSyncViewModel @Inject constructor(
 
         brapiObservations.forEach { brapiObs ->
 
-            //check if this observation corresponds to one we have edited locally
-            //either it has the same brapi id or its unit/variable ids match
-            //edited observations have previously been synced so they must have a brapi id
             val localEdited = editedObservations.firstOrNull {
                 it.dbId == brapiObs.dbId
             }
 
-            if (localEdited != null && localEdited.value != brapiObs.value) {
-                // Conflict between local edited and server version: record for user resolution
-                val conflict = Conflict(serverObservation = brapiObs, localObservation = localEdited)
-                conflicts.add(conflict)
+            if (localEdited != null) {
+                val diffs = buildFieldDiffs(localEdited, brapiObs)
+                if (diffs.isNotEmpty()) {
+                    conflicts.add(Conflict(
+                        serverObservation = brapiObs,
+                        localObservation = localEdited,
+                        fieldDiffs = diffs,
+                    ))
+                } else {
+                    // values are identical — treat as already synced
+                    updateObservations.add(brapiObs)
+                }
                 return@forEach
             }
 
@@ -542,19 +551,49 @@ class BrapiSyncViewModel @Inject constructor(
             }
 
             if (localNew == null) {
-                //purely new download
                 insertObservations.add(brapiObs)
-
-            } else { //already exists but check if there has been an update
-
-                // If timestamps differ between server and local record, it's a conflict to resolve
-                if (localNew.value != brapiObs.value) {
-                    conflicts.add(Conflict(serverObservation = brapiObs, localObservation = localNew))
+            } else {
+                // server has changes — compare fields and auto-merge if only server changed
+                val diffs = buildFieldDiffs(localNew, brapiObs)
+                if (diffs.isNotEmpty()) {
+                    // Server-side only changes — auto-merge: take server values
+                    mergeIntoLocal(localNew, brapiObs, diffs)
+                    updateObservations.add(brapiObs)
                 }
             }
         }
 
         return Triple(insertObservations, updateObservations, conflicts)
+    }
+
+    private fun buildFieldDiffs(local: Observation, server: Observation): List<FieldDiff> {
+        val diffs = mutableListOf<FieldDiff>()
+        val locVal = local.value ?: ""
+        val srvVal = server.value ?: ""
+        if (locVal != srvVal) {
+            diffs.add(FieldDiff("Value", locVal, srvVal))
+        }
+        val locCollector = local.collector ?: ""
+        val srvCollector = server.collector ?: ""
+        if (locCollector != srvCollector) {
+            diffs.add(FieldDiff("Collector", locCollector, srvCollector))
+        }
+        val locRep = local.rep ?: ""
+        val srvRep = server.rep ?: ""
+        if (locRep != srvRep) {
+            diffs.add(FieldDiff("Rep", locRep, srvRep))
+        }
+        return diffs
+    }
+
+    private fun mergeIntoLocal(local: Observation, server: Observation, diffs: List<FieldDiff>) {
+        for (diff in diffs) {
+            when (diff.fieldName) {
+                "Value" -> local.value = server.value
+                "Collector" -> local.collector = server.collector
+                "Rep" -> local.rep = server.rep
+            }
+        }
     }
 
     // Store pending conflicts for UI to resolve
@@ -567,7 +606,8 @@ class BrapiSyncViewModel @Inject constructor(
                 localValue = c.localObservation.value ?: "",
                 serverValue = c.serverObservation.value ?: "",
                 localDbId = c.localObservation.dbId,
-                serverDbId = c.serverObservation.dbId
+                serverDbId = c.serverObservation.dbId,
+                fieldDiffs = c.fieldDiffs,
             )
         }
         _uiState.update { it.copy(pendingConflictsCount = uiConflicts.size, pendingConflicts = uiConflicts) }
@@ -585,23 +625,27 @@ class BrapiSyncViewModel @Inject constructor(
 
         when (strategy) {
             is MergeStrategy.Local -> {
+                // Keep local values — nothing to update from server
                 pendingConflicts.forEach { (_, local) -> local?.let { toKeepLocal.add(it) } }
             }
 
             is MergeStrategy.Server -> {
+                // Take all server values
                 pendingConflicts.forEach { (server, _) -> toUpdateFromServer.add(server) }
             }
 
             is MergeStrategy.MostRecent -> {
                 pendingConflicts.forEach { (server, local) ->
-                    if (local != null && local.timestamp > server.timestamp) toKeepLocal.add(local) else toUpdateFromServer.add(server)
+                    if (local != null && local.timestamp > server.timestamp) {
+                        toKeepLocal.add(local)
+                    } else {
+                        toUpdateFromServer.add(server)
+                    }
                 }
             }
 
             is MergeStrategy.Manual -> {
-                // manualChoices: map from brapiId to true (choose server) or false (choose local)
                 if (manualChoices == null) return
-                Log.d(TAG, "Applying manual conflict resolution with choices: ${manualChoices.keys.size} entries")
                 pendingConflicts.forEach { (server, local) ->
                     val id = server.dbId ?: local?.dbId
                     if (id == null) return@forEach
@@ -614,21 +658,18 @@ class BrapiSyncViewModel @Inject constructor(
             }
         }
 
+        // Persist server values to local database
         if (toUpdateFromServer.isNotEmpty()) {
             viewModelScope.launch(Dispatchers.IO) {
                 dataHelper.updateObservationsByBrapiId(toUpdateFromServer)
             }
         }
 
-        // clear and update ui state
         pendingConflicts = emptyList()
-
         _uiState.update { it.copy(pendingConflictsCount = 0, pendingConflicts = emptyList()) }
 
         viewModelScope.launch(Dispatchers.IO) {
-
             refreshLocalStatus()
-
         }
     }
 

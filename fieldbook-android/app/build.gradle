@@ -229,6 +229,9 @@ dependencies {
 
     implementation 'androidx.documentfile:documentfile:1.1.0'
 
+    // WorkManager for background sync
+    implementation "androidx.work:work-runtime-ktx:2.10.0"
+
     //hilt dependency injection
     implementation "com.google.dagger:hilt-android:2.56.2"
     implementation 'androidx.compose.material3:material3:1.4.0'

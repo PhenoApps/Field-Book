@@ -7,5 +7,5 @@ services:
     volumes:
       - ./data:/data
     environment:
-      - DATABASE_URL=sqlite:////data/brapi.db
+      - DATABASE_URL=sqlite+aiosqlite:////data/brapi.db
     restart: unless-stopped

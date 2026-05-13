@@ -120,6 +120,12 @@ class PreferenceKeys {
         const val BRAPI_LAST_CHECKED_UPLOAD = "BRAPI_LAST_CHECKED_UPLOAD"
         const val BRAPI_LAST_CHECKED_DOWNLOAD = "BRAPI_LAST_CHECKED_DOWNLOAD"
 
+        // Background sync
+        const val BRAPI_SYNC_ENABLED = "BRAPI_SYNC_ENABLED"
+        const val BRAPI_SYNC_INTERVAL_MINUTES = "BRAPI_SYNC_INTERVAL_MINUTES"
+        const val BRAPI_LAST_SYNC_TIME = "BRAPI_LAST_SYNC_TIME"
+        const val BRAPI_LAST_SYNC_CONFLICTS = "BRAPI_LAST_SYNC_CONFLICTS"
+
         // categorical trait
         const val LABELVAL_CUSTOMIZE = "LABELVAL_CUSTOMIZE"
 

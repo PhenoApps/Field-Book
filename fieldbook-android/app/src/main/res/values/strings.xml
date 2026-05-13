@@ -1955,6 +1955,12 @@
     <string name="local">Local</string>
     <string name="recent">Most recent</string>
     <string name="brapi_sync">BrAPI Sync</string>
+    <string name="brapi_sync_channel_name">Field Book Sync</string>
+    <string name="brapi_sync_channel_desc">Background sync status notifications</string>
+    <string name="brapi_sync_complete_title">Sync Complete</string>
+    <string name="brapi_sync_uploaded">%1$d uploaded</string>
+    <string name="brapi_sync_downloaded">%1$d downloaded</string>
+    <string name="brapi_sync_conflicts">%1$d conflicts</string>
     <string name="download_from">Download from %1$s</string>
     <string name="last_checked">Last checked: %1$s</string>
     <string name="brapi_conflicts_found">Found %1$d conflicting observations. Choose a merge strategy:</string>

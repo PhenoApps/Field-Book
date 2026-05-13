@@ -831,7 +831,7 @@ fun PendingConflictsList(
 
                         Spacer(modifier = Modifier.height(8.dp))
 
-                        // brapi id row (left-justified)
+                        // brapi id row
                         Text(
                             text = id,
                             style = MaterialTheme.typography.titleSmall,
@@ -840,7 +840,22 @@ fun PendingConflictsList(
                                 .padding(start = 8.dp)
                         )
 
-                        // Top row: Server button left, Local button right — now equal halves
+                        // Field-level differences when available
+                        if (c.fieldDiffs.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            c.fieldDiffs.forEach { diff ->
+                                Text(
+                                    text = "${diff.fieldName}: " +
+                                           "S=\"${diff.serverValue}\" vs " +
+                                           "L=\"${diff.localValue}\"",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.padding(start = 8.dp, top = 2.dp)
+                                )
+                            }
+                        }
+
+                        // Server button left, Local button right
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -850,7 +865,6 @@ fun PendingConflictsList(
                             Button(
                                 onClick = {
                                     selectionMap[id] = true
-                                    // any manual selection should clear the global "all" toggle highlight
                                     globalChoice = GlobalChoice.NONE
                                 },
                                 modifier = Modifier.weight(0.5f),

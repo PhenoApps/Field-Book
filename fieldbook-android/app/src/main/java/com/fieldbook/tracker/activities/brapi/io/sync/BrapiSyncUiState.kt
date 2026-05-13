@@ -24,12 +24,19 @@ sealed class MergeStrategy {
 /**
  * UI-friendly representation of a single conflicting observation pair
  */
+data class FieldDiff(
+    val fieldName: String,
+    val localValue: String,
+    val serverValue: String,
+)
+
 data class PendingConflictUi(
     val brapiId: String,
     val localValue: String,
     val serverValue: String,
     val localDbId: String?,
-    val serverDbId: String?
+    val serverDbId: String?,
+    val fieldDiffs: List<FieldDiff> = emptyList(),
 )
 
 data class Progress(
