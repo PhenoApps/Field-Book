@@ -247,10 +247,10 @@
 | **Settings/BrAPI/Advanced**      |                    |                    |
 | BrAPI version / V1               | :white_check_mark: |                    |
 | BrAPI version / V2               | :white_check_mark: |                    |
-| Page size                        |                    |                    |
+| Page size                        | :white_check_mark: |                    |
 | Chunk size                       |                    |                    |
 | Server timeout                   |                    |                    |
-| Cache invalidation               |                    |                    |
+| Cache invalidation               | :white_check_mark: |                    |
 |                                  |                    |                    |
 | **Settings/BrAPI/Preferences**   |                    |                    |
 | Value vs Label display           |                    |                    |
