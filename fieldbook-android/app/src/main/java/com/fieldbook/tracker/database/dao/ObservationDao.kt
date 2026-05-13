@@ -305,25 +305,26 @@ class ObservationDao {
                     val isPhoto = format == "photo"
                     
                     // Determine the category for this observation
+                    val isLocalTrait = source == "local" || source == null
                     val category = when {
-                        // Source-based categories
-                        source == "local" || source == null -> {
+                        // Source-based categories (only for observations without server ID)
+                        isLocalTrait && observation.dbId == null -> {
                             if (isPhoto) "userCreatedImageObservations" else "userCreatedTraitObservations"
                         }
-                        source != hostUrl -> {
+                        source != null && source != "" && source != hostUrl && observation.dbId == null -> {
                             if (isPhoto) "wrongSourceImageObservations" else "wrongSourceObservations"
                         }
-                        // Status-based categories
+                        // Status-based categories (applies to both BrAPI and synced local traits)
                         observation.dbId == null -> {
                             if (isPhoto) "newImageObservations" else "newObservations"
                         }
                         observation.lastSyncedTime == null -> {
-                            if (isPhoto) "incompleteImageObservations" else "editedObservations" // Non-photos without sync time are considered edited
+                            if (isPhoto) "incompleteImageObservations" else "editedObservations"
                         }
                         else -> {
                             val obsTimestamp = observation.timestamp
                             val syncTimestamp = observation.lastSyncedTime
-                            
+
                             if (obsTimestamp == null || obsTimestamp <= syncTimestamp) {
                                 if (isPhoto) "syncedImageObservations" else "syncedObservations"
                             } else {

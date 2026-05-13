@@ -158,11 +158,15 @@ async def post_observations(
                 variable_name=snake.get("observation_variable_name"),
                 study_db_id=snake.get("study_db_id"),
             )
-        # Drop client-side observationDbId to avoid UNIQUE conflicts on re-upload
-        snake.pop("observation_db_id", None)
+        # Only keep non-empty client observation_db_id to prevent duplicate re-uploads
+        client_obs_db_id = snake.get("observation_db_id")
+        if not client_obs_db_id:
+            snake.pop("observation_db_id", None)
         filtered = {}
         for k, v in snake.items():
             if k not in allowed:
+                continue
+            if k == "observation_db_id" and not v:
                 continue
             if k in json_cols and isinstance(v, (list, dict)):
                 filtered[k] = json.dumps(v) if v else None

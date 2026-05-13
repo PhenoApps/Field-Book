@@ -1136,7 +1136,12 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         Map<String, String> externalIdToInternalMap = new HashMap<>();
         for (TraitObject trait : traits) {
             String dbId = trait.getId();
-            externalIdToInternalMap.put(trait.getExternalDbId(), dbId);
+            if (trait.getExternalDbId() != null && !trait.getExternalDbId().isEmpty()) {
+                externalIdToInternalMap.put(trait.getExternalDbId(), dbId);
+            }
+            if (trait.getName() != null && !trait.getName().isEmpty()) {
+                externalIdToInternalMap.put("__name__" + trait.getName(), dbId);
+            }
         }
         return externalIdToInternalMap;
     }
@@ -1156,12 +1161,16 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
      * @param brapiObservationList
      * @return list of Fieldbook Observation objects
      */
-    private List<Observation> mapObservations(List<BrAPIObservation> brapiObservationList, Map<String, String> extVariableDbIdMap, List<String> validVariableDbIds) {
+    private List<Observation> mapObservations(List<BrAPIObservation> brapiObservationList, Map<String, String> extVariableDbIdMap, @Nullable List<String> validVariableDbIds) {
         List<Observation> outputList = new ArrayList<>();
         for (BrAPIObservation brapiObservation : brapiObservationList) {
 
-            if (!validVariableDbIds.contains(brapiObservation.getObservationVariableDbId())) {
-                continue;
+            if (validVariableDbIds != null
+                    && !validVariableDbIds.contains(brapiObservation.getObservationVariableDbId())) {
+                String varName = brapiObservation.getObservationVariableName();
+                if (varName == null || !extVariableDbIdMap.containsKey("__name__" + varName)) {
+                    continue;
+                }
             }
 
             Observation newObservation = new Observation();
@@ -1172,8 +1181,17 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             String internalUnitId = brapiObservation.getObservationUnitDbId();//extUnitDbIdMap.getOrDefault(brapiObservation.getObservationUnitDbId(), null);
             newObservation.setUnitDbId(internalUnitId);
 
-            //need to get out the internal observation variable DB ID or else we will store the wrong thing in the table
-            String internalVarId = extVariableDbIdMap.getOrDefault(brapiObservation.getObservationVariableDbId(), null);
+            String serverVarDbId = brapiObservation.getObservationVariableDbId();
+            String internalVarId = extVariableDbIdMap.get(serverVarDbId);
+            if (internalVarId == null) {
+                String obsVarName = brapiObservation.getObservationVariableName();
+                if (obsVarName != null) {
+                    internalVarId = extVariableDbIdMap.get("__name__" + obsVarName);
+                }
+                if (internalVarId == null) {
+                    internalVarId = serverVarDbId;
+                }
+            }
             newObservation.setVariableDbId(internalVarId);
 
             newObservation.setValue(brapiObservation.getValue());
@@ -1220,13 +1238,6 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                                    final Function<List<Observation>, Void> function,
                                    final Function<Integer, Void> failFunction) {
 
-        ArrayList<String> validObservationVariableDbIds = new ArrayList<>();
-        for (Observation observation : observations) {
-            if (observation.getVariableDbId() != null && !observation.getVariableDbId().isEmpty()) {
-                validObservationVariableDbIds.add(observation.getVariableDbId());
-            }
-        }
-
         try {
             BrapiV2ApiCallBack<BrAPIObservationListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationListResponse>() {
                 @Override
@@ -1240,7 +1251,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                                     mapObservations(
                                             phenotypesResponse.getResult().getData(),
                                             getExtVariableDbIdMapping(),
-                                            validObservationVariableDbIds
+                                            null
                                     )
                             );
                         }
