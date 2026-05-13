@@ -28,6 +28,7 @@ import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 import com.fieldbook.tracker.traits.formats.ui.ParameterScrollView
 import com.fieldbook.tracker.utilities.SoundHelperImpl
 import com.fieldbook.tracker.utilities.VibrateUtil
+import java.util.UUID
 import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.utils.SoftKeyboardUtil
 import javax.inject.Inject
@@ -514,6 +515,7 @@ class NewTraitDialog(
 
         t.visible = true
         t.traitDataSource = "local"
+        t.externalDbId = UUID.randomUUID().toString()
 
         return t
     }

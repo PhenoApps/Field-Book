@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>brapi-light DB</title>
+<style>
+  body { font-family: -apple-system, sans-serif; max-width: 1300px; margin: 0 auto; padding: 16px; background: #fafafa; }
+  h1 { font-size: 20px; border-bottom: 2px solid #333; padding-bottom: 8px; }
+  .tables { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+  .tables a { padding: 6px 14px; background: #e8e8e8; border-radius: 4px; text-decoration: none; color: #333; font-size: 14px; }
+  .tables a:hover, .tables a.sel { background: #4a90d9; color: white; }
+  table { border-collapse: collapse; width: 100%; margin-top: 8px; background: white; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  th { background: #4a90d9; color: white; padding: 8px 12px; text-align: left; font-size: 13px; white-space: nowrap; }
+  td { padding: 6px 12px; border-bottom: 1px solid #eee; font-family: monospace; font-size: 12px; max-width: 400px; overflow: hidden; text-overflow: ellipsis; }
+  tr:hover td { background: #f0f6ff; }
+  .null { color: #bbb; font-style: italic; font-size: 11px; }
+  .count { color: #888; font-size: 13px; }
+  .refresh { float: right; font-size: 13px; color: #4a90d9; text-decoration: none; }
+</style>
+</head>
+<body>
+<h1>brapi-light DB Browser <a class="refresh" href="/admin/db{% if active_table %}?table={{ active_table.name }}{% endif %}">Refresh</a></h1>
+<div class="tables">
+  {% for t in tables %}
+    <a href="/admin/db?table={{ t }}" {% if active_table and active_table.name == t %}class="sel"{% endif %}>{{ t }}</a>
+  {% endfor %}
+</div>
+
+{% if active_table %}
+  <h2>{{ active_table.name }} <span class="count">({{ active_table.rows|length }} rows)</span></h2>
+  {% if active_table.rows %}
+    <div style="overflow-x:auto;">
+    <table>
+      <thead><tr>
+        {% for col in active_table.columns %}
+          <th>{{ col }}</th>
+        {% endfor %}
+      </tr></thead>
+      <tbody>
+        {% for row in active_table.rows %}
+          <tr>
+            {% for cell in row %}
+              <td>
+                {% if cell is none %}
+                  <span class="null">NULL</span>
+                {% elif cell is string and ((cell.startswith('{') and cell.endswith('}')) or (cell.startswith('[') and cell.endswith(']'))) %}
+                  {% set display = cell[:200] %}
+                  {% if cell|length > 200 %}{% set display = display + "…" %}{% endif %}
+                  {{ display }}
+                {% else %}
+                  {{ cell }}
+                {% endif %}
+              </td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  {% else %}
+    <p>Table is empty.</p>
+  {% endif %}
+{% else %}
+  <p>Select a table above to view its contents.</p>
+{% endif %}
+</body>
+</html>

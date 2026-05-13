@@ -142,6 +142,24 @@ async def post_observations(
         if isinstance(snake.get("season"), dict):
             s = snake["season"]
             snake["season"] = s.get("seasonName") or s.get("season") or str(s.get("year", ""))
+        # Auto-create / ensure variable exists for both local and BrAPI traits
+        var_id = snake.get("observation_variable_db_id")
+        if not var_id:
+            resolved_id = await svc.resolve_or_create_variable(
+                db,
+                variable_name=snake.get("observation_variable_name"),
+                study_db_id=snake.get("study_db_id"),
+            )
+            if resolved_id is not None:
+                snake["observation_variable_db_id"] = resolved_id
+        else:
+            await svc.ensure_variable_exists(
+                db, var_id,
+                variable_name=snake.get("observation_variable_name"),
+                study_db_id=snake.get("study_db_id"),
+            )
+        # Drop client-side observationDbId to avoid UNIQUE conflicts on re-upload
+        snake.pop("observation_db_id", None)
         filtered = {}
         for k, v in snake.items():
             if k not in allowed:
@@ -153,7 +171,10 @@ async def post_observations(
         observations.append(Observation(**filtered))
     created = await svc.create_observations(db, observations)
     return BrAPIListResponse(
-        metadata=Metadata(),
+        metadata=Metadata(pagination=Pagination(
+            pageSize=len(created), currentPage=0,
+            totalCount=len(created), totalPages=1,
+        )),
         result={"data": [ObservationSchema.model_validate(orm_to_camel(o)) for o in created]},
     ).model_dump(by_alias=True)
 
@@ -166,14 +187,15 @@ async def put_observations(
     snake_body = {k: camel_dict_to_snake(v) for k, v in body.items()}
     updated, conflicts = await svc.update_observations(db, snake_body)
     result = [ObservationSchema.model_validate(orm_to_camel(o)) for o in updated]
+    p = Pagination(pageSize=len(result), currentPage=0, totalCount=len(result), totalPages=1)
     if conflicts:
         conflict_info = [{"observationDbId": cid, "message": "rev mismatch"} for cid in conflicts]
         return BrAPIListResponse(
-            metadata=Metadata(status=[{"conflicts": conflict_info}]),
+            metadata=Metadata(pagination=p, status=[{"conflicts": conflict_info}]),
             result={"data": result},
         ).model_dump(by_alias=True)
     return BrAPIListResponse(
-        metadata=Metadata(),
+        metadata=Metadata(pagination=p),
         result={"data": result},
     ).model_dump(by_alias=True)
 

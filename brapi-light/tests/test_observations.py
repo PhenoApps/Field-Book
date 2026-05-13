@@ -160,3 +160,119 @@ async def test_observations_put_nonexistent(client, db_session):
     })
     assert response.status_code == 200
     assert response.json()["result"]["data"] == []
+
+
+# ── null variable + auto-create tests ──────────────────────
+
+
+@pytest.mark.asyncio
+async def test_observations_get_with_null_variable(client, db_session):
+    from brapi_light.models.core import Program, Study, Trial
+    from brapi_light.models.phenotyping import Observation, ObservationUnit
+
+    p = Program(program_db_id="p1", program_name="Wheat")
+    t = Trial(trial_db_id="t1", trial_name="T1", program_db_id="p1")
+    s = Study(study_db_id="s1", study_name="S1", program_db_id="p1", trial_db_id="t1")
+    u = ObservationUnit(observation_unit_db_id="u1", study_db_id="s1")
+    db_session.add_all([p, t, s, u])
+    await db_session.flush()
+    db_session.add(Observation(
+        observation_db_id="o_null",
+        observation_unit_db_id="u1",
+        observation_variable_db_id=None,
+        study_db_id="s1",
+        observation_variable_name="local",
+        value="42",
+    ))
+    await db_session.commit()
+
+    response = await client.get("/brapi/v2/observations?studyDbId=s1")
+    assert response.status_code == 200
+    data = response.json()["result"]["data"]
+    assert len(data) == 1
+    assert data[0]["observationVariableDbId"] is None
+    assert data[0]["value"] == "42"
+
+
+@pytest.mark.asyncio
+async def test_observations_post_with_null_variable(client, db_session):
+    from brapi_light.models.core import Program, Study, Trial
+    from brapi_light.models.phenotyping import ObservationUnit
+
+    p = Program(program_db_id="p1", program_name="Wheat")
+    t = Trial(trial_db_id="t1", trial_name="T1", program_db_id="p1")
+    s = Study(study_db_id="s1", study_name="S1", program_db_id="p1", trial_db_id="t1")
+    u = ObservationUnit(observation_unit_db_id="u1", study_db_id="s1")
+    db_session.add_all([p, t, s, u])
+    await db_session.commit()
+
+    response = await client.post("/brapi/v2/observations", json=[{
+        "observationUnitDbId": "u1",
+        "observationVariableDbId": None,
+        "value": "99",
+        "studyDbId": "s1",
+        "observationVariableName": None,
+    }])
+    assert response.status_code == 200
+    data = response.json()["result"]["data"]
+    assert len(data) == 1
+    assert data[0]["observationVariableDbId"] is None
+
+
+@pytest.mark.asyncio
+async def test_observations_post_auto_creates_variable(client, db_session):
+    from brapi_light.models.core import Program, Study, Trial
+    from brapi_light.models.phenotyping import ObservationUnit
+
+    p = Program(program_db_id="p1", program_name="Wheat")
+    t = Trial(trial_db_id="t1", trial_name="T1", program_db_id="p1")
+    s = Study(study_db_id="s1", study_name="S1", program_db_id="p1", trial_db_id="t1")
+    u = ObservationUnit(observation_unit_db_id="u1", study_db_id="s1")
+    db_session.add_all([p, t, s, u])
+    await db_session.commit()
+
+    response = await client.post("/brapi/v2/observations", json=[{
+        "observationUnitDbId": "u1",
+        "observationVariableDbId": None,
+        "studyDbId": "s1",
+        "observationVariableName": "MyLocalTrait",
+        "value": "50",
+    }])
+    assert response.status_code == 200
+    data = response.json()["result"]["data"]
+    assert len(data) == 1
+    var_id = data[0]["observationVariableDbId"]
+    assert var_id is not None
+
+    # Verify the variable was created
+    var_response = await client.get("/brapi/v2/variables?studyDbId=s1")
+    names = {v["observationVariableName"] for v in var_response.json()["result"]["data"]}
+    assert "MyLocalTrait" in names
+
+
+@pytest.mark.asyncio
+async def test_observations_post_reuses_existing_variable(client, db_session):
+    from brapi_light.models.core import Program, Study, Trial
+    from brapi_light.models.phenotyping import ObservationUnit
+
+    p = Program(program_db_id="p1", program_name="Wheat")
+    t = Trial(trial_db_id="t1", trial_name="T1", program_db_id="p1")
+    s = Study(study_db_id="s1", study_name="S1", program_db_id="p1", trial_db_id="t1")
+    u = ObservationUnit(observation_unit_db_id="u1", study_db_id="s1")
+    db_session.add_all([p, t, s, u])
+    await db_session.commit()
+
+    payload = [{
+        "observationUnitDbId": "u1",
+        "observationVariableDbId": None,
+        "studyDbId": "s1",
+        "observationVariableName": "SharedTrait",
+        "value": "10",
+    }]
+    resp1 = await client.post("/brapi/v2/observations", json=payload)
+    first_var = resp1.json()["result"]["data"][0]["observationVariableDbId"]
+
+    resp2 = await client.post("/brapi/v2/observations", json=payload)
+    second_var = resp2.json()["result"]["data"][0]["observationVariableDbId"]
+
+    assert first_var == second_var

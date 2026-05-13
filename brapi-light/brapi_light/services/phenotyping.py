@@ -1,5 +1,6 @@
 """CRUD operations for phenotyping entities."""
 
+import json
 from datetime import datetime, timezone
 
 from sqlalchemy import func, select
@@ -51,9 +52,63 @@ async def list_observations(
     observation_variable_db_id: str | None = None,
     page: int = 0, page_size: int = 1000,
 ) -> tuple[list[Observation], int]:
-    return await _list_all(db, Observation, page=page, page_size=page_size,
-                           study_db_id=study_db_id,
-                           observation_variable_db_id=observation_variable_db_id)
+    items, total = await _list_all(db, Observation, page=page, page_size=10000,
+                                   study_db_id=study_db_id,
+                                   observation_variable_db_id=observation_variable_db_id)
+    # Deduplicate: keep only the latest record per (unit, variable) pair
+    seen: dict[tuple[str, str], Observation] = {}
+    for obs in sorted(items, key=lambda o: o.last_synced_time or ""):
+        key = (obs.observation_unit_db_id, obs.observation_variable_db_id or "")
+        seen[key] = obs  # later entries overwrite earlier ones
+    deduped = list(seen.values())
+    total = len(deduped)
+    start = page * page_size
+    return deduped[start:start + page_size], total
+
+
+async def resolve_or_create_variable(
+    db: AsyncSession,
+    variable_name: str | None,
+    study_db_id: str | None,
+) -> str | None:
+    if not variable_name:
+        return None
+    stmt = select(ObservationVariable).where(
+        ObservationVariable.observation_variable_name == variable_name
+    )
+    existing = (await db.execute(stmt)).scalars().first()
+    if existing is not None:
+        return existing.observation_variable_db_id
+    new_var = ObservationVariable(
+        observation_variable_name=variable_name,
+        study_db_id=study_db_id,
+        trait=json.dumps({"traitName": variable_name}),
+    )
+    db.add(new_var)
+    await db.flush()
+    return new_var.observation_variable_db_id
+
+
+async def ensure_variable_exists(
+    db: AsyncSession,
+    variable_db_id: str,
+    variable_name: str | None = None,
+    study_db_id: str | None = None,
+) -> None:
+    """Ensure an ObservationVariable with the given ID exists. Creates one if missing."""
+    stmt = select(ObservationVariable).where(
+        ObservationVariable.observation_variable_db_id == variable_db_id
+    )
+    existing = (await db.execute(stmt)).scalars().first()
+    if existing is not None:
+        return
+    db.add(ObservationVariable(
+        observation_variable_db_id=variable_db_id,
+        observation_variable_name=variable_name or variable_db_id[:8],
+        study_db_id=study_db_id,
+        trait=json.dumps({"traitName": variable_name or variable_db_id[:8]}),
+    ))
+    await db.flush()
 
 
 async def create_observations(db: AsyncSession, observations: list[Observation]) -> list[Observation]:

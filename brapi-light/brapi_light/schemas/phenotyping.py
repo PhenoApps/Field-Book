@@ -50,7 +50,7 @@ class ObservationUnitSchema(BaseModel):
 class ObservationSchema(BaseModel):
     observationDbId: str | None = None
     observationUnitDbId: str
-    observationVariableDbId: str
+    observationVariableDbId: str | None = None
     observationVariableName: str | None = None
     value: str
     collector: str | None = None
