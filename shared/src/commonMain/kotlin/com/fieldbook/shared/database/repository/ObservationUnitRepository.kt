@@ -31,4 +31,12 @@ class ObservationUnitRepository() {
             ObservationUnitModel(r.toMap())
         }
     }
+
+    fun updateGeoCoordinates(studyId: Long, observationUnitDbId: String, geoCoordinates: String) {
+        db.observation_unitsQueries.updateGeoCoordinates(
+            geo_coordinates = geoCoordinates,
+            observation_unit_db_id = observationUnitDbId,
+            study_id = studyId,
+        )
+    }
 }

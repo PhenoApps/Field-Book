@@ -15,8 +15,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -25,14 +25,15 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.fieldbook.shared.preferences.PreferenceKeys
 import com.fieldbook.shared.screens.collect.traits.BooleanTrait
 import com.fieldbook.shared.screens.collect.traits.CategoricalTrait
 import com.fieldbook.shared.screens.collect.traits.CounterTrait
 import com.fieldbook.shared.screens.collect.traits.DateTrait
+import com.fieldbook.shared.screens.collect.traits.LocationTrait
 import com.fieldbook.shared.screens.collect.traits.NumericTrait
 import com.fieldbook.shared.screens.collect.traits.PercentTrait
 import com.fieldbook.shared.screens.collect.traits.PhotoTrait
-import com.fieldbook.shared.preferences.PreferenceKeys
 import com.fieldbook.shared.theme.AppColors
 import com.fieldbook.shared.traits.Formats
 import com.fieldbook.shared.utilities.CategoryJsonUtil
@@ -308,8 +309,13 @@ fun TraitInputHost(
             modifier = modifier.fillMaxWidth().padding(8.dp)
         )
 
-        Formats.LOCATION ->NotImplementedTrait(
-            traitFormat = trait.format!!,
+        Formats.LOCATION -> LocationTrait(
+            value = value,
+            onValueChange = {
+                controller.updateCurrentTraitValue(it)
+                onEdited()
+            },
+            modifier = modifier.fillMaxWidth().padding(8.dp)
         )
 
         Formats.CAMERA -> {

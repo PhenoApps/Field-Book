@@ -44,3 +44,9 @@ INSERT INTO observation_units (
 ) VALUES (
     ?, ?, ?, ?, ?
 );
+
+updateGeoCoordinates:
+UPDATE observation_units
+SET geo_coordinates = ?
+WHERE observation_unit_db_id = ?
+AND study_id = ?;
