@@ -83,6 +83,48 @@
     <color name="blue_heatmap_color_high">#6457a6</color>
     <color name="blue_heatmap_color_max">#5c2751</color>
 
+    <!--
+      Soda Dark theme — RGB values from buymeasoda/soda-theme Soda Dark 3.sublime-theme:
+      sheet/window [25,25,25], dialog [67,67,67], grid border [70,70,70], progress [30,30,30]/[144,144,144],
+      label [204,204,204], status [150,150,150], sidebar row [33,33,33], match_fg [126,199,239], selected_match [166,229,255], etc.
+    -->
+    <color name="soda_dark_window">#FF191919</color>
+    <color name="soda_dark_panel">#FF434343</color>
+    <color name="soda_dark_row">#FF212121</color>
+    <color name="soda_dark_border">#FF464646</color>
+    <color name="soda_dark_text">#FFCCCCCC</color>
+    <color name="soda_dark_text_secondary">#FF969696</color>
+    <color name="soda_dark_text_dim">#FF7D7D7D</color>
+    <color name="soda_dark_text_bright">#FFE6E6E6</color>
+    <color name="soda_dark_heading">#FFD2D2D2</color>
+    <color name="soda_dark_accent">#FF7EC7EF</color>
+    <color name="soda_dark_accent_bright">#FFA6E5FF</color>
+    <color name="soda_dark_primary_transparent">#667EC7EF</color>
+    <color name="soda_dark_trait_percent_center">#FF212121</color>
+    <color name="soda_dark_trait_percent_start_end">#FF2A2A2A</color>
+    <color name="soda_dark_trait_percent_stroke">#FF7EC7EF</color>
+    <color name="soda_dark_trait_percent_start">#FFA6E5FF</color>
+    <color name="soda_dark_boolean_true">#FFA6E5FF</color>
+    <color name="soda_dark_chip_first">#FF909090</color>
+    <color name="soda_dark_chip_second">#FF7D7D7D</color>
+    <color name="soda_dark_chip_third">#FF5A5A5A</color>
+    <color name="soda_dark_heatmap_low">#FF2E2E2E</color>
+    <color name="soda_dark_heatmap_medium">#FF5C5C5C</color>
+    <color name="soda_dark_heatmap_high">#FF7EC7EF</color>
+    <color name="soda_dark_heatmap_max">#FFA6E5FF</color>
+    <color name="soda_dark_active_cell">#FF7EC7EF</color>
+    <color name="soda_dark_datagrid_empty">#FF3D3D3D</color>
+    <color name="soda_dark_data_filled">#667EC7EF</color>
+    <color name="soda_dark_graph_unselected">#FF212121</color>
+    <color name="soda_dark_subheading">#FF969696</color>
+    <color name="soda_dark_button_normal">#FF212121</color>
+    <color name="soda_dark_button_pressed">#FF434343</color>
+    <color name="soda_dark_trait_button_tint">#FF212121</color>
+    <color name="soda_dark_value_saved">#FFFF8A80</color>
+    <color name="soda_dark_value_altered">#FF82AAFF</color>
+    <color name="soda_dark_seekbar">#44969696</color>
+    <color name="soda_dark_seekbar_thumb">#CC7EC7EF</color>
+
     <!-- high contrast theme colors -->
     <color name="high_contrast_border">@color/BLACK</color>
     <color name="high_contrast_primary">@color/WHITE</color>

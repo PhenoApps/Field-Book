@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.ui.theme.colors
 
 import androidx.compose.material3.TopAppBarColors
+import androidx.compose.ui.graphics.Color
 
 /**
  * Define theme colors for default theme, and override specific colors for other theme in their own implementation
@@ -217,6 +218,136 @@ val BlueAppColors = DefaultAppColors.copy(
         icon = BlueThemeOverrides.StepperIcon,
         iconOnDoneBackground = BlueThemeOverrides.StepperIconOnDoneBg,
         lineOnDone = BlueThemeOverrides.StepperLineOnDone
+    ),
+)
+
+val SodaDarkToggleColors = ToggleColors(
+    track = SodaDarkPalette.Row,
+    indicator = SodaDarkPalette.Accent,
+    icon = SodaDarkPalette.TabSelected,
+    iconUnselected = SodaDarkPalette.StatusText
+)
+
+val SodaDarkAppColors = DefaultAppColors.copy(
+    primary = SodaDarkPalette.Panel,
+    primaryDark = SodaDarkPalette.Window,
+    accent = SodaDarkPalette.Accent,
+    primaryTransparent = SodaDarkPalette.PrimaryTransparent,
+    background = SodaDarkPalette.Window,
+    lightGray = SodaDarkPalette.Row,
+
+    surface = DefaultAppColors.surface.copy(
+        border = SodaDarkPalette.Border,
+        iconTint = SodaDarkPalette.Label,
+        iconFillTint = SodaDarkPalette.TabSelected,
+        preferencesHorizontalBreak = Color.Transparent
+    ),
+
+    text = TextColors(
+        primary = SodaDarkPalette.Label,
+        secondary = SodaDarkPalette.StatusText,
+        tertiary = SodaDarkPalette.TabSelected,
+        hint = SodaDarkPalette.Dim,
+        highContrast = SodaDarkPalette.Window,
+        title = SodaDarkPalette.TabSelected,
+        subheading = SodaDarkPalette.StatusText,
+        button = SodaDarkPalette.TabSelected,
+    ),
+
+    topAppBarColors = TopAppBarColors(
+        containerColor = SodaDarkPalette.Panel,
+        scrolledContainerColor = SodaDarkPalette.PrimaryTransparent,
+        navigationIconContentColor = SodaDarkPalette.TabSelected,
+        titleContentColor = SodaDarkPalette.TabSelected,
+        actionIconContentColor = SodaDarkPalette.TabSelected,
+        subtitleContentColor = SodaDarkPalette.Label,
+    ),
+
+    button = DefaultAppColors.button.copy(
+        normal = SodaDarkPalette.Row,
+        pressed = SodaDarkPalette.Panel,
+        textBackground = SodaDarkPalette.Panel,
+        categoricalPress = SodaDarkPalette.Accent,
+        categoricalSelected = SodaDarkPalette.Accent,
+        traitBackground = SodaDarkPalette.Row,
+    ),
+
+    interactive = DefaultAppColors.interactive.copy(
+        tapTarget = SodaDarkPalette.AccentBright,
+        spinnerFocused = SodaDarkPalette.Accent,
+        spinnerSelected = SodaDarkPalette.PrimaryTransparent,
+        seekBar = Color(0x44969696),
+        seekBarThumb = Color(0xCC7EC7EF),
+        selectedItemBackground = SodaDarkPalette.PrimaryTransparent,
+    ),
+
+    toggle = SodaDarkToggleColors,
+
+    status = DefaultAppColors.status.copy(
+        valueSaved = SodaDarkPalette.ValueSaved,
+        valueAltered = SodaDarkPalette.ValueAltered,
+        success = SodaDarkPalette.Accent,
+        error = Color(0xFFFF5252),
+        bluetoothConnected = SodaDarkPalette.Bluetooth,
+        progressBar = Color(0xFF909090),
+    ),
+
+    dataVisualization = DefaultAppColors.dataVisualization.copy(
+        heatmap = HeatmapColors(
+            low = SodaDarkPalette.HeatmapLow,
+            medium = SodaDarkPalette.HeatmapMed,
+            high = SodaDarkPalette.HeatmapHigh,
+            max = SodaDarkPalette.HeatmapMax
+        ),
+        graph = DefaultAppColors.dataVisualization.graph.copy(
+            itemSelected = SodaDarkPalette.Accent,
+            itemUnselected = SodaDarkPalette.Row,
+            itemText = SodaDarkPalette.Label,
+        ),
+        dataGrid = DefaultAppColors.dataVisualization.dataGrid.copy(
+            emptyCell = SodaDarkPalette.DataGridEmpty,
+            activeCell = SodaDarkPalette.Accent,
+            tableBorder = SodaDarkPalette.Border,
+            dataFilled = SodaDarkPalette.PrimaryTransparent,
+            cellText = SodaDarkPalette.Label,
+            activeCellText = SodaDarkPalette.Window,
+        ),
+    ),
+
+    trait = DefaultAppColors.trait.copy(
+        percent = PercentTraitColors(
+            backgroundCenter = SodaDarkPalette.Row,
+            backgroundStartEnd = Color(0xFF2A2A2A),
+            stroke = SodaDarkPalette.Accent,
+            start = SodaDarkPalette.AccentBright
+        ),
+        boolean = BooleanTraitColors(
+            `true` = SodaDarkPalette.AccentBright,
+            `false` = Color(0xFFFF8A80)
+        )
+    ),
+
+    chip = DefaultAppColors.chip.copy(
+        defaultBackground = SodaDarkPalette.PrimaryTransparent,
+        selectableBackground = SodaDarkPalette.Row,
+        selectableStroke = SodaDarkPalette.Accent,
+        first = SodaDarkPalette.Chip1,
+        second = SodaDarkPalette.Chip2,
+        third = SodaDarkPalette.Chip3,
+        fourth = SodaDarkPalette.Chip3
+    ),
+
+    stepper = DefaultAppColors.stepper.copy(
+        icon = SodaDarkPalette.Accent,
+        iconBackground = SodaDarkPalette.Row,
+        iconOnDone = SodaDarkPalette.Window,
+        iconOnDoneBackground = SodaDarkPalette.Accent,
+        line = SodaDarkPalette.Border,
+        lineOnDone = SodaDarkPalette.Accent
+    ),
+
+    crop = DefaultAppColors.crop.copy(
+        inverseRegion = Color(0x80E6E6E6)
     ),
 )
 

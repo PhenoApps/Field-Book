@@ -2,6 +2,8 @@ package com.fieldbook.tracker.ui.theme
 
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Typography
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -57,6 +59,55 @@ fun AppColors.toMaterialColorScheme(): ColorScheme {
         surfaceContainer = this.interactive.selectedItemBackground.copy(alpha = 0.08f),
         surfaceContainerHigh = this.interactive.selectedItemBackground.copy(alpha = 0.12f),
         surfaceContainerHighest = this.interactive.selectedItemBackground.copy(alpha = 0.16f)
+    )
+}
+
+fun AppColors.toSodaDarkMaterialColorScheme(): ColorScheme {
+    return darkColorScheme(
+        primary = primary,
+        onPrimary = text.tertiary,
+        primaryContainer = lightGray,
+        onPrimaryContainer = text.primary,
+
+        secondary = accent,
+        onSecondary = background,
+        secondaryContainer = accent.copy(alpha = 0.28f),
+        onSecondaryContainer = text.primary,
+
+        tertiary = chip.first,
+        onTertiary = background,
+        tertiaryContainer = chip.first.copy(alpha = 0.35f),
+        onTertiaryContainer = text.primary,
+
+        error = status.error,
+        onError = Color.White,
+        errorContainer = status.error.copy(alpha = 0.3f),
+        onErrorContainer = Color.White,
+
+        background = background,
+        onBackground = text.primary,
+
+        surface = lightGray,
+        onSurface = text.primary,
+        surfaceVariant = interactive.selectedItemBackground,
+        onSurfaceVariant = text.secondary,
+
+        outline = surface.border,
+        outlineVariant = surface.border.copy(alpha = 0.45f),
+
+        scrim = Color.Black.copy(alpha = 0.5f),
+
+        inverseSurface = text.primary,
+        inverseOnSurface = background,
+        inversePrimary = accent,
+
+        surfaceDim = background,
+        surfaceBright = lightGray,
+        surfaceContainerLowest = background,
+        surfaceContainerLow = interactive.selectedItemBackground.copy(alpha = 0.12f),
+        surfaceContainer = lightGray,
+        surfaceContainerHigh = primary,
+        surfaceContainerHighest = primary.copy(alpha = 0.85f)
     )
 }
 

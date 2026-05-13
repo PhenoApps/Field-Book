@@ -112,6 +112,36 @@ object BlueThemeOverrides {
     val StepperLineOnDone = Primary
 }
 
+/**
+ * RGB values from [buymeasoda/soda-theme](https://github.com/buymeasoda/soda-theme)
+ * `Soda Dark 3.sublime-theme` (e.g. sheet_container [25,25,25], dialog [67,67,67], label [204,204,204],
+ * sidebar_label [125,125,125], match_fg [126,199,239], selected_match_fg [166,229,255]).
+ */
+object SodaDarkPalette {
+    val Window = Color(0xFF191919)
+    val Row = Color(0xFF212121)
+    val Panel = Color(0xFF434343)
+    val Border = Color(0xFF464646)
+    val Label = Color(0xFFCCCCCC)
+    val StatusText = Color(0xFF969696)
+    val Dim = Color(0xFF7D7D7D)
+    val TabSelected = Color(0xFFE6E6E6)
+    val Accent = Color(0xFF7EC7EF)
+    val AccentBright = Color(0xFFA6E5FF)
+    val PrimaryTransparent = Color(0x667EC7EF)
+    val Chip1 = Color(0xFF909090)
+    val Chip2 = Color(0xFF7D7D7D)
+    val Chip3 = Color(0xFF5A5A5A)
+    val HeatmapLow = Color(0xFF2E2E2E)
+    val HeatmapMed = Color(0xFF5C5C5C)
+    val HeatmapHigh = Color(0xFF7EC7EF)
+    val HeatmapMax = Color(0xFFA6E5FF)
+    val ValueSaved = Color(0xFFFF8A80)
+    val ValueAltered = Color(0xFF82AAFF)
+    val Bluetooth = Color(0xFF33B5E5)
+    val DataGridEmpty = Color(0xFF3D3D3D)
+}
+
 object HighContrastOverrides {
     val Primary = Color.White
     val PrimaryDark = Color.Black

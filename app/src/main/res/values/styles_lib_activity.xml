@@ -44,6 +44,12 @@
         <item name="fb_color_accent">@color/blue_color_accent</item>
     </style>
 
+    <style name="AboutLibrariesCustom.SodaDark">
+        <item name="fb_color_primary">@color/soda_dark_panel</item>
+        <item name="fb_color_primary_dark">@color/soda_dark_window</item>
+        <item name="fb_color_accent">@color/soda_dark_accent</item>
+    </style>
+
     <!-- High Contrast Theme -->
     <style name="AboutLibrariesCustom.HighContrast">
         <item name="fb_color_primary">@color/high_contrast_primary</item>

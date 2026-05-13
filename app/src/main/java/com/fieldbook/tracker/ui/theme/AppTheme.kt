@@ -15,6 +15,7 @@ import com.fieldbook.tracker.ui.theme.colors.AppColors
 import com.fieldbook.tracker.ui.theme.colors.BlueAppColors
 import com.fieldbook.tracker.ui.theme.colors.DefaultAppColors
 import com.fieldbook.tracker.ui.theme.colors.HighContrastAppColors
+import com.fieldbook.tracker.ui.theme.colors.SodaDarkAppColors
 import com.fieldbook.tracker.ui.theme.enums.AppThemeType
 import com.fieldbook.tracker.ui.theme.typography.CompactTypography
 import com.fieldbook.tracker.ui.theme.typography.ExpandedTypography
@@ -31,7 +32,6 @@ import com.fieldbook.tracker.ui.theme.typography.ThemeTypography
  *      - use colors/text sizes
  *          eg. AppTheme.colors.primary, AppTheme.colors.dataVisualization.heatmap.high, AppTheme.typography.bodyStyle
  *
- *  TODO: add darkTheme support
  */
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
@@ -50,6 +50,7 @@ fun AppTheme(
             AppThemeType.Default -> DefaultAppColors
             AppThemeType.HighContrast -> HighContrastAppColors
             AppThemeType.Blue -> BlueAppColors
+            AppThemeType.SodaDark -> SodaDarkAppColors
         }
     }
 
@@ -65,7 +66,12 @@ fun AppTheme(
         }
     }
 
-    val materialColorScheme = remember(colors) { colors.toMaterialColorScheme() }
+    val materialColorScheme = remember(colors, themeType) {
+        when (themeType) {
+            AppThemeType.SodaDark -> colors.toSodaDarkMaterialColorScheme()
+            else -> colors.toMaterialColorScheme()
+        }
+    }
 
     val materialTypography = remember(typography) { typography.toMaterialTypography() }
 
