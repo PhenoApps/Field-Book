@@ -11,7 +11,33 @@ Field Book 伞形仓库 — 多人作物表型协作采集系统。包含两个�
 | **fieldbook-android** | `fieldbook-android/` | Kotlin/Java, Gradle, Android SDK | 田间表型数据采集 Android App |
 | **brapi-light** | `brapi-light/` | Python 3.11+, FastAPI, SQLite | 轻量 BrAPI v2 后端服务 |
 
-目标：用 brapi-light 替换笨重的 BreedBase（2GB 镜像 / 20 分钟启动 → 200MB / 2 秒），实现多人实时协作采集。
+核心目标：实现多人实时协作采集。最初尝试基于 BreedBase 改造，发现其架构不支持协作场景，因此自建 brapi-light。
+
+## 开发流程：PRD → Issue → 实现
+
+**每次开始新任务前，先定位需求来源，不要从代码反推意图。**
+
+```
+1. 查 PRD（doc/prd.md）→ 找到对应的特性 ID（F-BE-01 等）和 Gherkin 验收条件
+2. 查 GitHub Issues → 找到对应的 Issue 编号，确认没有人在做
+3. 创建 worktree → git worktree add 隔离开发
+4. 实现 → TDD 循环（RED → GREEN → REFACTOR）
+5. 提交 → 使用特性 ID 标记（如 "fix(F-BE-03): xxx"）
+6. PR → 引用 "Fixes #N"，合并后 Issue 自动关闭
+```
+
+### 需求追溯链
+
+```
+PRD 特性 ID (F-SYNC-02) ← 引用 → GitHub Issue (#10) ← 关联 → Commit/PR
+                          ← 验收条件 → 测试用例 (test_sync.py)
+```
+
+### 当前 Milestone
+
+`v1.0.0` — 7 个 open Issue (#9-#15)，发布标准见 `doc/prd.md` 第 5 章。
+
+**不要直接凭感觉开始写代码。** 先回答这个问题："我在实现 PRD 的哪个特性？关联哪个 Issue？"
 
 ## 构建环境（重要）
 
@@ -166,10 +192,11 @@ docker compose up -d                  # 启动 brapi-light 服务 (端口 38000)
 
 ## 当前状态
 
+- **需求基线**: `doc/prd.md` — 5 个特性领域、13 个功能、Gherkin 验收条件
+- **任务追踪**: [GitHub Issues](https://github.com/nwafufhy/Field-Book/issues) — v1.0.0 Milestone，7 个 open Issue (#9-#15)
 - brapi-light: 53 测试通过，0 lint 错误，Docker 镜像 ~73MB
-- Android: APK 可编译运行，BrAPI 连接成功，Study 导入成功
-- 待修复: Trait 导入报错、正规 BrAPI trait 上传/下载验证
-- 详见 `doc/handoff-status.md`
+- Android: APK 可编译运行，BrAPI 连接成功，Study/Trait 导入成功
+- 活跃卡点: #10 上传后本地状态不更新 (F-SYNC-02)
 
 ## 注意事项
 
