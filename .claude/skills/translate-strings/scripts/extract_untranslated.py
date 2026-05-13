@@ -174,7 +174,10 @@ def main():
         writer.writerow(["name", "english_value", "section"])
         for name in missing:
             detail = en_details.get(name, {})
-            writer.writerow([name, detail.get("value", ""), detail.get("section", "")])
+            section = detail.get("section", "")
+            if args.section and args.section.upper() != section.upper():
+                continue
+            writer.writerow([name, detail.get("value", ""), section])
         return
 
     sections_to_show = list(en_sections.keys())

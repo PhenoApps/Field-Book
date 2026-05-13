@@ -1,13 +1,13 @@
 ---
 name: translate-strings
-description: Use when translating Field Book Android strings.xml resources to Chinese, filling missing translations (currently 20.3% coverage, 1271 untranslated strings), or maintaining i18n term consistency across Field Book modules. Triggers on requests to "翻译strings", "汉化", "补全翻译", or work on Issue #1.
+description: Use when translating Field Book Android strings.xml resources to Chinese, filling missing translations (99% coverage, 8 remaining non-translatable items), or maintaining i18n term consistency across Field Book modules. Triggers on requests to "翻译strings", "汉化", "补全翻译", or work on Issue #1.
 ---
 
 # Android Strings 汉化工作流
 
 ## 概述
 
-将 Field Book Android 的 `strings.xml` 从英文翻译为中文。当前覆盖率仅 20.3%（323/1594），Issue #1 记录了完整的汉化需求和术语约定。
+将 Field Book Android 的 `strings.xml` 从英文翻译为中文。已完成两轮翻译，覆盖率 99%（1561/1569），8 条剩余项为 string-array/plurals/空字符串/translatable=false。
 
 **核心原则：术语一致 > 格式保全 > 表达自然**
 
@@ -113,3 +113,50 @@ chore(i18n): 补全<模块名>中文翻译 (#1)
 - [ ] XML 结构完整（开闭标签匹配）
 - [ ] `<plurals>` 的 item 数量与英文源匹配
 - [ ] `translatable="false"` 的 string 未翻译
+
+## 大规模翻译最佳实践（经验总结）
+
+### 分批策略
+
+按 Issue #1 优先级分 4 批并行，每批使用 `general-purpose` + `haiku` 模型 subagent：
+
+| 批次 | 模型 | 适用范围 |
+|------|------|----------|
+| P1-P2 | haiku | 高频模块 (BrAPI, Collect) — 模式化字符串 |
+| P3-P4 | haiku | 通用 UI, Preferences — 量大但术语固定 |
+
+**关键经验**：
+
+1. **subagent 无法写文件** — haiku 模型的 subagent 没有 Write/Bash 写权限。解决办法：让 agent 在回复中直接输出 XML，主 session 负责写文件和合并。
+
+2. **`--section` 与 `--csv` 不兼容** — `extract_untranslated.py --csv` 会忽略 `--section` 参数（代码第 171-178 行提前 return）。必须使用 `--by-section` 模式才能按 section 筛选。
+
+3. **Worktree 路径陷阱** — git worktree 从上游 main 创建后不含本地翻译历史。合并脚本应使用**相对路径**或在主仓库中操作。
+
+4. **`%ss` 误报警告** — 英文 `Location updates is %ss` 中的 `%ss` 是 `%s` 占位符 + 字面 `s`（表示秒），validator 误报为缺失占位符。忽略即可。
+
+5. **string-array / plurals 需特殊处理** — `community_servers_*` 是 string-array，`years_ago`/`fields_delete_confirmation` 是 plurals，不能作为普通 `<string>` 合并。建议最后手动处理或使用专门脚本。
+
+6. **Agent 输出 HTML 转义** — Agent 在 markdown 代码块中输出 `&lt;` `&gt;`，写入真实 XML 文件时需用实际 `<` `>` 字符。
+
+7. **dedup 合并策略** — 4 个 agent 并行输出到独立 `batchN_*.xml`，然后用 `merge.py` 统一合并到 `values-zh-rCN/strings.xml`，自动跳过已存在的 name。
+
+### 并行翻译流水线
+
+```bash
+# 1. 创建临时目录
+mkdir -p temp_i18n
+
+# 2. 并行启动 4 个 subagent（各自输出到独立 temp 文件）
+# 3. 主 session 收集翻译，写入 batchN_*.xml
+# 4. 合并（自动去重）
+python temp_i18n/merge.py
+
+# 5. 校验
+python .claude/skills/translate-strings/scripts/validate_xml.py
+
+# 6. 清理并提交
+rm -rf temp_i18n
+git add fieldbook-android/app/src/main/res/values-zh-rCN/strings.xml
+git commit -m "chore(i18n): 补全XX条中文翻译 (#1)"
+```
