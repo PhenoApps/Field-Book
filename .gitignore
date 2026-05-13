@@ -66,3 +66,7 @@ keystore.config
 
 # python cache files
 __pycache__/
+
+# Local SDK / IDE (never commit)
+.android-sdk/
+.cursor/
