@@ -174,8 +174,8 @@
     <style name="AppToolbar" parent="@style/Widget.AppCompat.Toolbar">
         <item name="titleTextColor">?attr/fb_title_text_color</item>
         <item name="android:background">?attr/fb_color_primary</item>
-        <item name="android:popupBackground">@android:color/white</item>
-        <item name="android:itemBackground">@android:color/white</item>
+        <item name="android:popupBackground">?attr/fb_color_background</item>
+        <item name="android:itemBackground">?attr/fb_color_background</item>
         <item name="android:paddingEnd">8dp</item>
     </style>
 

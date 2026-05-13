@@ -5,7 +5,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:backgroundTint="@color/WHITE">
+    android:background="?attr/fb_color_background">
 
     <androidx.appcompat.widget.Toolbar
         android:layout_width="0dp"

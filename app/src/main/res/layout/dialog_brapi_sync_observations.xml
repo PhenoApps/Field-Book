@@ -3,7 +3,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="#FFFFFF"
+    android:background="?attr/fb_color_background"
     android:orientation="vertical"
     android:paddingLeft="20dp"
     android:paddingTop="5dp"
@@ -17,7 +17,7 @@
         android:layout_marginLeft="15dip"
         android:paddingLeft="10dp"
         android:paddingBottom="10dp"
-        android:textColor="#000000"
+        android:textColor="?attr/fb_color_text_dark"
         android:textSize="@dimen/text_size_medium"
         android:textStyle="bold" />
 
@@ -41,7 +41,7 @@
         android:paddingLeft="10dp"
         android:paddingBottom="5dp"
         android:text="@string/brapi_study_description"
-        android:textColor="#000000"
+        android:textColor="?attr/fb_color_text_dark"
         android:textSize="@dimen/text_size_large"
         android:textStyle="bold" />
 
@@ -56,7 +56,7 @@
             android:paddingLeft="10dp"
             android:paddingBottom="5dp"
             android:text="@string/number_traits_label"
-            android:textColor="#000000"
+            android:textColor="?attr/fb_color_text_dark"
             android:textSize="@dimen/text_size_medium"
             android:textStyle="bold" />
         <TextView
@@ -66,7 +66,7 @@
             android:layout_marginLeft="15dip"
             android:paddingLeft="10dp"
             android:paddingBottom="10dp"
-            android:textColor="#000000"
+            android:textColor="?attr/fb_color_text_dark"
             android:textSize="@dimen/text_size_medium"
             android:textStyle="bold" />
 
@@ -83,7 +83,7 @@
             android:paddingLeft="10dp"
             android:paddingBottom="5dp"
             android:text="@string/number_observation_label"
-            android:textColor="#000000"
+            android:textColor="?attr/fb_color_text_dark"
             android:textSize="@dimen/text_size_medium"
             android:textStyle="bold" />
         <TextView
@@ -93,7 +93,7 @@
             android:layout_marginLeft="15dip"
             android:paddingLeft="10dp"
             android:paddingBottom="10dp"
-            android:textColor="#000000"
+            android:textColor="?attr/fb_color_text_dark"
             android:textSize="@dimen/text_size_medium"
             android:textStyle="bold" />
     </LinearLayout>
