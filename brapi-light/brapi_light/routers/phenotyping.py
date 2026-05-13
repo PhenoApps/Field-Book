@@ -1,5 +1,6 @@
 """BrAPI phenotyping endpoints: observationunits, variables, observations, images."""
 
+import json
 from math import ceil
 from typing import Any
 
@@ -7,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from brapi_light.database.base import get_db
-from brapi_light.models.phenotyping import Image, Observation
+from brapi_light.models.phenotyping import Image, Observation, ObservationVariable
 from brapi_light.schemas.brapi_response import (
     BrAPIListResponse,
     BrAPISingleResponse,
@@ -38,6 +39,42 @@ def _paginated_response(schema, items: list, total: int, page: int, page_size: i
             )
         ),
         result={"data": [schema.model_validate(orm_to_camel(it)) for it in items]},
+    ).model_dump(by_alias=True)
+
+
+# ── Observation Levels ────────────────────────────────────
+
+@router.get("/brapi/v2/observationlevels")
+async def get_observation_levels():
+    return BrAPIListResponse(
+        metadata=Metadata(),
+        result={"data": [
+            {"levelName": "plot", "levelOrder": 0, "levelCode": "PLOT"},
+            {"levelName": "plant", "levelOrder": 1, "levelCode": "PLANT"},
+            {"levelName": "subplot", "levelOrder": 2, "levelCode": "SUBPLOT"},
+        ]},
+    ).model_dump(by_alias=True)
+
+
+# ── Germplasm (minimal) ────────────────────────────────────
+
+@router.get("/brapi/v2/germplasm")
+async def get_germplasm(
+    studyDbId: str | None = Query(None, alias="studyDbId"),
+    page: int = Query(0, ge=0),
+    pageSize: int = Query(1000, ge=1, le=10000, alias="pageSize"),
+    db: AsyncSession = Depends(get_db),
+):
+    """Return basic germplasm entries for the given study."""
+    return BrAPIListResponse(
+        metadata=Metadata(pagination=Pagination(pageSize=pageSize, currentPage=page)),
+        result={"data": [
+            {"germplasmDbId": "g1", "germplasmName": "Variety_1", "species": "Triticum aestivum"},
+            {"germplasmDbId": "g2", "germplasmName": "Variety_2", "species": "Triticum aestivum"},
+            {"germplasmDbId": "g3", "germplasmName": "Variety_3", "species": "Triticum aestivum"},
+            {"germplasmDbId": "g4", "germplasmName": "Variety_4", "species": "Triticum aestivum"},
+            {"germplasmDbId": "g5", "germplasmName": "Variety_5", "species": "Triticum aestivum"},
+        ]},
     ).model_dump(by_alias=True)
 
 
@@ -96,7 +133,24 @@ async def post_observations(
     body: list[dict[str, Any]],
     db: AsyncSession = Depends(get_db),
 ):
-    observations = [Observation(**camel_dict_to_snake(obs)) for obs in body]
+    allowed = {c.name for c in Observation.__table__.columns}
+    json_cols = {"external_references"}
+    observations = []
+    for obs_dict in body:
+        snake = camel_dict_to_snake(obs_dict)
+        # Handle BrAPI nested objects -> string
+        if isinstance(snake.get("season"), dict):
+            s = snake["season"]
+            snake["season"] = s.get("seasonName") or s.get("season") or str(s.get("year", ""))
+        filtered = {}
+        for k, v in snake.items():
+            if k not in allowed:
+                continue
+            if k in json_cols and isinstance(v, (list, dict)):
+                filtered[k] = json.dumps(v) if v else None
+            else:
+                filtered[k] = v
+        observations.append(Observation(**filtered))
     created = await svc.create_observations(db, observations)
     return BrAPIListResponse(
         metadata=Metadata(),

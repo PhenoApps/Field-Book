@@ -40,7 +40,7 @@ class Observation(Base):
 
     observation_db_id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
     observation_unit_db_id: Mapped[str] = mapped_column(ForeignKey("observation_unit.observation_unit_db_id"), nullable=False)
-    observation_variable_db_id: Mapped[str] = mapped_column(ForeignKey("observation_variable.observation_variable_db_id"), nullable=False)
+    observation_variable_db_id: Mapped[str | None] = mapped_column(ForeignKey("observation_variable.observation_variable_db_id"), nullable=True)
     study_db_id: Mapped[str] = mapped_column(ForeignKey("study.study_db_id"), nullable=False)
     observation_variable_name: Mapped[str | None] = mapped_column(String, nullable=True)
     value: Mapped[str] = mapped_column(String, nullable=False)

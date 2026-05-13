@@ -142,7 +142,8 @@ class BrapiSyncViewModel @Inject constructor(
         val hostURL = BrAPIService.getHostUrl(context)
         val exportData = dataHelper.getBrAPIExportData(studyId, hostURL)
 
-        newObservations = exportData["newObservations"] ?: emptyList()
+        newObservations = (exportData["newObservations"] ?: emptyList()) +
+                          (exportData["userCreatedTraitObservations"] ?: emptyList())
         syncedObservations = exportData["syncedObservations"] ?: emptyList()
         syncedImageObservations = exportData["syncedImageObservations"] ?: emptyList()
         editedObservations = exportData["editedObservations"] ?: emptyList()

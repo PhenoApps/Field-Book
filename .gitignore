@@ -32,6 +32,9 @@ venv/
 *.egg-info/
 dist/
 
+# === Docs ===
+doc/test/
+
 # === Docker ===
 docker/data/
 
@@ -48,6 +51,7 @@ docker/data/
 
 # === Git ===
 *.orig
+*.db
 
 # === GitHub ===
 .github/*

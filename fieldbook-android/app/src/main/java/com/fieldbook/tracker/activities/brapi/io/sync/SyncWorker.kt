@@ -56,8 +56,9 @@ class SyncWorker(
                 val fieldId = field.studyId
                 val exportData = dataHelper.getBrAPIExportData(fieldId, hostUrl)
 
-                // ── Upload new observations ──
-                val newObs = exportData["newObservations"] ?: emptyList()
+                // ── Upload new observations (BrAPI + user-created traits) ──
+                val newObs = (exportData["newObservations"] ?: emptyList()) +
+                             (exportData["userCreatedTraitObservations"] ?: emptyList())
                 if (newObs.isNotEmpty()) {
                     val uploaded = mutableListOf<Int>()
                     brAPIService.awaitCreateObservations(

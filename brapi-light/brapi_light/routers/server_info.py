@@ -39,6 +39,12 @@ EXPECTED_CALLS = [
         "dataTypes": ["application/json"],
     },
     {
+        "service": "observationlevels",
+        "versions": ["2.0", "2.1"],
+        "methods": ["GET"],
+        "dataTypes": ["application/json"],
+    },
+    {
         "service": "variables",
         "versions": ["2.0", "2.1"],
         "methods": ["GET"],

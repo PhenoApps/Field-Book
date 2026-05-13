@@ -13,6 +13,75 @@ Field Book 伞形仓库 — 多人作物表型协作采集系统。包含两个�
 
 目标：用 brapi-light 替换笨重的 BreedBase（2GB 镜像 / 20 分钟启动 → 200MB / 2 秒），实现多人实时协作采集。
 
+## 构建环境（重要）
+
+### 优先级：Android Studio > 命令行
+
+**直接用 Android Studio 打开 `fieldbook-android/` 目录构建**，不要用命令行 Gradle 折腾。AS 自动处理 SDK、依赖下载、Gradle wrapper。只有 AS 也失败时才考虑命令行。
+
+### 国内网络镜像
+
+已配置：
+- `~/.gradle/init.gradle.kts` — 全局镜像脚本，将 google()/mavenCentral() 重定向到腾讯云
+- `gradle/wrapper/gradle-wrapper.properties` — distributionUrl 使用腾讯云镜像 + `-all` 分发包（含源码，避免 IDE 额外下载 src.zip）
+
+如果 Sync 还是慢，检查 `services.gradle.org` 是否被 `init.gradle.kts` 拦截；`-all` 分发包一次性解决了 wrapper + src 两个下载。
+
+## 调试纪律：logcat 优先
+
+**规则：先用工具获取真实数据，再凭推断写代码。**
+
+### brapi-light 后端
+
+```bash
+# 前台启动，直接看请求和 traceback
+uv run uvicorn brapi_light.main:app --host 0.0.0.0 --port 8000
+```
+
+### fieldbook-android 前端
+
+```
+adb logcat -d | grep -iE "BrAPI|500|error|Exception"
+```
+
+或使用 MCP 工具 `mcp__android-dev__log_logcat` / `mcp__android-emulator__get_logs`。
+
+**禁止行为**：看到 500 错误后凭猜测修改服务端代码。必须先读到响应的 traceback 或请求体再做修改。
+
+## BrAPI 协议陷阱
+
+Field Book 内置了 `brapi-java-client` SDK，它对 JSON 响应格式有严格要求，比 REST 规范更挑剔。
+
+| 陷阱 | 表现 | 对策 |
+|------|------|------|
+| `observationUnitPosition.observationLevel` 缺失 | NPE 崩溃 | 必须返回 `{observationLevel: {levelName, levelOrder}}` |
+| `trait` 字段为 null | Trait 导入失败 | 必须返回 `{traitDbId, traitName}` |
+| `season` 是嵌套对象不是字符串 | 500 / 解析失败 | POST 时提取 `seasonName` 或 `year` 转字符串 |
+| `externalReferences` 传输 `fieldBookDbId` | 上传后客户端无法匹配响应 | 请求中的 externalReferences 必须原样返回 |
+| `observationVariableDbId` 被服务端改写 | 客户端过滤响应时跳过该条记录 | 不要改变客户端发来的 ID 值 |
+| 响应字段缺失（如 `serverDescription`） | 客户端 NPE 崩溃 | 查 BrAPI spec 确保所有必填字段存在 |
+
+## TDD 适用范围
+
+**TDD 在可控环境（brapi-light 后端）有效，在不可控环境（Android 构建/网络问题未解决时）是花架子。**
+
+流程纪律：
+1. 先保证目标平台能构建、能跑起来
+2. 再开始写测试
+3. 测试失败原因必须是"功能缺失"而不是"环境没通"
+
+53 个 brapi-light 测试在模型变更时多次有效拦截了回归 bug。Android 端测试因构建环境不通未能执行。
+
+## MCP 工具（Android 联调）
+
+项目已配置 `android-emulator` 和 `android-dev` 两套 MCP 服务器，通过 `.claude/skills/android-harness/SKILL.md` 的 skill 调用。
+
+关键工具：
+- `get_all_text` / `get_clickable_elements` — 低成本看 UI 状态
+- `logcat` — 读 app 运行日志
+- `tap` / `press_key` — 操作模拟器
+- `screenshot` — 仅在需要视觉确认时用（token 成本高）
+
 ## 测试纪律：BDD + TDD 双循环
 
 ### 外循环 — BDD 行为规格（动手前必做）
@@ -65,17 +134,17 @@ cd fieldbook-android
 
 ```bash
 cd brapi-light
-uv sync                              # 安装依赖
-uv run pytest                        # 运行测试
-uv run ruff check .                  # Lint
-uv run uvicorn brapi_light.main:app --reload  # 启动开发服务器
+uv sync --extra dev                   # 安装依赖（含测试）
+uv run pytest                         # 运行测试
+uv run ruff check .                   # Lint
+uv run uvicorn brapi_light.main:app --host 0.0.0.0 --port 8000  # 开发服务器
 ```
 
 ### Docker
 
 ```bash
 cd docker
-docker compose up -d                 # 启动 brapi-light 服务
+docker compose up -d                  # 启动 brapi-light 服务 (端口 38000)
 ```
 
 ## 架构要点
@@ -83,16 +152,24 @@ docker compose up -d                 # 启动 brapi-light 服务
 ### brapi-light 设计约束
 
 - 目标替换 BreedBase 的 BrAPI 层，不是全功能育种数据库
-- 只需实现 13 个 BrAPI 端点（见 `doc/brapi-deploy-plan.md`）
+- 实现了 16 个端点（含 observationlevels、germplasm、sync/changes、OIDC）
 - SQLite 足够小团队（3-10 人）使用，无需 PostgreSQL
 - 通过 Docker Compose 部署，端口 38000
 - 数据模型参考 [BrAPI-FastAPI](https://github.com/agostof/BrAPI-FastAPI) Pydantic 桩
+- 已实现：乐观锁 (rev)、增量同步 (/sync/changes)、OIDC 绕过
 
 ### fieldbook-android 改造方向
 
-- WorkManager 定期自动同步（核心需求）
-- 增量冲突检测
-- 同步状态通知
+- WorkManager 定期自动同步（已集成，间隔 1 分钟，默认启用）
+- 字段级冲突检测（代码已完成，待联调验证）
+- 同步状态通知（已实现 SyncNotifications）
+
+## 当前状态
+
+- brapi-light: 53 测试通过，0 lint 错误，Docker 镜像 ~73MB
+- Android: APK 可编译运行，BrAPI 连接成功，Study 导入成功
+- 待修复: Trait 导入报错、正规 BrAPI trait 上传/下载验证
+- 详见 `doc/handoff-status.md`
 
 ## 注意事项
 
@@ -100,3 +177,5 @@ docker compose up -d                 # 启动 brapi-light 服务
 - brapi-light 使用 uv 作为包管理器和虚拟环境工具
 - BreedBase 快照保存在 Docker 镜像中：`breedbase-local:final`
 - 测试账号：`janedoe` / 环境详情见 `doc/brapi-deploy-plan.md`
+- 国内网络需 `~/.gradle/init.gradle.kts` 镜像脚本，不要删除
+- 调试 POST 500 错误时用前台模式启动 uvicorn，直接看 traceback
