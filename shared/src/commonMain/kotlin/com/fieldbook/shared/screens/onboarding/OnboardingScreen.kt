@@ -58,9 +58,7 @@ import com.fieldbook.shared.generated.resources.other_ic_field_book
 import com.fieldbook.shared.preferences.GeneralKeys
 import com.fieldbook.shared.theme.AlertDialog
 import com.fieldbook.shared.theme.TextButton
-import com.fieldbook.shared.utilities.configurePickedStorageDirectory
-import com.fieldbook.shared.utilities.detectStorageProviderLabel
-import com.fieldbook.shared.utilities.detectStorageProviderType
+import com.fieldbook.shared.utilities.configureAndPersistStorageDirectory
 import com.fieldbook.shared.utilities.displayStorageDirectoryPath
 import com.fieldbook.shared.utilities.isStorageDirectoryConfigured
 import com.fieldbook.shared.utilities.selectFirstField
@@ -107,26 +105,23 @@ fun OnboardingScreen(
     val directoryLauncher = rememberDirectoryPickerLauncher(
         title = stringResource(Res.string.app_intro_storage_title)
     ) { directory ->
-        val configuredDirectory = directory?.let(::configurePickedStorageDirectory)
-        if (configuredDirectory != null) {
-            settings.putString(GeneralKeys.DEFAULT_STORAGE_LOCATION_DIRECTORY.key, configuredDirectory)
-            settings.putString(
-                GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_TYPE.key,
-                detectStorageProviderType(configuredDirectory).name
-            )
-            settings.putString(
-                GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_LABEL.key,
-                detectStorageProviderLabel(configuredDirectory)
-            )
-            storageConfigured = true
-            storageDisplayPath = displayStorageDirectoryPath(
-                configuredDirectory,
-                settings.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_TYPE.key, ""),
-                settings.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_LABEL.key, "")
-            )
-        } else if (directory != null) {
+        if (directory != null) {
             coroutineScope.launch {
-                snackbarHostState.showSnackbar("Failed to configure the selected folder.")
+                configureAndPersistStorageDirectory(directory, settings)
+                    .onSuccess { result ->
+                        storageConfigured = true
+                        storageDisplayPath = displayStorageDirectoryPath(
+                            result.configuredDirectory,
+                            result.providerTypeName,
+                            result.providerLabel
+                        )
+                        if (result.sampleSeedFailed) {
+                            snackbarHostState.showSnackbar("Storage configured, but sample files could not be prepared.")
+                        }
+                    }
+                    .onFailure {
+                        snackbarHostState.showSnackbar("Failed to configure the selected folder.")
+                    }
             }
         }
     }

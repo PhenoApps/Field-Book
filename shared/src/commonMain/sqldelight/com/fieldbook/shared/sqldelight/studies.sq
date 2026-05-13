@@ -18,7 +18,8 @@ CREATE TABLE studies (
   common_crop_name TEXT,
   study_source TEXT,
   count TEXT,
-  observation_levels TEXT
+  observation_levels TEXT,
+  observation_unit_search_attribute TEXT
 );
 
 getById:
@@ -134,5 +135,6 @@ INSERT INTO studies (
   common_crop_name,
   study_source,
   count,
-  observation_levels
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+  observation_levels,
+  observation_unit_search_attribute
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);

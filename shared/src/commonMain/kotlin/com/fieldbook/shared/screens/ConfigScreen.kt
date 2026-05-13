@@ -26,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -81,6 +82,7 @@ private data class ConfigItem(
 @Composable
 fun ConfigScreen(
     viewModel: ConfigScreenViewModel = viewModel { ConfigScreenViewModel() },
+    resetGeneration: Int = 0,
     onBack: (() -> Unit)? = null,
     onNavigate: ((KmpHostScreenType) -> Unit)? = null,
 ) {
@@ -91,6 +93,10 @@ fun ConfigScreen(
         )
     }
     var showVersionDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(resetGeneration) {
+        showOnboarding = settings.getBoolean(GeneralKeys.FIRST_RUN_KMP.key, true)
+    }
 
     if (showOnboarding) {
         OnboardingScreen(
