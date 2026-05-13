@@ -37,7 +37,7 @@ class LanguagePreferenceFragment : PreferenceFragmentCompat(), Preference.OnPref
         try {
             context?.let { ctx ->
                 val currentPrefTag = PreferenceManager.getDefaultSharedPreferences(ctx)
-                    .getString(PreferenceKeys.LANGUAGE_LOCALE_ID, "en-US")
+                    .getString(PreferenceKeys.LANGUAGE_LOCALE_ID, "zh-CN")
 
                 var id = preference.key
                 var languageSummary = preference.title.toString()

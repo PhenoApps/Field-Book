@@ -46,7 +46,8 @@ class AppLanguageUtil {
 
                     } else {
 
-                        Log.d(TAG, "No language stored in preferences.")
+                        Log.d(TAG, "No language stored in preferences, defaulting to zh-CN.")
+                        AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("zh-CN"))
 
                     }
 
