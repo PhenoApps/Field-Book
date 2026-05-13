@@ -109,7 +109,7 @@
             android:paddingLeft="10dp"
             android:paddingBottom="5dp"
             android:text="@string/no_observations_warning"
-            android:textColor="#FF0000"
+            android:textColor="?attr/fb_error_message_color"
             android:textSize="@dimen/text_size_xlarge"
             android:textStyle="bold" />
     </LinearLayout>

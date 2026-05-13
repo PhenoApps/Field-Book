@@ -3,7 +3,7 @@
 
     <!-- Widget styles -->
     <style name="PopupMenuStyle" parent="Widget.AppCompat.PopupMenu">
-        <item name="android:popupBackground">@drawable/cell</item>
+        <item name="android:popupBackground">@drawable/cell_menu</item>
     </style>
 
     <!-- styles the trait date picker dialog -->
@@ -20,7 +20,7 @@
     <!-- Info bar styling, trait selector -->
     <style name="SpinnerStyle" parent="Widget.AppCompat.Spinner">
         <item name="android:textViewStyle">@style/DropDownTextViewStyle</item>
-        <item name="android:popupBackground">@drawable/cell</item>
+        <item name="android:popupBackground">@drawable/cell_menu</item>
         <item name="android:backgroundTint">?attr/fb_color_primary_dark</item>
         <item name="android:textColor">?attr/fb_color_text_dark</item>
     </style>
@@ -168,7 +168,7 @@
     </style>
 
     <style name="OverFlowMenuStyle" parent="Widget.AppCompat.PopupMenu.Overflow">
-        <item name="android:popupBackground">@drawable/cell</item>
+        <item name="android:popupBackground">@drawable/cell_menu</item>
     </style>
 
     <!-- Action bar (toolbar) style -->

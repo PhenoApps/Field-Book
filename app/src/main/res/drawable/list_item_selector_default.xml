@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#80FFFFFF"/>
+    <solid android:color="?attr/fb_color_list_selector_default_overlay"/>
 </shape>

@@ -117,6 +117,7 @@
         <item name="iconTint">?attr/fb_icon_tint</item>
 
         <item name="fb_error_message_color">@color/RED</item>
+        <item name="fb_color_list_selector_default_overlay">#80FFFFFF</item>
 
         <item name="colorSecondary">?attr/fb_color_accent</item>
       
@@ -233,6 +234,7 @@
         <item name="fb_color_text_light">@color/soda_dark_text_bright</item>
         <item name="fb_color_hint_text">@color/soda_dark_text_dim</item>
         <item name="fb_color_text_dark">@color/soda_dark_text</item>
+        <item name="fb_color_list_selector_default_overlay">#30FFFFFF</item>
         <item name="fb_icon_tint">@color/soda_dark_text_bright</item>
         <item name="fb_icon_fill_tint">@color/soda_dark_text_bright</item>
         <item name="fb_trait_status_selected_color">@color/soda_dark_accent_bright</item>

@@ -11,6 +11,9 @@
 
     <style name="AppAlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
 
+        <item name="android:colorBackground">?attr/fb_color_background</item>
+        <item name="android:windowBackground">?attr/fb_color_background</item>
+
         <item name="buttonBarNegativeButtonStyle">@style/ButtonBarStyle</item>
         <item name="buttonBarNeutralButtonStyle">@style/ButtonBarStyle</item>
         <item name="buttonBarPositiveButtonStyle">@style/ButtonBarStyle</item>

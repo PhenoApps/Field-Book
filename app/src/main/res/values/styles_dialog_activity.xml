@@ -21,6 +21,7 @@
         <item name="fb_color_accent">@color/main_color_accent</item>
         <item name="fb_color_background">@color/WHITE</item>
         <item name="fb_color_card_background">@color/light_gray</item>
+        <item name="fb_color_list_selector_default_overlay">#80FFFFFF</item>
         <item name="fb_color_text_light">@color/BLACK</item>
         <item name="fb_color_text_dark">@color/BLACK</item>
         <item name="fb_color_text_button_background">@color/GRAY</item>
@@ -85,6 +86,7 @@
         <item name="fb_color_accent">@color/soda_dark_accent</item>
         <item name="fb_color_background">@color/soda_dark_window</item>
         <item name="fb_color_card_background">@color/soda_dark_row</item>
+        <item name="fb_color_list_selector_default_overlay">#30FFFFFF</item>
         <item name="fb_color_text_button_background">@color/soda_dark_panel</item>
         <item name="fb_color_text_light">@color/soda_dark_text_bright</item>
         <item name="fb_color_hint_text">@color/soda_dark_text_dim</item>

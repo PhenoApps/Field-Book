@@ -212,6 +212,9 @@
     <attr format="color" name="fb_color_background"/>
     <attr format="color" name="fb_color_card_background"/>
 
+    <!-- Idle list row overlay (non-activated) in list_item_selector_default -->
+    <attr format="color" name="fb_color_list_selector_default_overlay"/>
+
     <attr format="dimension" name="fb_title_text_size"/>
     <attr format="dimension" name="fb_body_text_size" />
     <attr format="dimension" name="fb_subheading_text_size"/>
