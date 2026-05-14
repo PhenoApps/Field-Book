@@ -55,11 +55,11 @@
 | Multicategorial                  | :white_check_mark: | :white_check_mark: |
 | Counter                          | :white_check_mark: | :white_check_mark: |
 | Date                             | :white_check_mark: | :white_check_mark: |
-| Location                         |                    |                    |
+| Location                         | :white_check_mark: | :white_check_mark: |
 | Numeric                          | :white_check_mark: | :white_check_mark: |
 | Percent                          | :white_check_mark: | :white_check_mark: |
 | Text                             | :white_check_mark: | :white_check_mark: |
-| Angle                            |                    |                    |
+| Angle                            | :white_check_mark: | :white_check_mark: |
 | Disease rating                   |                    |                    |
 | GNSS                             |                    |                    |
 | Zebra label print                |                    |                    |
