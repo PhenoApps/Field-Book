@@ -15,8 +15,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -25,14 +25,16 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.fieldbook.shared.preferences.PreferenceKeys
+import com.fieldbook.shared.screens.collect.traits.AngleTrait
 import com.fieldbook.shared.screens.collect.traits.BooleanTrait
 import com.fieldbook.shared.screens.collect.traits.CategoricalTrait
 import com.fieldbook.shared.screens.collect.traits.CounterTrait
 import com.fieldbook.shared.screens.collect.traits.DateTrait
+import com.fieldbook.shared.screens.collect.traits.LocationTrait
 import com.fieldbook.shared.screens.collect.traits.NumericTrait
 import com.fieldbook.shared.screens.collect.traits.PercentTrait
 import com.fieldbook.shared.screens.collect.traits.PhotoTrait
-import com.fieldbook.shared.preferences.PreferenceKeys
 import com.fieldbook.shared.theme.AppColors
 import com.fieldbook.shared.traits.Formats
 import com.fieldbook.shared.utilities.CategoryJsonUtil
@@ -247,8 +249,13 @@ fun TraitInputHost(
                 .padding(8.dp)
         )
 
-        Formats.ANGLE -> NotImplementedTrait(
-            traitFormat = trait.format!!,
+        Formats.ANGLE -> AngleTrait(
+            value = value,
+            onValueChange = {
+                controller.updateCurrentTraitValue(it)
+                onEdited()
+            },
+            modifier = modifier.fillMaxWidth().padding(8.dp)
         )
 
         Formats.CATEGORICAL -> CategoricalTrait(
@@ -308,8 +315,13 @@ fun TraitInputHost(
             modifier = modifier.fillMaxWidth().padding(8.dp)
         )
 
-        Formats.LOCATION ->NotImplementedTrait(
-            traitFormat = trait.format!!,
+        Formats.LOCATION -> LocationTrait(
+            value = value,
+            onValueChange = {
+                controller.updateCurrentTraitValue(it)
+                onEdited()
+            },
+            modifier = modifier.fillMaxWidth().padding(8.dp)
         )
 
         Formats.CAMERA -> {
@@ -329,42 +341,10 @@ fun TraitInputHost(
             )
         }
 
-        // Add more as needed, or use legacy string fallback for custom/unknown
-        else -> when (trait?.format) {
-            "barcode" -> NotImplementedTrait(
-                traitFormat = trait.format!!,
-            )
-
-            "disease", "disease_rating" -> NotImplementedTrait(
-                traitFormat = trait.format!!,
-            )
-
-            "gnss", "gps" -> NotImplementedTrait(
-                traitFormat = trait.format!!,
-            )
-
-            "labelprint", "label_print" -> NotImplementedTrait(
-                traitFormat = trait.format!!,
-            )
-
-            "audio", "usb_camera", "gopro", "canon" -> NotImplementedTrait(
-                traitFormat = trait.format!!,
-            )
-
-            else -> {
-                EditableValueText(
-                    value = value,
-                    onValueChange = {
-                        controller.updateCurrentTraitValue(it)
-                        onEdited()
-                    },
-                    modifier = modifier.fillMaxWidth().padding(8.dp),
-                    fontWeight = FontWeight.Bold,
-                    fontStyle = FontStyle.Italic,
-                    color = AppColors.fb_color_text_dark.color,
-                )
-            }
-        }
+        else -> NotImplementedTrait(
+            traitFormat = trait?.format ?: "unknown",
+            modifier = modifier.fillMaxWidth().padding(8.dp)
+        )
     }
 }
 

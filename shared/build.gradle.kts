@@ -411,6 +411,9 @@ kotlin {
                 implementation(libs.coil.compose)
                 implementation(libs.reorderable)
                 implementation(libs.lazytable)
+                implementation(libs.compass.geolocation)
+                implementation(libs.compass.geolocation.mobile)
+                implementation(libs.ksensor)
             }
         }
 

@@ -21,9 +21,9 @@ import com.russhwolf.settings.Settings
 
 // TODO refactor to use ViewModel() ?
 class CollectScreenController {
-    private val observationUnitRepository = ObservationUnitRepository()
     private val traitRepository = TraitRepository()
     private val observationRepository = ObservationRepository()
+    private val observationUnitRepository = ObservationUnitRepository()
     private val observationUnitPropertyRepository = ObservationUnitPropertyRepository()
     private val studyRepository = StudyRepository()
 
@@ -173,6 +173,26 @@ class CollectScreenController {
             traitValues = traitValues.toMutableMap().apply {
                 put(trait.id!!, listOf(value))
             }
+        }
+    }
+
+    fun updateCurrentUnitGeoCoordinates(geoCoordinates: String) {
+        val unit = units.getOrNull(currentUnitIndex)
+        val unitDbId = unit?.observation_unit_db_id ?: return
+
+        observationUnitRepository.updateGeoCoordinates(
+            studyId = studyId.toLong(),
+            observationUnitDbId = unitDbId,
+            geoCoordinates = geoCoordinates,
+        )
+
+        units = units.toMutableList().also { updated ->
+            val current = updated.getOrNull(currentUnitIndex) ?: return@also
+            updated[currentUnitIndex] = current.copy(
+                map = current.map.toMutableMap().apply {
+                    put("geo_coordinates", geoCoordinates)
+                }
+            )
         }
     }
 

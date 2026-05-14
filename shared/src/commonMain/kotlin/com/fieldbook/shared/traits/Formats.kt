@@ -49,6 +49,7 @@ enum class Formats(
             PERCENT,
             TEXT,
             ANGLE,
+            LOCATION,
             CAMERA,
         )
     }
