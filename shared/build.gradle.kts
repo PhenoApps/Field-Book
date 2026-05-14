@@ -413,6 +413,7 @@ kotlin {
                 implementation(libs.lazytable)
                 implementation(libs.compass.geolocation)
                 implementation(libs.compass.geolocation.mobile)
+                implementation(libs.ksensor)
             }
         }
 
