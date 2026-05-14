@@ -5,10 +5,7 @@ import android.os.Build
 import com.fieldbook.shared.AndroidAppContextHolder
 import org.jetbrains.compose.resources.StringResource
 import org.phenoapps.utils.BaseDocumentTreeUtil
-import java.io.BufferedInputStream
 import java.io.File
-import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
 import androidx.documentfile.provider.DocumentFile as AndroidXDocumentFile
 
 class AndroidDocumentFile(val file: AndroidXDocumentFile) : DocumentFile {
@@ -90,51 +87,6 @@ actual fun copyFileToDirectory(source: DocumentFile, destinationDir: DocumentFil
         }
         AndroidDocumentFile(newFile)
     }
-}
-
-actual fun zipFiles(
-    files: List<DocumentFile>,
-    destinationDir: DocumentFile,
-    zipFileName: String
-): DocumentFile? {
-    val ctx = AndroidAppContextHolder.context
-    val dest = destinationDir as? AndroidDocumentFile ?: return null
-    val zipFile = dest.file.createFile("application/zip", "$zipFileName.zip") ?: return null
-
-    ctx.contentResolver.openOutputStream(zipFile.uri)?.use { outputStream ->
-        ZipOutputStream(outputStream).use { zipOutput ->
-            files.forEach { file ->
-                addToZip(zipOutput, file, file.name().orEmpty())
-            }
-        }
-    }
-
-    return AndroidDocumentFile(zipFile)
-}
-
-private fun addToZip(zipOutput: ZipOutputStream, file: DocumentFile, entryName: String) {
-    val androidFile = (file as? AndroidDocumentFile)?.file ?: return
-    val safeEntryName = entryName.trim('/')
-
-    if (androidFile.isDirectory) {
-        val children = androidFile.listFiles()
-        if (children.isEmpty()) {
-            zipOutput.putNextEntry(ZipEntry("$safeEntryName/"))
-            zipOutput.closeEntry()
-        } else {
-            children.forEach { child ->
-                val childName = child.name ?: return@forEach
-                addToZip(zipOutput, AndroidDocumentFile(child), "$safeEntryName/$childName")
-            }
-        }
-        return
-    }
-
-    zipOutput.putNextEntry(ZipEntry(safeEntryName))
-    AndroidAppContextHolder.context.contentResolver.openInputStream(androidFile.uri)?.use { input ->
-        BufferedInputStream(input).copyTo(zipOutput)
-    }
-    zipOutput.closeEntry()
 }
 
 actual fun shareFile(file: DocumentFile) {

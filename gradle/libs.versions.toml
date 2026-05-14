@@ -17,6 +17,7 @@ openapi-generator = "7.22.0"
 lazytable = "1.10.0"
 compass = "1.2.4"
 ksensor = "2.0.4"
+kmp-zip = "0.8.0"
 
 [libraries]
 multiplatform-settings = { module = "com.russhwolf:multiplatform-settings-no-arg", version.ref = "multiplatform-settings" }
@@ -44,6 +45,7 @@ lazytable = { module = "io.github.oleksandrbalan:lazytable", version.ref = "lazy
 compass-geolocation = { module = "dev.jordond.compass:geolocation", version.ref = "compass" }
 compass-geolocation-mobile = { module = "dev.jordond.compass:geolocation-mobile", version.ref = "compass" }
 ksensor = { module = "io.github.shadmanadman:KSensor", version.ref = "ksensor" }
+kmp-zip = { module = "no.synth:kmp-zip", version.ref = "kmp-zip" }
 
 [plugins]
 app-cash-sqldelight = { id = "app.cash.sqldelight", version = "2.1.0" }

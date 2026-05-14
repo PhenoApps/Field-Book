@@ -6,6 +6,7 @@ import com.fieldbook.shared.generated.resources.Res
 import com.fieldbook.shared.generated.resources.dir_database
 import com.fieldbook.shared.sqldelight.FieldbookDatabase
 import com.fieldbook.shared.sqldelight.closeDatabase
+import com.russhwolf.settings.Settings
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -41,10 +42,68 @@ fun exportDatabaseZip(fileName: String): DocumentFile {
         ?: error("Database file was not found.")
     val databaseDir = getDirectory(Res.string.dir_database)
         ?: error("Database export directory was not found.")
+    val preferencesFile = createPreferencesBackupFile(databaseDir)
+        ?: error("Unable to create preferences backup.")
 
-    return zipFiles(
-        files = listOf(databaseFile),
-        destinationDir = databaseDir,
-        zipFileName = normalizedFileName
-    ) ?: error("Unable to create database export.")
+    return try {
+        zipFiles(
+            files = listOf(databaseFile, preferencesFile),
+            destinationDir = databaseDir,
+            zipFileName = normalizedFileName
+        ) ?: error("Unable to create database export.")
+    } finally {
+        runCatching { deleteFile(preferencesFile) }
+    }
 }
+
+private fun createPreferencesBackupFile(databaseDir: DocumentFile): DocumentFile? {
+    val fileName = "preferences_backup_${Clock.System.now().toEpochMilliseconds()}.xml"
+    return databaseDir.createFile("text/xml", fileName)?.also { file ->
+        file.writeBytes(createPreferencesXml().encodeToByteArray())
+    }
+}
+
+private fun createPreferencesXml(settings: Settings = Settings()): String {
+    val entries = settings.keys.sorted().mapNotNull { key ->
+        preferenceXmlEntry(settings, key)
+    }
+
+    return buildString {
+        appendLine("""<?xml version="1.0" encoding="utf-8" standalone="yes"?>""")
+        appendLine("<map>")
+        entries.forEach { entry ->
+            appendLine("    $entry")
+        }
+        appendLine("</map>")
+    }
+}
+
+private fun preferenceXmlEntry(settings: Settings, key: String): String? {
+    runCatching { settings.getStringOrNull(key) }.getOrNull()?.let { value ->
+        return """<string name="${escapeXmlAttribute(key)}">${escapeXmlText(value)}</string>"""
+    }
+
+    runCatching { settings.getBooleanOrNull(key) }.getOrNull()?.let { value ->
+        return """<boolean name="${escapeXmlAttribute(key)}" value="$value" />"""
+    }
+
+    runCatching { settings.getIntOrNull(key) }.getOrNull()?.let { value ->
+        return """<int name="${escapeXmlAttribute(key)}" value="$value" />"""
+    }
+
+    return null
+}
+
+private fun escapeXmlAttribute(value: String): String =
+    value
+        .replace("&", "&amp;")
+        .replace("\"", "&quot;")
+        .replace("'", "&apos;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+
+private fun escapeXmlText(value: String): String =
+    value
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")

@@ -215,19 +215,6 @@ actual fun copyFileToDirectory(source: DocumentFile, destinationDir: DocumentFil
     }
 }
 
-actual fun zipFiles(
-    files: List<DocumentFile>,
-    destinationDir: DocumentFile,
-    zipFileName: String
-): DocumentFile? {
-    val bundleDir = destinationDir.createDirectory("$zipFileName.export") ?: return null
-    files.forEach { file ->
-        val name = file.name() ?: return@forEach
-        copyFileToDirectory(file, bundleDir, name)
-    }
-    return bundleDir
-}
-
 @OptIn(BetaInteropApi::class)
 actual fun shareFile(file: DocumentFile) {
     val iosFile = file as? IosDocumentFile ?: return
