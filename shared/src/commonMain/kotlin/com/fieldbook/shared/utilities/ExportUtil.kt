@@ -238,7 +238,9 @@ class ExportUtil : CoroutineScope by MainScope() {
         val finalFile = try {
             val generatedFiles = pendingExport.generatedFiles.toList()
             val file = if (generatedFiles.size > 1) {
-                zipFiles(generatedFiles, options.fileName)
+                val exportDir = getDirectory(Res.string.dir_field_export)
+                    ?: return ExportResult.Failure(IllegalStateException("Field export directory not found"))
+                zipFiles(generatedFiles, exportDir, options.fileName)
             } else {
                 generatedFiles.firstOrNull()
             } ?: return ExportResult.Failure(IllegalStateException("Failed to create export file"))

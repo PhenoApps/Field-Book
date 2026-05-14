@@ -3,11 +3,10 @@ package com.fieldbook.shared.utilities
 import android.content.Intent
 import android.os.Build
 import com.fieldbook.shared.AndroidAppContextHolder
-import com.fieldbook.shared.generated.resources.Res
-import com.fieldbook.shared.generated.resources.dir_field_export
 import org.jetbrains.compose.resources.StringResource
 import org.phenoapps.utils.BaseDocumentTreeUtil
 import java.io.BufferedInputStream
+import java.io.File
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import androidx.documentfile.provider.DocumentFile as AndroidXDocumentFile
@@ -53,6 +52,11 @@ actual fun createDir(parent: String, child: String): DocumentFile? {
     return dir?.let { AndroidDocumentFile(it) }
 }
 
+actual fun getFileByPath(path: String): DocumentFile? {
+    val file = File(path)
+    return if (file.exists()) AndroidDocumentFile(AndroidXDocumentFile.fromFile(file)) else null
+}
+
 actual fun getDirectory(directory: StringResource): DocumentFile? {
     val ctx = AndroidAppContextHolder.context
     val dir = BaseDocumentTreeUtil.getDirectory(
@@ -88,10 +92,14 @@ actual fun copyFileToDirectory(source: DocumentFile, destinationDir: DocumentFil
     }
 }
 
-actual fun zipFiles(files: List<DocumentFile>, zipFileName: String): DocumentFile? {
+actual fun zipFiles(
+    files: List<DocumentFile>,
+    destinationDir: DocumentFile,
+    zipFileName: String
+): DocumentFile? {
     val ctx = AndroidAppContextHolder.context
-    val exportDir = getDirectory(Res.string.dir_field_export) as? AndroidDocumentFile ?: return null
-    val zipFile = exportDir.file.createFile("application/zip", "$zipFileName.zip") ?: return null
+    val dest = destinationDir as? AndroidDocumentFile ?: return null
+    val zipFile = dest.file.createFile("application/zip", "$zipFileName.zip") ?: return null
 
     ctx.contentResolver.openOutputStream(zipFile.uri)?.use { outputStream ->
         ZipOutputStream(outputStream).use { zipOutput ->

@@ -18,6 +18,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -35,17 +36,21 @@ import androidx.compose.ui.unit.dp
 import com.fieldbook.shared.database.utils.DATABASE_NAME
 import com.fieldbook.shared.database.utils.importDatabaseFromBundled
 import com.fieldbook.shared.generated.resources.Res
+import com.fieldbook.shared.generated.resources.database_dialog_title
 import com.fieldbook.shared.generated.resources.database_export
+import com.fieldbook.shared.generated.resources.database_export_invalid_filename
 import com.fieldbook.shared.generated.resources.database_import
 import com.fieldbook.shared.generated.resources.database_reset
-import com.fieldbook.shared.generated.resources.database_reset_message
 import com.fieldbook.shared.generated.resources.database_reset_warning1
 import com.fieldbook.shared.generated.resources.database_reset_warning2
 import com.fieldbook.shared.generated.resources.dialog_cancel
 import com.fieldbook.shared.generated.resources.dialog_delete
 import com.fieldbook.shared.generated.resources.dialog_no
+import com.fieldbook.shared.generated.resources.dialog_save
 import com.fieldbook.shared.generated.resources.dialog_warning
 import com.fieldbook.shared.generated.resources.dialog_yes
+import com.fieldbook.shared.generated.resources.export_complete
+import com.fieldbook.shared.generated.resources.export_error_general
 import com.fieldbook.shared.generated.resources.ic_pref_database_delete
 import com.fieldbook.shared.generated.resources.ic_pref_database_export
 import com.fieldbook.shared.generated.resources.ic_pref_database_import
@@ -56,14 +61,18 @@ import com.fieldbook.shared.generated.resources.preferences_storage_files_base_d
 import com.fieldbook.shared.generated.resources.preferences_storage_storage_title
 import com.fieldbook.shared.generated.resources.preferences_storage_title
 import com.fieldbook.shared.preferences.GeneralKeys
-import com.fieldbook.shared.screens.export.ExportScreen
 import com.fieldbook.shared.theme.AlertDialog
 import com.fieldbook.shared.theme.TextButton
+import com.fieldbook.shared.utilities.defaultDatabaseExportFileName
 import com.fieldbook.shared.utilities.displayStorageDirectoryPath
+import com.fieldbook.shared.utilities.exportDatabaseZip
 import com.fieldbook.shared.utilities.resetLocalDatabaseAndPreferences
 import com.fieldbook.shared.utilities.selectFirstField
+import com.fieldbook.shared.utilities.shareFile
 import com.russhwolf.settings.Settings
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
@@ -89,6 +98,8 @@ fun StoragePreferencesScreen(
     var showDeleteWarning1 by remember { mutableStateOf(false) }
     var showDeleteWarning2 by remember { mutableStateOf(false) }
     var isImporting by remember { mutableStateOf(false) }
+    var isExporting by remember { mutableStateOf(false) }
+    var exportFileName by remember { mutableStateOf("") }
     var importResult by remember { mutableStateOf<String?>(null) }
     var showSuccessSnackbar by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
@@ -98,8 +109,10 @@ fun StoragePreferencesScreen(
         settings.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_TYPE.key, ""),
         settings.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_LABEL.key, "")
     )
-    val deleteSuccessMessage = stringResource(Res.string.database_reset_message)
     val deleteFailureMessage = "Failed to delete database."
+    val exportCompleteMessage = stringResource(Res.string.export_complete)
+    val exportErrorMessage = stringResource(Res.string.export_error_general)
+    val invalidExportFileNameMessage = stringResource(Res.string.database_export_invalid_filename)
 
     val storageItems = listOf(
         StoragePreferenceItem(
@@ -208,7 +221,10 @@ fun StoragePreferencesScreen(
                                 .clickable {
                                     when (item.key) {
                                         "pref_database_import" -> showImportDialog = true
-                                        "pref_database_export" -> showExportDialog = true
+                                        "pref_database_export" -> {
+                                            exportFileName = defaultDatabaseExportFileName()
+                                            showExportDialog = true
+                                        }
                                         "pref_database_delete" -> showDeleteWarning1 = true
                                     }
                                 },
@@ -347,9 +363,63 @@ fun StoragePreferencesScreen(
     }
 
     if (showExportDialog) {
-        ExportScreen(
-            fieldIds = emptyList(),
-            onBack = { showExportDialog = false }
+        AlertDialog(
+            onDismissRequest = {
+                if (!isExporting) {
+                    showExportDialog = false
+                }
+            },
+            title = { Text(stringResource(Res.string.database_dialog_title)) },
+            text = {
+                OutlinedTextField(
+                    value = exportFileName,
+                    onValueChange = { exportFileName = it },
+                    enabled = !isExporting,
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val requestedFileName = exportFileName.trim()
+                        if (requestedFileName.isBlank()) {
+                            onSnackbarMessage(invalidExportFileNameMessage)
+                            return@Button
+                        }
+
+                        coroutineScope.launch {
+                            isExporting = true
+                            try {
+                                runCatching {
+                                    withContext(Dispatchers.Default) {
+                                        exportDatabaseZip(requestedFileName)
+                                    }
+                                }.onSuccess { exportedFile ->
+                                    showExportDialog = false
+                                    shareFile(exportedFile)
+                                    onSnackbarMessage(exportCompleteMessage)
+                                }.onFailure {
+                                    onSnackbarMessage(exportErrorMessage)
+                                }
+                            } finally {
+                                isExporting = false
+                            }
+                        }
+                    },
+                    enabled = !isExporting
+                ) {
+                    Text(stringResource(Res.string.dialog_save))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showExportDialog = false },
+                    enabled = !isExporting
+                ) {
+                    Text(stringResource(Res.string.dialog_cancel))
+                }
+            }
         )
     }
 }

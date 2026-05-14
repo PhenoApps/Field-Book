@@ -2,8 +2,6 @@
 
 package com.fieldbook.shared.utilities
 
-import com.fieldbook.shared.generated.resources.Res
-import com.fieldbook.shared.generated.resources.dir_field_export
 import com.fieldbook.shared.preferences.GeneralKeys
 import com.russhwolf.settings.Settings
 import kotlinx.cinterop.BetaInteropApi
@@ -178,6 +176,9 @@ actual fun createDir(
     return directoryPath.takeIf { ensureDirectoryExists(it) }?.let(::IosDocumentFile)
 }
 
+actual fun getFileByPath(path: String): DocumentFile? =
+    path.takeIf(fileManager::fileExistsAtPath)?.let(::IosDocumentFile)
+
 actual fun getDirectory(directory: StringResource): DocumentFile? =
     IosDocumentFile(directoryPath(directory))
 
@@ -214,9 +215,12 @@ actual fun copyFileToDirectory(source: DocumentFile, destinationDir: DocumentFil
     }
 }
 
-actual fun zipFiles(files: List<DocumentFile>, zipFileName: String): DocumentFile? {
-    val exportDir = getDirectory(Res.string.dir_field_export) ?: return null
-    val bundleDir = exportDir.createDirectory("$zipFileName.export") ?: return null
+actual fun zipFiles(
+    files: List<DocumentFile>,
+    destinationDir: DocumentFile,
+    zipFileName: String
+): DocumentFile? {
+    val bundleDir = destinationDir.createDirectory("$zipFileName.export") ?: return null
     files.forEach { file ->
         val name = file.name() ?: return@forEach
         copyFileToDirectory(file, bundleDir, name)
