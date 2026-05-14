@@ -341,42 +341,10 @@ fun TraitInputHost(
             )
         }
 
-        // Add more as needed, or use legacy string fallback for custom/unknown
-        else -> when (trait?.format) {
-            "barcode" -> NotImplementedTrait(
-                traitFormat = trait.format!!,
-            )
-
-            "disease", "disease_rating" -> NotImplementedTrait(
-                traitFormat = trait.format!!,
-            )
-
-            "gnss", "gps" -> NotImplementedTrait(
-                traitFormat = trait.format!!,
-            )
-
-            "labelprint", "label_print" -> NotImplementedTrait(
-                traitFormat = trait.format!!,
-            )
-
-            "audio", "usb_camera", "gopro", "canon" -> NotImplementedTrait(
-                traitFormat = trait.format!!,
-            )
-
-            else -> {
-                EditableValueText(
-                    value = value,
-                    onValueChange = {
-                        controller.updateCurrentTraitValue(it)
-                        onEdited()
-                    },
-                    modifier = modifier.fillMaxWidth().padding(8.dp),
-                    fontWeight = FontWeight.Bold,
-                    fontStyle = FontStyle.Italic,
-                    color = AppColors.fb_color_text_dark.color,
-                )
-            }
-        }
+        else -> NotImplementedTrait(
+            traitFormat = trait?.format ?: "unknown",
+            modifier = modifier.fillMaxWidth().padding(8.dp)
+        )
     }
 }
 
