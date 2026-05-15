@@ -838,8 +838,8 @@ class FieldEditorScreenViewModel(
     }
 
     fun syncBrapiObservations(fieldId: Int, defaultBrapiBaseUrl: String) {
+        _brapiSyncSaving.value = true
         viewModelScope.launch {
-            _brapiSyncSaving.value = true
             try {
                 when (val result = brapiObservationSyncSupport.sync(
                     fieldId = fieldId,

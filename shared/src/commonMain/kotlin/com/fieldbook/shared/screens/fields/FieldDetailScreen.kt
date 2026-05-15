@@ -136,6 +136,8 @@ fun FieldDetailScreen(
     var showSearchDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showBrapiSyncDialog by remember { mutableStateOf(false) }
+    var brapiSyncSubmitted by remember { mutableStateOf(false) }
+    var brapiSyncSaveStarted by remember { mutableStateOf(false) }
     var searchAttributeOptions by remember { mutableStateOf<List<String>>(emptyList()) }
 
     LaunchedEffect(fieldId) {
@@ -153,6 +155,16 @@ fun FieldDetailScreen(
             searchAttributeOptions = withContext(Dispatchers.Default) {
                 viewModel.getPossibleUniqueAttributes(fieldId)
             }
+        }
+    }
+
+    LaunchedEffect(brapiSyncSubmitted, brapiSyncSaving) {
+        if (brapiSyncSubmitted && brapiSyncSaving) {
+            brapiSyncSaveStarted = true
+        } else if (brapiSyncSubmitted && brapiSyncSaveStarted && !brapiSyncSaving) {
+            showBrapiSyncDialog = false
+            brapiSyncSubmitted = false
+            brapiSyncSaveStarted = false
         }
     }
 
@@ -453,8 +465,12 @@ fun FieldDetailScreen(
                     saving = brapiSyncSaving,
                     preview = brapiSyncPreview,
                     onDismiss = {
-                        showBrapiSyncDialog = false
-                        viewModel.clearBrapiObservationSync()
+                        if (!brapiSyncSaving) {
+                            showBrapiSyncDialog = false
+                            brapiSyncSubmitted = false
+                            brapiSyncSaveStarted = false
+                            viewModel.clearBrapiObservationSync()
+                        }
                     },
                     onSave = {
                         currentField.exp_id?.let {
@@ -462,8 +478,8 @@ fun FieldDetailScreen(
                                 fieldId = it,
                                 defaultBrapiBaseUrl = defaultBrapiBaseUrl,
                             )
+                            brapiSyncSubmitted = true
                         }
-                        showBrapiSyncDialog = false
                     }
                 )
             }
@@ -512,7 +528,10 @@ private fun BrapiObservationSyncDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                enabled = !saving,
+                onClick = onDismiss
+            ) {
                 Text(stringResource(Res.string.dialog_cancel))
             }
         }

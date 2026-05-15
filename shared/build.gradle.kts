@@ -414,6 +414,7 @@ kotlin {
                 implementation(libs.compass.geolocation)
                 implementation(libs.compass.geolocation.mobile)
                 implementation(libs.ksensor)
+                implementation(libs.kmp.zip)
             }
         }
 

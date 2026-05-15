@@ -7,7 +7,10 @@ import com.fieldbook.shared.database.repository.ExistingBrapiObservation
 import com.fieldbook.shared.database.repository.ObservationRepository
 import com.fieldbook.shared.database.repository.StudyRepository
 import com.fieldbook.shared.database.repository.TraitRepository
+import com.fieldbook.shared.sqldelight.createDatabase
 import com.fieldbook.shared.utilities.currentLocalInternalTimestamp
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 
 data class BrapiObservationSyncPreview(
     val traitCount: Int,
@@ -49,10 +52,10 @@ class BrapiObservationSyncSupport(
         fieldId: Int,
         service: BrAPIService,
         pageSize: Int,
-    ): BrapiResult<BrapiObservationSyncResult> {
+    ): BrapiResult<BrapiObservationSyncResult> = withContext(NonCancellable) {
         val field = studyRepository.getById(fieldId)
         val studyDbId = field.study_db_id.takeIf { it.isNotBlank() }
-            ?: return BrapiResult.Failure(message = "Field is missing BrAPI study id")
+            ?: return@withContext BrapiResult.Failure(message = "Field is missing BrAPI study id")
         val traitByExternalId = traitRepository.getAllTraits()
             .mapNotNull { trait ->
                 val traitId = trait.id ?: return@mapNotNull null
@@ -61,7 +64,7 @@ class BrapiObservationSyncSupport(
             }
             .toMap()
 
-        return when (val result = service.getStudyObservations(studyDbId, traitByExternalId.keys.toList(), pageSize)) {
+        when (val result = service.getStudyObservations(studyDbId, traitByExternalId.keys.toList(), pageSize)) {
             is BrapiResult.Failure -> result
             is BrapiResult.Success -> {
                 val syncResult = saveObservations(fieldId, result.value, traitByExternalId)
@@ -81,60 +84,66 @@ class BrapiObservationSyncSupport(
         observations: List<BrapiObservationImport>,
         traitByExternalId: Map<String, Long>,
     ): BrapiObservationSyncResult {
-        val existingObservations = getExistingObservations(fieldId)
-        val existingDbIds = existingObservations.mapNotNull { it.observationDbId }.toSet()
-        val repBase = existingObservations
-            .groupingBy { it.observationUnitDbId to it.externalTraitDbId }
-            .eachCount()
-            .toMutableMap()
-        val syncTimestamp = currentLocalInternalTimestamp()
-        var saved = 0
-        var skipped = 0
+        var syncResult = BrapiObservationSyncResult(savedObservations = 0, skippedObservations = 0)
 
-        observations
-            .filter { it.canImport }
-            .sortedBy { it.observationTimeStamp.orEmpty() }
-            .forEach { observation ->
-                val observationUnitDbId = observation.observationUnitDbId ?: return@forEach
-                val externalTraitDbId = observation.observationVariableDbId ?: return@forEach
-                val traitId = traitByExternalId[externalTraitDbId] ?: return@forEach
-                val observationDbId = observation.observationDbId
-                val normalizedTimestamp = observation.observationTimeStamp.normalizeBrapiTimestamp()
+        createDatabase().transaction {
+            val existingObservations = getExistingObservations(fieldId)
+            val existingByDbId = existingObservations
+                .mapNotNull { existing -> existing.observationDbId?.let { it to existing } }
+                .toMap()
+            val repBase = existingObservations
+                .groupingBy { it.observationUnitDbId to it.externalTraitDbId }
+                .eachCount()
+                .toMutableMap()
+            val syncTimestamp = currentLocalInternalTimestamp()
+            var saved = 0
+            var skipped = 0
 
-                if (observationDbId != null && observationDbId in existingDbIds) {
-                    val existing = existingObservations.firstOrNull { it.observationDbId == observationDbId }
+            observations
+                .filter { it.canImport }
+                .sortedBy { it.observationTimeStamp.orEmpty() }
+                .forEach { observation ->
+                    val observationUnitDbId = observation.observationUnitDbId ?: return@forEach
+                    val externalTraitDbId = observation.observationVariableDbId ?: return@forEach
+                    val traitId = traitByExternalId[externalTraitDbId] ?: return@forEach
+                    val observationDbId = observation.observationDbId
+                    val normalizedTimestamp = observation.observationTimeStamp.normalizeBrapiTimestamp()
+
+                    val existing = observationDbId?.let(existingByDbId::get)
                     if (existing?.timestamp.isSameOrAfter(normalizedTimestamp) == true) {
                         skipped++
                         return@forEach
                     }
+
+                    val repKey = observationUnitDbId to externalTraitDbId
+                    val nextRep = (repBase[repKey] ?: 0) + 1
+                    repBase[repKey] = nextRep
+
+                    if (hasObservation(fieldId, observationUnitDbId, traitId, nextRep.toString())) {
+                        skipped++
+                        return@forEach
+                    }
+
+                    insertObservation(
+                        fieldId = fieldId,
+                        observation = observation,
+                        traitId = traitId,
+                        observationTimeStamp = normalizedTimestamp,
+                        lastSyncedTime = syncTimestamp,
+                        rep = nextRep.toString(),
+                    )
+                    saved++
                 }
 
-                val repKey = observationUnitDbId to externalTraitDbId
-                val nextRep = (repBase[repKey] ?: 0) + 1
-                repBase[repKey] = nextRep
+            studyRepository.updateSyncDate(fieldId, syncTimestamp)
 
-                if (hasObservation(fieldId, observationUnitDbId, traitId, nextRep.toString())) {
-                    skipped++
-                    return@forEach
-                }
+            syncResult = BrapiObservationSyncResult(
+                savedObservations = saved,
+                skippedObservations = skipped,
+            )
+        }
 
-                insertObservation(
-                    fieldId = fieldId,
-                    observation = observation,
-                    traitId = traitId,
-                    observationTimeStamp = normalizedTimestamp,
-                    lastSyncedTime = syncTimestamp,
-                    rep = nextRep.toString(),
-                )
-                saved++
-            }
-
-        studyRepository.updateSyncDate(fieldId, syncTimestamp)
-
-        return BrapiObservationSyncResult(
-            savedObservations = saved,
-            skippedObservations = skipped,
-        )
+        return syncResult
     }
 
     private fun insertObservation(

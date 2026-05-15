@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,12 +19,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,38 +33,49 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.fieldbook.shared.database.utils.DATABASE_NAME
-import com.fieldbook.shared.database.utils.importDatabaseFromBundled
 import com.fieldbook.shared.generated.resources.Res
+import com.fieldbook.shared.generated.resources.database_dialog_title
 import com.fieldbook.shared.generated.resources.database_export
+import com.fieldbook.shared.generated.resources.database_export_invalid_filename
 import com.fieldbook.shared.generated.resources.database_import
 import com.fieldbook.shared.generated.resources.database_reset
-import com.fieldbook.shared.generated.resources.database_reset_message
 import com.fieldbook.shared.generated.resources.database_reset_warning1
 import com.fieldbook.shared.generated.resources.database_reset_warning2
 import com.fieldbook.shared.generated.resources.dialog_cancel
 import com.fieldbook.shared.generated.resources.dialog_delete
 import com.fieldbook.shared.generated.resources.dialog_no
+import com.fieldbook.shared.generated.resources.dialog_save
 import com.fieldbook.shared.generated.resources.dialog_warning
 import com.fieldbook.shared.generated.resources.dialog_yes
+import com.fieldbook.shared.generated.resources.export_complete
+import com.fieldbook.shared.generated.resources.export_error_general
 import com.fieldbook.shared.generated.resources.ic_pref_database_delete
 import com.fieldbook.shared.generated.resources.ic_pref_database_export
 import com.fieldbook.shared.generated.resources.ic_pref_database_import
 import com.fieldbook.shared.generated.resources.ic_pref_general_root_directory
+import com.fieldbook.shared.generated.resources.import_dialog_importing
+import com.fieldbook.shared.generated.resources.import_error_general
 import com.fieldbook.shared.generated.resources.preferences_storage_database_title
 import com.fieldbook.shared.generated.resources.preferences_storage_files_base_directory_description
 import com.fieldbook.shared.generated.resources.preferences_storage_files_base_directory_title
 import com.fieldbook.shared.generated.resources.preferences_storage_storage_title
 import com.fieldbook.shared.generated.resources.preferences_storage_title
 import com.fieldbook.shared.preferences.GeneralKeys
-import com.fieldbook.shared.screens.export.ExportScreen
 import com.fieldbook.shared.theme.AlertDialog
 import com.fieldbook.shared.theme.TextButton
+import com.fieldbook.shared.utilities.DatabaseImportResult
+import com.fieldbook.shared.utilities.DocumentFile
+import com.fieldbook.shared.utilities.availableDatabaseImportFiles
+import com.fieldbook.shared.utilities.defaultDatabaseExportFileName
 import com.fieldbook.shared.utilities.displayStorageDirectoryPath
+import com.fieldbook.shared.utilities.exportDatabaseZip
+import com.fieldbook.shared.utilities.importDatabaseFile
 import com.fieldbook.shared.utilities.resetLocalDatabaseAndPreferences
-import com.fieldbook.shared.utilities.selectFirstField
+import com.fieldbook.shared.utilities.shareFile
 import com.russhwolf.settings.Settings
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
@@ -89,8 +101,9 @@ fun StoragePreferencesScreen(
     var showDeleteWarning1 by remember { mutableStateOf(false) }
     var showDeleteWarning2 by remember { mutableStateOf(false) }
     var isImporting by remember { mutableStateOf(false) }
-    var importResult by remember { mutableStateOf<String?>(null) }
-    var showSuccessSnackbar by remember { mutableStateOf(false) }
+    var isExporting by remember { mutableStateOf(false) }
+    var exportFileName by remember { mutableStateOf("") }
+    var importFiles by remember { mutableStateOf<List<DocumentFile>>(emptyList()) }
     val coroutineScope = rememberCoroutineScope()
     val settings = remember { Settings() }
     val storageDirectorySummary = displayStorageDirectoryPath(
@@ -98,8 +111,11 @@ fun StoragePreferencesScreen(
         settings.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_TYPE.key, ""),
         settings.getString(GeneralKeys.DEFAULT_STORAGE_LOCATION_PROVIDER_LABEL.key, "")
     )
-    val deleteSuccessMessage = stringResource(Res.string.database_reset_message)
     val deleteFailureMessage = "Failed to delete database."
+    val exportCompleteMessage = stringResource(Res.string.export_complete)
+    val exportErrorMessage = stringResource(Res.string.export_error_general)
+    val importErrorMessage = stringResource(Res.string.import_error_general)
+    val invalidExportFileNameMessage = stringResource(Res.string.database_export_invalid_filename)
 
     val storageItems = listOf(
         StoragePreferenceItem(
@@ -207,8 +223,14 @@ fun StoragePreferencesScreen(
                                 .padding(16.dp)
                                 .clickable {
                                     when (item.key) {
-                                        "pref_database_import" -> showImportDialog = true
-                                        "pref_database_export" -> showExportDialog = true
+                                        "pref_database_import" -> {
+                                            importFiles = availableDatabaseImportFiles()
+                                            showImportDialog = true
+                                        }
+                                        "pref_database_export" -> {
+                                            exportFileName = defaultDatabaseExportFileName()
+                                            showExportDialog = true
+                                        }
                                         "pref_database_delete" -> showDeleteWarning1 = true
                                     }
                                 },
@@ -232,35 +254,54 @@ fun StoragePreferencesScreen(
                     onDismissRequest = {
                         showImportDialog = false
                         isImporting = false
-                        importResult = null
                     },
                     title = { Text(text = stringResource(Res.string.database_import)) },
                     text = {
-                        Column {
-                            if (!isImporting && importResult == null) {
-                                TextButton(
-                                    onClick = {
-                                        coroutineScope.launch {
-                                            isImporting = true
-                                            importResult = null
-                                            try {
-                                                importDatabaseFromBundled(
-                                                    DATABASE_NAME
-                                                )
-                                                selectFirstField()
-                                                showImportDialog = false
-                                                showSuccessSnackbar = true
-                                            } catch (e: Exception) {
-                                                importResult =
-                                                    "Failed to import sample database: ${'$'}{e.message}"
-                                            } finally {
-                                                isImporting = false
-                                            }
+                        when {
+                            isImporting -> Text(stringResource(Res.string.import_dialog_importing))
+                            importFiles.isEmpty() -> Text("No database backups found.")
+                            else -> {
+                                LazyColumn(modifier = Modifier.heightIn(max = 320.dp)) {
+                                    items(importFiles) { file ->
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable(enabled = !isImporting) {
+                                                    coroutineScope.launch {
+                                                        isImporting = true
+                                                        try {
+                                                            val result = withContext(Dispatchers.Default) {
+                                                                importDatabaseFile(file)
+                                                            }
+
+                                                            when (result) {
+                                                                DatabaseImportResult.Success -> {
+                                                                    showImportDialog = false
+                                                                    onSnackbarMessage("Database imported successfully.")
+                                                                }
+
+                                                                DatabaseImportResult.NoDatabaseFile,
+                                                                DatabaseImportResult.UnsupportedFile -> {
+                                                                    onSnackbarMessage(importErrorMessage)
+                                                                }
+                                                            }
+                                                        } catch (_: Exception) {
+                                                            onSnackbarMessage(importErrorMessage)
+                                                        } finally {
+                                                            isImporting = false
+                                                        }
+                                                    }
+                                                }
+                                                .padding(vertical = 12.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = file.name().orEmpty(),
+                                                style = MaterialTheme.typography.bodyLarge
+                                            )
                                         }
-                                    },
-                                    enabled = !isImporting
-                                ) {
-                                    Text("sample_db")
+                                        Divider()
+                                    }
                                 }
                             }
                         }
@@ -270,7 +311,6 @@ fun StoragePreferencesScreen(
                             onClick = {
                                 showImportDialog = false
                                 isImporting = false
-                                importResult = null
                             }
                         ) {
                             Text(stringResource(Res.string.dialog_cancel))
@@ -337,19 +377,67 @@ fun StoragePreferencesScreen(
                     }
                 )
             }
-            if (showSuccessSnackbar) {
-                LaunchedEffect(showSuccessSnackbar) {
-                    onSnackbarMessage("Sample database imported successfully.")
-                    showSuccessSnackbar = false
-                }
-            }
         }
     }
 
     if (showExportDialog) {
-        ExportScreen(
-            fieldIds = emptyList(),
-            onBack = { showExportDialog = false }
+        AlertDialog(
+            onDismissRequest = {
+                if (!isExporting) {
+                    showExportDialog = false
+                }
+            },
+            title = { Text(stringResource(Res.string.database_dialog_title)) },
+            text = {
+                OutlinedTextField(
+                    value = exportFileName,
+                    onValueChange = { exportFileName = it },
+                    enabled = !isExporting,
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val requestedFileName = exportFileName.trim()
+                        if (requestedFileName.isBlank()) {
+                            onSnackbarMessage(invalidExportFileNameMessage)
+                            return@Button
+                        }
+
+                        coroutineScope.launch {
+                            isExporting = true
+                            try {
+                                runCatching {
+                                    withContext(Dispatchers.Default) {
+                                        exportDatabaseZip(requestedFileName)
+                                    }
+                                }.onSuccess { exportedFile ->
+                                    showExportDialog = false
+                                    shareFile(exportedFile)
+                                    onSnackbarMessage(exportCompleteMessage)
+                                }.onFailure {
+                                    onSnackbarMessage(exportErrorMessage)
+                                }
+                            } finally {
+                                isExporting = false
+                            }
+                        }
+                    },
+                    enabled = !isExporting
+                ) {
+                    Text(stringResource(Res.string.dialog_save))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showExportDialog = false },
+                    enabled = !isExporting
+                ) {
+                    Text(stringResource(Res.string.dialog_cancel))
+                }
+            }
         )
     }
 }

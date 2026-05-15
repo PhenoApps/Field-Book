@@ -32,8 +32,6 @@ import com.fieldbook.shared.screens.brapi.trait.brapiTraitImportViewModelFactory
 import com.fieldbook.shared.screens.collect.CollectScreen
 import com.fieldbook.shared.screens.export.ExportScreen
 import com.fieldbook.shared.screens.fields.FieldEditorScreen
-import com.fieldbook.shared.screens.fields.FieldEditorScreenViewModel
-import com.fieldbook.shared.screens.fields.fieldEditorViewModelFactory
 import com.fieldbook.shared.screens.preferences.AppearancePreferencesScreen
 import com.fieldbook.shared.screens.preferences.BrapiPreferencesScreen
 import com.fieldbook.shared.screens.preferences.FeaturePreferenceScreen
@@ -42,8 +40,6 @@ import com.fieldbook.shared.screens.preferences.PreferencesScreen
 import com.fieldbook.shared.screens.preferences.StorageDefinerScreen
 import com.fieldbook.shared.screens.preferences.StoragePreferencesScreen
 import com.fieldbook.shared.screens.trait.TraitEditorScreen
-import com.fieldbook.shared.screens.trait.TraitEditorScreenViewModel
-import com.fieldbook.shared.screens.trait.traitEditorScreenViewModelFactory
 import kotlinx.coroutines.launch
 
 @Composable
@@ -70,12 +66,6 @@ fun KmpApp(
     } else {
         KmpHostScreenType.CONFIG
     }
-    val traitEditorViewModel: TraitEditorScreenViewModel = viewModel(
-        factory = traitEditorScreenViewModelFactory()
-    )
-    val fieldEditorViewModel: FieldEditorScreenViewModel = viewModel(
-        factory = fieldEditorViewModelFactory()
-    )
     val brapiImportSharedViewModel: BrapiImportSharedViewModel = viewModel(
         factory = brapiImportSharedViewModelFactory()
     )
@@ -111,7 +101,6 @@ fun KmpApp(
                 FieldEditorScreen(
                     onBack = { navController.navigateBackOrExit(onExit) },
                     onNavigateToBrapi = { navController.navigateTo(KmpHostScreenType.FIELD_BRAPI) },
-                    viewModel = fieldEditorViewModel,
                     onSnackbarMessage = onSnackbarMessage,
                 )
             }
@@ -133,8 +122,6 @@ fun KmpApp(
                     onBack = { navController.navigateBackOrExit(onExit) },
                     onMissingStudy = { navController.navigateBackOrExit(onExit) },
                     onImportComplete = {
-                        fieldEditorViewModel.loadFields()
-                        traitEditorViewModel.loadTraits()
                         navController.navigateTo(
                             screen = KmpHostScreenType.FIELD_EDITOR,
                             popUpToScreen = KmpHostScreenType.FIELD_EDITOR,
@@ -148,7 +135,6 @@ fun KmpApp(
                 TraitEditorScreen(
                     onBack = { navController.navigateBackOrExit(onExit) },
                     onNavigateToBrapi = { navController.navigateTo(KmpHostScreenType.TRAIT_BRAPI) },
-                    viewModel = traitEditorViewModel,
                     onSnackbarMessage = onSnackbarMessage,
                 )
             }
@@ -158,7 +144,6 @@ fun KmpApp(
                     onBack = { navController.navigateBackOrExit(onExit) },
                     onNavigateToFilter = { navController.navigateTo(KmpHostScreenType.BRAPI_FILTER) },
                     onImportComplete = {
-                        traitEditorViewModel.loadTraits()
                         navController.navigateBackOrExit(onExit)
                     },
                     sharedViewModel = brapiImportSharedViewModel,
