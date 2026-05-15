@@ -173,8 +173,10 @@
 | **Settings/Storage**             |                    |                    |
 | Define storage location          | :white_check_mark: | :white_check_mark: |
 | Import db (sample)               | :white_check_mark: | :white_check_mark: |
-| Import db (other file)           |                    |                    |
-| Export db                        |                    |                    |
+| Import db (other zip exports)    | :white_check_mark: | :white_check_mark: |
+| Import db (pref file xml)        |                    |                    |
+| Export db                        | :white_check_mark: | :white_check_mark: |
+| Export db (pref file xml)        | :white_check_mark: | :white_check_mark: |
 | Delete db                        | :white_check_mark: | :white_check_mark: |
 |                                  |                    |                    |
 | **Settings/Experimental**        |                    |                    |
