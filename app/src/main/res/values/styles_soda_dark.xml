@@ -119,11 +119,25 @@
         <item name="fb_color_text_button_background">@color/soda_dark_panel</item>
         <item name="fb_color_text_light">@color/soda_dark_text_bright</item>
         <item name="fb_color_hint_text">@color/soda_dark_text_dim</item>
-        <item name="fb_color_text_dark">@color/soda_dark_text</item>
-        <item name="fb_icon_tint">@color/soda_dark_text</item>
+        <item name="fb_color_text_dark">@color/soda_dark_text_bright</item>
+        <item name="fb_color_text_secondary">@color/soda_dark_text_secondary</item>
+        <item name="fb_icon_tint">@color/soda_dark_text_bright</item>
         <item name="fb_icon_fill_tint">@color/soda_dark_text_bright</item>
+        <item name="fb_title_text_color">@color/soda_dark_text_bright</item>
         <item name="fb_spinner_focused">@color/soda_dark_accent</item>
         <item name="fb_spinner_selected">@color/soda_dark_primary_transparent</item>
+
+        <item name="mal_card_background">@color/soda_dark_row</item>
+        <item name="mal_color_primary">@color/soda_dark_text_bright</item>
+        <item name="mal_color_secondary">@color/soda_dark_text_secondary</item>
+        <item name="mal_toolbarTheme">@style/Theme.Mal.Toolbar.Dark</item>
+        <item name="mal_toolbarPopupTheme">@style/Theme.Mal.Toolbar.Dark</item>
+
+        <item name="android:colorBackground">@color/soda_dark_window</item>
+        <item name="android:windowBackground">@color/soda_dark_window</item>
+        <item name="android:textColorPrimary">@color/soda_dark_text_bright</item>
+        <item name="android:textColorSecondary">@color/soda_dark_text_secondary</item>
+        <item name="colorControlNormal">@color/soda_dark_text_bright</item>
 
         <item name="colorPrimary">?attr/fb_color_primary</item>
         <item name="colorPrimaryDark">?attr/fb_color_primary_dark</item>

@@ -48,6 +48,12 @@
         <item name="fb_color_primary">@color/soda_dark_panel</item>
         <item name="fb_color_primary_dark">@color/soda_dark_window</item>
         <item name="fb_color_accent">@color/soda_dark_accent</item>
+        <item name="fb_color_background">@color/soda_dark_window</item>
+
+        <item name="about_libraries_window_background">@color/soda_dark_window</item>
+        <item name="about_libraries_card">@color/soda_dark_row</item>
+        <item name="about_libraries_title_openSource">@color/soda_dark_text_bright</item>
+        <item name="about_libraries_text_openSource">@color/soda_dark_text</item>
     </style>
 
     <!-- High Contrast Theme -->

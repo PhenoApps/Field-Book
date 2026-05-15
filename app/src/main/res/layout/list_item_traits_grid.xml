@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="128dp"
@@ -16,16 +17,18 @@
         android:scaleType="centerCrop"
         android:scaleX="2"
         android:scaleY="2"
+        app:tint="?attr/colorControlNormal"
         tools:src="@drawable/ic_trait_numeric" />
 
     <TextView
-        style="@style/TextAppearance.MaterialComponents.Subtitle2"
         android:id="@+id/list_item_traits_grid_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:ellipsize="marquee"
         android:singleLine="true"
+        android:textColor="?attr/fb_color_text_dark"
+        android:textSize="?attr/fb_subheading_text_size"
         tools:text="@string/traits_format_disease_rating" />
 
 </LinearLayout>
