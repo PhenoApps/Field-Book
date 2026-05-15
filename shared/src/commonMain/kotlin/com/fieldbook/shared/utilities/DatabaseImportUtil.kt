@@ -108,10 +108,10 @@ private fun readPreferencesXml(bytes: ByteArray): Map<String, ImportedPreference
     val body = xml.substring(mapStart, mapEnd)
     val preferences = mutableMapOf<String, ImportedPreferenceValue>()
 
-    preferenceElementRegex.findAll(body).forEach { match ->
+    preferenceElementRegex.findEach(body) { match ->
         val tagName = match.groupValues[1]
         val attributes = readXmlAttributes(match.groupValues[2])
-        val name = attributes["name"] ?: return@forEach
+        val name = attributes["name"] ?: return@findEach
 
         when (tagName) {
             "string" -> {
@@ -141,16 +141,34 @@ private fun readPreferencesXml(bytes: ByteArray): Map<String, ImportedPreference
 }
 
 private val preferenceElementRegex =
-    Regex("""<([A-Za-z][A-Za-z0-9_-]*)\b([^>]*)(?:/>|>(.*?)</\1>)""", RegexOption.DOT_MATCHES_ALL)
+    Regex("""<([A-Za-z][A-Za-z0-9_-]*)\b([^>]*)(?:/>|>([\s\S]*?)</\1>)""")
 
 private val xmlAttributeRegex =
     Regex("""([A-Za-z_:][A-Za-z0-9_:.-]*)\s*=\s*("[^"]*"|'[^']*')""")
 
 private fun readXmlAttributes(attributes: String): Map<String, String> =
-    xmlAttributeRegex.findAll(attributes).associate { match ->
-        val valueWithQuotes = match.groupValues[2]
-        match.groupValues[1] to valueWithQuotes.substring(1, valueWithQuotes.length - 1).decodeXmlEntities()
+    buildMap {
+        xmlAttributeRegex.findEach(attributes) { match ->
+            val valueWithQuotes = match.groupValues[2]
+            put(
+                match.groupValues[1],
+                valueWithQuotes.substring(1, valueWithQuotes.length - 1).decodeXmlEntities(),
+            )
+        }
     }
+
+private inline fun Regex.findEach(input: CharSequence, action: (MatchResult) -> Unit) {
+    var startIndex = 0
+    while (startIndex <= input.length) {
+        val match = find(input, startIndex) ?: break
+        action(match)
+        startIndex = if (match.range.isEmpty()) {
+            match.range.last + 2
+        } else {
+            match.range.last + 1
+        }
+    }
+}
 
 private fun String.decodeXmlEntities(): String =
     replace("&lt;", "<")
