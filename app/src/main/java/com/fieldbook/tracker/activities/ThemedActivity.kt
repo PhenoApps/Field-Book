@@ -131,6 +131,15 @@ open class ThemedActivity: AppCompatActivity() {
             else -> styles.medium
         }
 
+        @JvmStatic
+        fun resolveActivityThemeStyle(context: android.content.Context): Int {
+            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+            val themeIndex = prefs.getString(PreferenceKeys.THEME, "0")?.toInt() ?: 0
+            val textIndex = prefs.getString(PreferenceKeys.TEXT_THEME, "1")?.toInt() ?: 1
+            val styles = themeStyles[themeIndex] ?: themeStyles.getValue(DEFAULT)
+            return themeStyleFor(textIndex, styles)
+        }
+
         fun applyTheme(activity: Activity) {
 
             val prefs = PreferenceManager.getDefaultSharedPreferences(activity)

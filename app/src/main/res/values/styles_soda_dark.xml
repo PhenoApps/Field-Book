@@ -84,6 +84,8 @@
         <item name="android:colorBackground">@color/soda_dark_window</item>
         <item name="colorSurface">@color/soda_dark_row</item>
         <item name="colorOnSurface">@color/soda_dark_text_bright</item>
+
+        <item name="alertDialogTheme">@style/AppAlertDialog.SodaDark</item>
     </style>
 
     <style name="BaseAppTheme.SodaDark" parent="Theme.SodaDark.Palette" />
