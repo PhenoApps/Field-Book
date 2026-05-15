@@ -15,6 +15,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
+import com.google.android.material.color.MaterialColors;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -277,7 +278,7 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
 
         Bitmap cardBitmap = Bitmap.createBitmap(holder.statisticsCard.getWidth(), holder.statisticsCard.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas cardCanvas = new Canvas(cardBitmap);
-        cardCanvas.drawColor(Color.WHITE);
+        cardCanvas.drawColor(MaterialColors.getColor(originActivity, R.attr.fb_color_background, Color.WHITE));
         holder.statisticsCard.draw(cardCanvas);
 
         // Adding the field book logo

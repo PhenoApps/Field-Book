@@ -79,6 +79,11 @@
         <item name="stepper_icon_on_done_bg_color">@color/soda_dark_accent</item>
         <item name="stepper_line_color">@color/soda_dark_border</item>
         <item name="stepper_line_on_done_color">@color/soda_dark_accent</item>
+
+        <item name="android:windowBackground">@color/soda_dark_window</item>
+        <item name="android:colorBackground">@color/soda_dark_window</item>
+        <item name="colorSurface">@color/soda_dark_row</item>
+        <item name="colorOnSurface">@color/soda_dark_text_bright</item>
     </style>
 
     <style name="BaseAppTheme.SodaDark" parent="Theme.SodaDark.Palette" />
@@ -109,7 +114,12 @@
 
     <style name="ActivityDialog.SodaDark" parent="Theme.SodaDark.Palette.Dialog" />
 
-    <style name="Theme.SodaDark.Palette.Mal" parent="BaseAppTheme.Mal">
+    <style name="Theme.SodaDark.Palette.Mal" parent="Theme.Mal.Dark">
+        <item name="android:textViewStyle">@style/TextViewStyle</item>
+        <item name="toolbarStyle">@style/AppToolbar</item>
+        <item name="actionBarTheme">@style/AppToolbar</item>
+        <item name="navigationIcon">@drawable/ic_arrow_left</item>
+
         <item name="fb_color_primary">@color/soda_dark_panel</item>
         <item name="fb_color_primary_dark">@color/soda_dark_window</item>
         <item name="fb_color_accent">@color/soda_dark_accent</item>
