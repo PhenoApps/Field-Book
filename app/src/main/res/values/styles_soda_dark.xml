@@ -86,6 +86,9 @@
         <item name="colorOnSurface">@color/soda_dark_text_bright</item>
 
         <item name="alertDialogTheme">@style/AppAlertDialog.SodaDark</item>
+        <item name="textInputStyle">@style/FieldBookTextInputLayoutStyle</item>
+        <item name="editTextStyle">@style/DialogEditTextStyle</item>
+        <item name="android:textColorHint">?attr/fb_color_text_light</item>
     </style>
 
     <style name="BaseAppTheme.SodaDark" parent="Theme.SodaDark.Palette" />
@@ -97,38 +100,21 @@
 
     <style name="ActivityDialog.SodaDark" parent="Theme.SodaDark.Palette.Dialog" />
 
-    <style name="Theme.SodaDark.Palette.Mal" parent="Theme.Mal.Dark">
+    <style name="Theme.SodaDark.Palette.Mal" parent="Theme.SodaDark.Palette">
         <item name="android:textViewStyle">@style/TextViewStyle</item>
         <item name="toolbarStyle">@style/AppToolbar</item>
         <item name="actionBarTheme">@style/AppToolbar</item>
         <item name="navigationIcon">@drawable/ic_arrow_left</item>
 
-        <item name="fb_color_primary">@color/soda_dark_panel</item>
-        <item name="fb_color_primary_dark">@color/soda_dark_window</item>
-        <item name="fb_color_accent">@color/soda_dark_accent</item>
-        <item name="fb_color_background">@color/soda_dark_window</item>
         <item name="fb_color_card_background">@color/soda_dark_row</item>
-        <item name="fb_color_list_selector_default_overlay">#30FFFFFF</item>
-        <item name="fb_color_text_button_background">@color/soda_dark_panel</item>
-        <item name="fb_color_text_light">@color/soda_dark_text_bright</item>
-        <item name="fb_color_hint_text">@color/soda_dark_text_dim</item>
         <item name="fb_color_text_dark">@color/soda_dark_text_bright</item>
-        <item name="fb_color_text_secondary">@color/soda_dark_text_secondary</item>
-        <item name="fb_icon_tint">@color/soda_dark_text_bright</item>
-        <item name="fb_icon_fill_tint">@color/soda_dark_text_bright</item>
         <item name="fb_title_text_color">@color/soda_dark_text_bright</item>
-        <item name="fb_spinner_focused">@color/soda_dark_accent</item>
-        <item name="fb_spinner_selected">@color/soda_dark_primary_transparent</item>
 
         <item name="mal_card_background">@color/soda_dark_row</item>
         <item name="mal_color_primary">@color/soda_dark_text_bright</item>
-        <item name="mal_color_secondary">@color/soda_dark_text_secondary</item>
+        <item name="mal_color_secondary">@color/soda_dark_text</item>
         <item name="mal_toolbarTheme">@style/Theme.Mal.Toolbar.Dark</item>
         <item name="mal_toolbarPopupTheme">@style/Theme.Mal.Toolbar.Dark</item>
-
-        <item name="colorPrimary">?attr/fb_color_primary</item>
-        <item name="colorPrimaryDark">?attr/fb_color_primary_dark</item>
-        <item name="colorAccent">?attr/fb_color_accent</item>
     </style>
 
     <style name="BaseAppTheme.Mal.SodaDark" parent="Theme.SodaDark.Palette.Mal" />

@@ -124,7 +124,8 @@ public class AboutActivity extends MaterialAboutActivity {
         }
         drawable = DrawableCompat.wrap(drawable.mutate());
         TypedValue typedValue = new TypedValue();
-        if (getTheme().resolveAttribute(androidx.appcompat.R.attr.colorControlNormal, typedValue, true)) {
+        if (getTheme().resolveAttribute(R.attr.fb_icon_tint, typedValue, true)
+                || getTheme().resolveAttribute(androidx.appcompat.R.attr.colorControlNormal, typedValue, true)) {
             DrawableCompat.setTint(drawable, typedValue.data);
         }
         return drawable;

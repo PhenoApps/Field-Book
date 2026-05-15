@@ -2,6 +2,7 @@ package com.fieldbook.tracker.utilities
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.TypedValue
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.ThemedActivity
@@ -151,6 +152,19 @@ object AppThemeResolver {
 
     fun statusBarColorRes(themeIndex: Int): Int =
         (themeStyles[themeIndex] ?: themeStyles.getValue(ThemedActivity.DEFAULT)).statusBarColorRes
+
+    /** Resolves [android.R.attr.alertDialogTheme] from the activity theme (Soda-aware). */
+    @JvmStatic
+    fun alertDialogStyle(context: Context): Int {
+        val typedValue = TypedValue()
+        return if (context.theme.resolveAttribute(android.R.attr.alertDialogTheme, typedValue, true)
+            && typedValue.resourceId != 0
+        ) {
+            typedValue.resourceId
+        } else {
+            R.style.AppAlertDialog
+        }
+    }
 
     private fun textStyleFor(textIndex: Int, styles: TextSizedStyles): Int = when (textIndex) {
         ThemedActivity.SMALL -> styles.small

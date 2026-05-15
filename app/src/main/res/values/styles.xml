@@ -88,6 +88,7 @@
         <item name="progressBarStyle">@style/ProgressBarStyle</item>
         <item name="indeterminateProgressStyle">@style/IndeterminateProgressStyle</item>
         <item name="editTextStyle">@style/EditTextStyle</item>
+        <item name="textInputStyle">@style/FieldBookTextInputLayoutStyle</item>
         <item name="spinnerDropDownItemStyle">@style/SpinnerDropDownItemStyle</item>
         <item name="spinnerStyle">@style/SpinnerStyle</item>
         <item name="dropDownListViewStyle">@style/DropDownListViewStyle</item>

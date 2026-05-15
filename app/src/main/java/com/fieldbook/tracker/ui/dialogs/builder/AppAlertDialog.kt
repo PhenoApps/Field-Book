@@ -40,7 +40,7 @@ fun AppAlertDialog(
     Dialog(onDismissRequest = onDismissRequest) {
         Surface(
             modifier = modifier.fillMaxWidth(),
-            color = MaterialTheme.colorScheme.surface,
+            color = AppTheme.colors.lightGray,
             shadowElevation = 0.dp
         ) {
             Column(
@@ -53,6 +53,7 @@ fun AppAlertDialog(
                     Text(
                         text = title,
                         style = AppTheme.typography.titleStyle,
+                        color = AppTheme.colors.text.title,
                         modifier = Modifier
                             .padding(horizontal = 24.dp)
                             .padding(bottom = 16.dp)

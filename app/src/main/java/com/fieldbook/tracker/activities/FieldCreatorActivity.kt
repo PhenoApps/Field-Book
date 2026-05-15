@@ -253,7 +253,7 @@ class FieldCreatorActivity : ThemedActivity() {
     }
 
     private fun showExitWarningDialog() {
-        AlertDialog.Builder(this, R.style.AppAlertDialog)
+        AlertDialog.Builder(this, com.fieldbook.tracker.utilities.AppThemeResolver.alertDialogStyle(this))
             .setTitle(getString(R.string.field_creator_exit_dialog_title))
             .setMessage(getString(R.string.field_creator_exit_dialog_message))
             .setPositiveButton(getString(R.string.dialog_exit)) { _, _ ->

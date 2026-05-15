@@ -3,11 +3,6 @@
 
     <!-- MFlisar changelog library (com.github.MFlisar:changelog) -->
 
-    <!-- Used by AlertDialog.Builder(activity); fragment setStyle alone does not apply. -->
-    <style name="AppAlertDialog.SodaDark" parent="Theme.SodaDark.Palette.Dialog">
-        <item name="android:windowIsFloating">true</item>
-    </style>
-
     <style name="ChangelogDialogDarkTheme" parent="AppAlertDialog.SodaDark">
         <item name="android:windowNoTitle">false</item>
     </style>

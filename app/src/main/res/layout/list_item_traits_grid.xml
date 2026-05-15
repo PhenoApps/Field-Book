@@ -17,7 +17,7 @@
         android:scaleType="centerCrop"
         android:scaleX="2"
         android:scaleY="2"
-        app:tint="?attr/colorControlNormal"
+        app:tint="?attr/fb_icon_tint"
         tools:src="@drawable/ic_trait_numeric" />
 
     <TextView

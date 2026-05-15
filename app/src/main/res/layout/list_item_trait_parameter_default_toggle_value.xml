@@ -26,6 +26,7 @@
 
         <ToggleButton
             android:id="@+id/dialog_new_trait_default_toggle_btn"
+            style="@style/ToggleButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textOff="@string/traits_create_false"

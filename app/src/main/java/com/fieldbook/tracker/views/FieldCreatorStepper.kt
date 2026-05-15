@@ -38,6 +38,9 @@ fun FieldCreatorStepper(currentStep: FieldCreationStep, onStepClicked: (FieldCre
     theme.resolveAttribute(R.attr.stepper_icon_color, typedValue, true)
     val stepperIconColor = Color(typedValue.data)
 
+    theme.resolveAttribute(R.attr.fb_icon_tint, typedValue, true)
+    val stepperIconTint = Color(typedValue.data)
+
     theme.resolveAttribute(R.attr.stepper_icon_bg_color, typedValue, true)
     val stepperIconBgColor = Color(typedValue.data)
 
@@ -59,14 +62,13 @@ fun FieldCreatorStepper(currentStep: FieldCreationStep, onStepClicked: (FieldCre
             onTodo = StepStyle(
                 stepColor = stepperIconBgColor,
                 stepSize = 40.dp,
-                iconStyle = IconStyle(iconSize = 24.dp),
+                iconStyle = IconStyle(iconSize = 24.dp, iconTint = stepperIconTint),
                 borderStyle = BorderStyle(color = stepperIconColor)
             ),
             onCurrent = StepStyle(
                 stepColor = stepperIconBgColor,
                 stepSize = 60.dp,
-                iconStyle = IconStyle(iconSize = 44.dp),
-                // textStyle = TextStyle(color = Color.Black, fontSize = 18.sp),
+                iconStyle = IconStyle(iconSize = 44.dp, iconTint = stepperIconTint),
                 borderStyle = BorderStyle(color = stepperIconColor)
             ),
             onDone = StepStyle(

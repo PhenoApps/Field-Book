@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppAlertDialog.SodaDark" parent="Theme.SodaDark.Palette">
+        <item name="android:colorBackground">?attr/fb_color_background</item>
+        <item name="android:windowBackground">?attr/fb_color_background</item>
+        <item name="android:textColorPrimary">?attr/fb_color_text_light</item>
+        <item name="android:textColorSecondary">?attr/fb_color_text_secondary</item>
+        <item name="android:textColorHint">?attr/fb_color_hint_text</item>
+        <item name="colorControlNormal">?attr/fb_icon_tint</item>
+        <item name="colorAccent">?attr/fb_color_accent</item>
+        <item name="colorSurface">?attr/fb_color_card_background</item>
+
+        <item name="buttonBarNegativeButtonStyle">@style/ButtonBarStyle</item>
+        <item name="buttonBarNeutralButtonStyle">@style/ButtonBarStyle</item>
+        <item name="buttonBarPositiveButtonStyle">@style/ButtonBarStyle</item>
+        <item name="android:background">@color/TRANSPARENT</item>
+        <item name="checkedTextViewStyle">@style/AlertCheckedView</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:windowTitleBackgroundStyle">@android:color/transparent</item>
+        <item name="android:windowTitleStyle">@style/DialogTitleStyle.SodaDark</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowSoftInputMode">stateUnchanged</item>
+        <item name="android:fitsSystemWindows">true</item>
+        <item name="windowNoTitle">true</item>
+
+        <item name="editTextStyle">@style/DialogEditTextStyle</item>
+        <item name="android:editTextStyle">@style/DialogEditTextStyle</item>
+        <item name="textInputStyle">@style/DialogTextInputLayoutStyle</item>
+        <item name="floatingActionButtonStyle">@style/FloatingActionButtonStyle</item>
+        <item name="imageButtonStyle">@style/ImageButtonStyle</item>
+        <item name="radioButtonStyle">@style/RadioButtonStyle</item>
+        <item name="buttonStyle">@style/ButtonStyle</item>
+        <item name="android:buttonStyleToggle">@style/ToggleButtonStyle</item>
+        <item name="toolbarStyle">@style/AppToolbar</item>
+        <item name="checkboxStyle">@style/CheckBoxStyle</item>
+        <item name="actionOverflowButtonStyle">@style/OverFlowStyle</item>
+        <item name="progressBarStyle">@style/ProgressBarStyle</item>
+        <item name="indeterminateProgressStyle">@style/IndeterminateProgressStyle</item>
+        <item name="android:textViewStyle">@style/TextViewStyle</item>
+        <item name="spinnerDropDownItemStyle">@style/SpinnerDropDownItemStyle</item>
+        <item name="dropDownListViewStyle">@style/DropDownListViewStyle</item>
+        <item name="android:checkedTextViewStyle">@style/AlertCheckedView</item>
+    </style>
+
+    <style name="DialogTitleStyle.SodaDark" parent="DialogTitleStyle">
+        <item name="android:textColor">?attr/fb_color_text_light</item>
+    </style>
+
+</resources>

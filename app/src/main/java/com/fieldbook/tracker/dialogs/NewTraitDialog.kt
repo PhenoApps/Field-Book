@@ -272,7 +272,7 @@ class NewTraitDialog(
 
         val builder = AlertDialog.Builder(
             activity,
-            R.style.AppAlertDialog
+            com.fieldbook.tracker.utilities.AppThemeResolver.alertDialogStyle(activity),
         )
 
         builder.setTitle(R.string.trait_creator_title_layout)
@@ -471,7 +471,10 @@ class NewTraitDialog(
 
     private fun askUserToVerifyDismiss() {
 
-        val builder = AlertDialog.Builder(activity, R.style.AppAlertDialog)
+        val builder = AlertDialog.Builder(
+            activity,
+            com.fieldbook.tracker.utilities.AppThemeResolver.alertDialogStyle(activity),
+        )
 
         builder.setTitle(activity.getString(R.string.dialog_close))
 

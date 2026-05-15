@@ -254,7 +254,10 @@ class TraitActivity : ThemedActivity() {
             } catch (_: Exception) {
             }
 
-            val dialog = android.app.Dialog(this, R.style.AppAlertDialog)
+            val dialog = android.app.Dialog(
+                this,
+                com.fieldbook.tracker.utilities.AppThemeResolver.alertDialogStyle(this),
+            )
             dialog.setContentView(dialogView)
 
             // Add Save/Cancel buttons at the bottom of the dialogView programmatically
