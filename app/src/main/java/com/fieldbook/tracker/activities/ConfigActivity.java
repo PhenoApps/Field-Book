@@ -35,6 +35,7 @@ import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.AppLanguageUtil;
+import com.fieldbook.tracker.utilities.AppThemeResolver;
 import com.fieldbook.tracker.utilities.FieldBookChangelogRenderer;
 import com.fieldbook.tracker.utilities.FuzzySearch;
 import com.fieldbook.tracker.utilities.InsetHandler;
@@ -244,8 +245,7 @@ public class ConfigActivity extends ThemedActivity {
     }
 
     private boolean useDarkChangelogDialog() {
-        String theme = preferences.getString(PreferenceKeys.THEME, "0");
-        return String.valueOf(ThemedActivity.SODA_DARK).equals(theme);
+        return AppThemeResolver.isSodaDark(preferences);
     }
 
     private ChangelogBuilder newChangelogBuilder(Boolean managedShow, Boolean rateButton, boolean useCustomRenderer) {

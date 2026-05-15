@@ -4,15 +4,8 @@
     <!-- MFlisar changelog library (com.github.MFlisar:changelog) -->
 
     <!-- Used by AlertDialog.Builder(activity); fragment setStyle alone does not apply. -->
-    <style name="AppAlertDialog.SodaDark" parent="Theme.MaterialComponents.Dialog.Alert">
-        <item name="android:colorBackground">@color/soda_dark_row</item>
-        <item name="android:windowBackground">@color/soda_dark_window</item>
-        <item name="colorSurface">@color/soda_dark_row</item>
-        <item name="android:textColorPrimary">@color/soda_dark_text_bright</item>
-        <item name="android:textColorSecondary">@color/soda_dark_text</item>
-        <item name="colorOnSurface">@color/soda_dark_text</item>
-        <item name="colorControlNormal">@color/soda_dark_text_bright</item>
-        <item name="colorAccent">@color/soda_dark_accent</item>
+    <style name="AppAlertDialog.SodaDark" parent="Theme.SodaDark.Palette.Dialog">
+        <item name="android:windowIsFloating">true</item>
     </style>
 
     <style name="ChangelogDialogDarkTheme" parent="AppAlertDialog.SodaDark">

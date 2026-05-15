@@ -40,6 +40,7 @@ import com.fieldbook.tracker.dialogs.CitationDialog;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
+import com.fieldbook.tracker.utilities.AppThemeResolver;
 import com.fieldbook.tracker.utilities.InsetHandler;
 import com.google.android.material.appbar.AppBarLayout;
 import com.mikepenz.aboutlibraries.LibsBuilder;
@@ -136,8 +137,7 @@ public class AboutActivity extends MaterialAboutActivity {
         MaterialAboutCard.Builder appCardBuilder = new MaterialAboutCard.Builder();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if (prefs.getString(PreferenceKeys.THEME, "0").equals(String.valueOf(ThemedActivity.HIGH_CONTRAST))
-                || prefs.getString(PreferenceKeys.THEME, "0").equals(String.valueOf(ThemedActivity.SODA_DARK))) {
+        if (AppThemeResolver.usesMonochromeLauncherIcon(prefs)) {
             appCardBuilder.addItem(new MaterialAboutTitleItem.Builder()
                     .text(getString(R.string.field_book))
                     .icon(R.mipmap.ic_launcher_monochrome)
@@ -228,22 +228,8 @@ public class AboutActivity extends MaterialAboutActivity {
                 .setOnClickAction(ConvenienceBuilder.createWebsiteOnClickAction(c, Uri.parse("https://github.com/PhenoApps/Field-Book")))
                 .build());
 
-        String theme = PreferenceManager.getDefaultSharedPreferences(this)
-                .getString(PreferenceKeys.THEME, "0");
-
-        int styleId = R.style.AboutLibrariesCustom;
-        switch (theme) {
-            case "2":
-                styleId = R.style.AboutLibrariesCustom_Blue;
-                break;
-            case "3":
-                styleId = R.style.AboutLibrariesCustom_SodaDark;
-                break;
-            case "1":
-                styleId = R.style.AboutLibrariesCustom_HighContrast;
-                break;
-        }
-        final int libStyleId = styleId;
+        final int libStyleId = AppThemeResolver.aboutLibrariesStyle(
+                AppThemeResolver.themeIndex(prefs));
 
         technicalCardBuilder.addItem(new MaterialAboutActionItem.Builder()
                 .text(R.string.about_libraries_title)
