@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.utilities;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.util.TypedValue;
 import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
