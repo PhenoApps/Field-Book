@@ -21,6 +21,7 @@
         <item name="checkboxStyle">@style/CheckBoxStyle</item>
         <item name="actionOverflowButtonStyle">@style/OverFlowStyle</item>
         <item name="navigationIcon">@drawable/ic_arrow_left</item>
+        <item name="colorControlNormal">?attr/fb_icon_tint</item>
 
         <!-- Search bar card style -->
         <item name="cardViewStyle">@style/CardViewStyle</item>

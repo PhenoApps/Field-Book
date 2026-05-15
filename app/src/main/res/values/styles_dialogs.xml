@@ -13,6 +13,9 @@
 
         <item name="android:colorBackground">?attr/fb_color_background</item>
         <item name="android:windowBackground">?attr/fb_color_background</item>
+        <item name="android:textColorPrimary">?attr/fb_color_text_dark</item>
+        <item name="android:textColorSecondary">?attr/fb_color_text_secondary</item>
+        <item name="colorControlNormal">?attr/fb_icon_tint</item>
 
         <item name="buttonBarNegativeButtonStyle">@style/ButtonBarStyle</item>
         <item name="buttonBarNeutralButtonStyle">@style/ButtonBarStyle</item>
@@ -49,7 +52,7 @@
         <item name="android:checkedTextViewStyle">@style/AlertCheckedView</item>
     </style>
 
-    <style name="AppAlertDialog.Preference">
+    <style name="AppAlertDialog.Preference" parent="AppAlertDialog">
         <item name="android:windowBackground">@drawable/inset_border</item>
     </style>
 
