@@ -25,8 +25,6 @@ open class ThemedActivity: AppCompatActivity() {
 
         val TAG = ThemedActivity::class.simpleName
 
-        private data class ThemePair(val color: Int, val size: Int)
-
         const val DEFAULT = 0
         const val HIGH_CONTRAST = 1
         const val BLUE = 2
@@ -37,190 +35,132 @@ open class ThemedActivity: AppCompatActivity() {
         const val LARGE = 2
         const val EXTRA_LARGE = 3
 
+        private data class ThemeStyleSet(
+            val small: Int,
+            val medium: Int,
+            val large: Int,
+            val extraLarge: Int,
+            val statusBarColorRes: Int,
+        )
+
+        private data class MalThemeStyleSet(
+            val small: Int,
+            val medium: Int,
+            val large: Int,
+            val extraLarge: Int,
+        )
+
+        private val themeStyles = mapOf(
+            DEFAULT to ThemeStyleSet(
+                small = R.style.BaseAppTheme_SmallTextTheme,
+                medium = R.style.BaseAppTheme_MediumTextTheme,
+                large = R.style.BaseAppTheme_LargeTextTheme,
+                extraLarge = R.style.BaseAppTheme_ExtraLargeTextTheme,
+                statusBarColorRes = R.color.main_primary_dark,
+            ),
+            HIGH_CONTRAST to ThemeStyleSet(
+                small = R.style.BaseAppTheme_HighContrast_SmallTextTheme,
+                medium = R.style.BaseAppTheme_HighContrast_MediumTextTheme,
+                large = R.style.BaseAppTheme_HighContrast_LargeTextTheme,
+                extraLarge = R.style.BaseAppTheme_HighContrast_ExtraLargeTextTheme,
+                statusBarColorRes = R.color.high_contrast_primary_dark,
+            ),
+            BLUE to ThemeStyleSet(
+                small = R.style.BaseAppTheme_Blue_SmallTextTheme,
+                medium = R.style.BaseAppTheme_Blue_MediumTextTheme,
+                large = R.style.BaseAppTheme_Blue_LargeTextTheme,
+                extraLarge = R.style.BaseAppTheme_Blue_ExtraLargeTextTheme,
+                statusBarColorRes = R.color.blue_primary_dark,
+            ),
+            SODA_DARK to ThemeStyleSet(
+                small = R.style.BaseAppTheme_SodaDark_SmallTextTheme,
+                medium = R.style.BaseAppTheme_SodaDark_MediumTextTheme,
+                large = R.style.BaseAppTheme_SodaDark_LargeTextTheme,
+                extraLarge = R.style.BaseAppTheme_SodaDark_ExtraLargeTextTheme,
+                statusBarColorRes = R.color.soda_dark_window,
+            ),
+        )
+
+        private val malThemeStyles = mapOf(
+            DEFAULT to MalThemeStyleSet(
+                small = R.style.BaseAppTheme_Mal_SmallTextTheme,
+                medium = R.style.BaseAppTheme_Mal_MediumTextTheme,
+                large = R.style.BaseAppTheme_Mal_LargeTextTheme,
+                extraLarge = R.style.BaseAppTheme_Mal_ExtraLargeTextTheme,
+            ),
+            HIGH_CONTRAST to MalThemeStyleSet(
+                small = R.style.BaseAppTheme_Mal_HighContrast_SmallTextTheme,
+                medium = R.style.BaseAppTheme_Mal_HighContrast_MediumTextTheme,
+                large = R.style.BaseAppTheme_Mal_HighContrast_LargeTextTheme,
+                extraLarge = R.style.BaseAppTheme_Mal_HighContrast_ExtraLargeTextTheme,
+            ),
+            BLUE to MalThemeStyleSet(
+                small = R.style.BaseAppTheme_Mal_Blue_SmallTextTheme,
+                medium = R.style.BaseAppTheme_Mal_Blue_MediumTextTheme,
+                large = R.style.BaseAppTheme_Mal_Blue_LargeTextTheme,
+                extraLarge = R.style.BaseAppTheme_Mal_Blue_ExtraLargeTextTheme,
+            ),
+            SODA_DARK to MalThemeStyleSet(
+                small = R.style.BaseAppTheme_Mal_SodaDark_SmallTextTheme,
+                medium = R.style.BaseAppTheme_Mal_SodaDark_MediumTextTheme,
+                large = R.style.BaseAppTheme_Mal_SodaDark_LargeTextTheme,
+                extraLarge = R.style.BaseAppTheme_Mal_SodaDark_ExtraLargeTextTheme,
+            ),
+        )
+
+        private val dialogThemeStyles = mapOf(
+            DEFAULT to R.style.ActivityDialog,
+            HIGH_CONTRAST to R.style.ActivityDialog_HighContrast,
+            BLUE to R.style.ActivityDialog_Blue,
+            SODA_DARK to R.style.ActivityDialog_SodaDark,
+        )
+
+        private fun themeStyleFor(textIndex: Int, styles: ThemeStyleSet): Int = when (textIndex) {
+            SMALL -> styles.small
+            MEDIUM -> styles.medium
+            LARGE -> styles.large
+            EXTRA_LARGE -> styles.extraLarge
+            else -> styles.medium
+        }
+
+        private fun malThemeStyleFor(textIndex: Int, styles: MalThemeStyleSet): Int = when (textIndex) {
+            SMALL -> styles.small
+            MEDIUM -> styles.medium
+            LARGE -> styles.large
+            EXTRA_LARGE -> styles.extraLarge
+            else -> styles.medium
+        }
+
         fun applyTheme(activity: Activity) {
 
             val prefs = PreferenceManager.getDefaultSharedPreferences(activity)
 
-            //set the theme
-            val (themeIndex, textIndex) = with(prefs) {
+            val themeIndex = prefs.getString(PreferenceKeys.THEME, "0")?.toInt() ?: 0
+            val textIndex = prefs.getString(PreferenceKeys.TEXT_THEME, "1")?.toInt() ?: 1
 
-                (getString(PreferenceKeys.THEME, "0")?.toInt()
-                    ?: 0) to (getString(PreferenceKeys.TEXT_THEME, "1")?.toInt() ?: 1)
-
-            }
-
-            var statusBarColor = ContextCompat.getColor(activity, R.color.main_primary_dark)
+            val styles = themeStyles[themeIndex] ?: themeStyles.getValue(DEFAULT)
+            var statusBarColor = ContextCompat.getColor(activity, styles.statusBarColorRes)
 
             activity.runOnUiThread {
 
-                when (ThemePair(themeIndex, textIndex)) {
-
-                    //small text themes
-                    ThemePair(DEFAULT, SMALL) -> {
-                        activity.setTheme(R.style.BaseAppTheme_SmallTextTheme)
-                    }
-                    ThemePair(HIGH_CONTRAST, SMALL) -> {
-                        activity.setTheme(R.style.BaseAppTheme_HighContrast_SmallTextTheme)
-                        statusBarColor = ContextCompat.getColor(activity, R.color.high_contrast_primary_dark)
-                    }
-                    ThemePair(BLUE, SMALL) -> {
-                        activity.setTheme(R.style.BaseAppTheme_Blue_SmallTextTheme)
-                        statusBarColor = ContextCompat.getColor(activity, R.color.blue_primary_dark)
-                    }
-                    ThemePair(SODA_DARK, SMALL) -> {
-                        activity.setTheme(R.style.BaseAppTheme_SodaDark_SmallTextTheme)
-                        statusBarColor = ContextCompat.getColor(activity, R.color.soda_dark_window)
-                    }
-
-                    //medium text themes
-                    ThemePair(DEFAULT, MEDIUM) -> {
-                        activity.setTheme(R.style.BaseAppTheme_MediumTextTheme)
-                    }
-                    ThemePair(HIGH_CONTRAST, MEDIUM) -> {
-                        activity.setTheme(R.style.BaseAppTheme_HighContrast_MediumTextTheme)
-                        statusBarColor = ContextCompat.getColor(activity, R.color.high_contrast_primary_dark)
-                    }
-                    ThemePair(BLUE, MEDIUM) -> {
-                        activity.setTheme(R.style.BaseAppTheme_Blue_MediumTextTheme)
-                        statusBarColor = ContextCompat.getColor(activity, R.color.blue_primary_dark)
-                    }
-                    ThemePair(SODA_DARK, MEDIUM) -> {
-                        activity.setTheme(R.style.BaseAppTheme_SodaDark_MediumTextTheme)
-                        statusBarColor = ContextCompat.getColor(activity, R.color.soda_dark_window)
-                    }
-
-                    //large text themes
-                    ThemePair(DEFAULT, LARGE) -> {
-                        activity.setTheme(R.style.BaseAppTheme_LargeTextTheme)
-                    }
-                    ThemePair(HIGH_CONTRAST, LARGE) -> {
-                        activity.setTheme(R.style.BaseAppTheme_HighContrast_LargeTextTheme)
-                        statusBarColor = ContextCompat.getColor(activity, R.color.high_contrast_primary_dark)
-                    }
-                    ThemePair(BLUE, LARGE) -> {
-                        activity.setTheme(R.style.BaseAppTheme_Blue_LargeTextTheme)
-                        statusBarColor = ContextCompat.getColor(activity, R.color.blue_primary_dark)
-                    }
-                    ThemePair(SODA_DARK, LARGE) -> {
-                        activity.setTheme(R.style.BaseAppTheme_SodaDark_LargeTextTheme)
-                        statusBarColor = ContextCompat.getColor(activity, R.color.soda_dark_window)
-                    }
-
-                    //extra large text themes
-                    ThemePair(DEFAULT, EXTRA_LARGE) -> {
-                        activity.setTheme(R.style.BaseAppTheme_ExtraLargeTextTheme)
-                    }
-                    ThemePair(HIGH_CONTRAST, EXTRA_LARGE) -> {
-                        activity.setTheme(R.style.BaseAppTheme_HighContrast_ExtraLargeTextTheme)
-                        statusBarColor = ContextCompat.getColor(activity, R.color.high_contrast_primary_dark)
-                    }
-                    ThemePair(BLUE, EXTRA_LARGE) -> {
-                        activity.setTheme(R.style.BaseAppTheme_Blue_ExtraLargeTextTheme)
-                        statusBarColor = ContextCompat.getColor(activity, R.color.blue_primary_dark)
-                    }
-                    ThemePair(SODA_DARK, EXTRA_LARGE) -> {
-                        activity.setTheme(R.style.BaseAppTheme_SodaDark_ExtraLargeTextTheme)
-                        statusBarColor = ContextCompat.getColor(activity, R.color.soda_dark_window)
-                    }
-                }
+                activity.setTheme(themeStyleFor(textIndex, styles))
 
                 Log.d(TAG, "Applying theme $themeIndex to ${activity::class.simpleName}")
 
                 if (activity is AboutActivity) {
-
-                    when (ThemePair(themeIndex, textIndex)) {
-
-                        //small text themes
-                        ThemePair(DEFAULT, SMALL) -> {
-                            activity.setTheme(R.style.BaseAppTheme_Mal_SmallTextTheme)
-                        }
-                        ThemePair(HIGH_CONTRAST, SMALL) -> {
-                            activity.setTheme(R.style.BaseAppTheme_Mal_HighContrast_SmallTextTheme)
-                            statusBarColor = ContextCompat.getColor(activity, R.color.high_contrast_primary_dark)
-                        }
-                        ThemePair(BLUE, SMALL) -> {
-                            activity.setTheme(R.style.BaseAppTheme_Mal_Blue_SmallTextTheme)
-                            statusBarColor = ContextCompat.getColor(activity, R.color.blue_primary_dark)
-                        }
-                        ThemePair(SODA_DARK, SMALL) -> {
-                            activity.setTheme(R.style.BaseAppTheme_Mal_SodaDark_SmallTextTheme)
-                            statusBarColor = ContextCompat.getColor(activity, R.color.soda_dark_window)
-                        }
-
-                        //medium text themes
-                        ThemePair(DEFAULT, MEDIUM) -> {
-                            activity.setTheme(R.style.BaseAppTheme_Mal_MediumTextTheme)
-                        }
-                        ThemePair(HIGH_CONTRAST, MEDIUM) -> {
-                            activity.setTheme(R.style.BaseAppTheme_Mal_HighContrast_MediumTextTheme)
-                            statusBarColor = ContextCompat.getColor(activity, R.color.high_contrast_primary_dark)
-                        }
-                        ThemePair(BLUE, MEDIUM) -> {
-                            activity.setTheme(R.style.BaseAppTheme_Mal_Blue_MediumTextTheme)
-                            statusBarColor = ContextCompat.getColor(activity, R.color.blue_primary_dark)
-                        }
-                        ThemePair(SODA_DARK, MEDIUM) -> {
-                            activity.setTheme(R.style.BaseAppTheme_Mal_SodaDark_MediumTextTheme)
-                            statusBarColor = ContextCompat.getColor(activity, R.color.soda_dark_window)
-                        }
-
-                        //large text themes
-                        ThemePair(DEFAULT, LARGE) -> {
-                            activity.setTheme(R.style.BaseAppTheme_Mal_LargeTextTheme)
-                        }
-                        ThemePair(HIGH_CONTRAST, LARGE) -> {
-                            activity.setTheme(R.style.BaseAppTheme_Mal_HighContrast_LargeTextTheme)
-                            statusBarColor = ContextCompat.getColor(activity, R.color.high_contrast_primary_dark)
-                        }
-                        ThemePair(BLUE, LARGE) -> {
-                            activity.setTheme(R.style.BaseAppTheme_Mal_Blue_LargeTextTheme)
-                            statusBarColor = ContextCompat.getColor(activity, R.color.blue_primary_dark)
-                        }
-                        ThemePair(SODA_DARK, LARGE) -> {
-                            activity.setTheme(R.style.BaseAppTheme_Mal_SodaDark_LargeTextTheme)
-                            statusBarColor = ContextCompat.getColor(activity, R.color.soda_dark_window)
-                        }
-
-                        //extra large text themes
-                        ThemePair(DEFAULT, EXTRA_LARGE) -> {
-                            activity.setTheme(R.style.BaseAppTheme_Mal_ExtraLargeTextTheme)
-                        }
-                        ThemePair(HIGH_CONTRAST, EXTRA_LARGE) -> {
-                            activity.setTheme(R.style.BaseAppTheme_Mal_HighContrast_ExtraLargeTextTheme)
-                            statusBarColor = ContextCompat.getColor(activity, R.color.high_contrast_primary_dark)
-                        }
-                        ThemePair(BLUE, EXTRA_LARGE) -> {
-                            activity.setTheme(R.style.BaseAppTheme_Mal_Blue_ExtraLargeTextTheme)
-                            statusBarColor = ContextCompat.getColor(activity, R.color.blue_primary_dark)
-                        }
-                        ThemePair(SODA_DARK, EXTRA_LARGE) -> {
-                            activity.setTheme(R.style.BaseAppTheme_Mal_SodaDark_ExtraLargeTextTheme)
-                            statusBarColor = ContextCompat.getColor(activity, R.color.soda_dark_window)
-                        }
-                    }
+                    val malStyles = malThemeStyles[themeIndex] ?: malThemeStyles.getValue(DEFAULT)
+                    activity.setTheme(malThemeStyleFor(textIndex, malStyles))
+                    statusBarColor = ContextCompat.getColor(activity, styles.statusBarColorRes)
                 }
 
                 //TODO this doesn't seem to be doing its job (must be set in manifest)
                 if (activity is FileExploreActivity) {
-
-                    when (themeIndex) {
-                        0 -> {
-                            activity.setTheme(R.style.ActivityDialog)
-                        }
-                        1 -> {
-                            activity.setTheme(R.style.ActivityDialog_HighContrast)
-                        }
-                        2 -> {
-                            activity.setTheme(R.style.ActivityDialog_Blue)
-                        }
-                        SODA_DARK -> {
-                            activity.setTheme(R.style.ActivityDialog_SodaDark)
-                        }
-                    }
+                    activity.setTheme(
+                        dialogThemeStyles[themeIndex] ?: dialogThemeStyles.getValue(DEFAULT)
+                    )
                 }
 
                 if (activity is PreferencesActivity) {
-
                     activity.setTheme(R.style.PreferenceTheme)
                 }
             }

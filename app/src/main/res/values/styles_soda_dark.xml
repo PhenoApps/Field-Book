@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Soda Dark (palette from buymeasoda/soda-theme Soda Dark 3) -->
+    <style name="Theme.SodaDark.Palette" parent="BaseAppTheme">
+        <item name="actionModeBackground">@color/soda_dark_panel</item>
+        <item name="selectedItemBackground">@color/soda_dark_primary_transparent</item>
+        <item name="defaultChipBackground">@color/soda_dark_panel</item>
+        <item name="selectableChipBackground">@color/soda_dark_panel</item>
+        <item name="selectableChipStroke">@color/soda_dark_accent</item>
+        <item name="fb_color_primary">@color/soda_dark_panel</item>
+        <item name="fb_color_primary_dark">@color/soda_dark_window</item>
+        <item name="fb_color_accent">@color/soda_dark_accent</item>
+        <item name="fb_color_background">@color/soda_dark_window</item>
+        <item name="fb_color_card_background">@color/soda_dark_row</item>
+        <item name="fb_color_text_button_background">@color/soda_dark_panel</item>
+        <item name="fb_color_text_light">@color/soda_dark_text_bright</item>
+        <item name="fb_color_hint_text">@color/soda_dark_text_dim</item>
+        <item name="fb_color_text_dark">@color/soda_dark_text</item>
+        <item name="fb_color_list_selector_default_overlay">#30FFFFFF</item>
+        <item name="fb_icon_tint">@color/soda_dark_text_bright</item>
+        <item name="fb_icon_fill_tint">@color/soda_dark_text_bright</item>
+        <item name="fb_trait_status_selected_color">@color/soda_dark_accent_bright</item>
+        <item name="fb_spinner_focused">@color/soda_dark_accent</item>
+        <item name="fb_spinner_selected">@color/soda_dark_primary_transparent</item>
+        <item name="fb_trait_percent_background_center_color">@color/soda_dark_trait_percent_center</item>
+        <item name="fb_trait_percent_background_start_end_color">@color/soda_dark_trait_percent_start_end</item>
+        <item name="fb_trait_percent_start_color">@color/soda_dark_trait_percent_start</item>
+        <item name="fb_trait_percent_stroke_color">@color/soda_dark_trait_percent_stroke</item>
+        <item name="fb_trait_boolean_true_color">@color/soda_dark_boolean_true</item>
+        <item name="fb_trait_boolean_false_color">@color/RED</item>
+        <item name="fb_value_saved_color">@color/soda_dark_value_saved</item>
+        <item name="fb_value_altered_color">@color/soda_dark_value_altered</item>
+        <item name="fb_color_text_secondary">@color/soda_dark_text_secondary</item>
+        <item name="fb_button_color_normal">@color/soda_dark_button_normal</item>
+        <item name="fb_button_color_pressed">@color/soda_dark_button_pressed</item>
+        <item name="fb_subheading_color">@color/soda_dark_subheading</item>
+        <item name="fb_border_color">@color/soda_dark_border</item>
+        <item name="fb_trait_button_background_tint">@color/soda_dark_trait_button_tint</item>
+        <item name="fb_button_text_color">@color/soda_dark_text_bright</item>
+        <item name="fb_seek_bar_color">@color/soda_dark_seekbar</item>
+        <item name="fb_seek_bar_thumb_color">@color/soda_dark_seekbar_thumb</item>
+
+        <item name="colorPrimary">?attr/fb_color_primary</item>
+        <item name="colorPrimaryDark">?attr/fb_color_primary_dark</item>
+        <item name="colorPrimaryVariant">?attr/fb_color_primary_dark</item>
+        <item name="colorAccent">?attr/fb_color_accent</item>
+        <item name="android:colorAccent">?attr/fb_color_accent</item>
+        <item name="android:textColorPrimary">@color/soda_dark_text_bright</item>
+        <item name="android:textColorSecondary">@color/soda_dark_text</item>
+        <item name="colorControlNormal">@color/soda_dark_text_bright</item>
+
+        <item name="fb_first_chip_color">@color/soda_dark_chip_first</item>
+        <item name="fb_second_chip_color">@color/soda_dark_chip_second</item>
+        <item name="fb_third_chip_color">@color/soda_dark_chip_third</item>
+        <item name="fb_fourth_chip_color">@color/soda_dark_chip_third</item>
+
+        <item name="fb_heatmap_color_high">@color/soda_dark_heatmap_high</item>
+        <item name="fb_heatmap_color_medium">@color/soda_dark_heatmap_medium</item>
+        <item name="fb_heatmap_color_low">@color/soda_dark_heatmap_low</item>
+        <item name="fb_heatmap_color_max">@color/soda_dark_heatmap_max</item>
+
+        <item name="selected_date_circle_color">?fb_heatmap_color_medium</item>
+
+        <item name="dataFilledColor">@color/soda_dark_data_filled</item>
+        <item name="emptyCellColor">@color/soda_dark_datagrid_empty</item>
+        <item name="activeCellColor">@color/soda_dark_active_cell</item>
+        <item name="activeCellTextColor">@color/soda_dark_window</item>
+        <item name="cellTextColor">@color/soda_dark_text</item>
+        <item name="tableBorderColor">@color/soda_dark_border</item>
+
+        <item name="fb_graph_item_selected_color">@color/soda_dark_accent</item>
+        <item name="fb_graph_item_unselected_color">@color/soda_dark_graph_unselected</item>
+        <item name="fb_graph_item_text_color">@color/soda_dark_text</item>
+
+        <item name="stepper_icon_color">@color/soda_dark_accent</item>
+        <item name="stepper_icon_bg_color">@color/soda_dark_row</item>
+        <item name="stepper_icon_on_done_color">@color/soda_dark_window</item>
+        <item name="stepper_icon_on_done_bg_color">@color/soda_dark_accent</item>
+        <item name="stepper_line_color">@color/soda_dark_border</item>
+        <item name="stepper_line_on_done_color">@color/soda_dark_accent</item>
+    </style>
+
+    <style name="BaseAppTheme.SodaDark" parent="Theme.SodaDark.Palette" />
+
+    <style name="Theme.SodaDark.Palette.Dialog" parent="ActivityDialog">
+        <item name="fb_color_primary">@color/soda_dark_panel</item>
+        <item name="fb_color_primary_dark">@color/soda_dark_window</item>
+        <item name="fb_color_accent">@color/soda_dark_accent</item>
+        <item name="fb_color_background">@color/soda_dark_window</item>
+        <item name="fb_color_card_background">@color/soda_dark_row</item>
+        <item name="fb_color_list_selector_default_overlay">#30FFFFFF</item>
+        <item name="fb_color_text_button_background">@color/soda_dark_panel</item>
+        <item name="fb_color_text_light">@color/soda_dark_text_bright</item>
+        <item name="fb_color_hint_text">@color/soda_dark_text_dim</item>
+        <item name="fb_color_text_dark">@color/soda_dark_text</item>
+        <item name="fb_icon_tint">@color/soda_dark_text</item>
+        <item name="fb_icon_fill_tint">@color/soda_dark_text_bright</item>
+        <item name="fb_trait_boolean_true_color">@color/soda_dark_boolean_true</item>
+        <item name="fb_spinner_focused">@color/soda_dark_accent</item>
+        <item name="fb_spinner_selected">@color/soda_dark_primary_transparent</item>
+
+        <item name="colorPrimary">?attr/fb_color_primary</item>
+        <item name="colorPrimaryDark">?attr/fb_color_primary_dark</item>
+        <item name="colorAccent">?attr/fb_color_accent</item>
+
+        <item name="android:windowBackground">@color/soda_dark_window</item>
+    </style>
+
+    <style name="ActivityDialog.SodaDark" parent="Theme.SodaDark.Palette.Dialog" />
+
+    <style name="Theme.SodaDark.Palette.Mal" parent="BaseAppTheme.Mal">
+        <item name="fb_color_primary">@color/soda_dark_panel</item>
+        <item name="fb_color_primary_dark">@color/soda_dark_window</item>
+        <item name="fb_color_accent">@color/soda_dark_accent</item>
+        <item name="fb_color_background">@color/soda_dark_window</item>
+        <item name="fb_color_card_background">@color/soda_dark_row</item>
+        <item name="fb_color_list_selector_default_overlay">#30FFFFFF</item>
+        <item name="fb_color_text_button_background">@color/soda_dark_panel</item>
+        <item name="fb_color_text_light">@color/soda_dark_text_bright</item>
+        <item name="fb_color_hint_text">@color/soda_dark_text_dim</item>
+        <item name="fb_color_text_dark">@color/soda_dark_text</item>
+        <item name="fb_icon_tint">@color/soda_dark_text</item>
+        <item name="fb_icon_fill_tint">@color/soda_dark_text_bright</item>
+        <item name="fb_spinner_focused">@color/soda_dark_accent</item>
+        <item name="fb_spinner_selected">@color/soda_dark_primary_transparent</item>
+
+        <item name="colorPrimary">?attr/fb_color_primary</item>
+        <item name="colorPrimaryDark">?attr/fb_color_primary_dark</item>
+        <item name="colorAccent">?attr/fb_color_accent</item>
+    </style>
+
+    <style name="BaseAppTheme.Mal.SodaDark" parent="Theme.SodaDark.Palette.Mal" />
+
+</resources>

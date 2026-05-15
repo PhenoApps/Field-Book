@@ -12,102 +12,102 @@ import com.fieldbook.tracker.ui.theme.typography.ThemeTypography
 /**
  * Maps AppColors to Material 3 ColorScheme
  */
-fun AppColors.toMaterialColorScheme(): ColorScheme {
-    return lightColorScheme(
-        primary = this.primary,
-        onPrimary = this.text.highContrast,
-        primaryContainer = this.primaryTransparent,
-        onPrimaryContainer = this.text.primary,
+fun AppColors.toMaterialColorScheme(isDark: Boolean = false): ColorScheme {
+    return if (isDark) {
+        darkColorScheme(
+            primary = primary,
+            onPrimary = text.tertiary,
+            primaryContainer = lightGray,
+            onPrimaryContainer = text.primary,
 
-        secondary = this.accent,
-        onSecondary = this.text.primary,
-        secondaryContainer = this.accent.copy(alpha = 0.12f),
-        onSecondaryContainer = this.text.primary,
+            secondary = accent,
+            onSecondary = background,
+            secondaryContainer = accent.copy(alpha = 0.28f),
+            onSecondaryContainer = text.primary,
 
-        tertiary = this.chip.first,
-        onTertiary = this.text.primary,
-        tertiaryContainer = this.chip.first.copy(alpha = 0.12f),
-        onTertiaryContainer = this.text.primary,
+            tertiary = chip.first,
+            onTertiary = background,
+            tertiaryContainer = chip.first.copy(alpha = 0.35f),
+            onTertiaryContainer = text.primary,
 
-        error = this.status.error,
-        onError = Color.White,
-        errorContainer = this.status.error.copy(alpha = 0.12f),
-        onErrorContainer = this.status.error,
+            error = status.error,
+            onError = Color.White,
+            errorContainer = status.error.copy(alpha = 0.3f),
+            onErrorContainer = Color.White,
 
-        background = this.background,
-        onBackground = this.text.primary,
+            background = background,
+            onBackground = text.primary,
 
-        surface = this.background,
-        onSurface = this.text.primary,
-        surfaceVariant = this.interactive.selectedItemBackground,
-        onSurfaceVariant = this.text.secondary,
+            surface = lightGray,
+            onSurface = text.primary,
+            surfaceVariant = interactive.selectedItemBackground,
+            onSurfaceVariant = text.secondary,
 
-        outline = this.surface.border,
-        outlineVariant = this.surface.border.copy(alpha = 0.4f),
+            outline = surface.border,
+            outlineVariant = surface.border.copy(alpha = 0.45f),
 
-        scrim = Color.Black.copy(alpha = 0.32f),
+            scrim = Color.Black.copy(alpha = 0.5f),
 
-        inverseSurface = this.text.primary,
-        inverseOnSurface = this.background,
-        inversePrimary = this.primary.copy(alpha = 0.8f),
+            inverseSurface = text.primary,
+            inverseOnSurface = background,
+            inversePrimary = accent,
 
-        surfaceDim = this.background,
-        surfaceBright = this.background,
-        surfaceContainerLowest = this.background,
-        surfaceContainerLow = this.interactive.selectedItemBackground.copy(alpha = 0.05f),
-        surfaceContainer = this.interactive.selectedItemBackground.copy(alpha = 0.08f),
-        surfaceContainerHigh = this.interactive.selectedItemBackground.copy(alpha = 0.12f),
-        surfaceContainerHighest = this.interactive.selectedItemBackground.copy(alpha = 0.16f)
-    )
-}
+            surfaceDim = background,
+            surfaceBright = lightGray,
+            surfaceContainerLowest = background,
+            surfaceContainerLow = interactive.selectedItemBackground.copy(alpha = 0.12f),
+            surfaceContainer = lightGray,
+            surfaceContainerHigh = primary,
+            surfaceContainerHighest = primary.copy(alpha = 0.85f)
+        )
+    } else {
+        lightColorScheme(
+            primary = primary,
+            onPrimary = text.highContrast,
+            primaryContainer = primaryTransparent,
+            onPrimaryContainer = text.primary,
 
-fun AppColors.toSodaDarkMaterialColorScheme(): ColorScheme {
-    return darkColorScheme(
-        primary = primary,
-        onPrimary = text.tertiary,
-        primaryContainer = lightGray,
-        onPrimaryContainer = text.primary,
+            secondary = accent,
+            onSecondary = text.primary,
+            secondaryContainer = accent.copy(alpha = 0.12f),
+            onSecondaryContainer = text.primary,
 
-        secondary = accent,
-        onSecondary = background,
-        secondaryContainer = accent.copy(alpha = 0.28f),
-        onSecondaryContainer = text.primary,
+            tertiary = chip.first,
+            onTertiary = text.primary,
+            tertiaryContainer = chip.first.copy(alpha = 0.12f),
+            onTertiaryContainer = text.primary,
 
-        tertiary = chip.first,
-        onTertiary = background,
-        tertiaryContainer = chip.first.copy(alpha = 0.35f),
-        onTertiaryContainer = text.primary,
+            error = status.error,
+            onError = Color.White,
+            errorContainer = status.error.copy(alpha = 0.12f),
+            onErrorContainer = status.error,
 
-        error = status.error,
-        onError = Color.White,
-        errorContainer = status.error.copy(alpha = 0.3f),
-        onErrorContainer = Color.White,
+            background = background,
+            onBackground = text.primary,
 
-        background = background,
-        onBackground = text.primary,
+            surface = background,
+            onSurface = text.primary,
+            surfaceVariant = interactive.selectedItemBackground,
+            onSurfaceVariant = text.secondary,
 
-        surface = lightGray,
-        onSurface = text.primary,
-        surfaceVariant = interactive.selectedItemBackground,
-        onSurfaceVariant = text.secondary,
+            outline = surface.border,
+            outlineVariant = surface.border.copy(alpha = 0.4f),
 
-        outline = surface.border,
-        outlineVariant = surface.border.copy(alpha = 0.45f),
+            scrim = Color.Black.copy(alpha = 0.32f),
 
-        scrim = Color.Black.copy(alpha = 0.5f),
+            inverseSurface = text.primary,
+            inverseOnSurface = background,
+            inversePrimary = primary.copy(alpha = 0.8f),
 
-        inverseSurface = text.primary,
-        inverseOnSurface = background,
-        inversePrimary = accent,
-
-        surfaceDim = background,
-        surfaceBright = lightGray,
-        surfaceContainerLowest = background,
-        surfaceContainerLow = interactive.selectedItemBackground.copy(alpha = 0.12f),
-        surfaceContainer = lightGray,
-        surfaceContainerHigh = primary,
-        surfaceContainerHighest = primary.copy(alpha = 0.85f)
-    )
+            surfaceDim = background,
+            surfaceBright = background,
+            surfaceContainerLowest = background,
+            surfaceContainerLow = interactive.selectedItemBackground.copy(alpha = 0.05f),
+            surfaceContainer = interactive.selectedItemBackground.copy(alpha = 0.08f),
+            surfaceContainerHigh = interactive.selectedItemBackground.copy(alpha = 0.12f),
+            surfaceContainerHighest = interactive.selectedItemBackground.copy(alpha = 0.16f)
+        )
+    }
 }
 
 /**

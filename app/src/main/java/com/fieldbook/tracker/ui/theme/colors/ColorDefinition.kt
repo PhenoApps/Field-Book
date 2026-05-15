@@ -221,13 +221,6 @@ val BlueAppColors = DefaultAppColors.copy(
     ),
 )
 
-val SodaDarkToggleColors = ToggleColors(
-    track = SodaDarkPalette.Row,
-    indicator = SodaDarkPalette.Accent,
-    icon = SodaDarkPalette.TabSelected,
-    iconUnselected = SodaDarkPalette.StatusText
-)
-
 val SodaDarkAppColors = DefaultAppColors.copy(
     primary = SodaDarkPalette.Panel,
     primaryDark = SodaDarkPalette.Window,
@@ -243,7 +236,7 @@ val SodaDarkAppColors = DefaultAppColors.copy(
         preferencesHorizontalBreak = Color.Transparent
     ),
 
-    text = TextColors(
+    text = DefaultAppColors.text.copy(
         primary = SodaDarkPalette.Label,
         secondary = SodaDarkPalette.StatusText,
         tertiary = SodaDarkPalette.TabSelected,
@@ -276,20 +269,25 @@ val SodaDarkAppColors = DefaultAppColors.copy(
         tapTarget = SodaDarkPalette.AccentBright,
         spinnerFocused = SodaDarkPalette.Accent,
         spinnerSelected = SodaDarkPalette.PrimaryTransparent,
-        seekBar = Color(0x44969696),
-        seekBarThumb = Color(0xCC7EC7EF),
+        seekBar = SodaDarkPalette.Seekbar,
+        seekBarThumb = SodaDarkPalette.SeekbarThumb,
         selectedItemBackground = SodaDarkPalette.PrimaryTransparent,
     ),
 
-    toggle = SodaDarkToggleColors,
+    toggle = DefaultToggleColors.copy(
+        track = SodaDarkPalette.Row,
+        indicator = SodaDarkPalette.Accent,
+        icon = SodaDarkPalette.TabSelected,
+        iconUnselected = SodaDarkPalette.StatusText,
+    ),
 
     status = DefaultAppColors.status.copy(
         valueSaved = SodaDarkPalette.ValueSaved,
         valueAltered = SodaDarkPalette.ValueAltered,
         success = SodaDarkPalette.Accent,
-        error = Color(0xFFFF5252),
+        error = SodaDarkPalette.Error,
         bluetoothConnected = SodaDarkPalette.Bluetooth,
-        progressBar = Color(0xFF909090),
+        progressBar = SodaDarkPalette.ProgressBar,
     ),
 
     dataVisualization = DefaultAppColors.dataVisualization.copy(
@@ -315,16 +313,16 @@ val SodaDarkAppColors = DefaultAppColors.copy(
     ),
 
     trait = DefaultAppColors.trait.copy(
-        percent = PercentTraitColors(
+        percent = DefaultAppColors.trait.percent.copy(
             backgroundCenter = SodaDarkPalette.Row,
-            backgroundStartEnd = Color(0xFF2A2A2A),
+            backgroundStartEnd = SodaDarkPalette.TraitPercentBackgroundStartEnd,
             stroke = SodaDarkPalette.Accent,
-            start = SodaDarkPalette.AccentBright
+            start = SodaDarkPalette.AccentBright,
         ),
-        boolean = BooleanTraitColors(
+        boolean = DefaultAppColors.trait.boolean.copy(
             `true` = SodaDarkPalette.AccentBright,
-            `false` = Color(0xFFFF8A80)
-        )
+            `false` = SodaDarkPalette.BooleanFalse,
+        ),
     ),
 
     chip = DefaultAppColors.chip.copy(
@@ -334,7 +332,7 @@ val SodaDarkAppColors = DefaultAppColors.copy(
         first = SodaDarkPalette.Chip1,
         second = SodaDarkPalette.Chip2,
         third = SodaDarkPalette.Chip3,
-        fourth = SodaDarkPalette.Chip3
+        fourth = SodaDarkPalette.Chip3,
     ),
 
     stepper = DefaultAppColors.stepper.copy(
@@ -343,11 +341,11 @@ val SodaDarkAppColors = DefaultAppColors.copy(
         iconOnDone = SodaDarkPalette.Window,
         iconOnDoneBackground = SodaDarkPalette.Accent,
         line = SodaDarkPalette.Border,
-        lineOnDone = SodaDarkPalette.Accent
+        lineOnDone = SodaDarkPalette.Accent,
     ),
 
     crop = DefaultAppColors.crop.copy(
-        inverseRegion = Color(0x80E6E6E6)
+        inverseRegion = SodaDarkPalette.InverseCropRegion,
     ),
 )
 

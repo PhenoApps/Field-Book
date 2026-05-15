@@ -140,6 +140,13 @@ object SodaDarkPalette {
     val ValueAltered = Color(0xFF82AAFF)
     val Bluetooth = Color(0xFF33B5E5)
     val DataGridEmpty = Color(0xFF3D3D3D)
+    val TraitPercentBackgroundStartEnd = Color(0xFF2A2A2A)
+    val BooleanFalse = Color(0xFFFF8A80)
+    val Seekbar = Color(0x44969696)
+    val SeekbarThumb = Color(0xCC7EC7EF)
+    val Error = Color(0xFFFF5252)
+    val ProgressBar = Color(0xFF909090)
+    val InverseCropRegion = Color(0x80E6E6E6)
 }
 
 object HighContrastOverrides {

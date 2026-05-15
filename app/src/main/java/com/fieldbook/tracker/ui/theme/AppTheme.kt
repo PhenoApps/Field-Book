@@ -67,10 +67,7 @@ fun AppTheme(
     }
 
     val materialColorScheme = remember(colors, themeType) {
-        when (themeType) {
-            AppThemeType.SodaDark -> colors.toSodaDarkMaterialColorScheme()
-            else -> colors.toMaterialColorScheme()
-        }
+        colors.toMaterialColorScheme(isDark = themeType.isDark)
     }
 
     val materialTypography = remember(typography) { typography.toMaterialTypography() }
