@@ -914,7 +914,7 @@
     <string name="theme_default">Default</string>
     <string name="theme_high_contrast">High Contrast</string>
     <string name="theme_blue">Blue</string>
-    <string name="theme_soda_dark">Soda Dark (thx buymeasoda)</string>
+    <string name="theme_soda_dark">Soda Dark</string>
 
     <string name="preferences_theme_text_size_title">Text Size</string>
     <string name="text_size_s">Small</string>
