@@ -66,10 +66,6 @@ class TraitEditorScreenViewModel(
     private val _messages = MutableSharedFlow<String>()
     val messages = _messages.asSharedFlow()
 
-    init {
-        loadTraits()
-    }
-
     fun loadTraits() {
         viewModelScope.launch {
             _loading.value = true
