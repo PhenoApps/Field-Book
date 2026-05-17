@@ -6,6 +6,9 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.models.ObservationUnitModel
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
+import com.fieldbook.tracker.preferences.enums.GeoNavSearchAngle
+import com.fieldbook.tracker.preferences.enums.GeoNavSearchMethod
+import com.fieldbook.tracker.preferences.enums.GeoNavUpdateInterval
 import com.fieldbook.tracker.utilities.StringUtil.escape
 import com.google.gson.Gson
 import math.geom2d.Point2D
@@ -79,16 +82,25 @@ class GeodeticUtils {
                 if (!isHeader) {
                     //update the geonav log line with the shared preference parameters
                     //set update interval from the preferences can be 1s, 5s or 10s
-                    val interval = preferences.getString(PreferenceKeys.UPDATE_INTERVAL, "1") ?: "1"
+                    val interval = preferences.getString(
+                        PreferenceKeys.UPDATE_INTERVAL,
+                        GeoNavUpdateInterval.DEFAULT.value
+                    ) ?: GeoNavUpdateInterval.DEFAULT.value
                     //find the mac address of the device, if not found then start the internal GPS
                     val address: String =
                         (preferences.getString(PreferenceKeys.PAIRED_DEVICE_ADDRESS, "internal") ?: "")
                             .replace(":".toRegex(), "-")
                             .replace("\\s".toRegex(), "_")
                     //the angle of the IZ algorithm to use, see Geodetic util class for more details
-                    val theta: String = preferences.getString(PreferenceKeys.SEARCH_ANGLE, "0") ?: "0"
+                    val theta: String = preferences.getString(
+                        PreferenceKeys.SEARCH_ANGLE,
+                        GeoNavSearchAngle.DEFAULT.value
+                    ) ?: GeoNavSearchAngle.DEFAULT.value
                     val geoNavMethod: String =
-                        preferences.getString(PreferenceKeys.GEONAV_SEARCH_METHOD, "0") ?: "0"
+                        preferences.getString(
+                            PreferenceKeys.GEONAV_SEARCH_METHOD,
+                            GeoNavSearchMethod.DEFAULT.value
+                        ) ?: GeoNavSearchMethod.DEFAULT.value
                     val d1: Double =
                         preferences.getString(PreferenceKeys.GEONAV_PARAMETER_D1, "0.001")?.toDouble()
                             ?: 0.001
@@ -190,7 +202,7 @@ class GeodeticUtils {
                         azimuth = azimuth.toString(), teslas = teslas.toString(), bearing = bearing.toString(),
                         distance = distance.toString(), closest = NOT_CLOSEST.toString(), fix = fix)
 
-                    if (geoNavMethod == "0") { //default distance based method
+                    if (geoNavMethod == GeoNavSearchMethod.DISTANCE.value) { //default distance based method
 
                         if (closestDistance > distance) {
 

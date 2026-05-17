@@ -112,7 +112,8 @@ public class AboutActivity extends MaterialAboutActivity {
         MaterialAboutCard.Builder appCardBuilder = new MaterialAboutCard.Builder();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if (prefs.getString(PreferenceKeys.THEME, "0").equals(String.valueOf(ThemedActivity.HIGH_CONTRAST))) {
+        if (prefs.getString(PreferenceKeys.THEME, String.valueOf(ThemedActivity.DEFAULT))
+                .equals(String.valueOf(ThemedActivity.HIGH_CONTRAST))) {
             appCardBuilder.addItem(new MaterialAboutTitleItem.Builder()
                     .text(getString(R.string.field_book))
                     .icon(R.mipmap.ic_launcher_monochrome)
@@ -203,15 +204,19 @@ public class AboutActivity extends MaterialAboutActivity {
                 .setOnClickAction(ConvenienceBuilder.createWebsiteOnClickAction(c, Uri.parse("https://github.com/PhenoApps/Field-Book")))
                 .build());
 
-        String theme = PreferenceManager.getDefaultSharedPreferences(this)
-                .getString(PreferenceKeys.THEME, "0");
+        int theme = ThemedActivity.DEFAULT;
+        try {
+            theme = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this)
+                    .getString(PreferenceKeys.THEME, String.valueOf(ThemedActivity.DEFAULT)));
+        } catch (NumberFormatException ignored) {
+        }
 
         int styleId = R.style.AboutLibrariesCustom;
         switch (theme) {
-            case "2":
+            case ThemedActivity.BLUE:
                 styleId = R.style.AboutLibrariesCustom_Blue;
                 break;
-            case "1":
+            case ThemedActivity.HIGH_CONTRAST:
                 styleId = R.style.AboutLibrariesCustom_HighContrast;
                 break;
         }

@@ -17,6 +17,7 @@ import androidx.preference.PreferenceFragmentCompat;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.PreferencesActivity;
+import com.fieldbook.tracker.utilities.MediaKeyCodeActionHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,7 +46,9 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
         try {
             preferences.getString(PreferenceKeys.VOLUME_NAVIGATION, "");
         } catch (ClassCastException e) {
-            preferences.edit().putString(PreferenceKeys.VOLUME_NAVIGATION, "0").apply();
+            preferences.edit()
+                    .putString(PreferenceKeys.VOLUME_NAVIGATION, MediaKeyCodeActionHelper.VolumeNavigation.DEFAULT.getValue())
+                    .apply();
             Log.d(TAG, "Stagnant Deprecated preference data found, fixing.");
         }
 
