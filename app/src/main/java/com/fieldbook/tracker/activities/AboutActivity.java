@@ -12,13 +12,11 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -35,7 +33,6 @@ import com.danielstone.materialaboutlibrary.model.MaterialAboutList;
 import com.fieldbook.tracker.BuildConfig;
 import com.fieldbook.tracker.dialogs.CitationDialog;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.InsetHandler;
 import com.google.android.material.appbar.AppBarLayout;
@@ -114,7 +111,8 @@ public class AboutActivity extends MaterialAboutActivity {
         MaterialAboutCard.Builder appCardBuilder = new MaterialAboutCard.Builder();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if (prefs.getString(PreferenceKeys.THEME, "0").equals(String.valueOf(ThemedActivity.HIGH_CONTRAST))) {
+        if (prefs.getString(PreferenceKeys.THEME, String.valueOf(ThemedActivity.DEFAULT))
+                .equals(String.valueOf(ThemedActivity.HIGH_CONTRAST))) {
             appCardBuilder.addItem(new MaterialAboutTitleItem.Builder()
                     .text(getString(R.string.field_book))
                     .icon(R.mipmap.ic_launcher_monochrome)
@@ -204,6 +202,24 @@ public class AboutActivity extends MaterialAboutActivity {
                 .icon(R.drawable.ic_about_github)
                 .setOnClickAction(ConvenienceBuilder.createWebsiteOnClickAction(c, Uri.parse("https://github.com/PhenoApps/Field-Book")))
                 .build());
+
+        int theme = ThemedActivity.DEFAULT;
+        try {
+            theme = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(this)
+                    .getString(PreferenceKeys.THEME, String.valueOf(ThemedActivity.DEFAULT)));
+        } catch (NumberFormatException ignored) {
+        }
+
+        int styleId = R.style.AboutLibrariesCustom;
+        switch (theme) {
+            case ThemedActivity.BLUE:
+                styleId = R.style.AboutLibrariesCustom_Blue;
+                break;
+            case ThemedActivity.HIGH_CONTRAST:
+                styleId = R.style.AboutLibrariesCustom_HighContrast;
+                break;
+        }
+        final int libStyleId = styleId;
 
         technicalCardBuilder.addItem(new MaterialAboutActionItem.Builder()
                 .text(R.string.about_libraries_title)

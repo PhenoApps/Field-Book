@@ -42,6 +42,7 @@ import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.BrapiAccountHelper
+import com.fieldbook.tracker.preferences.enums.TransferSource
 import com.fieldbook.tracker.utilities.SnackbarUtils
 import com.fieldbook.tracker.utilities.TapTargetUtil
 import com.fieldbook.tracker.utilities.Utils
@@ -425,13 +426,13 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
     }
 
     private fun handleImportAction() {
-        val importer = mPrefs.getString("IMPORT_SOURCE_DEFAULT", "ask")
-        when (importer) {
-            "ask" -> showFileDialog()
-            "local" -> loadLocal()
-            "brapi" -> loadBrAPI()
-            "cloud" -> loadCloud()
-            else -> showFileDialog()
+        when (TransferSource.fromValue(
+            mPrefs.getString(PreferenceKeys.IMPORT_SOURCE_DEFAULT, TransferSource.DEFAULT.value)
+        )) {
+            TransferSource.ASK -> showFileDialog()
+            TransferSource.LOCAL -> loadLocal()
+            TransferSource.BRAPI -> loadBrAPI()
+            TransferSource.CLOUD -> loadCloud()
         }
     }
 

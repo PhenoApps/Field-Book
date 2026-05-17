@@ -34,6 +34,7 @@ import com.fieldbook.tracker.activities.PreferencesActivity;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.fragments.ExportDatabaseFragment;
 import com.fieldbook.tracker.fragments.ImportDatabaseFragment;
+import com.fieldbook.tracker.preferences.enums.TransferSource;
 import com.fieldbook.tracker.utilities.FileUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.ZipUtil;
@@ -158,7 +159,7 @@ public class StoragePreferencesFragment extends PreferenceFragmentCompat impleme
     }
 
     private boolean validateBrapiEnabledBeforeSetting(String newValue) {
-        if ("brapi".equals(newValue) && !preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false)) {
+        if (TransferSource.BRAPI.getValue().equals(newValue) && !preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false)) {
             showBrapiDisabledAlertDialog();
             return false;
         }

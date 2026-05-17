@@ -82,6 +82,9 @@ import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.preferences.enums.BarcodeScanningOptions;
+import com.fieldbook.tracker.preferences.enums.MoveToUniqueIdMode;
+import com.fieldbook.tracker.preferences.enums.SkipEntriesMode;
+import com.fieldbook.tracker.preferences.enums.ToolbarItem;
 import com.fieldbook.tracker.preferences.models.ReturnCharacterMode;
 import com.fieldbook.tracker.traits.AbstractCameraTrait;
 import com.fieldbook.tracker.traits.AudioTraitLayout;
@@ -1391,8 +1394,16 @@ public class CollectActivity extends ThemedActivity
         // Update menu item visibility
         if (systemMenu != null) {
             systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(PreferenceKeys.TIPS, false));
-            systemMenu.findItem(R.id.nextEmptyPlot).setVisible(!preferences.getString(PreferenceKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "0").equals("0"));
-            systemMenu.findItem(R.id.jumpToPlot).setVisible(!preferences.getString(PreferenceKeys.MOVE_TO_UNIQUE_ID, "0").equals("0"));
+            systemMenu.findItem(R.id.nextEmptyPlot).setVisible(
+                    SkipEntriesMode.Companion.fromValue(preferences.getString(
+                            PreferenceKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR,
+                            SkipEntriesMode.DEFAULT.getValue()
+                    )).isEnabled());
+            systemMenu.findItem(R.id.jumpToPlot).setVisible(
+                    MoveToUniqueIdMode.Companion.fromValue(preferences.getString(
+                            PreferenceKeys.MOVE_TO_UNIQUE_ID,
+                            MoveToUniqueIdMode.DEFAULT.getValue()
+                    )).isEnabled());
             systemMenu.findItem(R.id.datagrid).setVisible(preferences.getBoolean(PreferenceKeys.DATAGRID_SETTING, false));
         }
 
@@ -1660,10 +1671,10 @@ public class CollectActivity extends ThemedActivity
         Set<String> entries = preferences.getStringSet(PreferenceKeys.TOOLBAR_CUSTOMIZE, new HashSet<>());
 
         if (systemMenu != null) {
-            systemMenu.findItem(R.id.search).setVisible(entries.contains("search"));
-            systemMenu.findItem(R.id.resources).setVisible(entries.contains("resources"));
-            systemMenu.findItem(R.id.summary).setVisible(entries.contains("summary"));
-            systemMenu.findItem(R.id.lockData).setVisible(entries.contains("lockData"));
+            systemMenu.findItem(R.id.search).setVisible(entries.contains(ToolbarItem.SEARCH.getValue()));
+            systemMenu.findItem(R.id.resources).setVisible(entries.contains(ToolbarItem.RESOURCES.getValue()));
+            systemMenu.findItem(R.id.summary).setVisible(entries.contains(ToolbarItem.SUMMARY.getValue()));
+            systemMenu.findItem(R.id.lockData).setVisible(entries.contains(ToolbarItem.LOCK_DATA.getValue()));
         }
     }
 
@@ -1674,8 +1685,16 @@ public class CollectActivity extends ThemedActivity
         systemMenu = menu;
 
         systemMenu.findItem(R.id.help).setVisible(preferences.getBoolean(PreferenceKeys.TIPS, false));
-        systemMenu.findItem(R.id.nextEmptyPlot).setVisible(!preferences.getString(PreferenceKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "0").equals("0"));
-        systemMenu.findItem(R.id.jumpToPlot).setVisible(!preferences.getString(PreferenceKeys.MOVE_TO_UNIQUE_ID, "0").equals("0"));
+        systemMenu.findItem(R.id.nextEmptyPlot).setVisible(
+                SkipEntriesMode.Companion.fromValue(preferences.getString(
+                        PreferenceKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR,
+                        SkipEntriesMode.DEFAULT.getValue()
+                )).isEnabled());
+        systemMenu.findItem(R.id.jumpToPlot).setVisible(
+                MoveToUniqueIdMode.Companion.fromValue(preferences.getString(
+                        PreferenceKeys.MOVE_TO_UNIQUE_ID,
+                        MoveToUniqueIdMode.DEFAULT.getValue()
+                )).isEnabled());
         systemMenu.findItem(R.id.datagrid).setVisible(preferences.getBoolean(PreferenceKeys.DATAGRID_SETTING, false));
 
         //toggle repeated values indicator
@@ -1841,14 +1860,16 @@ public class CollectActivity extends ThemedActivity
             rangeBox.setPaging(rangeBox.movePaging(rangeBox.getPaging(), 1, true));
             refreshMain();
         } else if (itemId == jumpToPlotId) {
-            String moveToUniqueIdValue = preferences.getString(PreferenceKeys.MOVE_TO_UNIQUE_ID, "");
+            MoveToUniqueIdMode moveToUniqueIdMode = MoveToUniqueIdMode.Companion.fromValue(
+                    preferences.getString(PreferenceKeys.MOVE_TO_UNIQUE_ID, MoveToUniqueIdMode.DEFAULT.getValue())
+            );
 
             // If this is the first time the user clicks the jumpToPlot toolbar icon,
             // show an informational alert pointing them to the bottom toolbar as the
             // new approach. Use SharedPreferences to ensure it only shows once.
-            if (moveToUniqueIdValue.equals("1")) {
+            if (moveToUniqueIdMode == MoveToUniqueIdMode.TEXT_OR_SCAN) {
                 moveToPlotID();
-            } else if (moveToUniqueIdValue.equals("2")) {
+            } else if (moveToUniqueIdMode == MoveToUniqueIdMode.DIRECT_CAMERA_SCAN) {
                 boolean hasShownJumpInfo = preferences.getBoolean(GeneralKeys.PREF_KEY_SHOWN_JUMP_INFO, false);
 
                 if (!hasShownJumpInfo) {
@@ -1863,7 +1884,7 @@ public class CollectActivity extends ThemedActivity
                             .setPositiveButton(android.R.string.ok, (dialog, which) -> requestScanSingleBarcode(true))
                             .setOnDismissListener((dialog) -> {
                                 systemMenu.findItem(R.id.jumpToPlot).setVisible(false);
-                                preferences.edit().putString(PreferenceKeys.MOVE_TO_UNIQUE_ID, "0").apply();
+                                preferences.edit().putString(PreferenceKeys.MOVE_TO_UNIQUE_ID, MoveToUniqueIdMode.DISABLED.getValue()).apply();
                             })
                             .setCancelable(true)
                             .show();
@@ -2630,7 +2651,7 @@ public class CollectActivity extends ThemedActivity
 
         Log.d(TAG, "Fuzzy search on barcode: " + barcode);
 
-        String option = preferences.getString(PreferenceKeys.BARCODE_SCANNING_OPTIONS, BarcodeScanningOptions.Move.INSTANCE.getValue());
+        String option = preferences.getString(PreferenceKeys.BARCODE_SCANNING_OPTIONS, BarcodeScanningOptions.Default.getValue());
         String optionEnter = BarcodeScanningOptions.EnterValue.INSTANCE.getValue();
         String optionMove = BarcodeScanningOptions.Move.INSTANCE.getValue();
         String optionAsk = BarcodeScanningOptions.Ask.INSTANCE.getValue();
