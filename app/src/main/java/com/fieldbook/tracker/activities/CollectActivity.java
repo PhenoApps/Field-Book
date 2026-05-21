@@ -24,7 +24,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.webkit.MimeTypeMap;
-import android.provider.DocumentsContract;
+import android.database.Cursor;
+import android.provider.OpenableColumns;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -1711,35 +1712,35 @@ public class CollectActivity extends ThemedActivity
         String fileString = resourceFileName != null ? resourceFileName :
                             preferences.getString(GeneralKeys.LAST_USED_RESOURCE_FILE, "");
         Log.d(TAG, "fileString after selection: " + fileString);
-        if (!fileString.isEmpty()) {
-            try {
-                Uri resultUri = resolveResourceFileUri(fileString);
-                if (resultUri == null) {
-                    Utils.makeToast(this, getString(R.string.act_file_explorer_no_file_error));
-                    return;
-                }
-
-                String mime = null;
-                if ("content".equalsIgnoreCase(resultUri.getScheme())) {
-                    try {
-                        mime = getContentResolver().getType(resultUri);
-                    } catch (Exception ignore) {
-                    }
-                }
-                if (mime == null) {
-                    String suffix = fileString.substring(fileString.lastIndexOf('.') + 1).toLowerCase();
-                    mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(suffix);
-                }
-
-                Intent open = new Intent(Intent.ACTION_VIEW);
-                open.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                open.setDataAndType(resultUri, mime);
-                startActivity(open);
-            } catch (Exception e) {
-                Log.e(TAG, "Error opening saved resource file.", e);
-            }
-        } else {
+        if (fileString.isEmpty()) {
             Utils.makeToast(this, "No file preference saved, select a file with a short press");
+            return;
+        }
+
+        try {
+            Uri resultUri = resolveResourceFileUri(fileString);
+            if (resultUri == null) {
+                Utils.makeToast(this, getString(R.string.act_file_explorer_no_file_error));
+                return;
+            }
+
+            // Use the content resolver to determine the MIME type
+            String mime = null;
+            try {
+                getContentResolver().getType(resultUri);
+            } catch (Exception ignore) {}
+
+            if (mime == null) {
+                String suffix = fileString.substring(fileString.lastIndexOf('.') + 1).toLowerCase();
+                mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(suffix);
+            }
+
+            Intent open = new Intent(Intent.ACTION_VIEW);
+            open.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            open.setDataAndType(resultUri, mime);
+            startActivity(open);
+        } catch (Exception e) {
+            Log.e(TAG, "Error opening saved resource file.", e);
         }
     }
 
@@ -1748,34 +1749,20 @@ public class CollectActivity extends ThemedActivity
         final String trimmed = resourceFileValue.trim();
         if (trimmed.isEmpty()) return null;
 
-        // Portable form: resources/<relative-path>
-        if (trimmed.regionMatches(true, 0, "resources/", 0, "resources/".length())) {
-            final String relPath = trimmed.substring("resources/".length());
-            return resolveFromResourcesDir(relPath);
-        }
+        // Portable form: resources/<relative-path> — resolve via the resources directory tree
+        if (!trimmed.startsWith("content://") && !trimmed.startsWith("file://")) {
 
-        // Legacy: treat as URI (keep as-is; do not guess/normalize).
-        return Uri.parse(trimmed);
-    }
-
-    private Uri resolveFromResourcesDir(String relPath) {
-        try {
             DocumentFile resDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_resources);
             if (resDir == null || !resDir.exists()) return null;
-
-            String[] parts = relPath.split("/");
-            DocumentFile current = resDir;
-            for (String part : parts) {
-                if (part == null || part.isEmpty()) continue;
-                DocumentFile next = current.findFile(part);
-                if (next == null || !next.exists()) return null;
-                current = next;
+            DocumentFile current = resDir.findFile(trimmed);
+            if (current != null) {
+                current.getUri();
+                return current.getUri();
             }
-            return current.getUri();
-        } catch (Exception e) {
-            Log.e(TAG, "Failed resolving resources path: " + relPath, e);
-            return null;
         }
+
+        // Legacy: treat as a raw URI (content:// or file://)
+        return Uri.parse(trimmed);
     }
 
     // Overload for backward compatibility
@@ -2366,16 +2353,18 @@ public class CollectActivity extends ThemedActivity
                             if ("content".equalsIgnoreCase(chosenUri.getScheme())) {
                                 DocumentFile resDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_resources);
                                 if (resDir != null && resDir.exists()) {
-                                    // SAF provides stable "documentId" strings which we can use to compute a relative path
-                                    // inside a tree. This avoids fragile string matching on URIs or guessing filenames.
-                                    try {
-                                        String treeId = DocumentsContract.getTreeDocumentId(resDir.getUri());
-                                        String docId = DocumentsContract.getDocumentId(chosenUri);
-                                        if (treeId != null && docId != null && docId.startsWith(treeId + "/")) {
-                                            String rel = docId.substring(treeId.length() + 1); // after "treeId/"
-                                            rel = rel.trim();
-                                            if (!rel.isEmpty()) {
-                                                storedValue = "resources/" + rel;
+                                    // Query the content resolver for the display name of the chosen file.
+                                    try (Cursor cursor = getContentResolver().query(
+                                            chosenUri,
+                                            new String[]{OpenableColumns.DISPLAY_NAME},
+                                            null, null, null)) {
+                                        if (cursor != null && cursor.moveToFirst()) {
+                                            int nameIdx = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                                            if (nameIdx >= 0) {
+                                                String displayName = cursor.getString(nameIdx);
+                                                if (displayName != null && !displayName.trim().isEmpty()) {
+                                                    storedValue = displayName.trim();
+                                                }
                                             }
                                         }
                                     } catch (Exception ignore) {}
