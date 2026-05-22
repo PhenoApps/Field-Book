@@ -42,6 +42,7 @@ import kotlin.collections.isNotEmpty
 import kotlin.collections.map
 import androidx.core.content.edit
 import com.fieldbook.tracker.database.repository.TraitRepository
+import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter
 import kotlinx.coroutines.withContext
 
 @HiltViewModel
@@ -49,7 +50,8 @@ class BrapiSyncViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val dataHelper: DataHelper,
     private val preferences: SharedPreferences,
-    private val traitRepo: TraitRepository
+    private val traitRepo: TraitRepository,
+    private val valueProcessorFormatAdapter: ValueProcessorFormatAdapter
 ) : ViewModel() {
 
     private var brAPIService = BrAPIServiceFactory.getBrAPIService(context)
@@ -764,8 +766,14 @@ class BrapiSyncViewModel @Inject constructor(
         observations: List<Observation>,
         processor: suspend (List<Observation>) -> Flow<UploadProgressUpdate>
     ) {
-
         Log.d(TAG, "Starting upload observations")
+
+        val traits = traitRepo.getTraits().associateBy { it.id }
+        observations.forEach { obs ->
+            traits[obs.internalVariableDbId]?.let { trait ->
+                obs.value = valueProcessorFormatAdapter.processValue(obs.value, trait)
+            }
+        }
 
         processor(observations)
             .onCompletion { cause ->

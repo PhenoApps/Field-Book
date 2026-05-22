@@ -271,6 +271,7 @@ class ObservationDao {
                     obs.last_synced_time,
                     obs.collector,
                     obs.rep,
+                    obs.${ObservationVariable.FK} AS internalVariableDbId,
                     study.${Study.PK} AS ${Study.FK},
                     study.study_db_id,
                     vars.external_db_id,
@@ -298,6 +299,7 @@ class ObservationDao {
                         variableName = getStringVal(cursor, "observation_variable_name")
                         rep = getStringVal(cursor, "rep")
                         variableDetails = getStringVal(cursor, "observation_variable_details")
+                        internalVariableDbId = getStringVal(cursor, "internalVariableDbId")
                     }
                     
                     val format = getStringVal(cursor, "observation_variable_field_book_format")
