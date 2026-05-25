@@ -1,7 +1,8 @@
 package com.fieldbook.tracker.traits
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import android.Manifest
-import android.app.AlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.provider.MediaStore
@@ -529,7 +530,7 @@ class VideoTraitLayout : PhotoTraitLayout {
     override fun showSettings() {
 
         val settingsView = VideoCameraSettingsView(context, videoSupportedResolutions)
-        AlertDialog.Builder(context, style.AppAlertDialog)
+        ThemedAlertDialog.builder(context)
             .setTitle(string.trait_system_photo_settings_title)
             .setPositiveButton(string.dialog_ok) { dialog, _ ->
                 settingsView.commitChanges()

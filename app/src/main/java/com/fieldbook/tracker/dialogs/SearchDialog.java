@@ -1,5 +1,8 @@
 package com.fieldbook.tracker.dialogs;
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog;
+import com.fieldbook.tracker.utilities.AppThemeResolver;
+
 import android.app.Dialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -64,7 +67,7 @@ public class SearchDialog extends DialogFragment implements AttributeChooserDial
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(originActivity, R.style.AppAlertDialog);
+        AlertDialog.Builder builder = ThemedAlertDialog.builder(originActivity);
 
         View customView = getLayoutInflater().inflate(R.layout.dialog_search, null);
         builder.setTitle(originActivity.getString(R.string.main_toolbar_search));
@@ -224,7 +227,7 @@ public class SearchDialog extends DialogFragment implements AttributeChooserDial
                 traitData.add(temp);
             }
 
-            AlertDialog.Builder builder1 = new AlertDialog.Builder(originActivity, R.style.AppAlertDialog);
+            AlertDialog.Builder builder1 = ThemedAlertDialog.builder(originActivity);
 
             View layout = getLayoutInflater().inflate(R.layout.dialog_search_results, null);
             builder1.setTitle(R.string.search_results_dialog_title).setCancelable(true).setView(layout);

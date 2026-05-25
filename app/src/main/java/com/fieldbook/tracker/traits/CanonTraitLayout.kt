@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.traits
 
-import android.app.AlertDialog
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Network
@@ -184,7 +185,7 @@ class CanonTraitLayout :
 
         val settingsView = CanonCameraTraitSettingsView(context)
 
-        AlertDialog.Builder(context, R.style.AppAlertDialog)
+        ThemedAlertDialog.builder(context)
             .setTitle(R.string.canon_trait_settings_title)
             .setView(settingsView)
             .setPositiveButton(android.R.string.ok) { dialog, _ ->

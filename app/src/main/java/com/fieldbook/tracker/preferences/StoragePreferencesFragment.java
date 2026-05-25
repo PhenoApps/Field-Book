@@ -1,9 +1,11 @@
 package com.fieldbook.tracker.preferences;
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog;
+import com.fieldbook.tracker.utilities.AppThemeResolver;
 import static android.app.Activity.RESULT_OK;
 
 import android.Manifest;
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -166,7 +168,7 @@ public class StoragePreferencesFragment extends PreferenceFragmentCompat impleme
     }
 
     private void showBrapiDisabledAlertDialog() {
-        new AlertDialog.Builder(getContext(), R.style.AppAlertDialog)
+        ThemedAlertDialog.builder(getContext())
                 .setTitle(R.string.brapi_disabled_alert_title)
                 .setMessage(R.string.brapi_disabled_alert_message)
                 .setPositiveButton(android.R.string.ok, null)
@@ -206,7 +208,7 @@ public class StoragePreferencesFragment extends PreferenceFragmentCompat impleme
         SimpleDateFormat timeStamp = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
         String autoFillName = timeStamp.format(Calendar.getInstance().getTime()) + "_" + "systemdb" + DataHelper.DATABASE_VERSION;
         exportFile.setText(autoFillName);
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog);
+        AlertDialog.Builder builder = ThemedAlertDialog.builder(getContext());
         builder.setTitle(R.string.database_dialog_title)
                 .setCancelable(true)
                 .setView(layout)
@@ -241,7 +243,7 @@ public class StoragePreferencesFragment extends PreferenceFragmentCompat impleme
     }
 
     private void showDatabaseResetDialog1() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog);
+        AlertDialog.Builder builder = ThemedAlertDialog.builder(getContext());
         builder.setTitle(getString(R.string.dialog_warning));
         builder.setMessage(getString(R.string.database_reset_warning1));
         builder.setPositiveButton(getString(R.string.dialog_delete), (dialog, which) -> {
@@ -257,7 +259,7 @@ public class StoragePreferencesFragment extends PreferenceFragmentCompat impleme
     }
 
     private void showDatabaseResetDialog2() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog);
+        AlertDialog.Builder builder = ThemedAlertDialog.builder(getContext());
         builder.setTitle(getString(R.string.dialog_warning));
         builder.setMessage(getString(R.string.database_reset_warning2));
         builder.setPositiveButton(getString(R.string.dialog_yes), (dialog, which) -> {

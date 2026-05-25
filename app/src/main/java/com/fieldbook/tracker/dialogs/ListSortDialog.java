@@ -1,7 +1,10 @@
 package com.fieldbook.tracker.dialogs;
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog;
+import com.fieldbook.tracker.utilities.AppThemeResolver;
+
 import android.app.Activity;
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -66,7 +69,7 @@ public class ListSortDialog {
         };
         myList.setAdapter(adapter);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity, R.style.AppAlertDialog);
+        AlertDialog.Builder builder = ThemedAlertDialog.builder(activity);
         builder.setTitle(R.string.dialog_sort_by)
                 .setCancelable(true)
                 .setView(layout)

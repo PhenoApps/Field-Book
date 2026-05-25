@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.dialogs
 
-import android.app.AlertDialog
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
 import com.fieldbook.tracker.R
@@ -28,7 +29,7 @@ class SimpleListDialog {
 
             assert(items.size == itemNames.size)
 
-            val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
+            val builder = ThemedAlertDialog.builder(context)
             builder.setTitle(titleResId)
             builder.setSingleChoiceItems(
                 itemNames.toTypedArray(),

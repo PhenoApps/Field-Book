@@ -1,5 +1,7 @@
 package com.fieldbook.tracker.dialogs;
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -19,7 +21,7 @@ public class OperatorDialog extends AlertDialog {
     private int adapter_position;
 
     public OperatorDialog(Context context, OnOperatorClickedListener listener, int adapter_position) {
-        super(context, R.style.AppAlertDialog);
+        super(context, ThemedAlertDialog.dialogStyle(context));
         this.context = context;
         this.listener = listener;
         this.adapter_position = adapter_position;

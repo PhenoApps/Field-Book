@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.preferences
 
-import android.app.AlertDialog
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
@@ -147,7 +148,8 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
 
             if (!hasAccelerometer || !hasMagneticSensor) {
 
-                AlertDialog.Builder(context, R.style.AppAlertDialog)
+                val ctx = requireContext()
+                ThemedAlertDialog.builder(ctx)
                     .setTitle(R.string.dialog_geonav_prefs_sensor_missing_title)
                     .setMessage(R.string.dialog_geonav_prefs_sensor_missing_message)
                     .setPositiveButton(org.phenoapps.androidlibrary.R.string.ok) { dialog, which ->
@@ -266,7 +268,8 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
             }
             val internalGps = getString(R.string.pref_behavior_geonav_internal_gps_choice)
             names.add(internalGps)
-            val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
+            val ctx = requireContext()
+            val builder = ThemedAlertDialog.builder(ctx)
             builder.setTitle(R.string.choose_paired_bluetooth_devices_title)
 
             //when a device is chosen, start a connect thread

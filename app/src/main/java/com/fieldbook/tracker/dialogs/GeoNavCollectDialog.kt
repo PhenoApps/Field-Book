@@ -1,6 +1,8 @@
 package com.fieldbook.tracker.dialogs
 
-import android.app.AlertDialog
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
+
+import androidx.appcompat.app.AlertDialog
 import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
@@ -17,7 +19,7 @@ import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.Utils
 
 class GeoNavCollectDialog(private val activity: CollectActivity) :
-    AlertDialog.Builder(activity, R.style.AppAlertDialog) {
+    AlertDialog.Builder(activity, ThemedAlertDialog.dialogStyle(activity)) {
 
     companion object {
         private const val GEO_NAV_RESTART_DELAY_MS = 1000L

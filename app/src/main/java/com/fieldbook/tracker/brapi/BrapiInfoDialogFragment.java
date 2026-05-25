@@ -1,6 +1,8 @@
 package com.fieldbook.tracker.brapi;
 
-import android.app.AlertDialog;
+import com.fieldbook.tracker.utilities.ThemedAlertDialog;
+import com.fieldbook.tracker.utilities.AppThemeResolver;
+import androidx.appcompat.app.AlertDialog;
 import android.app.Dialog;
 import android.os.Bundle;
 
@@ -22,7 +24,7 @@ public class BrapiInfoDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext(), R.style.AppAlertDialog);
+        AlertDialog.Builder builder = ThemedAlertDialog.builder(requireContext());
         builder.setTitle(requireContext().getString(R.string.brapi_info_title));
         builder.setMessage(bodyMessage);
         builder.setNegativeButton(requireContext().getString(R.string.dialog_close), (dialog, which) -> dialog.dismiss());

@@ -123,12 +123,14 @@
         <item name="fabCustomSize">@dimen/fb_trait_fab_size</item>
         <item name="maxImageSize">@dimen/fb_trait_fab_image_size</item>
         <item name="android:backgroundTint">?fb_trait_button_background_tint</item>
+        <item name="tint">?fb_icon_fill_tint</item>
     </style>
 
     <style name="FloatingActionButtonStyle.SmallTraitButtons">
         <item name="fabCustomSize">@dimen/fb_trait_fab_size_small</item>
         <item name="maxImageSize">@dimen/fb_trait_fab_image_size_small</item>
         <item name="android:backgroundTint">?fb_trait_button_background_tint</item>
+        <item name="tint">?fb_icon_fill_tint</item>
     </style>
 
     <style name="MaterialCardViewStyle" parent="Widget.MaterialComponents.CardView">
@@ -182,6 +184,7 @@
     <!-- Action bar (toolbar) style -->
     <style name="AppToolbar" parent="@style/Widget.AppCompat.Toolbar">
         <item name="titleTextColor">?attr/fb_title_text_color</item>
+        <item name="colorControlNormal">?attr/fb_icon_tint</item>
         <item name="android:background">?attr/fb_color_primary</item>
         <item name="android:popupBackground">?attr/fb_color_background</item>
         <item name="android:itemBackground">?attr/fb_color_background</item>

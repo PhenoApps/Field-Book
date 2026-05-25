@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.dialogs
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import android.content.Context
 import android.text.Html
 import android.text.method.LinkMovementMethod
@@ -21,7 +22,7 @@ class CitationDialog(private val context: Context) {
             </a>
         """.trimIndent()
 
-        val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
+        val builder = ThemedAlertDialog.builder(context)
         builder.setTitle(context.getString(R.string.citation_title))
             .setMessage(Html.fromHtml(htmlMessage))
             .setCancelable(false)

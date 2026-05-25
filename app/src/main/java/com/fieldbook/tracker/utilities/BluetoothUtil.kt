@@ -1,6 +1,8 @@
 package com.fieldbook.tracker.utilities
 
-import android.app.AlertDialog
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
+
+import androidx.appcompat.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
@@ -45,7 +47,7 @@ class BluetoothUtil {
                 }
             }
 
-            val builder = AlertDialog.Builder(ctx, R.style.AppAlertDialog).apply {
+            val builder = ThemedAlertDialog.builder(ctx).apply {
 
                 setTitle(context.getString(R.string.bluetooth_printer_choose_device_title))
 

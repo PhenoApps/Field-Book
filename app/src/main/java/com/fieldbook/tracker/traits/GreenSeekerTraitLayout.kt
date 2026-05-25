@@ -1,7 +1,8 @@
 package com.fieldbook.tracker.traits
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import android.app.Activity
-import android.app.AlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.content.Context
@@ -161,7 +162,7 @@ class GreenSeekerTraitLayout : BaseTraitLayout, LineGraphSelectableAdapter.Liste
 
             }
 
-            dialog = AlertDialog.Builder(context, R.style.AppAlertDialog)
+            dialog = ThemedAlertDialog.builder(context)
                 .setTitle(context.getString(R.string.device_settings_dialog_title))
                 .setView(settingsView)
                 .setPositiveButton(android.R.string.ok) { dialog, _ ->
@@ -798,7 +799,7 @@ class GreenSeekerTraitLayout : BaseTraitLayout, LineGraphSelectableAdapter.Liste
     }
 
     private fun askUserReplaceObservationsWithNa(observations: Array<ObservationModel>) {
-        AlertDialog.Builder(context)
+        ThemedAlertDialog.builder(context)
             .setTitle(R.string.replace_observations)
             .setMessage(R.string.replace_observations_message)
             .setPositiveButton(android.R.string.ok) { _, _ ->
@@ -873,7 +874,7 @@ class GreenSeekerTraitLayout : BaseTraitLayout, LineGraphSelectableAdapter.Liste
         if (item != null) {
 
             //create alert dialog
-            val builder = AlertDialog.Builder(context)
+            val builder = ThemedAlertDialog.builder(context)
             builder.setTitle(R.string.spectral_trait_insert_note_message)
             val input = EditText(context)
             builder.setView(input)

@@ -153,9 +153,12 @@ object AppThemeResolver {
     fun statusBarColorRes(themeIndex: Int): Int =
         (themeStyles[themeIndex] ?: themeStyles.getValue(ThemedActivity.DEFAULT)).statusBarColorRes
 
-    /** Resolves [android.R.attr.alertDialogTheme] from the activity theme (Soda-aware). */
+    /** Resolves themed alert dialog style (Soda uses [R.style.AppAlertDialog.SodaDark]). */
     @JvmStatic
     fun alertDialogStyle(context: Context): Int {
+        if (themeIndex(PreferenceManager.getDefaultSharedPreferences(context)) == ThemedActivity.SODA_DARK) {
+            return R.style.AppAlertDialog_SodaDark
+        }
         val typedValue = TypedValue()
         return if (context.theme.resolveAttribute(android.R.attr.alertDialogTheme, typedValue, true)
             && typedValue.resourceId != 0

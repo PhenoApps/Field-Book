@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.preferences
 
-import android.app.AlertDialog
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.Toast
@@ -43,7 +44,8 @@ class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
             if (newValue == false) {
 
                 if (isAdded) {
-                    AlertDialog.Builder(context, R.style.AppAlertDialog)
+                    val ctx = requireContext()
+                    ThemedAlertDialog.builder(ctx)
                         .setTitle(getString(R.string.pref_experimental_repeated_values_disabled_title))
                         .setMessage(getString(R.string.pref_experimental_repeated_values_disabled_message))
                         .setPositiveButton(android.R.string.ok) { dialog, _ -> dialog.dismiss() }
@@ -73,7 +75,7 @@ class ExperimentalPreferencesFragment : PreferenceFragmentCompat() {
         val generateSampleData = findPreference<Preference>(PreferenceKeys.GENERATE_SAMPLE_DATA)
         generateSampleData?.setOnPreferenceClickListener {
             context?.let { ctx ->
-                AlertDialog.Builder(ctx, R.style.AppAlertDialog)
+                ThemedAlertDialog.builder(ctx)
                     .setTitle(getString(R.string.pref_experimental_generate_sample_data_confirm_title))
                     .setMessage(getString(R.string.pref_experimental_generate_sample_data_confirm_message))
                     .setPositiveButton(android.R.string.ok) { dialog, _ ->

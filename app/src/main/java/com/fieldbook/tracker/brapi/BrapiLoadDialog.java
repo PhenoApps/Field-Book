@@ -1,7 +1,9 @@
 package com.fieldbook.tracker.brapi;
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog;
+import com.fieldbook.tracker.utilities.AppThemeResolver;
 import android.app.Activity;
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -96,7 +98,7 @@ public class BrapiLoadDialog extends DialogFragment {
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         this.context = requireActivity();
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppAlertDialog);
+        AlertDialog.Builder builder = ThemedAlertDialog.builder(context);
 
 //        builder.setTitle(R.string.field_import_string);
         builder.setNegativeButton(R.string.dialog_cancel, (dialog, which) -> dialog.dismiss());
@@ -208,7 +210,7 @@ public class BrapiLoadDialog extends DialogFragment {
         }, code -> {
             ((Activity) context).runOnUiThread(() -> {
                 loadingPanel.setVisibility(View.GONE);
-                new AlertDialog.Builder(context, R.style.AppAlertDialog)
+                ThemedAlertDialog.builder(context)
                         .setTitle(R.string.dialog_save_error_title)
                         .setPositiveButton(org.phenoapps.androidlibrary.R.string.okButtonText, (dialogInterface, i) -> {
                             ((Activity) context).finish();
@@ -450,7 +452,7 @@ public class BrapiLoadDialog extends DialogFragment {
             AlertDialog.Builder alertDialogBuilder = null;
             // Display our message.
             if (brapiControllerResponse != null && !brapiControllerResponse.status) {
-                alertDialogBuilder = new AlertDialog.Builder(context, R.style.AppAlertDialog);
+                alertDialogBuilder = ThemedAlertDialog.builder(context);
                 alertDialogBuilder.setTitle(R.string.dialog_save_error_title)
                         .setPositiveButton(R.string.dialog_ok, (dialogInterface, i) -> {
                             // Finish our BrAPI import activity
@@ -478,7 +480,7 @@ public class BrapiLoadDialog extends DialogFragment {
                 } else {
                     Log.e("error-opef", "unknown");
                 }
-                alertDialogBuilder = new AlertDialog.Builder(context, R.style.AppAlertDialog);
+                alertDialogBuilder = ThemedAlertDialog.builder(context);
                 alertDialogBuilder.setTitle(R.string.dialog_save_error_title)
                         .setPositiveButton(org.phenoapps.androidlibrary.R.string.okButtonText, (dialogInterface, i) -> {
                             // Finish our BrAPI import activity

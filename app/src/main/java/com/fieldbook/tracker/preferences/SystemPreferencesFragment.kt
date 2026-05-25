@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.preferences
 
-import android.app.AlertDialog
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
@@ -49,7 +50,8 @@ class SystemPreferencesFragment : PreferenceFragmentCompat(),
 
         val resetPref = findPreference<Preference>(GeneralKeys.RESET_PREFERENCES)
         resetPref?.onPreferenceClickListener = Preference.OnPreferenceClickListener {
-            AlertDialog.Builder(context, R.style.AppAlertDialog)
+            val ctx = requireContext()
+            ThemedAlertDialog.builder(ctx)
                 .setTitle(R.string.reset_preferences_title)
                 .setMessage(R.string.reset_preferences_message)
                 .setPositiveButton(android.R.string.ok) { _, _ ->
@@ -107,7 +109,8 @@ class SystemPreferencesFragment : PreferenceFragmentCompat(),
     }
 
     private fun showBrapiDisabledAlertDialog() {
-        AlertDialog.Builder(context, R.style.AppAlertDialog)
+        val ctx = requireContext()
+        ThemedAlertDialog.builder(ctx)
             .setTitle(R.string.brapi_disabled_alert_title)
             .setMessage(R.string.brapi_disabled_alert_message)
             .setPositiveButton(android.R.string.ok, null)

@@ -1,7 +1,8 @@
 package com.fieldbook.tracker.traits
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import android.app.Activity
-import android.app.AlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Handler
@@ -253,7 +254,7 @@ open class PhotoTraitLayout : CameraTrait {
     override fun showSettings() {
 
         val settingsView = CameraTraitSettingsView(context, supportedResolutions)
-        AlertDialog.Builder(context, R.style.AppAlertDialog)
+        ThemedAlertDialog.builder(context)
             .setTitle(R.string.trait_system_photo_settings_title)
             .setPositiveButton(R.string.dialog_ok) { dialog, _ ->
                 settingsView.commitChanges()

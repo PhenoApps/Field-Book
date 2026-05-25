@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.utilities
 
-import android.app.AlertDialog
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -70,7 +71,7 @@ class VerifyPersonHelper @Inject constructor(@ActivityContext private val contex
         neutral: String,
         negative: String
     ) {
-        val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
+        val builder = ThemedAlertDialog.builder(context)
             .setTitle(message)
             .setPositiveButton(positive, null)
             .setNeutralButton(neutral, null)

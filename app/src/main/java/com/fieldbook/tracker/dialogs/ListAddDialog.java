@@ -1,7 +1,8 @@
 package com.fieldbook.tracker.dialogs;
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog;
 import android.app.Activity;
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
@@ -60,8 +61,8 @@ public class ListAddDialog extends DialogFragment {
         ListAddAdapter adapter = new ListAddAdapter(activity, items, icons);
         listView.setAdapter(adapter);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(
-                activity, AppThemeResolver.alertDialogStyle(activity));
+        AlertDialog.Builder builder = ThemedAlertDialog.builder(
+                activity);
         builder.setTitle(title)
                 .setCancelable(true)
                 .setView(layout)

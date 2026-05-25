@@ -1,5 +1,7 @@
 package com.fieldbook.tracker.fragments
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
+
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.SharedPreferences
@@ -186,7 +188,8 @@ class ImportDatabaseFragment : Fragment() {
     private fun showProgressBarLoadingDialog() {
         // show only if the fragment is added to the activity
         if (isAdded) {
-            dialog = ProgressDialog(mContext, R.style.AppAlertDialog)
+            val ctx = requireContext()
+            dialog = ThemedAlertDialog.progressDialog(ctx)
             dialog?.isIndeterminate = true
             dialog?.setCancelable(false)
             dialog?.setMessage(

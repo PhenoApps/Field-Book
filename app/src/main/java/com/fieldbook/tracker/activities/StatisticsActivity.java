@@ -1,6 +1,8 @@
 package com.fieldbook.tracker.activities;
 
-import android.app.AlertDialog;
+import com.fieldbook.tracker.utilities.ThemedAlertDialog;
+import com.fieldbook.tracker.utilities.AppThemeResolver;
+import androidx.appcompat.app.AlertDialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -92,7 +94,7 @@ public class StatisticsActivity extends ThemedActivity {
             }
         });
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+        AlertDialog.Builder builder = ThemedAlertDialog.builder(this);
         builder.setView(getLayoutInflater().inflate(R.layout.dialog_loading, null));
         loadingDialog = builder.create();
 

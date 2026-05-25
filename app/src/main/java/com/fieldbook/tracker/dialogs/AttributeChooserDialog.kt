@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.dialogs
 
-import android.app.AlertDialog
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
 import android.util.Log
@@ -86,7 +87,7 @@ open class AttributeChooserDialog(
         tabLayout.getTabAt(2)?.view?.visibility =
             if (showOther) TabLayout.VISIBLE else TabLayout.GONE
 
-        val builder = AlertDialog.Builder(requireActivity(), R.style.AppAlertDialog)
+        val builder = ThemedAlertDialog.builder(requireActivity())
             .setView(view)
             .setNegativeButton(android.R.string.cancel, null)
             .setCancelable(true)

@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.traits
 
-import android.app.AlertDialog
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.content.Context
 import android.net.ConnectivityManager
 import android.os.Handler
@@ -247,7 +248,7 @@ class NixTraitLayout : SpectralTraitLayout {
 
             }
 
-            dialog = AlertDialog.Builder(context, R.style.AppAlertDialog)
+            dialog = ThemedAlertDialog.builder(context)
                 .setTitle(context.getString(R.string.nix_trait_settings_title, nixDevice.name))
                 .setView(settingsView)
                 .setPositiveButton(android.R.string.ok) { dialog, _ ->

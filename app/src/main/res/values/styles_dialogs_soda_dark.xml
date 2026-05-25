@@ -1,12 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- Light dialog body text; referenced by alert-dialog widget styles below. -->
+    <style name="TextViewStyle.Dialog.SodaDark" parent="TextViewStyle">
+        <item name="android:textColor">?attr/fb_color_text_light</item>
+    </style>
+
+    <style name="AlertCheckedView.SodaDark" parent="AlertCheckedView">
+        <item name="android:textColor">?attr/fb_color_text_light</item>
+    </style>
+
+    <style name="CheckBoxStyle.SodaDark" parent="CheckBoxStyle">
+        <item name="android:textColor">?attr/fb_color_text_light</item>
+    </style>
+
+    <style name="RadioButtonStyle.SodaDark" parent="RadioButtonStyle">
+        <item name="android:textColor">?attr/fb_color_text_light</item>
+    </style>
+
+    <style name="DropDownTextViewStyle.Dialog.SodaDark" parent="TextViewStyle.Dialog.SodaDark" />
+
+    <style name="SpinnerDropDownItemStyle.SodaDark" parent="SpinnerDropDownItemStyle">
+        <item name="android:textViewStyle">@style/DropDownTextViewStyle.Dialog.SodaDark</item>
+    </style>
+
+    <style name="DropDownListViewStyle.SodaDark" parent="DropDownListViewStyle">
+        <item name="android:textViewStyle">@style/DropDownTextViewStyle.Dialog.SodaDark</item>
+    </style>
+
     <style name="AppAlertDialog.SodaDark" parent="Theme.SodaDark.Palette">
         <item name="android:colorBackground">?attr/fb_color_background</item>
         <item name="android:windowBackground">?attr/fb_color_background</item>
         <item name="android:textColorPrimary">?attr/fb_color_text_light</item>
         <item name="android:textColorSecondary">?attr/fb_color_text_secondary</item>
         <item name="android:textColorHint">?attr/fb_color_hint_text</item>
+        <item name="textColorAlertDialogListItem">?attr/fb_color_text_light</item>
+        <item name="android:textColorAlertDialogListItem">?attr/fb_color_text_light</item>
         <item name="colorControlNormal">?attr/fb_icon_tint</item>
         <item name="colorAccent">?attr/fb_color_accent</item>
         <item name="colorSurface">?attr/fb_color_card_background</item>
@@ -15,7 +44,7 @@
         <item name="buttonBarNeutralButtonStyle">@style/ButtonBarStyle</item>
         <item name="buttonBarPositiveButtonStyle">@style/ButtonBarStyle</item>
         <item name="android:background">@color/TRANSPARENT</item>
-        <item name="checkedTextViewStyle">@style/AlertCheckedView</item>
+        <item name="checkedTextViewStyle">@style/AlertCheckedView.SodaDark</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:windowTitleBackgroundStyle">@android:color/transparent</item>
@@ -32,18 +61,17 @@
         <item name="textInputStyle">@style/DialogTextInputLayoutStyle</item>
         <item name="floatingActionButtonStyle">@style/FloatingActionButtonStyle</item>
         <item name="imageButtonStyle">@style/ImageButtonStyle</item>
-        <item name="radioButtonStyle">@style/RadioButtonStyle</item>
+        <item name="radioButtonStyle">@style/RadioButtonStyle.SodaDark</item>
         <item name="buttonStyle">@style/ButtonStyle</item>
         <item name="android:buttonStyleToggle">@style/ToggleButtonStyle</item>
         <item name="toolbarStyle">@style/AppToolbar</item>
-        <item name="checkboxStyle">@style/CheckBoxStyle</item>
+        <item name="checkboxStyle">@style/CheckBoxStyle.SodaDark</item>
         <item name="actionOverflowButtonStyle">@style/OverFlowStyle</item>
         <item name="progressBarStyle">@style/ProgressBarStyle</item>
         <item name="indeterminateProgressStyle">@style/IndeterminateProgressStyle</item>
-        <item name="android:textViewStyle">@style/TextViewStyle</item>
-        <item name="spinnerDropDownItemStyle">@style/SpinnerDropDownItemStyle</item>
-        <item name="dropDownListViewStyle">@style/DropDownListViewStyle</item>
-        <item name="android:checkedTextViewStyle">@style/AlertCheckedView</item>
+        <item name="android:textViewStyle">@style/TextViewStyle.Dialog.SodaDark</item>
+        <item name="spinnerDropDownItemStyle">@style/SpinnerDropDownItemStyle.SodaDark</item>
+        <item name="dropDownListViewStyle">@style/DropDownListViewStyle.SodaDark</item>
     </style>
 
     <style name="DialogTitleStyle.SodaDark" parent="DialogTitleStyle">

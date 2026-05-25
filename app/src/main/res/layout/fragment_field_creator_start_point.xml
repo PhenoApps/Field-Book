@@ -78,6 +78,8 @@
         android:background="?attr/selectableItemBackground"
         android:contentDescription="@string/dialog_back"
         android:src="@drawable/chevron_left"
+        app:tint="?attr/stepper_icon_color"
+        app:tintMode="src_in"
         app:layout_constraintBottom_toBottomOf="@id/bottom_navigation"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/bottom_navigation" />
@@ -91,6 +93,8 @@
         android:contentDescription="@string/next"
         android:enabled="false"
         android:src="@drawable/chevron_right"
+        app:tint="?attr/stepper_icon_color"
+        app:tintMode="src_in"
         app:layout_constraintBottom_toBottomOf="@id/bottom_navigation"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/bottom_navigation" />

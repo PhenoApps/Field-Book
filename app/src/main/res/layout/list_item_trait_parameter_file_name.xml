@@ -24,6 +24,7 @@
         android:layout_height="wrap_content"
         app:endIconMode="custom"
         app:endIconDrawable="@drawable/ic_tb_folder"
+        app:endIconTint="?attr/fb_icon_tint"
         app:errorEnabled="false">
 
         <com.google.android.material.textfield.TextInputEditText

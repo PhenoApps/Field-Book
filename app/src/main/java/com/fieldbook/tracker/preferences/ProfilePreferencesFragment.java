@@ -1,6 +1,8 @@
 package com.fieldbook.tracker.preferences;
 
-import android.app.AlertDialog;
+import com.fieldbook.tracker.utilities.ThemedAlertDialog;
+import com.fieldbook.tracker.utilities.AppThemeResolver;
+import androidx.appcompat.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -121,7 +123,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         firstName.setSelectAllOnFocus(true);
         lastName.setSelectAllOnFocus(true);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog);
+        AlertDialog.Builder builder = ThemedAlertDialog.builder(getContext());
         builder.setTitle(R.string.preferences_profile_person_dialog_title)
                 .setCancelable(true)
                 .setView(layout);
@@ -184,7 +186,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
         ArrayAdapter<String> adapter = getPersonNameAdapter(currentPersonIndex, previousNames);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog)
+        AlertDialog.Builder builder = ThemedAlertDialog.builder(getContext())
                 .setTitle(R.string.preferences_profile_previous_names)
                 .setAdapter(adapter, (dialogInterface, which) -> {
                     PersonNameManager.PersonName selectedName = previouslySavedNames.get(which);
@@ -201,7 +203,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
     }
 
     private void showPersonResetWarning() {
-        AlertDialog alertDialog = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog)
+        AlertDialog alertDialog = ThemedAlertDialog.builder(getContext())
                 .setTitle(R.string.dialog_warning)
                 .setMessage(R.string.preferences_profile_previous_names_warning)
                 .setNegativeButton(R.string.dialog_cancel, null)
@@ -229,7 +231,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
         deviceName.setSelectAllOnFocus(true);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog);
+        AlertDialog.Builder builder = ThemedAlertDialog.builder(getContext());
         builder.setTitle(R.string.preferences_profile_device_name_dialog_title)
                 .setCancelable(true)
                 .setView(layout);

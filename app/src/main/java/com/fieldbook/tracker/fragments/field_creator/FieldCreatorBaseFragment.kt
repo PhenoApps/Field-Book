@@ -207,7 +207,9 @@ abstract class FieldCreatorBaseFragment : Fragment() {
 
     /** Apply theme icon tint to navigation and option icons in field creator screens. */
     private fun tintFieldCreatorIcons(root: View) {
-        val tintColor = MaterialColors.getColor(root, R.attr.fb_icon_tint, 0)
+        val tintColor = MaterialColors.getColor(root, R.attr.stepper_icon_color, 0)
+            .takeIf { it != 0 }
+            ?: MaterialColors.getColor(root, R.attr.fb_icon_tint, android.graphics.Color.WHITE)
         if (tintColor == 0) return
         val tintList = ColorStateList.valueOf(tintColor)
         when (root) {

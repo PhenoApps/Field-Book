@@ -1,9 +1,11 @@
 package com.fieldbook.tracker.activities;
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog;
+import com.fieldbook.tracker.utilities.AppThemeResolver;
 import static com.fieldbook.tracker.ui.MediaViewerActivity.EXTRA_TRAIT_DB_ID;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -819,7 +821,7 @@ public class CollectActivity extends ThemedActivity
                         if (hasMedia) {
                             // Warn the user that attached media will also be removed
                             ObservationModel finalObs = obs;
-                            new AlertDialog.Builder(CollectActivity.this, R.style.AppAlertDialog)
+                            ThemedAlertDialog.builder(CollectActivity.this)
                                     .setTitle(R.string.confirm_delete_with_media_title)
                                     .setMessage(getString(R.string.confirm_delete_with_media_message))
                                     .setPositiveButton(R.string.delete, (dialog, which) -> {
@@ -1846,7 +1848,7 @@ public class CollectActivity extends ThemedActivity
 
                     // Show an alert dialog explaining the new bottom toolbar approach,
                     // then perform the original jump action when the user acknowledges it.
-                    new AlertDialog.Builder(CollectActivity.this, R.style.AppAlertDialog)
+                    ThemedAlertDialog.builder(CollectActivity.this)
                             .setTitle(getString(R.string.main_toolbar_moveto))
                             .setMessage(getString(R.string.alert_jump_to_plot_bottom_toolbar_message))
                             .setPositiveButton(android.R.string.ok, (dialog, which) -> requestScanSingleBarcode(true))
@@ -2022,7 +2024,7 @@ public class CollectActivity extends ThemedActivity
             /*
              * Multi Measure delete dialogs
              */
-            AlertDialog dialogMultiMeasureDelete = new AlertDialog.Builder(this, R.style.AppAlertDialog)
+            AlertDialog dialogMultiMeasureDelete = ThemedAlertDialog.builder(this)
                     .setTitle(R.string.dialog_multi_measure_delete_title)
                     .setMultiChoiceItems(items, checked, (d, which, isChecked) -> {
                     })
@@ -2071,7 +2073,7 @@ public class CollectActivity extends ThemedActivity
 
     private void showConfirmMultiMeasureDeleteDialog(List<ObservationModel> models) {
 
-        AlertDialog dialogMultiMeasureConfirmDelete = new AlertDialog.Builder(this, R.style.AppAlertDialog)
+        AlertDialog dialogMultiMeasureConfirmDelete = ThemedAlertDialog.builder(this)
                 .setTitle(R.string.dialog_multi_measure_confirm_delete_title)
                 .setPositiveButton(R.string.delete, (d, which) -> deleteMultiMeasures(models))
                 .setNegativeButton(android.R.string.cancel, (d, which) -> d.dismiss())
@@ -2191,7 +2193,7 @@ public class CollectActivity extends ThemedActivity
         View layout = inflater.inflate(R.layout.dialog_gotobarcode, null);
         final EditText barcodeId = layout.findViewById(R.id.barcodeid);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+        AlertDialog.Builder builder = ThemedAlertDialog.builder(this);
         builder.setTitle(R.string.main_toolbar_moveto)
                 .setCancelable(true)
                 .setView(layout);
@@ -2643,7 +2645,7 @@ public class CollectActivity extends ThemedActivity
 
             final int[] selected = new int[]{checkedIndex};
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+            AlertDialog.Builder builder = ThemedAlertDialog.builder(this);
             builder.setTitle(R.string.preferences_behavior_barcode_scanning_title);
             builder.setSingleChoiceItems(entries, checkedIndex, (dialog, which) -> selected[0] = which);
             builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
@@ -2721,7 +2723,7 @@ public class CollectActivity extends ThemedActivity
 
     private void showBarcodeAskDialog(String barcode) {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+        AlertDialog.Builder builder = ThemedAlertDialog.builder(this);
 
         builder.setTitle(R.string.barcode_ask_title);
         builder.setMessage(getString(R.string.barcode_ask_message, barcode));
@@ -3197,7 +3199,7 @@ public class CollectActivity extends ThemedActivity
                     dialogPrecisionLoss.dismiss();
                 }
 
-                dialogPrecisionLoss = new AlertDialog.Builder(this, R.style.AppAlertDialog)
+                dialogPrecisionLoss = ThemedAlertDialog.builder(this)
                         .setTitle(getString(R.string.dialog_geonav_precision_loss_title))
                         .setMessage(getString(R.string.dialog_geonav_precision_loss_msg))
                         .setPositiveButton(android.R.string.ok, (dialog, which) -> dialog.dismiss())
@@ -3448,7 +3450,7 @@ public class CollectActivity extends ThemedActivity
                     dialogCrashReport.dismiss();
                 }
 
-                dialogCrashReport = new AlertDialog.Builder(this, R.style.AppAlertDialog)
+                dialogCrashReport = ThemedAlertDialog.builder(this)
                         .setTitle(getString(R.string.dialog_crash_report_title))
                         .setMessage(getString(R.string.dialog_crash_report_message))
                         .setPositiveButton(android.R.string.ok, (dialog, which) -> {
@@ -3551,7 +3553,7 @@ public class CollectActivity extends ThemedActivity
      */
     public void showCropDialog(String traitId, Uri uri) {
         try {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppAlertDialog);
+            AlertDialog.Builder builder = ThemedAlertDialog.builder(this);
             builder.setTitle(R.string.dialog_crop_title);
             builder.setMessage(R.string.dialog_crop_message);
             builder.setPositiveButton(R.string.dialog_yes, (dialog, which) -> startCropActivity(traitId, uri, false));
@@ -3741,7 +3743,7 @@ public class CollectActivity extends ThemedActivity
             if (existingUri != null && !existingUri.isEmpty()) {
                 runOnUiThread(() -> {
                     try {
-                        new AlertDialog.Builder(this, R.style.AppAlertDialog)
+                        ThemedAlertDialog.builder(this)
                                 .setTitle(R.string.confirm_replace_media_title)
                                 .setMessage(getString(R.string.confirm_replace_media_message))
                                 .setPositiveButton(R.string.dialog_yes, (d, which) -> {

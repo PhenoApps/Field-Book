@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.utilities
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import android.Manifest
 import android.content.Context
 import android.content.SharedPreferences
@@ -484,7 +485,7 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
         progressMessage = dialogView.findViewById(R.id.progress_message)
 
         progressDialog?.dismiss()
-        progressDialog = AlertDialog.Builder(context, R.style.AppAlertDialog)
+        progressDialog = ThemedAlertDialog.builder(context)
             .setView(dialogView)
             .setNegativeButton(R.string.dialog_cancel) { d, _ ->
                 stopNearbyShare()
@@ -540,7 +541,7 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
 
         deviceSelectionDialog?.dismiss() // dismiss any existing dialog
 
-        deviceSelectionDialog = AlertDialog.Builder(context, R.style.AppAlertDialog)
+        deviceSelectionDialog = ThemedAlertDialog.builder(context)
             .setTitle(getString(R.string.dialog_device_selection_title))
             .setItems(deviceNames) { dialog, which ->
                 val selectedEndpoint = endpoints[which]
@@ -565,7 +566,7 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
     }
 
     private fun showAuthDialog(context: Context, endpointId: String, info: ConnectionInfo) {
-        authenticationDialog = AlertDialog.Builder(context, R.style.AppAlertDialog)
+        authenticationDialog = ThemedAlertDialog.builder(context)
             .setTitle(getString(R.string.dialog_nearby_authentication_title, info.endpointName))
             .setMessage(getString(R.string.dialog_nearby_authentication_summary, info.authenticationDigits))
             .setPositiveButton(getString(R.string.dialog_accept)) { _, _ ->

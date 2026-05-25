@@ -1,6 +1,8 @@
 package com.fieldbook.tracker.preferences
 
-import android.app.AlertDialog
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
+
+import androidx.appcompat.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
 import androidx.core.os.LocaleListCompat
@@ -63,7 +65,7 @@ class LanguagePreferenceFragment : PreferenceFragmentCompat(), Preference.OnPref
                     edit().putString(PreferenceKeys.LANGUAGE_LOCALE_SUMMARY, languageSummary).apply()
                 }
 
-                AlertDialog.Builder(ctx, R.style.AppAlertDialog).apply {
+                ThemedAlertDialog.builder(ctx).apply {
                     setTitle(context.getString(R.string.dialog_warning))
                     setMessage(context.getString(R.string.preference_language_warning))
                     setPositiveButton(context.getString(android.R.string.ok)) { dialog, _ ->

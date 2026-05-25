@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.traits
 
-import android.app.AlertDialog
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.content.Intent
@@ -82,7 +83,7 @@ class GoProTraitLayout :
 
     private fun setupWaitForStreamDialog() {
 
-        dialogWaitForStream = AlertDialog.Builder(context, R.style.AppAlertDialog)
+        dialogWaitForStream = ThemedAlertDialog.builder(context)
             .setTitle(R.string.dialog_go_pro_wait_stream_title)
             .setMessage(R.string.dialog_go_pro_wait_stream_message)
             .setPositiveButton(android.R.string.cancel) { dialog, _ ->
@@ -268,7 +269,7 @@ class GoProTraitLayout :
         val devices = adapter.bondedDevices.toTypedArray()
         val displayList = devices.map { it.name }.toTypedArray()
         var selected = 0
-        val dialog = AlertDialog.Builder(context, R.style.AppAlertDialog)
+        val dialog = ThemedAlertDialog.builder(context)
             .setTitle(R.string.trait_go_pro_await_device_title)
             .setCancelable(true)
             .setSingleChoiceItems(displayList, 0) { _, which ->
@@ -302,7 +303,7 @@ class GoProTraitLayout :
     override fun showSettings() {
         val settingsView = GoProCameraSettingsView(context, currentTrait)
 
-        AlertDialog.Builder(context, R.style.AppAlertDialog)
+        ThemedAlertDialog.builder(context)
             .setTitle(R.string.go_pro_trait_settings_title)
             .setView(settingsView)
             .setPositiveButton(android.R.string.ok) { dialog, _ ->

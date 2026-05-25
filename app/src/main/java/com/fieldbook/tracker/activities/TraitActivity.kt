@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.activities
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -254,10 +255,7 @@ class TraitActivity : ThemedActivity() {
             } catch (_: Exception) {
             }
 
-            val dialog = android.app.Dialog(
-                this,
-                com.fieldbook.tracker.utilities.AppThemeResolver.alertDialogStyle(this),
-            )
+            val dialog = ThemedAlertDialog.dialog(this)
             dialog.setContentView(dialogView)
 
             // Add Save/Cancel buttons at the bottom of the dialogView programmatically

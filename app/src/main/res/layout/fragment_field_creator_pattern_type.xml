@@ -45,7 +45,8 @@
                 android:layout_marginEnd="16dp"
                 android:src="@drawable/ic_linear_pattern"
                 android:contentDescription="@string/field_creator_pattern_linear"
-                app:tint="?attr/colorOnSurface" />
+                app:tint="?attr/stepper_icon_color"
+                app:tintMode="src_in" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -92,7 +93,8 @@
                 android:layout_marginEnd="16dp"
                 android:src="@drawable/ic_serpentine_pattern"
                 android:contentDescription="@string/field_creator_pattern_zigzag"
-                app:tint="?attr/colorOnSurface" />
+                app:tint="?attr/stepper_icon_color"
+                app:tintMode="src_in" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -160,6 +162,8 @@
         android:background="?attr/selectableItemBackground"
         android:contentDescription="@string/dialog_back"
         android:src="@drawable/chevron_left"
+        app:tint="?attr/stepper_icon_color"
+        app:tintMode="src_in"
         app:layout_constraintBottom_toBottomOf="@id/bottom_navigation"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/bottom_navigation" />
@@ -173,6 +177,8 @@
         android:contentDescription="@string/next"
         android:enabled="false"
         android:src="@drawable/chevron_right"
+        app:tint="?attr/stepper_icon_color"
+        app:tintMode="src_in"
         app:layout_constraintBottom_toBottomOf="@id/bottom_navigation"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/bottom_navigation" />

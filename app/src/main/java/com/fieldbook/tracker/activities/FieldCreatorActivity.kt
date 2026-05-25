@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.activities
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -8,7 +9,10 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.compose.material3.MaterialTheme
+import com.google.android.material.color.MaterialColors
 import androidx.compose.ui.platform.ComposeView
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
@@ -63,6 +67,7 @@ class FieldCreatorActivity : ThemedActivity() {
             setDisplayShowHomeEnabled(true)
             setHomeButtonEnabled(true)
         }
+        tintToolbarNavigationIcon(toolbar)
 
         setupFieldCreatorWindowInsets()
 
@@ -253,7 +258,7 @@ class FieldCreatorActivity : ThemedActivity() {
     }
 
     private fun showExitWarningDialog() {
-        AlertDialog.Builder(this, com.fieldbook.tracker.utilities.AppThemeResolver.alertDialogStyle(this))
+        ThemedAlertDialog.builder(this)
             .setTitle(getString(R.string.field_creator_exit_dialog_title))
             .setMessage(getString(R.string.field_creator_exit_dialog_message))
             .setPositiveButton(getString(R.string.dialog_exit)) { _, _ ->
@@ -267,5 +272,16 @@ class FieldCreatorActivity : ThemedActivity() {
 
     private fun showCreationMessage() {
         Utils.makeToast(this, getString(R.string.field_creator_creation_in_progress))
+    }
+
+    private fun tintToolbarNavigationIcon(toolbar: Toolbar) {
+        val drawable = ContextCompat.getDrawable(this, R.drawable.arrow_left)?.mutate() ?: return
+        val tintColor = MaterialColors.getColor(toolbar, R.attr.fb_icon_tint, 0)
+        if (tintColor != 0) {
+            DrawableCompat.setTint(drawable, tintColor)
+            toolbar.navigationIcon = drawable
+        } else {
+            toolbar.setNavigationIcon(R.drawable.arrow_left)
+        }
     }
 }

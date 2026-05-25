@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.views
 
-import android.app.AlertDialog
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -248,7 +249,7 @@ class TraitBoxView : ConstraintLayout {
     }
 
     private fun showTraitPickerDialog(visibleTraits: Array<TraitObject>) {
-        val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
+        val builder = ThemedAlertDialog.builder(context)
 
         builder.setTitle(R.string.select_trait)
             .setCancelable(true)

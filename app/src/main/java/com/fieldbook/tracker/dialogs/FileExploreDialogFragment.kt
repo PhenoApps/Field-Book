@@ -1,5 +1,7 @@
 package com.fieldbook.tracker.dialogs
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
+
 import android.app.Dialog
 import android.net.Uri
 import android.os.Bundle
@@ -46,7 +48,7 @@ class FileExploreDialogFragment : DialogFragment() {
         include = arguments?.getStringArray("include")
         val dialogTitle = arguments?.getString("dialogTitle") ?: getString(R.string.file_explorer_select_file_title)
 
-        val dialog = Dialog(requireContext(), R.style.AppAlertDialog)
+        val dialog = ThemedAlertDialog.dialog(requireContext())
 
         dialog.setContentView(ComposeView(requireContext()).apply {
             setContent {

@@ -1,7 +1,8 @@
 package com.fieldbook.tracker.dialogs
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import android.app.Activity
-import android.app.AlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
 import android.util.Log
@@ -64,7 +65,8 @@ open class SortDialogFragment : DialogFragment(), SortAdapter.Sorter {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
+        val ctx = requireContext()
+        val builder = ThemedAlertDialog.builder(ctx)
             .setTitle(this.dialogTitle)
             .setNegativeButton(R.string.dialog_cancel) { _, _ -> }
             .setPositiveButton(R.string.dialog_ok) { _, _ -> }
@@ -285,7 +287,8 @@ open class SortDialogFragment : DialogFragment(), SortAdapter.Sorter {
 
     private fun askDialogForAttribute(unused: List<String>) {
 
-        val dialog = AlertDialog.Builder(context, R.style.AppAlertDialog)
+        val ctx = requireContext()
+        val dialog = ThemedAlertDialog.builder(ctx)
 
         val adapter = context?.let {
             ArrayAdapter(

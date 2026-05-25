@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.traits
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import android.Manifest
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
@@ -372,7 +373,7 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
     }
 
     override fun showSettings() {
-        var dialog: android.app.AlertDialog? = null
+        var dialog: androidx.appcompat.app.AlertDialog? = null
 
         // if we have a connected nano device, show device info in settings
         connectedNanoDevice?.let { nano ->
@@ -400,7 +401,7 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
                 dialog?.dismiss()
             }
 
-            dialog = android.app.AlertDialog.Builder(context, R.style.AppAlertDialog)
+            dialog = ThemedAlertDialog.builder(context)
                 .setTitle(context.getString(R.string.traits_format_inno_spectra))
                 .setView(settingsView)
                 .setPositiveButton(android.R.string.ok) { d, _ ->

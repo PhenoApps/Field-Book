@@ -1,6 +1,8 @@
 package com.fieldbook.tracker.preferences;
 
-import android.app.AlertDialog;
+import com.fieldbook.tracker.utilities.ThemedAlertDialog;
+import com.fieldbook.tracker.utilities.AppThemeResolver;
+import androidx.appcompat.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
@@ -96,7 +98,7 @@ public class BehaviorPreferencesFragment extends PreferenceFragmentCompat implem
     }
 
     private void promptEnableCycleTraitsSound() {
-        new AlertDialog.Builder(context)
+        ThemedAlertDialog.builder(context)
                 .setTitle(R.string.preferences_behavior_cycle_sound_title)
                 .setMessage(R.string.preferences_behavior_cycle_sound_description)
                 .setPositiveButton(R.string.dialog_enable, (dialog, which) -> {

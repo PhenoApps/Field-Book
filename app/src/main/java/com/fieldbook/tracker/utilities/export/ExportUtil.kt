@@ -1,8 +1,9 @@
 package com.fieldbook.tracker.utilities.export
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import android.Manifest
 import android.app.Activity
-import android.app.AlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
@@ -208,7 +209,7 @@ class ExportUtil @Inject constructor(
         defaultFileString = "${timeStamp.format(Calendar.getInstance().time)}_$defaultFieldString"
         fileName.setText(defaultFileString)
 
-        val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
+        val builder = ThemedAlertDialog.builder(context)
         builder.setTitle(R.string.settings_export)
             .setCancelable(true)
             .setView(layout)
@@ -289,7 +290,7 @@ class ExportUtil @Inject constructor(
             fun proceedWithExport() {
                 //show a warning if table is selected and repeated measures is enabled
                 if (checkTable.isChecked && repeatedMeasuresEnabled) {
-                    AlertDialog.Builder(context, R.style.AppAlertDialog)
+                    ThemedAlertDialog.builder(context)
                         .setTitle(R.string.export_util_repeated_measures_table_warning_title)
                         .setMessage(R.string.export_util_repeated_measures_table_warning_message)
                         .setPositiveButton(android.R.string.ok) { _, _ ->
@@ -304,7 +305,7 @@ class ExportUtil @Inject constructor(
                 val useActiveTraits = activeTraits?.isChecked == true
                 val mediaFileCount = countMediaFiles(fields, useActiveTraits)
                 if (mediaFileCount > BUNDLE_MEDIA_WARNING_THRESHOLD) {
-                    AlertDialog.Builder(context, R.style.AppAlertDialog)
+                    ThemedAlertDialog.builder(context)
                         .setTitle(R.string.export_util_bundle_media_warning_title)
                         .setMessage(context.getString(R.string.export_util_bundle_media_warning_message, mediaFileCount))
                         .setPositiveButton(R.string.export_util_bundle_media_warning_continue) { _, _ ->

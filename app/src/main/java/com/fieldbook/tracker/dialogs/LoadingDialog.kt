@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.dialogs
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import android.content.Context
 import android.view.LayoutInflater
 import android.widget.TextView
@@ -15,7 +16,7 @@ class LoadingDialog(private val context: Context) {
         val messageTv = dialogView.findViewById<TextView>(R.id.loading_message)
         messageTv.text = context.getString(messageResId)
 
-        loadingDialog = AlertDialog.Builder(context, R.style.AppAlertDialog)
+        loadingDialog = ThemedAlertDialog.builder(context)
             .setView(dialogView)
             .create()
 

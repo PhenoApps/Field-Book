@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.dialogs
 
-import android.app.AlertDialog
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
 import android.text.InputType
@@ -42,7 +43,7 @@ class QuickGotoDialog(
         primaryEt.hint = primary
         secondaryEt.hint = secondary
 
-        val dialog = AlertDialog.Builder(requireContext())
+        val dialog = ThemedAlertDialog.builder(requireContext())
             .setTitle(R.string.dialog_quick_goto_title)
             .setView(view)
             .setPositiveButton(R.string.dialog_quick_goto_go) { _, _ ->

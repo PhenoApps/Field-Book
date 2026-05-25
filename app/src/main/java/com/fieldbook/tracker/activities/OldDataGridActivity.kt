@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.activities
 
-import android.app.AlertDialog
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
@@ -176,7 +177,7 @@ class OldDataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITa
                     val rowHeaderIndex = columns.indexOf(rowHeader).takeIf { it >= 0 } ?: 0
 
                     //show a dialog to choose a prefix trait to be displayed
-                    AlertDialog.Builder(this, R.style.AppAlertDialog)
+                    ThemedAlertDialog.builder(this)
                         .setTitle(R.string.dialog_data_grid_header_picker_title)
                         .setSingleChoiceItems(columns, rowHeaderIndex) { dialog, which ->
 
@@ -471,7 +472,7 @@ class OldDataGridActivity : ThemedActivity(), CoroutineScope by MainScope(), ITa
         val choices = repeatedValues.map { it.value }.filter { it.isNotBlank() }.toTypedArray()
 
         //show a dialog to choose which value to navigate to
-        AlertDialog.Builder(this, R.style.AppAlertDialog)
+        ThemedAlertDialog.builder(this)
             .setTitle(R.string.dialog_data_grid_repeated_measures_title)
             .setSingleChoiceItems(choices, 0) { dialog, which ->
 

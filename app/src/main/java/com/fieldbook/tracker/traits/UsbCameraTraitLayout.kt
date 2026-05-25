@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.traits
 
-import android.app.AlertDialog
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.SurfaceTexture
@@ -148,7 +149,7 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
         val initialMaxIndexSelected = supportedSizes?.maxByOrNull { it.height * it.width }?.let { supportedSizes.indexOf(it) } ?: 0
         val settingsView = UsbCameraTraitSettingsView(context, supportedSizes ?: listOf(), initialMaxIndexSelected)
 
-        AlertDialog.Builder(context, R.style.AppAlertDialog)
+        ThemedAlertDialog.builder(context)
             .setTitle(R.string.trait_usb_photo_settings_title)
             .setPositiveButton(R.string.dialog_ok) { dialog, _ ->
                 settingsView.commitChanges()

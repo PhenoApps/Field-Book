@@ -95,6 +95,8 @@
         android:layout_margin="8dp"
         android:visibility="gone"
         android:src="@drawable/ic_arrow_expand_all"
+        app:tint="?attr/stepper_icon_color"
+        app:tintMode="src_in"
         android:contentDescription="@string/field_creator_preview_expand_button"
         app:layout_constraintBottom_toTopOf="@id/bottom_separator"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -125,6 +127,8 @@
         android:background="?attr/selectableItemBackground"
         android:contentDescription="@string/dialog_back"
         android:src="@drawable/chevron_left"
+        app:tint="?attr/stepper_icon_color"
+        app:tintMode="src_in"
         app:layout_constraintBottom_toBottomOf="@id/bottom_navigation"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/bottom_navigation" />
@@ -137,6 +141,8 @@
         android:background="?attr/selectableItemBackground"
         android:contentDescription="@string/field_creator_preview_create_button"
         android:src="@drawable/ic_check_bold"
+        app:tint="?attr/stepper_icon_color"
+        app:tintMode="src_in"
         app:layout_constraintBottom_toBottomOf="@id/bottom_navigation"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/bottom_navigation" />
