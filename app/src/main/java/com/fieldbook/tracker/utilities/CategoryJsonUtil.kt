@@ -39,6 +39,54 @@ class CategoryJsonUtil {
         }
 
         /**
+         * Parses a trait category definition that may be JSON or legacy slash-delimited values.
+         */
+        fun parseTraitCategories(categories: String): ArrayList<BrAPIScaleValidValuesCategories> {
+            if (categories.isBlank()) return arrayListOf()
+
+            return try {
+                decodeCategories(categories)
+            } catch (_: Exception) {
+                ArrayList(
+                    categories.split("/")
+                        .map { it.trim() }
+                        .filter { it.isNotEmpty() }
+                        .map { token ->
+                            BrAPIScaleValidValuesCategories().apply {
+                                label = token
+                                value = token
+                            }
+                        }
+                )
+            }
+        }
+
+        /**
+         * Converts downloaded BrAPI categorical raw values into Field Book internal JSON format.
+         * The stored category value always remains the original BrAPI token; label is resolved
+         * from the trait category definition when available.
+         */
+        fun encodeDownloadedBrapiCategoricalValue(rawValue: String, traitCategories: String): String {
+            if (rawValue.isBlank() || rawValue == "NA") return rawValue
+
+            // Already in internal JSON representation.
+            if (rawValue.trim().startsWith("[") && JsonUtil.isJsonValid(rawValue)) return rawValue
+
+            val categories = parseTraitCategories(traitCategories)
+            val selectedValues = rawValue.split(":").map { it.trim() }.filter { it.isNotEmpty() }
+
+            val mapped = ArrayList(selectedValues.map { selected ->
+                val matched = categories.firstOrNull { it.value == selected || it.label == selected }
+                BrAPIScaleValidValuesCategories().apply {
+                    value = selected
+                    label = matched?.label ?: selected
+                }
+            })
+
+            return if (mapped.isEmpty()) rawValue else encode(mapped)
+        }
+
+        /**
          * Takes an array of BrAPIScaleValidValuesCategories and returns a printable version.
          * JSON is currently stored in the backend to keep record of label/value pairs, the actual exported value
          * is converted using this function to a ":" delimited string. This might lead to data having extra ":" if the user

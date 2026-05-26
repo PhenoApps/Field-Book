@@ -42,6 +42,9 @@ import kotlin.collections.isNotEmpty
 import kotlin.collections.map
 import androidx.core.content.edit
 import com.fieldbook.tracker.database.repository.TraitRepository
+import com.fieldbook.tracker.objects.TraitObject
+import com.fieldbook.tracker.traits.CategoricalTraitLayout
+import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter
 import kotlinx.coroutines.withContext
 
@@ -406,6 +409,7 @@ class BrapiSyncViewModel @Inject constructor(
                                 val (inserts, updates, conflicts) = withContext(Dispatchers.IO) {
 
                                     val resolved = resolveObservationStatus(update.data)
+                                    val traitsById = traitRepo.getTraits().associateBy { it.id }
 
                                     Log.d(TAG, "Saving ${resolved.first.size} new observations")
 
@@ -416,6 +420,9 @@ class BrapiSyncViewModel @Inject constructor(
                                             Log.d(TAG, "Saving observation: ${obs.dbId}")
 
                                             obs.internalVariableDbId = obs.variableDbId
+
+                                            // Store categorical BrAPI values using Field Book's internal JSON format.
+                                            obs.value = normalizeDownloadedObservationValue(obs, traitsById)
 
                                             val rep = dataHelper.getNextRep(fieldObject.studyId.toString(), obs.unitDbId, obs.internalVariableDbId).toInt()
 
@@ -436,6 +443,10 @@ class BrapiSyncViewModel @Inject constructor(
                                     }
 
                                     Log.d(TAG, "Updating local database with ${resolved.second.size} updates")
+
+                                    resolved.second.forEach { obs ->
+                                        obs.value = normalizeDownloadedObservationValue(obs, traitsById)
+                                    }
 
                                     dataHelper.updateObservationsByBrapiId(resolved.second)
 
@@ -669,10 +680,48 @@ class BrapiSyncViewModel @Inject constructor(
 
         }.flowOn(Dispatchers.IO)
 
+    private fun processNewObservations(
+        newObs: List<Observation>,
+        localValuesByFieldBookId: Map<String, String>
+    ): Flow<UploadProgressUpdate> =
+        channelFlow {
+
+            val incompatible = AtomicInteger(0)
+            val new = AtomicInteger(0)
+            val edited = AtomicInteger(0)
+
+            brAPIService.awaitCreateObservations(
+                context,
+                newObs,
+                { chunk ->
+
+                    val (incompats, news, edits) = processChunk(
+                        chunk,
+                        newObs,
+                        localValuesByFieldBookId = localValuesByFieldBookId
+                    )
+
+                    incompatible.addAndGet(incompats)
+                    new.addAndGet(news)
+                    edited.addAndGet(edits)
+
+                    trySend(UploadProgressUpdate.InUploadProgress(chunk.size, newObs.size))
+
+                }) { errorCode, failedChunk ->
+
+                //errors coming from brapi api
+                trySend(UploadProgressUpdate.InUploadFailedChunk(errorCode, failedChunk))
+            }
+
+            send(UploadProgressUpdate.Completed(incompatible.get(), new.get(), edited.get()))
+
+        }.flowOn(Dispatchers.IO)
+
     private fun processChunk(
         chunk: List<Observation>,
         referenceObservations: List<Observation>,
-        isNew: Boolean = true
+        isNew: Boolean = true,
+        localValuesByFieldBookId: Map<String, String> = emptyMap()
     ): Triple<Int, Int, Int> {
 
         var incompatible = 0
@@ -703,6 +752,12 @@ class BrapiSyncViewModel @Inject constructor(
             } else if (firstIndex in referenceObservations.indices) {
 
                 val update = referenceObservations[firstIndex]
+                update.fieldBookDbId?.let { fieldBookId ->
+                    localValuesByFieldBookId[fieldBookId]?.let { preservedValue ->
+                        // Keep local DB observation value in Field Book's internal representation.
+                        update.value = preservedValue
+                    }
+                }
                 update.dbId = observation.dbId
                 update.setLastSyncedTime(syncTime)
                 dataHelper.updateObservationsByFieldBookId(listOf(update))
@@ -734,7 +789,10 @@ class BrapiSyncViewModel @Inject constructor(
      * When observation timestamp is greater that synced time, they must be pushed and updated
      * on the brapi endpoint.
      */
-    private fun processEditedObservations(editedObs: List<Observation>): Flow<UploadProgressUpdate> =
+    private fun processEditedObservations(
+        editedObs: List<Observation>,
+        localValuesByFieldBookId: Map<String, String>
+    ): Flow<UploadProgressUpdate> =
         channelFlow {
 
             val incompatible = AtomicInteger(0)
@@ -745,7 +803,12 @@ class BrapiSyncViewModel @Inject constructor(
                 context,
                 editedObs, { chunk ->
 
-                    val (incompats, news, edits) = processChunk(chunk, editedObs, isNew = false)
+                    val (incompats, news, edits) = processChunk(
+                        chunk,
+                        editedObs,
+                        isNew = false,
+                        localValuesByFieldBookId = localValuesByFieldBookId
+                    )
 
                     incompatible.addAndGet(incompats)
                     new.addAndGet(news)
@@ -764,9 +827,13 @@ class BrapiSyncViewModel @Inject constructor(
 
     private suspend fun processObservations(
         observations: List<Observation>,
-        processor: suspend (List<Observation>) -> Flow<UploadProgressUpdate>
+        processor: suspend (List<Observation>, Map<String, String>) -> Flow<UploadProgressUpdate>
     ) {
         Log.d(TAG, "Starting upload observations")
+
+        val localValuesByFieldBookId = observations.mapNotNull { obs ->
+            obs.fieldBookDbId?.let { id -> id to (obs.value ?: "") }
+        }.toMap()
 
         val traits = traitRepo.getTraits().associateBy { it.id }
         observations.forEach { obs ->
@@ -775,7 +842,7 @@ class BrapiSyncViewModel @Inject constructor(
             }
         }
 
-        processor(observations)
+        processor(observations, localValuesByFieldBookId)
             .onCompletion { cause ->
 
                 _uiState.update {
@@ -1115,6 +1182,22 @@ class BrapiSyncViewModel @Inject constructor(
         }
 
     }.flowOn(Dispatchers.IO)
+
+    private fun normalizeDownloadedObservationValue(
+        observation: Observation,
+        traitsById: Map<String, TraitObject>
+    ): String {
+        val rawValue = observation.value ?: return ""
+
+        if (rawValue.isBlank() || rawValue == "NA") return rawValue
+
+        val traitId = observation.internalVariableDbId ?: return rawValue
+        val trait = traitsById[traitId] ?: return rawValue
+
+        if (trait.format !in CategoricalTraitLayout.POSSIBLE_VALUES) return rawValue
+
+        return CategoryJsonUtil.encodeDownloadedBrapiCategoricalValue(rawValue, trait.categories)
+    }
 
     private fun processImageResponse(
         converted: FieldBookImage,
