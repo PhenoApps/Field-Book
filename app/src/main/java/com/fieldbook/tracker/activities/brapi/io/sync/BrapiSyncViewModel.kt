@@ -771,7 +771,7 @@ class BrapiSyncViewModel @Inject constructor(
         val traits = traitRepo.getTraits().associateBy { it.id }
         observations.forEach { obs ->
             traits[obs.internalVariableDbId]?.let { trait ->
-                obs.value = valueProcessorFormatAdapter.processValue(obs.value, trait)
+                obs.value = valueProcessorFormatAdapter.processValue(obs.value, trait, forBrapi = true)
             }
         }
 

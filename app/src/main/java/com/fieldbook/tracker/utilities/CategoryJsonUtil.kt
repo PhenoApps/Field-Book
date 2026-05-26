@@ -76,6 +76,10 @@ class CategoryJsonUtil {
 
             val rawValue = row["value"] as? String
 
+            val forBrapi = if ("forBrapi" in row.keys) {
+                row["forBrapi"] as? Boolean ?: false
+            } else false
+
             return when(row["observation_variable_field_book_format"]) {
                 in CategoricalTraitLayout.POSSIBLE_VALUES -> {
                     try {
@@ -83,9 +87,11 @@ class CategoryJsonUtil {
                         val showValue = row["categoryDisplayValue"] as? Boolean == true
                         val decoded = decode(rawValue ?: "")
                         if (decoded.size > 1) { // trait has multicat enabled
-                            decoded.joinToString(":") { if (showValue) it.value else it.label }
+                            decoded.joinToString(":") {
+                                if (showValue || forBrapi) it.value else it.label
+                            }
                         } else {
-                            if (showValue) decoded[0].value else decoded[0].label
+                            if (showValue || forBrapi) decoded[0].value else decoded[0].label
                         }
                     } catch (ignore: Exception) {
                         rawValue
