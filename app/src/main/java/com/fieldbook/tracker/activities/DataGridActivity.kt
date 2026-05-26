@@ -299,8 +299,28 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
 
                                     // check repeated values and replace cellvalue with an ellipses
                                     if (repeatedValues.size > 1) {
-                                        // data list is a trait row in the data grid
-                                        dataList.add(CellData("...", id))
+                                        // If repeated measures is disabled, show the latest value
+                                        // Otherwise show ellipses to indicate multiple values
+                                        val displayValue = if (!variable.repeatedMeasures) {
+                                            // Get the latest observation (highest rep number)
+                                            val latestObs = repeatedValues.maxByOrNull { it.rep.toInt() }
+                                            if (latestObs != null && isCategorical) {
+                                                try {
+                                                    CategoryJsonUtil.flattenMultiCategoryValue(
+                                                        CategoryJsonUtil.decode(latestObs.value),
+                                                        !variable.categoryDisplayValue
+                                                    )
+                                                } catch (e: Exception) {
+                                                    e.printStackTrace()
+                                                    latestObs.value
+                                                }
+                                            } else {
+                                                latestObs?.value ?: ""
+                                            }
+                                        } else {
+                                            "..."
+                                        }
+                                        dataList.add(CellData(displayValue, id))
                                     } else {
                                         dataList.add(CellData(cellValue, id))
                                     }
@@ -516,24 +536,35 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
         }
     }
 
-    private fun onCellClicked(row: Int, col: Int) {
-        val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
-        val plotId = mPlotIds[row]
-        val trait = mTraits[col]
-        val repeatedValues = database.getRepeatedValues(studyId, plotId, trait.id)
+     private fun onCellClicked(row: Int, col: Int) {
+         val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
+         val plotId = mPlotIds[row]
+         val trait = mTraits[col]
+         val repeatedValues = database.getRepeatedValues(studyId, plotId, trait.id)
 
-        try {
-            if (repeatedValues.size <= 1) {
-                navigateFromValueClicked(plotId, col)
-            } else {
-                //show alert dialog with repeated values
-                showRepeatedValuesNavigatorDialog(trait, repeatedValues)
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error occurred while trying to navigate: " + e.printStackTrace())
-            FirebaseCrashlytics.getInstance().recordException(e)
-        }
-    }
+         try {
+             if (repeatedValues.size <= 1) {
+                 navigateFromValueClicked(plotId, col)
+             } else {
+                 // If repeated measures is disabled, automatically navigate to the latest value
+                 if (!trait.repeatedMeasures) {
+                     val latestObs = repeatedValues.maxByOrNull { it.rep.toInt() }
+                     if (latestObs != null) {
+                         val repIndex = repeatedValues.indexOf(latestObs) + 1
+                         navigateFromValueClicked(plotId, col, repIndex)
+                     } else {
+                         navigateFromValueClicked(plotId, col)
+                     }
+                 } else {
+                     //show alert dialog with repeated values
+                     showRepeatedValuesNavigatorDialog(trait, repeatedValues)
+                 }
+             }
+         } catch (e: Exception) {
+             Log.e(TAG, "Error occurred while trying to navigate: " + e.printStackTrace())
+             FirebaseCrashlytics.getInstance().recordException(e)
+         }
+     }
 
     private fun navigateFromValueClicked(plotId: String, traitIndex: Int, rep: Int = 1) {
 
