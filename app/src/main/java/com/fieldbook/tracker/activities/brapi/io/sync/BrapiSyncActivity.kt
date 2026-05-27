@@ -7,7 +7,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.ComposeView
 import androidx.media3.common.util.Log
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.ThemedActivity
@@ -106,6 +105,9 @@ class BrapiSyncActivity : ThemedActivity() {
                     onApplyManualChoices = { choices ->
                         viewModel.setMergeStrategy(MergeStrategy.Manual)
                         viewModel.applyConflictResolution(MergeStrategy.Manual, choices)
+                    },
+                    onApplyPendingResyncChoice = { applyAsUpdate ->
+                        viewModel.applyPendingResyncChoices(applyAsUpdate)
                     }
                 )
             }

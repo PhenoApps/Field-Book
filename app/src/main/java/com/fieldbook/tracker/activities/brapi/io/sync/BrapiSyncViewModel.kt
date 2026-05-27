@@ -36,6 +36,7 @@ import kotlinx.coroutines.sync.withPermit
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import java.util.UUID
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import kotlin.collections.isNotEmpty
@@ -72,6 +73,10 @@ class BrapiSyncViewModel @Inject constructor(
 
     // Conflicts detected during last download that need user resolution
     private var pendingConflicts: List<Pair<Observation, Observation?>> = emptyList()
+    // Pending pre-upload re-sync choices where local observations have no BrAPI id.
+    private var pendingResyncChoices: List<PendingResyncChoice> = emptyList()
+    private val resyncUploadAsNewKeys = mutableSetOf<String>()
+    private val resyncAdoptServerKeys = mutableSetOf<String>()
 
     private var activeJob: Job? = null
 
@@ -88,6 +93,16 @@ class BrapiSyncViewModel @Inject constructor(
     }
 
     data class Conflict(val serverObservation: Observation, val localObservation: Observation)
+    private data class PreUploadResyncResult(
+        val observationsToUpload: List<Observation>,
+        val requiresUserChoice: Boolean
+    )
+    private data class PendingResyncChoice(
+        val key: String,
+        val localObservation: Observation,
+        val serverObservation: Observation,
+        val preservedLocalValue: String
+    )
 
     enum class UploadError {
         NONE,
@@ -188,6 +203,9 @@ class BrapiSyncViewModel @Inject constructor(
             refreshLocalStatus()
             // load persisted last-checked timestamps into state
             loadLastCheckedFromPrefs()
+            clearPendingResyncChoices()
+            resyncUploadAsNewKeys.clear()
+            resyncAdoptServerKeys.clear()
 
         }
     }
@@ -217,6 +235,16 @@ class BrapiSyncViewModel @Inject constructor(
             return
         }
 
+        if (uiState.value.pendingResyncChoicesCount > 0) {
+            _uiState.update {
+                it.copy(
+                    isUploadFinished = false,
+                    uploadError = context.getString(R.string.brapi_resync_choice_required)
+                )
+            }
+            return
+        }
+
         activeJob = viewModelScope.launch(Dispatchers.IO) {
 
             try {
@@ -235,6 +263,7 @@ class BrapiSyncViewModel @Inject constructor(
                     }
 
                     processObservations(newObservations, ::processNewObservations)
+                    if (uiState.value.pendingResyncChoicesCount > 0) return@launch
                 }
 
                 if (editedObservations.isNotEmpty()) {
@@ -251,6 +280,7 @@ class BrapiSyncViewModel @Inject constructor(
                     }
 
                     processObservations(editedObservations, ::processEditedObservations)
+                    if (uiState.value.pendingResyncChoicesCount > 0) return@launch
                 }
 
                 if (newImageObservations.isNotEmpty() && uiState.value.uploadImages) {
@@ -645,41 +675,84 @@ class BrapiSyncViewModel @Inject constructor(
         }
     }
 
+    private fun setPendingResyncChoices(choices: List<PendingResyncChoice>) {
+        pendingResyncChoices = choices
+        val uiChoices = choices.map { choice ->
+            PendingResyncChoiceUi(
+                key = choice.key,
+                localValue = choice.localObservation.value ?: "",
+                serverValue = choice.serverObservation.value ?: "",
+                localFieldBookId = choice.localObservation.fieldBookDbId,
+                serverDbId = choice.serverObservation.dbId
+            )
+        }
+        _uiState.update {
+            it.copy(
+                pendingResyncChoicesCount = uiChoices.size,
+                pendingResyncChoices = uiChoices
+            )
+        }
+    }
+
+    private fun clearPendingResyncChoices() {
+        pendingResyncChoices = emptyList()
+        _uiState.update {
+            it.copy(
+                pendingResyncChoicesCount = 0,
+                pendingResyncChoices = emptyList()
+            )
+        }
+    }
+
+    fun applyPendingResyncChoices(applyAsUpdate: Boolean) {
+        if (pendingResyncChoices.isEmpty()) return
+
+        val syncTime = timestamp.format(calendar.time)
+        val updatesToPersist = mutableListOf<Observation>()
+
+        pendingResyncChoices.forEach { choice ->
+            val key = choice.key
+            if (applyAsUpdate) {
+                resyncAdoptServerKeys.add(key)
+                resyncUploadAsNewKeys.remove(key)
+
+                val localObservation = choice.localObservation
+                localObservation.value = choice.preservedLocalValue
+                localObservation.dbId = choice.serverObservation.dbId
+                val serverSyncTime = choice.serverObservation.timestamp
+                if (serverSyncTime != null) {
+                    localObservation.setLastSyncedTime(serverSyncTime)
+                } else {
+                    localObservation.setLastSyncedTime(syncTime)
+                }
+                updatesToPersist.add(localObservation)
+            } else {
+                resyncUploadAsNewKeys.add(key)
+                resyncAdoptServerKeys.remove(key)
+            }
+        }
+
+        if (updatesToPersist.isNotEmpty()) {
+            viewModelScope.launch(Dispatchers.IO) {
+                dataHelper.updateObservationsByFieldBookId(updatesToPersist)
+                refreshLocalStatus()
+            }
+        }
+
+        clearPendingResyncChoices()
+
+        _uiState.update {
+            it.copy(
+                uploadError = ""
+            )
+        }
+    }
+
 
     /**
      * New Observations are saved in chunks, when returning from BrAPI they are updated in the local FB
      * database to save the observationDbId and synced time.
      */
-    private fun processNewObservations(newObs: List<Observation>): Flow<UploadProgressUpdate> =
-        channelFlow {
-
-            val incompatible = AtomicInteger(0)
-            val new = AtomicInteger(0)
-            val edited = AtomicInteger(0)
-
-            brAPIService.awaitCreateObservations(
-                context,
-                newObs,
-                { chunk ->
-
-                    val (incompats, news, edits) = processChunk(chunk, newObs)
-
-                    incompatible.addAndGet(incompats)
-                    new.addAndGet(news)
-                    edited.addAndGet(edits)
-
-                    trySend(UploadProgressUpdate.InUploadProgress(chunk.size, newObs.size))
-
-                }) { errorCode, failedChunk ->
-
-                //errors coming from brapi api
-                trySend(UploadProgressUpdate.InUploadFailedChunk(errorCode, failedChunk))
-            }
-
-            send(UploadProgressUpdate.Completed(incompatible.get(), new.get(), edited.get()))
-
-        }.flowOn(Dispatchers.IO)
-
     private fun processNewObservations(
         newObs: List<Observation>,
         localValuesByFieldBookId: Map<String, String>
@@ -750,7 +823,6 @@ class BrapiSyncViewModel @Inject constructor(
                 retVal = UploadError.MULTIPLE_OBSERVATIONS_PER_VARIABLE
 
             } else if (firstIndex in referenceObservations.indices) {
-
                 val update = referenceObservations[firstIndex]
                 update.fieldBookDbId?.let { fieldBookId ->
                     localValuesByFieldBookId[fieldBookId]?.let { preservedValue ->
@@ -842,7 +914,28 @@ class BrapiSyncViewModel @Inject constructor(
             }
         }
 
-        processor(observations, localValuesByFieldBookId)
+        val preUploadResyncResult = performResyncCheckBeforeUpload(
+            observations,
+            localValuesByFieldBookId
+        )
+        if (preUploadResyncResult.requiresUserChoice) {
+            _uiState.update {
+                it.copy(
+                    viewMode = ViewMode.IDLE,
+                    isUploadFinished = false,
+                    uploadError = context.getString(R.string.brapi_resync_choice_required)
+                )
+            }
+            return
+        }
+
+        val observationsToUpload = preUploadResyncResult.observationsToUpload
+        if (observationsToUpload.isEmpty()) {
+            Log.d(TAG, "Re-sync check found all observations on the server, skipping upload")
+            return
+        }
+
+        processor(observationsToUpload, localValuesByFieldBookId)
             .onCompletion { cause ->
 
                 _uiState.update {
@@ -902,6 +995,168 @@ class BrapiSyncViewModel @Inject constructor(
             }
 
         Log.d(TAG, "Observation processing complete.")
+    }
+
+    /**
+     * Re-sync check for issue #550. Before upload, verify if observations were already stored
+     * by a prior request (for example, app crash after server write but before local sync update).
+     */
+    private suspend fun performResyncCheckBeforeUpload(
+        observations: List<Observation>,
+        localValuesByFieldBookId: Map<String, String>
+    ): PreUploadResyncResult {
+
+        if (observations.isEmpty()) return PreUploadResyncResult(observations, false)
+
+        val studyDbId = uiState.value.study?.studyDbId
+        if (studyDbId.isNullOrEmpty()) return PreUploadResyncResult(observations, false)
+
+        val variableDbIds = observations.mapNotNull { it.variableDbId }.distinct()
+        if (variableDbIds.isEmpty()) return PreUploadResyncResult(observations, false)
+
+        return try {
+            val pageSize = preferences.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50")?.toInt() ?: 50
+            val paginationManager = BrapiPaginationManager(0, pageSize)
+
+            val firstPage = brAPIService.awaitGetSingleObservationPage(
+                studyDbId,
+                variableDbIds,
+                paginationManager
+            )
+
+            val allCandidateObservations = if ((paginationManager.totalPages ?: 1) <= 1) {
+                firstPage
+            } else {
+                brAPIService.awaitGetObservations(
+                    brapiStudyId = studyDbId,
+                    variableDbIds = variableDbIds,
+                    paginationManager = paginationManager,
+                    initialPages = firstPage,
+                    concurrencyLimit = preferences.getString(
+                        PreferenceKeys.BRAPI_MAX_CONCURRENT_OBSERVATION_TRANSFER,
+                        "5"
+                    )?.toInt() ?: 5
+                ) { _, _ ->
+                    // Re-sync check runs silently without changing upload progress UI.
+                }
+            }
+
+            val pendingUpload = mutableListOf<Observation>()
+            val pendingUserChoices = mutableListOf<PendingResyncChoice>()
+            val remainingCandidates = allCandidateObservations.toMutableList()
+            var recoveredCount = 0
+            val localDeviceId = getOrCreateBrapiDeviceId()
+
+            observations.forEach { localObservation ->
+                val matchIndex = remainingCandidates.indexOfFirst { serverObservation ->
+                    matchesResyncCheck(localObservation, serverObservation, localDeviceId)
+                }
+
+                if (matchIndex >= 0) {
+                    val matchedServerObservation = remainingCandidates.removeAt(matchIndex)
+                    val choiceKey = buildResyncChoiceKey(localObservation, matchedServerObservation)
+
+                    if (localObservation.dbId.isNullOrEmpty() && !resyncAdoptServerKeys.contains(choiceKey) && !resyncUploadAsNewKeys.contains(choiceKey)) {
+                        val preservedValue = localObservation.fieldBookDbId
+                            ?.let { localValuesByFieldBookId[it] }
+                            ?: localObservation.value.orEmpty()
+                        pendingUserChoices.add(
+                            PendingResyncChoice(
+                                key = choiceKey,
+                                localObservation = localObservation,
+                                serverObservation = matchedServerObservation,
+                                preservedLocalValue = preservedValue
+                            )
+                        )
+                        return@forEach
+                    }
+
+                    if (localObservation.dbId.isNullOrEmpty() && resyncUploadAsNewKeys.contains(choiceKey)) {
+                        pendingUpload.add(localObservation)
+                        return@forEach
+                    }
+
+                    localObservation.fieldBookDbId?.let { fieldBookId ->
+                        localValuesByFieldBookId[fieldBookId]?.let { preservedValue ->
+                            localObservation.value = preservedValue
+                        }
+                    }
+
+                    localObservation.dbId = matchedServerObservation.dbId
+                    val serverSyncTime = matchedServerObservation.timestamp
+                    if (serverSyncTime != null) {
+                        localObservation.setLastSyncedTime(serverSyncTime)
+                    } else {
+                        localObservation.setLastSyncedTime(timestamp.format(calendar.time))
+                    }
+                    dataHelper.updateObservationsByFieldBookId(listOf(localObservation))
+                    resyncAdoptServerKeys.remove(choiceKey)
+                    resyncUploadAsNewKeys.remove(choiceKey)
+                    recoveredCount++
+                } else {
+                    pendingUpload.add(localObservation)
+                }
+            }
+
+            if (pendingUserChoices.isNotEmpty()) {
+                setPendingResyncChoices(pendingUserChoices)
+                return PreUploadResyncResult(emptyList(), true)
+            }
+
+            clearPendingResyncChoices()
+
+            if (recoveredCount > 0) {
+                Log.i(
+                    TAG,
+                    "Pre-upload re-sync check recovered $recoveredCount/${observations.size} observations"
+                )
+            }
+
+            PreUploadResyncResult(pendingUpload, false)
+        } catch (e: Exception) {
+            Log.w(TAG, "Pre-upload re-sync check failed; continuing with normal upload", e)
+            PreUploadResyncResult(observations, false)
+        }
+    }
+
+    private fun matchesResyncCheck(
+        localObservation: Observation,
+        serverObservation: Observation,
+        localDeviceId: String
+    ): Boolean {
+        val localValue = localObservation.value?.trim().orEmpty()
+        val serverValue = serverObservation.value?.trim().orEmpty()
+
+        if (localValue != serverValue) return false
+
+        val localDbId = localObservation.dbId
+        if (!localDbId.isNullOrEmpty()) {
+            return localDbId == serverObservation.dbId
+        }
+
+        val localFieldBookDbId = localObservation.fieldBookDbId
+        val serverFieldBookDbId = serverObservation.fieldBookDbId
+        val serverDeviceId = serverObservation.originDeviceId
+
+        return !localFieldBookDbId.isNullOrEmpty()
+                && localFieldBookDbId == serverFieldBookDbId
+                && !serverDeviceId.isNullOrEmpty()
+                && serverDeviceId == localDeviceId
+    }
+
+    private fun buildResyncChoiceKey(localObservation: Observation, serverObservation: Observation): String {
+        val localKey = localObservation.fieldBookDbId ?: ""
+        val serverKey = serverObservation.dbId ?: ""
+        return "$localKey|$serverKey|${localObservation.variableDbId ?: ""}|${localObservation.unitDbId ?: ""}"
+    }
+
+    private fun getOrCreateBrapiDeviceId(): String {
+        val existing = preferences.getString(PreferenceKeys.BRAPI_DEVICE_ID, null)
+        if (!existing.isNullOrEmpty()) return existing
+
+        val generated = UUID.randomUUID().toString()
+        preferences.edit { putString(PreferenceKeys.BRAPI_DEVICE_ID, generated) }
+        return generated
     }
 
     private suspend fun processImages(images: List<FieldBookImage>, isNew: Boolean = true) = coroutineScope {

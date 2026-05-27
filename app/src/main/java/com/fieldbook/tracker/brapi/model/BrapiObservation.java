@@ -12,6 +12,7 @@ public class BrapiObservation {
     private String dbId;
     private OffsetDateTime lastSyncedTime;
     private String fieldbookDbId;
+    private String originDeviceId;
     private String variableName;
     private String variableDetails;
 
@@ -151,6 +152,14 @@ public class BrapiObservation {
 
     public void setFieldBookDbId(String fieldbookDbId) {
         this.fieldbookDbId = fieldbookDbId;
+    }
+
+    public String getOriginDeviceId() {
+        return originDeviceId;
+    }
+
+    public void setOriginDeviceId(String originDeviceId) {
+        this.originDeviceId = originDeviceId;
     }
 
     public enum Status {
