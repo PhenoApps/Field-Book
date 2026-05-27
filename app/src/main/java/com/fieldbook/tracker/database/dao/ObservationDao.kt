@@ -183,6 +183,13 @@ class ObservationDao {
                 traitDbId
             ).maxByOrNull { it.rep.toInt() }?.rep?.toInt() ?: 0) + 1
 
+        /**
+         * Gets the latest observation by rep number for the given study, observation unit, and trait.
+         * Used when repeated measures is disabled to display only the most recent value.
+         */
+        fun getLatestObservation(studyId: String, obsUnit: String, traitDbId: String): ObservationModel? =
+            getAllRepeatedValues(studyId, obsUnit, traitDbId).maxByOrNull { it.rep.toInt() }
+
         //false warning, cursor is closed in toTable
         @SuppressLint("Recycle")
         fun getHostImageObservations(ctx: Context, hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
