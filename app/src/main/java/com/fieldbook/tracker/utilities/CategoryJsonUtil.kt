@@ -87,6 +87,34 @@ class CategoryJsonUtil {
         }
 
         /**
+         * Converts a locally-stored or BrAPI categorical value into a plain BrAPI wire-format
+         * token string ("val1:val2") suitable for comparison or upload.
+         *
+         * Handles both the internal Field Book JSON representation (`[{"label":…,"value":…}]`)
+         * and plain colon-delimited BrAPI token strings. Always returns category *value* tokens.
+         */
+        fun encodeBrapiCategoricalValue(rawValue: String, traitCategories: String): String {
+            if (rawValue.isBlank() || rawValue == "NA") return rawValue
+
+            if (rawValue.trim().startsWith("[") && JsonUtil.isJsonValid(rawValue)) {
+                return flattenMultiCategoryValue(decodeCategories(rawValue), showLabel = false)
+            }
+
+            val categories = parseTraitCategories(traitCategories)
+            val selectedValues = rawValue.split(":").map { it.trim() }.filter { it.isNotEmpty() }
+
+            val mapped = ArrayList(selectedValues.map { selected ->
+                val matched = categories.firstOrNull { it.value == selected || it.label == selected }
+                BrAPIScaleValidValuesCategories().apply {
+                    value = matched?.value ?: selected
+                    label = matched?.label ?: selected
+                }
+            })
+
+            return if (mapped.isEmpty()) rawValue else flattenMultiCategoryValue(mapped, showLabel = false)
+        }
+
+        /**
          * Takes an array of BrAPIScaleValidValuesCategories and returns a printable version.
          * JSON is currently stored in the backend to keep record of label/value pairs, the actual exported value
          * is converted using this function to a ":" delimited string. This might lead to data having extra ":" if the user

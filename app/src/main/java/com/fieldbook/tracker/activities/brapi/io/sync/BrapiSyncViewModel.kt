@@ -45,7 +45,11 @@ import androidx.core.content.edit
 import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.CategoricalTraitLayout
+import com.fieldbook.tracker.traits.formats.Formats
+import com.fieldbook.tracker.traits.formats.coders.DateJsonCoder
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
+import com.fieldbook.tracker.utilities.DateJsonUtil
+import com.fieldbook.tracker.utilities.JsonUtil
 import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter
 import kotlinx.coroutines.withContext
 
@@ -438,8 +442,8 @@ class BrapiSyncViewModel @Inject constructor(
 
                                 val (inserts, updates, conflicts) = withContext(Dispatchers.IO) {
 
-                                    val resolved = resolveObservationStatus(update.data)
                                     val traitsById = traitRepo.getTraits().associateBy { it.id }
+                                    val resolved = resolveObservationStatus(update.data, traitsById)
 
                                     Log.d(TAG, "Saving ${resolved.first.size} new observations")
 
@@ -475,6 +479,9 @@ class BrapiSyncViewModel @Inject constructor(
                                     Log.d(TAG, "Updating local database with ${resolved.second.size} updates")
 
                                     resolved.second.forEach { obs ->
+                                        if (obs.internalVariableDbId.isNullOrBlank()) {
+                                            obs.internalVariableDbId = obs.variableDbId
+                                        }
                                         obs.value = normalizeDownloadedObservationValue(obs, traitsById)
                                     }
 
@@ -546,6 +553,29 @@ class BrapiSyncViewModel @Inject constructor(
     }
 
     /**
+     * Reduces a stored or BrAPI observation value to a plain, comparable string so that
+     * local (Field Book JSON) and server (BrAPI token) representations of the same value
+     * are treated as equal.
+     *
+     * - Categorical: both local JSON and BrAPI tokens are reduced to "val1:val2" format.
+     * - Date: local DateJson is reduced to its formattedDate (ISO "YYYY-MM-DD"); BrAPI ISO strings pass through unchanged.
+     * - Other types: returned unchanged.
+     */
+    private fun normalizeValueForComparison(value: String, trait: TraitObject?): String {
+        if (value.isBlank() || value == "NA") return value
+        if (trait == null) return value
+        return when {
+            trait.format in CategoricalTraitLayout.POSSIBLE_VALUES ->
+                CategoryJsonUtil.encodeBrapiCategoricalValue(value, trait.categories)
+            trait.format == Formats.DATE.getDatabaseName() -> {
+                val decoded = DateJsonUtil.decode(value)
+                if (decoded is DateJsonCoder.DateJson) decoded.formattedDate else value
+            }
+            else -> value
+        }
+    }
+
+    /**
      * @param: observations downloaded from brapi
      * Compare brapi observations with edited and synced observations to determine if we need to push
      * updates or update the local database.
@@ -558,7 +588,7 @@ class BrapiSyncViewModel @Inject constructor(
      *         - second: a list of obs from brapi that can be updated in fieldbook
      *         - third: a list of obs that have conflicting edits (local is newer), and should be pushed
      */
-    private fun resolveObservationStatus(brapiObservations: List<Observation>): Triple<List<Observation>, List<Observation>, List<Conflict>> {
+    private fun resolveObservationStatus(brapiObservations: List<Observation>, traitsById: Map<String, TraitObject>): Triple<List<Observation>, List<Observation>, List<Conflict>> {
 
         val insertObservations = mutableListOf<Observation>()
         val updateObservations = mutableListOf<Observation>()
@@ -573,10 +603,15 @@ class BrapiSyncViewModel @Inject constructor(
                 it.dbId == brapiObs.dbId
             }
 
-            if (localEdited != null && localEdited.value != brapiObs.value) {
-                // Conflict between local edited and server version: record for user resolution
-                val conflict = Conflict(serverObservation = brapiObs, localObservation = localEdited)
-                conflicts.add(conflict)
+            if (localEdited != null) {
+                val trait = traitsById[localEdited.internalVariableDbId]
+                val localNorm = normalizeValueForComparison(localEdited.value ?: "", trait)
+                val serverNorm = normalizeValueForComparison(brapiObs.value ?: "", trait)
+                if (localNorm != serverNorm) {
+                    // Conflict between local edited and server version: record for user resolution
+                    val conflict = Conflict(serverObservation = brapiObs, localObservation = localEdited)
+                    conflicts.add(conflict)
+                }
                 return@forEach
             }
 
@@ -590,8 +625,10 @@ class BrapiSyncViewModel @Inject constructor(
 
             } else { //already exists but check if there has been an update
 
-                // If timestamps differ between server and local record, it's a conflict to resolve
-                if (localNew.value != brapiObs.value) {
+                val trait = traitsById[localNew.internalVariableDbId]
+                val localNorm = normalizeValueForComparison(localNew.value ?: "", trait)
+                val serverNorm = normalizeValueForComparison(brapiObs.value ?: "", trait)
+                if (localNorm != serverNorm) {
                     conflicts.add(Conflict(serverObservation = brapiObs, localObservation = localNew))
                 }
             }
@@ -600,15 +637,53 @@ class BrapiSyncViewModel @Inject constructor(
         return Triple(insertObservations, updateObservations, conflicts)
     }
 
+    /**
+     * Decodes a raw stored observation value into a human-readable display string.
+     *  - Categorical: decodes internal JSON (or raw BrAPI token list) to show category labels.
+     *  - Date: decodes JSON to show the formatted date or day-of-year per trait settings.
+     *  - All other types: returns the value unchanged.
+     */
+    private fun decodeObservationValueForDisplay(value: String, trait: TraitObject?): String {
+        if (value.isBlank() || value == "NA") return value
+        if (trait == null) return value
+        return when {
+            trait.format in CategoricalTraitLayout.POSSIBLE_VALUES -> {
+                // Local values are stored as internal JSON; server values may be raw BrAPI tokens.
+                // Normalize to internal JSON first, then extract the human-readable labels.
+                val encoded = if (value.trim().startsWith("[") && JsonUtil.isJsonValid(value)) {
+                    value
+                } else {
+                    CategoryJsonUtil.encodeDownloadedBrapiCategoricalValue(value, trait.categories)
+                }
+                try {
+                    CategoryJsonUtil.decode(encoded).joinToString(":") { it.label }
+                } catch (_: Exception) {
+                    value
+                }
+            }
+            trait.format == Formats.DATE.getDatabaseName() -> {
+                val decoded = DateJsonUtil.decode(value)
+                if (decoded is DateJsonCoder.DateJson) {
+                    if (trait.useDayOfYear) decoded.dayOfYear else decoded.formattedDate
+                } else value
+            }
+            else -> value
+        }
+    }
+
     // Store pending conflicts for UI to resolve
-    private fun setPendingConflicts(conflicts: List<Conflict>) {
+    private suspend fun setPendingConflicts(conflicts: List<Conflict>) {
         pendingConflicts = conflicts.map { Pair(it.serverObservation, it.localObservation) }
 
+        val traitsById = traitRepo.getTraits().associateBy { it.id }
+
         val uiConflicts = conflicts.map { c ->
+            val trait = traitsById[c.localObservation.internalVariableDbId]
+                ?: traitsById[c.serverObservation.internalVariableDbId]
             PendingConflictUi(
                 brapiId = c.serverObservation.dbId ?: c.localObservation.dbId ?: "",
-                localValue = c.localObservation.value ?: "",
-                serverValue = c.serverObservation.value ?: "",
+                localValue = decodeObservationValueForDisplay(c.localObservation.value ?: "", trait),
+                serverValue = decodeObservationValueForDisplay(c.serverObservation.value ?: "", trait),
                 localDbId = c.localObservation.dbId,
                 serverDbId = c.serverObservation.dbId
             )
@@ -657,31 +732,41 @@ class BrapiSyncViewModel @Inject constructor(
             }
         }
 
-        if (toUpdateFromServer.isNotEmpty()) {
-            viewModelScope.launch(Dispatchers.IO) {
-                dataHelper.updateObservationsByBrapiId(toUpdateFromServer)
-            }
-        }
-
         // clear and update ui state
         pendingConflicts = emptyList()
 
         _uiState.update { it.copy(pendingConflictsCount = 0, pendingConflicts = emptyList()) }
 
         viewModelScope.launch(Dispatchers.IO) {
+            if (toUpdateFromServer.isNotEmpty()) {
+                // Re-encode raw BrAPI server values to Field Book's internal format before persisting.
+                val traitsById = traitRepo.getTraits().associateBy { it.id }
+                toUpdateFromServer.forEach { obs ->
+                    if (obs.internalVariableDbId.isNullOrBlank()) {
+                        obs.internalVariableDbId = obs.variableDbId
+                    }
+                    obs.value = normalizeDownloadedObservationValue(obs, traitsById)
+                }
+                dataHelper.updateObservationsByBrapiId(toUpdateFromServer)
+            }
 
             refreshLocalStatus()
 
         }
     }
 
-    private fun setPendingResyncChoices(choices: List<PendingResyncChoice>) {
+    private suspend fun setPendingResyncChoices(choices: List<PendingResyncChoice>) {
         pendingResyncChoices = choices
+
+        val traitsById = traitRepo.getTraits().associateBy { it.id }
+
         val uiChoices = choices.map { choice ->
+            val trait = traitsById[choice.localObservation.internalVariableDbId]
+                ?: traitsById[choice.serverObservation.internalVariableDbId]
             PendingResyncChoiceUi(
                 key = choice.key,
-                localValue = choice.localObservation.value ?: "",
-                serverValue = choice.serverObservation.value ?: "",
+                localValue = decodeObservationValueForDisplay(choice.localObservation.value ?: "", trait),
+                serverValue = decodeObservationValueForDisplay(choice.serverObservation.value ?: "", trait),
                 localFieldBookId = choice.localObservation.fieldBookDbId,
                 serverDbId = choice.serverObservation.dbId
             )
@@ -1446,12 +1531,38 @@ class BrapiSyncViewModel @Inject constructor(
 
         if (rawValue.isBlank() || rawValue == "NA") return rawValue
 
-        val traitId = observation.internalVariableDbId ?: return rawValue
+        val traitId = observation.internalVariableDbId
+            ?.takeIf { it.isNotBlank() }
+            ?: observation.variableDbId?.takeIf { it.isNotBlank() }
+            ?: return rawValue
         val trait = traitsById[traitId] ?: return rawValue
 
-        if (trait.format !in CategoricalTraitLayout.POSSIBLE_VALUES) return rawValue
+        return when {
+            trait.format in CategoricalTraitLayout.POSSIBLE_VALUES ->
+                CategoryJsonUtil.encodeDownloadedBrapiCategoricalValue(rawValue, trait.categories)
 
-        return CategoryJsonUtil.encodeDownloadedBrapiCategoricalValue(rawValue, trait.categories)
+            trait.format == Formats.DATE.getDatabaseName() -> {
+                // If the value is already internal DateJson, keep it as-is.
+                if (JsonUtil.isJsonValid(rawValue)) return rawValue
+                // Otherwise it's a plain BrAPI ISO-8601 date "YYYY-MM-DD". Convert to DateJson.
+                try {
+                    val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                    val parsed = sdf.parse(rawValue) ?: return rawValue
+                    val cal = Calendar.getInstance()
+                    cal.time = parsed
+                    DateJsonUtil.encode(
+                        DateJsonCoder.DateJson(
+                            formattedDate = rawValue,
+                            dayOfYear = cal.get(Calendar.DAY_OF_YEAR).toString()
+                        )
+                    )
+                } catch (_: Exception) {
+                    rawValue
+                }
+            }
+
+            else -> rawValue
+        }
     }
 
     private fun processImageResponse(
