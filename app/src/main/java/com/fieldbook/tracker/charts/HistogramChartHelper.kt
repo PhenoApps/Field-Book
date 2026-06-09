@@ -20,12 +20,6 @@ import kotlin.math.pow
 
 object HistogramChartHelper {
 
-    private fun resolveChartTextColor(context: Context): Int {
-        val typedValue = TypedValue()
-        context.theme.resolveAttribute(R.attr.fb_graph_item_text_color, typedValue, true)
-        return typedValue.data
-    }
-
     data class HistogramData(
         val binLabels: List<String>,
         val binCounts: List<Int>,
@@ -60,7 +54,7 @@ object HistogramChartHelper {
             BarEntry(adjustedBinIndex, count.toFloat())
         }
 
-        val chartTextColor = resolveChartTextColor(context)
+        val chartTextColor = ChartTheme.graphTextColor(context)
 
         val dataSet = BarDataSet(entries, null).apply {
             val theme = context.theme

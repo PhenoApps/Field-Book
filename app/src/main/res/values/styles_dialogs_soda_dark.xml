@@ -36,13 +36,11 @@
         <item name="android:textViewStyle">@style/DropDownTextViewStyle.Dialog.SodaDark</item>
     </style>
 
-    <style name="TextAppearance.AppCompat.Title.SodaDark" parent="TextAppearance.AppCompat.Title">
-        <item name="android:textColor">@color/soda_dark_text_bright</item>
-    </style>
+    <style name="TextAppearance.AppCompat.Title.SodaDark"
+        parent="MaterialAlertDialog.MaterialComponents.Title.Text.SodaDark" />
 
-    <style name="TextAppearance.AppCompat.Subhead.SodaDark" parent="TextAppearance.AppCompat.Subhead">
-        <item name="android:textColor">@color/soda_dark_text_bright</item>
-    </style>
+    <style name="TextAppearance.AppCompat.Subhead.SodaDark"
+        parent="MaterialAlertDialog.MaterialComponents.Title.Text.SodaDark" />
 
     <style name="MaterialAlertDialog.MaterialComponents.Title.Text.SodaDark"
         parent="MaterialAlertDialog.MaterialComponents.Title.Text">
@@ -50,9 +48,7 @@
     </style>
 
     <style name="MaterialAlertDialog.MaterialComponents.Body.Text.SodaDark"
-        parent="MaterialAlertDialog.MaterialComponents.Body.Text">
-        <item name="android:textColor">@color/soda_dark_text_bright</item>
-    </style>
+        parent="MaterialAlertDialog.MaterialComponents.Title.Text.SodaDark" />
 
     <style name="MaterialAlertDialog.MaterialComponents.Title.Panel.SodaDark"
         parent="MaterialAlertDialog.MaterialComponents.Title.Panel">
@@ -81,6 +77,8 @@
         <item name="buttonBarStyle">@style/ButtonBarStyle.SodaDark</item>
         <item name="fb_color_background">@color/soda_dark_window</item>
         <item name="fb_color_card_background">@color/soda_dark_row</item>
+        <item name="fb_border_color">@color/soda_dark_border</item>
+        <item name="fb_button_color_pressed">@color/soda_dark_button_pressed</item>
         <item name="fb_color_text_dark">@color/soda_dark_text_bright</item>
         <item name="fb_color_text_light">@color/soda_dark_text_bright</item>
         <item name="fb_color_text_secondary">@color/soda_dark_text_secondary</item>
@@ -106,10 +104,6 @@
         <item name="materialAlertDialogBodyTextStyle">
             @style/MaterialAlertDialog.MaterialComponents.Body.Text.SodaDark
         </item>
-
-        <item name="buttonBarNegativeButtonStyle">@style/ButtonBarStyle.SodaDark</item>
-        <item name="buttonBarNeutralButtonStyle">@style/ButtonBarStyle.SodaDark</item>
-        <item name="buttonBarPositiveButtonStyle">@style/ButtonBarStyle.SodaDark</item>
 
         <item name="checkedTextViewStyle">@style/AlertCheckedView.SodaDark</item>
         <item name="android:checkedTextViewStyle">@style/AlertCheckedView.SodaDark</item>
@@ -137,7 +131,7 @@
     </style>
 
     <style name="AppAlertDialog.Preference.SodaDark" parent="AppAlertDialog.SodaDark">
-        <item name="android:windowBackground">@drawable/inset_border_soda_dark</item>
+        <item name="android:windowBackground">@drawable/inset_border</item>
         <item name="editTextStyle">@style/DialogEditTextStyle.SodaDark</item>
         <item name="android:editTextStyle">@style/DialogEditTextStyle.SodaDark</item>
     </style>

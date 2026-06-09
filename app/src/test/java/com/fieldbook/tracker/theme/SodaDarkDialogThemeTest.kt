@@ -2,17 +2,12 @@ package com.fieldbook.tracker.theme
 
 import android.content.Context
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.Drawable
-import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.InsetDrawable
-import android.graphics.drawable.LayerDrawable
-import android.graphics.drawable.ShapeDrawable
 import android.os.Build
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.annotation.LayoutRes
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.core.content.ContextCompat
@@ -27,21 +22,15 @@ import com.google.android.material.color.MaterialColors
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import org.robolectric.shadows.ShadowLooper
 
 /**
- * Rendering tests for Soda Dark alert dialogs.
- *
- * These intentionally exercise production paths ([ThemedAlertDialog.builder],
- * [show], [create] + [show], [chainOnShow]) and assert what is painted after
- * [show] — not merely that XML theme attributes resolve in isolation.
+ * Rendering tests for Soda Dark alert dialogs via production [ThemedAlertDialog] paths.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.P])
@@ -57,6 +46,14 @@ class SodaDarkDialogThemeTest {
     private val whiteRgb by lazy { Color.WHITE and 0x00FFFFFF }
 
     private val openDialogs = mutableListOf<AlertDialog>()
+
+    private val customViewCases = listOf(
+        CustomViewCase(R.layout.dialog_field_edit_name, R.string.field_edit_display_name, "edit display name"),
+        CustomViewCase(R.layout.dialog_field_sort, R.string.dialog_field_sort_title, "sort entries"),
+        CustomViewCase(R.layout.dialog_collect_att_chooser, R.string.search_attribute_dialog_title, "set search id"),
+        CustomViewCase(R.layout.dialog_export, R.string.settings_export, "export"),
+        CustomViewCase(R.layout.dialog_trait_creator, R.string.traits_new_dialog_title, "trait layout"),
+    )
 
     @Before
     fun setUp() {
@@ -74,8 +71,6 @@ class SodaDarkDialogThemeTest {
         openDialogs.clear()
     }
 
-    // --- Production path: builder.show() (Delete field, Export save, etc.) ---
-
     @Test
     fun showPath_messageOnly_rendersDarkPanelAndBrightTitle() {
         val dialog = ThemedAlertDialog.builder(sodaActivityContext)
@@ -83,9 +78,8 @@ class SodaDarkDialogThemeTest {
             .setMessage(R.string.fields_delete_permanent_warning)
             .show()
         track(dialog)
-        idleAfterShow()
-
-        assertRenderedAlertChrome(dialog, "delete confirmation")
+        DialogChromeAssertions.idleAfterShow()
+        assertChrome(dialog, "delete confirmation")
     }
 
     @Test
@@ -99,12 +93,9 @@ class SodaDarkDialogThemeTest {
             .setMessage(R.string.act_brapi_auth_http_warning_message)
             .show()
         track(dialog)
-        idleAfterShow()
-
-        assertRenderedAlertChrome(dialog, "HTTP warning")
+        DialogChromeAssertions.idleAfterShow()
+        assertChrome(dialog, "HTTP warning")
     }
-
-    // --- Production path: create().show() (wireSodaChrome onShow) ---
 
     @Test
     fun createShowPath_messageOnly_rendersDarkPanelWithoutManualChrome() {
@@ -114,12 +105,9 @@ class SodaDarkDialogThemeTest {
             .create()
         dialog.show()
         track(dialog)
-        idleAfterShow()
-
-        assertRenderedAlertChrome(dialog, "new field message (create().show())")
+        DialogChromeAssertions.idleAfterShow()
+        assertChrome(dialog, "new field message (create().show())")
     }
-
-    // --- Production path: create() + chainOnShow + show() (Field detail edit name) ---
 
     @Test
     fun chainOnShowPath_rendersDarkPanelWithoutManualChrome() {
@@ -131,43 +119,27 @@ class SodaDarkDialogThemeTest {
         ThemedAlertDialog.chainOnShow(dialog, sodaActivityContext, null)
         dialog.show()
         track(dialog)
-        idleAfterShow()
-
-        assertRenderedAlertChrome(dialog, "edit display name (chainOnShow)")
-    }
-
-    // --- Custom-view dialogs (culprit layouts) ---
-
-    @Test
-    fun showPath_editDisplayName_rendersDarkPanelAndContent() {
-        assertCustomViewDialog(R.layout.dialog_field_edit_name, R.string.field_edit_display_name, "edit display name")
+        DialogChromeAssertions.idleAfterShow()
+        assertChrome(dialog, "edit display name (chainOnShow)")
     }
 
     @Test
-    fun showPath_sortEntries_rendersDarkPanelAndContent() {
-        assertCustomViewDialog(R.layout.dialog_field_sort, R.string.dialog_field_sort_title, "sort entries")
-    }
+    fun showPath_customViewDialogs_rendersDarkPanelAndContent() {
+        customViewCases.forEach { case ->
+            val content = ThemedAlertDialog.inflate(sodaActivityContext, case.layoutRes)
+            val rootBg = MaterialColors.getColor(content.context, R.attr.fb_color_background, Color.WHITE)
+            DialogChromeAssertions.assertColorEquals("${case.label} content bg", sodaWindow, rootBg)
 
-    @Test
-    fun showPath_setSearchId_rendersDarkPanelAndContent() {
-        assertCustomViewDialog(
-            R.layout.dialog_collect_att_chooser,
-            R.string.search_attribute_dialog_title,
-            "set search id",
-        )
+            val dialog = ThemedAlertDialog.builder(sodaActivityContext)
+                .setTitle(case.titleRes)
+                .setView(content)
+                .setPositiveButton(R.string.dialog_ok, null)
+                .show()
+            track(dialog)
+            DialogChromeAssertions.idleAfterShow()
+            assertChrome(dialog, case.label)
+        }
     }
-
-    @Test
-    fun showPath_export_rendersDarkPanelAndContent() {
-        assertCustomViewDialog(R.layout.dialog_export, R.string.settings_export, "export")
-    }
-
-    @Test
-    fun showPath_traitLayout_rendersDarkPanelAndContent() {
-        assertCustomViewDialog(R.layout.dialog_trait_creator, R.string.traits_new_dialog_title, "trait layout")
-    }
-
-  // --- ListAddDialog pattern: programmatic root using contentContext ---
 
     @Test
     fun showPath_newFieldListAddPattern_rendersDarkPanelAndContent() {
@@ -187,13 +159,14 @@ class SodaDarkDialogThemeTest {
             .setPositiveButton(R.string.dialog_cancel, null)
             .show()
         track(dialog)
-        idleAfterShow()
-
-        assertRenderedAlertChrome(dialog, "new field (ListAdd pattern)")
-        assertColorEquals("ListAdd custom root background", sodaWindow, layout.backgroundColor())
+        DialogChromeAssertions.idleAfterShow()
+        assertChrome(dialog, "new field (ListAdd pattern)")
+        DialogChromeAssertions.assertColorEquals(
+            "ListAdd custom root background",
+            sodaWindow,
+            layout.backgroundColor(),
+        )
     }
-
-    // --- Guard: non-Soda theme must not force dark chrome ---
 
     @Test
     fun lightTheme_showPath_doesNotForceSodaPanelColor() {
@@ -207,20 +180,13 @@ class SodaDarkDialogThemeTest {
             .setMessage(R.string.dialog_cancel)
             .show()
         track(dialog)
-        idleAfterShow()
+        DialogChromeAssertions.idleAfterShow()
 
-        val panel = dialog.requireParentPanel("light theme")
-        val panelColor = panel.backgroundColor()
+        val panelColor = dialog.requireParentPanel("light theme").backgroundColor()
         if (panelColor != null) {
-            assertNotEquals(
-                "Light theme must not paint Soda row color on panel",
-                sodaRow,
-                panelColor,
-            )
+            assertNotEquals("Light theme must not paint Soda row color on panel", sodaRow, panelColor)
         }
     }
-
-    // --- Minimal theme attr sanity (not a substitute for rendering checks above) ---
 
     @Test
     fun resolverAndAlertDialogStyle_useSodaDarkResources() {
@@ -237,82 +203,22 @@ class SodaDarkDialogThemeTest {
         assertEquals(R.style.AlertDialog_FieldBook_SodaDark, styleValue.resourceId)
     }
 
-    private fun assertCustomViewDialog(layoutRes: Int, titleRes: Int, label: String) {
-        val content = ThemedAlertDialog.inflate(sodaActivityContext, layoutRes)
-        val rootBg = MaterialColors.getColor(content.context, R.attr.fb_color_background, Color.WHITE)
-        assertColorEquals("$label content bg", sodaWindow, rootBg)
-
-        val dialog = ThemedAlertDialog.builder(sodaActivityContext)
-            .setTitle(titleRes)
-            .setView(content)
-            .setPositiveButton(R.string.dialog_ok, null)
-            .show()
-        track(dialog)
-        idleAfterShow()
-
-        assertRenderedAlertChrome(dialog, label)
-    }
-
-    private fun assertRenderedAlertChrome(dialog: AlertDialog, label: String) {
-        val panel = dialog.requireParentPanel(label)
-        val panelColor = panel.backgroundColor()
-        assertNotNull("$label: parentPanel must have a readable background after show", panelColor)
-        assertColorEquals("$label: parentPanel background", sodaRow, panelColor)
-        assertNotWhite(panelColor!!, "$label: parentPanel")
-
-        dialog.findViewById<TextView>(androidx.appcompat.R.id.alertTitle)?.let { title ->
-            assertColorEquals("$label: title text", sodaBright, title.currentTextColor)
-            assertNotWhite(title.currentTextColor, "$label: title text")
-        }
-
-        dialog.findViewById<TextView>(android.R.id.message)?.let { message ->
-            assertNotWhite(message.currentTextColor, "$label: message text")
-        }
-    }
-
-    private fun AlertDialog.requireParentPanel(label: String): View {
-        val panel = findViewById<View>(androidx.appcompat.R.id.parentPanel)
-        assertNotNull("$label: parentPanel must exist after show", panel)
-        return panel!!
-    }
-
-    private fun View.backgroundColor(): Int? = when (val bg = background) {
-        is ColorDrawable -> bg.color
-        is GradientDrawable -> bg.color?.defaultColor
-        is ShapeDrawable -> bg.paint.color
-        else -> null
-    }
-
-    private fun assertNotWhite(color: Int, label: String) {
-        assertNotEquals("$label must not be white", whiteRgb, color and 0x00FFFFFF)
-    }
-
-    private fun assertColorEquals(message: String, expected: Int, actual: Int?) {
-        assertNotNull(message, actual)
-        assertEquals(message, expected.toLong(), actual!!.toLong())
-    }
-
-    private fun idleAfterShow() {
-        ShadowLooper.idleMainLooper()
+    private fun assertChrome(dialog: AlertDialog, label: String) {
+        DialogChromeAssertions.assertRenderedAlertChrome(dialog, label, sodaRow, sodaBright, whiteRgb)
     }
 
     private fun track(dialog: AlertDialog) {
         openDialogs.add(dialog)
     }
 
-    private fun extractSolidColor(drawable: Drawable): Int? {
-        return when (drawable) {
-            is ColorDrawable -> drawable.color
-            is GradientDrawable -> drawable.color?.defaultColor
-            is InsetDrawable -> drawable.drawable?.let { extractSolidColor(it) }
-            is LayerDrawable -> {
-                for (i in 0 until drawable.numberOfLayers) {
-                    extractSolidColor(drawable.getDrawable(i))?.let { return it }
-                }
-                null
-            }
-            is ShapeDrawable -> drawable.paint.color
-            else -> null
-        }
-    }
+    private fun AlertDialog.requireParentPanel(label: String): View =
+        with(DialogChromeAssertions) { requireParentPanel(label) }
+
+    private fun View.backgroundColor(): Int? = with(DialogChromeAssertions) { backgroundColor() }
+
+    private data class CustomViewCase(
+        @LayoutRes val layoutRes: Int,
+        @StringRes val titleRes: Int,
+        val label: String,
+    )
 }

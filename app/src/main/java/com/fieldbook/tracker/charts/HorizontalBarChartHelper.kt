@@ -16,12 +16,6 @@ import kotlin.math.ceil
 
 object HorizontalBarChartHelper {
 
-    private fun resolveChartTextColor(context: Context): Int {
-        val typedValue = TypedValue()
-        context.theme.resolveAttribute(R.attr.fb_graph_item_text_color, typedValue, true)
-        return typedValue.data
-    }
-
     private const val BASE_HEIGHT_DP = 40f // Base height for the chart in density-independent pixels
     private const val HEIGHT_PER_BAR_DP = 40f // Height to add per bar in density-independent pixels
 
@@ -49,7 +43,7 @@ object HorizontalBarChartHelper {
             BarEntry(index.toFloat(), categoryCounts[category]?.toFloat() ?: 0f)
         }
 
-        val chartTextColor = resolveChartTextColor(context)
+        val chartTextColor = ChartTheme.graphTextColor(context)
 
         val dataSet = BarDataSet(entries, "Categories").apply {
             val theme = context.theme
