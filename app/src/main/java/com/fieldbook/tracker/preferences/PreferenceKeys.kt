@@ -99,6 +99,7 @@ class PreferenceKeys {
 
         // BrAPI
         const val BRAPI_ENABLED = "BRAPI_ENABLED"
+        const val BRAPI_OAUTH_REDIRECT = "BRAPI_OAUTH_REDIRECT"
         const val BRAPI_BASE_URL = "BRAPI_BASE_URL"
         const val BRAPI_OIDC_URL = "BRAPI_OIDC_URL"
         const val BRAPI_OIDC_FLOW = "BRAPI_OIDC_FLOW"

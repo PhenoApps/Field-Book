@@ -146,10 +146,15 @@ public class BrapiAuthActivity extends ThemedActivity {
             String clientId = sharedPreferences.getString(PreferenceKeys.BRAPI_OIDC_CLIENT_ID, "fieldbook");
             String scope = sharedPreferences.getString(PreferenceKeys.BRAPI_OIDC_SCOPE, "");
 
-            // Authorization code flow works better with custom URL scheme fieldbook://app/auth
-            // https://github.com/openid/AppAuth-Android/issues?q=is%3Aissue+intent+null
-            Uri redirectURI = flow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)) ?
-                    Uri.parse("https://phenoapps.org/field-book") : Uri.parse("fieldbook://app/auth");
+            Uri redirectURI;
+            if (isExperimentalOAuthRedirect(sharedPreferences)) {
+                redirectURI = Uri.parse("fieldbook://app/auth");
+            } else {
+                // Authorization code flow works better with custom URL scheme fieldbook://app/auth
+                // https://github.com/openid/AppAuth-Android/issues?q=is%3Aissue+intent+null
+                redirectURI = flow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit)) ?
+                        Uri.parse("https://phenoapps.org/field-book") : Uri.parse("fieldbook://app/auth");
+            }
 
             authUtil.getAuthServiceConfiguration((authorizationServiceConfiguration, ex) -> {
 
@@ -218,6 +223,10 @@ public class BrapiAuthActivity extends ThemedActivity {
         authService.performAuthorizationRequest(
                 authRequest,
                 PendingIntent.getActivity(context, 0, responseIntent, PendingIntent.FLAG_MUTABLE));
+    }
+
+    private static boolean isExperimentalOAuthRedirect(SharedPreferences sharedPreferences) {
+        return "experimental".equals(sharedPreferences.getString(PreferenceKeys.BRAPI_OAUTH_REDIRECT, "default"));
     }
 
     public void authorizeBrAPI_OLD(SharedPreferences sharedPreferences, Context context) {

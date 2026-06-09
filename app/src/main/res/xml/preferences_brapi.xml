@@ -9,6 +9,12 @@
         android:summary="@string/preferences_brapi_enable_summary"
         android:title="@string/preferences_brapi_enable_title" />
 
+    <Preference
+        android:icon="@drawable/ic_pref_brapi_version"
+        android:key="BRAPI_OAUTH_REDIRECT"
+        android:summary="@string/preferences_brapi_oauth_redirect_default"
+        android:title="@string/preferences_brapi_oauth_redirect_title" />
+
     <PreferenceCategory
         android:key="brapi_server"
         android:title="@string/preferences_brapi_server_title"

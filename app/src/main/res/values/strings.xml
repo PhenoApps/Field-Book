@@ -1249,6 +1249,9 @@
 
     <string name="preferences_brapi_enable_title">Enable BrAPI</string>
     <string name="preferences_brapi_enable_summary">The Breeding API allows simple data transfer to compatible databases.</string>
+    <string name="preferences_brapi_oauth_redirect_title">OAuth Redirect</string>
+    <string name="preferences_brapi_oauth_redirect_default">Default</string>
+    <string name="preferences_brapi_oauth_redirect_experimental">Experimental (phenoapps.org independent)</string>
     <string name="preferences_brapi_server_title">Server</string>
     <string name="preferences_brapi_barcode_config_title">Auto-configure</string>
     <string name="preferences_brapi_barcode_config_summary">Manage settings with QR codes</string>
