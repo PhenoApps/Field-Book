@@ -25,6 +25,7 @@
             android:layout_height="wrap_content"
             android:text="@string/stat_title_fields"
             android:layout_gravity="center_horizontal"
+            android:textColor="?android:attr/textColorPrimary"
             android:textStyle="bold" />
 
         <ImageView
@@ -32,14 +33,16 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:src="@drawable/ic_stats_field"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            app:tint="?attr/colorControlNormal" />
 
         <TextView
             android:id="@+id/stat_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:text="data"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            android:textColor="?android:attr/textColorSecondary" />
 
     </LinearLayout>
 

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -112,12 +113,12 @@ fun BottomToolbar(
                                     .size(16.dp)
                                     .align(Alignment.TopEnd)
                                     .offset(x = 6.dp, y = (-6).dp)
-                                    .background(color = Color.Red, shape = CircleShape),
+                                    .background(color = MaterialTheme.colorScheme.error, shape = CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     text = displayCount.toString(),
-                                    color = Color.White,
+                                    color = MaterialTheme.colorScheme.onError,
                                     fontSize = 10.sp,
                                     lineHeight = 10.sp,
                                     textAlign = TextAlign.Center,

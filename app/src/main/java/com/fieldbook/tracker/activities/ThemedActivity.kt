@@ -68,7 +68,7 @@ open class ThemedActivity: AppCompatActivity() {
                 }
 
                 if (activity is PreferencesActivity) {
-                    activity.setTheme(R.style.PreferenceTheme)
+                    activity.setTheme(AppThemeResolver.preferenceThemeStyle(prefs))
                 }
             }
 

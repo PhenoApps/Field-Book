@@ -84,7 +84,8 @@
                     android:id="@+id/expand_collapse_icon"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
-                    android:src="@drawable/ic_chevron_down" />
+                    android:src="@drawable/ic_chevron_down"
+                    app:tint="?attr/colorControlNormal" />
             </LinearLayout>
 
             <!-- Collapsible Chart -->

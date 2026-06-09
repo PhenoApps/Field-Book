@@ -12,6 +12,12 @@ import com.github.mikephil.charting.data.PieEntry
 
 object PieChartHelper {
 
+    private fun resolveChartTextColor(context: Context): Int {
+        val typedValue = TypedValue()
+        context.theme.resolveAttribute(R.attr.fb_graph_item_text_color, typedValue, true)
+        return typedValue.data
+    }
+
     private const val DEFAULT_BASE_HEIGHT_DP = 50f // Default base height in density-independent pixels
 
     /**
@@ -50,7 +56,7 @@ object PieChartHelper {
         // Set center text with the appropriate size
         chart.setCenterText("${(completeness * 100).toInt()}%")
         chart.setCenterTextSize(chartTextSize)
-        chart.setCenterTextColor(Color.BLACK)
+        chart.setCenterTextColor(resolveChartTextColor(context))
 
         // Determine chart height based on base height and text size
         val displayMetrics = context.resources.displayMetrics

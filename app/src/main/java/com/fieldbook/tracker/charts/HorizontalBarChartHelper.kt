@@ -16,6 +16,12 @@ import kotlin.math.ceil
 
 object HorizontalBarChartHelper {
 
+    private fun resolveChartTextColor(context: Context): Int {
+        val typedValue = TypedValue()
+        context.theme.resolveAttribute(R.attr.fb_graph_item_text_color, typedValue, true)
+        return typedValue.data
+    }
+
     private const val BASE_HEIGHT_DP = 40f // Base height for the chart in density-independent pixels
     private const val HEIGHT_PER_BAR_DP = 40f // Height to add per bar in density-independent pixels
 
@@ -43,15 +49,17 @@ object HorizontalBarChartHelper {
             BarEntry(index.toFloat(), categoryCounts[category]?.toFloat() ?: 0f)
         }
 
+        val chartTextColor = resolveChartTextColor(context)
+
         val dataSet = BarDataSet(entries, "Categories").apply {
             val theme = context.theme
             val fbColorPrimaryValue = TypedValue()
             theme.resolveAttribute(R.attr.fb_color_primary, fbColorPrimaryValue, true)
 
             color = fbColorPrimaryValue.data
-            valueTextColor = Color.WHITE
+            valueTextColor = chartTextColor
             setDrawValues(false)
-            barBorderColor = Color.BLACK
+            barBorderColor = chartTextColor
             barBorderWidth = 1f
         }
 
@@ -64,7 +72,7 @@ object HorizontalBarChartHelper {
             position = XAxis.XAxisPosition.BOTTOM
             setDrawGridLines(false)
             setDrawAxisLine(true)
-            textColor = Color.BLACK
+            textColor = chartTextColor
             textSize = chartTextSize
             granularity = 1f
             setLabelCount(sortedCategories.size, false)
@@ -78,7 +86,7 @@ object HorizontalBarChartHelper {
         val yAxisLeft: YAxis = chart.axisLeft.apply {
             setDrawGridLines(false)
             setDrawAxisLine(true)
-            textColor = Color.BLACK
+            textColor = chartTextColor
             textSize = chartTextSize
             axisMinimum = 0f
             val maxY = entries.maxOfOrNull { it.y.toInt() } ?: 1
@@ -95,7 +103,7 @@ object HorizontalBarChartHelper {
         val yAxisRight: YAxis = chart.axisRight.apply {
             setDrawGridLines(false)
             setDrawAxisLine(true)
-            textColor = Color.BLACK
+            textColor = chartTextColor
             textSize = chartTextSize
             axisMinimum = 0f
             val maxY = entries.maxOfOrNull { it.y.toInt() } ?: 1
@@ -119,7 +127,7 @@ object HorizontalBarChartHelper {
                 text = ""
             }
             setNoDataText(context.getString(R.string.chart_no_data))
-            setNoDataTextColor(Color.BLACK)
+            setNoDataTextColor(chartTextColor)
 
             // Avoids label cut-off
             setExtraOffsets(0f, 0f, 0f, 16f)

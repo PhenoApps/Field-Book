@@ -100,6 +100,8 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
     private var emptyCellBgColor: Int = 0
     private var activeCellTextColor: Int = 0
     private var cellTextColor: Int = 0
+    private var headerCellBgColor: Int = 0
+    private var tableBorderColor: Int = 0
 
     private var isLoading by mutableStateOf(true)
     private lateinit var lazyTableState: LazyTableState
@@ -193,6 +195,12 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
 
             resolveAttribute(R.attr.cellTextColor, typedValue, true)
             cellTextColor = typedValue.data
+
+            resolveAttribute(R.attr.headerCellColor, typedValue, true)
+            headerCellBgColor = typedValue.data
+
+            resolveAttribute(R.attr.tableBorderColor, typedValue, true)
+            tableBorderColor = typedValue.data
         }
     }
 
@@ -442,7 +450,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
     fun HeaderCell(text: String) {
         TableCell(
             text = text,
-            backgroundColor = Color.White,
+            backgroundColor = Color(headerCellBgColor),
             textColor = Color(cellTextColor)
         )
     }
@@ -451,7 +459,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
     fun RowHeaderCell(text: String) {
         TableCell(
             text = text,
-            backgroundColor = Color.White,
+            backgroundColor = Color(headerCellBgColor),
             textColor = Color(cellTextColor)
         )
     }
@@ -487,7 +495,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .background(backgroundColor)
-                .border(Dp.Hairline, Color(cellTextColor))
+                .border(Dp.Hairline, Color(tableBorderColor))
                 .then(if (isClickable) Modifier.clickable(onClick = onClick) else Modifier)
         ) {
             Text(

@@ -7,7 +7,6 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
 import android.widget.ProgressBar
@@ -478,7 +477,7 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
     }
 
     private fun showProgressDialog() {
-        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_nearby_share, null)
+        val dialogView = ThemedAlertDialog.inflate(context, R.layout.dialog_nearby_share)
 
         progressBar = dialogView.findViewById(R.id.progress_bar)
         progressStatusIcon = dialogView.findViewById(R.id.progress_status_icon)
@@ -525,7 +524,7 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
         progressBar?.visibility = View.GONE
         progressStatusIcon?.apply {
             visibility = View.VISIBLE
-            setImageResource(icon)
+            ThemedAlertDialog.setThemedImageResource(this, context, icon, ThemedAlertDialog.IconTint.Icon)
         }
         progressMessage?.text = message
     }

@@ -25,6 +25,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="11"
                 android:textSize="?attr/fb_title_text_size"
+                android:textColor="?android:attr/textColorPrimary"
                 android:textStyle="bold"
                 android:padding="8dp"
                 android:paddingStart="16dp" />
@@ -35,7 +36,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:padding="5dp"
-                android:src="@drawable/ic_stats_export" />
+                android:src="@drawable/ic_stats_export"
+                app:tint="?attr/colorControlNormal" />
 
         </LinearLayout>
 

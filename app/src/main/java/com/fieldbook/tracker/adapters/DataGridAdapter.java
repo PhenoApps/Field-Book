@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.adapters;
 
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -157,6 +158,7 @@ public class DataGridAdapter extends AbstractTableAdapter<OldDataGridActivity.He
          if (columnHeaderItemModel != null) {
              columnHeaderViewHolder.textView.setText(columnHeaderItemModel.getName());
          }
+         applyHeaderCellStyle(columnHeaderViewHolder.textView);
 
          // If your TableView should have auto resize for cells & columns.
          // Then you should consider the below lines. Otherwise, you can ignore them.
@@ -213,6 +215,14 @@ public class DataGridAdapter extends AbstractTableAdapter<OldDataGridActivity.He
          if (rowHeaderItemModel != null) {
              rowHeaderViewHolder.textView.setText(rowHeaderItemModel.getCode());
          }
+         applyHeaderCellStyle(rowHeaderViewHolder.textView);
+     }
+
+     private void applyHeaderCellStyle(TextView textView) {
+         textView.setBackgroundResource(R.drawable.table_header_cell);
+         TypedValue typedValue = new TypedValue();
+         textView.getContext().getTheme().resolveAttribute(R.attr.cellTextColor, typedValue, true);
+         textView.setTextColor(typedValue.data);
      }
 
      @NotNull

@@ -65,7 +65,7 @@
         android:layout_toRightOf="@+id/spacer3"
         android:ellipsize="end"
         android:singleLine="true"
-        android:textColor="#000000"
+        android:textColor="?attr/fb_color_text_dark"
         android:textSize="@dimen/text_size_small" />
 
 </RelativeLayout>
