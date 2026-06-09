@@ -100,6 +100,15 @@ object AppThemeResolver {
         ThemedActivity.SODA_DARK to R.style.ActivityDialog_SodaDark,
     )
 
+    private val preferenceThemeStyles = mapOf(
+        ThemedActivity.SODA_DARK to mapOf(
+            ThemedActivity.SMALL to R.style.PreferenceTheme_SodaDark_SmallTextTheme,
+            ThemedActivity.MEDIUM to R.style.PreferenceTheme_SodaDark,
+            ThemedActivity.LARGE to R.style.PreferenceTheme_SodaDark_LargeTextTheme,
+            ThemedActivity.EXTRA_LARGE to R.style.PreferenceTheme_SodaDark_ExtraLargeTextTheme,
+        ),
+    )
+
     private val aboutLibrariesStyles = mapOf(
         ThemedActivity.DEFAULT to R.style.AboutLibrariesCustom,
         ThemedActivity.HIGH_CONTRAST to R.style.AboutLibrariesCustom_HighContrast,
@@ -147,26 +156,52 @@ object AppThemeResolver {
         dialogThemeStyles[themeIndex] ?: dialogThemeStyles.getValue(ThemedActivity.DEFAULT)
 
     @JvmStatic
+    fun preferenceThemeStyle(prefs: SharedPreferences): Int {
+        val styles = preferenceThemeStyles[themeIndex(prefs)] ?: return R.style.PreferenceTheme
+        return textStyleFor(textIndex(prefs), object : TextSizedStyles {
+            override val small = styles.getValue(ThemedActivity.SMALL)
+            override val medium = styles.getValue(ThemedActivity.MEDIUM)
+            override val large = styles.getValue(ThemedActivity.LARGE)
+            override val extraLarge = styles.getValue(ThemedActivity.EXTRA_LARGE)
+        })
+    }
+
+    @JvmStatic
     fun aboutLibrariesStyle(themeIndex: Int): Int =
         aboutLibrariesStyles[themeIndex] ?: aboutLibrariesStyles.getValue(ThemedActivity.DEFAULT)
 
     fun statusBarColorRes(themeIndex: Int): Int =
         (themeStyles[themeIndex] ?: themeStyles.getValue(ThemedActivity.DEFAULT)).statusBarColorRes
 
+    /** Resolves themed date picker dialog style (Soda uses [R.style.DatePickerDialogStyle_SodaDark]). */
+    @JvmStatic
+    fun datePickerDialogStyle(context: Context): Int {
+        if (themeIndex(PreferenceManager.getDefaultSharedPreferences(context)) == ThemedActivity.SODA_DARK) {
+            return R.style.DatePickerDialogStyle_SodaDark
+        }
+        return R.style.DatePickerDialogStyle
+    }
+
     /** Resolves themed alert dialog style (Soda uses [R.style.AppAlertDialog.SodaDark]). */
     @JvmStatic
     fun alertDialogStyle(context: Context): Int {
-        if (themeIndex(PreferenceManager.getDefaultSharedPreferences(context)) == ThemedActivity.SODA_DARK) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        if (isSodaDark(prefs)) {
+            val typedValue = TypedValue()
+            if (context.theme.resolveAttribute(androidx.appcompat.R.attr.alertDialogTheme, typedValue, true)
+                && typedValue.resourceId == R.style.AppAlertDialog_Preference_SodaDark
+            ) {
+                return R.style.AppAlertDialog_Preference_SodaDark
+            }
             return R.style.AppAlertDialog_SodaDark
         }
         val typedValue = TypedValue()
-        return if (context.theme.resolveAttribute(android.R.attr.alertDialogTheme, typedValue, true)
+        if (context.theme.resolveAttribute(androidx.appcompat.R.attr.alertDialogTheme, typedValue, true)
             && typedValue.resourceId != 0
         ) {
-            typedValue.resourceId
-        } else {
-            R.style.AppAlertDialog
+            return typedValue.resourceId
         }
+        return R.style.AppAlertDialog
     }
 
     private fun textStyleFor(textIndex: Int, styles: TextSizedStyles): Int = when (textIndex) {

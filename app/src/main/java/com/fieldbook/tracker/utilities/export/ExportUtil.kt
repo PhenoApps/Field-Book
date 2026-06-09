@@ -4,14 +4,12 @@ import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import android.Manifest
 import android.app.Activity
 import androidx.appcompat.app.AlertDialog
-import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
 import android.os.Build
 import android.text.Html
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.widget.*
@@ -74,7 +72,7 @@ class ExportUtil @Inject constructor(
     private var filesToExport: MutableList<DocumentFile> = mutableListOf()
     private var processedFieldCount = 0
     private val ioScope = CoroutineScope(Dispatchers.IO)
-    private var progressDialog: ProgressDialog? = null
+    private var progressDialog: AlertDialog? = null
 
     private val preferences = PreferenceManager.getDefaultSharedPreferences(context)
     private val timeStamp = SimpleDateFormat("yyyy-MM-dd-hh-mm-ss", Locale.getDefault())
@@ -164,7 +162,7 @@ class ExportUtil @Inject constructor(
     }
 
     private fun exportLocal(fields: List<FieldObject>) {
-        val layout = LayoutInflater.from(context).inflate(R.layout.dialog_export, null)
+        val layout = ThemedAlertDialog.inflate(context, R.layout.dialog_export)
 
         val bundleInfoMessage: TextView = layout.findViewById(R.id.bundleInfo)
         val fileName: EditText = layout.findViewById(R.id.fileName)
@@ -319,12 +317,11 @@ class ExportUtil @Inject constructor(
     }
 
     private fun showProgressDialog() {
-        progressDialog = ProgressDialog(context).apply {
-            isIndeterminate = true
-            setCancelable(false)
-            setMessage(Html.fromHtml(context.getString(R.string.export_progress)))
-            show()
-        }
+        progressDialog = ThemedAlertDialog.indeterminateProgressDialog(
+            context,
+            Html.fromHtml(context.getString(R.string.export_progress)),
+        )
+        progressDialog?.show()
     }
 
     // Launches a new coroutine for each export task

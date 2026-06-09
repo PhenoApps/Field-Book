@@ -112,8 +112,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
      * @param populatePersonName - whether to try to show current person's name in the editTexts
      */
     private void showPersonDialog(boolean populatePersonName) {
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_person, null);
+        View layout = ThemedAlertDialog.inflate(getContext(), R.layout.dialog_person);
         firstName = layout.findViewById(R.id.firstName);
         lastName = layout.findViewById(R.id.lastName);
 
@@ -217,12 +216,13 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
                     d.dismiss();
                 }).show();
 
-        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(context, R.color.main_value_saved_color));
+        TypedValue savedColor = new TypedValue();
+        context.getTheme().resolveAttribute(R.attr.fb_value_saved_color, savedColor, true);
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(savedColor.data);
     }
 
     private void showDeviceNameDialog() {
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_device_name, null);
+        View layout = ThemedAlertDialog.inflate(getContext(), R.layout.dialog_device_name);
         final EditText deviceName = layout.findViewById(R.id.deviceName);
         final TextView errorMessageView = layout.findViewById(R.id.error_message);
 

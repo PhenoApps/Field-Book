@@ -2,10 +2,10 @@ package com.fieldbook.tracker.dialogs
 
 import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import android.content.Context
-import android.text.Html
 import android.text.method.LinkMovementMethod
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.core.text.HtmlCompat
 import com.fieldbook.tracker.R
 
 class CitationDialog(private val context: Context) {
@@ -24,7 +24,7 @@ class CitationDialog(private val context: Context) {
 
         val builder = ThemedAlertDialog.builder(context)
         builder.setTitle(context.getString(R.string.citation_title))
-            .setMessage(Html.fromHtml(htmlMessage))
+            .setMessage(HtmlCompat.fromHtml(htmlMessage, HtmlCompat.FROM_HTML_MODE_LEGACY))
             .setCancelable(false)
             .setPositiveButton(context.getString(R.string.dialog_ok)) { dialog, _ ->
                 dialog.dismiss()

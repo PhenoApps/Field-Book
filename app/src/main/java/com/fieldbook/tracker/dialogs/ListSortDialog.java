@@ -41,8 +41,7 @@ public class ListSortDialog {
     }
 
     public void show() {
-        LayoutInflater inflater = activity.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_list_buttonless, null);
+        View layout = ThemedAlertDialog.inflate(activity, R.layout.dialog_list_buttonless);
 
         ListView myList = layout.findViewById(R.id.myList);
         List<String> displayOptions = new ArrayList<>(sortOptions.keySet());
@@ -91,7 +90,7 @@ public class ListSortDialog {
             alertDialog.dismiss();
         });
 
-        alertDialog.setOnShowListener(dialogInterface -> {
+        ThemedAlertDialog.chainOnShow(alertDialog, activity, dialogInterface -> {
             android.view.WindowManager.LayoutParams params = alertDialog.getWindow().getAttributes();
             params.width = android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
             params.height = android.view.ViewGroup.LayoutParams.WRAP_CONTENT;

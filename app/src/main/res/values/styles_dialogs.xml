@@ -107,4 +107,13 @@
         <item name="android:textSize">?attr/fb_title_text_size</item>
     </style>
 
+    <!-- Section headers inside alert dialog custom views (uses dialog theme textColorPrimary). -->
+    <style name="TextViewStyle.Bold.Dialog" parent="TextViewStyle.Bold">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
+    <style name="TextViewStyle.Bold.Title.Dialog" parent="TextViewStyle.Bold.Title">
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
+    </style>
+
 </resources>

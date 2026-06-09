@@ -187,11 +187,10 @@ abstract class BaseFieldActivity : ThemedActivity(), FieldAdapterController, Fie
     fun showDeleteConfirmationDialog(fieldIds: List<Int>, isFromDetailFragment: Boolean) {
         val fieldNames = getFieldNames(fieldIds)
         val message = resources.getQuantityString(R.plurals.fields_delete_confirmation, fieldIds.size, fieldNames)
-        val formattedMessage = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-            android.text.Html.fromHtml(message, android.text.Html.FROM_HTML_MODE_LEGACY)
-        } else {
-            android.text.Html.fromHtml(message)
-        }
+        val formattedMessage = androidx.core.text.HtmlCompat.fromHtml(
+            message,
+            androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY,
+        )
 
         val builder = ThemedAlertDialog.builder(this)
             .setTitle(getString(R.string.fields_delete_study))

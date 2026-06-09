@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
+    android:background="?attr/fb_color_background"
     android:orientation="vertical"
     android:weightSum="1">
 

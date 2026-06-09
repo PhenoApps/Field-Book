@@ -27,7 +27,7 @@
         android:layout_gravity="center"
         android:ellipsize="marquee"
         android:singleLine="true"
-        android:textColor="?attr/fb_color_text_dark"
+        android:textColor="?android:attr/textColorPrimary"
         android:textSize="?attr/fb_subheading_text_size"
         tools:text="@string/traits_format_disease_rating" />
 

@@ -236,8 +236,7 @@ class TraitActivity : ThemedActivity() {
         parameter: BaseFormatParameter, trait: TraitObject,
         onUpdated: (TraitObject) -> Unit,
     ) {
-        val dialogView = LayoutInflater.from(this)
-            .inflate(R.layout.dialog_trait_parameter_edit, null)
+        val dialogView = ThemedAlertDialog.inflate(this, R.layout.dialog_trait_parameter_edit)
 
         val format = Formats.entries.find { it.getDatabaseName() == trait.format }
         val formatDefinition = format?.getTraitFormatDefinition()

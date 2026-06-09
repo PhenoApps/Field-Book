@@ -795,8 +795,7 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
     }
 
     private fun importDialog(columns: Array<String>) {
-        val inflater = this.layoutInflater
-        val layout = inflater.inflate(R.layout.dialog_field_file_import, null)
+        val layout = ThemedAlertDialog.inflate(this, R.layout.dialog_field_file_import)
 
         unique = layout.findViewById(R.id.uniqueSpin)
         setSpinner(unique, columns)
@@ -993,8 +992,7 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
     }
 
     private fun showNewGroupDialog(fieldIds: List<Int>) {
-        val inflater = this.layoutInflater
-        val layout = inflater.inflate(R.layout.dialog_group_name, null)
+        val layout = ThemedAlertDialog.inflate(this, R.layout.dialog_group_name)
         val groupName = layout.findViewById<EditText>(R.id.groupName)
 
         groupName.clearFocus()

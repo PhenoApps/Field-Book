@@ -6,7 +6,6 @@ import static android.app.Activity.RESULT_OK;
 
 import android.Manifest;
 import androidx.appcompat.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -17,6 +16,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.Html;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -202,8 +202,7 @@ public class StoragePreferencesFragment extends PreferenceFragmentCompat impleme
     }
 
     private void showDatabaseExportDialog() {
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_save_database, null);
+        View layout = ThemedAlertDialog.inflate(getContext(), R.layout.dialog_save_database);
         exportFile = layout.findViewById(R.id.fileName);
         SimpleDateFormat timeStamp = new SimpleDateFormat("yyyy-MM-dd-hh-mm-ss", Locale.getDefault());
         String autoFillName = timeStamp.format(Calendar.getInstance().getTime()) + "_" + "systemdb" + DataHelper.DATABASE_VERSION;
@@ -255,7 +254,9 @@ public class StoragePreferencesFragment extends PreferenceFragmentCompat impleme
         alert.show();
 
         // Set the delete button text color to red
-        alert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(getContext(), R.color.main_value_saved_color));
+        TypedValue savedColor = new TypedValue();
+        getContext().getTheme().resolveAttribute(R.attr.fb_value_saved_color, savedColor, true);
+        alert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(savedColor.data);
     }
 
     private void showDatabaseResetDialog2() {

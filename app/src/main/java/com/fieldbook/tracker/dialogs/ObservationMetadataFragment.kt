@@ -31,8 +31,7 @@ class ObservationMetadataFragment : DialogFragment() {
         val builder = ThemedAlertDialog.builder(requireContext())
         builder.setTitle(R.string.observation_metadata_title)
 
-        val inflater = requireActivity().layoutInflater
-        val view = inflater.inflate(R.layout.dialog_observation_metadata, null) as ViewGroup
+        val view = ThemedAlertDialog.inflate(requireContext(), R.layout.dialog_observation_metadata) as ViewGroup
 
         recyclerView = view.findViewById(R.id.dialog_observation_metadata_rv)
 

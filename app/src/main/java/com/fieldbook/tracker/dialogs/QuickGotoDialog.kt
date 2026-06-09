@@ -26,8 +26,7 @@ class QuickGotoDialog(
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val inflater = requireActivity().layoutInflater
-        val view = inflater.inflate(R.layout.dialog_quick_goto, null)
+        val view = ThemedAlertDialog.inflate(requireContext(), R.layout.dialog_quick_goto)
 
         val prefs = controller.getPreferences()
 
@@ -42,6 +41,8 @@ class QuickGotoDialog(
 
         primaryEt.hint = primary
         secondaryEt.hint = secondary
+
+        ThemedAlertDialog.tintImageView(swapButton, requireContext(), ThemedAlertDialog.IconTint.Icon)
 
         val dialog = ThemedAlertDialog.builder(requireContext())
             .setTitle(R.string.dialog_quick_goto_title)
@@ -68,11 +69,16 @@ class QuickGotoDialog(
             toggleInputType(secondaryEt)
 
 
-            swapButton.setImageResource(if (secondaryEt.inputType == InputType.TYPE_CLASS_NUMBER) {
-                R.drawable.ic_trait_text
-            } else {
-                R.drawable.ic_trait_numeric
-            })
+            ThemedAlertDialog.setThemedImageResource(
+                swapButton,
+                requireContext(),
+                if (secondaryEt.inputType == InputType.TYPE_CLASS_NUMBER) {
+                    R.drawable.ic_trait_text
+                } else {
+                    R.drawable.ic_trait_numeric
+                },
+                ThemedAlertDialog.IconTint.Icon,
+            )
         }
 
         return dialog

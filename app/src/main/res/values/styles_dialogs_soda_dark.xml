@@ -1,21 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Light dialog body text; referenced by alert-dialog widget styles below. -->
     <style name="TextViewStyle.Dialog.SodaDark" parent="TextViewStyle">
-        <item name="android:textColor">?attr/fb_color_text_light</item>
+        <item name="android:textColor">@color/soda_dark_text_bright</item>
+    </style>
+
+    <style name="TextViewStyle.Bold.Dialog.SodaDark" parent="TextViewStyle.Dialog.SodaDark">
+        <item name="android:textStyle">bold</item>
     </style>
 
     <style name="AlertCheckedView.SodaDark" parent="AlertCheckedView">
-        <item name="android:textColor">?attr/fb_color_text_light</item>
+        <item name="android:textColor">@color/soda_dark_text_bright</item>
     </style>
 
     <style name="CheckBoxStyle.SodaDark" parent="CheckBoxStyle">
-        <item name="android:textColor">?attr/fb_color_text_light</item>
+        <item name="android:textColor">@color/soda_dark_text_bright</item>
     </style>
 
     <style name="RadioButtonStyle.SodaDark" parent="RadioButtonStyle">
-        <item name="android:textColor">?attr/fb_color_text_light</item>
+        <item name="android:textColor">@color/soda_dark_text_bright</item>
+    </style>
+
+    <style name="ButtonBarStyle.SodaDark" parent="Widget.AppCompat.ButtonBar.AlertDialog">
+        <item name="android:textColor">@color/soda_dark_text_bright</item>
+        <item name="android:background">@color/soda_dark_row</item>
     </style>
 
     <style name="DropDownTextViewStyle.Dialog.SodaDark" parent="TextViewStyle.Dialog.SodaDark" />
@@ -28,54 +36,121 @@
         <item name="android:textViewStyle">@style/DropDownTextViewStyle.Dialog.SodaDark</item>
     </style>
 
-    <style name="AppAlertDialog.SodaDark" parent="Theme.SodaDark.Palette">
-        <item name="android:colorBackground">?attr/fb_color_background</item>
-        <item name="android:windowBackground">?attr/fb_color_background</item>
-        <item name="android:textColorPrimary">?attr/fb_color_text_light</item>
-        <item name="android:textColorSecondary">?attr/fb_color_text_secondary</item>
-        <item name="android:textColorHint">?attr/fb_color_hint_text</item>
-        <item name="textColorAlertDialogListItem">?attr/fb_color_text_light</item>
-        <item name="android:textColorAlertDialogListItem">?attr/fb_color_text_light</item>
-        <item name="colorControlNormal">?attr/fb_icon_tint</item>
-        <item name="colorAccent">?attr/fb_color_accent</item>
-        <item name="colorSurface">?attr/fb_color_card_background</item>
+    <style name="TextAppearance.AppCompat.Title.SodaDark" parent="TextAppearance.AppCompat.Title">
+        <item name="android:textColor">@color/soda_dark_text_bright</item>
+    </style>
 
-        <item name="buttonBarNegativeButtonStyle">@style/ButtonBarStyle</item>
-        <item name="buttonBarNeutralButtonStyle">@style/ButtonBarStyle</item>
-        <item name="buttonBarPositiveButtonStyle">@style/ButtonBarStyle</item>
-        <item name="android:background">@color/TRANSPARENT</item>
+    <style name="TextAppearance.AppCompat.Subhead.SodaDark" parent="TextAppearance.AppCompat.Subhead">
+        <item name="android:textColor">@color/soda_dark_text_bright</item>
+    </style>
+
+    <style name="MaterialAlertDialog.MaterialComponents.Title.Text.SodaDark"
+        parent="MaterialAlertDialog.MaterialComponents.Title.Text">
+        <item name="android:textColor">@color/soda_dark_text_bright</item>
+    </style>
+
+    <style name="MaterialAlertDialog.MaterialComponents.Body.Text.SodaDark"
+        parent="MaterialAlertDialog.MaterialComponents.Body.Text">
+        <item name="android:textColor">@color/soda_dark_text_bright</item>
+    </style>
+
+    <style name="MaterialAlertDialog.MaterialComponents.Title.Panel.SodaDark"
+        parent="MaterialAlertDialog.MaterialComponents.Title.Panel">
+        <item name="android:background">@color/soda_dark_row</item>
+    </style>
+
+    <!-- AppCompat alert chrome (not Material mtrl layout). Hardcoded colors only. -->
+    <style name="AlertDialog.FieldBook.SodaDark" parent="AlertDialog.AppCompat">
+        <item name="backgroundTint">@color/soda_dark_row</item>
+        <item name="android:background">@color/soda_dark_row</item>
+        <item name="materialAlertDialogTitlePanelStyle">
+            @style/MaterialAlertDialog.MaterialComponents.Title.Panel.SodaDark
+        </item>
+        <item name="materialAlertDialogTitleTextStyle">
+            @style/MaterialAlertDialog.MaterialComponents.Title.Text.SodaDark
+        </item>
+        <item name="materialAlertDialogBodyTextStyle">
+            @style/MaterialAlertDialog.MaterialComponents.Body.Text.SodaDark
+        </item>
+    </style>
+
+    <!-- Parent AppAlertDialog (valid dialog overlay). Hardcoded soda colors — do NOT use ?attr/fb_*
+         here: they resolve through BaseAppTheme (light) and yield white surfaces. -->
+    <style name="AppAlertDialog.SodaDark" parent="AppAlertDialog">
+        <item name="alertDialogStyle">@style/AlertDialog.FieldBook.SodaDark</item>
+        <item name="buttonBarStyle">@style/ButtonBarStyle.SodaDark</item>
+        <item name="fb_color_background">@color/soda_dark_window</item>
+        <item name="fb_color_card_background">@color/soda_dark_row</item>
+        <item name="fb_color_text_dark">@color/soda_dark_text_bright</item>
+        <item name="fb_color_text_light">@color/soda_dark_text_bright</item>
+        <item name="fb_color_text_secondary">@color/soda_dark_text_secondary</item>
+        <item name="fb_color_hint_text">@color/soda_dark_text_dim</item>
+        <item name="fb_icon_tint">@color/soda_dark_text_bright</item>
+        <item name="fb_color_accent">@color/soda_dark_accent</item>
+
+        <item name="android:colorBackground">@color/soda_dark_window</item>
+        <item name="android:windowBackground">@color/soda_dark_window</item>
+        <item name="android:textColorPrimary">@color/soda_dark_text_bright</item>
+        <item name="android:textColorSecondary">@color/soda_dark_text_secondary</item>
+        <item name="android:textColorHint">@color/soda_dark_text_dim</item>
+        <item name="textColorAlertDialogListItem">@color/soda_dark_text_bright</item>
+        <item name="android:textColorAlertDialogListItem">@color/soda_dark_text_bright</item>
+        <item name="colorControlNormal">@color/soda_dark_text_bright</item>
+        <item name="colorAccent">@color/soda_dark_accent</item>
+        <item name="colorSurface">@color/soda_dark_row</item>
+        <item name="colorOnSurface">@color/soda_dark_text_bright</item>
+
+        <item name="materialAlertDialogTitleTextStyle">
+            @style/MaterialAlertDialog.MaterialComponents.Title.Text.SodaDark
+        </item>
+        <item name="materialAlertDialogBodyTextStyle">
+            @style/MaterialAlertDialog.MaterialComponents.Body.Text.SodaDark
+        </item>
+
+        <item name="buttonBarNegativeButtonStyle">@style/ButtonBarStyle.SodaDark</item>
+        <item name="buttonBarNeutralButtonStyle">@style/ButtonBarStyle.SodaDark</item>
+        <item name="buttonBarPositiveButtonStyle">@style/ButtonBarStyle.SodaDark</item>
+
         <item name="checkedTextViewStyle">@style/AlertCheckedView.SodaDark</item>
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:windowTitleBackgroundStyle">@android:color/transparent</item>
+        <item name="android:checkedTextViewStyle">@style/AlertCheckedView.SodaDark</item>
         <item name="android:windowTitleStyle">@style/DialogTitleStyle.SodaDark</item>
-        <item name="android:windowIsFloating">true</item>
-        <item name="android:windowFullscreen">true</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowSoftInputMode">stateUnchanged</item>
-        <item name="android:fitsSystemWindows">true</item>
-        <item name="windowNoTitle">true</item>
 
-        <item name="editTextStyle">@style/DialogEditTextStyle</item>
-        <item name="android:editTextStyle">@style/DialogEditTextStyle</item>
-        <item name="textInputStyle">@style/DialogTextInputLayoutStyle</item>
-        <item name="floatingActionButtonStyle">@style/FloatingActionButtonStyle</item>
-        <item name="imageButtonStyle">@style/ImageButtonStyle</item>
+        <item name="editTextStyle">@style/DialogEditTextStyle.SodaDark</item>
+        <item name="android:editTextStyle">@style/DialogEditTextStyle.SodaDark</item>
         <item name="radioButtonStyle">@style/RadioButtonStyle.SodaDark</item>
-        <item name="buttonStyle">@style/ButtonStyle</item>
-        <item name="android:buttonStyleToggle">@style/ToggleButtonStyle</item>
-        <item name="toolbarStyle">@style/AppToolbar</item>
         <item name="checkboxStyle">@style/CheckBoxStyle.SodaDark</item>
-        <item name="actionOverflowButtonStyle">@style/OverFlowStyle</item>
-        <item name="progressBarStyle">@style/ProgressBarStyle</item>
-        <item name="indeterminateProgressStyle">@style/IndeterminateProgressStyle</item>
         <item name="android:textViewStyle">@style/TextViewStyle.Dialog.SodaDark</item>
         <item name="spinnerDropDownItemStyle">@style/SpinnerDropDownItemStyle.SodaDark</item>
         <item name="dropDownListViewStyle">@style/DropDownListViewStyle.SodaDark</item>
+
+        <item name="android:datePickerStyle">@style/DatePickerDialogStyle.SodaDark</item>
     </style>
 
     <style name="DialogTitleStyle.SodaDark" parent="DialogTitleStyle">
-        <item name="android:textColor">?attr/fb_color_text_light</item>
+        <item name="android:textColor">@color/soda_dark_text_bright</item>
+        <item name="android:background">@color/soda_dark_row</item>
+    </style>
+
+    <style name="DialogEditTextStyle.SodaDark" parent="DialogEditTextStyle">
+        <item name="android:textColor">@color/soda_dark_text_bright</item>
+        <item name="android:textColorHint">@color/soda_dark_text_dim</item>
+    </style>
+
+    <style name="AppAlertDialog.Preference.SodaDark" parent="AppAlertDialog.SodaDark">
+        <item name="android:windowBackground">@drawable/inset_border_soda_dark</item>
+        <item name="editTextStyle">@style/DialogEditTextStyle.SodaDark</item>
+        <item name="android:editTextStyle">@style/DialogEditTextStyle.SodaDark</item>
+    </style>
+
+    <style name="DatePickerDialogStyle.SodaDark" parent="ThemeOverlay.MaterialComponents.Dialog">
+        <item name="colorAccent">@color/soda_dark_accent</item>
+        <item name="colorPrimary">@color/soda_dark_panel</item>
+        <item name="colorSurface">@color/soda_dark_row</item>
+        <item name="android:colorBackground">@color/soda_dark_window</item>
+        <item name="android:textColorPrimary">@color/soda_dark_text_bright</item>
+        <item name="android:textColorSecondary">@color/soda_dark_text_secondary</item>
+        <item name="colorControlActivated">@color/soda_dark_accent</item>
+        <item name="colorControlHighlight">@color/soda_dark_panel</item>
     </style>
 
 </resources>

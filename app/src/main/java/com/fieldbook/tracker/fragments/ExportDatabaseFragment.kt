@@ -2,11 +2,11 @@ package com.fieldbook.tracker.fragments
 
 import com.fieldbook.tracker.utilities.ThemedAlertDialog
 
-import android.app.ProgressDialog
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.text.Html
+import androidx.appcompat.app.AlertDialog
+import androidx.core.text.HtmlCompat
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import com.fieldbook.tracker.R
@@ -40,7 +40,7 @@ class ExportDatabaseFragment : Fragment() {
     @Inject
     lateinit var preferences: SharedPreferences
 
-    private var dialog: ProgressDialog? = null
+    private var dialog: AlertDialog? = null
 
     //coroutine scope for launching background process
     private val scope by lazy {
@@ -130,12 +130,12 @@ class ExportDatabaseFragment : Fragment() {
         // show only if the fragment is added to the activity
         if (isAdded) {
             val ctx = requireContext()
-            dialog = ThemedAlertDialog.progressDialog(ctx)
-            dialog?.isIndeterminate = true
-            dialog?.setCancelable(false)
-            dialog?.setMessage(
-                Html
-                    .fromHtml(context?.getString(R.string.import_dialog_importing))
+            dialog = ThemedAlertDialog.indeterminateProgressDialog(
+                ctx,
+                HtmlCompat.fromHtml(
+                    ctx.getString(R.string.import_dialog_importing),
+                    HtmlCompat.FROM_HTML_MODE_LEGACY,
+                ),
             )
             dialog?.show()
         }

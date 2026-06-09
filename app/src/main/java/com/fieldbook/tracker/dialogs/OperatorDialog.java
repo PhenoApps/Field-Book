@@ -31,7 +31,7 @@ public class OperatorDialog extends AlertDialog {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        View customView = getLayoutInflater().inflate(R.layout.dialog_operator, null);
+        View customView = ThemedAlertDialog.inflate(context, R.layout.dialog_operator);
         setView(customView);
         setTitle(context.getString(R.string.search_dialog_operator_dialog_title));
         setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.dialog_cancel), (dialogInterface, i) -> dialogInterface.dismiss());

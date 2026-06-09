@@ -14,7 +14,7 @@
         android:layout_margin="8dp"
         android:weightSum="1">
 
-        <TextView style="@style/TextViewStyle.Bold.Title"
+        <TextView style="@style/TextViewStyle.Bold.Title.Dialog"
             android:id="@+id/uniqueCol"
             android:layout_width="150dp"
             android:layout_height="wrap_content"

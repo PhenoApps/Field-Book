@@ -7,7 +7,6 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -20,7 +19,7 @@ import android.widget.TextView;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.fragment.app.DialogFragment;
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.utilities.AppThemeResolver;
+import com.google.android.material.color.MaterialColors;
 
 public class ListAddDialog extends DialogFragment {
 
@@ -40,17 +39,19 @@ public class ListAddDialog extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        LinearLayout layout = new LinearLayout(activity);
+        android.content.Context dialogContext = ThemedAlertDialog.contentContext(activity);
+        int surfaceColor = MaterialColors.getColor(dialogContext, R.attr.fb_color_background, 0);
+
+        LinearLayout layout = new LinearLayout(dialogContext);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(16, 16, 16, 16);
-        TypedValue bgValue = new TypedValue();
-        if (activity.getTheme().resolveAttribute(R.attr.fb_color_background, bgValue, true)) {
-            layout.setBackgroundColor(bgValue.data);
+        if (surfaceColor != 0) {
+            layout.setBackgroundColor(surfaceColor);
         }
 
-        ListView listView = new ListView(activity);
-        if (activity.getTheme().resolveAttribute(R.attr.fb_color_background, bgValue, true)) {
-            listView.setBackgroundColor(bgValue.data);
+        ListView listView = new ListView(dialogContext);
+        if (surfaceColor != 0) {
+            listView.setBackgroundColor(surfaceColor);
         }
         listView.setLayoutParams(new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -58,11 +59,10 @@ public class ListAddDialog extends DialogFragment {
         ));
         layout.addView(listView);
 
-        ListAddAdapter adapter = new ListAddAdapter(activity, items, icons);
+        ListAddAdapter adapter = new ListAddAdapter(dialogContext, items, icons);
         listView.setAdapter(adapter);
 
-        AlertDialog.Builder builder = ThemedAlertDialog.builder(
-                activity);
+        AlertDialog.Builder builder = ThemedAlertDialog.builder(activity);
         builder.setTitle(title)
                 .setCancelable(true)
                 .setView(layout)
@@ -74,12 +74,13 @@ public class ListAddDialog extends DialogFragment {
                 });
 
         final AlertDialog dialog = builder.create();
-        dialog.show();
 
-        WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
-        params.width = WindowManager.LayoutParams.MATCH_PARENT;
-        params.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        dialog.getWindow().setAttributes(params);
+        ThemedAlertDialog.chainOnShow(dialog, activity, dialogInterface -> {
+            WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
+            params.width = WindowManager.LayoutParams.MATCH_PARENT;
+            params.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            dialog.getWindow().setAttributes(params);
+        });
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -93,13 +94,13 @@ public class ListAddDialog extends DialogFragment {
     }
 
     private class ListAddAdapter extends ArrayAdapter<String> {
-        private final Activity context;
+        private final android.content.Context dialogContext;
         private final String[] values;
         private final int[] icons;
 
-        public ListAddAdapter(Activity context, String[] values, int[] icons) {
-            super(context, R.layout.list_item_dialog_with_icon, values);
-            this.context = context;
+        public ListAddAdapter(android.content.Context dialogContext, String[] values, int[] icons) {
+            super(dialogContext, R.layout.list_item_dialog_with_icon, values);
+            this.dialogContext = dialogContext;
             this.values = values;
             this.icons = icons;
         }
@@ -107,7 +108,8 @@ public class ListAddDialog extends DialogFragment {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
-                convertView = context.getLayoutInflater().inflate(R.layout.list_item_dialog_with_icon, parent, false);
+                convertView = android.view.LayoutInflater.from(dialogContext)
+                        .inflate(R.layout.list_item_dialog_with_icon, parent, false);
             }
 
             ImageView imageView = convertView.findViewById(R.id.icon);
@@ -115,24 +117,23 @@ public class ListAddDialog extends DialogFragment {
 
             textView.setText(values[position]);
             imageView.setImageResource(icons[position]);
-            tintListItem(context, imageView, textView);
+            tintListItem(dialogContext, imageView, textView);
 
             return convertView;
         }
     }
 
-    private static void tintListItem(Activity context, ImageView imageView, TextView textView) {
-        TypedValue typedValue = new TypedValue();
+    private static void tintListItem(android.content.Context dialogContext, ImageView imageView, TextView textView) {
+        int iconTint = MaterialColors.getColor(dialogContext, R.attr.fb_icon_tint, 0);
         Drawable drawable = imageView.getDrawable();
-        if (drawable != null
-                && context.getTheme().resolveAttribute(R.attr.fb_icon_tint, typedValue, true)) {
+        if (drawable != null && iconTint != 0) {
             drawable = DrawableCompat.wrap(drawable.mutate());
-            DrawableCompat.setTint(drawable, typedValue.data);
+            DrawableCompat.setTint(drawable, iconTint);
             imageView.setImageDrawable(drawable);
         }
-        if (context.getTheme().resolveAttribute(android.R.attr.textColorPrimary, typedValue, true)) {
-            textView.setTextColor(typedValue.data);
+        int textColor = MaterialColors.getColor(dialogContext, android.R.attr.textColorPrimary, 0);
+        if (textColor != 0) {
+            textView.setTextColor(textColor);
         }
     }
 }
-

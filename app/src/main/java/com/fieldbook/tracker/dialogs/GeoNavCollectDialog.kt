@@ -5,7 +5,6 @@ import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import androidx.appcompat.app.AlertDialog
 import android.os.Handler
 import android.os.Looper
-import android.view.LayoutInflater
 import android.widget.ArrayAdapter
 import android.widget.CheckBox
 import android.widget.Spinner
@@ -85,7 +84,7 @@ class GeoNavCollectDialog(private val activity: CollectActivity) :
     private var geoNavAttributeModels: List<AttributeModel> = emptyList()
 
     private val view by lazy {
-        LayoutInflater.from(context).inflate(R.layout.dialog_geonav_collect, null, false)
+        ThemedAlertDialog.inflate(context, R.layout.dialog_geonav_collect, null, false)
     }
 
     init {

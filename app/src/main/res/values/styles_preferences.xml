@@ -49,4 +49,51 @@
         <item name="android:textSize">?attr/fb_subheading_text_size</item>
     </style>
 
+    <!-- Soda Dark: palette from BaseAppTheme.SodaDark.*; dialogs use AppAlertDialog.Preference.SodaDark -->
+    <style name="PreferenceTheme.SodaDark" parent="BaseAppTheme.SodaDark.MediumTextTheme">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+
+        <item name="buttonStyle">@style/ButtonStyle</item>
+        <item name="toolbarStyle">@style/AppToolbar</item>
+        <item name="checkboxStyle">@style/CheckBoxStyle.SodaDark</item>
+        <item name="actionOverflowButtonStyle">@style/OverFlowStyle</item>
+        <item name="navigationIcon">@drawable/ic_arrow_left</item>
+        <item name="colorControlNormal">?attr/fb_icon_tint</item>
+
+        <item name="cardViewStyle">@style/CardViewStyle</item>
+
+        <item name="android:textColorHint">?attr/fb_color_hint_text</item>
+        <item name="android:colorBackground">?attr/fb_color_background</item>
+        <item name="android:textColor">?attr/fb_color_text_light</item>
+        <item name="android:textColorPrimary">?attr/fb_color_text_light</item>
+        <item name="android:textColorSecondary">?attr/fb_color_text_secondary</item>
+        <item name="titleTextColor">?attr/fb_color_text_light</item>
+
+        <item name="android:textAppearanceListItem">@style/AppTextAppearance.Preference.Title</item>
+        <item name="android:textAppearanceListItemSecondary">
+            @style/AppTextAppearance.Preference.Summary
+        </item>
+
+        <item name="alertDialogTheme">@style/AppAlertDialog.Preference.SodaDark</item>
+    </style>
+
+    <style name="PreferenceTheme.SodaDark.SmallTextTheme" parent="PreferenceTheme.SodaDark">
+        <item name="fb_title_text_size">@dimen/title_text_size_small</item>
+        <item name="fb_body_text_size">@dimen/text_size_small</item>
+        <item name="fb_subheading_text_size">@dimen/sub_text_size_small</item>
+    </style>
+
+    <style name="PreferenceTheme.SodaDark.LargeTextTheme" parent="PreferenceTheme.SodaDark">
+        <item name="fb_title_text_size">@dimen/title_text_size_large</item>
+        <item name="fb_body_text_size">@dimen/text_size_large</item>
+        <item name="fb_subheading_text_size">@dimen/sub_text_size_large</item>
+    </style>
+
+    <style name="PreferenceTheme.SodaDark.ExtraLargeTextTheme" parent="PreferenceTheme.SodaDark">
+        <item name="fb_title_text_size">@dimen/title_text_size_xlarge</item>
+        <item name="fb_body_text_size">@dimen/text_size_xlarge</item>
+        <item name="fb_subheading_text_size">@dimen/sub_text_size_xlarge</item>
+    </style>
+
 </resources>

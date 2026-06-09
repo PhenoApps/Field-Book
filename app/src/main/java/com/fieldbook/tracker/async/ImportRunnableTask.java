@@ -1,6 +1,8 @@
 package com.fieldbook.tracker.async;
 
-import android.app.ProgressDialog;
+import androidx.appcompat.app.AlertDialog;
+
+import com.fieldbook.tracker.utilities.ThemedAlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -22,7 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
-    ProgressDialog dialog;
+    AlertDialog dialog;
 
     WeakReference<Context> mContext;
     FieldAdapterController controller;
@@ -61,10 +63,9 @@ public class ImportRunnableTask extends AsyncTask<Integer, Integer, Integer> {
         Context context = mContext.get();
 
         if (context != null) {
-            dialog = new ProgressDialog(context);
-            dialog.setIndeterminate(true);
-            dialog.setCancelable(false);
-            dialog.setMessage(Html.fromHtml(context.getString(R.string.import_dialog_importing)));
+            dialog = ThemedAlertDialog.indeterminateProgressDialog(
+                    context,
+                    Html.fromHtml(context.getString(R.string.import_dialog_importing)));
             dialog.show();
         }
     }

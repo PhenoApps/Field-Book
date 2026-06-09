@@ -473,8 +473,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     }
 
     private fun showEditDisplayNameDialog(field: FieldObject) {
-        val inflater = requireActivity().layoutInflater
-        val dialogView = inflater.inflate(R.layout.dialog_field_edit_name, null)
+        val dialogView = ThemedAlertDialog.inflate(requireContext(), R.layout.dialog_field_edit_name)
 
         val editText = dialogView.findViewById<EditText>(R.id.edit_text)
         val errorMessageView = dialogView.findViewById<TextView>(R.id.error_message)
@@ -488,7 +487,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
 
         val dialog = builder.create()
 
-        dialog.setOnShowListener {
+        ThemedAlertDialog.chainOnShow(dialog, requireContext()) {
             val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
             positiveButton.setOnClickListener {
                 val newName = editText.text.toString()

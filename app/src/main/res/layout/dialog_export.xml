@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <TextView style="@style/TextViewStyle.Bold"
+            <TextView style="@style/TextViewStyle.Bold.Dialog"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/traits_create_format" />
@@ -53,7 +53,7 @@
                     android:layout_weight=".5"
                     android:orientation="vertical">
 
-                    <TextView style="@style/TextViewStyle.Bold"
+                    <TextView style="@style/TextViewStyle.Bold.Dialog"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/export_content_columns_title" />
@@ -84,7 +84,7 @@
                     android:layout_weight=".5"
                     android:orientation="vertical">
 
-                    <TextView style="@style/TextViewStyle.Bold"
+                    <TextView style="@style/TextViewStyle.Bold.Dialog"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/settings_traits" />
@@ -127,7 +127,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="10dp" />
 
-            <TextView style="@style/TextViewStyle.Bold"
+            <TextView style="@style/TextViewStyle.Bold.Dialog"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/export_file_name" />
@@ -145,7 +145,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/export_overwrite" />
 
-            <TextView style="@style/TextViewStyle.Bold"
+            <TextView style="@style/TextViewStyle.Bold.Dialog"
                 android:id="@+id/bundleInfo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

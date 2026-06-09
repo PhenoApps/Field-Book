@@ -69,6 +69,7 @@ import com.fieldbook.tracker.activities.FieldEditorActivity
 import com.fieldbook.tracker.adapters.AttributeAdapter
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.BackgroundUiTask
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
 
 /**
  * Dialog to choose a search attribute for a field.
@@ -102,8 +103,7 @@ class SearchAttributeChooserDialog : AttributeChooserDialog(
         dialog.setTitle(R.string.search_attribute_dialog_title)
         applyAllCheckbox.visibility = View.VISIBLE
         
-        // Override the loading process with our own
-        dialog.setOnShowListener {
+        ThemedAlertDialog.chainOnShow(dialog, requireContext()) {
             toggleProgressVisibility(true)
             BackgroundUiTask.execute(
                 backgroundBlock = { loadUniqueAttributes() },

@@ -269,7 +269,7 @@ class NewTraitDialog(
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
-        val view = layoutInflater.inflate(R.layout.dialog_trait_creator, null)
+        val view = ThemedAlertDialog.inflate(requireContext(), R.layout.dialog_trait_creator)
 
         val builder = ThemedAlertDialog.builder(activity)
 

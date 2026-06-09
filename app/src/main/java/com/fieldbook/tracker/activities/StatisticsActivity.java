@@ -95,7 +95,7 @@ public class StatisticsActivity extends ThemedActivity {
         });
 
         AlertDialog.Builder builder = ThemedAlertDialog.builder(this);
-        builder.setView(getLayoutInflater().inflate(R.layout.dialog_loading, null));
+        builder.setView(ThemedAlertDialog.inflate(this, R.layout.dialog_loading));
         loadingDialog = builder.create();
 
         loadData();

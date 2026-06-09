@@ -2189,8 +2189,7 @@ public class CollectActivity extends ThemedActivity
     }
 
     private void moveToPlotID() {
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_gotobarcode, null);
+        View layout = ThemedAlertDialog.inflate(this, R.layout.dialog_gotobarcode);
         final EditText barcodeId = layout.findViewById(R.id.barcodeid);
 
         AlertDialog.Builder builder = ThemedAlertDialog.builder(this);

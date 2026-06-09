@@ -35,6 +35,7 @@
         <item name="fb_button_color_normal">@color/soda_dark_button_normal</item>
         <item name="fb_button_color_pressed">@color/soda_dark_button_pressed</item>
         <item name="fb_subheading_color">@color/soda_dark_subheading</item>
+        <item name="fb_error_message_color">@color/soda_dark_value_saved</item>
         <item name="fb_border_color">@color/soda_dark_border</item>
         <item name="fb_trait_button_background_tint">@color/soda_dark_trait_button_tint</item>
         <item name="fb_button_text_color">@color/soda_dark_text_bright</item>
@@ -67,6 +68,7 @@
         <item name="activeCellColor">@color/soda_dark_active_cell</item>
         <item name="activeCellTextColor">@color/soda_dark_window</item>
         <item name="cellTextColor">@color/soda_dark_text</item>
+        <item name="headerCellColor">@color/soda_dark_panel</item>
         <item name="tableBorderColor">@color/soda_dark_border</item>
 
         <item name="fb_graph_item_selected_color">@color/soda_dark_accent</item>
@@ -87,7 +89,9 @@
 
         <item name="alertDialogTheme">@style/AppAlertDialog.SodaDark</item>
         <item name="textInputStyle">@style/FieldBookTextInputLayoutStyle</item>
-        <item name="editTextStyle">@style/DialogEditTextStyle</item>
+        <item name="editTextStyle">@style/DialogEditTextStyle.SodaDark</item>
+        <item name="android:editTextStyle">@style/DialogEditTextStyle.SodaDark</item>
+        <item name="android:datePickerStyle">@style/DatePickerDialogStyle.SodaDark</item>
         <item name="android:textColorHint">?attr/fb_color_text_light</item>
     </style>
 

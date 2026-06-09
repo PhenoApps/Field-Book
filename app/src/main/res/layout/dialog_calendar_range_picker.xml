@@ -13,7 +13,7 @@
         app:disable_date_color="?attr/fb_color_text_secondary"
         app:range_color="?attr/fb_color_accent"
         app:selected_date_circle_color="?attr/fb_heatmap_color_medium"
-        app:title_color="?attr/fb_color_text_dark">
+        app:title_color="?android:attr/textColorPrimary">
     </com.archit.calendardaterangepicker.customviews.DateRangeCalendarView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

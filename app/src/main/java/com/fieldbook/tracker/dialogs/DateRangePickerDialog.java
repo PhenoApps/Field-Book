@@ -41,7 +41,7 @@ public class DateRangePickerDialog extends DialogFragment {
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         AlertDialog.Builder builder = ThemedAlertDialog.builder(originActivity);
 
-        View customView = getLayoutInflater().inflate(R.layout.dialog_calendar_range_picker, null);
+        View customView = ThemedAlertDialog.inflate(originActivity, R.layout.dialog_calendar_range_picker);
         builder.setTitle(getString(R.string.stats_date_range_picker_title)).setCancelable(true).setView(customView);
 
         DateRangeCalendarView calendar = customView.findViewById(R.id.calendarRange);
