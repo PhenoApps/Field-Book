@@ -78,6 +78,11 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
     data class HeaderData(val name: String, val code: String)
     data class CellData(val value: String?, val code: String, val color: Int = android.graphics.Color.GREEN)
 
+    companion object {
+        private const val TAG = "DataGridActivity"
+        private const val ROW_HEADER_DELIMITER = " "
+    }
+
     private val scope by lazy {
         CoroutineScope(Dispatchers.IO)
     }
@@ -217,11 +222,14 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
         isLoading = true
         val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
         val uniqueHeader = preferences.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
-        val rowHeader = getCurrentRowHeader()
-        val rowHeaderIndex = database.getAllObservationUnitAttributeNames(studyId)
-            .indexOf(rowHeader).takeIf { it >= 0 } ?: 0
+        val rowHeaders = getCurrentRowHeaders()
+        val unitAttributes = database.getAllObservationUnitAttributeNames(studyId)
+        val rowHeaderIndices = rowHeaders.mapNotNull { name ->
+            val idx = unitAttributes.indexOf(name)
+            if (idx >= 0) idx else null
+        }
 
-        if (rowHeader.isBlank()) {
+        if (rowHeaders.isEmpty() || rowHeaderIndices.isEmpty()) {
             isLoading = false
             return
         }
@@ -270,7 +278,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
 
                         if (uniqueIndex > -1) { // if it doesn't exist skip this row
                             val id = rowData[uniqueIndex] ?: ""
-                            val header = if (rowHeaderIndex > -1) rowData[rowHeaderIndex] ?: "" else ""
+                            val header = buildRowHeader(rowHeaderIndices, rowData)
 
                             val dataList = arrayListOf<CellData>()
 
@@ -381,7 +389,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
                     count = columnCount,
                     layoutInfo = { LazyTableItem(column = it, row = 0) }) { index ->
                     if (index == 0) {
-                        HeaderCell(text = getCurrentRowHeader())
+                        HeaderCell(text = getCurrentRowHeaders().joinToString(ROW_HEADER_DELIMITER))
                     } else {
                         val traitIndex = index - 1
                         if (traitIndex < mTraits.size) {
@@ -500,20 +508,36 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
     }
 
     /**
-     * Determines the current row header.
+     * Determines the current row header(s) to display in the first column.
+     * Reads from the multi-select preference, falling back to the legacy single preference,
+     * then to the unique header.
      */
-    private fun getCurrentRowHeader(): String {
+    private fun getCurrentRowHeaders(): List<String> {
         val uniqueHeader = preferences.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
-        val rowHeader = preferences.getString(GeneralKeys.DATAGRID_PREFIX_TRAIT, uniqueHeader) ?: ""
         val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
         val unitAttributes = database.getAllObservationUnitAttributeNames(studyId)
-        return if (rowHeader in unitAttributes) {
-            Log.d("DataGridActivity", "Using saved row header from preferences: $rowHeader")
-            rowHeader
+        val selected = preferences.getStringSet(GeneralKeys.DATAGRID_PREFIX_TRAITS, null)
+        val fromMulti = selected?.toList()?.filter { it in unitAttributes }.orEmpty()
+        if (fromMulti.isNotEmpty()) {
+            Log.d("DataGridActivity", "Using saved row headers from preferences: $fromMulti")
+            return fromMulti
+        }
+        val legacy = preferences.getString(GeneralKeys.DATAGRID_PREFIX_TRAIT, uniqueHeader) ?: ""
+        return if (legacy in unitAttributes) {
+            Log.d("DataGridActivity", "Using legacy single row header from preferences: $legacy")
+            listOf(legacy)
         } else {
             Log.d("DataGridActivity", "Saved row header invalid. Falling back to unique header: $uniqueHeader")
-            uniqueHeader
+            listOf(uniqueHeader)
         }
+    }
+
+    /**
+     * Concatenates values from multiple selected row header columns into a single display string.
+     */
+    private fun buildRowHeader(indices: List<Int>, rowData: List<String?>): String {
+        return indices.mapNotNull { rowData.getOrNull(it)?.takeIf { v -> v.isNotBlank() } }
+            .joinToString(ROW_HEADER_DELIMITER)
     }
 
     private fun onCellClicked(row: Int, col: Int) {
@@ -586,7 +610,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
 
 
     /**
-     * Shows dialog to choose a prefix trait to be displayed.
+     * Shows dialog to choose one or more prefix traits to be displayed as row headers.
      */
     private fun showHeaderPickerDialog() {
 
@@ -595,17 +619,30 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
         val columns = database.getAllObservationUnitAttributeNames(studyId)
 
         if (columns.isNotEmpty()) {
-            val rowHeader = getCurrentRowHeader()
-            val rowHeaderIndex = columns.indexOf(rowHeader).takeIf { it >= 0 } ?: 0
+            val currentHeaders = getCurrentRowHeaders()
+            val checked = BooleanArray(columns.size) { columns[it] in currentHeaders }
 
             AlertDialog.Builder(this, R.style.AppAlertDialog)
                 .setTitle(R.string.dialog_data_grid_header_picker_title)
-                .setSingleChoiceItems(columns, rowHeaderIndex) { dialog, which ->
-                    // update the preference to the determined row header
-                    preferences.edit { putString(GeneralKeys.DATAGRID_PREFIX_TRAIT, columns[which]) }
+                .setMultiChoiceItems(columns, checked) { _, which, isChecked ->
+                    checked[which] = isChecked
+                }
+                .setPositiveButton(R.string.dialog_data_grid_header_picker_ok) { dialog, _ ->
+                    val selected = columns.filterIndexed { i, _ -> checked[i] }
+                    // persist the multi-selection
+                    preferences.edit {
+                        putStringSet(GeneralKeys.DATAGRID_PREFIX_TRAITS, selected.toSet())
+                        // clear the legacy single preference so multi takes precedence
+                        remove(GeneralKeys.DATAGRID_PREFIX_TRAIT)
+                    }
                     initialize()
                     dialog.dismiss()
-                }.create().show()
+                }
+                .setNegativeButton(android.R.string.cancel) { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .create()
+                .show()
         }
     }
 }

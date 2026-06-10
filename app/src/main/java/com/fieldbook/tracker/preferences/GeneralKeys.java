@@ -59,13 +59,13 @@ public class GeneralKeys {
     // @formatter:on
 
     // GNSS
-    public static final String GNSS_LAST_PAIRED_DEVICE_NAME      = "GNSS_LAST_PAIRED_DEVICE_NAME";
+    public static final String GNSS_LAST_PAIRED_DEVICE_NAME = "GNSS_LAST_PAIRED_DEVICE_NAME";
 
-    public static final String GNSS_LAST_CHOSEN_PRECISION        = "GNSS_LAST_CHOSEN_PRECISION";
+    public static final String GNSS_LAST_CHOSEN_PRECISION = "GNSS_LAST_CHOSEN_PRECISION";
 
-    public static final String GNSS_WARNED_PRECISION             = "GNSS_WARNED_PRECISION";
+    public static final String GNSS_WARNED_PRECISION = "GNSS_WARNED_PRECISION";
 
-    public static final String GNSS_PRECISION_OK_SOUND           = "GNSS_PRECISION_OK_SOUND";
+    public static final String GNSS_PRECISION_OK_SOUND = "GNSS_PRECISION_OK_SOUND";
 
     // Canon
     public static final String CANON_SSID_NAME = "com.tracker.fieldbook.preferences.keys.canon.ssid_name";
@@ -151,7 +151,10 @@ public class GeneralKeys {
     public static final String TRAIT_DETAIL_DATA_COLLAPSED = "TRAIT_DETAIL_DATA_COLLAPSED";
 
     //Data grid
+    //old preference used with only one header
     public static final String DATAGRID_PREFIX_TRAIT = "com.fieldbook.tracker.datagrid.DATAGRID_PREFIX_TRAIT";
+    //new pref key that allows multiple header choices
+    public static final String DATAGRID_PREFIX_TRAITS = "com.fieldbook.tracker.datagrid.DATAGRID_PREFIX_TRAITS";
 
     //summary filter
     public static final String SUMMARY_FILTER_ATTRIBUTES = "com.fieldbook.tracker.summary.SUMMARY_FILTER_ATTRIBUTES";
@@ -161,7 +164,7 @@ public class GeneralKeys {
     public static final String CALENDAR_LAST_SAVED_DATE = "com.fieldbook.tracker.CALENDAR_LAST_SAVED_DATE";
 
     //Zebra Label Print Trait
-    public static final String LABEL_PRINT_DEVICE_NAME      = "LABEL_PRINT_DEVICE_NAME";
+    public static final String LABEL_PRINT_DEVICE_NAME = "LABEL_PRINT_DEVICE_NAME";
 
     //Dialog Export
     public static final String DIALOG_EXPORT_BUNDLE_CHECKED = "com.fieldbook.tracker.DIALOG_EXPORT_BUNDLE_CHECKED";
@@ -220,6 +223,7 @@ public class GeneralKeys {
 
     /**
      * Function that returns the key for the crop coordinates of a trait
+     *
      * @param traitId --the internal db id of the trait
      * @return key used in preferences to obtain the (tl, tr, br, bl) coordinates used for cropping images
      */
