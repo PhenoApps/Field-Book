@@ -87,6 +87,7 @@ fun Button(
     modifier: Modifier = Modifier,
     shape: androidx.compose.foundation.shape.CornerBasedShape = MaterialTheme.shapes.small,
     selectedColor: Color = MaterialTheme.colorScheme.primary,
+    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     content: @Composable RowScope.() -> Unit
 ) {
     val borderModifier = if (!selected) Modifier.border(1.dp, Color.Black, shape) else Modifier
@@ -95,6 +96,7 @@ fun Button(
         colors = traitButtonColors(selected, selectedColor),
         modifier = modifier.then(borderModifier),
         shape = shape,
+        contentPadding = contentPadding,
         content = content
     )
 }
