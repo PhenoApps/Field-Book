@@ -68,7 +68,7 @@ fun RangeBox(
         ) {
             IconButton(
                 onClick = { controller.updateCurrentUnitIndex(controller.currentUnitIndex - 1) },
-                enabled = controller.currentUnitIndex > 0,
+                enabled = !controller.collectInteractionLocked && controller.currentUnitIndex > 0,
                 modifier = Modifier.size(56.dp)
             ) {
                 Icon(
@@ -98,7 +98,7 @@ fun RangeBox(
             }
             IconButton(
                 onClick = { controller.updateCurrentUnitIndex(controller.currentUnitIndex + 1) },
-                enabled = controller.currentUnitIndex < controller.units.size - 1,
+                enabled = !controller.collectInteractionLocked && controller.currentUnitIndex < controller.units.size - 1,
                 modifier = Modifier.size(56.dp)
             ) {
                 Icon(

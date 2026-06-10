@@ -60,6 +60,8 @@ class CollectScreenController {
     private var lastUnitId: String? = null
     private var restoredUnitSelection = false
     private var restoredTraitSelection = false
+    var collectInteractionLocked by mutableStateOf(false)
+        private set
 
     val primaryId = settings.getString(GeneralKeys.PRIMARY_NAME.key, "")
     val secondaryId = settings.getString(GeneralKeys.SECONDARY_NAME.key, "")
@@ -259,6 +261,9 @@ class CollectScreenController {
         return Color(storedArgb)
     }
 
+    fun updateCollectInteractionLocked(locked: Boolean) {
+        collectInteractionLocked = locked
+    }
     fun persistCurrentSelection() {
         currentRangeUniqueId()?.let {
             settings.putString(lastPlotKey(), it)

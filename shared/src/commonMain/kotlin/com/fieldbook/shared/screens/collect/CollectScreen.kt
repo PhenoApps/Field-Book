@@ -107,14 +107,20 @@ fun CollectScreen(
                 title = { Text(text = "Collect Data") },
                 navigationIcon = {
                     if (onBack != null) {
-                        IconButton(onClick = handleBack) {
+                        IconButton(
+                            onClick = handleBack,
+                            enabled = !controller.collectInteractionLocked
+                        ) {
                             Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
                         }
                     }
                 },
                 actions = {
                     if (dataGridEnabled) {
-                        IconButton(onClick = { showDataGrid = true }) {
+                        IconButton(
+                            onClick = { showDataGrid = true },
+                            enabled = !controller.collectInteractionLocked
+                        ) {
                             Icon(
                                 painter = painterResource(Res.drawable.ic_field),
                                 contentDescription = "Data Grid"

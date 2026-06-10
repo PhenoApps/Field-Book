@@ -34,7 +34,7 @@ fun TraitBox(
         ) {
             IconButton(
                 onClick = { viewModel.updateCurrentTraitIndex(viewModel.currentTraitIndex - 1) },
-                enabled = viewModel.currentTraitIndex > 0,
+                enabled = !viewModel.collectInteractionLocked && viewModel.currentTraitIndex > 0,
                 modifier = Modifier.size(56.dp)
             ) {
                 Icon(
@@ -52,7 +52,7 @@ fun TraitBox(
             )
             IconButton(
                 onClick = { viewModel.updateCurrentTraitIndex(viewModel.currentTraitIndex + 1) },
-                enabled = viewModel.currentTraitIndex < viewModel.traits.size - 1,
+                enabled = !viewModel.collectInteractionLocked && viewModel.currentTraitIndex < viewModel.traits.size - 1,
                 modifier = Modifier.size(56.dp)
             ) {
                 Icon(
