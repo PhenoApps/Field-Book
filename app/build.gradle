@@ -8,7 +8,6 @@ apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'androidx.navigation.safeargs'
 apply plugin: 'com.google.dagger.hilt.android'
 apply plugin: 'org.jetbrains.kotlin.plugin.compose'
-apply plugin: 'com.google.devtools.ksp'
 apply plugin: "org.jetbrains.kotlin.plugin.serialization"
 apply plugin: "kotlin-parcelize"
 
@@ -230,9 +229,9 @@ dependencies {
     implementation 'androidx.documentfile:documentfile:1.1.0'
 
     //hilt dependency injection
-    implementation "com.google.dagger:hilt-android:2.56.2"
+    implementation "com.google.dagger:hilt-android:2.58"
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
-    ksp "com.google.dagger:hilt-compiler:2.56.2"
+    kapt "com.google.dagger:hilt-compiler:2.58"
 
     implementation 'com.google.mlkit:barcode-scanning:17.3.0'
 
@@ -327,9 +326,9 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-idling-resource:$espressoVersion"
 
     // For instrumented tests.
-    androidTestImplementation 'com.google.dagger:hilt-android-testing:2.56.2'
+    androidTestImplementation 'com.google.dagger:hilt-android-testing:2.58'
     // ...with Kotlin.
-    kspAndroidTest 'com.google.dagger:hilt-android-compiler:2.56.2'
+    kaptAndroidTest 'com.google.dagger:hilt-android-compiler:2.58'
 
     // For trait data charts
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
