@@ -1986,4 +1986,18 @@
     <string name="view_trait_innospectra_na">N/A</string>
     <string name="unknown">Unknown</string>
 
+    <string name="field_detail_manage_traits">Traits</string>
+    <string name="field_detail_traits_none">No traits</string>
+    <string name="traits_viewer_add_to_field">Add Traits to Field</string>
+    <string name="traits_viewer_no_available_traits">No additional traits are available to add.</string>
+    <string name="traits_viewer_add_selected">Add Selected</string>
+    <string name="traits_viewer_create_new_trait">Create New Trait</string>
+    <string name="traits_viewer_added_count">Added %1$d trait(s) to this field</string>
+    <string name="traits_viewer_removed_trait">Removed trait from this field</string>
+    <string name="traits_viewer_synced_with_main_list">Synced field traits with main list</string>
+    <string name="traits_toolbar_sync_with_main_list">Sync with main list</string>
+    <string name="traits_viewer_remove_from_field_title">Remove Trait</string>
+    <string name="traits_viewer_remove_from_field_message">Remove %1$s from this field list?</string>
+    <string name="dialog_remove">Remove</string>
+    <string name="search_hint">search</string>
 </resources>
