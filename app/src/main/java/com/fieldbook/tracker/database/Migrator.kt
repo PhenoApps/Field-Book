@@ -16,6 +16,7 @@ import com.fieldbook.tracker.database.migrators.MulticatToCategoricalVersion20
 import com.fieldbook.tracker.database.migrators.SpectralMigratorVersion16
 import com.fieldbook.tracker.database.migrators.TraitAliasSynonymVersion18
 import com.fieldbook.tracker.database.migrators.StudyConfigurationVersion17
+import com.fieldbook.tracker.database.migrators.FieldTraitConfigMigratorVersion22
 import com.fieldbook.tracker.objects.TraitObject
 
 /**
@@ -472,6 +473,17 @@ class Migrator {
                 }
                 .onSuccess {
                     Log.d(TAG, "Migrated to version 21")
+                }
+        }
+
+        fun migrateToVersion22(db: SQLiteDatabase) {
+
+            FieldTraitConfigMigratorVersion22().migrate(db)
+                .onFailure {
+                    Log.e(TAG, "Failed to migrate to version 22", it)
+                }
+                .onSuccess {
+                    Log.d(TAG, "Migrated to version 22")
                 }
         }
     }
