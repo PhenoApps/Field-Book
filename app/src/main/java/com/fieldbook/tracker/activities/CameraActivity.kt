@@ -811,7 +811,7 @@ class CameraActivity : ThemedActivity() {
 
                     // Determine whether to show crop region overlay for video based on saved crop coordinates for this trait
                     val showCropForVideo = try {
-                        val key = GeneralKeys.getCropCoordinatesKey(traitId?.toInt() ?: -1)
+                        val key = GeneralKeys.getCropCoordinatesKey(traitId)
                         val cropCoordinates = prefs.getString(key, "")
                         !cropCoordinates.isNullOrEmpty() && cropCoordinates != CropImageView.DEFAULT_CROP_COORDINATES
                     } catch (_: Exception) {

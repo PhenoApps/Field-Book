@@ -193,7 +193,7 @@ abstract class AbstractCameraTrait :
 
     protected fun isCropRequired() = (currentTrait?.saveImage ?: true) && (currentTrait?.cropImage ?: false)
 
-    protected fun isCropExist() = (preferences.getString(GeneralKeys.getCropCoordinatesKey(currentTrait?.id?.toInt() ?: -1), "") ?: "").isNotEmpty()
+    protected fun isCropExist() = (preferences.getString(GeneralKeys.getCropCoordinatesKey(currentTrait?.id), "") ?: "").isNotEmpty()
 
     protected fun requestCropDefinition(traitId: String, imageUri: Uri) {
 
@@ -719,7 +719,7 @@ abstract class AbstractCameraTrait :
                 if (isCropExist()) {
 
                     //get bitmap from uri, create new bitmap from preference roi and update uri to database
-                    val cropRect = preferences.getString(GeneralKeys.getCropCoordinatesKey(currentTrait.id.toInt()), "") ?: ""
+                    val cropRect = preferences.getString(GeneralKeys.getCropCoordinatesKey(currentTrait.id), "") ?: ""
 
                     withContext(Dispatchers.IO) {
 

@@ -235,7 +235,7 @@ class VideoTraitLayout : PhotoTraitLayout {
                     val cropRequired = isCropRequired() && isCropExist()
 
                     if (cropRequired) {
-                        val cropRect = preferences.getString(GeneralKeys.getCropCoordinatesKey(currentTrait.id.toInt()), "") ?: ""
+                        val cropRect = preferences.getString(GeneralKeys.getCropCoordinatesKey(currentTrait.id), "") ?: ""
                         val rect = CropImageView.parseRectCoordinates(cropRect)
 
                         if (rect != null) {
@@ -303,7 +303,7 @@ class VideoTraitLayout : PhotoTraitLayout {
                     val cropRequired = isCropRequired() && isCropExist()
 
                     if (cropRequired) {
-                        val cropRect = preferences.getString(GeneralKeys.getCropCoordinatesKey(currentTrait.id.toInt()), "") ?: ""
+                        val cropRect = preferences.getString(GeneralKeys.getCropCoordinatesKey(currentTrait.id), "") ?: ""
                         val rect = CropImageView.parseRectCoordinates(cropRect)
 
                         if (rect != null) {
