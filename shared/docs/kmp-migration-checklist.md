@@ -21,8 +21,8 @@
 | Create new field                 | :white_check_mark: | :white_check_mark: |
 | Edit field                       | :white_check_mark: | :white_check_mark: |
 | Switch field                     | :white_check_mark: | :white_check_mark: |
-| Delete field                     | :white_check_mark: |                    |
-| Import from file                 | :white_check_mark: |                    |
+| Delete field                     | :white_check_mark: | :white_check_mark: |
+| Import from file                 | :white_check_mark: | :white_check_mark: |
 |                                  |                    |                    |
 | **Field Details**                |                    |                    |
 | Edit field                       | :white_check_mark: | :white_check_mark: |
@@ -44,12 +44,12 @@
 | Export                           | :white_check_mark: | :white_check_mark: |
 | Sort                             | :white_check_mark: | :white_check_mark: |
 | Select all                       | :white_check_mark: | :white_check_mark: |
-| Import from file                 | :white_check_mark: |                    |
+| Import from file                 | :white_check_mark: | :white_check_mark: |
 |                                  |                    |                    |
 | ...                              |                    |                    |
 |                                  |                    |                    |
 | **Trait formats**                |                    |                    |
-| Audio                            |                    |                    |
+| Audio                            | :white_check_mark: | :white_check_mark: |
 | Boolean                          | :white_check_mark: | :white_check_mark: |
 | Categorical                      | :white_check_mark: | :white_check_mark: |
 | Multicategorial                  | :white_check_mark: | :white_check_mark: |
@@ -60,7 +60,7 @@
 | Percent                          | :white_check_mark: | :white_check_mark: |
 | Text                             | :white_check_mark: | :white_check_mark: |
 | Angle                            | :white_check_mark: | :white_check_mark: |
-| Disease rating                   |                    |                    |
+| Disease rating                   | :white_check_mark: | :white_check_mark: |
 | GNSS                             |                    |                    |
 | Zebra label print                |                    |                    |
 |                                  |                    |                    |
