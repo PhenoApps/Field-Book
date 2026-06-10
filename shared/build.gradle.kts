@@ -420,7 +420,7 @@ kotlin {
 
         commonTest {
             dependencies {
-                implementation("org.jetbrains.kotlin:kotlin-test:2.1.10")
+                implementation("org.jetbrains.kotlin:kotlin-test:2.3.10")
             }
         }
 
