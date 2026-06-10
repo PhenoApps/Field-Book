@@ -45,23 +45,24 @@ public class FieldObject {
     }
 
     public static class TraitDetail {
+        private final String traitId;
         private final String traitName;
         private final String format;
         private String categories;
         private final int count;
         private final List<String> observations;
-        private final float completeness;  // Add this line
+        private final float completeness;
 
-        public TraitDetail(String traitName, String format, String categories, int count, List<String> observations, float completeness) {
+        public TraitDetail(String id, String traitName, String format, String categories, int count, List<String> observations, float completeness) {
+            this.traitId = id;
             this.traitName = traitName;
             this.format = format;
             this.categories = categories;
             this.count = count;
             this.observations = observations;
-            this.completeness = completeness;  // Add this line
+            this.completeness = completeness;
         }
 
-        // Getters
         public String getTraitName() { return traitName; }
         public String getFormat() { return format; }
         public String getCategories() {
@@ -69,7 +70,8 @@ public class FieldObject {
         }
         public int getCount() { return count; }
         public List<String> getObservations() { return observations; }
-        public float getCompleteness() { return completeness; }  // Add this line
+        public float getCompleteness() { return completeness; }
+        public String getTraitId() { return traitId; }
     }
 
     private List<TraitDetail> traitDetails;
