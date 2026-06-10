@@ -146,7 +146,7 @@ class ScaleGattManager @Inject constructor(
                     return
                 }
 
-                //Log.d("GATT", "${value.toList().map { it.toChar() }}")
+                //Log.d("GATT", "${value.toList().map { it.toInt().toChar() }}")
 
                 byteBuffer.addAll(value.toList())
 
@@ -156,7 +156,7 @@ class ScaleGattManager @Inject constructor(
 //              val byteHexes = byteBuffer.joinToString(", ") { String.format("0x%02X", it) }
 //              Log.d("GATT", "Received complete message: ${byteHexes}")
                     //convert bytes to char and log
-                    val charValues = byteBuffer.map { it.toChar() }
+                    val charValues = byteBuffer.map { it.toInt().toChar() }
 //              Log.d("GATT", "Received complete message as chars: ${charValues.joinToString("")}")
                     val weightString = charValues.joinToString("").dropLast(2) // Drop the last CRLF characters
                     val pattern = Regex(
@@ -184,7 +184,7 @@ class ScaleGattManager @Inject constructor(
 
         private fun handleCraneScaleWeightCharacteristic(characteristic: BluetoothGattCharacteristic) {
 
-            val stringValue = characteristic.value?.joinToString("") { it.toChar().toString() }
+            val stringValue = characteristic.value?.joinToString("") { it.toInt().toChar().toString() }
 
             stringValue?.let { weightString ->
 
@@ -212,14 +212,14 @@ class ScaleGattManager @Inject constructor(
             //log as hex values
             //Log.d("GATT", "Characteristic changed: ${characteristic.uuid}, Value (Hex): ${value?.joinToString(", ") { String.format("0x%02X", it) }}")
             //log as string
-            val stringValue = value?.joinToString("") { it.toChar().toString() }
+            val stringValue = value?.joinToString("") { it.toInt().toChar().toString() }
             //log as integer
             //Log.d("Scale", "Characteristic changed: ${characteristic.uuid}, Value Length: ${value?.size}, Value (String): $stringValue")
 
             listener?.logUnknownScaleBytes(
                 characteristic.service.uuid.toString(),
                 characteristic.uuid.toString(),
-                (value?.joinToString("") { it.toChar().toString() }
+                (value?.joinToString("") { it.toInt().toChar().toString() }
                         + " "
                         +value?.joinToString(", ") { String.format("0x%02X", it) })
 
