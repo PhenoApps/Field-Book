@@ -31,6 +31,9 @@ import com.fieldbook.shared.screens.collect.traits.BooleanTrait
 import com.fieldbook.shared.screens.collect.traits.CategoricalTrait
 import com.fieldbook.shared.screens.collect.traits.CounterTrait
 import com.fieldbook.shared.screens.collect.traits.DateTrait
+import com.fieldbook.shared.screens.collect.traits.DiseaseRatingTrait
+import com.fieldbook.shared.screens.collect.traits.AngleTrait
+import com.fieldbook.shared.screens.collect.traits.AudioTrait
 import com.fieldbook.shared.screens.collect.traits.LocationTrait
 import com.fieldbook.shared.screens.collect.traits.NumericTrait
 import com.fieldbook.shared.screens.collect.traits.PercentTrait
@@ -154,6 +157,26 @@ fun CollectInput(
                     )
                 }
             }
+        } else if (formatEnum == Formats.AUDIO) {
+            TraitInputContainer(
+                usesLazyVerticalInput = false,
+                scrollable = false,
+                centerContent = false,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                key(currentPlotId, currentTraitId) {
+                    TraitInputHost(
+                        controller = controller,
+                        trait = trait,
+                        values = values,
+                        onEdited = { isEdited = true },
+                        modifier = Modifier.fillMaxWidth(),
+                        onExpandPhotoTrait = onExpandPhotoTrait
+                    )
+                }
+            }
         } else {
             Text(
                 text = displayValue,
@@ -195,6 +218,7 @@ fun CollectInput(
 private fun TraitInputContainer(
     usesLazyVerticalInput: Boolean,
     scrollable: Boolean = true,
+    centerContent: Boolean = !scrollable,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
@@ -206,11 +230,11 @@ private fun TraitInputContainer(
                 Modifier.verticalScroll(rememberScrollState())
             }
         ),
-        contentAlignment = if (scrollable) Alignment.TopCenter else Alignment.Center
+        contentAlignment = if (centerContent) Alignment.Center else Alignment.TopCenter
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = if (scrollable) Arrangement.Top else Arrangement.Center,
+            verticalArrangement = if (centerContent) Arrangement.Center else Arrangement.Top,
             modifier = if (usesLazyVerticalInput || !scrollable) {
                 Modifier.fillMaxSize()
             } else {
@@ -232,6 +256,7 @@ fun TraitInputHost(
     onExpandPhotoTrait: () -> Unit = {},
 ) {
     val value = values.firstOrNull() ?: ""
+    val normalizedTraitFormat = trait?.format?.trim().orEmpty()
     val formatEnum = trait?.format?.let { formatStr ->
         Formats.entries.find { it.databaseName.equals(formatStr, ignoreCase = true) }
     }
@@ -306,12 +331,32 @@ fun TraitInputHost(
             modifier = modifier.fillMaxWidth().padding(8.dp)
         )
 
+        Formats.AUDIO -> AudioTrait(
+            value = value,
+            onValueChange = {
+                controller.updateCurrentTraitValue(it)
+                onEdited()
+            },
+            controller = controller,
+            modifier = modifier.fillMaxWidth().padding(8.dp)
+        )
+
         Formats.DATE -> DateTrait(
             value = value,
             onValueChange = {
                 controller.updateCurrentTraitValue(it)
                 onEdited()
             },
+            modifier = modifier.fillMaxWidth().padding(8.dp)
+        )
+
+        Formats.DISEASE_RATING -> DiseaseRatingTrait(
+            value = value,
+            onValueChange = {
+                controller.updateCurrentTraitValue(it)
+                onEdited()
+            },
+            onValidationError = { },
             modifier = modifier.fillMaxWidth().padding(8.dp)
         )
 
@@ -341,10 +386,22 @@ fun TraitInputHost(
             )
         }
 
-        else -> NotImplementedTrait(
-            traitFormat = trait?.format ?: "unknown",
-            modifier = modifier.fillMaxWidth().padding(8.dp)
-        )
+        else -> when (normalizedTraitFormat.lowercase()) {
+            "disease", "disease_rating", "disease rating", "rust rating" -> DiseaseRatingTrait(
+                value = value,
+                onValueChange = {
+                    controller.updateCurrentTraitValue(it)
+                    onEdited()
+                },
+                onValidationError = { },
+                modifier = modifier.fillMaxWidth().padding(8.dp)
+            )
+
+            else -> NotImplementedTrait(
+                traitFormat = trait?.format ?: "unknown",
+                modifier = modifier.fillMaxWidth().padding(8.dp)
+            )
+        }
     }
 }
 
