@@ -282,6 +282,120 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardViewTraits"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:cardElevation="4dp"
+            app:strokeColor="@android:color/transparent"
+            app:cardBackgroundColor="@color/main_color_background">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="12dp"
+                android:paddingBottom="8dp">
+
+                <!-- Tappable header row — navigates to TraitActivity -->
+                <LinearLayout
+                    android:id="@+id/traitsCardHeader"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
+
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_margin="8dp"
+                        android:src="@drawable/ic_ruler" />
+
+                    <TextView
+                        style="@style/TextViewStyle.Bold.Title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        android:text="@string/field_detail_manage_traits" />
+
+                    <ImageView
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:src="@drawable/ic_chevron_right" />
+
+                </LinearLayout>
+
+                <!-- Summary / expanded toggle row -->
+                <LinearLayout
+                    android:id="@+id/traitsIconsRow"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
+
+                    <!-- Expand/collapse arrow — left of the icon list -->
+                    <ImageView
+                        android:id="@+id/traitsExpandCollapseIcon"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginEnd="6dp"
+                        android:src="@drawable/ic_chevron_down"
+                        android:visibility="gone" />
+
+                    <!-- Centered scrollable format-icon row (hidden when expanded) -->
+                    <HorizontalScrollView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:scrollbars="none">
+
+                        <LinearLayout
+                            android:id="@+id/traitIconsContainer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center" />
+
+                    </HorizontalScrollView>
+
+                    <TextView
+                        android:id="@+id/traitsNoneTextView"
+                        style="@style/TextViewStyle.Sub"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:visibility="gone"
+                        android:text="@string/field_detail_traits_none" />
+
+                </LinearLayout>
+
+                <!-- Expanded: trait list with icon + name -->
+                <LinearLayout
+                    android:id="@+id/traitsExpandedContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingStart="46dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="4dp"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
         <!-- Export Card -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardViewExport"

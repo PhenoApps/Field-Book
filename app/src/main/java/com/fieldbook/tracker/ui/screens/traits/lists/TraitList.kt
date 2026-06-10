@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.ui.screens.traits.lists
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,8 +21,14 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 @Composable
 fun TraitList(
     traits: List<TraitObject>,
+    selectedTraitIds: Set<String> = emptySet(),
+    showVisibilityControls: Boolean,
+    showRemoveAction: Boolean,
+    allowReorder: Boolean,
     onTraitClick: (String) -> Unit,
+    onTraitLongClick: (String) -> Unit = {},
     onToggleVisibility: (TraitObject, Boolean) -> Unit,
+    onRemoveTrait: (TraitObject) -> Unit,
     onMoveItem: (Int, Int) -> Unit,
     onDragStateChanged: (Boolean) -> Unit,
     modifier: Modifier = Modifier
@@ -31,27 +38,56 @@ fun TraitList(
         onMoveItem(from.index, to.index)
     }
 
+    // Track drag lifecycle once at list-level so commit is always triggered when dragging ends.
+    LaunchedEffect(state.isAnyItemDragging) {
+        onDragStateChanged(state.isAnyItemDragging)
+    }
+
     LazyColumn(
         state = lazyListState,
-        modifier = modifier,
-        contentPadding = PaddingValues(4.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        modifier = modifier.animateContentSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(
             count = traits.size,
             key = { index -> traits[index].id }
         ) { index ->
             val trait = traits[index]
-            ReorderableItem(state, key = trait.id) { isDragging ->
-                LaunchedEffect(isDragging) {
-                    onDragStateChanged(isDragging)
+            val isSelected = trait.id in selectedTraitIds
+            
+            if (allowReorder) {
+                ReorderableItem(state, key = trait.id) { isDragging ->
+                    TraitListItem(
+                        position = index + 1,
+                        trait = trait,
+                        isSelected = isSelected,
+                        showVisibilityCheckbox = showVisibilityControls,
+                        showRemoveAction = showRemoveAction,
+                        showDragHandle = true,
+                        onClick = { onTraitClick(trait.id) },
+                        onLongClick = { onTraitLongClick(trait.id) },
+                        onToggleVisibility = { isVisible -> onToggleVisibility(trait, isVisible) },
+                        onRemove = { onRemoveTrait(trait) },
+                        isDragging = isDragging,
+                        reorderableScope = this@ReorderableItem,
+                        isAnyItemDragging = state.isAnyItemDragging,
+                    )
                 }
+            } else {
                 TraitListItem(
+                    position = index + 1,
                     trait = trait,
+                    isSelected = isSelected,
+                    showVisibilityCheckbox = showVisibilityControls,
+                    showRemoveAction = showRemoveAction,
+                    showDragHandle = false,
                     onClick = { onTraitClick(trait.id) },
+                    onLongClick = { onTraitLongClick(trait.id) },
                     onToggleVisibility = { isVisible -> onToggleVisibility(trait, isVisible) },
-                    reorderableScope = this@ReorderableItem,
-                    isAnyItemDragging = state.isAnyItemDragging,
+                    onRemove = { onRemoveTrait(trait) },
+                    reorderableScope = null,
+                    isAnyItemDragging = false,
                 )
             }
         }
@@ -80,8 +116,12 @@ private fun TraitListPreview() {
         Box(modifier = Modifier.fillMaxHeight()) {
             TraitList(
                 traits = traitList,
+                showVisibilityControls = true,
+                showRemoveAction = true,
+                allowReorder = true,
                 onTraitClick = { },
                 onToggleVisibility = { _, _ -> },
+                onRemoveTrait = { },
                 onMoveItem = { _, _ -> },
                 onDragStateChanged = { },
                 modifier = Modifier,

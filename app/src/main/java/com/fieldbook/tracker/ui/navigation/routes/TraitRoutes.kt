@@ -9,4 +9,7 @@ object TraitGraph
 object TraitEditor
 
 @Serializable
+object TraitFieldPicker
+
+@Serializable
 data class TraitDetail(val traitId: String)

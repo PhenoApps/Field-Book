@@ -8,13 +8,14 @@ import androidx.core.content.edit
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.application.IoDispatcher
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.dao.FieldTraitConfigDao
 import com.fieldbook.tracker.database.models.ObservationModel
-import com.fieldbook.tracker.database.models.TraitAttributes
 import com.fieldbook.tracker.enums.FileFormat
 import com.fieldbook.tracker.objects.TraitImportFile
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.objects.toTraitJson
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.TraitScopePreferences
 import com.fieldbook.tracker.utilities.CSVReader
 import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.FileUtils.copyToDirectory
@@ -25,7 +26,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonPrimitive
 import org.phenoapps.utils.BaseDocumentTreeUtil
 import java.io.InputStreamReader
 import java.util.ArrayList
@@ -47,12 +47,230 @@ class TraitRepository @Inject constructor(
         prettyPrint = false
     }
 
+    private val fieldTraitConfigDao = FieldTraitConfigDao()
+
     val valueFormatter: ValueProcessorFormatAdapter
         get() = database.valueFormatter
 
-    suspend fun getTraits(): List<TraitObject> = withContext(ioDispatcher) {
+    suspend fun getTraits(
+        studyId: Int? = null,
+        usePerFieldList: Boolean = false,
+        sortOrder: String = "position",
+    ): List<TraitObject> =
+        withContext(ioDispatcher) {
+            val allTraits = database.getAllTraitObjects()
+
+            if (!usePerFieldList || studyId == null || studyId < 0) {
+                return@withContext allTraits
+            }
+
+            // Ensure field-specific configuration is initialized on first access
+            ensureStudyVisibilityInitialized(studyId)
+
+            val scopedIds = TraitScopePreferences.getOrInitializeStudyTraitIds(
+                preferences = prefs,
+                studyId = studyId,
+                fallbackTraitIds = allTraits.map { it.id }.toSet(),
+            )
+
+            // Since we ensured initialization above, hasFieldConfig should be true
+            // if the study is valid.
+            val hasFieldConfig = fieldTraitConfigDao.hasFieldTraitConfig(studyId)
+            
+            // Per-field visibility is stored in preferences
+            val customVisibleIds = TraitScopePreferences.getStudyVisibleTraitIds(prefs, studyId)
+            
+            val scopedVisibleIds: Set<String> = if (customVisibleIds != null) {
+                customVisibleIds.intersect(scopedIds)
+            } else {
+                allTraits.filter { it.visible && it.id in scopedIds }.map { it.id }.toSet()
+            }
+
+            Log.d(TAG, "getTraits: studyId=$studyId hasFieldConfig=$hasFieldConfig scopedVisibleCount=${scopedVisibleIds.size}")
+
+            var filtered = allTraits
+                .filter { it.id in scopedIds }
+                .map { trait ->
+                    trait.clone().apply { visible = id in scopedVisibleIds }
+                }
+
+            // For field-specific lists, prefer the field-specific trait order when one exists.
+            // Fall back to observation_variables position (global order) when no field order is set.
+            if (sortOrder == "position") {
+                val fieldOrder = if (hasFieldConfig) fieldTraitConfigDao.getTraitIdsInOrder(studyId) else emptyList()
+                filtered = if (fieldOrder.isNotEmpty()) {
+                    val orderMap = fieldOrder.mapIndexed { index, id -> id to index }.toMap()
+                    filtered.sortedWith(compareBy { orderMap[it.id] ?: Int.MAX_VALUE })
+                } else {
+                    filtered.sortedWith(
+                        compareBy<TraitObject> { it.realPosition }
+                            .thenBy { it.id.toIntOrNull() ?: Int.MAX_VALUE }
+                    )
+                }
+            } else if (sortOrder == "visible") {
+                // Keep visible traits at the top when sorting by visibility.
+                filtered = filtered.sortedWith(
+                    compareByDescending<TraitObject> { it.visible }
+                        .thenBy { it.alias.ifBlank { it.name }.lowercase() }
+                )
+            } else if (sortOrder == "observation_variable_name") {
+                filtered = filtered.sortedBy { it.alias.ifBlank { it.name }.lowercase() }
+            } else if (sortOrder == "observation_variable_field_book_format") {
+                filtered = filtered.sortedWith(
+                    compareBy<TraitObject> { it.format.lowercase() }
+                        .thenBy { it.alias.ifBlank { it.name }.lowercase() }
+                )
+            } else if (sortOrder == "internal_id_observation_variable") {
+                filtered = filtered.sortedWith(
+                    compareBy<TraitObject> { it.id.toIntOrNull() ?: Int.MAX_VALUE }
+                        .thenBy { it.alias.ifBlank { it.name }.lowercase() }
+                )
+            }
+
+            filtered
+        }
+
+    suspend fun getUnscopedTraits(): List<TraitObject> = withContext(ioDispatcher) {
         database.getAllTraitObjects()
     }
+
+    suspend fun addTraitsToStudy(studyId: Int, traitIds: Set<String>) = withContext(ioDispatcher) {
+        TraitScopePreferences.addStudyTraitIds(prefs, studyId, traitIds)
+        // Ensure field is initialized before adding new traits as visible
+        ensureStudyVisibilityInitialized(studyId)
+
+        val allTraitsInGlobalOrder = database.getAllTraitObjects()
+        val orderedNewIds = allTraitsInGlobalOrder
+            .map { it.id }
+            .filter { it in traitIds }
+
+        // Update ordering
+        val currentOrder = fieldTraitConfigDao.getTraitIdsInOrder(studyId).toMutableList()
+        orderedNewIds.forEach { newId ->
+            if (newId !in currentOrder) currentOrder.add(newId)
+        }
+        fieldTraitConfigDao.setTraitConfiguration(studyId, currentOrder)
+
+        // Update visibility (default to visible for new additions)
+        val currentVisible = TraitScopePreferences.getStudyVisibleTraitIds(prefs, studyId)?.toMutableSet()
+            ?: allTraitsInGlobalOrder.filter { it.visible }.map { it.id }.toSet().toMutableSet()
+        currentVisible.addAll(traitIds)
+        TraitScopePreferences.setStudyVisibleTraitIds(prefs, studyId, currentVisible)
+    }
+
+    suspend fun removeTraitsFromStudy(studyId: Int, traitIds: Set<String>) = withContext(ioDispatcher) {
+        if (studyId < 0 || traitIds.isEmpty()) return@withContext
+
+        val allTraitIds = database.getAllTraitObjects().map { it.id }.toSet()
+        val currentScoped = TraitScopePreferences.getOrInitializeStudyTraitIds(
+            preferences = prefs,
+            studyId = studyId,
+            fallbackTraitIds = allTraitIds,
+        )
+
+        val updatedScoped = currentScoped - traitIds
+        TraitScopePreferences.setStudyTraitIds(prefs, studyId, updatedScoped)
+
+        ensureStudyVisibilityInitialized(studyId)
+        
+        // Update ordering
+        val updatedOrder = fieldTraitConfigDao.getTraitIdsInOrder(studyId).filterNot { it in traitIds }
+        fieldTraitConfigDao.setTraitConfiguration(studyId, updatedOrder)
+
+        // Update visibility
+        TraitScopePreferences.getStudyVisibleTraitIds(prefs, studyId)?.let { currentVisible ->
+            val updatedVisible = currentVisible - traitIds
+            TraitScopePreferences.setStudyVisibleTraitIds(prefs, studyId, updatedVisible)
+        }
+    }
+
+    suspend fun syncStudyWithMainList(studyId: Int) = withContext(ioDispatcher) {
+        if (studyId < 0) return@withContext
+
+        val allTraitsInGlobalOrder = database.getAllTraitObjects()
+        val allIds = allTraitsInGlobalOrder.map { it.id }
+        val globalVisible = allTraitsInGlobalOrder.filter { it.visible }.map { it.id }.toSet()
+
+        TraitScopePreferences.setStudyTraitIds(prefs, studyId, allIds.toSet())
+        TraitScopePreferences.setStudyVisibleTraitIds(prefs, studyId, globalVisible)
+
+        fieldTraitConfigDao.setTraitConfiguration(
+            studyId = studyId,
+            traitIdsInOrder = allIds,
+        )
+    }
+
+    /**
+     * Ensures that the field-specific trait configuration is initialized.
+     * Creates config based on the current global visibility state if not already done.
+     * This is a no-op if the field already has a custom configuration.
+     */
+    private fun ensureStudyVisibilityInitialized(studyId: Int) {
+        if (studyId < 0) return
+        if (fieldTraitConfigDao.hasFieldTraitConfig(studyId)) return
+
+        val allTraitsInGlobalOrder = database.getAllTraitObjects()
+        val fallbackIds = allTraitsInGlobalOrder.map { it.id }.toSet()
+        val scopedIds = TraitScopePreferences.getOrInitializeStudyTraitIds(
+            preferences = prefs,
+            studyId = studyId,
+            fallbackTraitIds = fallbackIds,
+        )
+        
+        // Initialize order with ALL scoped traits
+        val scopedOrder = allTraitsInGlobalOrder
+            .filter { it.id in scopedIds }
+            .map { it.id }
+
+        Log.d(TAG, "ensureStudyVisibilityInitialized: initializing studyId=$studyId with ${scopedOrder.size} scoped traits in order")
+        fieldTraitConfigDao.setTraitConfiguration(
+            studyId = studyId,
+            traitIdsInOrder = scopedOrder,
+        )
+
+        // Initialize visibility if not already present
+        if (TraitScopePreferences.getStudyVisibleTraitIds(prefs, studyId) == null) {
+            val scopedVisibleIds = allTraitsInGlobalOrder
+                .filter { it.visible && it.id in scopedIds }
+                .map { it.id }
+                .toSet()
+            TraitScopePreferences.setStudyVisibleTraitIds(prefs, studyId, scopedVisibleIds)
+        }
+    }
+
+    suspend fun updateStudyTraitVisibility(studyId: Int, traitId: String, isVisible: Boolean) =
+        withContext(ioDispatcher) {
+            // Initialize field-specific visibility on first edit (lazy initialization)
+            ensureStudyVisibilityInitialized(studyId)
+            
+            val currentVisible = TraitScopePreferences.getStudyVisibleTraitIds(prefs, studyId)?.toMutableSet()
+                ?: mutableSetOf()
+
+            if (isVisible) {
+                currentVisible.add(traitId)
+            } else {
+                currentVisible.remove(traitId)
+            }
+            
+            TraitScopePreferences.setStudyVisibleTraitIds(prefs, studyId, currentVisible)
+        }
+
+    suspend fun updateAllStudyTraitVisibility(studyId: Int, traitIds: Set<String>, isVisible: Boolean) =
+        withContext(ioDispatcher) {
+            // Initialize field-specific visibility on first edit (lazy initialization)
+            ensureStudyVisibilityInitialized(studyId)
+
+            val currentVisible = TraitScopePreferences.getStudyVisibleTraitIds(prefs, studyId)?.toMutableSet()
+                ?: mutableSetOf()
+
+            if (isVisible) {
+                currentVisible.addAll(traitIds)
+            } else {
+                currentVisible.removeAll(traitIds)
+            }
+
+            TraitScopePreferences.setStudyVisibleTraitIds(prefs, studyId, currentVisible)
+        }
 
     suspend fun getTraitById(id: String): TraitObject? = withContext(ioDispatcher) {
         database.getTraitById(id)
@@ -77,7 +295,7 @@ class TraitRepository @Inject constructor(
         // clear crop coordinates
         prefs.edit {
             traits.forEach { trait ->
-                remove(GeneralKeys.getCropCoordinatesKey(trait.id.toInt()))
+                remove(GeneralKeys.getCropCoordinatesKey(trait.id))
             }
         }
     }
@@ -87,7 +305,7 @@ class TraitRepository @Inject constructor(
 
         // clear crop coordinates
         prefs.edit {
-            remove(GeneralKeys.getCropCoordinatesKey(traitId.toInt()))
+            remove(GeneralKeys.getCropCoordinatesKey(traitId))
         }
     }
 
@@ -118,6 +336,27 @@ class TraitRepository @Inject constructor(
             database.updateTraitPosition(trait.id, index + 1)
         }
     }
+
+    /**
+     * Update field-specific trait order. This creates a field-specific trait list
+     * in the field_trait_config table to remember the custom ordering for this field.
+     */
+    suspend fun updateStudyTraitOrder(studyId: Int, orderedTraitIds: List<String>) =
+        withContext(ioDispatcher) {
+            ensureStudyVisibilityInitialized(studyId)
+            fieldTraitConfigDao.setTraitConfiguration(
+                studyId = studyId,
+                traitIdsInOrder = orderedTraitIds,
+            )
+        }
+
+    /**
+     * Check if a field has a custom trait list (field-specific ordering)
+     */
+    suspend fun hasFieldSpecificTraitList(studyId: Int): Boolean =
+        withContext(ioDispatcher) {
+            fieldTraitConfigDao.getTraitIdsInOrder(studyId).isNotEmpty()
+        }
 
     // returns -1 if insertion failed, else returns rowId if successful
     suspend fun insertTrait(trait: TraitObject): Long = withContext(ioDispatcher) {
