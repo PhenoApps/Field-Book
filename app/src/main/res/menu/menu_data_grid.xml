@@ -20,12 +20,29 @@
         android:title="@string/menu_action_wrap_content_data_grid_title" />
     <item
         android:id="@+id/menu_data_grid_action_header_view"
-        android:icon="@drawable/ic_view_split_vertical"
+        android:icon="@drawable/ic_reorder"
         app:showAsAction="always"
         android:title="@string/menu_action_header_view_data_grid_title" />
+    <item
+        android:id="@+id/menu_data_grid_action_column_view"
+        android:icon="@drawable/ic_view_split_vertical"
+        app:showAsAction="always"
+        android:title="@string/menu_action_column_view_data_grid_title" />
     <item
         android:id="@+id/menu_data_grid_action_heatmap"
         android:icon="@drawable/ic_tb_heatmap"
         app:showAsAction="always"
         android:title="@string/menu_action_heatmap_data_grid_title" />
+    <item
+        android:id="@+id/menu_data_grid_action_trial_view"
+        android:icon="@drawable/ic_tb_toggle_all"
+        app:showAsAction="ifRoom"
+        android:title="@string/menu_data_grid_action_trial_view"
+        android:orderInCategory="1" />
+    <item
+        android:id="@+id/menu_data_grid_action_cell_details"
+        android:icon="@drawable/ic_information_outline"
+        app:showAsAction="always"
+        android:title="@string/menu_data_grid_action_cell_details"
+        android:orderInCategory="3" />
 </menu>

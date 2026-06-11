@@ -110,6 +110,12 @@ class DataGridViewModel @Inject constructor(
         preferences.edit().putFloat(GeneralKeys.DATAGRID_ZOOM, newValue).apply()
     }
 
+    fun setZoom(zoom: Float) {
+        val newValue = zoom.coerceIn(0.5f, 2f)
+        _zoomLevel.value = newValue
+        preferences.edit().putFloat(GeneralKeys.DATAGRID_ZOOM, newValue).apply()
+    }
+
     override fun onCleared() {
         super.onCleared()
     }
