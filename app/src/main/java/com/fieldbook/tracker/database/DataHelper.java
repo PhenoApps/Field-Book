@@ -639,6 +639,18 @@ public class DataHelper {
     }
 
     /**
+     * Lightweight DataGrid-specific query: same SQL as getExportTableData but returns the raw
+     * cursor without value processing. Avoids O(rows × traits) getTraitByName() DB calls.
+     */
+    public Cursor getDataGridTableData(int fieldId, ArrayList<TraitObject> traits, List<String> requiredAttributes) {
+
+        open();
+
+        return ObservationUnitPropertyDao.Companion.getDataGridTableData(context, fieldId, traits, requiredAttributes);
+
+    }
+
+    /**
      * Used by the application to return all traits which are visible
      */
     public ArrayList<TraitObject> getVisibleTraits() {
@@ -1440,6 +1452,20 @@ public class DataHelper {
         open();
 
         return ObservationDao.Companion.getAllRepeatedValues(studyId, plotId, traitDbId);
+    }
+
+    public java.util.Map<kotlin.Pair<String, String>, Integer> getBatchRepeatCounts(String studyId) {
+
+        open();
+
+        return ObservationDao.Companion.getRepeatCountsForStudy(studyId);
+    }
+
+    public int getObservationCount(String studyId) {
+
+        open();
+
+        return ObservationDao.Companion.getObservationCount(studyId);
     }
 
     public String getObservationUnitPropertyByPlotId(String uniqueName, String column, String uniqueId) {
