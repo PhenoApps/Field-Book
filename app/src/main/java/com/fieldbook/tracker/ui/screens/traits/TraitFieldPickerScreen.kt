@@ -106,13 +106,6 @@ fun TraitFieldPickerScreen(
                                 },
                                 displayMode = ActionDisplayMode.ALWAYS,
                                 contentDescription = stringResource(R.string.fields_select_all)
-                            ),
-                            TopAppBarAction(
-                                title = stringResource(R.string.traits_viewer_create_new_trait),
-                                icon = Icons.Default.Add,
-                                onClick = { onCreateNewTrait() },
-                                displayMode = ActionDisplayMode.ALWAYS,
-                                contentDescription = stringResource(R.string.traits_viewer_create_new_trait)
                             )
                         )
                     } else {
@@ -125,6 +118,13 @@ fun TraitFieldPickerScreen(
                                 },
                                 displayMode = ActionDisplayMode.IF_ROOM,
                                 contentDescription = stringResource(R.string.fields_select_all)
+                            ),
+                            TopAppBarAction(
+                                title = stringResource(R.string.traits_viewer_create_new_trait),
+                                icon = Icons.Default.Add,
+                                onClick = { onCreateNewTrait() },
+                                displayMode = ActionDisplayMode.ALWAYS,
+                                contentDescription = stringResource(R.string.traits_viewer_create_new_trait)
                             )
                         )
                     }

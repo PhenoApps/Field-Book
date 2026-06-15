@@ -153,7 +153,6 @@ class TraitActivity : ThemedActivity() {
                                 availableTraits = uiState.availableTraits,
                                 onBack = { traitNav.navigateBack() },
                                 onCreateNewTrait = {
-                                    traitNav.navigateBack()
                                     showCreateNewTraitDialog(
                                         trait = null,
                                         onSaved = {
