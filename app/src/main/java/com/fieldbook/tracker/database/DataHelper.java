@@ -735,11 +735,10 @@ public class DataHelper {
 
     public List<String> getExistingObservationUnitCoreColumns() {
         return java.util.Arrays.asList(
-            "position_coordinate_x",
-            "position_coordinate_y",
             "primary_id",
             "secondary_id",
-            "observation_unit_db_id"
+            "observation_unit_db_id",
+            "geo_coordinates"
         );
     }
 

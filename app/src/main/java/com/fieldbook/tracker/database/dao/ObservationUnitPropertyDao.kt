@@ -21,7 +21,6 @@ import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.traits.formats.presenters.UriPresenter
-import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter
 
 class ObservationUnitPropertyDao {
@@ -242,8 +241,14 @@ class ObservationUnitPropertyDao {
         ): Cursor? = withDatabase { db ->
             val headers = ObservationUnitAttributeDao.getAllNames(studyId)
 
+            val coreColumns = listOf("primary_id", "secondary_id", "observation_unit_db_id", "geo_coordinates")
+
             val selectAttributes = headers.joinToString(", ") { attributeName ->
-                "MAX(CASE WHEN attr.observation_unit_attribute_name = '$attributeName' THEN vals.observation_unit_value_name ELSE NULL END) AS \"$attributeName\""
+                if (attributeName in coreColumns) {
+                    "MAX(units.\"$attributeName\") AS \"$attributeName\""
+                } else {
+                    "MAX(CASE WHEN attr.observation_unit_attribute_name = '$attributeName' THEN vals.observation_unit_value_name ELSE NULL END) AS \"$attributeName\""
+                }
             }
 
             val traitNames = traits.map { DataHelper.replaceIdentifiers(it.name) }
@@ -321,8 +326,14 @@ class ObservationUnitPropertyDao {
             val headers: List<String> = if (requiredAttributes.isNotEmpty()) requiredAttributes
                           else ObservationUnitAttributeDao.getAllNames(studyId).toList()
 
+            val coreColumns = listOf("primary_id", "secondary_id", "observation_unit_db_id", "geo_coordinates")
+
             val selectAttributes = headers.joinToString(", ") { attributeName ->
-                "MAX(CASE WHEN attr.observation_unit_attribute_name = '$attributeName' THEN vals.observation_unit_value_name ELSE NULL END) AS \"$attributeName\""
+                if (attributeName in coreColumns) {
+                    "MAX(units.\"$attributeName\") AS \"$attributeName\""
+                } else {
+                    "MAX(CASE WHEN attr.observation_unit_attribute_name = '$attributeName' THEN vals.observation_unit_value_name ELSE NULL END) AS \"$attributeName\""
+                }
             }
 
             val selectObservations = traits.joinToString(", ") { trait ->

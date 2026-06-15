@@ -666,6 +666,7 @@
     <string name="trial_view_legend_empty">Empty</string>
     <string name="trial_view_legend_missing">Missing</string>
     <string name="trial_view_traits_with_data">Traits with data:</string>
+    <string name="trial_view_use_geo_coordinates">Use GPS Coordinates (%d detected)</string>
 
     <!--- Lock -->
     <string name="activity_collect_locked_state">Locked - data entry, modification and deletion are disabled</string>

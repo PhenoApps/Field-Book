@@ -1,6 +1,5 @@
 package com.fieldbook.tracker.activities
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -9,6 +8,7 @@ import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -41,6 +41,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -144,7 +145,8 @@ class DataGridActivity : ThemedActivity() {
         val col: Int,
         val plotId: String,
         val traitIndex: Int,
-        val repeated: List<ObservationModel> = emptyList()
+        val repeated: List<ObservationModel> = emptyList(),
+        val label: String? = null
     )
 
     // for active highlighted cell (navigated from)
@@ -174,10 +176,10 @@ class DataGridActivity : ThemedActivity() {
     private var viewMode by mutableStateOf(DataGridViewMode.GRID)
     private var showCellDetails by mutableStateOf(true)
     private var activeTrialFilter by mutableStateOf(TrialFilter.NONE)
-    private var trialPlotDataList = emptyList<TrialPlotData>()
-    private var trialGridRows = 0
-    private var trialGridCols = 0
-    private var trialGrid: Array<Array<TrialPlotData?>> = emptyArray()
+    private var trialPlotDataList by mutableStateOf(emptyList<TrialPlotData>())
+    private var trialGridRows by mutableIntStateOf(0)
+    private var trialGridCols by androidx.compose.runtime.mutableIntStateOf(0)
+    private var trialGrid by mutableStateOf<Array<Array<TrialPlotData?>>>(emptyArray())
 
     // RowHeaders for trial view display (from the grid state)
     private var mRowHeaders = ArrayList<HeaderData>()
@@ -215,7 +217,8 @@ class DataGridActivity : ThemedActivity() {
         setDataGridColors()
 
         // Restore view mode preference
-        viewMode = if (preferences.getBoolean(GeneralKeys.TRIAL_VIEW_SETTING, false)) {
+        val trialViewEnabled = preferences.getBoolean(GeneralKeys.TRIAL_VIEW_SETTING, false)
+        viewMode = if (trialViewEnabled) {
             DataGridViewMode.TRIAL
         } else {
             DataGridViewMode.GRID
@@ -372,10 +375,14 @@ class DataGridActivity : ThemedActivity() {
         }
 
         menu.findItem(R.id.menu_data_grid_action_header_view)?.let {
-            it.isVisible = isGrid
-            it.title = getString(R.string.menu_action_header_view_data_grid_title)
+            it.isVisible = true
+            it.title = if (isGrid) getString(R.string.menu_action_header_view_data_grid_title)
+            else "Y"
         }
-        menu.findItem(R.id.menu_data_grid_action_column_view)?.isVisible = false
+        menu.findItem(R.id.menu_data_grid_action_column_view)?.let {
+            it.isVisible = !isGrid
+            it.title = "X"
+        }
 
         menu.findItem(R.id.menu_data_grid_action_heatmap)?.isVisible = isGrid
 
@@ -400,6 +407,16 @@ class DataGridActivity : ThemedActivity() {
         val wrapItem = menu.findItem(R.id.menu_data_grid_action_wrap_content)
         val isWrapped = viewModel.wrapContent.value
         wrapItem?.setIcon(if (isWrapped) R.drawable.arrow_collapse_horizontal else R.drawable.arrow_expand_horizontal)
+
+        menu.findItem(R.id.menu_data_grid_action_header_view)?.let {
+            it.isVisible = true
+            it.title = if (isGrid) getString(R.string.menu_action_header_view_data_grid_title)
+            else "Y"
+        }
+        menu.findItem(R.id.menu_data_grid_action_column_view)?.let {
+            it.isVisible = !isGrid
+            it.title = "X"
+        }
 
         val heatmapItem = menu.findItem(R.id.menu_data_grid_action_heatmap)
         heatmapItem?.isVisible = isGrid
@@ -475,10 +492,10 @@ class DataGridActivity : ThemedActivity() {
             DataGridViewMode.GRID
         }
         preferences.edit {
-            putBoolean(GeneralKeys.TRIAL_VIEW_SETTING, viewMode == DataGridViewMode.TRIAL)
+            putBoolean(GeneralKeys.TRIAL_VIEW_SETTING, viewMode != DataGridViewMode.GRID)
         }
         // Reload data for the new mode if needed
-        if (viewMode == DataGridViewMode.TRIAL && trialPlotDataList.isEmpty()) {
+        if (viewMode != DataGridViewMode.GRID) {
             loadTrialData()
         }
         invalidateOptionsMenu()
@@ -500,6 +517,8 @@ class DataGridActivity : ThemedActivity() {
 
     private fun showTrialSingleAttributePickerDialog(isRow: Boolean) {
         val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+        val units = database.getAllObservationUnits(studyId) ?: emptyArray<ObservationUnitModel>()
+        val geoCount = units.count { !it.geo_coordinates.isNullOrBlank() }
 
         val propColumns = database.getAllObservationUnitAttributeNames(studyId).toList()
         val coreColumns = database.existingObservationUnitCoreColumns
@@ -510,16 +529,15 @@ class DataGridActivity : ThemedActivity() {
         val currentAttr = if (isRow) preferences.getString(GeneralKeys.TRIAL_ROW_ATTR, "") ?: ""
         else preferences.getString(GeneralKeys.TRIAL_COL_ATTR, "") ?: ""
 
-        val items = allColumns
-        var selected = items.indexOfFirst { it == currentAttr }.coerceAtLeast(0)
+        var selected = allColumns.indexOfFirst { it == currentAttr }.coerceAtLeast(0)
 
-        AlertDialog.Builder(this, R.style.AppAlertDialog)
-            .setTitle(if (isRow) R.string.dialog_data_grid_header_picker_title else R.string.dialog_data_grid_column_picker_title)
-            .setSingleChoiceItems(items, selected) { _, which ->
+        val builder = AlertDialog.Builder(this, R.style.AppAlertDialog)
+            .setTitle(if (isRow) "Y" else "X")
+            .setSingleChoiceItems(allColumns, selected) { _, which ->
                 selected = which
             }
             .setPositiveButton(R.string.dialog_ok) { _, _ ->
-                val attr = items[selected]
+                val attr = allColumns[selected]
                 preferences.edit {
                     putString(
                         if (isRow) GeneralKeys.TRIAL_ROW_ATTR else GeneralKeys.TRIAL_COL_ATTR,
@@ -529,8 +547,20 @@ class DataGridActivity : ThemedActivity() {
                 loadTrialData()
             }
             .setNegativeButton(android.R.string.cancel, null)
-            .create()
-            .show()
+
+        if (geoCount > 0) {
+            builder.setNeutralButton(getString(R.string.trial_view_use_geo_coordinates, geoCount)) { _, _ ->
+                preferences.edit {
+                    putString(GeneralKeys.TRIAL_ROW_ATTR, "geo_coordinates")
+                    putString(GeneralKeys.TRIAL_COL_ATTR, "geo_coordinates")
+                    putBoolean(GeneralKeys.TRIAL_VIEW_SETTING, true)
+                }
+                viewMode = DataGridViewMode.TRIAL
+                loadTrialData()
+            }
+        }
+
+        builder.create().show()
     }
 
     private fun setDataGridColors() {
@@ -553,8 +583,6 @@ class DataGridActivity : ThemedActivity() {
             cellTextColor = typedValue.data
         }
     }
-
-    // ─── Trial Data Loading ─────────────────────────────────────────────
 
     private fun loadTrialData() {
         isLoading = true
@@ -583,21 +611,18 @@ class DataGridActivity : ThemedActivity() {
         val coreFieldNames = database.existingObservationUnitCoreColumns
         val allValidNames = unitAttributeNames + coreFieldNames.filter { it !in unitAttributeNames }
 
-        val hasPosCoordY = units.any { it.position_coordinate_y?.toIntOrNull() != null }
-        val hasPosCoordX = units.any { it.position_coordinate_x?.toIntOrNull() != null }
-
-        val defaultRowAttr = if (hasPosCoordY) "position_coordinate_y"
-        else allValidNames.firstOrNull {
+        val defaultRowAttr = allValidNames.firstOrNull {
             it.contains("row", ignoreCase = true) || it.contains("range", ignoreCase = true)
         } ?: allValidNames.firstOrNull() ?: "position_coordinate_y"
 
-        val defaultColAttr = if (hasPosCoordX) "position_coordinate_x"
-        else allValidNames.firstOrNull {
+        val defaultColAttr = allValidNames.firstOrNull {
             it.contains("col", ignoreCase = true) || it.contains("column", ignoreCase = true)
         } ?: allValidNames.getOrNull(1) ?: "position_coordinate_x"
 
         val rowAttrName = savedRowAttr.ifBlank { defaultRowAttr }
         val colAttrName = savedColAttr.ifBlank { defaultColAttr }
+
+        val isSpatialMode = (rowAttrName == "geo_coordinates" && colAttrName == "geo_coordinates")
 
         val effectiveRowAttr = if (rowAttrName in allValidNames) rowAttrName
         else if (defaultRowAttr in allValidNames) defaultRowAttr
@@ -648,14 +673,13 @@ class DataGridActivity : ThemedActivity() {
                 cursor.close()
             }
 
-            if (effectiveRowAttr == null || effectiveColAttr == null) {
+            if (!isSpatialMode && (effectiveRowAttr == null || effectiveColAttr == null)) {
                 withContext(Dispatchers.Main) {
                     trialPlotDataList = emptyList()
                     trialGridRows = 0
                     trialGridCols = 0
                     trialGrid = emptyArray()
                     isLoading = false
-                    showTrialRowAttributePickerDialog()
                 }
                 return@launch
             }
@@ -664,27 +688,70 @@ class DataGridActivity : ThemedActivity() {
             var maxRow = 0
             var maxCol = 0
 
-            units.forEach { unit ->
-                val rowStr = getAttributeValue(unit, effectiveRowAttr)
-                val colStr = getAttributeValue(unit, effectiveColAttr)
-                val row = rowStr?.toIntOrNull() ?: return@forEach
-                val col = colStr?.toIntOrNull() ?: return@forEach
-                val rowZero = (row - 1).coerceAtLeast(0)
-                val colZero = (col - 1).coerceAtLeast(0)
-                maxRow = maxOf(maxRow, rowZero + 1)
-                maxCol = maxOf(maxCol, colZero + 1)
-                val plotId = unit.observation_unit_db_id
-                val observed = plotObservationCounts[plotId] ?: 0
-                plots.add(
-                    TrialPlotData(
-                        plotId = plotId,
-                        rowIndex = rowZero,
-                        colIndex = colZero,
-                        label = "$row:$col",
-                        observedTraits = observed,
-                        totalTraits = totalTraits
+            if (isSpatialMode) {
+                val unitLocations = units.mapNotNull { unit ->
+                    val loc = com.fieldbook.tracker.utilities.GeodeticUtils.parseGeoCoordinate(unit.geo_coordinates)
+                    if (loc != null) unit to loc else null
+                }
+
+                if (unitLocations.isEmpty()) {
+                    withContext(Dispatchers.Main) {
+                        trialPlotDataList = emptyList()
+                        trialGridRows = 0
+                        trialGridCols = 0
+                        trialGrid = emptyArray()
+                        isLoading = false
+                    }
+                    return@launch
+                }
+
+                // Get unique sorted latitudes (descending, North to South) and longitudes (ascending, West to East)
+                val sortedLats = unitLocations.map { it.second.latitude }.distinct().sortedDescending()
+                val sortedLons = unitLocations.map { it.second.longitude }.distinct().sorted()
+
+                maxRow = sortedLats.size
+                maxCol = sortedLons.size
+
+                unitLocations.forEach { (unit, loc) ->
+                    val rowIndex = sortedLats.indexOf(loc.latitude)
+                    val colIndex = sortedLons.indexOf(loc.longitude)
+
+                    val plotId = unit.observation_unit_db_id
+                    val observed = plotObservationCounts[plotId] ?: 0
+                    plots.add(
+                        TrialPlotData(
+                            plotId = plotId,
+                            rowIndex = rowIndex,
+                            colIndex = colIndex,
+                            label = String.format(java.util.Locale.US, "%.5f, %.5f", loc.latitude, loc.longitude),
+                            observedTraits = observed,
+                            totalTraits = totalTraits
+                        )
                     )
-                )
+                }
+            } else {
+                units.forEach { unit ->
+                    val rowStr = getAttributeValue(unit, effectiveRowAttr!!)
+                    val colStr = getAttributeValue(unit, effectiveColAttr!!)
+                    val row = rowStr?.toIntOrNull() ?: return@forEach
+                    val col = colStr?.toIntOrNull() ?: return@forEach
+                    val rowZero = (row - 1).coerceAtLeast(0)
+                    val colZero = (col - 1).coerceAtLeast(0)
+                    maxRow = maxOf(maxRow, rowZero + 1)
+                    maxCol = maxOf(maxCol, colZero + 1)
+                    val plotId = unit.observation_unit_db_id
+                    val observed = plotObservationCounts[plotId] ?: 0
+                    plots.add(
+                        TrialPlotData(
+                            plotId = plotId,
+                            rowIndex = rowZero,
+                            colIndex = colZero,
+                            label = "$row:$col",
+                            observedTraits = observed,
+                            totalTraits = totalTraits
+                        )
+                    )
+                }
             }
 
             val grid = Array(maxRow) { arrayOfNulls<TrialPlotData?>(maxCol) }
@@ -711,6 +778,7 @@ class DataGridActivity : ThemedActivity() {
             "primary_id" -> unit.primary_id
             "secondary_id" -> unit.secondary_id
             "observation_unit_db_id" -> unit.observation_unit_db_id
+            "geo_coordinates" -> unit.geo_coordinates
             else -> {
                 val uniqueName = preferences.getString(GeneralKeys.UNIQUE_NAME, "")
                 database.getObservationUnitPropertyByPlotId(
@@ -729,6 +797,20 @@ class DataGridActivity : ThemedActivity() {
         wrapContent: Boolean = false,
         zoom: Float = 1f
     ) {
+        LaunchedEffect(trialGridRows, trialGridCols) {
+            if (trialGridRows == 0 || trialGridCols == 0) {
+                val savedRowAttr = preferences.getString(GeneralKeys.TRIAL_ROW_ATTR, "") ?: ""
+                val savedColAttr = preferences.getString(GeneralKeys.TRIAL_COL_ATTR, "") ?: ""
+                if (savedRowAttr.isBlank()) {
+                    showTrialRowAttributePickerDialog()
+                } else if (savedColAttr.isBlank()) {
+                    showTrialColumnAttributePickerDialog()
+                } else {
+                    showTrialRowAttributePickerDialog()
+                }
+            }
+        }
+
         if (trialGridRows == 0 || trialGridCols == 0) {
             Text(
                 text = getString(R.string.trial_view_no_layout),
@@ -751,8 +833,8 @@ class DataGridActivity : ThemedActivity() {
 
         if (isCondensed) {
             val matches = mutableListOf<Pair<Int, Int>>()
-            for (r in 0 until trialGridRows) {
-                for (c in 0 until trialGridCols) {
+            for (r in 0..<trialGridRows) {
+                for (c in 0 ..< trialGridCols) {
                     val plot = trialGrid[r][c]
                     val isMatch = when (activeTrialFilter) {
                         TrialFilter.NONE -> true
@@ -767,13 +849,16 @@ class DataGridActivity : ThemedActivity() {
             activeRowIndices = matches.map { it.first }.distinct().sorted()
             activeColIndices = matches.map { it.second }.distinct().sorted()
         } else {
-            activeRowIndices = (0 until trialGridRows).toList()
-            activeColIndices = (0 until trialGridCols).toList()
+            activeRowIndices = (0 ..< trialGridRows).toList()
+            activeColIndices = (0 ..< trialGridCols).toList()
         }
 
         val displayRows = activeRowIndices.size
         val displayCols = activeColIndices.size
         val columnCount = displayCols + 1
+
+        val isSpatial = preferences.getString(GeneralKeys.TRIAL_ROW_ATTR, "") == "geo_coordinates" &&
+                preferences.getString(GeneralKeys.TRIAL_COL_ATTR, "") == "geo_coordinates"
 
         Box(modifier = Modifier.fillMaxSize()) {
             Column(modifier = Modifier.fillMaxSize()) {
@@ -818,9 +903,10 @@ class DataGridActivity : ThemedActivity() {
                             count = columnCount,
                             layoutInfo = { LazyTableItem(column = it, row = 0) }
                         ) { col ->
-                            val text =
-                                if (col == 0) "" else activeColIndices[col - 1].let { it + 1 }
-                                    .toString()
+                            val text = when {
+                                col == 0 -> if (isSpatial) "Lat\\Lon" else "Y\\X"
+                                else -> (activeColIndices[col - 1] + 1).toString()
+                            }
                             Box(
                                 contentAlignment = Alignment.Center,
                                 modifier = Modifier
@@ -918,9 +1004,9 @@ class DataGridActivity : ThemedActivity() {
                                         } else Modifier)
                                 ) {
                                     val label = plot?.let {
-                                        when {
-                                            it.status == TrialPlotStatus.EMPTY -> ""
-                                            it.status == TrialPlotStatus.COMPLETE -> "\u2713"
+                                        when (it.status) {
+                                            TrialPlotStatus.EMPTY -> ""
+                                            TrialPlotStatus.COMPLETE -> "\u2713"
                                             else -> "~"
                                         }
                                     } ?: "\u2715"
@@ -1077,7 +1163,7 @@ class DataGridActivity : ThemedActivity() {
                         )
                     } else if (viewMode == DataGridViewMode.TRIAL) {
                         TrialDetails(
-                            cell, plotLabel, mRowHeaders.getOrNull(cell.row)?.name ?: cell.plotId,
+                            cell, plotLabel,
                             traitsWithDataTitle, noValue
                         )
                     } else {
@@ -1113,10 +1199,10 @@ class DataGridActivity : ThemedActivity() {
     private fun TrialDetails(
         cell: SelectedCell,
         plotLabel: String,
-        rowHeader: String,
         traitsWithDataTitle: String,
         noValue: String
     ) {
+        val rowHeader = cell.label ?: cell.plotId
         DetailsRow(plotLabel, rowHeader)
 
         Spacer(Modifier.height(8.dp))
@@ -1129,7 +1215,10 @@ class DataGridActivity : ThemedActivity() {
         Spacer(Modifier.height(4.dp))
 
         val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
-        val traitIcons = mutableStateOf<List<Pair<TraitObject, Boolean>>>(emptyList())
+
+        var traitIcons by remember {
+            mutableStateOf(emptyList<Pair<TraitObject, Boolean>>())
+        }
 
         LaunchedEffect(cell.plotId) {
             val icons = mTraits.mapNotNull { trait ->
@@ -1137,10 +1226,10 @@ class DataGridActivity : ThemedActivity() {
                 val hasValue = repeatedValues.any { it.value.isNotBlank() }
                 if (hasValue) Pair(trait, true) else null
             }
-            traitIcons.value = icons
+            traitIcons = icons
         }
 
-        if (traitIcons.value.isEmpty()) {
+        if (traitIcons.isEmpty()) {
             Text(
                 text = noValue,
                 color = Color(cellTextColor).copy(alpha = 0.7f),
@@ -1151,7 +1240,7 @@ class DataGridActivity : ThemedActivity() {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                traitIcons.value.forEach { (trait, _) ->
+                traitIcons.forEach { (trait, _) ->
                     TraitFormatIcon(trait = trait)
                 }
             }
@@ -1582,11 +1671,19 @@ class DataGridActivity : ThemedActivity() {
         val uniqueHeader = getCurrentRowHeader()
         val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
         val unitAttributes = database.getAllObservationUnitAttributeNames(studyId)
+        val coreFieldNames = database.existingObservationUnitCoreColumns
+        val allValidNames = unitAttributes + coreFieldNames.filter { it !in unitAttributes }
+
         val savedHeaders = preferences.getStringSet(GeneralKeys.DATAGRID_EXTRA_HEADERS, null)
         return if (savedHeaders == null) {
-            listOf(uniqueHeader).filter { it in unitAttributes }
+            val base = listOf(uniqueHeader)
+            if ("geo_coordinates" in allValidNames) {
+                (base + "geo_coordinates").filter { it in allValidNames }
+            } else {
+                base.filter { it in allValidNames }
+            }
         } else {
-            val others = unitAttributes.filter { it in savedHeaders && it != uniqueHeader }
+            val others = allValidNames.filter { it in savedHeaders && it != uniqueHeader }
             if (uniqueHeader in savedHeaders) listOf(uniqueHeader) + others else others
         }
     }
@@ -1647,7 +1744,8 @@ class DataGridActivity : ThemedActivity() {
             col = 0,
             plotId = plot.plotId,
             traitIndex = 0,
-            repeated = repeatedValues.toList()
+            repeated = repeatedValues.toList(),
+            label = plot.label
         )
     }
 
@@ -1722,8 +1820,8 @@ class DataGridActivity : ThemedActivity() {
                 else displayItems[idx] in savedHeaders
             }
 
-            AlertDialog.Builder(this@DataGridActivity, R.style.AppAlertDialog)
-                .setTitle(R.string.dialog_data_grid_header_picker_title)
+            val dialog = AlertDialog.Builder(this@DataGridActivity, R.style.AppAlertDialog)
+                .setTitle("Y")
                 .setMultiChoiceItems(
                     displayItems.toTypedArray(),
                     checkedItems
@@ -1731,6 +1829,7 @@ class DataGridActivity : ThemedActivity() {
                     checkedItems[which] = isChecked
                 }
                 .setNegativeButton(android.R.string.cancel, null)
+                .setNeutralButton(R.string.dialog_fragment_summary_neutral_button, null)
                 .setPositiveButton(android.R.string.ok) { _, _ ->
                     val newSelected =
                         displayItems.filterIndexed { idx, _ -> checkedItems[idx] }.toSet()
@@ -1748,7 +1847,17 @@ class DataGridActivity : ThemedActivity() {
                         viewModel.loadGrid(getCurrentRowHeader(), orderedDisplay)
                     }
                 }
-                .create().show()
+                .create()
+
+            dialog.show()
+
+            dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
+                val allChecked = checkedItems.all { it }
+                for (i in checkedItems.indices) {
+                    checkedItems[i] = !allChecked
+                    dialog.listView.setItemChecked(i, !allChecked)
+                }
+            }
         }
     }
 
