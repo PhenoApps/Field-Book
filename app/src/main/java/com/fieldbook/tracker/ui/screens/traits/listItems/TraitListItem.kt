@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.rounded.DragHandle
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
@@ -105,7 +104,7 @@ fun TraitListItem(
         shape = RoundedCornerShape(12.dp),
         color = if (isSelected) AppTheme.colors.interactive.selectedItemBackground else AppTheme.colors.background,
         border = androidx.compose.foundation.BorderStroke(
-            if (isSelected) 1.dp else 0.dp,
+            1.dp,
             if (isSelected) AppTheme.colors.primary else AppTheme.colors.surface.border
         ),
         shadowElevation = 0.dp

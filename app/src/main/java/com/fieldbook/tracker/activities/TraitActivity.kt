@@ -10,8 +10,8 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.remember
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
@@ -23,14 +23,11 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.database.viewmodels.TraitDetailViewModel
+import com.fieldbook.tracker.database.viewmodels.TraitEditorViewModel
 import com.fieldbook.tracker.dialogs.FileExploreDialogFragment
 import com.fieldbook.tracker.dialogs.NewTraitDialog
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
-import com.fieldbook.tracker.ui.screens.traits.TraitEditorScreen
-import com.fieldbook.tracker.ui.theme.AppTheme
-import com.fieldbook.tracker.utilities.Utils
-import com.fieldbook.tracker.database.viewmodels.TraitEditorViewModel
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.traits.formats.NumericFormat
 import com.fieldbook.tracker.traits.formats.TraitFormat
@@ -42,8 +39,11 @@ import com.fieldbook.tracker.ui.navigation.routes.TraitEditor
 import com.fieldbook.tracker.ui.navigation.routes.TraitFieldPicker
 import com.fieldbook.tracker.ui.navigation.routes.TraitGraph
 import com.fieldbook.tracker.ui.screens.traits.TraitDetailScreen
+import com.fieldbook.tracker.ui.screens.traits.TraitEditorScreen
 import com.fieldbook.tracker.ui.screens.traits.TraitFieldPickerScreen
+import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.SoundHelperImpl
+import com.fieldbook.tracker.utilities.Utils
 import com.fieldbook.tracker.utilities.VibrateUtil
 import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.utils.BaseDocumentTreeUtil
@@ -204,7 +204,6 @@ class TraitActivity : ThemedActivity() {
                                 },
                             )
                         }
-
                     }
                 }
             }
