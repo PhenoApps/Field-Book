@@ -44,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -183,7 +184,7 @@ fun TraitFieldPickerScreen(
             Surface(
                 tonalElevation = 3.dp,
                 shadowElevation = 8.dp,
-                color = AppTheme.colors.background
+                color = AppTheme.colors.primary
             ) {
                 Row(
                     modifier = Modifier
@@ -199,12 +200,14 @@ fun TraitFieldPickerScreen(
                         modifier = Modifier.fillMaxWidth(),
                         contentPadding = PaddingValues(vertical = 12.dp),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = AppTheme.colors.primary
+                            contentColor = AppTheme.colors.primary,
+                            containerColor = AppTheme.colors.background
                         )
                     ) {
                         Text(
                             text = stringResource(R.string.traits_viewer_add_selected),
-                            style = MaterialTheme.typography.labelLarge
+                            style = MaterialTheme.typography.labelLarge,
+                            color = Color.Black
                         )
                     }
                 }
