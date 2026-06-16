@@ -638,9 +638,9 @@
     <string name="menu_action_reset_sort_data_grid_title">Reset Sort</string>
     <string name="menu_action_wrap_content_data_grid_title">Wrap Content</string>
     <string name="menu_action_heatmap_data_grid_title">Heatmap</string>
-    <string name="menu_data_grid_action_trial_view">Trial View</string>
+    <string name="menu_data_grid_action_map_view">Map View</string>
     <string name="menu_data_grid_action_grid_view">Grid View</string>
-    <string name="menu_data_grid_action_trial_attributes">Set Row/Column</string>
+    <string name="menu_data_grid_action_map_attributes">Set Row/Column</string>
     <string name="menu_data_grid_action_cell_details">Cell Details</string>
     <string name="menu_data_grid_action_cell_details_on">Details: On</string>
     <string name="menu_data_grid_action_cell_details_off">Details: Off</string>
@@ -656,17 +656,17 @@
     <string name="act_data_grid_details_repeated">%d more measures available</string>
     <string name="act_data_grid_collect_button">Collect</string>
     <string name="act_data_grid_details_title">Cell Details</string>
-    <string name="trial_view_no_layout">Field layout not available. Use Set Row/Column to define the row and column attributes.</string>
-    <string name="trial_view_choose_attributes_title">Choose Row and Column</string>
-    <string name="trial_view_row_prompt">Select attribute for ROW:</string>
-    <string name="trial_view_col_prompt">Select attribute for COLUMN:</string>
-    <string name="trial_view_choose_attributes_ok">Set Attributes</string>
-    <string name="trial_view_legend_complete">Complete</string>
-    <string name="trial_view_legend_partial">Partial</string>
-    <string name="trial_view_legend_empty">Empty</string>
-    <string name="trial_view_legend_missing">Missing</string>
-    <string name="trial_view_traits_with_data">Traits with data:</string>
-    <string name="trial_view_use_geo_coordinates">Use GPS Coordinates (%d detected)</string>
+    <string name="map_view_no_layout">Field layout not available. Use Set Row/Column to define the row and column attributes.</string>
+    <string name="map_view_choose_attributes_title">Choose Row and Column</string>
+    <string name="map_view_row_prompt">Select attribute for ROW:</string>
+    <string name="map_view_col_prompt">Select attribute for COLUMN:</string>
+    <string name="map_view_choose_attributes_ok">Set Attributes</string>
+    <string name="map_view_legend_complete">Complete</string>
+    <string name="map_view_legend_partial">Partial</string>
+    <string name="map_view_legend_empty">Empty</string>
+    <string name="map_view_legend_missing">Missing</string>
+    <string name="map_view_traits_with_data">Traits with data:</string>
+    <string name="map_view_use_geo_coordinates">Use GPS Coordinates (%d detected)</string>
 
     <!--- Lock -->
     <string name="activity_collect_locked_state">Locked - data entry, modification and deletion are disabled</string>

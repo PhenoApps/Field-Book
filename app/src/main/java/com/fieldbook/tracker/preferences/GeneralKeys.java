@@ -162,10 +162,10 @@ public class GeneralKeys {
     public static final String DATAGRID_SORT_COLUMN = "com.fieldbook.tracker.datagrid.DATAGRID_SORT_COLUMN";
     public static final String DATAGRID_SORT_ASCENDING = "com.fieldbook.tracker.datagrid.DATAGRID_SORT_ASCENDING";
     public static final String DATAGRID_ZOOM = "com.fieldbook.tracker.datagrid.DATAGRID_ZOOM";
-    //Trial view
-    public static final String TRIAL_VIEW_SETTING = "com.fieldbook.tracker.datagrid.TRIAL_VIEW_SETTING";
-    public static final String TRIAL_ROW_ATTR = "com.fieldbook.tracker.datagrid.TRIAL_ROW_ATTR";
-    public static final String TRIAL_COL_ATTR = "com.fieldbook.tracker.datagrid.TRIAL_COL_ATTR";
+    //Map view
+    public static final String MAP_VIEW_SETTING = "com.fieldbook.tracker.datagrid.MAP_VIEW_SETTING";
+    public static final String MAP_ROW_ATTR = "com.fieldbook.tracker.datagrid.MAP_ROW_ATTR";
+    public static final String MAP_COL_ATTR = "com.fieldbook.tracker.datagrid.MAP_COL_ATTR";
     //Cell details panel
     public static final String CELL_DETAILS_SETTING = "com.fieldbook.tracker.datagrid.CELL_DETAILS_SETTING";
 
