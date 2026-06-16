@@ -31,9 +31,9 @@ fun TraitList(
     onRemoveTrait: (TraitObject) -> Unit,
     onMoveItem: (Int, Int) -> Unit,
     onDragStateChanged: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    lazyListState: androidx.compose.foundation.lazy.LazyListState = rememberLazyListState()
 ) {
-    val lazyListState = rememberLazyListState()
     val state = rememberReorderableLazyListState(lazyListState) { from, to ->
         onMoveItem(from.index, to.index)
     }

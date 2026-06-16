@@ -8,10 +8,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
+import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
-import com.fieldbook.tracker.database.repository.TraitRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -91,7 +91,10 @@ class TraitEditorViewModel @Inject constructor(
         }
         _uiState.update { it.copy(sortOrder = sortOrder) }
 
-        loadTraits(showLoading = false)
+        viewModelScope.launch {
+            loadTraitsInternal(showLoading = false)
+            _events.emit(TraitEditorEvent.ScrollToTop)
+        }
     }
 
     // IN-MEMORY UPDATES (does not fetch from db)
@@ -161,35 +164,40 @@ class TraitEditorViewModel @Inject constructor(
 
     // DB RELATED
 
-    fun loadTraits(showLoading: Boolean = true) {
+    private suspend fun loadTraitsInternal(showLoading: Boolean = true) {
         if (!isScopeConfigured) return
 
+        if (showLoading) {
+            _uiState.update { it.copy(isLoading = true) }
+        }
+
+        runCatching {
+            repo.getTraits(
+                studyId = scopedStudyId,
+                usePerFieldList = usePerFieldTraitList,
+                sortOrder = if (_uiState.value.sortOrder == "position")
+                    prefs.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position") ?: "position"
+                else _uiState.value.sortOrder
+            )
+        }
+            .onSuccess { traits ->
+                _uiState.update {
+                    it.copy(traits = traits, isLoading = false)
+                }
+                lastCommittedSortedTraitIds = traits.map { it.id }
+            }
+            .onFailure { e ->
+                _uiState.update {
+                    it.copy(isLoading = false)
+                }
+                Log.e(TAG, "Error loading traits", e)
+                _events.emit(TraitEditorEvent.ShowToast(R.string.error_loading_traits))
+            }
+    }
+
+    fun loadTraits(showLoading: Boolean = true) {
         viewModelScope.launch {
-            if (showLoading) {
-                _uiState.update { it.copy(isLoading = true) }
-            }
-
-            runCatching {
-                repo.getTraits(
-                    studyId = scopedStudyId,
-                    usePerFieldList = usePerFieldTraitList,
-                    sortOrder = _uiState.value.sortOrder,
-                )
-            }
-                .onSuccess { traits ->
-                    _uiState.update {
-                        it.copy(traits = traits, isLoading = false)
-                    }
-                    lastCommittedSortedTraitIds = traits.map { it.id }
-
-                }
-                .onFailure { e ->
-                    _uiState.update {
-                        it.copy(isLoading = false)
-                    }
-                    Log.e(TAG, "Error loading traits", e)
-                    _events.emit(TraitEditorEvent.ShowToast(R.string.error_loading_traits))
-                }
+            loadTraitsInternal(showLoading)
         }
     }
 
@@ -215,7 +223,10 @@ class TraitEditorViewModel @Inject constructor(
         }
         _uiState.update { it.copy(sortOrder = sortOrder) }
 
-        loadTraits(showLoading = false)
+        viewModelScope.launch {
+            loadTraitsInternal(showLoading = false)
+            _events.emit(TraitEditorEvent.ScrollToTop)
+        }
     }
 
     fun loadAvailableTraitsForCurrentStudy() {
@@ -744,6 +755,7 @@ sealed class TraitEditorEvent {
     data class RequestStoragePermissionForExport(val source: DialogTriggerSource) : TraitEditorEvent()
     object OpenFileExplorer : TraitEditorEvent()
     object OpenCloudFilePicker : TraitEditorEvent()
+    object ScrollToTop : TraitEditorEvent()
 }
 
 // only one dialog can be active at a time

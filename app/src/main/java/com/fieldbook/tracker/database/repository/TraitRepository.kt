@@ -28,7 +28,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import org.phenoapps.utils.BaseDocumentTreeUtil
 import java.io.InputStreamReader
-import java.util.ArrayList
 import java.util.UUID
 import javax.inject.Inject
 
@@ -95,18 +94,15 @@ class TraitRepository @Inject constructor(
                 }
 
             // For field-specific lists, prefer the field-specific trait order when one exists.
-            // Fall back to observation_variables position (global order) when no field order is set.
+            // Fall back to the Editor screen's current order when no field order is set.
             if (sortOrder == "position") {
                 val fieldOrder = if (hasFieldConfig) fieldTraitConfigDao.getTraitIdsInOrder(studyId) else emptyList()
-                filtered = if (fieldOrder.isNotEmpty()) {
+                if (fieldOrder.isNotEmpty()) {
                     val orderMap = fieldOrder.mapIndexed { index, id -> id to index }.toMap()
-                    filtered.sortedWith(compareBy { orderMap[it.id] ?: Int.MAX_VALUE })
-                } else {
-                    filtered.sortedWith(
-                        compareBy<TraitObject> { it.realPosition }
-                            .thenBy { it.id.toIntOrNull() ?: Int.MAX_VALUE }
-                    )
+                    filtered = filtered.sortedWith(compareBy { orderMap[it.id] ?: Int.MAX_VALUE })
                 }
+                // If fieldOrder is empty, we keep the order of 'filtered', which matches 'allTraits'.
+                // 'allTraits' is already sorted according to the Editor's current sort preference.
             } else if (sortOrder == "visible") {
                 // Keep visible traits at the top when sorting by visibility.
                 filtered = filtered.sortedWith(

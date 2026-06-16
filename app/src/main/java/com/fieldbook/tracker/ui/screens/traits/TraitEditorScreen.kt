@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -66,6 +64,8 @@ fun TraitEditorScreen(
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isPerFieldTraitListEnabled = true
+
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
 
     LaunchedEffect(isViewerMode, scopedStudyId, isPerFieldTraitListEnabled) {
         val studyScope = if (isViewerMode) scopedStudyId else null
@@ -183,6 +183,7 @@ fun TraitEditorScreen(
                         onDragStateChanged = { dragging ->
                             viewModel.onDragStateChanged(dragging)
                         },
+                        lazyListState = listState,
                         modifier = Modifier.fillMaxSize()
                     )
                 }
@@ -355,6 +356,10 @@ fun TraitEditorScreen(
                 is TraitEditorEvent.ShareFile -> {
                     val doc = DocumentFile.fromSingleUri(context, event.fileUri)
                     FileUtil.shareFile(context, prefs, doc)
+                }
+
+                TraitEditorEvent.ScrollToTop -> {
+                    listState.animateScrollToItem(0)
                 }
             }
         }
