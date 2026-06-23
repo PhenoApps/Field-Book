@@ -3,7 +3,6 @@ package com.fieldbook.tracker.adapters;
 import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -16,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.dialogs.OperatorDialog;
 import com.fieldbook.tracker.objects.SearchDialogDataModel;
+import com.fieldbook.tracker.utilities.ThemedAlertDialog;
 
 import java.util.List;
 
@@ -37,7 +37,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
     @NonNull
     @Override
     public SearchViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_search, parent, false);
+        View itemView = ThemedAlertDialog.inflate(parent.getContext(), R.layout.list_item_search, parent, false);
         return new SearchViewHolder(itemView);
     }
 
@@ -51,7 +51,8 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
             AttributeAdapter.AttributeModel attribute = data.getAttribute();
 
             holder.c.setText(attribute.getLabel());
-            holder.l.setImageResource(data.getImageResourceId());
+            ThemedAlertDialog.setThemedImageResource(
+                    holder.l, holder.l.getContext(), data.getImageResourceId());
             holder.e.setText(data.getText());
             holder.e.addTextChangedListener(new TextWatcher() {
                 @Override
@@ -76,6 +77,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.SearchView
         holder.d.setOnClickListener(arg0 -> {
             onDeleteClickedListener.onDeleteClicked(holder.getBindingAdapterPosition());
         });
+        ThemedAlertDialog.tintImageView(holder.d, holder.d.getContext());
     }
 
     @Override

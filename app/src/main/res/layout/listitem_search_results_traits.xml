@@ -7,4 +7,5 @@
     android:gravity="center"
     android:paddingTop="4dp"
     android:paddingBottom="4dp"
+    android:textColor="?android:attr/textColorPrimary"
     android:textSize="?attr/fb_body_text_size"/>

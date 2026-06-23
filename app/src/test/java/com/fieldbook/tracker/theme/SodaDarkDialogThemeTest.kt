@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import android.os.Build
 import android.view.View
+import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.LayoutRes
@@ -50,6 +51,7 @@ class SodaDarkDialogThemeTest {
     private val customViewCases = listOf(
         CustomViewCase(R.layout.dialog_field_edit_name, R.string.field_edit_display_name, "edit display name"),
         CustomViewCase(R.layout.dialog_field_sort, R.string.dialog_field_sort_title, "sort entries"),
+        CustomViewCase(R.layout.dialog_search, R.string.main_toolbar_search, "search query builder"),
         CustomViewCase(R.layout.dialog_collect_att_chooser, R.string.search_attribute_dialog_title, "set search id"),
         CustomViewCase(R.layout.dialog_export, R.string.settings_export, "export"),
         CustomViewCase(R.layout.dialog_trait_creator, R.string.traits_new_dialog_title, "trait layout"),
@@ -121,6 +123,24 @@ class SodaDarkDialogThemeTest {
         track(dialog)
         DialogChromeAssertions.idleAfterShow()
         assertChrome(dialog, "edit display name (chainOnShow)")
+    }
+
+    @Test
+    fun showPath_searchDialog_usesFullWidthPanel() {
+        val content = ThemedAlertDialog.inflate(sodaActivityContext, R.layout.dialog_search)
+        val dialog = ThemedAlertDialog.builder(sodaActivityContext)
+            .setTitle(R.string.main_toolbar_search)
+            .setView(content)
+            .create()
+        ThemedAlertDialog.chainOnShow(dialog, sodaActivityContext) {
+            val params = dialog.window!!.attributes
+            params.width = WindowManager.LayoutParams.MATCH_PARENT
+            dialog.window!!.attributes = params
+        }
+        dialog.show()
+        track(dialog)
+        DialogChromeAssertions.idleAfterShow()
+        DialogChromeAssertions.assertDialogUsesMostOfScreenWidth(dialog, "search query builder")
     }
 
     @Test

@@ -99,7 +99,12 @@ public class SearchDialog extends DialogFragment implements AttributeChooserDial
         builder.setNeutralButton(R.string.search_dialog_clear, null);
 
         AlertDialog dialog = builder.create();
-        dialog.setOnShowListener(d -> dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM));
+        ThemedAlertDialog.chainOnShow(dialog, originActivity, d -> {
+            dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+            WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
+            params.width = WindowManager.LayoutParams.MATCH_PARENT;
+            dialog.getWindow().setAttributes(params);
+        });
         return dialog;
     }
 
@@ -279,7 +284,7 @@ public class SearchDialog extends DialogFragment implements AttributeChooserDial
 
             // If search has results, show them, otherwise display error message
 
-            myList.setAdapter(new SearchResultsAdapter(getActivity(), data, traitData));
+            myList.setAdapter(new SearchResultsAdapter(originActivity, data, traitData));
             //Dismiss the search dialog
             dismiss();
             //Show the results dialog

@@ -10,6 +10,7 @@ import androidx.appcompat.app.AlertDialog
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.robolectric.shadows.ShadowLooper
 
 internal object DialogChromeAssertions {
@@ -54,6 +55,20 @@ internal object DialogChromeAssertions {
         val panel = findViewById<View>(androidx.appcompat.R.id.parentPanel)
         assertNotNull("$label: parentPanel must exist after show", panel)
         return panel!!
+    }
+
+    fun assertDialogUsesMostOfScreenWidth(
+        dialog: AlertDialog,
+        label: String,
+        minFraction: Float = 0.85f,
+    ) {
+        val panel = dialog.requireParentPanel(label)
+        val screenWidth = panel.resources.displayMetrics.widthPixels
+        val minWidth = (screenWidth * minFraction).toInt()
+        assertTrue(
+            "$label: panel width ${panel.width}px should be >= ${minWidth}px (${minFraction * 100}% of screen)",
+            panel.width >= minWidth,
+        )
     }
 
     fun View.backgroundColor(): Int? = when (val bg = background) {
