@@ -1,0 +1,42 @@
+name: soda-dark-fork-release
+
+# Publishes a debug APK when a soda-dark-* tag is pushed (uses GITHUB_TOKEN; no local gh auth).
+on:
+  push:
+    tags:
+      - "soda-dark-*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout tag
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build debug APK
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Soda Dark preview ${{ github.ref_name }}
+          files: app/build/outputs/apk/debug/app-debug.apk
+          body: |
+            Debug APK from `feature/soda-dark-theme` tag `${{ github.ref_name }}`.
+
+            Built in CI from the tagged commit via `assembleDebug`.
