@@ -267,15 +267,19 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
 
         val useCaseGroup = useCaseGroupBuilder.build()
 
-        val camera = cameraXInstance.get().bindToLifecycle(
-            context as LifecycleOwner,
-            currentSelector,
-            useCaseGroup
-        )
+        try {
+            val camera = cameraXInstance.get().bindToLifecycle(
+                context as LifecycleOwner,
+                currentSelector,
+                useCaseGroup
+            )
 
-        Log.d(TAG, "Camera lifecycle bound: ${camera.cameraInfo}")
+            Log.d(TAG, "Camera lifecycle bound: ${camera.cameraInfo}")
 
-        onBind.invoke(camera, executor, imageCapture)
+            onBind.invoke(camera, executor, imageCapture)
+        } catch (e: Exception) {
+            Log.e(TAG, "bindPreview: failed to bind camera lifecycle", e)
+        }
     }
 
     @OptIn(ExperimentalGetImage::class)

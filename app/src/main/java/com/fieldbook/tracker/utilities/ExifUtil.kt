@@ -13,6 +13,8 @@ import com.fieldbook.tracker.traits.PhotoTraitLayout
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import java.io.File
+import java.io.FileOutputStream
 
 /**
  * Utility class for handling ExifInterface on images.
@@ -24,45 +26,30 @@ class ExifUtil {
 
         inline fun <reified T> saveJsonToExif(context: Context, model: T, uri: Uri) {
 
-            try {
-
-                context.contentResolver.openFileDescriptor(uri, "rw").use { fd ->
-
-                    fd?.let { desc ->
-
-                        val exif = ExifInterface(desc.fileDescriptor)
-
-                        val gson = Gson().toJson(
-                            model,
-                            object : TypeToken<T>() {}.type
-                        )
-
-                        exif.setAttribute(ExifInterface.TAG_USER_COMMENT, gson.toString())
-                        exif.saveAttributes()
-                    }
-                }
-
-            } catch (e: Exception) {
-
-                e.printStackTrace()
-
-                Log.d(PhotoTraitLayout.TAG, "EXIF data failed to write.")
-            }
+            val gson = Gson().toJson(model, object : TypeToken<T>() {}.type)
+            saveStringToExif(context, gson.toString(), uri)
         }
 
         fun saveStringToExif(context: Context, data: String, uri: Uri) {
 
+            // ExifInterface(FileDescriptor).saveAttributes() has a bug on some Android versions
+            // where it writes an incorrect APP1 segment length and re-includes the original JPEG's
+            // SOI byte, producing a corrupt file. Using a temp-file path avoids this bug.
+            val tempFile = File(context.cacheDir, "exif_edit_${System.currentTimeMillis()}.jpg")
+
             try {
 
-                context.contentResolver.openFileDescriptor(uri, "rw").use { fd ->
+                context.contentResolver.openInputStream(uri)?.use { input ->
+                    FileOutputStream(tempFile).use { output -> input.copyTo(output) }
+                } ?: return
 
-                    fd?.let { desc ->
+                val exif = ExifInterface(tempFile.absolutePath)
+                exif.setAttribute(ExifInterface.TAG_USER_COMMENT, data)
+                exif.saveAttributes()
 
-                        val exif = ExifInterface(desc.fileDescriptor)
-
-                        exif.setAttribute(ExifInterface.TAG_USER_COMMENT, data)
-                        exif.saveAttributes()
-                    }
+                // Write the corrected file back, truncating any previous content
+                context.contentResolver.openOutputStream(uri, "wt")?.use { output ->
+                    tempFile.inputStream().use { input -> input.copyTo(output) }
                 }
 
             } catch (e: Exception) {
@@ -70,6 +57,10 @@ class ExifUtil {
                 e.printStackTrace()
 
                 Log.d(PhotoTraitLayout.TAG, "EXIF data failed to write.")
+
+            } finally {
+
+                tempFile.delete()
             }
         }
 

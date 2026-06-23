@@ -2,11 +2,13 @@ package com.fieldbook.tracker.traits
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
+import android.util.Log
 import android.util.AttributeSet
 import android.util.Size
 import androidx.annotation.OptIn
@@ -338,6 +340,11 @@ open class PhotoTraitLayout : CameraTrait {
 
         val file = File(context.cacheDir, TEMPORARY_IMAGE_NAME)
 
+        if (!file.exists() || file.length() == 0L) {
+            Log.e(TAG, "makeImage: temp file is missing or empty — camera may not have written to the output URI")
+            return
+        }
+
         file.inputStream().use { stream ->
 
             val data = stream.readBytes()
@@ -370,6 +377,10 @@ open class PhotoTraitLayout : CameraTrait {
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(context.packageManager) != null) {
             takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri)
+            // Required on Android 7.0+ so the camera app can write to the FileProvider URI.
+            // Without this the camera silently fails to save and returns RESULT_OK with an empty file.
+            takePictureIntent.clipData = ClipData.newRawUri("", uri)
+            takePictureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
             (context as Activity).startActivityForResult(
                 takePictureIntent,
                 PICTURE_REQUEST_CODE
