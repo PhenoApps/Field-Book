@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.activities.brapi.io.filter.filterer
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -253,7 +254,7 @@ class BrapiStudyFilterActivity(
             .map { it.study.seasons ?: listOf() }.flatten().filterNotNull().distinct().size
         val cropCount = models.map { it.study.commonCropName }.distinct().size
 
-        AlertDialog.Builder(this)
+        ThemedAlertDialog.builder(this)
             .setTitle(R.string.dialog_brapi_filter_choices_title)
             .setItems(
                 arrayOf(

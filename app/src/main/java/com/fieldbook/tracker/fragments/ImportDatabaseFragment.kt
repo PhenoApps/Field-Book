@@ -1,11 +1,13 @@
 package com.fieldbook.tracker.fragments
 
-import android.app.ProgressDialog
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
+
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.text.Html
 import android.util.Log
+import androidx.appcompat.app.AlertDialog
+import androidx.core.text.HtmlCompat
 import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
@@ -36,7 +38,7 @@ class ImportDatabaseFragment : Fragment() {
     @Inject
     lateinit var database: DataHelper
 
-    private var dialog: ProgressDialog? = null
+    private var dialog: AlertDialog? = null
 
     private var fail: Boolean = false
 
@@ -186,12 +188,13 @@ class ImportDatabaseFragment : Fragment() {
     private fun showProgressBarLoadingDialog() {
         // show only if the fragment is added to the activity
         if (isAdded) {
-            dialog = ProgressDialog(mContext, R.style.AppAlertDialog)
-            dialog?.isIndeterminate = true
-            dialog?.setCancelable(false)
-            dialog?.setMessage(
-                Html
-                    .fromHtml(context?.getString(R.string.import_dialog_importing))
+            val ctx = requireContext()
+            dialog = ThemedAlertDialog.indeterminateProgressDialog(
+                ctx,
+                HtmlCompat.fromHtml(
+                    ctx.getString(R.string.import_dialog_importing),
+                    HtmlCompat.FROM_HTML_MODE_LEGACY,
+                ),
             )
             dialog?.show()
         }

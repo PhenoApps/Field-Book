@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.dialogs
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import android.content.Context
 import androidx.appcompat.app.AlertDialog
 import com.fieldbook.tracker.R
@@ -15,7 +16,7 @@ class InvalidValueDialog(private val context: Context) {
     ) {
         val message = context.getString(R.string.dialog_save_invalid_value_message)
 
-        AlertDialog.Builder(context, R.style.AppAlertDialog)
+        ThemedAlertDialog.builder(context)
             .setTitle(R.string.dialog_invalid_value_title)
             .setMessage(message)
             .setPositiveButton(R.string.dialog_yes) { dialog, _ ->

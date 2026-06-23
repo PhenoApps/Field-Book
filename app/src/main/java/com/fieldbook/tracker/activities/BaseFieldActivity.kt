@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.activities
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Handler
@@ -186,13 +187,12 @@ abstract class BaseFieldActivity : ThemedActivity(), FieldAdapterController, Fie
     fun showDeleteConfirmationDialog(fieldIds: List<Int>, isFromDetailFragment: Boolean) {
         val fieldNames = getFieldNames(fieldIds)
         val message = resources.getQuantityString(R.plurals.fields_delete_confirmation, fieldIds.size, fieldNames)
-        val formattedMessage = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-            android.text.Html.fromHtml(message, android.text.Html.FROM_HTML_MODE_LEGACY)
-        } else {
-            android.text.Html.fromHtml(message)
-        }
+        val formattedMessage = androidx.core.text.HtmlCompat.fromHtml(
+            message,
+            androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY,
+        )
 
-        val builder = AlertDialog.Builder(this, R.style.AppAlertDialog)
+        val builder = ThemedAlertDialog.builder(this)
             .setTitle(getString(R.string.fields_delete_study))
             .setMessage(formattedMessage)
             .setPositiveButton(getString(R.string.dialog_yes)) { _, _ ->
@@ -227,7 +227,7 @@ abstract class BaseFieldActivity : ThemedActivity(), FieldAdapterController, Fie
     }
 
     private fun showPermanentDeleteWarningDialog(fieldIds: List<Int>, isFromDetailFragment: Boolean) {
-        AlertDialog.Builder(this, R.style.AppAlertDialog)
+        ThemedAlertDialog.builder(this)
             .setTitle(getString(R.string.fields_delete_study))
             .setMessage(getString(R.string.fields_delete_permanent_warning))
             .setPositiveButton(getString(R.string.fields_delete)) { _, _ ->

@@ -42,6 +42,17 @@ public final class SnackbarUtils {
      * @param view    The view to find a parent from.
      * @param message The text to show.  Can be formatted text.
      */
+    private static int resolveThemeColor(@NonNull Context ctx, int attrId, int fallbackColor) {
+        TypedValue tv = new TypedValue();
+        if (!ctx.getTheme().resolveAttribute(attrId, tv, true)) {
+            return fallbackColor;
+        }
+        if (tv.resourceId != 0) {
+            return ContextCompat.getColor(ctx, tv.resourceId);
+        }
+        return tv.data;
+    }
+
     private static void showSnackbar(@NonNull View view, @NonNull String message, int duration) {
         if (message.isEmpty()) {
             return;
@@ -51,31 +62,21 @@ public final class SnackbarUtils {
         TextView textView = snackbar.getView().findViewById(com.google.android.material.R.id.snackbar_text);
         textView.setSingleLine(false);
 
-        // Apply theme-aware colors: prefer app-specific attributes (fb_color_primary_dark for bg,
-        // fb_color_text_light for text). Fall back to Material default colors if attrs not present.
+        // Theme-aware snackbar colors (fallbacks only if attrs are missing)
         try {
             Context ctx = view.getContext();
-            TypedValue tv = new TypedValue();
 
-            int bgColor = Color.parseColor("#323232"); // default material snack background
-            int txtColor = Color.WHITE; // default material snack text
-
-            // Resolve background color from theme attribute fb_color_primary_dark, fallback to colorPrimaryDark
-            if (ctx.getTheme().resolveAttribute(R.attr.fb_color_primary_dark, tv, true)) {
-                if (tv.resourceId != 0) bgColor = ContextCompat.getColor(ctx, tv.resourceId);
-                else bgColor = tv.data;
-            } else if (ctx.getTheme().resolveAttribute(android.R.attr.colorPrimaryDark, tv, true)) {
-                if (tv.resourceId != 0) bgColor = ContextCompat.getColor(ctx, tv.resourceId);
-                else bgColor = tv.data;
+            int bgColor = resolveThemeColor(ctx, R.attr.fb_color_primary_dark, 0);
+            if (bgColor == 0) {
+                bgColor = resolveThemeColor(ctx, R.attr.fb_color_background, 0);
+            }
+            if (bgColor == 0) {
+                bgColor = resolveThemeColor(ctx, android.R.attr.colorPrimaryDark, ContextCompat.getColor(ctx, android.R.color.darker_gray));
             }
 
-            // Resolve text color from fb_color_text_light, fallback to white or android:textColorPrimary
-            if (ctx.getTheme().resolveAttribute(R.attr.fb_color_text_light, tv, true)) {
-                if (tv.resourceId != 0) txtColor = ContextCompat.getColor(ctx, tv.resourceId);
-                else txtColor = tv.data;
-            } else if (ctx.getTheme().resolveAttribute(android.R.attr.textColorPrimary, tv, true)) {
-                if (tv.resourceId != 0) txtColor = ContextCompat.getColor(ctx, tv.resourceId);
-                else txtColor = tv.data;
+            int txtColor = resolveThemeColor(ctx, R.attr.fb_color_text_light, 0);
+            if (txtColor == 0) {
+                txtColor = resolveThemeColor(ctx, android.R.attr.textColorPrimary, ContextCompat.getColor(ctx, android.R.color.white));
             }
 
             // Apply background tint using ColorStateList for broader compatibility

@@ -7,6 +7,6 @@
 
     <path android:fillColor="#33000000" android:pathData="M3 10 H21 V14 H3 Z"/>
 
-    <path android:fillColor="#FF000000" android:pathData="M3 10 H9 V14 H3 Z"/>
+    <path android:fillColor="?attr/colorControlNormal" android:pathData="M3 10 H9 V14 H3 Z"/>
 
 </vector>

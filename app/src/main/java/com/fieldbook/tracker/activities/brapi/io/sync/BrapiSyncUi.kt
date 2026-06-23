@@ -44,8 +44,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -117,14 +117,16 @@ fun BrapiSyncScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = Color.Black
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
                 ),
                 navigationIcon = {
                     IconButton(onClick = onNavigateUp) {
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_left),
                             contentDescription = stringResource(R.string.dialog_back),
-                            tint = Color.Black
+                            tint = MaterialTheme.colorScheme.onPrimary,
                         )
                     }
                 },
@@ -133,7 +135,7 @@ fun BrapiSyncScreen(
                         Icon(
                             painter = painterResource(R.drawable.lock_reset),
                             contentDescription = stringResource(R.string.authenticate),
-                            tint = Color.Black
+                            tint = MaterialTheme.colorScheme.onPrimary,
                         )
                     }
                 }
@@ -195,7 +197,7 @@ fun BrapiSyncScreen(
                             ResultRow(
                                 uiState.downloadSuccessMessage,
                                 painterResource(R.drawable.ic_check_bold),
-                                Color.Black
+                                MaterialTheme.colorScheme.primary,
                             )
                         }
                         if (uiState.downloadError != null && uiState.downloadError.isNotEmpty()) {
@@ -439,13 +441,14 @@ fun InfoCard(
                     painter = icon,
                     contentDescription = null,
                     modifier = Modifier.size(20.dp),
-                    tint = Color.Black
+                    tint = MaterialTheme.colorScheme.onSurface,
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
             }
             Column(
@@ -477,12 +480,12 @@ fun ResultsCard(
             if (inserts > 0) ResultRow(
                 text = stringResource(R.string.new_items, inserts, label.lowercase()),
                 icon = painterResource(if (label == stringResource(R.string.uploaded)) R.drawable.upload else R.drawable.download),
-                tint = Color.Black
+                tint = MaterialTheme.colorScheme.onSurface,
             )
             if (updates > 0) ResultRow(
                 text = stringResource(R.string.edited_items, updates),
                 icon = painterResource(R.drawable.pencil),
-                tint = Color.Black
+                tint = MaterialTheme.colorScheme.onSurface,
             )
             if (errors > 0) ResultRow(
                 text = stringResource(R.string.failed_items, errors),
@@ -515,22 +518,22 @@ fun UploadResultsCard(
             if (inserts > 0) ResultRow(
                 text = stringResource(R.string.new_items, inserts, label.lowercase()),
                 icon = painterResource(R.drawable.ic_stats_observation),
-                tint = Color.Black
+                tint = MaterialTheme.colorScheme.onSurface,
             )
             if (updates > 0) ResultRow(
                 text = stringResource(R.string.edited_items, updates),
                 icon = painterResource(R.drawable.pencil),
-                tint = Color.Black
+                tint = MaterialTheme.colorScheme.onSurface,
             )
             if (imageInserts > 0) ResultRow(
                 text = stringResource(R.string.new_images, imageInserts, label.lowercase()),
                 icon = painterResource(R.drawable.ic_trait_camera),
-                tint = Color.Black
+                tint = MaterialTheme.colorScheme.onSurface,
             )
             if (imageEdits > 0) ResultRow(
                 text = stringResource(R.string.edited_images, imageEdits),
                 icon = painterResource(R.drawable.pencil),
-                tint = Color.Black
+                tint = MaterialTheme.colorScheme.onSurface,
             )
             if (imageErrors > 0) ResultRow(
                 text = stringResource(R.string.failed_images, imageErrors),
@@ -617,7 +620,7 @@ fun ExportProgressIndicator(
                     imageVector = Icons.Default.CheckCircle,
                     contentDescription = stringResource(R.string.complete),
                     modifier = Modifier.size(120.dp),
-                    tint = Color.Black
+                    tint = MaterialTheme.colorScheme.primary,
                 )
             } else {
                 CircularProgressIndicator(

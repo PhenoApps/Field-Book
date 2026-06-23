@@ -57,6 +57,7 @@ fun OptionsDialogListItem(
             Text(
                 text = title,
                 style = AppTheme.typography.titleStyle,
+                color = AppTheme.colors.text.primary,
             )
         }
     }

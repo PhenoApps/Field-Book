@@ -1,7 +1,8 @@
 package com.fieldbook.tracker.dialogs
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import android.app.Activity
-import android.app.AlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
 import android.content.SharedPreferences
@@ -268,12 +269,9 @@ class NewTraitDialog(
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
-        val view = layoutInflater.inflate(R.layout.dialog_trait_creator, null)
+        val view = ThemedAlertDialog.inflate(requireContext(), R.layout.dialog_trait_creator)
 
-        val builder = AlertDialog.Builder(
-            activity,
-            R.style.AppAlertDialog
-        )
+        val builder = ThemedAlertDialog.builder(activity)
 
         builder.setTitle(R.string.trait_creator_title_layout)
             .setCancelable(true)
@@ -471,7 +469,7 @@ class NewTraitDialog(
 
     private fun askUserToVerifyDismiss() {
 
-        val builder = AlertDialog.Builder(activity, R.style.AppAlertDialog)
+        val builder = ThemedAlertDialog.builder(activity)
 
         builder.setTitle(activity.getString(R.string.dialog_close))
 

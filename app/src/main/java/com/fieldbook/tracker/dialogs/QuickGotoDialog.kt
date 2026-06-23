@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.dialogs
 
-import android.app.AlertDialog
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
 import android.text.InputType
@@ -25,8 +26,7 @@ class QuickGotoDialog(
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val inflater = requireActivity().layoutInflater
-        val view = inflater.inflate(R.layout.dialog_quick_goto, null)
+        val view = ThemedAlertDialog.inflate(requireContext(), R.layout.dialog_quick_goto)
 
         val prefs = controller.getPreferences()
 
@@ -42,7 +42,9 @@ class QuickGotoDialog(
         primaryEt.hint = primary
         secondaryEt.hint = secondary
 
-        val dialog = AlertDialog.Builder(requireContext())
+        ThemedAlertDialog.tintImageView(swapButton, requireContext(), ThemedAlertDialog.IconTint.Icon)
+
+        val dialog = ThemedAlertDialog.builder(requireContext())
             .setTitle(R.string.dialog_quick_goto_title)
             .setView(view)
             .setPositiveButton(R.string.dialog_quick_goto_go) { _, _ ->
@@ -67,11 +69,16 @@ class QuickGotoDialog(
             toggleInputType(secondaryEt)
 
 
-            swapButton.setImageResource(if (secondaryEt.inputType == InputType.TYPE_CLASS_NUMBER) {
-                R.drawable.ic_trait_text
-            } else {
-                R.drawable.ic_trait_numeric
-            })
+            ThemedAlertDialog.setThemedImageResource(
+                swapButton,
+                requireContext(),
+                if (secondaryEt.inputType == InputType.TYPE_CLASS_NUMBER) {
+                    R.drawable.ic_trait_text
+                } else {
+                    R.drawable.ic_trait_numeric
+                },
+                ThemedAlertDialog.IconTint.Icon,
+            )
         }
 
         return dialog

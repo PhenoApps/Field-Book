@@ -1,5 +1,6 @@
 package com.fieldbook.tracker.activities
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -235,8 +236,7 @@ class TraitActivity : ThemedActivity() {
         parameter: BaseFormatParameter, trait: TraitObject,
         onUpdated: (TraitObject) -> Unit,
     ) {
-        val dialogView = LayoutInflater.from(this)
-            .inflate(R.layout.dialog_trait_parameter_edit, null)
+        val dialogView = ThemedAlertDialog.inflate(this, R.layout.dialog_trait_parameter_edit)
 
         val format = Formats.entries.find { it.getDatabaseName() == trait.format }
         val formatDefinition = format?.getTraitFormatDefinition()
@@ -254,7 +254,7 @@ class TraitActivity : ThemedActivity() {
             } catch (_: Exception) {
             }
 
-            val dialog = android.app.Dialog(this, R.style.AppAlertDialog)
+            val dialog = ThemedAlertDialog.dialog(this)
             dialog.setContentView(dialogView)
 
             // Add Save/Cancel buttons at the bottom of the dialogView programmatically

@@ -1,12 +1,12 @@
 package com.fieldbook.tracker.utilities
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import android.Manifest
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
 import android.widget.ProgressBar
@@ -477,14 +477,14 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
     }
 
     private fun showProgressDialog() {
-        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_nearby_share, null)
+        val dialogView = ThemedAlertDialog.inflate(context, R.layout.dialog_nearby_share)
 
         progressBar = dialogView.findViewById(R.id.progress_bar)
         progressStatusIcon = dialogView.findViewById(R.id.progress_status_icon)
         progressMessage = dialogView.findViewById(R.id.progress_message)
 
         progressDialog?.dismiss()
-        progressDialog = AlertDialog.Builder(context, R.style.AppAlertDialog)
+        progressDialog = ThemedAlertDialog.builder(context)
             .setView(dialogView)
             .setNegativeButton(R.string.dialog_cancel) { d, _ ->
                 stopNearbyShare()
@@ -524,7 +524,7 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
         progressBar?.visibility = View.GONE
         progressStatusIcon?.apply {
             visibility = View.VISIBLE
-            setImageResource(icon)
+            ThemedAlertDialog.setThemedImageResource(this, context, icon, ThemedAlertDialog.IconTint.Icon)
         }
         progressMessage?.text = message
     }
@@ -540,7 +540,7 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
 
         deviceSelectionDialog?.dismiss() // dismiss any existing dialog
 
-        deviceSelectionDialog = AlertDialog.Builder(context, R.style.AppAlertDialog)
+        deviceSelectionDialog = ThemedAlertDialog.builder(context)
             .setTitle(getString(R.string.dialog_device_selection_title))
             .setItems(deviceNames) { dialog, which ->
                 val selectedEndpoint = endpoints[which]
@@ -565,7 +565,7 @@ class NearbyShareUtil @Inject constructor(@ActivityContext private val context: 
     }
 
     private fun showAuthDialog(context: Context, endpointId: String, info: ConnectionInfo) {
-        authenticationDialog = AlertDialog.Builder(context, R.style.AppAlertDialog)
+        authenticationDialog = ThemedAlertDialog.builder(context)
             .setTitle(getString(R.string.dialog_nearby_authentication_title, info.endpointName))
             .setMessage(getString(R.string.dialog_nearby_authentication_summary, info.authenticationDigits))
             .setPositiveButton(getString(R.string.dialog_accept)) { _, _ ->

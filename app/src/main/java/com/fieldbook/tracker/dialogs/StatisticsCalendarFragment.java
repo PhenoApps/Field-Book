@@ -22,6 +22,7 @@ import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.StatisticsActivity;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
+import com.google.android.material.color.MaterialColors;
 import com.kizitonwose.calendar.core.CalendarDay;
 import com.kizitonwose.calendar.core.CalendarMonth;
 import com.kizitonwose.calendar.core.DayPosition;
@@ -104,10 +105,12 @@ public class StatisticsCalendarFragment extends Fragment implements DateRangePic
                 if (day.getPosition() == DayPosition.MonthDate) {
                     // Setting the color if the date is out of the selected range
                     if (day.getDate().isBefore(heatMapStartDate) || day.getDate().isAfter(heatMapEndDate)) {
-                        container.calendarDayText.setTextColor(Color.GRAY);
+                        int outOfRangeColor = MaterialColors.getColor(originActivity, android.R.attr.textColorSecondary, Color.GRAY);
+                        container.calendarDayText.setTextColor(outOfRangeColor);
                     } else {
                         // Setting the text and background color for the date
-                        container.calendarDayText.setTextColor(Color.BLACK);
+                        int inRangeColor = MaterialColors.getColor(originActivity, android.R.attr.textColorPrimary, Color.BLACK);
+                        container.calendarDayText.setTextColor(inRangeColor);
                         if (count > 0)
                             container.circleBackground.setBackgroundTintList(ColorStateList.valueOf(getColorForObservations(count)));
                     }

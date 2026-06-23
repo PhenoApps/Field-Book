@@ -20,6 +20,10 @@
         android:id="@+id/tab_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="?attr/fb_color_primary"
+        app:tabTextColor="?attr/fb_color_text_light"
+        app:tabSelectedTextColor="?attr/fb_color_text_light"
+        app:tabIndicatorColor="?attr/fb_color_accent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar"
         app:layout_constraintBottom_toTopOf="@id/statistics_card_rv" />
 
@@ -27,6 +31,7 @@
         android:id="@+id/statistics_card_rv"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:background="?attr/fb_color_background"
         app:layout_constraintTop_toBottomOf="@+id/tab_layout"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:listitem="@layout/statistics_card"

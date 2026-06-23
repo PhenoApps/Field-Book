@@ -43,6 +43,8 @@
         android:minWidth="48dp"
         android:minHeight="48dp"
         android:src="@drawable/chevron_right"
+        app:tint="?attr/fb_icon_tint"
+        app:tintMode="src_in"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

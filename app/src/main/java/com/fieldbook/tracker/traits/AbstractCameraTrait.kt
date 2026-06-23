@@ -1,7 +1,8 @@
 package com.fieldbook.tracker.traits
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import android.app.Activity
-import android.app.AlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -853,7 +854,7 @@ abstract class AbstractCameraTrait :
                     container.addView(playerView)
 
                     // use the container (with PlayerView) as the dialog content
-                    AlertDialog.Builder(context, R.style.AppAlertDialog)
+                    ThemedAlertDialog.builder(context)
                         .setTitle(R.string.delete_local_photo)
                         .setOnCancelListener { dialog ->
                             try {
@@ -899,7 +900,7 @@ abstract class AbstractCameraTrait :
                 }
              }
 
-            AlertDialog.Builder(context, R.style.AppAlertDialog)
+            ThemedAlertDialog.builder(context)
                 .setTitle(R.string.delete_local_photo)
                 .setOnCancelListener { dialog -> dialog.dismiss() }
                 .setPositiveButton(R.string.delete) { dialog, _ ->

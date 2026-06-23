@@ -57,7 +57,6 @@
         android:id="@+id/menu_export"
         android:icon="@drawable/ic_file_export_outline"
         android:title="@string/fields_export"
-        android:background="@color/WHITE"
         app:showAsAction="ifRoom"
         android:visible="false"/>
 

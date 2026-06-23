@@ -1,9 +1,10 @@
 package com.fieldbook.tracker.dialogs
 
-import android.app.AlertDialog
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
+
+import androidx.appcompat.app.AlertDialog
 import android.os.Handler
 import android.os.Looper
-import android.view.LayoutInflater
 import android.widget.ArrayAdapter
 import android.widget.CheckBox
 import android.widget.Spinner
@@ -17,7 +18,7 @@ import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.Utils
 
 class GeoNavCollectDialog(private val activity: CollectActivity) :
-    AlertDialog.Builder(activity, R.style.AppAlertDialog) {
+    AlertDialog.Builder(activity, ThemedAlertDialog.dialogStyle(activity)) {
 
     companion object {
         private const val GEO_NAV_RESTART_DELAY_MS = 1000L
@@ -83,7 +84,7 @@ class GeoNavCollectDialog(private val activity: CollectActivity) :
     private var geoNavAttributeModels: List<AttributeModel> = emptyList()
 
     private val view by lazy {
-        LayoutInflater.from(context).inflate(R.layout.dialog_geonav_collect, null, false)
+        ThemedAlertDialog.inflate(context, R.layout.dialog_geonav_collect, null, false)
     }
 
     init {

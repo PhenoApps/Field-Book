@@ -9,10 +9,12 @@
         android:id="@+id/list_item_search_search_text"
         android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:gravity="end"
         android:inputType="text"
         android:singleLine="true"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textColorHint="?android:attr/textColorHint"
         android:textSize="?attr/fb_body_text_size"
-        android:gravity="end"
         app:layout_constraintBottom_toBottomOf="@id/list_item_search_like"
         app:layout_constraintEnd_toStartOf="@id/list_item_search_delete_btn"
         app:layout_constraintStart_toEndOf="@id/list_item_search_like"
@@ -24,13 +26,13 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:background="@color/zxing_transparent"
-        android:contentDescription="@string/list_item_field_sort_delete_content_description"
+        android:contentDescription="@string/search_dialog_operator_dialog_title"
         android:padding="8dp"
         android:src="@drawable/ic_tb_less_than"
-        android:text="@string/fields_delete"
         app:layout_constraintEnd_toStartOf="@+id/list_item_search_search_text"
         app:layout_constraintStart_toEndOf="@id/list_item_search_columns"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="?attr/colorControlNormal" />
 
     <TextView
         android:id="@+id/list_item_search_columns"
@@ -39,6 +41,7 @@
         android:layout_margin="4dp"
         android:ellipsize="end"
         android:maxLines="1"
+        android:textColor="?android:attr/textColorPrimary"
         android:textSize="?attr/fb_body_text_size"
         app:layout_constraintBottom_toBottomOf="@id/list_item_search_like"
         app:layout_constraintEnd_toStartOf="@id/list_item_search_like"
@@ -47,16 +50,16 @@
         tools:text="Value" />
 
     <ImageButton
-        android:padding="8dp"
-        android:background="@color/zxing_transparent"
-        android:src="@drawable/ic_tb_delete"
-        android:text="@string/fields_delete"
         android:id="@+id/list_item_search_delete_btn"
         android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:background="@color/zxing_transparent"
+        android:contentDescription="@string/list_item_field_sort_delete_content_description"
+        android:padding="8dp"
+        android:src="@drawable/ic_tb_delete"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
+        app:tint="?attr/colorControlNormal" />
 
     <View
         android:id="@+id/view2"

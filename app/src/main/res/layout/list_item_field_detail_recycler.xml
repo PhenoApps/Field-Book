@@ -13,7 +13,8 @@
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="4dp">
+        android:layout_margin="4dp"
+        app:cardBackgroundColor="?attr/fb_color_card_background">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -83,7 +84,8 @@
                     android:id="@+id/expand_collapse_icon"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
-                    android:src="@drawable/ic_chevron_down" />
+                    android:src="@drawable/ic_chevron_down"
+                    app:tint="?attr/colorControlNormal" />
             </LinearLayout>
 
             <!-- Collapsible Chart -->
@@ -99,7 +101,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:visibility="gone"
-                    android:textColor="@color/main_color_text_dark"
+                    android:textColor="?attr/fb_color_text_dark"
                     android:padding="8dp"/>
 
                 <com.github.mikephil.charting.charts.BarChart

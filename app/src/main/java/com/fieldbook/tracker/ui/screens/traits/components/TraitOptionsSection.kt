@@ -154,9 +154,14 @@ fun TraitOptionsSection(
                     }
 
                 displayableParams.forEach { param ->
+                    val toggleEnabled = when (param) {
+                        is DefaultToggleParameter -> param.getToggleValue(trait)
+                        else -> true
+                    }
                     Chip(
                         text = getParamText(context, param, trait),
                         icon = getParamIcon(param, trait),
+                        enabled = toggleEnabled,
                         onClick = {
                             if (param is DefaultToggleParameter) {
                                 val updatedTrait = trait.clone()

@@ -1,7 +1,8 @@
 package com.fieldbook.tracker.traits
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import android.Manifest
-import android.app.AlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.provider.MediaStore
@@ -176,13 +177,19 @@ class VideoTraitLayout : PhotoTraitLayout {
                     when (event) {
                         is VideoRecordEvent.Start -> {
                             videoRecording = true
-                            shutterButton?.setImageResource(drawable.ic_media_stop)
-                            shutterButton?.setColorFilter(android.graphics.Color.BLACK)
+                            shutterButton?.let { btn ->
+                                ThemedAlertDialog.setThemedImageResource(
+                                    btn, act, drawable.ic_media_stop, ThemedAlertDialog.IconTint.Icon,
+                                )
+                            }
                         }
                         is VideoRecordEvent.Finalize -> {
                             videoRecording = false
-                            shutterButton?.setImageResource(drawable.camera_24px)
-                            shutterButton?.clearColorFilter()
+                            shutterButton?.let { btn ->
+                                ThemedAlertDialog.setThemedImageResource(
+                                    btn, act, drawable.camera_24px, ThemedAlertDialog.IconTint.Icon,
+                                )
+                            }
 
                             // Copy the saved media from MediaStore URI into field storage using saveToStorage
                             try {
@@ -209,8 +216,11 @@ class VideoTraitLayout : PhotoTraitLayout {
             }
             currentRecording = null
             videoRecording = false
-            shutterButton?.setImageResource(drawable.camera_24px)
-            shutterButton?.clearColorFilter()
+            shutterButton?.let { btn ->
+                ThemedAlertDialog.setThemedImageResource(
+                    btn, act, drawable.camera_24px, ThemedAlertDialog.IconTint.Icon,
+                )
+            }
         }
     }
 
@@ -529,7 +539,7 @@ class VideoTraitLayout : PhotoTraitLayout {
     override fun showSettings() {
 
         val settingsView = VideoCameraSettingsView(context, videoSupportedResolutions)
-        AlertDialog.Builder(context, style.AppAlertDialog)
+        ThemedAlertDialog.builder(context)
             .setTitle(string.trait_system_photo_settings_title)
             .setPositiveButton(string.dialog_ok) { dialog, _ ->
                 settingsView.commitChanges()

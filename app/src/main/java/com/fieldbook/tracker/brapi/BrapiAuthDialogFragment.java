@@ -1,6 +1,8 @@
 package com.fieldbook.tracker.brapi;
 
-import android.app.AlertDialog;
+import com.fieldbook.tracker.utilities.ThemedAlertDialog;
+import com.fieldbook.tracker.utilities.AppThemeResolver;
+import androidx.appcompat.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -25,7 +27,7 @@ public class BrapiAuthDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext(), R.style.AppAlertDialog);
+        AlertDialog.Builder builder = ThemedAlertDialog.builder(requireContext());
 
         builder.setTitle(R.string.brapi_auth_needed_title);
         builder.setMessage(R.string.brapi_auth_needed);

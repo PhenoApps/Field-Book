@@ -50,7 +50,7 @@ object PieChartHelper {
         // Set center text with the appropriate size
         chart.setCenterText("${(completeness * 100).toInt()}%")
         chart.setCenterTextSize(chartTextSize)
-        chart.setCenterTextColor(Color.BLACK)
+        chart.setCenterTextColor(ChartTheme.graphTextColor(context))
 
         // Determine chart height based on base height and text size
         val displayMetrics = context.resources.displayMetrics

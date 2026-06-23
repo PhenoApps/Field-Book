@@ -24,23 +24,34 @@ fun Chip(
     icon: Int? = null,
     backgroundColor: Color? = null,
     strokeColor: Color? = null,
+    enabled: Boolean = true,
     onClick: (() -> Unit)? = null
 ) {
     val isClickable = onClick != null
 
     var background = backgroundColor
     var stroke = strokeColor
+    val textColor = if (enabled) AppTheme.colors.text.primary else AppTheme.colors.text.secondary
+    val iconTint = if (enabled) {
+        AppTheme.colors.surface.iconTint
+    } else {
+        AppTheme.colors.text.secondary
+    }
 
     if (background == null) {
-        background =
-            if (isClickable) AppTheme.colors.chip.selectableBackground
-            else AppTheme.colors.chip.defaultBackground
+        background = when {
+            !enabled -> AppTheme.colors.chip.defaultBackground
+            isClickable -> AppTheme.colors.chip.selectableBackground
+            else -> AppTheme.colors.chip.defaultBackground
+        }
     }
 
     if (stroke == null) {
-        stroke =
-            if (isClickable) AppTheme.colors.chip.selectableStroke
-            else null
+        stroke = when {
+            !enabled -> null
+            isClickable -> AppTheme.colors.chip.selectableStroke
+            else -> null
+        }
     }
 
     Surface(
@@ -70,13 +81,14 @@ fun Chip(
                         .padding(end = 8.dp),
                     icon = painterResource(id = icon),
                     contentDescription = null,
+                    tint = iconTint,
                 )
             }
 
             Text(
                 text = text,
                 style = AppTheme.typography.bodyStyle,
-                color = AppTheme.colors.text.primary
+                color = textColor
             )
         }
     }

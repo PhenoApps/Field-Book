@@ -1,10 +1,12 @@
 package com.fieldbook.tracker.dialogs
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import android.app.Activity
-import android.app.AlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ImageButton
@@ -64,27 +66,27 @@ open class SortDialogFragment : DialogFragment(), SortAdapter.Sorter {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
+        val ctx = requireContext()
+        val builder = ThemedAlertDialog.builder(ctx)
             .setTitle(this.dialogTitle)
             .setNegativeButton(R.string.dialog_cancel) { _, _ -> }
             .setPositiveButton(R.string.dialog_ok) { _, _ -> }
 
-        val view = layoutInflater.inflate(R.layout.dialog_field_sort, null)
+        val view = ThemedAlertDialog.inflate(ctx, R.layout.dialog_field_sort)
         builder.setView(view)
-
-        val dialog = builder.create()
+        ThemedAlertDialog.tintDialogIcons(view, ctx)
 
         attributeRv = view.findViewById(R.id.dialog_field_sort_rv)
         addButton = view.findViewById(R.id.dialog_field_sort_add_btn)
         deleteAllButton = view.findViewById(R.id.dialog_field_sort_delete_all_btn)
         sortOrderButton = view.findViewById(R.id.dialog_field_sort_toggle_order_btn)
 
-        dialog.show()
-
-        okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-        cancelButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
-
-        setupUi()
+        val dialog = builder.create()
+        ThemedAlertDialog.chainOnShow(dialog, ctx) {
+            okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            cancelButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+            setupUi()
+        }
 
         return dialog
     }
@@ -226,14 +228,20 @@ open class SortDialogFragment : DialogFragment(), SortAdapter.Sorter {
 
             studyId?.let { it1 -> toggleSortOrder(it1) }
 
-            studyId?.let { it1 -> getSortIcon(it1) }
-                ?.let { it2 -> sortOrderButton?.setImageResource(it2) }
+            studyId?.let { it1 -> getSortIcon(it1) }?.let { updateSortOrderIcon(it) }
         }
 
         submitList()
 
-        getStudyId()?.let { getSortIcon(it) }?.let { sortOrderButton?.setImageResource(it) }
+        getStudyId()?.let { getSortIcon(it) }?.let { updateSortOrderIcon(it) }
 
+    }
+
+    private fun updateSortOrderIcon(drawableRes: Int) {
+        val ctx = context ?: return
+        sortOrderButton?.let {
+            ThemedAlertDialog.setThemedImageResource(it, ctx, drawableRes)
+        }
     }
 
     private fun getStudyId() = context?.let {
@@ -285,7 +293,8 @@ open class SortDialogFragment : DialogFragment(), SortAdapter.Sorter {
 
     private fun askDialogForAttribute(unused: List<String>) {
 
-        val dialog = AlertDialog.Builder(context, R.style.AppAlertDialog)
+        val ctx = requireContext()
+        val dialog = ThemedAlertDialog.builder(ctx)
 
         val adapter = context?.let {
             ArrayAdapter(

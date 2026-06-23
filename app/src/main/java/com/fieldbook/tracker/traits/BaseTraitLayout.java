@@ -180,7 +180,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
 
             act.getInputView().prepareEmptyObservationsMode();
 
-            getCollectInputView().setTextColor(Color.BLACK);
+            getCollectInputView().setTextColor(resolveThemeColor(R.attr.fb_color_text_dark));
 
             checkDefaultValue();
         }
@@ -298,7 +298,7 @@ public abstract class BaseTraitLayout extends LinearLayout {
         return resolveThemeColor(R.attr.fb_value_altered_color);
     }
 
-    private int resolveThemeColor(int resid) {
+    protected int resolveThemeColor(int resid) {
         TypedValue value = new TypedValue();
         getContext().getTheme().resolveAttribute(resid, value, true);
         return value.data;

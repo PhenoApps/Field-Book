@@ -31,6 +31,7 @@ class ThemeViewModel @Inject constructor(
             0 -> AppThemeType.Default
             1 -> AppThemeType.HighContrast
             2 -> AppThemeType.Blue
+            3 -> AppThemeType.SodaDark
             else -> AppThemeType.Default
         }
     }

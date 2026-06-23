@@ -5,11 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -18,7 +20,9 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.preference.PreferenceManager;
@@ -36,6 +40,7 @@ import com.fieldbook.tracker.dialogs.CitationDialog;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
+import com.fieldbook.tracker.utilities.AppThemeResolver;
 import com.fieldbook.tracker.utilities.InsetHandler;
 import com.google.android.material.appbar.AppBarLayout;
 import com.mikepenz.aboutlibraries.LibsBuilder;
@@ -105,6 +110,27 @@ public class AboutActivity extends MaterialAboutActivity {
     }
 
     private MaterialAboutActionItem.Builder updatesButtonBuilder;
+
+    /**
+     * Material About Library does not apply vector {@code android:tint} when icons are set on items.
+     * Tint here so About menu icons follow {@code colorControlNormal} like the rest of the app.
+     * Do not use for branded PNGs (e.g. Coordinate, Intercross).
+     */
+    @Nullable
+    private Drawable themedAboutIcon(int drawableRes) {
+        Drawable drawable = ContextCompat.getDrawable(this, drawableRes);
+        if (drawable == null) {
+            return null;
+        }
+        drawable = DrawableCompat.wrap(drawable.mutate());
+        TypedValue typedValue = new TypedValue();
+        if (getTheme().resolveAttribute(R.attr.fb_icon_tint, typedValue, true)
+                || getTheme().resolveAttribute(androidx.appcompat.R.attr.colorControlNormal, typedValue, true)) {
+            DrawableCompat.setTint(drawable, typedValue.data);
+        }
+        return drawable;
+    }
+
     @Override
     @NonNull
     public MaterialAboutList getMaterialAboutList(@NonNull Context c) {
@@ -112,7 +138,7 @@ public class AboutActivity extends MaterialAboutActivity {
         MaterialAboutCard.Builder appCardBuilder = new MaterialAboutCard.Builder();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if (prefs.getString(PreferenceKeys.THEME, "0").equals(String.valueOf(ThemedActivity.HIGH_CONTRAST))) {
+        if (AppThemeResolver.usesMonochromeLauncherIcon(prefs)) {
             appCardBuilder.addItem(new MaterialAboutTitleItem.Builder()
                     .text(getString(R.string.field_book))
                     .icon(R.mipmap.ic_launcher_monochrome)
@@ -125,7 +151,7 @@ public class AboutActivity extends MaterialAboutActivity {
         }
 
         appCardBuilder.addItem(ConvenienceBuilder.createVersionActionItem(c,
-                getResources().getDrawable(R.drawable.ic_about_info),
+                themedAboutIcon(R.drawable.ic_about_info),
                 getString(R.string.about_version_title),
                 false));
 
@@ -139,14 +165,14 @@ public class AboutActivity extends MaterialAboutActivity {
         appCardBuilder.addItem(updateCheckItem);
 
         appCardBuilder.addItem(ConvenienceBuilder.createWebsiteActionItem(c,
-                getResources().getDrawable(R.drawable.book_open_variant),
+                themedAboutIcon(R.drawable.book_open_variant),
                 getString(R.string.about_manual_title),
                 false,
                 Uri.parse("https://fieldbook.phenoapps.org/")));
 
         appCardBuilder.addItem(new MaterialAboutActionItem.Builder()
                 .text(R.string.citation_card_title)
-                .icon(R.drawable.ic_script_text_outline)
+                .icon(themedAboutIcon(R.drawable.ic_script_text_outline))
                 .setOnClickAction(new MaterialAboutItemOnClickAction() {
                     @Override
                     public void onClick() {
@@ -156,7 +182,7 @@ public class AboutActivity extends MaterialAboutActivity {
                 .build());
 
         appCardBuilder.addItem(ConvenienceBuilder.createRateActionItem(c,
-                getResources().getDrawable(R.drawable.ic_about_rate),
+                themedAboutIcon(R.drawable.ic_about_rate),
                 getString(R.string.about_rate),
                 null
         ));
@@ -167,11 +193,11 @@ public class AboutActivity extends MaterialAboutActivity {
         authorCardBuilder.addItem(new MaterialAboutActionItem.Builder()
                 .text(getString(R.string.about_developer_trife))
                 .subText(getString(R.string.about_developer_trife_location))
-                .icon(R.drawable.ic_pref_profile_person)
+                .icon(themedAboutIcon(R.drawable.ic_pref_profile_person))
                 .build());
 
         authorCardBuilder.addItem(ConvenienceBuilder.createEmailItem(c,
-                getResources().getDrawable(R.drawable.ic_about_email),
+                themedAboutIcon(R.drawable.ic_about_email),
                 getString(R.string.about_email_title),
                 true,
                 getString(R.string.about_developer_trife_email),
@@ -182,13 +208,13 @@ public class AboutActivity extends MaterialAboutActivity {
 
 
         contributorsCardBuilder.addItem(ConvenienceBuilder.createWebsiteActionItem(c,
-                getResources().getDrawable(R.drawable.ic_about_contributors),
+                themedAboutIcon(R.drawable.ic_about_contributors),
                 getString(R.string.about_contributors_title),
                 false,
                 Uri.parse("https://github.com/PhenoApps/Field-Book#-contributors")));
 
         contributorsCardBuilder.addItem(ConvenienceBuilder.createWebsiteActionItem(c,
-                getResources().getDrawable(R.drawable.ic_about_funding),
+                themedAboutIcon(R.drawable.ic_about_funding),
                 getString(R.string.about_contributors_funding_title),
                 false,
                 Uri.parse("https://github.com/PhenoApps/Field-Book#-funding")));
@@ -199,27 +225,16 @@ public class AboutActivity extends MaterialAboutActivity {
 
         technicalCardBuilder.addItem(new MaterialAboutActionItem.Builder()
                 .text(R.string.about_github_title)
-                .icon(R.drawable.ic_about_github)
+                .icon(themedAboutIcon(R.drawable.ic_about_github))
                 .setOnClickAction(ConvenienceBuilder.createWebsiteOnClickAction(c, Uri.parse("https://github.com/PhenoApps/Field-Book")))
                 .build());
 
-        String theme = PreferenceManager.getDefaultSharedPreferences(this)
-                .getString(PreferenceKeys.THEME, "0");
-
-        int styleId = R.style.AboutLibrariesCustom;
-        switch (theme) {
-            case "2":
-                styleId = R.style.AboutLibrariesCustom_Blue;
-                break;
-            case "1":
-                styleId = R.style.AboutLibrariesCustom_HighContrast;
-                break;
-        }
-        final int libStyleId = styleId;
+        final int libStyleId = AppThemeResolver.aboutLibrariesStyle(
+                AppThemeResolver.themeIndex(prefs));
 
         technicalCardBuilder.addItem(new MaterialAboutActionItem.Builder()
                 .text(R.string.about_libraries_title)
-                .icon(R.drawable.ic_about_libraries)
+                .icon(themedAboutIcon(R.drawable.ic_about_libraries))
                 .setOnClickAction(new MaterialAboutItemOnClickAction() {
                     @Override
                     public void onClick() {
@@ -238,7 +253,7 @@ public class AboutActivity extends MaterialAboutActivity {
         otherAppsCardBuilder.title(getString(R.string.about_title_other_apps));
 
         otherAppsCardBuilder.addItem(ConvenienceBuilder.createWebsiteActionItem(c,
-                getResources().getDrawable(R.drawable.ic_about_website),
+                themedAboutIcon(R.drawable.ic_about_website),
                 "PhenoApps.org",
                 false,
                 Uri.parse("http://phenoapps.org/")));
@@ -336,7 +351,7 @@ public class AboutActivity extends MaterialAboutActivity {
         if (isNewVersionAvailable) {
             updateCheckItem.setText(getString(R.string.found_updates_title));
             updateCheckItem.setSubText(latestVersion);
-            updateCheckItem.setIcon(getResources().getDrawable(R.drawable.ic_about_get_update));
+            updateCheckItem.setIcon(themedAboutIcon(R.drawable.ic_about_get_update));
 
             // Set the onClickAction to open the browser with the release URL
             updateCheckItem.setOnClickAction(new MaterialAboutItemOnClickAction() {
@@ -350,7 +365,7 @@ public class AboutActivity extends MaterialAboutActivity {
             });
         } else {
             updateCheckItem.setText(getString(R.string.no_updates_title));
-            updateCheckItem.setIcon(getResources().getDrawable(R.drawable.ic_about_up_to_date));
+            updateCheckItem.setIcon(themedAboutIcon(R.drawable.ic_about_up_to_date));
             updateCheckItem.setOnClickAction(null);
         }
         refreshMaterialAboutList();

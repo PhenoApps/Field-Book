@@ -14,8 +14,11 @@ import android.widget.ListView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.documentfile.provider.DocumentFile
 import com.fieldbook.tracker.R
+import com.google.android.material.color.MaterialColors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -196,14 +199,27 @@ class FileExploreActivity : ActivityDialog(), CoroutineScope by MainScope() {
                 if (fileList.isNotEmpty()) {
 
                     view.findViewById<TextView>(android.R.id.text1).also { tv ->
+                        val iconDrawable = ContextCompat.getDrawable(
+                            this@FileExploreActivity,
+                            fileList[position].icon,
+                        )?.mutate()
+                        if (iconDrawable != null) {
+                            val tintColor = MaterialColors.getColor(
+                                tv,
+                                R.attr.fb_icon_tint,
+                                android.graphics.Color.WHITE,
+                            )
+                            DrawableCompat.setTint(iconDrawable, tintColor)
+                            tv.setCompoundDrawablesWithIntrinsicBounds(iconDrawable, null, null, null)
+                        } else {
+                            tv.setCompoundDrawablesWithIntrinsicBounds(
+                                fileList[position].icon,
+                                0,
+                                0,
+                                0,
+                            )
+                        }
 
-                        // put the image on the text view
-                        tv.setCompoundDrawablesWithIntrinsicBounds(
-                            fileList[position].icon, 0, 0, 0
-                        )
-
-                        // add margin between image and text (support various screen
-                        // densities)
                         val dp5 = (5 * resources.displayMetrics.density + 0.5f).toInt()
                         tv.compoundDrawablePadding = dp5
                     }

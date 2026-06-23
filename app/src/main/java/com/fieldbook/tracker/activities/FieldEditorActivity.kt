@@ -1,7 +1,8 @@
 package com.fieldbook.tracker.activities
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import android.Manifest
-import android.app.AlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.content.Intent
 import android.graphics.Rect
 import android.location.Location
@@ -794,13 +795,12 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
     }
 
     private fun importDialog(columns: Array<String>) {
-        val inflater = this.layoutInflater
-        val layout = inflater.inflate(R.layout.dialog_field_file_import, null)
+        val layout = ThemedAlertDialog.inflate(this, R.layout.dialog_field_file_import)
 
         unique = layout.findViewById(R.id.uniqueSpin)
         setSpinner(unique, columns)
 
-        AlertDialog.Builder(this, R.style.AppAlertDialog)
+        ThemedAlertDialog.builder(this)
             .setTitle(R.string.fields_new_dialog_title)
             .setCancelable(true)
             .setView(layout)
@@ -889,7 +889,7 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
         } catch (e: Exception) {
             Log.e(TAG, "Error updating sorting", e)
 
-            AlertDialog.Builder(this, R.style.AppAlertDialog)
+            ThemedAlertDialog.builder(this)
                 .setTitle(R.string.dialog_save_error_title)
                 .setPositiveButton(R.string.dialog_ok) { _, _ ->
                     Log.d("FieldAdapter", "Sort save error dialog dismissed")
@@ -975,7 +975,7 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
     private fun showExistingGroupsDialog(fieldIds: List<Int>) {
         val existingGroups = db.allStudyGroups
 
-        AlertDialog.Builder(this, R.style.AppAlertDialog)
+        ThemedAlertDialog.builder(this)
             .setTitle(R.string.group_existing)
             .setItems(existingGroups.map { it.groupName }.toTypedArray()) { _, which ->
                 val groupId = existingGroups[which].id
@@ -992,13 +992,12 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
     }
 
     private fun showNewGroupDialog(fieldIds: List<Int>) {
-        val inflater = this.layoutInflater
-        val layout = inflater.inflate(R.layout.dialog_group_name, null)
+        val layout = ThemedAlertDialog.inflate(this, R.layout.dialog_group_name)
         val groupName = layout.findViewById<EditText>(R.id.groupName)
 
         groupName.clearFocus()
 
-        val dialog = AlertDialog.Builder(this, R.style.AppAlertDialog)
+        val dialog = ThemedAlertDialog.builder(this)
             .setTitle(R.string.create_new_group)
             .setView(layout)
             .setPositiveButton(getString(R.string.dialog_ok), null)
@@ -1034,7 +1033,7 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
             return
         }
 
-        val builder = AlertDialog.Builder(this, R.style.AppAlertDialog)
+        val builder = ThemedAlertDialog.builder(this)
             .setTitle(R.string.archive_active_field_title)
             .setMessage(R.string.archive_active_field_message)
             .setPositiveButton(R.string.dialog_yes) { _, _ ->

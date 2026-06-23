@@ -1,6 +1,9 @@
 package com.fieldbook.tracker.adapters;
 
-import android.app.AlertDialog;
+import com.fieldbook.tracker.utilities.ThemedAlertDialog;
+import com.fieldbook.tracker.utilities.AppThemeResolver;
+
+import androidx.appcompat.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -89,9 +92,9 @@ public class StatisticsCardAdapter extends RecyclerView.Adapter<StatisticsCardAd
             return;
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(originActivity, R.style.AppAlertDialog);
+        AlertDialog.Builder builder = ThemedAlertDialog.builder(originActivity);
 
-        View layout = originActivity.getLayoutInflater().inflate(R.layout.dialog_individual_statistics, null);
+        View layout = ThemedAlertDialog.inflate(originActivity, R.layout.dialog_individual_statistics);
         builder.setTitle(titleString).setView(layout);
         builder.setNegativeButton(R.string.dialog_close, (dialogInterface, id) -> dialogInterface.dismiss());
 

@@ -1,5 +1,8 @@
 package com.fieldbook.tracker.dialogs;
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog;
+import com.fieldbook.tracker.utilities.AppThemeResolver;
+
 import android.app.Dialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -64,9 +67,9 @@ public class SearchDialog extends DialogFragment implements AttributeChooserDial
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(originActivity, R.style.AppAlertDialog);
+        AlertDialog.Builder builder = ThemedAlertDialog.builder(originActivity);
 
-        View customView = getLayoutInflater().inflate(R.layout.dialog_search, null);
+        View customView = ThemedAlertDialog.inflate(originActivity, R.layout.dialog_search);
         builder.setTitle(originActivity.getString(R.string.main_toolbar_search));
         builder.setView(customView);
 
@@ -96,7 +99,12 @@ public class SearchDialog extends DialogFragment implements AttributeChooserDial
         builder.setNeutralButton(R.string.search_dialog_clear, null);
 
         AlertDialog dialog = builder.create();
-        dialog.setOnShowListener(d -> dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM));
+        ThemedAlertDialog.chainOnShow(dialog, originActivity, d -> {
+            dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+            WindowManager.LayoutParams params = dialog.getWindow().getAttributes();
+            params.width = WindowManager.LayoutParams.MATCH_PARENT;
+            dialog.getWindow().setAttributes(params);
+        });
         return dialog;
     }
 
@@ -224,9 +232,9 @@ public class SearchDialog extends DialogFragment implements AttributeChooserDial
                 traitData.add(temp);
             }
 
-            AlertDialog.Builder builder1 = new AlertDialog.Builder(originActivity, R.style.AppAlertDialog);
+            AlertDialog.Builder builder1 = ThemedAlertDialog.builder(originActivity);
 
-            View layout = getLayoutInflater().inflate(R.layout.dialog_search_results, null);
+            View layout = ThemedAlertDialog.inflate(originActivity, R.layout.dialog_search_results);
             builder1.setTitle(R.string.search_results_dialog_title).setCancelable(true).setView(layout);
 
             builder1.setNeutralButton(R.string.dialog_back, (dialogInterface1, id1) -> {
@@ -246,7 +254,7 @@ public class SearchDialog extends DialogFragment implements AttributeChooserDial
 
             LinearLayout results_parent = layout.findViewById(R.id.search_results_parent);
             for (String column : columnsList) {
-                View v = getLayoutInflater().inflate(R.layout.dialog_search_results_trait_headers, null);
+                View v = ThemedAlertDialog.inflate(originActivity, R.layout.dialog_search_results_trait_headers);
                 TextView textView = v.findViewById(R.id.trait_header);
                 textView.setText(column);
                 LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(0, // width
@@ -276,7 +284,7 @@ public class SearchDialog extends DialogFragment implements AttributeChooserDial
 
             // If search has results, show them, otherwise display error message
 
-            myList.setAdapter(new SearchResultsAdapter(getActivity(), data, traitData));
+            myList.setAdapter(new SearchResultsAdapter(originActivity, data, traitData));
             //Dismiss the search dialog
             dismiss();
             //Show the results dialog

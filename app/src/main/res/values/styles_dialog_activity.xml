@@ -20,6 +20,8 @@
         <item name="fb_color_primary_dark">@color/main_primary_dark</item>
         <item name="fb_color_accent">@color/main_color_accent</item>
         <item name="fb_color_background">@color/WHITE</item>
+        <item name="fb_color_card_background">@color/light_gray</item>
+        <item name="fb_color_list_selector_default_overlay">#80FFFFFF</item>
         <item name="fb_color_text_light">@color/BLACK</item>
         <item name="fb_color_text_dark">@color/BLACK</item>
         <item name="fb_color_text_button_background">@color/GRAY</item>
@@ -65,6 +67,7 @@
         <item name="fb_color_primary_dark">@color/blue_primary_dark</item>
         <item name="fb_color_accent">@color/blue_color_accent</item>
         <item name="fb_color_background">@color/WHITE</item>
+        <item name="fb_color_card_background">@color/light_gray</item>
         <item name="fb_color_text_button_background">?attr/fb_color_primary</item>
         <item name="fb_color_text_light">@color/WHITE</item>
         <item name="fb_color_hint_text">@color/BLACK</item>
@@ -86,6 +89,7 @@
         <item name="fb_color_text_dark">@color/BLACK</item>
         <item name="fb_color_hint_text">@color/BLACK</item>
         <item name="fb_color_background">@color/WHITE</item>
+        <item name="fb_color_card_background">@color/light_gray</item>
         <item name="fb_color_text_button_background">?attr/fb_color_primary</item>
         <item name="fb_spinner_focused">@color/high_contrast_color_accent</item>
         <item name="fb_spinner_selected">@color/high_contrast_primary_transparent</item>

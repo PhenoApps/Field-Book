@@ -1,12 +1,12 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android" android:constantSize="true">
     <item android:state_selected="false">
         <shape android:shape="rectangle">
-            <solid android:color="@color/LIGHTGRAY" />
+            <solid android:color="?attr/defaultChipBackground" />
         </shape>
     </item>
     <item android:state_selected="true">
         <shape android:shape="rectangle">
-            <solid android:color="@color/GRAY" />
+            <solid android:color="?attr/fb_spinner_selected" />
         </shape>
     </item>
 </selector>

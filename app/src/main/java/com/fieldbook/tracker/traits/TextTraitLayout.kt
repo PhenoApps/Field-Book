@@ -200,7 +200,7 @@ class TextTraitLayout : BaseTraitLayout {
         inputEditText?.let { input ->
             input.setText("")
             input.setSelection(0)
-            input.setTextColor(Color.BLACK)
+            input.setTextColor(resolveThemeColor(R.attr.fb_color_text_dark))
             scan = ""
         }
 

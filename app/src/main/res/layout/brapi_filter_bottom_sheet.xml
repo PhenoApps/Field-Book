@@ -53,7 +53,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/brapi_filter_subtitle_tv"
             android:visibility="gone"
-            android:backgroundTint="#00ffffff"
+            android:backgroundTint="@android:color/transparent"
             tools:visibility="visible"/>
 
         <com.google.android.material.chip.ChipGroup

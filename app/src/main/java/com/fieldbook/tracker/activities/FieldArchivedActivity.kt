@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.activities
 
-import android.app.AlertDialog
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -89,7 +90,7 @@ class FieldArchivedActivity : BaseFieldActivity() {
     }
 
     private fun showUnarchiveDialog(fieldId: Int) {
-        AlertDialog.Builder(this, R.style.AppAlertDialog)
+        ThemedAlertDialog.builder(this)
             .setTitle(getString(R.string.dialog_unarchive_field_title))
             .setMessage(getString(R.string.dialog_unarchive_field_message))
             .setPositiveButton(getString(R.string.dialog_yes)) { d, _ ->

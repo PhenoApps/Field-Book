@@ -6,11 +6,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.content.res.ColorStateList
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.widget.ImageViewCompat
 import androidx.fragment.app.Fragment
+import com.google.android.material.color.MaterialColors
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.fieldbook.tracker.R
@@ -57,6 +61,7 @@ abstract class FieldCreatorBaseFragment : Fragment() {
 
         backButton = view.findViewById(R.id.back_button)
         forwardButton = view.findViewById(R.id.forward_button)
+        tintFieldCreatorIcons(view)
 
         updateActivityStepper()
         setupViews(view)
@@ -197,6 +202,23 @@ abstract class FieldCreatorBaseFragment : Fragment() {
                 }
             }
             null -> emptySet()
+        }
+    }
+
+    /** Apply theme icon tint to navigation and option icons in field creator screens. */
+    private fun tintFieldCreatorIcons(root: View) {
+        val tintColor = MaterialColors.getColor(root, R.attr.stepper_icon_color, 0)
+            .takeIf { it != 0 }
+            ?: MaterialColors.getColor(root, R.attr.fb_icon_tint, android.graphics.Color.WHITE)
+        if (tintColor == 0) return
+        val tintList = ColorStateList.valueOf(tintColor)
+        when (root) {
+            is ImageButton, is ImageView -> ImageViewCompat.setImageTintList(root, tintList)
+            is ViewGroup -> {
+                for (i in 0 until root.childCount) {
+                    tintFieldCreatorIcons(root.getChildAt(i))
+                }
+            }
         }
     }
 }

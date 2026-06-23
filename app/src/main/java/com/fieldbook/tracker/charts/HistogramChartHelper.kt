@@ -54,15 +54,17 @@ object HistogramChartHelper {
             BarEntry(adjustedBinIndex, count.toFloat())
         }
 
+        val chartTextColor = ChartTheme.graphTextColor(context)
+
         val dataSet = BarDataSet(entries, null).apply {
             val theme = context.theme
             val fbColorPrimaryValue = TypedValue()
             theme.resolveAttribute(R.attr.fb_color_primary, fbColorPrimaryValue, true)
 
             color = fbColorPrimaryValue.data
-            valueTextColor = Color.WHITE
+            valueTextColor = chartTextColor
             setDrawValues(false)
-            barBorderColor = Color.BLACK
+            barBorderColor = chartTextColor
             barBorderWidth = 1f
         }
 
@@ -75,7 +77,7 @@ object HistogramChartHelper {
             position = XAxis.XAxisPosition.BOTTOM
             setDrawGridLines(false)
             setDrawAxisLine(true)
-            textColor = Color.BLACK
+            textColor = chartTextColor
             textSize = chartTextSize
             axisMinimum = 0f
             axisMaximum = maxBinIndex.toFloat()
@@ -93,7 +95,7 @@ object HistogramChartHelper {
         chart.axisLeft.apply {
             setDrawGridLines(false)
             setDrawAxisLine(true)
-            textColor = Color.BLACK
+            textColor = chartTextColor
             textSize = chartTextSize
             axisMinimum = 0f
             val maxY = entries.maxOfOrNull { it.y.toInt() } ?: 1
@@ -118,7 +120,7 @@ object HistogramChartHelper {
                 text = ""
             }
             setNoDataText(context.getString(R.string.chart_no_data))
-            setNoDataTextColor(Color.BLACK)
+            setNoDataTextColor(chartTextColor)
 
             // Add extra offsets to avoid label cut-off
             setExtraOffsets(8f, 0f, 0f, 8f)

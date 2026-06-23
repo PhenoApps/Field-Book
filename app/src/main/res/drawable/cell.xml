@@ -7,9 +7,7 @@
         android:color="?fb_border_color"
         android:width="1dp" />
 
-    <gradient
-        android:startColor="#FFFFFF"
-        android:endColor="#FFFFFF"/>
+    <solid android:color="?attr/fb_color_card_background" />
 
     <padding
         android:bottom="5dp"

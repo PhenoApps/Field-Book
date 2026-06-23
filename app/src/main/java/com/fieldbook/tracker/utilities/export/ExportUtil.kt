@@ -1,16 +1,15 @@
 package com.fieldbook.tracker.utilities.export
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import android.Manifest
 import android.app.Activity
-import android.app.AlertDialog
-import android.app.ProgressDialog
+import androidx.appcompat.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
 import android.os.Build
 import android.text.Html
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.widget.*
@@ -73,7 +72,7 @@ class ExportUtil @Inject constructor(
     private var filesToExport: MutableList<DocumentFile> = mutableListOf()
     private var processedFieldCount = 0
     private val ioScope = CoroutineScope(Dispatchers.IO)
-    private var progressDialog: ProgressDialog? = null
+    private var progressDialog: AlertDialog? = null
 
     private val preferences = PreferenceManager.getDefaultSharedPreferences(context)
     private val timeStamp = SimpleDateFormat("yyyy-MM-dd-hh-mm-ss", Locale.getDefault())
@@ -163,7 +162,7 @@ class ExportUtil @Inject constructor(
     }
 
     private fun exportLocal(fields: List<FieldObject>) {
-        val layout = LayoutInflater.from(context).inflate(R.layout.dialog_export, null)
+        val layout = ThemedAlertDialog.inflate(context, R.layout.dialog_export)
 
         val bundleInfoMessage: TextView = layout.findViewById(R.id.bundleInfo)
         val fileName: EditText = layout.findViewById(R.id.fileName)
@@ -208,7 +207,7 @@ class ExportUtil @Inject constructor(
         defaultFileString = "${timeStamp.format(Calendar.getInstance().time)}_$defaultFieldString"
         fileName.setText(defaultFileString)
 
-        val builder = AlertDialog.Builder(context, R.style.AppAlertDialog)
+        val builder = ThemedAlertDialog.builder(context)
         builder.setTitle(R.string.settings_export)
             .setCancelable(true)
             .setView(layout)
@@ -289,7 +288,7 @@ class ExportUtil @Inject constructor(
             fun proceedWithExport() {
                 //show a warning if table is selected and repeated measures is enabled
                 if (checkTable.isChecked && repeatedMeasuresEnabled) {
-                    AlertDialog.Builder(context, R.style.AppAlertDialog)
+                    ThemedAlertDialog.builder(context)
                         .setTitle(R.string.export_util_repeated_measures_table_warning_title)
                         .setMessage(R.string.export_util_repeated_measures_table_warning_message)
                         .setPositiveButton(android.R.string.ok) { _, _ ->
@@ -304,7 +303,7 @@ class ExportUtil @Inject constructor(
                 val useActiveTraits = activeTraits?.isChecked == true
                 val mediaFileCount = countMediaFiles(fields, useActiveTraits)
                 if (mediaFileCount > BUNDLE_MEDIA_WARNING_THRESHOLD) {
-                    AlertDialog.Builder(context, R.style.AppAlertDialog)
+                    ThemedAlertDialog.builder(context)
                         .setTitle(R.string.export_util_bundle_media_warning_title)
                         .setMessage(context.getString(R.string.export_util_bundle_media_warning_message, mediaFileCount))
                         .setPositiveButton(R.string.export_util_bundle_media_warning_continue) { _, _ ->
@@ -318,12 +317,11 @@ class ExportUtil @Inject constructor(
     }
 
     private fun showProgressDialog() {
-        progressDialog = ProgressDialog(context).apply {
-            isIndeterminate = true
-            setCancelable(false)
-            setMessage(Html.fromHtml(context.getString(R.string.export_progress)))
-            show()
-        }
+        progressDialog = ThemedAlertDialog.indeterminateProgressDialog(
+            context,
+            Html.fromHtml(context.getString(R.string.export_progress)),
+        )
+        progressDialog?.show()
     }
 
     // Launches a new coroutine for each export task

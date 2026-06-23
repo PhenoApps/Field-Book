@@ -1,92 +1,47 @@
 package com.fieldbook.tracker.views
 
 import com.fieldbook.tracker.R
-import android.util.TypedValue
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.binayshaw7777.kotstep.v3.KotStep
-import com.binayshaw7777.kotstep.v3.model.step.StepLayoutStyle
-import com.binayshaw7777.kotstep.v3.model.style.BorderStyle
-import com.binayshaw7777.kotstep.v3.model.style.IconStyle
-import com.binayshaw7777.kotstep.v3.model.style.KotStepStyle
-import com.binayshaw7777.kotstep.v3.model.style.LineStyle
-import com.binayshaw7777.kotstep.v3.model.style.LineStyles
-import com.binayshaw7777.kotstep.v3.model.style.StepStyle
-import com.binayshaw7777.kotstep.v3.model.style.StepStyles
-import com.binayshaw7777.kotstep.v3.util.ExperimentalKotStep
 import com.fieldbook.tracker.enums.FieldCreationStep
+import com.google.android.material.color.MaterialColors
 
-@OptIn(ExperimentalKotStep::class)
 @Composable
 fun FieldCreatorStepper(currentStep: FieldCreationStep, onStepClicked: (FieldCreationStep) -> Unit = {}) {
     val context = LocalContext.current
-    val theme = context.theme
-    val typedValue = TypedValue()
+    fun themeColor(@androidx.annotation.AttrRes attr: Int): Color =
+        Color(MaterialColors.getColor(context, attr, android.graphics.Color.WHITE))
 
-    theme.resolveAttribute(R.attr.stepper_icon_color, typedValue, true)
-    val stepperIconColor = Color(typedValue.data)
-
-    theme.resolveAttribute(R.attr.stepper_icon_bg_color, typedValue, true)
-    val stepperIconBgColor = Color(typedValue.data)
-
-    theme.resolveAttribute(R.attr.stepper_icon_on_done_color, typedValue, true)
-    val stepperIconOnDoneColor = Color(typedValue.data)
-
-    theme.resolveAttribute(R.attr.stepper_icon_on_done_bg_color, typedValue, true)
-    val stepperIconOnDoneBgColor = Color(typedValue.data)
-
-    theme.resolveAttribute(R.attr.stepper_line_color, typedValue, true)
-    val stepperLineColor = Color(typedValue.data)
-
-    theme.resolveAttribute(R.attr.stepper_line_on_done_color, typedValue, true)
-    val stepperLineOnDoneColor = Color(typedValue.data)
-
-    val kotStepStyle = KotStepStyle(
-        stepLayoutStyle = StepLayoutStyle.Horizontal,
-        stepStyle = StepStyles(
-            onTodo = StepStyle(
-                stepColor = stepperIconBgColor,
-                stepSize = 40.dp,
-                iconStyle = IconStyle(iconSize = 24.dp),
-                borderStyle = BorderStyle(color = stepperIconColor)
-            ),
-            onCurrent = StepStyle(
-                stepColor = stepperIconBgColor,
-                stepSize = 60.dp,
-                iconStyle = IconStyle(iconSize = 44.dp),
-                // textStyle = TextStyle(color = Color.Black, fontSize = 18.sp),
-                borderStyle = BorderStyle(color = stepperIconColor)
-            ),
-            onDone = StepStyle(
-                stepColor = stepperIconOnDoneBgColor,
-                stepSize = 40.dp,
-                iconStyle = IconStyle(iconSize = 24.dp, iconTint = stepperIconOnDoneColor),
-                borderStyle = BorderStyle(color = stepperIconColor)
-            )
-        ),
-        lineStyle = LineStyles(
-            onTodo = LineStyle(lineColor = stepperLineColor, progressColor = stepperLineColor),
-            onCurrent = LineStyle(lineColor = stepperLineColor, progressColor = stepperLineColor),
-            onDone = LineStyle(lineColor = stepperLineColor, progressColor = stepperLineOnDoneColor, lineThickness = 4.dp)
-        )
-    )
+    val stepperIconColor = themeColor(R.attr.stepper_icon_color)
+    val stepperIconBgColor = themeColor(R.attr.stepper_icon_bg_color)
+    val stepperIconOnDoneColor = themeColor(R.attr.stepper_icon_on_done_color)
+    val stepperIconOnDoneBgColor = themeColor(R.attr.stepper_icon_on_done_bg_color)
+    val stepperLineColor = themeColor(R.attr.stepper_line_color)
+    val stepperLineOnDoneColor = themeColor(R.attr.stepper_line_on_done_color)
 
     val steps = FieldCreationStep.displayableEntries()
-    val icons: Map<FieldCreationStep, ImageVector?> = steps.associateWith { step ->
-        step.icon?.let { ImageVector.vectorResource(id = it) }
-    }
 
     Row(
         modifier = Modifier
@@ -94,23 +49,98 @@ fun FieldCreatorStepper(currentStep: FieldCreationStep, onStepClicked: (FieldCre
             .height(100.dp)
             .horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        KotStep(
-            currentStep = { currentStep.position.toFloat() },
-            style = kotStepStyle
-        ) {
-            steps.forEach { step ->
-                icons[step]?.let { icon ->
-                    step(
-                        icon = icon,
-                        onClick = {
-                            onStepClicked(step)
-                        }
+        steps.forEachIndexed { index, step ->
+            if (index > 0) {
+                val previousDone = steps[index - 1].position < currentStep.position
+                Box(
+                    modifier = Modifier
+                        .width(28.dp)
+                        .height(4.dp)
+                        .clip(CircleShape)
+                        .background(if (previousDone) stepperLineOnDoneColor else stepperLineColor),
+                )
+            }
+
+            val state = when {
+                step.position < currentStep.position -> StepVisualState.Done
+                step.position == currentStep.position -> StepVisualState.Current
+                else -> StepVisualState.Todo
+            }
+
+            FieldCreatorStepItem(
+                step = step,
+                state = state,
+                stepperIconColor = stepperIconColor,
+                stepperIconBgColor = stepperIconBgColor,
+                stepperIconOnDoneColor = stepperIconOnDoneColor,
+                stepperIconOnDoneBgColor = stepperIconOnDoneBgColor,
+                onClick = { onStepClicked(step) },
+            )
+        }
+    }
+}
+
+private enum class StepVisualState {
+    Todo, Current, Done,
+}
+
+@Composable
+private fun FieldCreatorStepItem(
+    step: FieldCreationStep,
+    state: StepVisualState,
+    stepperIconColor: Color,
+    stepperIconBgColor: Color,
+    stepperIconOnDoneColor: Color,
+    stepperIconOnDoneBgColor: Color,
+    onClick: () -> Unit,
+) {
+    val stepSize = when (state) {
+        StepVisualState.Current -> 60.dp
+        StepVisualState.Todo, StepVisualState.Done -> 40.dp
+    }
+    val iconSize = when (state) {
+        StepVisualState.Current -> 28.dp
+        StepVisualState.Todo, StepVisualState.Done -> 22.dp
+    }
+    val backgroundColor = when (state) {
+        StepVisualState.Done -> stepperIconOnDoneBgColor
+        StepVisualState.Todo, StepVisualState.Current -> stepperIconBgColor
+    }
+    val iconTint = when (state) {
+        StepVisualState.Done -> stepperIconOnDoneColor
+        StepVisualState.Todo, StepVisualState.Current -> stepperIconColor
+    }
+
+    Box(
+        modifier = Modifier
+            .size(stepSize)
+            .clip(CircleShape)
+            .background(backgroundColor)
+            .border(2.dp, stepperIconColor, CircleShape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        when (state) {
+            StepVisualState.Done -> {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                    tint = iconTint,
+                    modifier = Modifier.size(iconSize),
+                )
+            }
+            StepVisualState.Todo, StepVisualState.Current -> {
+                step.icon?.let { iconRes ->
+                    Icon(
+                        painter = painterResource(iconRes),
+                        contentDescription = null,
+                        tint = iconTint,
+                        modifier = Modifier.size(iconSize),
                     )
                 }
             }
         }
     }
 }
-

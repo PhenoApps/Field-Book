@@ -1,5 +1,7 @@
 package com.fieldbook.tracker.dialogs;
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -19,7 +21,7 @@ public class OperatorDialog extends AlertDialog {
     private int adapter_position;
 
     public OperatorDialog(Context context, OnOperatorClickedListener listener, int adapter_position) {
-        super(context, R.style.AppAlertDialog);
+        super(context, ThemedAlertDialog.dialogStyle(context));
         this.context = context;
         this.listener = listener;
         this.adapter_position = adapter_position;
@@ -29,7 +31,7 @@ public class OperatorDialog extends AlertDialog {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        View customView = getLayoutInflater().inflate(R.layout.dialog_operator, null);
+        View customView = ThemedAlertDialog.inflate(context, R.layout.dialog_operator);
         setView(customView);
         setTitle(context.getString(R.string.search_dialog_operator_dialog_title));
         setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.dialog_cancel), (dialogInterface, i) -> dialogInterface.dismiss());

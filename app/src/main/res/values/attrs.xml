@@ -210,6 +210,10 @@
     <attr format="color" name="fb_color_primary_dark"/>
     <attr format="color" name="fb_color_accent"/>
     <attr format="color" name="fb_color_background"/>
+    <attr format="color" name="fb_color_card_background"/>
+
+    <!-- Idle list row overlay (non-activated) in list_item_selector_default -->
+    <attr format="color" name="fb_color_list_selector_default_overlay"/>
 
     <attr format="dimension" name="fb_title_text_size"/>
     <attr format="dimension" name="fb_body_text_size" />
@@ -242,6 +246,9 @@
     <!-- these will change colors of all icons -->
     <attr format="color" name="fb_icon_tint"/>
     <attr format="color" name="fb_icon_fill_tint"/>
+
+    <!-- collect trait progress bar: selected trait marker (defaults to primary_dark) -->
+    <attr format="color" name="fb_trait_status_selected_color"/>
 
     <!-- color of toolbar titles -->
     <attr format="color" name="fb_title_text_color"/>
@@ -326,6 +333,7 @@
     <attr name="activeCellColor" format="color"/>
     <attr name="activeCellTextColor" format="color"/>
     <attr name="cellTextColor" format="color"/>
+    <attr name="headerCellColor" format="color"/>
     <attr name="tableBorderColor" format="color"/>
 
     <!-- stepper ui colors -->

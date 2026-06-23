@@ -13,6 +13,8 @@
 
 Allows you to change the Field Book theme, text size, or saved data color.
 
+App themes include **Default**, **High Contrast**, **Blue**, and **Soda Dark** — a dark appearance option inspired by the [Soda Dark](https://github.com/buymeasoda/soda-theme) palette (Soda Dark 3). Choose **Soda Dark** under **Settings → Appearance → App Theme** for lower-glare use in bright field conditions. Text size and saved-data color can still be adjusted independently of the app theme.
+
 <figure class="image">
   <img class="screenshot" src="_static/images/settings/appearance/settings_appearance_theme_framed.png" width="350px"> 
   <figcaption class="screenshot-caption"><i>Theme options</i></figcaption> 

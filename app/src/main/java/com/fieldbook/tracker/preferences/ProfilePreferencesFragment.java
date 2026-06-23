@@ -1,6 +1,8 @@
 package com.fieldbook.tracker.preferences;
 
-import android.app.AlertDialog;
+import com.fieldbook.tracker.utilities.ThemedAlertDialog;
+import com.fieldbook.tracker.utilities.AppThemeResolver;
+import androidx.appcompat.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -110,8 +112,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
      * @param populatePersonName - whether to try to show current person's name in the editTexts
      */
     private void showPersonDialog(boolean populatePersonName) {
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_person, null);
+        View layout = ThemedAlertDialog.inflate(getContext(), R.layout.dialog_person);
         firstName = layout.findViewById(R.id.firstName);
         lastName = layout.findViewById(R.id.lastName);
 
@@ -121,7 +122,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
         firstName.setSelectAllOnFocus(true);
         lastName.setSelectAllOnFocus(true);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog);
+        AlertDialog.Builder builder = ThemedAlertDialog.builder(getContext());
         builder.setTitle(R.string.preferences_profile_person_dialog_title)
                 .setCancelable(true)
                 .setView(layout);
@@ -184,7 +185,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
         ArrayAdapter<String> adapter = getPersonNameAdapter(currentPersonIndex, previousNames);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog)
+        AlertDialog.Builder builder = ThemedAlertDialog.builder(getContext())
                 .setTitle(R.string.preferences_profile_previous_names)
                 .setAdapter(adapter, (dialogInterface, which) -> {
                     PersonNameManager.PersonName selectedName = previouslySavedNames.get(which);
@@ -201,7 +202,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
     }
 
     private void showPersonResetWarning() {
-        AlertDialog alertDialog = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog)
+        AlertDialog alertDialog = ThemedAlertDialog.builder(getContext())
                 .setTitle(R.string.dialog_warning)
                 .setMessage(R.string.preferences_profile_previous_names_warning)
                 .setNegativeButton(R.string.dialog_cancel, null)
@@ -215,12 +216,13 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
                     d.dismiss();
                 }).show();
 
-        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(context, R.color.main_value_saved_color));
+        TypedValue savedColor = new TypedValue();
+        context.getTheme().resolveAttribute(R.attr.fb_value_saved_color, savedColor, true);
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(savedColor.data);
     }
 
     private void showDeviceNameDialog() {
-        LayoutInflater inflater = this.getLayoutInflater();
-        View layout = inflater.inflate(R.layout.dialog_device_name, null);
+        View layout = ThemedAlertDialog.inflate(getContext(), R.layout.dialog_device_name);
         final EditText deviceName = layout.findViewById(R.id.deviceName);
         final TextView errorMessageView = layout.findViewById(R.id.error_message);
 
@@ -229,7 +231,7 @@ public class ProfilePreferencesFragment extends PreferenceFragmentCompat impleme
 
         deviceName.setSelectAllOnFocus(true);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.AppAlertDialog);
+        AlertDialog.Builder builder = ThemedAlertDialog.builder(getContext());
         builder.setTitle(R.string.preferences_profile_device_name_dialog_title)
                 .setCancelable(true)
                 .setView(layout);

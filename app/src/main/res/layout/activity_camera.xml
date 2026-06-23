@@ -71,7 +71,6 @@
         app:srcCompat="@drawable/camera_24px"
         app:maxImageSize="@dimen/fb_trait_fab_image_size"
         app:useCompatPadding="true"
-        android:tint="@color/BLACK"
         app:layout_constraintBottom_toTopOf="@id/media_mode_compose"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

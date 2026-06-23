@@ -1,7 +1,9 @@
 package com.fieldbook.tracker.traits;
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog;
+import com.fieldbook.tracker.utilities.AppThemeResolver;
 import android.app.Activity;
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.text.InputType;
@@ -335,7 +337,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
         container.setPadding(padding, 0, padding, 0);
         container.addView(input, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 
-        new AlertDialog.Builder(getContext())
+        ThemedAlertDialog.builder(getContext())
                 .setTitle(R.string.trait_other_dialog_title)
                 .setView(container)
                 .setPositiveButton(android.R.string.ok, (dialog, which) -> {

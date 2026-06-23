@@ -35,6 +35,8 @@ import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.AppLanguageUtil;
+import com.fieldbook.tracker.utilities.AppThemeResolver;
+import com.fieldbook.tracker.utilities.FieldBookChangelogRenderer;
 import com.fieldbook.tracker.utilities.FuzzySearch;
 import com.fieldbook.tracker.utilities.InsetHandler;
 import com.fieldbook.tracker.utilities.export.ExportUtil;
@@ -52,7 +54,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.michaelflisar.changelog.ChangelogBuilder;
 import com.michaelflisar.changelog.classes.ImportanceChangelogSorter;
-import com.michaelflisar.changelog.internal.ChangelogDialogFragment;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.phenoapps.utils.BaseDocumentTreeUtil;
@@ -243,16 +244,38 @@ public class ConfigActivity extends ThemedActivity {
         firstRunSetup();
     }
 
-    private void showChangelog(Boolean managedShow, Boolean rateButton) {
-        ChangelogDialogFragment builder = new ChangelogBuilder()
+    private boolean useDarkChangelogDialog() {
+        return AppThemeResolver.isSodaDark(preferences);
+    }
+
+    private ChangelogBuilder newChangelogBuilder(Boolean managedShow, Boolean rateButton, boolean useCustomRenderer) {
+        ChangelogBuilder builder = new ChangelogBuilder()
                 .withUseBulletList(true) // true if you want to show bullets before each changelog row, false otherwise
                 .withManagedShowOnStart(managedShow)  // library will take care to show activity/dialog only if the changelog has new infos and will only show this new infos
                 .withRateButton(rateButton) // enable this to show a "rate app" button in the dialog => clicking it will open the play store; the parent activity or target fragment can also implement IChangelogRateHandler to handle the button click
                 .withSummary(false, true) // enable this to show a summary and a "show more" button, the second paramter describes if releases without summary items should be shown expanded or not
                 .withTitle(getString(R.string.changelog_title)) // provide a custom title if desired, default one is "Changelog <VERSION>"
                 .withOkButtonLabel(getString(android.R.string.ok)) // provide a custom ok button text if desired, default one is "OK"
-                .withSorter(new ImportanceChangelogSorter())
-                .buildAndShowDialog(this, false); // second parameter defines, if the dialog has a dark or light theme
+                .withSorter(new ImportanceChangelogSorter());
+        if (useCustomRenderer) {
+            builder.withRenderer(new FieldBookChangelogRenderer());
+        }
+        return builder;
+    }
+
+    private void showChangelog(Boolean managedShow, Boolean rateButton) {
+        if (useDarkChangelogDialog()) {
+            // Full-screen activity: do not parcel a custom renderer (subclass CREATOR issue).
+            // Soda colors come from resolveActivityThemeStyle + ChangelogRow/Header styles.
+            newChangelogBuilder(managedShow, rateButton, false)
+                    .buildAndStartActivity(
+                            this,
+                            ThemedActivity.resolveActivityThemeStyle(this),
+                            false); // false = use layout Toolbar; true causes NPE in ChangelogActivity
+        } else {
+            newChangelogBuilder(managedShow, rateButton, true)
+                    .buildAndShowDialog(this, false);
+        }
     }
 
     private void initToolbar() {

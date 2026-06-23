@@ -1,7 +1,8 @@
 package com.fieldbook.tracker.traits
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import android.app.Activity
-import android.app.AlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.content.Context
@@ -146,7 +147,7 @@ class ScaleTraitLayout : BaseTraitLayout {
 
             }
 
-            dialog = AlertDialog.Builder(context, R.style.AppAlertDialog)
+            dialog = ThemedAlertDialog.builder(context)
                 .setTitle(context.getString(R.string.device_settings_dialog_title))
                 .setPositiveButton(android.R.string.ok) { dialog, _ ->
                     dialog.dismiss()

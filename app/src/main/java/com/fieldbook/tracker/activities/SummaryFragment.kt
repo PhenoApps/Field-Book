@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.activities
 
-import android.app.AlertDialog
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,7 +10,9 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ListView
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.core.content.edit
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
@@ -22,6 +25,7 @@ import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.InsetHandler
+import com.google.android.material.color.MaterialColors
 import com.google.gson.JsonParseException
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -82,7 +86,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
         toolbar?.setTitle(R.string.fragment_summary_toolbar_title)
 
-        toolbar?.setNavigationIcon(R.drawable.arrow_left)
+        tintToolbarNavigationIcon()
 
         toolbar?.setNavigationOnClickListener {
 
@@ -102,6 +106,19 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
             }
 
             true
+        }
+    }
+
+    private fun tintToolbarNavigationIcon() {
+        val bar = toolbar ?: return
+        val drawable = ContextCompat.getDrawable(requireContext(), R.drawable.arrow_left)?.mutate()
+            ?: return
+        val tintColor = MaterialColors.getColor(bar, R.attr.fb_icon_tint, 0)
+        if (tintColor != 0) {
+            DrawableCompat.setTint(drawable, tintColor)
+            bar.navigationIcon = drawable
+        } else {
+            bar.setNavigationIcon(R.drawable.arrow_left)
         }
     }
 
@@ -364,7 +381,7 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
                 loadableModels.addAll(models.filterIndexed { index, _ -> checked[index] })
 
                 filterDialog =
-                    AlertDialog.Builder(activity, R.style.AppAlertDialog)
+                    ThemedAlertDialog.builder(requireContext())
                         .setTitle(R.string.fragment_summary_filter_title)
                         .setMultiChoiceItems(
                             models.map { it.label }.toTypedArray(),

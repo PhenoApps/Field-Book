@@ -40,7 +40,7 @@ class TraitsStatusAdapter(private val traitBoxView: TraitBoxView) :
         val theme = context.theme
 
         val activeTraitColor = TypedValue()
-        theme.resolveAttribute(R.attr.fb_color_primary_dark, activeTraitColor, true)
+        theme.resolveAttribute(R.attr.fb_trait_status_selected_color, activeTraitColor, true)
         val inactiveTraitColor = TypedValue()
         theme.resolveAttribute(R.attr.fb_color_accent, inactiveTraitColor, true)
 

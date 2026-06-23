@@ -21,6 +21,7 @@
         <item name="fb_color_primary_dark">@color/main_primary_dark</item>
         <item name="fb_color_accent">@color/main_color_accent</item>
         <item name="fb_color_background">@color/main_color_background</item>
+        <item name="fb_color_card_background">@color/main_color_background</item>
         <item name="fb_color_text_light">@color/main_color_text_light</item>
         <item name="fb_color_text_dark">@color/main_color_text_dark</item>
         <item name="fb_color_text_button_background">@color/main_color_text_button_background</item>
@@ -66,10 +67,12 @@
         <item name="fb_trait_button_background_tint">@color/light_gray</item>
 
         <item name="fb_categorical_button_selected_color">?attr/fb_color_primary</item>
+        <item name="fb_trait_status_selected_color">@color/main_primary_dark</item>
 
         <!-- these are used in material design components -->
         <item name="android:textColorPrimary">?attr/fb_color_text_dark</item>
         <item name="android:textColorSecondary">?attr/fb_color_text_dark</item>
+        <item name="colorControlNormal">?attr/fb_icon_tint</item>
 
         <!-- widget style declarations (found in styles_widgets.xml)-->
         <item name="floatingActionButtonStyle">@style/FloatingActionButtonStyle</item>
@@ -85,6 +88,7 @@
         <item name="progressBarStyle">@style/ProgressBarStyle</item>
         <item name="indeterminateProgressStyle">@style/IndeterminateProgressStyle</item>
         <item name="editTextStyle">@style/EditTextStyle</item>
+        <item name="textInputStyle">@style/FieldBookTextInputLayoutStyle</item>
         <item name="spinnerDropDownItemStyle">@style/SpinnerDropDownItemStyle</item>
         <item name="spinnerStyle">@style/SpinnerStyle</item>
         <item name="dropDownListViewStyle">@style/DropDownListViewStyle</item>
@@ -114,6 +118,7 @@
         <item name="iconTint">?attr/fb_icon_tint</item>
 
         <item name="fb_error_message_color">@color/RED</item>
+        <item name="fb_color_list_selector_default_overlay">#80FFFFFF</item>
 
         <item name="colorSecondary">?attr/fb_color_accent</item>
       
@@ -138,6 +143,7 @@
         <item name="activeCellColor">@color/main_primary_dark</item>
         <item name="activeCellTextColor">@color/WHITE</item>
         <item name="cellTextColor">@color/main_color_text_dark</item>
+        <item name="headerCellColor">@color/WHITE</item>
         <item name="tableBorderColor">@color/BLACK</item>
 
         <item name="fb_graph_item_selected_color">?attr/fb_color_primary</item>
@@ -164,6 +170,7 @@
         <item name="fb_color_primary_dark">@color/blue_primary_dark</item>
         <item name="fb_color_accent">@color/blue_color_accent</item>
         <item name="fb_color_background">@color/WHITE</item>
+        <item name="fb_color_card_background">@color/light_gray</item>
         <item name="fb_color_text_button_background">?attr/fb_color_primary</item>
         <item name="fb_color_text_light">@color/WHITE</item>
         <item name="fb_color_hint_text">@color/BLACK</item>
@@ -210,6 +217,7 @@
         <item name="stepper_icon_on_done_bg_color">@color/blue_primary</item>
         <item name="stepper_line_color">@color/GRAY</item>
         <item name="stepper_line_on_done_color">@color/blue_primary</item>
+        <item name="fb_trait_status_selected_color">@color/blue_primary_dark</item>
     </style>
 
     <!-- High Contrast Theme -->
@@ -227,6 +235,7 @@
         <item name="fb_color_text_high_contrast_inverted">@color/high_contrast_primary</item>
         <item name="fb_color_hint_text">@color/high_contrast_color_hint_text</item>
         <item name="fb_color_background">@color/high_contrast_color_background</item>
+        <item name="fb_color_card_background">@color/light_gray</item>
         <item name="fb_color_text_button_background">?attr/fb_color_primary</item>
         <item name="fb_spinner_focused">@color/high_contrast_color_accent</item>
         <item name="fb_spinner_selected">@color/high_contrast_primary_transparent</item>
@@ -349,6 +358,7 @@
         <item name="dataFilledColor">@color/high_contrast_data_filled_color</item>
         <item name="emptyCellColor">@color/high_contrast_empty_cell_color</item>
         <item name="activeCellColor">@color/high_contrast_active_cell_color</item>
+        <item name="headerCellColor">@color/WHITE</item>
 
         <!-- Stepper UI -->
         <item name="stepper_icon_color">@color/BLACK</item>
@@ -357,6 +367,7 @@
         <item name="stepper_icon_on_done_bg_color">@color/BLACK</item>
         <item name="stepper_line_color">@color/BLACK</item>
         <item name="stepper_line_on_done_color">@color/BLACK</item>
+        <item name="fb_trait_status_selected_color">@color/high_contrast_primary_dark</item>
     </style>
 
     <!-- need to define a theme for each type of material component until we can use the new themes -->

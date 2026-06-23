@@ -1,6 +1,6 @@
 package com.fieldbook.tracker.dialogs
 
-import android.app.AlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle

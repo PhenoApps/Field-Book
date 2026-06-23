@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.dialogs
 
-import android.app.AlertDialog
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
 import android.util.Log
@@ -63,8 +64,7 @@ open class AttributeChooserDialog(
     protected var attributeSelectedListener: OnAttributeSelectedListener? = null
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val inflater = requireActivity().layoutInflater
-        val view = inflater.inflate(R.layout.dialog_collect_att_chooser, null)
+        val view = ThemedAlertDialog.inflate(requireContext(), R.layout.dialog_collect_att_chooser)
 
         var titleResId = arguments?.getInt(ARG_TITLE) ?: R.string.dialog_att_chooser_title_default
         if (titleResId == 0) titleResId = R.string.dialog_att_chooser_title_default
@@ -86,7 +86,7 @@ open class AttributeChooserDialog(
         tabLayout.getTabAt(2)?.view?.visibility =
             if (showOther) TabLayout.VISIBLE else TabLayout.GONE
 
-        val builder = AlertDialog.Builder(requireActivity(), R.style.AppAlertDialog)
+        val builder = ThemedAlertDialog.builder(requireActivity())
             .setView(view)
             .setNegativeButton(android.R.string.cancel, null)
             .setCancelable(true)
@@ -95,8 +95,7 @@ open class AttributeChooserDialog(
 
         val dialog = builder.create()
 
-        // Call loadData after dialog is shown
-        dialog.setOnShowListener {
+        ThemedAlertDialog.chainOnShow(dialog, requireContext()) {
             toggleProgressVisibility(true)
             BackgroundUiTask.execute(
                 backgroundBlock = ::loadData,

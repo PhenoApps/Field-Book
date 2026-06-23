@@ -1,7 +1,8 @@
 package com.fieldbook.tracker.activities.brapi.io.filter
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import android.app.Activity
-import android.app.AlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.ContextThemeWrapper
@@ -491,7 +492,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             }
 
             R.id.action_reset_cache -> {
-                AlertDialog.Builder(this, R.style.AppAlertDialog)
+                ThemedAlertDialog.builder(this)
                     .setTitle(R.string.act_brapi_list_filter_reset_cache_title)
                     .setMessage(getString(R.string.act_brapi_list_filter_reset_cache_message))
                     .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss() }
@@ -502,7 +503,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             }
 
             R.id.action_clear_selection -> {
-                AlertDialog.Builder(this, R.style.AppAlertDialog)
+                ThemedAlertDialog.builder(this)
                     .setTitle(R.string.act_brapi_list_filter_reset_cache_title)
                     .setMessage(getString(R.string.act_brapi_list_filter_reset_selection_message))
                     .setNegativeButton(android.R.string.cancel) { dialog, _ -> dialog.dismiss() }

@@ -75,6 +75,30 @@
         <item name="fb_subheading_text_size">@dimen/sub_text_size_xlarge</item>
     </style>
 
+    <style name="BaseAppTheme.SodaDark.SmallTextTheme">
+        <item name="fb_title_text_size">@dimen/title_text_size_small</item>
+        <item name="fb_body_text_size">@dimen/text_size_small</item>
+        <item name="fb_subheading_text_size">@dimen/sub_text_size_small</item>
+    </style>
+
+    <style name="BaseAppTheme.SodaDark.MediumTextTheme">
+        <item name="fb_title_text_size">@dimen/title_text_size_medium</item>
+        <item name="fb_body_text_size">@dimen/text_size_medium</item>
+        <item name="fb_subheading_text_size">@dimen/sub_text_size_medium</item>
+    </style>
+
+    <style name="BaseAppTheme.SodaDark.LargeTextTheme">
+        <item name="fb_title_text_size">@dimen/title_text_size_large</item>
+        <item name="fb_body_text_size">@dimen/text_size_large</item>
+        <item name="fb_subheading_text_size">@dimen/sub_text_size_large</item>
+    </style>
+
+    <style name="BaseAppTheme.SodaDark.ExtraLargeTextTheme">
+        <item name="fb_title_text_size">@dimen/title_text_size_xlarge</item>
+        <item name="fb_body_text_size">@dimen/text_size_xlarge</item>
+        <item name="fb_subheading_text_size">@dimen/sub_text_size_xlarge</item>
+    </style>
+
     <style name="BaseAppTheme.Mal.SmallTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_small</item>
         <item name="fb_body_text_size">@dimen/text_size_small</item>
@@ -142,6 +166,30 @@
     </style>
 
     <style name="BaseAppTheme.Mal.Blue.ExtraLargeTextTheme">
+        <item name="fb_title_text_size">@dimen/title_text_size_xlarge</item>
+        <item name="fb_body_text_size">@dimen/text_size_xlarge</item>
+        <item name="fb_subheading_text_size">@dimen/sub_text_size_xlarge</item>
+    </style>
+
+    <style name="BaseAppTheme.Mal.SodaDark.SmallTextTheme">
+        <item name="fb_title_text_size">@dimen/title_text_size_small</item>
+        <item name="fb_body_text_size">@dimen/text_size_small</item>
+        <item name="fb_subheading_text_size">@dimen/sub_text_size_small</item>
+    </style>
+
+    <style name="BaseAppTheme.Mal.SodaDark.MediumTextTheme">
+        <item name="fb_title_text_size">@dimen/title_text_size_medium</item>
+        <item name="fb_body_text_size">@dimen/text_size_medium</item>
+        <item name="fb_subheading_text_size">@dimen/sub_text_size_medium</item>
+    </style>
+
+    <style name="BaseAppTheme.Mal.SodaDark.LargeTextTheme">
+        <item name="fb_title_text_size">@dimen/title_text_size_large</item>
+        <item name="fb_body_text_size">@dimen/text_size_large</item>
+        <item name="fb_subheading_text_size">@dimen/sub_text_size_large</item>
+    </style>
+
+    <style name="BaseAppTheme.Mal.SodaDark.ExtraLargeTextTheme">
         <item name="fb_title_text_size">@dimen/title_text_size_xlarge</item>
         <item name="fb_body_text_size">@dimen/text_size_xlarge</item>
         <item name="fb_subheading_text_size">@dimen/sub_text_size_xlarge</item>

@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.activities
 
-import android.app.AlertDialog
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -99,6 +100,8 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
     private var emptyCellBgColor: Int = 0
     private var activeCellTextColor: Int = 0
     private var cellTextColor: Int = 0
+    private var headerCellBgColor: Int = 0
+    private var tableBorderColor: Int = 0
 
     private var isLoading by mutableStateOf(true)
     private lateinit var lazyTableState: LazyTableState
@@ -192,6 +195,12 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
 
             resolveAttribute(R.attr.cellTextColor, typedValue, true)
             cellTextColor = typedValue.data
+
+            resolveAttribute(R.attr.headerCellColor, typedValue, true)
+            headerCellBgColor = typedValue.data
+
+            resolveAttribute(R.attr.tableBorderColor, typedValue, true)
+            tableBorderColor = typedValue.data
         }
     }
 
@@ -441,7 +450,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
     fun HeaderCell(text: String) {
         TableCell(
             text = text,
-            backgroundColor = Color.White,
+            backgroundColor = Color(headerCellBgColor),
             textColor = Color(cellTextColor)
         )
     }
@@ -450,7 +459,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
     fun RowHeaderCell(text: String) {
         TableCell(
             text = text,
-            backgroundColor = Color.White,
+            backgroundColor = Color(headerCellBgColor),
             textColor = Color(cellTextColor)
         )
     }
@@ -486,7 +495,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .background(backgroundColor)
-                .border(Dp.Hairline, Color(cellTextColor))
+                .border(Dp.Hairline, Color(tableBorderColor))
                 .then(if (isClickable) Modifier.clickable(onClick = onClick) else Modifier)
         ) {
             Text(
@@ -571,7 +580,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
         val choices = repeatedValues.map { it.value }.filter { it.isNotBlank() }.toTypedArray()
 
         // show a dialog to choose which value to navigate to
-        AlertDialog.Builder(this, R.style.AppAlertDialog)
+        ThemedAlertDialog.builder(this)
             .setTitle(R.string.dialog_data_grid_repeated_measures_title)
             .setSingleChoiceItems(choices, 0) { dialog, which ->
                 val value = repeatedValues[which]
@@ -598,7 +607,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
             val rowHeader = getCurrentRowHeader()
             val rowHeaderIndex = columns.indexOf(rowHeader).takeIf { it >= 0 } ?: 0
 
-            AlertDialog.Builder(this, R.style.AppAlertDialog)
+            ThemedAlertDialog.builder(this)
                 .setTitle(R.string.dialog_data_grid_header_picker_title)
                 .setSingleChoiceItems(columns, rowHeaderIndex) { dialog, which ->
                     // update the preference to the determined row header

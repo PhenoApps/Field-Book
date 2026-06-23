@@ -3,7 +3,7 @@
     android:id="@+id/trait_line"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="#FFFFFF"
+    android:background="?attr/fb_color_background"
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:paddingTop="4dp"
@@ -65,7 +65,7 @@
         android:layout_toRightOf="@+id/spacer3"
         android:ellipsize="end"
         android:singleLine="true"
-        android:textColor="#000000"
+        android:textColor="?attr/fb_color_text_dark"
         android:textSize="@dimen/text_size_small" />
 
 </RelativeLayout>

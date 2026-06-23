@@ -2,6 +2,7 @@ package com.fieldbook.tracker.adapters
 
 import android.content.Context
 import android.graphics.Color
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -38,9 +39,11 @@ class TraitFormatAdapter(
         }
 
         fun setBackgroundToggle(format: Formats) {
-
-            iconBtn.setBackgroundColor(if (format == selectedFormat) Color.GRAY else Color.TRANSPARENT)
-
+            val selectedColor = TypedValue()
+            context.theme.resolveAttribute(R.attr.fb_spinner_selected, selectedColor, true)
+            iconBtn.setBackgroundColor(
+                if (format == selectedFormat) selectedColor.data else Color.TRANSPARENT
+            )
         }
     }
 
@@ -61,6 +64,8 @@ class TraitFormatAdapter(
         with(currentList[position]) {
             viewHolder.iconBtn.setImageResource(getIcon())
             viewHolder.nameTv.text = getReadableName(context)
+
+            viewHolder.setBackgroundToggle(this)
 
             viewHolder.iconBtn.setOnClickListener {
 

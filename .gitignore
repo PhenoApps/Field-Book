@@ -66,3 +66,9 @@ keystore.config
 
 # python cache files
 __pycache__/
+
+# Local dev artifacts (not for commit)
+.android-sdk/
+.cursor/test_windows/
+.cursor/test_windows.zip
+.cursor/soda-dialog-theme-check/

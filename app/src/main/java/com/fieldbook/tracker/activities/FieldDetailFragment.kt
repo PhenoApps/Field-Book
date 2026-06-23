@@ -1,7 +1,8 @@
 package com.fieldbook.tracker.activities
 
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
 import android.Manifest
-import android.app.AlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
@@ -22,6 +23,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.Toolbar
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -40,6 +42,7 @@ import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.utilities.export.ExportUtil
 import com.fieldbook.tracker.utilities.FileUtil
+import com.google.android.material.color.MaterialColors
 import com.fieldbook.tracker.utilities.SemanticDateUtil
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
@@ -423,7 +426,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
 
         toolbar?.setTitle(R.string.field_detail_title)
 
-        toolbar?.setNavigationIcon(R.drawable.arrow_left)
+        tintToolbarNavigationIcon()
 
         toolbar?.setNavigationOnClickListener {
 
@@ -445,8 +448,21 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         }
     }
 
+    private fun tintToolbarNavigationIcon() {
+        val bar = toolbar ?: return
+        val drawable = ContextCompat.getDrawable(requireContext(), R.drawable.arrow_left)?.mutate()
+            ?: return
+        val tintColor = MaterialColors.getColor(bar, R.attr.fb_icon_tint, 0)
+        if (tintColor != 0) {
+            DrawableCompat.setTint(drawable, tintColor)
+            bar.navigationIcon = drawable
+        } else {
+            bar.setNavigationIcon(R.drawable.arrow_left)
+        }
+    }
+
     private fun showWrongSourceDialog(field: FieldObject) {
-        val builder = AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
+        val builder = ThemedAlertDialog.builder(requireContext())
             .setTitle(getString(R.string.brapi_field_non_matching_sources_title))
             .setMessage(String.format(getString(R.string.brapi_field_non_matching_sources), field.dataSource, BrAPIService.getHostUrl(context)))
             .setPositiveButton(getString(R.string.dialog_ok)) { d, _ ->
@@ -457,14 +473,13 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     }
 
     private fun showEditDisplayNameDialog(field: FieldObject) {
-        val inflater = requireActivity().layoutInflater
-        val dialogView = inflater.inflate(R.layout.dialog_field_edit_name, null)
+        val dialogView = ThemedAlertDialog.inflate(requireContext(), R.layout.dialog_field_edit_name)
 
         val editText = dialogView.findViewById<EditText>(R.id.edit_text)
         val errorMessageView = dialogView.findViewById<TextView>(R.id.error_message)
         editText.setText(field.alias)
 
-        val builder = AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
+        val builder = ThemedAlertDialog.builder(requireContext())
             .setTitle(getString(R.string.field_edit_display_name))
             .setView(dialogView)
             .setPositiveButton(getString(R.string.dialog_save), null) // Custom handling later
@@ -472,7 +487,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
 
         val dialog = builder.create()
 
-        dialog.setOnShowListener {
+        ThemedAlertDialog.chainOnShow(dialog, requireContext()) {
             val positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
             positiveButton.setOnClickListener {
                 val newName = editText.text.toString()
@@ -629,7 +644,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     }
 
     private fun showUnarchiveDialog() {
-        AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
+        ThemedAlertDialog.builder(requireContext())
             .setTitle(getString(R.string.dialog_unarchive_field_title))
             .setMessage(getString(R.string.dialog_unarchive_field_message))
             .setPositiveButton(getString(R.string.dialog_yes)) { d, _ ->

@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.dialogs
 
-import android.app.AlertDialog
+import com.fieldbook.tracker.utilities.ThemedAlertDialog
+import androidx.appcompat.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
 import android.view.ViewGroup
@@ -27,11 +28,10 @@ class ObservationMetadataFragment : DialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val builder = AlertDialog.Builder(requireContext(), R.style.AppAlertDialog)
+        val builder = ThemedAlertDialog.builder(requireContext())
         builder.setTitle(R.string.observation_metadata_title)
 
-        val inflater = requireActivity().layoutInflater
-        val view = inflater.inflate(R.layout.dialog_observation_metadata, null) as ViewGroup
+        val view = ThemedAlertDialog.inflate(requireContext(), R.layout.dialog_observation_metadata) as ViewGroup
 
         recyclerView = view.findViewById(R.id.dialog_observation_metadata_rv)
 

@@ -9,8 +9,13 @@ import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
+import androidx.preference.PreferenceManager;
+
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.objects.SearchData;
+import com.fieldbook.tracker.utilities.AppThemeResolver;
+import com.fieldbook.tracker.utilities.ThemedAlertDialog;
 
 import java.util.ArrayList;
 
@@ -23,12 +28,24 @@ public class SearchResultsAdapter extends BaseAdapter {
     private final SearchData[] data;
     private final ArrayList<ArrayList<String>> traitData;
     private final int numberOfTraits;
+    private final int rowColorEven;
+    private final int rowColorOdd;
+    private final int cellTextColor;
 
     public SearchResultsAdapter(Context context, SearchData[] data, ArrayList<ArrayList<String>> traitData) {
-        mLayoutInflater = LayoutInflater.from(context);
+        mLayoutInflater = LayoutInflater.from(ThemedAlertDialog.contentContext(context));
         this.data = data;
         this.traitData = traitData;
         this.numberOfTraits = traitData.get(0).size();
+        if (AppThemeResolver.isSodaDark(PreferenceManager.getDefaultSharedPreferences(context))) {
+            rowColorEven = ContextCompat.getColor(context, R.color.soda_dark_row);
+            rowColorOdd = ContextCompat.getColor(context, R.color.soda_dark_window);
+            cellTextColor = ThemedAlertDialog.dialogTextColor(context);
+        } else {
+            rowColorEven = Color.WHITE;
+            rowColorOdd = Color.LTGRAY;
+            cellTextColor = ThemedAlertDialog.dialogTextColor(context);
+        }
     }
 
     public int getCount() {
@@ -59,10 +76,7 @@ public class SearchResultsAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
             holder.itemContainer.removeAllViews();
         }
-        if (position % 2 == 0)
-            convertView.setBackgroundColor(Color.WHITE);
-        else
-            convertView.setBackgroundColor(Color.LTGRAY);
+        convertView.setBackgroundColor(position % 2 == 0 ? rowColorEven : rowColorOdd);
 
         createAndAddTextView(holder, getItem(position).range);
         createAndAddTextView(holder, getItem(position).plot);
@@ -92,6 +106,7 @@ public class SearchResultsAdapter extends BaseAdapter {
         View v = mLayoutInflater.inflate(R.layout.listitem_search_results_traits, null);
         TextView textView = v.findViewById(R.id.trait_value);
         textView.setText(text);
+        textView.setTextColor(cellTextColor);
         textView.setLayoutParams(layoutParams);
         holder.itemContainer.addView(textView);
     }
