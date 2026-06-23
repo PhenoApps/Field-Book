@@ -274,11 +274,12 @@ val SodaDarkAppColors = DefaultAppColors.copy(
         selectedItemBackground = SodaDarkPalette.PrimaryTransparent,
     ),
 
+    // Camera attach-media toggle sits on a black preview; Row (#212121) vanishes on that background.
     toggle = DefaultToggleColors.copy(
-        track = SodaDarkPalette.Row,
+        track = SodaDarkPalette.Panel,
         indicator = SodaDarkPalette.Accent,
-        icon = SodaDarkPalette.TabSelected,
-        iconUnselected = SodaDarkPalette.StatusText,
+        icon = SodaDarkPalette.AccentBright,
+        iconUnselected = SodaDarkPalette.Label,
     ),
 
     status = DefaultAppColors.status.copy(

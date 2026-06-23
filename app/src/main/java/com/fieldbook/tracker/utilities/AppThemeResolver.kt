@@ -7,6 +7,11 @@ import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.ThemedActivity
 import com.fieldbook.tracker.preferences.PreferenceKeys
+import com.fieldbook.tracker.ui.theme.colors.AppColors
+import com.fieldbook.tracker.ui.theme.colors.BlueAppColors
+import com.fieldbook.tracker.ui.theme.colors.DefaultAppColors
+import com.fieldbook.tracker.ui.theme.colors.HighContrastAppColors
+import com.fieldbook.tracker.ui.theme.colors.SodaDarkAppColors
 
 /**
  * Central registry for appearance theme → Android style resource mapping.
@@ -202,6 +207,15 @@ object AppThemeResolver {
             return typedValue.resourceId
         }
         return R.style.AppAlertDialog
+    }
+
+    /** Compose [AppColors] for embedded hosts that cannot rely on [com.fieldbook.tracker.ui.theme.AppTheme] Hilt wiring. */
+    @JvmStatic
+    fun composeAppColors(prefs: SharedPreferences): AppColors = when (themeIndex(prefs)) {
+        ThemedActivity.HIGH_CONTRAST -> HighContrastAppColors
+        ThemedActivity.BLUE -> BlueAppColors
+        ThemedActivity.SODA_DARK -> SodaDarkAppColors
+        else -> DefaultAppColors
     }
 
     private fun textStyleFor(textIndex: Int, styles: TextSizedStyles): Int = when (textIndex) {

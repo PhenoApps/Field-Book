@@ -23,16 +23,15 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -40,9 +39,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.ui.theme.AppTheme
+import com.fieldbook.tracker.ui.theme.LocalAppColors
+import com.fieldbook.tracker.ui.theme.colors.SodaDarkAppColors
 import com.fieldbook.tracker.ui.theme.colors.ToggleColors
 import kotlinx.coroutines.launch
-import kotlin.math.abs
 
 /**
  * A three-state toggle implemented in Jetpack Compose.
@@ -77,37 +77,29 @@ fun ThreeStateToggle(
     val density = LocalDensity.current
 
     val slotCount = states.size
+    val slotEnabledList = remember(enabledStates, enabled) {
+        List(slotCount) { i -> enabledStates?.getOrNull(i) ?: enabled }
+    }
 
-    // Track measured width in px
+    // Track measured width in px (used for stable fractional positioning of 3 equal slots)
     var trackPxWidth by remember { mutableStateOf(0f) }
-    // Track left in window coordinates (px)
-    var trackLeftWindowPx by remember { mutableStateOf(0f) }
 
-    // Animatable for indicator X offset (px) relative to track left
+    // Animatable for indicator X offset (px)
     val indicatorX = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()
-
-    // Measured icon centers in window coordinates
-    val iconCentersWindow = remember { mutableStateListOf<Float>().apply { repeat(slotCount) { add(0f) } } }
-
-    // Helper to compute centers relative to track left (px)
-    fun centersRelativeToTrack(): List<Float> {
-        if (trackLeftWindowPx == 0f) return emptyList()
-        return iconCentersWindow.map { it - trackLeftWindowPx }
-    }
 
     // Convert indicator size to px
     val indicatorSizePx: Float = with(density) { indicatorSize.toPx() }
 
-    // When selection changes or when track measurement changes, animate indicator to the selected center
-    LaunchedEffect(selectedIndex, iconCentersWindow.toList(), trackLeftWindowPx, trackPxWidth) {
-        val centers = centersRelativeToTrack()
-        if (centers.size == slotCount && trackPxWidth > 0f) {
-            val centerPx = centers.getOrNull(selectedIndex) ?: centers.first()
-            val targetOffset = (centerPx - indicatorSizePx / 2f).coerceIn(0f, trackPxWidth - indicatorSizePx)
+    // Stable indicator positioning based on selected index and track width.
+    // Slots are always 3, laid out equally -> centers at (i+0.5)/3 of width.
+    // This avoids layout races from child onGloballyPositioned + window coords.
+    LaunchedEffect(selectedIndex, trackPxWidth) {
+        if (trackPxWidth > 0f) {
+            val center = (selectedIndex + 0.5f) * (trackPxWidth / 3f)
+            val targetOffset = (center - indicatorSizePx / 2f).coerceIn(0f, trackPxWidth - indicatorSizePx)
             indicatorX.animateTo(
                 targetOffset,
-                // softer spring
                 animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)
             )
         }
@@ -121,45 +113,33 @@ fun ThreeStateToggle(
                 .height(trackHeight)
                 .onGloballyPositioned { layoutCoordinates ->
                     trackPxWidth = layoutCoordinates.size.width.toFloat()
-                    trackLeftWindowPx = layoutCoordinates.positionInWindow().x
-                     // If indicator not initialized yet, snap to initial selected center
-                    val centers = centersRelativeToTrack()
-                    if (indicatorX.value == 0f && centers.size == slotCount && trackPxWidth > 0f) {
+                    // Snap initial indicator using stable fractional position (no child centers needed)
+                    if (indicatorX.value == 0f && trackPxWidth > 0f) {
                         scope.launch {
-                            val centerPx = centers.getOrNull(selectedIndex) ?: centers.first()
-                            val initial = (centerPx - indicatorSizePx / 2f).coerceIn(0f, trackPxWidth - indicatorSizePx)
+                            val center = (selectedIndex + 0.5f) * (trackPxWidth / 3f)
+                            val initial = (center - indicatorSizePx / 2f).coerceIn(0f, trackPxWidth - indicatorSizePx)
                             indicatorX.snapTo(initial)
                         }
                     }
                  }
-                 .pointerInput(iconCentersWindow.toList(), trackLeftWindowPx) {
+                 .pointerInput(trackPxWidth) {
                     detectTapGestures { offset ->
-                        val centers = centersRelativeToTrack()
-                         if (centers.size == slotCount) {
-                             val tapX = offset.x
-                             var bestIndex = 0
-                             var bestDist = Float.MAX_VALUE
-                             centers.forEachIndexed { idx, center ->
-                                 val d = abs(center - tapX)
-                                 if (d < bestDist) {
-                                     bestDist = d
-                                     bestIndex = idx
-                                 }
-                             }
-                            // Ignore taps on disabled slots
-                            val slotEnabled = enabledStates?.getOrNull(bestIndex) ?: enabled
-                            if (!slotEnabled) return@detectTapGestures
-                             onSelected(bestIndex)
-                             // animate indicator to feedback
-                             val targetOffsetImmediate = (centers[bestIndex] - indicatorSizePx / 2f).coerceIn(0f, trackPxWidth - indicatorSizePx)
-                             scope.launch {
-                                 indicatorX.animateTo(
-                                     targetOffsetImmediate,
-                                     animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)
-                                 )
-                             }
-                         }
-                     }
+                        if (trackPxWidth > 0f) {
+                            // Divide track into 3 equal zones for stable selection (works with weights)
+                            val zone = (offset.x / trackPxWidth * 3).toInt().coerceIn(0, 2)
+                            if (slotEnabledList[zone]) {
+                                onSelected(zone)
+                                val center = (zone + 0.5f) * (trackPxWidth / 3f)
+                                val target = (center - indicatorSizePx / 2f).coerceIn(0f, trackPxWidth - indicatorSizePx)
+                                scope.launch {
+                                    indicatorX.animateTo(
+                                        target,
+                                        animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)
+                                    )
+                                }
+                            }
+                        }
+                    }
                  }
                  .background(finalTrackColor, RoundedCornerShape(trackHeight / 2)),
               contentAlignment = Alignment.CenterStart
@@ -179,13 +159,14 @@ fun ThreeStateToggle(
                 )
             }
 
-            // Icons row inside the track so icons are visually within the oval container.
+            // Icons row inside the track. Use equal weights so the 3 slots (including disabled)
+            // always divide the space evenly -> stable indicator math and no layout-dependent centers.
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     // small vertical padding so icons sit slightly above the indicator center
                     .padding(vertical = 6.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 for (i in 0 until slotCount) {
@@ -193,18 +174,14 @@ fun ThreeStateToggle(
                     val targetTint = if (i == selectedIndex) finalIconTint else finalUnselectedIconTint
                     val tint by animateColorAsState(targetValue = targetTint)
 
-                    val slotEnabled = enabledStates?.getOrNull(i) ?: enabled
+                    val slotEnabled = slotEnabledList[i]
 
                     Box(
                         modifier = Modifier
+                            .weight(1f)
                             .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
                             .clickable(enabled = slotEnabled) { if (slotEnabled) onSelected(i) }
-                             .onGloballyPositioned { coords ->
-                                 // record center X in window coordinates
-                                 val center = coords.positionInWindow().x + coords.size.width / 2f
-                                 iconCentersWindow[i] = center
-                             }
-                             .semantics(mergeDescendants = false) { this.contentDescription = desc },
+                            .semantics(mergeDescendants = false) { this.contentDescription = desc },
                         contentAlignment = Alignment.Center
                     ) {
                         Image(
@@ -246,6 +223,32 @@ fun ThreeStateToggle(
                  contentDescriptions = listOf("Home", "Favorites", "Settings"),
                  enabled = true,
                  enabledStates = listOf(true, true, true)
+             )
+         }
+     }
+ }
+
+ @Preview(showBackground = true, backgroundColor = 0xFF000000, name = "Photo+Audio Soda Dark")
+ @Composable
+ fun ThreeStateTogglePhotoAudioSodaDarkPreview() {
+     CompositionLocalProvider(LocalAppColors provides SodaDarkAppColors) {
+         var selected by remember { mutableStateOf(0) }
+         val painters = listOf(
+             rememberVectorPainter(Icons.Filled.Home),
+             rememberVectorPainter(Icons.Filled.Favorite),
+             rememberVectorPainter(Icons.Filled.Settings)
+         )
+
+         Column(
+             modifier = Modifier.padding(16.dp),
+             horizontalAlignment = Alignment.CenterHorizontally
+         ) {
+             ThreeStateToggle(
+                 states = painters,
+                 selectedIndex = selected,
+                 onSelected = { selected = it },
+                 contentDescriptions = listOf("Photo", "Video", "Audio"),
+                 enabledStates = listOf(true, false, true)
              )
          }
      }

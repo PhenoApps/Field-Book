@@ -28,7 +28,10 @@ import androidx.camera.video.VideoRecordEvent
 import androidx.camera.view.PreviewView
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
+import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -36,7 +39,7 @@ import com.fieldbook.tracker.views.CropImageView
 import com.fieldbook.tracker.traits.AbstractCameraTrait
 import com.fieldbook.tracker.ui.MediaViewerActivity
 import com.fieldbook.tracker.ui.components.widgets.ThreeStateToggle
-import com.fieldbook.tracker.ui.theme.AppTheme
+import com.fieldbook.tracker.ui.theme.colors.SodaDarkPalette
 import com.fieldbook.tracker.utilities.CameraXFacade
 import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.InsetHandler
@@ -175,6 +178,9 @@ class CameraActivity : ThemedActivity() {
 
         // Compose host for media toggle
         mediaCompose = findViewById(R.id.media_mode_compose)
+        mediaCompose.setViewTreeLifecycleOwner(this)
+        mediaCompose.setViewTreeSavedStateRegistryOwner(this)
+        mediaCompose.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
         val toolbar = findViewById<Toolbar>(R.id.act_camera_toolbar)
         toolbar?.let {
@@ -278,42 +284,53 @@ class CameraActivity : ThemedActivity() {
             currentMode = MODE_VIDEO
         }
 
-        // If multiple states are visible, set Compose content. Build Painter resources inside the composable lambda (painterResource is @Composable).
+        // Stable labels for the three media mode icons. Always 3 to keep layout stable.
+        val mediaSlotLabels = listOf(
+            getString(R.string.traits_attach_media_photo_label),
+            getString(R.string.traits_attach_media_video_label),
+            getString(R.string.traits_attach_media_audio_label),
+        )
+
+        // If multiple states are visible, set Compose content.
+        // Colors are passed explicitly using the palette designed for black camera preview
+        // (avoids fragile composition-local / resolver / hilt wiring for this embedded block).
         if (visibleModes.size > 1 && mediaCompose.isVisible) {
             val modes = visibleModes.toList()
             mediaCompose.setContent {
-                AppTheme {
+                val orderedModes = listOf(MODE_PHOTO, MODE_VIDEO, MODE_AUDIO)
+                val enabledSet = modes.toSet()
 
-                    val orderedModes = listOf(MODE_PHOTO, MODE_VIDEO, MODE_AUDIO)
-                    val enabledSet = modes.toSet()
+                val paintersToShow = orderedModes.map { mode ->
+                    when (mode) {
+                        MODE_PHOTO -> painterResource(R.drawable.ic_media_toggle_photo)
+                        MODE_VIDEO -> painterResource(R.drawable.ic_media_toggle_video)
+                        MODE_AUDIO -> painterResource(R.drawable.ic_media_toggle_audio)
+                        else -> painterResource(R.drawable.ic_media_toggle_photo)
+                    }
+                }
 
-                    val paintersToShow = orderedModes.map { mode ->
-                        when (mode) {
-                            MODE_PHOTO -> painterResource(R.drawable.ic_trait_camera)
-                            MODE_VIDEO -> painterResource(R.drawable.video)
-                            MODE_AUDIO -> painterResource(R.drawable.trait_audio)
-                            else -> painterResource(R.drawable.ic_trait_camera)
+                val initialIdx = orderedModes.indexOf(currentMode).takeIf { it >= 0 } ?: 0
+                val selectedIdxState = remember { mutableIntStateOf(initialIdx) }
+
+                ThreeStateToggle(
+                    states = paintersToShow,
+                    selectedIndex = selectedIdxState.intValue,
+                    enabledStates = orderedModes.map { it in enabledSet },
+                    contentDescriptions = mediaSlotLabels,
+                    trackColor = SodaDarkPalette.Panel,
+                    indicatorColor = SodaDarkPalette.Accent,
+                    iconTint = SodaDarkPalette.AccentBright,
+                    unselectedIconTint = SodaDarkPalette.Label,
+                    onSelected = { idx ->
+                        selectedIdxState.intValue = idx
+                        val mode = orderedModes.getOrNull(idx)
+                        if (mode != null && enabledSet.contains(mode)) {
+                            switchMode(mode)
                         }
                     }
-
-                    val initialIdx = orderedModes.indexOf(currentMode).takeIf { it >= 0 } ?: 0
-                    val selectedIdxState = remember { mutableIntStateOf(initialIdx) }
-
-                    ThreeStateToggle(
-                        states = paintersToShow,
-                        selectedIndex = selectedIdxState.intValue,
-                        enabledStates = orderedModes.map { it in enabledSet },
-                        onSelected = { idx ->
-                            selectedIdxState.intValue = idx
-                            val mode = orderedModes.getOrNull(idx)
-                            if (mode != null && enabledSet.contains(mode)) {
-                                switchMode(mode)
-                            }
-                        }
-                    )
-                 }
-             }
-         }
+                )
+            }
+        }
 
         cameraXFacade.await(this) {
             bindCameraForInformation()
@@ -437,7 +454,7 @@ class CameraActivity : ThemedActivity() {
         if (audioRecording) {
             captureButton.setImageResource(R.drawable.ic_media_stop)
         } else {
-            captureButton.setImageResource(R.drawable.trait_audio)
+            captureButton.setImageResource(R.drawable.ic_media_toggle_audio)
         }
     }
 
