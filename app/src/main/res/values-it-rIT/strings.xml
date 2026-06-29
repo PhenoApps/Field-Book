@@ -287,7 +287,7 @@
     <string name="traits_dialog_import">Importa</string>
     <string name="import_error_format_trait">Solo i file TRT possono essere importati come una lista di caratteri</string>
     <string name="import_error_format_trait_json">Formato JSON non valido: %s</string>
-    <string name="import_error_no_traits">Nessuna caratteristica trovata</string>
+    <string name="import_error_no_traits">Nessun caratteri trovato</string>
     <string name="trait_import_successful">Caratteri importati con successo</string>
     <string name="traits_export_check">Esporta la lista di caratteri corrente?</string>
     <string name="traits_dialog_export">Esporta</string>
@@ -454,7 +454,7 @@
     <string name="trait_brapi_value_display">Mostra Valori (es. %s)</string>
     <string name="error_loading_trait_detail">Errore nel caricare le informazioni del carattere</string>
     <string name="error_deleting_trait">Errore: impossibile eliminare il carattere</string>
-    <string name="error_updating_trait_resource_file">Errore nell\'aggiornamento del file risorsa del carattere</string>
+    <string name="error_updating_trait_resource_file">Errore nell\'aggiornamento del file di risorsa del carattere</string>
     <string name="error_updating_trait_visibility">Errore nell\'aggiornare la visibilità del carattere</string>
     <string name="error_empty_trait_name">Il nome del carattere non può essere vuoto</string>
     <string name="error_copy_trait">Errore durante la copia del carattere</string>
