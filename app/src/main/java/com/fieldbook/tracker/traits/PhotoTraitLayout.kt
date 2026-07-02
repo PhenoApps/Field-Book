@@ -336,13 +336,13 @@ open class PhotoTraitLayout : CameraTrait {
         bindCameraForInformation()
     }
 
-    fun makeImage(currentTrait: TraitObject) {
+    fun makeImage(currentTrait: TraitObject): Boolean {
 
         val file = File(context.cacheDir, TEMPORARY_IMAGE_NAME)
 
         if (!file.exists() || file.length() == 0L) {
             Log.e(TAG, "makeImage: temp file is missing or empty — camera may not have written to the output URI")
-            return
+            return false
         }
 
         file.inputStream().use { stream ->
@@ -357,6 +357,8 @@ open class PhotoTraitLayout : CameraTrait {
                 SaveState.SINGLE_SHOT
             )
         }
+
+        return true
     }
 
     /**
@@ -367,6 +369,7 @@ open class PhotoTraitLayout : CameraTrait {
 
         val file = File(context.cacheDir, TEMPORARY_IMAGE_NAME)
 
+        file.delete()
         file.createNewFile()
 
         val uri =

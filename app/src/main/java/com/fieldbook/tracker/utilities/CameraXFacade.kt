@@ -279,6 +279,7 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
             onBind.invoke(camera, executor, imageCapture)
         } catch (e: Exception) {
             Log.e(TAG, "bindPreview: failed to bind camera lifecycle", e)
+            throw e
         }
     }
 
@@ -372,15 +373,20 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
 
         val useCaseGroup = useCaseGroupBuilder.build()
 
-        val camera = cameraXInstance.get().bindToLifecycle(
-            context as LifecycleOwner,
-            currentSelector,
-            useCaseGroup
-        )
+        try {
+            val camera = cameraXInstance.get().bindToLifecycle(
+                context as LifecycleOwner,
+                currentSelector,
+                useCaseGroup
+            )
 
-        Log.d(TAG, "Camera lifecycle bound for video: ${camera.cameraInfo}")
+            Log.d(TAG, "Camera lifecycle bound for video: ${camera.cameraInfo}")
 
-        onBind.invoke(camera, executor, videoCapture)
+            onBind.invoke(camera, executor, videoCapture)
+        } catch (e: Exception) {
+            Log.e(TAG, "bindPreviewForVideo: failed to bind camera lifecycle", e)
+            throw e
+        }
     }
 
     // Drawable that dims the area outside of a normalized crop rect (values 0..1)

@@ -48,8 +48,11 @@ class ExifUtil {
                 exif.saveAttributes()
 
                 // Write the corrected file back, truncating any previous content
-                context.contentResolver.openOutputStream(uri, "wt")?.use { output ->
-                    tempFile.inputStream().use { input -> input.copyTo(output) }
+                val out = context.contentResolver.openOutputStream(uri, "wt")
+                if (out != null) {
+                    out.use { output -> tempFile.inputStream().use { input -> input.copyTo(output) } }
+                } else {
+                    Log.e(PhotoTraitLayout.TAG, "saveStringToExif: openOutputStream returned null, EXIF not written back")
                 }
 
             } catch (e: Exception) {
