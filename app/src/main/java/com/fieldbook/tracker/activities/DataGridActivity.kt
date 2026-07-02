@@ -550,7 +550,7 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
                  if (!trait.repeatedMeasures) {
                      val latestObs = repeatedValues.maxByOrNull { it.rep.toInt() }
                      if (latestObs != null) {
-                         val repIndex = repeatedValues.indexOf(latestObs) + 1
+                          val repIndex = latestObs.rep.toIntOrNull() ?: 1
                          navigateFromValueClicked(plotId, col, repIndex)
                      } else {
                          navigateFromValueClicked(plotId, col)

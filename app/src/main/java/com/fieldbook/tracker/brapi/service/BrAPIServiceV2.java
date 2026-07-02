@@ -115,7 +115,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -1195,17 +1194,19 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                         String id = ref.getReferenceID();
                         if (id != null && !id.isEmpty()) {
                             newObservation.setFieldBookDbId(id);
-                            continue;
+                            break;
                         }
 
                         String refId = ref.getReferenceId();
                         if (refId != null && !refId.isEmpty()) {
                             newObservation.setFieldBookDbId(refId);
+                            break;
                         }
                     } else if (source != null && source.equals(fieldBookDeviceReferenceSource)) {
                         String deviceId = getPrioritizedValue(ref.getReferenceID(), ref.getReferenceId());
                         if (deviceId != null && !deviceId.isEmpty()) {
                             newObservation.setOriginDeviceId(deviceId);
+                            break;
                         }
                     }
                 }
@@ -1355,7 +1356,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         reference.setReferenceSource(fieldBookReferenceSource);
 
         BrAPIExternalReference deviceReference = new BrAPIExternalReference();
-        String deviceId = getOrCreateBrapiDeviceId();
+        String deviceId = BrapiDeviceIdProvider.getOrCreate(context);
         deviceReference.setReferenceId(deviceId);
         deviceReference.setReferenceID(deviceId);
         deviceReference.setReferenceSource(fieldBookDeviceReferenceSource);
@@ -1379,20 +1380,6 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         return returnValue;
     }
 
-    private String getOrCreateBrapiDeviceId() {
-        String existing = PreferenceManager.getDefaultSharedPreferences(context)
-                .getString(PreferenceKeys.BRAPI_DEVICE_ID, null);
-        if (existing != null && !existing.isEmpty()) {
-            return existing;
-        }
-
-        String generated = UUID.randomUUID().toString();
-        PreferenceManager.getDefaultSharedPreferences(context)
-                .edit()
-                .putString(PreferenceKeys.BRAPI_DEVICE_ID, generated)
-                .apply();
-        return generated;
-    }
 
     public void getTraits(final String studyDbId,
                           final Function<BrapiStudyDetails, Void> function,
