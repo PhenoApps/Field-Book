@@ -59,7 +59,6 @@ fun TraitList(
             if (allowReorder) {
                 ReorderableItem(state, key = trait.id) { isDragging ->
                     TraitListItem(
-                        position = index + 1,
                         trait = trait,
                         isSelected = isSelected,
                         showVisibilityCheckbox = showVisibilityControls,
@@ -76,7 +75,6 @@ fun TraitList(
                 }
             } else {
                 TraitListItem(
-                    position = index + 1,
                     trait = trait,
                     isSelected = isSelected,
                     showVisibilityCheckbox = showVisibilityControls,

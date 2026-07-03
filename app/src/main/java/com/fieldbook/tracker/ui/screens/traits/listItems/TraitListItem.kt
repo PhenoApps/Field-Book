@@ -29,7 +29,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -43,7 +42,6 @@ import sh.calvin.reorderable.ReorderableCollectionItemScope
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TraitListItem(
-    position: Int,
     trait: TraitObject,
     isSelected: Boolean = false,
     showVisibilityCheckbox: Boolean,
@@ -115,18 +113,6 @@ fun TraitListItem(
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp, vertical = 10.dp)
         ) {
-            Text(
-                text = "$position",
-                modifier = Modifier.width(16.dp),
-                style = AppTheme.typography.subheadingStyle,
-                color = if (isSelected) AppTheme.colors.primary else AppTheme.colors.text.secondary,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Spacer(modifier = Modifier.width(4.dp))
-
             if (showVisibilityCheckbox) {
                 // visibility checkbox
                 Checkbox(
@@ -225,7 +211,6 @@ private fun TraitListItemPreview() {
 
     AppTheme {
         TraitListItem(
-            position = 1,
             trait = traitObject,
             showVisibilityCheckbox = true,
             showRemoveAction = true,
