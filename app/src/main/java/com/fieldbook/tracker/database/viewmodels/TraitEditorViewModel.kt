@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.database.repository.TraitRepository
+import com.fieldbook.tracker.database.viewmodels.TraitEditorViewModel.Companion.SORT_FIELD_DEFAULT
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
@@ -42,6 +43,9 @@ class TraitEditorViewModel @Inject constructor(
     companion object {
         private const val TAG = "TraitEditorViewModel"
         private const val FIELD_TRAIT_SORT_ORDER_PREFIX = "field_trait_sort_order_"
+
+        /** Sort key meaning "follow the main editor's global sort preference" (viewer-only). */
+        const val SORT_FIELD_DEFAULT = "field_default"
     }
 
     private val _uiState = MutableStateFlow(TraitEditorUiState())
@@ -80,6 +84,24 @@ class TraitEditorViewModel @Inject constructor(
         prefs.getString(PreferenceKeys.BRAPI_DISPLAY_NAME, default) ?: default
 
     fun previouslyExported() = prefs.getBoolean(GeneralKeys.TRAITS_EXPORTED, false)
+
+    /**
+     * Resolves the effective sort-order to pass to the repository.
+     *
+     * In viewer mode the preference lives under a field-specific key; otherwise the global key.
+     * The special key [SORT_FIELD_DEFAULT] is passed through to the repo, which will
+     * apply the global sort preference to the scoped traits.
+     * "position" in viewer mode means "use the field-specific DB order" (custom reorder).
+     */
+    private fun resolveSortOrder(): String {
+        if (isViewerMode && scopedStudyId != null) {
+            return prefs.getString(
+                "$FIELD_TRAIT_SORT_ORDER_PREFIX${scopedStudyId}",
+                SORT_FIELD_DEFAULT
+            ) ?: SORT_FIELD_DEFAULT
+        }
+        return prefs.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position") ?: "position"
+    }
 
     fun updateSortOrder(sortOrder: String) {
         if (!isViewerMode) {
@@ -175,9 +197,7 @@ class TraitEditorViewModel @Inject constructor(
             repo.getTraits(
                 studyId = scopedStudyId,
                 usePerFieldList = usePerFieldTraitList,
-                sortOrder = if (_uiState.value.sortOrder == "position")
-                    prefs.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position") ?: "position"
-                else _uiState.value.sortOrder
+                sortOrder = resolveSortOrder()
             )
         }
             .onSuccess { traits ->
@@ -216,8 +236,8 @@ class TraitEditorViewModel @Inject constructor(
         val sortOrder = if (isViewerMode && scopedStudyId != null) {
             prefs.getString(
                 "$FIELD_TRAIT_SORT_ORDER_PREFIX${scopedStudyId}",
-                prefs.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position") ?: "position"
-            ) ?: "position"
+                SORT_FIELD_DEFAULT
+            ) ?: SORT_FIELD_DEFAULT
         } else {
             prefs.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position") ?: "position"
         }
@@ -377,7 +397,7 @@ class TraitEditorViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 if (useScopedVisibility) {
-                    repo.updateStudyTraitVisibility(scopedStudy!!, traitId, isVisible)
+                    repo.updateStudyTraitVisibility(scopedStudy, traitId, isVisible)
                     // Create/update field-specific trait list when visibility changes
                     val currentTraits = _uiState.value.traits
                     repo.updateStudyTraitOrder(scopedStudy, currentTraits.map { it.id })
@@ -410,7 +430,7 @@ class TraitEditorViewModel @Inject constructor(
             runCatching {
                 if (useScopedVisibility) {
                     repo.updateAllStudyTraitVisibility(
-                        studyId = scopedStudy!!,
+                        studyId = scopedStudy,
                         traitIds = oldList.map { it.id }.toSet(),
                         isVisible = newVisibility,
                     )
@@ -455,7 +475,7 @@ class TraitEditorViewModel @Inject constructor(
             runCatching {
                 if (useScopedVisibility) {
                     repo.updateAllStudyTraitVisibility(
-                        studyId = scopedStudy!!,
+                        studyId = scopedStudy,
                         traitIds = selectedIds,
                         isVisible = newVisibility,
                     )
@@ -530,6 +550,23 @@ class TraitEditorViewModel @Inject constructor(
      * That is, if previously dragging and currently not dragging anymore
      */
     fun onDragStateChanged(isCurrentlyDragging: Boolean) {
+        // Detect drag start: previously not dragging, now dragging
+        if (!wasPreviouslyDragging && isCurrentlyDragging) {
+            // If a custom sort order is active, reset to default "position" to allow manual reordering
+            if (_uiState.value.sortOrder != "position") {
+                // Update the correct preference key (field-specific in viewer mode, global otherwise)
+                if (isViewerMode) {
+                    scopedStudyId?.let { studyId ->
+                        prefs.edit { putString("$FIELD_TRAIT_SORT_ORDER_PREFIX$studyId", "position") }
+                    }
+                } else {
+                    prefs.edit { putString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position") }
+                }
+                _uiState.update { it.copy(sortOrder = "position") }
+            }
+        }
+
+        // Detect drag end: previously dragging, now stopped
         if (wasPreviouslyDragging && !isCurrentlyDragging) { // drag ended
             commitTraitOrder()
         }
@@ -548,7 +585,7 @@ class TraitEditorViewModel @Inject constructor(
 
                 if (useScopedOrder) {
                     // Create/update field-specific trait list with new order
-                    repo.updateStudyTraitOrder(scopedStudy!!, finalList.map { it.id })
+                    repo.updateStudyTraitOrder(scopedStudy, finalList.map { it.id })
                 } else {
                     // Update global trait positions
                     repo.updateTraitOrder(finalList)

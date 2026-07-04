@@ -273,6 +273,7 @@ fun TraitEditorScreen(
         TraitActivityDialog.SortTraits -> {
             SortOptionsDialog(
                 currentSortOrder = uiState.sortOrder,
+                isViewerMode = isViewerMode,
                 onCancel = { viewModel.hideDialog() },
                 onSortSelected = { sortOrder ->
                     viewModel.updateSortOrder(sortOrder)

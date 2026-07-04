@@ -658,19 +658,31 @@ public class DataHelper {
 
         open();
 
-        String sortColumn = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
+        // Read the field-specific sort preference first, falling back to the global one.
+        // The key "field_default" means "follow the main editor's global sort".
+        String sortColumn = preferences.getString(
+                "field_trait_sort_order_" + studyId, null);
+        if (sortColumn == null) {
+            sortColumn = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
+        }
         return getVisibleTraitsForStudy(studyId, sortColumn);
 
     }
 
     private ArrayList<TraitObject> getVisibleTraitsForStudy(int studyId, String sortColumn) {
-        ArrayList<TraitObject> visibleTraits = ObservationVariableDao.Companion.getAllVisibleTraitObjects(sortColumn);
+        // Resolve "field_default" apply the main editor's global sort preference
+        String effectiveSortColumn = sortColumn;
+        if ("field_default".equals(sortColumn)) {
+            effectiveSortColumn = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
+        }
+
+        ArrayList<TraitObject> visibleTraits = ObservationVariableDao.Companion.getAllVisibleTraitObjects(effectiveSortColumn);
 
         if (studyId < 0) {
             return visibleTraits;
         }
 
-        ArrayList<TraitObject> allTraits = ObservationVariableDao.Companion.getAllTraitObjects(sortColumn);
+        ArrayList<TraitObject> allTraits = ObservationVariableDao.Companion.getAllTraitObjects(effectiveSortColumn);
         java.util.HashSet<String> fallbackIds = new java.util.HashSet<>();
         for (TraitObject trait : allTraits) {
             fallbackIds.add(trait.getId());
@@ -696,8 +708,7 @@ public class DataHelper {
             }
         }
 
-        // For field-specific lists, prefer the field-specific trait order when one exists.
-        if (sortColumn.equals("position")) {
+        if ("position".equals(effectiveSortColumn)) {
             List<String> fieldOrder = fieldTraitConfigDao.getTraitIdsInOrder(studyId);
             if (!fieldOrder.isEmpty()) {
                 java.util.Map<String, Integer> orderMap = new java.util.HashMap<>();
@@ -723,8 +734,8 @@ public class DataHelper {
         }
 
         // For non-position sort orders, apply the requested sort
-        if (!"position".equals(sortColumn)) {
-            if ("visible".equals(sortColumn)) {
+        if (!"position".equals(effectiveSortColumn)) {
+            if ("visible".equals(effectiveSortColumn)) {
                 // Keep visible traits at the top when sorting by visibility.
                 filtered.sort(Comparator.comparing(TraitObject::getVisible).reversed()
                         .thenComparing(t -> {
@@ -732,20 +743,20 @@ public class DataHelper {
                             String name = !t.getAlias().isEmpty() ? t.getAlias() : t.getName();
                             return name.toLowerCase();
                         }));
-            } else if ("observation_variable_name".equals(sortColumn)) {
+            } else if ("observation_variable_name".equals(effectiveSortColumn)) {
                 filtered.sort(Comparator.comparing(t -> {
                     t.getAlias();
                     String name = !t.getAlias().isEmpty() ? t.getAlias() : t.getName();
                     return name.toLowerCase();
                 }));
-            } else if ("observation_variable_field_book_format".equals(sortColumn)) {
+            } else if ("observation_variable_field_book_format".equals(effectiveSortColumn)) {
                 filtered.sort(Comparator.comparing((TraitObject t) -> t.getFormat().toLowerCase())
                         .thenComparing(t -> {
                             t.getAlias();
                             String name = !t.getAlias().isEmpty() ? t.getAlias() : t.getName();
                             return name.toLowerCase();
                         }));
-            } else if ("internal_id_observation_variable".equals(sortColumn)) {
+            } else if ("internal_id_observation_variable".equals(effectiveSortColumn)) {
                 filtered.sort(Comparator.comparingInt(t -> {
                     try {
                         return Integer.parseInt(t.getId());

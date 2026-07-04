@@ -9,6 +9,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.application.IoDispatcher
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.dao.FieldTraitConfigDao
+import com.fieldbook.tracker.database.dao.ObservationVariableDao
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.enums.FileFormat
 import com.fieldbook.tracker.objects.TraitImportFile
@@ -93,9 +94,12 @@ class TraitRepository @Inject constructor(
                     trait.clone().apply { visible = id in scopedVisibleIds }
                 }
 
-            // For field-specific lists, prefer the field-specific trait order when one exists.
-            // Fall back to the Editor screen's current order when no field order is set.
-            if (sortOrder == "position") {
+            if (sortOrder == "field_default") {
+                val globalSort = prefs.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position") ?: "position"
+                val globallySorted = ObservationVariableDao.getAllTraitObjects(globalSort)
+                val idToGlobalIndex = globallySorted.mapIndexed { idx, t -> t.id to idx }.toMap()
+                filtered = filtered.sortedWith(compareBy { idToGlobalIndex[it.id] ?: Int.MAX_VALUE })
+            } else if (sortOrder == "position") {
                 val fieldOrder = if (hasFieldConfig) fieldTraitConfigDao.getTraitIdsInOrder(studyId) else emptyList()
                 if (fieldOrder.isNotEmpty()) {
                     val orderMap = fieldOrder.mapIndexed { index, id -> id to index }.toMap()
