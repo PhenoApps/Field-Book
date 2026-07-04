@@ -7,6 +7,7 @@ object TraitScopePreferences {
 
     private const val STUDY_TRAIT_IDS_PREFIX = "study_trait_ids_"
     private const val STUDY_TRAIT_VISIBILITY_PREFIX = "study_trait_visibility_"
+    private const val STUDY_TRAIT_INITIALIZED_PREFIX = "study_trait_initialized_"
 
     @JvmStatic
     fun getStudyTraitIds(preferences: SharedPreferences, studyId: Int): Set<String> {
@@ -26,6 +27,23 @@ object TraitScopePreferences {
         preferences.edit { putStringSet("$STUDY_TRAIT_VISIBILITY_PREFIX$studyId", traitIds) }
     }
 
+    /**
+     * Returns true if a study's trait scope has been explicitly initialized
+     * (even if the resulting set is empty due to all traits being removed).
+     */
+    @JvmStatic
+    fun isStudyTraitScopeInitialized(preferences: SharedPreferences, studyId: Int): Boolean {
+        if (studyId < 0) return false
+        return preferences.getBoolean("$STUDY_TRAIT_INITIALIZED_PREFIX$studyId", false)
+    }
+
+    /**
+     * Returns the scoped trait IDs for a study, initializing them from [fallbackTraitIds]
+     * only if the scope has never been initialized before.
+     *
+     * If the scope was previously initialized and the set is empty (e.g. all traits
+     * were removed), the empty set is returned as-is — it will NOT be repopulated.
+     */
     @JvmStatic
     fun getOrInitializeStudyTraitIds(
         preferences: SharedPreferences,
@@ -34,12 +52,18 @@ object TraitScopePreferences {
     ): Set<String> {
         if (studyId < 0) return emptySet()
 
-        val existing = getStudyTraitIds(preferences, studyId)
-        if (existing.isNotEmpty()) return existing
+        // If already initialized (even to empty), respect the current value
+        if (isStudyTraitScopeInitialized(preferences, studyId)) {
+            return getStudyTraitIds(preferences, studyId)
+        }
 
+        // First-time initialization: populate from fallback
         if (fallbackTraitIds.isEmpty()) return emptySet()
 
-        preferences.edit { putStringSet("$STUDY_TRAIT_IDS_PREFIX$studyId", fallbackTraitIds) }
+        preferences.edit {
+            putStringSet("$STUDY_TRAIT_IDS_PREFIX$studyId", fallbackTraitIds)
+            putBoolean("$STUDY_TRAIT_INITIALIZED_PREFIX$studyId", true)
+        }
         return fallbackTraitIds
     }
 
@@ -51,12 +75,18 @@ object TraitScopePreferences {
             addAll(traitIds)
         }
 
-        preferences.edit { putStringSet("$STUDY_TRAIT_IDS_PREFIX$studyId", merged) }
+        preferences.edit {
+            putStringSet("$STUDY_TRAIT_IDS_PREFIX$studyId", merged)
+            putBoolean("$STUDY_TRAIT_INITIALIZED_PREFIX$studyId", true)
+        }
     }
 
     @JvmStatic
     fun setStudyTraitIds(preferences: SharedPreferences, studyId: Int, traitIds: Set<String>) {
         if (studyId < 0) return
-        preferences.edit { putStringSet("$STUDY_TRAIT_IDS_PREFIX$studyId", traitIds) }
+        preferences.edit {
+            putStringSet("$STUDY_TRAIT_IDS_PREFIX$studyId", traitIds)
+            putBoolean("$STUDY_TRAIT_INITIALIZED_PREFIX$studyId", true)
+        }
     }
 }
