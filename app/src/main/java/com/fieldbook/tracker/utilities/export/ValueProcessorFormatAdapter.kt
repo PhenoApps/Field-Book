@@ -21,7 +21,7 @@ class ValueProcessorFormatAdapter @Inject constructor(
         private const val TAG = "ValueProcessorFA"
     }
 
-    fun processValue(value: String, trait: TraitObject): String? {
+    fun processValue(value: String, trait: TraitObject, forBrapi: Boolean = false): String? {
         return when {
 
             trait.format in setOf(Formats.DATE.getDatabaseName()) -> {
@@ -31,12 +31,15 @@ class ValueProcessorFormatAdapter @Inject constructor(
                 return (Formats.DATE.getTraitFormatDefinition() as ValuePresenter).represent(context, dateValue, trait)
             }
 
-            trait.format in CategoricalTraitLayout.POSSIBLE_VALUES -> return CategoryJsonUtil.processValue(
-                buildMap {
-                    put("value", value)
-                    put("observation_variable_field_book_format", trait.format)
-                    put("categoryDisplayValue", trait.categoryDisplayValue)
-                })
+            trait.format in CategoricalTraitLayout.POSSIBLE_VALUES -> {
+                return CategoryJsonUtil.processValue(
+                    buildMap {
+                        put("value", value)
+                        put("observation_variable_field_book_format", trait.format)
+                        put("forBrapi", forBrapi)
+                        put("categoryDisplayValue", trait.categoryDisplayValue)
+                    })
+            }
 
             trait.format in Formats.getSpectralFormats().map { it.getDatabaseName() } -> {
                 spectralFileProcessor.processValue(value)
