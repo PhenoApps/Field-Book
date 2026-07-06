@@ -287,7 +287,7 @@
     <string name="traits_dialog_import">Importa</string>
     <string name="import_error_format_trait">Solo i file TRT possono essere importati come una lista di caratteri</string>
     <string name="import_error_format_trait_json">Formato JSON non valido: %s</string>
-    <string name="import_error_no_traits">Nessuna caratteristica trovata</string>
+    <string name="import_error_no_traits">Nessun caratteri trovato</string>
     <string name="trait_import_successful">Caratteri importati con successo</string>
     <string name="traits_export_check">Esporta la lista di caratteri corrente?</string>
     <string name="traits_dialog_export">Esporta</string>
@@ -454,7 +454,7 @@
     <string name="trait_brapi_value_display">Mostra Valori (es. %s)</string>
     <string name="error_loading_trait_detail">Errore nel caricare le informazioni del carattere</string>
     <string name="error_deleting_trait">Errore: impossibile eliminare il carattere</string>
-    <string name="error_updating_trait_resource_file">Errore nell\'aggiornamento del file risorsa del carattere</string>
+    <string name="error_updating_trait_resource_file">Errore nell\'aggiornamento del file di risorsa del carattere</string>
     <string name="error_updating_trait_visibility">Errore nell\'aggiornare la visibilità del carattere</string>
     <string name="error_empty_trait_name">Il nome del carattere non può essere vuoto</string>
     <string name="error_copy_trait">Errore durante la copia del carattere</string>
@@ -1479,6 +1479,8 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="pref_experimental_generate_sample_data_success">Campo di esempio creato con successo.</string>
     <string name="pref_experimental_generate_sample_data_failure">Impossibile generare il campo di esempio. Controllare che l\'archiviazione sia configurata correttamente.</string>
     <string name="traits_format_experimental">Sperimentale</string>
+    <string name="pref_experimental_traits_category_title">Caratteri Sperimentali</string>
+    <string name="pref_experimental_traits_category_summary">Mostra una categoria di caratteri sperimentali nel selettore del tipo di carattere</string>
     <string name="pref_alpha_media_keycode_events_summary">La traccia successiva/precedente naviga i entrati, il volume su/giù si muove attraverso i caratteri, la chiamata catturerà le foto</string>
     <string name="pref_alpha_media_keycode_events_title">Naviga Tramite Comandi Multimediali dell\'Hardware</string>
     <string name="pref_geonav_distance_threshold_summary">GeoNav si ferma automaticamente quando la distanza da tutti le parcelle supera questo valore in chilometri.</string>
