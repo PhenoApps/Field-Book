@@ -42,7 +42,6 @@ fun DataGridMapView(
     mapGridRows: Int,
     mapGridCols: Int,
     activeMapFilter: MapFilter,
-    selectedMapPlotId: String?,
     isSpatial: Boolean,
     colors: DataGridUiColors,
     columnLocked: Boolean = true,
@@ -202,16 +201,10 @@ fun DataGridMapView(
                                 null -> Color.Transparent
                             }
 
-                            val isSelectedMap =
-                                plot != null && plot.plotId == selectedMapPlotId
-                            val cellBorder = if (isSelectedMap) {
-                                Modifier.border(3.dp, Color(colors.activeCellBgColor))
-                            } else {
-                                Modifier.border(
-                                    Dp.Hairline,
-                                    gridColors.borderColor.copy(alpha = if (matchesFilter) 1f else 0.2f)
-                                )
-                            }
+                            val cellBorder = Modifier.border(
+                                Dp.Hairline,
+                                gridColors.borderColor.copy(alpha = if (matchesFilter) 1f else 0.2f)
+                            )
 
                             Box(
                                 contentAlignment = Alignment.Center,

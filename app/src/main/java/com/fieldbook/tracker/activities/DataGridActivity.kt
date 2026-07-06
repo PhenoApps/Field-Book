@@ -37,19 +37,16 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
-import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.database.models.ObservationUnitModel
 import com.fieldbook.tracker.databinding.ActivityDataGridBinding
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.ui.grid.datagrid.DataGridMapView
-import com.fieldbook.tracker.ui.grid.datagrid.DataGridObservationDetails
 import com.fieldbook.tracker.ui.grid.datagrid.DataGridTable
 import com.fieldbook.tracker.ui.grid.datagrid.DataGridUiColors
 import com.fieldbook.tracker.ui.grid.datagrid.DataGridViewMode
 import com.fieldbook.tracker.ui.grid.datagrid.MapFilter
 import com.fieldbook.tracker.ui.grid.datagrid.MapPlotData
-import com.fieldbook.tracker.ui.grid.datagrid.SelectedCell
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.fieldbook.tracker.utilities.InsetHandler
 import com.fieldbook.tracker.utilities.Utils
@@ -88,13 +85,6 @@ class DataGridActivity : ThemedActivity() {
     private var activeTrait: Int? = null
     private var activePlotIdString: String? by mutableStateOf(null)
 
-    // for selected cell highlight (last clicked in grid)
-    private var selectedPlotId by mutableStateOf<Int?>(null)
-    private var selectedTrait by mutableStateOf<Int?>(null)
-
-    // for last clicked map plot
-    private var selectedMapPlotId by mutableStateOf<String?>(null)
-
     private var activeCellBgColor: Int = 0
     private var filledCellBgColor: Int = 0
     private var emptyCellBgColor: Int = 0
@@ -103,12 +93,8 @@ class DataGridActivity : ThemedActivity() {
 
     private var isLoading by mutableStateOf(true)
 
-    // Currently selected cell driving the bottom details panel + Collect button
-    private var selectedCell by mutableStateOf<SelectedCell?>(null)
-
     // Map view state
     private var viewMode by mutableStateOf(DataGridViewMode.GRID)
-    private var showCellDetails by mutableStateOf(true)
     private var activeMapFilter by mutableStateOf(MapFilter.NONE)
     private var mapPlotDataList by mutableStateOf(emptyList<MapPlotData>())
     private var mapGridRows by mutableIntStateOf(0)
@@ -155,9 +141,6 @@ class DataGridActivity : ThemedActivity() {
             DataGridViewMode.GRID
         }
 
-        // Restore cell details preference
-        showCellDetails = preferences.getBoolean(GeneralKeys.CELL_DETAILS_SETTING, true)
-
         // Trigger grid load — ViewModel survives rotation so this is a no-op on re-creation
         // if the grid is already loaded
         if (viewModel.uiState.value is DataGridViewModel.UiState.Loading) {
@@ -186,10 +169,6 @@ class DataGridActivity : ThemedActivity() {
                 activeCellTextColor = activeCellTextColor,
                 cellTextColor = cellTextColor
             )
-            val gridRowHeaderNames = (uiState as? DataGridViewModel.UiState.Loaded)
-                ?.rowHeaders
-                ?.map { it.name }
-                ?: emptyList()
 
             LaunchedEffect(columnLocked) {
                 invalidateOptionsMenu()
@@ -242,7 +221,6 @@ class DataGridActivity : ThemedActivity() {
                                 mapGridRows = mapGridRows,
                                 mapGridCols = mapGridCols,
                                 activeMapFilter = activeMapFilter,
-                                selectedMapPlotId = selectedMapPlotId,
                                 isSpatial = isMapSpatialMode(),
                                 colors = dataGridColors,
                                 columnLocked = columnLocked,
@@ -251,11 +229,7 @@ class DataGridActivity : ThemedActivity() {
                                 onMissingLayout = ::showMissingMapLayoutPicker,
                                 onFilterClicked = ::toggleMapFilter,
                                 onPlotClicked = { plot ->
-                                    if (showCellDetails) {
-                                        onMapPlotClicked(plot)
-                                    } else {
-                                        navigateFromValueClicked(plot.plotId, 0, 1)
-                                    }
+                                    navigateFromValueClicked(plot.plotId, 0, 1)
                                 }
                             )
                         } else {
@@ -281,11 +255,7 @@ class DataGridActivity : ThemedActivity() {
                                         activePlotId = activePlotId,
                                         activePlotIdString = activePlotIdString,
                                         activeTrait = activeTrait,
-                                        selectedPlotId = selectedPlotId,
-                                        selectedTrait = selectedTrait,
-                                        showCellDetails = showCellDetails,
                                         onSortByColumn = viewModel::sortByColumn,
-                                        onCellClicked = ::onCellClickedFromGrid,
                                         onNavigateFromValue = ::navigateFromValueClicked
                                     )
                                 }
@@ -309,21 +279,6 @@ class DataGridActivity : ThemedActivity() {
                         thickness = Dp.Hairline,
                         color = Color(cellTextColor)
                     )
-
-                    if (showCellDetails) {
-                        DataGridObservationDetails(
-                            cell = selectedCell,
-                            viewMode = viewMode,
-                            gridRowHeaderNames = gridRowHeaderNames,
-                            colors = dataGridColors,
-                            loadObservedMapTraits = ::loadObservedMapTraits,
-                            onCollectClicked = {
-                                selectedCell?.let { cell ->
-                                    navigateFromValueClicked(cell.plotId, cell.traitIndex, 1)
-                                }
-                            }
-                        )
-                    }
                 }
             }
         }
@@ -356,10 +311,6 @@ class DataGridActivity : ThemedActivity() {
 
         menu.findItem(R.id.menu_data_grid_action_heatmap)?.isVisible = isGrid
 
-        // Sync cell details toggle title
-        menu.findItem(R.id.menu_data_grid_action_cell_details)?.title =
-            if (showCellDetails) getString(R.string.menu_data_grid_action_cell_details_on)
-            else getString(R.string.menu_data_grid_action_cell_details_off)
         menu.findItem(R.id.menu_data_grid_action_reset_sort)?.isVisible =
             isGrid && viewModel.sortState.value.columnIndex >= 0
         return super.onCreateOptionsMenu(menu)
@@ -437,19 +388,6 @@ class DataGridActivity : ThemedActivity() {
 
             R.id.menu_data_grid_action_map_view -> {
                 toggleViewMode()
-            }
-
-            R.id.menu_data_grid_action_cell_details -> {
-                showCellDetails = !showCellDetails
-                preferences.edit { putBoolean(GeneralKeys.CELL_DETAILS_SETTING, showCellDetails) }
-                if (!showCellDetails) {
-                    selectedCell = null
-                    selectedPlotId = null
-                    selectedTrait = null
-                    selectedMapPlotId = null
-                }
-                invalidateOptionsMenu()
-                return true
             }
         }
         return super.onOptionsItemSelected(item)
@@ -552,16 +490,6 @@ class DataGridActivity : ThemedActivity() {
 
     private fun toggleMapFilter(filter: MapFilter) {
         activeMapFilter = if (activeMapFilter == filter) MapFilter.NONE else filter
-    }
-
-    private suspend fun loadObservedMapTraits(plotId: String): List<TraitObject> {
-        val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
-        return withContext(Dispatchers.IO) {
-            mTraits.mapNotNull { trait ->
-                val repeatedValues = database.getRepeatedValues(studyId, plotId, trait.id)
-                if (repeatedValues.any { it.value.isNotBlank() }) trait else null
-            }
-        }
     }
 
     private fun setDataGridColors() {
@@ -805,7 +733,7 @@ class DataGridActivity : ThemedActivity() {
 
         val savedHeaders = preferences.getStringSet(GeneralKeys.DATAGRID_EXTRA_HEADERS, null)
         return if (savedHeaders == null) {
-            val base = listOf(uniqueHeader)
+            val base = listOf<String>(uniqueHeader)
             if ("geo_coordinates" in allValidNames) {
                 (base + "geo_coordinates").filter { it in allValidNames }
             } else {
@@ -813,69 +741,8 @@ class DataGridActivity : ThemedActivity() {
             }
         } else {
             val others = allValidNames.filter { it in savedHeaders && it != uniqueHeader }
-            if (uniqueHeader in savedHeaders) listOf(uniqueHeader) + others else others
+            if (uniqueHeader in savedHeaders) listOf<String>(uniqueHeader) + others else others
         }
-    }
-
-    private fun onCellClickedFromGrid(
-        row: Int,
-        col: Int,
-        traits: List<TraitObject>,
-        plotIds: List<String>
-    ) {
-        val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
-        val plotId = plotIds[row]
-
-        // Check if clicking the same cell - deselect if so
-        if (selectedPlotId == row + 1 && selectedTrait == col + 1) {
-            selectedCell = null
-            selectedPlotId = null
-            selectedTrait = null
-            return
-        }
-
-        val trait = traits[col]
-        val repeatedValues = database.getRepeatedValues(studyId, plotId, trait.id)
-
-        // Mark this cell as the last clicked one
-        selectedPlotId = row + 1
-        selectedTrait = col + 1
-
-        // Populate details panel
-        selectedCell = SelectedCell(
-            row = row,
-            col = col,
-            plotId = plotId,
-            traitIndex = col,
-            repeated = repeatedValues.toList()
-        )
-    }
-
-    private fun onMapPlotClicked(plot: MapPlotData) {
-        val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
-
-        // Check if clicking the same plot - deselect if so
-        if (selectedMapPlotId == plot.plotId) {
-            selectedCell = null
-            selectedMapPlotId = null
-            return
-        }
-
-        val firstTraitId = mTraits.firstOrNull()?.id ?: ""
-        val repeatedValues = if (firstTraitId.isNotBlank()) {
-            database.getRepeatedValues(studyId, plot.plotId, firstTraitId)
-        } else emptyArray<ObservationModel>()
-
-        selectedMapPlotId = plot.plotId
-
-        selectedCell = SelectedCell(
-            row = mapPlotDataList.indexOfFirst { it.plotId == plot.plotId },
-            col = 0,
-            plotId = plot.plotId,
-            traitIndex = 0,
-            repeated = repeatedValues.toList(),
-            label = plot.label
-        )
     }
 
     private fun navigateFromValueClicked(plotId: String, traitIndex: Int, rep: Int = 1) {
@@ -888,41 +755,6 @@ class DataGridActivity : ThemedActivity() {
 
         setResult(RESULT_OK, returnIntent)
         finish()
-    }
-
-    private fun decodeValue(showValue: Boolean, value: String): String {
-        val scale = CategoryJsonUtil.decode(value)
-        return if (scale.isNotEmpty()) {
-            if (showValue) scale[0].value else scale[0].label
-        } else ""
-    }
-
-    private fun showRepeatedValuesNavigatorDialog(
-        trait: TraitObject,
-        repeatedValues: Array<ObservationModel>,
-        traits: List<TraitObject>
-    ) {
-        for (m in repeatedValues) {
-            if (m.observation_variable_field_book_format in setOf("categorical", "qualitative")) {
-                if (m.value.isNotEmpty()) {
-                    m.value = decodeValue(trait.categoryDisplayValue, m.value)
-                }
-            }
-        }
-
-        val choices = repeatedValues.map { it.value }.filter { it.isNotBlank() }.toTypedArray()
-
-        AlertDialog.Builder(this, R.style.AppAlertDialog)
-            .setTitle(R.string.dialog_data_grid_repeated_measures_title)
-            .setSingleChoiceItems(choices, 0) { dialog, which ->
-                val value = repeatedValues[which]
-                val plotId = value.observation_unit_id
-                val traitIndex =
-                    traits.indexOfFirst { it.id == value.observation_variable_db_id.toString() }
-
-                navigateFromValueClicked(plotId, traitIndex, which + 1)
-                dialog.dismiss()
-            }.create().show()
     }
 
     private fun showHeaderPickerDialog() {

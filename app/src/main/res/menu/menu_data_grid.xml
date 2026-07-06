@@ -39,10 +39,4 @@
         app:showAsAction="ifRoom"
         android:title="@string/menu_data_grid_action_map_view"
         android:orderInCategory="1" />
-    <item
-        android:id="@+id/menu_data_grid_action_cell_details"
-        android:icon="@drawable/ic_information_outline"
-        app:showAsAction="always"
-        android:title="@string/menu_data_grid_action_cell_details"
-        android:orderInCategory="3" />
 </menu>

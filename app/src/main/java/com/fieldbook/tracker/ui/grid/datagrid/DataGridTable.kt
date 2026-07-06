@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.viewmodels.DataGridViewModel
 import eu.wewox.lazytable.LazyTable
 import eu.wewox.lazytable.LazyTableItem
@@ -37,11 +36,7 @@ fun DataGridTable(
     activePlotId: Int? = null,
     activePlotIdString: String? = null,
     activeTrait: Int? = null,
-    selectedPlotId: Int? = null,
-    selectedTrait: Int? = null,
-    showCellDetails: Boolean = true,
     onSortByColumn: (Int) -> Unit,
-    onCellClicked: (row: Int, col: Int, traits: List<TraitObject>, plotIds: List<String>) -> Unit,
     onNavigateFromValue: (plotId: String, traitIndex: Int, rep: Int) -> Unit
 ) {
     val traits = state.traits
@@ -223,17 +218,13 @@ fun DataGridTable(
                         value = cellData?.value ?: "",
                         colors = colors,
                         isHighlighted = (plotIds.getOrNull(row) == activePlotIdString && columnIndex == activeTraitIdx),
-                        isSelected = (row + 1 == selectedPlotId && columnIndex + 1 == selectedTrait),
+                        isSelected = false,
                         heatmapColor = heatmapColor,
                         wrapContent = wrapContent,
                         zoom = zoom,
                         onClick = {
                             if (cellData != null && row < plotIds.size) {
-                                if (showCellDetails) {
-                                    onCellClicked(row, columnIndex, traits, plotIds)
-                                } else {
-                                    onNavigateFromValue(plotIds[row], columnIndex, 1)
-                                }
+                                onNavigateFromValue(plotIds[row], columnIndex, 1)
                             }
                         },
                         onLongClick = {
