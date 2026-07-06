@@ -17,11 +17,16 @@ import com.fieldbook.tracker.ui.theme.AppTheme
 @Composable
 fun RemoveTraitFromFieldDialog(
     traitName: String,
+    isViewerMode: Boolean,
     onCancel: () -> Unit,
     onRemove: () -> Unit,
 ) {
+    val title = if (isViewerMode) R.string.traits_viewer_remove_from_field_title else R.string.traits_options_delete_title
+    val message = if (isViewerMode) R.string.traits_viewer_remove_from_field_message else R.string.traits_warning_delete
+    val confirmText = if (isViewerMode) R.string.dialog_remove else R.string.dialog_delete
+
     AppAlertDialog(
-        title = stringResource(R.string.traits_viewer_remove_from_field_title),
+        title = stringResource(title),
         content = {
             Column {
                 Row(
@@ -29,13 +34,13 @@ fun RemoveTraitFromFieldDialog(
                     modifier = Modifier.padding(bottom = 16.dp)
                 ) {
                     Text(
-                        text = stringResource(R.string.traits_viewer_remove_from_field_message, traitName),
+                        text = if (isViewerMode) stringResource(message, traitName) else stringResource(message),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
             }
         },
-        positiveButtonText = stringResource(R.string.dialog_remove),
+        positiveButtonText = stringResource(confirmText),
         positiveTextColor = AppTheme.colors.status.error,
         onPositive = onRemove,
         negativeButtonText = stringResource(R.string.dialog_cancel),

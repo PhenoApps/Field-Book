@@ -108,9 +108,9 @@ fun TraitEditorScreen(
                 isTutorialEnabled = viewModel.isTutorialEnabled(),
                 isSelectionMode = uiState.isSelectionMode,
                 selectedCount = uiState.selectedTraitIds.size,
-                onBack = { 
+                onBack = {
                     if (uiState.isSelectionMode) viewModel.clearSelection()
-                    else onNavigateBack() 
+                    else onNavigateBack()
                 },
                 onToggleAllTraits = { viewModel.toggleAllTraitsVisibility() },
                 onSyncWithMainList = { viewModel.syncCurrentStudyWithMainList() },
@@ -118,7 +118,7 @@ fun TraitEditorScreen(
                 onRequestExportPermission = { viewModel.requestExportPermission(DialogTriggerSource.TOOLBAR) },
                 onClearSelection = { viewModel.clearSelection() },
                 onSelectAll = { viewModel.selectAll() },
-                onRemoveSelected = { viewModel.requestRemoveSelectedTraitsFromCurrentStudy() },
+                onRemoveSelected = { viewModel.requestRemoveSelectedTraits() },
                 onToggleVisibilitySelected = { viewModel.toggleVisibilityForSelectedTraits() }
             )
         },
@@ -162,8 +162,8 @@ fun TraitEditorScreen(
                         traits = uiState.traits,
                         selectedTraitIds = uiState.selectedTraitIds,
                         showVisibilityControls = isViewerMode,
-                        showRemoveAction = isViewerMode && !uiState.isSelectionMode,
-                        allowReorder = isViewerMode && !uiState.isSelectionMode,
+                        showRemoveAction = !uiState.isSelectionMode,
+                        allowReorder = !uiState.isSelectionMode,
                         onTraitClick = { traitId ->
                             if (uiState.isSelectionMode) viewModel.toggleTraitSelection(traitId)
                             else onTraitDetail(traitId)
@@ -175,7 +175,7 @@ fun TraitEditorScreen(
                             viewModel.updateTraitVisibility(trait.id, isVisible)
                         },
                         onRemoveTrait = { trait ->
-                            viewModel.requestRemoveTraitFromCurrentStudy(trait)
+                            viewModel.requestRemoveTrait(trait)
                         },
                         onMoveItem = { from, to ->
                             viewModel.moveTraitItem(from, to)
@@ -265,8 +265,9 @@ fun TraitEditorScreen(
         is TraitActivityDialog.RemoveFromField -> {
             RemoveTraitFromFieldDialog(
                 traitName = dialog.message,
+                isViewerMode = isViewerMode,
                 onCancel = { viewModel.hideDialog() },
-                onRemove = { viewModel.removeTraitFromCurrentStudy(dialog.traitIds) },
+                onRemove = { viewModel.removeTraits(dialog.traitIds) },
             )
         }
 
@@ -335,7 +336,10 @@ fun TraitEditorScreen(
 
                 TraitEditorEvent.NavigateToBrapi -> {
                     if (!Utils.isConnected(context)) {
-                        Utils.makeToast(context, resources.getString(R.string.opening_brapi_no_network_error))
+                        Utils.makeToast(
+                            context,
+                            resources.getString(R.string.opening_brapi_no_network_error)
+                        )
                         return@collect
                     }
 

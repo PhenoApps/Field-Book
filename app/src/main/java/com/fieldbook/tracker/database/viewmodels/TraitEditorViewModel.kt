@@ -290,12 +290,12 @@ class TraitEditorViewModel @Inject constructor(
         }
     }
 
-    fun requestRemoveTraitFromCurrentStudy(trait: TraitObject) {
+    fun requestRemoveTrait(trait: TraitObject) {
         val traitName = trait.alias.ifBlank { trait.name }
         showDialog(TraitActivityDialog.RemoveFromField(setOf(trait.id), traitName))
     }
 
-    fun requestRemoveSelectedTraitsFromCurrentStudy() {
+    fun requestRemoveSelectedTraits() {
         val selectedIds = _uiState.value.selectedTraitIds
         if (selectedIds.isEmpty()) return
         
@@ -309,14 +309,11 @@ class TraitEditorViewModel @Inject constructor(
         showDialog(TraitActivityDialog.RemoveFromField(selectedIds, message))
     }
 
-    fun removeTraitFromCurrentStudy(traitIds: Set<String>) {
-        val currentStudyId = scopedStudyId ?: return
-        if (!usePerFieldTraitList || traitIds.isEmpty()) return
+    fun removeTraits(traitIds: Set<String>) {
+        if (traitIds.isEmpty()) return
 
         hideDialog()
 
-        val oldList = _uiState.value.traits
-        
         // Optimistic local removal
         val newList = _uiState.value.traits.filterNot { it.id in traitIds }
         _uiState.update { state ->
@@ -329,15 +326,25 @@ class TraitEditorViewModel @Inject constructor(
 
         viewModelScope.launch {
             runCatching {
-                repo.removeTraitsFromStudy(currentStudyId, traitIds)
+                if (isViewerMode && usePerFieldTraitList) {
+                    val currentStudyId = scopedStudyId ?: return@runCatching
+                    repo.removeTraitsFromStudy(currentStudyId, traitIds)
+                } else {
+                    traitIds.forEach { repo.deleteTrait(it) }
+                    repo.updateTraitOrder(newList)
+                }
             }.onSuccess {
-                loadAvailableTraitsForCurrentStudy()
-                _events.emit(TraitEditorEvent.ShowToast(R.string.traits_viewer_removed_trait))
+                if (isViewerMode) {
+                    loadAvailableTraitsForCurrentStudy()
+                    _events.emit(TraitEditorEvent.ShowToast(R.string.traits_viewer_removed_trait))
+                }
+                notifyCollectReload()
             }.onFailure { e ->
                 // Rollback (simplified, just reload quietly)
                 loadTraits(showLoading = false)
-                Log.e(TAG, "Error removing traits from study", e)
-                _events.emit(TraitEditorEvent.ShowToast(R.string.error_updating_trait_visibility))
+                Log.e(TAG, "Error removing traits", e)
+                val errorMsg = if (isViewerMode) R.string.error_updating_trait_visibility else R.string.error_deleting_traits
+                _events.emit(TraitEditorEvent.ShowToast(errorMsg))
             }
         }
     }
