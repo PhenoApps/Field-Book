@@ -36,7 +36,7 @@
     <item
         android:id="@+id/menu_data_grid_action_map_view"
         android:icon="@drawable/ic_tb_toggle_all"
-        app:showAsAction="ifRoom"
+        app:showAsAction="always"
         android:title="@string/menu_data_grid_action_map_view"
         android:orderInCategory="1" />
 </menu>
