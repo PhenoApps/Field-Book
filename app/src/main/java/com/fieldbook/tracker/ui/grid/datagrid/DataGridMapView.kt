@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -102,157 +103,168 @@ fun DataGridMapView(
     val displayCols = activeColIndices.size
     val columnCount = displayCols + 1
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            DataGridMapLegend(
-                activeMapFilter = activeMapFilter,
-                textColor = Color(colors.cellTextColor),
-                onFilterClicked = onFilterClicked
-            )
+    Column(modifier = Modifier.fillMaxSize()) {
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f, fill = false)
+        ) {
+            val availableWidth = maxWidth
+            val horizontalPadding = 8.dp // 4.dp on each side in LazyTable contentPadding
 
-            BoxWithConstraints(modifier = Modifier.weight(1f)) {
-                val availableWidth = maxWidth
-                val availableHeight = maxHeight
+            val baseHeaderWidth = 48.dp
+            val baseHeaderHeight = 32.dp
 
-                LazyTable(
-                    modifier = Modifier.fillMaxSize(),
-                    dimensions = lazyTableDimensions(
-                        columnSize = { col ->
-                            if (col == 0) (48 * zoom).dp
-                            else if (wrapContent) {
-                                (64 * zoom).dp
-                            } else {
-                                val cellW =
-                                    ((availableWidth - 48.dp) / maxOf(displayCols, 1)) * zoom
-                                cellW.coerceIn(32.dp, 80.dp)
-                            }
-                        },
-                        rowSize = { row ->
-                            if (row == 0) (32 * zoom).dp
-                            else if (wrapContent) {
-                                (48 * zoom).dp
-                            } else {
-                                val cellH =
-                                    ((availableHeight - 32.dp) / maxOf(displayRows, 1)) * zoom
-                                cellH.coerceIn(32.dp, 80.dp)
-                            }
-                        }
-                    ),
-                    contentPadding = PaddingValues(4.dp),
-                    pinConfiguration = lazyTablePinConfiguration(
-                        columns = if (columnLocked) 1 else 0,
-                        rows = if (columnLocked) 1 else 0
+            val baseCellSize = if (wrapContent) {
+                ((availableWidth - baseHeaderWidth - horizontalPadding) / maxOf(
+                    displayCols,
+                    1
+                )).coerceAtLeast(8.dp)
+            } else {
+                64.dp
+            }
+
+            val headerWidth = baseHeaderWidth * zoom
+            val headerHeight = baseHeaderHeight * zoom
+            val cellSize = baseCellSize * zoom
+
+            val totalGridHeight = headerHeight + (cellSize * displayRows) + 8.dp
+
+            LazyTable(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(totalGridHeight),
+                dimensions = lazyTableDimensions(
+                    columnSize = { col ->
+                        if (col == 0) headerWidth else cellSize
+                    },
+                    rowSize = { row ->
+                        if (row == 0) headerHeight else cellSize
+                    }
+                ),
+                contentPadding = PaddingValues(4.dp),
+                pinConfiguration = lazyTablePinConfiguration(
+                    columns = if (columnLocked) 1 else 0,
+                    rows = if (columnLocked) 1 else 0
+                )
+            ) {
+                items(
+                    count = columnCount,
+                    layoutInfo = { LazyTableItem(column = it, row = 0) }
+                ) { col ->
+                    val text = when {
+                        col == 0 -> if (isSpatial) "Lat\\Lon" else "Y\\X"
+                        else -> (activeColIndices[col - 1] + 1).toString()
+                    }
+                    DataGridMapHeaderCell(
+                        text = text,
+                        textColor = Color(colors.cellTextColor),
+                        borderColor = gridColors.borderColor,
+                        zoom = zoom
                     )
-                ) {
-                    items(
-                        count = columnCount,
-                        layoutInfo = { LazyTableItem(column = it, row = 0) }
-                    ) { col ->
-                        val text = when {
-                            col == 0 -> if (isSpatial) "Lat\\Lon" else "Y\\X"
-                            else -> (activeColIndices[col - 1] + 1).toString()
-                        }
+                }
+
+                items(
+                    count = displayRows * columnCount,
+                    layoutInfo = {
+                        val r = (it / columnCount) + 1
+                        val c = it % columnCount
+                        LazyTableItem(column = c, row = r)
+                    }
+                ) { index ->
+                    val rPrime = (index / columnCount)
+                    val cPrime = index % columnCount
+
+                    if (cPrime == 0) {
                         DataGridMapHeaderCell(
-                            text = text,
+                            text = "${activeRowIndices[rPrime] + 1}",
                             textColor = Color(colors.cellTextColor),
                             borderColor = gridColors.borderColor,
                             zoom = zoom
                         )
-                    }
+                    } else {
+                        val plotRow = activeRowIndices[rPrime]
+                        val plotCol = activeColIndices[cPrime - 1]
+                        val plot =
+                            if (plotRow < mapGrid.size && plotCol < mapGrid[plotRow].size) {
+                                mapGrid[plotRow][plotCol]
+                            } else null
 
-                    items(
-                        count = displayRows * columnCount,
-                        layoutInfo = {
-                            val r = (it / columnCount) + 1
-                            val c = it % columnCount
-                            LazyTableItem(column = c, row = r)
+                        val matchesFilter = when (activeMapFilter) {
+                            MapFilter.NONE -> true
+                            MapFilter.COMPLETE -> plot?.status == MapPlotStatus.COMPLETE
+                            MapFilter.PARTIAL -> plot?.status == MapPlotStatus.PARTIAL
+                            MapFilter.EMPTY -> plot?.status == MapPlotStatus.EMPTY
+                            MapFilter.MISSING -> plot == null
                         }
-                    ) { index ->
-                        val rPrime = (index / columnCount)
-                        val cPrime = index % columnCount
 
-                        if (cPrime == 0) {
-                            DataGridMapHeaderCell(
-                                text = "${activeRowIndices[rPrime] + 1}",
-                                textColor = Color(colors.cellTextColor),
-                                borderColor = gridColors.borderColor,
-                                zoom = zoom
-                            )
-                        } else {
-                            val plotRow = activeRowIndices[rPrime]
-                            val plotCol = activeColIndices[cPrime - 1]
-                            val plot =
-                                if (plotRow < mapGrid.size && plotCol < mapGrid[plotRow].size) {
-                                    mapGrid[plotRow][plotCol]
-                                } else null
+                        val cellColor = when (plot?.status) {
+                            MapPlotStatus.COMPLETE -> completeColor
+                            MapPlotStatus.PARTIAL -> partialColor
+                            MapPlotStatus.EMPTY -> emptyColor
+                            null -> Color.Transparent
+                        }
 
-                            val matchesFilter = when (activeMapFilter) {
-                                MapFilter.NONE -> true
-                                MapFilter.COMPLETE -> plot?.status == MapPlotStatus.COMPLETE
-                                MapFilter.PARTIAL -> plot?.status == MapPlotStatus.PARTIAL
-                                MapFilter.EMPTY -> plot?.status == MapPlotStatus.EMPTY
-                                MapFilter.MISSING -> plot == null
-                            }
+                        val cellBorder = Modifier.border(
+                            Dp.Hairline,
+                            gridColors.borderColor.copy(alpha = if (matchesFilter) 1f else 0.2f)
+                        )
 
-                            val cellColor = when (plot?.status) {
-                                MapPlotStatus.COMPLETE -> completeColor
-                                MapPlotStatus.PARTIAL -> partialColor
-                                MapPlotStatus.EMPTY -> emptyColor
-                                null -> Color.Transparent
-                            }
-
-                            val cellBorder = Modifier.border(
-                                Dp.Hairline,
-                                gridColors.borderColor.copy(alpha = if (matchesFilter) 1f else 0.2f)
-                            )
-
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier
-                                    .background(
-                                        if (matchesFilter) cellColor else cellColor.copy(
-                                            alpha = 0.1f
-                                        )
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .background(
+                                    if (matchesFilter) cellColor else cellColor.copy(
+                                        alpha = 0.1f
                                     )
-                                    .then(cellBorder)
-                                    .then(if (plot != null) Modifier.clickable {
-                                        onPlotClicked(plot)
-                                    } else Modifier)
-                            ) {
-                                val label = plot?.let {
-                                    when (it.status) {
-                                        MapPlotStatus.EMPTY -> ""
-                                        MapPlotStatus.COMPLETE -> "\u2713"
-                                        else -> "~"
-                                    }
-                                } ?: "\u2715"
-
-                                val textColor = if (plot == null) {
-                                    Color.Gray.copy(alpha = if (matchesFilter) 0.5f else 0.1f)
-                                } else {
-                                    Color.White.copy(alpha = if (matchesFilter) 1f else 0.1f)
-                                }
-
-                                Text(
-                                    text = label,
-                                    color = textColor,
-                                    textAlign = TextAlign.Center,
-                                    fontSize = when {
-                                        displayRows * displayCols > 500 -> (8 * zoom).sp
-                                        displayRows * displayCols > 200 -> (10 * zoom).sp
-                                        else -> (12 * zoom).sp
-                                    },
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
                                 )
+                                .then(cellBorder)
+                                .then(if (plot != null) Modifier.clickable {
+                                    onPlotClicked(plot)
+                                } else Modifier)
+                        ) {
+                            val label = plot?.let {
+                                when (it.status) {
+                                    MapPlotStatus.EMPTY -> ""
+                                    MapPlotStatus.COMPLETE -> "\u2713"
+                                    else -> "~"
+                                }
+                            } ?: "\u2715"
+
+                            val textColor = if (plot == null) {
+                                Color.Gray.copy(alpha = if (matchesFilter) 0.5f else 0.1f)
+                            } else {
+                                Color.White.copy(alpha = if (matchesFilter) 1f else 0.1f)
                             }
+
+                            Text(
+                                text = label,
+                                color = textColor,
+                                textAlign = TextAlign.Center,
+                                fontSize = when {
+                                    displayRows * displayCols > 500 -> (8 * zoom).sp
+                                    displayRows * displayCols > 200 -> (10 * zoom).sp
+                                    else -> (12 * zoom).sp
+                                },
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
                         }
                     }
                 }
             }
         }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        DataGridMapLegend(
+            activeMapFilter = activeMapFilter,
+            textColor = Color(colors.cellTextColor),
+            onFilterClicked = onFilterClicked
+        )
     }
 }
+
 
 @Composable
 private fun DataGridMapHeaderCell(

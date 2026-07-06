@@ -211,7 +211,7 @@ class DataGridActivity : ThemedActivity() {
                                     }
                                 }
                             },
-                        contentAlignment = Alignment.Center
+                        contentAlignment = Alignment.TopCenter
                     ) {
                         if (isLoading && viewMode == DataGridViewMode.MAP) {
                             CircularProgressIndicator(color = Color(activeCellBgColor))
