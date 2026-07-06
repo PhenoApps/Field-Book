@@ -3,6 +3,7 @@ package com.fieldbook.tracker.activities.brapi.io.sync
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fieldbook.tracker.R
@@ -10,9 +11,19 @@ import com.fieldbook.tracker.brapi.model.FieldBookImage
 import com.fieldbook.tracker.brapi.model.Observation
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory
+import com.fieldbook.tracker.brapi.service.BrapiDeviceIdProvider
 import com.fieldbook.tracker.brapi.service.BrapiPaginationManager
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.repository.TraitRepository
+import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.PreferenceKeys
+import com.fieldbook.tracker.traits.CategoricalTraitLayout
+import com.fieldbook.tracker.traits.formats.Formats
+import com.fieldbook.tracker.traits.formats.coders.DateJsonCoder
+import com.fieldbook.tracker.utilities.CategoryJsonUtil
+import com.fieldbook.tracker.utilities.DateJsonUtil
+import com.fieldbook.tracker.utilities.JsonUtil
+import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
@@ -33,25 +44,12 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import java.util.UUID
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
-import kotlin.collections.isNotEmpty
-import kotlin.collections.map
-import androidx.core.content.edit
-import com.fieldbook.tracker.database.repository.TraitRepository
-import com.fieldbook.tracker.objects.TraitObject
-import com.fieldbook.tracker.traits.CategoricalTraitLayout
-import com.fieldbook.tracker.traits.formats.Formats
-import com.fieldbook.tracker.traits.formats.coders.DateJsonCoder
-import com.fieldbook.tracker.utilities.CategoryJsonUtil
-import com.fieldbook.tracker.utilities.DateJsonUtil
-import com.fieldbook.tracker.utilities.JsonUtil
-import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter
-import kotlinx.coroutines.withContext
 
 @HiltViewModel
 class BrapiSyncViewModel @Inject constructor(
@@ -77,6 +75,7 @@ class BrapiSyncViewModel @Inject constructor(
 
     // Conflicts detected during last download that need user resolution
     private var pendingConflicts: List<Pair<Observation, Observation?>> = emptyList()
+
     // Pending pre-upload re-sync choices where local observations have no BrAPI id.
     private var pendingResyncChoices: List<PendingResyncChoice> = emptyList()
     private val resyncUploadAsNewKeys = mutableSetOf<String>()
@@ -101,6 +100,7 @@ class BrapiSyncViewModel @Inject constructor(
         val observationsToUpload: List<Observation>,
         val requiresUserChoice: Boolean
     )
+
     private data class PendingResyncChoice(
         val key: String,
         val localObservation: Observation,
@@ -413,7 +413,8 @@ class BrapiSyncViewModel @Inject constructor(
                         _uiState.update {
                             it.copy(
                                 viewMode = ViewMode.IDLE,
-                                downloadError = cause.message ?: context.getString(R.string.download_failed)
+                                downloadError = cause.message
+                                    ?: context.getString(R.string.download_failed)
                             )
                         }
                     }
@@ -456,9 +457,14 @@ class BrapiSyncViewModel @Inject constructor(
                                             obs.internalVariableDbId = obs.variableDbId
 
                                             // Store categorical BrAPI values using Field Book's internal JSON format.
-                                            obs.value = normalizeDownloadedObservationValue(obs, traitsById)
+                                            obs.value =
+                                                normalizeDownloadedObservationValue(obs, traitsById)
 
-                                            val rep = dataHelper.getNextRep(fieldObject.studyId.toString(), obs.unitDbId, obs.internalVariableDbId).toInt()
+                                            val rep = dataHelper.getNextRep(
+                                                fieldObject.studyId.toString(),
+                                                obs.unitDbId,
+                                                obs.internalVariableDbId
+                                            ).toInt()
 
                                             dataHelper.insertObservation(
                                                 obs.unitDbId,
@@ -476,13 +482,17 @@ class BrapiSyncViewModel @Inject constructor(
                                         }
                                     }
 
-                                    Log.d(TAG, "Updating local database with ${resolved.second.size} updates")
+                                    Log.d(
+                                        TAG,
+                                        "Updating local database with ${resolved.second.size} updates"
+                                    )
 
                                     resolved.second.forEach { obs ->
                                         if (obs.internalVariableDbId.isNullOrBlank()) {
                                             obs.internalVariableDbId = obs.variableDbId
                                         }
-                                        obs.value = normalizeDownloadedObservationValue(obs, traitsById)
+                                        obs.value =
+                                            normalizeDownloadedObservationValue(obs, traitsById)
                                     }
 
                                     dataHelper.updateObservationsByBrapiId(resolved.second)
@@ -567,10 +577,12 @@ class BrapiSyncViewModel @Inject constructor(
         return when {
             trait.format in CategoricalTraitLayout.POSSIBLE_VALUES ->
                 CategoryJsonUtil.encodeBrapiCategoricalValue(value, trait.categories)
+
             trait.format == Formats.DATE.getDatabaseName() -> {
                 val decoded = DateJsonUtil.decode(value)
                 if (decoded is DateJsonCoder.DateJson) decoded.formattedDate else value
             }
+
             else -> value
         }
     }
@@ -588,7 +600,10 @@ class BrapiSyncViewModel @Inject constructor(
      *         - second: a list of obs from brapi that can be updated in fieldbook
      *         - third: a list of obs that have conflicting edits (local is newer), and should be pushed
      */
-    private fun resolveObservationStatus(brapiObservations: List<Observation>, traitsById: Map<String, TraitObject>): Triple<List<Observation>, List<Observation>, List<Conflict>> {
+    private fun resolveObservationStatus(
+        brapiObservations: List<Observation>,
+        traitsById: Map<String, TraitObject>
+    ): Triple<List<Observation>, List<Observation>, List<Conflict>> {
 
         val insertObservations = mutableListOf<Observation>()
         val updateObservations = mutableListOf<Observation>()
@@ -609,7 +624,8 @@ class BrapiSyncViewModel @Inject constructor(
                 val serverNorm = normalizeValueForComparison(brapiObs.value ?: "", trait)
                 if (localNorm != serverNorm) {
                     // Conflict between local edited and server version: record for user resolution
-                    val conflict = Conflict(serverObservation = brapiObs, localObservation = localEdited)
+                    val conflict =
+                        Conflict(serverObservation = brapiObs, localObservation = localEdited)
                     conflicts.add(conflict)
                 }
                 return@forEach
@@ -629,7 +645,12 @@ class BrapiSyncViewModel @Inject constructor(
                 val localNorm = normalizeValueForComparison(localNew.value ?: "", trait)
                 val serverNorm = normalizeValueForComparison(brapiObs.value ?: "", trait)
                 if (localNorm != serverNorm) {
-                    conflicts.add(Conflict(serverObservation = brapiObs, localObservation = localNew))
+                    conflicts.add(
+                        Conflict(
+                            serverObservation = brapiObs,
+                            localObservation = localNew
+                        )
+                    )
                 }
             }
         }
@@ -661,12 +682,14 @@ class BrapiSyncViewModel @Inject constructor(
                     value
                 }
             }
+
             trait.format == Formats.DATE.getDatabaseName() -> {
                 val decoded = DateJsonUtil.decode(value)
                 if (decoded is DateJsonCoder.DateJson) {
                     if (trait.useDayOfYear) decoded.dayOfYear else decoded.formattedDate
                 } else value
             }
+
             else -> value
         }
     }
@@ -682,20 +705,34 @@ class BrapiSyncViewModel @Inject constructor(
                 ?: traitsById[c.serverObservation.internalVariableDbId]
             PendingConflictUi(
                 brapiId = c.serverObservation.dbId ?: c.localObservation.dbId ?: "",
-                localValue = decodeObservationValueForDisplay(c.localObservation.value ?: "", trait),
-                serverValue = decodeObservationValueForDisplay(c.serverObservation.value ?: "", trait),
+                localValue = decodeObservationValueForDisplay(
+                    c.localObservation.value ?: "",
+                    trait
+                ),
+                serverValue = decodeObservationValueForDisplay(
+                    c.serverObservation.value ?: "",
+                    trait
+                ),
                 localDbId = c.localObservation.dbId,
                 serverDbId = c.serverObservation.dbId
             )
         }
-        _uiState.update { it.copy(pendingConflictsCount = uiConflicts.size, pendingConflicts = uiConflicts) }
+        _uiState.update {
+            it.copy(
+                pendingConflictsCount = uiConflicts.size,
+                pendingConflicts = uiConflicts
+            )
+        }
     }
 
     /**
      * Apply a user-selected merge strategy to pending conflicts and persist results.
      * Supports Manual strategy where a map of brapiId->choice is provided (true=server, false=local).
      */
-    fun applyConflictResolution(strategy: MergeStrategy, manualChoices: Map<String, Boolean>? = null) {
+    fun applyConflictResolution(
+        strategy: MergeStrategy,
+        manualChoices: Map<String, Boolean>? = null
+    ) {
         if (pendingConflicts.isEmpty()) return
 
         val toUpdateFromServer = mutableListOf<Observation>()
@@ -712,14 +749,19 @@ class BrapiSyncViewModel @Inject constructor(
 
             is MergeStrategy.MostRecent -> {
                 pendingConflicts.forEach { (server, local) ->
-                    if (local != null && local.timestamp > server.timestamp) toKeepLocal.add(local) else toUpdateFromServer.add(server)
+                    if (local != null && local.timestamp > server.timestamp) toKeepLocal.add(local) else toUpdateFromServer.add(
+                        server
+                    )
                 }
             }
 
             is MergeStrategy.Manual -> {
                 // manualChoices: map from brapiId to true (choose server) or false (choose local)
                 if (manualChoices == null) return
-                Log.d(TAG, "Applying manual conflict resolution with choices: ${manualChoices.keys.size} entries")
+                Log.d(
+                    TAG,
+                    "Applying manual conflict resolution with choices: ${manualChoices.keys.size} entries"
+                )
                 pendingConflicts.forEach { (server, local) ->
                     val id = server.dbId ?: local?.dbId
                     if (id == null) return@forEach
@@ -765,8 +807,14 @@ class BrapiSyncViewModel @Inject constructor(
                 ?: traitsById[choice.serverObservation.internalVariableDbId]
             PendingResyncChoiceUi(
                 key = choice.key,
-                localValue = decodeObservationValueForDisplay(choice.localObservation.value ?: "", trait),
-                serverValue = decodeObservationValueForDisplay(choice.serverObservation.value ?: "", trait),
+                localValue = decodeObservationValueForDisplay(
+                    choice.localObservation.value ?: "",
+                    trait
+                ),
+                serverValue = decodeObservationValueForDisplay(
+                    choice.serverObservation.value ?: "",
+                    trait
+                ),
                 localFieldBookId = choice.localObservation.fieldBookDbId,
                 serverDbId = choice.serverObservation.dbId
             )
@@ -806,7 +854,7 @@ class BrapiSyncViewModel @Inject constructor(
                 localObservation.dbId = choice.serverObservation.dbId
                 val serverSyncTime = choice.serverObservation.timestamp
                 if (serverSyncTime != null) {
-                    localObservation.setLastSyncedTime(serverSyncTime)
+                    localObservation.lastSyncedTime = serverSyncTime
                 } else {
                     localObservation.setLastSyncedTime(syncTime)
                 }
@@ -830,6 +878,10 @@ class BrapiSyncViewModel @Inject constructor(
             it.copy(
                 uploadError = ""
             )
+        }
+
+        if (!applyAsUpdate) {
+            startUpload()
         }
     }
 
@@ -995,7 +1047,8 @@ class BrapiSyncViewModel @Inject constructor(
         val traits = traitRepo.getTraits().associateBy { it.id }
         observations.forEach { obs ->
             traits[obs.internalVariableDbId]?.let { trait ->
-                obs.value = valueProcessorFormatAdapter.processValue(obs.value, trait, forBrapi = true)
+                obs.value =
+                    valueProcessorFormatAdapter.processValue(obs.value, trait, forBrapi = true)
             }
         }
 
@@ -1100,7 +1153,8 @@ class BrapiSyncViewModel @Inject constructor(
         if (variableDbIds.isEmpty()) return PreUploadResyncResult(observations, false)
 
         return try {
-            val pageSize = preferences.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50")?.toInt() ?: 50
+            val pageSize =
+                preferences.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50")?.toInt() ?: 50
             val paginationManager = BrapiPaginationManager(0, pageSize)
 
             val firstPage = brAPIService.awaitGetSingleObservationPage(
@@ -1130,7 +1184,7 @@ class BrapiSyncViewModel @Inject constructor(
             val pendingUserChoices = mutableListOf<PendingResyncChoice>()
             val remainingCandidates = allCandidateObservations.toMutableList()
             var recoveredCount = 0
-            val localDeviceId = getOrCreateBrapiDeviceId()
+            val localDeviceId = BrapiDeviceIdProvider.getOrCreate(context)
 
             observations.forEach { localObservation ->
                 val matchIndex = remainingCandidates.indexOfFirst { serverObservation ->
@@ -1141,7 +1195,10 @@ class BrapiSyncViewModel @Inject constructor(
                     val matchedServerObservation = remainingCandidates.removeAt(matchIndex)
                     val choiceKey = buildResyncChoiceKey(localObservation, matchedServerObservation)
 
-                    if (localObservation.dbId.isNullOrEmpty() && !resyncAdoptServerKeys.contains(choiceKey) && !resyncUploadAsNewKeys.contains(choiceKey)) {
+                    if (localObservation.dbId.isNullOrEmpty() && !resyncAdoptServerKeys.contains(
+                            choiceKey
+                        ) && !resyncUploadAsNewKeys.contains(choiceKey)
+                    ) {
                         val preservedValue = localObservation.fieldBookDbId
                             ?.let { localValuesByFieldBookId[it] }
                             ?: localObservation.value.orEmpty()
@@ -1156,7 +1213,10 @@ class BrapiSyncViewModel @Inject constructor(
                         return@forEach
                     }
 
-                    if (localObservation.dbId.isNullOrEmpty() && resyncUploadAsNewKeys.contains(choiceKey)) {
+                    if (localObservation.dbId.isNullOrEmpty() && resyncUploadAsNewKeys.contains(
+                            choiceKey
+                        )
+                    ) {
                         pendingUpload.add(localObservation)
                         return@forEach
                     }
@@ -1170,7 +1230,7 @@ class BrapiSyncViewModel @Inject constructor(
                     localObservation.dbId = matchedServerObservation.dbId
                     val serverSyncTime = matchedServerObservation.timestamp
                     if (serverSyncTime != null) {
-                        localObservation.setLastSyncedTime(serverSyncTime)
+                        localObservation.lastSyncedTime = serverSyncTime
                     } else {
                         localObservation.setLastSyncedTime(timestamp.format(calendar.time))
                     }
@@ -1229,57 +1289,52 @@ class BrapiSyncViewModel @Inject constructor(
                 && serverDeviceId == localDeviceId
     }
 
-    private fun buildResyncChoiceKey(localObservation: Observation, serverObservation: Observation): String {
+    private fun buildResyncChoiceKey(
+        localObservation: Observation,
+        serverObservation: Observation
+    ): String {
         val localKey = localObservation.fieldBookDbId ?: ""
         val serverKey = serverObservation.dbId ?: ""
         return "$localKey|$serverKey|${localObservation.variableDbId ?: ""}|${localObservation.unitDbId ?: ""}"
     }
 
-    private fun getOrCreateBrapiDeviceId(): String {
-        val existing = preferences.getString(PreferenceKeys.BRAPI_DEVICE_ID, null)
-        if (!existing.isNullOrEmpty()) return existing
+    private suspend fun processImages(images: List<FieldBookImage>, isNew: Boolean = true) =
+        coroutineScope {
 
-        val generated = UUID.randomUUID().toString()
-        preferences.edit { putString(PreferenceKeys.BRAPI_DEVICE_ID, generated) }
-        return generated
-    }
+            if (images.isEmpty()) {
+                Log.d(TAG, "No images to process.")
+                return@coroutineScope
+            }
 
-    private suspend fun processImages(images: List<FieldBookImage>, isNew: Boolean = true) = coroutineScope {
+            val concurrencyLimit = (preferences.getString(
+                PreferenceKeys.BRAPI_MAX_CONCURRENT_IMAGE_CONTENT, "3"
+            ) ?: "3").toInt()
 
-        if (images.isEmpty()) {
-            Log.d(TAG, "No images to process.")
-            return@coroutineScope
-        }
+            Log.d(TAG, "Processing ${images.size} images with a concurrency of $concurrencyLimit.")
 
-        val concurrencyLimit = (preferences.getString(
-            PreferenceKeys.BRAPI_MAX_CONCURRENT_IMAGE_CONTENT, "3"
-        ) ?: "3").toInt()
+            val semaphore = Semaphore(concurrencyLimit)
 
-        Log.d(TAG, "Processing ${images.size} images with a concurrency of $concurrencyLimit.")
+            images.map { image ->
+                async(Dispatchers.IO) {
+                    semaphore.withPermit {
 
-        val semaphore = Semaphore(concurrencyLimit)
+                        if (!isActive) return@withPermit
+                        val message = if (isNew) processNewImage(image) else updateImages(image)
 
-        images.map { image ->
-            async(Dispatchers.IO) {
-                semaphore.withPermit {
-
-                    if (!isActive) return@withPermit
-                    val message = if (isNew) processNewImage(image)else updateImages(image)
-
-                    _uiState.update {
-                        it.copy(
-                            progress = it.progress.copy(
-                                current = it.progress.current + 1,
-                                message = message
+                        _uiState.update {
+                            it.copy(
+                                progress = it.progress.copy(
+                                    current = it.progress.current + 1,
+                                    message = message
+                                )
                             )
-                        )
+                        }
                     }
                 }
-            }
-        }.awaitAll()
+            }.awaitAll()
 
-        Log.d(TAG, "All image processing jobs have completed.")
-    }
+            Log.d(TAG, "All image processing jobs have completed.")
+        }
 
     /**
      * For each image:
@@ -1449,9 +1504,11 @@ class BrapiSyncViewModel @Inject constructor(
 
         val pageCount = AtomicInteger(1)
 
-        val study = _uiState.value.study ?: throw IllegalStateException(context.getString(R.string.study_not_initialized))
+        val study = _uiState.value.study
+            ?: throw IllegalStateException(context.getString(R.string.study_not_initialized))
         val brapiStudyId =
-            study.studyDbId ?: throw IllegalStateException(context.getString(R.string.brapi_study_db_id_is_missing))
+            study.studyDbId
+                ?: throw IllegalStateException(context.getString(R.string.brapi_study_db_id_is_missing))
 
         val variables = traitRepo.getTraits().filter {
             it.traitDataSource.isNotEmpty() && it.traitDataSource == study.dataSource
@@ -1496,7 +1553,8 @@ class BrapiSyncViewModel @Inject constructor(
             )
 
             val concurrencyLimit = (preferences.getString(
-                PreferenceKeys.BRAPI_MAX_CONCURRENT_OBSERVATION_TRANSFER, "5"))?.toInt() ?: 5
+                PreferenceKeys.BRAPI_MAX_CONCURRENT_OBSERVATION_TRANSFER, "5"
+            ))?.toInt() ?: 5
 
             val allObservations = brAPIService.awaitGetObservations(
                 brapiStudyId = brapiStudyId,

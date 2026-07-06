@@ -286,7 +286,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         } else {
             fbImage.setFileSize(original.getFileSize());
         }
-        if (image.getImageHeight() != null){
+        if (image.getImageHeight() != null) {
             fbImage.setHeight(image.getImageHeight());
         } else {
             fbImage.setHeight(original.getHeight());
@@ -1087,8 +1087,8 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     }
 
     public void getObservationsByPage(final String studyDbId, final List<String> observationVariableDbIds,
-                                BrapiPaginationManager paginationManager, final Function<List<Observation>, Void> function,
-                                final Function<Integer, Void> failFunction) {
+                                      BrapiPaginationManager paginationManager, final Function<List<Observation>, Void> function,
+                                      final Function<Integer, Void> failFunction) {
 
         try {
             BrapiV2ApiCallBack<BrAPIObservationListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationListResponse>() {
@@ -1705,14 +1705,14 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             // Do a pre-check to see if the field exists so we can show an error
             int FieldUniqueStatus = dataHelper.checkBrapiStudyUnique(field.getObservationLevel(), field.getStudyDbId());
             if (FieldUniqueStatus != -1) {
-                return new BrapiControllerResponse(false, this.notUniqueFieldMessage);
+                return new BrapiControllerResponse(false, BrAPIService.notUniqueFieldMessage);
             }
 
             // Check that there are not duplicate unique ids in the database
             HashMap<String, String> checkMap = new HashMap<>();
 
             if (studyDetails.getValues().isEmpty()) {
-                return new BrapiControllerResponse(false, this.noPlots);
+                return new BrapiControllerResponse(false, BrAPIService.noPlots);
             }
 
             // Construct our map to check for uniques
@@ -1722,7 +1722,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             }
 
             if (!dataHelper.checkUnique(checkMap)) {
-                return new BrapiControllerResponse(false, this.notUniqueIdMessage);
+                return new BrapiControllerResponse(false, BrAPIService.notUniqueIdMessage);
             }
 
 
