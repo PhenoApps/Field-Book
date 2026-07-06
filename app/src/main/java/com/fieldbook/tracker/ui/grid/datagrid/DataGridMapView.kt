@@ -276,7 +276,7 @@ private fun DataGridMapHeaderCell(
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
-            .background(Color.LightGray.copy(alpha = 0.3f))
+            .background(Color.LightGray)
             .border(Dp.Hairline, borderColor)
     ) {
         Text(
