@@ -6,6 +6,10 @@ import android.os.Bundle
 import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.ArrayAdapter
+import android.widget.LinearLayout
+import android.widget.Spinner
+import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -47,7 +51,6 @@ import com.fieldbook.tracker.ui.grid.datagrid.DataGridUiColors
 import com.fieldbook.tracker.ui.grid.datagrid.DataGridViewMode
 import com.fieldbook.tracker.ui.grid.datagrid.MapFilter
 import com.fieldbook.tracker.ui.grid.datagrid.MapPlotData
-import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.fieldbook.tracker.utilities.InsetHandler
 import com.fieldbook.tracker.utilities.Utils
 import com.fieldbook.tracker.viewmodels.DataGridViewModel
@@ -98,7 +101,7 @@ class DataGridActivity : ThemedActivity() {
     private var activeMapFilter by mutableStateOf(MapFilter.NONE)
     private var mapPlotDataList by mutableStateOf(emptyList<MapPlotData>())
     private var mapGridRows by mutableIntStateOf(0)
-    private var mapGridCols by androidx.compose.runtime.mutableIntStateOf(0)
+    private var mapGridCols by mutableIntStateOf(0)
     private var mapGrid by mutableStateOf<Array<Array<MapPlotData?>>>(emptyArray())
 
     private var mTraits = ArrayList<TraitObject>()
@@ -221,7 +224,6 @@ class DataGridActivity : ThemedActivity() {
                                 mapGridRows = mapGridRows,
                                 mapGridCols = mapGridCols,
                                 activeMapFilter = activeMapFilter,
-                                isSpatial = isMapSpatialMode(),
                                 colors = dataGridColors,
                                 columnLocked = columnLocked,
                                 wrapContent = wrapContent,
@@ -302,11 +304,7 @@ class DataGridActivity : ThemedActivity() {
         menu.findItem(R.id.menu_data_grid_action_header_view)?.let {
             it.isVisible = true
             it.title = if (isGrid) getString(R.string.menu_action_header_view_data_grid_title)
-            else "Y"
-        }
-        menu.findItem(R.id.menu_data_grid_action_column_view)?.let {
-            it.isVisible = !isGrid
-            it.title = "X"
+            else getString(R.string.map_view_choose_attributes_title)
         }
 
         menu.findItem(R.id.menu_data_grid_action_heatmap)?.isVisible = isGrid
@@ -332,11 +330,7 @@ class DataGridActivity : ThemedActivity() {
         menu.findItem(R.id.menu_data_grid_action_header_view)?.let {
             it.isVisible = true
             it.title = if (isGrid) getString(R.string.menu_action_header_view_data_grid_title)
-            else "Y"
-        }
-        menu.findItem(R.id.menu_data_grid_action_column_view)?.let {
-            it.isVisible = !isGrid
-            it.title = "X"
+            else getString(R.string.map_view_choose_attributes_title)
         }
 
         val heatmapItem = menu.findItem(R.id.menu_data_grid_action_heatmap)
@@ -370,12 +364,8 @@ class DataGridActivity : ThemedActivity() {
                 if (viewMode == DataGridViewMode.GRID) {
                     showHeaderPickerDialog()
                 } else {
-                    showMapRowAttributePickerDialog()
+                    showMapLayoutPickerDialog()
                 }
-            }
-
-            R.id.menu_data_grid_action_column_view -> {
-                showMapColumnAttributePickerDialog()
             }
 
             R.id.menu_data_grid_action_reset_sort -> {
@@ -410,20 +400,9 @@ class DataGridActivity : ThemedActivity() {
     }
 
     /**
-     * Shows a dialog to choose the row attribute for the map view layout.
+     * Shows a dialog to choose both row (Y) and column (X) attributes for the map view layout.
      */
-    private fun showMapRowAttributePickerDialog() {
-        showMapSingleAttributePickerDialog(true)
-    }
-
-    /**
-     * Shows a dialog to choose the column attribute for the map view layout.
-     */
-    private fun showMapColumnAttributePickerDialog() {
-        showMapSingleAttributePickerDialog(false)
-    }
-
-    private fun showMapSingleAttributePickerDialog(isRow: Boolean) {
+    private fun showMapLayoutPickerDialog() {
         val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
         val units = database.getAllObservationUnits(studyId) ?: emptyArray<ObservationUnitModel>()
         val geoCount = units.count { !it.geo_coordinates.isNullOrBlank() }
@@ -434,30 +413,78 @@ class DataGridActivity : ThemedActivity() {
 
         if (allColumns.isEmpty()) return
 
-        val currentAttr = if (isRow) preferences.getString(GeneralKeys.MAP_ROW_ATTR, "") ?: ""
-        else preferences.getString(GeneralKeys.MAP_COL_ATTR, "") ?: ""
+        val currentRowAttr = preferences.getString(GeneralKeys.MAP_ROW_ATTR, "") ?: ""
+        val currentColAttr = preferences.getString(GeneralKeys.MAP_COL_ATTR, "") ?: ""
 
-        var selected = allColumns.indexOfFirst { it == currentAttr }.coerceAtLeast(0)
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            val pad = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                16f,
+                resources.displayMetrics
+            ).toInt()
+            setPadding(pad, pad, pad, pad)
+        }
+
+        val rowLabel =
+            TextView(this).apply { text = context.getString(R.string.map_view_row_prompt) }
+        val rowSpinner = Spinner(this).apply {
+            adapter = ArrayAdapter(
+                this@DataGridActivity,
+                android.R.layout.simple_spinner_dropdown_item,
+                allColumns
+            )
+            setSelection(allColumns.indexOfFirst { it == currentRowAttr }.coerceAtLeast(0))
+        }
+
+        val colLabel = TextView(this).apply {
+            text = context.getString(R.string.map_view_col)
+            setPadding(
+                0,
+                TypedValue.applyDimension(
+                    TypedValue.COMPLEX_UNIT_DIP,
+                    16f,
+                    resources.displayMetrics
+                ).toInt(),
+                0,
+                0
+            )
+        }
+        val colSpinner = Spinner(this).apply {
+            adapter = ArrayAdapter(
+                this@DataGridActivity,
+                android.R.layout.simple_spinner_dropdown_item,
+                allColumns
+            )
+            setSelection(allColumns.indexOfFirst { it == currentColAttr }.coerceAtLeast(0))
+        }
+
+        layout.addView(rowLabel)
+        layout.addView(rowSpinner)
+        layout.addView(colLabel)
+        layout.addView(colSpinner)
 
         val builder = AlertDialog.Builder(this, R.style.AppAlertDialog)
-            .setTitle(if (isRow) "Y" else "X")
-            .setSingleChoiceItems(allColumns, selected) { _, which ->
-                selected = which
-            }
+            .setTitle(R.string.map_view_choose_attributes_title)
+            .setView(layout)
             .setPositiveButton(R.string.dialog_ok) { _, _ ->
-                val attr = allColumns[selected]
+                val rowAttr = allColumns[rowSpinner.selectedItemPosition]
+                val colAttr = allColumns[colSpinner.selectedItemPosition]
                 preferences.edit {
-                    putString(
-                        if (isRow) GeneralKeys.MAP_ROW_ATTR else GeneralKeys.MAP_COL_ATTR,
-                        attr
-                    )
+                    putString(GeneralKeys.MAP_ROW_ATTR, rowAttr)
+                    putString(GeneralKeys.MAP_COL_ATTR, colAttr)
                 }
                 loadMapData()
             }
             .setNegativeButton(android.R.string.cancel, null)
 
         if (geoCount > 0) {
-            builder.setNeutralButton(getString(R.string.map_view_use_geo_coordinates, geoCount)) { _, _ ->
+            builder.setNeutralButton(
+                getString(
+                    R.string.map_view_use_geo_coordinates,
+                    geoCount
+                )
+            ) { _, _ ->
                 preferences.edit {
                     putString(GeneralKeys.MAP_ROW_ATTR, "geo_coordinates")
                     putString(GeneralKeys.MAP_COL_ATTR, "geo_coordinates")
@@ -472,20 +499,7 @@ class DataGridActivity : ThemedActivity() {
     }
 
     private fun showMissingMapLayoutPicker() {
-        val savedRowAttr = preferences.getString(GeneralKeys.MAP_ROW_ATTR, "") ?: ""
-        val savedColAttr = preferences.getString(GeneralKeys.MAP_COL_ATTR, "") ?: ""
-        if (savedRowAttr.isBlank()) {
-            showMapRowAttributePickerDialog()
-        } else if (savedColAttr.isBlank()) {
-            showMapColumnAttributePickerDialog()
-        } else {
-            showMapRowAttributePickerDialog()
-        }
-    }
-
-    private fun isMapSpatialMode(): Boolean {
-        return preferences.getString(GeneralKeys.MAP_ROW_ATTR, "") == "geo_coordinates" &&
-            preferences.getString(GeneralKeys.MAP_COL_ATTR, "") == "geo_coordinates"
+        showMapLayoutPickerDialog()
     }
 
     private fun toggleMapFilter(filter: MapFilter) {
@@ -619,7 +633,8 @@ class DataGridActivity : ThemedActivity() {
 
             if (isSpatialMode) {
                 val unitLocations = units.mapNotNull { unit ->
-                    val loc = com.fieldbook.tracker.utilities.GeodeticUtils.parseGeoCoordinate(unit.geo_coordinates)
+                    val loc =
+                        com.fieldbook.tracker.utilities.GeodeticUtils.parseGeoCoordinate(unit.geo_coordinates)
                     if (loc != null) unit to loc else null
                 }
 
@@ -635,7 +650,8 @@ class DataGridActivity : ThemedActivity() {
                 }
 
                 // Get unique sorted latitudes (descending, North to South) and longitudes (ascending, West to East)
-                val sortedLats = unitLocations.map { it.second.latitude }.distinct().sortedDescending()
+                val sortedLats =
+                    unitLocations.map { it.second.latitude }.distinct().sortedDescending()
                 val sortedLons = unitLocations.map { it.second.longitude }.distinct().sorted()
 
                 maxRow = sortedLats.size
@@ -652,7 +668,12 @@ class DataGridActivity : ThemedActivity() {
                             plotId = plotId,
                             rowIndex = rowIndex,
                             colIndex = colIndex,
-                            label = String.format(java.util.Locale.US, "%.5f, %.5f", loc.latitude, loc.longitude),
+                            label = String.format(
+                                java.util.Locale.US,
+                                "%.5f, %.5f",
+                                loc.latitude,
+                                loc.longitude
+                            ),
                             observedTraits = observed,
                             totalTraits = totalTraits
                         )
@@ -782,7 +803,7 @@ class DataGridActivity : ThemedActivity() {
             }
 
             val dialog = AlertDialog.Builder(this@DataGridActivity, R.style.AppAlertDialog)
-                .setTitle("Y")
+                .setTitle(getString(R.string.dialog_data_grid_column_picker_title))
                 .setMultiChoiceItems(
                     displayItems.toTypedArray(),
                     checkedItems

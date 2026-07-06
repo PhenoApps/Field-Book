@@ -43,7 +43,6 @@ fun DataGridMapView(
     mapGridRows: Int,
     mapGridCols: Int,
     activeMapFilter: MapFilter,
-    isSpatial: Boolean,
     colors: DataGridUiColors,
     columnLocked: Boolean = true,
     wrapContent: Boolean = false,
@@ -153,7 +152,7 @@ fun DataGridMapView(
                     layoutInfo = { LazyTableItem(column = it, row = 0) }
                 ) { col ->
                     val text = when {
-                        col == 0 -> if (isSpatial) "Lat\\Lon" else "Y\\X"
+                        col == 0 -> ""
                         else -> (activeColIndices[col - 1] + 1).toString()
                     }
                     DataGridMapHeaderCell(
