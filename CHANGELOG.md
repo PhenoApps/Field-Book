@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- Photos are no longer corrupted on certain Samsung devices (https://github.com/PhenoApps/Field-Book/pull/1489)
 - Numerous BrAPI bug fixes and improvements (https://github.com/PhenoApps/Field-Book/pull/1483)
 
 ## [v7.2.1] - 2026-04-30
