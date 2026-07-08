@@ -8,6 +8,7 @@ import com.fieldbook.tracker.database.DataGridCache
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.traits.formats.coders.DateJsonCoder
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -317,6 +318,15 @@ class DataGridViewModel @Inject constructor(
                                         CategoryJsonUtil.decode(value),
                                         !variable.categoryDisplayValue
                                     )
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            } else if (variable.format == "date") {
+                                try {
+                                    val decoded = DateJsonCoder().decode(value)
+                                    if (decoded is DateJsonCoder.DateJson) {
+                                        cellValue = decoded.formattedDate
+                                    }
                                 } catch (e: Exception) {
                                     e.printStackTrace()
                                 }

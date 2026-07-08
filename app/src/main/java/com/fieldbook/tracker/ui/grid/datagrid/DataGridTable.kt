@@ -22,6 +22,7 @@ import eu.wewox.lazytable.LazyTableItem
 import eu.wewox.lazytable.lazyTableDimensions
 import eu.wewox.lazytable.lazyTablePinConfiguration
 import eu.wewox.lazytable.rememberSaveableLazyTableState
+import java.time.LocalDate
 import kotlin.math.ceil
 
 @Composable
@@ -273,10 +274,25 @@ fun DataGridTable(
 private fun String.toHeatmapDouble(): Double? {
     if (isBlank() || equals("NA", ignoreCase = true) || this == "...") return null
     toDoubleOrNull()?.let { return it }
+    toEpochDayOrNull()?.let { return it.toDouble() }
     return when (lowercase()) {
         "true", "yes" -> 1.0
         "false", "no" -> 0.0
         else -> null
+    }
+}
+
+/** Parses a "yyyy-MM-dd" date trait value (as decoded by the view model) into an epoch day for gradient coloring. */
+private fun String.toEpochDayOrNull(): Long? {
+    val parts = split("-")
+    if (parts.size != 3) return null
+    val year = parts[0].toIntOrNull() ?: return null
+    val month = parts[1].toIntOrNull() ?: return null
+    val day = parts[2].toIntOrNull() ?: return null
+    return try {
+        LocalDate.of(year, month, day).toEpochDay()
+    } catch (e: Exception) {
+        null
     }
 }
 
