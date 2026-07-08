@@ -636,6 +636,7 @@
     <string name="menu_action_header_view_data_grid_title">Update Row Headers</string>
     <string name="menu_action_column_view_data_grid_title">Update Column Headers</string>
     <string name="menu_action_reset_sort_data_grid_title">Reset Sort</string>
+    <string name="menu_data_grid_action_locate_plot">Locate Active Plot</string>
     <string name="menu_action_wrap_content_data_grid_title">Wrap Content</string>
     <string name="menu_action_heatmap_data_grid_title">Heatmap</string>
     <string name="menu_data_grid_action_map_view">Map View</string>
@@ -656,8 +657,14 @@
     <string name="act_data_grid_details_repeated">%d more measures available</string>
     <string name="act_data_grid_collect_button">Collect</string>
     <string name="act_data_grid_details_title">Cell Details</string>
-    <string name="map_view_no_layout">Field layout not available. Use Set Row/Column to define the row and column attributes.</string>
+    <string name="map_view_no_layout">Field layout not available. Open Map Settings to define the row and column attributes.</string>
     <string name="map_view_choose_attributes_title">Choose Row and Column</string>
+    <string name="map_settings_title">Map Settings</string>
+    <string name="map_settings_row_attribute">Row attribute</string>
+    <string name="map_settings_col_attribute">Column attribute</string>
+    <string name="map_settings_invert_subheader">Invert</string>
+    <string name="map_settings_invert_row">Invert row order</string>
+    <string name="map_settings_invert_col">Invert column order</string>
     <string name="map_view_row_prompt">Select attribute for ROW:</string>
     <string name="map_view_col_prompt">Select attribute for COLUMN:</string>
     <string name="map_view_row">Row</string>

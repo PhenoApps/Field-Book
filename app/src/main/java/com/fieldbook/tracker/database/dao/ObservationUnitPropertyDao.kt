@@ -3,6 +3,7 @@ package com.fieldbook.tracker.database.dao
 import android.content.Context
 import android.database.Cursor
 import android.database.MatrixCursor
+import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import androidx.core.database.getStringOrNull
 import androidx.preference.PreferenceManager
@@ -323,8 +324,13 @@ class ObservationUnitPropertyDao {
         ): Cursor? = withDatabase { db ->
             // Use only the requested attributes (unique id + row header + extra headers).
             // Fall back to all attributes only if none were specified (e.g. legacy callers).
-            val headers: List<String> = if (requiredAttributes.isNotEmpty()) requiredAttributes
+            // The study's sort column(s) are also pulled in even if not requested, since the
+            // ORDER BY clause below references them by name and would otherwise fail with
+            // "no such column" when the sort attribute isn't one of the displayed columns.
+            val baseHeaders: List<String> = if (requiredAttributes.isNotEmpty()) requiredAttributes
                           else ObservationUnitAttributeDao.getAllNames(studyId).toList()
+            val sortColumnNames = getSortColumnNames(db, studyId.toString())
+            val headers: List<String> = (baseHeaders + sortColumnNames).distinct()
 
             val coreColumns = listOf("primary_id", "secondary_id", "observation_unit_db_id", "geo_coordinates")
 
@@ -483,11 +489,8 @@ class ObservationUnitPropertyDao {
             db.rawQuery(query, null)
         }
 
-        private fun getSortOrderClause(context: Context, studyId: String): String? = withDatabase { db ->
-            val sortOrder = if (PreferenceManager.getDefaultSharedPreferences(context)
-                    .getBoolean("${GeneralKeys.SORT_ORDER}.$studyId", true)) "ASC" else "DESC"
-
-            var sortCols = "" // Adjusted to start as an empty string
+        /** The study's configured sort column name(s), e.g. from a "study_sort_name" of "Plot,Rep". */
+        private fun getSortColumnNames(db: SQLiteDatabase, studyId: String): List<String> {
             val sortName = db.query(
                 Study.tableName,
                 select = arrayOf("study_sort_name"),
@@ -495,10 +498,15 @@ class ObservationUnitPropertyDao {
                 whereArgs = arrayOf(studyId)
             ).toFirst()["study_sort_name"]?.toString()
 
-            if (!sortName.isNullOrEmpty() && sortName != "null") {
-                sortCols = sortName.split(',')
-                    .joinToString(",") { col -> "cast(`$col` as integer), `$col`" } + (if (sortCols.isNotEmpty()) ", " else "")
-            }
+            return if (!sortName.isNullOrEmpty() && sortName != "null") sortName.split(',') else emptyList()
+        }
+
+        private fun getSortOrderClause(context: Context, studyId: String): String? = withDatabase { db ->
+            val sortOrder = if (PreferenceManager.getDefaultSharedPreferences(context)
+                    .getBoolean("${GeneralKeys.SORT_ORDER}.$studyId", true)) "ASC" else "DESC"
+
+            val sortCols = getSortColumnNames(db, studyId)
+                .joinToString(",") { col -> "cast(`$col` as integer), `$col`" }
 
             if (sortCols.isNotEmpty()) "ORDER BY $sortCols COLLATE NOCASE $sortOrder" else ""
         }

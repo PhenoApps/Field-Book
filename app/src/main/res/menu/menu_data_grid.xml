@@ -3,6 +3,12 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/menu_data_grid_action_locate_plot"
+        android:icon="@drawable/ic_explore_black_24dp"
+        android:visible="false"
+        app:showAsAction="always"
+        android:title="@string/menu_data_grid_action_locate_plot" />
+    <item
         android:id="@+id/menu_data_grid_action_reset_sort"
         android:icon="@drawable/ic_tb_sort_clear"
         android:visible="false"

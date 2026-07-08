@@ -166,6 +166,9 @@ public class GeneralKeys {
     public static final String MAP_VIEW_SETTING = "com.fieldbook.tracker.datagrid.MAP_VIEW_SETTING";
     public static final String MAP_ROW_ATTR = "com.fieldbook.tracker.datagrid.MAP_ROW_ATTR";
     public static final String MAP_COL_ATTR = "com.fieldbook.tracker.datagrid.MAP_COL_ATTR";
+    public static final String MAP_INVERT_ROW = "com.fieldbook.tracker.datagrid.MAP_INVERT_ROW";
+    public static final String MAP_INVERT_COL = "com.fieldbook.tracker.datagrid.MAP_INVERT_COL";
+    public static final String DATAGRID_MAP_ZOOM = "com.fieldbook.tracker.datagrid.DATAGRID_MAP_ZOOM";
     //Cell details panel
     public static final String CELL_DETAILS_SETTING = "com.fieldbook.tracker.datagrid.CELL_DETAILS_SETTING";
 

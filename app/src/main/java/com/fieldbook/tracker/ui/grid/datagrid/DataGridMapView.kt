@@ -3,6 +3,7 @@ package com.fieldbook.tracker.ui.grid.datagrid
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -21,9 +22,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -38,13 +48,19 @@ import eu.wewox.lazytable.LazyTable
 import eu.wewox.lazytable.LazyTableItem
 import eu.wewox.lazytable.lazyTableDimensions
 import eu.wewox.lazytable.lazyTablePinConfiguration
+import eu.wewox.lazytable.rememberSaveableLazyTableState
 
 @Composable
 fun DataGridMapView(
     mapGrid: Array<Array<MapPlotData?>>,
     mapGridRows: Int,
     mapGridCols: Int,
+    invertRow: Boolean = false,
+    invertCol: Boolean = false,
     activeMapFilter: MapFilter,
+    activePlotIdString: String? = null,
+    /** Bumped by the caller (e.g. a toolbar "locate" action) to force a re-scroll to the active plot. */
+    locateTrigger: Int = 0,
     colors: DataGridUiColors,
     columnLocked: Boolean = true,
     wrapContent: Boolean = false,
@@ -103,68 +119,136 @@ fun DataGridMapView(
 
     val displayRows = activeRowIndices.size
     val displayCols = activeColIndices.size
-    val columnCount = displayCols + 1
+    // Headers are duplicated on all four sides: column 0 / last column are row headers,
+    // row 0 / last row are column headers.
+    val totalCols = displayCols + 2
+    val totalRows = displayRows + 2
+
+    val lazyTableState = rememberSaveableLazyTableState()
+    var hasScrolledToActive by rememberSaveable { mutableStateOf(false) }
+
+    suspend fun scrollToActivePlot() {
+        if (activePlotIdString == null) return
+
+        var gridRow = -1
+        var gridCol = -1
+        outer@ for (r in 0 until mapGridRows) {
+            for (c in 0 until mapGridCols) {
+                if (mapGrid[r][c]?.plotId == activePlotIdString) {
+                    gridRow = r
+                    gridCol = c
+                    break@outer
+                }
+            }
+        }
+
+        if (gridRow >= 0) {
+            val displayRowPos = activeRowIndices.indexOf(gridRow)
+            val displayColPos = activeColIndices.indexOf(gridCol)
+            if (displayRowPos >= 0 && displayColPos >= 0) {
+                lazyTableState.animateToCell(column = displayColPos + 1, row = displayRowPos + 1)
+                hasScrolledToActive = true
+            }
+        }
+    }
+
+    // Auto-scroll once, the first time the active plot becomes locatable.
+    LaunchedEffect(activePlotIdString, mapGridRows, mapGridCols, activeRowIndices, activeColIndices) {
+        if (!hasScrolledToActive) scrollToActivePlot()
+    }
+
+    // Re-scroll on demand (e.g. the toolbar "locate" action), bypassing the one-time guard.
+    LaunchedEffect(locateTrigger) {
+        if (locateTrigger > 0) scrollToActivePlot()
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f, fill = false)
+                .weight(1f),
+            contentAlignment = Alignment.TopStart
         ) {
             val availableWidth = maxWidth
-            val horizontalPadding = 8.dp // 4.dp on each side in LazyTable contentPadding
 
-            val baseHeaderWidth = 48.dp
-            val baseHeaderHeight = 32.dp
+            // Row-header column width matches column-header row height (a single-line-of-text
+            // size), rather than the wider size needed to fit a multi-digit row number.
+            val baseHeaderSize = if (wrapContent) 20.dp else 32.dp
 
-            val baseCellSize = if (wrapContent) {
-                ((availableWidth - baseHeaderWidth - horizontalPadding) / maxOf(
-                    displayCols,
-                    1
-                )).coerceAtLeast(8.dp)
+            val baseCellSize = (if (wrapContent) {
+                (availableWidth - baseHeaderSize * 2) / maxOf(displayCols, 1)
             } else {
                 64.dp
-            }
+            }).coerceAtLeast(8.dp)
 
-            val headerWidth = baseHeaderWidth * zoom
-            val headerHeight = baseHeaderHeight * zoom
+            val headerWidth = baseHeaderSize * zoom
+            val headerHeight = baseHeaderSize * zoom
             val cellSize = baseCellSize * zoom
 
-            val totalGridHeight = headerHeight + (cellSize * displayRows) + 8.dp
+            // Size to content (up to the available viewport) rather than filling it, so the
+            // table sits flush at the top instead of being centered within unused space.
+            val totalGridHeight = (headerHeight * 2 + cellSize * displayRows).coerceAtMost(maxHeight)
+
+            // Header numbers reflect the true row/column number. When an axis is inverted the
+            // grid is mirrored, so grid index g maps to number (dim - g) instead of (g + 1).
+            fun colHeader(gridCol: Int) =
+                (if (invertCol) mapGridCols - gridCol else gridCol + 1).toString()
+
+            fun rowHeader(gridRow: Int) =
+                (if (invertRow) mapGridRows - gridRow else gridRow + 1).toString()
+
+            // Perf: these are constant across all cells in this pass, so compute them once
+            // instead of per-cell. Skip drawing the status glyph when cells are too small to
+            // read it — this removes hundreds of Text composables when zoomed out, which is
+            // the main cause of scroll jank at low zoom.
+            val showLabels = cellSize >= 18.dp
+            val labelFontSize = when {
+                displayRows * displayCols > 500 -> 8 * zoom
+                displayRows * displayCols > 200 -> 10 * zoom
+                else -> 12 * zoom
+            }.sp
 
             LazyTable(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(totalGridHeight),
+                state = lazyTableState,
                 dimensions = lazyTableDimensions(
                     columnSize = { col ->
-                        if (col == 0) headerWidth else cellSize
+                        if (col == 0 || col == totalCols - 1) headerWidth else cellSize
                     },
                     rowSize = { row ->
-                        if (row == 0) headerHeight else cellSize
+                        if (row == 0 || row == totalRows - 1) headerHeight else cellSize
                     }
                 ),
-                contentPadding = PaddingValues(4.dp),
+                contentPadding = PaddingValues(0.dp),
                 pinConfiguration = lazyTablePinConfiguration(
                     columns = if (columnLocked) 1 else 0,
                     rows = if (columnLocked) 1 else 0
                 )
             ) {
                 items(
-                    count = columnCount,
+                    count = totalCols,
                     layoutInfo = { LazyTableItem(column = it, row = 0) }
                 ) { col ->
-                    if (col == 0) {
-                        DataGridMapCornerCell(
+                    when (col) {
+                        0 -> DataGridMapCornerCell(
                             isLocked = columnLocked,
                             textColor = Color(colors.cellTextColor),
                             borderColor = gridColors.borderColor,
                             zoom = zoom,
                             onClick = onToggleLock
                         )
-                    } else {
-                        DataGridMapHeaderCell(
-                            text = (activeColIndices[col - 1] + 1).toString(),
+
+                        totalCols - 1 -> DataGridMapHeaderCell(
+                            text = "",
+                            textColor = Color(colors.cellTextColor),
+                            borderColor = gridColors.borderColor,
+                            zoom = zoom
+                        )
+
+                        else -> DataGridMapHeaderCell(
+                            text = colHeader(activeColIndices[col - 1]),
                             textColor = Color(colors.cellTextColor),
                             borderColor = gridColors.borderColor,
                             zoom = zoom
@@ -173,19 +257,32 @@ fun DataGridMapView(
                 }
 
                 items(
-                    count = displayRows * columnCount,
+                    count = totalCols,
+                    layoutInfo = { LazyTableItem(column = it, row = totalRows - 1) }
+                ) { col ->
+                    val text = if (col == 0 || col == totalCols - 1) "" else colHeader(activeColIndices[col - 1])
+                    DataGridMapHeaderCell(
+                        text = text,
+                        textColor = Color(colors.cellTextColor),
+                        borderColor = gridColors.borderColor,
+                        zoom = zoom
+                    )
+                }
+
+                items(
+                    count = displayRows * totalCols,
                     layoutInfo = {
-                        val r = (it / columnCount) + 1
-                        val c = it % columnCount
+                        val r = (it / totalCols) + 1
+                        val c = it % totalCols
                         LazyTableItem(column = c, row = r)
                     }
                 ) { index ->
-                    val rPrime = (index / columnCount)
-                    val cPrime = index % columnCount
+                    val rPrime = (index / totalCols)
+                    val cPrime = index % totalCols
 
-                    if (cPrime == 0) {
+                    if (cPrime == 0 || cPrime == totalCols - 1) {
                         DataGridMapHeaderCell(
-                            text = "${activeRowIndices[rPrime] + 1}",
+                            text = rowHeader(activeRowIndices[rPrime]),
                             textColor = Color(colors.cellTextColor),
                             borderColor = gridColors.borderColor,
                             zoom = zoom
@@ -213,57 +310,77 @@ fun DataGridMapView(
                             null -> Color.Transparent
                         }
 
-                        val cellBorder = Modifier.border(
-                            Dp.Hairline,
+                        val fillColor = if (matchesFilter) cellColor else cellColor.copy(alpha = 0.1f)
+                        val borderColor =
                             gridColors.borderColor.copy(alpha = if (matchesFilter) 1f else 0.2f)
-                        )
+                        val isActive = plot != null && plot.plotId == activePlotIdString
+                        val activeBorderColor = Color.Black
 
+                        // Hoisted unconditionally (never call remember inside the `if` below,
+                        // which would corrupt the slot table when a cell flips occupied/empty).
+                        val interactionSource = remember { MutableInteractionSource() }
+
+                        // Perf: paint fill + border in a single drawBehind pass (avoids the extra
+                        // graphics layer that Modifier.background + Modifier.border allocate per
+                        // cell), and use a click handler without ripple indication \u2014 ripple nodes
+                        // across hundreds of visible cells are a major source of scroll jank.
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
-                                .background(
-                                    if (matchesFilter) cellColor else cellColor.copy(
-                                        alpha = 0.1f
-                                    )
-                                )
-                                .then(cellBorder)
-                                .then(if (plot != null) Modifier.clickable {
-                                    onPlotClicked(plot)
-                                } else Modifier)
-                        ) {
-                            val label = plot?.let {
-                                when (it.status) {
-                                    MapPlotStatus.EMPTY -> ""
-                                    MapPlotStatus.COMPLETE -> "\u2713"
-                                    else -> "~"
+                                .drawBehind {
+                                    drawRect(fillColor)
+                                    drawRect(borderColor, style = Stroke(width = 1f))
+                                    // The active plot gets a bold border inset within the cell,
+                                    // rather than a filled background, so its status color stays visible.
+                                    if (isActive) {
+                                        val strokeWidthPx = ACTIVE_CELL_BORDER_WIDTH.toPx()
+                                        drawRect(
+                                            color = activeBorderColor,
+                                            topLeft = Offset(strokeWidthPx / 2f, strokeWidthPx / 2f),
+                                            size = Size(
+                                                size.width - strokeWidthPx,
+                                                size.height - strokeWidthPx
+                                            ),
+                                            style = Stroke(width = strokeWidthPx)
+                                        )
+                                    }
                                 }
-                            } ?: "\u2715"
+                                .then(
+                                    if (plot != null) Modifier.clickable(
+                                        interactionSource = interactionSource,
+                                        indication = null
+                                    ) { onPlotClicked(plot) } else Modifier
+                                )
+                        ) {
+                            if (showLabels) {
+                                val label = plot?.let {
+                                    when (it.status) {
+                                        MapPlotStatus.EMPTY -> ""
+                                        MapPlotStatus.COMPLETE -> "\u2713"
+                                        else -> "~"
+                                    }
+                                } ?: "\u2715"
 
-                            val textColor = if (plot == null) {
-                                Color.Gray.copy(alpha = if (matchesFilter) 0.5f else 0.1f)
-                            } else {
-                                Color.White.copy(alpha = if (matchesFilter) 1f else 0.1f)
+                                val textColor = if (plot == null) {
+                                    Color.Gray.copy(alpha = if (matchesFilter) 0.5f else 0.1f)
+                                } else {
+                                    Color.White.copy(alpha = if (matchesFilter) 1f else 0.1f)
+                                }
+
+                                Text(
+                                    text = label,
+                                    color = textColor,
+                                    textAlign = TextAlign.Center,
+                                    fontSize = labelFontSize,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
                             }
-
-                            Text(
-                                text = label,
-                                color = textColor,
-                                textAlign = TextAlign.Center,
-                                fontSize = when {
-                                    displayRows * displayCols > 500 -> (8 * zoom).sp
-                                    displayRows * displayCols > 200 -> (10 * zoom).sp
-                                    else -> (12 * zoom).sp
-                                },
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
                         }
                     }
                 }
             }
         }
-
-        Spacer(modifier = Modifier.weight(1f))
 
         DataGridMapLegend(
             activeMapFilter = activeMapFilter,
@@ -284,7 +401,7 @@ private fun DataGridMapHeaderCell(
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
-            .background(Color.LightGray)
+            .background(Color.White)
             .border(Dp.Hairline, borderColor)
     ) {
         Text(
@@ -307,7 +424,7 @@ private fun DataGridMapCornerCell(
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
-            .background(Color.LightGray)
+            .background(Color.White)
             .border(Dp.Hairline, borderColor)
             .clickable(onClick = onClick)
     ) {

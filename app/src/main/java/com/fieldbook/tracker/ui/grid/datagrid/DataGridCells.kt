@@ -22,6 +22,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fieldbook.tracker.R
 
+/** The active plot's bold inset border, shared by grid and map view for a consistent look. */
+val ACTIVE_CELL_BORDER_WIDTH = 3.6.dp
+
 @Composable
 fun DataGridHeaderCell(
     text: String,
@@ -109,7 +112,6 @@ fun DataGridDataCell(
     onLongClick: () -> Unit = {}
 ) {
     val resolvedColor = when {
-        isHighlighted -> Color(colors.activeCellBgColor)
         isSelected -> Color(colors.activeCellBgColor).copy(alpha = 0.6f)
         heatmapColor != null -> heatmapColor
         value.isNotBlank() -> Color(colors.filledCellBgColor)
@@ -121,13 +123,15 @@ fun DataGridDataCell(
     val backgroundColor = if (isLocked) resolvedColor.compositeOverWhite() else resolvedColor
 
     val textColor =
-        if (isHighlighted || isSelected) Color(colors.activeCellTextColor)
+        if (isSelected) Color(colors.activeCellTextColor)
         else Color(colors.cellTextColor)
 
-    val borderModifier = if (isSelected) {
-        Modifier.border(2.dp, Color(colors.activeCellBgColor))
-    } else {
-        Modifier.border(Dp.Hairline, Color(colors.cellTextColor))
+    // The active plot is marked with a bold border inset within the cell, rather than a filled
+    // background, so its heatmap/filled/empty color stays visible underneath.
+    val borderModifier = when {
+        isHighlighted -> Modifier.border(ACTIVE_CELL_BORDER_WIDTH, Color.Black)
+        isSelected -> Modifier.border(2.dp, Color(colors.activeCellBgColor))
+        else -> Modifier.border(Dp.Hairline, Color(colors.cellTextColor))
     }
 
     DataGridTableCell(

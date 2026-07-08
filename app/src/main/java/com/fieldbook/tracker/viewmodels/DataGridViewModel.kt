@@ -129,25 +129,31 @@ class DataGridViewModel @Inject constructor(
         preferences.edit().putBoolean(GeneralKeys.DATAGRID_HEATMAP, newValue).apply()
     }
 
+    // Grid and map views zoom independently of each other, each with its own saved preference.
     private val _zoomLevel = MutableStateFlow(preferences.getFloat(GeneralKeys.DATAGRID_ZOOM, 1f))
     val zoomLevel: StateFlow<Float> = _zoomLevel.asStateFlow()
 
-    fun zoomIn() {
-        val newValue = (_zoomLevel.value + 0.25f).coerceAtMost(2f)
-        _zoomLevel.value = newValue
-        preferences.edit().putFloat(GeneralKeys.DATAGRID_ZOOM, newValue).apply()
-    }
+    fun zoomIn() = setZoom(_zoomLevel.value + 0.25f)
 
-    fun zoomOut() {
-        val newValue = (_zoomLevel.value - 0.25f).coerceAtLeast(0.5f)
-        _zoomLevel.value = newValue
-        preferences.edit().putFloat(GeneralKeys.DATAGRID_ZOOM, newValue).apply()
-    }
+    fun zoomOut() = setZoom(_zoomLevel.value - 0.25f)
 
     fun setZoom(zoom: Float) {
         val newValue = zoom.coerceIn(0.5f, 2f)
         _zoomLevel.value = newValue
         preferences.edit().putFloat(GeneralKeys.DATAGRID_ZOOM, newValue).apply()
+    }
+
+    private val _mapZoomLevel = MutableStateFlow(preferences.getFloat(GeneralKeys.DATAGRID_MAP_ZOOM, 1f))
+    val mapZoomLevel: StateFlow<Float> = _mapZoomLevel.asStateFlow()
+
+    fun mapZoomIn() = setMapZoom(_mapZoomLevel.value + 0.25f)
+
+    fun mapZoomOut() = setMapZoom(_mapZoomLevel.value - 0.25f)
+
+    fun setMapZoom(zoom: Float) {
+        val newValue = zoom.coerceIn(0.5f, 2f)
+        _mapZoomLevel.value = newValue
+        preferences.edit().putFloat(GeneralKeys.DATAGRID_MAP_ZOOM, newValue).apply()
     }
 
     override fun onCleared() {

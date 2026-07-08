@@ -2,11 +2,13 @@ package com.fieldbook.tracker.activities
 
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Typeface
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.ArrayAdapter
+import android.widget.CheckBox
 import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
@@ -40,6 +42,7 @@ import androidx.core.database.getStringOrNull
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.lifecycleScope
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.database.DataGridCache
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.models.ObservationUnitModel
 import com.fieldbook.tracker.databinding.ActivityDataGridBinding
@@ -103,6 +106,11 @@ class DataGridActivity : ThemedActivity() {
     private var mapGridRows by mutableIntStateOf(0)
     private var mapGridCols by mutableIntStateOf(0)
     private var mapGrid by mutableStateOf<Array<Array<MapPlotData?>>>(emptyArray())
+    private var mapInvertRow by mutableStateOf(false)
+    private var mapInvertCol by mutableStateOf(false)
+    // Incremented each time "Locate Active Plot" is tapped, so the map view can react even
+    // after its one-time auto-scroll-on-load has already fired.
+    private var mapLocateTrigger by mutableIntStateOf(0)
 
     private var mTraits = ArrayList<TraitObject>()
 
@@ -111,6 +119,9 @@ class DataGridActivity : ThemedActivity() {
 
     @Inject
     lateinit var preferences: SharedPreferences
+
+    @Inject
+    lateinit var dataGridCache: DataGridCache
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -166,6 +177,7 @@ class DataGridActivity : ThemedActivity() {
             val wrapContent by viewModel.wrapContent.collectAsState()
             val heatmapEnabled by viewModel.heatmapEnabled.collectAsState()
             val zoomLevel by viewModel.zoomLevel.collectAsState()
+            val mapZoomLevel by viewModel.mapZoomLevel.collectAsState()
             val dataGridColors = DataGridUiColors(
                 activeCellBgColor = activeCellBgColor,
                 filledCellBgColor = filledCellBgColor,
@@ -173,6 +185,20 @@ class DataGridActivity : ThemedActivity() {
                 activeCellTextColor = activeCellTextColor,
                 cellTextColor = cellTextColor
             )
+
+            // Resolved once the grid data loads, regardless of which view is currently shown,
+            // so the active-plot highlight is available immediately in map view too.
+            LaunchedEffect(uiState) {
+                val state = uiState
+                if (activePlotIdString == null && activePlotId != null && state is DataGridViewModel.UiState.Loaded) {
+                    // activePlotId is 1-based (sent by CollectActivity); subtract 1 to index rawPlotIds
+                    activePlotIdString = viewModel.rawPlotIds.getOrNull(activePlotId!! - 1)
+                }
+            }
+
+            LaunchedEffect(activePlotIdString, viewMode) {
+                invalidateOptionsMenu()
+            }
 
             LaunchedEffect(sortState) {
                 invalidateOptionsMenu()
@@ -202,7 +228,11 @@ class DataGridActivity : ThemedActivity() {
                                         if (event.changes.size >= 2) {
                                             val zoomChange = event.calculateZoom()
                                             if (zoomChange != 1f) {
-                                                viewModel.setZoom(viewModel.zoomLevel.value * zoomChange)
+                                                if (viewMode == DataGridViewMode.MAP) {
+                                                    viewModel.setMapZoom(viewModel.mapZoomLevel.value * zoomChange)
+                                                } else {
+                                                    viewModel.setZoom(viewModel.zoomLevel.value * zoomChange)
+                                                }
                                             }
                                             // Prioritize zoom: consume 2-finger events so children (LazyTable) don't scroll
                                             event.changes.forEach { it.consume() }
@@ -214,17 +244,26 @@ class DataGridActivity : ThemedActivity() {
                         contentAlignment = Alignment.TopCenter
                     ) {
                         if (isLoading && viewMode == DataGridViewMode.MAP) {
-                            CircularProgressIndicator(color = Color(activeCellBgColor))
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(color = Color(activeCellBgColor))
+                            }
                         } else if (viewMode == DataGridViewMode.MAP) {
                             DataGridMapView(
                                 mapGrid = mapGrid,
                                 mapGridRows = mapGridRows,
                                 mapGridCols = mapGridCols,
+                                invertRow = mapInvertRow,
+                                invertCol = mapInvertCol,
                                 activeMapFilter = activeMapFilter,
+                                activePlotIdString = activePlotIdString,
+                                locateTrigger = mapLocateTrigger,
                                 colors = dataGridColors,
                                 columnLocked = columnLocked,
                                 wrapContent = wrapContent,
-                                zoom = zoomLevel,
+                                zoom = mapZoomLevel,
                                 onMissingLayout = ::showMissingMapLayoutPicker,
                                 onFilterClicked = ::toggleMapFilter,
                                 onPlotClicked = { plot ->
@@ -239,11 +278,6 @@ class DataGridActivity : ThemedActivity() {
                                 }
 
                                 is DataGridViewModel.UiState.Loaded -> {
-                                    if (activePlotIdString == null && activePlotId != null) {
-                                        // activePlotId is 1-based (sent by CollectActivity); subtract 1 to index rawPlotIds
-                                        activePlotIdString =
-                                            viewModel.rawPlotIds.getOrNull(activePlotId!! - 1)
-                                    }
                                     DataGridTable(
                                         state = state,
                                         colors = dataGridColors,
@@ -304,13 +338,16 @@ class DataGridActivity : ThemedActivity() {
         menu.findItem(R.id.menu_data_grid_action_header_view)?.let {
             it.isVisible = true
             it.title = if (isGrid) getString(R.string.menu_action_header_view_data_grid_title)
-            else getString(R.string.map_view_choose_attributes_title)
+            else getString(R.string.map_settings_title)
         }
 
         menu.findItem(R.id.menu_data_grid_action_heatmap)?.isVisible = isGrid
 
         menu.findItem(R.id.menu_data_grid_action_reset_sort)?.isVisible =
             isGrid && viewModel.sortState.value.columnIndex >= 0
+
+        menu.findItem(R.id.menu_data_grid_action_locate_plot)?.isVisible =
+            !isGrid && activePlotIdString != null
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -319,6 +356,9 @@ class DataGridActivity : ThemedActivity() {
 
         val resetSortItem = menu.findItem(R.id.menu_data_grid_action_reset_sort)
         resetSortItem?.isVisible = isGrid && viewModel.sortState.value.columnIndex >= 0
+
+        menu.findItem(R.id.menu_data_grid_action_locate_plot)?.isVisible =
+            !isGrid && activePlotIdString != null
 
         val mapItem = menu.findItem(R.id.menu_data_grid_action_map_view)
         mapItem?.let {
@@ -337,7 +377,7 @@ class DataGridActivity : ThemedActivity() {
         menu.findItem(R.id.menu_data_grid_action_header_view)?.let {
             it.isVisible = true
             it.title = if (isGrid) getString(R.string.menu_action_header_view_data_grid_title)
-            else getString(R.string.map_view_choose_attributes_title)
+            else getString(R.string.map_settings_title)
         }
 
         val heatmapItem = menu.findItem(R.id.menu_data_grid_action_heatmap)
@@ -379,6 +419,10 @@ class DataGridActivity : ThemedActivity() {
                 viewModel.toggleHeatmap()
             }
 
+            R.id.menu_data_grid_action_locate_plot -> {
+                mapLocateTrigger++
+            }
+
             R.id.menu_data_grid_action_map_view -> {
                 toggleViewMode()
             }
@@ -403,7 +447,8 @@ class DataGridActivity : ThemedActivity() {
     }
 
     /**
-     * Shows a dialog to choose both row (Y) and column (X) attributes for the map view layout.
+     * Shows the Map Settings dialog: pick the row/column attributes, invert either axis, or
+     * switch to GPS-coordinate layout.
      */
     private fun showMapLayoutPickerDialog() {
         val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
@@ -419,56 +464,52 @@ class DataGridActivity : ThemedActivity() {
         val currentRowAttr = preferences.getString(GeneralKeys.MAP_ROW_ATTR, "") ?: ""
         val currentColAttr = preferences.getString(GeneralKeys.MAP_COL_ATTR, "") ?: ""
 
+        val dp = { value: Float ->
+            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, value, resources.displayMetrics).toInt()
+        }
+
         val layout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            val pad = TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                16f,
-                resources.displayMetrics
-            ).toInt()
-            setPadding(pad, pad, pad, pad)
+            setPadding(dp(24f), dp(16f), dp(24f), dp(8f))
         }
 
-        val rowLabel =
-            TextView(this).apply { text = context.getString(R.string.map_view_row_prompt) }
-        val rowSpinner = Spinner(this).apply {
+        fun makeLabel(textRes: Int, topMargin: Int = 0) = TextView(this).apply {
+            text = getString(textRes)
+            setTypeface(typeface, Typeface.BOLD)
+            setPadding(0, topMargin, 0, dp(2f))
+        }
+
+        fun makeSpinner(selected: String) = Spinner(this).apply {
             adapter = ArrayAdapter(
                 this@DataGridActivity,
                 android.R.layout.simple_spinner_dropdown_item,
                 allColumns
             )
-            setSelection(allColumns.indexOfFirst { it == currentRowAttr }.coerceAtLeast(0))
+            setSelection(allColumns.indexOfFirst { it == selected }.coerceAtLeast(0))
         }
 
-        val colLabel = TextView(this).apply {
-            text = context.getString(R.string.map_view_col)
-            setPadding(
-                0,
-                TypedValue.applyDimension(
-                    TypedValue.COMPLEX_UNIT_DIP,
-                    16f,
-                    resources.displayMetrics
-                ).toInt(),
-                0,
-                0
-            )
+        val rowSpinner = makeSpinner(currentRowAttr)
+        val colSpinner = makeSpinner(currentColAttr)
+
+        val invertRowCheck = CheckBox(this).apply {
+            text = getString(R.string.map_settings_invert_row)
+            isChecked = preferences.getBoolean(GeneralKeys.MAP_INVERT_ROW, false)
         }
-        val colSpinner = Spinner(this).apply {
-            adapter = ArrayAdapter(
-                this@DataGridActivity,
-                android.R.layout.simple_spinner_dropdown_item,
-                allColumns
-            )
-            setSelection(allColumns.indexOfFirst { it == currentColAttr }.coerceAtLeast(0))
+        val invertColCheck = CheckBox(this).apply {
+            text = getString(R.string.map_settings_invert_col)
+            isChecked = preferences.getBoolean(GeneralKeys.MAP_INVERT_COL, false)
         }
 
-        layout.addView(rowLabel)
+        layout.addView(makeLabel(R.string.map_settings_row_attribute))
         layout.addView(rowSpinner)
-        layout.addView(colLabel)
+        layout.addView(makeLabel(R.string.map_settings_col_attribute, dp(12f)))
         layout.addView(colSpinner)
+        layout.addView(makeLabel(R.string.map_settings_invert_subheader, dp(16f)))
+        layout.addView(invertRowCheck)
+        layout.addView(invertColCheck)
 
         val builder = AlertDialog.Builder(this, R.style.AppAlertDialog)
-            .setTitle(R.string.map_view_choose_attributes_title)
+            .setTitle(R.string.map_settings_title)
             .setView(layout)
             .setPositiveButton(R.string.dialog_ok) { _, _ ->
                 val rowAttr = allColumns[rowSpinner.selectedItemPosition]
@@ -476,6 +517,8 @@ class DataGridActivity : ThemedActivity() {
                 preferences.edit {
                     putString(GeneralKeys.MAP_ROW_ATTR, rowAttr)
                     putString(GeneralKeys.MAP_COL_ATTR, colAttr)
+                    putBoolean(GeneralKeys.MAP_INVERT_ROW, invertRowCheck.isChecked)
+                    putBoolean(GeneralKeys.MAP_INVERT_COL, invertColCheck.isChecked)
                 }
                 loadMapData()
             }
@@ -491,6 +534,8 @@ class DataGridActivity : ThemedActivity() {
                 preferences.edit {
                     putString(GeneralKeys.MAP_ROW_ATTR, "geo_coordinates")
                     putString(GeneralKeys.MAP_COL_ATTR, "geo_coordinates")
+                    putBoolean(GeneralKeys.MAP_INVERT_ROW, invertRowCheck.isChecked)
+                    putBoolean(GeneralKeys.MAP_INVERT_COL, invertColCheck.isChecked)
                     putBoolean(GeneralKeys.MAP_VIEW_SETTING, true)
                 }
                 viewMode = DataGridViewMode.MAP
@@ -570,6 +615,9 @@ class DataGridActivity : ThemedActivity() {
 
         val isSpatialMode = (rowAttrName == "geo_coordinates" && colAttrName == "geo_coordinates")
 
+        val invertRow = preferences.getBoolean(GeneralKeys.MAP_INVERT_ROW, false)
+        val invertCol = preferences.getBoolean(GeneralKeys.MAP_INVERT_COL, false)
+
         val effectiveRowAttr = if (rowAttrName in allValidNames) rowAttrName
         else if (defaultRowAttr in allValidNames) defaultRowAttr
         else null
@@ -577,7 +625,24 @@ class DataGridActivity : ThemedActivity() {
         else if (defaultColAttr in allValidNames) defaultColAttr
         else null
 
+        val traitIds = traits.map { it.id }.sorted()
+
         lifecycleScope.launch(Dispatchers.IO) {
+            val observationCount = database.getObservationCount(studyId.toString())
+            val cached = dataGridCache.getMap(studyId, rowAttrName, colAttrName, invertRow, invertCol, traitIds, observationCount)
+            if (cached != null) {
+                withContext(Dispatchers.Main) {
+                    mapPlotDataList = cached.plots
+                    mapGridRows = cached.gridRows
+                    mapGridCols = cached.gridCols
+                    mapGrid = cached.grid
+                    mapInvertRow = invertRow
+                    mapInvertCol = invertCol
+                    isLoading = false
+                }
+                return@launch
+            }
+
             val cursor = database.getExportTableData(studyId, ArrayList(traits))
             val plotObservationCounts = mutableMapOf<String, Int>()
 
@@ -707,18 +772,39 @@ class DataGridActivity : ThemedActivity() {
                 }
             }
 
+            // Inverting an axis flips which corner holds cell 1,1 by mirroring the grid placement.
             val grid = Array(maxRow) { arrayOfNulls<MapPlotData?>(maxCol) }
             plots.forEach { plot ->
-                if (plot.rowIndex < maxRow && plot.colIndex < maxCol) {
-                    grid[plot.rowIndex][plot.colIndex] = plot
+                val r = if (invertRow) maxRow - 1 - plot.rowIndex else plot.rowIndex
+                val c = if (invertCol) maxCol - 1 - plot.colIndex else plot.colIndex
+                if (r in 0 until maxRow && c in 0 until maxCol) {
+                    grid[r][c] = plot
                 }
             }
+
+            dataGridCache.putMap(
+                DataGridCache.MapSnapshot(
+                    studyId = studyId,
+                    rowAttr = rowAttrName,
+                    colAttr = colAttrName,
+                    invertRow = invertRow,
+                    invertCol = invertCol,
+                    traitIds = traitIds,
+                    observationCount = observationCount,
+                    plots = plots,
+                    gridRows = maxRow,
+                    gridCols = maxCol,
+                    grid = grid
+                )
+            )
 
             withContext(Dispatchers.Main) {
                 mapPlotDataList = plots
                 mapGridRows = maxRow
                 mapGridCols = maxCol
                 mapGrid = grid
+                mapInvertRow = invertRow
+                mapInvertCol = invertCol
                 isLoading = false
             }
         }
