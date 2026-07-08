@@ -17,12 +17,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -49,7 +51,8 @@ fun DataGridMapView(
     zoom: Float = 1f,
     onMissingLayout: () -> Unit,
     onFilterClicked: (MapFilter) -> Unit,
-    onPlotClicked: (MapPlotData) -> Unit
+    onPlotClicked: (MapPlotData) -> Unit,
+    onToggleLock: () -> Unit = {}
 ) {
     LaunchedEffect(mapGridRows, mapGridCols) {
         if (mapGridRows == 0 || mapGridCols == 0) {
@@ -151,16 +154,22 @@ fun DataGridMapView(
                     count = columnCount,
                     layoutInfo = { LazyTableItem(column = it, row = 0) }
                 ) { col ->
-                    val text = when {
-                        col == 0 -> ""
-                        else -> (activeColIndices[col - 1] + 1).toString()
+                    if (col == 0) {
+                        DataGridMapCornerCell(
+                            isLocked = columnLocked,
+                            textColor = Color(colors.cellTextColor),
+                            borderColor = gridColors.borderColor,
+                            zoom = zoom,
+                            onClick = onToggleLock
+                        )
+                    } else {
+                        DataGridMapHeaderCell(
+                            text = (activeColIndices[col - 1] + 1).toString(),
+                            textColor = Color(colors.cellTextColor),
+                            borderColor = gridColors.borderColor,
+                            zoom = zoom
+                        )
                     }
-                    DataGridMapHeaderCell(
-                        text = text,
-                        textColor = Color(colors.cellTextColor),
-                        borderColor = gridColors.borderColor,
-                        zoom = zoom
-                    )
                 }
 
                 items(
@@ -283,6 +292,30 @@ private fun DataGridMapHeaderCell(
             fontWeight = FontWeight.Bold,
             fontSize = (10 * zoom).sp,
             color = textColor
+        )
+    }
+}
+
+@Composable
+private fun DataGridMapCornerCell(
+    isLocked: Boolean,
+    textColor: Color,
+    borderColor: Color,
+    zoom: Float,
+    onClick: () -> Unit
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .background(Color.LightGray)
+            .border(Dp.Hairline, borderColor)
+            .clickable(onClick = onClick)
+    ) {
+        Icon(
+            painter = painterResource(id = if (isLocked) R.drawable.ic_tb_lock else R.drawable.ic_tb_unlock),
+            contentDescription = null,
+            tint = textColor,
+            modifier = Modifier.size((16 * zoom).dp)
         )
     }
 }

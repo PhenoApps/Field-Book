@@ -161,6 +161,7 @@ class DataGridActivity : ThemedActivity() {
         binding.composeView.setContent {
             val uiState by viewModel.uiState.collectAsState()
             val columnLocked by viewModel.columnLocked.collectAsState()
+            val lockedColumnIds by viewModel.lockedColumnIds.collectAsState()
             val sortState by viewModel.sortState.collectAsState()
             val wrapContent by viewModel.wrapContent.collectAsState()
             val heatmapEnabled by viewModel.heatmapEnabled.collectAsState()
@@ -172,10 +173,6 @@ class DataGridActivity : ThemedActivity() {
                 activeCellTextColor = activeCellTextColor,
                 cellTextColor = cellTextColor
             )
-
-            LaunchedEffect(columnLocked) {
-                invalidateOptionsMenu()
-            }
 
             LaunchedEffect(sortState) {
                 invalidateOptionsMenu()
@@ -232,7 +229,8 @@ class DataGridActivity : ThemedActivity() {
                                 onFilterClicked = ::toggleMapFilter,
                                 onPlotClicked = { plot ->
                                     navigateFromValueClicked(plot.plotId, 0, 1)
-                                }
+                                },
+                                onToggleLock = viewModel::toggleColumnLock
                             )
                         } else {
                             when (val state = uiState) {
@@ -249,7 +247,7 @@ class DataGridActivity : ThemedActivity() {
                                     DataGridTable(
                                         state = state,
                                         colors = dataGridColors,
-                                        columnLocked = columnLocked,
+                                        lockedColumnIds = lockedColumnIds,
                                         sortState = sortState,
                                         wrapContent = wrapContent,
                                         heatmapEnabled = heatmapEnabled,
@@ -258,6 +256,7 @@ class DataGridActivity : ThemedActivity() {
                                         activePlotIdString = activePlotIdString,
                                         activeTrait = activeTrait,
                                         onSortByColumn = viewModel::sortByColumn,
+                                        onToggleColumn = viewModel::toggleColumn,
                                         onNavigateFromValue = ::navigateFromValueClicked
                                     )
                                 }
@@ -299,6 +298,7 @@ class DataGridActivity : ThemedActivity() {
             } else {
                 getString(R.string.menu_data_grid_action_grid_view)
             }
+            it.setIcon(if (isGrid) R.drawable.map else R.drawable.table)
         }
 
         menu.findItem(R.id.menu_data_grid_action_header_view)?.let {
@@ -316,12 +316,19 @@ class DataGridActivity : ThemedActivity() {
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         val isGrid = viewMode == DataGridViewMode.GRID
-        val lockItem = menu.findItem(R.id.menu_data_grid_action_lock_column)
-        val isLocked = viewModel.columnLocked.value
-        lockItem?.setIcon(if (isLocked) R.drawable.ic_tb_lock else R.drawable.ic_tb_unlock)
 
         val resetSortItem = menu.findItem(R.id.menu_data_grid_action_reset_sort)
         resetSortItem?.isVisible = isGrid && viewModel.sortState.value.columnIndex >= 0
+
+        val mapItem = menu.findItem(R.id.menu_data_grid_action_map_view)
+        mapItem?.let {
+            it.title = if (isGrid) {
+                getString(R.string.menu_data_grid_action_map_view)
+            } else {
+                getString(R.string.menu_data_grid_action_grid_view)
+            }
+            it.setIcon(if (isGrid) R.drawable.map else R.drawable.table)
+        }
 
         val wrapItem = menu.findItem(R.id.menu_data_grid_action_wrap_content)
         val isWrapped = viewModel.wrapContent.value
@@ -350,10 +357,6 @@ class DataGridActivity : ThemedActivity() {
         when (item.itemId) {
             android.R.id.home -> {
                 finish()
-            }
-
-            R.id.menu_data_grid_action_lock_column -> {
-                viewModel.toggleColumnLock()
             }
 
             R.id.menu_data_grid_action_wrap_content -> {

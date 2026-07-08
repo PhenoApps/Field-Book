@@ -20,13 +20,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fieldbook.tracker.R
 
 @Composable
 fun DataGridHeaderCell(
     text: String,
     colors: DataGridUiColors,
     sortIconRes: Int? = null,
+    isLocked: Boolean = false,
     onClick: (() -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
     wrapContent: Boolean = false,
     zoom: Float = 1f
 ) {
@@ -35,12 +38,25 @@ fun DataGridHeaderCell(
         modifier = Modifier
             .background(Color.White)
             .border(Dp.Hairline, Color(colors.cellTextColor))
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .then(
+                if (onClick != null) Modifier.combinedClickable(
+                    onClick = onClick,
+                    onLongClick = onLongClick
+                ) else Modifier
+            )
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
         ) {
+            if (isLocked) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_tb_lock),
+                    contentDescription = null,
+                    tint = Color(colors.cellTextColor),
+                    modifier = Modifier.size(14.dp)
+                )
+            }
             Text(
                 text = text,
                 color = Color(colors.cellTextColor),
@@ -85,19 +101,24 @@ fun DataGridDataCell(
     colors: DataGridUiColors,
     isHighlighted: Boolean = false,
     isSelected: Boolean = false,
+    isLocked: Boolean = false,
     heatmapColor: Color? = null,
     wrapContent: Boolean = false,
     zoom: Float = 1f,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {}
 ) {
-    val backgroundColor = when {
+    val resolvedColor = when {
         isHighlighted -> Color(colors.activeCellBgColor)
         isSelected -> Color(colors.activeCellBgColor).copy(alpha = 0.6f)
         heatmapColor != null -> heatmapColor
         value.isNotBlank() -> Color(colors.filledCellBgColor)
         else -> Color(colors.emptyCellBgColor)
     }
+    // Locked/pinned columns must be fully opaque, or cells scrolling underneath show through.
+    // The theme's filled-cell color is intentionally translucent, so composite it over white
+    // instead of just forcing alpha=1 (which would oversaturate it).
+    val backgroundColor = if (isLocked) resolvedColor.compositeOverWhite() else resolvedColor
 
     val textColor =
         if (isHighlighted || isSelected) Color(colors.activeCellTextColor)
@@ -122,6 +143,13 @@ fun DataGridDataCell(
         zoom = zoom
     )
 }
+
+private fun Color.compositeOverWhite(): Color = Color(
+    red = red * alpha + (1f - alpha),
+    green = green * alpha + (1f - alpha),
+    blue = blue * alpha + (1f - alpha),
+    alpha = 1f
+)
 
 @Composable
 fun DataGridTableCell(

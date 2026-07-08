@@ -28,7 +28,7 @@ import kotlin.math.ceil
 fun DataGridTable(
     state: DataGridViewModel.UiState.Loaded,
     colors: DataGridUiColors,
-    columnLocked: Boolean = true,
+    lockedColumnIds: Set<String> = emptySet(),
     sortState: DataGridViewModel.SortState = DataGridViewModel.SortState(),
     wrapContent: Boolean = false,
     heatmapEnabled: Boolean = false,
@@ -37,6 +37,7 @@ fun DataGridTable(
     activePlotIdString: String? = null,
     activeTrait: Int? = null,
     onSortByColumn: (Int) -> Unit,
+    onToggleColumn: (String) -> Unit = {},
     onNavigateFromValue: (plotId: String, traitIndex: Int, rep: Int) -> Unit
 ) {
     val traits = state.traits
@@ -56,10 +57,28 @@ fun DataGridTable(
     val columnCount = traits.size + extraCount
     val rowCount = rowHeaders.size + 1
 
+    // A column's key is its field (header) name, or the trait id for trait columns.
+    fun columnKey(rawIndex: Int): String =
+        if (rawIndex < extraCount) extraHeaderNames[rawIndex] else traits[rawIndex - extraCount].id
+
+    // Locked columns — field or trait — are moved to the front so they can be pinned together.
+    // The underlying table only supports pinning a contiguous leading run of columns.
+    val displayOrder: List<Int> = remember(extraHeaderNames, traits, lockedColumnIds) {
+        (0 until columnCount).sortedBy { rawIdx -> if (columnKey(rawIdx) in lockedColumnIds) 0 else 1 }
+    }
+    val rawToDisplayPos: IntArray = remember(displayOrder) {
+        IntArray(displayOrder.size).also { arr ->
+            displayOrder.forEachIndexed { displayPos, rawIdx -> arr[rawIdx] = displayPos }
+        }
+    }
+    val pinnedColumnCount = remember(extraHeaderNames, traits, lockedColumnIds) {
+        (0 until columnCount).count { rawIdx -> columnKey(rawIdx) in lockedColumnIds }
+    }
+
     val activeTraitIdx: Int = activeTrait?.let { pos ->
         traits.indexOfFirst { it.realPosition == pos }
     }?.takeIf { it >= 0 } ?: 0
-    val targetColumn = extraCount + activeTraitIdx
+    val targetColumn = rawToDisplayPos.getOrNull(extraCount + activeTraitIdx) ?: (extraCount + activeTraitIdx)
     val targetRow = activePlotId ?: 1
 
     var hasScrolled by rememberSaveable { mutableStateOf(false) }
@@ -74,20 +93,21 @@ fun DataGridTable(
         }
     }
 
-    val columnWidths: List<Dp> = remember(state, wrapContent) {
+    val columnWidths: List<Dp> = remember(state, wrapContent, displayOrder) {
         if (!wrapContent) emptyList()
         else (0 until columnCount).map { col ->
+            val rawIdx = displayOrder.getOrNull(col) ?: col
             val headerLen = when {
-                col < extraCount -> extraHeaderNames[col].length
-                else -> traits.getOrNull(col - extraCount)?.alias?.length ?: 0
+                rawIdx < extraCount -> extraHeaderNames[rawIdx].length
+                else -> traits.getOrNull(rawIdx - extraCount)?.alias?.length ?: 0
             }
             val maxDataLen = when {
-                col < extraCount -> extraHeaderData.maxOfOrNull {
-                    it.getOrNull(col)?.length ?: 0
+                rawIdx < extraCount -> extraHeaderData.maxOfOrNull {
+                    it.getOrNull(rawIdx)?.length ?: 0
                 } ?: 0
 
                 else -> gridData.maxOfOrNull { row ->
-                    row.getOrNull(col - extraCount)?.value?.length ?: 0
+                    row.getOrNull(rawIdx - extraCount)?.value?.length ?: 0
                 } ?: 0
             }
             val maxLen = maxOf(headerLen, maxDataLen).coerceAtLeast(1)
@@ -95,23 +115,24 @@ fun DataGridTable(
         }
     }
 
-    val rowHeights: List<Dp> = remember(state, wrapContent, columnWidths) {
+    val rowHeights: List<Dp> = remember(state, wrapContent, columnWidths, displayOrder) {
         if (!wrapContent) emptyList()
         else (0 until rowCount).map { row ->
             val maxLines = (0 until columnCount).maxOf { col ->
+                val rawIdx = displayOrder.getOrNull(col) ?: col
                 val colWidthPx = (columnWidths.getOrNull(col) ?: 100.dp).value
                 val charsPerLine = ((colWidthPx - 16f) / 10f).toInt().coerceAtLeast(1)
                 val textLen = when {
                     row == 0 -> when {
-                        col < extraCount -> extraHeaderNames[col].length
-                        else -> traits.getOrNull(col - extraCount)?.alias?.length ?: 0
+                        rawIdx < extraCount -> extraHeaderNames[rawIdx].length
+                        else -> traits.getOrNull(rawIdx - extraCount)?.alias?.length ?: 0
                     }
 
-                    col < extraCount -> extraHeaderData.getOrNull(row - 1)
-                        ?.getOrNull(col)?.length ?: 0
+                    rawIdx < extraCount -> extraHeaderData.getOrNull(row - 1)
+                        ?.getOrNull(rawIdx)?.length ?: 0
 
                     else -> gridData.getOrNull(row - 1)
-                        ?.getOrNull(col - extraCount)?.value?.length ?: 0
+                        ?.getOrNull(rawIdx - extraCount)?.value?.length ?: 0
                 }.coerceAtLeast(1)
                 ceil(textLen.toFloat() / charsPerLine).toInt().coerceAtLeast(1)
             }
@@ -133,8 +154,9 @@ fun DataGridTable(
             state = lazyTableState,
             dimensions = lazyTableDimensions(
                 columnSize = { col ->
+                    val rawIdx = displayOrder.getOrNull(col) ?: col
                     if (wrapContent) (columnWidths.getOrNull(col) ?: 100.dp) * zoom
-                    else if (col < extraCount) 120.dp * zoom else 100.dp * zoom
+                    else if (rawIdx < extraCount) 120.dp * zoom else 100.dp * zoom
                 },
                 rowSize = { row ->
                     if (wrapContent) (rowHeights.getOrNull(row) ?: 48.dp) * zoom
@@ -143,35 +165,42 @@ fun DataGridTable(
             ),
             contentPadding = PaddingValues(0.dp),
             pinConfiguration = lazyTablePinConfiguration(
-                columns = if (columnLocked) extraCount else 0,
+                columns = pinnedColumnCount,
                 rows = 1
             )
         ) {
             items(
                 count = columnCount,
                 layoutInfo = { LazyTableItem(column = it, row = 0) }) { index ->
-                val isSorted = sortState.columnIndex == index
+                val rawIdx = displayOrder.getOrNull(index) ?: index
+                val isSorted = sortState.columnIndex == rawIdx
                 val sortIcon = when {
                     !isSorted -> null
                     sortState.ascending -> R.drawable.ic_chevron_up
                     else -> R.drawable.ic_chevron_down
                 }
-                if (index < extraCount) {
+                val key = columnKey(rawIdx)
+                val isLocked = key in lockedColumnIds
+                if (rawIdx < extraCount) {
                     DataGridHeaderCell(
-                        text = extraHeaderNames[index],
+                        text = extraHeaderNames[rawIdx],
                         colors = colors,
                         sortIconRes = sortIcon,
-                        onClick = { onSortByColumn(index) },
+                        isLocked = isLocked,
+                        onClick = { onSortByColumn(rawIdx) },
+                        onLongClick = { onToggleColumn(key) },
                         wrapContent = wrapContent,
                         zoom = zoom
                     )
                 } else {
-                    val traitIndex = index - extraCount
+                    val trait = traits.getOrNull(rawIdx - extraCount)
                     DataGridHeaderCell(
-                        text = if (traitIndex < traits.size) traits[traitIndex].alias else "",
+                        text = trait?.alias ?: "",
                         colors = colors,
                         sortIconRes = sortIcon,
-                        onClick = { onSortByColumn(index) },
+                        isLocked = isLocked,
+                        onClick = { onSortByColumn(rawIdx) },
+                        onLongClick = { onToggleColumn(key) },
                         wrapContent = wrapContent,
                         zoom = zoom
                     )
@@ -188,16 +217,17 @@ fun DataGridTable(
             ) { index ->
                 val row = (index / columnCount)
                 val column = index % columnCount
+                val rawIdx = displayOrder.getOrNull(column) ?: column
 
-                if (column < extraCount) {
+                if (rawIdx < extraCount) {
                     DataGridRowHeaderCell(
-                        text = extraHeaderData.getOrNull(row)?.getOrNull(column) ?: "",
+                        text = extraHeaderData.getOrNull(row)?.getOrNull(rawIdx) ?: "",
                         colors = colors,
                         wrapContent = wrapContent,
                         zoom = zoom
                     )
                 } else {
-                    val columnIndex = column - extraCount
+                    val columnIndex = rawIdx - extraCount
                     val cellData =
                         if (row < gridData.size && columnIndex < gridData[row].size)
                             gridData[row][columnIndex]
@@ -219,6 +249,7 @@ fun DataGridTable(
                         colors = colors,
                         isHighlighted = (plotIds.getOrNull(row) == activePlotIdString && columnIndex == activeTraitIdx),
                         isSelected = false,
+                        isLocked = columnKey(rawIdx) in lockedColumnIds,
                         heatmapColor = heatmapColor,
                         wrapContent = wrapContent,
                         zoom = zoom,

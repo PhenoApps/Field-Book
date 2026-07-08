@@ -68,13 +68,46 @@ class DataGridViewModel @Inject constructor(
     val rawPlotIds: List<String>
         get() = (_rawUiState.value as? UiState.Loaded)?.plotIds ?: emptyList()
 
-    private val _columnLocked = MutableStateFlow(preferences.getBoolean(GeneralKeys.DATAGRID_COLUMN_LOCKED, true))
-    val columnLocked: StateFlow<Boolean> = _columnLocked.asStateFlow()
+    // Locked columns — both field (row header) columns, keyed by header name, and trait
+    // columns, keyed by trait id — share one set so any column can be pinned individually.
+    private val _lockedColumnIds = MutableStateFlow(
+        preferences.getStringSet(GeneralKeys.DATAGRID_LOCKED_COLUMN_IDS, null)?.toSet() ?: emptySet()
+    )
+    val lockedColumnIds: StateFlow<Set<String>> = _lockedColumnIds.asStateFlow()
 
+    /** True when every currently visible field column is locked. Drives the toolbar lock icon and map view pin. */
+    val columnLocked: StateFlow<Boolean> = combine(_lockedColumnIds, _rawUiState) { locked, raw ->
+        val fieldColumns = (raw as? UiState.Loaded)?.extraHeaderNames ?: emptyList()
+        fieldColumns.isNotEmpty() && fieldColumns.all { it in locked }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    private fun persistLockedColumns(newValue: Set<String>) {
+        _lockedColumnIds.value = newValue
+        preferences.edit().putStringSet(GeneralKeys.DATAGRID_LOCKED_COLUMN_IDS, newValue).apply()
+    }
+
+    /** Bulk toggle for the toolbar action: locks/unlocks all field columns together. */
     fun toggleColumnLock() {
-        val newValue = !_columnLocked.value
-        _columnLocked.value = newValue
-        preferences.edit().putBoolean(GeneralKeys.DATAGRID_COLUMN_LOCKED, newValue).apply()
+        val fieldColumns = (_rawUiState.value as? UiState.Loaded)?.extraHeaderNames ?: emptyList()
+        if (fieldColumns.isEmpty()) return
+        val allLocked = fieldColumns.all { it in _lockedColumnIds.value }
+        val newValue = if (allLocked) _lockedColumnIds.value - fieldColumns.toSet()
+                       else _lockedColumnIds.value + fieldColumns.toSet()
+        persistLockedColumns(newValue)
+    }
+
+    /** Per-column toggle used by long-pressing a field or trait column header. */
+    fun toggleColumn(columnId: String) {
+        val current = _lockedColumnIds.value
+        val newValue = if (columnId in current) current - columnId else current + columnId
+        persistLockedColumns(newValue)
+    }
+
+    /** The first time the grid ever loads with no saved lock preference, pin the first field column. */
+    private fun applyDefaultColumnLock(extraHeaders: List<String>) {
+        if (extraHeaders.isEmpty()) return
+        if (preferences.contains(GeneralKeys.DATAGRID_LOCKED_COLUMN_IDS)) return
+        persistLockedColumns(setOf(extraHeaders.first()))
     }
 
     private val _wrapContent = MutableStateFlow(preferences.getBoolean(GeneralKeys.DATAGRID_WRAP_CONTENT, false))
@@ -176,6 +209,8 @@ class DataGridViewModel @Inject constructor(
     }
 
     fun loadGrid(rowHeader: String, extraHeaders: List<String> = emptyList()) {
+        applyDefaultColumnLock(extraHeaders)
+
         if (rowHeader.isBlank()) {
             _rawUiState.value = UiState.Empty
             return

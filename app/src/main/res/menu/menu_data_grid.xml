@@ -3,15 +3,10 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/menu_data_grid_action_lock_column"
-        android:icon="@drawable/ic_tb_lock"
-        app:showAsAction="always"
-        android:title="@string/menu_action_lock_column_data_grid_title" />
-    <item
         android:id="@+id/menu_data_grid_action_reset_sort"
         android:icon="@drawable/ic_tb_sort_clear"
         android:visible="false"
-        app:showAsAction="ifRoom"
+        app:showAsAction="always"
         android:title="@string/menu_action_reset_sort_data_grid_title" />
     <item
         android:id="@+id/menu_data_grid_action_wrap_content"
@@ -20,7 +15,7 @@
         android:title="@string/menu_action_wrap_content_data_grid_title" />
     <item
         android:id="@+id/menu_data_grid_action_header_view"
-        android:icon="@drawable/ic_reorder"
+        android:icon="@drawable/table_cog"
         app:showAsAction="always"
         android:title="@string/menu_action_header_view_data_grid_title" />
     <item
@@ -30,7 +25,7 @@
         android:title="@string/menu_action_heatmap_data_grid_title" />
     <item
         android:id="@+id/menu_data_grid_action_map_view"
-        android:icon="@drawable/ic_dots_grid"
+        android:icon="@drawable/map"
         app:showAsAction="always"
         android:title="@string/menu_data_grid_action_map_view"
         android:orderInCategory="1" />

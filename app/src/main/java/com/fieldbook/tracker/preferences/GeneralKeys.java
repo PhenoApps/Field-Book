@@ -155,7 +155,7 @@ public class GeneralKeys {
     public static final String DATAGRID_PREFIX_TRAIT = "com.fieldbook.tracker.datagrid.DATAGRID_PREFIX_TRAIT";
     //new pref key that allows multiple header choices
     public static final String DATAGRID_PREFIX_TRAITS = "com.fieldbook.tracker.datagrid.DATAGRID_PREFIX_TRAITS";
-    public static final String DATAGRID_COLUMN_LOCKED = "com.fieldbook.tracker.datagrid.DATAGRID_COLUMN_LOCKED";
+    public static final String DATAGRID_LOCKED_COLUMN_IDS = "com.fieldbook.tracker.datagrid.DATAGRID_LOCKED_COLUMN_IDS";
     public static final String DATAGRID_WRAP_CONTENT = "com.fieldbook.tracker.datagrid.DATAGRID_WRAP_CONTENT";
     public static final String DATAGRID_HEATMAP = "com.fieldbook.tracker.datagrid.DATAGRID_HEATMAP";
     public static final String DATAGRID_EXTRA_HEADERS = "com.fieldbook.tracker.datagrid.DATAGRID_EXTRA_HEADERS";

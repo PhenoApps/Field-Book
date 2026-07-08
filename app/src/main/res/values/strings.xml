@@ -631,11 +631,10 @@
     <string name="data_grid_empty">No data to display.</string>
     <string name="dialog_data_grid_header_picker_title">Choose Row Headers</string>
     <string name="dialog_data_grid_header_picker_ok">OK</string>
-    <string name="dialog_data_grid_column_picker_title">Choose Column Headers</string>
+    <string name="dialog_data_grid_column_picker_title">Choose Columns</string>
     <string name="dialog_data_grid_repeated_measures_title">Choose Observation</string>
     <string name="menu_action_header_view_data_grid_title">Update Row Headers</string>
     <string name="menu_action_column_view_data_grid_title">Update Column Headers</string>
-    <string name="menu_action_lock_column_data_grid_title">Lock First Column</string>
     <string name="menu_action_reset_sort_data_grid_title">Reset Sort</string>
     <string name="menu_action_wrap_content_data_grid_title">Wrap Content</string>
     <string name="menu_action_heatmap_data_grid_title">Heatmap</string>
