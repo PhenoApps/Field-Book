@@ -60,7 +60,7 @@ class CropImageFragment: Fragment(R.layout.crop_image_fragment), CoroutineScope 
             override fun onCropImageSaved(rectCoordinates: String) {
 
                 //save the coordinate text to preferences, make the key relative to the input trait id
-                prefs.edit { putString(GeneralKeys.getCropCoordinatesKey(traitId), rectCoordinates) }
+                prefs.edit { putString(GeneralKeys.getCropCoordinatesKey(traitId.toString()), rectCoordinates) }
 
                 launch(Dispatchers.IO) {
 
@@ -89,7 +89,7 @@ class CropImageFragment: Fragment(R.layout.crop_image_fragment), CoroutineScope 
 
             override fun getCropCoordinates(): String {
 
-                return prefs.getString(GeneralKeys.getCropCoordinatesKey(traitId), "") ?: ""
+                return prefs.getString(GeneralKeys.getCropCoordinatesKey(traitId.toString()), "") ?: ""
             }
 
             override fun getImageUri() = imageUri

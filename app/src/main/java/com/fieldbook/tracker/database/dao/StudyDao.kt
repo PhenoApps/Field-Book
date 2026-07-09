@@ -339,7 +339,7 @@ class StudyDao {
                 val traitDetails = mutableListOf<FieldObject.TraitDetail>()
 
                 val cursor = db.rawQuery("""
-                    SELECT ov.observation_variable_name, ov.observation_variable_field_book_format, COUNT(*) as count, GROUP_CONCAT(o.value, '|') as observations,
+                    SELECT ov.internal_id_observation_variable, ov.observation_variable_name, ov.observation_variable_field_book_format, COUNT(*) as count, GROUP_CONCAT(o.value, '|') as observations,
                     COUNT(DISTINCT observation_unit_id) AS distinct_obs_units,
                     (SELECT COUNT(*) FROM observation_units WHERE study_id = ?) AS total_obs_units,
                     (SELECT v.observation_variable_attribute_value 
@@ -355,6 +355,7 @@ class StudyDao {
 
                 if (cursor.moveToFirst()) {
                     do {
+                        val traitId = cursor.getString(cursor.getColumnIndexOrThrow("internal_id_observation_variable"))
                         val traitName = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_name"))
                         val format = cursor.getString(cursor.getColumnIndexOrThrow("observation_variable_field_book_format"))
                         val count = cursor.getInt(cursor.getColumnIndexOrThrow("count"))
@@ -373,7 +374,7 @@ class StudyDao {
                         val completeness = distinctObsUnits.toFloat() / totalObsUnits.toFloat()
                         val categories = cursor.getString(cursor.getColumnIndexOrThrow("categories"))
 
-                        traitDetails.add(FieldObject.TraitDetail(traitName, format, categories, count, observations, completeness))
+                        traitDetails.add(FieldObject.TraitDetail(traitId, traitName, format, categories, count, observations, completeness))
                     } while (cursor.moveToNext())
                 }
 

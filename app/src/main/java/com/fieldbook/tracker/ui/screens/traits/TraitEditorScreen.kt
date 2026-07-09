@@ -39,6 +39,7 @@ import com.fieldbook.tracker.ui.screens.traits.dialogs.CreateTraitsDialog
 import com.fieldbook.tracker.ui.screens.traits.dialogs.DeleteAllTraitsDialog
 import com.fieldbook.tracker.ui.screens.traits.dialogs.ExportCheckDialog
 import com.fieldbook.tracker.ui.screens.traits.dialogs.ExportDialog
+import com.fieldbook.tracker.ui.screens.traits.dialogs.RemoveTraitFromFieldDialog
 import com.fieldbook.tracker.ui.screens.traits.dialogs.SortOptionsDialog
 import com.fieldbook.tracker.ui.screens.traits.dialogs.TraitImportDialog
 import com.fieldbook.tracker.ui.screens.traits.lists.TraitList
@@ -49,8 +50,11 @@ import com.fieldbook.tracker.utilities.Utils
 @Composable
 fun TraitEditorScreen(
     viewModel: TraitEditorViewModel,
+    isViewerMode: Boolean,
+    scopedStudyId: Int?,
     onNavigateBack: () -> Unit,
     onTraitDetail: (String) -> Unit,
+    onNavigateToFieldTraitPicker: () -> Unit,
     onShowCreateNewTraitDialog: () -> Unit,
     onShowLocalFilePicker: () -> Unit,
 ) {
@@ -59,6 +63,14 @@ fun TraitEditorScreen(
     val prefs = PreferenceManager.getDefaultSharedPreferences(context)
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isPerFieldTraitListEnabled = true
+
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+
+    LaunchedEffect(isViewerMode, scopedStudyId, isPerFieldTraitListEnabled) {
+        val studyScope = if (isViewerMode) scopedStudyId else null
+        viewModel.configureTraitScope(studyScope, isPerFieldTraitListEnabled, isViewerMode)
+    }
 
     val permissionCallback = remember { mutableStateOf<(() -> Unit)?>(null) }
 
@@ -92,19 +104,43 @@ fun TraitEditorScreen(
         topBar = {
             TraitEditorToolbar(
                 hasTraits = uiState.hasTraits,
+                isViewerMode = isViewerMode,
                 isTutorialEnabled = viewModel.isTutorialEnabled(),
-                onBack = onNavigateBack,
+                isSelectionMode = uiState.isSelectionMode,
+                selectedCount = uiState.selectedTraitIds.size,
+                onBack = {
+                    if (uiState.isSelectionMode) viewModel.clearSelection()
+                    else onNavigateBack()
+                },
                 onToggleAllTraits = { viewModel.toggleAllTraitsVisibility() },
+                onSyncWithMainList = { viewModel.syncCurrentStudyWithMainList() },
                 onShowDialog = { dialog -> viewModel.showDialog(dialog) },
                 onRequestExportPermission = { viewModel.requestExportPermission(DialogTriggerSource.TOOLBAR) },
+                onClearSelection = { viewModel.clearSelection() },
+                onSelectAll = { viewModel.selectAll() },
+                onRemoveSelected = { viewModel.requestRemoveSelectedTraits() },
+                onToggleVisibilitySelected = { viewModel.toggleVisibilityForSelectedTraits() }
             )
         },
         floatingActionButton = {
-            CircularBorderedFab(
-                onClick = { viewModel.showDialog(TraitActivityDialog.NewTrait) },
-                icon = Icons.Filled.Add,
-                contentDescription = stringResource(R.string.traits_new_dialog_title)
-            )
+            if (!isViewerMode || (isPerFieldTraitListEnabled && scopedStudyId != null)) {
+                CircularBorderedFab(
+                    onClick = {
+                        if (isViewerMode && isPerFieldTraitListEnabled && scopedStudyId != null) {
+                            viewModel.loadAvailableTraitsForCurrentStudy()
+                            onNavigateToFieldTraitPicker()
+                        } else {
+                            viewModel.showDialog(TraitActivityDialog.NewTrait)
+                        }
+                    },
+                    icon = Icons.Filled.Add,
+                    contentDescription = if (isViewerMode) {
+                        stringResource(R.string.traits_viewer_add_to_field)
+                    } else {
+                        stringResource(R.string.traits_new_dialog_title)
+                    }
+                )
+            }
         }
     ) { paddingValues ->
 
@@ -124,9 +160,22 @@ fun TraitEditorScreen(
                 else -> {
                     TraitList(
                         traits = uiState.traits,
-                        onTraitClick = onTraitDetail,
+                        selectedTraitIds = uiState.selectedTraitIds,
+                        showVisibilityControls = isViewerMode,
+                        showRemoveAction = !uiState.isSelectionMode,
+                        allowReorder = !uiState.isSelectionMode,
+                        onTraitClick = { traitId ->
+                            if (uiState.isSelectionMode) viewModel.toggleTraitSelection(traitId)
+                            else onTraitDetail(traitId)
+                        },
+                        onTraitLongClick = { traitId ->
+                            if (!uiState.isSelectionMode) viewModel.toggleTraitSelection(traitId)
+                        },
                         onToggleVisibility = { trait, isVisible ->
                             viewModel.updateTraitVisibility(trait.id, isVisible)
+                        },
+                        onRemoveTrait = { trait ->
+                            viewModel.requestRemoveTrait(trait)
                         },
                         onMoveItem = { from, to ->
                             viewModel.moveTraitItem(from, to)
@@ -134,6 +183,7 @@ fun TraitEditorScreen(
                         onDragStateChanged = { dragging ->
                             viewModel.onDragStateChanged(dragging)
                         },
+                        lazyListState = listState,
                         modifier = Modifier.fillMaxSize()
                     )
                 }
@@ -212,9 +262,19 @@ fun TraitEditorScreen(
             )
         }
 
+        is TraitActivityDialog.RemoveFromField -> {
+            RemoveTraitFromFieldDialog(
+                traitName = dialog.message,
+                isViewerMode = isViewerMode,
+                onCancel = { viewModel.hideDialog() },
+                onRemove = { viewModel.removeTraits(dialog.traitIds) },
+            )
+        }
+
         TraitActivityDialog.SortTraits -> {
             SortOptionsDialog(
                 currentSortOrder = uiState.sortOrder,
+                isViewerMode = isViewerMode,
                 onCancel = { viewModel.hideDialog() },
                 onSortSelected = { sortOrder ->
                     viewModel.updateSortOrder(sortOrder)
@@ -276,7 +336,10 @@ fun TraitEditorScreen(
 
                 TraitEditorEvent.NavigateToBrapi -> {
                     if (!Utils.isConnected(context)) {
-                        Utils.makeToast(context, resources.getString(R.string.opening_brapi_no_network_error))
+                        Utils.makeToast(
+                            context,
+                            resources.getString(R.string.opening_brapi_no_network_error)
+                        )
                         return@collect
                     }
 
@@ -298,6 +361,10 @@ fun TraitEditorScreen(
                 is TraitEditorEvent.ShareFile -> {
                     val doc = DocumentFile.fromSingleUri(context, event.fileUri)
                     FileUtil.shareFile(context, prefs, doc)
+                }
+
+                TraitEditorEvent.ScrollToTop -> {
+                    listState.animateScrollToItem(0)
                 }
             }
         }

@@ -2429,7 +2429,7 @@ public class CollectActivity extends ThemedActivity
 
                         if (Objects.equals(mediaType, "photo")) {
                             TraitObject trait = getCurrentTrait();
-                            String roiString = preferences.getString(GeneralKeys.getCropCoordinatesKey(Integer.parseInt(trait.getId())), "");
+                            String roiString = preferences.getString(GeneralKeys.getCropCoordinatesKey(trait.getId()), "");
                             if (roiString.isEmpty()) {
 
                                 File f = new File(getContext().getCacheDir(), AbstractCameraTrait.TEMPORARY_IMAGE_NAME);
@@ -3571,7 +3571,7 @@ public class CollectActivity extends ThemedActivity
 
                         //update crop region to full image
                         preferences.edit()
-                            .putString(GeneralKeys.getCropCoordinatesKey(Integer.parseInt(traitId)), "0,0,1,1")
+                            .putString(GeneralKeys.getCropCoordinatesKey(traitId), "0,0,1,1")
                             .apply();
                     }
                 } catch (Exception e) {

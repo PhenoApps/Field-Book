@@ -145,6 +145,7 @@ public class GeneralKeys {
     // Field and trait detail
     public static final String FIELD_DETAIL_OVERVIEW_COLLAPSED = "FIELD_DETAIL_OVERVIEW_COLLAPSED";
     public static final String FIELD_DETAIL_DATA_COLLAPSED = "FIELD_DETAIL_DATA_COLLAPSED";
+    public static final String FIELD_DETAIL_TRAITS_EXPANDED = "FIELD_DETAIL_TRAITS_EXPANDED";
     public static final String FIELD_DETAIL_FIELD_ID = "FIELD_DETAIL_FIELD_ID";
     public static final String TRAIT_DETAIL_OVERVIEW_COLLAPSED = "TRAIT_DETAIL_OVERVIEW_COLLAPSED";
     public static final String TRAIT_DETAIL_OPTIONS_COLLAPSED = "TRAIT_DETAIL_OPTIONS_COLLAPSED";
@@ -224,7 +225,7 @@ public class GeneralKeys {
      * @return key used in preferences to obtain the (tl, tr, br, bl) coordinates used for cropping images
      */
     @NotNull
-    public static String getCropCoordinatesKey(int traitId) {
+    public static String getCropCoordinatesKey(String traitId) {
         return "com.fieldbook.tracker.crop_coordinates." + traitId;
     }
 

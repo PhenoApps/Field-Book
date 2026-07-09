@@ -83,3 +83,13 @@ object ObservationVariableAttributeDetailsView {
     const val ATTACH_AUDIO = "attachAudio"
     const val ALLOW_OTHER = "allowOther"
 }
+
+object FieldTraitConfigTable {
+    const val TABLE_NAME = "field_trait_config"
+    const val ID = "id"
+    const val STUDY_ID = "study_id"
+    const val TRAIT_IDS = "trait_ids"
+    const val CREATED_AT = "created_at"
+    const val UPDATED_AT = "updated_at"
+    const val FK = "field_trait_config_id"
+}

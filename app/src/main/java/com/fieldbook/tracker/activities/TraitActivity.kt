@@ -6,26 +6,28 @@ import android.view.LayoutInflater
 import android.widget.LinearLayout
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.remember
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import androidx.preference.PreferenceManager
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.database.viewmodels.TraitDetailViewModel
+import com.fieldbook.tracker.database.viewmodels.TraitEditorViewModel
 import com.fieldbook.tracker.dialogs.FileExploreDialogFragment
 import com.fieldbook.tracker.dialogs.NewTraitDialog
 import com.fieldbook.tracker.objects.TraitObject
-import com.fieldbook.tracker.ui.screens.traits.TraitEditorScreen
-import com.fieldbook.tracker.ui.theme.AppTheme
-import com.fieldbook.tracker.utilities.Utils
-import com.fieldbook.tracker.database.viewmodels.TraitEditorViewModel
+import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.traits.formats.NumericFormat
 import com.fieldbook.tracker.traits.formats.TraitFormat
@@ -34,9 +36,14 @@ import com.fieldbook.tracker.traits.formats.parameters.DecimalPlacesParameter
 import com.fieldbook.tracker.ui.navigation.controllers.TraitNavController
 import com.fieldbook.tracker.ui.navigation.routes.TraitDetail
 import com.fieldbook.tracker.ui.navigation.routes.TraitEditor
+import com.fieldbook.tracker.ui.navigation.routes.TraitFieldPicker
 import com.fieldbook.tracker.ui.navigation.routes.TraitGraph
 import com.fieldbook.tracker.ui.screens.traits.TraitDetailScreen
+import com.fieldbook.tracker.ui.screens.traits.TraitEditorScreen
+import com.fieldbook.tracker.ui.screens.traits.TraitFieldPickerScreen
+import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.SoundHelperImpl
+import com.fieldbook.tracker.utilities.Utils
 import com.fieldbook.tracker.utilities.VibrateUtil
 import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.utils.BaseDocumentTreeUtil
@@ -59,10 +66,20 @@ class TraitActivity : ThemedActivity() {
 
     companion object {
         private const val TAG = "TraitEditorActivity"
+        const val EXTRA_MODE = "com.fieldbook.tracker.activities.trait.MODE"
+        const val EXTRA_STUDY_ID = "com.fieldbook.tracker.activities.trait.STUDY_ID"
+        const val MODE_EDITOR = "editor"
+        const val MODE_VIEWER = "viewer"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val isViewerMode = intent?.getStringExtra(EXTRA_MODE) == MODE_VIEWER
+        val scopedStudyId = intent?.getIntExtra(EXTRA_STUDY_ID, -1)?.takeIf { it >= 0 }
+            ?: PreferenceManager.getDefaultSharedPreferences(this)
+                .getInt(GeneralKeys.SELECTED_FIELD_ID, -1)
+                .takeIf { it >= 0 }
 
         setupBackCallback()
 
@@ -78,7 +95,11 @@ class TraitActivity : ThemedActivity() {
 
                 NavHost(
                     navController = navController,
-                    startDestination = TraitGraph
+                    startDestination = TraitGraph,
+                    enterTransition = { EnterTransition.None },
+                    exitTransition = { ExitTransition.None },
+                    popEnterTransition = { EnterTransition.None },
+                    popExitTransition = { ExitTransition.None }
                 ) {
                     navigation<TraitGraph>(startDestination = TraitEditor) {
 
@@ -92,12 +113,17 @@ class TraitActivity : ThemedActivity() {
 
                             TraitEditorScreen(
                                 viewModel = editorViewModel,
+                                isViewerMode = isViewerMode,
+                                scopedStudyId = scopedStudyId,
                                 onNavigateBack = { finish() },
                                 onTraitDetail = { traitId ->
                                     traitNav.navigateToTraitDetail(
                                         traitId = traitId,
                                         from = backStackEntry,
                                     )
+                                },
+                                onNavigateToFieldTraitPicker = {
+                                    traitNav.navigateToFieldTraitPicker(backStackEntry)
                                 },
                                 onShowCreateNewTraitDialog = {
                                     showCreateNewTraitDialog(
@@ -111,6 +137,33 @@ class TraitActivity : ThemedActivity() {
                                             editorViewModel.importTraits(it)
                                         }
                                     )
+                                }
+                            )
+                        }
+
+                        composable<TraitFieldPicker> { backStackEntry ->
+                            val parentEntry = remember(backStackEntry) {
+                                navController.getBackStackEntry(TraitGraph)
+                            }
+
+                            val editorViewModel: TraitEditorViewModel = hiltViewModel(parentEntry)
+                            val uiState = editorViewModel.uiState.collectAsStateWithLifecycle().value
+
+                            TraitFieldPickerScreen(
+                                availableTraits = uiState.availableTraits,
+                                onBack = { traitNav.navigateBack() },
+                                onCreateNewTrait = {
+                                    showCreateNewTraitDialog(
+                                        trait = null,
+                                        onSaved = {
+                                            editorViewModel.loadTraits()
+                                            editorViewModel.loadAvailableTraitsForCurrentStudy()
+                                        },
+                                    )
+                                },
+                                onAddSelected = { selectedIds ->
+                                    editorViewModel.addTraitsToCurrentStudy(selectedIds)
+                                    traitNav.navigateBack()
                                 }
                             )
                         }
@@ -150,7 +203,6 @@ class TraitActivity : ThemedActivity() {
                                 },
                             )
                         }
-
                     }
                 }
             }

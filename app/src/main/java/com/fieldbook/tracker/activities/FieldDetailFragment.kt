@@ -18,6 +18,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.res.ResourcesCompat
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.Toolbar
 import androidx.cardview.widget.CardView
@@ -35,6 +36,7 @@ import com.fieldbook.tracker.interfaces.FieldSortController
 import com.fieldbook.tracker.interfaces.FieldSyncController
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.ImportFormat
+import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.traits.formats.Formats
@@ -86,6 +88,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private lateinit var lastExportTextView: TextView
     private lateinit var lastSyncTextView: TextView
     private lateinit var cardViewCollect: CardView
+    private lateinit var cardViewTraits: CardView
     private lateinit var cardViewExport: CardView
     private lateinit var cardViewSync: CardView
     private lateinit var sourceChip: Chip
@@ -98,6 +101,10 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private lateinit var observationCountChip: Chip
     private lateinit var trialNameChip: Chip
     private lateinit var studyGroupNameChip: Chip
+    private lateinit var traitIconsContainer: LinearLayout
+    private lateinit var traitsNoneTextView: TextView
+    private lateinit var traitsExpandCollapseIcon: ImageView
+    private lateinit var traitsExpandedContent: LinearLayout
     private lateinit var detailRecyclerView: RecyclerView
     private var adapter: FieldDetailAdapter? = null
 
@@ -129,6 +136,10 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         detailRecyclerView = rootView.findViewById(R.id.fieldDetailRecyclerView)
         trialNameChip = rootView.findViewById(R.id.trialNameChip)
         studyGroupNameChip = rootView.findViewById(R.id.studyGroupName)
+        traitIconsContainer = rootView.findViewById(R.id.traitIconsContainer)
+        traitsNoneTextView = rootView.findViewById(R.id.traitsNoneTextView)
+        traitsExpandCollapseIcon = rootView.findViewById(R.id.traitsExpandCollapseIcon)
+        traitsExpandedContent = rootView.findViewById(R.id.traitsExpandedContent)
 
         fieldId = arguments?.getInt(GeneralKeys.FIELD_DETAIL_FIELD_ID)
         loadFieldDetails()
@@ -155,6 +166,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         }
 
         cardViewCollect = rootView.findViewById(R.id.cardViewCollect)
+        cardViewTraits = rootView.findViewById(R.id.cardViewTraits)
         cardViewExport = rootView.findViewById(R.id.cardViewExport)
 
         cardViewCollect.setOnClickListener {
@@ -180,6 +192,25 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                 }
             } ?: Log.e("FieldDetailFragment", "Field ID is null, cannot export data")
         }
+
+        rootView.findViewById<LinearLayout>(R.id.traitsCardHeader).setOnClickListener {
+            fieldId?.let { id ->
+                val intent = Intent(requireContext(), TraitActivity::class.java).apply {
+                    putExtra(TraitActivity.EXTRA_MODE, TraitActivity.MODE_VIEWER)
+                    putExtra(TraitActivity.EXTRA_STUDY_ID, id)
+                }
+                startActivity(intent)
+            } ?: Log.e("FieldDetailFragment", "Field ID is null, cannot manage traits")
+        }
+
+        val traitsIconsRow = rootView.findViewById<LinearLayout>(R.id.traitsIconsRow)
+        traitsIconsRow.setOnClickListener { toggleTraitsExpanded() }
+
+        val traitsExpanded = preferences.getBoolean(GeneralKeys.FIELD_DETAIL_TRAITS_EXPANDED, false)
+        traitsExpandedContent.visibility = if (traitsExpanded) View.VISIBLE else View.GONE
+        traitsExpandCollapseIcon.setImageResource(
+            if (traitsExpanded) R.drawable.ic_chevron_up else R.drawable.ic_chevron_down
+        )
 
         val dataExpandCollapseIcon: ImageView = rootView.findViewById(R.id.data_expand_collapse_icon)
         val dataCollapsibleContent: LinearLayout = rootView.findViewById(R.id.data_collapsible_content)
@@ -276,13 +307,14 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         fieldId?.let { id ->
             CoroutineScope(Dispatchers.IO).launch {
                 val field = database.getFieldObject(id)
-                
+                val visibleTraits = database.getVisibleTraitsForStudy(id)
+
                 withContext(Dispatchers.Main) {
                     fieldObject = field  // Store the field object
                     
                     if (field != null) {
-                        updateFieldData(field)
-                        
+                        updateFieldData(field, visibleTraits)
+
                         if (detailRecyclerView.adapter == null) { // initial load
                             detailRecyclerView.layoutManager = LinearLayoutManager(context)
                             val initialItems = createTraitDetailItems(field).toMutableList()
@@ -299,7 +331,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         } ?: Log.e("FieldDetailFragment", "Field ID is null")
     }
 
-    private fun updateFieldData(field: FieldObject) {
+    private fun updateFieldData(field: FieldObject, visibleTraits: List<TraitObject>) {
 
         cardViewSync.visibility = View.GONE
         cardViewSync.setOnClickListener(null)
@@ -372,6 +404,9 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         }
 
         traitCountChip.text = field.traitCount.toString()
+
+        populateTraitIcons(visibleTraits)
+
         if (field.observationCount.toInt() > 0) {
             observationCountChip.visibility = View.VISIBLE
             observationCountChip.text = field.observationCount.toString()
@@ -385,6 +420,94 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         if (!groupName.isNullOrEmpty() && groupName != field.trialName) {
             studyGroupNameChip.visibility = View.VISIBLE
             studyGroupNameChip.text = groupName
+        }
+    }
+
+    private fun populateTraitIcons(traits: List<TraitObject>) {
+        val ctx = context ?: return
+        val isExpanded = preferences.getBoolean(GeneralKeys.FIELD_DETAIL_TRAITS_EXPANDED, false)
+
+        if (traits.isEmpty()) {
+            traitIconsContainer.visibility = View.GONE
+            traitsNoneTextView.visibility = View.VISIBLE
+            traitsExpandCollapseIcon.visibility = View.GONE
+            traitsExpandedContent.visibility = View.GONE
+            return
+        }
+
+        traitsNoneTextView.visibility = View.GONE
+        traitsExpandCollapseIcon.visibility = View.VISIBLE
+        traitIconsContainer.visibility = if (isExpanded) View.INVISIBLE else View.VISIBLE
+
+        traitIconsContainer.removeAllViews()
+        val iconSizePx = (24 * ctx.resources.displayMetrics.density).toInt()
+        val marginPx = (4 * ctx.resources.displayMetrics.density).toInt()
+
+        for (trait in traits) {
+            val iconRes = Formats.entries
+                .find { it.getDatabaseName() == trait.format }
+                ?.getIcon() ?: R.drawable.ic_trait_text
+
+            val iv = ImageView(ctx).apply {
+                layoutParams = LinearLayout.LayoutParams(iconSizePx, iconSizePx).also {
+                    it.marginEnd = marginPx
+                }
+                setImageDrawable(ResourcesCompat.getDrawable(resources, iconRes, ctx.theme))
+                contentDescription = trait.alias.takeIf { it.isNotBlank() } ?: trait.name
+            }
+            traitIconsContainer.addView(iv)
+        }
+
+        traitsExpandedContent.removeAllViews()
+        for (trait in traits) {
+            val iconRes = Formats.entries
+                .find { it.getDatabaseName() == trait.format }
+                ?.getIcon() ?: R.drawable.ic_trait_text
+
+            val rowView = LinearLayout(ctx).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = android.view.Gravity.CENTER_VERTICAL
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).also { it.bottomMargin = marginPx }
+            }
+
+            val iv = ImageView(ctx).apply {
+                layoutParams = LinearLayout.LayoutParams(iconSizePx, iconSizePx).also {
+                    it.marginEnd = marginPx
+                }
+                setImageDrawable(ResourcesCompat.getDrawable(resources, iconRes, ctx.theme))
+            }
+
+            val tv = TextView(ctx).apply {
+                text = trait.alias.takeIf { it.isNotBlank() } ?: trait.name
+                setTextAppearance(R.style.TextViewStyle_Sub)
+                layoutParams = LinearLayout.LayoutParams(
+                    0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f
+                )
+                maxLines = 1
+                ellipsize = android.text.TextUtils.TruncateAt.END
+            }
+
+            rowView.addView(iv)
+            rowView.addView(tv)
+            traitsExpandedContent.addView(rowView)
+        }
+    }
+
+    private fun toggleTraitsExpanded() {
+        val isExpanded = traitsExpandedContent.visibility == View.VISIBLE
+        if (isExpanded) {
+            traitsExpandedContent.visibility = View.GONE
+            traitIconsContainer.visibility = View.VISIBLE
+            traitsExpandCollapseIcon.setImageResource(R.drawable.ic_chevron_down)
+            preferences.edit { putBoolean(GeneralKeys.FIELD_DETAIL_TRAITS_EXPANDED, false) }
+        } else {
+            traitsExpandedContent.visibility = View.VISIBLE
+            traitIconsContainer.visibility = View.INVISIBLE
+            traitsExpandCollapseIcon.setImageResource(R.drawable.ic_chevron_up)
+            preferences.edit { putBoolean(GeneralKeys.FIELD_DETAIL_TRAITS_EXPANDED, true) }
         }
     }
 
@@ -581,8 +704,12 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
 
     fun checkTraitsExist(callback: (Int) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
-
-            val traits = database.getVisibleTraits()
+            val currentFieldId = fieldId
+            val traits = if (currentFieldId != null) {
+                database.getVisibleTraitsForStudy(currentFieldId)
+            } else {
+                database.getVisibleTraits()
+            }
             val result = when {
                 traits.isEmpty() -> {
                     withContext(Dispatchers.Main) {

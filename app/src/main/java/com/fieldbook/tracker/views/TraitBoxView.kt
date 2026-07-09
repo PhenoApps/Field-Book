@@ -267,7 +267,10 @@ class TraitBoxView : ConstraintLayout {
                 R.string.edit_traits
             ) {
                     _: DialogInterface, _: Int ->
-                    val intent = Intent(context, TraitActivity::class.java)
+                    val intent = Intent(context, TraitActivity::class.java).apply {
+                        putExtra(TraitActivity.EXTRA_MODE, TraitActivity.MODE_VIEWER)
+                        putExtra(TraitActivity.EXTRA_STUDY_ID, studyId)
+                    }
                     startActivity(context, intent, null)
             }
         val dialog = builder.create()

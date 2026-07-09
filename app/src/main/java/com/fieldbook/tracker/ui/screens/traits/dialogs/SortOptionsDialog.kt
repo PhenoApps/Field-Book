@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.database.viewmodels.TraitEditorViewModel.Companion.SORT_FIELD_DEFAULT
 import com.fieldbook.tracker.ui.dialogs.DialogOption
 import com.fieldbook.tracker.ui.dialogs.OptionsDialog
 import com.fieldbook.tracker.ui.theme.AppTheme
@@ -15,16 +16,26 @@ import com.fieldbook.tracker.ui.theme.AppTheme
 @Composable
 fun SortOptionsDialog(
     currentSortOrder: String,
+    isViewerMode: Boolean = false,
     onCancel: () -> Unit,
     onSortSelected: (String) -> Unit,
 ) {
-    val sortOptions = listOf(
-        "position" to stringResource(R.string.traits_sort_default),
+    // In viewer mode, "Default" maps to SORT_FIELD_DEFAULT ("follow main editor's sort").
+    // In editor mode, "Default" maps to "position" (DB order).
+    val defaultKey = if (isViewerMode) SORT_FIELD_DEFAULT else "position"
+
+    val sortOptions = mutableListOf(
+        defaultKey to stringResource(R.string.traits_sort_default),
         "observation_variable_name" to stringResource(R.string.traits_sort_name),
         "observation_variable_field_book_format" to stringResource(R.string.traits_sort_format),
         "internal_id_observation_variable" to stringResource(R.string.traits_sort_import_order),
-        "visible" to stringResource(R.string.traits_sort_visibility)
     )
+
+    if (isViewerMode) {
+        sortOptions.add(
+            "visible" to stringResource(R.string.traits_sort_visibility)
+        )
+    }
 
     var selectedOption by remember(currentSortOrder) { mutableStateOf(currentSortOrder) }
 

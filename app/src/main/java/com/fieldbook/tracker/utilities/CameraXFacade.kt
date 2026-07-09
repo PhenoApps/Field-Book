@@ -221,8 +221,7 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
         }
 
         //parse crop from prefs
-        val cropCoordinates = (context as? ThemedActivity)?.prefs?.getString(GeneralKeys.getCropCoordinatesKey(
-            traitId?.toInt() ?: -1), "")
+        val cropCoordinates = (context as? ThemedActivity)?.prefs?.getString(GeneralKeys.getCropCoordinatesKey(traitId), "")
 
         // If crop coordinates are valid, add a drawable to the PreviewView overlay that dims outside the crop rect
         if (showCropRegion && !cropCoordinates.isNullOrEmpty() && cropCoordinates != CropImageView.DEFAULT_CROP_COORDINATES && previewView != null) {
@@ -327,8 +326,7 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
             Log.w(TAG, "Error removing previous crop drawable: ${e.message}")
         }
 
-        val cropCoordinates = (context as? ThemedActivity)?.prefs?.getString(GeneralKeys.getCropCoordinatesKey(
-            traitId?.toInt() ?: -1), "")
+        val cropCoordinates = (context as? ThemedActivity)?.prefs?.getString(GeneralKeys.getCropCoordinatesKey(traitId), "")
 
         if (showCropRegion && !cropCoordinates.isNullOrEmpty() && cropCoordinates != CropImageView.DEFAULT_CROP_COORDINATES && previewView != null) {
             val rect = CropImageView.parseRectCoordinates(cropCoordinates)

@@ -18,31 +18,33 @@ import androidx.preference.PreferenceManager;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.brapi.model.FieldBookImage;
 import com.fieldbook.tracker.brapi.model.Observation;
+import com.fieldbook.tracker.database.dao.FieldTraitConfigDao;
 import com.fieldbook.tracker.database.dao.GroupDao;
 import com.fieldbook.tracker.database.dao.ObservationDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitAttributeDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitPropertyDao;
 import com.fieldbook.tracker.database.dao.ObservationVariableDao;
+import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.spectral.DeviceDao;
 import com.fieldbook.tracker.database.dao.spectral.ProtocolDao;
 import com.fieldbook.tracker.database.dao.spectral.SpectralDao;
-import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.spectral.UriDao;
-import com.fieldbook.tracker.database.migrators.ObservationMediaMigratorVersion21;
-import com.fieldbook.tracker.database.views.ObservationVariableAttributeDetailViewCreator;
+import com.fieldbook.tracker.database.migrators.FieldTraitConfigMigratorVersion22;
+import com.fieldbook.tracker.database.models.GroupModel;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.database.models.ObservationVariableModel;
-import com.fieldbook.tracker.database.models.GroupModel;
 import com.fieldbook.tracker.database.models.StudyModel;
 import com.fieldbook.tracker.database.repository.SpectralRepository;
+import com.fieldbook.tracker.database.views.ObservationVariableAttributeDetailViewCreator;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.SearchData;
 import com.fieldbook.tracker.objects.SearchDialogDataModel;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.TraitScopePreferences;
 import com.fieldbook.tracker.utilities.GeoJsonUtil;
 import com.fieldbook.tracker.utilities.ZipUtil;
 import com.fieldbook.tracker.utilities.export.SpectralFileProcessor;
@@ -61,10 +63,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -77,7 +81,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext;
  */
 public class DataHelper {
 
-    public static final int DATABASE_VERSION = ObservationMediaMigratorVersion21.VERSION;
+    public static final int DATABASE_VERSION = FieldTraitConfigMigratorVersion22.VERSION;
     private static final String DATABASE_NAME = "fieldbook.db";
     public static SQLiteDatabase db;
     private static final String TAG = "Field Book";
@@ -101,6 +105,7 @@ public class DataHelper {
     private SearchQueryBuilder queryBuilder;
 
     private final GroupDao studyGroupDao = new GroupDao(GroupsTable.Type.STUDY);
+    private final FieldTraitConfigDao fieldTraitConfigDao = new FieldTraitConfigDao();
 
     @Inject
     public DataHelper(@ApplicationContext Context context) {
@@ -644,10 +649,125 @@ public class DataHelper {
     public ArrayList<TraitObject> getVisibleTraits() {
 
         open();
+        int selectedStudyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, -1);
+        return getVisibleTraitsForStudy(selectedStudyId);
 
-        String sortColumn = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
+    }
 
-        return ObservationVariableDao.Companion.getAllVisibleTraitObjects(sortColumn);
+    public ArrayList<TraitObject> getVisibleTraitsForStudy(int studyId) {
+
+        open();
+
+        // Read the field-specific sort preference first, falling back to the global one.
+        // The key "field_default" means "follow the main editor's global sort".
+        String sortColumn = preferences.getString(
+                "field_trait_sort_order_" + studyId, null);
+        if (sortColumn == null) {
+            sortColumn = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
+        }
+        return getVisibleTraitsForStudy(studyId, sortColumn);
+
+    }
+
+    private ArrayList<TraitObject> getVisibleTraitsForStudy(int studyId, String sortColumn) {
+        // Resolve "field_default" apply the main editor's global sort preference
+        String effectiveSortColumn = sortColumn;
+        if ("field_default".equals(sortColumn)) {
+            effectiveSortColumn = preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position");
+        }
+
+        ArrayList<TraitObject> visibleTraits = ObservationVariableDao.Companion.getAllVisibleTraitObjects(effectiveSortColumn);
+
+        if (studyId < 0) {
+            return visibleTraits;
+        }
+
+        ArrayList<TraitObject> allTraits = ObservationVariableDao.Companion.getAllTraitObjects(effectiveSortColumn);
+        java.util.HashSet<String> fallbackIds = new java.util.HashSet<>();
+        for (TraitObject trait : allTraits) {
+            fallbackIds.add(trait.getId());
+        }
+
+        Set<String> scopedIds = TraitScopePreferences.getOrInitializeStudyTraitIds(preferences, studyId, fallbackIds);
+
+        // If the field has never been customized (no config row), use global visibility as default.
+        // Only use field-specific visibility once the user has explicitly customized this field.
+        List<String> scopedVisibleIds;
+        Set<String> customVisibleIds = TraitScopePreferences.getStudyVisibleTraitIds(preferences, studyId);
+
+        if (customVisibleIds != null) {
+            scopedVisibleIds = new ArrayList<>(customVisibleIds);
+            scopedVisibleIds.removeIf(id -> !scopedIds.contains(id));
+        } else {
+            // Default: use global visible flag
+            scopedVisibleIds = new ArrayList<>();
+            for (TraitObject trait : allTraits) {
+                if (trait.getVisible() && scopedIds.contains(trait.getId())) {
+                    scopedVisibleIds.add(trait.getId());
+                }
+            }
+        }
+
+        if ("position".equals(effectiveSortColumn)) {
+            List<String> fieldOrder = fieldTraitConfigDao.getTraitIdsInOrder(studyId);
+            if (!fieldOrder.isEmpty()) {
+                java.util.Map<String, Integer> orderMap = new java.util.HashMap<>();
+                for (int i = 0; i < fieldOrder.size(); i++) {
+                    orderMap.put(fieldOrder.get(i), i);
+                }
+                allTraits.sort(Comparator.comparing(t -> orderMap.getOrDefault(t.getId(), Integer.MAX_VALUE)));
+            }
+        }
+
+        ArrayList<TraitObject> filtered = new ArrayList<>();
+        // Create a map for quick lookup by ID
+        java.util.Map<String, TraitObject> traitMap = new java.util.HashMap<>();
+        for (TraitObject trait : allTraits) {
+            traitMap.put(trait.getId(), trait);
+        }
+
+        for (String traitId : scopedVisibleIds) {
+            TraitObject trait = traitMap.get(traitId);
+            if (trait != null) {
+                filtered.add(trait);
+            }
+        }
+
+        // For non-position sort orders, apply the requested sort
+        if (!"position".equals(effectiveSortColumn)) {
+            if ("visible".equals(effectiveSortColumn)) {
+                // Keep visible traits at the top when sorting by visibility.
+                filtered.sort(Comparator.comparing(TraitObject::getVisible).reversed()
+                        .thenComparing(t -> {
+                            t.getAlias();
+                            String name = !t.getAlias().isEmpty() ? t.getAlias() : t.getName();
+                            return name.toLowerCase();
+                        }));
+            } else if ("observation_variable_name".equals(effectiveSortColumn)) {
+                filtered.sort(Comparator.comparing(t -> {
+                    t.getAlias();
+                    String name = !t.getAlias().isEmpty() ? t.getAlias() : t.getName();
+                    return name.toLowerCase();
+                }));
+            } else if ("observation_variable_field_book_format".equals(effectiveSortColumn)) {
+                filtered.sort(Comparator.comparing((TraitObject t) -> t.getFormat().toLowerCase())
+                        .thenComparing(t -> {
+                            t.getAlias();
+                            String name = !t.getAlias().isEmpty() ? t.getAlias() : t.getName();
+                            return name.toLowerCase();
+                        }));
+            } else if ("internal_id_observation_variable".equals(effectiveSortColumn)) {
+                filtered.sort(Comparator.comparingInt(t -> {
+                    try {
+                        return Integer.parseInt(t.getId());
+                    } catch (NumberFormatException e) {
+                        return Integer.MAX_VALUE;
+                    }
+                }));
+            }
+        }
+
+        return filtered;
 
     }
 
@@ -694,10 +814,58 @@ public class DataHelper {
 
         List<FieldObject.TraitDetail> traitDetails = getTraitDetailsForStudy(studyId);
 
+        // Filter trait details based on group visibility
+        traitDetails = filterTraitDetailsByGroupVisibility(studyId, traitDetails);
+
         return StudyDao.Companion.getFieldObject(
                 studyId,
                 traitDetails
         );
+    }
+
+    /**
+     * Filters trait details to only include traits that are visible for the given study/field group.
+     * If the field has never been customized, all traits are included.
+     */
+    private List<FieldObject.TraitDetail> filterTraitDetailsByGroupVisibility(Integer studyId, List<FieldObject.TraitDetail> traitDetails) {
+        if (studyId == null || studyId < 0 || traitDetails == null || traitDetails.isEmpty()) {
+            return traitDetails;
+        }
+
+        // If the field has never been customized, return all traits
+        if (!fieldTraitConfigDao.hasFieldTraitConfig(studyId)) {
+            return traitDetails;
+        }
+
+        // Get the visible trait IDs for this field in their custom order
+        List<String> visibleTraitIds = new ArrayList<>();
+        Set<String> customVisibleIds = TraitScopePreferences.getStudyVisibleTraitIds(preferences, studyId);
+        if (customVisibleIds != null) {
+            visibleTraitIds.addAll(customVisibleIds);
+        } else {
+            for (TraitObject trait : ObservationVariableDao.Companion.getAllTraitObjects()) {
+                if (trait.getVisible()) {
+                    visibleTraitIds.add(trait.getId());
+                }
+            }
+        }
+
+        // Map trait details by their ID for quick lookup and ordering
+        java.util.Map<String, FieldObject.TraitDetail> detailMap = new java.util.HashMap<>();
+        for (FieldObject.TraitDetail detail : traitDetails) {
+            detailMap.put(String.valueOf(detail.getTraitId()), detail);
+        }
+
+        // Create the filtered and ordered list based on visibleTraitIds
+        List<FieldObject.TraitDetail> filtered = new ArrayList<>();
+        for (String traitId : visibleTraitIds) {
+            FieldObject.TraitDetail detail = detailMap.get(traitId);
+            if (detail != null) {
+                filtered.add(detail);
+            }
+        }
+
+        return filtered;
     }
 
     public List<FieldObject.TraitDetail> getTraitDetailsForStudy(Integer studyId) {
@@ -1779,6 +1947,11 @@ public class DataHelper {
             if (oldVersion <= 20 && newVersion >= 21) {
 
                 Migrator.Companion.migrateToVersion21(db);
+            }
+
+            if (oldVersion <= 21 && newVersion >= 22) {
+
+                Migrator.Companion.migrateToVersion22(db);
             }
         }
     }

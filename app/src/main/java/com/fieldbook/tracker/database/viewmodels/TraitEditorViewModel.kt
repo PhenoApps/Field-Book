@@ -8,10 +8,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
+import com.fieldbook.tracker.database.repository.TraitRepository
+import com.fieldbook.tracker.database.viewmodels.TraitEditorViewModel.Companion.SORT_FIELD_DEFAULT
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
-import com.fieldbook.tracker.database.repository.TraitRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,6 +42,10 @@ class TraitEditorViewModel @Inject constructor(
 
     companion object {
         private const val TAG = "TraitEditorViewModel"
+        private const val FIELD_TRAIT_SORT_ORDER_PREFIX = "field_trait_sort_order_"
+
+        /** Sort key meaning "follow the main editor's global sort preference" (viewer-only). */
+        const val SORT_FIELD_DEFAULT = "field_default"
     }
 
     private val _uiState = MutableStateFlow(TraitEditorUiState())
@@ -50,14 +55,17 @@ class TraitEditorViewModel @Inject constructor(
     val events = _events.asSharedFlow()
 
     // to manage db updates on reorder
-    private var lastCommittedSortedList: List<TraitObject> = emptyList()
+    private var lastCommittedSortedTraitIds: List<String> = emptyList()
     private var wasPreviouslyDragging = false
+    private var scopedStudyId: Int? = null
+    private var usePerFieldTraitList: Boolean = false
+    private var isViewerMode: Boolean = false
+    private var isScopeConfigured: Boolean = false
 
     init {
         val sortOrder =
             prefs.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position") ?: "position"
-        _uiState.update { it.copy(sortOrder = sortOrder) }
-        loadTraits()
+        _uiState.update { it.copy(sortOrder = sortOrder, isLoading = true) }
     }
 
     private fun notifyCollectReload() {
@@ -77,11 +85,38 @@ class TraitEditorViewModel @Inject constructor(
 
     fun previouslyExported() = prefs.getBoolean(GeneralKeys.TRAITS_EXPORTED, false)
 
+    /**
+     * Resolves the effective sort-order to pass to the repository.
+     *
+     * In viewer mode the preference lives under a field-specific key; otherwise the global key.
+     * The special key [SORT_FIELD_DEFAULT] is passed through to the repo, which will
+     * apply the global sort preference to the scoped traits.
+     * "position" in viewer mode means "use the field-specific DB order" (custom reorder).
+     */
+    private fun resolveSortOrder(): String {
+        if (isViewerMode && scopedStudyId != null) {
+            return prefs.getString(
+                "$FIELD_TRAIT_SORT_ORDER_PREFIX${scopedStudyId}",
+                SORT_FIELD_DEFAULT
+            ) ?: SORT_FIELD_DEFAULT
+        }
+        return prefs.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position") ?: "position"
+    }
+
     fun updateSortOrder(sortOrder: String) {
-        prefs.edit { putString(GeneralKeys.TRAITS_LIST_SORT_ORDER, sortOrder) }
+        if (!isViewerMode) {
+            prefs.edit { putString(GeneralKeys.TRAITS_LIST_SORT_ORDER, sortOrder) }
+        } else {
+            scopedStudyId?.let { studyId ->
+                prefs.edit { putString("$FIELD_TRAIT_SORT_ORDER_PREFIX$studyId", sortOrder) }
+            }
+        }
         _uiState.update { it.copy(sortOrder = sortOrder) }
 
-        loadTraits()
+        viewModelScope.launch {
+            loadTraitsInternal(showLoading = false)
+            _events.emit(TraitEditorEvent.ScrollToTop)
+        }
     }
 
     // IN-MEMORY UPDATES (does not fetch from db)
@@ -89,16 +124,31 @@ class TraitEditorViewModel @Inject constructor(
     fun addTraitObject(newTrait: TraitObject) {
         _uiState.update { state ->
             state.copy(
-                traits = state.traits + newTrait
+                traits = state.traits + newTrait,
+                selectedTraitIds = state.selectedTraitIds - newTrait.id
             )
         }
     }
 
     fun removeTraitObject(id: String) {
+        val newList = _uiState.value.traits.filterNot { it.id == id }
         _uiState.update { state ->
             state.copy(
-                traits = state.traits.filterNot { it.id == id }
+                traits = newList,
+                selectedTraitIds = state.selectedTraitIds - id
             )
+        }
+        lastCommittedSortedTraitIds = newList.map { it.id }
+
+        // Perform background reorder if in global mode to ensure positions are gapless
+        if (!isViewerMode) {
+            viewModelScope.launch {
+                runCatching {
+                    repo.updateTraitOrder(newList)
+                }.onFailure { e ->
+                    Log.e(TAG, "Soft reorder failed after trait deletion", e)
+                }
+            }
         }
     }
 
@@ -112,27 +162,217 @@ class TraitEditorViewModel @Inject constructor(
         }
     }
 
+    fun toggleTraitSelection(id: String) {
+        _uiState.update { state ->
+            val newSelection = if (id in state.selectedTraitIds) {
+                state.selectedTraitIds - id
+            } else {
+                state.selectedTraitIds + id
+            }
+            state.copy(selectedTraitIds = newSelection)
+        }
+    }
+
+    fun clearSelection() {
+        _uiState.update { it.copy(selectedTraitIds = emptySet()) }
+    }
+
+    fun selectAll() {
+        _uiState.update { state ->
+            state.copy(selectedTraitIds = state.traits.map { it.id }.toSet())
+        }
+    }
+
 
     // DB RELATED
 
-    fun loadTraits() {
+    private suspend fun loadTraitsInternal(showLoading: Boolean = true) {
+        if (!isScopeConfigured) return
+
+        if (showLoading) {
+            _uiState.update { it.copy(isLoading = true) }
+        }
+
+        runCatching {
+            repo.getTraits(
+                studyId = scopedStudyId,
+                usePerFieldList = usePerFieldTraitList,
+                sortOrder = resolveSortOrder()
+            )
+        }
+            .onSuccess { traits ->
+                _uiState.update {
+                    it.copy(traits = traits, isLoading = false)
+                }
+                lastCommittedSortedTraitIds = traits.map { it.id }
+            }
+            .onFailure { e ->
+                _uiState.update {
+                    it.copy(isLoading = false)
+                }
+                Log.e(TAG, "Error loading traits", e)
+                _events.emit(TraitEditorEvent.ShowToast(R.string.error_loading_traits))
+            }
+    }
+
+    fun loadTraits(showLoading: Boolean = true) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
+            loadTraitsInternal(showLoading)
+        }
+    }
 
-            runCatching { repo.getTraits() }
-                .onSuccess { traits ->
-                    _uiState.update {
-                        it.copy(traits = traits, isLoading = false)
-                    }
+    fun configureTraitScope(studyId: Int?, enablePerFieldScope: Boolean, isViewer: Boolean) {
+        val normalizedStudyId = studyId?.takeIf { it >= 0 }
+        if (scopedStudyId == normalizedStudyId && usePerFieldTraitList == enablePerFieldScope && isViewerMode == isViewer && isScopeConfigured) {
+            return
+        }
 
+        isViewerMode = isViewer
+        scopedStudyId = normalizedStudyId
+        usePerFieldTraitList = enablePerFieldScope
+        isScopeConfigured = true
+
+        // Field-specific list defaults to the same sort mode as the main list.
+        val sortOrder = if (isViewerMode && scopedStudyId != null) {
+            prefs.getString(
+                "$FIELD_TRAIT_SORT_ORDER_PREFIX${scopedStudyId}",
+                SORT_FIELD_DEFAULT
+            ) ?: SORT_FIELD_DEFAULT
+        } else {
+            prefs.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position") ?: "position"
+        }
+        _uiState.update { it.copy(sortOrder = sortOrder) }
+
+        viewModelScope.launch {
+            loadTraitsInternal(showLoading = false)
+            _events.emit(TraitEditorEvent.ScrollToTop)
+        }
+    }
+
+    fun loadAvailableTraitsForCurrentStudy() {
+        scopedStudyId ?: return
+        if (!usePerFieldTraitList) return
+
+        viewModelScope.launch {
+            runCatching {
+                val allTraits = repo.getUnscopedTraits()
+                val currentIds = uiState.value.traits.map { it.id }.toSet()
+                allTraits.filterNot { it.id in currentIds }
+            }.onSuccess { available ->
+                _uiState.update { it.copy(availableTraits = available) }
+            }.onFailure { e ->
+                Log.e(TAG, "Error loading available traits", e)
+                _events.emit(TraitEditorEvent.ShowToast(R.string.error_loading_traits))
+            }
+        }
+    }
+
+    fun addTraitsToCurrentStudy(traitIds: Set<String>) {
+        val currentStudyId = scopedStudyId ?: return
+        if (!usePerFieldTraitList || traitIds.isEmpty()) return
+
+        viewModelScope.launch {
+            runCatching {
+                repo.addTraitsToStudy(currentStudyId, traitIds)
+            }.onSuccess {
+                loadTraits()
+                loadAvailableTraitsForCurrentStudy()
+                _events.emit(
+                    TraitEditorEvent.ShowMessageWithArgs(
+                        R.string.traits_viewer_added_count,
+                        listOf(traitIds.size)
+                    )
+                )
+            }.onFailure { e ->
+                Log.e(TAG, "Error assigning traits to study", e)
+                _events.emit(TraitEditorEvent.ShowToast(R.string.error_importing_traits))
+            }
+        }
+    }
+
+    fun requestRemoveTrait(trait: TraitObject) {
+        val traitName = trait.alias.ifBlank { trait.name }
+        showDialog(TraitActivityDialog.RemoveFromField(setOf(trait.id), traitName))
+    }
+
+    fun requestRemoveSelectedTraits() {
+        val selectedIds = _uiState.value.selectedTraitIds
+        if (selectedIds.isEmpty()) return
+        
+        val message = if (selectedIds.size == 1) {
+            val trait = _uiState.value.traits.find { it.id == selectedIds.first() }
+            trait?.alias?.ifBlank { trait.name } ?: ""
+        } else {
+            selectedIds.size.toString()
+        }
+        
+        showDialog(TraitActivityDialog.RemoveFromField(selectedIds, message))
+    }
+
+    fun removeTraits(traitIds: Set<String>) {
+        if (traitIds.isEmpty()) return
+
+        hideDialog()
+
+        // Optimistic local removal
+        val newList = _uiState.value.traits.filterNot { it.id in traitIds }
+        _uiState.update { state ->
+            state.copy(
+                traits = newList,
+                selectedTraitIds = state.selectedTraitIds - traitIds
+            )
+        }
+        lastCommittedSortedTraitIds = newList.map { it.id }
+
+        viewModelScope.launch {
+            runCatching {
+                if (isViewerMode && usePerFieldTraitList) {
+                    val currentStudyId = scopedStudyId ?: return@runCatching
+                    repo.removeTraitsFromStudy(currentStudyId, traitIds)
+                } else {
+                    traitIds.forEach { repo.deleteTrait(it) }
+                    repo.updateTraitOrder(newList)
                 }
-                .onFailure { e ->
-                    _uiState.update {
-                        it.copy(isLoading = false)
-                    }
-                    Log.e(TAG, "Error loading traits", e)
-                    _events.emit(TraitEditorEvent.ShowToast(R.string.error_loading_traits))
+            }.onSuccess {
+                if (isViewerMode) {
+                    loadAvailableTraitsForCurrentStudy()
+                    _events.emit(TraitEditorEvent.ShowToast(R.string.traits_viewer_removed_trait))
                 }
+                notifyCollectReload()
+            }.onFailure { e ->
+                // Rollback (simplified, just reload quietly)
+                loadTraits(showLoading = false)
+                Log.e(TAG, "Error removing traits", e)
+                val errorMsg = if (isViewerMode) R.string.error_updating_trait_visibility else R.string.error_deleting_traits
+                _events.emit(TraitEditorEvent.ShowToast(errorMsg))
+            }
+        }
+    }
+
+    private fun rollbackRemovedTrait(trait: TraitObject, index: Int) {
+        _uiState.update { state ->
+            val updated = state.traits.toMutableList()
+            val safeIndex = index.coerceIn(0, updated.size)
+            updated.add(safeIndex, trait)
+            state.copy(traits = updated)
+        }
+    }
+
+    fun syncCurrentStudyWithMainList() {
+        val currentStudyId = scopedStudyId ?: return
+        if (!usePerFieldTraitList) return
+
+        viewModelScope.launch {
+            runCatching {
+                repo.syncStudyWithMainList(currentStudyId)
+            }.onSuccess {
+                loadTraits()
+                loadAvailableTraitsForCurrentStudy()
+                _events.emit(TraitEditorEvent.ShowToast(R.string.traits_viewer_synced_with_main_list))
+            }.onFailure { e ->
+                Log.e(TAG, "Error syncing field trait list with main list", e)
+                _events.emit(TraitEditorEvent.ShowToast(R.string.error_loading_traits))
+            }
         }
     }
 
@@ -155,12 +395,23 @@ class TraitEditorViewModel @Inject constructor(
 
     fun updateTraitVisibility(traitId: String, isVisible: Boolean) {
         val trait = uiState.value.traits.find { it.id == traitId } ?: return
+        val scopedStudy = scopedStudyId
+        val useScopedVisibility = usePerFieldTraitList && scopedStudy != null
 
         val updatedTrait = trait.clone().apply { visible = isVisible }
         updateTraitInList(updatedTrait)
 
         viewModelScope.launch {
-            runCatching { repo.updateVisibility(traitId, isVisible) }
+            runCatching {
+                if (useScopedVisibility) {
+                    repo.updateStudyTraitVisibility(scopedStudy, traitId, isVisible)
+                    // Create/update field-specific trait list when visibility changes
+                    val currentTraits = _uiState.value.traits
+                    repo.updateStudyTraitOrder(scopedStudy, currentTraits.map { it.id })
+                } else {
+                    repo.updateVisibility(traitId, isVisible)
+                }
+            }
                 .onSuccess { notifyCollectReload() }
                 .onFailure { e -> // rollback
                     updateTraitInList(trait)
@@ -173,6 +424,8 @@ class TraitEditorViewModel @Inject constructor(
 
     fun toggleAllTraitsVisibility() {
         val oldList = _uiState.value.traits
+        val scopedStudy = scopedStudyId
+        val useScopedVisibility = usePerFieldTraitList && scopedStudy != null
 
         val newVisibility = !oldList.all { it.visible }
 
@@ -182,8 +435,18 @@ class TraitEditorViewModel @Inject constructor(
 
         viewModelScope.launch {
             runCatching {
-                oldList.forEach {
-                    repo.updateVisibility(it.id, newVisibility)
+                if (useScopedVisibility) {
+                    repo.updateAllStudyTraitVisibility(
+                        studyId = scopedStudy,
+                        traitIds = oldList.map { it.id }.toSet(),
+                        isVisible = newVisibility,
+                    )
+                    // Create/update field-specific trait list when toggling all
+                    repo.updateStudyTraitOrder(scopedStudy, updatedList.map { it.id })
+                } else {
+                    oldList.forEach {
+                        repo.updateVisibility(it.id, newVisibility)
+                    }
                 }
             }
                 .onSuccess { notifyCollectReload() }
@@ -192,6 +455,54 @@ class TraitEditorViewModel @Inject constructor(
                 Log.e(TAG, "Error toggling visibility for all traits", e)
                 _events.emit(TraitEditorEvent.ShowToast(R.string.error_toggling_all_traits_visibility))
             }
+        }
+    }
+
+    fun toggleVisibilityForSelectedTraits() {
+        val selectedIds = _uiState.value.selectedTraitIds
+        if (selectedIds.isEmpty()) return
+
+        val currentTraits = _uiState.value.traits.filter { it.id in selectedIds }
+        val allVisible = currentTraits.all { it.visible }
+        val newVisibility = !allVisible
+
+        val scopedStudy = scopedStudyId
+        val useScopedVisibility = usePerFieldTraitList && scopedStudy != null
+
+        // Update in-memory state for immediate feedback
+        _uiState.update { state ->
+            val updatedTraits = state.traits.map {
+                if (it.id in selectedIds) it.clone().apply { visible = newVisibility }
+                else it
+            }
+            state.copy(traits = updatedTraits)
+        }
+
+        viewModelScope.launch {
+            runCatching {
+                if (useScopedVisibility) {
+                    repo.updateAllStudyTraitVisibility(
+                        studyId = scopedStudy,
+                        traitIds = selectedIds,
+                        isVisible = newVisibility,
+                    )
+                    // Update field order as well if needed (optional, keeping it simple for now)
+                    val updatedTraits = _uiState.value.traits
+                    repo.updateStudyTraitOrder(scopedStudy, updatedTraits.map { it.id })
+                } else {
+                    selectedIds.forEach {
+                        repo.updateVisibility(it, newVisibility)
+                    }
+                }
+            }
+                .onSuccess { 
+                    notifyCollectReload()
+                }
+                .onFailure { e ->
+                    loadTraits() // Rollback by reloading
+                    Log.e(TAG, "Error toggling visibility for selected traits", e)
+                    _events.emit(TraitEditorEvent.ShowToast(R.string.error_toggling_all_traits_visibility))
+                }
         }
     }
 
@@ -246,6 +557,23 @@ class TraitEditorViewModel @Inject constructor(
      * That is, if previously dragging and currently not dragging anymore
      */
     fun onDragStateChanged(isCurrentlyDragging: Boolean) {
+        // Detect drag start: previously not dragging, now dragging
+        if (!wasPreviouslyDragging && isCurrentlyDragging) {
+            // If a custom sort order is active, reset to default "position" to allow manual reordering
+            if (_uiState.value.sortOrder != "position") {
+                // Update the correct preference key (field-specific in viewer mode, global otherwise)
+                if (isViewerMode) {
+                    scopedStudyId?.let { studyId ->
+                        prefs.edit { putString("$FIELD_TRAIT_SORT_ORDER_PREFIX$studyId", "position") }
+                    }
+                } else {
+                    prefs.edit { putString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position") }
+                }
+                _uiState.update { it.copy(sortOrder = "position") }
+            }
+        }
+
+        // Detect drag end: previously dragging, now stopped
         if (wasPreviouslyDragging && !isCurrentlyDragging) { // drag ended
             commitTraitOrder()
         }
@@ -254,21 +582,39 @@ class TraitEditorViewModel @Inject constructor(
 
     fun commitTraitOrder() {
         val finalList = _uiState.value.traits
-        if (finalList == lastCommittedSortedList) return
+        val finalIds = finalList.map { it.id }
+        if (finalIds == lastCommittedSortedTraitIds) return
 
         viewModelScope.launch {
             runCatching {
-                repo.updateTraitOrder(finalList)
+                val scopedStudy = scopedStudyId
+                val useScopedOrder = usePerFieldTraitList && scopedStudy != null
+
+                if (useScopedOrder) {
+                    // Create/update field-specific trait list with new order
+                    repo.updateStudyTraitOrder(scopedStudy, finalList.map { it.id })
+                } else {
+                    // Update global trait positions
+                    repo.updateTraitOrder(finalList)
+                }
                 notifyCollectReload()
 
-                lastCommittedSortedList = finalList
+                lastCommittedSortedTraitIds = finalIds
 
-                // update pref and state
-                prefs.edit {
-                    putString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position")
+                // Keep global sort preference untouched in field-specific viewer mode.
+                if (!isViewerMode) {
+                    prefs.edit {
+                        putString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position")
+                    }
+                } else {
+                    scopedStudyId?.let { studyId ->
+                        prefs.edit { putString("$FIELD_TRAIT_SORT_ORDER_PREFIX$studyId", "position") }
+                    }
                 }
 
                 _uiState.update { it.copy(sortOrder = "position") }
+                // Reload quietly to guarantee UI reflects persisted DB-backed field order.
+                loadTraits(showLoading = false)
             }.onFailure { e ->
                 Log.e(TAG, "Failed to save trait order", e)
                 _events.emit(TraitEditorEvent.ShowToast(R.string.error_saving_trait_order))
@@ -435,10 +781,13 @@ enum class DialogTriggerSource { IMPORT_WORKFLOW, TOOLBAR }
 data class TraitEditorUiState(
     val activeDialog: TraitActivityDialog = TraitActivityDialog.None,
     val traits: List<TraitObject> = emptyList(),
-    val isLoading: Boolean = false,
+    val availableTraits: List<TraitObject> = emptyList(),
+    val selectedTraitIds: Set<String> = emptySet(),
+    val isLoading: Boolean = true,
     val sortOrder: String = "position",
 ) {
     val hasTraits: Boolean get() = traits.isNotEmpty()
+    val isSelectionMode: Boolean get() = selectedTraitIds.isNotEmpty()
 }
 
 sealed class TraitEditorEvent {
@@ -450,6 +799,7 @@ sealed class TraitEditorEvent {
     data class RequestStoragePermissionForExport(val source: DialogTriggerSource) : TraitEditorEvent()
     object OpenFileExplorer : TraitEditorEvent()
     object OpenCloudFilePicker : TraitEditorEvent()
+    object ScrollToTop : TraitEditorEvent()
 }
 
 // only one dialog can be active at a time
@@ -461,5 +811,6 @@ sealed class TraitActivityDialog {
     object ExportCheck : TraitActivityDialog()
     data class Export(val source: DialogTriggerSource) : TraitActivityDialog()
     data class DeleteAll(val source: DialogTriggerSource) : TraitActivityDialog()
+    data class RemoveFromField(val traitIds: Set<String>, val message: String) : TraitActivityDialog()
     object SortTraits : TraitActivityDialog()
 }

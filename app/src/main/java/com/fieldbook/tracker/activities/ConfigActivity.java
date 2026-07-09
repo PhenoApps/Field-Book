@@ -21,30 +21,28 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
-import androidx.preference.PreferenceManager;
 
 import com.fieldbook.tracker.BuildConfig;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.adapters.ImageListAdapter;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.models.ObservationModel;
-import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.fragments.ImportDatabaseFragment;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.AppLanguageUtil;
+import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.FuzzySearch;
 import com.fieldbook.tracker.utilities.InsetHandler;
-import com.fieldbook.tracker.utilities.export.ExportUtil;
-import com.fieldbook.tracker.utilities.FieldSwitchImpl;
 import com.fieldbook.tracker.utilities.OldPhotosMigrator;
 import com.fieldbook.tracker.utilities.PersonNameManager;
 import com.fieldbook.tracker.utilities.SoundHelperImpl;
 import com.fieldbook.tracker.utilities.TapTargetUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.fieldbook.tracker.utilities.VerifyPersonHelper;
+import com.fieldbook.tracker.utilities.export.ExportUtil;
 import com.getkeepsafe.taptargetview.TapTarget;
 import com.getkeepsafe.taptargetview.TapTargetSequence;
 import com.getkeepsafe.taptargetview.TapTargetView;
@@ -290,6 +288,7 @@ public class ConfigActivity extends ThemedActivity {
                 case 1:
                     intent.setClassName(ConfigActivity.this,
                             TraitActivity.class.getName());
+                    intent.putExtra(TraitActivity.EXTRA_MODE, TraitActivity.MODE_EDITOR);
                     startActivity(intent);
 
                     break;

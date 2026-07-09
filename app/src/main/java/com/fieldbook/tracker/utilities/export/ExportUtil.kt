@@ -259,19 +259,6 @@ class ExportUtil @Inject constructor(
             BaseDocumentTreeUtil.getDirectory(context as Activity, R.string.dir_field_export)
 
             exportTrait.clear()
-            if (isActiveTraitsChecked) {
-                val traits = database.allTraitObjects
-                for (t in traits) {
-                    if (t.visible) {
-                        exportTrait.add(t)
-                    }
-                }
-            }
-
-            if (isAllTraitsChecked) {
-                exportTrait.addAll(database.allTraitObjects)
-            }
-
             checkDbBool = checkDB.isChecked
             checkTableBool = checkTable.isChecked
             exportFileString = fileName.text.toString()
@@ -346,6 +333,14 @@ class ExportUtil @Inject constructor(
             Log.d(TAG, "Export task started for fieldId: $fieldId")
             val bundleChecked = preferences.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, false)
             val fo = database.getFieldObject(fieldId)
+
+            val isActiveTraitsChecked = preferences.getBoolean(GeneralKeys.EXPORT_TRAITS_ACTIVE, false)
+            exportTrait = if (isActiveTraitsChecked) {
+                database.getVisibleTraitsForStudy(fieldId)
+            } else {
+                database.allTraitObjects
+            }
+
             var fieldFileString = exportFileString
             if (multipleFields) { fieldFileString = "${timeStamp.format(Calendar.getInstance().time)}_${fo.name}" }
 
@@ -473,15 +468,15 @@ class ExportUtil @Inject constructor(
     }
 
     private fun countMediaFiles(fields: List<FieldObject>, useActiveTraits: Boolean): Int {
-        val traits = database.allTraitObjects
-        val traitNames = if (useActiveTraits) {
-            traits.filter { it.visible }.map { FileUtil.sanitizeFileName(it.name) }
-        } else {
-            traits.map { FileUtil.sanitizeFileName(it.name) }
-        }
-
         var count = 0
         for (field in fields) {
+            val traits = if (useActiveTraits) {
+                database.getVisibleTraitsForStudy(field.studyId)
+            } else {
+                database.allTraitObjects
+            }
+            val traitNames = traits.map { FileUtil.sanitizeFileName(it.name) }
+
             val mediaDir = BaseDocumentTreeUtil.getFile(context, R.string.dir_plot_data, field.name)
             if (mediaDir != null && mediaDir.exists() && mediaDir.isDirectory) {
                 mediaDir.listFiles().forEach { traitDir ->
