@@ -21,6 +21,7 @@
     * [Scales](traits/trait-scales.md)
     * [Greenseeker](traits/trait-greenseeker.md)
     * [Stopwatch](traits/trait-stopwatch.md)
+    * [Pollinator](traits/trait-pollinator.md)
 * Function
   * [Collect](collect.md)
   * [Export](export.md)
