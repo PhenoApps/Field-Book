@@ -291,6 +291,7 @@ class DataGridActivity : ThemedActivity() {
                                         activeTrait = activeTrait,
                                         onSortByColumn = viewModel::sortByColumn,
                                         onToggleColumn = viewModel::toggleColumn,
+                                        onToggleLock = viewModel::toggleColumnLock,
                                         onNavigateFromValue = ::navigateFromValueClicked
                                     )
                                 }

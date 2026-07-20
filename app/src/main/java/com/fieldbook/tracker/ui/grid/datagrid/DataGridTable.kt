@@ -39,6 +39,7 @@ fun DataGridTable(
     activeTrait: Int? = null,
     onSortByColumn: (Int) -> Unit,
     onToggleColumn: (String) -> Unit = {},
+    onToggleLock: () -> Unit = {},
     onNavigateFromValue: (plotId: String, traitIndex: Int, rep: Int) -> Unit
 ) {
     val traits = state.traits
@@ -188,8 +189,9 @@ fun DataGridTable(
                         colors = colors,
                         sortIconRes = sortIcon,
                         isLocked = isLocked,
+                        showUnlockIcon = index == 0,
                         onClick = { onSortByColumn(rawIdx) },
-                        onLongClick = { onToggleColumn(key) },
+                        onLongClick = { if (index == 0) onToggleLock() else onToggleColumn(key) },
                         wrapContent = wrapContent,
                         zoom = zoom
                     )

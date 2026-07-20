@@ -31,6 +31,7 @@ fun DataGridHeaderCell(
     colors: DataGridUiColors,
     sortIconRes: Int? = null,
     isLocked: Boolean = false,
+    showUnlockIcon: Boolean = false,
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
     wrapContent: Boolean = false,
@@ -52,9 +53,9 @@ fun DataGridHeaderCell(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
         ) {
-            if (isLocked) {
+            if (isLocked || showUnlockIcon) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_tb_lock),
+                    painter = painterResource(id = if (isLocked) R.drawable.ic_tb_lock else R.drawable.ic_tb_unlock),
                     contentDescription = null,
                     tint = Color(colors.cellTextColor),
                     modifier = Modifier.size(14.dp)
