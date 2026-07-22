@@ -220,8 +220,10 @@
     <string name="dialog_field_creator_insert_field">Creazione di campo, righe: %1$s per colonne: %2$s</string>
     <string name="dialog_field_creator_insert_field_complete">Creazione di campo, righe: %1$s per colonne: %2$s …completa.</string>
     <string name="dialog_field_creator_insert_plot">Inserimento della parcella %1$s nella riga %2$s colonna %3$s</string>
-    <string name="brapi_resync_choice_required">Re-sync ha trovato osservazioni server esistenti senza ID BrAPI locali. Scegli come gestirle prima di caricare.</string>
+    <string name="brapi_resync_choice_required">Ri-Sincronizzazione ha trovato osservazioni server esistenti senza ID BrAPI locali. Scegli come gestirle prima di caricare.</string>
     <string name="brapi_resync_dialog_title">Ri-Sincronizzazione Corrispondenza Trovata</string>
+    <string name="brapi_resync_dialog_message">%1$d osservazioni corrispondono a dati già memorizzati sul server ma non hanno un ID BrAPI locale. Scegli un\'azione per queste corrispondenze.</string>
+    <string name="brapi_resync_dialog_values">Locale: %1$s | Server: %2$s</string>
     <string name="brapi_resync_update_existing">Aggiorna Esistente</string>
     <string name="brapi_resync_upload_new">Carica come Nuovo</string>
     <string name="dialog_field_creator_review_title">Rivedere</string>
