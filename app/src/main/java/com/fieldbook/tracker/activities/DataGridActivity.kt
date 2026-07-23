@@ -44,6 +44,8 @@ import androidx.lifecycle.lifecycleScope
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataGridCache
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.dao.ObservationDao
+import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.database.models.ObservationUnitModel
 import com.fieldbook.tracker.databinding.ActivityDataGridBinding
 import com.fieldbook.tracker.objects.TraitObject
@@ -56,6 +58,7 @@ import com.fieldbook.tracker.ui.grid.datagrid.MapFilter
 import com.fieldbook.tracker.ui.grid.datagrid.MapPlotData
 import com.fieldbook.tracker.utilities.InsetHandler
 import com.fieldbook.tracker.utilities.Utils
+import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter
 import com.fieldbook.tracker.viewmodels.DataGridViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -108,6 +111,7 @@ class DataGridActivity : ThemedActivity() {
     private var mapGrid by mutableStateOf<Array<Array<MapPlotData?>>>(emptyArray())
     private var mapInvertRow by mutableStateOf(false)
     private var mapInvertCol by mutableStateOf(false)
+
     // Incremented each time "Locate Active Plot" is tapped, so the map view can react even
     // after its one-time auto-scroll-on-load has already fired.
     private var mapLocateTrigger by mutableIntStateOf(0)
@@ -122,6 +126,9 @@ class DataGridActivity : ThemedActivity() {
 
     @Inject
     lateinit var dataGridCache: DataGridCache
+
+    @Inject
+    lateinit var valueProcessor: ValueProcessorFormatAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -267,7 +274,7 @@ class DataGridActivity : ThemedActivity() {
                                 onMissingLayout = ::showMissingMapLayoutPicker,
                                 onFilterClicked = ::toggleMapFilter,
                                 onPlotClicked = { plot ->
-                                    navigateFromValueClicked(plot.plotId, 0, 1)
+                                    navigateFromValueClicked(plot.plotId, 0)
                                 },
                                 onToggleLock = viewModel::toggleColumnLock
                             )
@@ -466,7 +473,8 @@ class DataGridActivity : ThemedActivity() {
         val currentColAttr = preferences.getString(GeneralKeys.MAP_COL_ATTR, "") ?: ""
 
         val dp = { value: Float ->
-            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, value, resources.displayMetrics).toInt()
+            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, value, resources.displayMetrics)
+                .toInt()
         }
 
         val layout = LinearLayout(this).apply {
@@ -630,7 +638,15 @@ class DataGridActivity : ThemedActivity() {
 
         lifecycleScope.launch(Dispatchers.IO) {
             val observationCount = database.getObservationCount(studyId.toString())
-            val cached = dataGridCache.getMap(studyId, rowAttrName, colAttrName, invertRow, invertCol, traitIds, observationCount)
+            val cached = dataGridCache.getMap(
+                studyId,
+                rowAttrName,
+                colAttrName,
+                invertRow,
+                invertCol,
+                traitIds,
+                observationCount
+            )
             if (cached != null) {
                 withContext(Dispatchers.Main) {
                     mapPlotDataList = cached.plots
@@ -857,6 +873,54 @@ class DataGridActivity : ThemedActivity() {
     }
 
     private fun navigateFromValueClicked(plotId: String, traitIndex: Int, rep: Int = 1) {
+        val trait = mTraits.getOrNull(traitIndex)
+        if (trait == null) {
+            performNavigation(plotId, traitIndex, rep)
+            return
+        }
+
+        val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            val observations = ObservationDao.getAllRepeatedValues(studyId, plotId, trait.id)
+
+            withContext(Dispatchers.Main) {
+                if (trait.repeatedMeasures && observations.size > 1) {
+                    showRepetitionPickerDialog(plotId, traitIndex, observations.toList())
+                } else {
+                    val highestRep = observations.maxByOrNull { it.rep.toInt() }?.rep?.toInt() ?: 1
+                    performNavigation(plotId, traitIndex, highestRep)
+                }
+            }
+        }
+    }
+
+    private fun showRepetitionPickerDialog(
+        plotId: String,
+        traitIndex: Int,
+        observations: List<ObservationModel>
+    ) {
+        val trait = mTraits.getOrNull(traitIndex)
+        val displayItems = observations.map {
+            val displayValue = if (trait != null) {
+                valueProcessor.processValue(it.value, trait) ?: it.value
+            } else {
+                it.value
+            }
+            getString(R.string.observation_info_rep) + " ${it.rep}: $displayValue"
+        }.toTypedArray()
+
+        AlertDialog.Builder(this, R.style.AppAlertDialog)
+            .setTitle(R.string.dialog_data_grid_repeated_measures_title)
+            .setItems(displayItems) { _, which ->
+                val selectedRep = observations[which].rep.toInt()
+                performNavigation(plotId, traitIndex, selectedRep)
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun performNavigation(plotId: String, traitIndex: Int, rep: Int) {
         Utils.makeToast(applicationContext, plotId)
 
         val returnIntent = Intent()
