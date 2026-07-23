@@ -860,12 +860,7 @@ class DataGridActivity : ThemedActivity() {
 
         val savedHeaders = preferences.getStringSet(GeneralKeys.DATAGRID_EXTRA_HEADERS, null)
         return if (savedHeaders == null) {
-            val base = listOf<String>(uniqueHeader)
-            if ("geo_coordinates" in allValidNames) {
-                (base + "geo_coordinates").filter { it in allValidNames }
-            } else {
-                base.filter { it in allValidNames }
-            }
+            listOf<String>(uniqueHeader).filter { it in allValidNames }
         } else {
             val others = allValidNames.filter { it in savedHeaders && it != uniqueHeader }
             if (uniqueHeader in savedHeaders) listOf<String>(uniqueHeader) + others else others
