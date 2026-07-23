@@ -2351,10 +2351,11 @@ public class CollectActivity extends ThemedActivity
                     if (currentTrait != null) {
                         BaseTraitLayout traitPhoto = traitLayouts.getTraitLayout(currentTrait.getFormat());
                         if (traitPhoto instanceof PhotoTraitLayout) {
-                            ((PhotoTraitLayout) traitPhoto).makeImage(currentTrait);
+                            boolean saved = ((PhotoTraitLayout) traitPhoto).makeImage(currentTrait);
+                            triggerTts(saved ? success : fail);
+                        } else {
+                            triggerTts(success);
                         }
-
-                        triggerTts(success);
                     }
 
                 } else triggerTts(fail);

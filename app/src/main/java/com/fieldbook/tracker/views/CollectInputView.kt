@@ -114,7 +114,7 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
 
         } else {
 
-            text = models.minByOrNull { it.rep.toInt() }?.value ?: ""
+            text = models.maxByOrNull { it.rep.toInt() }?.value ?: ""
             markObservationEdited()
         }
     }

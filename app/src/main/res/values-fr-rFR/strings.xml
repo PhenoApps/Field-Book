@@ -54,7 +54,10 @@
     <string name="group_archive">Archiver</string>
     <string name="group_remove">Retirer du groupe</string>
     <string name="dialog_group_name">Nom du Groupe</string>
+    <string name="menu_group">Groupe</string>
     <string name="menu_archive">Archiver</string>
+    <string name="menu_groups_toggle">Activer/Désactiver la Visibilité des Groupes</string>
+    <string name="group_toggle_icon">Activer/Désactiver le Groupe</string>
     <string name="archived_fields">Champs Archivés</string>
     <string name="menu_unarchive">Retirer des archives</string>
     <string name="archive_active_field_title">Archiver le Champ Actif ?</string>

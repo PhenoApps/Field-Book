@@ -1,5 +1,10 @@
 <changelog>
 
+    <release date="2026-07-07" versionCode="70202" versionName="v7.2.2">
+        <bugfix>Photos are no longer corrupted on certain Samsung devices</bugfix>
+        <bugfix>Numerous BrAPI bug fixes and improvements</bugfix>
+    </release>
+
     <release date="2026-04-30" versionCode="70201" versionName="v7.2.1">
         <new>New Experimental Traits setting to show traits under development</new>
         <bugfix>Large values now fit correctly in the repeated values view</bugfix>

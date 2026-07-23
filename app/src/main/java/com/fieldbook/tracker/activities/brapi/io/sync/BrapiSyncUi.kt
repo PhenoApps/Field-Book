@@ -33,7 +33,6 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -96,6 +95,7 @@ fun BrapiSyncScreen(
     onMergeStrategyChange: (MergeStrategy) -> Unit,
     onPersistLastCheckedDownload: (String) -> Unit = {},
     onApplyManualChoices: (Map<String, Boolean>) -> Unit = {},
+    onApplyPendingResyncChoice: (Boolean) -> Unit = {},
 ) {
     // Local UI state to allow the user to temporarily dismiss the conflict-resolution prompt
     var suppressConflictDialog by remember { mutableStateOf(false) }
@@ -337,6 +337,50 @@ fun BrapiSyncScreen(
                         Text(stringResource(R.string.cancel))
                     }
                 } else {
+
+                    if (uiState.pendingResyncChoicesCount > 0) {
+                        AppAlertDialog(
+                            positiveButtonText = stringResource(R.string.brapi_resync_update_existing),
+                            negativeButtonText = stringResource(R.string.brapi_resync_upload_new),
+                            title = stringResource(R.string.brapi_resync_dialog_title),
+                            content = {
+                                Column {
+                                    Text(
+                                        stringResource(
+                                            R.string.brapi_resync_dialog_message,
+                                            uiState.pendingResyncChoicesCount
+                                        )
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    LazyColumn(modifier = Modifier.height(180.dp)) {
+                                        itemsIndexed(uiState.pendingResyncChoices) { _, c ->
+                                            Text(
+                                                text = c.localFieldBookId ?: c.key,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                fontWeight = FontWeight.Bold,
+                                                modifier = Modifier.padding(vertical = 4.dp)
+                                            )
+                                            Text(
+                                                text = stringResource(
+                                                    R.string.brapi_resync_dialog_values,
+                                                    c.localValue,
+                                                    c.serverValue
+                                                ),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                modifier = Modifier.padding(bottom = 6.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            },
+                            onPositive = {
+                                onApplyPendingResyncChoice(true)
+                            },
+                            onNegative = {
+                                onApplyPendingResyncChoice(false)
+                            }
+                        )
+                    }
 
                     if (uiState.uploadError != null) {
                         ResultRow(

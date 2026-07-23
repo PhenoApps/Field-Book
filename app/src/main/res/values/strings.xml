@@ -259,6 +259,13 @@
     <string name="dialog_field_creator_insert_field">Creating field rows: %1$s by cols: %2$s</string>
     <string name="dialog_field_creator_insert_field_complete">Creating field rows: %1$s by cols: %2$s …complete.</string>
     <string name="dialog_field_creator_insert_plot">Inserting plot %1$s at row %2$s column %3$s</string>
+
+    <string name="brapi_resync_choice_required">Re-sync found existing server observations without local BrAPI IDs. Choose how to handle them before uploading.</string>
+    <string name="brapi_resync_dialog_title">Re-sync Match Found</string>
+    <string name="brapi_resync_dialog_message">%1$d observation(s) match data already stored on the server but have no local BrAPI ID. Choose one action for these matches.</string>
+    <string name="brapi_resync_dialog_values">Local: %1$s | Server: %2$s</string>
+    <string name="brapi_resync_update_existing">Update Existing</string>
+    <string name="brapi_resync_upload_new">Upload as New</string>
     <string name="dialog_field_creator_review_title">Review</string>
     <string name="dialog_field_creator_size_group_error">Please enter a valid name and format.</string>
     <string name="dialog_field_creator_field_name_not_unique">Field name already in use.</string>

@@ -396,16 +396,16 @@ class TraitRepository @Inject constructor(
         }
 
         return when {
-            existingTraitByName != null || existingTraitByAlias != null -> {
-                TraitProcessResult.NameOrAliasConflict
-            }
-
             existingTraitByExId != null -> { // update existing trait
                 trait.apply {
                     id = existingTraitByExId.id
                 }
                 val res = updateTrait(trait)
                 if (res != -1L) TraitProcessResult.Success else TraitProcessResult.Error
+            }
+
+            existingTraitByName != null || existingTraitByAlias != null -> {
+                TraitProcessResult.NameOrAliasConflict
             }
 
             else -> { // no conflicts, insert the new trait
