@@ -124,6 +124,8 @@
     <string name="activity_collect_dialog_verify_no_button">नहीं</string>
     <string name="activity_collect_dialog_verify_yes_button">हां</string>
     <!--- Datagrid -->
+    <string name="dialog_data_grid_header_picker_ok">ठीक</string>
+    <string name="act_data_grid_details_plot">प्लाट</string>
     <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">आपके यंत्र में इस सुविधा के लिए आवश्यक हार्डवेयर नहीं है</string>
@@ -194,8 +196,8 @@
     <string name="brapi_choice_to_make_default_positive">सुरक्षित करें</string>
     <!-- Brapi Server Info -->
     <string name="brapi_server_info_field_book">फील्ड बुक</string>
-    <!-- Community Servers -->
     <!-- Authorization -->
+    <!-- Multi-account management -->
     <!-- BrAPI Import -->
     <!-- BrAPI Export -->
     <string name="brapi_export_button">निर्यात करें</string>
