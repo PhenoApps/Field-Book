@@ -87,6 +87,15 @@ class DataGridActivity : ThemedActivity() {
     companion object {
         private const val TAG = "DataGridActivity"
         private const val ROW_HEADER_DELIMITER = " "
+
+        /** Splits an attribute name into alphabetic tokens on any run of non-letter characters. */
+        private val ATTR_TOKEN_DELIMITER_REGEX = Regex("[^A-Za-z]+")
+
+        /** Matches a whole token identifying a row-like attribute (row/rows/range/ranges). */
+        private val ROW_ATTR_TOKEN_REGEX = Regex("rows?|ranges?", RegexOption.IGNORE_CASE)
+
+        /** Matches a whole token identifying a column-like attribute (col/cols/column/columns). */
+        private val COL_ATTR_TOKEN_REGEX = Regex("cols?|columns?", RegexOption.IGNORE_CASE)
     }
 
     // for active highlighted cell (navigated from)
@@ -454,6 +463,22 @@ class DataGridActivity : ThemedActivity() {
         invalidateOptionsMenu()
     }
 
+    /** Splits an attribute name into alphabetic tokens, e.g. "row_number" -> ["row", "number"]. */
+    private fun attrNameTokens(name: String): List<String> =
+        name.split(ATTR_TOKEN_DELIMITER_REGEX).filter { it.isNotBlank() }
+
+    /** Best-guess row attribute: a column whose name has a "row"/"range" token, else the first column. */
+    private fun guessRowAttr(allValidNames: List<String>): String? =
+        allValidNames.firstOrNull { name ->
+            attrNameTokens(name).any { it.matches(ROW_ATTR_TOKEN_REGEX) }
+        } ?: allValidNames.firstOrNull()
+
+    /** Best-guess column attribute: a column whose name has a "col"/"column" token, else the second column. */
+    private fun guessColAttr(allValidNames: List<String>): String? =
+        allValidNames.firstOrNull { name ->
+            attrNameTokens(name).any { it.matches(COL_ATTR_TOKEN_REGEX) }
+        } ?: allValidNames.getOrNull(1) ?: allValidNames.firstOrNull()
+
     /**
      * Shows the Map Settings dialog: pick the row/column attributes, invert either axis, or
      * switch to GPS-coordinate layout.
@@ -469,8 +494,16 @@ class DataGridActivity : ThemedActivity() {
 
         if (allColumns.isEmpty()) return
 
-        val currentRowAttr = preferences.getString(GeneralKeys.MAP_ROW_ATTR, "") ?: ""
-        val currentColAttr = preferences.getString(GeneralKeys.MAP_COL_ATTR, "") ?: ""
+        val allColumnsList = allColumns.toList()
+        val savedRowAttr = preferences.getString(GeneralKeys.MAP_ROW_ATTR, "") ?: ""
+        val savedColAttr = preferences.getString(GeneralKeys.MAP_COL_ATTR, "") ?: ""
+
+        // Fall back to the best-guess row/column attribute (rather than the first list entry)
+        // when nothing has been saved yet, or the saved attribute no longer exists.
+        val currentRowAttr = savedRowAttr.takeIf { it in allColumnsList }
+            ?: guessRowAttr(allColumnsList) ?: ""
+        val currentColAttr = savedColAttr.takeIf { it in allColumnsList }
+            ?: guessColAttr(allColumnsList) ?: ""
 
         val dp = { value: Float ->
             TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, value, resources.displayMetrics)
@@ -607,17 +640,13 @@ class DataGridActivity : ThemedActivity() {
         val savedRowAttr = preferences.getString(GeneralKeys.MAP_ROW_ATTR, "") ?: ""
         val savedColAttr = preferences.getString(GeneralKeys.MAP_COL_ATTR, "") ?: ""
 
-        val unitAttributeNames = database.getAllObservationUnitAttributeNames(studyId)
+        val unitAttributeNames = database.getAllObservationUnitAttributeNames(studyId).toList()
         val coreFieldNames = database.existingObservationUnitCoreColumns
         val allValidNames = unitAttributeNames + coreFieldNames.filter { it !in unitAttributeNames }
 
-        val defaultRowAttr = allValidNames.firstOrNull {
-            it.contains("row", ignoreCase = true) || it.contains("range", ignoreCase = true)
-        } ?: allValidNames.firstOrNull() ?: "position_coordinate_y"
+        val defaultRowAttr = guessRowAttr(allValidNames) ?: "position_coordinate_y"
 
-        val defaultColAttr = allValidNames.firstOrNull {
-            it.contains("col", ignoreCase = true) || it.contains("column", ignoreCase = true)
-        } ?: allValidNames.getOrNull(1) ?: "position_coordinate_x"
+        val defaultColAttr = guessColAttr(allValidNames) ?: "position_coordinate_x"
 
         val rowAttrName = savedRowAttr.ifBlank { defaultRowAttr }
         val colAttrName = savedColAttr.ifBlank { defaultColAttr }
