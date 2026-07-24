@@ -220,6 +220,12 @@
     <string name="dialog_field_creator_insert_field">Creando Campo de %1$s filas por %2$s columnas</string>
     <string name="dialog_field_creator_insert_field_complete">Creando Campo de %1$s filas por %2$s columnas …completo.</string>
     <string name="dialog_field_creator_insert_plot">Insertando parcela %1$s en la fila %2$s columna %3$s</string>
+    <string name="brapi_resync_choice_required">Re-sincronización encontró observaciones del servidor existentes sin ID BrAPI local. Elija cómo manejarlas antes de subir.</string>
+    <string name="brapi_resync_dialog_title">Resincronizar Coincidencia Encontrada</string>
+    <string name="brapi_resync_dialog_message">%1$d observación(es) coinciden con los datos ya almacenados en el servidor pero no tienen ID BrAPI local. Elija una acción para estas coincidencias.</string>
+    <string name="brapi_resync_dialog_values">Local: %1$s | Servidor: %2$s</string>
+    <string name="brapi_resync_update_existing">Actualizar Existente</string>
+    <string name="brapi_resync_upload_new">Subir como Nuevo</string>
     <string name="dialog_field_creator_review_title">Revisar</string>
     <string name="dialog_field_creator_size_group_error">Por favor, ingrese un nombre y formato válidos.</string>
     <string name="dialog_field_creator_field_name_not_unique">El nombre del Campo ya está en uso.</string>
