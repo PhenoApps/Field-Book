@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Datagrid updates (https://github.com/PhenoApps/Field-Book/pull/1488)
 
 ### Changed
 
