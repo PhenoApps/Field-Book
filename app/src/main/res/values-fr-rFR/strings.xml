@@ -198,6 +198,9 @@
     <string name="activity_collect_dialog_verify_no_button">non</string>
     <string name="activity_collect_dialog_verify_yes_button">oui</string>
     <!--- Datagrid -->
+    <string name="dialog_data_grid_header_picker_ok">ok</string>
+    <string name="act_data_grid_details_plot">parcelle</string>
+    <string name="act_data_grid_collect_button">Collecter</string>
     <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">votre appareil ne possède pas le disque dur nécessaire pour cette application</string>
