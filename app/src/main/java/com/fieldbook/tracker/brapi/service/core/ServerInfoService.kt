@@ -24,13 +24,13 @@ interface ServerInfoService {
                     statusCode: Int,
                     responseHeaders: MutableMap<String, MutableList<String>>?
                 ) {
-                    result?.let { onSuccess(it) }
+                    if (result != null) onSuccess(result) else onFail(0)
                 }
 
                 override fun onFailure(
                     error: ApiException,
                     statusCode: Int,
-                    responseHeaders: Map<String, List<String>>
+                    responseHeaders: Map<String, List<String>>?
                 ) {
                     onFail(error.code)
                 }
