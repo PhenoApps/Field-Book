@@ -30,7 +30,11 @@ object InsetHandler {
 
             toolbar?.updatePadding(top = systemBars.top)
 
-            rootView.updatePadding(bottom = systemBars.bottom)
+            rootView.updatePadding(
+                left = systemBars.left,
+                right = systemBars.right,
+                bottom = systemBars.bottom
+            )
 
             insets
         }

@@ -1,6 +1,6 @@
 <link rel="stylesheet" type="text/css" href="_styles/styles.css">
 
-# Traits
+# Traits <!-- {docsify-ignore-all} -->
 
 ## Overview
 
