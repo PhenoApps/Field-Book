@@ -553,8 +553,16 @@
     <!--- Datagrid -->
     <string name="act_data_grid_cursor_failed">Не удалось загрузить данные в таблицу.</string>
     <string name="dialog_data_grid_header_picker_title">Выберите заголовки строк</string>
+    <string name="dialog_data_grid_header_picker_ok">Правильно</string>
     <string name="dialog_data_grid_repeated_measures_title">Выберите наблюдение</string>
     <string name="menu_action_header_view_data_grid_title">Обновить заголовки строк</string>
+    <string name="menu_action_heatmap_data_grid_title">Тепловая карта</string>
+    <string name="act_data_grid_details_plot">Делянка</string>
+    <string name="act_data_grid_details_value">Значение</string>
+    <string name="act_data_grid_details_rep">Повтор</string>
+    <string name="act_data_grid_details_collector">Сборщик</string>
+    <string name="act_data_grid_collect_button">Сбор данных</string>
+    <string name="map_view_legend_complete">Готово</string>
     <!--- Lock -->
     <string name="activity_collect_locked_state">Заблокировано — ввод, изменение и удаление данных отключены</string>
     <string name="activity_collect_frozen_state">Заморожено — после сохранения данные нельзя изменить или удалить</string>
@@ -1243,7 +1251,8 @@
     <string name="page_one_of_one">Страница 1 из 1</string>
     <!-- General -->
     <string name="device_offline_warning">Устройство офлайн: подключитесь к сети и попробуйте снова</string>
-    <string name="brapi_info_message">        Признаки и поля, импортированные через BrAPI, смогут экспортировать наблюдения через экспорт BrAPI.
+    <string name="brapi_info_message">
+        Признаки и поля, импортированные через BrAPI, смогут экспортировать наблюдения через экспорт BrAPI.
         Признаки и поля, созданные вручную или импортированные через CSV, нужно экспортировать в формате CSV.
     </string>
     <string name="brapi_na">Н/Д</string>
