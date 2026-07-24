@@ -115,6 +115,8 @@
     <string name="activity_collect_dialog_verify_no_button">Nein</string>
     <string name="activity_collect_dialog_verify_yes_button">Ja</string>
     <!--- Datagrid -->
+    <string name="dialog_data_grid_header_picker_ok">OK</string>
+    <string name="act_data_grid_details_plot">Parzelle</string>
     <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">Ihr Gerät verfüget nicht über die notwendige Hardware um diese Funktion auszuführen</string>
