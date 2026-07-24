@@ -24,7 +24,7 @@ class DataGridCache @Inject constructor() {
 
     data class GridSnapshot(
         val studyId: Int,
-        /** Sorted list of visible trait DB IDs — part of the cache key. */
+        /** Visible trait DB IDs in display order — part of the cache key (order matters). */
         val traitIds: List<String>,
         val rowHeader: String,
         val extraHeaders: List<String> = emptyList(),
@@ -64,7 +64,7 @@ class DataGridCache @Inject constructor() {
         val colAttr: String,
         val invertRow: Boolean,
         val invertCol: Boolean,
-        /** Sorted list of visible trait DB IDs — part of the cache key. */
+        /** Visible trait DB IDs in display order — part of the cache key (order matters). */
         val traitIds: List<String>,
         /** COUNT(*) of observations at the time the snapshot was built, used for staleness checks. */
         val observationCount: Int,

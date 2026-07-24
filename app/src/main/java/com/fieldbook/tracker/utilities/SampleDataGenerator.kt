@@ -49,9 +49,6 @@ class SampleDataGenerator @Inject constructor(
         /** Modifier letters matching the disease rating layout */
         private val DISEASE_MODIFIER_OPTIONS = listOf("R", "M", "S")
 
-        /** Characters available on the numeric soft keyboard */
-        private val NUMERIC_CHARS = ('0'..'9').toList() + listOf(';', '+', '-', '*', '.')
-
         /** Characters available on the text soft keyboard */
         private val TEXT_CHARS = (('a'..'z') + ('A'..'Z') + ('0'..'9')).toList()
 
@@ -98,7 +95,11 @@ class SampleDataGenerator @Inject constructor(
                 return studyId
             }
 
-            // Step 5: Generate artificial observations with randomized timestamps
+            // Step 5: Clear any previously generated sample observations so re-running this
+            // (e.g. from the experimental preference button) replaces rather than duplicates them.
+            database.deleteAllObservationsForStudy(studyId.toString())
+
+            // Step 6: Generate artificial observations with randomized timestamps
             val now = OffsetDateTime.now()
             val threeMonthsAgo = now.minusMonths(3)
             val epochNow = now.toEpochSecond()
@@ -237,11 +238,8 @@ class SampleDataGenerator @Inject constructor(
         return when (trait.format) {
 
             "numeric" -> {
-                // Three random digits from the numeric keypad (0–9)
-                (0 until 3).map { NUMERIC_CHARS.random() }
-                    .joinToString("")
-                    .trimStart('0')
-                    .ifEmpty { "1" }
+                // A plain 1-3 digit number, no keypad symbols
+                Random.nextInt(1, 1000).toString()
             }
 
             "percent" -> Random.nextInt(0, 101).toString()

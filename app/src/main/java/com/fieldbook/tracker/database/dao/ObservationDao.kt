@@ -763,6 +763,10 @@ class ObservationDao {
                 "${Observation.PK} = ?", arrayOf(id))
         }
 
+        fun deleteAllForStudy(studyId: String) = withDatabase { db ->
+            db.delete(Observation.tableName, "${Study.FK} = ?", arrayOf(studyId))
+        }
+
         fun updateObservationModels(db: SQLiteDatabase, observations: List<ObservationModel>) {
 
             observations.forEach {

@@ -1491,6 +1491,13 @@ public class DataHelper {
         ObservationDao.Companion.delete(id);
     }
 
+    public void deleteAllObservationsForStudy(String studyId) {
+
+        open();
+
+        ObservationDao.Companion.deleteAllForStudy(studyId);
+    }
+
     /**
      * When the version number changes, this class will recreate the entire
      * database

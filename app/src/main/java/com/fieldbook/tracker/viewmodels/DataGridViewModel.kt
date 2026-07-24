@@ -232,7 +232,9 @@ class DataGridViewModel @Inject constructor(
             try {
                 val allTraitObjects = database.allTraitObjects
                 val visibleTraits = allTraitObjects.filter { it.visible }
-                val traitIds = visibleTraits.map { it.id }.sorted()
+                // Order matters here (not just membership) so the cache key changes when the
+                // user reorders traits, even if the set of visible traits is unchanged.
+                val traitIds = visibleTraits.map { it.id }
 
                 // Cache check
                 val snapshot = dataGridCache.get(studyId, traitIds, rowHeader, extraHeaders)
