@@ -555,8 +555,16 @@
     <!--- Datagrid -->
     <string name="act_data_grid_cursor_failed">La grilla de datos no pudo cargar sus datos.</string>
     <string name="dialog_data_grid_header_picker_title">Elegir Encabezados de Fila</string>
+    <string name="dialog_data_grid_header_picker_ok">OK</string>
     <string name="dialog_data_grid_repeated_measures_title">Elegir Observación</string>
     <string name="menu_action_header_view_data_grid_title">Actualizar Encabezados de Fila</string>
+    <string name="menu_action_heatmap_data_grid_title">Mapa de calor</string>
+    <string name="act_data_grid_details_plot">Parcela</string>
+    <string name="act_data_grid_details_value">Valor</string>
+    <string name="act_data_grid_details_rep">Rep</string>
+    <string name="act_data_grid_details_collector">Colector</string>
+    <string name="act_data_grid_collect_button">Capturar</string>
+    <string name="map_view_legend_complete">Completo</string>
     <!--- Lock -->
     <string name="activity_collect_locked_state">Bloqueado - entrada, modificación y eliminación de datos están desactivados</string>
     <string name="activity_collect_frozen_state">Congelado - una vez guardados los datos no se pueden modificar o eliminar</string>
@@ -1245,7 +1253,8 @@
     <string name="page_one_of_one">Página 1 de 1</string>
     <!-- General -->
     <string name="device_offline_warning">Dispositivo sin conexión: conéctese a una red e intente nuevamente</string>
-    <string name="brapi_info_message">        Los rasgos y los campos importados vía BrAPI podrán exportar sus observaciones a través de la exportación BrAPI.
+    <string name="brapi_info_message">
+        Los rasgos y los campos importados vía BrAPI podrán exportar sus observaciones a través de la exportación BrAPI.
        Los rasgos y los campos creados manualmente o importados a través de CSV deberán exportarse a través de formato CSV.
     </string>
     <string name="brapi_na">NA</string>
