@@ -280,8 +280,9 @@
     <string name="brapi_choice_to_make_default_positive">Spara</string>
     <!-- Brapi Server Info -->
     <string name="brapi_server_info_field_book">FieldBook</string>
-    <!-- Community Servers -->
     <!-- Authorization -->
+    <!-- Multi-account management -->
+    <string name="brapi_chip_edit">Redigera</string>
     <string name="brapi_auth_btn">Logga in på sida</string>
     <string name="brapi_auth_needed_title">Inloggning krävs</string>
     <!-- BrAPI Import -->
