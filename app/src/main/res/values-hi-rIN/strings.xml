@@ -196,8 +196,8 @@
     <string name="brapi_choice_to_make_default_positive">सुरक्षित करें</string>
     <!-- Brapi Server Info -->
     <string name="brapi_server_info_field_book">फील्ड बुक</string>
-    <!-- Community Servers -->
     <!-- Authorization -->
+    <!-- Multi-account management -->
     <!-- BrAPI Import -->
     <!-- BrAPI Export -->
     <string name="brapi_export_button">निर्यात करें</string>
