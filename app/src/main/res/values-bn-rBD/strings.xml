@@ -226,8 +226,9 @@
     <string name="brapi_choice_to_make_default_positive">সঞ্চিত করা</string>
     <!-- Brapi Server Info -->
     <string name="brapi_server_info_field_book">মাঠ বহি</string>
-    <!-- Community Servers -->
     <!-- Authorization -->
+    <!-- Multi-account management -->
+    <string name="brapi_chip_edit">সংস্করণ</string>
     <!-- BrAPI Import -->
     <!-- BrAPI Export -->
     <string name="brapi_export_button">দিয়ে দেয়া</string>
