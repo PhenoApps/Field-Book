@@ -87,6 +87,8 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
     private static final int REQUEST_BARCODE_SCAN_BRAPI_CONFIG = 97;
     private static final int AUTH_REQUEST_CODE = 123;
     private static final String DIALOG_FRAGMENT_TAG = "com.tracker.fieldbook.preferences.BRAPI_DIALOG_FRAGMENT";
+    private static final String OAUTH_REDIRECT_DEFAULT = "default";
+    private static final String OAUTH_REDIRECT_EXPERIMENTAL = "experimental";
 
     private Context context;
     private PreferenceCategory brapiServerPrefCategory;
@@ -159,6 +161,8 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             });
             updatePreferencesVisibility(brapiEnabledPref.isChecked());
         }
+
+        setupOAuthRedirectPreference();
 
         setupToolbar();
         setHasOptionsMenu(true);
@@ -292,11 +296,53 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat implement
             .show();
     }
 
+    private void setupOAuthRedirectPreference() {
+        Preference oauthRedirectPref = findPreference(PreferenceKeys.BRAPI_OAUTH_REDIRECT);
+        if (oauthRedirectPref != null) {
+            updateOAuthRedirectSummary(oauthRedirectPref);
+            oauthRedirectPref.setOnPreferenceClickListener(preference -> {
+                showOAuthRedirectDialog();
+                return true;
+            });
+        }
+    }
+
+    private void updateOAuthRedirectSummary(Preference oauthRedirectPref) {
+        String mode = preferences.getString(PreferenceKeys.BRAPI_OAUTH_REDIRECT, OAUTH_REDIRECT_DEFAULT);
+        oauthRedirectPref.setSummary(OAUTH_REDIRECT_EXPERIMENTAL.equals(mode)
+                ? getString(R.string.preferences_brapi_oauth_redirect_experimental)
+                : getString(R.string.preferences_brapi_oauth_redirect_default));
+    }
+
+    private void showOAuthRedirectDialog() {
+        String[] options = {
+                getString(R.string.preferences_brapi_oauth_redirect_default),
+                getString(R.string.preferences_brapi_oauth_redirect_experimental)
+        };
+        String current = preferences.getString(PreferenceKeys.BRAPI_OAUTH_REDIRECT, OAUTH_REDIRECT_DEFAULT);
+        int selected = OAUTH_REDIRECT_EXPERIMENTAL.equals(current) ? 1 : 0;
+
+        new AlertDialog.Builder(context, R.style.AppAlertDialog)
+                .setTitle(R.string.preferences_brapi_oauth_redirect_title)
+                .setSingleChoiceItems(options, selected, (dialog, which) -> {
+                    String value = which == 1 ? OAUTH_REDIRECT_EXPERIMENTAL : OAUTH_REDIRECT_DEFAULT;
+                    preferences.edit().putString(PreferenceKeys.BRAPI_OAUTH_REDIRECT, value).apply();
+                    Preference oauthRedirectPref = findPreference(PreferenceKeys.BRAPI_OAUTH_REDIRECT);
+                    if (oauthRedirectPref != null) {
+                        updateOAuthRedirectSummary(oauthRedirectPref);
+                    }
+                    dialog.dismiss();
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
     private void updatePreferencesVisibility(boolean isChecked) {
         PreferenceScreen preferenceScreen = getPreferenceScreen();
         for (int i = 0; i < preferenceScreen.getPreferenceCount(); i++) {
             Preference preferenceItem = preferenceScreen.getPreference(i);
-            if (preferenceItem.getKey().equals(PreferenceKeys.BRAPI_ENABLED)) { // Skip the checkbox preference itself
+            if (preferenceItem.getKey().equals(PreferenceKeys.BRAPI_ENABLED)
+                    || preferenceItem.getKey().equals(PreferenceKeys.BRAPI_OAUTH_REDIRECT)) {
                 continue;
             }
             preferenceItem.setVisible(isChecked);
