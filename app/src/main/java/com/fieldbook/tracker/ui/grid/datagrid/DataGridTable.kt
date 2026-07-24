@@ -183,6 +183,7 @@ fun DataGridTable(
                 }
                 val key = columnKey(rawIdx)
                 val isLocked = key in lockedColumnIds
+                val isLastLockedColumn = pinnedColumnCount > 0 && index == pinnedColumnCount - 1
                 if (rawIdx < extraCount) {
                     DataGridHeaderCell(
                         text = extraHeaderNames[rawIdx],
@@ -190,6 +191,7 @@ fun DataGridTable(
                         sortIconRes = sortIcon,
                         isLocked = isLocked,
                         showUnlockIcon = index == 0,
+                        showRightDivider = isLastLockedColumn,
                         onClick = { onSortByColumn(rawIdx) },
                         onLongClick = { if (index == 0) onToggleLock() else onToggleColumn(key) },
                         wrapContent = wrapContent,
@@ -202,6 +204,7 @@ fun DataGridTable(
                         colors = colors,
                         sortIconRes = sortIcon,
                         isLocked = isLocked,
+                        showRightDivider = isLastLockedColumn,
                         onClick = { onSortByColumn(rawIdx) },
                         onLongClick = { onToggleColumn(key) },
                         wrapContent = wrapContent,
@@ -221,11 +224,13 @@ fun DataGridTable(
                 val row = (index / columnCount)
                 val column = index % columnCount
                 val rawIdx = displayOrder.getOrNull(column) ?: column
+                val isLastLockedColumn = pinnedColumnCount > 0 && column == pinnedColumnCount - 1
 
                 if (rawIdx < extraCount) {
                     DataGridRowHeaderCell(
                         text = extraHeaderData.getOrNull(row)?.getOrNull(rawIdx) ?: "",
                         colors = colors,
+                        showRightDivider = isLastLockedColumn,
                         wrapContent = wrapContent,
                         zoom = zoom
                     )
@@ -253,6 +258,7 @@ fun DataGridTable(
                         isHighlighted = (plotIds.getOrNull(row) == activePlotIdString && columnIndex == activeTraitIdx),
                         isSelected = false,
                         isLocked = columnKey(rawIdx) in lockedColumnIds,
+                        showRightDivider = isLastLockedColumn,
                         heatmapColor = heatmapColor,
                         wrapContent = wrapContent,
                         zoom = zoom,

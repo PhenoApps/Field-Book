@@ -6,8 +6,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,6 +28,20 @@ import com.fieldbook.tracker.R
 /** The active plot's bold inset border, shared by grid and map view for a consistent look. */
 val ACTIVE_CELL_BORDER_WIDTH = 3.6.dp
 
+/** Width of the divider drawn on the right edge of the last locked/pinned column. */
+private val LOCKED_DIVIDER_WIDTH = 2.dp
+
+@Composable
+private fun BoxScope.LockedColumnDivider() {
+    Box(
+        modifier = Modifier
+            .align(Alignment.CenterEnd)
+            .fillMaxHeight()
+            .width(LOCKED_DIVIDER_WIDTH)
+            .background(Color.Black)
+    )
+}
+
 @Composable
 fun DataGridHeaderCell(
     text: String,
@@ -32,6 +49,7 @@ fun DataGridHeaderCell(
     sortIconRes: Int? = null,
     isLocked: Boolean = false,
     showUnlockIcon: Boolean = false,
+    showRightDivider: Boolean = false,
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
     wrapContent: Boolean = false,
@@ -79,6 +97,9 @@ fun DataGridHeaderCell(
                 )
             }
         }
+        if (showRightDivider) {
+            LockedColumnDivider()
+        }
     }
 }
 
@@ -86,6 +107,7 @@ fun DataGridHeaderCell(
 fun DataGridRowHeaderCell(
     text: String,
     colors: DataGridUiColors,
+    showRightDivider: Boolean = false,
     wrapContent: Boolean = false,
     zoom: Float = 1f
 ) {
@@ -94,6 +116,7 @@ fun DataGridRowHeaderCell(
         backgroundColor = Color.White,
         textColor = Color(colors.cellTextColor),
         borderColor = Color(colors.cellTextColor),
+        showRightDivider = showRightDivider,
         wrapContent = wrapContent,
         zoom = zoom
     )
@@ -106,6 +129,7 @@ fun DataGridDataCell(
     isHighlighted: Boolean = false,
     isSelected: Boolean = false,
     isLocked: Boolean = false,
+    showRightDivider: Boolean = false,
     heatmapColor: Color? = null,
     wrapContent: Boolean = false,
     zoom: Float = 1f,
@@ -141,6 +165,7 @@ fun DataGridDataCell(
         textColor = textColor,
         borderColor = Color(colors.cellTextColor),
         borderModifier = borderModifier,
+        showRightDivider = showRightDivider,
         onClick = onClick,
         onLongClick = onLongClick,
         isClickable = true,
@@ -163,6 +188,7 @@ fun DataGridTableCell(
     textColor: Color,
     borderColor: Color,
     borderModifier: Modifier = Modifier.border(Dp.Hairline, borderColor),
+    showRightDivider: Boolean = false,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
     isClickable: Boolean = false,
@@ -193,5 +219,8 @@ fun DataGridTableCell(
             maxLines = if (wrapContent) Int.MAX_VALUE else 1,
             softWrap = wrapContent,
         )
+        if (showRightDivider) {
+            LockedColumnDivider()
+        }
     }
 }
