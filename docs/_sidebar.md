@@ -8,7 +8,7 @@
     * [Managing Traits](traits.md#managing-traits)
     * [Trait Details](traits.md#trait-details)
     * [Repeated Measures](traits.md#repeated-measures)
-    * [Formats](javascript:void(0))
+    * [Formats](# ':disabled :class=sidebar-group-label')
       * [Audio](traits/trait-audio.md)
       * [Angle](traits/trait-angle.md)
       * [Boolean](traits/trait-boolean.md)

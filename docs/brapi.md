@@ -7,17 +7,7 @@
 BrAPI is an application programming interface for plant breeding.
 It allows Field Book to directly communicate with compatible databases to import fields and traits, and export collected data.
 This eliminates the need to manually transfer files and enables Field Book to offer more sophisticated features including field, trait, and data syncing.
-
-## Setup
-
 BrAPI can be set up in the <img class="icon" src="_static/icons/settings/main/server-network.png"> [Brapi settings](./settings/settings-brapi.md).
-To use BrAPI, set the base URL to the URL of a valid BrAPI server and authorize it.
-Once authorized, Field Book will be able to communicate with the server to import fields and traits and export data.
-
-<figure class="image">
-  <img src="_static/images/brapi/brapi_url_joined.png" width="700px" class="screenshot"> 
-  <figcaption class="screenshot-caption"><i>Example BrAPI URL authorization</i></figcaption> 
-</figure>
 
 ## Import fields
 

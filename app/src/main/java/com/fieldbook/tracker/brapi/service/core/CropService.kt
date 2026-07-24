@@ -33,7 +33,6 @@ interface CropService {
                     i: Int,
                     map: MutableMap<String, MutableList<String>>?
                 ) {
-                    super.onFailure(error, i, map)
                     onFail(error?.code ?: 0)
                 }
             })
