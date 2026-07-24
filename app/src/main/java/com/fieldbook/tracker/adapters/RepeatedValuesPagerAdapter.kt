@@ -7,9 +7,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import androidx.viewpager.widget.PagerAdapter
+import androidx.viewpager.widget.PagerAdapter.POSITION_NONE
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.views.RepeatedValuesView
+import com.mikepenz.fastadapter.adapters.ItemAdapter.items
 
 /**
  * Used in the repeated values view.
@@ -35,8 +37,12 @@ class RepeatedValuesPagerAdapter(private val mContext: Context) : PagerAdapter()
 
         // Set the long click listener
         editText.setOnLongClickListener {
-            val observationId = items[position].model.internal_id_observation
-            (mContext as CollectActivity).showObservationMetadataDialog(observationId)
+            try {
+                val observationId = items[position].model.internal_id_observation
+                (mContext as CollectActivity).showObservationMetadataDialog(observationId)
+            } catch (_: NoSuchElementException) {
+                // in case the observation is not found we can just ignore the long clicl
+            }
             true
         }
 

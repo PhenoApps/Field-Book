@@ -3,6 +3,7 @@ package com.fieldbook.tracker.database.dao
 import android.content.Context
 import android.database.Cursor
 import android.database.MatrixCursor
+import android.database.sqlite.SQLiteDatabase
 import android.util.Log
 import androidx.core.database.getStringOrNull
 import androidx.preference.PreferenceManager
@@ -21,7 +22,6 @@ import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.traits.formats.presenters.UriPresenter
-import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter
 
 class ObservationUnitPropertyDao {
@@ -242,8 +242,14 @@ class ObservationUnitPropertyDao {
         ): Cursor? = withDatabase { db ->
             val headers = ObservationUnitAttributeDao.getAllNames(studyId)
 
+            val coreColumns = listOf("primary_id", "secondary_id", "observation_unit_db_id", "geo_coordinates")
+
             val selectAttributes = headers.joinToString(", ") { attributeName ->
-                "MAX(CASE WHEN attr.observation_unit_attribute_name = '$attributeName' THEN vals.observation_unit_value_name ELSE NULL END) AS \"$attributeName\""
+                if (attributeName in coreColumns) {
+                    "MAX(units.\"$attributeName\") AS \"$attributeName\""
+                } else {
+                    "MAX(CASE WHEN attr.observation_unit_attribute_name = '$attributeName' THEN vals.observation_unit_value_name ELSE NULL END) AS \"$attributeName\""
+                }
             }
 
             val traitNames = traits.map { DataHelper.replaceIdentifiers(it.name) }
@@ -298,6 +304,68 @@ class ObservationUnitPropertyDao {
 
             cursor.close()
             matrixCursor
+        }
+
+        /**
+         * Lightweight variant of getExportTableData for use by DataGridActivity only.
+         *
+         * Returns the raw SQLite cursor directly, skipping the MatrixCursor copy and the
+         * ValueProcessorFormatAdapter pass (which calls getTraitByName() per cell).
+         * This eliminates O(rows × traits) extra DB queries that the export path requires for
+         * value formatting, but which the DataGrid doesn't need.
+         *
+         * The caller is responsible for closing the returned cursor.
+         */
+        fun getDataGridTableData(
+            context: Context,
+            studyId: Int,
+            traits: ArrayList<TraitObject>,
+            requiredAttributes: List<String> = emptyList()
+        ): Cursor? = withDatabase { db ->
+            // Use only the requested attributes (unique id + row header + extra headers).
+            // Fall back to all attributes only if none were specified (e.g. legacy callers).
+            // The study's sort column(s) are also pulled in even if not requested, since the
+            // ORDER BY clause below references them by name and would otherwise fail with
+            // "no such column" when the sort attribute isn't one of the displayed columns.
+            val baseHeaders: List<String> = if (requiredAttributes.isNotEmpty()) requiredAttributes
+                          else ObservationUnitAttributeDao.getAllNames(studyId).toList()
+            val sortColumnNames = getSortColumnNames(db, studyId.toString())
+            val headers: List<String> = (baseHeaders + sortColumnNames).distinct()
+
+            val coreColumns = listOf("primary_id", "secondary_id", "observation_unit_db_id", "geo_coordinates")
+
+            val selectAttributes = headers.joinToString(", ") { attributeName ->
+                if (attributeName in coreColumns) {
+                    "MAX(units.\"$attributeName\") AS \"$attributeName\""
+                } else {
+                    "MAX(CASE WHEN attr.observation_unit_attribute_name = '$attributeName' THEN vals.observation_unit_value_name ELSE NULL END) AS \"$attributeName\""
+                }
+            }
+
+            val selectObservations = traits.joinToString(", ") { trait ->
+                val traitName = DataHelper.replaceIdentifiers(trait.name)
+                "MAX(CASE WHEN vars.internal_id_observation_variable='${trait.id}' THEN obs.value ELSE NULL END) AS \"$traitName\""
+            }
+
+            val combinedSelection = listOf(selectAttributes, selectObservations)
+                .filter { it.isNotEmpty() }
+                .joinToString(", ")
+
+            val orderByClause = getSortOrderClause(context, studyId.toString())
+
+            val query = """
+                SELECT $combinedSelection
+                FROM observation_units AS units
+                LEFT JOIN observation_units_values AS vals ON units.internal_id_observation_unit = vals.observation_unit_id
+                LEFT JOIN observation_units_attributes AS attr ON vals.observation_unit_attribute_db_id = attr.internal_id_observation_unit_attribute
+                LEFT JOIN observations AS obs ON units.observation_unit_db_id = obs.observation_unit_id AND obs.study_id = ?
+                LEFT JOIN observation_variables AS vars ON vars.${ObservationVariable.PK} = obs.${ObservationVariable.FK}
+                WHERE units.study_id = ?
+                GROUP BY units.internal_id_observation_unit
+                $orderByClause
+            """.trimIndent()
+
+            db.rawQuery(query, arrayOf(studyId.toString(), studyId.toString()))
         }
 
         /**
@@ -421,11 +489,8 @@ class ObservationUnitPropertyDao {
             db.rawQuery(query, null)
         }
 
-        private fun getSortOrderClause(context: Context, studyId: String): String? = withDatabase { db ->
-            val sortOrder = if (PreferenceManager.getDefaultSharedPreferences(context)
-                    .getBoolean("${GeneralKeys.SORT_ORDER}.$studyId", true)) "ASC" else "DESC"
-
-            var sortCols = "" // Adjusted to start as an empty string
+        /** The study's configured sort column name(s), e.g. from a "study_sort_name" of "Plot,Rep". */
+        private fun getSortColumnNames(db: SQLiteDatabase, studyId: String): List<String> {
             val sortName = db.query(
                 Study.tableName,
                 select = arrayOf("study_sort_name"),
@@ -433,10 +498,15 @@ class ObservationUnitPropertyDao {
                 whereArgs = arrayOf(studyId)
             ).toFirst()["study_sort_name"]?.toString()
 
-            if (!sortName.isNullOrEmpty() && sortName != "null") {
-                sortCols = sortName.split(',')
-                    .joinToString(",") { col -> "cast(`$col` as integer), `$col`" } + (if (sortCols.isNotEmpty()) ", " else "")
-            }
+            return if (!sortName.isNullOrEmpty() && sortName != "null") sortName.split(',') else emptyList()
+        }
+
+        private fun getSortOrderClause(context: Context, studyId: String): String? = withDatabase { db ->
+            val sortOrder = if (PreferenceManager.getDefaultSharedPreferences(context)
+                    .getBoolean("${GeneralKeys.SORT_ORDER}.$studyId", true)) "ASC" else "DESC"
+
+            val sortCols = getSortColumnNames(db, studyId)
+                .joinToString(",") { col -> "cast(`$col` as integer), `$col`" }
 
             if (sortCols.isNotEmpty()) "ORDER BY $sortCols COLLATE NOCASE $sortOrder" else ""
         }

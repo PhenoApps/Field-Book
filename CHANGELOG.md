@@ -8,6 +8,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Datagrid cells can now be shaded with a color gradient (https://github.com/PhenoApps/Field-Book/pull/1488)
+- Datagrid columns can now be sorted (https://github.com/PhenoApps/Field-Book/pull/1488)
+- Multiple attributes can now be selected as row headers in Datagrid (https://github.com/PhenoApps/Field-Book/pull/1488)
+- Datagrid column width can be adjusted to match values (https://github.com/PhenoApps/Field-Book/pull/1488)
+- Datagrid columns can now be locked to remain visible while scrolling (https://github.com/PhenoApps/Field-Book/pull/1488)
+- New Datagrid Map View matches spatial layout of the field (https://github.com/PhenoApps/Field-Book/pull/1488)
+
+### Changed
+
+### Fixed
+
+## [v7.2.3] - 2026-07-24
+
+### Fixed
+- Categorical traits with multiple categories selected now correctly reset (https://github.com/PhenoApps/Field-Book/pull/1498)
+- Auto advance in date traits now correctly resets after a value is saved (https://github.com/PhenoApps/Field-Book/pull/1496)
+
+## [v7.2.2] - 2026-07-07
+
+### Fixed
+- Photos are no longer corrupted on certain Samsung devices (https://github.com/PhenoApps/Field-Book/pull/1489)
+- Numerous BrAPI bug fixes and improvements (https://github.com/PhenoApps/Field-Book/pull/1483)
+
+## [v7.2.1] - 2026-04-30
+
+### Added
+- New Experimental Traits setting to show traits under development (https://github.com/PhenoApps/Field-Book/pull/1469)
+
+### Fixed
+- Large values now fit correctly in the repeated values view (https://github.com/PhenoApps/Field-Book/pull/1468)
+- InfoBars no longer disappear when attempting to display trait data (https://github.com/PhenoApps/Field-Book/pull/1458)
+- Repeated measures can now still be collected when data input is frozen (https://github.com/PhenoApps/Field-Book/pull/1459)
+- Nix trait now works correctly in public builds (https://github.com/PhenoApps/Field-Book/pull/1465)
+- Canon trait now works correctly with EOS 6D Mark II (https://github.com/PhenoApps/Field-Book/pull/1463)
+
+## [v7.2.0] - 2026-03-17
+
+### Added
 - New Innospectra trait format (https://github.com/PhenoApps/Field-Book/pull/1392)
 - Entry progress bar is now scrollable for navigation (https://github.com/PhenoApps/Field-Book/pull/1414)
 - Simpler debugging now in system settings (https://github.com/PhenoApps/Field-Book/pull/1438)
@@ -920,3 +958,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v7.1.0]: https://github.com/PhenoApps/Field-Book/releases/tag/7.1.0
 [v7.1.1]: https://github.com/PhenoApps/Field-Book/releases/tag/7.1.1
 [v7.1.2]: https://github.com/PhenoApps/Field-Book/releases/tag/7.1.2
+
+[v7.2.0]: https://github.com/PhenoApps/Field-Book/releases/tag/7.2.0
+
+[v7.2.1]: https://github.com/PhenoApps/Field-Book/releases/tag/7.2.1
+
+[v7.2.2]: https://github.com/PhenoApps/Field-Book/releases/tag/7.2.2
+[v7.2.3]: https://github.com/PhenoApps/Field-Book/releases/tag/7.2.3

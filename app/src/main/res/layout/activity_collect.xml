@@ -85,6 +85,7 @@
         android:id="@+id/svTraitContainer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:fillViewport="false"
         android:isScrollContainer="true"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"

@@ -220,6 +220,12 @@
     <string name="dialog_field_creator_insert_field">Creazione di campo, righe: %1$s per colonne: %2$s</string>
     <string name="dialog_field_creator_insert_field_complete">Creazione di campo, righe: %1$s per colonne: %2$s …completa.</string>
     <string name="dialog_field_creator_insert_plot">Inserimento della parcella %1$s nella riga %2$s colonna %3$s</string>
+    <string name="brapi_resync_choice_required">Ri-Sincronizzazione ha trovato osservazioni server esistenti senza ID BrAPI locali. Scegli come gestirle prima di caricare.</string>
+    <string name="brapi_resync_dialog_title">Ri-Sincronizzazione Corrispondenza Trovata</string>
+    <string name="brapi_resync_dialog_message">%1$d osservazioni corrispondono a dati già memorizzati sul server ma non hanno un ID BrAPI locale. Scegli un\'azione per queste corrispondenze.</string>
+    <string name="brapi_resync_dialog_values">Locale: %1$s | Server: %2$s</string>
+    <string name="brapi_resync_update_existing">Aggiorna Esistente</string>
+    <string name="brapi_resync_upload_new">Carica come Nuovo</string>
     <string name="dialog_field_creator_review_title">Rivedere</string>
     <string name="dialog_field_creator_size_group_error">Inserisci un nome e un formato validi.</string>
     <string name="dialog_field_creator_field_name_not_unique">Nome del campo già in uso.</string>
@@ -287,7 +293,7 @@
     <string name="traits_dialog_import">Importa</string>
     <string name="import_error_format_trait">Solo i file TRT possono essere importati come una lista di caratteri</string>
     <string name="import_error_format_trait_json">Formato JSON non valido: %s</string>
-    <string name="import_error_no_traits">Nessuna caratteristica trovata</string>
+    <string name="import_error_no_traits">Nessun caratteri trovato</string>
     <string name="trait_import_successful">Caratteri importati con successo</string>
     <string name="traits_export_check">Esporta la lista di caratteri corrente?</string>
     <string name="traits_dialog_export">Esporta</string>
@@ -341,6 +347,7 @@
     <string name="traits_format_green_seeker">GreenSeeker</string>
     <string name="traits_format_scale">Scala</string>
     <string name="traits_format_stop_watch">Cronometro</string>
+    <string name="traits_format_custom">Personalizzato</string>
     <string name="traits_format_hardware">Hardware</string>
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Formati di Carattere</string>
@@ -453,7 +460,7 @@
     <string name="trait_brapi_value_display">Mostra Valori (es. %s)</string>
     <string name="error_loading_trait_detail">Errore nel caricare le informazioni del carattere</string>
     <string name="error_deleting_trait">Errore: impossibile eliminare il carattere</string>
-    <string name="error_updating_trait_resource_file">Errore nell\'aggiornamento del file risorsa del carattere</string>
+    <string name="error_updating_trait_resource_file">Errore nell\'aggiornamento del file di risorsa del carattere</string>
     <string name="error_updating_trait_visibility">Errore nell\'aggiornare la visibilità del carattere</string>
     <string name="error_empty_trait_name">Il nome del carattere non può essere vuoto</string>
     <string name="error_copy_trait">Errore durante la copia del carattere</string>
@@ -1444,6 +1451,9 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="pref_experimental_generate_sample_data_confirm_message">Questo creerà o popolerà un campo chiamato \"field_sample\" con osservazioni artificiali. I caratteri di esempio saranno caricate automaticamente se non sono presenti.</string>
     <string name="pref_experimental_generate_sample_data_success">Campo di esempio creato con successo.</string>
     <string name="pref_experimental_generate_sample_data_failure">Impossibile generare il campo di esempio. Controllare che l\'archiviazione sia configurata correttamente.</string>
+    <string name="traits_format_experimental">Sperimentale</string>
+    <string name="pref_experimental_traits_category_title">Caratteri Sperimentali</string>
+    <string name="pref_experimental_traits_category_summary">Mostra una categoria di caratteri sperimentali nel selettore del tipo di carattere</string>
     <string name="pref_alpha_media_keycode_events_summary">La traccia successiva/precedente naviga i entrati, il volume su/giù si muove attraverso i caratteri, la chiamata catturerà le foto</string>
     <string name="pref_alpha_media_keycode_events_title">Naviga Tramite Comandi Multimediali dell\'Hardware</string>
     <string name="pref_geonav_distance_threshold_summary">GeoNav si ferma automaticamente quando la distanza da tutti le parcelle supera questo valore in chilometri.</string>

@@ -9,6 +9,7 @@ import android.view.View
 import android.widget.Button
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.viewpager.widget.ViewPager
+import com.fieldbook.tracker.views.WrapContentViewPager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.adapters.RepeatedValuesPagerAdapter
@@ -70,7 +71,7 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
     private val leftButton: Button
     private val rightButton: Button
     private val addButton: FloatingActionButton
-    private val pager: ViewPager
+    private val pager: WrapContentViewPager
     //private val nonEmptyGroup: Group
 
     //initialize all the global view variables
@@ -81,7 +82,7 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
         leftButton = findViewById(R.id.repeated_values_view_left_btn)
         rightButton = findViewById(R.id.repeated_values_view_right_btn)
         addButton = findViewById(R.id.repeated_values_view_add_btn)
-        pager = findViewById(R.id.repeated_values_view_pager)
+        pager = findViewById<WrapContentViewPager>(R.id.repeated_values_view_pager)
         //nonEmptyGroup = findViewById(R.id.view_repeated_values_group)
 
         pager.pageMargin = 8f.dipToPixels(context).toInt()
@@ -121,7 +122,6 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
                     act.traitLayoutRefresh()
 
                 }
-
             }
         }
 
@@ -349,6 +349,20 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
         getEditText()?.setTextColor(color)
     }
 
+    fun getSavedIds(): List<Int> {
+
+        return mValues.filter { it.model.study_id.toInt() >= 0 }.map { it.model.internal_id_observation }
+    }
+
+    fun isSelectedSaved(): Boolean {
+
+        return try {
+            mValues[pager.currentItem].model.internal_id_observation > 0
+        } catch (_: Exception) {
+            false
+        }
+    }
+
     private fun getSelectedModel(): ObservationModel? {
         return if (mValues.isNotEmpty()) {
             val model = mValues[pager.currentItem].model
@@ -377,6 +391,8 @@ class RepeatedValuesView(context: Context, attributeSet: AttributeSet) :
     private fun submitList() {
 
         (pager.adapter as RepeatedValuesPagerAdapter).submitItems(mValues)
+
+        pager.requestLayout()
 
         updateButtonVisibility()
     }

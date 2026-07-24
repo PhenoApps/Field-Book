@@ -1,5 +1,38 @@
 <changelog>
 
+    <release date="2026-07-24" versionCode="70203" versionName="v7.2.3">
+        <bugfix>Categorical traits with multiple categories selected now correctly reset</bugfix>
+        <bugfix>Auto advance in date traits now correctly resets after a value is saved</bugfix>
+    </release>
+
+    <release date="2026-07-07" versionCode="70202" versionName="v7.2.2">
+        <bugfix>Photos are no longer corrupted on certain Samsung devices</bugfix>
+        <bugfix>Numerous BrAPI bug fixes and improvements</bugfix>
+    </release>
+
+    <release date="2026-04-30" versionCode="70201" versionName="v7.2.1">
+        <new>New Experimental Traits setting to show traits under development</new>
+        <bugfix>Large values now fit correctly in the repeated values view</bugfix>
+        <bugfix>InfoBars no longer disappear when attempting to display trait data</bugfix>
+        <bugfix>Repeated measures can now still be collected when data input is frozen</bugfix>
+        <bugfix>Nix trait now works correctly in public builds</bugfix>
+        <bugfix>Canon trait now works correctly with EOS 6D Mark II</bugfix>
+    </release>
+
+    <release date="2026-03-17" versionCode="70200" versionName="v7.2.0">
+        <new>New Innospectra trait format</new>
+        <new>Entry progress bar is now scrollable for navigation</new>
+        <new>Simpler debugging now in system settings</new>
+        <new>Categorical traits now have an option that allows new categories to be defined during collection</new>
+        <info>Media now exports as file name instead of full URI</info>
+        <info>Sample files updated</info>
+        <info>Hardware and Custom trait groups added to the trait creator</info>
+        <info>Disease severity scale is now created and managed within Field Book</info>
+        <info>Delete field dialog now includes an archive option</info>
+        <bugfix>Toolbars now use the correct themes</bugfix>
+        <bugfix>Trait files from BreedBase are now correctly imported</bugfix>
+    </release>
+
     <release date="2026-02-24" versionCode="70102" versionName="v7.1.2">
         <new>External scanners can now be used on numeric and percent traits</new>
         <info>Bundling more than 100 media items now warns users that it will slow down the app</info>

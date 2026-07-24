@@ -220,6 +220,12 @@
     <string name="dialog_field_creator_insert_field">Criando campo no %1$s linhas por %2$s colunas</string>
     <string name="dialog_field_creator_insert_field_complete">Criando campo de %1$s linhas por %2$s colunas …completo.</string>
     <string name="dialog_field_creator_insert_plot">Inserindo parcela %1$s na linha %2$s coluna %3$s</string>
+    <string name="brapi_resync_choice_required">Re-sincronizar observações de servidor existentes sem IDs de BrAPI locais. Escolha como manipulá-las antes de fazer o upload.</string>
+    <string name="brapi_resync_dialog_title">Correspondência de Re-sincronização Encontrada</string>
+    <string name="brapi_resync_dialog_message">%1$d observações correspondem a dados já armazenados no servidor, mas não possuem um ID BrAPI local. Escolha uma ação para essas correspondências.</string>
+    <string name="brapi_resync_dialog_values">Local: %1$s Server: %2$s</string>
+    <string name="brapi_resync_update_existing">Atualizar Existente</string>
+    <string name="brapi_resync_upload_new">Carregar como Novo</string>
     <string name="dialog_field_creator_review_title">Revisar</string>
     <string name="dialog_field_creator_size_group_error">Por favor, insira um nome e formato válidos.</string>
     <string name="dialog_field_creator_field_name_not_unique">Nome do campo já está em uso.</string>
@@ -341,6 +347,7 @@
     <string name="traits_format_green_seeker">GreenSeeker</string>
     <string name="traits_format_scale">Escala</string>
     <string name="traits_format_stop_watch">Cronômetro</string>
+    <string name="traits_format_custom">Personalizado</string>
     <string name="traits_format_hardware">Equipamento</string>
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Formato de Característica</string>
@@ -1205,7 +1212,8 @@
     <string name="page_one_of_one">Página 1 de 1</string>
     <!-- General -->
     <string name="device_offline_warning">Dispositivo Offline: Conecte-se a uma rede e tente novamente</string>
-    <string name="brapi_info_message">        Características e campos importados via BrAPI poderão exportar suas observações por meio da exportação BrAPI.
+    <string name="brapi_info_message">
+        Características e campos importados via BrAPI poderão exportar suas observações por meio da exportação BrAPI.
         Características e campos criados manualmente ou importados via CSV precisarão ser exportados no formato CSV.
     </string>
     <string name="brapi_na">NA</string>
@@ -1445,6 +1453,9 @@
     <string name="pref_experimental_generate_sample_data_confirm_message">Isto irá criar ou preencher um campo chamado \"field_sample\" com observações artificiais. Características de exemplo serão carregadas automaticamente se nenhuma estiver presente.</string>
     <string name="pref_experimental_generate_sample_data_success">Campo de exemplo criado com sucesso.</string>
     <string name="pref_experimental_generate_sample_data_failure">Falha ao gerar o campo de exemplo. Verifique se o armazenamento está configurado corretamente.</string>
+    <string name="traits_format_experimental">Experimental</string>
+    <string name="pref_experimental_traits_category_title">Características Experimentais</string>
+    <string name="pref_experimental_traits_category_summary">Mostrar uma categoria de características experimentais no seletor de tipo de característica</string>
     <string name="pref_alpha_media_keycode_events_summary">Seguinte/anterior navega pelas entradas, o botão de aumentar/diminuir o volume alterna entre as características e a função \"Ligar\" captura fotos</string>
     <string name="pref_alpha_media_keycode_events_title">Navegar Com Comandos de Mídia de Hardware</string>
     <string name="pref_geonav_distance_threshold_summary">GeoNav automaticamente para quando a distância de todos os lotes exceder esse valor em quilômetros.</string>

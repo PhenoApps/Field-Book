@@ -1,63 +1,70 @@
 package com.fieldbook.tracker.activities
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Typeface
 import android.os.Bundle
-import android.util.Log
 import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
+import android.widget.ArrayAdapter
+import android.widget.CheckBox
+import android.widget.LinearLayout
+import android.widget.Spinner
+import android.widget.TextView
+import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.calculateZoom
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.ui.graphics.Color
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
+import androidx.core.content.edit
 import androidx.core.database.getStringOrNull
+import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.lifecycleScope
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.database.DataGridCache
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.dao.ObservationDao
 import com.fieldbook.tracker.database.models.ObservationModel
+import com.fieldbook.tracker.database.models.ObservationUnitModel
+import com.fieldbook.tracker.databinding.ActivityDataGridBinding
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
-import com.fieldbook.tracker.utilities.CategoryJsonUtil
+import com.fieldbook.tracker.ui.grid.datagrid.DataGridMapView
+import com.fieldbook.tracker.ui.grid.datagrid.DataGridTable
+import com.fieldbook.tracker.ui.grid.datagrid.DataGridUiColors
+import com.fieldbook.tracker.ui.grid.datagrid.DataGridViewMode
+import com.fieldbook.tracker.ui.grid.datagrid.MapFilter
+import com.fieldbook.tracker.ui.grid.datagrid.MapPlotData
+import com.fieldbook.tracker.utilities.InsetHandler
 import com.fieldbook.tracker.utilities.Utils
+import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter
+import com.fieldbook.tracker.viewmodels.DataGridViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import eu.wewox.lazytable.LazyTable
-import eu.wewox.lazytable.LazyTableItem
-import eu.wewox.lazytable.lazyTableDimensions
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import androidx.core.content.edit
-import androidx.databinding.DataBindingUtil
-import com.fieldbook.tracker.databinding.ActivityDataGridBinding
-import com.fieldbook.tracker.utilities.InsetHandler
-import com.google.firebase.crashlytics.FirebaseCrashlytics
-import eu.wewox.lazytable.LazyTableState
-import eu.wewox.lazytable.lazyTablePinConfiguration
-import eu.wewox.lazytable.rememberSaveableLazyTableState
 
 /**
  * This activity is available as an optional toolbar action.
@@ -73,26 +80,28 @@ import eu.wewox.lazytable.rememberSaveableLazyTableState
  * i.putExtra("trait", 1) <- actually a trait index s.a 0 -> "height", 1 -> "lodging"
  **/
 @AndroidEntryPoint
-class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
+class DataGridActivity : ThemedActivity() {
 
-    data class HeaderData(val name: String, val code: String)
-    data class CellData(val value: String?, val code: String, val color: Int = android.graphics.Color.GREEN)
+    private val viewModel: DataGridViewModel by viewModels()
 
-    private val scope by lazy {
-        CoroutineScope(Dispatchers.IO)
+    companion object {
+        private const val TAG = "DataGridActivity"
+        private const val ROW_HEADER_DELIMITER = " "
+
+        /** Splits an attribute name into alphabetic tokens on any run of non-letter characters. */
+        private val ATTR_TOKEN_DELIMITER_REGEX = Regex("[^A-Za-z]+")
+
+        /** Matches a whole token identifying a row-like attribute (row/rows/range/ranges). */
+        private val ROW_ATTR_TOKEN_REGEX = Regex("rows?|ranges?", RegexOption.IGNORE_CASE)
+
+        /** Matches a whole token identifying a column-like attribute (col/cols/column/columns). */
+        private val COL_ATTR_TOKEN_REGEX = Regex("cols?|columns?", RegexOption.IGNORE_CASE)
     }
 
-    /**
-     * Lists used to store grid information, also used for click events
-     */
-    private var mRowHeaders = ArrayList<HeaderData>()
-    private var mPlotIds = ArrayList<String>()
-    private var mTraits = ArrayList<TraitObject>()
-    private var mGridData = ArrayList<List<CellData>>()
-
-    // for active highlighted cell
+    // for active highlighted cell (navigated from)
     private var activePlotId: Int? = null
     private var activeTrait: Int? = null
+    private var activePlotIdString: String? by mutableStateOf(null)
 
     private var activeCellBgColor: Int = 0
     private var filledCellBgColor: Int = 0
@@ -101,7 +110,22 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
     private var cellTextColor: Int = 0
 
     private var isLoading by mutableStateOf(true)
-    private lateinit var lazyTableState: LazyTableState
+
+    // Map view state
+    private var viewMode by mutableStateOf(DataGridViewMode.GRID)
+    private var activeMapFilter by mutableStateOf(MapFilter.NONE)
+    private var mapPlotDataList by mutableStateOf(emptyList<MapPlotData>())
+    private var mapGridRows by mutableIntStateOf(0)
+    private var mapGridCols by mutableIntStateOf(0)
+    private var mapGrid by mutableStateOf<Array<Array<MapPlotData?>>>(emptyArray())
+    private var mapInvertRow by mutableStateOf(false)
+    private var mapInvertCol by mutableStateOf(false)
+
+    // Incremented each time "Locate Active Plot" is tapped, so the map view can react even
+    // after its one-time auto-scroll-on-load has already fired.
+    private var mapLocateTrigger by mutableIntStateOf(0)
+
+    private var mTraits = ArrayList<TraitObject>()
 
     @Inject
     lateinit var database: DataHelper
@@ -109,12 +133,16 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
     @Inject
     lateinit var preferences: SharedPreferences
 
+    @Inject
+    lateinit var dataGridCache: DataGridCache
+
+    @Inject
+    lateinit var valueProcessor: ValueProcessorFormatAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
 
-        //this activity uses databinding to inflate the content layout
-        //this creates a 'binding' variable that has all the views as fields, an alternative to findViewById
         val binding = DataBindingUtil.setContentView<ActivityDataGridBinding>(
             this,
             R.layout.activity_data_grid
@@ -130,26 +158,179 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
             supportActionBar?.setHomeButtonEnabled(true)
         }
 
-        // get plot and trait IDs from intent
         activePlotId = intent.extras?.getInt("plot_id")
         activeTrait = intent.extras?.getInt("trait")
 
         setDataGridColors()
 
-        initialize()
+        // Restore view mode preference
+        val mapViewEnabled = preferences.getBoolean(GeneralKeys.MAP_VIEW_SETTING, false)
+        viewMode = if (mapViewEnabled) {
+            DataGridViewMode.MAP
+        } else {
+            DataGridViewMode.GRID
+        }
+
+        // Trigger grid load — ViewModel survives rotation so this is a no-op on re-creation
+        // if the grid is already loaded
+        if (viewModel.uiState.value is DataGridViewModel.UiState.Loading) {
+            lifecycleScope.launch {
+                val headers = withContext(Dispatchers.IO) { getDisplayHeaders() }
+                viewModel.loadGrid(getCurrentRowHeader(), headers)
+            }
+        }
+
+        // Load map data if needed
+        if (mapPlotDataList.isEmpty()) {
+            loadMapData()
+        }
 
         binding.composeView.setContent {
+            val uiState by viewModel.uiState.collectAsState()
+            val columnLocked by viewModel.columnLocked.collectAsState()
+            val lockedColumnIds by viewModel.lockedColumnIds.collectAsState()
+            val sortState by viewModel.sortState.collectAsState()
+            val wrapContent by viewModel.wrapContent.collectAsState()
+            val heatmapEnabled by viewModel.heatmapEnabled.collectAsState()
+            val zoomLevel by viewModel.zoomLevel.collectAsState()
+            val mapZoomLevel by viewModel.mapZoomLevel.collectAsState()
+            val dataGridColors = DataGridUiColors(
+                activeCellBgColor = activeCellBgColor,
+                filledCellBgColor = filledCellBgColor,
+                emptyCellBgColor = emptyCellBgColor,
+                activeCellTextColor = activeCellTextColor,
+                cellTextColor = cellTextColor
+            )
+
+            // Resolved once the grid data loads, regardless of which view is currently shown,
+            // so the active-plot highlight is available immediately in map view too.
+            LaunchedEffect(uiState) {
+                val state = uiState
+                if (activePlotIdString == null && activePlotId != null && state is DataGridViewModel.UiState.Loaded) {
+                    // activePlotId is 1-based (sent by CollectActivity); subtract 1 to index rawPlotIds
+                    activePlotIdString = viewModel.rawPlotIds.getOrNull(activePlotId!! - 1)
+                }
+            }
+
+            LaunchedEffect(activePlotIdString, viewMode) {
+                invalidateOptionsMenu()
+            }
+
+            LaunchedEffect(sortState) {
+                invalidateOptionsMenu()
+            }
+
+            LaunchedEffect(wrapContent) {
+                invalidateOptionsMenu()
+            }
+
+            LaunchedEffect(heatmapEnabled) {
+                invalidateOptionsMenu()
+            }
+
             Box(modifier = Modifier.fillMaxSize()) {
                 Column(
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    if (isLoading) {
-                        CircularProgressIndicator(color = Color(activeCellBgColor))
-                    } else {
-                        DataGridTable()
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .pointerInput(Unit) {
+                                awaitEachGesture {
+                                    awaitFirstDown(pass = PointerEventPass.Initial)
+                                    while (true) {
+                                        val event = awaitPointerEvent(PointerEventPass.Initial)
+                                        if (event.changes.size >= 2) {
+                                            val zoomChange = event.calculateZoom()
+                                            if (zoomChange != 1f) {
+                                                if (viewMode == DataGridViewMode.MAP) {
+                                                    viewModel.setMapZoom(viewModel.mapZoomLevel.value * zoomChange)
+                                                } else {
+                                                    viewModel.setZoom(viewModel.zoomLevel.value * zoomChange)
+                                                }
+                                            }
+                                            // Prioritize zoom: consume 2-finger events so children (LazyTable) don't scroll
+                                            event.changes.forEach { it.consume() }
+                                        }
+                                        if (event.changes.all { !it.pressed }) break
+                                    }
+                                }
+                            },
+                        contentAlignment = Alignment.TopCenter
+                    ) {
+                        if (isLoading && viewMode == DataGridViewMode.MAP) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(color = Color(activeCellBgColor))
+                            }
+                        } else if (viewMode == DataGridViewMode.MAP) {
+                            DataGridMapView(
+                                mapGrid = mapGrid,
+                                mapGridRows = mapGridRows,
+                                mapGridCols = mapGridCols,
+                                invertRow = mapInvertRow,
+                                invertCol = mapInvertCol,
+                                activeMapFilter = activeMapFilter,
+                                activePlotIdString = activePlotIdString,
+                                locateTrigger = mapLocateTrigger,
+                                colors = dataGridColors,
+                                columnLocked = columnLocked,
+                                wrapContent = wrapContent,
+                                zoom = mapZoomLevel,
+                                onMissingLayout = ::showMissingMapLayoutPicker,
+                                onFilterClicked = ::toggleMapFilter,
+                                onPlotClicked = { plot ->
+                                    navigateFromValueClicked(plot.plotId, 0)
+                                },
+                                onToggleLock = viewModel::toggleColumnLock
+                            )
+                        } else {
+                            when (val state = uiState) {
+                                is DataGridViewModel.UiState.Loading -> {
+                                    CircularProgressIndicator(color = Color(activeCellBgColor))
+                                }
+
+                                is DataGridViewModel.UiState.Loaded -> {
+                                    DataGridTable(
+                                        state = state,
+                                        colors = dataGridColors,
+                                        lockedColumnIds = lockedColumnIds,
+                                        sortState = sortState,
+                                        wrapContent = wrapContent,
+                                        heatmapEnabled = heatmapEnabled,
+                                        zoom = zoomLevel,
+                                        activePlotId = activePlotId,
+                                        activePlotIdString = activePlotIdString,
+                                        activeTrait = activeTrait,
+                                        onSortByColumn = viewModel::sortByColumn,
+                                        onToggleColumn = viewModel::toggleColumn,
+                                        onToggleLock = viewModel::toggleColumnLock,
+                                        onNavigateFromValue = ::navigateFromValueClicked
+                                    )
+                                }
+
+                                is DataGridViewModel.UiState.Empty -> {
+                                    Text(
+                                        text = getString(R.string.data_grid_empty),
+                                        color = Color(cellTextColor),
+                                        textAlign = TextAlign.Center
+                                    )
+                                }
+
+                                is DataGridViewModel.UiState.Error -> {
+                                    finish()
+                                }
+                            }
+                        }
                     }
+
+                    HorizontalDivider(
+                        thickness = Dp.Hairline,
+                        color = Color(cellTextColor)
+                    )
                 }
             }
         }
@@ -159,7 +340,74 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_data_grid, menu)
+        val isGrid = viewMode == DataGridViewMode.GRID
+
+        val mapItem = menu.findItem(R.id.menu_data_grid_action_map_view)
+        mapItem?.let {
+            it.title = if (isGrid) {
+                getString(R.string.menu_data_grid_action_map_view)
+            } else {
+                getString(R.string.menu_data_grid_action_grid_view)
+            }
+            it.setIcon(if (isGrid) R.drawable.map else R.drawable.table)
+        }
+
+        menu.findItem(R.id.menu_data_grid_action_header_view)?.let {
+            it.isVisible = true
+            it.title = if (isGrid) getString(R.string.menu_action_header_view_data_grid_title)
+            else getString(R.string.map_settings_title)
+        }
+
+        menu.findItem(R.id.menu_data_grid_action_heatmap)?.isVisible = isGrid
+
+        menu.findItem(R.id.menu_data_grid_action_reset_sort)?.isVisible =
+            isGrid && viewModel.sortState.value.columnIndex >= 0
+
+        menu.findItem(R.id.menu_data_grid_action_locate_plot)?.isVisible =
+            !isGrid && activePlotIdString != null
         return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        val isGrid = viewMode == DataGridViewMode.GRID
+
+        val resetSortItem = menu.findItem(R.id.menu_data_grid_action_reset_sort)
+        resetSortItem?.isVisible = isGrid && viewModel.sortState.value.columnIndex >= 0
+
+        menu.findItem(R.id.menu_data_grid_action_locate_plot)?.isVisible =
+            !isGrid && activePlotIdString != null
+
+        val mapItem = menu.findItem(R.id.menu_data_grid_action_map_view)
+        mapItem?.let {
+            it.title = if (isGrid) {
+                getString(R.string.menu_data_grid_action_map_view)
+            } else {
+                getString(R.string.menu_data_grid_action_grid_view)
+            }
+            it.setIcon(if (isGrid) R.drawable.map else R.drawable.table)
+        }
+
+        val wrapItem = menu.findItem(R.id.menu_data_grid_action_wrap_content)
+        val isWrapped = viewModel.wrapContent.value
+        wrapItem?.setIcon(if (isWrapped) R.drawable.arrow_collapse_horizontal else R.drawable.arrow_expand_horizontal)
+
+        menu.findItem(R.id.menu_data_grid_action_header_view)?.let {
+            it.isVisible = true
+            it.title = if (isGrid) getString(R.string.menu_action_header_view_data_grid_title)
+            else getString(R.string.map_settings_title)
+        }
+
+        val heatmapItem = menu.findItem(R.id.menu_data_grid_action_heatmap)
+        heatmapItem?.isVisible = isGrid
+        if (isGrid) {
+            val isHeatmap = viewModel.heatmapEnabled.value
+            if (isHeatmap) {
+                heatmapItem?.icon?.setTint(getColor(R.color.main_primary_dark))
+            } else {
+                heatmapItem?.icon?.setTintList(null)
+            }
+        }
+        return super.onPrepareOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -167,11 +415,185 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
             android.R.id.home -> {
                 finish()
             }
+
+            R.id.menu_data_grid_action_wrap_content -> {
+                viewModel.toggleWrapContent()
+            }
+
             R.id.menu_data_grid_action_header_view -> {
-                showHeaderPickerDialog()
+                if (viewMode == DataGridViewMode.GRID) {
+                    showHeaderPickerDialog()
+                } else {
+                    showMapLayoutPickerDialog()
+                }
+            }
+
+            R.id.menu_data_grid_action_reset_sort -> {
+                viewModel.resetSort()
+            }
+
+            R.id.menu_data_grid_action_heatmap -> {
+                viewModel.toggleHeatmap()
+            }
+
+            R.id.menu_data_grid_action_locate_plot -> {
+                mapLocateTrigger++
+            }
+
+            R.id.menu_data_grid_action_map_view -> {
+                toggleViewMode()
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun toggleViewMode() {
+        viewMode = if (viewMode == DataGridViewMode.GRID) {
+            DataGridViewMode.MAP
+        } else {
+            DataGridViewMode.GRID
+        }
+        preferences.edit {
+            putBoolean(GeneralKeys.MAP_VIEW_SETTING, viewMode != DataGridViewMode.GRID)
+        }
+        // Reload data for the new mode if needed
+        if (viewMode != DataGridViewMode.GRID) {
+            loadMapData()
+        }
+        invalidateOptionsMenu()
+    }
+
+    /** Splits an attribute name into alphabetic tokens, e.g. "row_number" -> ["row", "number"]. */
+    private fun attrNameTokens(name: String): List<String> =
+        name.split(ATTR_TOKEN_DELIMITER_REGEX).filter { it.isNotBlank() }
+
+    /** Best-guess row attribute: a column whose name has a "row"/"range" token, else the first column. */
+    private fun guessRowAttr(allValidNames: List<String>): String? =
+        allValidNames.firstOrNull { name ->
+            attrNameTokens(name).any { it.matches(ROW_ATTR_TOKEN_REGEX) }
+        } ?: allValidNames.firstOrNull()
+
+    /** Best-guess column attribute: a column whose name has a "col"/"column" token, else the second column. */
+    private fun guessColAttr(allValidNames: List<String>): String? =
+        allValidNames.firstOrNull { name ->
+            attrNameTokens(name).any { it.matches(COL_ATTR_TOKEN_REGEX) }
+        } ?: allValidNames.getOrNull(1) ?: allValidNames.firstOrNull()
+
+    /**
+     * Shows the Map Settings dialog: pick the row/column attributes, invert either axis, or
+     * switch to GPS-coordinate layout.
+     */
+    private fun showMapLayoutPickerDialog() {
+        val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+        val units = database.getAllObservationUnits(studyId) ?: emptyArray<ObservationUnitModel>()
+        val geoCount = units.count { !it.geo_coordinates.isNullOrBlank() }
+
+        val propColumns = database.getAllObservationUnitAttributeNames(studyId).toList()
+        val coreColumns = database.existingObservationUnitCoreColumns
+        val allColumns = (propColumns + coreColumns.filter { it !in propColumns }).toTypedArray()
+
+        if (allColumns.isEmpty()) return
+
+        val allColumnsList = allColumns.toList()
+        val savedRowAttr = preferences.getString(GeneralKeys.MAP_ROW_ATTR, "") ?: ""
+        val savedColAttr = preferences.getString(GeneralKeys.MAP_COL_ATTR, "") ?: ""
+
+        // Fall back to the best-guess row/column attribute (rather than the first list entry)
+        // when nothing has been saved yet, or the saved attribute no longer exists.
+        val currentRowAttr = savedRowAttr.takeIf { it in allColumnsList }
+            ?: guessRowAttr(allColumnsList) ?: ""
+        val currentColAttr = savedColAttr.takeIf { it in allColumnsList }
+            ?: guessColAttr(allColumnsList) ?: ""
+
+        val dp = { value: Float ->
+            TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, value, resources.displayMetrics)
+                .toInt()
+        }
+
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(24f), dp(16f), dp(24f), dp(8f))
+        }
+
+        fun makeLabel(textRes: Int, topMargin: Int = 0) = TextView(this).apply {
+            text = getString(textRes)
+            setTypeface(typeface, Typeface.BOLD)
+            setPadding(0, topMargin, 0, dp(2f))
+        }
+
+        fun makeSpinner(selected: String) = Spinner(this).apply {
+            adapter = ArrayAdapter(
+                this@DataGridActivity,
+                android.R.layout.simple_spinner_dropdown_item,
+                allColumns
+            )
+            setSelection(allColumns.indexOfFirst { it == selected }.coerceAtLeast(0))
+        }
+
+        val rowSpinner = makeSpinner(currentRowAttr)
+        val colSpinner = makeSpinner(currentColAttr)
+
+        val invertRowCheck = CheckBox(this).apply {
+            text = getString(R.string.map_settings_invert_row)
+            isChecked = preferences.getBoolean(GeneralKeys.MAP_INVERT_ROW, false)
+        }
+        val invertColCheck = CheckBox(this).apply {
+            text = getString(R.string.map_settings_invert_col)
+            isChecked = preferences.getBoolean(GeneralKeys.MAP_INVERT_COL, false)
+        }
+
+        layout.addView(makeLabel(R.string.map_settings_row_attribute))
+        layout.addView(rowSpinner)
+        layout.addView(makeLabel(R.string.map_settings_col_attribute, dp(12f)))
+        layout.addView(colSpinner)
+        layout.addView(makeLabel(R.string.map_settings_invert_subheader, dp(16f)))
+        layout.addView(invertRowCheck)
+        layout.addView(invertColCheck)
+
+        val builder = AlertDialog.Builder(this, R.style.AppAlertDialog)
+            .setTitle(R.string.map_settings_title)
+            .setView(layout)
+            .setPositiveButton(R.string.dialog_ok) { _, _ ->
+                val rowAttr = allColumns[rowSpinner.selectedItemPosition]
+                val colAttr = allColumns[colSpinner.selectedItemPosition]
+                preferences.edit {
+                    putString(GeneralKeys.MAP_ROW_ATTR, rowAttr)
+                    putString(GeneralKeys.MAP_COL_ATTR, colAttr)
+                    putBoolean(GeneralKeys.MAP_INVERT_ROW, invertRowCheck.isChecked)
+                    putBoolean(GeneralKeys.MAP_INVERT_COL, invertColCheck.isChecked)
+                }
+                loadMapData()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+
+        if (geoCount > 0) {
+            builder.setNeutralButton(
+                getString(
+                    R.string.map_view_use_geo_coordinates,
+                    geoCount
+                )
+            ) { _, _ ->
+                preferences.edit {
+                    putString(GeneralKeys.MAP_ROW_ATTR, "geo_coordinates")
+                    putString(GeneralKeys.MAP_COL_ATTR, "geo_coordinates")
+                    putBoolean(GeneralKeys.MAP_INVERT_ROW, invertRowCheck.isChecked)
+                    putBoolean(GeneralKeys.MAP_INVERT_COL, invertColCheck.isChecked)
+                    putBoolean(GeneralKeys.MAP_VIEW_SETTING, true)
+                }
+                viewMode = DataGridViewMode.MAP
+                loadMapData()
+            }
+        }
+
+        builder.create().show()
+    }
+
+    private fun showMissingMapLayoutPicker() {
+        showMapLayoutPickerDialog()
+    }
+
+    private fun toggleMapFilter(filter: MapFilter) {
+        activeMapFilter = if (activeMapFilter == filter) MapFilter.NONE else filter
     }
 
     private fun setDataGridColors() {
@@ -195,354 +617,338 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
         }
     }
 
-    /**
-     * Runs the data grid loading.
-     */
-    private fun initialize() {
-        //if something goes wrong finish the activity
-        try {
-            loadGridData()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            setResult(RESULT_CANCELED)
-            finish()
-        }
-    }
-
-    /**
-     * Uses the getExportTableData query to create a spreadsheet of values.
-     * Columns returned are plot_id followed by all traits.
-     */
-    private fun loadGridData() {
+    private fun loadMapData() {
         isLoading = true
         val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
-        val uniqueHeader = preferences.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
-        val rowHeader = getCurrentRowHeader()
-        val rowHeaderIndex = database.getAllObservationUnitAttributeNames(studyId)
-            .indexOf(rowHeader).takeIf { it >= 0 } ?: 0
-
-        if (rowHeader.isBlank()) {
+        val units = database.getAllObservationUnits(studyId) ?: run {
             isLoading = false
             return
         }
 
-        scope.launch {
-            // clear the lists
-            mTraits.clear()
-            mRowHeaders.clear()
-            mPlotIds.clear()
-
-            val dataMap = ArrayList<List<CellData>>()
-
-            // query database for visible traits
-            val traitObjects = database.allTraitObjects
-            traitObjects.forEach {
-                if (it.visible) {
-                    mTraits.add(it)
-                }
-            }
-
-            val traits = database.allTraitObjects
-
-            // expensive database call, only asks for the unique name plot attr and all visible traits
-            val cursor = database.getExportTableData(studyId, mTraits)
-
-            if (cursor.moveToFirst()) {
-                Log.d("DataGridActivity", "Query executed. Row count: ${cursor.count}")
-
-                try {
-                    do { // iterate over cursor results and populate lists of plot ids and related trait values
-                        val rowData = arrayListOf<String?>()
-                        val columns = arrayListOf<String>()
-                        val columnCount = cursor.columnCount
-
-                        for (i in 0 until columnCount) {
-                            try {
-                                columns.add(cursor.getColumnName(i))
-                                rowData.add(cursor.getStringOrNull(i))
-                            } catch (e: Exception) {
-                                e.printStackTrace()
-                            }
-                        }
-
-                        // unique name column is always the first column
-                        val uniqueIndex = columns.indexOf(uniqueHeader)
-
-                        if (uniqueIndex > -1) { // if it doesn't exist skip this row
-                            val id = rowData[uniqueIndex] ?: ""
-                            val header = if (rowHeaderIndex > -1) rowData[rowHeaderIndex] ?: "" else ""
-
-                            val dataList = arrayListOf<CellData>()
-
-                            mRowHeaders.add(HeaderData(header, header)) // add unique name row header
-                            mPlotIds.add(id)
-
-                            mTraits.forEachIndexed { _, variable ->
-                                val index = columns.indexOf(DataHelper.replaceIdentifiers(variable.name))
-
-                                if (index > -1) {
-                                    val value = rowData[index] ?: ""
-                                    val isCategorical = variable.format in setOf("categorical", "qualitative")
-                                    val repeatedValues = database.getRepeatedValues(studyId.toString(), id, variable.id)
-                                    var cellValue = value
-
-                                    if (isCategorical) {
-                                        try {
-                                            cellValue = CategoryJsonUtil.flattenMultiCategoryValue(
-                                                CategoryJsonUtil.decode(value),
-                                                !variable.categoryDisplayValue
-                                            )
-                                        } catch (e: Exception) {
-                                            e.printStackTrace()
-                                        }
-                                    }
-
-                                    // check repeated values and replace cellvalue with an ellipses
-                                    if (repeatedValues.size > 1) {
-                                        // data list is a trait row in the data grid
-                                        dataList.add(CellData("...", id))
-                                    } else {
-                                        dataList.add(CellData(cellValue, id))
-                                    }
-                                }
-                            }
-
-                            dataMap.add(dataList)
-                        }
-
-                    } while (cursor.moveToNext())
-
-                } catch (e: IllegalStateException) {
-                    withContext(Dispatchers.Main) {
-                        Utils.makeToast(this@DataGridActivity, getString(R.string.act_data_grid_cursor_failed))
-                    }
-                    e.printStackTrace()
-                }
-
-                cursor.close()
-
-                withContext(Dispatchers.Main) {
-                    mGridData.clear()
-                    mGridData.addAll(dataMap)
-                    isLoading = false
-                }
-            } else {
-                withContext(Dispatchers.Main) {
-                    isLoading = false
-                }
-            }
-        }
-    }
-
-    @Composable
-    fun DataGridTable() {
-        if (mTraits.isEmpty() || mRowHeaders.isEmpty()) {
+        if (units.isEmpty()) {
+            isLoading = false
             return
         }
 
-        lazyTableState = rememberSaveableLazyTableState()
+        val traits = database.allTraitObjects.filter { it.visible }
+        mTraits.clear()
+        mTraits.addAll(traits)
+        val totalTraits = traits.size
 
-        val columnCount = mTraits.size + 1 // +1 for rowHeader column
-        val rowCount = mRowHeaders.size + 1 // +1 for column headers (traits)
+        val uniqueHeader = preferences.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
 
-        val targetColumn = activeTrait ?: 1
-        val targetRow = activePlotId ?: 1
+        val savedRowAttr = preferences.getString(GeneralKeys.MAP_ROW_ATTR, "") ?: ""
+        val savedColAttr = preferences.getString(GeneralKeys.MAP_COL_ATTR, "") ?: ""
 
-        LaunchedEffect(mTraits, mRowHeaders) {
-            // this will trigger when traits or row headers are updated
-            Log.d("DataGridActivity", "Data loaded: ${mTraits.size} traits, ${mRowHeaders.size} rows")
-            if (mTraits.isNotEmpty() && mRowHeaders.isNotEmpty() && targetColumn <= mTraits.size && targetRow <= mRowHeaders.size) {
-                lazyTableState.animateToCell(column = targetColumn, row = targetRow)
-            }
-        }
+        val unitAttributeNames = database.getAllObservationUnitAttributeNames(studyId).toList()
+        val coreFieldNames = database.existingObservationUnitCoreColumns
+        val allValidNames = unitAttributeNames + coreFieldNames.filter { it !in unitAttributeNames }
 
-        Box(modifier = Modifier.fillMaxWidth()) {
-            LazyTable(
-                state = lazyTableState,
-                dimensions = lazyTableDimensions(
-                    columnSize = { col ->
-                        when (col) {
-                            0 -> 120.dp
-                            else -> 100.dp
-                        }
-                    },
-                    rowSize = { 48.dp } // row height
-                ),
-                contentPadding = PaddingValues(0.dp),
-                pinConfiguration = lazyTablePinConfiguration(
-                    columns = 1,    // pin the rowHeaders (first column)
-                    rows = 1        // pin the columnHeaders (first row)
-                ),
-                // modifier = Modifier
-                //     .fillMaxWidth()
-            ) {
-                // set up the header row
-                items(
-                    count = columnCount,
-                    layoutInfo = { LazyTableItem(column = it, row = 0) }) { index ->
-                    if (index == 0) {
-                        HeaderCell(text = getCurrentRowHeader())
-                    } else {
-                        val traitIndex = index - 1
-                        if (traitIndex < mTraits.size) {
-                            HeaderCell(text = mTraits[traitIndex].alias)
-                        } else {
-                            HeaderCell(text = "")
-                        }
-                    }
+        val defaultRowAttr = guessRowAttr(allValidNames) ?: "position_coordinate_y"
+
+        val defaultColAttr = guessColAttr(allValidNames) ?: "position_coordinate_x"
+
+        val rowAttrName = savedRowAttr.ifBlank { defaultRowAttr }
+        val colAttrName = savedColAttr.ifBlank { defaultColAttr }
+
+        val isSpatialMode = (rowAttrName == "geo_coordinates" && colAttrName == "geo_coordinates")
+
+        val invertRow = preferences.getBoolean(GeneralKeys.MAP_INVERT_ROW, false)
+        val invertCol = preferences.getBoolean(GeneralKeys.MAP_INVERT_COL, false)
+
+        val effectiveRowAttr = if (rowAttrName in allValidNames) rowAttrName
+        else if (defaultRowAttr in allValidNames) defaultRowAttr
+        else null
+        val effectiveColAttr = if (colAttrName in allValidNames) colAttrName
+        else if (defaultColAttr in allValidNames) defaultColAttr
+        else null
+
+        val traitIds = traits.map { it.id }.sorted()
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            val observationCount = database.getObservationCount(studyId.toString())
+            val cached = dataGridCache.getMap(
+                studyId,
+                rowAttrName,
+                colAttrName,
+                invertRow,
+                invertCol,
+                traitIds,
+                observationCount
+            )
+            if (cached != null) {
+                withContext(Dispatchers.Main) {
+                    mapPlotDataList = cached.plots
+                    mapGridRows = cached.gridRows
+                    mapGridCols = cached.gridCols
+                    mapGrid = cached.grid
+                    mapInvertRow = invertRow
+                    mapInvertCol = invertCol
+                    isLoading = false
                 }
+                return@launch
+            }
 
-                // set up the remaining grid cells
-                items(
-                    count = (rowCount - 1) * columnCount,
-                    layoutInfo = {
-                        val row = (it / columnCount) + 1  // +1 to skip header row
-                        val column = it % columnCount
-                        LazyTableItem(column = column, row = row)
-                    }
-                ) { index ->
-                    val row = (index / columnCount)
-                    val column = index % columnCount
+            val cursor = database.getExportTableData(studyId, ArrayList(traits))
+            val plotObservationCounts = mutableMapOf<String, Int>()
 
-                    if (column == 0) {
-                        // rowHeaders (first column)
-                        if (row < mRowHeaders.size) {
-                            val headerText = mRowHeaders[row].name
-                            RowHeaderCell(text = headerText)
-                        } else {
-                            RowHeaderCell(text = "")
-                        }
-                    } else {
-                        // data cells
-                        val columnIndex = column - 1 // -1 for header column
-                        val cellData =
-                            if (row < mGridData.size && columnIndex < mGridData[row].size) {
-                                mGridData[row][columnIndex]
-                            } else null
-
-                        DataCell(
-                            value = cellData?.value ?: "",
-                            isHighlighted = (row + 1 == activePlotId && columnIndex + 1 == activeTrait)
-                        ) {
-                            if (cellData != null && row < mPlotIds.size) {
-                                onCellClicked(row, columnIndex)
+            if (cursor.moveToFirst()) {
+                try {
+                    do {
+                        val columns = mutableListOf<String>()
+                        val rowData = mutableListOf<String?>()
+                        for (i in 0 until cursor.columnCount) {
+                            try {
+                                columns.add(cursor.getColumnName(i))
+                                rowData.add(cursor.getStringOrNull(i))
+                            } catch (_: Exception) {
                             }
                         }
+
+                        val uniqueIndex = columns.indexOf(uniqueHeader)
+                        if (uniqueIndex > -1) {
+                            val id = rowData[uniqueIndex] ?: ""
+                            var observedCount = 0
+                            traits.forEach { trait ->
+                                val colIdx = columns.indexOf(
+                                    DataHelper.replaceIdentifiers(
+                                        trait.name
+                                    )
+                                )
+                                if (colIdx > -1) {
+                                    val value = rowData[colIdx]
+                                    if (!value.isNullOrBlank()) {
+                                        observedCount++
+                                    }
+                                }
+                            }
+                            plotObservationCounts[id] = observedCount
+                        }
+                    } while (cursor.moveToNext())
+                } catch (_: Exception) {
+                }
+                cursor.close()
+            }
+
+            if (!isSpatialMode && (effectiveRowAttr == null || effectiveColAttr == null)) {
+                withContext(Dispatchers.Main) {
+                    mapPlotDataList = emptyList()
+                    mapGridRows = 0
+                    mapGridCols = 0
+                    mapGrid = emptyArray()
+                    isLoading = false
+                }
+                return@launch
+            }
+
+            val plots = mutableListOf<MapPlotData>()
+            var maxRow = 0
+            var maxCol = 0
+
+            if (isSpatialMode) {
+                val unitLocations = units.mapNotNull { unit ->
+                    val loc =
+                        com.fieldbook.tracker.utilities.GeodeticUtils.parseGeoCoordinate(unit.geo_coordinates)
+                    if (loc != null) unit to loc else null
+                }
+
+                if (unitLocations.isEmpty()) {
+                    withContext(Dispatchers.Main) {
+                        mapPlotDataList = emptyList()
+                        mapGridRows = 0
+                        mapGridCols = 0
+                        mapGrid = emptyArray()
+                        isLoading = false
                     }
+                    return@launch
+                }
+
+                // Get unique sorted latitudes (descending, North to South) and longitudes (ascending, West to East)
+                val sortedLats =
+                    unitLocations.map { it.second.latitude }.distinct().sortedDescending()
+                val sortedLons = unitLocations.map { it.second.longitude }.distinct().sorted()
+
+                maxRow = sortedLats.size
+                maxCol = sortedLons.size
+
+                unitLocations.forEach { (unit, loc) ->
+                    val rowIndex = sortedLats.indexOf(loc.latitude)
+                    val colIndex = sortedLons.indexOf(loc.longitude)
+
+                    val plotId = unit.observation_unit_db_id
+                    val observed = plotObservationCounts[plotId] ?: 0
+                    plots.add(
+                        MapPlotData(
+                            plotId = plotId,
+                            rowIndex = rowIndex,
+                            colIndex = colIndex,
+                            label = String.format(
+                                java.util.Locale.US,
+                                "%.5f, %.5f",
+                                loc.latitude,
+                                loc.longitude
+                            ),
+                            observedTraits = observed,
+                            totalTraits = totalTraits
+                        )
+                    )
+                }
+            } else {
+                units.forEach { unit ->
+                    val rowStr = getAttributeValue(unit, effectiveRowAttr!!)
+                    val colStr = getAttributeValue(unit, effectiveColAttr!!)
+                    val row = rowStr?.toIntOrNull() ?: return@forEach
+                    val col = colStr?.toIntOrNull() ?: return@forEach
+                    val rowZero = (row - 1).coerceAtLeast(0)
+                    val colZero = (col - 1).coerceAtLeast(0)
+                    maxRow = maxOf(maxRow, rowZero + 1)
+                    maxCol = maxOf(maxCol, colZero + 1)
+                    val plotId = unit.observation_unit_db_id
+                    val observed = plotObservationCounts[plotId] ?: 0
+                    plots.add(
+                        MapPlotData(
+                            plotId = plotId,
+                            rowIndex = rowZero,
+                            colIndex = colZero,
+                            label = "$row:$col",
+                            observedTraits = observed,
+                            totalTraits = totalTraits
+                        )
+                    )
                 }
             }
-        }
-    }
 
-    /**
-     * This is used for the first row in the data grid
-     */
-    @Composable
-    fun HeaderCell(text: String) {
-        TableCell(
-            text = text,
-            backgroundColor = Color.White,
-            textColor = Color(cellTextColor)
-        )
-    }
+            // Inverting an axis flips which corner holds cell 1,1 by mirroring the grid placement.
+            val grid = Array(maxRow) { arrayOfNulls<MapPlotData?>(maxCol) }
+            plots.forEach { plot ->
+                val r = if (invertRow) maxRow - 1 - plot.rowIndex else plot.rowIndex
+                val c = if (invertCol) maxCol - 1 - plot.colIndex else plot.colIndex
+                if (r in 0 until maxRow && c in 0 until maxCol) {
+                    grid[r][c] = plot
+                }
+            }
 
-    @Composable
-    fun RowHeaderCell(text: String) {
-        TableCell(
-            text = text,
-            backgroundColor = Color.White,
-            textColor = Color(cellTextColor)
-        )
-    }
-
-    @Composable
-    fun DataCell(value: String, isHighlighted: Boolean = false, onClick: () -> Unit = {}) {
-        val backgroundColor = when {
-            isHighlighted -> Color(activeCellBgColor)
-            value.isNotBlank() -> Color(filledCellBgColor)
-            else -> Color(emptyCellBgColor)
-        }
-
-        val textColor = if (isHighlighted) Color(activeCellTextColor) else Color(cellTextColor)
-
-        TableCell(
-            text = value,
-            backgroundColor = backgroundColor,
-            textColor = textColor,
-            onClick = onClick,
-            isClickable = true
-        )
-    }
-
-    @Composable
-    fun TableCell(
-        text: String,
-        backgroundColor: Color,
-        textColor: Color,
-        onClick: () -> Unit = {},
-        isClickable: Boolean = false
-    ) {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .background(backgroundColor)
-                .border(Dp.Hairline, Color(cellTextColor))
-                .then(if (isClickable) Modifier.clickable(onClick = onClick) else Modifier)
-        ) {
-            Text(
-                text = text,
-                color = textColor,
-                textAlign = TextAlign.Center,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
+            dataGridCache.putMap(
+                DataGridCache.MapSnapshot(
+                    studyId = studyId,
+                    rowAttr = rowAttrName,
+                    colAttr = colAttrName,
+                    invertRow = invertRow,
+                    invertCol = invertCol,
+                    traitIds = traitIds,
+                    observationCount = observationCount,
+                    plots = plots,
+                    gridRows = maxRow,
+                    gridCols = maxCol,
+                    grid = grid
+                )
             )
+
+            withContext(Dispatchers.Main) {
+                mapPlotDataList = plots
+                mapGridRows = maxRow
+                mapGridCols = maxCol
+                mapGrid = grid
+                mapInvertRow = invertRow
+                mapInvertCol = invertCol
+                isLoading = false
+            }
         }
     }
 
-    /**
-     * Determines the current row header.
-     */
+    private fun getAttributeValue(unit: ObservationUnitModel, attrName: String): String? {
+        return when (attrName) {
+            "position_coordinate_x" -> unit.position_coordinate_x
+            "position_coordinate_y" -> unit.position_coordinate_y
+            "primary_id" -> unit.primary_id
+            "secondary_id" -> unit.secondary_id
+            "observation_unit_db_id" -> unit.observation_unit_db_id
+            "geo_coordinates" -> unit.geo_coordinates
+            else -> {
+                val uniqueName = preferences.getString(GeneralKeys.UNIQUE_NAME, "")
+                database.getObservationUnitPropertyByPlotId(
+                    uniqueName,
+                    attrName,
+                    unit.observation_unit_db_id
+                )
+            }
+        }
+    }
+
+
     private fun getCurrentRowHeader(): String {
-        val uniqueHeader = preferences.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
-        val rowHeader = preferences.getString(GeneralKeys.DATAGRID_PREFIX_TRAIT, uniqueHeader) ?: ""
+        return preferences.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
+    }
+
+    private fun getDisplayHeaders(): List<String> {
+        val uniqueHeader = getCurrentRowHeader()
         val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
         val unitAttributes = database.getAllObservationUnitAttributeNames(studyId)
-        return if (rowHeader in unitAttributes) {
-            Log.d("DataGridActivity", "Using saved row header from preferences: $rowHeader")
-            rowHeader
+        val coreFieldNames = database.existingObservationUnitCoreColumns
+        val allValidNames = unitAttributes + coreFieldNames.filter { it !in unitAttributes }
+
+        val savedHeaders = preferences.getStringSet(GeneralKeys.DATAGRID_EXTRA_HEADERS, null)
+        return if (savedHeaders == null) {
+            listOf<String>(uniqueHeader).filter { it in allValidNames }
         } else {
-            Log.d("DataGridActivity", "Saved row header invalid. Falling back to unique header: $uniqueHeader")
-            uniqueHeader
-        }
-    }
-
-    private fun onCellClicked(row: Int, col: Int) {
-        val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
-        val plotId = mPlotIds[row]
-        val trait = mTraits[col]
-        val repeatedValues = database.getRepeatedValues(studyId, plotId, trait.id)
-
-        try {
-            if (repeatedValues.size <= 1) {
-                navigateFromValueClicked(plotId, col)
-            } else {
-                //show alert dialog with repeated values
-                showRepeatedValuesNavigatorDialog(trait, repeatedValues)
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error occurred while trying to navigate: " + e.printStackTrace())
-            FirebaseCrashlytics.getInstance().recordException(e)
+            val others = allValidNames.filter { it in savedHeaders && it != uniqueHeader }
+            if (uniqueHeader in savedHeaders) listOf<String>(uniqueHeader) + others else others
         }
     }
 
     private fun navigateFromValueClicked(plotId: String, traitIndex: Int, rep: Int = 1) {
+        val trait = mTraits.getOrNull(traitIndex)
+        if (trait == null) {
+            performNavigation(plotId, traitIndex, rep)
+            return
+        }
 
-        //this is the onClick handler which displays a quick message and sets the intent result / finishes
+        val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString()
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            val observations = ObservationDao.getAllRepeatedValues(studyId, plotId, trait.id)
+
+            withContext(Dispatchers.Main) {
+                if (trait.repeatedMeasures && observations.size > 1) {
+                    showRepetitionPickerDialog(plotId, traitIndex, observations.toList())
+                } else {
+                    val highestRep = observations.maxByOrNull { it.rep.toInt() }?.rep?.toInt() ?: 1
+                    performNavigation(plotId, traitIndex, highestRep)
+                }
+            }
+        }
+    }
+
+    private fun showRepetitionPickerDialog(
+        plotId: String,
+        traitIndex: Int,
+        observations: List<ObservationModel>
+    ) {
+        val trait = mTraits.getOrNull(traitIndex)
+        val displayItems = observations.map {
+            val displayValue = if (trait != null) {
+                valueProcessor.processValue(it.value, trait) ?: it.value
+            } else {
+                it.value
+            }
+            getString(R.string.observation_info_rep) + " ${it.rep}: $displayValue"
+        }.toTypedArray()
+
+        AlertDialog.Builder(this, R.style.AppAlertDialog)
+            .setTitle(R.string.dialog_data_grid_repeated_measures_title)
+            .setItems(displayItems) { _, which ->
+                val selectedRep = observations[which].rep.toInt()
+                performNavigation(plotId, traitIndex, selectedRep)
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun performNavigation(plotId: String, traitIndex: Int, rep: Int) {
         Utils.makeToast(applicationContext, plotId)
 
         val returnIntent = Intent()
         returnIntent.putExtra("result", plotId)
-        //the trait index is used to move collect activity to the clicked trait
         returnIntent.putExtra("trait", traitIndex)
         returnIntent.putExtra("rep", rep)
 
@@ -550,62 +956,69 @@ class DataGridActivity : ThemedActivity(), CoroutineScope by MainScope() {
         finish()
     }
 
-    private fun decodeValue(showValue: Boolean, value: String): String {
-        val scale = CategoryJsonUtil.decode(value)
+    private fun showHeaderPickerDialog() {
+        val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+        val uniqueHeader = preferences.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
 
-        return if (scale.isNotEmpty()) {
-            if (showValue) scale[0].value else scale[0].label
-        } else ""
-    }
+        lifecycleScope.launch {
+            val allAttributes = withContext(Dispatchers.IO) {
+                database.getAllObservationUnitAttributeNames(studyId)
+            }
 
-    private fun showRepeatedValuesNavigatorDialog(trait: TraitObject, repeatedValues: Array<ObservationModel>) {
+            if (allAttributes.isEmpty()) return@launch
 
-        for (m in repeatedValues) {
-            if (m.observation_variable_field_book_format in setOf("categorical", "qualitative")) {
-                if (m.value.isNotEmpty()) {
-                    m.value = decodeValue(trait.categoryDisplayValue, m.value)
+            val savedHeaders = preferences.getStringSet(GeneralKeys.DATAGRID_EXTRA_HEADERS, null)
+
+            val otherAttributes = allAttributes.filter { it != uniqueHeader }
+            val displayItems =
+                (if (uniqueHeader in allAttributes) listOf(uniqueHeader) else emptyList()) + otherAttributes
+
+            if (displayItems.isEmpty()) return@launch
+
+            val checkedItems = BooleanArray(displayItems.size) { idx ->
+                if (savedHeaders == null) idx == 0
+                else displayItems[idx] in savedHeaders
+            }
+
+            val dialog = AlertDialog.Builder(this@DataGridActivity, R.style.AppAlertDialog)
+                .setTitle(getString(R.string.dialog_data_grid_column_picker_title))
+                .setMultiChoiceItems(
+                    displayItems.toTypedArray(),
+                    checkedItems
+                ) { _, which, isChecked ->
+                    checkedItems[which] = isChecked
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .setNeutralButton(R.string.dialog_fragment_summary_neutral_button, null)
+                .setPositiveButton(android.R.string.ok) { _, _ ->
+                    val newSelected =
+                        displayItems.filterIndexed { idx, _ -> checkedItems[idx] }.toSet()
+                    preferences.edit {
+                        putStringSet(
+                            GeneralKeys.DATAGRID_EXTRA_HEADERS,
+                            newSelected
+                        )
+                    }
+                    val orderedDisplay = displayItems.filter { it in newSelected }
+                    val currentHeaders =
+                        (viewModel.uiState.value as? DataGridViewModel.UiState.Loaded)
+                            ?.extraHeaderNames
+                    if (orderedDisplay != currentHeaders && viewMode == DataGridViewMode.GRID) {
+                        viewModel.loadGrid(getCurrentRowHeader(), orderedDisplay)
+                    }
+                }
+                .create()
+
+            dialog.show()
+
+            dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener {
+                val allChecked = checkedItems.all { it }
+                for (i in checkedItems.indices) {
+                    checkedItems[i] = !allChecked
+                    dialog.listView.setItemChecked(i, !allChecked)
                 }
             }
         }
-
-        val choices = repeatedValues.map { it.value }.filter { it.isNotBlank() }.toTypedArray()
-
-        // show a dialog to choose which value to navigate to
-        AlertDialog.Builder(this, R.style.AppAlertDialog)
-            .setTitle(R.string.dialog_data_grid_repeated_measures_title)
-            .setSingleChoiceItems(choices, 0) { dialog, which ->
-                val value = repeatedValues[which]
-                val plotId = value.observation_unit_id
-                val traitIndex = mTraits.indexOfFirst { it.id == value.observation_variable_db_id.toString() }
-
-                navigateFromValueClicked(plotId, traitIndex, which + 1)
-                dialog.dismiss()
-            }.create().show()
     }
 
-
-
-    /**
-     * Shows dialog to choose a prefix trait to be displayed.
-     */
-    private fun showHeaderPickerDialog() {
-
-        val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
-        // get all available obs. property columns
-        val columns = database.getAllObservationUnitAttributeNames(studyId)
-
-        if (columns.isNotEmpty()) {
-            val rowHeader = getCurrentRowHeader()
-            val rowHeaderIndex = columns.indexOf(rowHeader).takeIf { it >= 0 } ?: 0
-
-            AlertDialog.Builder(this, R.style.AppAlertDialog)
-                .setTitle(R.string.dialog_data_grid_header_picker_title)
-                .setSingleChoiceItems(columns, rowHeaderIndex) { dialog, which ->
-                    // update the preference to the determined row header
-                    preferences.edit { putString(GeneralKeys.DATAGRID_PREFIX_TRAIT, columns[which]) }
-                    initialize()
-                    dialog.dismiss()
-                }.create().show()
-        }
-    }
 }

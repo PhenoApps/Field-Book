@@ -383,6 +383,9 @@ public class DateTraitLayout extends BaseTraitLayout {
     public void afterLoadNotExists(CollectActivity act) {
         super.afterLoadNotExists(act);
 
+        //clear any previously displayed value so it doesn't bleed into this entry
+        getCollectInputView().setText("");
+
         //if data does not exist, use the current date as a default value
         final Calendar c = Calendar.getInstance();
 
@@ -467,11 +470,14 @@ public class DateTraitLayout extends BaseTraitLayout {
 
         String dateString = ((StringCoder) Formats.DATE.getTraitFormatDefinition()).encode(encodedDate);
 
-        updateObservation(getCurrentTrait(), dateString);
-
+        //update the UI to reflect the saved value before persisting it, since updateObservation()
+        //may synchronously advance to the next entry (auto switch plot trait setting), which
+        //resets this layout for the new plot; running these after that would overwrite the reset
         updatePreviewDate(calendar);
 
         updateDateText(calendar);
+
+        updateObservation(getCurrentTrait(), dateString);
     }
 
     @Override

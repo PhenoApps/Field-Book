@@ -12,7 +12,8 @@ enum class Formats {
     LOCATION, GNSS, NUMERIC, PERCENT, STOP_WATCH,
     BASE_SPECTRAL, NIX, INNO_SPECTRA_SENSOR, GREEN_SEEKER,
     TEXT,
-    CUSTOM, DISEASE_RATING;
+    CUSTOM, DISEASE_RATING,
+    BASE_EXPERIMENTAL;
 
     companion object {
 
@@ -23,16 +24,19 @@ enum class Formats {
         fun isExternalCameraTrait(format: String) = format in setOf("usb camera", "gopro", "canon")
 
         fun getHardwareFormats() = entries.filter { it in setOf(SCALE, LABEL_PRINT) }
-        
+
         fun getCustomFormats() = entries.filter { it in setOf(DISEASE_RATING) }
-        
+
         fun getSpectralFormats() = entries.filter { it in setOf(NIX, GREEN_SEEKER, INNO_SPECTRA_SENSOR) }
 
         fun getCameraFormats() = entries.filter { it in setOf(CAMERA, USB_CAMERA, GO_PRO, CANON, VIDEO) }
 
-        fun getMainFormats() = entries - getCameraFormats().toSet() - getSpectralFormats().toSet() - getHardwareFormats().toSet() - getCustomFormats().toSet()
+        fun getExperimentalFormats() = entries.filter { it in setOf<Formats>() }
 
-        fun getBaseFormats() = setOf(BASE_PHOTO, BASE_SPECTRAL, HARDWARE, CUSTOM)
+        fun getMainFormats() = entries - getCameraFormats().toSet() - getSpectralFormats().toSet() -
+            getHardwareFormats().toSet() - getCustomFormats().toSet() - setOf(BASE_EXPERIMENTAL)
+
+        fun getBaseFormats() = setOf(BASE_PHOTO, BASE_SPECTRAL, HARDWARE, CUSTOM, BASE_EXPERIMENTAL)
 
         fun findTrait(format: String) = entries.find { it.getDatabaseName() == format }?.getTraitFormatDefinition()
 
@@ -66,6 +70,7 @@ enum class Formats {
         INNO_SPECTRA_SENSOR -> InnoSpectraSensorFormat()
         CUSTOM -> CustomFormat()
         HARDWARE -> HardwareFormat()
+        BASE_EXPERIMENTAL -> BaseExperimentalFormat()
         else -> TextFormat()
     }
 

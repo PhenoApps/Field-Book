@@ -220,6 +220,12 @@
     <string name="dialog_field_creator_insert_field">Creando Campo de %1$s filas por %2$s columnas</string>
     <string name="dialog_field_creator_insert_field_complete">Creando Campo de %1$s filas por %2$s columnas …completo.</string>
     <string name="dialog_field_creator_insert_plot">Insertando parcela %1$s en la fila %2$s columna %3$s</string>
+    <string name="brapi_resync_choice_required">Re-sincronización encontró observaciones del servidor existentes sin ID BrAPI local. Elija cómo manejarlas antes de subir.</string>
+    <string name="brapi_resync_dialog_title">Resincronizar Coincidencia Encontrada</string>
+    <string name="brapi_resync_dialog_message">%1$d observación(es) coinciden con los datos ya almacenados en el servidor pero no tienen ID BrAPI local. Elija una acción para estas coincidencias.</string>
+    <string name="brapi_resync_dialog_values">Local: %1$s | Servidor: %2$s</string>
+    <string name="brapi_resync_update_existing">Actualizar Existente</string>
+    <string name="brapi_resync_upload_new">Subir como Nuevo</string>
     <string name="dialog_field_creator_review_title">Revisar</string>
     <string name="dialog_field_creator_size_group_error">Por favor, ingrese un nombre y formato válidos.</string>
     <string name="dialog_field_creator_field_name_not_unique">El nombre del Campo ya está en uso.</string>
@@ -341,6 +347,7 @@
     <string name="traits_format_green_seeker">GreenSeeker</string>
     <string name="traits_format_scale">Escala</string>
     <string name="traits_format_stop_watch">Cronómetro</string>
+    <string name="traits_format_custom">Personalizado</string>
     <string name="traits_format_hardware">Hardware</string>
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Formato de Rasgo</string>
@@ -1152,7 +1159,7 @@
     <string name="brapi_enable_before_sync">BRAPI está desactivado. Por favor, actívalo en la configuración antes de usar la sincronización.</string>
     <string name="brapi_trait_already_exists">Rasgo ya existe: %1$s. No guardado.</string>
     <string name="brapi_error_saving_all_traits">Error al guardar los rasgos. No se guardaron rasgos.</string>
-    <string name="brapi_error_saving_some_traits">Error al guardar algunosrasgos. Algunos rasgos no se guardaron</string>
+    <string name="brapi_error_saving_some_traits">Error al guardar algunos rasgos. Algunos rasgos no se guardaron</string>
     <string name="brapi_traits_saved_success">Rasgos seleccionados guardados exitosamente.</string>
     <string name="brapi_obs_sync_menu_name">Sincronizar</string>
     <string name="brapi_obs_header_name">Descargando Observaciones para Estudio:</string>
@@ -1445,6 +1452,9 @@
     <string name="pref_experimental_generate_sample_data_confirm_message">Esto creará o rellenará un campo llamado \"field_sample\" con observaciones artificiales. Los rasgos de ejemplo se cargarán automáticamente si ninguno está presente.</string>
     <string name="pref_experimental_generate_sample_data_success">Campo de ejemplo creado exitosamente.</string>
     <string name="pref_experimental_generate_sample_data_failure">Error al generar el campo de muestra. Compruebe que el almacenamiento está configurado correctamente.</string>
+    <string name="traits_format_experimental">Experimental</string>
+    <string name="pref_experimental_traits_category_title">Rasgos Experimentales</string>
+    <string name="pref_experimental_traits_category_summary">Mostrar una categoría de rasgos experimentales en el selector de tipos de rasgo</string>
     <string name="pref_alpha_media_keycode_events_summary">Siguiente/anterior pista navega entradas, el volumen de arriba o abajo se mueve a través de rasgos, la llamada capturará fotos</string>
     <string name="pref_alpha_media_keycode_events_title">Navegar con Comandos Multimedia del Hardware</string>
     <string name="pref_geonav_distance_threshold_summary">GeoNav se detiene automáticamente cuando la distancia de todas las parcelas excede este valor en kilómetros.</string>

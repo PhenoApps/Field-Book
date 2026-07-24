@@ -3,8 +3,36 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/menu_data_grid_action_locate_plot"
+        android:icon="@drawable/ic_explore_black_24dp"
+        android:visible="false"
+        app:showAsAction="always"
+        android:title="@string/menu_data_grid_action_locate_plot" />
+    <item
+        android:id="@+id/menu_data_grid_action_reset_sort"
+        android:icon="@drawable/ic_tb_sort_clear"
+        android:visible="false"
+        app:showAsAction="always"
+        android:title="@string/menu_action_reset_sort_data_grid_title" />
+    <item
+        android:id="@+id/menu_data_grid_action_wrap_content"
+        android:icon="@drawable/arrow_expand_horizontal"
+        app:showAsAction="always"
+        android:title="@string/menu_action_wrap_content_data_grid_title" />
+    <item
         android:id="@+id/menu_data_grid_action_header_view"
-        android:icon="@drawable/ic_view_split_vertical"
+        android:icon="@drawable/table_cog"
         app:showAsAction="always"
         android:title="@string/menu_action_header_view_data_grid_title" />
+    <item
+        android:id="@+id/menu_data_grid_action_heatmap"
+        android:icon="@drawable/ic_tb_heatmap"
+        app:showAsAction="always"
+        android:title="@string/menu_action_heatmap_data_grid_title" />
+    <item
+        android:id="@+id/menu_data_grid_action_map_view"
+        android:icon="@drawable/map"
+        app:showAsAction="always"
+        android:title="@string/menu_data_grid_action_map_view"
+        android:orderInCategory="1" />
 </menu>

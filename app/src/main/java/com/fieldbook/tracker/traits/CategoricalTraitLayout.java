@@ -12,15 +12,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.CollectActivity;
-import com.fieldbook.tracker.database.dao.ObservationVariableDao;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.JsonUtil;
@@ -29,12 +26,13 @@ import com.google.android.flexbox.AlignItems;
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexWrap;
 import com.google.android.flexbox.FlexboxLayoutManager;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.StringJoiner;
-import java.util.concurrent.Executors;
 
 public class CategoricalTraitLayout extends BaseTraitLayout {
 
@@ -82,6 +80,23 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
         return shouldDisplayValues() ? category.getValue() : category.getLabel();
     }
 
+    private BrAPIScaleValidValuesCategories resolveCategoryForDisplay(
+            BrAPIScaleValidValuesCategories category,
+            ArrayList<BrAPIScaleValidValuesCategories> categories
+    ) {
+        if (category == null) return null;
+        for (BrAPIScaleValidValuesCategories defined : categories) {
+            if (defined == null) continue;
+            if (Objects.equals(defined.getValue(), category.getValue())
+                    || Objects.equals(defined.getLabel(), category.getValue())
+                    || Objects.equals(defined.getValue(), category.getLabel())
+                    || Objects.equals(defined.getLabel(), category.getLabel())) {
+                return defined;
+            }
+        }
+        return category;
+    }
+
     @Override
     public void setNaTraitsText() {
         getCollectInputView().setText("NA");
@@ -122,12 +137,19 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
     @Override
     public void afterLoadNotExists(CollectActivity act) {
         super.afterLoadNotExists(act);
+        if (isMulticatEnabled()) {
+            categoryList = new ArrayList<>();
+        }
         setAdapter();
     }
 
     @Override
     public void afterLoadDefault(CollectActivity act) {
         super.afterLoadDefault(act);
+        if (isMulticatEnabled()) {
+            categoryList = new ArrayList<>();
+            loadMulticatScale();
+        }
         setAdapter();
     }
 
@@ -165,22 +187,21 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                 if (cat.size() > 1) {
                     StringJoiner joiner = new StringJoiner(CATEGORY_SEPARATOR);
                     for (BrAPIScaleValidValuesCategories c : cat) {
-                        joiner.add(getDisplayText(c));
+                        BrAPIScaleValidValuesCategories resolved = resolveCategoryForDisplay(c, categories);
+                        if (resolved != null) {
+                            joiner.add(getDisplayText(resolved));
+                        }
                     }
                     getCollectInputView().setText(joiner.toString());
                     return;
                 }
 
                 //get the value from the single-sized array
-                BrAPIScaleValidValuesCategories category = cat.get(0);
+                BrAPIScaleValidValuesCategories category = resolveCategoryForDisplay(cat.get(0), categories);
 
-                //check that this pair is a valid label/val pair in the category,
-                //if it is then set the text based on the preference
-                if (CategoryJsonUtil.Companion.contains(categories, category)) {
-
-                    //display the category based on preferences
+                //display the category based on preferences
+                if (category != null) {
                     getCollectInputView().setText(getDisplayText(category));
-
                 }
             }
 
@@ -188,10 +209,13 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
             e.printStackTrace(); //if it fails to decode, assume its an old string
 
-            if (CategoryJsonUtil.Companion.contains(categories, value)) {
+            BrAPIScaleValidValuesCategories rawCategory = new BrAPIScaleValidValuesCategories();
+            rawCategory.setLabel(value);
+            rawCategory.setValue(value);
+            BrAPIScaleValidValuesCategories resolved = resolveCategoryForDisplay(rawCategory, categories);
 
-                getCollectInputView().setText(value);
-
+            if (resolved != null) {
+                getCollectInputView().setText(getDisplayText(resolved));
                 getCollectInputView().setTextColor(Color.parseColor(getDisplayColor()));
             }
         }
@@ -222,9 +246,19 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
             }
         }
 
+        ArrayList<BrAPIScaleValidValuesCategories> categories = getCategories();
+        ArrayList<BrAPIScaleValidValuesCategories> resolvedScale = new ArrayList<>();
+        for (BrAPIScaleValidValuesCategories observed : scale) {
+            BrAPIScaleValidValuesCategories resolved = resolveCategoryForDisplay(observed, categories);
+            if (resolved != null) {
+                resolvedScale.add(resolved);
+            }
+        }
+        scale = resolvedScale;
+
         //only filter if it's not NA
         if (!value.equals("NA")) {
-            BrAPIScaleValidValuesCategories[] categoriesArray = getCategories().toArray(new BrAPIScaleValidValuesCategories[0]);
+            BrAPIScaleValidValuesCategories[] categoriesArray = categories.toArray(new BrAPIScaleValidValuesCategories[0]);
             scale = CategoryJsonUtil.Companion.filterExists(categoriesArray, scale);
         }
 

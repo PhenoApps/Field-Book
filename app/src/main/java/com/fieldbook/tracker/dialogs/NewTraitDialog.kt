@@ -20,6 +20,7 @@ import com.fieldbook.tracker.adapters.TraitFormatAdapter
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.traits.formats.TraitFormatParametersAdapter
 import com.fieldbook.tracker.traits.formats.ValidationResult
@@ -148,7 +149,7 @@ class NewTraitDialog(
             neutralBtn?.setOnClickListener {
                 isShowingSubFormat = false
                 traitFormatsRv.adapter = null
-                showFormatLayouts(Formats.getMainFormats())
+                showFormatLayouts(topLevelFormats)
             }
 
         } else {
@@ -228,9 +229,15 @@ class NewTraitDialog(
 
                         showFormatLayouts(Formats.getCustomFormats(), showBack = true)
 
+                    } else if (format in Formats.getExperimentalFormats()) {
+
+                        isShowingSubFormat = true
+
+                        showFormatLayouts(Formats.getExperimentalFormats(), showBack = true)
+
                     } else {
 
-                        showFormatLayouts(Formats.getMainFormats())
+                        showFormatLayouts(topLevelFormats)
 
                     }
                 }
@@ -285,19 +292,19 @@ class NewTraitDialog(
     }
 
     private fun show() {
-        if (initialTraitObject == null) {
-            showFormatLayouts(Formats.getMainFormats())
+        topLevelFormats = if (prefs.getBoolean(PreferenceKeys.EXPERIMENTAL_TRAITS_CATEGORY, false)) {
+            Formats.getMainFormats() + listOf(Formats.BASE_EXPERIMENTAL)
         } else {
-            // a match will be found if format was not empty
-            // if match was found, showFormatParameters
+            Formats.getMainFormats()
+        }
+
+        if (initialTraitObject == null) {
+            showFormatLayouts(topLevelFormats)
+        } else {
             val existingFormat = Formats.entries.firstOrNull {
                 initialTraitObject?.format == it.getDatabaseName()
             }
-
-            // if no match found (empty format)
-            // copy certain trait properties (defined in repo.changeTraitFormat)
-            // and let the user select format first
-            if (existingFormat == null) showFormatLayouts(Formats.getMainFormats())
+            if (existingFormat == null) showFormatLayouts(topLevelFormats)
             else showFormatParameters(existingFormat)
         }
     }
@@ -557,6 +564,7 @@ class NewTraitDialog(
     }
 
     private var isShowingSubFormat = false
+    private var topLevelFormats: List<Formats> = emptyList()
 
     override fun onSelected(format: Formats) {
 
@@ -571,6 +579,7 @@ class NewTraitDialog(
                 Formats.BASE_SPECTRAL -> Formats.getSpectralFormats()
                 Formats.HARDWARE -> Formats.getHardwareFormats()
                 Formats.CUSTOM -> Formats.getCustomFormats()
+                Formats.BASE_EXPERIMENTAL -> Formats.getExperimentalFormats()
                 else -> Formats.getMainFormats()
             }, showBack = true)
 

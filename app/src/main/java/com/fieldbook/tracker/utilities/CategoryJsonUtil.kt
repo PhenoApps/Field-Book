@@ -39,6 +39,82 @@ class CategoryJsonUtil {
         }
 
         /**
+         * Parses a trait category definition that may be JSON or legacy slash-delimited values.
+         */
+        fun parseTraitCategories(categories: String): ArrayList<BrAPIScaleValidValuesCategories> {
+            if (categories.isBlank()) return arrayListOf()
+
+            return try {
+                decodeCategories(categories)
+            } catch (_: Exception) {
+                ArrayList(
+                    categories.split("/")
+                        .map { it.trim() }
+                        .filter { it.isNotEmpty() }
+                        .map { token ->
+                            BrAPIScaleValidValuesCategories().apply {
+                                label = token
+                                value = token
+                            }
+                        }
+                )
+            }
+        }
+
+        /**
+         * Converts downloaded BrAPI categorical raw values into Field Book internal JSON format.
+         * The stored category value always remains the original BrAPI token; label is resolved
+         * from the trait category definition when available.
+         */
+        fun encodeDownloadedBrapiCategoricalValue(rawValue: String, traitCategories: String): String {
+            if (rawValue.isBlank() || rawValue == "NA") return rawValue
+
+            // Already in internal JSON representation.
+            if (rawValue.trim().startsWith("[") && JsonUtil.isJsonValid(rawValue)) return rawValue
+
+            val categories = parseTraitCategories(traitCategories)
+            val selectedValues = rawValue.split(":").map { it.trim() }.filter { it.isNotEmpty() }
+
+            val mapped = ArrayList(selectedValues.map { selected ->
+                val matched = categories.firstOrNull { it.value == selected || it.label == selected }
+                BrAPIScaleValidValuesCategories().apply {
+                    value = selected
+                    label = matched?.label ?: selected
+                }
+            })
+
+            return if (mapped.isEmpty()) rawValue else encode(mapped)
+        }
+
+        /**
+         * Converts a locally-stored or BrAPI categorical value into a plain BrAPI wire-format
+         * token string ("val1:val2") suitable for comparison or upload.
+         *
+         * Handles both the internal Field Book JSON representation (`[{"label":…,"value":…}]`)
+         * and plain colon-delimited BrAPI token strings. Always returns category *value* tokens.
+         */
+        fun encodeBrapiCategoricalValue(rawValue: String, traitCategories: String): String {
+            if (rawValue.isBlank() || rawValue == "NA") return rawValue
+
+            if (rawValue.trim().startsWith("[") && JsonUtil.isJsonValid(rawValue)) {
+                return flattenMultiCategoryValue(decodeCategories(rawValue), showLabel = false)
+            }
+
+            val categories = parseTraitCategories(traitCategories)
+            val selectedValues = rawValue.split(":").map { it.trim() }.filter { it.isNotEmpty() }
+
+            val mapped = ArrayList(selectedValues.map { selected ->
+                val matched = categories.firstOrNull { it.value == selected || it.label == selected }
+                BrAPIScaleValidValuesCategories().apply {
+                    value = matched?.value ?: selected
+                    label = matched?.label ?: selected
+                }
+            })
+
+            return if (mapped.isEmpty()) rawValue else flattenMultiCategoryValue(mapped, showLabel = false)
+        }
+
+        /**
          * Takes an array of BrAPIScaleValidValuesCategories and returns a printable version.
          * JSON is currently stored in the backend to keep record of label/value pairs, the actual exported value
          * is converted using this function to a ":" delimited string. This might lead to data having extra ":" if the user
@@ -76,6 +152,10 @@ class CategoryJsonUtil {
 
             val rawValue = row["value"] as? String
 
+            val forBrapi = if ("forBrapi" in row.keys) {
+                row["forBrapi"] as? Boolean ?: false
+            } else false
+
             return when(row["observation_variable_field_book_format"]) {
                 in CategoricalTraitLayout.POSSIBLE_VALUES -> {
                     try {
@@ -83,9 +163,11 @@ class CategoryJsonUtil {
                         val showValue = row["categoryDisplayValue"] as? Boolean == true
                         val decoded = decode(rawValue ?: "")
                         if (decoded.size > 1) { // trait has multicat enabled
-                            decoded.joinToString(":") { if (showValue) it.value else it.label }
+                            decoded.joinToString(":") {
+                                if (showValue || forBrapi) it.value else it.label
+                            }
                         } else {
-                            if (showValue) decoded[0].value else decoded[0].label
+                            if (showValue || forBrapi) decoded[0].value else decoded[0].label
                         }
                     } catch (ignore: Exception) {
                         rawValue
