@@ -1,5 +1,10 @@
 <changelog>
 
+    <release date="2026-07-24" versionCode="70203" versionName="v7.2.3">
+        <bugfix>Categorical traits with multiple categories selected now correctly reset</bugfix>
+        <bugfix>Auto advance in date traits now correctly resets after a value is saved</bugfix>
+    </release>
+
     <release date="2026-07-07" versionCode="70202" versionName="v7.2.2">
         <bugfix>Photos are no longer corrupted on certain Samsung devices</bugfix>
         <bugfix>Numerous BrAPI bug fixes and improvements</bugfix>

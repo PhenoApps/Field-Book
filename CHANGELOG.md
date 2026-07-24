@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+
+## [v7.2.3] - 2026-07-24
+
+### Fixed
 - Categorical traits with multiple categories selected now correctly reset (https://github.com/PhenoApps/Field-Book/pull/1498)
 - Auto advance in date traits now correctly resets after a value is saved (https://github.com/PhenoApps/Field-Book/pull/1496)
 
@@ -954,3 +958,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v7.2.1]: https://github.com/PhenoApps/Field-Book/releases/tag/7.2.1
 
 [v7.2.2]: https://github.com/PhenoApps/Field-Book/releases/tag/7.2.2
+[v7.2.3]: https://github.com/PhenoApps/Field-Book/releases/tag/7.2.3
