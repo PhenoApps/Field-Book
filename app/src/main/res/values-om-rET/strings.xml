@@ -192,8 +192,8 @@
     <string name="brapi_choice_to_make_default_positive">Olkaa\'i</string>
     <!-- Brapi Server Info -->
     <string name="brapi_server_info_field_book">Baruule Dirree</string>
-    <!-- Community Servers -->
     <!-- Authorization -->
+    <!-- Multi-account management -->
     <!-- BrAPI Import -->
     <!-- BrAPI Export -->
     <string name="brapi_export_button">kara biraatti baasuu</string>
