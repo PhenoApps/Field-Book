@@ -137,12 +137,19 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
     @Override
     public void afterLoadNotExists(CollectActivity act) {
         super.afterLoadNotExists(act);
+        if (isMulticatEnabled()) {
+            categoryList = new ArrayList<>();
+        }
         setAdapter();
     }
 
     @Override
     public void afterLoadDefault(CollectActivity act) {
         super.afterLoadDefault(act);
+        if (isMulticatEnabled()) {
+            categoryList = new ArrayList<>();
+            loadMulticatScale();
+        }
         setAdapter();
     }
 

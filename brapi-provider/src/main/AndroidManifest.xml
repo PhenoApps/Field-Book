@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+
+    <queries>
+        <package android:name="com.fieldbook.tracker" />
+        <package android:name="com.fieldbook.tracker.debug" />
+        <package android:name="org.wheatgenetics.coordinate" />
+        <package android:name="org.wheatgenetics.coordinate.debug" />
+        <package android:name="org.phenoapps.intercross" />
+        <package android:name="org.phenoapps.intercross.debug" />
+    </queries>
+
+    <application>
+        <activity
+            android:name="org.phenoapps.brapi.account.BrapiAccessConfirmActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.Light.Dialog.Alert" />
+    </application>
+
+</manifest>

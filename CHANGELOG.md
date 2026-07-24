@@ -8,10 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Datagrid cells can now be shaded with a color gradient (https://github.com/PhenoApps/Field-Book/pull/1488)
+- Datagrid columns can now be sorted (https://github.com/PhenoApps/Field-Book/pull/1488)
+- Multiple attributes can now be selected as row headers in Datagrid (https://github.com/PhenoApps/Field-Book/pull/1488)
+- Datagrid column width can be adjusted to match values (https://github.com/PhenoApps/Field-Book/pull/1488)
+- Datagrid columns can now be locked to remain visible while scrolling (https://github.com/PhenoApps/Field-Book/pull/1488)
+- New Datagrid Map View matches spatial layout of the field (https://github.com/PhenoApps/Field-Book/pull/1488)
+- Multiple BrAPI accounts can now be added (https://github.com/PhenoApps/Field-Book/pull/1412)
+- BrAPI accounts are now managed in Android system settings (https://github.com/PhenoApps/Field-Book/pull/1412)
 
 ### Changed
 
 ### Fixed
+
+## [v7.2.3] - 2026-07-24
+
+### Fixed
+- Categorical traits with multiple categories selected now correctly reset (https://github.com/PhenoApps/Field-Book/pull/1498)
+- Auto advance in date traits now correctly resets after a value is saved (https://github.com/PhenoApps/Field-Book/pull/1496)
 
 ## [v7.2.2] - 2026-07-07
 
@@ -952,3 +966,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v7.2.1]: https://github.com/PhenoApps/Field-Book/releases/tag/7.2.1
 
 [v7.2.2]: https://github.com/PhenoApps/Field-Book/releases/tag/7.2.2
+[v7.2.3]: https://github.com/PhenoApps/Field-Book/releases/tag/7.2.3

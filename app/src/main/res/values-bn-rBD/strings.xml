@@ -142,6 +142,8 @@
     <string name="activity_collect_dialog_verify_no_button">না</string>
     <string name="activity_collect_dialog_verify_yes_button">হ্যাঁ</string>
     <!--- Datagrid -->
+    <string name="dialog_data_grid_header_picker_ok">ঠিক আছে</string>
+    <string name="act_data_grid_details_plot">প্লট</string>
     <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">এই চরিত্রের জন্য আপনার যন্ত্র প্রয়োজনীয় হার্ডওয়্যার ধারণ করে না</string>
@@ -224,8 +226,9 @@
     <string name="brapi_choice_to_make_default_positive">সঞ্চিত করা</string>
     <!-- Brapi Server Info -->
     <string name="brapi_server_info_field_book">মাঠ বহি</string>
-    <!-- Community Servers -->
     <!-- Authorization -->
+    <!-- Multi-account management -->
+    <string name="brapi_chip_edit">সংস্করণ</string>
     <!-- BrAPI Import -->
     <!-- BrAPI Export -->
     <string name="brapi_export_button">দিয়ে দেয়া</string>

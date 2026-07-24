@@ -50,6 +50,18 @@
         <item name="android:windowBackground">@drawable/inset_border</item>
     </style>
 
+    <!-- Full-screen transparent window for Compose dialogs.
+         The window starts at screen (0,0) so Compose cursor handles and touch
+         targets are always correctly aligned with their EditText positions. -->
+    <style name="BrapiComposeDialog" parent="Theme.AppCompat.Light">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.5</item>
+    </style>
+
     <style name="DialogTitleStyle">
         <item name="android:textColor">?attr/fb_color_text_dark</item>
         <item name="android:background">?attr/fb_color_background</item>
