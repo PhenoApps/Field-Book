@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
@@ -28,8 +30,8 @@ import com.fieldbook.tracker.R
 /** The active plot's bold inset border, shared by grid and map view for a consistent look. */
 val ACTIVE_CELL_BORDER_WIDTH = 3.6.dp
 
-/** Width of the divider drawn on the right edge of the last locked/pinned column. */
-private val LOCKED_DIVIDER_WIDTH = 2.dp
+/** Thickness of the divider drawn on the edges of locked columns/rows. */
+private val DIVIDER_THICKNESS = 2.dp
 
 @Composable
 private fun BoxScope.LockedColumnDivider() {
@@ -37,7 +39,18 @@ private fun BoxScope.LockedColumnDivider() {
         modifier = Modifier
             .align(Alignment.CenterEnd)
             .fillMaxHeight()
-            .width(LOCKED_DIVIDER_WIDTH)
+            .width(DIVIDER_THICKNESS)
+            .background(Color.Black)
+    )
+}
+
+@Composable
+private fun BoxScope.HeaderRowDivider() {
+    Box(
+        modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .fillMaxWidth()
+            .height(DIVIDER_THICKNESS)
             .background(Color.Black)
     )
 }
@@ -100,6 +113,7 @@ fun DataGridHeaderCell(
         if (showRightDivider) {
             LockedColumnDivider()
         }
+        HeaderRowDivider()
     }
 }
 
