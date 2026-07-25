@@ -24,6 +24,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
@@ -47,6 +48,7 @@ import com.google.android.material.chip.ChipGroup
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import pub.devrel.easypermissions.EasyPermissions
@@ -101,6 +103,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private lateinit var studyGroupNameChip: Chip
     private lateinit var detailRecyclerView: RecyclerView
     private var adapter: FieldDetailAdapter? = null
+    private var fieldDetailsJob: Job? = null
 
     private val brapiSyncIntentLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -274,6 +277,13 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         }
     }
 
+    /**
+     * Loads the screen in two stages so the header card does not wait on the trait data.
+     *
+     * The study row and its counts are a cheap read, while the trait details carry every
+     * observation value in the field. Loading both before drawing anything meant the name, dates
+     * and chips appeared only once the expensive half had finished.
+     */
     fun loadFieldDetails() {
         val id = fieldId
         if (id == null) {
@@ -281,34 +291,41 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             return
         }
 
-        // Resolved here rather than inside the coroutine: the background load can outlive the
-        // fragment's attachment, and requireContext() throws once that happens.
+        // Both are resolved here rather than inside the coroutine: the load can outlive the
+        // fragment's view, and requireContext()/viewLifecycleOwner throw once that happens.
         val context = context ?: return
+        val lifecycleOwner = viewLifecycleOwnerLiveData.value ?: return
 
-        CoroutineScope(Dispatchers.IO).launch {
-            val field = database.getFieldObject(id)
+        // Overlapping loads must not interleave. onResume and a sync completing can both land
+        // here, and without this the slow stage of the earlier load could arrive last and leave
+        // stale traits on screen.
+        fieldDetailsJob?.cancel()
+        fieldDetailsJob = lifecycleOwner.lifecycleScope.launch {
 
-            // The group name and the per-trait items used to be built in the main-thread block
-            // below, which put every one of their queries on the UI thread. They are read here so
-            // the main thread is left with nothing but view updates.
-            val studyGroupName = field?.let { database.getStudyGroupNameById(it.groupId) }
-            val items = field?.let { createTraitDetailItems(it, context) } ?: emptyList()
+            val (field, studyGroupName) = withContext(Dispatchers.IO) {
+                val study = database.getFieldObject(id, false)
+                study to study?.let { database.getStudyGroupNameById(it.groupId) }
+            }
 
-            withContext(Dispatchers.Main) {
-                fieldObject = field  // Store the field object
+            fieldObject = field  // Store the field object
+            if (field == null) return@launch
 
-                if (field != null) {
-                    updateFieldData(field, studyGroupName)
+            // Stage one is on screen here: header, chips and toolbar are populated and the card
+            // actions are usable while the observations are still being read.
+            updateFieldData(field, studyGroupName)
+            setupToolbar(field)
 
-                    if (detailRecyclerView.adapter == null) { // initial load
-                        detailRecyclerView.layoutManager = LinearLayoutManager(context)
-                        adapter = FieldDetailAdapter(items.toMutableList())
-                        detailRecyclerView.adapter = adapter
-                        setupToolbar(field)
-                    } else { // reload after data change
-                        adapter?.updateItems(items)
-                    }
-                }
+            // Stage two: the observation values, and the per-trait processing they feed.
+            val items = withContext(Dispatchers.IO) {
+                createTraitDetailItems(database.getTraitDetailsForStudy(id), context)
+            }
+
+            if (detailRecyclerView.adapter == null) { // initial load
+                detailRecyclerView.layoutManager = LinearLayoutManager(context)
+                adapter = FieldDetailAdapter(items.toMutableList())
+                detailRecyclerView.adapter = adapter
+            } else { // reload after data change
+                adapter?.updateItems(items)
             }
         }
     }
@@ -405,41 +422,45 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
      * Builds the recycler items for a field's traits. Runs off the main thread, so it takes the
      * context as a parameter instead of reaching for requireContext().
      */
-    private fun createTraitDetailItems(field: FieldObject, context: Context): List<FieldDetailItem> {
-        field.traitDetails?.let { traitDetails ->
-            return traitDetails.map { traitDetail ->
-                val iconRes = Formats.entries
-                    .find { it.getDatabaseName() == traitDetail.format }?.getIcon()
+    private fun createTraitDetailItems(
+        traitDetails: List<FieldObject.TraitDetail>,
+        context: Context
+    ): List<FieldDetailItem> {
+        return traitDetails.map { traitDetail ->
+            val iconRes = Formats.entries
+                .find { it.getDatabaseName() == traitDetail.format }?.getIcon()
 
-                // Every observation in this group belongs to the same trait, so the trait is
-                // looked up once instead of once per value. The lookup is not cheap either — it
-                // also loads the trait's attribute values, making it two queries a call — so
-                // running it per observation was what stalled fields with a lot of data.
-                val trait = database.getTraitByName(traitDetail.traitName)
+            // Every observation in this group belongs to the same trait, so the trait is looked
+            // up once instead of once per value. The lookup is not cheap either — it also loads
+            // the trait's attribute values, making it two queries a call — so running it per
+            // observation was what stalled fields with a lot of data.
+            val trait = database.getTraitByName(traitDetail.traitName)
 
-                val processedObservations =
-                    traitDetail.observations?.map { observation ->
-                        trait?.let {
-                            valueProcessor.processValue(observation, it)
-                        } ?: observation
-                    }
+            val processedObservations =
+                traitDetail.observations?.map { observation ->
+                    trait?.let {
+                        valueProcessor.processValue(observation, it)
+                    } ?: observation
+                }
 
-                FieldDetailItem(
-                    traitDetail.traitName,
-                    traitDetail.format,
-                    traitDetail.categories,
-                    context.getString(R.string.field_trait_observation_total, traitDetail.count),
-                    ContextCompat.getDrawable(context, iconRes ?: R.drawable.ic_trait_categorical),
-                    processedObservations,
-                    traitDetail.completeness
-                )
-            }
+            FieldDetailItem(
+                traitDetail.traitName,
+                traitDetail.format,
+                traitDetail.categories,
+                context.getString(R.string.field_trait_observation_total, traitDetail.count),
+                ContextCompat.getDrawable(context, iconRes ?: R.drawable.ic_trait_categorical),
+                processedObservations,
+                traitDetail.completeness
+            )
         }
-        return emptyList()
     }
 
 
     private fun setupToolbar(field: FieldObject) {
+
+        // Called on every load so the menu action closes over the current field rather than the
+        // one from first load. Clearing first keeps the items from stacking up on each pass.
+        toolbar?.menu?.clear()
 
         toolbar?.inflateMenu(R.menu.menu_field_details)
 
