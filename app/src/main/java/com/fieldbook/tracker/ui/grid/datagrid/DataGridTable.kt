@@ -81,13 +81,28 @@ fun DataGridTable(
         traits.indexOfFirst { it.realPosition == pos }
     }?.takeIf { it >= 0 } ?: 0
     val targetColumn = rawToDisplayPos.getOrNull(extraCount + activeTraitIdx) ?: (extraCount + activeTraitIdx)
-    val targetRow = activePlotId ?: 1
+
+    // Resolved from the plot id against the displayed order, the same way the highlight is
+    // matched below, so the scroll follows sorting. activePlotId is a 1-based index into the
+    // original DB order and is only a valid row number while the grid is unsorted; using it
+    // directly would scroll to an unrelated plot whenever a sort is applied. Row 0 is the
+    // column header, so a plot at display index i sits on table row i + 1.
+    val targetRow = activePlotIdString
+        ?.let { id -> plotIds.indexOf(id).takeIf { it >= 0 }?.plus(1) }
+        ?: activePlotId
+        ?: 1
+
+    // Two things have to settle before the one-shot scroll can commit to a row: the plot id is
+    // resolved asynchronously once the grid loads, and rows stream in progressively — while
+    // either is outstanding a sorted row position can still move, and scrolling early would
+    // latch the wrong one.
+    val targetSettled = state.isComplete && !((activePlotId ?: 0) > 0 && activePlotIdString == null)
 
     var hasScrolled by rememberSaveable { mutableStateOf(false) }
 
-    LaunchedEffect(rowHeaders.size) {
+    LaunchedEffect(rowHeaders.size, activePlotIdString, state.isComplete) {
         Log.d("DataGridTable", "Data loaded: ${traits.size} traits, ${rowHeaders.size} rows")
-        if (!hasScrolled && traits.isNotEmpty() && rowHeaders.isNotEmpty()
+        if (!hasScrolled && targetSettled && traits.isNotEmpty() && rowHeaders.isNotEmpty()
             && targetColumn < columnCount && targetRow <= rowHeaders.size
         ) {
             lazyTableState.animateToCell(column = targetColumn, row = targetRow)

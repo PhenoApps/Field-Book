@@ -42,7 +42,14 @@ class DataGridViewModel @Inject constructor(
             val plotIds: List<String>,
             val gridData: List<List<DataGridCache.CellData>>,
             val extraHeaderNames: List<String> = emptyList(),
-            val extraHeaderData: List<List<String>> = emptyList()
+            val extraHeaderData: List<List<String>> = emptyList(),
+            /**
+             * False for the partial states emitted while rows are still streaming in. A row's
+             * position isn't final until every row has loaded, since sorting reorders whatever
+             * has arrived so far — consumers that act on a row index (the auto-scroll) must
+             * wait for this.
+             */
+            val isComplete: Boolean = true
         ) : UiState()
         object Empty : UiState()
         object Error : UiState()
@@ -201,7 +208,8 @@ class DataGridViewModel @Inject constructor(
             plotIds          = indices.map { raw.plotIds[it] },
             gridData         = indices.map { raw.gridData[it] },
             extraHeaderNames = raw.extraHeaderNames,
-            extraHeaderData  = indices.map { raw.extraHeaderData.getOrNull(it) ?: emptyList() }
+            extraHeaderData  = indices.map { raw.extraHeaderData.getOrNull(it) ?: emptyList() },
+            isComplete       = raw.isComplete
         )
     }
 
@@ -364,6 +372,7 @@ class DataGridViewModel @Inject constructor(
                         // Progressive emit: show grid after first batch so user sees data quickly
                         if (gridData.size % PROGRESSIVE_BATCH_SIZE == 0) {
                             _rawUiState.value = UiState.Loaded(
+                                isComplete = false,
                                 traits = visibleTraits,
                                 rowHeaders = rowHeaders.toList(),
                                 plotIds = plotIds.toList(),
