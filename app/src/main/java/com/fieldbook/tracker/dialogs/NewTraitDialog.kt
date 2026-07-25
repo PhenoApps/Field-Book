@@ -24,6 +24,7 @@ import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.traits.formats.TraitFormatParametersAdapter
 import com.fieldbook.tracker.traits.formats.ValidationResult
+import com.fieldbook.tracker.traits.formats.parameters.BaseFormatParameter
 import com.fieldbook.tracker.traits.formats.parameters.CanopySensitivityParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 import com.fieldbook.tracker.traits.formats.ui.ParameterScrollView
@@ -346,10 +347,34 @@ class NewTraitDialog(
                 holder.bind(parameter, initialTraitObject)
 
                 parametersSv.addViewHolder(holder)
+
+                lockCanopySensitivityIfCollected(holder)
             }
         }
     }
 
+
+    /**
+     * Sensitivity can't be edited once the trait has observations, since the threshold is applied
+     * to stored captures as well as new ones.
+     */
+    private fun lockCanopySensitivityIfCollected(holder: BaseFormatParameter.ViewHolder) {
+
+        val canopyHolder = holder as? CanopySensitivityParameter.ViewHolder ?: return
+
+        val traitId = initialTraitObject?.id
+
+        if (traitId.isNullOrEmpty()) return
+
+        lifecycleScope.launch {
+
+            if (traitRepo.getTraitObservations(traitId).isNotEmpty()) {
+
+                canopyHolder.setLocked()
+
+            }
+        }
+    }
 
     private fun setupTraitFormatsRv(formats: List<Formats>) {
 

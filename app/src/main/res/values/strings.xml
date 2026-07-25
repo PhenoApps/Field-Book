@@ -1757,6 +1757,8 @@
     <string name="canopy_param_test">Test</string>
     <string name="canopy_param_threshold_format">Threshold: %.2f</string>
     <string name="canopy_param_output_format">Output value: %.1f</string>
+    <string name="canopy_param_locked_title">Sensitivity locked</string>
+    <string name="canopy_param_locked_message">Sensitivity cannot be changed because data has already been collected with this trait. Create a new Canopy trait to collect with a different sensitivity.</string>
     <string name="pref_experimental_traits_category_title">Experimental Traits</string>
     <string name="pref_experimental_traits_category_summary">Show an experimental traits category in the trait type selector</string>
 

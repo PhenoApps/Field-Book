@@ -57,10 +57,12 @@ class CanopySensitivityParameter : BaseFormatParameter(
         private val outputTv: TextView = itemView.findViewById(R.id.canopy_param_output_tv)
         private val defaultMark: View = itemView.findViewById(R.id.canopy_param_default_mark)
         private val testBtn: Button = itemView.findViewById(R.id.canopy_param_test_btn)
+        private val lockedTv: TextView = itemView.findViewById(R.id.canopy_param_locked_tv)
         val previewIv: ImageView = itemView.findViewById(R.id.canopy_param_preview_iv)
         private var testBitmap: Bitmap? = null
         private var previewJob: Job? = null
         private var previewVersion = 0
+        private var isLocked = false
 
         override fun bind(parameter: BaseFormatParameter, initialTraitObject: TraitObject?) {
             super.bind(parameter, initialTraitObject)
@@ -71,7 +73,18 @@ class CanopySensitivityParameter : BaseFormatParameter(
         }
 
         fun setInlineTestVisible(visible: Boolean) {
-            testBtn.visibility = if (visible) View.VISIBLE else View.GONE
+            testBtn.visibility = if (visible && !isLocked) View.VISIBLE else View.GONE
+        }
+
+        /**
+         * The threshold is applied when redrawing stored captures as well as when analyzing new
+         * ones, so it can no longer be edited once the trait has observations.
+         */
+        fun setLocked() {
+            isLocked = true
+            seekBar.isEnabled = false
+            testBtn.visibility = View.GONE
+            lockedTv.visibility = View.VISIBLE
         }
 
         fun configureStandaloneDialog() {
