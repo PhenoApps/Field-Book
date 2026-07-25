@@ -311,6 +311,7 @@
     <!--    <string name="field_default_sort_order">import order</string>-->
 
     <string name="field_data_title">Data</string>
+    <string name="field_data_summary">%1$d observations across %2$d traits</string>
     <string name="field_trait_observation_total">"%d" observations</string>
 
     <!-- Field Detail Charts -->

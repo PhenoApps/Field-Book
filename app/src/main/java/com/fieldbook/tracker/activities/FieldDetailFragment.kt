@@ -11,7 +11,6 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
@@ -45,7 +44,6 @@ import com.fieldbook.tracker.utilities.DateJsonUtil
 import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.SemanticDateUtil
 import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -98,8 +96,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private lateinit var attributeCountChip: Chip
     private lateinit var sortOrderChip: Chip
     private lateinit var editUniqueChip: Chip
-    private lateinit var traitCountChip: Chip
-    private lateinit var observationCountChip: Chip
+    private lateinit var dataSummaryTextView: TextView
     private lateinit var trialNameChip: Chip
     private lateinit var studyGroupNameChip: Chip
     private lateinit var detailRecyclerView: RecyclerView
@@ -129,8 +126,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         attributeCountChip = rootView.findViewById(R.id.attributeCountChip)
         sortOrderChip = rootView.findViewById(R.id.sortOrderChip)
         editUniqueChip = rootView.findViewById(R.id.editUniqueChip)
-        traitCountChip = rootView.findViewById(R.id.traitCountChip)
-        observationCountChip = rootView.findViewById(R.id.observationCountChip)
+        dataSummaryTextView = rootView.findViewById(R.id.dataSummaryTextView)
         detailRecyclerView = rootView.findViewById(R.id.fieldDetailRecyclerView)
         trialNameChip = rootView.findViewById(R.id.trialNameChip)
         studyGroupNameChip = rootView.findViewById(R.id.studyGroupName)
@@ -226,8 +222,6 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             }
         }
 
-        disableDataChipRipples()
-
         InsetHandler.setupFragmentWithTopInsetsOnly(rootView, toolbar)
         return rootView
     }
@@ -256,25 +250,6 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                 Intent(context, BrapiSyncActivity::class.java)
                     .putIntegerArrayListExtra(BrapiSyncActivity.FIELD_IDS, arrayListOf(fieldId))
             )
-        }
-    }
-
-    private fun disableDataChipRipples() {
-        // Intercept data card touch events to prevent chip ripple but still trigger expand/collapse
-
-        val chipGroup: ChipGroup = rootView.findViewById(R.id.dataChipGroup)
-        chipGroup.setOnTouchListener { _, event ->
-            if (event.action == MotionEvent.ACTION_UP) {
-                rootView.findViewById<View>(R.id.data_collapsible_header).performClick()
-            }
-            true
-        }
-
-        rootView.findViewById<View>(R.id.data_collapsible_header).setOnTouchListener { v, event ->
-            if (event.action == MotionEvent.ACTION_UP) {
-                v.performClick()
-            }
-            true
         }
     }
 
@@ -403,13 +378,13 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             getString(R.string.no_activity)
         }
 
-        traitCountChip.text = field.traitCount.toString()
-        if (field.observationCount.toInt() > 0) {
-            observationCountChip.visibility = View.VISIBLE
-            observationCountChip.text = field.observationCount.toString()
-        } else {
-            observationCountChip.visibility = View.GONE
-        }
+        // Counts arrive as strings straight off the query, so they are parsed defensively rather
+        // than with toInt(), which threw on a null or empty column.
+        dataSummaryTextView.text = getString(
+            R.string.field_data_summary,
+            field.observationCount?.toIntOrNull() ?: 0,
+            field.traitCount?.toIntOrNull() ?: 0
+        )
 
 
         studyGroupNameChip.visibility = View.GONE
