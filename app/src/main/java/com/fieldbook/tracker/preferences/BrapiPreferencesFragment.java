@@ -83,6 +83,11 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
     private static final int AUTH_REQUEST_CODE = 123;
     private static final int CHOOSE_ACCOUNT_REQUEST_CODE = 124;
 
+    // The logout flow spans a trip to the browser, so its pending state has to survive the
+    // fragment being recreated while that browser is in front (rotation, low memory).
+    private static final String STATE_PENDING_AUTH_ACCOUNT = "pending_auth_account";
+    private static final String STATE_PENDING_REMOVE_AFTER_LOGOUT = "pending_remove_after_logout";
+
     private Context context;
     private PreferenceCategory activeServerCategory;
     private PreferenceCategory availableServersCategory;
@@ -104,8 +109,20 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
     }
 
     @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(STATE_PENDING_AUTH_ACCOUNT, pendingAuthAccount);
+        outState.putBoolean(STATE_PENDING_REMOVE_AFTER_LOGOUT, pendingRemoveAfterLogout);
+    }
+
+    @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.preferences_brapi, rootKey);
+
+        if (savedInstanceState != null) {
+            pendingAuthAccount = savedInstanceState.getParcelable(STATE_PENDING_AUTH_ACCOUNT);
+            pendingRemoveAfterLogout = savedInstanceState.getBoolean(STATE_PENDING_REMOVE_AFTER_LOGOUT, false);
+        }
 
         CheckBoxPreference brapiEnabledPref = findPreference(PreferenceKeys.BRAPI_ENABLED);
         if (brapiEnabledPref != null) {
@@ -569,35 +586,63 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
             return;
         }
 
+        // Handled ahead of the RESULT_OK gate below: a cancelled end-session still has to clear
+        // the pending logout state, otherwise it stays armed for whatever consumes it next.
+        if (requestCode == BrapiAuthActivity.END_SESSION_REQUEST_CODE) {
+            Account loggedOutAccount = pendingAuthAccount;
+            boolean removeAfterLogout = pendingRemoveAfterLogout;
+            pendingAuthAccount = null;
+            pendingRemoveAfterLogout = false;
+
+            if (resultCode != RESULT_OK) {
+                // User backed out of the provider's sign-out page; the account stays signed in.
+                refreshServerCards();
+                return;
+            }
+
+            // OIDC end-session completed — clear token for the pending account
+            if (loggedOutAccount != null) {
+                AccountManager am = AccountManager.get(context);
+                String serverUrl = am.getUserData(loggedOutAccount, BrapiAuthenticator.KEY_SERVER_URL);
+                accountHelper.clearToken(serverUrl != null ? serverUrl : "");
+
+                String activeUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
+                boolean wasActiveAccount = serverUrl != null && serverUrl.equals(activeUrl);
+
+                if (wasActiveAccount) {
+                    // The legacy BRAPI_TOKEN/BRAPI_ID_TOKEN prefs mirror the *active* account, so
+                    // they may only be cleared when it is the one being signed out. Clearing them
+                    // while logging out some other account would sign the active account out of
+                    // every code path that still reads the mirrors.
+                    // clearToken() above already does this; repeating it here keeps the result
+                    // correct regardless of the order these two edits run in.
+                    preferences.edit()
+                            .putString(PreferenceKeys.BRAPI_BASE_URL, "")
+                            .remove(PreferenceKeys.BRAPI_ID_TOKEN)
+                            .remove(PreferenceKeys.BRAPI_TOKEN)
+                            .apply();
+                    BrapiFilterCache.Companion.delete(context, true);
+                }
+                if (removeAfterLogout && serverUrl != null) {
+                    accountHelper.removeAccount(serverUrl);
+                }
+            } else {
+                // Lost track of which account this result belongs to; clear the legacy pref
+                // mirrors so nothing keeps using a token the provider has just invalidated.
+                preferences.edit()
+                        .remove(PreferenceKeys.BRAPI_ID_TOKEN)
+                        .remove(PreferenceKeys.BRAPI_TOKEN)
+                        .apply();
+            }
+            refreshServerCards();
+            return;
+        }
+
         if (resultCode != RESULT_OK) return;
 
         if (requestCode == AUTH_REQUEST_CODE) {
             // Re-authorization completed — refresh cards to reflect new token state
             pendingAuthAccount = null;
-            refreshServerCards();
-        } else if (requestCode == BrapiAuthActivity.END_SESSION_REQUEST_CODE) {
-            // OIDC end-session completed — clear token for the pending account
-            if (pendingAuthAccount != null) {
-                AccountManager am = AccountManager.get(context);
-                String serverUrl = am.getUserData(pendingAuthAccount, BrapiAuthenticator.KEY_SERVER_URL);
-                accountHelper.clearToken(serverUrl != null ? serverUrl : "");
-                String activeUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
-                if (serverUrl != null && serverUrl.equals(activeUrl)) {
-                    preferences.edit().putString(PreferenceKeys.BRAPI_BASE_URL, "").apply();
-                    BrapiFilterCache.Companion.delete(context, true);
-                }
-                if (pendingRemoveAfterLogout) {
-                    pendingRemoveAfterLogout = false;
-                    if (serverUrl != null) {
-                        accountHelper.removeAccount(serverUrl);
-                    }
-                }
-                pendingAuthAccount = null;
-            }
-            preferences.edit()
-                    .remove(PreferenceKeys.BRAPI_ID_TOKEN)
-                    .remove(PreferenceKeys.BRAPI_TOKEN)
-                    .apply();
             refreshServerCards();
         }
     }
