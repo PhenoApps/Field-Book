@@ -468,13 +468,13 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
                     am.getUserData(account, BrapiAuthenticator.KEY_SERVER_URL),
                     am.getUserData(account, BrapiAuthenticator.KEY_DISPLAY_NAME),
                     am.getUserData(account, BrapiAuthenticator.KEY_BRAPI_VERSION),
-                    am.getUserData(account, BrapiAuthenticator.KEY_OIDC_FLOW),
+                    // Published as the portable "code"/"implicit" spelling so that installs which
+                    // predate the stable flow identifiers still read this config correctly.
+                    BrapiAccountConstants.INSTANCE.toSharedConfigOidcFlow(
+                            am.getUserData(account, BrapiAuthenticator.KEY_OIDC_FLOW)),
                     am.getUserData(account, BrapiAuthenticator.KEY_OIDC_URL),
                     am.getUserData(account, BrapiAuthenticator.KEY_OIDC_CLIENT_ID),
-                    am.getUserData(account, BrapiAuthenticator.KEY_OIDC_SCOPE),
-                    preferences.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50"),
-                    preferences.getString(PreferenceKeys.BRAPI_CHUNK_SIZE, "500"),
-                    preferences.getString(PreferenceKeys.BRAPI_TIMEOUT, "120")
+                    am.getUserData(account, BrapiAuthenticator.KEY_OIDC_SCOPE)
             );
 
             String jsonConfig = new Gson().toJson(config);

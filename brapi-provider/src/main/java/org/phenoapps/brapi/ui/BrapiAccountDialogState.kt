@@ -32,9 +32,9 @@ fun parseBrapiConfig(json: String): BrapiAccountConfig? = runCatching {
         oidcUrl = obj.nonEmptyString("oidcUrl", "oidc"),
         clientId = obj.nonEmptyString("clientId"),
         scope = obj.nonEmptyString("scope"),
-        pageSize = obj.nonEmptyString("pageSize", "ps"),
-        chunkSize = obj.nonEmptyString("chunkSize", "cs"),
-        serverTimeoutMilli = obj.nonEmptyString("serverTimeoutMilli", "st"),
+        // pageSize / chunkSize / serverTimeoutMilli are intentionally not read. Older configs
+        // may still carry them from when a device had a single server; they are device-wide
+        // settings and are left to the scanning device.
     )
 }.getOrNull()
 

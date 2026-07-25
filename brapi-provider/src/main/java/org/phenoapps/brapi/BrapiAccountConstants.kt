@@ -45,6 +45,18 @@ object BrapiAccountConstants {
     // matching what old installs actually wrote to disk.
     private const val LEGACY_LABEL_OAUTH_IMPLICIT = "OAuth2 Implicit Grant"
 
+    /**
+     * The OIDC flow value to publish in a shared config (the QR transfer payload).
+     *
+     * Deliberately the spec-style spelling rather than the internal identifier: versions that
+     * predate those identifiers already understand "code" and "implicit" and map them correctly,
+     * whereas an unrecognised value silently falls back to the authorization-code flow. Emitting
+     * these keeps a config generated here readable by older Field Book installs and by sibling
+     * apps that haven't picked up this module yet.
+     */
+    fun toSharedConfigOidcFlow(rawFlow: String?): String =
+        if (normalizeOidcFlow(rawFlow) == OIDC_FLOW_OAUTH_IMPLICIT) "implicit" else "code"
+
     // PhenoApps packages that may discover and use BrAPI accounts
     val ALLOWED_PACKAGES = setOf(
         "com.fieldbook.tracker",
