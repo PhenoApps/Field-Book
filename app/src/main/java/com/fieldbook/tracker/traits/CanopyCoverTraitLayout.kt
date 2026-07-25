@@ -43,7 +43,7 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 
 /**
- * Canopy coverage trait using the Canopeo algorithm (Patrignani & Ochsner, 2015,
+ * Canopy cover trait using the Canopeo algorithm (Patrignani & Ochsner, 2015,
  * doi:10.2134/agronj15.0150). Classifies pixels as green canopy when:
  *   R/G < threshold  AND  B/G < threshold  AND  2G - R - B > 20
  * FGCC (Fractional Green Canopy Cover) is stored as a percentage string, e.g. "45.3".
@@ -51,11 +51,11 @@ import kotlin.math.roundToInt
  * Extends PhotoTraitLayout for live CameraX preview + system-camera fallback.
  * Sensitivity threshold is a trait parameter (set at creation/edit time), not in the collect screen.
  */
-class CanopyCoverageTraitLayout : PhotoTraitLayout {
+class CanopyCoverTraitLayout : PhotoTraitLayout {
 
     companion object {
-        const val TAG = "CanopyCoverage"
-        const val type = "canopy_coverage"
+        const val TAG = "CanopyCover"
+        const val type = "canopy_cover"
         const val DEFAULT_SLIDER_PROGRESS = 50
         const val THRESHOLD_MIN = 0.70f
         const val THRESHOLD_RANGE = 0.50f
@@ -94,7 +94,7 @@ class CanopyCoverageTraitLayout : PhotoTraitLayout {
         }
 
     override fun type() = type
-    override fun layoutId() = R.layout.trait_canopy_coverage
+    override fun layoutId() = R.layout.trait_canopy_cover
 
     override fun init(act: Activity) {
         super.init(act)
@@ -300,9 +300,9 @@ class CanopyCoverageTraitLayout : PhotoTraitLayout {
     private fun captureWithOverwriteWarning(captureImage: () -> Unit) {
         if (collectInputView.text.isNotEmpty()) {
             AlertDialog.Builder(context, R.style.AppAlertDialog)
-                .setTitle(R.string.canopy_coverage_overwrite_title)
-                .setMessage(R.string.canopy_coverage_overwrite_message)
-                .setPositiveButton(R.string.canopy_coverage_overwrite_positive) { dialog, _ ->
+                .setTitle(R.string.canopy_cover_overwrite_title)
+                .setMessage(R.string.canopy_cover_overwrite_message)
+                .setPositiveButton(R.string.canopy_cover_overwrite_positive) { dialog, _ ->
                     dialog.dismiss()
                     captureImage()
                 }

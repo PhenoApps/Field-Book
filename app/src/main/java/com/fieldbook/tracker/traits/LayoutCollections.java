@@ -34,7 +34,7 @@ public class LayoutCollections {
         traitLayouts.add(new StopWatchTraitLayout(_activity));
         traitLayouts.add(new GreenSeekerTraitLayout(_activity));
         traitLayouts.add(new ScaleTraitLayout(_activity));
-        traitLayouts.add(new CanopyCoverageTraitLayout(_activity));
+        traitLayouts.add(new CanopyCoverTraitLayout(_activity));
     }
 
     /**

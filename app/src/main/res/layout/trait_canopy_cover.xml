@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.fieldbook.tracker.traits.CanopyCoverageTraitLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.fieldbook.tracker.traits.CanopyCoverTraitLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/canopyCoverageLayout"
+    android:id="@+id/canopyCoverLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -28,7 +28,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="fitCenter"
-                android:contentDescription="@string/canopy_coverage_preview_description"
+                android:contentDescription="@string/canopy_cover_preview_description"
                 app:implementationMode="compatible" />
 
             <ImageView
@@ -37,7 +37,7 @@
                 android:layout_height="match_parent"
                 android:adjustViewBounds="true"
                 android:scaleType="fitCenter"
-                android:contentDescription="@string/canopy_coverage_preview_description"
+                android:contentDescription="@string/canopy_cover_preview_description"
                 android:visibility="gone" />
 
             <!-- Embiggen FAB: top-right corner, shown when an image is captured -->
@@ -48,7 +48,7 @@
                 android:layout_height="@dimen/fb_trait_fab_size_small"
                 android:layout_gravity="top|end"
                 android:layout_margin="8dp"
-                android:contentDescription="@string/canopy_coverage_embiggen_description"
+                android:contentDescription="@string/canopy_cover_embiggen_description"
                 android:visibility="gone"
                 app:srcCompat="@drawable/ic_fullscreen" />
 
@@ -82,7 +82,7 @@
             android:layout_width="@dimen/fb_trait_fab_size"
             android:layout_height="@dimen/fb_trait_fab_size"
             android:layout_margin="8dp"
-            android:contentDescription="@string/canopy_coverage_capture_description"
+            android:contentDescription="@string/canopy_cover_capture_description"
             android:visibility="gone"
             app:srcCompat="@drawable/ic_trait_camera"
             app:layout_constraintTop_toTopOf="parent"
@@ -92,4 +92,4 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-</com.fieldbook.tracker.traits.CanopyCoverageTraitLayout>
+</com.fieldbook.tracker.traits.CanopyCoverTraitLayout>

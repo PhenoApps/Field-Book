@@ -17,7 +17,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.provider.GenericFileProvider
-import com.fieldbook.tracker.traits.CanopyCoverageTraitLayout
+import com.fieldbook.tracker.traits.CanopyCoverTraitLayout
 import com.fieldbook.tracker.traits.formats.ValidationResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -67,7 +67,7 @@ class CanopySensitivityParameter : BaseFormatParameter(
         override fun bind(parameter: BaseFormatParameter, initialTraitObject: TraitObject?) {
             super.bind(parameter, initialTraitObject)
             val progress = initialTraitObject?.sensitivity?.toIntOrNull()
-                ?: CanopyCoverageTraitLayout.DEFAULT_SLIDER_PROGRESS
+                ?: CanopyCoverTraitLayout.DEFAULT_SLIDER_PROGRESS
             setupSeekBar(progress)
             testBtn.setOnClickListener { launchTestCapture() }
         }
@@ -98,7 +98,7 @@ class CanopySensitivityParameter : BaseFormatParameter(
             updateLabel(initial)
 
             seekBar.post {
-                val frac = CanopyCoverageTraitLayout.DEFAULT_SLIDER_PROGRESS / 100f
+                val frac = CanopyCoverTraitLayout.DEFAULT_SLIDER_PROGRESS / 100f
                 val trackWidth = (seekBar.width - seekBar.paddingStart - seekBar.paddingEnd).toFloat()
                 defaultMark.translationX =
                     seekBar.paddingStart + frac * trackWidth - defaultMark.width / 2f
@@ -107,8 +107,8 @@ class CanopySensitivityParameter : BaseFormatParameter(
 
             seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(sb: SeekBar, progress: Int, fromUser: Boolean) {
-                    if (fromUser && abs(progress - CanopyCoverageTraitLayout.DEFAULT_SLIDER_PROGRESS) <= 2) {
-                        sb.progress = CanopyCoverageTraitLayout.DEFAULT_SLIDER_PROGRESS
+                    if (fromUser && abs(progress - CanopyCoverTraitLayout.DEFAULT_SLIDER_PROGRESS) <= 2) {
+                        sb.progress = CanopyCoverTraitLayout.DEFAULT_SLIDER_PROGRESS
                     }
                     updateLabel(sb.progress)
                     updateTestPreview()
@@ -121,7 +121,7 @@ class CanopySensitivityParameter : BaseFormatParameter(
         private fun updateLabel(progress: Int) {
             thresholdTv.text = itemView.context.getString(
                 R.string.canopy_param_threshold_format,
-                CanopyCoverageTraitLayout.sliderToThreshold(progress)
+                CanopyCoverTraitLayout.sliderToThreshold(progress)
             )
         }
 
@@ -157,7 +157,7 @@ class CanopySensitivityParameter : BaseFormatParameter(
 
         private fun updateTestPreview() {
             val raw = testBitmap ?: return
-            val t = CanopyCoverageTraitLayout.sliderToThreshold(seekBar.progress)
+            val t = CanopyCoverTraitLayout.sliderToThreshold(seekBar.progress)
             val version = ++previewVersion
             previewJob?.cancel()
             previewJob = CoroutineScope(Dispatchers.IO).launch {
@@ -199,7 +199,7 @@ class CanopySensitivityParameter : BaseFormatParameter(
 
         override fun load(traitObject: TraitObject?): Boolean {
             val progress = traitObject?.sensitivity?.toIntOrNull()
-                ?: CanopyCoverageTraitLayout.DEFAULT_SLIDER_PROGRESS
+                ?: CanopyCoverTraitLayout.DEFAULT_SLIDER_PROGRESS
             seekBar.progress = progress
             updateLabel(progress)
             return true
