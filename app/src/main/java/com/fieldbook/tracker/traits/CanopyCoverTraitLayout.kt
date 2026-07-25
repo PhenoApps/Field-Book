@@ -163,9 +163,13 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
         }
     }
 
-    override fun makeImage(currentTrait: TraitObject) {
+    /** Returns whether the capture was accepted; the Canopeo analysis itself runs asynchronously. */
+    override fun makeImage(currentTrait: TraitObject): Boolean {
         val file = File(context.cacheDir, TEMPORARY_IMAGE_NAME)
-        if (!file.exists() || file.length() == 0L) return
+        if (!file.exists() || file.length() == 0L) {
+            Log.e(TAG, "makeImage: temp file is missing or empty")
+            return false
+        }
         val obsUnit = currentRange.uniqueId
         val rep = collectActivity.rep
         val imageKey = imagePrefsKey(currentTrait.id, obsUnit, rep)
@@ -195,6 +199,8 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
                 loadLayout()
             }
         }
+
+        return true
     }
 
     override fun afterLoadExists(act: CollectActivity, value: String?) {

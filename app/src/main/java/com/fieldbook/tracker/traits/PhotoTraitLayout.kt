@@ -8,6 +8,7 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
 import android.util.AttributeSet
+import android.util.Log
 import android.util.Size
 import androidx.annotation.OptIn
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
@@ -334,9 +335,14 @@ open class PhotoTraitLayout : CameraTrait {
         bindCameraForInformation()
     }
 
-    open fun makeImage(currentTrait: TraitObject) {
+    open fun makeImage(currentTrait: TraitObject): Boolean {
 
         val file = File(context.cacheDir, TEMPORARY_IMAGE_NAME)
+
+        if (!file.exists() || file.length() == 0L) {
+            Log.e(TAG, "makeImage: temp file is missing or empty — camera may not have written to the output URI")
+            return false
+        }
 
         file.inputStream().use { stream ->
 
@@ -350,6 +356,8 @@ open class PhotoTraitLayout : CameraTrait {
                 SaveState.SINGLE_SHOT
             )
         }
+
+        return true
     }
 
     /**
