@@ -1463,11 +1463,11 @@ public class DataHelper {
         return ObservationDao.Companion.getAllRepeatedValues(studyId, plotId, traitDbId);
     }
 
-    public java.util.Map<kotlin.Pair<String, String>, Integer> getBatchRepeatCounts(String studyId) {
+    public java.util.Map<kotlin.Pair<String, String>, ObservationDao.RepeatSummary> getBatchRepeatSummaries(String studyId) {
 
         open();
 
-        return ObservationDao.Companion.getRepeatCountsForStudy(studyId);
+        return ObservationDao.Companion.getRepeatSummariesForStudy(studyId);
     }
 
     public int getObservationCount(String studyId) {

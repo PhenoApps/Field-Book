@@ -22,6 +22,15 @@ import com.fieldbook.tracker.brapi.model.Observation as BrapiObservation
 
 class ObservationDao {
 
+    /**
+     * Repeated-observation summary for a single (plot, trait) pair.
+     *
+     * [latestValue] is the value of the highest-rep observation, which the DataGrid shows for
+     * traits that don't have repeated measures enabled but still accumulated repeats (e.g.
+     * observations imported over BrAPI, or a trait whose repeat parameter was later disabled).
+     */
+    data class RepeatSummary(val count: Int, val latestValue: String?)
+
     companion object {
 
         const val TAG = "ObservationDao"
@@ -182,13 +191,6 @@ class ObservationDao {
                 obsUnit,
                 traitDbId
             ).maxByOrNull { it.rep.toInt() }?.rep?.toInt() ?: 0) + 1
-
-        /**
-         * Gets the latest observation by rep number for the given study, observation unit, and trait.
-         * Used when repeated measures is disabled to display only the most recent value.
-         */
-        fun getLatestObservation(studyId: String, obsUnit: String, traitDbId: String): ObservationModel? =
-            getAllRepeatedValues(studyId, obsUnit, traitDbId).maxByOrNull { it.rep.toInt() }
 
         //false warning, cursor is closed in toTable
         @SuppressLint("Recycle")
@@ -889,16 +891,23 @@ class ObservationDao {
         } ?: 0
 
         /**
-         * Returns a map of (plotId, traitDbId) -> repeat count for all (plot, trait) pairs in a
+         * Returns a map of (plotId, traitDbId) -> [RepeatSummary] for all (plot, trait) pairs in a
          * study that have more than one observation. Used by DataGridActivity to avoid per-cell
          * repeated-value queries.
          */
-        fun getRepeatCountsForStudy(studyId: String): Map<Pair<String, String>, Int> =
+        fun getRepeatSummariesForStudy(studyId: String): Map<Pair<String, String>, RepeatSummary> =
             withDatabase { db ->
-                val map = mutableMapOf<Pair<String, String>, Int>()
+                val map = mutableMapOf<Pair<String, String>, RepeatSummary>()
+                // SQLite guarantees that when a query contains exactly one max() aggregate, bare
+                // columns in the result set (here `value`) are taken from the same input row that
+                // produced that maximum — so `value` is the highest-rep observation's value.
                 val cursor = db.rawQuery(
                     """
-                    SELECT observation_unit_id, observation_variable_db_id, COUNT(*) AS cnt
+                    SELECT observation_unit_id,
+                           observation_variable_db_id,
+                           COUNT(*) AS cnt,
+                           MAX(CAST(rep AS INTEGER)) AS max_rep,
+                           value
                     FROM observations
                     WHERE study_id = ?
                     GROUP BY observation_unit_id, observation_variable_db_id
@@ -911,7 +920,8 @@ class ObservationDao {
                         val plotId = it.getString(0)
                         val traitId = it.getString(1)
                         val count = it.getInt(2)
-                        map[Pair(plotId, traitId)] = count
+                        val latestValue = it.getString(4)
+                        map[Pair(plotId, traitId)] = RepeatSummary(count, latestValue)
                     }
                 }
                 map

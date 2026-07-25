@@ -255,8 +255,8 @@ class DataGridViewModel @Inject constructor(
                     Log.d(TAG, "Cache stale (obs count changed). Reloading.")
                 }
 
-                // Full reload: single batch query for repeated-value counts
-                val repeatCounts = database.getBatchRepeatCounts(studyId.toString())
+                // Full reload: single batch query for repeated-value counts and latest values
+                val repeatSummaries = database.getBatchRepeatSummaries(studyId.toString())
 
                 // Only pivot the attribute columns the grid actually displays.
                 val requiredAttributes = (listOf(uniqueHeader, rowHeader) + extraHeaders).distinct()
@@ -316,8 +316,23 @@ class DataGridViewModel @Inject constructor(
                                 return@mapIndexed DataGridCache.CellData("", id)
                             }
 
-                            val value = cursor.getString(colIdx) ?: ""
-                            val hasRepeats = (repeatCounts[Pair(id, variable.id)] ?: 0) > 1
+                            val repeats = repeatSummaries[Pair(id, variable.id)]
+
+                            // Repeats only collapse to an ellipsis for traits that actually have
+                            // repeated measures enabled — those get a picker dialog on tap. A trait
+                            // without the parameter can still accumulate repeats (BrAPI import, or
+                            // the parameter disabled after collection); there the latest rep is the
+                            // meaningful value, so show it rather than an ellipsis the user can't
+                            // expand.
+                            if (repeats != null && variable.repeatedMeasures) {
+                                return@mapIndexed DataGridCache.CellData("...", id)
+                            }
+
+                            // The pivoted column is MAX(value) across reps, which is lexicographic
+                            // rather than latest, so prefer the summary's highest-rep value.
+                            val value = repeats?.latestValue
+                                ?: cursor.getString(colIdx)
+                                ?: ""
                             var cellValue = value
 
                             if (variable.format in setOf("categorical", "qualitative")) {
@@ -340,8 +355,7 @@ class DataGridViewModel @Inject constructor(
                                 }
                             }
 
-                            if (hasRepeats) DataGridCache.CellData("...", id)
-                            else DataGridCache.CellData(cellValue, id)
+                            DataGridCache.CellData(cellValue, id)
                         }
 
                         gridData.add(dataList)
