@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.activities.brapi;
 
 import android.app.PendingIntent;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -124,11 +123,7 @@ public class BrapiAuthActivity extends ThemedActivity {
         // without data, so checking only getData() can accidentally start a second auth request
         // before the first response is handled.
         if (!hasAuthResult()) {
-            if (launchOidcFlow.equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
-                authorizeBrAPI_OLD(preferences, this);
-            } else {
-                authorizeBrAPI(preferences, this);
-            }
+            authorizeBrAPI(preferences, this);
         }
 
         getOnBackPressedDispatcher().addCallback(this, standardBackCallback());
@@ -263,26 +258,6 @@ public class BrapiAuthActivity extends ThemedActivity {
                         PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE));
     }
 
-    public void authorizeBrAPI_OLD(SharedPreferences sharedPreferences, Context context) {
-        try {
-            String url = sharedPreferences.getString(PreferenceKeys.BRAPI_BASE_URL, "") + "/brapi/authorize?display_name=Field Book&return_url=fieldbook://";
-            try {
-                // Go to url with the default browser
-                Uri uri = Uri.parse(url);
-                Intent i = new Intent(Intent.ACTION_VIEW, uri);
-                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                i.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                context.startActivity(i);
-            } catch (ActivityNotFoundException ex) {
-                Log.e("BrAPI", "Error starting BrAPI auth", ex);
-                authError(ex);
-            }
-        } catch (Exception ex) {
-            Log.e("BrAPI", "Error starting BrAPI auth", ex);
-            authError(ex);
-        }
-    }
-
     private void authError(Exception ex) {
 
         // Clear our data from our deep link so the app doesn't think it is
@@ -313,31 +288,6 @@ public class BrapiAuthActivity extends ThemedActivity {
         finish();
     }
 
-    public void checkBrapiAuth_OLD(Uri data) {
-
-        Integer status = Integer.parseInt(data.getQueryParameter("status"));
-
-        // Check that we actually have the data. If not return failure.
-        if (status == null) {
-            authError(null);
-            return;
-        }
-
-        if (status == 200) {
-            String token = data.getQueryParameter("token");
-
-            // Check that we received a token.
-            if (token == null) {
-                authError(null);
-                return;
-            }
-            authSuccess(token, null);
-
-        } else {
-            authError(null);
-        }
-    }
-
     /**
      * Create an instance of AuthorizationService with custom connection builder.
      * @return Configured auth service
@@ -359,15 +309,7 @@ public class BrapiAuthActivity extends ThemedActivity {
         }
 
         if (response != null || data != null) {
-            if (launchOidcFlow.equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
-                if (data != null) {
-                    checkBrapiAuth_OLD(data);
-                } else {
-                    authError(null);
-                }
-            } else {
-                checkBrapiAuth(data);
-            }
+            checkBrapiAuth(data);
             return true;
         }
 
