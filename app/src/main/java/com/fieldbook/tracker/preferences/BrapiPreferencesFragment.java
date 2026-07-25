@@ -319,11 +319,14 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
             Toast.makeText(context, R.string.logging_out_please_wait, Toast.LENGTH_SHORT).show();
             pendingAuthAccount = account;
             String accountOidcUrl = am.getUserData(account, BrapiAuthenticator.KEY_OIDC_URL);
+            // Resolved up front: getAuthServiceConfiguration() calls back asynchronously, by which
+            // point the fragment may be detached and getString() would throw.
+            final Uri postLogoutRedirect = Uri.parse(getString(R.string.brapi_redirect_uri));
             authUtil.getAuthServiceConfiguration((config, ex) -> {
                 EndSessionRequest endSessionRequest =
                         new EndSessionRequest.Builder(config)
                                 .setIdTokenHint(idToken)
-                                .setPostLogoutRedirectUri(Uri.parse(BrapiAuthActivity.REDIRECT_URI))
+                                .setPostLogoutRedirectUri(postLogoutRedirect)
                                 .build();
                 AuthorizationService authService = new AuthorizationService(context);
                 Intent endSessionIntent = authService.getEndSessionRequestIntent(endSessionRequest);

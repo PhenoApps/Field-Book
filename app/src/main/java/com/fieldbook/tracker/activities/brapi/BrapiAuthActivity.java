@@ -49,8 +49,6 @@ public class BrapiAuthActivity extends ThemedActivity {
     //first number that came to Pete's head --IRRI hackathon '25
     public static final int END_SESSION_REQUEST_CODE = 456;
 
-    public static String REDIRECT_URI = null; // initialized in onCreate from R.string.brapi_redirect_uri
-
     // Intent extras for per-account config (set by BrapiManualAccountDialogFragment)
     public static final String EXTRA_SERVER_URL = "brapi_extra_server_url";
     public static final String EXTRA_OIDC_URL = "brapi_extra_oidc_url";
@@ -94,7 +92,6 @@ public class BrapiAuthActivity extends ThemedActivity {
         View rootView = findViewById(android.R.id.content);
         InsetHandler.INSTANCE.setupStandardInsets(rootView, toolbar);
 
-        REDIRECT_URI = getString(R.string.brapi_redirect_uri);
         activityStarting = true;
 
         // Capture launch-time config before onNewIntent() can replace getIntent() with the OAuth
