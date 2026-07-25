@@ -155,12 +155,16 @@ class ObservationDao {
 
         fun getAllFromAYear(year: String): Array<ObservationModel> = withDatabase { db ->
 
+            // Ordered by time rather than by rep. Sorting by repetition number groups every
+            // rep 1 together, then every rep 2, which scrambles the chronology that the
+            // statistics screen measures collection intervals from.
             val query = """
                 SELECT *
                 FROM observations
                 JOIN observation_variables
                     ON observations.observation_variable_db_id = observation_variables.internal_id_observation_variable
                 WHERE observation_time_stamp LIKE ? AND study_id > 0
+                ORDER BY observations.observation_time_stamp
             """.trimIndent()
 
             //Log.d(TAG, query)
@@ -169,7 +173,6 @@ class ObservationDao {
 
                 it.toTable()
                     .map { ObservationModel(it) }
-                    .sortedBy { it.rep.toInt() }
                     .toTypedArray()
             }
 
