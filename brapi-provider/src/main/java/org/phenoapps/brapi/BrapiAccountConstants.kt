@@ -21,6 +21,30 @@ object BrapiAccountConstants {
     // Grant key prefix — stored per calling package: "grant_<package>" = "true"
     const val GRANT_KEY_PREFIX = "grant_"
 
+    // Stable identifiers for KEY_OIDC_FLOW. These are persisted and compared, so they must never
+    // be localized — earlier versions stored the picker's display label, which meant the value
+    // changed with the app language and stopped matching.
+    const val OIDC_FLOW_OAUTH_CODE = "oauth_code"
+    const val OIDC_FLOW_OAUTH_IMPLICIT = "oauth_implicit"
+
+    /**
+     * Resolves a stored OIDC flow to one of the stable identifiers above.
+     *
+     * Accepts the stable ids, and the legacy English display labels written before those ids
+     * existed. Labels stored in a language other than English are not recognised and fall back
+     * to the authorization-code flow, which is both the safer option and the current default;
+     * re-selecting the flow on the account rewrites it in the stable form.
+     */
+    fun normalizeOidcFlow(rawFlow: String?): String = when (rawFlow?.trim()) {
+        OIDC_FLOW_OAUTH_IMPLICIT, LEGACY_LABEL_OAUTH_IMPLICIT -> OIDC_FLOW_OAUTH_IMPLICIT
+        else -> OIDC_FLOW_OAUTH_CODE
+    }
+
+    // English labels persisted by versions before the stable ids above. Deliberately hardcoded
+    // rather than read from resources: the resource text is translated, and these must keep
+    // matching what old installs actually wrote to disk.
+    private const val LEGACY_LABEL_OAUTH_IMPLICIT = "OAuth2 Implicit Grant"
+
     // PhenoApps packages that may discover and use BrAPI accounts
     val ALLOWED_PACKAGES = setOf(
         "com.fieldbook.tracker",

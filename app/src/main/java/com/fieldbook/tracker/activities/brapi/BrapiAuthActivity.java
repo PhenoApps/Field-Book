@@ -12,6 +12,8 @@ import android.widget.Toast;
 
 import com.fieldbook.tracker.utilities.BrapiAccountHelper;
 
+import org.phenoapps.brapi.BrapiAccountConstants;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 
@@ -166,8 +168,13 @@ public class BrapiAuthActivity extends ThemedActivity {
     }
 
     public void authorizeBrAPI(SharedPreferences sharedPreferences, Context context) {
-        final String responseType = launchOidcFlow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))
-                ? ResponseTypeValues.TOKEN : ResponseTypeValues.CODE;
+        // Compared against a stable identifier, never the picker's label: the label is translated,
+        // so an account configured in one language stopped matching after a language change.
+        final boolean isImplicitFlow = BrapiAccountConstants.INSTANCE
+                .normalizeOidcFlow(launchOidcFlow)
+                .equals(BrapiAccountConstants.OIDC_FLOW_OAUTH_IMPLICIT);
+
+        final String responseType = isImplicitFlow ? ResponseTypeValues.TOKEN : ResponseTypeValues.CODE;
 
         try {
             final String finalClientId = launchOidcClientId;
@@ -175,7 +182,7 @@ public class BrapiAuthActivity extends ThemedActivity {
 
             // Authorization code flow works better with custom URL scheme (e.g. fieldbook://app/auth)
             // https://github.com/openid/AppAuth-Android/issues?q=is%3Aissue+intent+null
-            Uri redirectURI = launchOidcFlow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))
+            Uri redirectURI = isImplicitFlow
                     ? Uri.parse(getString(R.string.brapi_implicit_redirect_uri))
                     : Uri.parse(getString(R.string.brapi_redirect_uri));
 
