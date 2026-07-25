@@ -41,6 +41,7 @@ import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.utilities.export.ExportUtil
+import com.fieldbook.tracker.utilities.DateJsonUtil
 import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.SemanticDateUtil
 import com.google.android.material.chip.Chip
@@ -443,6 +444,13 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                     } ?: observation
                 }
 
+            // Read from the stored values rather than the processed ones: the presenter reduces a
+            // date to whichever single field the trait displays, so the day of year is gone by
+            // then whenever the trait is set to show a formatted date.
+            val dayOfYearValues = if (traitDetail.format == Formats.DATE.getDatabaseName()) {
+                traitDetail.observations?.mapNotNull { DateJsonUtil.extractDayOfYear(it) }
+            } else null
+
             FieldDetailItem(
                 traitDetail.traitName,
                 traitDetail.format,
@@ -450,7 +458,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                 context.getString(R.string.field_trait_observation_total, traitDetail.count),
                 ContextCompat.getDrawable(context, iconRes ?: R.drawable.ic_trait_categorical),
                 processedObservations,
-                traitDetail.completeness
+                traitDetail.completeness,
+                dayOfYearValues
             )
         }
     }
