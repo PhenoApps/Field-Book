@@ -44,6 +44,7 @@ import androidx.lifecycle.lifecycleScope
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataGridCache
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.ObservationChangeTracker
 import com.fieldbook.tracker.database.dao.ObservationDao
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.database.models.ObservationUnitModel
@@ -666,15 +667,16 @@ class DataGridActivity : ThemedActivity() {
         val traitIds = traits.map { it.id }.sorted()
 
         lifecycleScope.launch(Dispatchers.IO) {
-            val observationCount = database.getObservationCount(studyId.toString())
+            // Captured before the query runs, so a write that lands mid-query leaves the snapshot
+            // marked with the older revision and is caught on the next open.
+            val observationsRevision = ObservationChangeTracker.current
             val cached = dataGridCache.getMap(
                 studyId,
                 rowAttrName,
                 colAttrName,
                 invertRow,
                 invertCol,
-                traitIds,
-                observationCount
+                traitIds
             )
             if (cached != null) {
                 withContext(Dispatchers.Main) {
@@ -836,7 +838,7 @@ class DataGridActivity : ThemedActivity() {
                     invertRow = invertRow,
                     invertCol = invertCol,
                     traitIds = traitIds,
-                    observationCount = observationCount,
+                    observationsRevision = observationsRevision,
                     plots = plots,
                     gridRows = maxRow,
                     gridCols = maxCol,

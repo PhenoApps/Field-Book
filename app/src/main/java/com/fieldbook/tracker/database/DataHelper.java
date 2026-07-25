@@ -1470,13 +1470,6 @@ public class DataHelper {
         return ObservationDao.Companion.getRepeatSummariesForStudy(studyId);
     }
 
-    public int getObservationCount(String studyId) {
-
-        open();
-
-        return ObservationDao.Companion.getObservationCount(studyId);
-    }
-
     public String getObservationUnitPropertyByPlotId(String uniqueName, String column, String uniqueId) {
 
         open();

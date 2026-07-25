@@ -12,6 +12,7 @@ import com.fieldbook.tracker.database.Migrator.ObservationUnitValue
 import com.fieldbook.tracker.database.Migrator.ObservationVariable
 import com.fieldbook.tracker.database.Migrator.Study
 import com.fieldbook.tracker.database.GroupsTable
+import com.fieldbook.tracker.database.ObservationChangeTracker
 import com.fieldbook.tracker.database.getTime
 import com.fieldbook.tracker.database.models.StudyModel
 import com.fieldbook.tracker.database.query
@@ -160,6 +161,8 @@ class StudyDao {
                 db.update(Observation.tableName, contentValuesOf(Study.FK to Integer.parseInt("-$studyId")), "${Study.FK} = ?", arrayOf(studyId.toString()))
                 db.delete(Study.tableName, "${Study.PK} = ?", arrayOf(studyId.toString()))
                 db.rawQuery("PRAGMA foreign_keys=ON", null)
+
+                ObservationChangeTracker.markChanged()
 
             } catch (e: SQLiteException) {
 

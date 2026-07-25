@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fieldbook.tracker.database.DataGridCache
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.ObservationChangeTracker
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.traits.formats.coders.DateJsonCoder
@@ -234,25 +235,25 @@ class DataGridViewModel @Inject constructor(
                 val visibleTraits = allTraitObjects.filter { it.visible }
                 // Order matters here (not just membership) so the cache key changes when the
                 // user reorders traits, even if the set of visible traits is unchanged.
-                val traitIds = visibleTraits.map { it.id }
+                val traitsFingerprint = dataGridCache.fingerprintTraits(visibleTraits)
+
+                // Captured before the query runs, so a write that lands mid-query leaves the
+                // snapshot marked with the older revision and is caught on the next open.
+                val observationsRevision = ObservationChangeTracker.current
 
                 // Cache check
-                val snapshot = dataGridCache.get(studyId, traitIds, rowHeader, extraHeaders)
+                val snapshot = dataGridCache.get(studyId, traitsFingerprint, rowHeader, extraHeaders)
                 if (snapshot != null) {
-                    val currentCount = database.getObservationCount(studyId.toString())
-                    if (currentCount == snapshot.observationCount) {
-                        Log.d(TAG, "Cache hit. Serving ${snapshot.rowHeaders.size} rows from cache.")
-                        _rawUiState.value = UiState.Loaded(
-                            traits = snapshot.traits,
-                            rowHeaders = snapshot.rowHeaders,
-                            plotIds = snapshot.plotIds,
-                            gridData = snapshot.gridData,
-                            extraHeaderNames = snapshot.extraHeaders,
-                            extraHeaderData = snapshot.extraHeaderData
-                        )
-                        return@launch
-                    }
-                    Log.d(TAG, "Cache stale (obs count changed). Reloading.")
+                    Log.d(TAG, "Cache hit. Serving ${snapshot.rowHeaders.size} rows from cache.")
+                    _rawUiState.value = UiState.Loaded(
+                        traits = snapshot.traits,
+                        rowHeaders = snapshot.rowHeaders,
+                        plotIds = snapshot.plotIds,
+                        gridData = snapshot.gridData,
+                        extraHeaderNames = snapshot.extraHeaders,
+                        extraHeaderData = snapshot.extraHeaderData
+                    )
+                    return@launch
                 }
 
                 // Full reload: single batch query for repeated-value counts and latest values
@@ -383,14 +384,13 @@ class DataGridViewModel @Inject constructor(
                 }
 
                 // Store completed result in cache
-                val obsCount = database.getObservationCount(studyId.toString())
                 dataGridCache.put(
                     DataGridCache.GridSnapshot(
                         studyId = studyId,
-                        traitIds = traitIds,
+                        traitsFingerprint = traitsFingerprint,
                         rowHeader = rowHeader,
                         extraHeaders = extraHeaders,
-                        observationCount = obsCount,
+                        observationsRevision = observationsRevision,
                         traits = visibleTraits,
                         rowHeaders = rowHeaders.toList(),
                         plotIds = plotIds.toList(),

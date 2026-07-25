@@ -15,6 +15,7 @@ import com.fieldbook.tracker.database.Migrator.*
 import com.fieldbook.tracker.database.Migrator.Companion.sLocalImageObservationsViewName
 import com.fieldbook.tracker.database.Migrator.Companion.sNonImageObservationsViewName
 import com.fieldbook.tracker.database.Migrator.Companion.sRemoteImageObservationsViewName
+import com.fieldbook.tracker.database.ObservationChangeTracker
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import org.threeten.bp.OffsetDateTime
@@ -658,7 +659,7 @@ class ObservationDao {
                 ObservationVariable.FK to internalTraitId
             ))
 
-        } ?: -1L
+        }.also { ObservationChangeTracker.markChanged() } ?: -1L
 
         fun getUserDetail(studyId: String, plotId: String): HashMap<String, String> =
             withDatabase { db ->
@@ -748,7 +749,7 @@ class ObservationDao {
                     "${Study.FK} = ? AND ${ObservationUnit.FK} = ? AND observation_variable_db_id = ? AND rep = ?",
                     arrayOf(studyId, plotId, traitDbId, rep)
                 )
-            }
+            }.also { ObservationChangeTracker.markChanged() }
 
         fun deleteTraitByValue(studyId: String, plotId: String, traitDbId: String, value: String) =
             withDatabase { db ->
@@ -758,16 +759,16 @@ class ObservationDao {
                     "${Study.FK} = ? AND ${ObservationUnit.FK} = ? AND observation_variable_db_id = ? AND value = ?",
                     arrayOf(studyId, plotId, traitDbId, value)
                 )
-            }
+            }.also { ObservationChangeTracker.markChanged() }
 
         fun delete(id: String) = withDatabase { db ->
             db.delete(Observation.tableName,
                 "${Observation.PK} = ?", arrayOf(id))
-        }
+        }.also { ObservationChangeTracker.markChanged() }
 
         fun deleteAllForStudy(studyId: String) = withDatabase { db ->
             db.delete(Observation.tableName, "${Study.FK} = ?", arrayOf(studyId))
-        }
+        }.also { ObservationChangeTracker.markChanged() }
 
         fun updateObservationModels(db: SQLiteDatabase, observations: List<ObservationModel>) {
 
@@ -780,6 +781,8 @@ class ObservationDao {
                     "${Observation.PK} = ?", arrayOf(it.internal_id_observation.toString())
                 )
             }
+
+            ObservationChangeTracker.markChanged()
         }
 
         /**
@@ -801,7 +804,7 @@ class ObservationDao {
                         "observation_db_id = ?", arrayOf(it.dbId))
 
             }
-        }
+        }.also { ObservationChangeTracker.markChanged() }
 
         fun updateObservationsByFieldBookId(observations: List<BrapiObservation>) = withDatabase { db ->
 
@@ -818,7 +821,7 @@ class ObservationDao {
                     "${Observation.PK} = ?", arrayOf(it.fieldBookDbId))
 
             }
-        }
+        }.also { ObservationChangeTracker.markChanged() }
 
         fun updateObservationMediaUris(observation: ObservationModel) = withDatabase {
             db.update(Observation.tableName, contentValuesOf().apply {
@@ -830,7 +833,7 @@ class ObservationDao {
             },
                 "${Observation.PK} = ?", arrayOf(observation.internal_id_observation.toString())
             )
-        }
+        }.also { ObservationChangeTracker.markChanged() }
 
         fun updateObservation(observation: ObservationModel) = withDatabase { db ->
 
@@ -842,7 +845,7 @@ class ObservationDao {
                 "internal_id_observation = ?",
                 arrayOf(observation.internal_id_observation.toString())
                 )
-        }
+        }.also { ObservationChangeTracker.markChanged() }
 
         fun updateObservationValue(
             id: Int,
@@ -855,7 +858,7 @@ class ObservationDao {
                 "${Observation.PK} = ?",
                 arrayOf(id.toString())
             )
-        }
+        }.also { ObservationChangeTracker.markChanged() }
 
         fun updateImage(image: FieldBookImage) = withDatabase {
 
@@ -866,7 +869,7 @@ class ObservationDao {
                         put("last_synced_time", image.lastSyncedTime.format(internalTimeFormatter))
                     },
                     Observation.PK + " = ?", arrayOf(image.fieldBookDbId))
-        }
+        }.also { ObservationChangeTracker.markChanged() }
 
 
         /**
@@ -926,18 +929,5 @@ class ObservationDao {
                 }
                 map
             } ?: emptyMap()
-
-        /**
-         * Returns the total number of observations for a study. Used by DataGridActivity as a
-         * lightweight cache staleness check.
-         */
-        fun getObservationCount(studyId: String): Int = withDatabase { db ->
-            db.rawQuery(
-                "SELECT COUNT(*) FROM observations WHERE study_id = ?",
-                arrayOf(studyId)
-            ).use { cursor ->
-                if (cursor.moveToFirst()) cursor.getInt(0) else 0
-            }
-        } ?: 0
     }
 }
