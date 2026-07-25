@@ -96,10 +96,6 @@
             android:name=".activities.DataGridActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop" /> <!-- available within the collect activity, user can search by building sql statements -->
-        <activity
-            android:name=".activities.OldDataGridActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize|locale"
-            android:launchMode="singleTop" /> <!-- available within the collect activity, user can search by building sql statements -->
         <!-- The settings page, each category has its own fragment class -->
         <activity
             android:name=".activities.PreferencesActivity"

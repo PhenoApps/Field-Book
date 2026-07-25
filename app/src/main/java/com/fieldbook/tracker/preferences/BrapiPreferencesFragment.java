@@ -494,10 +494,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
                 am.getUserData(account, BrapiAuthenticator.KEY_OIDC_FLOW),
                 am.getUserData(account, BrapiAuthenticator.KEY_OIDC_URL),
                 am.getUserData(account, BrapiAuthenticator.KEY_OIDC_CLIENT_ID),
-                am.getUserData(account, BrapiAuthenticator.KEY_OIDC_SCOPE),
-                null,
-                null,
-                null
+                am.getUserData(account, BrapiAuthenticator.KEY_OIDC_SCOPE)
         );
 
         BrapiManualAccountDialogFragment frag = BrapiManualAccountDialogFragment.Companion.newInstance(
