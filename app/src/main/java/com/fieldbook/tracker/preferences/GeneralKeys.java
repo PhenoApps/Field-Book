@@ -97,9 +97,6 @@ public class GeneralKeys {
     public static final String REGION = "region";
     public static final String TIPS_CONFIGURED = "TipsConfigured";
 
-    //shared preferences file name
-    public static final String SHARED_PREF_FILE_NAME = "Settings";
-
     //used to get the name of the currently selected field that is saved in preferences
     //example: field_sample how to get: sharedPreferences.getString(Constants.FIELD_FILE, "")
     public static final String FIELD_FILE = "FieldFile";

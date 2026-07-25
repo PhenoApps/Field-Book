@@ -11,7 +11,6 @@ import android.widget.AdapterView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.documentfile.provider.DocumentFile;
-import androidx.preference.PreferenceManager;
 
 import com.bytehamster.lib.preferencesearch.SearchConfiguration;
 import com.bytehamster.lib.preferencesearch.SearchPreference;
@@ -37,7 +36,6 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class PreferencesFragment extends BasePreferenceFragment implements NearbyShareUtil.FileHandler {
 
-    private PreferenceManager prefMgr;
     private Context context;
     private SearchPreference searchPreference;
 
@@ -49,9 +47,9 @@ public class PreferencesFragment extends BasePreferenceFragment implements Nearb
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-        prefMgr = getPreferenceManager();
-        prefMgr.setSharedPreferencesName(GeneralKeys.SHARED_PREF_FILE_NAME);
-
+        // No setSharedPreferencesName() here on purpose: every reader in the app goes through
+        // PreferenceManager.getDefaultSharedPreferences(), so pointing this screen at a separate
+        // file would write settings nowhere anything reads them.
         setPreferencesFromResource(R.xml.preferences, rootKey);
 
         searchPreference = findPreference("searchPreference");
