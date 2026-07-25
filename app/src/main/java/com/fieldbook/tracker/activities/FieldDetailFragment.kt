@@ -2,6 +2,7 @@ package com.fieldbook.tracker.activities
 
 import android.Manifest
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
@@ -130,8 +131,9 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         trialNameChip = rootView.findViewById(R.id.trialNameChip)
         studyGroupNameChip = rootView.findViewById(R.id.studyGroupName)
 
+        // The details are not loaded here. onResume() always follows onCreateView() and loads them
+        // itself, so doing it in both places ran the whole query and chart pipeline twice on open.
         fieldId = arguments?.getInt(GeneralKeys.FIELD_DETAIL_FIELD_ID)
-        loadFieldDetails()
 
         val overviewExpandCollapseIcon: ImageView = rootView.findViewById(R.id.overview_expand_collapse_icon)
         val overviewCollapsibleContent: LinearLayout = rootView.findViewById(R.id.overview_collapsible_content)
@@ -273,33 +275,45 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     }
 
     fun loadFieldDetails() {
-        fieldId?.let { id ->
-            CoroutineScope(Dispatchers.IO).launch {
-                val field = database.getFieldObject(id)
-                
-                withContext(Dispatchers.Main) {
-                    fieldObject = field  // Store the field object
-                    
-                    if (field != null) {
-                        updateFieldData(field)
-                        
-                        if (detailRecyclerView.adapter == null) { // initial load
-                            detailRecyclerView.layoutManager = LinearLayoutManager(context)
-                            val initialItems = createTraitDetailItems(field).toMutableList()
-                            adapter = FieldDetailAdapter(initialItems)
-                            detailRecyclerView.adapter = adapter
-                            setupToolbar(field)
-                        } else { // reload after data change
-                            val newItems = createTraitDetailItems(field)
-                            adapter?.updateItems(newItems)
-                        }
+        val id = fieldId
+        if (id == null) {
+            Log.e("FieldDetailFragment", "Field ID is null")
+            return
+        }
+
+        // Resolved here rather than inside the coroutine: the background load can outlive the
+        // fragment's attachment, and requireContext() throws once that happens.
+        val context = context ?: return
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val field = database.getFieldObject(id)
+
+            // The group name and the per-trait items used to be built in the main-thread block
+            // below, which put every one of their queries on the UI thread. They are read here so
+            // the main thread is left with nothing but view updates.
+            val studyGroupName = field?.let { database.getStudyGroupNameById(it.groupId) }
+            val items = field?.let { createTraitDetailItems(it, context) } ?: emptyList()
+
+            withContext(Dispatchers.Main) {
+                fieldObject = field  // Store the field object
+
+                if (field != null) {
+                    updateFieldData(field, studyGroupName)
+
+                    if (detailRecyclerView.adapter == null) { // initial load
+                        detailRecyclerView.layoutManager = LinearLayoutManager(context)
+                        adapter = FieldDetailAdapter(items.toMutableList())
+                        detailRecyclerView.adapter = adapter
+                        setupToolbar(field)
+                    } else { // reload after data change
+                        adapter?.updateItems(items)
                     }
                 }
             }
-        } ?: Log.e("FieldDetailFragment", "Field ID is null")
+        }
     }
 
-    private fun updateFieldData(field: FieldObject) {
+    private fun updateFieldData(field: FieldObject, studyGroupName: String?) {
 
         cardViewSync.visibility = View.GONE
         cardViewSync.setOnClickListener(null)
@@ -381,22 +395,30 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
 
 
         studyGroupNameChip.visibility = View.GONE
-        val groupName = database.getStudyGroupNameById(field.groupId)
-        if (!groupName.isNullOrEmpty() && groupName != field.trialName) {
+        if (!studyGroupName.isNullOrEmpty() && studyGroupName != field.trialName) {
             studyGroupNameChip.visibility = View.VISIBLE
-            studyGroupNameChip.text = groupName
+            studyGroupNameChip.text = studyGroupName
         }
     }
 
-    private fun createTraitDetailItems(field: FieldObject): List<FieldDetailItem> {
+    /**
+     * Builds the recycler items for a field's traits. Runs off the main thread, so it takes the
+     * context as a parameter instead of reaching for requireContext().
+     */
+    private fun createTraitDetailItems(field: FieldObject, context: Context): List<FieldDetailItem> {
         field.traitDetails?.let { traitDetails ->
             return traitDetails.map { traitDetail ->
                 val iconRes = Formats.entries
                     .find { it.getDatabaseName() == traitDetail.format }?.getIcon()
 
+                // Every observation in this group belongs to the same trait, so the trait is
+                // looked up once instead of once per value. The lookup is not cheap either — it
+                // also loads the trait's attribute values, making it two queries a call — so
+                // running it per observation was what stalled fields with a lot of data.
+                val trait = database.getTraitByName(traitDetail.traitName)
+
                 val processedObservations =
                     traitDetail.observations?.map { observation ->
-                        val trait = database.getTraitByName(traitDetail.traitName)
                         trait?.let {
                             valueProcessor.processValue(observation, it)
                         } ?: observation
@@ -406,8 +428,8 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
                     traitDetail.traitName,
                     traitDetail.format,
                     traitDetail.categories,
-                    getString(R.string.field_trait_observation_total, traitDetail.count),
-                    ContextCompat.getDrawable(requireContext(), iconRes ?: R.drawable.ic_trait_categorical),
+                    context.getString(R.string.field_trait_observation_total, traitDetail.count),
+                    ContextCompat.getDrawable(context, iconRes ?: R.drawable.ic_trait_categorical),
                     processedObservations,
                     traitDetail.completeness
                 )
