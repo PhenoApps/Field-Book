@@ -25,7 +25,7 @@ enum class Formats {
 
         fun getHardwareFormats() = entries.filter { it in setOf(SCALE, LABEL_PRINT) }
 
-        fun getCustomFormats() = entries.filter { it in setOf(DISEASE_RATING) }
+        fun getCustomFormats() = entries.filter { it in setOf(DISEASE_RATING, POLLINATOR) }
 
         fun getSpectralFormats() = entries.filter { it in setOf(NIX, GREEN_SEEKER, INNO_SPECTRA_SENSOR) }
 

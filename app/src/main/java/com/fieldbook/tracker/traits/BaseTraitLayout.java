@@ -224,6 +224,15 @@ public abstract class BaseTraitLayout extends LinearLayout {
     public void onExit() {}
 
     /**
+     * Optional confirmation shown before the toolbar delete button removes an observation.
+     * Return null to delete without confirming.
+     */
+    @Nullable
+    public String getDeleteConfirmationMessage() {
+        return null;
+    }
+
+    /**
      * Handles the repeated value view list state.
      * If this feature is enabled, the list will be modified and updated.
      */

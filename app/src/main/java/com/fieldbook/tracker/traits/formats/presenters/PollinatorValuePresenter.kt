@@ -20,8 +20,11 @@ class PollinatorValuePresenter : ValuePresenter {
             val json = JSONObject(raw)
             val seconds = json.optInt(PollinatorTraitLayout.DURATION_KEY)
             val countsJson = json.optJSONObject(PollinatorTraitLayout.COUNTS_KEY) ?: JSONObject()
-            val counts = PollinatorTraitLayout.categoriesFor(context, trait)
-                .joinToString(" | ") { "${it.label}: ${countsJson.optInt(PollinatorTraitLayout.keyOf(it))}" }
+            //represent what was collected, categories edited after collection keep their stored key
+            val labels = PollinatorTraitLayout.categoriesFor(trait)
+                .associate { PollinatorTraitLayout.keyOf(it) to it.label }
+            val counts = countsJson.keys().asSequence()
+                .joinToString(" | ") { key -> "${labels[key] ?: key}: ${countsJson.optInt(key)}" }
             val elapsed = "%d:%02d".format(seconds / 60, seconds % 60)
             "$counts | $elapsed"
         } catch (e: Exception) {

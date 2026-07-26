@@ -40,6 +40,13 @@ class CategoriesParameter : BaseFormatParameter(
         val categoriesRv: RecyclerView =
             itemView.findViewById(R.id.list_item_trait_parameter_categories_rv)
 
+        /**
+         * True when a category has been added, or typed but not yet added,
+         * the latter is merged into the trait object on save.
+         */
+        fun hasCategories(): Boolean =
+            catList.isNotEmpty() || valueEt.text?.isNotBlank() == true
+
         private fun setupCategoriesRecyclerView() {
 
             categoriesRv.adapter = CategoryAdapter(this)

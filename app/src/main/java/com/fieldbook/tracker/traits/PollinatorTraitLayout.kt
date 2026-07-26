@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -54,29 +53,15 @@ class PollinatorTraitLayout : BaseTraitLayout {
         internal const val COUNTS_KEY = "counts"
         internal const val DURATION_KEY = "duration_sec"
 
-        //labels are localized, values are stable keys stored in the observation json
-        private val DEFAULT_CATEGORIES = listOf(
-            R.string.trait_pollinator_category_bumble_bee to "bumble_bee",
-            R.string.trait_pollinator_category_honey_bee to "honey_bee",
-            R.string.trait_pollinator_category_large_dark_bee to "large_dark_bee",
-            R.string.trait_pollinator_category_small_dark_bee to "small_dark_bee",
-            R.string.trait_pollinator_category_small_green_bee to "small_green_bee",
-            R.string.trait_pollinator_category_non_bee to "non_bee"
-        )
-
-        private fun defaultCategories(context: Context) = DEFAULT_CATEGORIES.map {
-            BrAPIScaleValidValuesCategories().label(context.getString(it.first)).value(it.second)
-        }
-
-        //categories used when the trait does not define its own
-        internal fun categoriesFor(context: Context, trait: TraitObject?): List<BrAPIScaleValidValuesCategories> {
+        //categories are always defined by the trait, there are no built-in defaults
+        internal fun categoriesFor(trait: TraitObject?): List<BrAPIScaleValidValuesCategories> {
             val json = trait?.categories
-            if (json.isNullOrEmpty()) return defaultCategories(context)
+            if (json.isNullOrEmpty()) return emptyList()
             return try {
                 CategoryJsonUtil.decodeCategories(json).filter { !it.label.isNullOrEmpty() }
-                    .ifEmpty { defaultCategories(context) }
             } catch (e: Exception) {
-                defaultCategories(context)
+                Log.e(TAG, "Failed to decode categories: $json", e)
+                emptyList()
             }
         }
 
@@ -125,12 +110,20 @@ class PollinatorTraitLayout : BaseTraitLayout {
         if (onNew == false) restore(currentObservation?.value)
     }
 
+    //warn before the toolbar delete button wipes counts that have been recorded
+    override fun getDeleteConfirmationMessage(): String? =
+        if (hasData()) context.getString(R.string.trait_pollinator_confirm_delete) else null
+
+    private fun hasData(): Boolean =
+        elapsedSeconds.intValue > 0 ||
+                counts.values.any { it > 0 } ||
+                currentObservation?.value?.isNotEmpty() == true
+
     override fun deleteTraitListener() {
-        isRunning.value = false
-        isFinished.value = false
-        elapsedSeconds.intValue = 0
-        counts.clear()
+        if (isLocked) return
+        collectActivity.removeTrait()
         super.deleteTraitListener()
+        loadLayout()
     }
 
     override fun onExit() {
@@ -155,7 +148,7 @@ class PollinatorTraitLayout : BaseTraitLayout {
 
     private fun durationSeconds(): Int = currentTrait?.minimum?.toIntOrNull()?.takeIf { it > 0 } ?: DEFAULT_DURATION
 
-    private fun categories(): List<BrAPIScaleValidValuesCategories> = categoriesFor(context, currentTrait)
+    private fun categories(): List<BrAPIScaleValidValuesCategories> = categoriesFor(currentTrait)
 
     private fun key(category: BrAPIScaleValidValuesCategories): String = keyOf(category)
 
@@ -173,8 +166,10 @@ class PollinatorTraitLayout : BaseTraitLayout {
     }
 
     private fun save() {
+        val categories = categories()
+        if (categories.isEmpty()) return
         val countsJson = JSONObject()
-        categories().forEach { countsJson.put(key(it), counts[key(it)] ?: 0) }
+        categories.forEach { countsJson.put(key(it), counts[key(it)] ?: 0) }
         val json = JSONObject()
         json.put(COUNTS_KEY, countsJson)
         json.put(DURATION_KEY, elapsedSeconds.intValue)
@@ -193,6 +188,7 @@ class PollinatorTraitLayout : BaseTraitLayout {
     private fun PollinatorView(accent: Color) {
 
         val total = durationSeconds()
+        val categories = categories()
 
         //tick from the system clock so the countdown stays accurate while running
         LaunchedEffect(isRunning.value) {
@@ -225,7 +221,15 @@ class PollinatorTraitLayout : BaseTraitLayout {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            categories().chunked(2).forEach { row ->
+            //the trait defines its own categories, prompt when none exist s.a. an imported trait
+            if (categories.isEmpty()) {
+                Text(
+                    text = context.getString(R.string.trait_pollinator_no_categories),
+                    modifier = Modifier.padding(vertical = 16.dp)
+                )
+            }
+
+            categories.chunked(2).forEach { row ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -242,25 +246,18 @@ class PollinatorTraitLayout : BaseTraitLayout {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                ControlButton(Icons.Default.Replay, context.getString(R.string.reset), accent, enabled = elapsedSeconds.intValue > 0 || counts.isNotEmpty()) {
+                ControlButton(Icons.Default.Stop, context.getString(R.string.stop), accent, enabled = !isFinished.value && elapsedSeconds.intValue > 0) {
                     isRunning.value = false
-                    isFinished.value = false
-                    elapsedSeconds.intValue = 0
-                    counts.clear()
+                    isFinished.value = true
+                    save()
                 }
 
                 ControlButton(
                     if (isRunning.value) Icons.Default.Pause else Icons.Default.PlayArrow,
                     context.getString(if (isRunning.value) R.string.pause else R.string.play),
                     accent,
-                    enabled = !isFinished.value
+                    enabled = !isFinished.value && categories.isNotEmpty()
                 ) { isRunning.value = !isRunning.value }
-
-                ControlButton(Icons.Default.Stop, context.getString(R.string.stop), accent, enabled = !isFinished.value && elapsedSeconds.intValue > 0) {
-                    isRunning.value = false
-                    isFinished.value = true
-                    save()
-                }
             }
         }
     }

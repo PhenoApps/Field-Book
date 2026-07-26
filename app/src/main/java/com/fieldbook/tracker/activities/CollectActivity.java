@@ -839,6 +839,23 @@ public class CollectActivity extends ThemedActivity
                         }
                     }
 
+                    // let the trait layout warn that collected data is about to be removed
+                    String deleteConfirmation = null;
+                    if (getCurrentTrait() != null) {
+                        deleteConfirmation = getTraitLayout().getDeleteConfirmationMessage();
+                    }
+
+                    if (deleteConfirmation != null) {
+                        new AlertDialog.Builder(CollectActivity.this, R.style.AppAlertDialog)
+                                .setTitle(R.string.confirm_delete_with_media_title)
+                                .setMessage(deleteConfirmation)
+                                .setPositiveButton(R.string.delete, (dialog, which) ->
+                                        performTraitDeleteAfterMediaCheck())
+                                .setNegativeButton(android.R.string.cancel, null)
+                                .show();
+                        return;
+                    }
+
                     // If no media or no current observation, proceed with original behavior
                     performTraitDeleteAfterMediaCheck();
                 }
