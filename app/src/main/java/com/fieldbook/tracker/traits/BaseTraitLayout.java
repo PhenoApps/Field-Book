@@ -224,11 +224,11 @@ public abstract class BaseTraitLayout extends LinearLayout {
     public void onExit() {}
 
     /**
-     * Optional confirmation shown before the toolbar delete button removes an observation.
-     * Return null to delete without confirming.
+     * Optional warning shown before a toolbar action discards collected data, s.a. delete or
+     * marking an observation missing. Return null to let the action proceed without confirming.
      */
     @Nullable
-    public String getDeleteConfirmationMessage() {
+    public String getDataLossWarning() {
         return null;
     }
 

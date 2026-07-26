@@ -9,8 +9,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -32,14 +34,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.objects.TraitObject
+import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import kotlinx.coroutines.delay
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories
@@ -110,9 +111,9 @@ class PollinatorTraitLayout : BaseTraitLayout {
         if (onNew == false) restore(currentObservation?.value)
     }
 
-    //warn before the toolbar delete button wipes counts that have been recorded
-    override fun getDeleteConfirmationMessage(): String? =
-        if (hasData()) context.getString(R.string.trait_pollinator_confirm_delete) else null
+    //warn before a toolbar action wipes counts that have been recorded
+    override fun getDataLossWarning(): String? =
+        if (hasData()) context.getString(R.string.trait_pollinator_data_loss_warning) else null
 
     private fun hasData(): Boolean =
         elapsedSeconds.intValue > 0 ||
@@ -174,18 +175,21 @@ class PollinatorTraitLayout : BaseTraitLayout {
         json.put(COUNTS_KEY, countsJson)
         json.put(DURATION_KEY, elapsedSeconds.intValue)
         val value = json.toString()
-        collectInputView.text = value
+        //the collect edit text displays the summary, the raw json is only stored in the database
+        collectInputView.text = decodeValue(value)
         collectActivity.updateObservation(currentTrait, value, null)
     }
 
     private fun setupUi() {
         composeView?.setContent {
-            PollinatorView(getThemedColor(R.attr.fb_color_primary))
+            AppTheme {
+                PollinatorView()
+            }
         }
     }
 
     @Composable
-    private fun PollinatorView(accent: Color) {
+    private fun PollinatorView() {
 
         val total = durationSeconds()
         val categories = categories()
@@ -213,18 +217,13 @@ class PollinatorTraitLayout : BaseTraitLayout {
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "%d:%02d".format(remaining / 60, remaining % 60),
-                fontSize = 44.sp,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
             //the trait defines its own categories, prompt when none exist s.a. an imported trait
             if (categories.isEmpty()) {
                 Text(
                     text = context.getString(R.string.trait_pollinator_no_categories),
+                    style = AppTheme.typography.bodyStyle,
+                    color = AppTheme.colors.text.primary,
+                    textAlign = TextAlign.Center,
                     modifier = Modifier.padding(vertical = 16.dp)
                 )
             }
@@ -235,27 +234,40 @@ class PollinatorTraitLayout : BaseTraitLayout {
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     row.forEach { category ->
-                        CountButton(Modifier.weight(1f), category, accent)
+                        CountButton(Modifier.weight(1f), category)
                     }
                     if (row.size == 1) Spacer(modifier = Modifier.weight(1f))
                 }
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
+            //the countdown sits between the controls to leave the space above for categories
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                ControlButton(Icons.Default.Stop, context.getString(R.string.stop), accent, enabled = !isFinished.value && elapsedSeconds.intValue > 0) {
+                ControlButton(Icons.Default.Stop, context.getString(R.string.stop), enabled = !isFinished.value && elapsedSeconds.intValue > 0) {
                     isRunning.value = false
                     isFinished.value = true
                     save()
                 }
 
+                Text(
+                    text = "%d:%02d".format(remaining / 60, remaining % 60),
+                    style = AppTheme.typography.titleStyle.copy(
+                        fontSize = AppTheme.typography.titleSize * 2
+                    ),
+                    color = AppTheme.colors.text.primary,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    //weight keeps the controls on screen at the largest text sizes
+                    modifier = Modifier.weight(1f)
+                )
+
                 ControlButton(
                     if (isRunning.value) Icons.Default.Pause else Icons.Default.PlayArrow,
                     context.getString(if (isRunning.value) R.string.pause else R.string.play),
-                    accent,
                     enabled = !isFinished.value && categories.isNotEmpty()
                 ) { isRunning.value = !isRunning.value }
             }
@@ -263,37 +275,46 @@ class PollinatorTraitLayout : BaseTraitLayout {
     }
 
     @Composable
-    private fun CountButton(modifier: Modifier, category: BrAPIScaleValidValuesCategories, accent: Color) {
+    private fun CountButton(modifier: Modifier, category: BrAPIScaleValidValuesCategories) {
         val k = key(category)
         Button(
             onClick = { if (isRunning.value && !isFinished.value) counts[k] = (counts[k] ?: 0) + 1 },
             enabled = isRunning.value && !isFinished.value,
-            modifier = modifier.height(72.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = accent)
+            //min height so the button grows with the text size preference instead of clipping
+            modifier = modifier.defaultMinSize(minHeight = 72.dp),
+            contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = AppTheme.colors.primary,
+                contentColor = AppTheme.colors.text.button
+            )
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(text = (counts[k] ?: 0).toString(), fontSize = 22.sp, fontWeight = FontWeight.Bold)
-                Text(text = category.label, fontSize = 11.sp)
+                Text(text = (counts[k] ?: 0).toString(), style = AppTheme.typography.titleStyle)
+                Text(
+                    text = category.label,
+                    style = AppTheme.typography.bodyStyle,
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }
 
     @Composable
-    private fun ControlButton(icon: ImageVector, description: String, accent: Color, enabled: Boolean, onClick: () -> Unit) {
+    private fun ControlButton(icon: ImageVector, description: String, enabled: Boolean, onClick: () -> Unit) {
+        val accent = AppTheme.colors.primary
+        val iconColor = AppTheme.colors.text.button
         IconButton(onClick = onClick, enabled = enabled, modifier = Modifier.size(64.dp)) {
             Box(
                 modifier = Modifier.size(56.dp).background(if (enabled) accent else accent.copy(alpha = 0.3f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(icon, contentDescription = description, modifier = Modifier.size(28.dp))
+                Icon(
+                    icon,
+                    contentDescription = description,
+                    tint = if (enabled) iconColor else iconColor.copy(alpha = 0.38f),
+                    modifier = Modifier.size(28.dp)
+                )
             }
         }
-    }
-
-    private fun getThemedColor(resId: Int): Color {
-        val typedArray = context.theme.obtainStyledAttributes(intArrayOf(resId))
-        val colorInt = typedArray.getColor(0, 0xFF6200EE.toInt())
-        typedArray.recycle()
-        return Color(colorInt)
     }
 }

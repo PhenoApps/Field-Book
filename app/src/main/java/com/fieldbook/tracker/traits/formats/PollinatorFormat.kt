@@ -2,6 +2,7 @@ package com.fieldbook.tracker.traits.formats
 
 import android.content.Context
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.traits.formats.feature.DisplayValue
 import com.fieldbook.tracker.traits.formats.parameters.AttachMediaParameter
 import com.fieldbook.tracker.traits.formats.parameters.BaseFormatParameter
 import com.fieldbook.tracker.traits.formats.parameters.CategoriesParameter
@@ -26,7 +27,7 @@ class PollinatorFormat : TraitFormat(
     DurationParameter(),
     RepeatedMeasureParameter(),
     AttachMediaParameter()
-), ValuePresenter by PollinatorValuePresenter() {
+), ValuePresenter by PollinatorValuePresenter(), DisplayValue {
 
     //counts are recorded per category, the trait is unusable without at least one
     override fun validate(
