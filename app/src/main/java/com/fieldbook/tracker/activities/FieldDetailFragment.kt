@@ -358,22 +358,22 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         editUniqueChip.text = searchAttribute
 
         val lastEdit = field.dateEdit
-        if (!lastEdit.isNullOrEmpty()) {
-            lastEditTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastEdit)
+        lastEditTextView.text = if (!lastEdit.isNullOrEmpty()) {
+            SemanticDateUtil.getSemanticDate(requireContext(), lastEdit)
         } else {
             getString(R.string.no_activity)
         }
 
         val lastExport = field.dateExport
-        if (!lastExport.isNullOrEmpty()) {
-            lastExportTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastExport)
+        lastExportTextView.text = if (!lastExport.isNullOrEmpty()) {
+            SemanticDateUtil.getSemanticDate(requireContext(), lastExport)
         } else {
             getString(R.string.no_activity)
         }
 
         val lastSync = field.dateSync
-        if (!lastSync.isNullOrEmpty()) {
-            lastSyncTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastSync)
+        lastSyncTextView.text = if (!lastSync.isNullOrEmpty()) {
+            SemanticDateUtil.getSemanticDate(requireContext(), lastSync)
         } else {
             getString(R.string.no_activity)
         }
