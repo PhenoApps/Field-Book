@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.objects.TraitObject
+import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.traits.formats.parameters.DEFAULT_DURATION_SECONDS
 import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
@@ -78,6 +79,9 @@ class PollinatorTraitLayout : BaseTraitLayout {
     private val isRunning = mutableStateOf(false)
     private val isFinished = mutableStateOf(false)
 
+    //mirrors the base isLocked field so the compose ui recomposes when the lock state changes
+    private val isDataLocked = mutableStateOf(false)
+
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
@@ -87,7 +91,7 @@ class PollinatorTraitLayout : BaseTraitLayout {
     override fun setNaTraitsText() {
     }
 
-    override fun type(): String = "pollinator"
+    override fun type(): String = Formats.POLLINATOR.getDatabaseName()
 
     override fun layoutId(): Int = R.layout.trait_pollinator
 
@@ -110,6 +114,15 @@ class PollinatorTraitLayout : BaseTraitLayout {
         elapsedSeconds.intValue = 0
         counts.clear()
         if (onNew == false) restore(currentObservation?.value)
+        //base updates isLocked per rep when frozen, pick it up after the value is restored
+        isDataLocked.value = isLocked
+    }
+
+    override fun refreshLock() {
+        super.refreshLock()
+        isDataLocked.value = isLocked
+        //never keep counting into an observation that has just been locked
+        if (isLocked) isRunning.value = false
     }
 
     //warn before a toolbar action wipes counts that have been recorded
@@ -125,7 +138,8 @@ class PollinatorTraitLayout : BaseTraitLayout {
         if (isLocked) return
         collectActivity.removeTrait()
         super.deleteTraitListener()
-        loadLayout()
+        //super selects the closest remaining rep, reloading the layout would jump to the last one
+        if (collectInputView.isRepeatEnabled()) refreshLayout(false) else loadLayout()
     }
 
     override fun onExit() {
@@ -184,6 +198,9 @@ class PollinatorTraitLayout : BaseTraitLayout {
         //the collect edit text displays the summary, the raw json is only stored in the database
         collectInputView.text = decodeValue(value)
         collectActivity.updateObservation(currentTrait, value, null)
+        //style the displayed value as saved and re-apply the lock state for the stored observation
+        afterLoadExists(collectActivity, value)
+        isDataLocked.value = isLocked
     }
 
     private fun setupUi() {
@@ -253,7 +270,11 @@ class PollinatorTraitLayout : BaseTraitLayout {
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                ControlButton(Icons.Default.Stop, context.getString(R.string.stop), enabled = !isFinished.value && elapsedSeconds.intValue > 0) {
+                ControlButton(
+                    Icons.Default.Stop,
+                    context.getString(R.string.stop),
+                    enabled = canCollect() && elapsedSeconds.intValue > 0
+                ) {
                     isRunning.value = false
                     isFinished.value = true
                     save()
@@ -274,18 +295,21 @@ class PollinatorTraitLayout : BaseTraitLayout {
                 ControlButton(
                     if (isRunning.value) Icons.Default.Pause else Icons.Default.PlayArrow,
                     context.getString(if (isRunning.value) R.string.pause else R.string.play),
-                    enabled = !isFinished.value && categories.isNotEmpty()
+                    enabled = canCollect() && categories.isNotEmpty()
                 ) { isRunning.value = !isRunning.value }
             }
         }
     }
 
+    //counting is only possible on a running observation that is not saved, locked or frozen
+    private fun canCollect(): Boolean = !isFinished.value && !isDataLocked.value
+
     @Composable
     private fun CountButton(modifier: Modifier, category: BrAPIScaleValidValuesCategories) {
         val k = key(category)
         Button(
-            onClick = { if (isRunning.value && !isFinished.value) counts[k] = (counts[k] ?: 0) + 1 },
-            enabled = isRunning.value && !isFinished.value,
+            onClick = { if (isRunning.value && canCollect()) counts[k] = (counts[k] ?: 0) + 1 },
+            enabled = isRunning.value && canCollect(),
             //min height so the button grows with the text size preference instead of clipping
             modifier = modifier.defaultMinSize(minHeight = 72.dp),
             contentPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp),
