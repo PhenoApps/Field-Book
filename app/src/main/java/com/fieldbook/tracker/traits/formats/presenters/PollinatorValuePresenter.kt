@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.PollinatorTraitLayout
+import com.fieldbook.tracker.utilities.JsonUtil
 import org.json.JSONObject
 
 class PollinatorValuePresenter : ValuePresenter {
@@ -16,6 +17,8 @@ class PollinatorValuePresenter : ValuePresenter {
     override fun represent(context: Context, value: Any, trait: TraitObject?): String {
         val raw = value as? String
         if (raw.isNullOrEmpty()) return ""
+        //missing observations are stored as NA, they are not json
+        if (raw == "NA" || !JsonUtil.isJsonValid(raw)) return raw
         return try {
             val json = JSONObject(raw)
             val seconds = json.optInt(PollinatorTraitLayout.DURATION_KEY)

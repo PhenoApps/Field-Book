@@ -43,6 +43,7 @@ import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.parameters.DEFAULT_DURATION_SECONDS
 import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
+import com.fieldbook.tracker.utilities.JsonUtil
 import kotlinx.coroutines.delay
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories
 import org.json.JSONObject
@@ -131,9 +132,10 @@ class PollinatorTraitLayout : BaseTraitLayout {
         isRunning.value = false
     }
 
-    //show the visit total instead of the raw json in the repeated values toolbar
+    //show the visit total instead of the raw json in the collect input and repeated values toolbar
     override fun decodeValue(value: String?): String {
         if (value.isNullOrEmpty()) return ""
+        if (isNotCollectedValue(value)) return value
         return try {
             val json = JSONObject(value)
             val seconds = json.optInt(DURATION_KEY)
@@ -154,8 +156,11 @@ class PollinatorTraitLayout : BaseTraitLayout {
 
     private fun key(category: BrAPIScaleValidValuesCategories): String = keyOf(category)
 
+    //NA and any other value that was not collected here leaves the counts empty
+    private fun isNotCollectedValue(value: String) = value == "NA" || !JsonUtil.isJsonValid(value)
+
     private fun restore(value: String?) {
-        if (value.isNullOrEmpty()) return
+        if (value.isNullOrEmpty() || isNotCollectedValue(value)) return
         try {
             val json = JSONObject(value)
             elapsedSeconds.intValue = json.optInt(DURATION_KEY)
