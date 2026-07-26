@@ -562,6 +562,7 @@
     <string name="trait_detail_chip_transfer_images">Transfer images</string>
     <string name="trait_detail_chip_invalid_value">Outlier values</string>
     <string name="trait_detail_chip_severities">Severities</string>
+    <string name="trait_detail_chip_duration">Duration: %s</string>
 
     <string name="trait_parameter_allow_multicat">Multiple Category Selection</string>
     <string name="trait_parameter_allow_other">Allow Other Category</string>

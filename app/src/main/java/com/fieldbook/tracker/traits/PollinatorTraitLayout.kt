@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.objects.TraitObject
+import com.fieldbook.tracker.traits.formats.parameters.DEFAULT_DURATION_SECONDS
 import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import kotlinx.coroutines.delay
@@ -50,7 +51,6 @@ class PollinatorTraitLayout : BaseTraitLayout {
 
     companion object {
         private const val TAG = "PollinatorTraitLayout"
-        private const val DEFAULT_DURATION = 300
         internal const val COUNTS_KEY = "counts"
         internal const val DURATION_KEY = "duration_sec"
 
@@ -147,7 +147,8 @@ class PollinatorTraitLayout : BaseTraitLayout {
         }
     }
 
-    private fun durationSeconds(): Int = currentTrait?.minimum?.toIntOrNull()?.takeIf { it > 0 } ?: DEFAULT_DURATION
+    private fun durationSeconds(): Int =
+        currentTrait?.minimum?.toIntOrNull()?.takeIf { it > 0 } ?: DEFAULT_DURATION_SECONDS
 
     private fun categories(): List<BrAPIScaleValidValuesCategories> = categoriesFor(currentTrait)
 
