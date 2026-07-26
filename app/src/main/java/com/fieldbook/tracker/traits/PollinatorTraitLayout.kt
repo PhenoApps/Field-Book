@@ -56,6 +56,9 @@ class PollinatorTraitLayout : BaseTraitLayout {
         internal const val COUNTS_KEY = "counts"
         internal const val DURATION_KEY = "duration_sec"
 
+        //resolved once, the format definition is rebuilt on every getDatabaseName call
+        private val TYPE = Formats.POLLINATOR.getDatabaseName()
+
         //categories are always defined by the trait, there are no built-in defaults
         internal fun categoriesFor(trait: TraitObject?): List<BrAPIScaleValidValuesCategories> {
             val json = trait?.categories
@@ -88,10 +91,12 @@ class PollinatorTraitLayout : BaseTraitLayout {
         context, attrs, defStyleAttr
     )
 
+    //marking an entry missing replaces the counts, clear them so the ui matches the stored value
     override fun setNaTraitsText() {
+        resetObservationState()
     }
 
-    override fun type(): String = Formats.POLLINATOR.getDatabaseName()
+    override fun type(): String = TYPE
 
     override fun layoutId(): Int = R.layout.trait_pollinator
 
@@ -106,13 +111,17 @@ class PollinatorTraitLayout : BaseTraitLayout {
         setupUi()
     }
 
-    //reload the saved counts when navigating between repeated measures
-    override fun refreshLayout(onNew: Boolean?) {
-        super.refreshLayout(onNew)
+    private fun resetObservationState() {
         isRunning.value = false
         isFinished.value = false
         elapsedSeconds.intValue = 0
         counts.clear()
+    }
+
+    //reload the saved counts when navigating between repeated measures
+    override fun refreshLayout(onNew: Boolean?) {
+        super.refreshLayout(onNew)
+        resetObservationState()
         if (onNew == false) restore(currentObservation?.value)
         //base updates isLocked per rep when frozen, pick it up after the value is restored
         isDataLocked.value = isLocked
@@ -129,10 +138,13 @@ class PollinatorTraitLayout : BaseTraitLayout {
     override fun getDataLossWarning(): String? =
         if (hasData()) context.getString(R.string.trait_pollinator_data_loss_warning) else null
 
+    //NA and other values that hold no counts are not worth warning about
     private fun hasData(): Boolean =
         elapsedSeconds.intValue > 0 ||
                 counts.values.any { it > 0 } ||
-                currentObservation?.value?.isNotEmpty() == true
+                currentObservation?.value?.let {
+                    it.isNotEmpty() && !isNotCollectedValue(it)
+                } == true
 
     override fun deleteTraitListener() {
         if (isLocked) return
@@ -164,7 +176,7 @@ class PollinatorTraitLayout : BaseTraitLayout {
     }
 
     private fun durationSeconds(): Int =
-        currentTrait?.minimum?.toIntOrNull()?.takeIf { it > 0 } ?: DEFAULT_DURATION_SECONDS
+        currentTrait?.duration?.toIntOrNull()?.takeIf { it > 0 } ?: DEFAULT_DURATION_SECONDS
 
     private fun categories(): List<BrAPIScaleValidValuesCategories> = categoriesFor(currentTrait)
 

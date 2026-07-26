@@ -248,7 +248,7 @@ private fun getParamText(context: Context, param: BaseFormatParameter, trait: Tr
         is SaveImageParameter -> context.getString(R.string.trait_detail_chip_transfer_images)
         is SeveritiesParameter -> context.getString(R.string.trait_detail_chip_severities)
         is DurationParameter -> {
-            val seconds = trait.minimum.toIntOrNull() ?: DEFAULT_DURATION_SECONDS
+            val seconds = trait.duration.toIntOrNull() ?: DEFAULT_DURATION_SECONDS
             context.getString(
                 R.string.trait_detail_chip_duration,
                 "%d:%02d".format(seconds / 60, seconds % 60)

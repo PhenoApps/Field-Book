@@ -1,10 +1,8 @@
 package com.fieldbook.tracker.traits.formats
 
-import android.content.Context
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.traits.formats.feature.DisplayValue
 import com.fieldbook.tracker.traits.formats.parameters.AttachMediaParameter
-import com.fieldbook.tracker.traits.formats.parameters.BaseFormatParameter
 import com.fieldbook.tracker.traits.formats.parameters.CategoriesParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.traits.formats.parameters.DurationParameter
@@ -23,30 +21,9 @@ class PollinatorFormat : TraitFormat(
     stringNameAux = null,
     NameParameter(),
     DetailsParameter(),
-    CategoriesParameter(),
+    //counts are recorded per category, the trait cannot collect without at least one
+    CategoriesParameter(isRequired = true),
     DurationParameter(),
     RepeatedMeasureParameter(),
     AttachMediaParameter()
-), ValuePresenter by PollinatorValuePresenter(), DisplayValue {
-
-    //counts are recorded per category, the trait is unusable without at least one
-    override fun validate(
-        context: Context,
-        parameterViewHolders: List<BaseFormatParameter.ViewHolder>
-    ) = ValidationResult().apply {
-
-        val categoriesHolder = parameterViewHolders
-            .find { it is CategoriesParameter.ViewHolder } as? CategoriesParameter.ViewHolder
-
-        if (categoriesHolder?.hasCategories() != true) {
-
-            val message = context.getString(R.string.traits_create_warning_categories_required)
-
-            result = false
-
-            error = message
-
-            categoriesHolder?.let { it.valueEt.error = message }
-        }
-    }
-}
+), ValuePresenter by PollinatorValuePresenter(), DisplayValue

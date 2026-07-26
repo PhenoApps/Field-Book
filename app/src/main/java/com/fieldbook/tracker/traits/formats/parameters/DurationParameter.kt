@@ -10,9 +10,9 @@ import com.fieldbook.tracker.objects.TraitObject
 const val DEFAULT_DURATION_SECONDS = 300
 
 /**
- * Observation duration in seconds, stored in the trait minimum field. Defaults to five minutes.
- * Uses its own parameter type so it is displayed as a chip on the trait detail screen,
- * unlike the minimum bound it shares storage with.
+ * Observation duration in seconds, stored in its own trait attribute. Defaults to five minutes.
+ * Reuses the minimum parameter UI for numeric entry, but neither the parameter type nor the
+ * stored attribute is shared with the numeric minimum bound.
  */
 class DurationParameter : MinimumParameter<Int>(
     nameStringResourceId = R.string.trait_pollinator_duration_label,
@@ -43,11 +43,11 @@ class DurationParameter : MinimumParameter<Int>(
         }
 
         override fun merge(traitObject: TraitObject) = traitObject.apply {
-            minimum = numericEt.text.toString().ifBlank { "$DEFAULT_DURATION_SECONDS" }
+            duration = numericEt.text.toString().ifBlank { "$DEFAULT_DURATION_SECONDS" }
         }
 
         override fun load(traitObject: TraitObject?): Boolean {
-            numericEt.setText(traitObject?.minimum?.takeIf { it.isNotEmpty() }
+            numericEt.setText(traitObject?.duration?.takeIf { it.isNotEmpty() }
                 ?: "$DEFAULT_DURATION_SECONDS")
             return true
         }
