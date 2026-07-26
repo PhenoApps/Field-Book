@@ -32,6 +32,14 @@ data class PendingConflictUi(
     val serverDbId: String?
 )
 
+data class PendingResyncChoiceUi(
+    val key: String,
+    val localValue: String,
+    val serverValue: String,
+    val localFieldBookId: String?,
+    val serverDbId: String?
+)
+
 data class Progress(
     val message: String = "",
     val current: Int = 0,
@@ -91,6 +99,9 @@ data class BrapiExportUiState(
     val pendingConflictsCount: Int = 0,
     // Detailed pending conflicts for UI display (server/local pairs)
     val pendingConflicts: List<PendingConflictUi> = emptyList(),
+    // Pre-upload re-sync matches for observations with no local BrAPI id.
+    val pendingResyncChoicesCount: Int = 0,
+    val pendingResyncChoices: List<PendingResyncChoiceUi> = emptyList(),
 )
 
 enum class ViewMode {

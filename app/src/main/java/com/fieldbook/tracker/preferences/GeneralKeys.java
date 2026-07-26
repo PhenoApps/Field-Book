@@ -151,7 +151,26 @@ public class GeneralKeys {
     public static final String TRAIT_DETAIL_DATA_COLLAPSED = "TRAIT_DETAIL_DATA_COLLAPSED";
 
     //Data grid
+    //old preference used with only one header
     public static final String DATAGRID_PREFIX_TRAIT = "com.fieldbook.tracker.datagrid.DATAGRID_PREFIX_TRAIT";
+    //new pref key that allows multiple header choices
+    public static final String DATAGRID_PREFIX_TRAITS = "com.fieldbook.tracker.datagrid.DATAGRID_PREFIX_TRAITS";
+    public static final String DATAGRID_LOCKED_COLUMN_IDS = "com.fieldbook.tracker.datagrid.DATAGRID_LOCKED_COLUMN_IDS";
+    public static final String DATAGRID_WRAP_CONTENT = "com.fieldbook.tracker.datagrid.DATAGRID_WRAP_CONTENT";
+    public static final String DATAGRID_HEATMAP = "com.fieldbook.tracker.datagrid.DATAGRID_HEATMAP";
+    public static final String DATAGRID_EXTRA_HEADERS = "com.fieldbook.tracker.datagrid.DATAGRID_EXTRA_HEADERS";
+    public static final String DATAGRID_SORT_COLUMN = "com.fieldbook.tracker.datagrid.DATAGRID_SORT_COLUMN";
+    public static final String DATAGRID_SORT_ASCENDING = "com.fieldbook.tracker.datagrid.DATAGRID_SORT_ASCENDING";
+    public static final String DATAGRID_ZOOM = "com.fieldbook.tracker.datagrid.DATAGRID_ZOOM";
+    //Map view
+    public static final String MAP_VIEW_SETTING = "com.fieldbook.tracker.datagrid.MAP_VIEW_SETTING";
+    public static final String MAP_ROW_ATTR = "com.fieldbook.tracker.datagrid.MAP_ROW_ATTR";
+    public static final String MAP_COL_ATTR = "com.fieldbook.tracker.datagrid.MAP_COL_ATTR";
+    public static final String MAP_INVERT_ROW = "com.fieldbook.tracker.datagrid.MAP_INVERT_ROW";
+    public static final String MAP_INVERT_COL = "com.fieldbook.tracker.datagrid.MAP_INVERT_COL";
+    public static final String DATAGRID_MAP_ZOOM = "com.fieldbook.tracker.datagrid.DATAGRID_MAP_ZOOM";
+    //Cell details panel
+    public static final String CELL_DETAILS_SETTING = "com.fieldbook.tracker.datagrid.CELL_DETAILS_SETTING";
 
     //summary filter
     public static final String SUMMARY_FILTER_ATTRIBUTES = "com.fieldbook.tracker.summary.SUMMARY_FILTER_ATTRIBUTES";
@@ -161,7 +180,7 @@ public class GeneralKeys {
     public static final String CALENDAR_LAST_SAVED_DATE = "com.fieldbook.tracker.CALENDAR_LAST_SAVED_DATE";
 
     //Zebra Label Print Trait
-    public static final String LABEL_PRINT_DEVICE_NAME      = "LABEL_PRINT_DEVICE_NAME";
+    public static final String LABEL_PRINT_DEVICE_NAME = "LABEL_PRINT_DEVICE_NAME";
 
     //Dialog Export
     public static final String DIALOG_EXPORT_BUNDLE_CHECKED = "com.fieldbook.tracker.DIALOG_EXPORT_BUNDLE_CHECKED";

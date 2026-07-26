@@ -90,6 +90,9 @@ This project follows the [all-contributors](https://allcontributors.org/) specif
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/rmcp"><img src="https://avatars.githubusercontent.com/u/5850588?v=4?s=100" width="100px;" alt="Renier Pestana"/><br /><sub><b>Renier Pestana</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=rmcp" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/alexismanin"><img src="https://avatars.githubusercontent.com/u/44767131?v=4?s=100" width="100px;" alt="Alexis Manin"/><br /><sub><b>Alexis Manin</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=alexismanin" title="Code">💻</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Stathmin"><img src="https://avatars.githubusercontent.com/u/55657873?v=4?s=100" width="100px;" alt="Stathmin"/><br /><sub><b>Stathmin</b></sub></a><br /><a href="#translation-Stathmin" title="Translation">🌍</a></td>
+    </tr>
   </tbody>
 </table>
 

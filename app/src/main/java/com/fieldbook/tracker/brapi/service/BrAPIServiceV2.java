@@ -2,6 +2,7 @@ package com.fieldbook.tracker.brapi.service;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.util.Pair;
 
@@ -35,6 +36,7 @@ import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.ImportFormat;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
+import com.fieldbook.tracker.utilities.BrapiAccountHelper;
 import com.fieldbook.tracker.utilities.CategoryJsonUtil;
 import com.fieldbook.tracker.utilities.FailureFunction;
 import com.fieldbook.tracker.utilities.SuccessFunction;
@@ -128,6 +130,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     protected final TrialsApi trialsApi;
     //used to identify field book db id in external references
     private final String fieldBookReferenceSource = "Field Book Upload";
+    private final String fieldBookDeviceReferenceSource = "Field Book Device";
     private final Context context;
     private final BrAPIClient apiClient;
     private final ImagesApi imagesApi;
@@ -148,6 +151,9 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     public final ObservationUnitService observationUnitService;
     public final GermplasmService germplasmService;
     public final ServerInfoService serverInfoService;
+
+    private final SharedPreferences preferences;
+    private final BrapiAccountHelper accountHelper;
 
     public BrAPIServiceV2(Context context) {
         this.context = context;
@@ -175,13 +181,25 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         this.observationUnitService = new ObservationUnitService.Default(this.observationUnitsApi);
         this.germplasmService = new GermplasmService.Default(this.germplasmApi);
         this.serverInfoService = new ServerInfoService.Default(this.serverInfoApi);
+
+        this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        this.accountHelper = new BrapiAccountHelper(context, preferences);
     }
 
     @Override
     public void authorizeClient() {
         try {
-            apiClient.authenticate(t -> PreferenceManager.getDefaultSharedPreferences(context)
-                    .getString(PreferenceKeys.BRAPI_TOKEN, null));
+            // Prefer the local cache; shared accounts may need AccountManager to resolve the token.
+            apiClient.authenticate(t -> {
+                String token = accountHelper.peekToken();
+                if (token == null) {
+                    token = accountHelper.getTokenBlocking();
+                }
+                if (token == null) {
+                    token = preferences.getString(PreferenceKeys.BRAPI_TOKEN, null);
+                }
+                return token;
+            });
         } catch (ApiException error) {
             Log.e("BrAPIServiceV2", "API Exception", error);
         }
@@ -285,7 +303,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         } else {
             fbImage.setFileSize(original.getFileSize());
         }
-        if (image.getImageHeight() != null){
+        if (image.getImageHeight() != null) {
             fbImage.setHeight(image.getImageHeight());
         } else {
             fbImage.setHeight(original.getHeight());
@@ -544,8 +562,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                                BrapiObservationLevel observationLevel, final Function<BrapiStudyDetails, Void> function,
                                final Function<Integer, Void> failFunction) {
         try {
-            final Integer pageSize = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context)
-                    .getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50"));
+            final Integer pageSize = Integer.parseInt(preferences.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50"));
             final BrapiStudyDetails study = new BrapiStudyDetails();
             study.setAttributes(new ArrayList<>());
             study.setValues(new ArrayList<>());
@@ -746,8 +763,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     }
 
     public Map<String, BrAPIGermplasm> getGermplasmDetails(List<String> allGermplasmDbIds, final Function<Integer, Void> failFunction) {
-        final Integer pageSize = Integer.parseInt(PreferenceManager.getDefaultSharedPreferences(context)
-                .getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50"));
+        final Integer pageSize = Integer.parseInt(preferences.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50"));
         BrAPIGermplasmSearchRequest germplasmBody = new BrAPIGermplasmSearchRequest();
         List<String> doubledGermplasmDbIds = new ArrayList<>(allGermplasmDbIds);
         doubledGermplasmDbIds.addAll(allGermplasmDbIds);
@@ -1086,8 +1102,8 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     }
 
     public void getObservationsByPage(final String studyDbId, final List<String> observationVariableDbIds,
-                                BrapiPaginationManager paginationManager, final Function<List<Observation>, Void> function,
-                                final Function<Integer, Void> failFunction) {
+                                      BrapiPaginationManager paginationManager, final Function<List<Observation>, Void> function,
+                                      final Function<Integer, Void> failFunction) {
 
         try {
             BrapiV2ApiCallBack<BrAPIObservationListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationListResponse>() {
@@ -1199,6 +1215,12 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                         String refId = ref.getReferenceId();
                         if (refId != null && !refId.isEmpty()) {
                             newObservation.setFieldBookDbId(refId);
+                            break;
+                        }
+                    } else if (source != null && source.equals(fieldBookDeviceReferenceSource)) {
+                        String deviceId = getPrioritizedValue(ref.getReferenceID(), ref.getReferenceId());
+                        if (deviceId != null && !deviceId.isEmpty()) {
+                            newObservation.setOriginDeviceId(deviceId);
                             break;
                         }
                     }
@@ -1348,7 +1370,16 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         reference.setReferenceID(observation.getFieldbookDbId()); // Keep obsolete referenceID
         reference.setReferenceSource(fieldBookReferenceSource);
 
-        newObservation.setExternalReferences(Collections.singletonList(reference));
+        BrAPIExternalReference deviceReference = new BrAPIExternalReference();
+        String deviceId = BrapiDeviceIdProvider.getOrCreate(context);
+        deviceReference.setReferenceId(deviceId);
+        deviceReference.setReferenceID(deviceId);
+        deviceReference.setReferenceSource(fieldBookDeviceReferenceSource);
+
+        List<BrAPIExternalReference> externalReferences = new ArrayList<>();
+        externalReferences.add(reference);
+        externalReferences.add(deviceReference);
+        newObservation.setExternalReferences(externalReferences);
 
         return newObservation;
     }
@@ -1363,6 +1394,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         }
         return returnValue;
     }
+
 
     public void getTraits(final String studyDbId,
                           final Function<BrapiStudyDetails, Void> function,
@@ -1688,14 +1720,14 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             // Do a pre-check to see if the field exists so we can show an error
             int FieldUniqueStatus = dataHelper.checkBrapiStudyUnique(field.getObservationLevel(), field.getStudyDbId());
             if (FieldUniqueStatus != -1) {
-                return new BrapiControllerResponse(false, this.notUniqueFieldMessage);
+                return new BrapiControllerResponse(false, BrAPIService.notUniqueFieldMessage);
             }
 
             // Check that there are not duplicate unique ids in the database
             HashMap<String, String> checkMap = new HashMap<>();
 
             if (studyDetails.getValues().isEmpty()) {
-                return new BrapiControllerResponse(false, this.noPlots);
+                return new BrapiControllerResponse(false, BrAPIService.noPlots);
             }
 
             // Construct our map to check for uniques
@@ -1705,7 +1737,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             }
 
             if (!dataHelper.checkUnique(checkMap)) {
-                return new BrapiControllerResponse(false, this.notUniqueIdMessage);
+                return new BrapiControllerResponse(false, BrAPIService.notUniqueIdMessage);
             }
 
 

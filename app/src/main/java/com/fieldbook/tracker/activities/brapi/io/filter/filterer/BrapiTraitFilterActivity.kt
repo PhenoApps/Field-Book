@@ -222,8 +222,8 @@ class BrapiTraitFilterActivity(
                     it.pageSize(pageSize)
                 }
             )
-                .catch {
-                    onApiException()
+                .catch { e ->
+                    onApiException(e)
                     queryVariablesJob?.cancel()
                 }
                 .collect {

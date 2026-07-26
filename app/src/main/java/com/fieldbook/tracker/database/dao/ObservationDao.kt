@@ -183,6 +183,13 @@ class ObservationDao {
                 traitDbId
             ).maxByOrNull { it.rep.toInt() }?.rep?.toInt() ?: 0) + 1
 
+        /**
+         * Gets the latest observation by rep number for the given study, observation unit, and trait.
+         * Used when repeated measures is disabled to display only the most recent value.
+         */
+        fun getLatestObservation(studyId: String, obsUnit: String, traitDbId: String): ObservationModel? =
+            getAllRepeatedValues(studyId, obsUnit, traitDbId).maxByOrNull { it.rep.toInt() }
+
         //false warning, cursor is closed in toTable
         @SuppressLint("Recycle")
         fun getHostImageObservations(ctx: Context, hostUrl: String, missingPhoto: Bitmap): List<FieldBookImage> = withDatabase { db ->
@@ -271,6 +278,7 @@ class ObservationDao {
                     obs.last_synced_time,
                     obs.collector,
                     obs.rep,
+                    obs.${ObservationVariable.FK} AS internalVariableDbId,
                     study.${Study.PK} AS ${Study.FK},
                     study.study_db_id,
                     vars.external_db_id,
@@ -298,6 +306,7 @@ class ObservationDao {
                         variableName = getStringVal(cursor, "observation_variable_name")
                         rep = getStringVal(cursor, "rep")
                         variableDetails = getStringVal(cursor, "observation_variable_details")
+                        internalVariableDbId = getStringVal(cursor, "internalVariableDbId")
                     }
                     
                     val format = getStringVal(cursor, "observation_variable_field_book_format")
@@ -465,32 +474,33 @@ class ObservationDao {
             }
             
             // Build a query to count all observation units in these studies
-            val studyIdList = studiesWithObservations.joinToString(",") { "'$it'" }
-            
+            val placeholders = studiesWithObservations.joinToString(",") { "?" }
+            val studyArgs = studiesWithObservations.toTypedArray()
+
             // Count total observation units in these studies
             val totalUnitsQuery = """
-                SELECT COUNT(*) as total_units 
-                FROM ${ObservationUnit.tableName} 
-                WHERE ${Study.FK} IN ($studyIdList)
+                SELECT COUNT(*) as total_units
+                FROM ${ObservationUnit.tableName}
+                WHERE ${Study.FK} IN ($placeholders)
             """
-            
-            val totalUnits = db.rawQuery(totalUnitsQuery, null).use { cursor ->
+
+            val totalUnits = db.rawQuery(totalUnitsQuery, studyArgs).use { cursor ->
                 if (cursor.moveToFirst()) {
                     cursor.getInt(cursor.getColumnIndexOrThrow("total_units"))
                 } else {
                     0
                 }
             }
-            
+
             // Count observation units that already have observations for this trait
             val observedUnitsQuery = """
-                SELECT COUNT(DISTINCT ${ObservationUnit.FK}) as observed_units 
-                FROM ${Observation.tableName} 
-                WHERE ${Study.FK} IN ($studyIdList) 
+                SELECT COUNT(DISTINCT ${ObservationUnit.FK}) as observed_units
+                FROM ${Observation.tableName}
+                WHERE ${Study.FK} IN ($placeholders)
                 AND ${ObservationVariable.FK} = ?
             """
-            
-            val observedUnits = db.rawQuery(observedUnitsQuery, arrayOf(traitDbId)).use { cursor ->
+
+            val observedUnits = db.rawQuery(observedUnitsQuery, studyArgs + traitDbId).use { cursor ->
                 if (cursor.moveToFirst()) {
                     cursor.getInt(cursor.getColumnIndexOrThrow("observed_units"))
                 } else {
@@ -753,6 +763,10 @@ class ObservationDao {
                 "${Observation.PK} = ?", arrayOf(id))
         }
 
+        fun deleteAllForStudy(studyId: String) = withDatabase { db ->
+            db.delete(Observation.tableName, "${Study.FK} = ?", arrayOf(studyId))
+        }
+
         fun updateObservationModels(db: SQLiteDatabase, observations: List<ObservationModel>) {
 
             observations.forEach {
@@ -872,6 +886,48 @@ class ObservationDao {
                 cursor.toTable().size
             }
 
+        } ?: 0
+
+        /**
+         * Returns a map of (plotId, traitDbId) -> repeat count for all (plot, trait) pairs in a
+         * study that have more than one observation. Used by DataGridActivity to avoid per-cell
+         * repeated-value queries.
+         */
+        fun getRepeatCountsForStudy(studyId: String): Map<Pair<String, String>, Int> =
+            withDatabase { db ->
+                val map = mutableMapOf<Pair<String, String>, Int>()
+                val cursor = db.rawQuery(
+                    """
+                    SELECT observation_unit_id, observation_variable_db_id, COUNT(*) AS cnt
+                    FROM observations
+                    WHERE study_id = ?
+                    GROUP BY observation_unit_id, observation_variable_db_id
+                    HAVING COUNT(*) > 1
+                    """.trimIndent(),
+                    arrayOf(studyId)
+                )
+                cursor.use {
+                    while (it.moveToNext()) {
+                        val plotId = it.getString(0)
+                        val traitId = it.getString(1)
+                        val count = it.getInt(2)
+                        map[Pair(plotId, traitId)] = count
+                    }
+                }
+                map
+            } ?: emptyMap()
+
+        /**
+         * Returns the total number of observations for a study. Used by DataGridActivity as a
+         * lightweight cache staleness check.
+         */
+        fun getObservationCount(studyId: String): Int = withDatabase { db ->
+            db.rawQuery(
+                "SELECT COUNT(*) FROM observations WHERE study_id = ?",
+                arrayOf(studyId)
+            ).use { cursor ->
+                if (cursor.moveToFirst()) cursor.getInt(0) else 0
+            }
         } ?: 0
     }
 }

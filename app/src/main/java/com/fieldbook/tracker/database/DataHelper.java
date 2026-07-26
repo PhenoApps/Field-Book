@@ -639,6 +639,18 @@ public class DataHelper {
     }
 
     /**
+     * Lightweight DataGrid-specific query: same SQL as getExportTableData but returns the raw
+     * cursor without value processing. Avoids O(rows × traits) getTraitByName() DB calls.
+     */
+    public Cursor getDataGridTableData(int fieldId, ArrayList<TraitObject> traits, List<String> requiredAttributes) {
+
+        open();
+
+        return ObservationUnitPropertyDao.Companion.getDataGridTableData(context, fieldId, traits, requiredAttributes);
+
+    }
+
+    /**
      * Used by the application to return all traits which are visible
      */
     public ArrayList<TraitObject> getVisibleTraits() {
@@ -718,6 +730,15 @@ public class DataHelper {
 
         return ObservationVariableDao.Companion.getAllTraitObjects(
                 preferences.getString(GeneralKeys.TRAITS_LIST_SORT_ORDER, "position")
+        );
+    }
+
+    public List<String> getExistingObservationUnitCoreColumns() {
+        return java.util.Arrays.asList(
+            "primary_id",
+            "secondary_id",
+            "observation_unit_db_id",
+            "geo_coordinates"
         );
     }
 
@@ -1442,6 +1463,20 @@ public class DataHelper {
         return ObservationDao.Companion.getAllRepeatedValues(studyId, plotId, traitDbId);
     }
 
+    public java.util.Map<kotlin.Pair<String, String>, Integer> getBatchRepeatCounts(String studyId) {
+
+        open();
+
+        return ObservationDao.Companion.getRepeatCountsForStudy(studyId);
+    }
+
+    public int getObservationCount(String studyId) {
+
+        open();
+
+        return ObservationDao.Companion.getObservationCount(studyId);
+    }
+
     public String getObservationUnitPropertyByPlotId(String uniqueName, String column, String uniqueId) {
 
         open();
@@ -1454,6 +1489,13 @@ public class DataHelper {
         open();
 
         ObservationDao.Companion.delete(id);
+    }
+
+    public void deleteAllObservationsForStudy(String studyId) {
+
+        open();
+
+        ObservationDao.Companion.deleteAllForStudy(studyId);
     }
 
     /**
