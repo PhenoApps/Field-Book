@@ -10,6 +10,7 @@ apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 apply plugin: 'com.google.devtools.ksp'
 apply plugin: "org.jetbrains.kotlin.plugin.serialization"
 apply plugin: "kotlin-parcelize"
+apply plugin: "com.mikepenz.aboutlibraries.plugin.android"
 
 Properties props = new Properties()
 props.load(new FileInputStream("$project.rootDir/version.properties"))
@@ -208,8 +209,7 @@ dependencies {
     //noinspection GradleDependency
     implementation 'com.github.MFlisar:changelog:1.1.6'
     implementation 'com.github.daniel-stoneuk:material-about-library:2.4.2'
-    //noinspection GradleDependency
-    implementation "com.mikepenz:aboutlibraries:6.2.3"
+    implementation "com.mikepenz:aboutlibraries-compose-m3:13.2.1"
     implementation 'com.getkeepsafe.taptargetview:taptargetview:1.15.0'
     implementation 'com.github.ByteHamster:SearchPreference:v2.5.1'
     implementation "com.github.skydoves:colorpickerpreference:2.0.4"
@@ -353,3 +353,11 @@ repositories {
 tasks.register('prepareKotlinBuildScriptModel') {}
 
 android.defaultConfig.manifestPlaceholders = ['appAuthRedirectScheme': 'fieldbook' ]
+
+// generates res/raw/aboutlibraries.json from the real dependency graph at build time
+// the nested blocks are set as properties, groovy resolves collect { } to its own collect method
+aboutLibraries {
+    // licenses come from the local poms, no network call during the build
+    collect.fetchRemoteLicense = false
+    export.prettyPrint = true
+}

@@ -22,7 +22,6 @@ import com.fieldbook.tracker.utilities.DateJsonUtil
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.HorizontalBarChart
 import com.github.mikephil.charting.charts.PieChart
-import com.mikepenz.fastadapter.adapters.ItemAdapter.items
 import java.math.BigDecimal
 
 class FieldDetailAdapter(private var items: MutableList<FieldDetailItem>) : RecyclerView.Adapter<FieldDetailAdapter.ViewHolder>() {

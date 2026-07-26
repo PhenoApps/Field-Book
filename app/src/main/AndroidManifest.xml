@@ -152,6 +152,10 @@
         <!-- shows version information and references to other apps, etc. -->
         <activity
             android:name=".activities.AboutActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale" />
+        <!-- open source libraries used by the app, opened from the about screen -->
+        <activity
+            android:name=".activities.LibrariesActivity"
             android:configChanges="orientation|keyboardHidden|screenSize|locale" /> <!-- Next couple of activities are used for brapi import/export and filtering -->
         <activity
             android:name=".activities.brapi.BrapiActivity"
