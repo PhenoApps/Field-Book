@@ -15,14 +15,26 @@
     <string name="dialog_warning">警告</string>
     <string name="dialog_save">保存</string>
     <string name="dialog_save_error_title">保存时出错</string>
+    <string name="dialog_next">下一个</string>
     <string name="dialog_scan">扫描</string>
+    <string name="dialog_sort_by">排序</string>
+    <string name="dialog_enable">启用</string>
     <string name="dialog_delete">删除</string>
+    <string name="dialog_accept">接受</string>
+    <string name="dialog_exit">退出</string>
     <string name="barcode_scanner_text">扫描条形码</string>
     <!-- Toolbar -->
+    <string name="appbar_more_options">更多选项</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">示例数据</string>
     <string name="startup_sample_data_message">加载示例数据？</string>
     <!-- App Intro -->
+    <string name="app_intro_intro_title_slide1">欢迎使用 Field Book</string>
+    <string name="app_intro_intro_summary_slide1">传统上，在田间采集数据需要手写并从纸质笔记本中转录。Field Book 作为一种数字化数据采集解决方案，在提高采集速度的同时，还能确保更高的数据完整性。</string>
+    <string name="app_intro_intro_title_slide2">功能和自定义</string>
+    <string name="app_intro_intro_summary_slide2">数据通过Field Book中的自定义性状布局进行录入，以简化数据输入并最大限度地减少错误。。\n\n 默认情况下，收集到的数据是本地存储的。Field Book同时支持建构API并将数据发送到与BrAPI兼容的系统。</string>
+    <string name="app_intro_required_setup_title">必要设置</string>
+    <string name="app_intro_required_setup_summary">要开始使用Field Book，请为应用程序授予必要的权限，然后定义存储数据的文件夹。</string>
     <string name="app_intro_tutorial_title">教程</string>
     <!-- Storage Definer -->
     <!-- Permissions  -->
