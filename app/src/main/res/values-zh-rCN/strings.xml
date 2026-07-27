@@ -14,7 +14,9 @@
     <string name="dialog_import">导入</string>
     <string name="dialog_warning">警告</string>
     <string name="dialog_save">保存</string>
+    <string name="dialog_go">转至</string>
     <string name="dialog_save_error_title">保存时出错</string>
+    <string name="dialog_back">返回</string>
     <string name="dialog_next">下一个</string>
     <string name="dialog_scan">扫描</string>
     <string name="dialog_sort_by">排序</string>
@@ -25,6 +27,7 @@
     <string name="barcode_scanner_text">扫描条形码</string>
     <!-- Toolbar -->
     <string name="appbar_more_options">更多选项</string>
+    <string name="appbar_back">返回</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">示例数据</string>
     <string name="startup_sample_data_message">加载示例数据？</string>
@@ -35,12 +38,29 @@
     <string name="app_intro_intro_summary_slide2">数据通过Field Book中的自定义性状布局进行录入，以简化数据输入并最大限度地减少错误。。\n\n 默认情况下，收集到的数据是本地存储的。Field Book同时支持建构API并将数据发送到与BrAPI兼容的系统。</string>
     <string name="app_intro_required_setup_title">必要设置</string>
     <string name="app_intro_required_setup_summary">要开始使用Field Book，请为应用程序授予必要的权限，然后定义存储数据的文件夹。</string>
+    <string name="app_intro_permissions_title">权限</string>
+    <string name="app_intro_permissions_warning">请授予必要的权限</string>
+    <string name="app_intro_storage_title">定义存储设置</string>
+    <string name="app_intro_storage_summary">定义存储您数据的文件夹。</string>
+    <string name="app_intro_storage_warning">请设置存储位置</string>
+    <string name="app_intro_required_optional_title">可选设定</string>
+    <string name="app_intro_required_optional_summary">这些可选设置自定义Field Book，可以在设置中进行调整。</string>
+    <string name="app_intro_load_sample_data_title">加载示例数据</string>
+    <string name="app_intro_load_sample_data_summary">导入一个包含示例田区和性状的示例数据库。</string>
     <string name="app_intro_tutorial_title">教程</string>
+    <string name="app_intro_tutorial_summary">在顶部工具栏中添加描述整个应用程序的功能的帮助图标。</string>
+    <string name="app_intro_high_contrast_title">高对比度主题</string>
+    <string name="app_intro_high_contrast_summary">启用高对比度主题以提高墨水屏设备的可见性。</string>
     <!-- Storage Definer -->
+    <string name="storage_definer_title">存储位置</string>
+    <string name="storage_definer_summary">请选择或创建一个可用于存储应用数据的文件夹。</string>
+    <string name="define_button_text">选择文件夹</string>
     <!-- Permissions  -->
+    <string name="permission_rationale_storage">访问设备的文件是必需的。</string>
     <string name="permission_rationale_storage_import">导入文件需要访问设备上的文件</string>
     <string name="permission_rationale_storage_export">导出数据需要访问设备上的文件。</string>
     <string name="permission_rationale_trait_features">采集数据需要访问设备上的文件，麦克风和相机。</string>
+    <string name="permission_ask_bluetooth">请接受蓝牙权限。</string>
     <!-- Config Activity  -->
     <string name="settings_fields">地块</string>
     <string name="settings_traits">性状</string>
@@ -48,22 +68,64 @@
     <string name="settings_export">导出</string>
     <string name="settings_advanced">设置</string>
     <string name="settings_profile">说明</string>
+    <string name="settings_statistics">统计信息</string>
     <!-- Config Activity Fuzzy Search  -->
+    <string name="act_config_fuzzy_search_failed">数据库无法通过代码检索田区或小区: %s</string>
+    <string name="act_config_fuzzy_search_error">搜索 %s 时发生错误</string>
+    <string name="act_config_search_fab_content_description">搜索所有田区和小区以加载/导航到条形码项目。</string>
     <!-- File manager  -->
     <string name="import_source_local">本地存储</string>
     <string name="import_source_cloud">云端存储</string>
     <string name="import_source_ask">总是询问</string>
     <string name="import_dialog_importing">请稍等...</string>
     <string name="import_error_general">导入错误</string>
+    <string name="act_file_explorer_no_file_error">找不到Field Book目录。</string>
     <!-- Warnings/Catches -->
     <string name="warning_field_missing">地块没有载入。请载入地块再采集数据。</string>
     <string name="warning_traits_missing">无性状存在。请先创建性状，再采集数据。</string>
     <!-- Changelog -->
     <string name="changelog_title">更改记录</string>
     <!--  Field Grouping  -->
+    <string name="group_archived_value">已归档</string>
+    <string name="fields_ungrouped">已取消群组</string>
+    <string name="dialog_group_options">分组选项</string>
+    <string name="group_existing">现有的群组</string>
+    <string name="group_archive">归档</string>
+    <string name="group_new">新群组</string>
+    <string name="group_remove">從群組中移除</string>
+    <string name="create_new_group">创建新群组</string>
+    <string name="dialog_group_name">群组名称</string>
+    <string name="dialog_group_name_warning">田区名称不能为空</string>
+    <string name="menu_group">群组</string>
+    <string name="menu_archive">归档</string>
+    <string name="menu_groups_toggle">切换群组可见性</string>
+    <string name="group_toggle_icon">切换群组</string>
+    <string name="archived_fields">已归档的田区</string>
+    <string name="menu_unarchive">从归档中删除</string>
+    <string name="menu_collapse_all">全部收起</string>
+    <string name="menu_expand_all">全部展开</string>
+    <string name="archive_active_field_title">将活动的田区归档？</string>
+    <string name="archive_active_field_message">您已选中要归档的活动田区。如果继续，将不再有活动田区。是否要继续？</string>
+    <string name="archive_others">將其他归档</string>
+    <string name="dialog_unarchive_field_title">取消归档田区？</string>
+    <string name="dialog_unarchive_field_message">此田区目前已归档。如果您继续，此田区将被取消归档并成为活动田区。您确定要继续吗？</string>
     <!-- FIELDS -->
     <!-- General -->
+    <string name="menu_fields_sort_list">排序田区列表</string>
+    <string name="fields_sort_reset">重置</string>
+    <string name="fields_sort_by_name">名称</string>
+    <string name="fields_sort_by_import_format">导入格式</string>
+    <string name="fields_sort_by_import_date">导入日期</string>
+    <string name="fields_sort_by_edit_date">编辑日期</string>
+    <string name="fields_sort_by_sync_date">同步日期</string>
+    <string name="fields_sort_by_export_date">导出日期</string>
+    <string name="list_item_field_popup_menu_content_description">打开被选中田区的菜单。</string>
+    <string name="selected_count">已选择 %1$d</string>
+    <string name="fields_select_all">全选</string>
+    <string name="field_generic_observation_level">记录</string>
+    <string name="field_observation_count_format">%1$s %2$s</string>
     <!-- Sort -->
+    <string name="field_sort_entries">排序</string>
     <!-- Modify -->
     <string name="fields_export">导出</string>
     <!-- Delete -->
@@ -433,11 +495,14 @@
     <!-- canon camera strings -->
     <!-- spectral trait strings -->
     <!-- inno spectra -->
+    <string name="sort">排序</string>
     <string name="brapi_traits_filter_title">性状</string>
     <string name="dialog_quick_goto_title">快速转移</string>
+    <string name="dialog_quick_goto_go">转至</string>
     <string name="traits_sort_default">默认值</string>
     <!--  NearbyShare  -->
     <!-- Stop Watch Trait Button content descriptions-->
+    <string name="reset">重置</string>
     <string name="save">保存</string>
     <string name="delete">删除</string>
     <string name="new_images">新图像</string>
