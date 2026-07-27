@@ -199,18 +199,26 @@
     <!-- Material Components -->
     <style name="FirstChipStyle" parent="Widget.MaterialComponents.Chip.Filter">
         <item name="chipBackgroundColor">?attr/fb_first_chip_color</item>
+        <item name="android:textColor">?attr/fb_color_text_light</item>
+        <item name="closeIconTint">?attr/fb_color_text_light</item>
     </style>
 
     <style name="SecondChipStyle" parent="Widget.MaterialComponents.Chip.Filter">
         <item name="chipBackgroundColor">?attr/fb_second_chip_color</item>
+        <item name="android:textColor">?attr/fb_color_text_light</item>
+        <item name="closeIconTint">?attr/fb_color_text_light</item>
     </style>
 
     <style name="ThirdChipStyle" parent="Widget.MaterialComponents.Chip.Filter">
         <item name="chipBackgroundColor">?attr/fb_third_chip_color</item>
+        <item name="android:textColor">?attr/fb_color_text_light</item>
+        <item name="closeIconTint">?attr/fb_color_text_light</item>
     </style>
 
     <style name="FourthChipStyle" parent="Widget.MaterialComponents.Chip.Filter">
         <item name="chipBackgroundColor">?attr/fb_third_chip_color</item>
+        <item name="android:textColor">?attr/fb_color_text_light</item>
+        <item name="closeIconTint">?attr/fb_color_text_light</item>
     </style>
 
     <style name="Widget.MaterialComponents.BottomSheet.DragHandle" parent="Widget.Material3.BottomSheet.DragHandle">

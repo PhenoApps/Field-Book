@@ -10,6 +10,7 @@ import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.ValidationResult
 import com.fieldbook.tracker.traits.formats.ui.AttachMediaChoice
+import com.fieldbook.tracker.ui.theme.AppTheme
 
 class AttachMediaParameter(private val initialDefaultValue: Boolean? = null) :
     BaseFormatParameter(
@@ -43,7 +44,9 @@ class AttachMediaParameter(private val initialDefaultValue: Boolean? = null) :
              }
 
             composeView.setContent {
-                AttachMediaChoice(photoState, videoState, audioState)
+                AppTheme {
+                    AttachMediaChoice(photoState, videoState, audioState)
+                }
             }
          }
 

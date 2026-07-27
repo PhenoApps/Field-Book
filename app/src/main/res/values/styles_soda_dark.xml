@@ -55,6 +55,7 @@
         <item name="fb_second_chip_color">@color/soda_dark_chip_second</item>
         <item name="fb_third_chip_color">@color/soda_dark_chip_third</item>
         <item name="fb_fourth_chip_color">@color/soda_dark_chip_third</item>
+        <item name="fb_inverse_crop_region_color">@color/soda_dark_inverse_crop_region</item>
 
         <item name="fb_heatmap_color_high">@color/soda_dark_heatmap_high</item>
         <item name="fb_heatmap_color_medium">@color/soda_dark_heatmap_medium</item>

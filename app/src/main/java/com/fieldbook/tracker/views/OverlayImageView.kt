@@ -3,16 +3,13 @@ package com.fieldbook.tracker.views
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffXfermode
 import android.graphics.Rect
-import android.os.Build
+import android.graphics.RectF
 import android.util.AttributeSet
-import androidx.annotation.RequiresApi
-import com.fieldbook.tracker.R
+import android.util.TypedValue
 import androidx.appcompat.widget.AppCompatImageView
+import com.fieldbook.tracker.R
 
 /**
  * An ImageView wrapper class that draws a rectangle around an image, leaving the outside semi-transparent.
@@ -24,25 +21,35 @@ class OverlayImageView: AppCompatImageView {
     private var bottomX: Float = 0f
     private var bottomY: Float = 0f
     private var bitmap: Bitmap? = null
-    private var parentX: Float = 0f
-    private var parentY: Float = 0f
     private var parentWidth: Int = 0
     private var parentHeight: Int = 0
     private var parentRect: Rect? = null
 
     private val rectPaint = Paint().also { paint ->
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            paint.color = context.getColor(R.color.main_primary)
+        val typedValue = TypedValue()
+        val accent = if (context.theme.resolveAttribute(R.attr.fb_color_accent, typedValue, true)) {
+            typedValue.data
         } else {
-            paint.color = Color.BLACK
+            context.getColor(R.color.main_primary)
         }
-        //create a dashed path
+        paint.color = accent
         paint.style = Paint.Style.STROKE
         paint.strokeWidth = 15f
     }
 
-    private val paint = Paint()
-    private val porterDuffXfermode = PorterDuffXfermode(PorterDuff.Mode.OVERLAY)
+    private val dimPaint = Paint().also { paint ->
+        val typedValue = TypedValue()
+        val dimColor = if (context.theme.resolveAttribute(R.attr.fb_inverse_crop_region_color, typedValue, true)) {
+            typedValue.data
+        } else {
+            context.getColor(R.color.main_inverse_crop_region_color)
+        }
+        paint.color = dimColor
+        paint.style = Paint.Style.FILL
+        paint.isAntiAlias = true
+    }
+
+    private val imagePaint = Paint()
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
@@ -56,8 +63,6 @@ class OverlayImageView: AppCompatImageView {
         this.bottomX = bottomX - x
         this.bottomY = bottomY - y
         this.bitmap = bitmap
-        this.parentX = parentX
-        this.parentY = parentY
         this.parentWidth = parentWidth
         this.parentHeight = parentHeight
         this.parentRect = Rect(0, 0, parentWidth, parentHeight)
@@ -69,21 +74,24 @@ class OverlayImageView: AppCompatImageView {
         super.onDraw(canvas)
 
         bitmap?.let { bmp ->
-
             parentRect?.let { parentRect ->
+                imagePaint.alpha = 255
+                canvas.drawBitmap(bmp, null, parentRect, imagePaint)
 
-                //set alpha to half and draw the full bitmap scaled to the parent
-                paint.alpha = 128
-                canvas.drawBitmap(bmp, null, parentRect, paint)
+                val left = topX.coerceAtMost(bottomX)
+                val top = topY.coerceAtMost(bottomY)
+                val right = topX.coerceAtLeast(bottomX)
+                val bottom = topY.coerceAtLeast(bottomY)
+                val crop = RectF(left, top, right, bottom)
+                val bounds = RectF(0f, 0f, parentWidth.toFloat(), parentHeight.toFloat())
 
-                //enable porter duff overlay, draw rect with full alpha and then disable
-                paint.alpha = 255
-                paint.xfermode = porterDuffXfermode
-                canvas.drawRect(topX, topY, bottomX, bottomY, paint)
-                paint.xfermode = null
+                // Dim everything outside the crop window; keep the crop area fully visible.
+                canvas.drawRect(bounds.left, bounds.top, bounds.right, crop.top, dimPaint)
+                canvas.drawRect(bounds.left, crop.top, crop.left, crop.bottom, dimPaint)
+                canvas.drawRect(crop.right, crop.top, bounds.right, crop.bottom, dimPaint)
+                canvas.drawRect(bounds.left, crop.bottom, bounds.right, bounds.bottom, dimPaint)
 
-                //draw the crop border
-                canvas.drawRect(topX, topY, bottomX, bottomY, rectPaint)
+                canvas.drawRect(crop, rectPaint)
             }
         }
     }

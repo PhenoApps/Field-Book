@@ -28,12 +28,14 @@ fun ServerInfoCard(
             Text(
                 text = stringResource(R.string.brapi_server_name_label, serverName),
                 style = AppTheme.typography.titleStyle,
+                color = AppTheme.colors.text.primary,
             )
 
             if (organizationName.isNotEmpty()) {
                 Text(
                     text = stringResource(R.string.brapi_organization_name_label, organizationName),
                     style = AppTheme.typography.subheadingStyle,
+                    color = AppTheme.colors.text.secondary,
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }
@@ -42,6 +44,7 @@ fun ServerInfoCard(
                 Text(
                     text = stringResource(R.string.brapi_server_description_label, serverDescription),
                     style = AppTheme.typography.subheadingStyle,
+                    color = AppTheme.colors.text.secondary,
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }

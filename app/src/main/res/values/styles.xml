@@ -372,20 +372,27 @@
 
     <!-- need to define a theme for each type of material component until we can use the new themes -->
     <!-- these are for chips, three defined for now to be used generically across filter layers -->
-    <style name="FirstChipTheme" parent="Theme.MaterialComponents">
+    <style name="FirstChipTheme" parent="ThemeOverlay.MaterialComponents">
         <item name="chipStyle">@style/FirstChipStyle</item>
-
+        <item name="colorOnSurface">?attr/fb_color_text_light</item>
+        <item name="colorControlNormal">?attr/fb_color_text_light</item>
     </style>
 
-    <style name="SecondChipTheme" parent="Theme.MaterialComponents">
+    <style name="SecondChipTheme" parent="ThemeOverlay.MaterialComponents">
         <item name="chipStyle">@style/SecondChipStyle</item>
+        <item name="colorOnSurface">?attr/fb_color_text_light</item>
+        <item name="colorControlNormal">?attr/fb_color_text_light</item>
     </style>
 
-    <style name="ThirdChipTheme" parent="Theme.MaterialComponents">
+    <style name="ThirdChipTheme" parent="ThemeOverlay.MaterialComponents">
         <item name="chipStyle">@style/ThirdChipStyle</item>
+        <item name="colorOnSurface">?attr/fb_color_text_light</item>
+        <item name="colorControlNormal">?attr/fb_color_text_light</item>
     </style>
 
-    <style name="FourthChipTheme" parent="Theme.MaterialComponents">
+    <style name="FourthChipTheme" parent="ThemeOverlay.MaterialComponents">
         <item name="chipStyle">@style/FourthChipStyle</item>
+        <item name="colorOnSurface">?attr/fb_color_text_light</item>
+        <item name="colorControlNormal">?attr/fb_color_text_light</item>
     </style>
 </resources>

@@ -17,6 +17,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.ui.theme.AppTheme
 
 @Preview
 @Composable
@@ -49,8 +50,13 @@ fun AttachMediaChoice(
 
 @Composable
 fun AttachMediaItem(state: MutableState<Boolean>, iconId: Int) {
+    val iconTint = AppTheme.colors.surface.iconTint
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Icon(painter = painterResource(iconId), contentDescription = null)
+        Icon(
+            painter = painterResource(iconId),
+            contentDescription = null,
+            tint = iconTint,
+        )
         Checkbox(checked = state.value, onCheckedChange = { state.value = it })
     }
 }

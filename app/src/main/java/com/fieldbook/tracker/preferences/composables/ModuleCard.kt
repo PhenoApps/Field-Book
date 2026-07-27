@@ -28,6 +28,7 @@ fun ModuleCard(moduleInfo: BrapiModuleCalls) {
                     moduleInfo.implementationPercentage
                 ),
                 style = AppTheme.typography.bodyStyle,
+                color = AppTheme.colors.text.secondary,
                 modifier = Modifier.padding(top = 4.dp)
             )
         }

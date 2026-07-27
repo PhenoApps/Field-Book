@@ -41,6 +41,8 @@ fun ServerCallsTable(calls: List<ServiceComparison>) {
     val headerBackgroundColor = AppTheme.colors.primaryDark
     val cellBorderColor = AppTheme.colors.dataVisualization.dataGrid.tableBorder
     val cellTextStyle = AppTheme.typography.bodyStyle
+    val primaryTextColor = AppTheme.colors.text.primary
+    val secondaryTextColor = AppTheme.colors.text.secondary
 
     BoxWithConstraints(
         modifier = Modifier
@@ -124,6 +126,7 @@ fun ServerCallsTable(calls: List<ServiceComparison>) {
                                 else -> ""
                             },
                             style = cellTextStyle,
+                            color = primaryTextColor,
                             fontWeight = FontWeight.Bold,
                             textAlign = if (column >= 1) TextAlign.Center else TextAlign.Start
                         )
@@ -138,6 +141,7 @@ fun ServerCallsTable(calls: List<ServiceComparison>) {
                                     Text( // service resource
                                         text = call.service,
                                         style = cellTextStyle,
+                                        color = primaryTextColor,
                                         fontWeight = FontWeight.Medium,
                                         modifier = Modifier.fillMaxWidth()
                                     )
@@ -153,6 +157,7 @@ fun ServerCallsTable(calls: List<ServiceComparison>) {
                                                 .ifEmpty { "-" }
                                         },
                                         style = cellTextStyle,
+                                        color = secondaryTextColor,
                                         modifier = Modifier
                                             .padding(top = 2.dp)
                                             .fillMaxWidth()

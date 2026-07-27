@@ -57,6 +57,7 @@ fun ServerInfoScreen(uiState: ServerInfoUiState) {
                             modifier = Modifier.padding(horizontal = 8.dp),
                             text = stringResource(R.string.brapi_compatibility_all_calls),
                             style = AppTheme.typography.subheadingStyle,
+                            color = AppTheme.colors.text.primary,
                             fontWeight = FontWeight.Bold
                         )
                     }
