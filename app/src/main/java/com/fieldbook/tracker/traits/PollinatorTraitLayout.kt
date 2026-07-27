@@ -85,6 +85,10 @@ class PollinatorTraitLayout : BaseTraitLayout {
     //mirrors the base isLocked field so the compose ui recomposes when the lock state changes
     private val isDataLocked = mutableStateOf(false)
 
+    //mirrors the trait settings so the compose ui recomposes when a different trait is selected
+    private val traitCategories = mutableStateOf<List<BrAPIScaleValidValuesCategories>>(emptyList())
+    private val traitDuration = mutableIntStateOf(DEFAULT_DURATION_SECONDS)
+
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
@@ -121,6 +125,9 @@ class PollinatorTraitLayout : BaseTraitLayout {
     //reload the saved counts when navigating between repeated measures
     override fun refreshLayout(onNew: Boolean?) {
         super.refreshLayout(onNew)
+        traitCategories.value = categoriesFor(currentTrait)
+        traitDuration.intValue =
+            currentTrait?.duration?.toIntOrNull()?.takeIf { it > 0 } ?: DEFAULT_DURATION_SECONDS
         resetObservationState()
         if (onNew == false) restore(currentObservation?.value)
         //base updates isLocked per rep when frozen, pick it up after the value is restored
@@ -175,10 +182,9 @@ class PollinatorTraitLayout : BaseTraitLayout {
         }
     }
 
-    private fun durationSeconds(): Int =
-        currentTrait?.duration?.toIntOrNull()?.takeIf { it > 0 } ?: DEFAULT_DURATION_SECONDS
+    private fun durationSeconds(): Int = traitDuration.intValue
 
-    private fun categories(): List<BrAPIScaleValidValuesCategories> = categoriesFor(currentTrait)
+    private fun categories(): List<BrAPIScaleValidValuesCategories> = traitCategories.value
 
     private fun key(category: BrAPIScaleValidValuesCategories): String = keyOf(category)
 
