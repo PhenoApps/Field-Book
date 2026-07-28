@@ -92,7 +92,7 @@
     <string name="group_existing">Grupo existente</string>
     <string name="group_archive">Archivar</string>
     <string name="group_new">Nuevo grupo</string>
-    <string name="group_remove">Eliminar del grupo</string>
+    <string name="group_remove">Remover del grupo</string>
     <string name="create_new_group">Crear Nuevo Grupo</string>
     <string name="dialog_group_name">Nombre del Grupo</string>
     <string name="dialog_group_name_warning">Este campo no puede estar en blanco</string>
@@ -101,7 +101,7 @@
     <string name="menu_groups_toggle">Alternar Visibilidad de Grupos</string>
     <string name="group_toggle_icon">Alternar Grupo</string>
     <string name="archived_fields">Campos Archivados</string>
-    <string name="menu_unarchive">Eliminar del archivo</string>
+    <string name="menu_unarchive">Remover del archivo</string>
     <string name="menu_collapse_all">Contraer Todo</string>
     <string name="menu_expand_all">Expandir Todo</string>
     <string name="archive_active_field_title">¿Archivar Campo Activo?</string>
@@ -555,10 +555,18 @@
     <string name="activity_collect_dialog_new_collector">¿Desea guardar el nombre de la persona capturando datos?</string>
     <!--- Datagrid -->
     <string name="dialog_data_grid_header_picker_ok">OK</string>
+    <string name="dialog_data_grid_column_picker_title">Elegir Columnas</string>
     <string name="dialog_data_grid_repeated_measures_title">Elegir Observación</string>
     <string name="menu_action_header_view_data_grid_title">Actualizar Encabezados de Fila</string>
+    <string name="menu_action_column_view_data_grid_title">Actualizar Encabezados de Columnas</string>
+    <string name="menu_action_reset_sort_data_grid_title">Restablecer Orden</string>
+    <string name="menu_data_grid_action_locate_plot">Localizar Parcela Activa</string>
+    <string name="menu_action_wrap_content_data_grid_title">Ajustar Contenido</string>
     <string name="menu_action_heatmap_data_grid_title">Mapa de calor</string>
     <string name="map_view_legend_complete">Completo</string>
+    <string name="map_view_legend_partial">Parcial</string>
+    <string name="map_view_legend_empty">Vacío</string>
+    <string name="map_view_legend_missing">Faltante</string>
     <!--- Lock -->
     <string name="activity_collect_locked_state">Bloqueado - entrada, modificación y eliminación de datos están desactivados</string>
     <string name="activity_collect_frozen_state">Congelado - una vez guardados los datos no se pueden modificar o eliminar</string>
@@ -1108,11 +1116,17 @@
     <string name="brapi_display_name">Mostrar Nombre</string>
     <string name="brapi_revoke_auth">Cerrar sesión</string>
     <!-- Multi-account management -->
+    <string name="brapi_add_account_guided_setup">Ingreso manual</string>
     <string name="brapi_chip_edit">Editar</string>
     <string name="brapi_chip_authorize">Autorizar</string>
+    <string name="brapi_chip_remove">Remover</string>
+    <string name="brapi_logout_manage_message">Elegir una acción para %1$s.</string>
+    <string name="brapi_logout_and_remove">Remover</string>
+    <string name="brapi_advanced_settings">Ajustes de Transmisión</string>
     <string name="brapi_auth_btn">Iniciar sesión en el Sitio</string>
     <string name="brapi_auth_success">Autorización por BrAPI exitosa</string>
     <string name="brapi_auth_deny">Autorización BrAPI denegada</string>
+    <string name="brapi_auth_failed_remove">Remover</string>
     <string name="brapi_auth_error_starting">Error al iniciar la autenticación BrAPI</string>
     <string name="brapi_auth_permission_deny">ERROR: no tiene los permisos necesarios para el sistema especificado.</string>
     <string name="brapi_auth_needed_title">Se necesita iniciar sesión</string>
