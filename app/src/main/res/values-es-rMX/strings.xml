@@ -265,6 +265,7 @@
     <string name="search_multiple_matches_found">Se encontraron parcelas coincidentes con %1$d . Mostrando la primera.</string>
     <!--    <string name="field_default_sort_order">import order</string>-->
     <string name="field_data_title">Datos</string>
+    <string name="field_data_summary">%1$d observaciones en %2$d rasgos</string>
     <string name="field_trait_observation_total">\"%d\" observaciones</string>
     <!-- Field Detail Charts -->
     <string name="chart_no_data">No hay datos para graficar</string>
@@ -554,6 +555,7 @@
     <string name="activity_collect_dialog_neutral_button">Modificar ajustes</string>
     <string name="activity_collect_dialog_new_collector">¿Desea guardar el nombre de la persona capturando datos?</string>
     <!--- Datagrid -->
+    <string name="data_grid_empty">No hay datos para mostrar.</string>
     <string name="dialog_data_grid_header_picker_ok">OK</string>
     <string name="dialog_data_grid_column_picker_title">Elegir Columnas</string>
     <string name="dialog_data_grid_repeated_measures_title">Elegir Observación</string>
@@ -563,10 +565,27 @@
     <string name="menu_data_grid_action_locate_plot">Localizar Parcela Activa</string>
     <string name="menu_action_wrap_content_data_grid_title">Ajustar Contenido</string>
     <string name="menu_action_heatmap_data_grid_title">Mapa de calor</string>
+    <string name="menu_data_grid_action_map_view">Vista del Mapa</string>
+    <string name="menu_data_grid_action_grid_view">Vista de Grilla</string>
+    <string name="menu_data_grid_action_map_attributes">Establecer Fila/Columna</string>
+    <string name="map_view_no_layout">Diseño de campo no disponible. Abra los ajustes de mapa para definir los atributos de fila y columna.</string>
+    <string name="map_view_choose_attributes_title">Elegir Fila y Columna</string>
+    <string name="map_settings_title">Ajustes del Mapa</string>
+    <string name="map_settings_row_attribute">Atributo de fila</string>
+    <string name="map_settings_col_attribute">Atributo de columna</string>
+    <string name="map_settings_invert_subheader">Invertir</string>
+    <string name="map_settings_invert_row">Invertir orden de fila</string>
+    <string name="map_settings_invert_col">Invertir orden de columna</string>
+    <string name="map_view_row_prompt">Seleccionar atributo para FILA:</string>
+    <string name="map_view_col_prompt">Seleccionar atributo para COLUMNA:</string>
+    <string name="map_view_row">Fila</string>
+    <string name="map_view_col">Columna</string>
+    <string name="map_view_choose_attributes_ok">Establecer atributos</string>
     <string name="map_view_legend_complete">Completo</string>
     <string name="map_view_legend_partial">Parcial</string>
     <string name="map_view_legend_empty">Vacío</string>
     <string name="map_view_legend_missing">Faltante</string>
+    <string name="map_view_use_geo_coordinates">Usar Coordenadas GPS (%d detectado)</string>
     <!--- Lock -->
     <string name="activity_collect_locked_state">Bloqueado - entrada, modificación y eliminación de datos están desactivados</string>
     <string name="activity_collect_frozen_state">Congelado - una vez guardados los datos no se pueden modificar o eliminar</string>
@@ -1047,6 +1066,7 @@
     <string name="no_updates_title">Ejecutando la última versión</string>
     <!-- BRAPI -->
     <!-- BrAPI preferences -->
+    <string name="preferences_brapi_title">Configuración</string>
     <string name="brapi_info_title">Información de sincronización de BrAPI</string>
     <string name="preferences_brapi_enable_title">Activar BrAPI</string>
     <string name="preferences_brapi_enable_summary">Las BrAPI permiten una simple transferencia de datos a bases de datos compatibles.</string>
@@ -1116,13 +1136,29 @@
     <string name="brapi_display_name">Mostrar Nombre</string>
     <string name="brapi_revoke_auth">Cerrar sesión</string>
     <!-- Multi-account management -->
+    <string name="brapi_add_account_title">Agregar Cuenta</string>
+    <string name="brapi_edit_account_title">Editar Cuenta</string>
     <string name="brapi_add_account_guided_setup">Ingreso manual</string>
+    <string name="brapi_add_account_scan_config">Escanear Código de Configuración</string>
+    <string name="brapi_switch_server_title">Cambiar Servidor</string>
+    <string name="brapi_switch_server_unauthenticated_message">¿Desea autenticarse antes de cambiar a este servidor?</string>
+    <string name="brapi_chip_compatibility">Compatibilidad</string>
+    <string name="brapi_chip_share">Compartir</string>
     <string name="brapi_chip_edit">Editar</string>
+    <string name="brapi_chip_logout">Cerrar sesión</string>
     <string name="brapi_chip_authorize">Autorizar</string>
     <string name="brapi_chip_remove">Remover</string>
+    <string name="brapi_auth_required_title">Autentificación Requerida</string>
+    <string name="brapi_auth_required_message">Su sesión ha caducado. ¿Desea volver a autorizar?</string>
+    <string name="brapi_logout_manage_title">Administrar Servidor</string>
     <string name="brapi_logout_manage_message">Elegir una acción para %1$s.</string>
     <string name="brapi_logout_and_remove">Remover</string>
+    <string name="brapi_logout_only">Cerrar sesión</string>
+    <string name="brapi_section_active_server">Servidor Activo</string>
+    <string name="brapi_section_available_servers">Servidores Disponibles</string>
+    <string name="brapi_add_account">Agregar Cuenta</string>
     <string name="brapi_advanced_settings">Ajustes de Transmisión</string>
+    <string name="menu_overflow">Más opciones</string>
     <string name="brapi_auth_btn">Iniciar sesión en el Sitio</string>
     <string name="brapi_auth_success">Autorización por BrAPI exitosa</string>
     <string name="brapi_auth_deny">Autorización BrAPI denegada</string>
@@ -1438,6 +1474,10 @@
     <string name="no_programdbid_provided">No se ha proporcionado programDbId</string>
     <string name="no_studydbids_provided">No se ha proporcionado studyDbIds</string>
     <string name="act_brapi_list_api_exception">Error desconocido. Por favor, comprueba las preferencias de BrAPI o contacta con los desarrolladores.</string>
+    <string name="brapi_error_unauthorized">Autenticación requerida. Por favor, inicia sesión e inténtalo de nuevo.</string>
+    <string name="brapi_error_forbidden">Acceso denegado. Puede que no tenga permiso para usar este servidor.</string>
+    <string name="brapi_error_not_found">Este servidor parece no soportar el /serverinfo endpoint.</string>
+    <string name="brapi_error_network">No se pudo acceder al servidor. Por favor, compruebe su conexión y URL del servidor.</string>
     <string name="act_brapi_list_filter_reset_cache_title">Confirmar Restablecimiento</string>
     <string name="act_brapi_list_filter_reset_cache_message">Esto eliminará los datos locales de BrAPI usados para buscar e importar.</string>
     <string name="search_bar_hint">Buscando… %s</string>
