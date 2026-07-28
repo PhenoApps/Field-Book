@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.activities.brapi;
 
 import android.app.PendingIntent;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,6 +11,8 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.fieldbook.tracker.utilities.BrapiAccountHelper;
+
+import org.phenoapps.brapi.BrapiAccountConstants;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -48,8 +49,6 @@ public class BrapiAuthActivity extends ThemedActivity {
 
     //first number that came to Pete's head --IRRI hackathon '25
     public static final int END_SESSION_REQUEST_CODE = 456;
-
-    public static String REDIRECT_URI = null; // initialized in onCreate from R.string.brapi_redirect_uri
 
     // Intent extras for per-account config (set by BrapiManualAccountDialogFragment)
     public static final String EXTRA_SERVER_URL = "brapi_extra_server_url";
@@ -94,7 +93,6 @@ public class BrapiAuthActivity extends ThemedActivity {
         View rootView = findViewById(android.R.id.content);
         InsetHandler.INSTANCE.setupStandardInsets(rootView, toolbar);
 
-        REDIRECT_URI = getString(R.string.brapi_redirect_uri);
         activityStarting = true;
 
         // Capture launch-time config before onNewIntent() can replace getIntent() with the OAuth
@@ -127,11 +125,7 @@ public class BrapiAuthActivity extends ThemedActivity {
         // without data, so checking only getData() can accidentally start a second auth request
         // before the first response is handled.
         if (!hasAuthResult()) {
-            if (launchOidcFlow.equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
-                authorizeBrAPI_OLD(preferences, this);
-            } else {
-                authorizeBrAPI(preferences, this);
-            }
+            authorizeBrAPI(preferences, this);
         }
 
         getOnBackPressedDispatcher().addCallback(this, standardBackCallback());
@@ -174,8 +168,13 @@ public class BrapiAuthActivity extends ThemedActivity {
     }
 
     public void authorizeBrAPI(SharedPreferences sharedPreferences, Context context) {
-        final String responseType = launchOidcFlow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))
-                ? ResponseTypeValues.TOKEN : ResponseTypeValues.CODE;
+        // Compared against a stable identifier, never the picker's label: the label is translated,
+        // so an account configured in one language stopped matching after a language change.
+        final boolean isImplicitFlow = BrapiAccountConstants.INSTANCE
+                .normalizeOidcFlow(launchOidcFlow)
+                .equals(BrapiAccountConstants.OIDC_FLOW_OAUTH_IMPLICIT);
+
+        final String responseType = isImplicitFlow ? ResponseTypeValues.TOKEN : ResponseTypeValues.CODE;
 
         try {
             final String finalClientId = launchOidcClientId;
@@ -183,7 +182,7 @@ public class BrapiAuthActivity extends ThemedActivity {
 
             // Authorization code flow works better with custom URL scheme (e.g. fieldbook://app/auth)
             // https://github.com/openid/AppAuth-Android/issues?q=is%3Aissue+intent+null
-            Uri redirectURI = launchOidcFlow.equals(getString(R.string.preferences_brapi_oidc_flow_oauth_implicit))
+            Uri redirectURI = isImplicitFlow
                     ? Uri.parse(getString(R.string.brapi_implicit_redirect_uri))
                     : Uri.parse(getString(R.string.brapi_redirect_uri));
 
@@ -266,26 +265,6 @@ public class BrapiAuthActivity extends ThemedActivity {
                         PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE));
     }
 
-    public void authorizeBrAPI_OLD(SharedPreferences sharedPreferences, Context context) {
-        try {
-            String url = sharedPreferences.getString(PreferenceKeys.BRAPI_BASE_URL, "") + "/brapi/authorize?display_name=Field Book&return_url=fieldbook://";
-            try {
-                // Go to url with the default browser
-                Uri uri = Uri.parse(url);
-                Intent i = new Intent(Intent.ACTION_VIEW, uri);
-                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                i.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                context.startActivity(i);
-            } catch (ActivityNotFoundException ex) {
-                Log.e("BrAPI", "Error starting BrAPI auth", ex);
-                authError(ex);
-            }
-        } catch (Exception ex) {
-            Log.e("BrAPI", "Error starting BrAPI auth", ex);
-            authError(ex);
-        }
-    }
-
     private void authError(Exception ex) {
 
         // Clear our data from our deep link so the app doesn't think it is
@@ -316,31 +295,6 @@ public class BrapiAuthActivity extends ThemedActivity {
         finish();
     }
 
-    public void checkBrapiAuth_OLD(Uri data) {
-
-        Integer status = Integer.parseInt(data.getQueryParameter("status"));
-
-        // Check that we actually have the data. If not return failure.
-        if (status == null) {
-            authError(null);
-            return;
-        }
-
-        if (status == 200) {
-            String token = data.getQueryParameter("token");
-
-            // Check that we received a token.
-            if (token == null) {
-                authError(null);
-                return;
-            }
-            authSuccess(token, null);
-
-        } else {
-            authError(null);
-        }
-    }
-
     /**
      * Create an instance of AuthorizationService with custom connection builder.
      * @return Configured auth service
@@ -362,15 +316,7 @@ public class BrapiAuthActivity extends ThemedActivity {
         }
 
         if (response != null || data != null) {
-            if (launchOidcFlow.equals(getString(R.string.preferences_brapi_oidc_flow_old_custom))) {
-                if (data != null) {
-                    checkBrapiAuth_OLD(data);
-                } else {
-                    authError(null);
-                }
-            } else {
-                checkBrapiAuth(data);
-            }
+            checkBrapiAuth(data);
             return true;
         }
 

@@ -186,17 +186,37 @@ open class BrapiAccountRepository(
             .apply()
     }
 
+    /**
+     * Signs [serverUrl] out: invalidates its cached auth token and drops its id token.
+     *
+     * The [preferenceKeys] token mirrors describe whichever account is currently active, so they
+     * are cleared only when [serverUrl] is that account. Clearing them while signing out some
+     * other account would sign the active account out of every caller still reading the mirrors.
+     *
+     * Accounts owned by another package can't be modified here, but their mirrors are still
+     * cleared when they are the active account — so signing out a shared account takes effect
+     * locally even though its AccountManager entry is left untouched.
+     *
+     * The active account itself is left selected; deactivating it is the caller's decision.
+     */
     fun clearToken(serverUrl: String) {
         val am = AccountManager.get(context)
-        val account = getWritableAccountByUrl(am, serverUrl) ?: return
-        am.peekAuthToken(account, BrapiAccountConstants.AUTH_TOKEN_TYPE)?.let { token ->
-            am.invalidateAuthToken(BrapiAccountConstants.ACCOUNT_TYPE, token)
+        val normalizedUrl = runCatching { normalizeUrl(serverUrl) }.getOrDefault(serverUrl)
+
+        getWritableAccountByUrl(am, serverUrl)?.let { account ->
+            am.peekAuthToken(account, BrapiAccountConstants.AUTH_TOKEN_TYPE)?.let { token ->
+                am.invalidateAuthToken(BrapiAccountConstants.ACCOUNT_TYPE, token)
+            }
+            am.setUserData(account, BrapiAccountConstants.KEY_ID_TOKEN, null)
         }
-        am.setUserData(account, BrapiAccountConstants.KEY_ID_TOKEN, null)
-        preferences.edit()
-            .remove(preferenceKeys.accessToken)
-            .remove(preferenceKeys.idToken)
-            .apply()
+
+        val activeUrl = preferences.getString(preferenceKeys.baseUrl, "") ?: ""
+        if (activeUrl == serverUrl || activeUrl == normalizedUrl) {
+            preferences.edit()
+                .remove(preferenceKeys.accessToken)
+                .remove(preferenceKeys.idToken)
+                .apply()
+        }
     }
 
     fun removeAccount(serverUrl: String) {

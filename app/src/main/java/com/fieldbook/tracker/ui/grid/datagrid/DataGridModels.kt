@@ -1,7 +1,5 @@
 package com.fieldbook.tracker.ui.grid.datagrid
 
-import com.fieldbook.tracker.database.models.ObservationModel
-
 enum class DataGridViewMode { GRID, MAP }
 
 data class DataGridUiColors(
@@ -32,12 +30,3 @@ data class MapPlotData(
 enum class MapPlotStatus { COMPLETE, PARTIAL, EMPTY }
 
 enum class MapFilter { NONE, COMPLETE, PARTIAL, EMPTY, MISSING }
-
-data class SelectedCell(
-    val row: Int,
-    val col: Int,
-    val plotId: String,
-    val traitIndex: Int,
-    val repeated: List<ObservationModel> = emptyList(),
-    val label: String? = null
-)

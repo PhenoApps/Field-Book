@@ -554,7 +554,6 @@
     <string name="activity_collect_dialog_neutral_button">Modificar ajustes</string>
     <string name="activity_collect_dialog_new_collector">¿Desea guardar el nombre de la persona capturando datos?</string>
     <!--- Datagrid -->
-    <string name="data_grid_empty">No hay datos para mostrar.</string>
     <string name="dialog_data_grid_header_picker_ok">OK</string>
     <string name="dialog_data_grid_column_picker_title">Elegir Columnas</string>
     <string name="dialog_data_grid_repeated_measures_title">Elegir Observación</string>
@@ -564,22 +563,6 @@
     <string name="menu_data_grid_action_locate_plot">Localizar Parcela Activa</string>
     <string name="menu_action_wrap_content_data_grid_title">Ajustar Contenido</string>
     <string name="menu_action_heatmap_data_grid_title">Mapa de calor</string>
-    <string name="menu_data_grid_action_map_view">Vista del Mapa</string>
-    <string name="menu_data_grid_action_grid_view">Vista de Grilla</string>
-    <string name="menu_data_grid_action_map_attributes">Establecer Fila/Columna</string>
-    <string name="map_view_no_layout">Diseño de campo no disponible. Abra los ajustes de mapa para definir los atributos de fila y columna.</string>
-    <string name="map_view_choose_attributes_title">Elegir Fila y Columna</string>
-    <string name="map_settings_title">Ajustes del Mapa</string>
-    <string name="map_settings_row_attribute">Atributo de fila</string>
-    <string name="map_settings_col_attribute">Atributo de columna</string>
-    <string name="map_settings_invert_subheader">Invertir</string>
-    <string name="map_settings_invert_row">Invertir orden de fila</string>
-    <string name="map_settings_invert_col">Invertir orden de columna</string>
-    <string name="map_view_row_prompt">Seleccionar atributo para FILA:</string>
-    <string name="map_view_col_prompt">Seleccionar atributo para COLUMNA:</string>
-    <string name="map_view_row">Fila</string>
-    <string name="map_view_col">Columna</string>
-    <string name="map_view_choose_attributes_ok">Establecer atributos</string>
     <string name="map_view_legend_complete">Completo</string>
     <string name="map_view_legend_partial">Parcial</string>
     <string name="map_view_legend_empty">Vacío</string>

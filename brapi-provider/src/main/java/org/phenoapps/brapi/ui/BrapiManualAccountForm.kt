@@ -25,7 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import org.phenoapps.brapi.R
@@ -45,8 +44,8 @@ fun BrapiManualAccountForm(
     onCancel: () -> Unit,
     onConfirm: () -> Unit,
 ) {
-    val oidcFlowOptions = stringArrayResource(R.array.pheno_brapi_oidc_flow_options)
-    val versionOptions = stringArrayResource(R.array.pheno_brapi_version_options)
+    val oidcFlowOptions = rememberOidcFlowOptions()
+    val versionOptions = rememberBrapiVersionOptions()
 
     BoxWithConstraints(
         modifier = Modifier

@@ -3,6 +3,7 @@ package com.fieldbook.tracker.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -16,9 +17,18 @@ import com.bytehamster.lib.preferencesearch.SearchPreferenceResultListener;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.preferences.AppearancePreferencesFragment;
 import com.fieldbook.tracker.preferences.BehaviorPreferencesFragment;
+import com.fieldbook.tracker.preferences.BrapiAdvancedPreferencesFragment;
+import com.fieldbook.tracker.preferences.BrapiPreferencesFragment;
+import com.fieldbook.tracker.preferences.ExperimentalPreferencesFragment;
+import com.fieldbook.tracker.preferences.FeaturesPreferencesFragment;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.LocationPreferencesFragment;
 import com.fieldbook.tracker.preferences.PreferencesFragment;
 import com.fieldbook.tracker.preferences.ProfilePreferencesFragment;
+import com.fieldbook.tracker.preferences.SoundsPreferencesFragment;
+import com.fieldbook.tracker.preferences.StoragePreferencesFragment;
+import com.fieldbook.tracker.preferences.SystemPreferencesFragment;
+import com.fieldbook.tracker.preferences.ThemePreferencesFragment;
 import com.fieldbook.tracker.utilities.InsetHandler;
 
 public class PreferencesActivity extends ThemedActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback, SearchPreferenceResultListener {
@@ -91,15 +101,54 @@ public class PreferencesActivity extends ThemedActivity implements PreferenceFra
 
     @Override
     public void onSearchResultClicked(SearchPreferenceResult result) {
-        prefsFragment = new PreferencesFragment();
-        getSupportFragmentManager().beginTransaction().replace(R.id.prefs_container, prefsFragment).addToBackStack("PrefsFragment").commit(); // Allow to navigate back to search
+        PreferenceFragmentCompat target = fragmentForSearchResult(result);
 
-        new Handler().post(new Runnable() { // Allow fragment to get created
+        if (target instanceof PreferencesFragment) {
+            prefsFragment = (PreferencesFragment) target;
+        }
+
+        getSupportFragmentManager().beginTransaction().replace(R.id.prefs_container, target).addToBackStack("PrefsFragment").commit(); // Allow to navigate back to search
+
+        new Handler(Looper.getMainLooper()).post(new Runnable() { // Allow fragment to get created
             @Override
             public void run() {
-                prefsFragment.onSearchResultClicked(result);
+                if (target instanceof PreferencesFragment) {
+                    ((PreferencesFragment) target).onSearchResultClicked(result);
+                } else {
+                    result.highlight(target);
+                }
             }
         });
+    }
+
+    /**
+     * Maps an indexed preference screen back to the fragment that owns it.
+     *
+     * Search results have to open the real fragment rather than have their XML inflated into
+     * {@link PreferencesFragment}: most of these screens attach click and change listeners in
+     * their own onCreatePreferences(), and a bare inflate silently drops all of that — leaving
+     * preferences that look right but do nothing when tapped.
+     *
+     * Anything unmapped (including the root screen) falls back to PreferencesFragment, which
+     * scrolls to the result on the root screen and inflates the raw XML otherwise.
+     */
+    private PreferenceFragmentCompat fragmentForSearchResult(SearchPreferenceResult result) {
+        int file = result.getResourceFile();
+
+        if (file == R.xml.preferences_profile) return new ProfilePreferencesFragment();
+        if (file == R.xml.preferences_features) return new FeaturesPreferencesFragment();
+        if (file == R.xml.preferences_appearance) return new AppearancePreferencesFragment();
+        if (file == R.xml.preferences_theme) return new ThemePreferencesFragment();
+        if (file == R.xml.preferences_behavior) return new BehaviorPreferencesFragment();
+        if (file == R.xml.preferences_location) return new LocationPreferencesFragment();
+        if (file == R.xml.preferences_sounds) return new SoundsPreferencesFragment();
+        if (file == R.xml.preferences_brapi) return new BrapiPreferencesFragment();
+        if (file == R.xml.preferences_brapi_advanced) return new BrapiAdvancedPreferencesFragment();
+        if (file == R.xml.preferences_system) return new SystemPreferencesFragment();
+        if (file == R.xml.preferences_storage) return new StoragePreferencesFragment();
+        if (file == R.xml.preferences_experimental) return new ExperimentalPreferencesFragment();
+
+        return new PreferencesFragment();
     }
 
     @Override

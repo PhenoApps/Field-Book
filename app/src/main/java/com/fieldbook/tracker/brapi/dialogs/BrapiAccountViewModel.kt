@@ -90,7 +90,6 @@ class BrapiAccountViewModel @Inject constructor(
      */
     fun reset() {
         _uiState.value = defaultBrapiAccountState(
-            context,
             context.getString(R.string.brapi_oidc_clientid_default),
         )
         _urlForFetch.value = ""

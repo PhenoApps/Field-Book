@@ -97,9 +97,6 @@ public class GeneralKeys {
     public static final String REGION = "region";
     public static final String TIPS_CONFIGURED = "TipsConfigured";
 
-    //shared preferences file name
-    public static final String SHARED_PREF_FILE_NAME = "Settings";
-
     //used to get the name of the currently selected field that is saved in preferences
     //example: field_sample how to get: sharedPreferences.getString(Constants.FIELD_FILE, "")
     public static final String FIELD_FILE = "FieldFile";
@@ -153,8 +150,6 @@ public class GeneralKeys {
     //Data grid
     //old preference used with only one header
     public static final String DATAGRID_PREFIX_TRAIT = "com.fieldbook.tracker.datagrid.DATAGRID_PREFIX_TRAIT";
-    //new pref key that allows multiple header choices
-    public static final String DATAGRID_PREFIX_TRAITS = "com.fieldbook.tracker.datagrid.DATAGRID_PREFIX_TRAITS";
     public static final String DATAGRID_LOCKED_COLUMN_IDS = "com.fieldbook.tracker.datagrid.DATAGRID_LOCKED_COLUMN_IDS";
     public static final String DATAGRID_WRAP_CONTENT = "com.fieldbook.tracker.datagrid.DATAGRID_WRAP_CONTENT";
     public static final String DATAGRID_HEATMAP = "com.fieldbook.tracker.datagrid.DATAGRID_HEATMAP";
@@ -169,8 +164,6 @@ public class GeneralKeys {
     public static final String MAP_INVERT_ROW = "com.fieldbook.tracker.datagrid.MAP_INVERT_ROW";
     public static final String MAP_INVERT_COL = "com.fieldbook.tracker.datagrid.MAP_INVERT_COL";
     public static final String DATAGRID_MAP_ZOOM = "com.fieldbook.tracker.datagrid.DATAGRID_MAP_ZOOM";
-    //Cell details panel
-    public static final String CELL_DETAILS_SETTING = "com.fieldbook.tracker.datagrid.CELL_DETAILS_SETTING";
 
     //summary filter
     public static final String SUMMARY_FILTER_ATTRIBUTES = "com.fieldbook.tracker.summary.SUMMARY_FILTER_ATTRIBUTES";
