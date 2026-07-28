@@ -160,15 +160,17 @@ class StudyDao {
                 //db.delete(ObservationUnitAttribute.tableName, "${Study.FK} = ?", arrayOf(exp_id.toString()))
                 db.update(Observation.tableName, contentValuesOf(Study.FK to Integer.parseInt("-$studyId")), "${Study.FK} = ?", arrayOf(studyId.toString()))
                 db.delete(Study.tableName, "${Study.PK} = ?", arrayOf(studyId.toString()))
-                db.rawQuery("PRAGMA foreign_keys=ON", null)
-
-                ObservationChangeTracker.markChanged()
 
             } catch (e: SQLiteException) {
 
                 e.printStackTrace()
 
                 Log.d(TAG, "error during field deletion")
+
+            } finally {
+
+                db.rawQuery("PRAGMA foreign_keys=ON", null)
+                ObservationChangeTracker.markChanged()
 
             }
 

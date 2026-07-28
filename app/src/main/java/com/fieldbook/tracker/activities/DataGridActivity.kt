@@ -62,7 +62,9 @@ import com.fieldbook.tracker.utilities.Utils
 import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter
 import com.fieldbook.tracker.viewmodels.DataGridViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -125,6 +127,8 @@ class DataGridActivity : ThemedActivity() {
     // Incremented each time "Locate Active Plot" is tapped, so the map view can react even
     // after its one-time auto-scroll-on-load has already fired.
     private var mapLocateTrigger by mutableIntStateOf(0)
+
+    private var mapPickerJob: Job? = null
 
     @Inject
     lateinit var database: DataHelper
@@ -485,21 +489,24 @@ class DataGridActivity : ThemedActivity() {
     private fun showMapLayoutPickerDialog() {
         val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
 
-        lifecycleScope.launch {
-            // Counting geo-tagged units walks every observation unit in the study, so these
-            // reads happen off the main thread before the dialog is built.
-            val (geoCount, allColumns) = withContext(Dispatchers.IO) {
-                val units = database.getAllObservationUnits(studyId)
-                    ?: emptyArray<ObservationUnitModel>()
-                val propColumns = database.getAllObservationUnitAttributeNames(studyId).toList()
-                val coreColumns = database.existingObservationUnitCoreColumns
-                units.count { !it.geo_coordinates.isNullOrBlank() } to
-                    (propColumns + coreColumns.filter { it !in propColumns }).toTypedArray()
-            }
+        mapPickerJob?.cancel()
+        mapPickerJob = lifecycleScope.launch {
+            try {
+                // Counting geo-tagged units walks every observation unit in the study, so these
+                // reads happen off the main thread before the dialog is built.
+                val (geoCount, allColumns) = withContext(Dispatchers.IO) {
+                    val units = database.getAllObservationUnits(studyId)
+                        ?: emptyArray<ObservationUnitModel>()
+                    val propColumns = database.getAllObservationUnitAttributeNames(studyId).toList()
+                    val coreColumns = database.existingObservationUnitCoreColumns
+                    units.count { !it.geo_coordinates.isNullOrBlank() } to
+                        (propColumns + coreColumns.filter { it !in propColumns }).toTypedArray()
+                }
 
-            if (allColumns.isEmpty()) return@launch
+                if (allColumns.isEmpty()) return@launch
 
-            buildMapLayoutPickerDialog(geoCount, allColumns)
+                buildMapLayoutPickerDialog(geoCount, allColumns)
+            } catch (_: CancellationException) {}
         }
     }
 
