@@ -10,7 +10,6 @@ import android.os.Looper
 import android.provider.MediaStore
 import android.util.Log
 import android.util.AttributeSet
-import android.util.Log
 import android.util.Size
 import androidx.annotation.OptIn
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
