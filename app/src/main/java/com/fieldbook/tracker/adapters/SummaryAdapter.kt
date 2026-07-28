@@ -51,7 +51,11 @@ class SummaryAdapter(private val controller: SummaryController) :
             viewHolder.itemView.tag = this
             viewHolder.keyTextView.text = label
             viewHolder.valueTextView.text = value
-            viewHolder.navButton.visibility = if (trait != null) View.VISIBLE else View.INVISIBLE
+
+            //only traits can be navigated to, attributes are read only
+            val isNavigable = trait != null
+            viewHolder.navButton.visibility = if (isNavigable) View.VISIBLE else View.GONE
+            viewHolder.itemView.isClickable = isNavigable
         }
     }
 

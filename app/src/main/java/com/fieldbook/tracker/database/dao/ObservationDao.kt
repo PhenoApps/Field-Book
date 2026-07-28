@@ -15,12 +15,22 @@ import com.fieldbook.tracker.database.Migrator.*
 import com.fieldbook.tracker.database.Migrator.Companion.sLocalImageObservationsViewName
 import com.fieldbook.tracker.database.Migrator.Companion.sNonImageObservationsViewName
 import com.fieldbook.tracker.database.Migrator.Companion.sRemoteImageObservationsViewName
+import com.fieldbook.tracker.database.ObservationChangeTracker
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import org.threeten.bp.OffsetDateTime
 import com.fieldbook.tracker.brapi.model.Observation as BrapiObservation
 
 class ObservationDao {
+
+    /**
+     * Repeated-observation summary for a single (plot, trait) pair.
+     *
+     * [latestValue] is the value of the highest-rep observation, which the DataGrid shows for
+     * traits that don't have repeated measures enabled but still accumulated repeats (e.g.
+     * observations imported over BrAPI, or a trait whose repeat parameter was later disabled).
+     */
+    data class RepeatSummary(val count: Int, val latestValue: String?)
 
     companion object {
 
@@ -145,12 +155,16 @@ class ObservationDao {
 
         fun getAllFromAYear(year: String): Array<ObservationModel> = withDatabase { db ->
 
+            // Ordered by time rather than by rep. Sorting by repetition number groups every
+            // rep 1 together, then every rep 2, which scrambles the chronology that the
+            // statistics screen measures collection intervals from.
             val query = """
                 SELECT *
                 FROM observations
                 JOIN observation_variables
                     ON observations.observation_variable_db_id = observation_variables.internal_id_observation_variable
                 WHERE observation_time_stamp LIKE ? AND study_id > 0
+                ORDER BY observations.observation_time_stamp
             """.trimIndent()
 
             //Log.d(TAG, query)
@@ -159,7 +173,6 @@ class ObservationDao {
 
                 it.toTable()
                     .map { ObservationModel(it) }
-                    .sortedBy { it.rep.toInt() }
                     .toTypedArray()
             }
 
@@ -182,13 +195,6 @@ class ObservationDao {
                 obsUnit,
                 traitDbId
             ).maxByOrNull { it.rep.toInt() }?.rep?.toInt() ?: 0) + 1
-
-        /**
-         * Gets the latest observation by rep number for the given study, observation unit, and trait.
-         * Used when repeated measures is disabled to display only the most recent value.
-         */
-        fun getLatestObservation(studyId: String, obsUnit: String, traitDbId: String): ObservationModel? =
-            getAllRepeatedValues(studyId, obsUnit, traitDbId).maxByOrNull { it.rep.toInt() }
 
         //false warning, cursor is closed in toTable
         @SuppressLint("Recycle")
@@ -656,7 +662,7 @@ class ObservationDao {
                 ObservationVariable.FK to internalTraitId
             ))
 
-        } ?: -1L
+        }.also { ObservationChangeTracker.markChanged() } ?: -1L
 
         fun getUserDetail(studyId: String, plotId: String): HashMap<String, String> =
             withDatabase { db ->
@@ -746,7 +752,7 @@ class ObservationDao {
                     "${Study.FK} = ? AND ${ObservationUnit.FK} = ? AND observation_variable_db_id = ? AND rep = ?",
                     arrayOf(studyId, plotId, traitDbId, rep)
                 )
-            }
+            }.also { ObservationChangeTracker.markChanged() }
 
         fun deleteTraitByValue(studyId: String, plotId: String, traitDbId: String, value: String) =
             withDatabase { db ->
@@ -756,16 +762,16 @@ class ObservationDao {
                     "${Study.FK} = ? AND ${ObservationUnit.FK} = ? AND observation_variable_db_id = ? AND value = ?",
                     arrayOf(studyId, plotId, traitDbId, value)
                 )
-            }
+            }.also { ObservationChangeTracker.markChanged() }
 
         fun delete(id: String) = withDatabase { db ->
             db.delete(Observation.tableName,
                 "${Observation.PK} = ?", arrayOf(id))
-        }
+        }.also { ObservationChangeTracker.markChanged() }
 
         fun deleteAllForStudy(studyId: String) = withDatabase { db ->
             db.delete(Observation.tableName, "${Study.FK} = ?", arrayOf(studyId))
-        }
+        }.also { ObservationChangeTracker.markChanged() }
 
         fun updateObservationModels(db: SQLiteDatabase, observations: List<ObservationModel>) {
 
@@ -778,6 +784,8 @@ class ObservationDao {
                     "${Observation.PK} = ?", arrayOf(it.internal_id_observation.toString())
                 )
             }
+
+            ObservationChangeTracker.markChanged()
         }
 
         /**
@@ -799,7 +807,7 @@ class ObservationDao {
                         "observation_db_id = ?", arrayOf(it.dbId))
 
             }
-        }
+        }.also { ObservationChangeTracker.markChanged() }
 
         fun updateObservationsByFieldBookId(observations: List<BrapiObservation>) = withDatabase { db ->
 
@@ -816,7 +824,7 @@ class ObservationDao {
                     "${Observation.PK} = ?", arrayOf(it.fieldBookDbId))
 
             }
-        }
+        }.also { ObservationChangeTracker.markChanged() }
 
         fun updateObservationMediaUris(observation: ObservationModel) = withDatabase {
             db.update(Observation.tableName, contentValuesOf().apply {
@@ -828,7 +836,7 @@ class ObservationDao {
             },
                 "${Observation.PK} = ?", arrayOf(observation.internal_id_observation.toString())
             )
-        }
+        }.also { ObservationChangeTracker.markChanged() }
 
         fun updateObservation(observation: ObservationModel) = withDatabase { db ->
 
@@ -840,7 +848,7 @@ class ObservationDao {
                 "internal_id_observation = ?",
                 arrayOf(observation.internal_id_observation.toString())
                 )
-        }
+        }.also { ObservationChangeTracker.markChanged() }
 
         fun updateObservationValue(
             id: Int,
@@ -853,7 +861,7 @@ class ObservationDao {
                 "${Observation.PK} = ?",
                 arrayOf(id.toString())
             )
-        }
+        }.also { ObservationChangeTracker.markChanged() }
 
         fun updateImage(image: FieldBookImage) = withDatabase {
 
@@ -864,7 +872,7 @@ class ObservationDao {
                         put("last_synced_time", image.lastSyncedTime.format(internalTimeFormatter))
                     },
                     Observation.PK + " = ?", arrayOf(image.fieldBookDbId))
-        }
+        }.also { ObservationChangeTracker.markChanged() }
 
 
         /**
@@ -889,16 +897,23 @@ class ObservationDao {
         } ?: 0
 
         /**
-         * Returns a map of (plotId, traitDbId) -> repeat count for all (plot, trait) pairs in a
+         * Returns a map of (plotId, traitDbId) -> [RepeatSummary] for all (plot, trait) pairs in a
          * study that have more than one observation. Used by DataGridActivity to avoid per-cell
          * repeated-value queries.
          */
-        fun getRepeatCountsForStudy(studyId: String): Map<Pair<String, String>, Int> =
+        fun getRepeatSummariesForStudy(studyId: String): Map<Pair<String, String>, RepeatSummary> =
             withDatabase { db ->
-                val map = mutableMapOf<Pair<String, String>, Int>()
+                val map = mutableMapOf<Pair<String, String>, RepeatSummary>()
+                // SQLite guarantees that when a query contains exactly one max() aggregate, bare
+                // columns in the result set (here `value`) are taken from the same input row that
+                // produced that maximum — so `value` is the highest-rep observation's value.
                 val cursor = db.rawQuery(
                     """
-                    SELECT observation_unit_id, observation_variable_db_id, COUNT(*) AS cnt
+                    SELECT observation_unit_id,
+                           observation_variable_db_id,
+                           COUNT(*) AS cnt,
+                           MAX(CAST(rep AS INTEGER)) AS max_rep,
+                           value
                     FROM observations
                     WHERE study_id = ?
                     GROUP BY observation_unit_id, observation_variable_db_id
@@ -911,23 +926,11 @@ class ObservationDao {
                         val plotId = it.getString(0)
                         val traitId = it.getString(1)
                         val count = it.getInt(2)
-                        map[Pair(plotId, traitId)] = count
+                        val latestValue = it.getString(4)
+                        map[Pair(plotId, traitId)] = RepeatSummary(count, latestValue)
                     }
                 }
                 map
             } ?: emptyMap()
-
-        /**
-         * Returns the total number of observations for a study. Used by DataGridActivity as a
-         * lightweight cache staleness check.
-         */
-        fun getObservationCount(studyId: String): Int = withDatabase { db ->
-            db.rawQuery(
-                "SELECT COUNT(*) FROM observations WHERE study_id = ?",
-                arrayOf(studyId)
-            ).use { cursor ->
-                if (cursor.moveToFirst()) cursor.getInt(0) else 0
-            }
-        } ?: 0
     }
 }

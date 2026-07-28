@@ -155,6 +155,17 @@ class BrapiSyncViewModel @Inject constructor(
         _uiState.update { it.copy(lastCheckedDownloadText = text) }
     }
 
+    /**
+     * Records that the study exchanged data with the server, this is what the field detail
+     * screen reads for its last sync date.
+     */
+    private fun markStudySynced() {
+
+        val studyId = uiState.value.study?.studyId ?: return
+
+        dataHelper.updateSyncDate(studyId)
+    }
+
     fun refreshLocalStatus() {
 
         val studyId = uiState.value.study?.studyId ?: return
@@ -499,6 +510,8 @@ class BrapiSyncViewModel @Inject constructor(
 
                                     resolved
                                 }
+
+                                markStudySynced()
 
                                 if (conflicts.isNotEmpty()) {
                                     // store pending conflicts and notify UI to prompt user
@@ -1082,6 +1095,9 @@ class BrapiSyncViewModel @Inject constructor(
                         isUploadFinished = true,
                     )
                 }
+
+                //cause is non null when the flow failed or was cancelled, nothing reached the server
+                if (cause == null) markStudySynced()
 
                 Log.d(TAG, "Upload flow completed. Cause: ${cause?.message}")
             }

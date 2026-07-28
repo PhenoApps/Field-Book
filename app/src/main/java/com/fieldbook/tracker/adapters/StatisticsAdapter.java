@@ -39,6 +39,7 @@ import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -156,10 +157,19 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.Vi
 
         }
 
+        // The interval sum only means anything in the order the observations were taken. This
+        // sorts the parsed dates rather than trusting the query order, because the stored
+        // timestamps carry a UTC offset and older rows have none, so the raw strings cannot be
+        // ordered reliably across both forms.
+        Collections.sort(dateObjects);
+
         long totalInterval = 0;
         for (int i = 1; i< dateObjects.size(); i++){
             long diff = dateObjects.get(i).getTime() - dateObjects.get(i-1).getTime();
-            if (diff <= TimeUnit.MINUTES.toMillis(intervalThreshold)){
+            // Gaps longer than the threshold are breaks between sessions rather than time spent
+            // collecting. The lower bound keeps a stray out-of-order timestamp from subtracting
+            // from the total, which is what previously drove this figure negative.
+            if (diff > 0 && diff <= TimeUnit.MINUTES.toMillis(intervalThreshold)){
                 totalInterval += TimeUnit.MILLISECONDS.toSeconds(diff);
             }
         }

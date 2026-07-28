@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
+import android.widget.ImageButton
 import android.widget.ListView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.edit
@@ -32,8 +32,8 @@ import javax.inject.Inject
 class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
     private var recyclerView: RecyclerView? = null
-    private var nextButton: ImageView? = null
-    private var prevButton: ImageView? = null
+    private var nextButton: ImageButton? = null
+    private var prevButton: ImageButton? = null
     private var toolbar: Toolbar? = null
     private var filterDialog: AlertDialog? = null
 
@@ -49,7 +49,11 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
         val view = inflater.inflate(R.layout.fragment_summary, container, false)
 
-        toolbar = view.findViewById(R.id.toolbar)
+        val topToolbar = view.findViewById<Toolbar>(R.id.toolbar)
+
+        val bottomContent = view.findViewById<View>(R.id.fragment_summary_bottom_content)
+
+        toolbar = topToolbar
 
         recyclerView = view.findViewById(R.id.fragment_summary_rv)
 
@@ -61,7 +65,8 @@ class SummaryFragment : Fragment(), SummaryAdapter.SummaryController {
 
         setup()
 
-        InsetHandler.setupFragmentWithTopInsetsOnly(view, toolbar)
+        //the bottom toolbar draws behind the navigation bar, its content is padded above it
+        InsetHandler.setupInsetsWithBottomBar(view, topToolbar, bottomContent)
 
         return view
 

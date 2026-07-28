@@ -37,12 +37,25 @@ object HistogramChartHelper {
      * @param context The context for accessing resources.
      * @param chart An instance of the MPAndroidChart BarChart component.
      * @param observations The data to display in the histogram, represented as a list of BigDecimal values.
+     * @param labelRotationAngle Rotation of the x axis labels in degrees. Wide labels overlap once
+     * there are more than a handful of bins, and turning them upright trades plot height for the
+     * horizontal room they need. Negative angles read bottom to top.
+     * @param labelFormatter Optional renderer for the x axis labels, receiving the value at the
+     * start of each bin. Lets a caller chart one quantity but label the axis with another — date
+     * traits bin on day of year and label with calendar dates.
      */
-    fun setupHistogram(context: Context, chart: BarChart, observations: List<BigDecimal>, chartTextSize: Float) {
+    fun setupHistogram(
+        context: Context,
+        chart: BarChart,
+        observations: List<BigDecimal>,
+        chartTextSize: Float,
+        labelRotationAngle: Float = 0f,
+        labelFormatter: ((Int) -> String)? = null
+    ) {
 
         chart.visibility = View.VISIBLE
 
-        val histogramData = computeHistogramData(context, observations)
+        val histogramData = computeHistogramData(context, observations, labelFormatter)
 
         val labels = histogramData.binLabels
         val counts = histogramData.binCounts
@@ -81,6 +94,7 @@ object HistogramChartHelper {
             axisMaximum = maxBinIndex.toFloat()
             setCenterAxisLabels(true)
             setLabelCount(labels.size, !(isBinSizeOne && counts.size > 1))
+            this.labelRotationAngle = labelRotationAngle
 
             valueFormatter = object : ValueFormatter() {
                 override fun getFormattedValue(value: Float): String {
@@ -128,7 +142,11 @@ object HistogramChartHelper {
         }
     }
 
-    fun computeHistogramData(context: Context, observations: List<BigDecimal>): HistogramData {
+    fun computeHistogramData(
+        context: Context,
+        observations: List<BigDecimal>,
+        labelFormatter: ((Int) -> String)? = null
+    ): HistogramData {
         // Calculate min, max, and range of observations
         val minValue = observations.minOrNull() ?: BigDecimal.ZERO
         val maxValue = observations.maxOrNull() ?: BigDecimal.ZERO
@@ -161,7 +179,7 @@ object HistogramChartHelper {
 
         val labels = sortedBinnedObservations.keys.map { binIndex ->
             val binStart = minValue.add(binSize.multiply(BigDecimal(binIndex)))
-            binStart.toInt().toString()
+            labelFormatter?.invoke(binStart.toInt()) ?: binStart.toInt().toString()
         }.let {
             if (isBinSizeOne) it.dropLast(1) else it
         }

@@ -2,6 +2,7 @@ package com.fieldbook.tracker.activities
 
 import android.Manifest
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
@@ -10,7 +11,6 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
@@ -23,6 +23,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
@@ -39,13 +40,14 @@ import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.utilities.export.ExportUtil
+import com.fieldbook.tracker.utilities.DateJsonUtil
 import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.SemanticDateUtil
 import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import pub.devrel.easypermissions.EasyPermissions
@@ -94,12 +96,12 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private lateinit var attributeCountChip: Chip
     private lateinit var sortOrderChip: Chip
     private lateinit var editUniqueChip: Chip
-    private lateinit var traitCountChip: Chip
-    private lateinit var observationCountChip: Chip
+    private lateinit var dataSummaryTextView: TextView
     private lateinit var trialNameChip: Chip
     private lateinit var studyGroupNameChip: Chip
     private lateinit var detailRecyclerView: RecyclerView
     private var adapter: FieldDetailAdapter? = null
+    private var fieldDetailsJob: Job? = null
 
     private val brapiSyncIntentLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -124,14 +126,14 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         attributeCountChip = rootView.findViewById(R.id.attributeCountChip)
         sortOrderChip = rootView.findViewById(R.id.sortOrderChip)
         editUniqueChip = rootView.findViewById(R.id.editUniqueChip)
-        traitCountChip = rootView.findViewById(R.id.traitCountChip)
-        observationCountChip = rootView.findViewById(R.id.observationCountChip)
+        dataSummaryTextView = rootView.findViewById(R.id.dataSummaryTextView)
         detailRecyclerView = rootView.findViewById(R.id.fieldDetailRecyclerView)
         trialNameChip = rootView.findViewById(R.id.trialNameChip)
         studyGroupNameChip = rootView.findViewById(R.id.studyGroupName)
 
+        // The details are not loaded here. onResume() always follows onCreateView() and loads them
+        // itself, so doing it in both places ran the whole query and chart pipeline twice on open.
         fieldId = arguments?.getInt(GeneralKeys.FIELD_DETAIL_FIELD_ID)
-        loadFieldDetails()
 
         val overviewExpandCollapseIcon: ImageView = rootView.findViewById(R.id.overview_expand_collapse_icon)
         val overviewCollapsibleContent: LinearLayout = rootView.findViewById(R.id.overview_collapsible_content)
@@ -220,8 +222,6 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
             }
         }
 
-        disableDataChipRipples()
-
         InsetHandler.setupFragmentWithTopInsetsOnly(rootView, toolbar)
         return rootView
     }
@@ -253,53 +253,60 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         }
     }
 
-    private fun disableDataChipRipples() {
-        // Intercept data card touch events to prevent chip ripple but still trigger expand/collapse
-
-        val chipGroup: ChipGroup = rootView.findViewById(R.id.dataChipGroup)
-        chipGroup.setOnTouchListener { _, event ->
-            if (event.action == MotionEvent.ACTION_UP) {
-                rootView.findViewById<View>(R.id.data_collapsible_header).performClick()
-            }
-            true
-        }
-
-        rootView.findViewById<View>(R.id.data_collapsible_header).setOnTouchListener { v, event ->
-            if (event.action == MotionEvent.ACTION_UP) {
-                v.performClick()
-            }
-            true
-        }
-    }
-
+    /**
+     * Loads the screen in two stages so the header card does not wait on the trait data.
+     *
+     * The study row and its counts are a cheap read, while the trait details carry every
+     * observation value in the field. Loading both before drawing anything meant the name, dates
+     * and chips appeared only once the expensive half had finished.
+     */
     fun loadFieldDetails() {
-        fieldId?.let { id ->
-            CoroutineScope(Dispatchers.IO).launch {
-                val field = database.getFieldObject(id)
-                
-                withContext(Dispatchers.Main) {
-                    fieldObject = field  // Store the field object
-                    
-                    if (field != null) {
-                        updateFieldData(field)
-                        
-                        if (detailRecyclerView.adapter == null) { // initial load
-                            detailRecyclerView.layoutManager = LinearLayoutManager(context)
-                            val initialItems = createTraitDetailItems(field).toMutableList()
-                            adapter = FieldDetailAdapter(initialItems)
-                            detailRecyclerView.adapter = adapter
-                            setupToolbar(field)
-                        } else { // reload after data change
-                            val newItems = createTraitDetailItems(field)
-                            adapter?.updateItems(newItems)
-                        }
-                    }
-                }
+        val id = fieldId
+        if (id == null) {
+            Log.e("FieldDetailFragment", "Field ID is null")
+            return
+        }
+
+        // Both are resolved here rather than inside the coroutine: the load can outlive the
+        // fragment's view, and requireContext()/viewLifecycleOwner throw once that happens.
+        val context = context ?: return
+        val lifecycleOwner = viewLifecycleOwnerLiveData.value ?: return
+
+        // Overlapping loads must not interleave. onResume and a sync completing can both land
+        // here, and without this the slow stage of the earlier load could arrive last and leave
+        // stale traits on screen.
+        fieldDetailsJob?.cancel()
+        fieldDetailsJob = lifecycleOwner.lifecycleScope.launch {
+
+            val (field, studyGroupName) = withContext(Dispatchers.IO) {
+                val study = database.getFieldObject(id, false)
+                study to study?.let { database.getStudyGroupNameById(it.groupId) }
             }
-        } ?: Log.e("FieldDetailFragment", "Field ID is null")
+
+            fieldObject = field  // Store the field object
+            if (field == null) return@launch
+
+            // Stage one is on screen here: header, chips and toolbar are populated and the card
+            // actions are usable while the observations are still being read.
+            updateFieldData(field, studyGroupName)
+            setupToolbar(field)
+
+            // Stage two: the observation values, and the per-trait processing they feed.
+            val items = withContext(Dispatchers.IO) {
+                createTraitDetailItems(database.getTraitDetailsForStudy(id), context)
+            }
+
+            if (detailRecyclerView.adapter == null) { // initial load
+                detailRecyclerView.layoutManager = LinearLayoutManager(context)
+                adapter = FieldDetailAdapter(items.toMutableList())
+                detailRecyclerView.adapter = adapter
+            } else { // reload after data change
+                adapter?.updateItems(items)
+            }
+        }
     }
 
-    private fun updateFieldData(field: FieldObject) {
+    private fun updateFieldData(field: FieldObject, studyGroupName: String?) {
 
         cardViewSync.visibility = View.GONE
         cardViewSync.setOnClickListener(null)
@@ -351,73 +358,93 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         editUniqueChip.text = searchAttribute
 
         val lastEdit = field.dateEdit
-        if (!lastEdit.isNullOrEmpty()) {
-            lastEditTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastEdit)
+        lastEditTextView.text = if (!lastEdit.isNullOrEmpty()) {
+            SemanticDateUtil.getSemanticDate(requireContext(), lastEdit)
         } else {
             getString(R.string.no_activity)
         }
 
         val lastExport = field.dateExport
-        if (!lastExport.isNullOrEmpty()) {
-            lastExportTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastExport)
+        lastExportTextView.text = if (!lastExport.isNullOrEmpty()) {
+            SemanticDateUtil.getSemanticDate(requireContext(), lastExport)
         } else {
             getString(R.string.no_activity)
         }
 
         val lastSync = field.dateSync
-        if (!lastSync.isNullOrEmpty()) {
-            lastSyncTextView.text = SemanticDateUtil.getSemanticDate(requireContext(), lastSync)
+        lastSyncTextView.text = if (!lastSync.isNullOrEmpty()) {
+            SemanticDateUtil.getSemanticDate(requireContext(), lastSync)
         } else {
             getString(R.string.no_activity)
         }
 
-        traitCountChip.text = field.traitCount.toString()
-        if (field.observationCount.toInt() > 0) {
-            observationCountChip.visibility = View.VISIBLE
-            observationCountChip.text = field.observationCount.toString()
-        } else {
-            observationCountChip.visibility = View.GONE
-        }
+        // Counts arrive as strings straight off the query, so they are parsed defensively rather
+        // than with toInt(), which threw on a null or empty column.
+        dataSummaryTextView.text = getString(
+            R.string.field_data_summary,
+            field.observationCount?.toIntOrNull() ?: 0,
+            field.traitCount?.toIntOrNull() ?: 0
+        )
 
 
         studyGroupNameChip.visibility = View.GONE
-        val groupName = database.getStudyGroupNameById(field.groupId)
-        if (!groupName.isNullOrEmpty() && groupName != field.trialName) {
+        if (!studyGroupName.isNullOrEmpty() && studyGroupName != field.trialName) {
             studyGroupNameChip.visibility = View.VISIBLE
-            studyGroupNameChip.text = groupName
+            studyGroupNameChip.text = studyGroupName
         }
     }
 
-    private fun createTraitDetailItems(field: FieldObject): List<FieldDetailItem> {
-        field.traitDetails?.let { traitDetails ->
-            return traitDetails.map { traitDetail ->
-                val iconRes = Formats.entries
-                    .find { it.getDatabaseName() == traitDetail.format }?.getIcon()
+    /**
+     * Builds the recycler items for a field's traits. Runs off the main thread, so it takes the
+     * context as a parameter instead of reaching for requireContext().
+     */
+    private fun createTraitDetailItems(
+        traitDetails: List<FieldObject.TraitDetail>,
+        context: Context
+    ): List<FieldDetailItem> {
+        return traitDetails.map { traitDetail ->
+            val iconRes = Formats.entries
+                .find { it.getDatabaseName() == traitDetail.format }?.getIcon()
 
-                val processedObservations =
-                    traitDetail.observations?.map { observation ->
-                        val trait = database.getTraitByName(traitDetail.traitName)
-                        trait?.let {
-                            valueProcessor.processValue(observation, it)
-                        } ?: observation
-                    }
+            // Every observation in this group belongs to the same trait, so the trait is looked
+            // up once instead of once per value. The lookup is not cheap either — it also loads
+            // the trait's attribute values, making it two queries a call — so running it per
+            // observation was what stalled fields with a lot of data.
+            val trait = database.getTraitByName(traitDetail.traitName)
 
-                FieldDetailItem(
-                    traitDetail.traitName,
-                    traitDetail.format,
-                    traitDetail.categories,
-                    getString(R.string.field_trait_observation_total, traitDetail.count),
-                    ContextCompat.getDrawable(requireContext(), iconRes ?: R.drawable.ic_trait_categorical),
-                    processedObservations,
-                    traitDetail.completeness
-                )
-            }
+            val processedObservations =
+                traitDetail.observations?.map { observation ->
+                    trait?.let {
+                        valueProcessor.processValue(observation, it)
+                    } ?: observation
+                }
+
+            // Read from the stored values rather than the processed ones: the presenter reduces a
+            // date to whichever single field the trait displays, so the day of year is gone by
+            // then whenever the trait is set to show a formatted date.
+            val dayOfYearValues = if (traitDetail.format == Formats.DATE.getDatabaseName()) {
+                traitDetail.observations?.mapNotNull { DateJsonUtil.extractDayOfYear(it) }
+            } else null
+
+            FieldDetailItem(
+                traitDetail.traitName,
+                traitDetail.format,
+                traitDetail.categories,
+                context.getString(R.string.field_trait_observation_total, traitDetail.count),
+                ContextCompat.getDrawable(context, iconRes ?: R.drawable.ic_trait_categorical),
+                processedObservations,
+                traitDetail.completeness,
+                dayOfYearValues
+            )
         }
-        return emptyList()
     }
 
 
     private fun setupToolbar(field: FieldObject) {
+
+        // Called on every load so the menu action closes over the current field rather than the
+        // one from first load. Clearing first keeps the items from stacking up on each pass.
+        toolbar?.menu?.clear()
 
         toolbar?.inflateMenu(R.menu.menu_field_details)
 

@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -38,7 +39,6 @@ import com.fieldbook.tracker.preferences.GeneralKeys;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.InsetHandler;
 import com.google.android.material.appbar.AppBarLayout;
-import com.mikepenz.aboutlibraries.LibsBuilder;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,6 +61,8 @@ public class AboutActivity extends MaterialAboutActivity {
     protected void onCreate(Bundle savedInstanceState) {
         ThemedActivity.Companion.applyTheme(this);
         super.onCreate(savedInstanceState);
+        //this activity cannot extend ThemedActivity, match what it does so the system bars agree
+        EdgeToEdge.enable(this);
         checkForUpdate();
         circularProgressDrawable = new CircularProgressDrawable(this);
         circularProgressDrawable.setStyle(CircularProgressDrawable.DEFAULT);
@@ -203,33 +205,14 @@ public class AboutActivity extends MaterialAboutActivity {
                 .setOnClickAction(ConvenienceBuilder.createWebsiteOnClickAction(c, Uri.parse("https://github.com/PhenoApps/Field-Book")))
                 .build());
 
-        String theme = PreferenceManager.getDefaultSharedPreferences(this)
-                .getString(PreferenceKeys.THEME, "0");
-
-        int styleId = R.style.AboutLibrariesCustom;
-        switch (theme) {
-            case "2":
-                styleId = R.style.AboutLibrariesCustom_Blue;
-                break;
-            case "1":
-                styleId = R.style.AboutLibrariesCustom_HighContrast;
-                break;
-        }
-        final int libStyleId = styleId;
-
         technicalCardBuilder.addItem(new MaterialAboutActionItem.Builder()
                 .text(R.string.about_libraries_title)
                 .icon(R.drawable.ic_about_libraries)
                 .setOnClickAction(new MaterialAboutItemOnClickAction() {
                     @Override
                     public void onClick() {
-                        new LibsBuilder()
-                                .withActivityTheme(libStyleId)
-                                .withAutoDetect(true)
-                                .withActivityTitle(getString(R.string.about_libraries_title))
-                                .withLicenseShown(true)
-                                .withVersionShown(true)
-                                .start(getApplicationContext());
+                        //started from the activity so it stays in this task
+                        startActivity(new Intent(AboutActivity.this, LibrariesActivity.class));
                     }
                 })
                 .build());

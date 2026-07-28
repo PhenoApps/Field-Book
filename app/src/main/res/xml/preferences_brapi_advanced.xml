@@ -30,7 +30,7 @@
         android:title="@string/brapi_timeout" />
 
     <com.fieldbook.tracker.preferences.BetterEditTextPreference
-        android:defaultValue="5"
+        android:defaultValue="3"
         android:icon="@drawable/image_multiple_outline"
         android:inputType="number"
         android:key="BRAPI_MAX_CONCURRENT_IMAGE_CONTENT"

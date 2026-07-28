@@ -10,8 +10,8 @@ import javax.inject.Singleton
  * Application-scoped cache for the DataGrid feature.
  *
  * Holds the last fully-computed grid snapshot. On subsequent opens of DataGridActivity, the
- * activity checks whether the snapshot is still valid (same study/traits/row-header and the same
- * observation count) before skipping the expensive multi-JOIN query.
+ * activity checks whether the snapshot is still valid (same study/traits/row-header and no
+ * observation writes since it was built) before skipping the expensive multi-JOIN query.
  */
 @Singleton
 class DataGridCache @Inject constructor() {
@@ -24,12 +24,16 @@ class DataGridCache @Inject constructor() {
 
     data class GridSnapshot(
         val studyId: Int,
-        /** Visible trait DB IDs in display order — part of the cache key (order matters). */
-        val traitIds: List<String>,
+        /**
+         * Fingerprint of the visible traits in display order — part of the cache key. Covers the
+         * trait attributes that change how a cell renders (not just which traits are shown), so
+         * toggling e.g. a trait's repeated-measures or category-display parameter is a miss.
+         */
+        val traitsFingerprint: String,
         val rowHeader: String,
         val extraHeaders: List<String> = emptyList(),
-        /** COUNT(*) of observations at the time the snapshot was built, used for staleness checks. */
-        val observationCount: Int,
+        /** [ObservationChangeTracker] revision when the snapshot was built, for staleness checks. */
+        val observationsRevision: Long,
         val traits: List<TraitObject>,
         val rowHeaders: List<HeaderData>,
         val plotIds: List<String>,
@@ -41,21 +45,41 @@ class DataGridCache @Inject constructor() {
     private var snapshot: GridSnapshot? = null
 
     /**
-     * Returns the cached snapshot if the cache key matches, or null on a miss.
+     * Returns the cached snapshot if the cache key matches and no observations have been written
+     * since it was built, or null on a miss.
      */
-    fun get(studyId: Int, traitIds: List<String>, rowHeader: String, extraHeaders: List<String> = emptyList()): GridSnapshot? =
+    fun get(
+        studyId: Int,
+        traitsFingerprint: String,
+        rowHeader: String,
+        extraHeaders: List<String> = emptyList()
+    ): GridSnapshot? =
         synchronized(lock) {
             val s = snapshot ?: return null
-            if (s.studyId == studyId && s.traitIds == traitIds && s.rowHeader == rowHeader && s.extraHeaders == extraHeaders) s
-            else null
+            if (s.studyId == studyId && s.traitsFingerprint == traitsFingerprint &&
+                s.rowHeader == rowHeader && s.extraHeaders == extraHeaders &&
+                s.observationsRevision == ObservationChangeTracker.current
+            ) s else null
+        }
+
+    /**
+     * Builds the trait half of the cache key from the traits about to be rendered. Includes every
+     * attribute the grid reads while building a cell, so a trait edit that changes rendering
+     * invalidates the snapshot even though the set of trait IDs is unchanged.
+     */
+    fun fingerprintTraits(traits: List<TraitObject>): String =
+        traits.joinToString("|") { trait ->
+            listOf(
+                trait.id,
+                trait.alias,
+                trait.format,
+                trait.categoryDisplayValue,
+                trait.repeatedMeasures
+            ).joinToString(":")
         }
 
     fun put(snapshot: GridSnapshot) {
         synchronized(lock) { this.snapshot = snapshot }
-    }
-
-    fun invalidate() {
-        synchronized(lock) { snapshot = null }
     }
 
     data class MapSnapshot(
@@ -66,8 +90,8 @@ class DataGridCache @Inject constructor() {
         val invertCol: Boolean,
         /** Visible trait DB IDs in display order — part of the cache key (order matters). */
         val traitIds: List<String>,
-        /** COUNT(*) of observations at the time the snapshot was built, used for staleness checks. */
-        val observationCount: Int,
+        /** [ObservationChangeTracker] revision when the snapshot was built, for staleness checks. */
+        val observationsRevision: Long,
         val plots: List<MapPlotData>,
         val gridRows: Int,
         val gridCols: Int,
@@ -78,8 +102,8 @@ class DataGridCache @Inject constructor() {
     private var mapSnapshot: MapSnapshot? = null
 
     /**
-     * Returns the cached map snapshot if the cache key matches and the observation count hasn't
-     * changed, or null on a miss.
+     * Returns the cached map snapshot if the cache key matches and no observations have been
+     * written since it was built, or null on a miss.
      */
     fun getMap(
         studyId: Int,
@@ -87,22 +111,18 @@ class DataGridCache @Inject constructor() {
         colAttr: String,
         invertRow: Boolean,
         invertCol: Boolean,
-        traitIds: List<String>,
-        observationCount: Int
+        traitIds: List<String>
     ): MapSnapshot? =
         synchronized(mapLock) {
             val s = mapSnapshot ?: return null
             if (s.studyId == studyId && s.rowAttr == rowAttr && s.colAttr == colAttr &&
                 s.invertRow == invertRow && s.invertCol == invertCol &&
-                s.traitIds == traitIds && s.observationCount == observationCount
+                s.traitIds == traitIds &&
+                s.observationsRevision == ObservationChangeTracker.current
             ) s else null
         }
 
     fun putMap(snapshot: MapSnapshot) {
         synchronized(mapLock) { mapSnapshot = snapshot }
-    }
-
-    fun invalidateMap() {
-        synchronized(mapLock) { mapSnapshot = null }
     }
 }
