@@ -4,9 +4,6 @@
     android:viewportWidth="24"
     android:viewportHeight="24">
 
-    <clip-path
-        android:fillColor="#000000"
-        android:pathData="M0 0 24 0 24 24 0 24 0 0M2.39 1.73 22.11 21.46 23.2 20 3.9.73Z" />
     <path
         android:fillColor="#000"
         android:pathData="M18.17,12L15,8.83L16.41,7.41L21,12L16.41,16.58L15,15.17L18.17,12
