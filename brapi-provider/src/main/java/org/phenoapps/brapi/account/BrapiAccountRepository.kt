@@ -44,11 +44,17 @@ open class BrapiAccountRepository(
      * what request building and re-authorization still read, so leaving them behind means the new
      * account is addressed with the previous one's version path and re-authorized against the
      * previous one's provider.
+     *
+     * Returns true when this actually changed which server is active, so callers can drop data
+     * cached from the previous one. Re-selecting the account that is already active returns false
+     * — the mirrors are still refreshed, but nothing server-specific has gone stale.
      */
-    fun setActiveAccount(serverUrl: String) {
+    fun setActiveAccount(serverUrl: String): Boolean {
         val normalized = normalizeUrl(serverUrl)
+        val changed = !isActiveAccount(normalized)
         preferences.edit().putString(preferenceKeys.baseUrl, normalized).apply()
         getAccountByUrl(normalized)?.let { syncActiveAccountPrefs(it) }
+        return changed
     }
 
     /**

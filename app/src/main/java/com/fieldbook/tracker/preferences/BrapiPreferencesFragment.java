@@ -381,23 +381,31 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
     }
 
     private void activateAccount(Account account) {
+        makeAccountActive(account);
+        refreshServerCards();
+    }
+
+    /**
+     * Makes {@code account} the active one, updating the legacy SharedPreference mirrors that
+     * BrAPIService and the re-authorization flow still read, and dropping cached field/trait data
+     * when this is a switch to a different server.
+     *
+     * @return the account's server URL
+     */
+    private String makeAccountActive(Account account) {
         AccountManager am = AccountManager.get(context);
         String serverUrl = am.getUserData(account, BrapiAuthenticator.KEY_SERVER_URL);
         if (serverUrl == null) serverUrl = account.name;
-        // setActiveAccount() also updates the legacy SharedPreference mirrors that BrAPIService
-        // and the re-authorization flow still read.
-        accountHelper.setActiveAccount(serverUrl);
-        // Invalidate cached field/trait data so the new server's data is loaded fresh
-        BrapiFilterCache.Companion.delete(context, true);
-        refreshServerCards();
+        if (accountHelper.setActiveAccount(serverUrl)) {
+            BrapiFilterCache.Companion.delete(context, true);
+        }
+        return serverUrl;
     }
 
     private @NotNull Unit authorizeAccount(Account account) {
         AccountManager am = AccountManager.get(context);
-        String serverUrl = am.getUserData(account, BrapiAuthenticator.KEY_SERVER_URL);
-        if (serverUrl == null) serverUrl = account.name;
-        // Temporarily make this account active so BrapiAuthActivity can pick up its config
-        accountHelper.syncActiveAccountPrefs(account);
+        // Make this account active so BrapiAuthActivity picks up its config
+        String serverUrl = makeAccountActive(account);
         pendingAuthAccount = account;
         Intent authIntent = new Intent(context, BrapiAuthActivity.class);
         authIntent.putExtra(BrapiAuthActivity.EXTRA_SERVER_URL, serverUrl);
