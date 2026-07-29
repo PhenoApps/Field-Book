@@ -1388,6 +1388,9 @@ public class CollectActivity extends ThemedActivity
             systemMenu.findItem(R.id.datagrid).setVisible(preferences.getBoolean(PreferenceKeys.DATAGRID_SETTING, false));
         }
 
+        // apply the appearance preference in case it was changed in settings
+        rangeBox.updateRangeBoxVisibility();
+
         refreshInfoBarAdapter();
 
         // If reload data is true, it means there was an import operation, and

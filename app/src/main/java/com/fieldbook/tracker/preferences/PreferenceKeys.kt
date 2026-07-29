@@ -31,6 +31,7 @@ class PreferenceKeys {
         const val TOOLBAR_CUSTOMIZE = "TOOLBAR_CUSTOMIZE"
         const val INFOBAR_NUMBER = "INFOBAR_NUMBER"
         const val HIDE_INFOBAR_PREFIX = "HIDE_INFOBAR_PREFIX"
+        const val HIDE_ENTRY_NAVIGATION = "HIDE_ENTRY_NAVIGATION"
         const val QUICK_GOTO = "QuickGoTo"
         const val RANGE_PROGRESS_BAR = "RANGE_PROGRESS_BAR"
         const val TRAITS_PROGRESS_BAR = "TRAITS_PROGRESS_BAR"
@@ -45,7 +46,7 @@ class PreferenceKeys {
         const val LANGUAGE_LOCALE_SUMMARY = "com.tracker.fieldbook.preference.language.summary"
         const val LANGUAGE_LOCALE_DEFAULT_ID = "com.tracker.fieldbook.preference.language.default_id"
 
-        private val appearancePreferenceKeys = setOf(TOOLBAR_CUSTOMIZE, INFOBAR_NUMBER, HIDE_INFOBAR_PREFIX, QUICK_GOTO, RANGE_PROGRESS_BAR,
+        private val appearancePreferenceKeys = setOf(TOOLBAR_CUSTOMIZE, INFOBAR_NUMBER, HIDE_INFOBAR_PREFIX, HIDE_ENTRY_NAVIGATION, QUICK_GOTO, RANGE_PROGRESS_BAR,
             TRAITS_PROGRESS_BAR, SHOW_OBSERVATION_TIMESTAMP, THEME, TEXT_THEME, SAVED_DATA_COLOR, LANGUAGE_PREF, LANGUAGE_LOCALE_ID,
             LANGUAGE_LOCALE_SUMMARY, LANGUAGE_LOCALE_DEFAULT_ID)
 

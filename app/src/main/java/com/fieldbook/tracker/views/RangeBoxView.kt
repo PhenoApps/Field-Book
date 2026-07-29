@@ -448,6 +448,17 @@ class RangeBoxView : ConstraintLayout {
         }
     }
 
+    /**
+     * Hides the whole range box when the appearance preference is enabled.
+     * The box is only hidden, so navigating with the toolbar, volume keys or
+     * the trait box still works while it is not shown.
+     */
+    fun updateRangeBoxVisibility() {
+        val hidden =
+            controller.getPreferences().getBoolean(PreferenceKeys.HIDE_ENTRY_NAVIGATION, false)
+        visibility = if (hidden) GONE else VISIBLE
+    }
+
     private fun updateProgressBarVisibility() {
         if (controller.getPreferences().getBoolean(PreferenceKeys.RANGE_PROGRESS_BAR, true)) {
             plotsProgressBar.visibility = VISIBLE

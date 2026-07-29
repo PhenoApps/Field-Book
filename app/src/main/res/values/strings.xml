@@ -1020,6 +1020,9 @@
     <string name="preferences_appearance_quickgoto">Quick GoTo</string>
     <string name="preferences_appearance_quickgoto_description">Change the middle section of main screen to the legacy Quick GoTo</string>
 
+    <string name="preferences_appearance_hide_entry_navigation">Hide entry navigation</string>
+    <string name="preferences_appearance_hide_entry_navigation_description">Hides the entry navigation arrows, identifiers, and progress bar on the collect screen</string>
+
     <string name="preferences_appearance_range_progress_bar">Entries progress bar</string>
     <string name="preferences_appearance_range_progress_bar_description">Shows your current position in the field</string>
 
