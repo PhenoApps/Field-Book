@@ -381,23 +381,31 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
     }
 
     private void activateAccount(Account account) {
+        makeAccountActive(account);
+        refreshServerCards();
+    }
+
+    /**
+     * Makes {@code account} the active one, updating the legacy SharedPreference mirrors that
+     * BrAPIService and the re-authorization flow still read, and dropping cached field/trait data
+     * when this is a switch to a different server.
+     *
+     * @return the account's server URL
+     */
+    private String makeAccountActive(Account account) {
         AccountManager am = AccountManager.get(context);
         String serverUrl = am.getUserData(account, BrapiAuthenticator.KEY_SERVER_URL);
         if (serverUrl == null) serverUrl = account.name;
-        accountHelper.setActiveAccount(serverUrl);
-        // Also update legacy SharedPreference mirrors so BrAPIService continues to work
-        syncActiveAccountPrefs(account);
-        // Invalidate cached field/trait data so the new server's data is loaded fresh
-        BrapiFilterCache.Companion.delete(context, true);
-        refreshServerCards();
+        if (accountHelper.setActiveAccount(serverUrl)) {
+            BrapiFilterCache.Companion.delete(context, true);
+        }
+        return serverUrl;
     }
 
     private @NotNull Unit authorizeAccount(Account account) {
         AccountManager am = AccountManager.get(context);
-        String serverUrl = am.getUserData(account, BrapiAuthenticator.KEY_SERVER_URL);
-        if (serverUrl == null) serverUrl = account.name;
-        // Temporarily make this account active so BrapiAuthActivity can pick up its config
-        syncActiveAccountPrefs(account);
+        // Make this account active so BrapiAuthActivity picks up its config
+        String serverUrl = makeAccountActive(account);
         pendingAuthAccount = account;
         Intent authIntent = new Intent(context, BrapiAuthActivity.class);
         authIntent.putExtra(BrapiAuthActivity.EXTRA_SERVER_URL, serverUrl);
@@ -411,31 +419,6 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
                 am.getUserData(account, BrapiAuthenticator.KEY_OIDC_SCOPE));
         startActivityForResult(authIntent, AUTH_REQUEST_CODE);
         return Unit.INSTANCE;
-    }
-
-    /**
-     * Mirrors active account settings from AccountManager user data into SharedPreferences
-     * so that existing BrAPIService code continues to function without changes.
-     */
-    private void syncActiveAccountPrefs(Account account) {
-        AccountManager am = AccountManager.get(context);
-        String serverUrl = am.getUserData(account, BrapiAuthenticator.KEY_SERVER_URL);
-        String displayName = am.getUserData(account, BrapiAuthenticator.KEY_DISPLAY_NAME);
-        String oidcUrl = am.getUserData(account, BrapiAuthenticator.KEY_OIDC_URL);
-        String oidcFlow = am.getUserData(account, BrapiAuthenticator.KEY_OIDC_FLOW);
-        String oidcClientId = am.getUserData(account, BrapiAuthenticator.KEY_OIDC_CLIENT_ID);
-        String oidcScope = am.getUserData(account, BrapiAuthenticator.KEY_OIDC_SCOPE);
-        String brapiVersion = am.getUserData(account, BrapiAuthenticator.KEY_BRAPI_VERSION);
-
-        SharedPreferences.Editor editor = preferences.edit();
-        if (serverUrl != null) editor.putString(PreferenceKeys.BRAPI_BASE_URL, serverUrl);
-        if (displayName != null) editor.putString(PreferenceKeys.BRAPI_DISPLAY_NAME, displayName);
-        if (oidcUrl != null) editor.putString(PreferenceKeys.BRAPI_OIDC_URL, oidcUrl);
-        if (oidcFlow != null) editor.putString(PreferenceKeys.BRAPI_OIDC_FLOW, oidcFlow);
-        if (oidcClientId != null) editor.putString(PreferenceKeys.BRAPI_OIDC_CLIENT_ID, oidcClientId);
-        if (oidcScope != null) editor.putString(PreferenceKeys.BRAPI_OIDC_SCOPE, oidcScope);
-        if (brapiVersion != null) editor.putString(PreferenceKeys.BRAPI_VERSION, brapiVersion);
-        editor.apply();
     }
 
     private @NotNull Unit checkServerCompatibility(Account account) {

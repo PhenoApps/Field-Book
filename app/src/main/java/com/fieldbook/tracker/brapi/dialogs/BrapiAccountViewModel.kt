@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache
 import com.fieldbook.tracker.utilities.BrapiAccountHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -190,7 +191,7 @@ class BrapiAccountViewModel @Inject constructor(
             oidcScope = state.oidcScope.trim(),
             brapiVersion = state.brapiVersion,
         )
-        accountHelper.setActiveAccount(url)
+        if (accountHelper.setActiveAccount(url)) invalidateCache()
         viewModelScope.launch {
             _events.emit(
                 BrapiAccountEvent.LaunchAuth(
@@ -228,6 +229,12 @@ class BrapiAccountViewModel @Inject constructor(
             brapiVersion = state.brapiVersion,
             originalServerUrl = editOriginalUrl,
         )
+        // Editing the active account has to repoint its preference mirrors, otherwise a changed
+        // BrAPI version or OIDC setting is stored but never used. Matched on the URL the account
+        // was active under, since the edit may have changed the URL itself.
+        if (accountHelper.isActiveAccount(editOriginalUrl ?: url)) {
+            if (accountHelper.setActiveAccount(url)) invalidateCache()
+        }
         viewModelScope.launch { _events.emit(BrapiAccountEvent.EditSaved) }
     }
 
@@ -245,6 +252,14 @@ class BrapiAccountViewModel @Inject constructor(
     }
 
     // ── Utilities ─────────────────────────────────────────────────────────────
+
+    /**
+     * Drops the cached study/trait lists and the filter selections built on top of them.
+     *
+     * Those are keyed by nothing but the server that supplied them, so carrying them across a
+     * switch shows the previous server's programs, trials and traits against the new one.
+     */
+    private fun invalidateCache() = BrapiFilterCache.delete(context, true)
 
     private fun fetchDisplayName(baseUrl: String) {
         viewModelScope.launch {
