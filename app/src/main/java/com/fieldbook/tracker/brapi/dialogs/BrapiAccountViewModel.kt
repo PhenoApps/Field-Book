@@ -228,6 +228,12 @@ class BrapiAccountViewModel @Inject constructor(
             brapiVersion = state.brapiVersion,
             originalServerUrl = editOriginalUrl,
         )
+        // Editing the active account has to repoint its preference mirrors, otherwise a changed
+        // BrAPI version or OIDC setting is stored but never used. Matched on the URL the account
+        // was active under, since the edit may have changed the URL itself.
+        if (accountHelper.isActiveAccount(editOriginalUrl ?: url)) {
+            accountHelper.setActiveAccount(url)
+        }
         viewModelScope.launch { _events.emit(BrapiAccountEvent.EditSaved) }
     }
 

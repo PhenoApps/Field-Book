@@ -37,8 +37,52 @@ open class BrapiAccountRepository(
         return getAccountByUrl(serverUrl)
     }
 
+    /**
+     * Makes [serverUrl] the active account and repoints every preference mirror at it.
+     *
+     * Writing only the base URL is not enough: the mirrors for BrAPI version and OIDC config are
+     * what request building and re-authorization still read, so leaving them behind means the new
+     * account is addressed with the previous one's version path and re-authorized against the
+     * previous one's provider.
+     */
     fun setActiveAccount(serverUrl: String) {
-        preferences.edit().putString(preferenceKeys.baseUrl, normalizeUrl(serverUrl)).apply()
+        val normalized = normalizeUrl(serverUrl)
+        preferences.edit().putString(preferenceKeys.baseUrl, normalized).apply()
+        getAccountByUrl(normalized)?.let { syncActiveAccountPrefs(it) }
+    }
+
+    /**
+     * Mirrors [account]'s stored config into the host's SharedPreference keys.
+     *
+     * Only keys the host declared in [preferenceKeys] are written, and only for user data the
+     * account actually carries — a missing value leaves the existing mirror alone rather than
+     * blanking it.
+     */
+    fun syncActiveAccountPrefs(account: Account) {
+        val am = AccountManager.get(context)
+        val editor = preferences.edit()
+
+        fun mirror(prefKey: String?, userDataKey: String) {
+            if (prefKey.isNullOrEmpty()) return
+            am.getUserData(account, userDataKey)?.let { editor.putString(prefKey, it) }
+        }
+
+        mirror(preferenceKeys.baseUrl, BrapiAccountConstants.KEY_SERVER_URL)
+        mirror(preferenceKeys.displayName, BrapiAccountConstants.KEY_DISPLAY_NAME)
+        mirror(preferenceKeys.oidcUrl, BrapiAccountConstants.KEY_OIDC_URL)
+        mirror(preferenceKeys.oidcFlow, BrapiAccountConstants.KEY_OIDC_FLOW)
+        mirror(preferenceKeys.oidcClientId, BrapiAccountConstants.KEY_OIDC_CLIENT_ID)
+        mirror(preferenceKeys.oidcScope, BrapiAccountConstants.KEY_OIDC_SCOPE)
+        mirror(preferenceKeys.brapiVersion, BrapiAccountConstants.KEY_BRAPI_VERSION)
+
+        editor.apply()
+    }
+
+    /** Whether [serverUrl] is the account the preference mirrors currently describe. */
+    fun isActiveAccount(serverUrl: String): Boolean {
+        val normalized = runCatching { normalizeUrl(serverUrl) }.getOrDefault(serverUrl)
+        val activeUrl = preferences.getString(preferenceKeys.baseUrl, "") ?: ""
+        return activeUrl.isNotEmpty() && (activeUrl == serverUrl || activeUrl == normalized)
     }
 
     fun hasActiveAccount(): Boolean {

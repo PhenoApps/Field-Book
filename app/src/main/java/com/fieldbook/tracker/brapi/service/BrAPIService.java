@@ -84,6 +84,9 @@ public interface BrAPIService {
 
     static String getBrapiUrl(Context context) {
         String baseURL = getPreferences(context).getString(PreferenceKeys.BRAPI_BASE_URL, "");
+        // Mirrored from the active account by BrapiAccountRepository.setActiveAccount(); it has to
+        // agree with the version BrAPIServiceFactory picks the client from, or a V2 client ends up
+        // issuing V2 calls against the /brapi/v1 path.
         String version = getPreferences(context).getString(PreferenceKeys.BRAPI_VERSION, "");
         String path;
         if (version.equals("V2"))
