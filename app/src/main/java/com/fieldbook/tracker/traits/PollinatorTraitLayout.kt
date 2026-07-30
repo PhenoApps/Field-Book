@@ -38,14 +38,18 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.fieldbook.tracker.R
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.traits.formats.parameters.DEFAULT_DURATION_SECONDS
+import com.fieldbook.tracker.R
 import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.fieldbook.tracker.utilities.JsonUtil
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories
 import org.json.JSONObject
 
@@ -89,6 +93,12 @@ class PollinatorTraitLayout : BaseTraitLayout {
     private val traitCategories = mutableStateOf<List<BrAPIScaleValidValuesCategories>>(emptyList())
     private val traitDuration = mutableIntStateOf(DEFAULT_DURATION_SECONDS)
 
+    //cancels the timer coroutine when the layout is reset
+    private var saveJob: Job? = null
+
+    //tracks if the observation has been saved so we don't save twice
+    @Volatile var hasSavedCurrent = false
+
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
@@ -116,6 +126,8 @@ class PollinatorTraitLayout : BaseTraitLayout {
     }
 
     private fun resetObservationState() {
+        cancelTimer()
+        hasSavedCurrent = false
         isRunning.value = false
         isFinished.value = false
         elapsedSeconds.intValue = 0
@@ -159,6 +171,11 @@ class PollinatorTraitLayout : BaseTraitLayout {
         super.deleteTraitListener()
         //super selects the closest remaining rep, reloading the layout would jump to the last one
         if (collectInputView.isRepeatEnabled()) refreshLayout(false) else loadLayout()
+    }
+
+    private fun cancelTimer() {
+        saveJob?.cancel()
+        saveJob = null
     }
 
     override fun onExit() {
@@ -205,6 +222,15 @@ class PollinatorTraitLayout : BaseTraitLayout {
     }
 
     private fun save() {
+        saveJob?.cancel()
+        saveJob = CoroutineScope(Dispatchers.IO).launch {
+            doSave()
+        }
+    }
+
+    private fun doSave() {
+        if (hasSavedCurrent) return
+        hasSavedCurrent = true
         val categories = categories()
         if (categories.isEmpty()) return
         val countsJson = JSONObject()
@@ -213,12 +239,13 @@ class PollinatorTraitLayout : BaseTraitLayout {
         json.put(COUNTS_KEY, countsJson)
         json.put(DURATION_KEY, elapsedSeconds.intValue)
         val value = json.toString()
-        //the collect edit text displays the summary, the raw json is only stored in the database
-        collectInputView.text = decodeValue(value)
+        val savedLocked = isLocked
         collectActivity.updateObservation(currentTrait, value, null)
-        //style the displayed value as saved and re-apply the lock state for the stored observation
-        afterLoadExists(collectActivity, value)
-        isDataLocked.value = isLocked
+        CoroutineScope(Dispatchers.Main).launch {
+            collectInputView.text = decodeValue(value)
+            afterLoadExists(collectActivity, value)
+            isDataLocked.value = savedLocked
+        }
     }
 
     private fun setupUi() {
@@ -294,8 +321,12 @@ class PollinatorTraitLayout : BaseTraitLayout {
                     enabled = canCollect() && elapsedSeconds.intValue > 0
                 ) {
                     isRunning.value = false
-                    isFinished.value = true
+                    if (hasSavedCurrent) {
+                        isFinished.value = true
+                        return@ControlButton
+                    }
                     save()
+                    isFinished.value = true
                 }
 
                 Text(
