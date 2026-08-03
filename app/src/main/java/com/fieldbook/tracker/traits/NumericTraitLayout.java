@@ -242,7 +242,6 @@ public class NumericTraitLayout extends BaseTraitLayout {
                 final String backspaceTts = getContext().getString(R.string.trait_numeric_backspace_tts);
                 final String curText = getCollectInputView().getText();
                 Button button = (Button) view;
-                triggerTts(button.getText().toString());
                 String value;
                 if (view.getId() == R.id.k16) {        // Backspace Key Pressed
                     triggerTts(backspaceTts);
@@ -256,6 +255,7 @@ public class NumericTraitLayout extends BaseTraitLayout {
                         removeTrait(getCurrentTrait());
                     }
                 } else if (numberButtons.containsKey(view.getId())) {
+                    triggerTts(button.getText().toString());
                     value = curText + numberButtons.get(view.getId()).getText().toString();
                     getCollectInputView().setText(value);
                     updateObservation(getCurrentTrait(), value);

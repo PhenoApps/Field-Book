@@ -148,9 +148,11 @@
             android:id="@+id/k16"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/trait_numeric_backspace"
+            android:gravity="center"
             android:minWidth="@dimen/button_width_numeric"
-            android:paddingLeft="29dp" />
+            android:contentDescription="@string/trait_numeric_backspace_tts"
+            android:textColor="?attr/fb_color_text_dark"
+            android:text="DEL" />
 
     </GridLayout>
 </com.fieldbook.tracker.traits.NumericTraitLayout>
