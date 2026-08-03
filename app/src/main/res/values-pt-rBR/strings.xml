@@ -557,6 +557,7 @@
     <string name="dialog_data_grid_header_picker_ok">OK</string>
     <string name="dialog_data_grid_repeated_measures_title">Escolher Observação</string>
     <string name="menu_action_header_view_data_grid_title">Escolher Cabeçalhos da Linha</string>
+    <string name="menu_data_grid_action_locate_plot">Localizar Parcela Ativa</string>
     <string name="menu_action_heatmap_data_grid_title">Mapa de calor</string>
     <string name="map_view_legend_complete">Completo</string>
     <!--- Lock -->
@@ -839,6 +840,8 @@
     <string name="preferences_appearance_infobar_hide_prefix_description">Prefixo do InfoBar será substituído por um ícone genérico</string>
     <string name="preferences_appearance_quickgoto">Ir Rápido Para</string>
     <string name="preferences_appearance_quickgoto_description">Altere a seção do meio da tela principal para o legado \"Ir Rápido Para\"</string>
+    <string name="preferences_appearance_hide_entry_navigation">Ocultar navegação das entradas</string>
+    <string name="preferences_appearance_hide_entry_navigation_description">Oculta as setas de navegação das entradas, identificadores e barra de progresso na tela de coleta</string>
     <string name="preferences_appearance_range_progress_bar">Barra de progresso de entradas</string>
     <string name="preferences_appearance_range_progress_bar_description">Mostra sua posição atual no campo</string>
     <string name="preferences_appearance_traits_progress_bar">Barra de progresso de características</string>
