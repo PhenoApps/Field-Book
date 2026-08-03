@@ -30,18 +30,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.fieldbook.tracker.R
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.traits.formats.parameters.DEFAULT_DURATION_SECONDS
-import com.fieldbook.tracker.R
 import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.fieldbook.tracker.utilities.JsonUtil
@@ -59,6 +59,7 @@ class PollinatorTraitLayout : BaseTraitLayout {
         private const val TAG = "PollinatorTraitLayout"
         internal const val COUNTS_KEY = "counts"
         internal const val DURATION_KEY = "duration_sec"
+        internal const val FINISHED_KEY = "finished"
 
         //resolved once, the format definition is rebuilt on every getDatabaseName call
         private val TYPE = Formats.POLLINATOR.getDatabaseName()
@@ -96,9 +97,6 @@ class PollinatorTraitLayout : BaseTraitLayout {
     //cancels the timer coroutine when the layout is reset
     private var saveJob: Job? = null
 
-    //tracks if the observation has been saved so we don't save twice
-    @Volatile var hasSavedCurrent = false
-
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
@@ -127,7 +125,6 @@ class PollinatorTraitLayout : BaseTraitLayout {
 
     private fun resetObservationState() {
         cancelTimer()
-        hasSavedCurrent = false
         isRunning.value = false
         isFinished.value = false
         elapsedSeconds.intValue = 0
@@ -142,7 +139,6 @@ class PollinatorTraitLayout : BaseTraitLayout {
             currentTrait?.duration?.toIntOrNull()?.takeIf { it > 0 } ?: DEFAULT_DURATION_SECONDS
         resetObservationState()
         if (onNew == false) restore(currentObservation?.value)
-        //base updates isLocked per rep when frozen, pick it up after the value is restored
         isDataLocked.value = isLocked
     }
 
@@ -180,6 +176,7 @@ class PollinatorTraitLayout : BaseTraitLayout {
 
     override fun onExit() {
         isRunning.value = false
+        if (hasData()) save()
     }
 
     //show the visit total instead of the raw json in the collect input and repeated values toolbar
@@ -205,6 +202,19 @@ class PollinatorTraitLayout : BaseTraitLayout {
 
     private fun key(category: BrAPIScaleValidValuesCategories): String = keyOf(category)
 
+    //build the json payload used by both async saves and the synchronous exit save
+    private fun buildJson(): String? {
+        val cats = categories()
+        if (cats.isEmpty()) return null
+        val countsJson = JSONObject()
+        cats.forEach { countsJson.put(key(it), counts[key(it)] ?: 0) }
+        val json = JSONObject()
+        json.put(COUNTS_KEY, countsJson)
+        json.put(DURATION_KEY, elapsedSeconds.intValue)
+        json.put(FINISHED_KEY, isFinished.value)
+        return json.toString()
+    }
+
     //NA and any other value that was not collected here leaves the counts empty
     private fun isNotCollectedValue(value: String) = value == "NA" || !JsonUtil.isJsonValid(value)
 
@@ -215,7 +225,7 @@ class PollinatorTraitLayout : BaseTraitLayout {
             elapsedSeconds.intValue = json.optInt(DURATION_KEY)
             val countsJson = json.optJSONObject(COUNTS_KEY) ?: JSONObject()
             countsJson.keys().forEach { k -> counts[k] = countsJson.optInt(k) }
-            isFinished.value = true
+            isFinished.value = json.optBoolean(FINISHED_KEY, false)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to restore value: $value", e)
         }
@@ -224,27 +234,14 @@ class PollinatorTraitLayout : BaseTraitLayout {
     private fun save() {
         saveJob?.cancel()
         saveJob = CoroutineScope(Dispatchers.IO).launch {
-            doSave()
-        }
-    }
-
-    private fun doSave() {
-        if (hasSavedCurrent) return
-        hasSavedCurrent = true
-        val categories = categories()
-        if (categories.isEmpty()) return
-        val countsJson = JSONObject()
-        categories.forEach { countsJson.put(key(it), counts[key(it)] ?: 0) }
-        val json = JSONObject()
-        json.put(COUNTS_KEY, countsJson)
-        json.put(DURATION_KEY, elapsedSeconds.intValue)
-        val value = json.toString()
-        val savedLocked = isLocked
-        collectActivity.updateObservation(currentTrait, value, null)
-        CoroutineScope(Dispatchers.Main).launch {
-            collectInputView.text = decodeValue(value)
-            afterLoadExists(collectActivity, value)
-            isDataLocked.value = savedLocked
+            val value = buildJson() ?: return@launch
+            val savedLocked = isLocked
+            collectActivity.updateObservation(currentTrait, value, null)
+            CoroutineScope(Dispatchers.Main).launch {
+                collectInputView.text = decodeValue(value)
+                afterLoadExists(collectActivity, value)
+                isDataLocked.value = savedLocked
+            }
         }
     }
 
@@ -321,10 +318,6 @@ class PollinatorTraitLayout : BaseTraitLayout {
                     enabled = canCollect() && elapsedSeconds.intValue > 0
                 ) {
                     isRunning.value = false
-                    if (hasSavedCurrent) {
-                        isFinished.value = true
-                        return@ControlButton
-                    }
                     save()
                     isFinished.value = true
                 }
@@ -357,7 +350,12 @@ class PollinatorTraitLayout : BaseTraitLayout {
     private fun CountButton(modifier: Modifier, category: BrAPIScaleValidValuesCategories) {
         val k = key(category)
         Button(
-            onClick = { if (isRunning.value && canCollect()) counts[k] = (counts[k] ?: 0) + 1 },
+            onClick = {
+                if (isRunning.value && canCollect()) {
+                    counts[k] = (counts[k] ?: 0) + 1
+                    save()
+                }
+            },
             enabled = isRunning.value && canCollect(),
             //min height so the button grows with the text size preference instead of clipping
             modifier = modifier.defaultMinSize(minHeight = 72.dp),
