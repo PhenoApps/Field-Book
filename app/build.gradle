@@ -11,6 +11,7 @@ apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 apply plugin: 'com.google.devtools.ksp'
 apply plugin: "org.jetbrains.kotlin.plugin.serialization"
 apply plugin: "kotlin-parcelize"
+apply plugin: 'io.github.takahirom.roborazzi'
 
 Properties props = new Properties()
 props.load(new FileInputStream("$project.rootDir/version.properties"))
@@ -128,12 +129,42 @@ android {
             unitTests.returnDefaultValues = true
             all {
                 systemProperty 'robolectric.graphicsMode', 'NATIVE'
+                systemProperty 'robolectric.pixelCopyRenderMode', 'hardware'
                 jvmArgs(
                     '--add-opens=java.base/java.lang=ALL-UNNAMED',
                     '--add-opens=java.base/java.lang.reflect=ALL-UNNAMED',
                 )
+                maxHeapSize = "4096m"
+                // Docs-only Roborazzi goldens — excluded from default CI unit tests.
+                def sodaScreenshotTasks = gradle.startParameter.taskNames.any { name ->
+                    name.contains('recordRoborazzi') ||
+                        name.contains('verifyRoborazzi') ||
+                        name.contains('compareRoborazzi') ||
+                        name.contains('publishSodaDarkReview')
+                }
+                if (!project.hasProperty('includeSodaDarkScreenshots') && !sodaScreenshotTasks) {
+                    exclude '**/SodaDarkReviewScreenshotTest.class'
+                }
+                if (project.hasProperty('includeSodaDarkScreenshots') || sodaScreenshotTasks) {
+                    forkEvery = 1
+                }
             }
         }
+    }
+}
+
+tasks.register('publishSodaDarkReviewScreenshots', Copy) {
+    group = 'documentation'
+    description = 'Copy soda-dark PR #1477 review screenshot PNGs to trait-tree/screenshots/soda-dark-pr1477/.'
+    from('src/test/screenshots/soda-dark-pr1477')
+    into(layout.projectDirectory.dir('../trait-tree/screenshots/soda-dark-pr1477'))
+    include('*.png')
+    doFirst {
+        destinationDir.mkdirs()
+    }
+    doLast {
+        logger.lifecycle('Soda-dark review screenshots copied to trait-tree/screenshots/soda-dark-pr1477/')
+        logger.lifecycle('HTML diff report: build/reports/roborazzi/index.html')
     }
 }
 
@@ -256,6 +287,7 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-gson:2.9.0"
 
     testImplementation 'androidx.test:core:1.7.0'
+    testImplementation 'androidx.test.ext:junit:1.3.0'
     testImplementation 'org.robolectric:robolectric:4.14.1'
     testImplementation 'androidx.compose.ui:ui-test-junit4'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
@@ -263,6 +295,8 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:5.15.2'
     testImplementation 'org.powermock:powermock-module-junit4:2.0.9'
     testImplementation 'org.powermock:powermock-api-mockito2:2.0.9'
+    testImplementation 'io.github.takahirom.roborazzi:roborazzi:1.43.1'
+    testImplementation 'io.github.takahirom.roborazzi:roborazzi-compose:1.43.1'
 
     //androidx exif interface
     implementation "androidx.exifinterface:exifinterface:1.4.1"

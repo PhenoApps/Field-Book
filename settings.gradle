@@ -1,4 +1,9 @@
 pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
     buildscript {
         repositories {
             mavenCentral()

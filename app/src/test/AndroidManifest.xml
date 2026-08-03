@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <application>
+
+    <!-- Soda dark XML baseline for screenshot harnesses (matches applyForcedThemePrefs). -->
+    <application android:theme="@style/BaseAppTheme_SodaDark_MediumTextTheme">
         <activity
             android:name="androidx.activity.ComponentActivity"
             android:exported="true"
-            android:theme="@android:style/Theme.Material.Light.NoActionBar" />
+            android:theme="@style/BaseAppTheme_SodaDark_MediumTextTheme" />
+        <activity
+            android:name="com.fieldbook.tracker.screenshots.SodaDarkReviewHarness"
+            android:exported="false"
+            android:theme="@style/BaseAppTheme_SodaDark_MediumTextTheme" />
     </application>
+
 </manifest>
