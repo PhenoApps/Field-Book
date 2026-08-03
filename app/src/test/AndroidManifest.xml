@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application android:theme="@style/BaseAppTheme_MediumTextTheme">
+        <activity
+            android:name="com.fieldbook.tracker.screenshots.TreeCollectIntegratedHarness"
+            android:exported="false"
+            android:theme="@style/BaseAppTheme_MediumTextTheme" />
+        <activity
+            android:name="com.fieldbook.tracker.screenshots.TreeConstructorIntegratedHarness"
+            android:exported="false"
+            android:theme="@style/BaseAppTheme_MediumTextTheme" />
+    </application>
+
+</manifest>

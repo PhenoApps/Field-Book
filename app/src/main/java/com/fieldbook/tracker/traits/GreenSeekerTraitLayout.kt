@@ -94,12 +94,12 @@ class GreenSeekerTraitLayout : BaseTraitLayout, LineGraphSelectableAdapter.Liste
     }
 
     override fun init(act: Activity) {
-        recyclerView = act.findViewById(R.id.recycler_view)
-        connectButton = act.findViewById(R.id.connect_btn)
-        captureButton = act.findViewById(R.id.capture_btn)
-        disconnectButton = act.findViewById(R.id.disconnect_btn)
-        lineChart = act.findViewById(R.id.line_chart)
-        settingsButton = act.findViewById(R.id.settings_btn)
+        recyclerView = findTraitView(R.id.recycler_view)
+        connectButton = findTraitView(R.id.connect_btn)
+        captureButton = findTraitViewOrNull(R.id.capture_btn)
+        disconnectButton = findTraitViewOrNull(R.id.disconnect_btn)
+        lineChart = findTraitViewOrNull(R.id.line_chart)
+        settingsButton = findTraitView(R.id.settings_btn)
 
         recyclerView?.adapter = LineGraphSelectableAdapter(this)
 
@@ -293,12 +293,14 @@ class GreenSeekerTraitLayout : BaseTraitLayout, LineGraphSelectableAdapter.Liste
                 }, color)
             })
 
+        val chart = lineChart ?: return
+
         renderNormal(
-            lineChart!!,
+            chart,
             entries
         )
 
-        lineChart!!.invalidate()
+        chart.invalidate()
 
         submitLinesList(if (submitPlaceholder) fs + SpectralFrame.placeholder() else fs)
 

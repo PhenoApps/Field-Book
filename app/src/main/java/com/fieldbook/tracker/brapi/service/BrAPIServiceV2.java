@@ -28,6 +28,10 @@ import com.fieldbook.tracker.brapi.service.core.TrialService;
 import com.fieldbook.tracker.brapi.service.germ.GermplasmService;
 import com.fieldbook.tracker.brapi.service.pheno.ObservationUnitService;
 import com.fieldbook.tracker.brapi.service.pheno.ObservationVariableService;
+import com.fieldbook.tracker.brapi.TreeBrapiBridge;
+import com.fieldbook.tracker.brapi.TreeBrapiExportRouting;
+import com.fieldbook.tracker.brapi.TreeBrapiPreparedUpload;
+import com.fieldbook.tracker.brapi.TreeBrapiUploadSequence;
 import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
 import com.fieldbook.tracker.database.dao.ObservationVariableDao;
@@ -665,11 +669,16 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             BrAPIObservationUnitPosition pos = unit.getObservationUnitPosition();
             if (pos != null) {
 
-                List<BrAPIObservationUnitLevelRelationship> levels = pos.getObservationLevelRelationships();
-                levels.add(pos.getObservationLevel());
+                List<BrAPIObservationUnitLevelRelationship> levels = new ArrayList<>();
+                if (pos.getObservationLevelRelationships() != null) {
+                    levels.addAll(pos.getObservationLevelRelationships());
+                }
+                if (pos.getObservationLevel() != null) {
+                    levels.add(pos.getObservationLevel());
+                }
 
                 for (BrAPIObservationUnitLevelRelationship level : levels) {
-                    if (level.getLevelName() != null) {
+                    if (level != null && level.getLevelName() != null) {
                         String attributeName = level.getLevelName();
                         attributeName = attributeName.substring(0, 1).toUpperCase() + attributeName.substring(1).toLowerCase();
                         attributesMap.put(attributeName, level.getLevelCode());
@@ -1248,6 +1257,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 validObservationVariableDbIds.add(observation.getVariableDbId());
             }
         }
+        final Map<String, String> traitFormatsById = resolveTraitFormats(observations);
 
         try {
             BrapiV2ApiCallBack<BrAPIObservationListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationListResponse>() {
@@ -1257,16 +1267,23 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                     try {
 
                         List<Observation> newObservations = new ArrayList<>();
+                        List<BrAPIObservation> serverData = null;
                         if (phenotypesResponse.getResult() != null && phenotypesResponse.getResult().getData() != null) {
+                            serverData = phenotypesResponse.getResult().getData();
                             newObservations.addAll(
                                     mapObservations(
-                                            phenotypesResponse.getResult().getData(),
+                                            serverData,
                                             getExtVariableDbIdMapping(),
                                             validObservationVariableDbIds
                                     )
                             );
                         }
-
+                        TreeBrapiExportRouting.ensureLocalTreeParentsSynced(
+                                filterTreeArchitectureObservations(observations, traitFormatsById),
+                                newObservations,
+                                serverData,
+                                fieldBookReferenceSource
+                        );
                         function.apply(newObservations);
 
                     } catch (Exception e) {
@@ -1283,17 +1300,56 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             };
 
             List<BrAPIObservation> request = new ArrayList<>();
+            List<BrAPIObservationUnit> childUnits = new ArrayList<>();
+            List<BrAPIObservation> nodeObservations = new ArrayList<>();
 
             for (Observation observation : observations) {
-                BrAPIObservation newObservation = convertToBrAPIObservation(observation);
-                request.add(newObservation);
+                ConvertedTreeObservation converted = convertToBrAPIObservation(observation);
+                request.add(converted.observation);
+                childUnits.addAll(converted.childUnits);
+                nodeObservations.addAll(converted.nodeObservations);
+                for (BrAPIObservation nodeObs : converted.nodeObservations) {
+                    if (nodeObs.getObservationVariableDbId() != null
+                            && !nodeObs.getObservationVariableDbId().isEmpty()) {
+                        validObservationVariableDbIds.add(nodeObs.getObservationVariableDbId());
+                    }
+                }
             }
+            request.addAll(nodeObservations);
 
-            observationsApi.observationsPostAsync(request, callback);
+            TreeBrapiUploadSequence.execute(
+                    !childUnits.isEmpty(),
+                    (onSuccess, onFail) -> observationUnitService.postObservationUnits(
+                            childUnits,
+                            response -> {
+                                java.util.List<BrAPIObservationUnit> posted = null;
+                                if (response != null && response.getResult() != null) {
+                                    posted = response.getResult().getData();
+                                }
+                                com.fieldbook.tracker.brapi.TreeBrapiMapper.remapChildUnitResponseIds(
+                                        childUnits, posted, nodeObservations);
+                                onSuccess.run();
+                                return null;
+                            },
+                            code -> {
+                                onFail.accept(code);
+                                return null;
+                            }
+                    ),
+                    onFail -> {
+                        try {
+                            observationsApi.observationsPostAsync(request, callback);
+                        } catch (ApiException error) {
+                            onFail.accept(error.getCode());
+                            Log.e("BrAPIServiceV2", "API Exception", error);
+                        }
+                    },
+                    code -> failFunction.apply(code)
+            );
 
-        } catch (ApiException error) {
-            failFunction.apply(error.getCode());
-            Log.e("BrAPIServiceV2", "API Exception", error);
+        } catch (Exception error) {
+            failFunction.apply(-1);
+            Log.e("BrAPIServiceV2", "Tree BrAPI upload orchestration failed", error);
         }
     }
 
@@ -1308,6 +1364,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                     validObservationVariableDbIds.add(observation.getVariableDbId());
                 }
             }
+            final Map<String, String> traitFormatsById = resolveTraitFormats(observations);
 
             BrapiV2ApiCallBack<BrAPIObservationListResponse> callback = new BrapiV2ApiCallBack<BrAPIObservationListResponse>() {
                 @Override
@@ -1339,21 +1396,212 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             };
 
             Map<String, BrAPIObservation> request = new HashMap<>();
+            List<BrAPIObservationUnit> childUnits = new ArrayList<>();
+            List<BrAPIObservation> nodeObservations = new ArrayList<>();
 
             for (Observation obs : observations) {
-                BrAPIObservation o = convertToBrAPIObservation(obs);
-                request.put(obs.getDbId(), o);
+                ConvertedTreeObservation converted = convertToBrAPIObservation(obs);
+                request.put(obs.getDbId(), converted.observation);
+                childUnits.addAll(converted.childUnits);
+                nodeObservations.addAll(converted.nodeObservations);
+                for (BrAPIObservation nodeObs : converted.nodeObservations) {
+                    if (nodeObs.getObservationVariableDbId() != null
+                            && !nodeObs.getObservationVariableDbId().isEmpty()) {
+                        validObservationVariableDbIds.add(nodeObs.getObservationVariableDbId());
+                    }
+                }
             }
 
-            observationsApi.observationsPutAsync(request, callback);
+            // Child OUs first (same as create); node observations appended via a follow-up POST
+            // because observationsPut is keyed by existing observationDbId.
+            TreeBrapiUploadSequence.execute(
+                    !childUnits.isEmpty(),
+                    (onSuccess, onFail) -> observationUnitService.postObservationUnits(
+                            childUnits,
+                            response -> {
+                                java.util.List<BrAPIObservationUnit> posted = null;
+                                if (response != null && response.getResult() != null) {
+                                    posted = response.getResult().getData();
+                                }
+                                com.fieldbook.tracker.brapi.TreeBrapiMapper.remapChildUnitResponseIds(
+                                        childUnits, posted, nodeObservations);
+                                onSuccess.run();
+                                return null;
+                            },
+                            code -> {
+                                onFail.accept(code);
+                                return null;
+                            }
+                    ),
+                    onFail -> {
+                        try {
+                            observationsApi.observationsPutAsync(request, new BrapiV2ApiCallBack<BrAPIObservationListResponse>() {
+                                @Override
+                                public void onSuccess(BrAPIObservationListResponse observationsResponse, int i, Map<String, List<String>> map) {
+                                    List<Observation> merged = new ArrayList<>();
+                                    final List<BrAPIObservation> putData;
+                                    if (observationsResponse.getResult() != null
+                                            && observationsResponse.getResult().getData() != null) {
+                                        putData = observationsResponse.getResult().getData();
+                                        merged.addAll(
+                                                mapObservations(
+                                                        putData,
+                                                        getExtVariableDbIdMapping(),
+                                                        validObservationVariableDbIds
+                                                )
+                                        );
+                                    } else {
+                                        putData = null;
+                                    }
+                                    if (nodeObservations.isEmpty()) {
+                                        TreeBrapiExportRouting.ensureLocalTreeParentsSynced(
+                                                filterTreeArchitectureObservations(observations, traitFormatsById),
+                                                merged,
+                                                putData,
+                                                fieldBookReferenceSource
+                                        );
+                                        function.apply(merged);
+                                        return;
+                                    }
+                                    try {
+                                        observationsApi.observationsPostAsync(
+                                                nodeObservations,
+                                                new BrapiV2ApiCallBack<BrAPIObservationListResponse>() {
+                                                    @Override
+                                                    public void onSuccess(
+                                                            BrAPIObservationListResponse postResponse,
+                                                            int status,
+                                                            Map<String, List<String>> headers
+                                                    ) {
+                                                        List<BrAPIObservation> postData = null;
+                                                        if (postResponse.getResult() != null
+                                                                && postResponse.getResult().getData() != null) {
+                                                            postData = postResponse.getResult().getData();
+                                                            merged.addAll(
+                                                                    mapObservations(
+                                                                            postData,
+                                                                            getExtVariableDbIdMapping(),
+                                                                            validObservationVariableDbIds
+                                                                    )
+                                                            );
+                                                        }
+                                                        List<BrAPIObservation> combined = new ArrayList<>();
+                                                        if (putData != null) combined.addAll(putData);
+                                                        if (postData != null) combined.addAll(postData);
+                                                        TreeBrapiExportRouting.ensureLocalTreeParentsSynced(
+                                                                filterTreeArchitectureObservations(observations, traitFormatsById),
+                                                                merged,
+                                                                combined,
+                                                                fieldBookReferenceSource
+                                                        );
+                                                        function.apply(merged);
+                                                    }
 
-        } catch (ApiException error) {
-            failFunction.apply(error.getCode());
-            Log.e("BrAPIServiceV2", "API Exception", error);
+                                                    @Override
+                                                    public void onFailure(
+                                                            ApiException error,
+                                                            int statusCode,
+                                                            Map<String, List<String>> responseHeaders
+                                                    ) {
+                                                        onFail.accept(error.getCode());
+                                                        Log.e("BrAPIServiceV2", "API Exception posting tree node observations", error);
+                                                    }
+                                                }
+                                        );
+                                    } catch (ApiException error) {
+                                        onFail.accept(error.getCode());
+                                        Log.e("BrAPIServiceV2", "API Exception posting tree node observations", error);
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(ApiException error, int statusCode, Map<String, List<String>> responseHeaders) {
+                                    onFail.accept(error.getCode());
+                                    Log.e("BrAPIServiceV2", "API Exception", error);
+                                }
+                            });
+                        } catch (ApiException error) {
+                            onFail.accept(error.getCode());
+                            Log.e("BrAPIServiceV2", "API Exception", error);
+                        }
+                    },
+                    code -> failFunction.apply(code)
+            );
+
+        } catch (Exception error) {
+            failFunction.apply(-1);
+            Log.e("BrAPIServiceV2", "Tree BrAPI update orchestration failed", error);
         }
     }
 
-    private BrAPIObservation convertToBrAPIObservation(Observation observation) {
+    private static class ConvertedTreeObservation {
+        final BrAPIObservation observation;
+        final List<BrAPIObservationUnit> childUnits;
+        final List<BrAPIObservation> nodeObservations;
+
+        ConvertedTreeObservation(
+                BrAPIObservation observation,
+                List<BrAPIObservationUnit> childUnits,
+                List<BrAPIObservation> nodeObservations
+        ) {
+            this.observation = observation;
+            this.childUnits = childUnits;
+            this.nodeObservations = nodeObservations;
+        }
+    }
+
+    /**
+     * Resolve trait formats once per upload batch with a single {@link DataHelper}.
+     * Dedupes by internal trait id so repeated observations do not re-query.
+     */
+    private Map<String, String> resolveTraitFormats(List<Observation> observations) {
+        Map<String, String> formatsByTraitId = new HashMap<>();
+        if (observations == null || observations.isEmpty()) {
+            return formatsByTraitId;
+        }
+        try {
+            DataHelper dataHelper = new DataHelper(context);
+            for (Observation observation : observations) {
+                if (observation == null) continue;
+                String traitId = observation.getInternalVariableDbId();
+                if (traitId == null || formatsByTraitId.containsKey(traitId)) {
+                    continue;
+                }
+                TraitObject trait = dataHelper.getTraitById(traitId);
+                formatsByTraitId.put(traitId, trait != null ? trait.getFormat() : null);
+            }
+        } catch (Exception e) {
+            Log.w("BrAPIServiceV2", "Trait format resolve skipped", e);
+        }
+        return formatsByTraitId;
+    }
+
+    /**
+     * Only tree-architecture parents should receive synthetic local sync marks.
+     * Uses a caller-supplied format map (from {@link #resolveTraitFormats}) — no per-observation DataHelper.
+     */
+    private List<Observation> filterTreeArchitectureObservations(
+            List<Observation> observations,
+            Map<String, String> traitFormatsById
+    ) {
+        if (observations == null || observations.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Map<String, String> formats = traitFormatsById != null
+                ? traitFormatsById
+                : resolveTraitFormats(observations);
+        List<Observation> treeParents = new ArrayList<>();
+        for (Observation observation : observations) {
+            if (observation == null) continue;
+            String format = formats.get(observation.getInternalVariableDbId());
+            if (TreeBrapiExportRouting.isTreeArchitecture(format)) {
+                treeParents.add(observation);
+            }
+        }
+        return treeParents;
+    }
+
+    private ConvertedTreeObservation convertToBrAPIObservation(Observation observation) {
         BrAPIObservation newObservation = new BrAPIObservation();
         String collectorName = observation.getCollector();
         newObservation.setCollector(collectorName != null ? collectorName.trim() : "");
@@ -1381,7 +1629,36 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         externalReferences.add(deviceReference);
         newObservation.setExternalReferences(externalReferences);
 
-        return newObservation;
+        List<BrAPIObservationUnit> childUnits = new ArrayList<>();
+        List<BrAPIObservation> nodeObservations = new ArrayList<>();
+        try {
+            DataHelper dataHelper = new DataHelper(context);
+            TraitObject trait = dataHelper.getTraitById(observation.getInternalVariableDbId());
+            if (trait != null) {
+                TreeBrapiPreparedUpload prepared = TreeBrapiBridge.enrichObservation(
+                        context,
+                        dataHelper,
+                        newObservation,
+                        trait.getFormat(),
+                        trait.getResourceFile(),
+                        observation.getValue(),
+                        collectorName,
+                        observation.getTimestamp()
+                );
+                if (prepared != null) {
+                    for (com.fieldbook.tracker.brapi.TreeBrapiNodeUnit unit : prepared.getChildUnits()) {
+                        childUnits.add(unit.getObservationUnit());
+                    }
+                    nodeObservations.addAll(prepared.getNodeObservations());
+                    // Value already set by TreeBrapiBridge.enrichObservation
+                    // (summary metric or MTG — never content://).
+                }
+            }
+        } catch (Exception e) {
+            Log.w("BrAPIServiceV2", "Tree BrAPI enrichment skipped", e);
+        }
+
+        return new ConvertedTreeObservation(newObservation, childUnits, nodeObservations);
     }
 
     private String getPrioritizedValue(String... values) {

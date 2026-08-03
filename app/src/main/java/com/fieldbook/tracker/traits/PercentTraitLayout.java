@@ -56,11 +56,11 @@ public class PercentTraitLayout extends BaseTraitLayout {
     @Override
     public void init(Activity act) {
         // Progress bar
-        seekBar = act.findViewById(R.id.seekbar);
+        seekBar = findTraitView(R.id.seekbar);
         seekBar.setMax(100);
 
-        mininmumTv = act.findViewById(R.id.trait_percent_minimum_tv);
-        maximumTv = act.findViewById(R.id.trait_percent_maximum_tv);
+        mininmumTv = findTraitView(R.id.trait_percent_minimum_tv);
+        maximumTv = findTraitView(R.id.trait_percent_maximum_tv);
 
         seekListener = new SeekBar.OnSeekBarChangeListener() {
 

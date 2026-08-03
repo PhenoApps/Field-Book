@@ -7,7 +7,6 @@ import android.provider.Settings;
 import android.util.AttributeSet;
 
 import com.fieldbook.tracker.R;
-import com.fieldbook.tracker.activities.CollectActivity;
 import com.fieldbook.tracker.location.GPSTracker;
 import com.fieldbook.tracker.utilities.Utils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -42,12 +41,15 @@ public class LocationTraitLayout extends BaseTraitLayout {
 
     @Override
     public void init(Activity act) {
-        FloatingActionButton getLocation = act.findViewById(R.id.getLocationBtn);
+        FloatingActionButton getLocation = findTraitView(R.id.getLocationBtn);
 
         String locationSavedTts = getContext().getString(R.string.trait_location_saved_tts);
 
         // Get Location
         getLocation.setOnClickListener(arg0 -> {
+            if (isLocked) {
+                return;
+            }
             GPSTracker gps = new GPSTracker(getContext());
             String fullLocation = "";
             double lat;
@@ -72,7 +74,7 @@ public class LocationTraitLayout extends BaseTraitLayout {
 
     @Override
     public void deleteTraitListener() {
-        ((CollectActivity) getContext()).removeTrait();
+        clearObservationOrRemoveTrait();
         super.deleteTraitListener();
     }
 }

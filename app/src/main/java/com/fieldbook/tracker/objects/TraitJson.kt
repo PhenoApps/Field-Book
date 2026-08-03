@@ -23,10 +23,12 @@ data class TraitJson(
 
     @SerialName("realPosition")
     val position: Int = 0,
+    val additionalInfo: String? = null,
+    val embeddedSchema: String? = null,
     val attributes: Map<String, JsonElement>? = null,
 )
 
-fun TraitObject.toTraitJson(): TraitJson {
+fun TraitObject.toTraitJson(embeddedSchema: String? = null): TraitJson {
     return TraitJson(
         name = name,
         alias = alias,
@@ -36,6 +38,8 @@ fun TraitObject.toTraitJson(): TraitJson {
         details = details,
         visible = visible,
         position = realPosition,
+        additionalInfo = additionalInfo,
+        embeddedSchema = embeddedSchema,
         attributes = toAttributeJsonMap().ifEmpty { null }
     )
 }

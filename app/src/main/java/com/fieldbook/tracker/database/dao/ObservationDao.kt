@@ -17,6 +17,7 @@ import com.fieldbook.tracker.database.Migrator.Companion.sNonImageObservationsVi
 import com.fieldbook.tracker.database.Migrator.Companion.sRemoteImageObservationsViewName
 import com.fieldbook.tracker.database.ObservationChangeTracker
 import com.fieldbook.tracker.database.models.ObservationModel
+import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import org.threeten.bp.OffsetDateTime
 import com.fieldbook.tracker.brapi.model.Observation as BrapiObservation
@@ -253,6 +254,61 @@ class ObservationDao {
 
 
         /**
+         * BrAPI export bucket for one observation row.
+         *
+         * Non-tree rows use the same `when` as main. Tree architecture rows go through
+         * [com.fieldbook.tracker.brapi.TreeBrapiExportRouting.exportCategory] so local
+         * tree traits remain uploadable (not parked in user-created).
+         */
+        fun resolveBrAPIExportCategory(
+            format: String?,
+            source: String?,
+            hostUrl: String,
+            dbId: String?,
+            timestamp: OffsetDateTime?,
+            lastSyncedTime: OffsetDateTime?,
+            isPhoto: Boolean,
+        ): String {
+            if (com.fieldbook.tracker.brapi.TreeBrapiExportRouting.isTreeArchitecture(format)) {
+                return com.fieldbook.tracker.brapi.TreeBrapiExportRouting.exportCategory(
+                    format,
+                    source,
+                    hostUrl,
+                    com.fieldbook.tracker.brapi.TreeBrapiExportRouting.SyncStatus(
+                        dbId = dbId,
+                        timestamp = timestamp,
+                        lastSyncedTime = lastSyncedTime,
+                    ),
+                    isPhoto,
+                )
+            }
+
+            return when {
+                source == "local" || source == null -> {
+                    if (isPhoto) "userCreatedImageObservations" else "userCreatedTraitObservations"
+                }
+                source != hostUrl -> {
+                    if (isPhoto) "wrongSourceImageObservations" else "wrongSourceObservations"
+                }
+                dbId == null -> {
+                    if (isPhoto) "newImageObservations" else "newObservations"
+                }
+                lastSyncedTime == null -> {
+                    if (isPhoto) "incompleteImageObservations" else "editedObservations"
+                }
+                else -> {
+                    val obsTimestamp = timestamp
+                    val syncTimestamp = lastSyncedTime
+                    if (obsTimestamp == null || obsTimestamp <= syncTimestamp) {
+                        if (isPhoto) "syncedImageObservations" else "syncedObservations"
+                    } else {
+                        if (isPhoto) "editedImageObservations" else "editedObservations"
+                    }
+                }
+            }
+        }
+
+        /**
         * Get all BrAPI export data categorized by type and status
         * @param studyId The study ID to get data for
         * @param hostUrl The BrAPI host URL
@@ -318,36 +374,17 @@ class ObservationDao {
                     val format = getStringVal(cursor, "observation_variable_field_book_format")
                     val source = getStringVal(cursor, "trait_data_source")
                     val isPhoto = format == "photo"
-                    
-                    // Determine the category for this observation
-                    val category = when {
-                        // Source-based categories
-                        source == "local" || source == null -> {
-                            if (isPhoto) "userCreatedImageObservations" else "userCreatedTraitObservations"
-                        }
-                        source != hostUrl -> {
-                            if (isPhoto) "wrongSourceImageObservations" else "wrongSourceObservations"
-                        }
-                        // Status-based categories
-                        observation.dbId == null -> {
-                            if (isPhoto) "newImageObservations" else "newObservations"
-                        }
-                        observation.lastSyncedTime == null -> {
-                            if (isPhoto) "incompleteImageObservations" else "editedObservations" // Non-photos without sync time are considered edited
-                        }
-                        else -> {
-                            val obsTimestamp = observation.timestamp
-                            val syncTimestamp = observation.lastSyncedTime
-                            
-                            if (obsTimestamp == null || obsTimestamp <= syncTimestamp) {
-                                if (isPhoto) "syncedImageObservations" else "syncedObservations"
-                            } else {
-                                if (isPhoto) "editedImageObservations" else "editedObservations"
-                            }
-                        }
-                    }
-                    
-                    // Add to the appropriate list
+
+                    val category = resolveBrAPIExportCategory(
+                        format = format,
+                        source = source,
+                        hostUrl = hostUrl,
+                        dbId = observation.dbId,
+                        timestamp = observation.timestamp,
+                        lastSyncedTime = observation.lastSyncedTime,
+                        isPhoto = isPhoto,
+                    )
+
                     categories[category]?.add(observation)
                 }
             }
@@ -407,6 +444,7 @@ class ObservationDao {
          */
         @SuppressLint("Recycle")
         fun getBrapiObservations(fieldId: Int, hostUrl: String): List<com.fieldbook.tracker.brapi.model.Observation> = withDatabase { db ->
+            val treeFormat = Formats.TREE_ARCHITECTURE.getDatabaseName()
             db.rawQuery("""
                 SELECT
                     DISTINCT obs.observation_unit_id AS unitDbId,
@@ -431,11 +469,16 @@ class ObservationDao {
                 WHERE obs.study_id = ?
                     AND study.study_source IS NOT NULL
                     AND obs.value <> ''
-                    AND vars.trait_data_source = ?
-                    AND vars.trait_data_source IS NOT NULL
                     AND vars.observation_variable_field_book_format <> 'photo'
+                    AND (
+                        vars.trait_data_source = ?
+                        OR (
+                            (vars.trait_data_source = 'local' OR vars.trait_data_source IS NULL)
+                            AND vars.observation_variable_field_book_format = ?
+                        )
+                    )
                     
-        """.trimIndent(), arrayOf(fieldId.toString(), hostUrl)).toTable()
+        """.trimIndent(), arrayOf(fieldId.toString(), hostUrl, treeFormat)).toTable()
                 .map { row -> com.fieldbook.tracker.brapi.model.Observation().apply {
                     rep = getStringVal(row, "rep")
                     unitDbId = getStringVal(row, "unitDbId")
@@ -704,27 +747,25 @@ class ObservationDao {
             rep: String
         ): BrapiObservation? = withDatabase { db ->
 
+            val query = """
+                SELECT ${Observation.PK}, ${ObservationUnit.FK}, observation_db_id, observation_time_stamp,
+                       last_synced_time, value, rep
+                FROM observations
+                JOIN observation_variables 
+                    ON observations.observation_variable_db_id = observation_variables.internal_id_observation_variable
+                WHERE study_id = ? AND observation_variable_db_id = ? AND ${ObservationUnit.FK} = ? AND rep = ?
+            """.trimIndent()
+
+            val row = db.rawQuery(query, arrayOf(studyId, traitDbId, plotId, rep)).use { it.toFirst() }
+            if (row.isEmpty()) return@withDatabase null
+
             BrapiObservation().apply {
-
-                val query = """
-                    SELECT ${Observation.PK}, ${ObservationUnit.FK}, observation_db_id, observation_time_stamp, last_synced_time
-                    FROM observations
-                    JOIN observation_variables 
-                        ON observations.observation_variable_db_id = observation_variables.internal_id_observation_variable
-                    WHERE study_id = ? AND observation_variable_db_id = ? AND ${ObservationUnit.FK} = ? AND rep = ?
-                """.trimIndent()
-
-                //Log.d(TAG, query)
-
-                db.rawQuery(query, arrayOf(studyId, traitDbId, plotId, rep)).use {
-                    it.toFirst().let { row ->
-                        dbId = getStringVal(row, "observation_db_id")
-                        unitDbId = getStringVal(row, ObservationUnit.FK)
-                        setRep(getStringVal(row, "rep"))
-                        setTimestamp(getStringVal(row, "observation_time_stamp"))
-                        setLastSyncedTime(getStringVal(row, "last_synced_time"))
-                    }
-                }
+                dbId = getStringVal(row, "observation_db_id")
+                unitDbId = getStringVal(row, ObservationUnit.FK)
+                setRep(getStringVal(row, "rep"))
+                setValue(getStringVal(row, "value"))
+                setTimestamp(getStringVal(row, "observation_time_stamp"))
+                setLastSyncedTime(getStringVal(row, "last_synced_time"))
             }
         }
 

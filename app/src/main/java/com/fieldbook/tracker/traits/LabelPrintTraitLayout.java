@@ -183,8 +183,8 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
 
         mActivity = act;
 
-        connectPrinter = act.findViewById(R.id.connectPrinterButton);
-        printLabel = act.findViewById(R.id.printLabelButton);
+        connectPrinter = findTraitView(R.id.connectPrinterButton);
+        printLabel = findTraitView(R.id.printLabelButton);
 
         mBluetoothUtil = new BluetoothUtil();
         Integer studyId = getPrefs().getInt(GeneralKeys.SELECTED_FIELD_ID, 0);
@@ -212,13 +212,13 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
         copiesArrayAdapter = new ArrayAdapter<>(
                 getContext(), R.layout.custom_spinner_layout, labelCopiesArray);
 
-        labelsize = act.findViewById(R.id.labelsize);
-        textfield1 = act.findViewById(R.id.textfield);
-        textfield2 = act.findViewById(R.id.textfield2);
-        textfield3 = act.findViewById(R.id.textfield3);
-        textfield4 = act.findViewById(R.id.textfield4);
-        barcodefield = act.findViewById(R.id.barcodefield);
-        labelcopies = act.findViewById(R.id.labelcopies);
+        labelsize = findTraitView(R.id.labelsize);
+        textfield1 = findTraitView(R.id.textfield);
+        textfield2 = findTraitView(R.id.textfield2);
+        textfield3 = findTraitView(R.id.textfield3);
+        textfield4 = findTraitView(R.id.textfield4);
+        barcodefield = findTraitView(R.id.barcodefield);
+        labelcopies = findTraitView(R.id.labelcopies);
 
         labelsize.setAdapter(sizeArrayAdapter);
         textfield1.setAdapter(fieldArrayAdapter);
@@ -228,7 +228,7 @@ public class LabelPrintTraitLayout extends BaseTraitLayout {
         barcodefield.setAdapter(fieldArrayAdapter);
         labelcopies.setAdapter(copiesArrayAdapter);
 
-        label = act.findViewById(R.id.labelPreview);
+        label = findTraitView(R.id.labelPreview);
 
         label.requestFocus();
     }

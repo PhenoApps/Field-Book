@@ -28,6 +28,7 @@ import com.fieldbook.tracker.traits.formats.feature.DisplayValue;
 import com.fieldbook.tracker.views.CollectInputView;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public abstract class BaseTraitLayout extends LinearLayout {
@@ -37,6 +38,14 @@ public abstract class BaseTraitLayout extends LinearLayout {
     protected boolean isLocked = false;
 
     protected CollectController controller;
+
+    /** Inflated trait XML root for [findTraitView]; set by [init(Activity, View)]. */
+    @Nullable
+    private View traitBindRoot;
+
+    /** When set (tree nodes), value I/O bypasses Collect's plot observation pipeline. */
+    @Nullable
+    private TraitValueSession valueSession;
 
     public BaseTraitLayout(Context context) {
         super(context);
@@ -59,6 +68,28 @@ public abstract class BaseTraitLayout extends LinearLayout {
         }
     }
 
+    /**
+     * Attach a value session before [init] / [loadNodeValue]. Collect path leaves this null
+     * and uses CollectActivity helpers directly. Nodes attach [NodeTraitValueSession].
+     */
+    public void attachSession(@NonNull TraitValueSession session) {
+        this.valueSession = session;
+        isLocked = session.isLocked();
+    }
+
+    public void setLockedState(boolean locked) {
+        isLocked = locked;
+    }
+
+    @Nullable
+    public TraitValueSession getValueSession() {
+        return valueSession;
+    }
+
+    public boolean hasNodeSession() {
+        return valueSession instanceof NodeTraitValueSession;
+    }
+
     public abstract int layoutId();
 
     public abstract String type();  // return trait type
@@ -69,7 +100,71 @@ public abstract class BaseTraitLayout extends LinearLayout {
         return trait.equals(type());
     }
 
+    /**
+     * Bind controls. Prefer [init(Activity, View)] so views resolve under the inflated root
+     * (required when multiple node fields share an activity).
+     */
     public abstract void init(Activity act);
+
+    /**
+     * Bind using [root] for findViewById. Collect and tree nodes must call this with the
+     * inflated trait layout view.
+     */
+    public void init(@NonNull Activity act, @NonNull View root) {
+        this.traitBindRoot = root;
+        // Collect leaves valueSession null (direct CollectActivity helpers).
+        // Nodes call attachSession(NodeTraitValueSession) before init.
+        init(act);
+    }
+
+    /**
+     * Resolve a child under the bound trait root (not activity-wide). Falls back to activity
+     * for legacy callers that only invoked [init(Activity)].
+     */
+    @NonNull
+    @SuppressWarnings("unchecked")
+    protected final <T extends View> T findTraitView(int id) {
+        T found = findTraitViewOrNull(id);
+        if (found != null) return found;
+        throw new IllegalStateException("Missing trait view id=" + id);
+    }
+
+    /** Optional binding for IDs that exist only in some format XMLs. */
+    @Nullable
+    @SuppressWarnings("unchecked")
+    protected final <T extends View> T findTraitViewOrNull(int id) {
+        if (traitBindRoot != null) {
+            // Node hosts: never fall back to activity-wide IDs (duplicate chrome).
+            return traitBindRoot.findViewById(id);
+        }
+        if (getContext() instanceof Activity) {
+            T found = ((Activity) getContext()).findViewById(id);
+            if (found != null) return found;
+        }
+        return findViewById(id);
+    }
+
+    /**
+     * Load a sidecar / node value without touching Collect's plot observation queries.
+     */
+    public void loadNodeValue(@Nullable String value) {
+        boolean sessionLocked = valueSession != null && valueSession.isLocked();
+        isLocked = sessionLocked;
+        CollectActivity act = getContext() instanceof CollectActivity
+                ? (CollectActivity) getContext() : null;
+        if (value != null && !value.isEmpty()) {
+            getCollectInputView().setText(value);
+            if (act != null) {
+                afterLoadExists(act, value);
+            }
+        } else if (act != null) {
+            afterLoadNotExists(act);
+        }
+        // afterLoad* may overwrite from Collect freeze/lock — restore node session lock.
+        if (hasNodeSession()) {
+            isLocked = sessionLocked;
+        }
+    }
 
     /**
      * validate is used in collect activity to check if the collected data is within the
@@ -91,6 +186,12 @@ public abstract class BaseTraitLayout extends LinearLayout {
      */
     public void refreshLayout(Boolean onNew) {
 
+        // Node hosts (StopWatch, Scale, …) may not be CollectActivity — never cast first.
+        if (hasNodeSession()) {
+            isLocked = valueSession != null && valueSession.isLocked();
+            return;
+        }
+
         // When frozen with repeated measures, update isLocked per-observation so
         // existing rep values stay read-only while new empty reps remain editable.
         CollectActivity act = (CollectActivity) getContext();
@@ -98,7 +199,9 @@ public abstract class BaseTraitLayout extends LinearLayout {
             isLocked = !getCollectInputView().getText().isEmpty();
         }
 
-        getCollectInputView().getRepeatView().refresh();
+        if (getCollectInputView().isRepeatEnabled()) {
+            getCollectInputView().getRepeatView().refresh();
+        }
 
     }
 
@@ -113,7 +216,12 @@ public abstract class BaseTraitLayout extends LinearLayout {
 
     public void loadLayout() {
 
-        ((CollectActivity) getContext()).refreshRepeatedValuesToolbarIndicator();
+        // Node hosts run outside CollectActivity (Constructor preview / tree Collect Compose).
+        // Never cast getContext() to CollectActivity on that path — it aborts chrome setup
+        // (StopWatch CircularTimer, Percent seekbar, Scale BLE UI, …) via ClassCastException.
+        if (!hasNodeSession()) {
+            ((CollectActivity) getContext()).refreshRepeatedValuesToolbarIndicator();
+        }
 
         //right now text entry is disabled in the camera and photo traits
         //uris are too long to be nicely displayed in the current editTexts
@@ -134,7 +242,29 @@ public abstract class BaseTraitLayout extends LinearLayout {
             }
         }
 
+        // Node-hosted controllers must not mutate Collect's carousel CollectInputView (H1).
+        if (hasNodeSession()) {
+            isLocked = valueSession != null && valueSession.isLocked();
+            String sessionValue = getCollectInputView().getText();
+            CollectActivity act = getContext() instanceof CollectActivity
+                    ? (CollectActivity) getContext() : null;
+            if (sessionValue != null && !sessionValue.isEmpty()) {
+                if (act != null) {
+                    afterLoadExists(act, sessionValue);
+                } else {
+                    loadNodeValue(sessionValue);
+                }
+            } else if (act != null) {
+                afterLoadNotExists(act);
+            } else {
+                loadNodeValue("");
+            }
+            isLocked = valueSession != null && valueSession.isLocked();
+            return;
+        }
+
         CollectActivity act = (CollectActivity) getContext();
+
         isLocked = act.isFrozen() || act.isLocked();
 
         ObservationModel[] observations = getDatabase().getRepeatedValues(
@@ -228,6 +358,15 @@ public abstract class BaseTraitLayout extends LinearLayout {
      * If this feature is enabled, the list will be modified and updated.
      */
     public void deleteTraitListener() {
+        if (hasNodeSession()) {
+            if (!isLocked) {
+                removeTrait(getCurrentTrait());
+                if (getPrefs().getBoolean(PreferenceKeys.DELETE_OBSERVATION_SOUND, false)) {
+                    controller.getSoundHelper().playDelete();
+                }
+            }
+            return;
+        }
         if (!isLocked) {
             CollectInputView inputView = getCollectInputView();
             if (inputView.isRepeatEnabled()) {
@@ -254,6 +393,9 @@ public abstract class BaseTraitLayout extends LinearLayout {
     }
 
     public TraitObject getCurrentTrait() {
+        if (valueSession != null) {
+            return valueSession.currentTrait();
+        }
         return ((CollectActivity) getContext()).getCurrentTrait();
     }
 
@@ -270,6 +412,9 @@ public abstract class BaseTraitLayout extends LinearLayout {
     }
 
     public CollectInputView getCollectInputView() {
+        if (valueSession != null) {
+            return valueSession.inputView();
+        }
         return ((CollectActivity) getContext()).getCollectInputView();
     }
 
@@ -335,6 +480,14 @@ public abstract class BaseTraitLayout extends LinearLayout {
      * @param value the Text value to be saved in the row
      */
     public void updateObservation(TraitObject trait, String value) {
+        if (valueSession != null) {
+            valueSession.commit(trait, value);
+            setCurrentValueAsEdited();
+            if (!(valueSession instanceof NodeTraitValueSession)) {
+                handleAutoSwitchToNextPlot(trait);
+            }
+            return;
+        }
         ((CollectActivity) getContext()).updateObservation(trait, value, null);
 
         setCurrentValueAsEdited();
@@ -342,25 +495,50 @@ public abstract class BaseTraitLayout extends LinearLayout {
     }
 
     protected void handleAutoSwitchToNextPlot(TraitObject trait) {
-        if (trait.getAutoSwitchPlot()) {
+        if (trait.getAutoSwitchPlot() && controller != null) {
             controller.getRangeBox().moveEntryRight();
         }
     }
 
     public void removeTrait(TraitObject trait) {
+        if (valueSession != null) {
+            valueSession.clear(trait);
+            return;
+        }
         ((CollectActivity) getContext()).removeTrait(trait);
     }
 
+    /** Clear node sidecar value, or remove the Collect plot observation. */
+    protected void clearObservationOrRemoveTrait() {
+        if (hasNodeSession()) {
+            removeTrait(getCurrentTrait());
+        } else {
+            ((CollectActivity) getContext()).removeTrait();
+        }
+    }
+
     public void triggerTts(String text) {
-        ((CollectActivity) getContext()).triggerTts(text);
+        if (valueSession instanceof NodeTraitValueSession) {
+            return;
+        }
+        if (getContext() instanceof CollectActivity) {
+            ((CollectActivity) getContext()).triggerTts(text);
+        }
     }
 
     protected List<ObservationModel> getObservations() {
+        if (hasNodeSession()) {
+            // Node values live in the session buffer, not Collect repeated-measure rows.
+            return Collections.emptyList();
+        }
         CollectActivity act = getCollectActivity();
         return Arrays.asList(getDatabase().getRepeatedValues(act.getStudyId(), act.getObservationUnit(), act.getTraitDbId()));
     }
 
     protected ObservationModel getCurrentObservation() {
+        if (hasNodeSession()) {
+            return null;
+        }
         String rep = getCollectInputView().getRep();
         List<ObservationModel> models = getObservations();
         for (ObservationModel m : models) {

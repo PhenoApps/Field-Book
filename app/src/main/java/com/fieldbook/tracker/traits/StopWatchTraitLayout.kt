@@ -8,13 +8,17 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.traits.composables.CircularTimer
 
 class StopWatchTraitLayout : BaseTraitLayout {
 
     companion object {
         private const val TAG = "StopWatchTraitLayout"
+        /** HH:MM:SS or HH:MM:SS.mmm (saved CircularTimer format). */
+        private val SAVED_TIME = Regex("""^\d+:[0-5]\d:[0-5]\d(\.\d{1,3})?$""")
     }
 
     private var composeView: ComposeView? = null
@@ -47,7 +51,15 @@ class StopWatchTraitLayout : BaseTraitLayout {
     override fun layoutId(): Int = R.layout.trait_stop_watch
 
     override fun init(act: Activity) {
-        composeView = act.findViewById<ComposeView>(R.id.compose_view)
+        composeView = findTraitView<ComposeView>(R.id.compose_view)
+        composeView?.setViewCompositionStrategy(
+            ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed,
+        )
+    }
+
+    override fun validate(data: String?): Boolean {
+        if (data.isNullOrBlank() || data.equals("NA", ignoreCase = true)) return true
+        return SAVED_TIME.matches(data.trim())
     }
 
     override fun loadLayout() {
@@ -57,8 +69,39 @@ class StopWatchTraitLayout : BaseTraitLayout {
         setupUi()
     }
 
+    override fun afterLoadExists(act: CollectActivity, value: String?) {
+        super.afterLoadExists(act, value)
+        isRunning.value = false
+        if (!value.isNullOrEmpty()) parseAndSetTime(value) else elapsedMillis.longValue = 0L
+        setupUi()
+    }
+
+    override fun afterLoadNotExists(act: CollectActivity) {
+        super.afterLoadNotExists(act)
+        isRunning.value = false
+        elapsedMillis.longValue = 0L
+        setupUi()
+    }
+
+    override fun loadNodeValue(value: String?) {
+        super.loadNodeValue(value)
+        isRunning.value = false
+        if (!value.isNullOrEmpty()) parseAndSetTime(value) else elapsedMillis.longValue = 0L
+        setupUi()
+    }
+
     override fun refreshLayout(onNew: Boolean?) {
         super.refreshLayout(onNew)
+        // Node hosts have no ObservationModel — read the detached CollectInputView buffer.
+        if (hasNodeSession()) {
+            val savedTime = collectInputView.text.orEmpty()
+            if (savedTime.isNotEmpty() && onNew != true) {
+                parseAndSetTime(savedTime)
+            } else {
+                elapsedMillis.longValue = 0L
+            }
+            return
+        }
         if (currentObservation == null) {
             elapsedMillis.longValue = 0L
             return
@@ -132,7 +175,7 @@ class StopWatchTraitLayout : BaseTraitLayout {
 
         collectInputView.text = savedTime
 
-        collectActivity.updateObservation(currentTrait, savedTime, null)
+        updateObservation(currentTrait, savedTime)
 
     }
 }

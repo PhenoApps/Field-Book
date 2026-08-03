@@ -71,10 +71,25 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
     }
 
     fun await(context: Context, onBindReady: () -> Unit) {
-        cameraXInstance.get().unbind()
-        cameraXInstance.addListener({
-            onBindReady()
-        }, ContextCompat.getMainExecutor(context))
+        val ready = try {
+            // Headless / broken HAL can leave ProcessCameraProvider pending forever;
+            // bound callers (CameraActivity onCreate) must not block the UI thread.
+            cameraXInstance.get(15, java.util.concurrent.TimeUnit.SECONDS).unbindAll()
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "CameraX provider await failed", e)
+            false
+        }
+        if (!ready) {
+            // Do not invoke onBindReady — callers must treat unbound camera as failure.
+            return
+        }
+        val main = ContextCompat.getMainExecutor(context)
+        try {
+            cameraXInstance.addListener({ onBindReady() }, main)
+        } catch (e: Exception) {
+            Log.e(TAG, "CameraX provider listener failed", e)
+        }
     }
 
     fun unbind() {

@@ -29,6 +29,7 @@ import com.fieldbook.tracker.ui.screens.traits.toolbars.TraitDetailToolbar
 import com.fieldbook.tracker.ui.screens.traits.dialogs.CopyTraitDialog
 import com.fieldbook.tracker.ui.screens.traits.dialogs.DeleteTraitDialog
 import com.fieldbook.tracker.utilities.TraitNameValidator
+import com.fieldbook.tracker.utilities.TreeDerivedTraitHelper
 import com.fieldbook.tracker.utilities.Utils
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -106,8 +107,10 @@ fun TraitDetailScreen(
                         detailViewModel.updateAttributes(updatedTrait)
                     },
                     onToggleVisibility = { newVis ->
-                        val updatedTrait = trait.clone().apply { visible = newVis }
-                        detailViewModel.updateTraitVisibility(trait, newVis)
+                        val clamped =
+                            if (TreeDerivedTraitHelper.isExportOnlySummary(trait)) false else newVis
+                        val updatedTrait = trait.clone().apply { visible = clamped }
+                        detailViewModel.updateTraitVisibility(trait, clamped)
                         editorViewModel.updateTraitInList(updatedTrait)
                     },
                     onResourceFilePickerDialog = {

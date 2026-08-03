@@ -9,6 +9,7 @@ import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.Migrator.ObservationVariable
 import com.fieldbook.tracker.database.models.ObservationVariableModel
 import com.fieldbook.tracker.objects.TraitObject
+import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.utilities.SynonymsUtil.deserializeSynonyms
 import com.fieldbook.tracker.utilities.SynonymsUtil.serializeSynonyms
 
@@ -225,7 +226,16 @@ class ObservationVariableDao {
             }
         } ?: ArrayList()
 
-        fun getAllVisibleTraitObjects(sortOrder: String): ArrayList<TraitObject> = ArrayList(getAllTraitObjects(sortOrder).filter { it.visible })
+        fun getAllVisibleTraitObjects(sortOrder: String): ArrayList<TraitObject> =
+            ArrayList(
+                getAllTraitObjects(sortOrder).filter { trait ->
+                    trait.visible &&
+                        !trait.format.equals(
+                            Formats.TREE_SUMMARY.getDatabaseName(),
+                            ignoreCase = true,
+                        )
+                },
+            )
 
         // Overload for Java compatibility
         fun getAllTraitObjects(): ArrayList<TraitObject> = getAllTraitObjects("position")
@@ -314,6 +324,7 @@ class ObservationVariableDao {
             }, "${ObservationVariable.PK} = ?", arrayOf(id))
         }
 
+        @JvmOverloads
         fun editTraits(id: String, trait: String, traitAlias: String, format: String, defaultValue: String,
                        minimum: String, maximum: String, details: String, categories: String,
                        closeKeyboardOnOpen: Boolean,
@@ -332,7 +343,8 @@ class ObservationVariableDao {
                        invalidValues: Boolean,
                        attachPhoto: Boolean,
                        attachVideo: Boolean,
-                       attachAudio: Boolean): Long = withDatabase { db ->
+                       attachAudio: Boolean,
+                       additionalInfo: String? = null): Long = withDatabase { db ->
 
            val contentValues = ContentValues().apply {
                put("observation_variable_name", trait)
@@ -341,6 +353,9 @@ class ObservationVariableDao {
                put("observation_variable_field_book_format", format)
                put("default_value", defaultValue)
                put("observation_variable_details", details)
+               if (additionalInfo != null) {
+                   put("additional_info", additionalInfo)
+               }
            }
 
             val rowid = db.update(

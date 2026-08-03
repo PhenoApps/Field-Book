@@ -132,6 +132,14 @@ class CameraActivity : ThemedActivity() {
         const val EXTRA_LAUNCHED_FOR_VIDEO_TRAIT = "launched_for_video_trait"
         // new extra key to mark launches from the photo trait (embiggen / capture from trait UI)
         const val EXTRA_LAUNCHED_FOR_PHOTO_TRAIT = "launched_for_photo_trait"
+
+        /** Same RESULT_OK extras [finishWithCapturedPhoto] / shutter onImageSaved return. */
+        fun photoResultIntent(mediaPath: String, skipSave: Boolean): Intent =
+            Intent().apply {
+                putExtra("media_type", "photo")
+                putExtra("media_path", mediaPath)
+                putExtra(EXTRA_SKIP_SAVE, skipSave)
+            }
     }
 
     private var boundCamera: Camera? = null
@@ -159,7 +167,10 @@ class CameraActivity : ThemedActivity() {
         studyName = studyId?.let { studyId -> database.getStudyById(studyId)?.study_name }
 
         //finish early if not enough information was given to the intent
-        if (currentMode != MODE_BARCODE && (studyName == null || obsUnit == null || traitId == "-1")) finish()
+        if (currentMode != MODE_BARCODE && (studyName == null || obsUnit == null || traitId == "-1")) {
+            finish()
+            return
+        }
 
         setContentView(R.layout.activity_camera)
 
@@ -276,6 +287,16 @@ class CameraActivity : ThemedActivity() {
             viewMediaButton.visibility = View.GONE
             mediaCompose.visibility = View.GONE
             currentMode = MODE_VIDEO
+        }
+
+        // Photo-trait / tree-node capture: stay in photo (or crop) — do not offer
+        // video/audio toggles driven by the host trait's attach* flags.
+        if (launchedForPhotoTrait) {
+            viewMediaButton.visibility = View.GONE
+            mediaCompose.visibility = View.GONE
+            if (currentMode != MODE_CROP) {
+                currentMode = MODE_PHOTO
+            }
         }
 
         // If multiple states are visible, set Compose content. Build Painter resources inside the composable lambda (painterResource is @Composable).
@@ -594,18 +615,28 @@ class CameraActivity : ThemedActivity() {
                     exception.printStackTrace()
                 }
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                    // after photo saved to file, run ML Kit on the saved file to detect a barcode
                     runOnUiThread {
-                        val destPath = saveFileToFieldStorage(tmp, traitName ?: "unknown")
-                        val intent = Intent()
-                        intent.putExtra("media_type", "photo")
-                        intent.putExtra("media_path", destPath)
-                        intent.putExtra(EXTRA_SKIP_SAVE, skipSaveFlag)
-                        setResult(RESULT_OK, intent)
-                        finish()
+                        // EXTRA_SKIP_SAVE (tree node / crop callers): return the cache
+                        // temp path so the caller owns storage — avoid a duplicate
+                        // plot_data copy that Collect would ignore.
+                        val destPath = if (skipSaveFlag) {
+                            tmp.absolutePath
+                        } else {
+                            saveFileToFieldStorage(tmp, traitName ?: "unknown")
+                        }
+                        finishWithCapturedPhoto(destPath)
                     }
                 }
             })
+    }
+
+    /**
+     * Completes MODE_PHOTO the same way [capturePhotoAndReturn] does after CameraX
+     * saves — used by instrumented tests when headless CameraX shutter is unavailable.
+     */
+    fun finishWithCapturedPhoto(mediaPath: String) {
+        setResult(RESULT_OK, photoResultIntent(mediaPath, skipSaveFlag))
+        finish()
     }
 
     private fun saveFileToFieldStorage(src: File, traitName: String): String {

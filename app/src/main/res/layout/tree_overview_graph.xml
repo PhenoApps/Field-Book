@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- GraphView-advised host: ZoomLayout wrapping RecyclerView (Buchheim–Walker tree). -->
+<com.otaliastudios.zoom.ZoomLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/tree_overview_zoom"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scrollbars="horizontal|vertical"
+    app:hasClickableChildren="true"
+    app:transformation="centerInside"
+    app:minZoom="0.4"
+    app:maxZoom="2.5">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/tree_overview_graph_rv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clipToPadding="false"
+        android:overScrollMode="never"
+        android:padding="24dp"
+        android:paddingBottom="72dp" />
+
+</com.otaliastudios.zoom.ZoomLayout>

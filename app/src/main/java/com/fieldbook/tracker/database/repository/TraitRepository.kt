@@ -12,12 +12,17 @@ import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.database.models.TraitAttributes
 import com.fieldbook.tracker.enums.FileFormat
 import com.fieldbook.tracker.objects.TraitImportFile
+import com.fieldbook.tracker.objects.TraitJson
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.objects.toTraitJson
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.utilities.CSVReader
 import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.FileUtils.copyToDirectory
+import com.fieldbook.tracker.utilities.TraitRefRenameRepairResult
+import com.fieldbook.tracker.utilities.TreeDerivedTraitHelper
+import com.fieldbook.tracker.utilities.TreeSchemaLoader
 import com.fieldbook.tracker.utilities.TraitImportFileUtil.detectTraitFileFormat
 import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -83,6 +88,25 @@ class TraitRepository @Inject constructor(
     }
 
     suspend fun deleteTrait(traitId: String) = withContext(ioDispatcher) {
+        val trait = database.getTraitById(traitId)
+        if (trait != null) {
+            if (trait.format.equals(Formats.TREE_ARCHITECTURE.getDatabaseName(), ignoreCase = true)) {
+                val summary = TreeDerivedTraitHelper.resolveDerivedTrait(database, traitId)
+                if (summary != null) {
+                    database.deleteTrait(summary.id)
+                    prefs.edit {
+                        remove(GeneralKeys.getCropCoordinatesKey(summary.id.toInt()))
+                    }
+                }
+            } else if (trait.format.equals(Formats.TREE_SUMMARY.getDatabaseName(), ignoreCase = true)) {
+                val source = TreeDerivedTraitHelper.resolveSourceTrait(database, traitId)
+                if (source != null) {
+                    source.additionalInfo = TreeDerivedTraitHelper.clearTreeLinkKeys(source.additionalInfo)
+                    database.updateTrait(source)
+                }
+            }
+        }
+
         database.deleteTrait(traitId)
 
         // clear crop coordinates
@@ -91,8 +115,106 @@ class TraitRepository @Inject constructor(
         }
     }
 
-    suspend fun updateTrait(trait: TraitObject) = withContext(ioDispatcher) {
-        database.updateTrait(trait)
+    suspend fun updateTrait(trait: TraitObject): TraitUpdateResult = withContext(ioDispatcher) {
+        val oldTrait = database.getTraitById(trait.id)
+        val res = database.updateTrait(trait)
+        if (oldTrait != null && oldTrait.name != trait.name) {
+            if (trait.format.equals(Formats.TREE_ARCHITECTURE.getDatabaseName(), ignoreCase = true)) {
+                val summary = TreeDerivedTraitHelper.resolveDerivedTrait(database, trait.id)
+                if (summary != null) {
+                    summary.name = "${trait.name} (summary)"
+                    summary.alias = summary.name
+                    summary.synonyms = listOf(summary.name)
+                    summary.details = "Derived from ${trait.name}"
+                    database.updateTrait(summary)
+                }
+            }
+            // Best-effort: rename plot_data/<field>/<oldTrait>/ → sanitized new name.
+            maybeRenameTraitMediaFolder(oldTrait.name, trait.name)
+        }
+        val repair = if (oldTrait != null && oldTrait.name != trait.name) {
+            val allTraits = database.getAllTraitObjects()
+            val hasTree = allTraits.any {
+                it.format.equals(Formats.TREE_ARCHITECTURE.getDatabaseName(), ignoreCase = true)
+            }
+            if (!hasTree) {
+                null
+            } else {
+                TreeSchemaLoader.repairTraitRefsAfterRename(
+                    context = context,
+                    treeTraits = allTraits,
+                    oldName = oldTrait.name,
+                    newName = trait.name,
+                ).also { result ->
+                    if (result.touchedAny) {
+                        Log.w(
+                            TAG,
+                            "Trait rename '${oldTrait.name}' → '${trait.name}': " +
+                                "updated ${result.schemasUpdated} schema(s), " +
+                                "${result.schemasUnwritable} unwritable",
+                        )
+                    }
+                }
+            }
+        } else {
+            null
+        }
+        TraitUpdateResult(rowId = res, traitRefRepair = repair)
+    }
+
+    /** Best-effort SAF rename of the trait media folder after a study trait rename. */
+    private fun maybeRenameTraitMediaFolder(oldName: String, newName: String) {
+        val oldFolder = FileUtil.sanitizeFileName(oldName)
+        val newFolder = FileUtil.sanitizeFileName(newName)
+        if (oldFolder.isBlank() || oldFolder == newFolder) return
+        runCatching {
+            val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
+            val fieldNames = linkedSetOf<String>()
+            database.allFieldObjects.mapNotNullTo(fieldNames) { it.name?.takeIf { n -> n.isNotBlank() } }
+            prefs.getString(GeneralKeys.FIELD_FILE, null)
+                ?.takeIf { it.isNotBlank() }
+                ?.let { fieldNames += it }
+            for (field in fieldNames) {
+                renameTraitMediaFolderInField(field, oldFolder, newFolder)
+            }
+        }.onFailure {
+            Log.w(TAG, "Trait media folder rename skipped: ${it.message}")
+        }
+    }
+
+    private fun renameTraitMediaFolderInField(field: String, oldFolder: String, newFolder: String) {
+        val mediaRoot = BaseDocumentTreeUtil.getFile(context, R.string.dir_plot_data, field) ?: return
+        val oldDir = mediaRoot.findFile(oldFolder)?.takeIf { it.isDirectory } ?: return
+        if (mediaRoot.findFile(newFolder) != null) return
+        val dest = mediaRoot.createDirectory(newFolder) ?: return
+        val children = oldDir.listFiles().filter { it.isFile && !it.name.isNullOrBlank() }
+        var copied = 0
+        for (child in children) {
+            val name = child.name ?: continue
+            val target = dest.createFile(child.type ?: "*/*", name) ?: run {
+                Log.w(TAG, "Trait media rename: failed to create $name in $newFolder; aborting delete of $oldFolder")
+                return
+            }
+            val ok = runCatching {
+                context.contentResolver.openInputStream(child.uri)?.use { input ->
+                    context.contentResolver.openOutputStream(target.uri)?.use { output ->
+                        input.copyTo(output)
+                    } ?: error("no output stream")
+                } ?: error("no input stream")
+            }.isSuccess
+            if (!ok) {
+                Log.w(TAG, "Trait media rename: copy failed for $name; leaving $oldFolder intact")
+                return
+            }
+            copied++
+        }
+        if (copied != children.size) {
+            Log.w(TAG, "Trait media rename: copied $copied/${children.size}; leaving $oldFolder intact")
+            return
+        }
+        if (!oldDir.delete()) {
+            Log.w(TAG, "Trait media rename: copied OK but could not delete $oldFolder")
+        }
     }
 
     suspend fun updateTraitAlias(trait: TraitObject, newAlias: String) = withContext(ioDispatcher) {
@@ -126,7 +248,47 @@ class TraitRepository @Inject constructor(
 
     // returns count of traits that were actually inserted
     suspend fun insertTraitsList(traits: List<TraitObject>): Int = withContext(ioDispatcher) {
-        traits.count { insertTrait(it) != -1L }
+        val inserted = mutableListOf<TraitObject>()
+        traits.forEach { trait ->
+            if (insertTrait(trait) != -1L) {
+                inserted += trait
+            } else {
+                // Drop stale exporter link ids so they cannot remount onto wrong DB rows.
+                trait.additionalInfo = TreeDerivedTraitHelper.clearTreeLinkKeys(trait.additionalInfo)
+                applyTreeResourceFileOnNameConflict(trait)
+            }
+        }
+        val updatedTraits = TreeDerivedTraitHelper.remapLinksAfterImport(inserted)
+        updatedTraits.forEach { updateTrait(it) }
+        inserted.size
+    }
+
+    /**
+     * Name-conflict import skips insert, but embedded-schema restore may still have
+     * written a local schema and set [TraitObject.resourceFile]. Point the existing
+     * tree trait at that restored file when the incoming ref is usable.
+     */
+    private suspend fun applyTreeResourceFileOnNameConflict(incoming: TraitObject) {
+        if (!incoming.format.equals(Formats.TREE_ARCHITECTURE.getDatabaseName(), ignoreCase = true)) {
+            return
+        }
+        if (incoming.resourceFile.isBlank()) return
+
+        val existing = database.getTraitByName(incoming.name)
+            ?: incoming.alias.takeIf { it.isNotBlank() }?.let { database.getTraitByAlias(it) }
+            ?: return
+        if (!existing.format.equals(Formats.TREE_ARCHITECTURE.getDatabaseName(), ignoreCase = true)) {
+            return
+        }
+        if (existing.resourceFile == incoming.resourceFile) return
+
+        val incomingReadable = TreeSchemaLoader.readText(context, incoming.resourceFile) != null
+        val existingReadable = existing.resourceFile.isNotBlank() &&
+            TreeSchemaLoader.readText(context, existing.resourceFile) != null
+        // Update when import restored a readable schema, or when existing is blank/unreadable.
+        if (incomingReadable || !existingReadable) {
+            updateResourceFile(existing, incoming.resourceFile)
+        }
     }
 
     suspend fun updateResourceFile(trait: TraitObject, fileUri: String): TraitObject =
@@ -163,12 +325,18 @@ class TraitRepository @Inject constructor(
             val newTrait = baseTrait.clone().apply {
                 name = newName
                 alias = newName
-                visible = true
+                // Copied summaries stay export-only; never force into Collect carousel.
+                visible = if (TreeDerivedTraitHelper.isExportOnlySummary(baseTrait)) false else true
                 realPosition = pos
+                // Drop peer tree↔summary IDs so we do not flush into the original's summary.
+                additionalInfo = TreeDerivedTraitHelper.clearTreeLinkKeys(additionalInfo)
             }
 
-            val inserted = insertTrait(newTrait) != -1L
-            if (inserted) newTrait else null
+            if (insertTrait(newTrait) == -1L) return@withContext null
+
+            // TREE_SUMMARY is created lazily when the copied tree first produces content.
+
+            newTrait
         }
 
     fun changeTraitFormat(trait: TraitObject): TraitObject = TraitObject().apply {
@@ -182,7 +350,7 @@ class TraitRepository @Inject constructor(
     suspend fun exportTraitsAsJson(
         fileName: String,
         traits: List<TraitObject>,
-        onSuccess: suspend (Uri) -> Unit,
+        onSuccess: suspend (Uri, Int) -> Unit,
         onError: suspend (Int) -> Unit,
     ) = withContext(ioDispatcher) {
         runCatching {
@@ -206,14 +374,21 @@ class TraitRepository @Inject constructor(
                 )
                     ?: return@withContext onError(R.string.error_output_stream_failed)
 
+            var missingEmbeddedSchemaCount = 0
             output.use {
-                val wrapper = TraitImportFile(traits.map { it.toTraitJson() })
+                val wrapper = TraitImportFile(
+                    traits.map { trait ->
+                        val (json, omittedSchema) = toExportTraitJson(trait)
+                        if (omittedSchema) missingEmbeddedSchemaCount++
+                        json
+                    },
+                )
                 val jsonString = json.encodeToString(TraitImportFile.serializer(), wrapper)
 
                 it.write(jsonString.toByteArray())
             }
 
-            onSuccess(exportFile.uri)
+            onSuccess(exportFile.uri, missingEmbeddedSchemaCount)
         }
             .onFailure { e ->
                 Log.e(TAG, "Error exporting file", e)
@@ -272,7 +447,19 @@ class TraitRepository @Inject constructor(
 
             wrapper.traits.mapNotNull { json ->
                 runCatching {
-                    TraitObject.fromJson(json, maxPosition, originalFileName)
+                    TraitObject.fromJson(json, maxPosition, originalFileName).apply {
+                        TreeDerivedTraitHelper.coerceExportOnlySummaryVisibility(this)
+                        if (format == Formats.TREE_ARCHITECTURE.getDatabaseName() && !json.embeddedSchema.isNullOrBlank()) {
+                            TreeSchemaLoader.saveEmbeddedSchema(
+                                context = context,
+                                traitName = name,
+                                resourceRef = resourceFile,
+                                schemaText = json.embeddedSchema,
+                            )?.let { savedRef ->
+                                resourceFile = savedRef
+                            }
+                        }
+                    }
                 }.getOrNull()
             }
         }
@@ -316,8 +503,7 @@ class TraitRepository @Inject constructor(
                                 maximum = row.getOrNull(4) ?: ""
                                 details = row.getOrNull(5) ?: ""
                                 categories = row.getOrNull(6) ?: ""
-                                visible =
-                                    row.getOrNull(7)?.equals("true", ignoreCase = true) != false
+                                visible = row.getOrNull(7)?.equals("true", ignoreCase = true) != false
                                 realPosition = maxPosition + (row.getOrNull(8)?.toIntOrNull() ?: 0)
                                 traitDataSource = originalFileName
 
@@ -326,6 +512,7 @@ class TraitRepository @Inject constructor(
                                     allowMulticat = true
                                 }
                             }
+                            TreeDerivedTraitHelper.coerceExportOnlySummaryVisibility(t)
                             list.add(t)
                         }
 
@@ -401,7 +588,7 @@ class TraitRepository @Inject constructor(
                     id = existingTraitByExId.id
                 }
                 val res = updateTrait(trait)
-                if (res != -1L) TraitProcessResult.Success else TraitProcessResult.Error
+                if (res.rowId != -1L) TraitProcessResult.Success else TraitProcessResult.Error
             }
 
             existingTraitByName != null || existingTraitByAlias != null -> {
@@ -420,6 +607,21 @@ class TraitRepository @Inject constructor(
         }
     }
 
+    private fun toExportTraitJson(trait: TraitObject): Pair<TraitJson, Boolean> {
+        if (trait.format != Formats.TREE_ARCHITECTURE.getDatabaseName()) {
+            return trait.toTraitJson(embeddedSchema = null) to false
+        }
+        val embeddedSchema = TreeSchemaLoader.readText(context, trait.resourceFile)
+        val omittedUnreadable = embeddedSchema.isNullOrBlank() && trait.resourceFile.isNotBlank()
+        if (omittedUnreadable) {
+            Log.w(
+                TAG,
+                "Omitting embeddedSchema for tree trait \"${trait.name}\": " +
+                    "resourceFile unreadable (${trait.resourceFile})",
+            )
+        }
+        return trait.toTraitJson(embeddedSchema = embeddedSchema) to omittedUnreadable
+    }
 }
 
 private sealed class TraitProcessResult {
@@ -440,3 +642,9 @@ data class TraitSaveResult(
     val allFailed: Boolean get() = successfulInserts == 0 && totalTraits > 0
     val oneFailed: Boolean get() = failedInserts.size == 1
 }
+
+/** Result of [TraitRepository.updateTrait], including optional R-18 schema repair. */
+data class TraitUpdateResult(
+    val rowId: Long,
+    val traitRefRepair: TraitRefRenameRepairResult? = null,
+)

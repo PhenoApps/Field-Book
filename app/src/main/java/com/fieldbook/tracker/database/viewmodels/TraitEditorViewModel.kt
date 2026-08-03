@@ -13,6 +13,7 @@ import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.utilities.BrapiAccountHelper
+import com.fieldbook.tracker.utilities.TreeDerivedTraitHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +23,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
 
 /**
  * All dialogs, and trait lists are saved as state using StateFlow
@@ -126,10 +126,28 @@ class TraitEditorViewModel @Inject constructor(
 
             runCatching { repo.getTraits() }
                 .onSuccess { traits ->
-                    _uiState.update {
-                        it.copy(traits = traits, isLoading = false)
+                    val toHide = traits.filter {
+                        TreeDerivedTraitHelper.isExportOnlySummary(it) && it.visible
                     }
-
+                    val coerced = if (toHide.isEmpty()) {
+                        traits
+                    } else {
+                        traits.map { trait ->
+                            if (TreeDerivedTraitHelper.isExportOnlySummary(trait)) {
+                                trait.clone().apply { visible = false }
+                            } else {
+                                trait
+                            }
+                        }
+                    }
+                    _uiState.update {
+                        it.copy(traits = coerced, isLoading = false)
+                    }
+                    toHide.forEach { summary ->
+                        viewModelScope.launch {
+                            runCatching { repo.updateVisibility(summary.id, false) }
+                        }
+                    }
                 }
                 .onFailure { e ->
                     _uiState.update {
@@ -160,12 +178,13 @@ class TraitEditorViewModel @Inject constructor(
 
     fun updateTraitVisibility(traitId: String, isVisible: Boolean) {
         val trait = uiState.value.traits.find { it.id == traitId } ?: return
+        val effectiveVisible = if (TreeDerivedTraitHelper.isExportOnlySummary(trait)) false else isVisible
 
-        val updatedTrait = trait.clone().apply { visible = isVisible }
+        val updatedTrait = trait.clone().apply { visible = effectiveVisible }
         updateTraitInList(updatedTrait)
 
         viewModelScope.launch {
-            runCatching { repo.updateVisibility(traitId, isVisible) }
+            runCatching { repo.updateVisibility(traitId, effectiveVisible) }
                 .onSuccess { notifyCollectReload() }
                 .onFailure { e -> // rollback
                     updateTraitInList(trait)
@@ -178,17 +197,22 @@ class TraitEditorViewModel @Inject constructor(
 
     fun toggleAllTraitsVisibility() {
         val oldList = _uiState.value.traits
+        val toggleable = oldList.filterNot { TreeDerivedTraitHelper.isExportOnlySummary(it) }
 
-        val newVisibility = !oldList.all { it.visible }
+        val newVisibility = !toggleable.all { it.visible }
 
-        val updatedList = oldList.map { it.clone().apply { visible = newVisibility } }
+        val updatedList = oldList.map { trait ->
+            trait.clone().apply {
+                visible = if (TreeDerivedTraitHelper.isExportOnlySummary(this)) false else newVisibility
+            }
+        }
 
         _uiState.update { it.copy(traits = updatedList) }
 
         viewModelScope.launch {
             runCatching {
-                oldList.forEach {
-                    repo.updateVisibility(it.id, newVisibility)
+                updatedList.forEach {
+                    repo.updateVisibility(it.id, it.visible)
                 }
             }
                 .onSuccess { notifyCollectReload() }
@@ -309,13 +333,21 @@ class TraitEditorViewModel @Inject constructor(
             repo.exportTraitsAsJson(
                 fileName = fileName,
                 traits = traits,
-                onSuccess = { uri ->
+                onSuccess = { uri, missingEmbeddedSchemaCount ->
                     _events.emit(
                         TraitEditorEvent.ShowMessageWithArgs(
                             R.string.message_traits_exported,
                             listOf(traits.size)
                         )
                     )
+                    if (missingEmbeddedSchemaCount > 0) {
+                        _events.emit(
+                            TraitEditorEvent.ShowMessageWithArgs(
+                                R.string.warning_trait_export_schema_unreadable,
+                                listOf(missingEmbeddedSchemaCount),
+                            )
+                        )
+                    }
                     _events.emit(TraitEditorEvent.ShareFile(uri))
                 },
                 onError = { resId ->

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="72dp"
+    android:layout_height="72dp"
+    android:padding="4dp">
+
+    <com.fieldbook.tracker.traits.composables.collect.TreeNodeGlyphView
+        android:id="@+id/tree_node_glyph"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@null" />
+
+</FrameLayout>

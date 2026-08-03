@@ -1,0 +1,36 @@
+{
+  "id": "soy_arch_v1",
+  "name": "Soybean architecture",
+  "version": 1,
+  "rootType": "plant",
+  "nodeTypes": [
+    {
+      "name": "plant",
+      "displayName": "Plant",
+      "cls": "P",
+      "allowedChildren": [
+        { "nodeType": "internode", "edge": "PRECEDES", "label": "Main stem" }
+      ],
+      "maxChildren": 1,
+      "traitRefs": []
+    },
+    {
+      "name": "internode",
+      "displayName": "Internode",
+      "cls": "N",
+      "allowedChildren": [
+        { "nodeType": "internode", "edge": "PRECEDES", "label": "Next internode" },
+        { "nodeType": "internode", "edge": "BEARS", "label": "Add offshoot" },
+        { "nodeType": "pod", "edge": "BEARS", "label": "Add pod" }
+      ],
+      "traitRefs": []
+    },
+    {
+      "name": "pod",
+      "displayName": "Pod",
+      "cls": "C",
+      "allowedChildren": [],
+      "traitRefs": []
+    }
+  ]
+}

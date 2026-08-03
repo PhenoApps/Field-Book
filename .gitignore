@@ -54,3 +54,6 @@ keystore.config
 
 # python cache files
 __pycache__/
+
+# Local design reference (not part of the app build)
+trait-tree/

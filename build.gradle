@@ -25,6 +25,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") version "2.2.10" apply false
     // 13.x is the last line that does not require AGP 9
     id 'com.mikepenz.aboutlibraries.plugin.android' version '13.2.1' apply false
+    id 'io.github.takahirom.roborazzi' version '1.43.1' apply false
 }
 
 allprojects {
@@ -33,6 +34,30 @@ allprojects {
         google()
         maven { url "https://jitpack.io" }
         maven { url 'https://raw.github.com/saki4510t/libcommon/master/repository/' }
+    }
+}
+
+tasks.register('recordTreeUiScreenshots') {
+    group = 'documentation'
+    description = 'Record integrated tree UI PNGs into trait-tree/screenshots/integrated/ (docs-only; not part of testDebugUnitTest).'
+    dependsOn ':app:publishTreeIntegratedScreenshots'
+}
+
+tasks.register('verifyTreeUiScreenshots') {
+    group = 'verification'
+    description = 'Verify integrated tree UI screenshot goldens only (docs-only; not full unit suite).'
+    doLast {
+        // Scope to TreeIntegratedScreenshotTest — verifyRoborazziDebug alone OOMs / runs too broad.
+        exec {
+            executable = './gradlew'
+            args = [
+                ':app:testDebugUnitTest',
+                '-PincludeTreeScreenshots',
+                '-Proborazzi.test.verify=true',
+                '--tests', 'com.fieldbook.tracker.screenshots.TreeIntegratedScreenshotTest',
+            ]
+            workingDir = rootDir
+        }
     }
 }
 

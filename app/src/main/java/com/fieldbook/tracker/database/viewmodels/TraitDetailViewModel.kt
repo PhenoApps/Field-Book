@@ -10,6 +10,7 @@ import com.fieldbook.tracker.application.IoDispatcher
 import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.utilities.TreeDerivedTraitHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -116,10 +117,12 @@ class TraitDetailViewModel @Inject constructor(
         }
 
     fun updateTraitVisibility(trait: TraitObject, newVisibility: Boolean) {
+        val effectiveVisible =
+            if (TreeDerivedTraitHelper.isExportOnlySummary(trait)) false else newVisibility
         viewModelScope.launch {
-            runCatching { repo.updateVisibility(trait.id, newVisibility) }
+            runCatching { repo.updateVisibility(trait.id, effectiveVisible) }
                 .onSuccess {
-                    val updated = trait.clone().apply { visible = newVisibility }
+                    val updated = trait.clone().apply { visible = effectiveVisible }
 
                     val obsData = (_uiState.value as? TraitDetailUiState.Success)?.observationData
                     _uiState.value = TraitDetailUiState.Success(updated, obsData)

@@ -59,11 +59,11 @@ public class DiseaseRatingTraitLayout extends BaseTraitLayout {
 
     @Override
     public void init(Activity act) {
-        severityGrid = act.findViewById(R.id.severityGrid);
-        rustR = act.findViewById(R.id.rustR);
-        rustM = act.findViewById(R.id.rustM);
-        rustS = act.findViewById(R.id.rustS);
-        rustDelim = act.findViewById(R.id.rustDelim);
+        severityGrid = findTraitView(R.id.severityGrid);
+        rustR = findTraitView(R.id.rustR);
+        rustM = findTraitView(R.id.rustM);
+        rustS = findTraitView(R.id.rustS);
+        rustDelim = findTraitView(R.id.rustDelim);
 
         severityAdapter = new DiseaseRatingAdapter(value -> {
             handleSeverityClick(value);

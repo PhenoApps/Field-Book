@@ -44,21 +44,41 @@ public class CounterTraitLayout extends BaseTraitLayout {
 
     @Override
     public void init(Activity act) {
-        FloatingActionButton addCounterBtn = act.findViewById(R.id.addBtn);
-        FloatingActionButton minusCounterBtn = act.findViewById(R.id.minusBtn);
+        FloatingActionButton addCounterBtn = findTraitView(R.id.addBtn);
+        FloatingActionButton minusCounterBtn = findTraitView(R.id.minusBtn);
 
         // Add counter
         addCounterBtn.setOnClickListener(view -> {
             if (isLocked) return;
             TraitObject trait = getCurrentTrait();
             if (trait != null) {
-                if (getCurrentObservation() == null || getCurrentObservation().getValue().equals("NA")) {
-                    getCollectInputView().setText("1");
+                if (hasNodeSession()) {
+                    // Node session has no ObservationModel — use the live input text.
+                    String current = getCollectInputView().getText();
+                    boolean emptyOrNa = current == null || current.isEmpty()
+                            || current.equalsIgnoreCase("NA");
+                    if (emptyOrNa) {
+                        getCollectInputView().setText("1");
+                    } else {
+                        try {
+                            getCollectInputView().setText(
+                                    Integer.toString(Integer.parseInt(current) + 1));
+                        } catch (NumberFormatException e) {
+                            getCollectInputView().setText(String.valueOf(1));
+                        }
+                    }
                 } else {
-                    try {
-                        getCollectInputView().setText(Integer.toString(Integer.parseInt(getCollectInputView().getText()) + 1));
-                    } catch (NumberFormatException e) {
-                        getCollectInputView().setText(String.valueOf(1));
+                    // Collect path: obs-first (main parity).
+                    ObservationModel obs = getCurrentObservation();
+                    if (obs == null || "NA".equals(obs.getValue())) {
+                        getCollectInputView().setText("1");
+                    } else {
+                        try {
+                            getCollectInputView().setText(Integer.toString(
+                                    Integer.parseInt(getCollectInputView().getText()) + 1));
+                        } catch (NumberFormatException e) {
+                            getCollectInputView().setText(String.valueOf(1));
+                        }
                     }
                 }
                 String value = getCollectInputView().getText();
@@ -73,14 +93,31 @@ public class CounterTraitLayout extends BaseTraitLayout {
         // Minus counter
         minusCounterBtn.setOnClickListener(view -> {
             if (isLocked) return;
-            if (getCurrentObservation() == null || getCurrentObservation().getValue().equals("NA")) {
-                getCollectInputView().setText("-1");
-            } else {
-                try {
-                    getCollectInputView().setText(Integer.toString(Integer.parseInt(getCollectInputView().getText()) - 1));
+            if (hasNodeSession()) {
+                String current = getCollectInputView().getText();
+                boolean emptyOrNa = current == null || current.isEmpty()
+                        || current.equalsIgnoreCase("NA");
+                if (emptyOrNa) {
+                    getCollectInputView().setText("-1");
+                } else {
+                    try {
+                        getCollectInputView().setText(
+                                Integer.toString(Integer.parseInt(current) - 1));
+                    } catch (NumberFormatException e) {
+                        getCollectInputView().setText(String.valueOf(-1));
+                    }
                 }
-                catch (NumberFormatException e) {
-                    getCollectInputView().setText(String.valueOf(-1));
+            } else {
+                ObservationModel obs = getCurrentObservation();
+                if (obs == null || "NA".equals(obs.getValue())) {
+                    getCollectInputView().setText("-1");
+                } else {
+                    try {
+                        getCollectInputView().setText(Integer.toString(
+                                Integer.parseInt(getCollectInputView().getText()) - 1));
+                    } catch (NumberFormatException e) {
+                        getCollectInputView().setText(String.valueOf(-1));
+                    }
                 }
             }
             String value = getCollectInputView().getText();

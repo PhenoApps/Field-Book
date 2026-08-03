@@ -50,22 +50,22 @@ public class NumericTraitLayout extends BaseTraitLayout {
     public void init(Activity act) {
         //void v = inflate(getContext(), layoutId(), null);
         numberButtons = new LinkedHashMap<>();
-        numberButtons.put(R.id.k1, act.findViewById(R.id.k1));
-        numberButtons.put(R.id.k2, act.findViewById(R.id.k2));
-        numberButtons.put(R.id.k3, act.findViewById(R.id.k3));
-        numberButtons.put(R.id.k4, act.findViewById(R.id.k4));
-        numberButtons.put(R.id.k5, act.findViewById(R.id.k5));
-        numberButtons.put(R.id.k6, act.findViewById(R.id.k6));
-        numberButtons.put(R.id.k7, act.findViewById(R.id.k7));
-        numberButtons.put(R.id.k8, act.findViewById(R.id.k8));
-        numberButtons.put(R.id.k9, act.findViewById(R.id.k9));
-        numberButtons.put(R.id.k10, act.findViewById(R.id.k10));
-        numberButtons.put(R.id.k11, act.findViewById(R.id.k11));
-        numberButtons.put(R.id.k12, act.findViewById(R.id.k12));
-        numberButtons.put(R.id.k13, act.findViewById(R.id.k13));
-        numberButtons.put(R.id.k14, act.findViewById(R.id.k14));
-        numberButtons.put(R.id.k15, act.findViewById(R.id.k15));
-        numberButtons.put(R.id.k16, act.findViewById(R.id.k16));
+        numberButtons.put(R.id.k1, findTraitView(R.id.k1));
+        numberButtons.put(R.id.k2, findTraitView(R.id.k2));
+        numberButtons.put(R.id.k3, findTraitView(R.id.k3));
+        numberButtons.put(R.id.k4, findTraitView(R.id.k4));
+        numberButtons.put(R.id.k5, findTraitView(R.id.k5));
+        numberButtons.put(R.id.k6, findTraitView(R.id.k6));
+        numberButtons.put(R.id.k7, findTraitView(R.id.k7));
+        numberButtons.put(R.id.k8, findTraitView(R.id.k8));
+        numberButtons.put(R.id.k9, findTraitView(R.id.k9));
+        numberButtons.put(R.id.k10, findTraitView(R.id.k10));
+        numberButtons.put(R.id.k11, findTraitView(R.id.k11));
+        numberButtons.put(R.id.k12, findTraitView(R.id.k12));
+        numberButtons.put(R.id.k13, findTraitView(R.id.k13));
+        numberButtons.put(R.id.k14, findTraitView(R.id.k14));
+        numberButtons.put(R.id.k15, findTraitView(R.id.k15));
+        numberButtons.put(R.id.k16, findTraitView(R.id.k16));
 
         for (Button numButton : numberButtons.values()) {
             numButton.setOnClickListener(new NumberButtonOnClickListener());
@@ -121,7 +121,7 @@ public class NumericTraitLayout extends BaseTraitLayout {
 
     @Override
     public void deleteTraitListener() {
-        ((CollectActivity) getContext()).removeTrait();
+        clearObservationOrRemoveTrait();
         super.deleteTraitListener();
     }
 

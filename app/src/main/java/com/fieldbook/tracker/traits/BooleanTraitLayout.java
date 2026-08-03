@@ -57,11 +57,11 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
         String on = getContext().getString(R.string.trait_boolean_on);
         String off = getContext().getString(R.string.trait_boolean_off);
 
-        threeStateSeekBar = act.findViewById(R.id.traitBooleanSeekBar);
+        threeStateSeekBar = findTraitView(R.id.traitBooleanSeekBar);
         threeStateSeekBar.setOnSeekBarChangeListener(this);
 
-        ImageView onImageView = act.findViewById(R.id.onImage);
-        ImageView offImageView = act.findViewById(R.id.offImage);
+        ImageView onImageView = findTraitView(R.id.onImage);
+        ImageView offImageView = findTraitView(R.id.offImage);
 
         onImageView.setOnClickListener((View v) -> {
             triggerTts(on);
@@ -108,6 +108,12 @@ public class BooleanTraitLayout extends BaseTraitLayout implements SeekBar.OnSee
 
     @Override
     public void deleteTraitListener() {
+        if (hasNodeSession()) {
+            clearObservationOrRemoveTrait();
+            threeStateSeekBar.setProgress(ThreeState.NEUTRAL.getValue());
+            super.deleteTraitListener();
+            return;
+        }
         ((CollectActivity) getContext()).removeTrait();
         threeStateSeekBar.setProgress(ThreeState.NEUTRAL.getValue());
         super.deleteTraitListener();

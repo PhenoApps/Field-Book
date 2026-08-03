@@ -3,6 +3,7 @@ package com.fieldbook.tracker.views
 import android.content.Context
 import android.graphics.Typeface
 import android.util.AttributeSet
+import android.view.View
 import android.widget.EditText
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -16,32 +17,52 @@ import com.fieldbook.tracker.preferences.PreferenceKeys
  * View that contains the default fb edit text and the repeated values view feature.
  * This class delegates the implementation based on the settings.
  */
-class CollectInputView(context: Context, attributeSet: AttributeSet) : ConstraintLayout(context, attributeSet) {
+class CollectInputView : ConstraintLayout {
 
     //used to initialize the selected value with an index (mainly used for navigation)
     var forceInitialRep = -1
 
     var hasData: Boolean = false
 
+    /** When true, never uses Collect repeated-measures UI (tree node sidecar buffer). */
+    var detachedFromCollect: Boolean = false
+
     private var isObservationSaved: Boolean = false
 
     private val originalEditText: EditText
 
+    private val repeatViewOrNull: RepeatedValuesView?
+
     val repeatView: RepeatedValuesView
+        get() = repeatViewOrNull
+            ?: error("RepeatedValuesView is not available on detached node input buffers")
 
-    private val timestampTextView: TextView
+    private val timestampTextView: TextView?
 
-    init {
-
+    constructor(context: Context, attributeSet: AttributeSet) : super(context, attributeSet) {
         inflate(context, R.layout.view_collect_input, this)
-
         originalEditText = findViewById(R.id.view_collect_input_edit_text)
-        repeatView = findViewById(R.id.view_collect_input_repeat_view)
+        repeatViewOrNull = findViewById(R.id.view_collect_input_repeat_view)
         timestampTextView = findViewById(R.id.view_collect_input_timestamp_tv)
-
-        timestampTextView.setOnClickListener {
+        timestampTextView?.setOnClickListener {
             (context as? CollectActivity)?.showObservationMetadataDialog()
         }
+    }
+
+    private constructor(context: Context, detached: Boolean) : super(context) {
+        require(detached)
+        detachedFromCollect = true
+        inflate(context, R.layout.view_collect_input_detached, this)
+        originalEditText = findViewById(R.id.view_collect_input_edit_text)
+        repeatViewOrNull = null
+        timestampTextView = null
+    }
+
+    companion object {
+        /** In-memory buffer for [com.fieldbook.tracker.traits.NodeTraitValueSession]. */
+        @JvmStatic
+        fun createDetached(context: Context): CollectInputView =
+            CollectInputView(context, detached = true)
     }
 
     /**
@@ -52,7 +73,7 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
 
         if (isRepeatEnabled()) {
 
-            markObservationUnsaved();
+            markObservationUnsaved()
 
             repeatView.prepareModeEmpty()
 
@@ -69,7 +90,9 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
 
         initialize(models)
 
-        repeatView.prepareModeNonEmpty()
+        if (isRepeatEnabled()) {
+            repeatView.prepareModeNonEmpty()
+        }
 
         markObservationSaved()
 
@@ -92,16 +115,17 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
      * Hides the label when [timestamp] is null/empty or the preference is disabled.
      */
     fun updateTimestampDisplay(timestamp: String?) {
+        val tv = timestampTextView ?: return
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         val show = prefs.getBoolean(PreferenceKeys.SHOW_OBSERVATION_TIMESTAMP, false)
         when {
-            !show -> timestampTextView.visibility = GONE
-            timestamp.isNullOrEmpty() -> timestampTextView.visibility = INVISIBLE
+            !show -> tv.visibility = GONE
+            timestamp.isNullOrEmpty() -> tv.visibility = INVISIBLE
             else -> {
                 // Trim to "yyyy-MM-dd HH:mm:ss" by taking the first 19 characters
                 val display = if (timestamp.length >= 19) timestamp.substring(0, 19) else timestamp
-                timestampTextView.text = display
-                timestampTextView.visibility = VISIBLE
+                tv.text = display
+                tv.visibility = VISIBLE
             }
         }
     }
@@ -123,15 +147,17 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
         editText.setOnEditorActionListener(listener)
     }
 
-    fun getRep(): String = repeatView.getRep()
+    fun getRep(): String = if (detachedFromCollect) "1" else repeatView.getRep()
 
     val editText: EditText
         get() = if (isRepeatEnabled()) {
             repeatView.getEditText() ?: originalEditText
         } else originalEditText.apply {
-            setOnLongClickListener {
-                (context as CollectActivity).showObservationMetadataDialog()
-                true
+            if (!detachedFromCollect) {
+                setOnLongClickListener {
+                    (context as CollectActivity).showObservationMetadataDialog()
+                    true
+                }
             }
         }
 
@@ -146,7 +172,8 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
             } else editText.setText(value)
         }
 
-    fun isRepeatEnabled() = (context as? CollectActivity)?.currentTrait?.repeatedMeasures == true
+    fun isRepeatEnabled() =
+        !detachedFromCollect && (context as? CollectActivity)?.currentTrait?.repeatedMeasures == true
 
     /**
      * Updates visibility of views based on current trait's repeatedMeasures
@@ -156,7 +183,7 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
             repeatView.visibility = visibility
             originalEditText.visibility = GONE
         } else {
-            repeatView.visibility = GONE
+            repeatViewOrNull?.visibility = GONE
             originalEditText.visibility = visibility
             originalEditText.hint = ""
         }
@@ -205,7 +232,8 @@ class CollectInputView(context: Context, attributeSet: AttributeSet) : Constrain
         } else isObservationSaved
     }
 
-    fun getSavedIds(): List<Int> = repeatView.getSavedIds()
+    fun getSavedIds(): List<Int> =
+        if (detachedFromCollect) emptyList() else repeatView.getSavedIds()
 
     fun markObservationUnsaved() {
         isObservationSaved = false

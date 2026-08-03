@@ -124,8 +124,8 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
     @Override
     public void init(Activity act) {
 
-        gridMultiCat = act.findViewById(R.id.catGrid);
-        otherButton = act.findViewById(R.id.otherCatButton);
+        gridMultiCat = findTraitView(R.id.catGrid);
+        otherButton = findTraitView(R.id.otherCatButton);
 
         if (isMulticatEnabled()) {
             categoryList = new ArrayList<>();
@@ -358,7 +358,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
     }
 
     private void showAddOtherDialog() {
-        if (((CollectActivity) getContext()).isDataLocked()) return;
+        if (isInteractionLocked()) return;
 
         EditText input = new EditText(getContext());
         input.setInputType(InputType.TYPE_CLASS_TEXT);
@@ -446,7 +446,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
     private OnClickListener createCategoryClickListener(final Button button) {
         return v -> {
 
-            if (!((CollectActivity) getContext()).isDataLocked()) {
+            if (!isInteractionLocked()) {
                 //cast tag to the buttons label/val pair
                 final BrAPIScaleValidValuesCategories pair = (BrAPIScaleValidValuesCategories) button.getTag();
                 final ArrayList<BrAPIScaleValidValuesCategories> scale = new ArrayList<>(); //this is saved in the db
@@ -469,7 +469,14 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
                 getCollectInputView().setText(currentCat);
 
-                updateObservation(getCurrentTrait(), CategoryJsonUtil.Companion.encode(scale));
+                // Node sessions clear to ""; Collect keeps encode([]) == "[]" (main parity).
+                if (scale.isEmpty()) {
+                    updateObservation(getCurrentTrait(), hasNodeSession()
+                            ? ""
+                            : CategoryJsonUtil.Companion.encode(scale));
+                } else {
+                    updateObservation(getCurrentTrait(), CategoryJsonUtil.Companion.encode(scale));
+                }
 
                 triggerTts(category);
             }
@@ -478,7 +485,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
     private OnClickListener createMultiCatClickListener(final Button button) {
         return v -> {
-            if (!((CollectActivity) getContext()).isDataLocked()) {
+            if (!isInteractionLocked()) {
                 removeCategory(defaultNaCategory);
                 BrAPIScaleValidValuesCategories cat = (BrAPIScaleValidValuesCategories) button.getTag();
 
@@ -496,8 +503,14 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                 }
 
                 getCollectInputView().setText(joiner.toString());
-                String json = CategoryJsonUtil.Companion.encode(categoryList);
-                updateObservation(getCurrentTrait(), json);
+                if (categoryList == null || categoryList.isEmpty()) {
+                    updateObservation(getCurrentTrait(), hasNodeSession()
+                            ? ""
+                            : CategoryJsonUtil.Companion.encode(new ArrayList<>()));
+                } else {
+                    String json = CategoryJsonUtil.Companion.encode(categoryList);
+                    updateObservation(getCurrentTrait(), json);
+                }
 
                 triggerTts(getDisplayText(cat));
             }
@@ -511,6 +524,17 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
                     && cat.getValue().equals(category.getValue())) return true;
         }
         return false;
+    }
+
+    /**
+     * Collect uses live [CollectActivity.isDataLocked]; node sessions use cached [isLocked].
+     */
+    private boolean isInteractionLocked() {
+        if (hasNodeSession()) {
+            return isLocked;
+        }
+        Context ctx = getContext();
+        return ctx instanceof CollectActivity && ((CollectActivity) ctx).isDataLocked();
     }
 
     private void addCategory(final BrAPIScaleValidValuesCategories category) {
@@ -544,7 +568,7 @@ public class CategoricalTraitLayout extends BaseTraitLayout {
 
     @Override
     public void deleteTraitListener() {
-        ((CollectActivity) getContext()).removeTrait();
+        clearObservationOrRemoveTrait();
         super.deleteTraitListener();
         if (isMulticatEnabled()) {
             refreshLayout(false);

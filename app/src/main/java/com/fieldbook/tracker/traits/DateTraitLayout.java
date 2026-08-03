@@ -89,14 +89,14 @@ public class DateTraitLayout extends BaseTraitLayout {
         date = getPrefs().getString(GeneralKeys.CALENDAR_LAST_SAVED_DATE, dateFormat.format(calendar.getTime()));
         log();
 
-        addDayBtn = act.findViewById(R.id.addDateBtn);
-        minusDayBtn = act.findViewById(R.id.minusDateBtn);
-        saveDayBtn = act.findViewById(R.id.enterBtn);
-        datePreviewText = act.findViewById(R.id.datePreviewText);
+        addDayBtn = findTraitView(R.id.addDateBtn);
+        minusDayBtn = findTraitView(R.id.minusDateBtn);
+        saveDayBtn = findTraitView(R.id.enterBtn);
+        datePreviewText = findTraitView(R.id.datePreviewText);
 
         updatePreviewDate(calendar);
 
-        ImageButton calendarVisibilityBtn = act.findViewById(R.id.trait_date_calendar_visibility_btn);
+        ImageButton calendarVisibilityBtn = findTraitView(R.id.trait_date_calendar_visibility_btn);
 
         String minusDayTts = getContext().getString(R.string.trait_date_minus_day_tts);
         String openCalendarTts = getContext().getString(R.string.trait_date_open_calendar_tts);
@@ -115,8 +115,6 @@ public class DateTraitLayout extends BaseTraitLayout {
 
                 updateViewDate(calendar);
 
-                String rep = ((CollectActivity) getContext()).getRep();
-
                 saveDateToDatabase(calendar);
 
                 triggerTts(getTtsFromCalendar(calendar));
@@ -127,8 +125,10 @@ public class DateTraitLayout extends BaseTraitLayout {
             });
 
             triggerTts(openCalendarTts);
-            newFragment.show(((CollectActivity) getContext()).getSupportFragmentManager(),
-                    "datePicker");
+            androidx.fragment.app.FragmentActivity fa = unwrapFragmentActivity();
+            if (fa != null) {
+                newFragment.show(fa.getSupportFragmentManager(), "datePicker");
+            }
         });
 
         // Add day
@@ -556,5 +556,17 @@ public class DateTraitLayout extends BaseTraitLayout {
             } catch (Exception ignore) {}
             return false;
         }
+    }
+
+    @Nullable
+    private androidx.fragment.app.FragmentActivity unwrapFragmentActivity() {
+        Context c = getContext();
+        while (c instanceof android.content.ContextWrapper) {
+            if (c instanceof androidx.fragment.app.FragmentActivity) {
+                return (androidx.fragment.app.FragmentActivity) c;
+            }
+            c = ((android.content.ContextWrapper) c).getBaseContext();
+        }
+        return null;
     }
 }

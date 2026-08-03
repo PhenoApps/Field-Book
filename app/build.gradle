@@ -11,6 +11,7 @@ apply plugin: 'com.google.devtools.ksp'
 apply plugin: "org.jetbrains.kotlin.plugin.serialization"
 apply plugin: "kotlin-parcelize"
 apply plugin: "com.mikepenz.aboutlibraries.plugin.android"
+apply plugin: 'io.github.takahirom.roborazzi'
 
 Properties props = new Properties()
 props.load(new FileInputStream("$project.rootDir/version.properties"))
@@ -126,7 +127,44 @@ android {
         unitTests {
             includeAndroidResources = true
             unitTests.returnDefaultValues = true
+            all {
+                systemProperty 'robolectric.pixelCopyRenderMode', 'hardware'
+                // Tall integrated goldens need a large forked JVM heap (Roborazzi FAQ).
+                maxHeapSize = "6144m"
+                // Docs-only Roborazzi goldens — excluded from default CI unit tests.
+                // Included when recording/verifying screenshots or -PincludeTreeScreenshots.
+                def treeScreenshotTasks = gradle.startParameter.taskNames.any { name ->
+                    name.contains('recordRoborazzi') ||
+                        name.contains('verifyRoborazzi') ||
+                        name.contains('compareRoborazzi') ||
+                        name.contains('recordTreeUi') ||
+                        name.contains('verifyTreeUi') ||
+                        name.contains('publishTreeIntegrated')
+                }
+                if (!project.hasProperty('includeTreeScreenshots') && !treeScreenshotTasks) {
+                    exclude '**/TreeIntegratedScreenshotTest.class'
+                }
+                // Isolate each screenshot test process so verify doesn't OOM on h4096dp bitmaps.
+                if (project.hasProperty('includeTreeScreenshots') || treeScreenshotTasks) {
+                    forkEvery = 1
+                }
+            }
         }
+    }
+}
+
+tasks.register('publishTreeIntegratedScreenshots', Copy) {
+    group = 'documentation'
+    description = 'Copy integrated Collect/Constructor screenshot PNGs to trait-tree/screenshots/integrated/.'
+    from('src/test/screenshots/integrated')
+    into(layout.projectDirectory.dir('../trait-tree/screenshots/integrated'))
+    include('*.png')
+    doFirst {
+        destinationDir.mkdirs()
+    }
+    doLast {
+        logger.lifecycle('Integrated tree UI screenshots copied to trait-tree/screenshots/integrated/')
+        logger.lifecycle('HTML diff report: build/reports/roborazzi/index.html')
     }
 }
 
@@ -163,6 +201,9 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
+    // Tree overview graph (Buchheim–Walker) + pan/zoom host required by GraphView docs
+    implementation 'dev.bandb.graphview:graphview:0.8.1'
+    implementation 'com.otaliastudios:zoomlayout:1.9.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     implementation 'androidx.exifinterface:exifinterface:1.4.1'
     implementation "androidx.legacy:legacy-preference-v14:1.0.0"
@@ -249,8 +290,12 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-gson:2.9.0"
 
     testImplementation 'androidx.test:core:1.7.0'
-    testImplementation 'org.robolectric:robolectric:4.3.1'
+    testImplementation 'org.robolectric:robolectric:4.14.1'
     testImplementation 'junit:junit:4.13.2'
+    testImplementation 'androidx.compose.ui:ui-test-junit4'
+    testImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
+    testImplementation 'io.github.takahirom.roborazzi:roborazzi:1.43.1'
+    testImplementation 'io.github.takahirom.roborazzi:roborazzi-compose:1.43.1'
     testImplementation 'org.mockito:mockito-core:5.15.2'
     testImplementation 'org.powermock:powermock-module-junit4:2.0.9'
     testImplementation 'org.powermock:powermock-api-mockito2:2.0.9'
@@ -322,6 +367,11 @@ dependencies {
 
     // Espresso dependencies
     androidTestImplementation "androidx.test.espresso:espresso-core:$espressoVersion"
+    androidTestImplementation "org.hamcrest:hamcrest:2.2"
+    androidTestImplementation "androidx.test.uiautomator:uiautomator:2.3.0"
+    androidTestImplementation platform('androidx.compose:compose-bom:2025.11.00')
+    androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
+    debugImplementation 'androidx.compose.ui:ui-test-manifest'
     androidTestImplementation "androidx.test.espresso:espresso-contrib:$espressoVersion"
     androidTestImplementation "androidx.test.espresso:espresso-intents:$espressoVersion"
     androidTestImplementation "androidx.test.espresso:espresso-accessibility:$espressoVersion"

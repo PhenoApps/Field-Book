@@ -91,11 +91,11 @@ class ScaleTraitLayout : BaseTraitLayout {
     }
 
     override fun init(act: Activity) {
-        composeView = act.findViewById(R.id.compose_view)
-        connectButton = act.findViewById(R.id.connect_btn)
-        captureButton = act.findViewById(R.id.capture_btn)
-        lineChart = act.findViewById(R.id.line_chart)
-        settingsButton = act.findViewById(R.id.settings_btn)
+        composeView = findTraitView(R.id.compose_view)
+        connectButton = findTraitView(R.id.connect_btn)
+        captureButton = findTraitView(R.id.capture_btn)
+        lineChart = findTraitViewOrNull(R.id.line_chart)
+        settingsButton = findTraitView(R.id.settings_btn)
     }
 
     override fun layoutId(): Int {

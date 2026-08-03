@@ -14,6 +14,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
+import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 
 /**
@@ -91,6 +92,20 @@ open class CameraTraitSettingsView: ConstraintLayout {
 
             prefs.edit().putInt(GeneralKeys.CAMERA_RESOLUTION, it).apply()
 
+        }
+    }
+
+    /**
+     * When Collect's current trait is a tree (or other host), wire Set Crop Region to the
+     * hosted study photo trait id — not [CollectActivity.getCurrentTrait].
+     */
+    fun bindHostedPhotoTrait(photoTrait: TraitObject?) {
+        val crop = photoTrait?.cropImage == true
+        cropButton.visibility = if (crop) View.VISIBLE else View.GONE
+        if (!crop || photoTrait == null) return
+        val traitId = photoTrait.id.toIntOrNull() ?: return
+        cropButton.setOnClickListener {
+            (context as CollectActivity).requestAndCropImage(traitId, true, false)
         }
     }
 

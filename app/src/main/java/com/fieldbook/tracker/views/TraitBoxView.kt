@@ -240,6 +240,9 @@ class TraitBoxView : ConstraintLayout {
             // to avoid flickering (e.g. camera preview restart) when navigating plots
             currentTraitLayout.onRefresh()
         } else {
+            lastInflatedFormat?.let { previousFormat ->
+                layoutCollections.getTraitLayout(previousFormat).onExit()
+            }
             controller.inflateTrait(currentTraitLayout)
             //Call specific load layout code for the current trait layout
             currentTraitLayout.loadLayout()

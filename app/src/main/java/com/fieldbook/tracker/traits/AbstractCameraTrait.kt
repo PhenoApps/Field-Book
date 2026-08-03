@@ -160,14 +160,14 @@ abstract class AbstractCameraTrait :
 
     override fun init(act: Activity) {
 
-        connectBtn = act.findViewById(R.id.camera_fragment_connect_btn)
-        imageView = act.findViewById(R.id.trait_camera_iv)
-        styledPlayerView = act.findViewById(R.id.trait_camera_spv)
-        recyclerView = act.findViewById(R.id.camera_fragment_rv)
-        settingsButton = act.findViewById(R.id.camera_fragment_settings_btn)
-        shutterButton = act.findViewById(R.id.camera_fragment_capture_btn)
-        previewCardView = act.findViewById(R.id.trait_camera_cv)
-        connectProgress = act.findViewById(R.id.camera_fragment_connect_progress)
+        connectBtn = findTraitView(R.id.camera_fragment_connect_btn)
+        imageView = findTraitView(R.id.trait_camera_iv)
+        styledPlayerView = findTraitView(R.id.trait_camera_spv)
+        recyclerView = findTraitView(R.id.camera_fragment_rv)
+        settingsButton = findTraitView(R.id.camera_fragment_settings_btn)
+        shutterButton = findTraitView(R.id.camera_fragment_capture_btn)
+        previewCardView = findTraitView(R.id.trait_camera_cv)
+        connectProgress = findTraitView(R.id.camera_fragment_connect_progress)
 
         recyclerView?.adapter = ImageAdapter(context, this)
 

@@ -78,15 +78,15 @@ public class AudioTraitLayout extends BaseTraitLayout {
 
     @Override
     public void init(Activity act) {
-        audioInfoCard = act.findViewById(R.id.audio_info_card);
-        fileMetadataLayout = act.findViewById(R.id.file_metadata_layout);
-        fileNameText = act.findViewById(R.id.file_name_text);
-        fileTimestamp = act.findViewById(R.id.file_timestamp);
-        fileDuration = act.findViewById(R.id.file_duration);
-        fileSize = act.findViewById(R.id.file_size);
+        audioInfoCard = findTraitView(R.id.audio_info_card);
+        fileMetadataLayout = findTraitView(R.id.file_metadata_layout);
+        fileNameText = findTraitView(R.id.file_name_text);
+        fileTimestamp = findTraitView(R.id.file_timestamp);
+        fileDuration = findTraitView(R.id.file_duration);
+        fileSize = findTraitView(R.id.file_size);
 
         buttonState = ButtonState.WAITING_FOR_RECORDING;
-        controlButton = act.findViewById(R.id.record);
+        controlButton = findTraitView(R.id.record);
         controlButton.setOnClickListener(new AudioTraitOnClickListener());
         controlButton.requestFocus();
 

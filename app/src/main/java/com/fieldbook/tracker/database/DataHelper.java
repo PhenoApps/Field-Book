@@ -580,6 +580,10 @@ public class DataHelper {
         open();
 
         ValueProcessorFormatAdapter processor = getValueFormatter();
+        FieldObject fo = getFieldObject(fieldId);
+        if (fo != null) {
+            processor.setExportFieldName(fo.getName());
+        }
 
         return ObservationUnitPropertyDao.Companion.getExportDbData(
                 context, fieldId, fieldList, traits, processor);
@@ -594,6 +598,10 @@ public class DataHelper {
         open();
 
         ValueProcessorFormatAdapter processor = getValueFormatter();
+        FieldObject fo = getFieldObject(fieldId);
+        if (fo != null) {
+            processor.setExportFieldName(fo.getName());
+        }
 
         return ObservationUnitPropertyDao.Companion.getExportDbDataShort(
                 context, fieldId, fieldList, uniqueId, traits, processor);
@@ -624,6 +632,10 @@ public class DataHelper {
         open();
 
         ValueProcessorFormatAdapter processor = new ValueProcessorFormatAdapter(context, spectralFileProcessor);
+        FieldObject fo = getFieldObject(fieldId);
+        if (fo != null) {
+            processor.setExportFieldName(fo.getName());
+        }
 
         return ObservationUnitPropertyDao.Companion.getExportTableDataShort(context, fieldId, uniqueId, traits, processor);
 
@@ -634,6 +646,10 @@ public class DataHelper {
         open();
 
         ValueProcessorFormatAdapter processor = new ValueProcessorFormatAdapter(context, spectralFileProcessor);
+        FieldObject fo = getFieldObject(fieldId);
+        if (fo != null) {
+            processor.setExportFieldName(fo.getName());
+        }
 
         return ObservationUnitPropertyDao.Companion.getExportTableData(context, fieldId, traits, processor);
 
@@ -780,8 +796,10 @@ public class DataHelper {
     }
 
     /**
-     * Get observation data that needs to be saved on edits
+     * Get observation data that needs to be saved on edits.
+     * @return the observation, or {@code null} when no matching row exists
      */
+    @Nullable
     public Observation getObservation(String studyId, String plotId, String traitDbId, String rep) {
 
         open();
@@ -1053,7 +1071,8 @@ public class DataHelper {
                 trait.getUseDayOfYear(), trait.getCategoryDisplayValue(), trait.getResourceFile(), trait.getSynonyms(),
                 trait.getMaxDecimalPlaces(), trait.getMathSymbolsEnabled(), trait.getAllowMulticat(),
                 trait.getRepeatedMeasures(), trait.getAutoSwitchPlot(), trait.getUnit(), trait.getInvalidValues(),
-                trait.getAttachPhoto(), trait.getAttachVideo(), trait.getAttachAudio());
+                trait.getAttachPhoto(), trait.getAttachVideo(), trait.getAttachAudio(),
+                trait.getAdditionalInfo());
     }
 
     public boolean checkUnique(HashMap<String, String> values) {

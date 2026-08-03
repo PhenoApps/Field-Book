@@ -113,7 +113,7 @@ class TraitObject {
 
         fun fromJson(json: TraitJson, maxPosition: Int, originalFileName: String) = TraitObject().apply {
             name = json.name
-            alias = json.alias ?: json.name
+            alias = json.alias?.takeIf { it.isNotBlank() } ?: json.name
             synonyms = json.synonyms.ifEmpty { listOf(name) }
             format = json.format
             defaultValue = json.defaultValue
@@ -121,6 +121,10 @@ class TraitObject {
             visible = json.visible
             realPosition = maxPosition + json.position
             traitDataSource = originalFileName
+            // Pre-existing DB column; opaque JSON. Tree link keys are content managed by
+            // TreeDerivedTraitHelper — not schema (resource-file). Import paths coerce
+            // export-only summary visibility via coerceExportOnlySummaryVisibility.
+            additionalInfo = json.additionalInfo ?: ""
 
             json.attributes?.forEach { (key, value) ->
                 val primitive = value as? JsonPrimitive

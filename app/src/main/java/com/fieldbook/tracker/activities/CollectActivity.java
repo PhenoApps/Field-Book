@@ -91,6 +91,7 @@ import com.fieldbook.tracker.traits.GNSSTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
 import com.fieldbook.tracker.traits.SpectralTraitLayout;
+import com.fieldbook.tracker.traits.TreeTraitLayout;
 import com.fieldbook.tracker.traits.formats.Formats;
 import com.fieldbook.tracker.traits.formats.TraitFormat;
 import com.fieldbook.tracker.traits.formats.coders.StringCoder;
@@ -196,6 +197,8 @@ public class CollectActivity extends ThemedActivity
     public static final int REQUEST_VIEW_MEDIA_CODE = 203;
     // pending media values used when we start a crop activity and need to show the confirm dialog
     private final PendingMedia pendingMedia = new PendingMedia();
+    /** Trait id for MODE_CROP / settings define-crop (study photo trait, not tree architecture). */
+    private Integer pendingCropTraitId = null;
 
     private static class PendingMedia {
         String type = null;
@@ -721,6 +724,17 @@ public class CollectActivity extends ThemedActivity
     @Override
     public void navigateIfDataIsValid(@Nullable String data, @NonNull Function0<Unit> onValidNavigation) {
 
+        // Tree MissingRequired blocks plot/trait leave; Date/Text block() stays for
+        // RepeatedValuesView only (main behavior — do not toast or early-return here).
+        if (isTraitBlocked()) {
+            BaseTraitLayout layout = traitLayouts.getTraitLayout(getTraitFormat());
+            if (layout instanceof TreeTraitLayout) {
+                Utils.makeToast(this, getString(R.string.tree_nav_blocked));
+                ((TreeTraitLayout) layout).openOverviewForBlockedNav();
+                return;
+            }
+        }
+
         if (validateData(data)) {
 
             onValidNavigation.invoke();
@@ -788,6 +802,13 @@ public class CollectActivity extends ThemedActivity
                             ((AbstractCameraTrait) traitLayouts.getTraitLayout(format)).setImageNa();
                         } else if (Formats.Companion.isSpectralFormat(format)) {
                             ((SpectralTraitLayout) traitLayouts.getTraitLayout(format)).setNa();
+                        } else if (Formats.TREE_ARCHITECTURE.getDatabaseName().equalsIgnoreCase(format)
+                                || Formats.TREE_SUMMARY.getDatabaseName().equalsIgnoreCase(format)) {
+                            // Tree observations store sidecar URIs — do not overwrite with scalar "NA".
+                            BaseTraitLayout treeLayout = traitLayouts.getTraitLayout(format);
+                            if (treeLayout != null) {
+                                treeLayout.setNaTraitsText();
+                            }
                         } else {
                             updateObservation(currentTrait, "NA", null);
                             setNaText();
@@ -1333,6 +1354,8 @@ public class CollectActivity extends ThemedActivity
         preferences.edit().putInt(GeneralKeys.DATA_LOCK_STATE, dataLocked).apply();
 
         traitLayouts.unregisterAllReceivers();
+
+        getTraitLayout().onExit();
 
         super.onPause();
     }
@@ -2379,7 +2402,11 @@ public class CollectActivity extends ThemedActivity
                             boolean deleteSuccess = new File(mediaPath).delete();
                             Log.d(TAG, "Request crop image: deleteSuccess: " + deleteSuccess);
                         } } catch (Exception ignore) {}
-                        startCropActivity(getCurrentTrait().getId(), uri, skipSave);
+                        String cropTraitId = pendingCropTraitId != null
+                                ? String.valueOf(pendingCropTraitId)
+                                : getCurrentTrait().getId();
+                        pendingCropTraitId = null;
+                        startCropActivity(cropTraitId, uri, skipSave);
                     }
                 }
                 break;
@@ -2387,6 +2414,13 @@ public class CollectActivity extends ThemedActivity
                 // Crop activity finished — use the pending media values (set before starting crop)
                 if (resultCode == RESULT_OK) {
                     try {
+                        // Tree node capture waiting on define-crop: cache file is cropped in place.
+                        BaseTraitLayout treeCropLayout = traitLayouts.getTraitLayout(TreeTraitLayout.type);
+                        if (treeCropLayout instanceof TreeTraitLayout
+                                && ((TreeTraitLayout) treeCropLayout).hasPendingNodePhotoCrop()) {
+                            ((TreeTraitLayout) treeCropLayout).handleNodePhotoCropFinished(true);
+                            break;
+                        }
                         if (pendingMedia.hasMedia()) {
                             final String path = pendingMedia.path;
                             final String type = pendingMedia.type;
@@ -2401,6 +2435,17 @@ public class CollectActivity extends ThemedActivity
                         }
                     } catch (Exception e) {
                         Log.e(TAG, "Error showing media dialog.", e);
+                    }
+                } else {
+                    // User cancelled CropImageActivity during tree node define-crop — save uncropped.
+                    try {
+                        BaseTraitLayout treeCropLayout = traitLayouts.getTraitLayout(TreeTraitLayout.type);
+                        if (treeCropLayout instanceof TreeTraitLayout
+                                && ((TreeTraitLayout) treeCropLayout).hasPendingNodePhotoCrop()) {
+                            ((TreeTraitLayout) treeCropLayout).handleNodePhotoCropFinished(false);
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error finishing tree node photo crop cancel.", e);
                     }
                 }
                 break;
@@ -2507,6 +2552,29 @@ public class CollectActivity extends ThemedActivity
                      } else if (barcode != null) {
 
                         startFuzzySearchRequest(barcode, false);
+                    }
+                }
+                break;
+            // Tree node photo: CameraActivity (EXTRA_SKIP_SAVE) or Android system camera
+            // writing AbstractCameraTrait.TEMPORARY_IMAGE_NAME — same dedicated request code
+            // as REQUEST_MEDIA_VIDEO_TRAIT (VideoTrait embiggen). Do not fold into
+            // REQUEST_MEDIA_CODE; that path attaches to the Activity's current observation.
+            case TreeTraitLayout.REQUEST_TREE_NODE_PHOTO:
+                BaseTraitLayout treeLayout = traitLayouts.getTraitLayout(TreeTraitLayout.type);
+                if (treeLayout instanceof TreeTraitLayout) {
+                    if (resultCode == RESULT_OK) {
+                        String mediaPath = data != null ? data.getStringExtra("media_path") : null;
+                        if (mediaPath == null || mediaPath.isEmpty()) {
+                            // System camera (ACTION_IMAGE_CAPTURE) wrote cache temp.jpg
+                            File tmp = new File(getCacheDir(), AbstractCameraTrait.TEMPORARY_IMAGE_NAME);
+                            if (tmp.exists() && tmp.length() > 0L) {
+                                mediaPath = tmp.getAbsolutePath();
+                            }
+                        }
+                        ((TreeTraitLayout) treeLayout).handleNodePhotoResult(mediaPath);
+                    } else {
+                        // Clear pending node/unit so a cancelled capture cannot apply later.
+                        ((TreeTraitLayout) treeLayout).handleNodePhotoResult(null);
                     }
                 }
                 break;
@@ -3036,12 +3104,13 @@ public class CollectActivity extends ThemedActivity
 
     @Override
     public void inflateTrait(@NonNull BaseTraitLayout layout) {
-        getTraitLayout().onExit();
+        // Previous layout must be flushed by the caller (TraitBoxView) via onExit()
+        // before format switch — do not call onExit() here (would hit the *new* layout).
         View v = LayoutInflater.from(this).inflate(layout.layoutId(), null);
         LinearLayout holder = findViewById(R.id.traitHolder);
         holder.removeAllViews();
         holder.addView(v);
-        layout.init(this);
+        layout.init(this, v);
         v.setVisibility(View.VISIBLE);
         initToolbars();
     }
@@ -3534,10 +3603,25 @@ public class CollectActivity extends ThemedActivity
      }
 
     public void requestAndCropImage(Boolean photoLaunch, Boolean videoLaunch) {
+        TraitObject trait = getCurrentTrait();
+        if (trait == null) return;
         try {
+            requestAndCropImage(Integer.parseInt(trait.getId()), photoLaunch, videoLaunch);
+        } catch (Exception e) {
+            Log.e(TAG, "Error requesting and cropping image.", e);
+        }
+    }
+
+    /**
+     * Define-crop capture for an explicit study trait id (tree node photo settings use the
+     * hosted photo trait — not the tree architecture trait that is Collect's currentTrait).
+     */
+    public void requestAndCropImage(int traitId, Boolean photoLaunch, Boolean videoLaunch) {
+        try {
+            pendingCropTraitId = traitId;
             Intent intent = new Intent(this, CameraActivity.class);
             intent.putExtra(CameraActivity.EXTRA_MODE, CameraActivity.MODE_CROP);
-            intent.putExtra(CameraActivity.EXTRA_TRAIT_ID, Integer.parseInt(getCurrentTrait().getId()));
+            intent.putExtra(CameraActivity.EXTRA_TRAIT_ID, traitId);
             intent.putExtra(CameraActivity.EXTRA_STUDY_ID, String.valueOf(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)));
             intent.putExtra(CameraActivity.EXTRA_OBS_UNIT, getObservationUnit());
             intent.putExtra(CameraActivity.EXTRA_SKIP_SAVE, true);
@@ -3576,6 +3660,13 @@ public class CollectActivity extends ThemedActivity
                         preferences.edit()
                             .putString(GeneralKeys.getCropCoordinatesKey(Integer.parseInt(traitId)), "0,0,1,1")
                             .apply();
+                    } else {
+                        // Tree node capture: decline define-crop — persist uncropped capture.
+                        BaseTraitLayout treeCropLayout = traitLayouts.getTraitLayout(TreeTraitLayout.type);
+                        if (treeCropLayout instanceof TreeTraitLayout
+                                && ((TreeTraitLayout) treeCropLayout).hasPendingNodePhotoCrop()) {
+                            ((TreeTraitLayout) treeCropLayout).handleNodePhotoCropFinished(false);
+                        }
                     }
                 } catch (Exception e) {
                     Log.e(TAG, "Error handling crop dialog cancellation for attach flow.", e);

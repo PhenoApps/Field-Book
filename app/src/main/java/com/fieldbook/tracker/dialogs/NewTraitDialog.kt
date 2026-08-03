@@ -25,6 +25,8 @@ import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.traits.formats.TraitFormatParametersAdapter
 import com.fieldbook.tracker.traits.formats.ValidationResult
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
+import com.fieldbook.tracker.traits.formats.parameters.TreeResourceFileParameter
+import com.fieldbook.tracker.utilities.TreeDerivedTraitHelper
 import com.fieldbook.tracker.traits.formats.ui.ParameterScrollView
 import com.fieldbook.tracker.utilities.SoundHelperImpl
 import com.fieldbook.tracker.utilities.VibrateUtil
@@ -35,6 +37,7 @@ import androidx.core.content.edit
 import androidx.lifecycle.lifecycleScope
 import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.traits.formats.parameters.DisplayValueParameter
+import com.fieldbook.tracker.utilities.TraitRefRenameRepairResult
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -229,11 +232,11 @@ class NewTraitDialog(
 
                         showFormatLayouts(Formats.getCustomFormats(), showBack = true)
 
-                    } else if (format in Formats.getExperimentalFormats()) {
+                    } else if (format in Formats.getCreatableExperimentalFormats()) {
 
                         isShowingSubFormat = true
 
-                        showFormatLayouts(Formats.getExperimentalFormats(), showBack = true)
+                        showFormatLayouts(Formats.getCreatableExperimentalFormats(), showBack = true)
 
                     } else {
 
@@ -328,10 +331,12 @@ class NewTraitDialog(
                 return@forEach
             }
 
-            if (parameter is ResourceFileParameter) {
-
-                parameter.setActivity(activity)
-
+            when (parameter) {
+                is TreeResourceFileParameter -> {
+                    parameter.setActivity(activity)
+                    parameter.setParametersScrollView(parametersSv)
+                }
+                is ResourceFileParameter -> parameter.setActivity(activity)
             }
 
             parameter.createViewHolder(parametersSv)?.let { holder ->
@@ -379,9 +384,13 @@ class NewTraitDialog(
 
                     t.realPosition = pos
 
-                    traitRepo.insertTrait(t)
+                    val rowId = traitRepo.insertTrait(t)
 
-                    onSaveFinish()
+                    // TREE_SUMMARY companion is created lazily on first meaningful tree flush
+                    // (TreeTraitLayout / TreeDerivedTraitHelper.ensureSummaryCompanion) — not here.
+                    if (rowId != -1L) {
+                        onSaveFinish()
+                    }
                 }
 
             } else if (pass) {
@@ -406,7 +415,11 @@ class NewTraitDialog(
 
                             } else {
 
-                                updateDatabaseTrait(t)
+                                val previousName = traitObject.name
+                                val updateResult = updateDatabaseTrait(t)
+                                maybeToastTraitRefRepair(previousName, t.name, updateResult.traitRefRepair)
+
+                                // Summary companions are created lazily when the tree has content.
 
                             }
 
@@ -522,10 +535,42 @@ class NewTraitDialog(
      * The trait object passed should already have UI loaded values.
      * Simply pass these to the DataHelper editTraits function to call SQL update.
      */
-    private suspend fun updateDatabaseTrait(traitObject: TraitObject) {
-
+    private suspend fun updateDatabaseTrait(traitObject: TraitObject) =
         traitRepo.updateTrait(traitObject)
 
+    private fun maybeToastTraitRefRepair(
+        previousName: String?,
+        newName: String?,
+        repair: TraitRefRenameRepairResult?,
+    ) {
+        val ctx = context ?: return
+        if (previousName.isNullOrBlank() || newName.isNullOrBlank() || previousName == newName) return
+        when {
+            repair == null -> Unit
+            repair.schemasUpdated > 0 -> {
+                Toast.makeText(
+                    ctx,
+                    ctx.getString(
+                        R.string.tree_trait_refs_updated_on_rename,
+                        repair.schemasUpdated,
+                        previousName,
+                        newName,
+                    ),
+                    Toast.LENGTH_LONG,
+                ).show()
+            }
+            repair.schemasUnwritable > 0 -> {
+                Toast.makeText(
+                    ctx,
+                    ctx.getString(
+                        R.string.tree_trait_refs_rename_unwritable,
+                        repair.schemasUnwritable,
+                        previousName,
+                    ),
+                    Toast.LENGTH_LONG,
+                ).show()
+            }
+        }
     }
 
     private fun validateFormat(): ValidationResult {
@@ -579,7 +624,7 @@ class NewTraitDialog(
                 Formats.BASE_SPECTRAL -> Formats.getSpectralFormats()
                 Formats.HARDWARE -> Formats.getHardwareFormats()
                 Formats.CUSTOM -> Formats.getCustomFormats()
-                Formats.BASE_EXPERIMENTAL -> Formats.getExperimentalFormats()
+                Formats.BASE_EXPERIMENTAL -> Formats.getCreatableExperimentalFormats()
                 else -> Formats.getMainFormats()
             }, showBack = true)
 

@@ -18,6 +18,11 @@ import java.util.Locale
 
 class FileExploreDialogFragment : DialogFragment() {
 
+    companion object {
+        const val ARG_RESULT_REQUEST_KEY = "resultRequestKey"
+        const val RESULT_URI = "uri"
+    }
+
     private var onFileSelectedListener: ((Uri) -> Unit)? = null
 
     private var currentPath: DocumentFile? = null
@@ -198,6 +203,12 @@ class FileExploreDialogFragment : DialogFragment() {
                     item.documentFile?.let { file ->
                         if (file.exists()) {
                             withContext(Dispatchers.Main) {
+                                arguments?.getString(ARG_RESULT_REQUEST_KEY)?.takeIf { it.isNotBlank() }?.let { key ->
+                                    parentFragmentManager.setFragmentResult(
+                                        key,
+                                        Bundle().apply { putString(RESULT_URI, file.uri.toString()) },
+                                    )
+                                }
                                 onFileSelectedListener?.invoke(file.uri)
                                 dismiss()
                             }

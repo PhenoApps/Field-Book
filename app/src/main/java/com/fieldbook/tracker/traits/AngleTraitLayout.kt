@@ -39,7 +39,7 @@ class AngleTraitLayout : BaseTraitLayout {
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     override fun deleteTraitListener() {
-        (context as CollectActivity).removeTrait()
+        clearObservationOrRemoveTrait()
         super.deleteTraitListener()
     }
 
@@ -50,8 +50,8 @@ class AngleTraitLayout : BaseTraitLayout {
     override fun layoutId(): Int = R.layout.trait_angle
 
     override fun init(act: Activity) {
-        compassView = act.findViewById(R.id.compassView)
-        captureButton = act.findViewById(R.id.captureButton)
+        compassView = findTraitView(R.id.compassView)
+        captureButton = findTraitView(R.id.captureButton)
 
         captureButton.setOnClickListener {
             val angleValue = "%.1f".format(currentAngle)
@@ -59,7 +59,11 @@ class AngleTraitLayout : BaseTraitLayout {
             collectInputView.text = angleValue
         }
 
-        updateHandler.post(updateRunnable)
+        // Sensor polling needs CollectController (device tilt). Skip outside Collect
+        // (Constructor preview / node AndroidView hosts) — still show compass chrome.
+        if (controller != null) {
+            updateHandler.post(updateRunnable)
+        }
     }
 
     private fun updateCompass() {
@@ -67,9 +71,8 @@ class AngleTraitLayout : BaseTraitLayout {
     }
 
     private fun updateFromSensor() {
-        controller.getDeviceTilt()?.let { deviceTilt ->
-            currentAngle = lowPassFilter(floatArrayOf(deviceTilt.roll), floatArrayOf(currentAngle))[0]
-            updateCompass()
-        }
+        val tilt = controller?.getDeviceTilt() ?: return
+        currentAngle = lowPassFilter(floatArrayOf(tilt.roll), floatArrayOf(currentAngle))[0]
+        updateCompass()
     }
 }

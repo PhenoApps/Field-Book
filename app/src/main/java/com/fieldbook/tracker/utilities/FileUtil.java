@@ -35,7 +35,7 @@ public final class FileUtil {
     public static String sanitizeFileName(String name) {
         //erase all C0 set characters (0x00-0x1F) and replace some other illegal characters with '_'
         return name.replaceAll("[\\x00-\\x1f]", "")
-                .replaceAll("[|\\?\\*<\"\\\\:>'\";]", "_");
+                .replaceAll("[|\\?\\*<\"\\\\:>'/;]", "_");
     }
 
     /**

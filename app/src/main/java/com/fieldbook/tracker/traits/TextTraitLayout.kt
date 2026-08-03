@@ -88,7 +88,7 @@ class TextTraitLayout : BaseTraitLayout {
     private var scan = ""
     override fun init(act: Activity) {
 
-        inputEditText = act.findViewById(R.id.trait_text_edit_text)
+        inputEditText = findTraitView(R.id.trait_text_edit_text)
 
         inputEditText?.setOnLongClickListener{
             (context as CollectActivity).showObservationMetadataDialog()
@@ -219,7 +219,7 @@ class TextTraitLayout : BaseTraitLayout {
     }
 
     override fun deleteTraitListener() {
-        (context as CollectActivity).removeTrait()
+        clearObservationOrRemoveTrait()
         super.deleteTraitListener()
         inputEditText?.removeTextChangedListener(textWatcher)
         inputEditText?.text?.clear()

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Minimal buffer for tree node TraitValueSession — no Hilt RepeatedValuesView. -->
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+    <EditText
+        android:id="@+id/view_collect_input_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:inputType="textNoSuggestions"
+        android:maxLines="1"
+        android:text=""
+        android:textColor="#000000"
+        android:textSize="@dimen/text_size_xlarge"
+        android:visibility="visible" />
+</merge>

@@ -25,6 +25,7 @@ import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.CSVWriter
 import com.fieldbook.tracker.utilities.FileUtil
+import com.fieldbook.tracker.utilities.TreeDerivedTraitHelper
 import com.fieldbook.tracker.utilities.ZipUtil
 import com.fieldbook.tracker.traits.formats.Formats
 import dagger.hilt.android.qualifiers.ActivityContext
@@ -72,6 +73,7 @@ class ExportUtil @Inject constructor(
     private var exportFileString = ""
     private var filesToExport: MutableList<DocumentFile> = mutableListOf()
     private var processedFieldCount = 0
+    private var missingSidecarTotal = 0
     private val ioScope = CoroutineScope(Dispatchers.IO)
     private var progressDialog: ProgressDialog? = null
 
@@ -80,8 +82,9 @@ class ExportUtil @Inject constructor(
     private var multipleFields = false
 
     // a temporary directory is created for bundled media export
-    // this needs to be deleted AFTER zipping is completed
+    // this needs to be deleted AFTER zipping is completed (all fields)
     private var tempDirectory: DocumentFile? = null
+    private val tempDirectories = mutableListOf<DocumentFile>()
 
     fun exportInnoSpectraFile(studyId: Int, format: Formats) {
 
@@ -266,10 +269,31 @@ class ExportUtil @Inject constructor(
                         exportTrait.add(t)
                     }
                 }
+                // Tree summary traits are export-only (visible=false) but must ship with
+                // their source tree architecture trait under "Active traits" — only when
+                // they actually hold meaningful summary values (not empty / "0").
+                val exportedIds = exportTrait.map { it.id }.toHashSet()
+                val treeSummaryFormat = Formats.TREE_SUMMARY.getDatabaseName()
+                for (t in traits) {
+                    if (!t.visible && t.format.equals(treeSummaryFormat, ignoreCase = true)) {
+                        val source = TreeDerivedTraitHelper.resolveSourceTrait(database, t.id)
+                        if (source != null && exportedIds.contains(source.id) &&
+                            exportTrait.none { it.id == t.id } &&
+                            TreeDerivedTraitHelper.hasMeaningfulSummaryObservations(database, t.id)
+                        ) {
+                            exportTrait.add(t)
+                        }
+                    }
+                }
             }
 
             if (isAllTraitsChecked) {
-                exportTrait.addAll(database.allTraitObjects)
+                exportTrait.addAll(
+                    database.allTraitObjects.filterNot { trait ->
+                        TreeDerivedTraitHelper.isExportOnlySummary(trait) &&
+                            !TreeDerivedTraitHelper.hasMeaningfulSummaryObservations(database, trait.id)
+                    },
+                )
             }
 
             checkDbBool = checkDB.isChecked
@@ -330,6 +354,9 @@ class ExportUtil @Inject constructor(
     private fun startExportTasks() {
         processedFieldCount = 0
         filesToExport.clear()
+        missingSidecarTotal = 0
+        tempDirectories.clear()
+        tempDirectory = null
         showProgressDialog()
         ioScope.launch {
             for (fieldId in fieldIds) {
@@ -344,6 +371,7 @@ class ExportUtil @Inject constructor(
     private suspend fun exportData(fieldId: Int): ExportResult {
         return try {
             Log.d(TAG, "Export task started for fieldId: $fieldId")
+            ValueProcessorFormatAdapter.resetMissingSidecarTally()
             val bundleChecked = preferences.getBoolean(GeneralKeys.DIALOG_EXPORT_BUNDLE_CHECKED, false)
             val fo = database.getFieldObject(fieldId)
             var fieldFileString = exportFileString
@@ -411,14 +439,22 @@ class ExportUtil @Inject constructor(
 
             spectralFileExporter.exportSpectralFile(fieldId)
 
-            if (bundleChecked) {
+            // Flatten CSV for tree traits whenever they are exported (not only media-bundle).
+            filesToExport.addAll(
+                TreeExportHelper.exportFlattenedNodesCsv(context, database, fo.name, exportTrait),
+            )
 
+            if (bundleChecked) {
                 handleBundledFiles(fieldId)
             }
 
             database.updateExportDate(fieldId)
-            Log.d(TAG, "Export finished successfully for field ${fo.name}")
-            ExportResult.Success("Export successful for field ${fo.name}")
+            val missing = ValueProcessorFormatAdapter.missingSidecarCount()
+            Log.d(TAG, "Export finished successfully for field ${fo.name} (missing sidecars: $missing)")
+            ExportResult.Success(
+                message = "Export successful for field ${fo.name}",
+                missingSidecars = missing,
+            )
         } catch (e: Exception) {
             val fo = database.getFieldObject(fieldId)
             Log.e(TAG, "Export failed for field ${fo.name}: ${e.message}", e)
@@ -526,6 +562,7 @@ class ExportUtil @Inject constructor(
         val exportDir = BaseDocumentTreeUtil.getDirectory(context, R.string.dir_field_export)
         val tempDirName = "temp_export_${timeStamp.format(Calendar.getInstance().time)}"
         tempDirectory = exportDir?.createDirectory(tempDirName)
+        tempDirectory?.let { tempDirectories.add(it) }
 
         try {
             tempDirectory?.let { tmpDir ->
@@ -542,7 +579,14 @@ class ExportUtil @Inject constructor(
                             val newDir = studyDirectory.createDirectory(traitDirName)
                             newDir?.let {
                                 traitDir.listFiles().forEach { file ->
-                                    if (file.isFile) copyFileToDirectory(file, it, file.name ?: "")
+                                    if (file.isFile) {
+                                        val name = file.name ?: return@forEach
+                                        if (TreeExportHelper.shouldSkipBundledMediaLeaf(name)) {
+                                            Log.d(TAG, "Skipping non-payload media leaf: $name")
+                                            return@forEach
+                                        }
+                                        copyFileToDirectory(file, it, name)
+                                    }
                                 }
                             }
                         }
@@ -574,7 +618,7 @@ class ExportUtil @Inject constructor(
     }
 
     sealed class ExportResult {
-        data class Success(val message: String): ExportResult()
+        data class Success(val message: String, val missingSidecars: Int = 0): ExportResult()
         data class Failure(val error: Throwable): ExportResult()
         object NoData: ExportResult()
     }
@@ -584,6 +628,7 @@ class ExportUtil @Inject constructor(
         when (result) {
             is ExportResult.Success -> {
                 processedFieldCount++
+                missingSidecarTotal += result.missingSidecars
                 if (processedFieldCount == fieldIds.size) {
                     val finalFile = if (filesToExport.size > 1) {
                         val zipFile = createZipFile(filesToExport, exportFileString)
@@ -607,6 +652,16 @@ class ExportUtil @Inject constructor(
 
                     progressDialog?.dismiss()
                     finalFile?.let { shareFile(it) }
+                    if (missingSidecarTotal > 0) {
+                        Toast.makeText(
+                            context,
+                            context.getString(
+                                R.string.export_warning_missing_sidecars,
+                                missingSidecarTotal,
+                            ),
+                            Toast.LENGTH_LONG,
+                        ).show()
+                    }
                     CitationDialog(context).show()
                 }
             }
@@ -620,8 +675,12 @@ class ExportUtil @Inject constructor(
             }
         }
 
-        // delete the temp dir that was previously created
-        tempDirectory?.delete()
+        // Only delete temp dirs after every field has been processed (multi-field zip).
+        if (processedFieldCount >= fieldIds.size) {
+            tempDirectories.forEach { it.delete() }
+            tempDirectories.clear()
+            tempDirectory = null
+        }
     }
 
     private fun archivePreviousExport(newFile: DocumentFile) {

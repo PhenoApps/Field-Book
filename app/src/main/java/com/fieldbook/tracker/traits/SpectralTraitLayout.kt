@@ -102,14 +102,14 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
     }
 
     override fun init(act: Activity) {
-        connectButton = act.findViewById(R.id.connect_btn)
-        captureButton = act.findViewById(R.id.capture_btn)
-        disconnectButton = act.findViewById(R.id.disconnect_btn)
-        recycler = act.findViewById(R.id.recycler_view)
-        colorRecycler = act.findViewById(R.id.color_recycler_view)
-        lineChart = act.findViewById(R.id.line_chart)
-        progressBar = act.findViewById(R.id.progress_bar)
-        settingsButton = act.findViewById(R.id.settings_btn)
+        connectButton = findTraitView(R.id.connect_btn)
+        captureButton = findTraitView(R.id.capture_btn)
+        disconnectButton = findTraitViewOrNull(R.id.disconnect_btn)
+        recycler = findTraitView(R.id.recycler_view)
+        colorRecycler = findTraitView(R.id.color_recycler_view)
+        lineChart = findTraitViewOrNull(R.id.line_chart)
+        progressBar = findTraitView(R.id.progress_bar)
+        settingsButton = findTraitView(R.id.settings_btn)
 
         recycler?.adapter = LineGraphSelectableAdapter(this)
         colorRecycler?.adapter = ColorAdapter(context, this)
@@ -547,25 +547,27 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
             (context as CollectActivity).updateCurrentTraitStatus(true)
         }
 
-        renderNormal(
-            lineChart!!,
-            ArrayList(frames.filter { it.wavelengths.isNotEmpty() && it.values.isNotEmpty() }
-                .mapIndexed { index, frame ->
-                    val color =
-                        if (index == selected) getColor(R.attr.fb_graph_item_selected_color) else Color.BLACK
-                    val ws = frame.wavelengths.split(" ").map { it.toFloat() }
-                    val vs = frame.values.split(" ").map { it.toFloat() }
+        val chart = lineChart
+        if (chart != null) {
+            renderNormal(
+                chart,
+                ArrayList(frames.filter { it.wavelengths.isNotEmpty() && it.values.isNotEmpty() }
+                    .mapIndexed { index, frame ->
+                        val color =
+                            if (index == selected) getColor(R.attr.fb_graph_item_selected_color) else Color.BLACK
+                        val ws = frame.wavelengths.split(" ").map { it.toFloat() }
+                        val vs = frame.values.split(" ").map { it.toFloat() }
 
-                    Triple(ws, vs, color)
-                }
-                .filter { (ws, vs, _) -> ws.size == vs.size }
-                .map { (ws, vs, color) ->
-                    FrameEntry(ws.mapIndexed { i, w ->
-                        Entry(w, vs[i]) }, color)
-                })
-        )
-
-        lineChart!!.invalidate()
+                        Triple(ws, vs, color)
+                    }
+                    .filter { (ws, vs, _) -> ws.size == vs.size }
+                    .map { (ws, vs, color) ->
+                        FrameEntry(ws.mapIndexed { i, w ->
+                            Entry(w, vs[i]) }, color)
+                    })
+            )
+            chart.invalidate()
+        }
 
         submitLinesList(if (submitPlaceholder) frames + SpectralFrame.placeholder() else frames)
     }

@@ -1,0 +1,45 @@
+{
+  "id": "soy_tree_carrier_v1",
+  "name": "soy tree-carrier",
+  "version": 1,
+  "rootType": "root",
+  "nodeTypes": [
+    {
+      "name": "root",
+      "displayName": "Root",
+      "cls": "R",
+      "allowedChildren": [
+        { "nodeType": "stem", "edge": "PRECEDES", "label": "Add Stem" }
+      ],
+      "traitRefs": [
+        { "traitName": "length", "order": 0 },
+        { "traitName": "color", "order": 1 }
+      ]
+    },
+    {
+      "name": "stem",
+      "displayName": "Stem",
+      "cls": "S",
+      "allowedChildren": [
+        { "nodeType": "stem", "edge": "PRECEDES", "label": "Add Stem" },
+        { "nodeType": "branch", "edge": "BEARS", "label": "Add Branch" }
+      ],
+      "traitRefs": [
+        { "traitName": "length", "order": 0 },
+        { "traitName": "color", "order": 1 }
+      ]
+    },
+    {
+      "name": "branch",
+      "displayName": "Branch",
+      "cls": "B",
+      "allowedChildren": [],
+      "traitRefs": [
+        { "traitName": "length", "order": 0 },
+        { "traitName": "color", "order": 1 },
+        { "traitName": "flowering date", "order": 2 },
+        { "traitName": "branch photo", "order": 3 }
+      ]
+    }
+  ]
+}

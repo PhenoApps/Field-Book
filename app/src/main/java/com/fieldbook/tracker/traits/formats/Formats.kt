@@ -13,6 +13,7 @@ enum class Formats {
     BASE_SPECTRAL, NIX, INNO_SPECTRA_SENSOR, GREEN_SEEKER,
     TEXT,
     CUSTOM, DISEASE_RATING,
+    TREE_ARCHITECTURE, TREE_SUMMARY,
     BASE_EXPERIMENTAL;
 
     companion object {
@@ -31,10 +32,14 @@ enum class Formats {
 
         fun getCameraFormats() = entries.filter { it in setOf(CAMERA, USB_CAMERA, GO_PRO, CANON, VIDEO) }
 
-        fun getExperimentalFormats() = entries.filter { it in setOf<Formats>() }
+        fun getExperimentalFormats() = entries.filter { it in setOf(TREE_ARCHITECTURE, TREE_SUMMARY) }
+
+        /** Formats offered when creating a new trait under Experimental (summary is auto-created). */
+        fun getCreatableExperimentalFormats() = entries.filter { it == TREE_ARCHITECTURE }
 
         fun getMainFormats() = entries - getCameraFormats().toSet() - getSpectralFormats().toSet() -
-            getHardwareFormats().toSet() - getCustomFormats().toSet() - setOf(BASE_EXPERIMENTAL)
+            getHardwareFormats().toSet() - getCustomFormats().toSet() - getExperimentalFormats().toSet() -
+            setOf(BASE_EXPERIMENTAL)
 
         fun getBaseFormats() = setOf(BASE_PHOTO, BASE_SPECTRAL, HARDWARE, CUSTOM, BASE_EXPERIMENTAL)
 
@@ -69,6 +74,8 @@ enum class Formats {
         VIDEO -> VideoFormat()
         INNO_SPECTRA_SENSOR -> InnoSpectraSensorFormat()
         CUSTOM -> CustomFormat()
+        TREE_ARCHITECTURE -> TreeArchitectureFormat()
+        TREE_SUMMARY -> TreeSummaryFormat()
         HARDWARE -> HardwareFormat()
         BASE_EXPERIMENTAL -> BaseExperimentalFormat()
         else -> TextFormat()

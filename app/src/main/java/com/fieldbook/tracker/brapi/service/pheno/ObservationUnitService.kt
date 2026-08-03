@@ -21,6 +21,12 @@ interface ObservationUnitService {
         onFail: ApiFailCallback
     )
 
+    fun postObservationUnits(
+        units: List<BrAPIObservationUnit>,
+        onSuccess: ApiListSuccess<BrAPIObservationUnitListResponse>,
+        onFail: ApiFailCallback
+    )
+
     fun fetchAll(
         params: ObservationUnitQueryParams
     ): Flow<Any>
@@ -51,6 +57,41 @@ interface ObservationUnitService {
                         onFail(error.code)
                     }
                 })
+        }
+
+        override fun postObservationUnits(
+            units: List<BrAPIObservationUnit>,
+            onSuccess: ApiListSuccess<BrAPIObservationUnitListResponse>,
+            onFail: ApiFailCallback
+        ) {
+            if (units.isEmpty()) {
+                onSuccess(null)
+                return
+            }
+            try {
+                api.observationunitsPostAsync(
+                    units,
+                    object : BrapiV2ApiCallBack<BrAPIObservationUnitListResponse>() {
+                        override fun onSuccess(
+                            result: BrAPIObservationUnitListResponse?,
+                            statusCode: Int,
+                            responseHeaders: MutableMap<String, MutableList<String>>?
+                        ) {
+                            onSuccess(result)
+                        }
+
+                        override fun onFailure(
+                            error: ApiException,
+                            statusCode: Int,
+                            responseHeaders: Map<String, List<String>>?
+                        ) {
+                            onFail(error.code)
+                        }
+                    }
+                )
+            } catch (error: ApiException) {
+                onFail(error.code)
+            }
         }
 
         /**
