@@ -21,6 +21,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -45,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
@@ -54,6 +56,29 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.ui.dialogs.builder.AppAlertDialog
+import com.fieldbook.tracker.ui.theme.AppTheme
+
+
+/**
+ * Filled action colors for BrAPI sync Download/Upload/Cancel.
+ *
+ * Soda Dark maps Material primary to panel grey, so default Button chrome blends into
+ * cards; use accent + dark label there. Light themes keep Material primary/onPrimary.
+ */
+@Composable
+private fun brapiSyncActionButtonColors(): ButtonColors {
+    val darkSurface = AppTheme.colors.background.luminance() < 0.5f
+    return if (darkSurface) {
+        ButtonDefaults.buttonColors(
+            containerColor = AppTheme.colors.accent,
+            contentColor = AppTheme.colors.background,
+            disabledContainerColor = AppTheme.colors.accent.copy(alpha = 0.38f),
+            disabledContentColor = AppTheme.colors.background.copy(alpha = 0.38f),
+        )
+    } else {
+        ButtonDefaults.buttonColors()
+    }
+}
 
 // File-level enum for global toggle state used in PendingConflictsList
 private enum class GlobalChoice { NONE, SERVER, LOCAL }
@@ -115,18 +140,13 @@ fun BrapiSyncScreen(
                         stringResource(R.string.brapi_sync)
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
-                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
-                ),
+                colors = AppTheme.colors.topAppBarColors,
                 navigationIcon = {
                     IconButton(onClick = onNavigateUp) {
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_left),
                             contentDescription = stringResource(R.string.dialog_back),
-                            tint = MaterialTheme.colorScheme.onPrimary,
+                            tint = AppTheme.colors.surface.iconTint,
                         )
                     }
                 },
@@ -135,7 +155,7 @@ fun BrapiSyncScreen(
                         Icon(
                             painter = painterResource(R.drawable.lock_reset),
                             contentDescription = stringResource(R.string.authenticate),
-                            tint = MaterialTheme.colorScheme.onPrimary,
+                            tint = AppTheme.colors.surface.iconTint,
                         )
                     }
                 }
@@ -175,7 +195,8 @@ fun BrapiSyncScreen(
                         ExportProgressIndicator(uiState.progress, Modifier.fillMaxWidth())
                         Button(
                             onClick = onCancelDownloadClick,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = brapiSyncActionButtonColors(),
                         ) {
                             Text(stringResource(R.string.cancel))
                         }
@@ -290,7 +311,8 @@ fun BrapiSyncScreen(
                                 }
                             },
                             modifier = Modifier.fillMaxWidth(),
-                            enabled = uiState.isInitialized && uiState.viewMode == ViewMode.IDLE
+                            enabled = uiState.isInitialized && uiState.viewMode == ViewMode.IDLE,
+                            colors = brapiSyncActionButtonColors(),
                         ) {
                             Text(stringResource(R.string.brapi_download_button))
                         }
@@ -335,7 +357,11 @@ fun BrapiSyncScreen(
 
                 if (uiState.viewMode == ViewMode.EXPORTING) {
                     ExportProgressIndicator(uiState.progress, Modifier.fillMaxWidth())
-                    Button(onClick = onCancelExportClick, modifier = Modifier.fillMaxWidth()) {
+                    Button(
+                        onClick = onCancelExportClick,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = brapiSyncActionButtonColors(),
+                    ) {
                         Text(stringResource(R.string.cancel))
                     }
                 } else {
@@ -412,7 +438,8 @@ fun BrapiSyncScreen(
                     Button(
                         onClick = onExportClick,
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = uiState.isInitialized && uiState.viewMode == ViewMode.IDLE
+                        enabled = uiState.isInitialized && uiState.viewMode == ViewMode.IDLE,
+                        colors = brapiSyncActionButtonColors(),
                     ) {
                         Text(stringResource(R.string.brapi_upload_button))
                     }

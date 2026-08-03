@@ -21,6 +21,14 @@
         <item name="android:textColor">@color/soda_dark_text_bright</item>
     </style>
 
+    <!-- Hardcoded soda fills — ButtonStyle uses ?fb_trait_button_background_tint /
+         ?fb_color_text_dark; without this override those resolve via BaseAppTheme (light)
+         and yield a near-white blob with bright text (e.g. Set Crop Region). -->
+    <style name="ButtonStyle.SodaDark" parent="ButtonStyle">
+        <item name="android:background">@drawable/button_unselected</item>
+        <item name="android:textColor">@color/soda_dark_text_bright</item>
+    </style>
+
     <style name="ButtonBarStyle.SodaDark" parent="Widget.AppCompat.ButtonBar.AlertDialog">
         <item name="android:textColor">@color/soda_dark_text_bright</item>
         <item name="android:background">@color/soda_dark_row</item>
@@ -78,7 +86,10 @@
         <item name="fb_color_background">@color/soda_dark_window</item>
         <item name="fb_color_card_background">@color/soda_dark_row</item>
         <item name="fb_border_color">@color/soda_dark_border</item>
+        <item name="fb_button_color_normal">@color/soda_dark_button_normal</item>
         <item name="fb_button_color_pressed">@color/soda_dark_button_pressed</item>
+        <item name="fb_button_text_color">@color/soda_dark_text_bright</item>
+        <item name="fb_trait_button_background_tint">@color/soda_dark_trait_button_tint</item>
         <item name="fb_color_text_dark">@color/soda_dark_text_bright</item>
         <item name="fb_color_text_light">@color/soda_dark_text_bright</item>
         <item name="fb_color_text_secondary">@color/soda_dark_text_secondary</item>
@@ -112,6 +123,7 @@
         <item name="editTextStyle">@style/DialogEditTextStyle.SodaDark</item>
         <item name="android:editTextStyle">@style/DialogEditTextStyle.SodaDark</item>
         <item name="radioButtonStyle">@style/RadioButtonStyle.SodaDark</item>
+        <item name="buttonStyle">@style/ButtonStyle.SodaDark</item>
         <item name="checkboxStyle">@style/CheckBoxStyle.SodaDark</item>
         <item name="android:textViewStyle">@style/TextViewStyle.Dialog.SodaDark</item>
         <item name="spinnerDropDownItemStyle">@style/SpinnerDropDownItemStyle.SodaDark</item>
