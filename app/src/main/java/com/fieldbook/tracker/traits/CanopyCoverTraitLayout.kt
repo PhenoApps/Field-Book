@@ -59,8 +59,8 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
         const val DEFAULT_SLIDER_PROGRESS = 50
         const val THRESHOLD_MIN = 0.70f
         const val THRESHOLD_RANGE = 0.50f
+        const val P3_THRESHOLD = 20f
         private const val MAX_ANALYSIS_WIDTH = 1000
-        private const val P3_THRESHOLD = 20f
         private const val DEFAULT_CAMERA_ASPECT_RATIO = 3f / 4f
 
         fun sliderToThreshold(progress: Int): Float =

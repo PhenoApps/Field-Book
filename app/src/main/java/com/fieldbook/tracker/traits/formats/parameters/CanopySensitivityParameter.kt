@@ -191,7 +191,7 @@ class CanopySensitivityParameter : BaseFormatParameter(
                 val r = android.graphics.Color.red(pixels[i]).toFloat()
                 val g = android.graphics.Color.green(pixels[i]).toFloat()
                 val b = android.graphics.Color.blue(pixels[i]).toFloat()
-                val isCanopy = g > 0f && r / g < t && b / g < t && 2f * g - r - b > 20f
+                val isCanopy = g > 0f && r / g < t && b / g < t && 2f * g - r - b > CanopyCoverTraitLayout.P3_THRESHOLD
                 if (isCanopy) canopyPixels++
                 pixels[i] = if (isCanopy) android.graphics.Color.WHITE else android.graphics.Color.BLACK
             }
