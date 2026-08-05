@@ -12,6 +12,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts.TakePicture
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
@@ -73,6 +74,12 @@ class NewTraitDialog(
 
     @Inject
     lateinit var traitRepo: TraitRepository
+
+    private val canopyTestCaptureLauncher = registerForActivityResult(TakePicture()) { success ->
+        if (success) {
+            parametersSv.findHolder<CanopySensitivityParameter.ViewHolder>()?.onTestCaptureResult()
+        }
+    }
 
     // flag to just return selectable format
     var isSelectingFormat: Boolean = false
@@ -347,6 +354,8 @@ class NewTraitDialog(
                 holder.bind(parameter, initialTraitObject)
 
                 parametersSv.addViewHolder(holder)
+
+                (holder as? CanopySensitivityParameter.ViewHolder)?.setTestCaptureLauncher(canopyTestCaptureLauncher)
 
                 lockCanopySensitivityIfCollected(holder)
             }

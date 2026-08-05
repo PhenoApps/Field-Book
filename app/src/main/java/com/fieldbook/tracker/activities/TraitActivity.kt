@@ -1,14 +1,13 @@
 package com.fieldbook.tracker.activities
 
-import android.app.Activity
 import android.app.AlertDialog
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts.TakePicture
 import androidx.compose.runtime.remember
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.setViewTreeLifecycleOwner
@@ -22,25 +21,25 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.database.viewmodels.TraitDetailViewModel
+import com.fieldbook.tracker.database.viewmodels.TraitEditorViewModel
 import com.fieldbook.tracker.dialogs.FileExploreDialogFragment
 import com.fieldbook.tracker.dialogs.NewTraitDialog
-import com.fieldbook.tracker.traits.formats.parameters.CanopySensitivityParameter
 import com.fieldbook.tracker.objects.TraitObject
-import com.fieldbook.tracker.ui.screens.traits.TraitEditorScreen
-import com.fieldbook.tracker.ui.theme.AppTheme
-import com.fieldbook.tracker.utilities.Utils
-import com.fieldbook.tracker.database.viewmodels.TraitEditorViewModel
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.traits.formats.NumericFormat
 import com.fieldbook.tracker.traits.formats.TraitFormat
 import com.fieldbook.tracker.traits.formats.parameters.BaseFormatParameter
+import com.fieldbook.tracker.traits.formats.parameters.CanopySensitivityParameter
 import com.fieldbook.tracker.traits.formats.parameters.DecimalPlacesParameter
 import com.fieldbook.tracker.ui.navigation.controllers.TraitNavController
 import com.fieldbook.tracker.ui.navigation.routes.TraitDetail
 import com.fieldbook.tracker.ui.navigation.routes.TraitEditor
 import com.fieldbook.tracker.ui.navigation.routes.TraitGraph
 import com.fieldbook.tracker.ui.screens.traits.TraitDetailScreen
+import com.fieldbook.tracker.ui.screens.traits.TraitEditorScreen
+import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.SoundHelperImpl
+import com.fieldbook.tracker.utilities.Utils
 import com.fieldbook.tracker.utilities.VibrateUtil
 import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.utils.BaseDocumentTreeUtil
@@ -66,6 +65,13 @@ class TraitActivity : ThemedActivity() {
     }
 
     private var activeCanopySensitivityHolder: CanopySensitivityParameter.ViewHolder? = null
+
+    private val canopyTestCaptureLauncher = registerForActivityResult(TakePicture()) { success ->
+        if (success) {
+            activeCanopySensitivityHolder?.onTestCaptureResult()
+            (supportFragmentManager.findFragmentByTag("NewTraitDialog") as? NewTraitDialog)?.onTestCaptureResult()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -177,18 +183,6 @@ class TraitActivity : ThemedActivity() {
         onBackPressedDispatcher.addCallback(this, backCallback)
     }
 
-    @Suppress("OVERRIDE_DEPRECATION")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == CanopySensitivityParameter.TEST_CAPTURE_REQUEST_CODE
-            && resultCode == Activity.RESULT_OK
-        ) {
-            activeCanopySensitivityHolder?.onTestCaptureResult()
-                ?: (supportFragmentManager.findFragmentByTag("NewTraitDialog") as? NewTraitDialog)
-                    ?.onTestCaptureResult()
-        }
-    }
-
     private fun showCreateNewTraitDialog(trait: TraitObject?, onSaved: () -> Unit) {
         val dialog = NewTraitDialog(this)
         dialog.setTraitObject(trait)
@@ -270,6 +264,7 @@ class TraitActivity : ThemedActivity() {
             parameterContainer.addView(holder.itemView)
             val canopyHolder = holder as? CanopySensitivityParameter.ViewHolder
             canopyHolder?.configureStandaloneDialog()
+            canopyHolder?.setTestCaptureLauncher(canopyTestCaptureLauncher)
             if (canopyHolder != null) {
                 activeCanopySensitivityHolder = canopyHolder
             }

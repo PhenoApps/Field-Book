@@ -1,11 +1,8 @@
 package com.fieldbook.tracker.traits.formats.parameters
 
-import android.app.Activity
-import android.content.ClipData
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.provider.MediaStore
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +10,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
+import androidx.activity.result.ActivityResultLauncher
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.TraitObject
@@ -34,13 +32,12 @@ class CanopySensitivityParameter : BaseFormatParameter(
 ) {
 
     companion object {
-        const val TEST_CAPTURE_REQUEST_CODE = 276
         private const val TEST_TEMP_FILE = "canopy_param_test.jpg"
     }
 
-    private var activity: Activity? = null
+    private var activity: android.app.Activity? = null
 
-    fun setActivity(activity: Activity) {
+    fun setActivity(activity: android.app.Activity) {
         this.activity = activity
     }
 
@@ -63,13 +60,23 @@ class CanopySensitivityParameter : BaseFormatParameter(
         private var previewJob: Job? = null
         private var previewVersion = 0
         private var isLocked = false
+        private var testCaptureLauncher: ActivityResultLauncher<Uri>? = null
 
         override fun bind(parameter: BaseFormatParameter, initialTraitObject: TraitObject?) {
             super.bind(parameter, initialTraitObject)
             val progress = initialTraitObject?.sensitivity?.toIntOrNull()
                 ?: CanopyCoverTraitLayout.DEFAULT_SLIDER_PROGRESS
             setupSeekBar(progress)
-            testBtn.setOnClickListener { launchTestCapture() }
+            testBtn.setOnClickListener {
+                if (isLocked) return@setOnClickListener
+                testCaptureLauncher?.let { launcher ->
+                    launchTestCapture(launcher)
+                }
+            }
+        }
+
+        fun setTestCaptureLauncher(launcher: ActivityResultLauncher<Uri>) {
+            testCaptureLauncher = launcher
         }
 
         fun setInlineTestVisible(visible: Boolean) {
@@ -125,23 +132,6 @@ class CanopySensitivityParameter : BaseFormatParameter(
             )
         }
 
-        fun launchTestCapture() {
-            val act = activity ?: return
-            val tempFile = File(act.cacheDir, TEST_TEMP_FILE)
-            if (tempFile.exists()) {
-                tempFile.delete()
-            }
-            tempFile.createNewFile()
-            val uri = GenericFileProvider.getUriForFile(act, GenericFileProvider.AUTHORITY, tempFile)
-            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
-                putExtra(MediaStore.EXTRA_OUTPUT, uri)
-                clipData = ClipData.newUri(act.contentResolver, "Canopy sensitivity test", uri)
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-            }
-            act.startActivityForResult(intent, TEST_CAPTURE_REQUEST_CODE)
-        }
-
         fun onTestCaptureResult() {
             val act = activity ?: return
             val tempFile = File(act.cacheDir, TEST_TEMP_FILE)
@@ -153,6 +143,24 @@ class CanopySensitivityParameter : BaseFormatParameter(
                     updateTestPreview()
                 }
             }
+        }
+
+        /** Convenience method for the neutral button in standalone dialog (TraitActivity). */
+        fun launchTestCapture() {
+            testCaptureLauncher?.let { launcher ->
+                launchTestCapture(launcher)
+            }
+        }
+
+        private fun launchTestCapture(launcher: ActivityResultLauncher<Uri>) {
+            val act = activity ?: return
+            val tempFile = File(act.cacheDir, TEST_TEMP_FILE)
+            if (tempFile.exists()) {
+                tempFile.delete()
+            }
+            tempFile.createNewFile()
+            val uri = GenericFileProvider.getUriForFile(act, GenericFileProvider.AUTHORITY, tempFile)
+            launcher.launch(uri)
         }
 
         private fun updateTestPreview() {
