@@ -265,6 +265,7 @@
     <string name="search_multiple_matches_found">Trovati %1$d appezzamenti corrispondenti. Visualizzazione del primo.</string>
     <!--    <string name="field_default_sort_order">import order</string>-->
     <string name="field_data_title">Dato</string>
+    <string name="field_data_summary">%1$d osservazioni su %2$d caratteri</string>
     <string name="field_trait_observation_total">\"%d\" osservazioni</string>
     <!-- Field Detail Charts -->
     <string name="chart_no_data">Nessun dato da rappresentare graficamente</string>
@@ -554,11 +555,37 @@
     <string name="activity_collect_dialog_neutral_button">Modifica impostazioni</string>
     <string name="activity_collect_dialog_new_collector">Vuoi salvare il nome di utente che raccoglie i dati?</string>
     <!--- Datagrid -->
+    <string name="data_grid_empty">Nessun dato da visualizzare.</string>
     <string name="dialog_data_grid_header_picker_ok">OK</string>
+    <string name="dialog_data_grid_column_picker_title">Scegliere le colonne</string>
     <string name="dialog_data_grid_repeated_measures_title">Scegli Osservazione</string>
     <string name="menu_action_header_view_data_grid_title">Aggiorna Intestazioni di Riga</string>
+    <string name="menu_action_column_view_data_grid_title">Aggiorna Intestazioni di Riga</string>
+    <string name="menu_action_reset_sort_data_grid_title">Resetta Ordinamento</string>
+    <string name="menu_data_grid_action_locate_plot">Individua La Parcella Attiva</string>
+    <string name="menu_action_wrap_content_data_grid_title">Avvolgi Contenuto</string>
     <string name="menu_action_heatmap_data_grid_title">Mappa Calore</string>
+    <string name="menu_data_grid_action_map_view">Vista Mappa</string>
+    <string name="menu_data_grid_action_grid_view">Vista Griglia</string>
+    <string name="menu_data_grid_action_map_attributes">Imposta Riga/Colonna</string>
+    <string name="map_view_no_layout">Layout del campo non disponibile. Apri le impostazioni della mappa per definire gli attributi di riga e colonna.</string>
+    <string name="map_view_choose_attributes_title">Scegli Riga e colonna</string>
+    <string name="map_settings_title">Impostazioni Della Mappa</string>
+    <string name="map_settings_row_attribute">Attributo di riga</string>
+    <string name="map_settings_col_attribute">Attributo di colonna</string>
+    <string name="map_settings_invert_subheader">Invertire</string>
+    <string name="map_settings_invert_row">Inverti ordine righe</string>
+    <string name="map_settings_invert_col">Inverti ordine delle colonne</string>
+    <string name="map_view_row_prompt">Seleziona attributo per ROW:</string>
+    <string name="map_view_col_prompt">Seleziona attributo per COLONNA:</string>
+    <string name="map_view_row">Riga</string>
+    <string name="map_view_col">Colonna</string>
+    <string name="map_view_choose_attributes_ok">Imposta Attributi</string>
     <string name="map_view_legend_complete">Completo</string>
+    <string name="map_view_legend_partial">Parziale</string>
+    <string name="map_view_legend_empty">Vuoto</string>
+    <string name="map_view_legend_missing">Mancante</string>
+    <string name="map_view_use_geo_coordinates">Usa le coordinate GPS (rilevate %d)</string>
     <!--- Lock -->
     <string name="activity_collect_locked_state">Bloccato - inserimento, modifica o eliminazione dei dati sono disabilitati</string>
     <string name="activity_collect_frozen_state">Congelato - una volta salvati i dati non possono essere modificati o eliminati</string>
@@ -839,6 +866,8 @@
     <string name="preferences_appearance_infobar_hide_prefix_description">Il prefisso InfoBar sarà sostituito da un\'icona generica</string>
     <string name="preferences_appearance_quickgoto">Vai Rapido a</string>
     <string name="preferences_appearance_quickgoto_description">Cambia la sezione centrale della schermata principale in quella precedente \'Vai Rapido a\"</string>
+    <string name="preferences_appearance_hide_entry_navigation">Nascondi navigazione voce</string>
+    <string name="preferences_appearance_hide_entry_navigation_description">Nasconde le frecce di navigazione d\'ingresso, gli identificatori e la barra di avanzamento sullo schermata di raccolta</string>
     <string name="preferences_appearance_range_progress_bar">Barra di progresso delle entrate</string>
     <string name="preferences_appearance_range_progress_bar_description">Mostra la tua posizione corrente nel campo</string>
     <string name="preferences_appearance_traits_progress_bar">Barra di progresso dei caratteri</string>
@@ -1039,6 +1068,7 @@
     <string name="no_updates_title">Ultima Versione In Esecuzione</string>
     <!-- BRAPI -->
     <!-- BrAPI preferences -->
+    <string name="preferences_brapi_title">Configurazione</string>
     <string name="brapi_info_title">Informazioni sulla sincronizzazione BrAPI</string>
     <string name="preferences_brapi_enable_title">Abilita BrAPI</string>
     <string name="preferences_brapi_enable_summary">L\'Breeding API consente un semplice trasferimento di dati a database compatibili.</string>
@@ -1108,11 +1138,33 @@
     <string name="brapi_display_name">Mostra Nome</string>
     <string name="brapi_revoke_auth">Disconnettersi</string>
     <!-- Multi-account management -->
+    <string name="brapi_add_account_title">Aggiungi Account</string>
+    <string name="brapi_edit_account_title">Modificare account</string>
+    <string name="brapi_add_account_guided_setup">Inserimento Manuale</string>
+    <string name="brapi_add_account_scan_config">Scansione Codice Di Configurazione</string>
+    <string name="brapi_switch_server_title">Cambia Il Server</string>
+    <string name="brapi_switch_server_unauthenticated_message">Vuoi autenticarti prima di passare a questo server?</string>
+    <string name="brapi_chip_compatibility">Compatibilità</string>
+    <string name="brapi_chip_share">Condividi</string>
     <string name="brapi_chip_edit">Modifica</string>
+    <string name="brapi_chip_logout">Disconnettiti</string>
     <string name="brapi_chip_authorize">Salva e autorizza</string>
+    <string name="brapi_chip_remove">Rimuovi</string>
+    <string name="brapi_auth_required_title">Autenticazione Richiesta</string>
+    <string name="brapi_auth_required_message">La sessione è scaduta. Autorizzare nuovamente?</string>
+    <string name="brapi_logout_manage_title">Gestisci Server</string>
+    <string name="brapi_logout_manage_message">Scegli un\'azione per %1$s.</string>
+    <string name="brapi_logout_and_remove">Rimuovi</string>
+    <string name="brapi_logout_only">Disconnettiti</string>
+    <string name="brapi_section_active_server">Server Attivo</string>
+    <string name="brapi_section_available_servers">Server Disponibili</string>
+    <string name="brapi_add_account">Aggiungi Account</string>
+    <string name="brapi_advanced_settings">Impostazioni Di Trasmissione</string>
+    <string name="menu_overflow">Più opzioni</string>
     <string name="brapi_auth_btn">Accedi al sito</string>
     <string name="brapi_auth_success">Autorizzazione BrAPI riuscita</string>
     <string name="brapi_auth_deny">Autorizzazione BrAPI negata</string>
+    <string name="brapi_auth_failed_remove">Rimuovi</string>
     <string name="brapi_auth_error_starting">Errore durante l\'avvio dell\'autenticazione BrAPI</string>
     <string name="brapi_auth_permission_deny">ERRORE: Non hai i permessi necessari per eseguire questa azione</string>
     <string name="brapi_auth_needed_title">Accesso necessario</string>
@@ -1422,6 +1474,10 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="no_programdbid_provided">Nessun programDbId fornito</string>
     <string name="no_studydbids_provided">Nessun studyDbIds fornito</string>
     <string name="act_brapi_list_api_exception">Errore sconosciuto. Controlla le preferenze BrAPI o contatta gli sviluppatori.</string>
+    <string name="brapi_error_unauthorized">Autenticazione richiesta. Effettua il login e riprova.</string>
+    <string name="brapi_error_forbidden">Accesso negato. Potresti non avere il permesso di utilizzare questo server.</string>
+    <string name="brapi_error_not_found">Questo server non sembra supportare l\'endpoint /serverinfo.</string>
+    <string name="brapi_error_network">Impossibile raggiungere il server. Controlla la tua connessione e l\'URL del server.</string>
     <string name="act_brapi_list_filter_reset_cache_title">Conferma Reimpostazione</string>
     <string name="act_brapi_list_filter_reset_cache_message">Questo eliminerà i dati BrAPI locali utilizzati per la ricerca e l\'importazione.</string>
     <string name="search_bar_hint">Ricercando… %s</string>
