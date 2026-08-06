@@ -576,10 +576,16 @@
     <string name="map_settings_invert_subheader">Inverter</string>
     <string name="map_settings_invert_row">Inverter ordem das linhas</string>
     <string name="map_settings_invert_col">Inverter ordem das colunas</string>
+    <string name="map_view_row_prompt">Selecione o atributo para LINHA:</string>
+    <string name="map_view_col_prompt">Selecione o atributo para COLUNA:</string>
     <string name="map_view_row">Linha</string>
     <string name="map_view_col">Coluna</string>
     <string name="map_view_choose_attributes_ok">Definir Atributos</string>
     <string name="map_view_legend_complete">Completo</string>
+    <string name="map_view_legend_partial">Parcial</string>
+    <string name="map_view_legend_empty">Vazio</string>
+    <string name="map_view_legend_missing">Faltando</string>
+    <string name="map_view_use_geo_coordinates">Usar coordenadas GPS (%d detectado)</string>
     <!--- Lock -->
     <string name="activity_collect_locked_state">Bloqueado - entrada de dados, modificação e exclusão estão desabilitados</string>
     <string name="activity_collect_frozen_state">Congelado - uma vez que os dados são salvos, eles não podem ser modificados ou excluídos</string>
@@ -1062,6 +1068,7 @@
     <string name="no_updates_title">Executando a Última Versão</string>
     <!-- BRAPI -->
     <!-- BrAPI preferences -->
+    <string name="preferences_brapi_title">Configuração</string>
     <string name="brapi_info_title">Breeding API</string>
     <string name="preferences_brapi_enable_title">Habilitar BrAPI</string>
     <string name="preferences_brapi_enable_summary">A Breeding API permite a transferência de dados para bases de dados compatíveis.</string>
@@ -1134,6 +1141,9 @@
     <string name="brapi_add_account_title">Adicionar Conta</string>
     <string name="brapi_edit_account_title">Editar Conta</string>
     <string name="brapi_add_account_guided_setup">Entrada Manual</string>
+    <string name="brapi_add_account_scan_config">Escanear Código de Configuração</string>
+    <string name="brapi_switch_server_title">Alternar Servidor</string>
+    <string name="brapi_switch_server_unauthenticated_message">Você gostaria de se autenticar antes de mudar para este servidor?</string>
     <string name="brapi_chip_compatibility">Compatibilidade</string>
     <string name="brapi_chip_share">Compartilhar</string>
     <string name="brapi_chip_edit">Editar</string>
@@ -1141,8 +1151,13 @@
     <string name="brapi_chip_authorize">Autorizar</string>
     <string name="brapi_chip_remove">Remover</string>
     <string name="brapi_auth_required_title">Autenticação Requerida</string>
+    <string name="brapi_auth_required_message">Sua sessão expirou. Você gostaria de voltar a autorizar?</string>
+    <string name="brapi_logout_manage_title">Gerenciar Servidor</string>
+    <string name="brapi_logout_manage_message">Escolha uma ação para %1$s.</string>
     <string name="brapi_logout_and_remove">Remover</string>
     <string name="brapi_logout_only">Encerrar Sessão</string>
+    <string name="brapi_section_active_server">Active Server</string>
+    <string name="brapi_section_available_servers">Servidores Disponíveis</string>
     <string name="brapi_add_account">Adicionar Conta</string>
     <string name="brapi_advanced_settings">Configurações de Transmissão</string>
     <string name="menu_overflow">Mais opções</string>
@@ -1462,6 +1477,9 @@
     <string name="no_studydbids_provided">Nenhum studyDbIds fornecido</string>
     <string name="act_brapi_list_api_exception">Erro desconhecido. Por favor, verifique as preferências do BrAPI ou contate os desenvolvedores.</string>
     <string name="brapi_error_unauthorized">Autenticação requerida. Por favor, faça o login e tente novamente.</string>
+    <string name="brapi_error_forbidden">Acesso negado. Talvez você não tenha permissão para usar este servidor.</string>
+    <string name="brapi_error_not_found">Este servidor parece não suportar o ponto de acesso /serverinfo</string>
+    <string name="brapi_error_network">Não foi possível encontrar o servidor. Verifique sua conexão e a URL do servidor.</string>
     <string name="act_brapi_list_filter_reset_cache_title">Confirmar Restabelecer</string>
     <string name="act_brapi_list_filter_reset_cache_message">Isto irá excluir os dados locais do BrAPI usados para procura e importação.</string>
     <string name="search_bar_hint">Procurando… %s</string>
