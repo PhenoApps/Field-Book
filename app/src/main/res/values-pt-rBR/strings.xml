@@ -265,6 +265,7 @@
     <string name="search_multiple_matches_found">Encontrados %1$d parcelas correspondentes. Mostrando a primeira.</string>
     <!--    <string name="field_default_sort_order">import order</string>-->
     <string name="field_data_title">Dados</string>
+    <string name="field_data_summary">%1$d observações entre %2$d características</string>
     <string name="field_trait_observation_total">\"%d\"observações</string>
     <!-- Field Detail Charts -->
     <string name="chart_no_data">Sem dados para o gráfico</string>
@@ -554,13 +555,30 @@
     <string name="activity_collect_dialog_neutral_button">Modificar configurações</string>
     <string name="activity_collect_dialog_new_collector">Você deseja salvar o nome da pessoa coletando dados?</string>
     <!--- Datagrid -->
+    <string name="data_grid_empty">Sem dados para exibir.</string>
     <string name="dialog_data_grid_header_picker_ok">OK</string>
+    <string name="dialog_data_grid_column_picker_title">Escolher Colunas</string>
     <string name="dialog_data_grid_repeated_measures_title">Escolher Observação</string>
     <string name="menu_action_header_view_data_grid_title">Escolher Cabeçalhos da Linha</string>
+    <string name="menu_action_column_view_data_grid_title">Atualizar Cabeçalhos de Coluna</string>
+    <string name="menu_action_reset_sort_data_grid_title">Redefinir Ordenação</string>
     <string name="menu_data_grid_action_locate_plot">Localizar Parcela Ativa</string>
+    <string name="menu_action_wrap_content_data_grid_title">Encapsular Conteúdo</string>
     <string name="menu_action_heatmap_data_grid_title">Mapa de calor</string>
+    <string name="menu_data_grid_action_map_view">Visualização do Mapa</string>
+    <string name="menu_data_grid_action_grid_view">Visualização de Grade</string>
+    <string name="menu_data_grid_action_map_attributes">Definir Linha/Coluna</string>
+    <string name="map_view_no_layout">Layout do campo não disponível. Abra as Configurações do Mapa para definir os atributos da linha e da coluna.</string>
+    <string name="map_view_choose_attributes_title">Escolher Linha e Coluna</string>
+    <string name="map_settings_title">Configurações do Mapa</string>
+    <string name="map_settings_row_attribute">Atributo de linha</string>
+    <string name="map_settings_col_attribute">Atributo de coluna</string>
+    <string name="map_settings_invert_subheader">Inverter</string>
+    <string name="map_settings_invert_row">Inverter ordem das linhas</string>
+    <string name="map_settings_invert_col">Inverter ordem das colunas</string>
     <string name="map_view_row">Linha</string>
     <string name="map_view_col">Coluna</string>
+    <string name="map_view_choose_attributes_ok">Definir Atributos</string>
     <string name="map_view_legend_complete">Completo</string>
     <!--- Lock -->
     <string name="activity_collect_locked_state">Bloqueado - entrada de dados, modificação e exclusão estão desabilitados</string>
@@ -1115,6 +1133,7 @@
     <!-- Multi-account management -->
     <string name="brapi_add_account_title">Adicionar Conta</string>
     <string name="brapi_edit_account_title">Editar Conta</string>
+    <string name="brapi_add_account_guided_setup">Entrada Manual</string>
     <string name="brapi_chip_compatibility">Compatibilidade</string>
     <string name="brapi_chip_share">Compartilhar</string>
     <string name="brapi_chip_edit">Editar</string>
@@ -1125,6 +1144,7 @@
     <string name="brapi_logout_and_remove">Remover</string>
     <string name="brapi_logout_only">Encerrar Sessão</string>
     <string name="brapi_add_account">Adicionar Conta</string>
+    <string name="brapi_advanced_settings">Configurações de Transmissão</string>
     <string name="menu_overflow">Mais opções</string>
     <string name="brapi_auth_btn">Iniciar Sessão no Site</string>
     <string name="brapi_auth_success">Autorização de BrAPI bem sucedida</string>
