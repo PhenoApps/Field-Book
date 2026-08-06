@@ -335,7 +335,7 @@
     <string name="traits_format_video">Vídeo</string>
     <string name="traits_format_audio">Áudio</string>
     <string name="traits_format_multicategorical">Multicategórico</string>
-    <string name="traits_format_location">Localização</string>
+    <string name="traits_format_location">Local</string>
     <string name="traits_format_gnss">GNSS</string>
     <string name="traits_format_barcode">Código de Barras</string>
     <string name="traits_format_labelprint">Impressão nas etiquetas Zebra</string>
@@ -693,7 +693,7 @@
     <string name="dialog_geonav_collect_reconnect">Reconectar</string>
     <string name="dialog_geonav_collect_reset_start_toast_message">Restabelecendo conexão…</string>
     <string name="dialog_geonav_collect_reset_end_toast_message">Restabelecer de conexão</string>
-    <string name="dialog_geonav_precision_loss_title">Perda de Precisão Localização</string>
+    <string name="dialog_geonav_precision_loss_title">Perda de Precisão de Localização</string>
     <string name="dialog_geonav_precision_loss_msg">Sua precisão preferida foi perdida.</string>
     <!--- Content Descriptions -->
     <string name="view_trait_box_right_content_description">Ir para a próxima característica.</string>
@@ -885,7 +885,7 @@
     <string name="preferences_behavior_barcode_scanning_enter_if_not_id">Registre um valor se não for o ID da entrada</string>
     <string name="preferences_behavior_barcode_scanning_ask">Perguntar a cada caso</string>
     <!-- Location -->
-    <string name="preferences_location_title">Localização</string>
+    <string name="preferences_location_title">Local</string>
     <string name="preferences_location_defaults_title">Geocoordenadas</string>
     <string name="pref_general_location_collection_title">Nível da Coleção</string>
     <string name="location_level_off">Desativado</string>
@@ -942,7 +942,7 @@
     <!-- Storage -->
     <string name="preferences_storage_title">Armazenamento</string>
     <string name="preferences_storage_storage_title">Armazenamento</string>
-    <string name="preferences_storage_files_base_directory_title">Definir local de armazenamento</string>
+    <string name="preferences_storage_files_base_directory_title">Definir Local de Armazenamento</string>
     <string name="preferences_storage_files_base_directory_description">Migre ou defina uma nova estrutura de diretório raiz. Os arquivos de exportação serão salvos aqui automaticamente.</string>
     <string name="preferences_storage_database_title">Base de dados</string>
     <string name="database_dialog_title">Base de dados</string>
@@ -1127,7 +1127,7 @@
     <string name="brapi_save_data_button">Pré-visualizar Campo</string>
     <string name="brapi_study_name">Nome</string>
     <string name="brapi_study_description">Descrição</string>
-    <string name="brapi_study_location">Localização</string>
+    <string name="brapi_study_location">Local</string>
     <string name="brapi_observation_level">Nível de Observação</string>
     <string name="brapi_study_num_traits"> Características</string>
     <string name="brapi_not_found">ERRO: O sistema de destino não suporta esta operação via BrAPI.</string>
