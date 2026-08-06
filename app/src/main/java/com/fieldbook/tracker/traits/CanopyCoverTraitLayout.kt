@@ -13,14 +13,16 @@ import android.util.AttributeSet
 import android.util.Log
 import android.util.Size
 import android.view.Gravity
-import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
-import androidx.cardview.widget.CardView
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.view.PreviewView
+import androidx.cardview.widget.CardView
+import androidx.core.content.edit
+import androidx.core.graphics.createBitmap
+import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import androidx.exifinterface.media.ExifInterface
 import com.fieldbook.tracker.R
@@ -78,7 +80,6 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
     private var canopyPreviewView: PreviewView? = null
     private var canopyFrameCard: CardView? = null
     private var embiggenButton: FloatingActionButton? = null
-    private var analysisJob: Job? = null
     private var previewLoadJob: Job? = null
     private var currentPreviewBitmap: Bitmap? = null
     private var previewResolution: Size? = null
@@ -163,39 +164,79 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
         }
     }
 
-    /** Returns whether the capture was accepted; the Canopeo analysis itself runs asynchronously. */
+    /** Returns whether the capture was accepted; analysis runs on IO dispatcher. */
     override fun makeImage(currentTrait: TraitObject): Boolean {
+        val act = context as? CollectActivity ?: return false
         val file = File(context.cacheDir, TEMPORARY_IMAGE_NAME)
         if (!file.exists() || file.length() == 0L) {
             Log.e(TAG, "makeImage: temp file is missing or empty")
             return false
         }
+
+        // Capture observation context at invocation time before any async work
+        val studyId = act.studyId
+        val traitId = currentTrait.id
         val obsUnit = currentRange.uniqueId
-        val rep = collectActivity.rep
-        val imageKey = imagePrefsKey(currentTrait.id, obsUnit, rep)
-        val previousUri = prefs.getString(imageKey, null)
+        val rep = act.rep
+        val imageKey = imagePrefsKey(traitId, obsUnit, rep)
+        val traitName = FileUtil.sanitizeFileName(currentTrait.name)
+        val saveTime = FileUtil.sanitizeFileName(
+            OffsetDateTime.now().format(
+                internalTimeFormatter
+            )
+        )
+        val fileName = "${obsUnit}_${traitName}_${saveTime}.jpg"
 
-        analysisJob?.cancel()
-        analysisJob = background.launch {
-            val bmp = loadAndScale(file, MAX_ANALYSIS_WIDTH) ?: return@launch
-            val t = threshold
-            val fgcc = analyze(bmp, t)
-            val overlay = buildOverlay(bmp, t)
-            val fgccStr = "%.1f".format(fgcc)
+        // Save image & insert observation with FGCC value all in this IO coroutine
+        background.launch {
+            val savedUri = saveCanopyImageToStorage(file, traitName, fileName)
 
-            val savedUri = saveCanopyImageToStorage(file, currentTrait, obsUnit)
-            if (savedUri != null) {
-                if (previousUri != null && previousUri != savedUri.toString()) {
+            // Run image analysis on the saved image
+            val overlay = savedUri?.let { uri ->
+                val bmp = loadAndScale(uri, MAX_ANALYSIS_WIDTH)
+                if (bmp != null) {
+                    val t = threshold
+                    val fgcc = analyze(bmp, t)
+                    val fgccStr = "%.1f".format(fgcc)
+
+                    // Insert observation with FGCC value using original captured context
+                    // All DB operations happen in this single IO coroutine - no race conditions
+                    try {
+                        val dataHelper = act.getDatabase()
+                        val newRep = dataHelper.getNextRep(studyId, obsUnit, traitId)
+                        val person = act.person.orEmpty()
+                        val location = try { act.locationByPreferences } catch (_: Exception) { "" }
+                        dataHelper.insertObservation(
+                            obsUnit, traitId, fgccStr,
+                            person, location, "", studyId, null, null, null, newRep
+                        )
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to insert observation", e)
+                    }
+
+                    buildOverlay(bmp, threshold)
+                } else null
+            } ?: return@launch
+
+            // Handle previous image cleanup and prefs update
+            try {
+                val previousUri = prefs.getString(imageKey, null)
+                if (previousUri != null) {
                     deleteImageUri(previousUri)
                 }
-                prefs.edit()
-                    .putString(imageKey, savedUri.toString())
-                    .apply()
+                savedUri.let { uri ->
+                    prefs.edit { putString(imageKey, uri.toString()) }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to update prefs", e)
             }
 
+            // Update UI on main thread
             withContext(Dispatchers.Main) {
                 showCapturedImage(overlay)
-                updateObservation(currentTrait, fgccStr)
+                act.updateCurrentTraitStatus(true)
+                act.refreshInfoBarAdapter()
+                act.refreshRepeatedValuesToolbarIndicator()
                 loadLayout()
             }
         }
@@ -227,14 +268,12 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
     }
 
     override fun onExit() {
-        analysisJob?.cancel()
         previewLoadJob?.cancel()
     }
 
     override fun deleteTraitListener() {
         if (isLocked) return
 
-        analysisJob?.cancel()
         previewLoadJob?.cancel()
 
         val rep = collectActivity.rep
@@ -336,7 +375,7 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
             return
         }
 
-        val uri = Uri.parse(uriStr)
+        val uri = uriStr.toUri()
         val thresholdForPreview = threshold
         previewLoadJob = background.launch {
             val bitmap = try {
@@ -369,8 +408,8 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
             adjustViewBounds = true
             scaleType = ImageView.ScaleType.FIT_CENTER
             layoutParams = FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
+                LayoutParams.MATCH_PARENT,
+                LayoutParams.MATCH_PARENT
             )
         }
         val closeButton = ImageButton(context).apply {
@@ -428,23 +467,7 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
         }
     }
 
-    private fun saveCanopyImageToStorage(tempFile: File, trait: TraitObject, obsUnit: String): Uri? {
-        return try {
-            val traitName = FileUtil.sanitizeFileName(trait.name)
-            val saveTime = FileUtil.sanitizeFileName(OffsetDateTime.now().format(internalTimeFormatter))
-            val fileName = "${obsUnit}_${traitName}_${saveTime}.jpg"
-            DocumentTreeUtil.getFieldMediaDirectory(context, traitName)?.let { dir ->
-                dir.createFile("image/jpeg", fileName)?.also { docFile ->
-                    context.contentResolver.openOutputStream(docFile.uri)?.use { out ->
-                        tempFile.inputStream().use { input -> input.copyTo(out) }
-                    }
-                }?.uri
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to save canopy image to storage", e)
-            null
-        }
-    }
+
 
     private fun deleteStoredImageForRep(rep: String) {
         val key = imagePrefsKey(currentTrait.id, currentRange.uniqueId, rep)
@@ -454,13 +477,13 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
         } catch (e: Exception) {
             Log.e(TAG, "Failed to delete canopy image for rep $rep", e)
         } finally {
-            prefs.edit().remove(key).apply()
+            prefs.edit { remove(key) }
         }
     }
 
     private fun deleteImageUri(uriString: String) {
         try {
-            val uri = Uri.parse(uriString)
+            val uri = uriString.toUri()
             val deleted = DocumentFile.fromSingleUri(context, uri)?.delete() == true
             if (!deleted && uri.scheme == "content") {
                 context.contentResolver.delete(uri, null, null)
@@ -472,23 +495,29 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
         }
     }
 
-    // ── Canopeo algorithm ─────────────────────────────────────────────────────
-
-    private fun loadAndScale(file: File, maxWidth: Int): Bitmap? {
+    /** Create file in field media storage and copy temp file - returns URI. No DB insert. */
+    private fun saveCanopyImageToStorage(
+        tempFile: File,
+        traitName: String,
+        fileName: String,
+    ): Uri? {
         return try {
-            val opts = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-            BitmapFactory.decodeFile(file.absolutePath, opts)
-            var sampleSize = 1
-            while (max(opts.outWidth, opts.outHeight) / sampleSize > maxWidth) sampleSize *= 2
-            opts.inSampleSize = sampleSize
-            opts.inJustDecodeBounds = false
-            BitmapFactory.decodeFile(file.absolutePath, opts)?.let {
-                applyExifRotation(it, readExifRotation(file))
+            DocumentTreeUtil.getFieldMediaDirectory(context, traitName)?.let { dir ->
+                dir.createFile("image/jpeg", fileName)?.let { docFile ->
+                    context.contentResolver.openOutputStream(docFile.uri)?.use { out ->
+                        tempFile.inputStream().use { input -> input.copyTo(out) }
+                    }
+                    docFile.uri
+                }
             }
         } catch (e: Exception) {
+            Log.e(TAG, "Failed to save canopy image to storage", e)
             null
         }
     }
+
+    // ── Canopeo algorithm ─────────────────────────────────────────────────────
+
 
     private fun loadAndScale(uri: Uri, maxWidth: Int): Bitmap? {
         return try {
@@ -505,23 +534,11 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
             }?.let {
                 applyExifRotation(it, readExifRotation(uri))
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
 
-    private fun readExifRotation(file: File): Float {
-        return try {
-            orientationToDegrees(
-                ExifInterface(file.absolutePath).getAttributeInt(
-                    ExifInterface.TAG_ORIENTATION,
-                    ExifInterface.ORIENTATION_NORMAL
-                )
-            )
-        } catch (e: Exception) {
-            0f
-        }
-    }
 
     private fun readExifRotation(uri: Uri): Float {
         return try {
@@ -533,7 +550,7 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
                     )
                 )
             } ?: 0f
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             0f
         }
     }
@@ -554,7 +571,7 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
             Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true).also {
                 if (it != bitmap) bitmap.recycle()
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             bitmap
         }
     }
@@ -600,7 +617,7 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
             pixels[i] = if (g > 0f && r / g < t && b / g < t && 2f * g - r - b > P3_THRESHOLD)
                 Color.WHITE else Color.BLACK
         }
-        val mask = Bitmap.createBitmap(source.width, source.height, Bitmap.Config.ARGB_8888)
+        val mask = createBitmap(source.width, source.height)
         mask.setPixels(pixels, 0, mask.width, 0, 0, mask.width, mask.height)
         return mask
     }
