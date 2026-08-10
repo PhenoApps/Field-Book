@@ -10,15 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - New Canopy Cover experimental trait (https://github.com/PhenoApps/Field-Book/pull/1501)
 - New Pollinator trait to count categories for a set duration (https://github.com/PhenoApps/Field-Book/pull/1492)
-- Entry navigation area can be optionally hidden from the interface (https://github.com/PhenoApps/Field-Book/pull/1502)
 - Datagrid cells can now be shaded with a color gradient (https://github.com/PhenoApps/Field-Book/pull/1488)
 - Datagrid columns can now be sorted (https://github.com/PhenoApps/Field-Book/pull/1488)
-- Multiple attributes can now be selected as row headers in Datagrid (https://github.com/PhenoApps/Field-Book/pull/1488)
 - Datagrid column width can be adjusted to match values (https://github.com/PhenoApps/Field-Book/pull/1488)
 - Datagrid columns can now be locked to remain visible while scrolling (https://github.com/PhenoApps/Field-Book/pull/1488)
+- Multiple attributes can now be selected as row headers in Datagrid (https://github.com/PhenoApps/Field-Book/pull/1488)
 - New Datagrid Map View matches spatial layout of the field (https://github.com/PhenoApps/Field-Book/pull/1488)
 - Multiple BrAPI accounts can now be added (https://github.com/PhenoApps/Field-Book/pull/1412)
 - BrAPI accounts are now managed in Android system settings (https://github.com/PhenoApps/Field-Book/pull/1412)
+- Entry navigation area can be optionally hidden from the interface (https://github.com/PhenoApps/Field-Book/pull/1502)
 
 ### Changed
 
