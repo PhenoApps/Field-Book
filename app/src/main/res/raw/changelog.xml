@@ -1,5 +1,20 @@
 <changelog>
 
+    <release date="2026-08-10" versionCode="70300" versionName="v7.3.0">
+        <new>New Canopy Cover experimental trait</new>
+        <new>New Pollinator trait to count categories for a set duration</new>
+        <new>Datagrid cells can now be shaded with a color gradient</new>
+        <new>Datagrid columns can now be sorted</new>
+        <new>Datagrid column width can be adjusted to match values</new>
+        <new>Datagrid columns can now be locked to remain visible while scrolling</new>
+        <new>Multiple attributes can now be selected as row headers in Datagrid</new>
+        <new>New Datagrid Map View matches spatial layout of the field</new>
+        <new>Multiple BrAPI accounts can now be added</new>
+        <new>BrAPI accounts are now managed in Android system settings</new>
+        <new>Entry navigation area can be optionally hidden from the interface</new>
+        <bugfix>Bug fixes and enhancements</bugfix>
+    </release>
+
     <release date="2026-07-24" versionCode="70203" versionName="v7.2.3">
         <bugfix>Categorical traits with multiple categories selected now correctly reset</bugfix>
         <bugfix>Auto advance in date traits now correctly resets after a value is saved</bugfix>

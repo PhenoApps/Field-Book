@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Fixed
+
+## [v7.3.0] - 2026-08-10
+
+### Added
 - New Canopy Cover experimental trait (https://github.com/PhenoApps/Field-Book/pull/1501)
 - New Pollinator trait to count categories for a set duration (https://github.com/PhenoApps/Field-Book/pull/1492)
 - Datagrid cells can now be shaded with a color gradient (https://github.com/PhenoApps/Field-Book/pull/1488)
@@ -19,8 +27,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Multiple BrAPI accounts can now be added (https://github.com/PhenoApps/Field-Book/pull/1412)
 - BrAPI accounts are now managed in Android system settings (https://github.com/PhenoApps/Field-Book/pull/1412)
 - Entry navigation area can be optionally hidden from the interface (https://github.com/PhenoApps/Field-Book/pull/1502)
-
-### Changed
 
 ### Fixed
 - Bug fixes and enhancements (https://github.com/PhenoApps/Field-Book/pull/1500)
@@ -971,3 +977,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [v7.2.2]: https://github.com/PhenoApps/Field-Book/releases/tag/7.2.2
 [v7.2.3]: https://github.com/PhenoApps/Field-Book/releases/tag/7.2.3
+
+[v7.3.0]: https://github.com/PhenoApps/Field-Book/releases/tag/7.3.0
