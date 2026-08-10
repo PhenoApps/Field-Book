@@ -102,6 +102,9 @@ class NewTraitDialog(
     // when editing this tracks the original object, to see if values changed when discarding
     private var originalInitialTraitObject: TraitObject? = null
 
+    // tracks whether onStart has already built the dialog's initial screen, see onStart
+    private var isDialogPopulated = false
+
     // private var createVisible: Boolean
 
     private var onTraitSaved: (() -> Unit)? = null
@@ -137,8 +140,16 @@ class NewTraitDialog(
         params?.height = LinearLayout.LayoutParams.WRAP_CONTENT
         dialog?.window?.attributes = params
 
+        /**
+         * The dialog view survives onStop/onStart (returning from the test capture camera, for
+         * example), so the initial screen is only built once per dialog creation. Rebuilding it
+         * would send the user back to the format selector and discard the parameter views.
+         */
         context?.let {
-            show()
+            if (!isDialogPopulated) {
+                isDialogPopulated = true
+                show()
+            }
         }
     }
 
@@ -296,6 +307,8 @@ class NewTraitDialog(
         parametersSv = view.findViewById(R.id.dialog_new_trait_parameters_psv)
         variableEditableErrorTv =
             view.findViewById(R.id.dialog_new_trait_variable_editable_error_tv)
+
+        isDialogPopulated = false
 
         return builder.create()
     }

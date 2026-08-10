@@ -2,6 +2,7 @@ package com.fieldbook.tracker.traits.formats.parameters
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
@@ -11,6 +12,7 @@ import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
+import androidx.exifinterface.media.ExifInterface
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.TraitObject
@@ -24,6 +26,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import kotlin.math.abs
+import kotlin.math.max
 
 class CanopySensitivityParameter : BaseFormatParameter(
     nameStringResourceId = R.string.trait_canopy_sensitivity_label,
@@ -33,6 +36,9 @@ class CanopySensitivityParameter : BaseFormatParameter(
 
     companion object {
         private const val TEST_TEMP_FILE = "canopy_param_test.jpg"
+
+        // matches CanopyCoverTraitLayout's analysis width so the test output value is representative
+        private const val MAX_ANALYSIS_WIDTH = 1000
     }
 
     private var activity: android.app.Activity? = null
@@ -137,11 +143,56 @@ class CanopySensitivityParameter : BaseFormatParameter(
             val tempFile = File(act.cacheDir, TEST_TEMP_FILE)
             if (!tempFile.exists() || tempFile.length() == 0L) return
             CoroutineScope(Dispatchers.IO).launch {
-                val raw = BitmapFactory.decodeFile(tempFile.absolutePath) ?: return@launch
+                val raw = decodeScaledAndRotated(tempFile) ?: return@launch
                 withContext(Dispatchers.Main) {
                     testBitmap = raw
                     updateTestPreview()
                 }
+            }
+        }
+
+        /**
+         * Full resolution captures are too large to threshold on every seek bar change, so decode
+         * at the same scale the trait layout analyzes at.
+         */
+        private fun decodeScaledAndRotated(file: File): Bitmap? = try {
+            val opts = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            BitmapFactory.decodeFile(file.absolutePath, opts)
+            var sampleSize = 1
+            while (max(opts.outWidth, opts.outHeight) / sampleSize > MAX_ANALYSIS_WIDTH) {
+                sampleSize *= 2
+            }
+            opts.inSampleSize = sampleSize
+            opts.inJustDecodeBounds = false
+            BitmapFactory.decodeFile(file.absolutePath, opts)?.let { bmp ->
+                applyRotation(bmp, readExifRotation(file))
+            }
+        } catch (_: Exception) {
+            null
+        }
+
+        private fun readExifRotation(file: File): Float = try {
+            when (ExifInterface(file.absolutePath).getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_NORMAL
+            )) {
+                ExifInterface.ORIENTATION_ROTATE_90 -> 90f
+                ExifInterface.ORIENTATION_ROTATE_180 -> 180f
+                ExifInterface.ORIENTATION_ROTATE_270 -> 270f
+                else -> 0f
+            }
+        } catch (_: Exception) {
+            0f
+        }
+
+        private fun applyRotation(bitmap: Bitmap, degrees: Float): Bitmap {
+            if (degrees == 0f) return bitmap
+            return try {
+                val matrix = Matrix().apply { postRotate(degrees) }
+                Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+                    .also { if (it != bitmap) bitmap.recycle() }
+            } catch (_: Exception) {
+                bitmap
             }
         }
 

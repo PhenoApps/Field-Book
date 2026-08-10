@@ -2,8 +2,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="16dp"
+    android:layout_marginEnd="16dp"
+    android:background="@drawable/cell"
+    android:orientation="vertical">
 
     <!-- Required by BaseFormatParameter.ViewHolder; not used by this parameter -->
     <com.google.android.material.textfield.TextInputLayout
@@ -14,10 +17,12 @@
 
     <TextView
         android:id="@+id/list_item_trait_parameter_title"
-        android:layout_width="match_parent"
+        style="@style/TextViewStyle.Bold.Title"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?attr/textAppearanceBodyMedium"
-        android:paddingBottom="8dp" />
+        android:layout_gravity="start|center_vertical"
+        android:ellipsize="end"
+        android:maxLines="1" />
 
     <!-- Explains why the seekbar is disabled once the trait has observations -->
     <TextView
@@ -71,7 +76,6 @@
 
     <Button
         android:id="@+id/canopy_param_test_btn"
-        style="?attr/borderlessButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
