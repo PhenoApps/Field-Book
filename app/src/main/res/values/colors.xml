@@ -130,4 +130,7 @@
     <color name="high_heatmap_color_max">#343434</color>
 
     <color name="collect_bottom_toolbar_icon_color">#343434</color>
+
+    <!-- Divider colour, carried over from the TableView library's default separator. -->
+    <color name="cell_line_divider_color">#E7E7E7</color>
 </resources>

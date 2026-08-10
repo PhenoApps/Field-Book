@@ -33,8 +33,6 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -52,6 +50,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.ui.components.appBar.ActionDisplayMode
+import com.fieldbook.tracker.ui.components.appBar.AppBar
+import com.fieldbook.tracker.ui.components.appBar.TopAppBarAction
+import com.fieldbook.tracker.ui.components.widgets.AppIcon
+import com.fieldbook.tracker.ui.components.widgets.CardView
 import com.fieldbook.tracker.ui.dialogs.builder.AppAlertDialog
 import com.fieldbook.tracker.ui.theme.AppTheme
 
@@ -110,45 +113,34 @@ fun BrapiSyncScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        stringResource(R.string.brapi_sync)
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = Color.Black
-                ),
+            AppBar(
+                title = stringResource(R.string.brapi_sync),
                 navigationIcon = {
                     IconButton(onClick = onNavigateUp) {
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_left),
-                            contentDescription = stringResource(R.string.dialog_back),
-                            tint = Color.Black
+                            contentDescription = stringResource(R.string.dialog_back)
                         )
                     }
                 },
-                actions = {
-                    IconButton(onClick = onAuthenticate) {
-                        Icon(
-                            painter = painterResource(R.drawable.lock_reset),
-                            contentDescription = stringResource(R.string.authenticate),
-                            tint = Color.Black
-                        )
-                    }
-                }
+                actions = listOf(
+                    TopAppBarAction(
+                        title = stringResource(R.string.authenticate),
+                        contentDescription = stringResource(R.string.authenticate),
+                        icon = R.drawable.lock_reset,
+                        displayMode = ActionDisplayMode.ALWAYS,
+                        onClick = onAuthenticate
+                    )
+                )
             )
-        },
-        bottomBar = {}
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(vertical = 8.dp)
         ) {
 
             // top card: study name + statistics
@@ -196,7 +188,7 @@ fun BrapiSyncScreen(
                             ResultRow(
                                 uiState.downloadSuccessMessage,
                                 painterResource(R.drawable.ic_check_bold),
-                                Color.Black
+                                AppTheme.colors.surface.iconTint
                             )
                         }
                         if (uiState.downloadError != null && uiState.downloadError.isNotEmpty()) {
@@ -465,32 +457,30 @@ fun BrapiSyncScreen(
     }
 }
 
+/**
+ * Section card, laid out like the collapsible sections on the trait detail screen so the
+ * two screens read the same.
+ */
 @Composable
 fun InfoCard(
     title: String,
     icon: Painter,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
+    CardView {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(bottom = 12.dp)
             ) {
-                Icon(
-                    painter = icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp),
-                    tint = Color.Black
+                AppIcon(
+                    icon = icon,
+                    modifier = Modifier.size(36.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = title,
-                    style = AppTheme.typography.titleStyle,
-                    fontWeight = FontWeight.Bold
+                    style = AppTheme.typography.titleStyle
                 )
             }
             Column(
@@ -522,12 +512,12 @@ fun ResultsCard(
             if (inserts > 0) ResultRow(
                 text = stringResource(R.string.new_items, inserts, label.lowercase()),
                 icon = painterResource(if (label == stringResource(R.string.uploaded)) R.drawable.upload else R.drawable.download),
-                tint = Color.Black
+                tint = AppTheme.colors.surface.iconTint
             )
             if (updates > 0) ResultRow(
                 text = stringResource(R.string.edited_items, updates),
                 icon = painterResource(R.drawable.pencil),
-                tint = Color.Black
+                tint = AppTheme.colors.surface.iconTint
             )
             if (errors > 0) ResultRow(
                 text = stringResource(R.string.failed_items, errors),
@@ -560,22 +550,22 @@ fun UploadResultsCard(
             if (inserts > 0) ResultRow(
                 text = stringResource(R.string.new_items, inserts, label.lowercase()),
                 icon = painterResource(R.drawable.ic_stats_observation),
-                tint = Color.Black
+                tint = AppTheme.colors.surface.iconTint
             )
             if (updates > 0) ResultRow(
                 text = stringResource(R.string.edited_items, updates),
                 icon = painterResource(R.drawable.pencil),
-                tint = Color.Black
+                tint = AppTheme.colors.surface.iconTint
             )
             if (imageInserts > 0) ResultRow(
                 text = stringResource(R.string.new_images, imageInserts, label.lowercase()),
                 icon = painterResource(R.drawable.ic_trait_camera),
-                tint = Color.Black
+                tint = AppTheme.colors.surface.iconTint
             )
             if (imageEdits > 0) ResultRow(
                 text = stringResource(R.string.edited_images, imageEdits),
                 icon = painterResource(R.drawable.pencil),
-                tint = Color.Black
+                tint = AppTheme.colors.surface.iconTint
             )
             if (imageErrors > 0) ResultRow(
                 text = stringResource(R.string.failed_images, imageErrors),
@@ -662,7 +652,7 @@ fun ExportProgressIndicator(
                     imageVector = Icons.Default.CheckCircle,
                     contentDescription = stringResource(R.string.complete),
                     modifier = Modifier.size(120.dp),
-                    tint = Color.Black
+                    tint = AppTheme.colors.status.success
                 )
             } else {
                 CircularProgressIndicator(

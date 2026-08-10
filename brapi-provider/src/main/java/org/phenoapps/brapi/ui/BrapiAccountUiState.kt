@@ -13,6 +13,13 @@ data class BrapiAccountUiState(
     val isFetchingDisplayName: Boolean = false,
 )
 
+/**
+ * A single BrAPI account's connection settings, as carried by a shared config (QR transfer).
+ *
+ * Deliberately limited to per-account values. Transfer tuning such as page size, chunk size and
+ * timeout is configured once per device rather than per server, so sharing one account's config
+ * must not carry it along and overwrite the scanning device's settings.
+ */
 data class BrapiAccountConfig(
     val url: String? = null,
     val name: String? = null,
@@ -21,7 +28,4 @@ data class BrapiAccountConfig(
     val oidcUrl: String? = null,
     val clientId: String? = null,
     val scope: String? = null,
-    val pageSize: String? = null,
-    val chunkSize: String? = null,
-    val serverTimeoutMilli: String? = null,
 )

@@ -44,6 +44,7 @@ import androidx.lifecycle.lifecycleScope
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataGridCache
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.ObservationChangeTracker
 import com.fieldbook.tracker.database.dao.ObservationDao
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.database.models.ObservationUnitModel
@@ -61,7 +62,9 @@ import com.fieldbook.tracker.utilities.Utils
 import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter
 import com.fieldbook.tracker.viewmodels.DataGridViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -125,7 +128,7 @@ class DataGridActivity : ThemedActivity() {
     // after its one-time auto-scroll-on-load has already fired.
     private var mapLocateTrigger by mutableIntStateOf(0)
 
-    private var mTraits = ArrayList<TraitObject>()
+    private var mapPickerJob: Job? = null
 
     @Inject
     lateinit var database: DataHelper
@@ -485,15 +488,30 @@ class DataGridActivity : ThemedActivity() {
      */
     private fun showMapLayoutPickerDialog() {
         val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
-        val units = database.getAllObservationUnits(studyId) ?: emptyArray<ObservationUnitModel>()
-        val geoCount = units.count { !it.geo_coordinates.isNullOrBlank() }
 
-        val propColumns = database.getAllObservationUnitAttributeNames(studyId).toList()
-        val coreColumns = database.existingObservationUnitCoreColumns
-        val allColumns = (propColumns + coreColumns.filter { it !in propColumns }).toTypedArray()
+        mapPickerJob?.cancel()
+        mapPickerJob = lifecycleScope.launch {
+            try {
+                // Counting geo-tagged units walks every observation unit in the study, so these
+                // reads happen off the main thread before the dialog is built.
+                val (geoCount, allColumns) = withContext(Dispatchers.IO) {
+                    val units = database.getAllObservationUnits(studyId)
+                        ?: emptyArray<ObservationUnitModel>()
+                    val propColumns = database.getAllObservationUnitAttributeNames(studyId).toList()
+                    val coreColumns = database.existingObservationUnitCoreColumns
+                    units.count { !it.geo_coordinates.isNullOrBlank() } to
+                        (propColumns + coreColumns.filter { it !in propColumns }).toTypedArray()
+                }
 
-        if (allColumns.isEmpty()) return
+                if (allColumns.isEmpty()) return@launch
 
+                buildMapLayoutPickerDialog(geoCount, allColumns)
+            } catch (_: CancellationException) {}
+        }
+    }
+
+    /** Builds and shows the Map Settings dialog. Main thread only — no database access here. */
+    private fun buildMapLayoutPickerDialog(geoCount: Int, allColumns: Array<String>) {
         val allColumnsList = allColumns.toList()
         val savedRowAttr = preferences.getString(GeneralKeys.MAP_ROW_ATTR, "") ?: ""
         val savedColAttr = preferences.getString(GeneralKeys.MAP_COL_ATTR, "") ?: ""
@@ -620,61 +638,60 @@ class DataGridActivity : ThemedActivity() {
     private fun loadMapData() {
         isLoading = true
         val studyId = preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
-        val units = database.getAllObservationUnits(studyId) ?: run {
-            isLoading = false
-            return
-        }
 
-        if (units.isEmpty()) {
-            isLoading = false
-            return
-        }
-
-        val traits = database.allTraitObjects.filter { it.visible }
-        mTraits.clear()
-        mTraits.addAll(traits)
-        val totalTraits = traits.size
-
-        val uniqueHeader = preferences.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
-
-        val savedRowAttr = preferences.getString(GeneralKeys.MAP_ROW_ATTR, "") ?: ""
-        val savedColAttr = preferences.getString(GeneralKeys.MAP_COL_ATTR, "") ?: ""
-
-        val unitAttributeNames = database.getAllObservationUnitAttributeNames(studyId).toList()
-        val coreFieldNames = database.existingObservationUnitCoreColumns
-        val allValidNames = unitAttributeNames + coreFieldNames.filter { it !in unitAttributeNames }
-
-        val defaultRowAttr = guessRowAttr(allValidNames) ?: "position_coordinate_y"
-
-        val defaultColAttr = guessColAttr(allValidNames) ?: "position_coordinate_x"
-
-        val rowAttrName = savedRowAttr.ifBlank { defaultRowAttr }
-        val colAttrName = savedColAttr.ifBlank { defaultColAttr }
-
-        val isSpatialMode = (rowAttrName == "geo_coordinates" && colAttrName == "geo_coordinates")
-
-        val invertRow = preferences.getBoolean(GeneralKeys.MAP_INVERT_ROW, false)
-        val invertCol = preferences.getBoolean(GeneralKeys.MAP_INVERT_COL, false)
-
-        val effectiveRowAttr = if (rowAttrName in allValidNames) rowAttrName
-        else if (defaultRowAttr in allValidNames) defaultRowAttr
-        else null
-        val effectiveColAttr = if (colAttrName in allValidNames) colAttrName
-        else if (defaultColAttr in allValidNames) defaultColAttr
-        else null
-
-        val traitIds = traits.map { it.id }.sorted()
-
+        // Everything below runs off the main thread. These queries walk every observation unit
+        // and attribute in the study, so on a large field they are far too slow to run inline
+        // in onCreate.
         lifecycleScope.launch(Dispatchers.IO) {
-            val observationCount = database.getObservationCount(studyId.toString())
+            val units = database.getAllObservationUnits(studyId)
+            if (units.isNullOrEmpty()) {
+                withContext(Dispatchers.Main) { isLoading = false }
+                return@launch
+            }
+
+            val traits = database.allTraitObjects.filter { it.visible }
+            val totalTraits = traits.size
+
+            val uniqueHeader = preferences.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
+
+            val savedRowAttr = preferences.getString(GeneralKeys.MAP_ROW_ATTR, "") ?: ""
+            val savedColAttr = preferences.getString(GeneralKeys.MAP_COL_ATTR, "") ?: ""
+
+            val unitAttributeNames = database.getAllObservationUnitAttributeNames(studyId).toList()
+            val coreFieldNames = database.existingObservationUnitCoreColumns
+            val allValidNames = unitAttributeNames + coreFieldNames.filter { it !in unitAttributeNames }
+
+            val defaultRowAttr = guessRowAttr(allValidNames) ?: "position_coordinate_y"
+
+            val defaultColAttr = guessColAttr(allValidNames) ?: "position_coordinate_x"
+
+            val rowAttrName = savedRowAttr.ifBlank { defaultRowAttr }
+            val colAttrName = savedColAttr.ifBlank { defaultColAttr }
+
+            val isSpatialMode = (rowAttrName == "geo_coordinates" && colAttrName == "geo_coordinates")
+
+            val invertRow = preferences.getBoolean(GeneralKeys.MAP_INVERT_ROW, false)
+            val invertCol = preferences.getBoolean(GeneralKeys.MAP_INVERT_COL, false)
+
+            val effectiveRowAttr = if (rowAttrName in allValidNames) rowAttrName
+            else if (defaultRowAttr in allValidNames) defaultRowAttr
+            else null
+            val effectiveColAttr = if (colAttrName in allValidNames) colAttrName
+            else if (defaultColAttr in allValidNames) defaultColAttr
+            else null
+
+            val traitIds = traits.map { it.id }.sorted()
+
+            // Captured before the query runs, so a write that lands mid-query leaves the snapshot
+            // marked with the older revision and is caught on the next open.
+            val observationsRevision = ObservationChangeTracker.current
             val cached = dataGridCache.getMap(
                 studyId,
                 rowAttrName,
                 colAttrName,
                 invertRow,
                 invertCol,
-                traitIds,
-                observationCount
+                traitIds
             )
             if (cached != null) {
                 withContext(Dispatchers.Main) {
@@ -836,7 +853,7 @@ class DataGridActivity : ThemedActivity() {
                     invertRow = invertRow,
                     invertCol = invertCol,
                     traitIds = traitIds,
-                    observationCount = observationCount,
+                    observationsRevision = observationsRevision,
                     plots = plots,
                     gridRows = maxRow,
                     gridCols = maxCol,
@@ -896,8 +913,15 @@ class DataGridActivity : ThemedActivity() {
         }
     }
 
+    /**
+     * The traits currently rendered as grid columns. [traitIndex] values arriving from the table
+     * are positions in this list, and sorting only reorders rows, so it stays in step.
+     */
+    private fun displayedTraits(): List<TraitObject> =
+        (viewModel.uiState.value as? DataGridViewModel.UiState.Loaded)?.traits ?: emptyList()
+
     private fun navigateFromValueClicked(plotId: String, traitIndex: Int, rep: Int = 1) {
-        val trait = mTraits.getOrNull(traitIndex)
+        val trait = displayedTraits().getOrNull(traitIndex)
         if (trait == null) {
             performNavigation(plotId, traitIndex, rep)
             return
@@ -924,7 +948,7 @@ class DataGridActivity : ThemedActivity() {
         traitIndex: Int,
         observations: List<ObservationModel>
     ) {
-        val trait = mTraits.getOrNull(traitIndex)
+        val trait = displayedTraits().getOrNull(traitIndex)
         val displayItems = observations.map {
             val displayValue = if (trait != null) {
                 valueProcessor.processValue(it.value, trait) ?: it.value

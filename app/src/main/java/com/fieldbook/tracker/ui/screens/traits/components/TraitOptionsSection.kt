@@ -25,8 +25,10 @@ import com.fieldbook.tracker.traits.formats.parameters.BaseFormatParameter
 import com.fieldbook.tracker.traits.formats.parameters.CategoriesParameter
 import com.fieldbook.tracker.traits.formats.parameters.CloseKeyboardParameter
 import com.fieldbook.tracker.traits.formats.parameters.CropImageParameter
+import com.fieldbook.tracker.traits.formats.parameters.DEFAULT_DURATION_SECONDS
 import com.fieldbook.tracker.traits.formats.parameters.DecimalPlacesParameter
 import com.fieldbook.tracker.traits.formats.parameters.DefaultToggleParameter
+import com.fieldbook.tracker.traits.formats.parameters.DurationParameter
 import com.fieldbook.tracker.traits.formats.parameters.InvalidValueParameter
 import com.fieldbook.tracker.traits.formats.parameters.MathSymbolsParameter
 import com.fieldbook.tracker.traits.formats.parameters.AttachMediaParameter
@@ -236,6 +238,7 @@ private fun getParamIcon(param: BaseFormatParameter, trait: TraitObject): Int {
         }
 
         is CategoriesParameter -> R.drawable.ic_trait_categorical
+        is DurationParameter -> R.drawable.timer
         is SeveritiesParameter -> R.drawable.ic_order_numeric_ascending
         is DecimalPlacesParameter -> R.drawable.ic_decimal
         is UnitParameter -> R.drawable.ic_tag_edit
@@ -259,6 +262,14 @@ private fun getParamText(context: Context, param: BaseFormatParameter, trait: Tr
 
         is SaveImageParameter -> context.getString(R.string.trait_detail_chip_transfer_images)
         is SeveritiesParameter -> context.getString(R.string.trait_detail_chip_severities)
+        is DurationParameter -> {
+            val seconds = trait.duration.toIntOrNull() ?: DEFAULT_DURATION_SECONDS
+            context.getString(
+                R.string.trait_detail_chip_duration,
+                "%d:%02d".format(seconds / 60, seconds % 60)
+            )
+        }
+
         else -> param.getName(context).capitalizeFirstLetter()
     }
 }

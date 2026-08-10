@@ -15,7 +15,11 @@ import com.fieldbook.tracker.utilities.CategoryJsonUtil.Companion.encode
 import com.google.android.material.textfield.TextInputEditText
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories
 
-class CategoriesParameter : BaseFormatParameter(
+/**
+ * @param isRequired formats that cannot collect without categories, s.a. pollinator, fail
+ *                      validation until at least one category is defined
+ */
+class CategoriesParameter(private val isRequired: Boolean = false) : BaseFormatParameter(
     nameStringResourceId = R.string.traits_create_categories_title,
     defaultLayoutId = R.layout.list_item_trait_parameter_categories,
     parameter = Parameters.CATEGORIES,
@@ -25,10 +29,11 @@ class CategoriesParameter : BaseFormatParameter(
     ): BaseFormatParameter.ViewHolder {
         val v = LayoutInflater.from(parent.context)
             .inflate(R.layout.list_item_trait_parameter_categories, parent, false)
-        return ViewHolder(v)
+        return ViewHolder(v, isRequired)
     }
 
-    class ViewHolder(itemView: View) : BaseFormatParameter.ViewHolder(itemView),
+    class ViewHolder(itemView: View, private val isRequired: Boolean = false) :
+        BaseFormatParameter.ViewHolder(itemView),
         CategoryAdapter.CategoryListItemOnClick {
 
         private var catList: ArrayList<BrAPIScaleValidValuesCategories> = ArrayList()
@@ -39,6 +44,13 @@ class CategoriesParameter : BaseFormatParameter(
             itemView.findViewById(R.id.list_item_trait_parameter_categories_add_btn)
         val categoriesRv: RecyclerView =
             itemView.findViewById(R.id.list_item_trait_parameter_categories_rv)
+
+        /**
+         * True when a category has been added, or typed but not yet added,
+         * the latter is merged into the trait object on save.
+         */
+        fun hasCategories(): Boolean =
+            catList.isNotEmpty() || valueEt.text?.isNotBlank() == true
 
         private fun setupCategoriesRecyclerView() {
 
@@ -149,7 +161,20 @@ class CategoriesParameter : BaseFormatParameter(
         override fun validate(
             traitRepo: TraitRepository,
             initialTraitObject: TraitObject?
-        ) = ValidationResult()
+        ) = ValidationResult().apply {
+
+            if (isRequired && !hasCategories()) {
+
+                result = false
+
+                error = itemView.context.getString(
+                    R.string.traits_create_warning_categories_required
+                )
+
+                valueEt.error = error
+
+            } else valueEt.error = null
+        }
 
         override fun onCategoryClick(label: String) {
             var scale: BrAPIScaleValidValuesCategories? = null

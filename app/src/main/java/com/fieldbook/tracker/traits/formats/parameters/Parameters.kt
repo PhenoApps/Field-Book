@@ -14,7 +14,8 @@ enum class Parameters {
     SEVERITIES,
     ATTACH_MEDIA,
     ALLOW_OTHER,
-    CANOPY_SENSITIVITY;
+    CANOPY_SENSITIVITY,
+    DURATION;
 
     companion object {
 

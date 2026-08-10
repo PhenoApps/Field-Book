@@ -781,18 +781,17 @@ public class CollectActivity extends ThemedActivity
 
                 if (!isDataLocked()) {
                     triggerTts(naTts);
-                    TraitObject currentTrait = traitBox.getCurrentTrait();
-                    if (currentTrait != null) {
-                        String format = currentTrait.getFormat();
-                        if (Formats.Companion.isCameraTrait(format)) {
-                            ((AbstractCameraTrait) traitLayouts.getTraitLayout(format)).setImageNa();
-                        } else if (Formats.Companion.isSpectralFormat(format)) {
-                            ((SpectralTraitLayout) traitLayouts.getTraitLayout(format)).setNa();
-                        } else {
-                            updateObservation(currentTrait, "NA", null);
-                            setNaText();
-                        }
+
+                    // marking missing overwrites collected data, warn the same way delete does
+                    String dataLossWarning = getTraitLayoutDataLossWarning();
+
+                    if (dataLossWarning != null) {
+                        showDataLossWarning(R.string.confirm_na_title, dataLossWarning,
+                                R.string.dialog_ok, CollectActivity.this::setCurrentTraitNa);
+                        return;
                     }
+
+                    setCurrentTraitNa();
                 }
             }
 
@@ -837,6 +836,15 @@ public class CollectActivity extends ThemedActivity
                                     .show();
                             return;
                         }
+                    }
+
+                    // let the trait layout warn that collected data is about to be removed
+                    String dataLossWarning = getTraitLayoutDataLossWarning();
+
+                    if (dataLossWarning != null) {
+                        showDataLossWarning(R.string.confirm_delete_with_media_title, dataLossWarning,
+                                R.string.delete, CollectActivity.this::performTraitDeleteAfterMediaCheck);
+                        return;
                     }
 
                     // If no media or no current observation, proceed with original behavior
@@ -1387,6 +1395,9 @@ public class CollectActivity extends ThemedActivity
             systemMenu.findItem(R.id.jumpToPlot).setVisible(!preferences.getString(PreferenceKeys.MOVE_TO_UNIQUE_ID, "0").equals("0"));
             systemMenu.findItem(R.id.datagrid).setVisible(preferences.getBoolean(PreferenceKeys.DATAGRID_SETTING, false));
         }
+
+        // apply the appearance preference in case it was changed in settings
+        rangeBox.updateRangeBoxVisibility();
 
         refreshInfoBarAdapter();
 
@@ -3767,6 +3778,44 @@ public class CollectActivity extends ThemedActivity
 
         } catch (Exception e) {
             Log.e(TAG, "Error showing media dialog.", e);
+        }
+    }
+
+    /**
+     * Warning supplied by the current trait layout when an action would discard collected data,
+     * null when the layout has nothing to lose or no trait is selected.
+     */
+    @Nullable
+    private String getTraitLayoutDataLossWarning() {
+        if (getCurrentTrait() == null) return null;
+        return getTraitLayout().getDataLossWarning();
+    }
+
+    private void showDataLossWarning(int titleResId, @NonNull String message, int confirmResId,
+                                     @NonNull Runnable onConfirm) {
+        new AlertDialog.Builder(this, R.style.AppAlertDialog)
+                .setTitle(titleResId)
+                .setMessage(message)
+                .setPositiveButton(confirmResId, (dialog, which) -> onConfirm.run())
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void setCurrentTraitNa() {
+
+        TraitObject currentTrait = traitBox.getCurrentTrait();
+
+        if (currentTrait == null) return;
+
+        String format = currentTrait.getFormat();
+
+        if (Formats.Companion.isCameraTrait(format)) {
+            ((AbstractCameraTrait) traitLayouts.getTraitLayout(format)).setImageNa();
+        } else if (Formats.Companion.isSpectralFormat(format)) {
+            ((SpectralTraitLayout) traitLayouts.getTraitLayout(format)).setNa();
+        } else {
+            updateObservation(currentTrait, "NA", null);
+            setNaText();
         }
     }
 

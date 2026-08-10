@@ -1,15 +1,14 @@
 package org.phenoapps.brapi.ui
 
-import android.content.Context
 import org.json.JSONObject
-import org.phenoapps.brapi.R
+import org.phenoapps.brapi.BrapiAccountConstants
 
 fun defaultBrapiAccountState(
-    context: Context,
     oidcClientId: String = "",
 ): BrapiAccountUiState =
     BrapiAccountUiState(
-        oidcFlow = context.getString(R.string.pheno_brapi_oidc_flow_oauth_implicit),
+        // Stable identifier, not the localized label — this value is persisted and compared.
+        oidcFlow = BrapiAccountConstants.OIDC_FLOW_OAUTH_IMPLICIT,
         brapiVersion = "V2",
         oidcClientId = oidcClientId,
     )
@@ -33,9 +32,9 @@ fun parseBrapiConfig(json: String): BrapiAccountConfig? = runCatching {
         oidcUrl = obj.nonEmptyString("oidcUrl", "oidc"),
         clientId = obj.nonEmptyString("clientId"),
         scope = obj.nonEmptyString("scope"),
-        pageSize = obj.nonEmptyString("pageSize", "ps"),
-        chunkSize = obj.nonEmptyString("chunkSize", "cs"),
-        serverTimeoutMilli = obj.nonEmptyString("serverTimeoutMilli", "st"),
+        // pageSize / chunkSize / serverTimeoutMilli are intentionally not read. Older configs
+        // may still carry them from when a device had a single server; they are device-wide
+        // settings and are left to the scanning device.
     )
 }.getOrNull()
 
@@ -61,17 +60,20 @@ fun BrapiAccountUiState.withConfig(config: BrapiAccountConfig): BrapiAccountUiSt
     )
 
 /**
- * Normalizes a raw OAuth flow value (e.g. from a scanned QR code) to the display string
- * expected by RadioPickerField and BrapiAuthActivity. Returns null when [raw] is null so
- * the caller can fall back to the existing state value.
+ * Normalizes a raw OAuth flow value to one of the stable identifiers in [BrapiAccountConstants].
+ *
+ * Handles the spec-style spellings a shared config (e.g. a scanned QR code) may carry, and
+ * delegates anything else — stable ids, and legacy English display labels stored by older
+ * versions — to the shared normalizer. Returns null when [raw] is null so the caller can fall
+ * back to the existing state value.
  */
 private fun normalizeOidcFlow(raw: String?): String? = when {
     raw == null -> null
     raw.equals("code", ignoreCase = true) ||
-    raw.equals("authorization_code", ignoreCase = true) -> "OAuth2 Authorization Code"
+    raw.equals("authorization_code", ignoreCase = true) -> BrapiAccountConstants.OIDC_FLOW_OAUTH_CODE
     raw.equals("implicit", ignoreCase = true) ||
-    raw.equals("token", ignoreCase = true) -> "OAuth2 Implicit Grant"
-    else -> raw  // already a display string or app-specific value — pass through
+    raw.equals("token", ignoreCase = true) -> BrapiAccountConstants.OIDC_FLOW_OAUTH_IMPLICIT
+    else -> BrapiAccountConstants.normalizeOidcFlow(raw)
 }
 
 fun isValidBrapiUrl(url: String): Boolean {

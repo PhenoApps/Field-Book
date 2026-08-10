@@ -31,6 +31,10 @@ class ValueProcessorFormatAdapter @Inject constructor(
                 return (Formats.DATE.getTraitFormatDefinition() as ValuePresenter).represent(context, dateValue, trait)
             }
 
+            trait.format == Formats.POLLINATOR.getDatabaseName() -> {
+                return (Formats.POLLINATOR.getTraitFormatDefinition() as ValuePresenter).represent(context, value, trait)
+            }
+
             trait.format in CategoricalTraitLayout.POSSIBLE_VALUES -> {
                 return CategoryJsonUtil.processValue(
                     buildMap {

@@ -92,6 +92,7 @@ This project follows the [all-contributors](https://allcontributors.org/) specif
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Stathmin"><img src="https://avatars.githubusercontent.com/u/55657873?v=4?s=100" width="100px;" alt="Stathmin"/><br /><sub><b>Stathmin</b></sub></a><br /><a href="#translation-Stathmin" title="Translation">🌍</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/BrianSmart"><img src="https://avatars.githubusercontent.com/u/106196144?v=4?s=100" width="100px;" alt="Brian Smart"/><br /><sub><b>Brian Smart</b></sub></a><br /><a href="https://github.com/PhenoApps/Field-Book/commits?author=briansmart" title="Code">💻</a> <a href="https://github.com/PhenoApps/Field-Book/commits?author=briansmart" title="Documentation">📖</a></td>
     </tr>
   </tbody>
 </table>

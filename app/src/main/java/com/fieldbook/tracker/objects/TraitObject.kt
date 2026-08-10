@@ -113,6 +113,10 @@ class TraitObject {
         get() = attributeValues.getString(TraitAttributes.CANOPY_SENSITIVITY)
         set(value) = attributeValues.setValue(TraitAttributes.CANOPY_SENSITIVITY, value)
 
+    var duration: String
+        get() = attributeValues.getString(TraitAttributes.DURATION)
+        set(value) = attributeValues.setValue(TraitAttributes.DURATION, value)
+
     companion object {
 
         fun fromJson(json: TraitJson, maxPosition: Int, originalFileName: String) = TraitObject().apply {
@@ -199,7 +203,8 @@ class TraitObject {
                 attachPhoto == that.attachPhoto &&
                 attachVideo == that.attachVideo &&
                 allowOther == that.allowOther &&
-                sensitivity == that.sensitivity
+                sensitivity == that.sensitivity &&
+                duration == that.duration
     }
 
     override fun hashCode(): Int {
@@ -210,7 +215,7 @@ class TraitObject {
             saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms,
             maxDecimalPlaces, mathSymbolsEnabled, allowMulticat, repeatedMeasures,
             autoSwitchPlot, unit, invalidValues, attachAudio, attachPhoto, attachVideo,
-            allowOther, sensitivity
+            allowOther, duration, sensitivity
         )
     }
 
@@ -250,6 +255,7 @@ class TraitObject {
         t.attachVideo = this.attachVideo
         t.allowOther = this.allowOther
         t.sensitivity = this.sensitivity
+        t.duration = this.duration
 
         return t
     }

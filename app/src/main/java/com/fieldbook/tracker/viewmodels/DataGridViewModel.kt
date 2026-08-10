@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fieldbook.tracker.database.DataGridCache
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.ObservationChangeTracker
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.traits.formats.coders.DateJsonCoder
@@ -41,7 +42,14 @@ class DataGridViewModel @Inject constructor(
             val plotIds: List<String>,
             val gridData: List<List<DataGridCache.CellData>>,
             val extraHeaderNames: List<String> = emptyList(),
-            val extraHeaderData: List<List<String>> = emptyList()
+            val extraHeaderData: List<List<String>> = emptyList(),
+            /**
+             * False for the partial states emitted while rows are still streaming in. A row's
+             * position isn't final until every row has loaded, since sorting reorders whatever
+             * has arrived so far — consumers that act on a row index (the auto-scroll) must
+             * wait for this.
+             */
+            val isComplete: Boolean = true
         ) : UiState()
         object Empty : UiState()
         object Error : UiState()
@@ -200,7 +208,8 @@ class DataGridViewModel @Inject constructor(
             plotIds          = indices.map { raw.plotIds[it] },
             gridData         = indices.map { raw.gridData[it] },
             extraHeaderNames = raw.extraHeaderNames,
-            extraHeaderData  = indices.map { raw.extraHeaderData.getOrNull(it) ?: emptyList() }
+            extraHeaderData  = indices.map { raw.extraHeaderData.getOrNull(it) ?: emptyList() },
+            isComplete       = raw.isComplete
         )
     }
 
@@ -234,29 +243,29 @@ class DataGridViewModel @Inject constructor(
                 val visibleTraits = allTraitObjects.filter { it.visible }
                 // Order matters here (not just membership) so the cache key changes when the
                 // user reorders traits, even if the set of visible traits is unchanged.
-                val traitIds = visibleTraits.map { it.id }
+                val traitsFingerprint = dataGridCache.fingerprintTraits(visibleTraits)
+
+                // Captured before the query runs, so a write that lands mid-query leaves the
+                // snapshot marked with the older revision and is caught on the next open.
+                val observationsRevision = ObservationChangeTracker.current
 
                 // Cache check
-                val snapshot = dataGridCache.get(studyId, traitIds, rowHeader, extraHeaders)
+                val snapshot = dataGridCache.get(studyId, traitsFingerprint, rowHeader, extraHeaders)
                 if (snapshot != null) {
-                    val currentCount = database.getObservationCount(studyId.toString())
-                    if (currentCount == snapshot.observationCount) {
-                        Log.d(TAG, "Cache hit. Serving ${snapshot.rowHeaders.size} rows from cache.")
-                        _rawUiState.value = UiState.Loaded(
-                            traits = snapshot.traits,
-                            rowHeaders = snapshot.rowHeaders,
-                            plotIds = snapshot.plotIds,
-                            gridData = snapshot.gridData,
-                            extraHeaderNames = snapshot.extraHeaders,
-                            extraHeaderData = snapshot.extraHeaderData
-                        )
-                        return@launch
-                    }
-                    Log.d(TAG, "Cache stale (obs count changed). Reloading.")
+                    Log.d(TAG, "Cache hit. Serving ${snapshot.rowHeaders.size} rows from cache.")
+                    _rawUiState.value = UiState.Loaded(
+                        traits = snapshot.traits,
+                        rowHeaders = snapshot.rowHeaders,
+                        plotIds = snapshot.plotIds,
+                        gridData = snapshot.gridData,
+                        extraHeaderNames = snapshot.extraHeaders,
+                        extraHeaderData = snapshot.extraHeaderData
+                    )
+                    return@launch
                 }
 
-                // Full reload: single batch query for repeated-value counts
-                val repeatCounts = database.getBatchRepeatCounts(studyId.toString())
+                // Full reload: single batch query for repeated-value counts and latest values
+                val repeatSummaries = database.getBatchRepeatSummaries(studyId.toString())
 
                 // Only pivot the attribute columns the grid actually displays.
                 val requiredAttributes = (listOf(uniqueHeader, rowHeader) + extraHeaders).distinct()
@@ -316,8 +325,23 @@ class DataGridViewModel @Inject constructor(
                                 return@mapIndexed DataGridCache.CellData("", id)
                             }
 
-                            val value = cursor.getString(colIdx) ?: ""
-                            val hasRepeats = (repeatCounts[Pair(id, variable.id)] ?: 0) > 1
+                            val repeats = repeatSummaries[Pair(id, variable.id)]
+
+                            // Repeats only collapse to an ellipsis for traits that actually have
+                            // repeated measures enabled — those get a picker dialog on tap. A trait
+                            // without the parameter can still accumulate repeats (BrAPI import, or
+                            // the parameter disabled after collection); there the latest rep is the
+                            // meaningful value, so show it rather than an ellipsis the user can't
+                            // expand.
+                            if (repeats != null && variable.repeatedMeasures) {
+                                return@mapIndexed DataGridCache.CellData("...", id)
+                            }
+
+                            // The pivoted column is MAX(value) across reps, which is lexicographic
+                            // rather than latest, so prefer the summary's highest-rep value.
+                            val value = repeats?.latestValue
+                                ?: cursor.getString(colIdx)
+                                ?: ""
                             var cellValue = value
 
                             if (variable.format in setOf("categorical", "qualitative")) {
@@ -340,8 +364,7 @@ class DataGridViewModel @Inject constructor(
                                 }
                             }
 
-                            if (hasRepeats) DataGridCache.CellData("...", id)
-                            else DataGridCache.CellData(cellValue, id)
+                            DataGridCache.CellData(cellValue, id)
                         }
 
                         gridData.add(dataList)
@@ -349,6 +372,7 @@ class DataGridViewModel @Inject constructor(
                         // Progressive emit: show grid after first batch so user sees data quickly
                         if (gridData.size % PROGRESSIVE_BATCH_SIZE == 0) {
                             _rawUiState.value = UiState.Loaded(
+                                isComplete = false,
                                 traits = visibleTraits,
                                 rowHeaders = rowHeaders.toList(),
                                 plotIds = plotIds.toList(),
@@ -369,14 +393,13 @@ class DataGridViewModel @Inject constructor(
                 }
 
                 // Store completed result in cache
-                val obsCount = database.getObservationCount(studyId.toString())
                 dataGridCache.put(
                     DataGridCache.GridSnapshot(
                         studyId = studyId,
-                        traitIds = traitIds,
+                        traitsFingerprint = traitsFingerprint,
                         rowHeader = rowHeader,
                         extraHeaders = extraHeaders,
-                        observationCount = obsCount,
+                        observationsRevision = observationsRevision,
                         traits = visibleTraits,
                         rowHeaders = rowHeaders.toList(),
                         plotIds = plotIds.toList(),

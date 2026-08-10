@@ -4,12 +4,14 @@ import android.app.AlertDialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.OneShotPreDrawListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -40,6 +42,18 @@ public class StatisticsActivity extends ThemedActivity {
     RecyclerView rvStatisticsCard;
     private ToggleVariable toggleVariable = ToggleVariable.TOTAL;
     AlertDialog loadingDialog;
+
+    /**
+     * Once the loading dialog is actually on screen it stays there at least this long. Without a
+     * floor, a fast load shows and hides it within a frame or two, which registers as a flicker
+     * rather than as feedback.
+     */
+    private static final long LOADING_MINIMUM_VISIBLE_MS = 500L;
+
+    private final Handler loadingHandler = new Handler(Looper.getMainLooper());
+    /** Uptime at which the dialog first drew, or 0 while it has yet to be drawn. */
+    private long loadingVisibleAtMs = 0L;
+    private Runnable pendingLoadingDismiss;
     public enum ToggleVariable {
         TOTAL,
         YEAR,
@@ -104,6 +118,20 @@ public class StatisticsActivity extends ThemedActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        // A delayed dismiss must not outlive the activity, or it fires against a destroyed
+        // window. Dismissing here also avoids leaking the dialog if the minimum has not elapsed.
+        if (pendingLoadingDismiss != null) {
+            loadingHandler.removeCallbacks(pendingLoadingDismiss);
+            pendingLoadingDismiss = null;
+        }
+        if (loadingDialog != null && loadingDialog.isShowing()) {
+            loadingDialog.dismiss();
+        }
+        super.onDestroy();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_statistics, menu);
         return true;
@@ -134,10 +162,50 @@ public class StatisticsActivity extends ThemedActivity {
      * Displays the loading screen and loads the statistics asynchronously
      */
     public void loadData() {
+        showLoadingDialog();
+
+        loadingHandler.post(this::setSeasons);
+    }
+
+    private void showLoadingDialog() {
+        if (pendingLoadingDismiss != null) {
+            loadingHandler.removeCallbacks(pendingLoadingDismiss);
+            pendingLoadingDismiss = null;
+        }
+
+        loadingVisibleAtMs = 0L;
         loadingDialog.show();
 
-        Handler mainHandler = new Handler(Looper.getMainLooper());
-        mainHandler.post(this::setSeasons);
+        // The minimum is timed from the first draw rather than from show(). setSeasons() and the
+        // adapter's row binding both run on the main thread, so the dialog cannot be drawn until
+        // the load has already finished — a minimum measured from show() would elapse entirely
+        // while the thread was blocked and the dialog would still vanish on its first frame.
+        View decorView = loadingDialog.getWindow() != null
+                ? loadingDialog.getWindow().getDecorView()
+                : null;
+        if (decorView != null) {
+            OneShotPreDrawListener.add(
+                    decorView, () -> loadingVisibleAtMs = SystemClock.uptimeMillis());
+        }
+    }
+
+    private void dismissLoadingDialog() {
+        if (!loadingDialog.isShowing()) return;
+
+        // A dialog that has not drawn yet counts as zero time on screen, so it waits the full
+        // minimum rather than being dismissed before the user ever sees it.
+        long visibleForMs = loadingVisibleAtMs == 0L
+                ? 0L
+                : SystemClock.uptimeMillis() - loadingVisibleAtMs;
+        long remainingMs = Math.max(0L, LOADING_MINIMUM_VISIBLE_MS - visibleForMs);
+
+        pendingLoadingDismiss = () -> {
+            pendingLoadingDismiss = null;
+            if (!isFinishing() && !isDestroyed() && loadingDialog.isShowing()) {
+                loadingDialog.dismiss();
+            }
+        };
+        loadingHandler.postDelayed(pendingLoadingDismiss, remainingMs);
     }
 
     public void setSeasons() {
@@ -162,7 +230,7 @@ public class StatisticsActivity extends ThemedActivity {
         rvStatisticsCard.setAdapter(new StatisticsAdapter(this, seasons, toggleVariable));
 
         // Dismiss the dialog after the recycler view loads all its children
-        rvStatisticsCard.post(() -> loadingDialog.dismiss());
+        rvStatisticsCard.post(this::dismissLoadingDialog);
     }
 
     private void setupStatisticsInsets(Toolbar toolbar) {

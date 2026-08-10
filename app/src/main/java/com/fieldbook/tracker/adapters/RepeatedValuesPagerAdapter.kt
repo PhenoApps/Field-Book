@@ -11,7 +11,6 @@ import androidx.viewpager.widget.PagerAdapter.POSITION_NONE
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.views.RepeatedValuesView
-import com.mikepenz.fastadapter.adapters.ItemAdapter.items
 
 /**
  * Used in the repeated values view.

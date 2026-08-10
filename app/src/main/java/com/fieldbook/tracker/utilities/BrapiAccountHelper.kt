@@ -20,5 +20,12 @@ class BrapiAccountHelper @Inject constructor(
         displayName = PreferenceKeys.BRAPI_DISPLAY_NAME,
         accessToken = PreferenceKeys.BRAPI_TOKEN,
         idToken = PreferenceKeys.BRAPI_ID_TOKEN,
+        // BrAPIService builds request URLs and BrapiListFilterActivity re-authorizes from these
+        // mirrors, so they have to follow whichever account is active.
+        oidcUrl = PreferenceKeys.BRAPI_OIDC_URL,
+        oidcFlow = PreferenceKeys.BRAPI_OIDC_FLOW,
+        oidcClientId = PreferenceKeys.BRAPI_OIDC_CLIENT_ID,
+        oidcScope = PreferenceKeys.BRAPI_OIDC_SCOPE,
+        brapiVersion = PreferenceKeys.BRAPI_VERSION,
     ),
 )

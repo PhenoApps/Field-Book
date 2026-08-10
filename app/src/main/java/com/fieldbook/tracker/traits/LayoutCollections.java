@@ -35,6 +35,7 @@ public class LayoutCollections {
         traitLayouts.add(new GreenSeekerTraitLayout(_activity));
         traitLayouts.add(new ScaleTraitLayout(_activity));
         traitLayouts.add(new CanopyCoverTraitLayout(_activity));
+        traitLayouts.add(new PollinatorTraitLayout(_activity));
     }
 
     /**

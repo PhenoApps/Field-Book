@@ -83,4 +83,5 @@ object ObservationVariableAttributeDetailsView {
     const val ATTACH_AUDIO = "attachAudio"
     const val ALLOW_OTHER = "allowOther"
     const val CANOPY_SENSITIVITY = "canopySensitivity"
+    const val DURATION = "duration"
 }

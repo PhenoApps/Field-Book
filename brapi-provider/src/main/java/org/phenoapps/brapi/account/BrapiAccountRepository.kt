@@ -37,8 +37,58 @@ open class BrapiAccountRepository(
         return getAccountByUrl(serverUrl)
     }
 
-    fun setActiveAccount(serverUrl: String) {
-        preferences.edit().putString(preferenceKeys.baseUrl, normalizeUrl(serverUrl)).apply()
+    /**
+     * Makes [serverUrl] the active account and repoints every preference mirror at it.
+     *
+     * Writing only the base URL is not enough: the mirrors for BrAPI version and OIDC config are
+     * what request building and re-authorization still read, so leaving them behind means the new
+     * account is addressed with the previous one's version path and re-authorized against the
+     * previous one's provider.
+     *
+     * Returns true when this actually changed which server is active, so callers can drop data
+     * cached from the previous one. Re-selecting the account that is already active returns false
+     * — the mirrors are still refreshed, but nothing server-specific has gone stale.
+     */
+    fun setActiveAccount(serverUrl: String): Boolean {
+        val normalized = normalizeUrl(serverUrl)
+        val changed = !isActiveAccount(normalized)
+        preferences.edit().putString(preferenceKeys.baseUrl, normalized).apply()
+        getAccountByUrl(normalized)?.let { syncActiveAccountPrefs(it) }
+        return changed
+    }
+
+    /**
+     * Mirrors [account]'s stored config into the host's SharedPreference keys.
+     *
+     * Only keys the host declared in [preferenceKeys] are written, and only for user data the
+     * account actually carries — a missing value leaves the existing mirror alone rather than
+     * blanking it.
+     */
+    fun syncActiveAccountPrefs(account: Account) {
+        val am = AccountManager.get(context)
+        val editor = preferences.edit()
+
+        fun mirror(prefKey: String?, userDataKey: String) {
+            if (prefKey.isNullOrEmpty()) return
+            am.getUserData(account, userDataKey)?.let { editor.putString(prefKey, it) }
+        }
+
+        mirror(preferenceKeys.baseUrl, BrapiAccountConstants.KEY_SERVER_URL)
+        mirror(preferenceKeys.displayName, BrapiAccountConstants.KEY_DISPLAY_NAME)
+        mirror(preferenceKeys.oidcUrl, BrapiAccountConstants.KEY_OIDC_URL)
+        mirror(preferenceKeys.oidcFlow, BrapiAccountConstants.KEY_OIDC_FLOW)
+        mirror(preferenceKeys.oidcClientId, BrapiAccountConstants.KEY_OIDC_CLIENT_ID)
+        mirror(preferenceKeys.oidcScope, BrapiAccountConstants.KEY_OIDC_SCOPE)
+        mirror(preferenceKeys.brapiVersion, BrapiAccountConstants.KEY_BRAPI_VERSION)
+
+        editor.apply()
+    }
+
+    /** Whether [serverUrl] is the account the preference mirrors currently describe. */
+    fun isActiveAccount(serverUrl: String): Boolean {
+        val normalized = runCatching { normalizeUrl(serverUrl) }.getOrDefault(serverUrl)
+        val activeUrl = preferences.getString(preferenceKeys.baseUrl, "") ?: ""
+        return activeUrl.isNotEmpty() && (activeUrl == serverUrl || activeUrl == normalized)
     }
 
     fun hasActiveAccount(): Boolean {
@@ -186,17 +236,37 @@ open class BrapiAccountRepository(
             .apply()
     }
 
+    /**
+     * Signs [serverUrl] out: invalidates its cached auth token and drops its id token.
+     *
+     * The [preferenceKeys] token mirrors describe whichever account is currently active, so they
+     * are cleared only when [serverUrl] is that account. Clearing them while signing out some
+     * other account would sign the active account out of every caller still reading the mirrors.
+     *
+     * Accounts owned by another package can't be modified here, but their mirrors are still
+     * cleared when they are the active account — so signing out a shared account takes effect
+     * locally even though its AccountManager entry is left untouched.
+     *
+     * The active account itself is left selected; deactivating it is the caller's decision.
+     */
     fun clearToken(serverUrl: String) {
         val am = AccountManager.get(context)
-        val account = getWritableAccountByUrl(am, serverUrl) ?: return
-        am.peekAuthToken(account, BrapiAccountConstants.AUTH_TOKEN_TYPE)?.let { token ->
-            am.invalidateAuthToken(BrapiAccountConstants.ACCOUNT_TYPE, token)
+        val normalizedUrl = runCatching { normalizeUrl(serverUrl) }.getOrDefault(serverUrl)
+
+        getWritableAccountByUrl(am, serverUrl)?.let { account ->
+            am.peekAuthToken(account, BrapiAccountConstants.AUTH_TOKEN_TYPE)?.let { token ->
+                am.invalidateAuthToken(BrapiAccountConstants.ACCOUNT_TYPE, token)
+            }
+            am.setUserData(account, BrapiAccountConstants.KEY_ID_TOKEN, null)
         }
-        am.setUserData(account, BrapiAccountConstants.KEY_ID_TOKEN, null)
-        preferences.edit()
-            .remove(preferenceKeys.accessToken)
-            .remove(preferenceKeys.idToken)
-            .apply()
+
+        val activeUrl = preferences.getString(preferenceKeys.baseUrl, "") ?: ""
+        if (activeUrl == serverUrl || activeUrl == normalizedUrl) {
+            preferences.edit()
+                .remove(preferenceKeys.accessToken)
+                .remove(preferenceKeys.idToken)
+                .apply()
+        }
     }
 
     fun removeAccount(serverUrl: String) {

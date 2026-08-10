@@ -11,7 +11,6 @@ import android.widget.AdapterView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.documentfile.provider.DocumentFile;
-import androidx.preference.PreferenceManager;
 
 import com.bytehamster.lib.preferencesearch.SearchConfiguration;
 import com.bytehamster.lib.preferencesearch.SearchPreference;
@@ -37,7 +36,6 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class PreferencesFragment extends BasePreferenceFragment implements NearbyShareUtil.FileHandler {
 
-    private PreferenceManager prefMgr;
     private Context context;
     private SearchPreference searchPreference;
 
@@ -49,9 +47,9 @@ public class PreferencesFragment extends BasePreferenceFragment implements Nearb
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-        prefMgr = getPreferenceManager();
-        prefMgr.setSharedPreferencesName(GeneralKeys.SHARED_PREF_FILE_NAME);
-
+        // No setSharedPreferencesName() here on purpose: every reader in the app goes through
+        // PreferenceManager.getDefaultSharedPreferences(), so pointing this screen at a separate
+        // file would write settings nowhere anything reads them.
         setPreferencesFromResource(R.xml.preferences, rootKey);
 
         searchPreference = findPreference("searchPreference");
@@ -63,11 +61,14 @@ public class PreferencesFragment extends BasePreferenceFragment implements Nearb
         config.index(R.xml.preferences_theme);
         config.index(R.xml.preferences_behavior);
         config.index(R.xml.preferences_brapi);
+        config.index(R.xml.preferences_brapi_advanced);
         config.index(R.xml.preferences_system);
         config.index(R.xml.preferences_profile);
         config.index(R.xml.preferences_sounds);
         config.index(R.xml.preferences_experimental);
         config.index(R.xml.preferences_location);
+        config.index(R.xml.preferences_features);
+        config.index(R.xml.preferences_storage);
 
         if (getActivity() != null && ((PreferencesActivity) getActivity()).getSupportActionBar() != null) {
             ((PreferencesActivity) this.getActivity()).getSupportActionBar().setTitle(getString(R.string.settings_advanced));

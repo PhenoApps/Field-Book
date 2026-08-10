@@ -61,6 +61,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -702,9 +703,21 @@ public class DataHelper {
 
     public FieldObject getFieldObject(Integer studyId) {
 
+        return getFieldObject(studyId, true);
+    }
+
+    /**
+     * Loads a study. Its trait details carry every observation value recorded against the study,
+     * so callers that never read them should pass false rather than paying to build and discard
+     * them.
+     */
+    public FieldObject getFieldObject(Integer studyId, boolean loadTraitDetails) {
+
         open();
 
-        List<FieldObject.TraitDetail> traitDetails = getTraitDetailsForStudy(studyId);
+        List<FieldObject.TraitDetail> traitDetails = loadTraitDetails
+                ? getTraitDetailsForStudy(studyId)
+                : Collections.emptyList();
 
         return StudyDao.Companion.getFieldObject(
                 studyId,
@@ -1463,18 +1476,11 @@ public class DataHelper {
         return ObservationDao.Companion.getAllRepeatedValues(studyId, plotId, traitDbId);
     }
 
-    public java.util.Map<kotlin.Pair<String, String>, Integer> getBatchRepeatCounts(String studyId) {
+    public java.util.Map<kotlin.Pair<String, String>, ObservationDao.RepeatSummary> getBatchRepeatSummaries(String studyId) {
 
         open();
 
-        return ObservationDao.Companion.getRepeatCountsForStudy(studyId);
-    }
-
-    public int getObservationCount(String studyId) {
-
-        open();
-
-        return ObservationDao.Companion.getObservationCount(studyId);
+        return ObservationDao.Companion.getRepeatSummariesForStudy(studyId);
     }
 
     public String getObservationUnitPropertyByPlotId(String uniqueName, String column, String uniqueId) {

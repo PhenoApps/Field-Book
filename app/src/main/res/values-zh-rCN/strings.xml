@@ -14,21 +14,53 @@
     <string name="dialog_import">导入</string>
     <string name="dialog_warning">警告</string>
     <string name="dialog_save">保存</string>
+    <string name="dialog_go">转至</string>
     <string name="dialog_save_error_title">保存时出错</string>
+    <string name="dialog_back">返回</string>
+    <string name="dialog_next">下一个</string>
     <string name="dialog_scan">扫描</string>
+    <string name="dialog_sort_by">排序</string>
+    <string name="dialog_enable">启用</string>
     <string name="dialog_delete">删除</string>
+    <string name="dialog_accept">接受</string>
+    <string name="dialog_exit">退出</string>
     <string name="barcode_scanner_text">扫描条形码</string>
     <!-- Toolbar -->
+    <string name="appbar_more_options">更多选项</string>
+    <string name="appbar_back">返回</string>
     <!-- Startup  -->
     <string name="startup_sample_data_title">示例数据</string>
     <string name="startup_sample_data_message">加载示例数据？</string>
     <!-- App Intro -->
+    <string name="app_intro_intro_title_slide1">欢迎使用 Field Book</string>
+    <string name="app_intro_intro_summary_slide1">传统上，在田间采集数据需要手写并从纸质笔记本中转录。Field Book 作为一种数字化数据采集解决方案，在提高采集速度的同时，还能确保更高的数据完整性。</string>
+    <string name="app_intro_intro_title_slide2">功能和自定义</string>
+    <string name="app_intro_intro_summary_slide2">数据通过Field Book中的自定义性状布局进行录入，以简化数据输入并最大限度地减少错误。。\n\n 默认情况下，收集到的数据是本地存储的。Field Book同时支持建构API并将数据发送到与BrAPI兼容的系统。</string>
+    <string name="app_intro_required_setup_title">必要设置</string>
+    <string name="app_intro_required_setup_summary">要开始使用Field Book，请为应用程序授予必要的权限，然后定义存储数据的文件夹。</string>
+    <string name="app_intro_permissions_title">权限</string>
+    <string name="app_intro_permissions_warning">请授予必要的权限</string>
+    <string name="app_intro_storage_title">定义存储设置</string>
+    <string name="app_intro_storage_summary">定义存储您数据的文件夹。</string>
+    <string name="app_intro_storage_warning">请设置存储位置</string>
+    <string name="app_intro_required_optional_title">可选设定</string>
+    <string name="app_intro_required_optional_summary">这些可选设置自定义Field Book，可以在设置中进行调整。</string>
+    <string name="app_intro_load_sample_data_title">加载示例数据</string>
+    <string name="app_intro_load_sample_data_summary">导入一个包含示例田区和性状的示例数据库。</string>
     <string name="app_intro_tutorial_title">教程</string>
+    <string name="app_intro_tutorial_summary">在顶部工具栏中添加描述整个应用程序的功能的帮助图标。</string>
+    <string name="app_intro_high_contrast_title">高对比度主题</string>
+    <string name="app_intro_high_contrast_summary">启用高对比度主题以提高墨水屏设备的可见性。</string>
     <!-- Storage Definer -->
+    <string name="storage_definer_title">存储位置</string>
+    <string name="storage_definer_summary">请选择或创建一个可用于存储应用数据的文件夹。</string>
+    <string name="define_button_text">选择文件夹</string>
     <!-- Permissions  -->
+    <string name="permission_rationale_storage">访问设备的文件是必需的。</string>
     <string name="permission_rationale_storage_import">导入文件需要访问设备上的文件</string>
     <string name="permission_rationale_storage_export">导出数据需要访问设备上的文件。</string>
     <string name="permission_rationale_trait_features">采集数据需要访问设备上的文件，麦克风和相机。</string>
+    <string name="permission_ask_bluetooth">请接受蓝牙权限。</string>
     <!-- Config Activity  -->
     <string name="settings_fields">地块</string>
     <string name="settings_traits">性状</string>
@@ -36,59 +68,202 @@
     <string name="settings_export">导出</string>
     <string name="settings_advanced">设置</string>
     <string name="settings_profile">说明</string>
+    <string name="settings_statistics">统计信息</string>
     <!-- Config Activity Fuzzy Search  -->
+    <string name="act_config_fuzzy_search_failed">数据库无法通过代码检索田区或小区: %s</string>
+    <string name="act_config_fuzzy_search_error">搜索 %s 时发生错误</string>
+    <string name="act_config_search_fab_content_description">搜索所有田区和小区以加载/导航到条形码项目。</string>
     <!-- File manager  -->
     <string name="import_source_local">本地存储</string>
     <string name="import_source_cloud">云端存储</string>
     <string name="import_source_ask">总是询问</string>
     <string name="import_dialog_importing">请稍等...</string>
     <string name="import_error_general">导入错误</string>
+    <string name="act_file_explorer_no_file_error">找不到Field Book目录。</string>
     <!-- Warnings/Catches -->
     <string name="warning_field_missing">地块没有载入。请载入地块再采集数据。</string>
     <string name="warning_traits_missing">无性状存在。请先创建性状，再采集数据。</string>
     <!-- Changelog -->
     <string name="changelog_title">更改记录</string>
     <!--  Field Grouping  -->
+    <string name="group_archived_value">已归档</string>
+    <string name="fields_ungrouped">已取消群组</string>
+    <string name="dialog_group_options">分组选项</string>
+    <string name="group_existing">现有的群组</string>
+    <string name="group_archive">归档</string>
+    <string name="group_new">新群组</string>
+    <string name="group_remove">從群組中移除</string>
+    <string name="create_new_group">创建新群组</string>
+    <string name="dialog_group_name">群组名称</string>
+    <string name="dialog_group_name_warning">田区名称不能为空</string>
+    <string name="menu_group">群组</string>
+    <string name="menu_archive">归档</string>
+    <string name="menu_groups_toggle">切换群组可见性</string>
+    <string name="group_toggle_icon">切换群组</string>
+    <string name="archived_fields">已归档的田区</string>
+    <string name="menu_unarchive">从归档中删除</string>
+    <string name="menu_collapse_all">全部收起</string>
+    <string name="menu_expand_all">全部展开</string>
+    <string name="archive_active_field_title">将活动的田区归档？</string>
+    <string name="archive_active_field_message">您已选中要归档的活动田区。如果继续，将不再有活动田区。是否要继续？</string>
+    <string name="archive_others">將其他归档</string>
+    <string name="dialog_unarchive_field_title">取消归档田区？</string>
+    <string name="dialog_unarchive_field_message">此田区目前已归档。如果您继续，此田区将被取消归档并成为活动田区。您确定要继续吗？</string>
     <!-- FIELDS -->
     <!-- General -->
+    <string name="menu_fields_sort_list">排序田区列表</string>
+    <string name="fields_sort_reset">重置</string>
+    <string name="fields_sort_by_name">名称</string>
+    <string name="fields_sort_by_import_format">导入格式</string>
+    <string name="fields_sort_by_import_date">导入日期</string>
+    <string name="fields_sort_by_edit_date">编辑日期</string>
+    <string name="fields_sort_by_sync_date">同步日期</string>
+    <string name="fields_sort_by_export_date">导出日期</string>
+    <string name="list_item_field_popup_menu_content_description">打开被选中田区的菜单。</string>
+    <string name="selected_count">已选择 %1$d</string>
+    <string name="fields_select_all">全选</string>
+    <string name="field_generic_observation_level">记录</string>
+    <string name="field_observation_count_format">%1$s %2$s</string>
     <!-- Sort -->
+    <string name="field_sort_entries">排序</string>
+    <string name="sort_dialog_saved">排序已更新</string>
+    <string name="sort_dialog_error_saving">更新排序错误</string>
+    <string name="list_item_field_sort_delete_content_description">删除排序属性。</string>
+    <string name="dialog_field_sort_title">排序条目</string>
+    <string name="list_item_field_sort_drag_content_description">拖动以移动项目。</string>
+    <string name="dialog_field_sort_no_attributes_found">找不到特性。</string>
+    <string name="dialog_field_sort_no_more_attributes_found">已使用所有属性。</string>
+    <string name="dialog_field_sort_delete_all_content_description">删除所有排序条目。</string>
+    <string name="dialog_field_sort_toggle_order_content_description">反转排序。</string>
+    <string name="dialog_field_sort_add_content_description">打开对话框以添加一个新属性来排序。</string>
     <!-- Modify -->
+    <string name="fields_rename_study">重新命名</string>
     <string name="fields_export">导出</string>
+    <string name="fields_archive">归档</string>
     <!-- Delete -->
     <string name="fields_delete">删除</string>
     <string name="fields_delete_study">删除地块</string>
     <string name="fields_delete_study_confirmation">你确信要删除这个地块吗？它将删除这个地块的全部数据！</string>
+    <string name="fields_delete_archive_instead">以归档来取代</string>
+    <string name="fields_delete_permanent_warning">删除田区是永久并无法撤消的。你想要以归档来取代删除吗？</string>
+    <plurals name="fields_delete_confirmation">
+        <item quantity="other">您确定要删除这些田区： %s？</item>
+    </plurals>
     <!-- Import -->
+    <string name="fields_new_button_content_description">添加新田区。</string>
+    <string name="fields_new_dialog_title">新田区</string>
+    <string name="fields_new_create_field">新建</string>
     <string name="import_dialog_unique">唯一标识符</string>
     <string name="import_dialog_primary">主要顺序</string>
     <string name="import_dialog_secondary">次要顺序</string>
+    <string name="import_dialog_sort">排序</string>
     <string name="import_error_unsupported">尚不支持此文件格式</string>
+    <string name="import_error_columns_replaced">列名包含非法字符，在导入时将被替换。</string>
     <string name="import_error_column_name">导入文件的列名称不能是：</string>
     <string name="import_error_unique_characters_illegal">所选列含有不能用作唯一标识的字符</string>
     <string name="import_error_column_choice">这些列不能用于同一个事项</string>
     <string name="import_error_unique">唯一标识包含重复项或被另一个文件使用了</string>
     <string name="import_error_format_field">只有CSV或XLS文件可作为地块导入</string>
+    <string name="act_field_editor_no_suitable_columns_error">导入的文件中没有合适的列可选择。</string>
+    <string name="import_runnable_db_failed_to_switch">数据库在切换田区時失败。</string>
+    <string name="import_runnable_create_field_data_failed">无法在文件中为行 %d 创建田区数据。</string>
+    <string name="import_runnable_duplicates_skipped">发现重复列，只使用第一个实例。</string>
     <string name="fields_study_exists_message">地块已经存在。</string>
+    <string name="fields_study_and_obs_exists_message">此田区已输入到此观察级别。</string>
+    <string name="act_field_editor_failed_to_read_columns">Field Book无法加载文件。</string>
+    <string name="act_field_editor_load_file_failed">文件加载时发生错误。</string>
     <string name="act_field_editor_file_open_failed">打开文件失败。</string>
     <!-- Field Creator  -->
+    <string name="field_creator_activity_toolbar_title">创建新田区</string>
+    <string name="field_creator_size_title">田区详细信息</string>
+    <string name="field_creator_start_corner_title">起始角</string>
+    <string name="field_creator_pattern_title">行走模式</string>
+    <string name="field_creator_direction_title">步行方向</string>
+    <string name="field_creator_preview_title">审查</string>
+    <string name="field_creator_exit_dialog_title">退出田区创建器</string>
+    <string name="field_creator_exit_dialog_message">您确定要退出吗？您的进度将会丢失。</string>
+    <string name="field_creator_creation_in_progress">田区建立中，请稍后</string>
+    <string name="field_creator_size_field_name_hint">田区名称</string>
+    <string name="field_creator_size_rows_hint">行</string>
+    <string name="field_creator_size_columns_hint">列</string>
+    <string name="field_name_required_error">田区名称为必填项</string>
+    <string name="field_name_exists_error">田区名称已存在</string>
+    <string name="field_creator_positive_number_error">必须为正数</string>
+    <string name="field_creator_rows_exceeded_error">不能超过 %s</string>
+    <string name="field_creator_cols_exceeded_error">不能超过 %s</string>
+    <string name="field_creator_total_plots_exceeded_error">总小区數不能超过 %1$s。当前总计： %2$s</string>
+    <string name="field_creation_failed_error">新建田区失败</string>
+    <string name="field_creator_start_point_instruction">点击一个角以选择起始点</string>
+    <string name="field_dimensions_format">田区: %d × %d</string>
+    <string name="field_creator_pattern_linear">线性</string>
+    <string name="field_creator_pattern_linear_summary">每行/列后遵循相同方向</string>
+    <string name="field_creator_stepper_pattern">行走模式</string>
+    <string name="field_creator_stepper_direction">步行方向</string>
     <!-- Geo-Navigate to Field -->
     <!-- Field Details -->
+    <string name="illegal_characters_message">发现非法字符: %1$s</string>
+    <string name="name_conflict_message">\"%1$s\" 已被用作另一个田区的 %2$s。</string>
+    <string name="name_conflict_import_name">导入名称</string>
+    <string name="name_conflict_display_name">显示名称</string>
+    <string name="dialog_att_chooser_title_default">选择一个属性</string>
+    <string name="search_attribute_dialog_title">设置搜索ID</string>
+    <string name="dialog_att_chooser_unique_attributes">唯一属性</string>
+    <string name="search_attribute_apply_to_all">将选择应用到所有符合条件的田区</string>
+    <string name="search_attribute_updated">搜索属性已更新</string>
+    <string name="search_attribute_updated_all">%1$d 田区的搜索属性已更新</string>
+    <string name="search_multiple_matches_found">找到 %1$d 匹配的小区，显示第一个。</string>
     <!--    <string name="field_default_sort_order">import order</string>-->
+    <string name="field_data_title">数据</string>
+    <string name="field_trait_observation_total">“%d” 观测值</string>
     <!-- Field Detail Charts -->
+    <string name="chart_no_data">没有可用于图表的数据</string>
+    <string name="chart_incompatible_format">此格式的性状无法用于图表</string>
+    <string name="chart_excess_data">图表有太多不同的值</string>
     <!-- Semantic dates -->
+    <string name="today">今天</string>
+    <string name="yesterday">昨天</string>
+    <plurals name="years_ago">
+        <item quantity="other">%d 年前</item>
+    </plurals>
+    <string name="no_activity">无活动</string>
+    <string name="invalid_date">无效的日期</string>
     <!-- TRAITS -->
     <!-- Sort -->
+    <string name="traits_toolbar_sort">排序性状</string>
     <string name="traits_sort_name">名称</string>
+    <string name="traits_sort_import_order">导入顺序</string>
     <string name="traits_sort_visibility">可见性</string>
     <string name="traits_sort_format">格式</string>
     <string name="warning_traits_missing_modify">先创建性状，才能修改。</string>
     <!-- Trait import/export -->
+    <string name="traits_new_dialog_title">新性状</string>
+    <string name="traits_dialog_create">创建新性状</string>
+    <string name="traits_dialog_import_from_file">从文件导入</string>
     <string name="traits_dialog_import">导入</string>
     <string name="import_error_format_trait">只有TRT文件可作为性状列表导入</string>
+    <string name="import_error_format_trait_json">无效的 JSON 格式： %s</string>
+    <string name="import_error_no_traits">未找到性状</string>
+    <string name="trait_import_successful">成功导入性状</string>
     <string name="traits_export_check">导出当前性状列表？</string>
     <string name="traits_dialog_export">导出</string>
+    <string name="dialog_delete_traits_message">您想要删除所有当前性状吗？删除性状也会删除该性状所收集的数据。</string>
     <string name="traits_toolbar_delete_all">删除全部性状</string>
+    <string name="act_trait_editor_no_traits_exist">没有存在的性状</string>
+    <string name="export_dialog_traits_exporting">导出性状…</string>
+    <string name="export_error_unknown">发生未知的导出错误</string>
+    <string name="export_error_directory_access">访问导出目录失败</string>
+    <string name="export_error_directory_not_found">未找到导出目录</string>
+    <string name="export_error_file_creation">无法创建导出文件</string>
+    <string name="export_error_file_stream">打开文件流失败</string>
+    <string name="error_trait_directory_not_available">性状目录不可用</string>
+    <string name="error_trait_directory_missing">缺少性状目录</string>
+    <string name="error_failed_to_create_file">创建文件失败</string>
+    <string name="error_output_stream_failed">输出流失败</string>
+    <string name="error_export_failed">导出失败</string>
+    <string name="error_unable_to_copy_trait_file">无法复制性状文件</string>
+    <string name="error_cannot_open_file">无法打开文件</string>
     <!-- Trait item menu -->
+    <string name="list_item_trait_popup_content_description">打开此性状的菜单。</string>
     <string name="traits_options_copy">复制</string>
     <string name="traits_options_edit">编辑</string>
     <string name="traits_options_delete">删除</string>
@@ -104,32 +279,136 @@
     <string name="traits_format_boolean">逻辑型</string>
     <string name="traits_format_text">文本型</string>
     <string name="traits_format_photo">图片</string>
+    <string name="traits_format_camera">摄像头</string>
+    <string name="traits_format_video">视频</string>
     <string name="traits_format_audio">音频</string>
     <string name="traits_format_multicategorical">多重分类</string>
     <string name="traits_format_location">位置</string>
+    <string name="traits_format_gnss">GNSS</string>
     <string name="traits_format_barcode">条形码</string>
     <string name="traits_format_labelprint">斑马标签打印</string>
+    <string name="traits_format_usb_camera">USB 摄像头</string>
+    <string name="traits_format_go_pro_camera">GoPro</string>
+    <string name="traits_format_angle">角度</string>
+    <string name="traits_format_spectral">光谱</string>
+    <string name="traits_format_custom">自定义</string>
+    <string name="traits_format_hardware">硬件</string>
     <!-- Trait Creation Dialog -->
+    <string name="traits_toolbar_add_trait">性状格式</string>
+    <string name="trait_creator_title_layout">性状布局</string>
+    <string name="trait_creator_parameters_title">%s 参数</string>
+    <string name="activity_traits_new_button_content_description">添加新性状。</string>
+    <string name="traits_create_name">名称</string>
     <string name="traits_create_format">格式</string>
     <string name="traits_create_value_default">默认值</string>
     <string name="traits_create_value_minimum">最小值</string>
     <string name="traits_create_value_maximum">最大值</string>
     <string name="traits_create_details">详细信息</string>
+    <string name="traits_create_unit">单位
+</string>
     <string name="traits_create_optional">可选的</string>
     <string name="traits_create_categories_title">类别</string>
+    <string name="traits_create_severities_title">严重性</string>
     <string name="traits_create_photo_maximum">照片的最大数目</string>
     <string name="traits_create_true">正确</string>
     <string name="traits_create_false">错误</string>
+    <string name="traits_create_unset">未设定</string>
+    <string name="traits_create_enabled">已启用</string>
+    <string name="traits_create_disabled">已停用</string>
     <string name="traits_create_categories_text">用“/\"分割类别</string>
+    <string name="traits_create_camera">摄像机</string>
+    <string name="traits_create_close_keyboard">关闭键盘</string>
+    <string name="trait_parameter_decimal_places">小数点位数</string>
+    <string name="trait_parameter_decimal_places_hint">小数点数 (-1 代表无限，0 代表整数)</string>
+    <string name="trait_parameter_decimal_places_error">值必须介于 -1 到 10 之间</string>
+    <string name="traits_attach_media_title">附加媒体</string>
     <string name="traits_attach_media_photo_label">图片</string>
     <string name="traits_attach_media_audio_label">音频</string>
+    <string name="traits_attach_media_video_label">视频</string>
     <string name="traits_create_warning_name_blank">性状名称不能为空</string>
     <string name="traits_create_warning_duplicate">性状已经存在</string>
     <string name="traits_create_warning_numeric_required">默认值、最小值和最大值必须设定为数字</string>
+    <string name="dialog_new_trait_add_cat_button_text">添加</string>
+    <string name="traits_create_categories_value_text">在此处输入类别值</string>
+    <string name="list_item_category_delete_content_description">删除此类别。</string>
+    <string name="dialog_new_trait_add_category_content_description">添加新类别</string>
+    <string name="list_item_traits_grid_content_description">切换选择</string>
+    <string name="dialog_trait_parameters_title">性状参数</string>
+    <string name="trait_parameter_default_value_number_format_error">必须为数字</string>
+    <string name="traits_create_unknown_error">发生未知错误: %s</string>
+    <string name="trait_creator_parameter_warning_infinite">数值不能为无限</string>
+    <string name="trait_creator_parameter_warning_nan">数值不能为NaN</string>
+    <string name="trait_creator_parameter_warning_negative">数值不能为负</string>
+    <string name="trait_creator_parameter_warning_too_big">数值过大</string>
+    <string name="trait_creator_parameter_warning_too_small">数值过小</string>
+    <string name="list_item_trait_parameter_categories_value_hint">输入要添加的类别名称</string>
+    <string name="list_item_trait_parameter_name_hint">输入性状名称</string>
+    <string name="dialog_new_trait_observations_exist_error">此性状的观察记录已经存在。只有以下参数可以编辑。</string>
+    <string name="dialog_new_trait_error_must_select_a_layout">您必须选择一个布局。</string>
+    <string name="trait_creator_parameter_warning_integer_required">要求为整数。</string>
+    <string name="dialog_new_trait_error_cannot_update_to_brapi_trait">性状无法更新到 BrAPI 性状。</string>
+    <string name="required">必填</string>
+    <string name="traits_create_warning_percent_value_required">必填值</string>
     <!-- Decimal Places Radio Options -->
+    <string name="trait_parameter_decimal_places_no_restriction">无限制</string>
+    <string name="trait_parameter_decimal_places_integer_only">仅限整数</string>
+    <string name="trait_parameter_decimal_places_allowed">允许输入小数</string>
+    <string name="trait_parameter_decimal_places_custom">最大小数位：</string>
+    <string name="trait_parameter_decimal_places_custom_hint">1–10</string>
+    <string name="trait_parameter_decimal_places_custom_required">请输入小数点位数 (1-10)</string>
+    <string name="trait_parameter_decimal_places_custom_error">数值必须介于 1到10之间。</string>
+    <string name="trait_parameter_invalid_number">无效的数字</string>
+    <string name="trait_parameter_mathematical_symbols">数学符号</string>
+    <string name="traits_create_warning_math_symbols_conflict">数学符号和小数位限制不能同时使用</string>
+    <string name="trait_parameter_repeated_measures">重复测量</string>
+    <string name="trait_parameter_auto_switch_plot">自动切换到下个小区</string>
+    <string name="trait_parameter_invalid_value">允许无效值</string>
+    <string name="select_trait">选择性状</string>
     <string name="edit_traits">编辑</string>
     <!-- Trait Editor -->
+    <string name="error_loading_traits">加载性状时错误</string>
+    <string name="error_deleting_traits">删除性状时错误</string>
+    <string name="error_toggling_all_traits_visibility">切换性状可见性时失败</string>
+    <string name="error_importing_traits">导入性状失败</string>
+    <string name="error_saving_trait_order">保存性状顺序失败</string>
+    <string name="error_exporting_traits">导出性状失败</string>
+    <string name="message_all_traits_deleted">所有性状已删除</string>
+    <string name="message_traits_imported">导入 %1$d 性状</string>
+    <string name="message_traits_imported_with_skipped">导入性状 %1$d , 跳过 %2$d 重复</string>
+    <string name="message_traits_exported">导出性状 %1$d </string>
     <!-- Trait Detail -->
+    <string name="trait_detail_title">性状详情</string>
+    <string name="trait_format_details">格式详情</string>
+    <string name="trait_data_title">观测数据</string>
+    <string name="trait_default_value">默认值：%s</string>
+    <string name="trait_min_value">最小值： %s</string>
+    <string name="trait_max_value">最大值： %s</string>
+    <string name="trait_categories">类别： %s</string>
+    <string name="trait_details">详细信息： %s</string>
+    <string name="trait_visible">可见</string>
+    <string name="trait_hidden">隐藏</string>
+    <string name="trait_options_title">选项</string>
+    <string name="trait_new_trait_name">复制性状名称</string>
+    <string name="trait_observation_data">数据</string>
+    <string name="trait_observation_count">%d 笔观测值</string>
+    <string name="trait_not_chartable">此格式的性状不能在图表中可视化</string>
+    <string name="traits_options_copy_title">复制性状</string>
+    <string name="trait_name_empty_error">性状名称不能为空</string>
+    <string name="trait_name_exists_error">已有同名的性状存在</string>
+    <string name="trait_copied_success">性状已复制到 %1$s</string>
+    <string name="trait_date_format_dialog_title">选择日期格式</string>
+    <string name="trait_date_format_display">日期 (%s)</string>
+    <string name="trait_day_format_display">年積日（Day of Year, DOY） (%s)</string>
+    <string name="trait_brapi_display_dialog_title">选择按钮文字</string>
+    <string name="trait_brapi_label_display">显示标签 (例如：%s)</string>
+    <string name="trait_brapi_value_display">显示值 (例如：%s)</string>
+    <string name="error_loading_trait_detail">加载性状信息时出错</string>
+    <string name="error_deleting_trait">错误：无法删除性状</string>
+    <string name="error_updating_trait_resource_file">更新性状资源文件时出错</string>
+    <string name="error_updating_trait_visibility">更新性状可见性出错</string>
+    <string name="error_empty_trait_name">性状名称不能为空</string>
+    <string name="trait_detail_chip_rename">重新命名</string>
+    <string name="trait_detail_chip_severities">严重性</string>
     <!-- COLLECT -->
     <!-- Validation -->
     <string name="trait_error_minimum_value">数值低于最小值</string>
@@ -167,8 +446,6 @@
     <string name="activity_collect_dialog_verify_yes_button">是</string>
     <!--- Datagrid -->
     <string name="dialog_data_grid_header_picker_ok">同意</string>
-    <string name="act_data_grid_details_plot">小区</string>
-    <string name="act_data_grid_collect_button">收集</string>
     <!--- Lock -->
     <!-- Trait Layout: Photo -->
     <string name="trait_error_hardware_missing">您的设备不包含此功能所必需的硬件</string>
@@ -176,6 +453,7 @@
     <!-- Trait Layout: GNSS -->
     <!-- Trait Layout: Date -->
     <!-- Trait Layout: Boolean -->
+    <string name="trait_boolean_unset">未设定</string>
     <!-- Trait Layout: GoPro -->
     <!-- Trait Layout: USB Camera -->
     <!--- Trait Layout: Zebra label print -->
@@ -196,6 +474,7 @@
     <!--- GeoNav -->
     <!--- Content Descriptions -->
     <!-- Observation Info -->
+    <string name="observation_info_trait_format">性状格式</string>
     <!-- Skip Entries -->
     <!-- EXPORT -->
     <!-- Export dialog -->
@@ -240,6 +519,7 @@
     <string name="preferences_appearance_quickgoto">快速转移</string>
     <!-- Behavior -->
     <string name="preferences_behavior_title">动作</string>
+    <string name="preferences_behavior_data_title">数据</string>
     <string name="preferences_behavior_return_character_do_nothing">无动作</string>
     <string name="preferences_general_use_day_number_description">采集数据时用当年日数代替日期</string>
     <!-- Location -->
@@ -259,6 +539,7 @@
     <!-- STATISTICS -->
     <string name="stat_title_fields">地块</string>
     <string name="stat_title_entries">记录</string>
+    <string name="stat_title_data">数据</string>
     <!-- ABOUT -->
     <!-- App  -->
     <string name="about_title">关于</string>
@@ -421,11 +702,15 @@
     <!-- canon camera strings -->
     <!-- spectral trait strings -->
     <!-- inno spectra -->
+    <string name="sort">排序</string>
     <string name="brapi_traits_filter_title">性状</string>
     <string name="dialog_quick_goto_title">快速转移</string>
+    <string name="dialog_quick_goto_go">转至</string>
     <string name="traits_sort_default">默认值</string>
     <!--  NearbyShare  -->
+    <string name="view_trait_nix_spectral_option">光谱</string>
     <!-- Stop Watch Trait Button content descriptions-->
+    <string name="reset">重置</string>
     <string name="save">保存</string>
     <string name="delete">删除</string>
     <string name="new_images">新图像</string>
