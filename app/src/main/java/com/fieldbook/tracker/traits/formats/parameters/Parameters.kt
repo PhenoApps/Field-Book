@@ -13,7 +13,8 @@ enum class Parameters {
     INVALID_VALUE,
     SEVERITIES,
     ATTACH_MEDIA,
-    ALLOW_OTHER;
+    ALLOW_OTHER,
+    DURATION;
 
     companion object {
 

@@ -13,7 +13,7 @@ enum class Formats {
     BASE_SPECTRAL, NIX, INNO_SPECTRA_SENSOR, GREEN_SEEKER,
     TEXT,
     CUSTOM, DISEASE_RATING,
-    BASE_EXPERIMENTAL;
+    BASE_EXPERIMENTAL, POLLINATOR;
 
     companion object {
 
@@ -25,7 +25,7 @@ enum class Formats {
 
         fun getHardwareFormats() = entries.filter { it in setOf(SCALE, LABEL_PRINT) }
 
-        fun getCustomFormats() = entries.filter { it in setOf(DISEASE_RATING) }
+        fun getCustomFormats() = entries.filter { it in setOf(DISEASE_RATING, POLLINATOR) }
 
         fun getSpectralFormats() = entries.filter { it in setOf(NIX, GREEN_SEEKER, INNO_SPECTRA_SENSOR) }
 
@@ -70,6 +70,7 @@ enum class Formats {
         INNO_SPECTRA_SENSOR -> InnoSpectraSensorFormat()
         CUSTOM -> CustomFormat()
         HARDWARE -> HardwareFormat()
+        POLLINATOR -> PollinatorFormat()
         BASE_EXPERIMENTAL -> BaseExperimentalFormat()
         else -> TextFormat()
     }

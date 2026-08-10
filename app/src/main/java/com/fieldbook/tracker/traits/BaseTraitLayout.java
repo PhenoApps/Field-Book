@@ -224,6 +224,15 @@ public abstract class BaseTraitLayout extends LinearLayout {
     public void onExit() {}
 
     /**
+     * Optional warning shown before a toolbar action discards collected data, s.a. delete or
+     * marking an observation missing. Return null to let the action proceed without confirming.
+     */
+    @Nullable
+    public String getDataLossWarning() {
+        return null;
+    }
+
+    /**
      * Handles the repeated value view list state.
      * If this feature is enabled, the list will be modified and updated.
      */

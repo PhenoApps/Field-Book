@@ -22,6 +22,7 @@
       * [Numeric](traits/trait-numeric.md)
       * [Percent](traits/trait-percent.md)
       * [Photo](traits/trait-photo.md)
+      * [Pollinator](traits/trait-pollinator.md)
       * [Scales](traits/trait-scales.md)
       * [Spectral](traits/trait-spectral.md)
       * [Stopwatch](traits/trait-stopwatch.md)
