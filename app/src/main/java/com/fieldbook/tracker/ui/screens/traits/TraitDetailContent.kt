@@ -74,6 +74,7 @@ fun TraitDetailContent(
                 onUpdateTrait = onUpdateAttributes,
                 onResourceFilePickerDialog = onResourceFilePickerDialog,
                 onShowParameterEditDialog = onShowParameterEditDialog,
+                hasObservations = (observationData?.observationCount ?: 0) > 0,
             )
         }
 

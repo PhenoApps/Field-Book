@@ -12,6 +12,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts.TakePicture
 import androidx.fragment.app.DialogFragment
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
@@ -24,6 +25,8 @@ import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.traits.formats.TraitFormatParametersAdapter
 import com.fieldbook.tracker.traits.formats.ValidationResult
+import com.fieldbook.tracker.traits.formats.parameters.BaseFormatParameter
+import com.fieldbook.tracker.traits.formats.parameters.CanopySensitivityParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 import com.fieldbook.tracker.traits.formats.ui.ParameterScrollView
 import com.fieldbook.tracker.utilities.SoundHelperImpl
@@ -72,6 +75,12 @@ class NewTraitDialog(
     @Inject
     lateinit var traitRepo: TraitRepository
 
+    private val canopyTestCaptureLauncher = registerForActivityResult(TakePicture()) { success ->
+        if (success) {
+            parametersSv.findHolder<CanopySensitivityParameter.ViewHolder>()?.onTestCaptureResult()
+        }
+    }
+
     // flag to just return selectable format
     var isSelectingFormat: Boolean = false
 
@@ -92,6 +101,9 @@ class NewTraitDialog(
 
     // when editing this tracks the original object, to see if values changed when discarding
     private var originalInitialTraitObject: TraitObject? = null
+
+    // tracks whether onStart has already built the dialog's initial screen, see onStart
+    private var isDialogPopulated = false
 
     // private var createVisible: Boolean
 
@@ -128,8 +140,16 @@ class NewTraitDialog(
         params?.height = LinearLayout.LayoutParams.WRAP_CONTENT
         dialog?.window?.attributes = params
 
+        /**
+         * The dialog view survives onStop/onStart (returning from the test capture camera, for
+         * example), so the initial screen is only built once per dialog creation. Rebuilding it
+         * would send the user back to the format selector and discard the parameter views.
+         */
         context?.let {
-            show()
+            if (!isDialogPopulated) {
+                isDialogPopulated = true
+                show()
+            }
         }
     }
 
@@ -288,6 +308,8 @@ class NewTraitDialog(
         variableEditableErrorTv =
             view.findViewById(R.id.dialog_new_trait_variable_editable_error_tv)
 
+        isDialogPopulated = false
+
         return builder.create()
     }
 
@@ -334,15 +356,47 @@ class NewTraitDialog(
 
             }
 
+            if (parameter is CanopySensitivityParameter) {
+
+                parameter.setActivity(activity)
+
+            }
+
             parameter.createViewHolder(parametersSv)?.let { holder ->
 
                 holder.bind(parameter, initialTraitObject)
 
                 parametersSv.addViewHolder(holder)
+
+                (holder as? CanopySensitivityParameter.ViewHolder)?.setTestCaptureLauncher(canopyTestCaptureLauncher)
+
+                lockCanopySensitivityIfCollected(holder)
             }
         }
     }
 
+
+    /**
+     * Sensitivity can't be edited once the trait has observations, since the threshold is applied
+     * to stored captures as well as new ones.
+     */
+    private fun lockCanopySensitivityIfCollected(holder: BaseFormatParameter.ViewHolder) {
+
+        val canopyHolder = holder as? CanopySensitivityParameter.ViewHolder ?: return
+
+        val traitId = initialTraitObject?.id
+
+        if (traitId.isNullOrEmpty()) return
+
+        lifecycleScope.launch {
+
+            if (traitRepo.getTraitObservations(traitId).isNotEmpty()) {
+
+                canopyHolder.setLocked()
+
+            }
+        }
+    }
 
     private fun setupTraitFormatsRv(formats: List<Formats>) {
 
@@ -565,6 +619,10 @@ class NewTraitDialog(
 
     private var isShowingSubFormat = false
     private var topLevelFormats: List<Formats> = emptyList()
+
+    fun onTestCaptureResult() {
+        parametersSv.findHolder<CanopySensitivityParameter.ViewHolder>()?.onTestCaptureResult()
+    }
 
     override fun onSelected(format: Formats) {
 

@@ -109,6 +109,10 @@ class TraitObject {
         get() = attributeValues.getBoolean(TraitAttributes.ALLOW_OTHER)
         set(value) = attributeValues.setValue(TraitAttributes.ALLOW_OTHER, value.toString())
 
+    var sensitivity: String
+        get() = attributeValues.getString(TraitAttributes.CANOPY_SENSITIVITY)
+        set(value) = attributeValues.setValue(TraitAttributes.CANOPY_SENSITIVITY, value)
+
     var duration: String
         get() = attributeValues.getString(TraitAttributes.DURATION)
         set(value) = attributeValues.setValue(TraitAttributes.DURATION, value)
@@ -199,6 +203,7 @@ class TraitObject {
                 attachPhoto == that.attachPhoto &&
                 attachVideo == that.attachVideo &&
                 allowOther == that.allowOther &&
+                sensitivity == that.sensitivity &&
                 duration == that.duration
     }
 
@@ -210,7 +215,7 @@ class TraitObject {
             saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms,
             maxDecimalPlaces, mathSymbolsEnabled, allowMulticat, repeatedMeasures,
             autoSwitchPlot, unit, invalidValues, attachAudio, attachPhoto, attachVideo,
-            allowOther, duration
+            allowOther, duration, sensitivity
         )
     }
 
@@ -249,6 +254,7 @@ class TraitObject {
         t.attachPhoto = this.attachPhoto
         t.attachVideo = this.attachVideo
         t.allowOther = this.allowOther
+        t.sensitivity = this.sensitivity
         t.duration = this.duration
 
         return t

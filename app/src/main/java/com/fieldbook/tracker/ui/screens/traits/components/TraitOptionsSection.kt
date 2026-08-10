@@ -33,6 +33,7 @@ import com.fieldbook.tracker.traits.formats.parameters.InvalidValueParameter
 import com.fieldbook.tracker.traits.formats.parameters.MathSymbolsParameter
 import com.fieldbook.tracker.traits.formats.parameters.AttachMediaParameter
 import com.fieldbook.tracker.traits.formats.parameters.AllowOtherParameter
+import com.fieldbook.tracker.traits.formats.parameters.CanopySensitivityParameter
 import com.fieldbook.tracker.traits.formats.parameters.MultipleCategoriesParameter
 import com.fieldbook.tracker.traits.formats.parameters.Parameters
 import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
@@ -42,6 +43,7 @@ import com.fieldbook.tracker.traits.formats.parameters.SeveritiesParameter
 import com.fieldbook.tracker.traits.formats.parameters.UnitParameter
 import com.fieldbook.tracker.ui.components.widgets.Chip
 import com.fieldbook.tracker.ui.screens.traits.dialogs.BrapiLabelValueDialog
+import com.fieldbook.tracker.ui.screens.traits.dialogs.CanopySensitivityLockedDialog
 import com.fieldbook.tracker.ui.screens.traits.dialogs.DateFormatDialog
 import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.StringUtil.capitalizeFirstLetter
@@ -70,11 +72,13 @@ fun TraitOptionsSection(
     onUpdateTrait: (TraitObject) -> Unit,
     onResourceFilePickerDialog: () -> Unit,
     onShowParameterEditDialog: (BaseFormatParameter, TraitObject, (TraitObject) -> Unit) -> Unit,
+    hasObservations: Boolean = false,
 ) {
     val context = LocalContext.current
 
     var showDateFormatDialog by remember { mutableStateOf(false) }
     var showBrapiLabelValueDialog by remember { mutableStateOf(false) }
+    var showCanopySensitivityLockedDialog by remember { mutableStateOf(false) }
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         FlowRow(
@@ -160,7 +164,11 @@ fun TraitOptionsSection(
                         text = getParamText(context, param, trait),
                         icon = getParamIcon(param, trait),
                         onClick = {
-                            if (param is DefaultToggleParameter) {
+                            // the threshold is applied to stored captures as well as new ones, so
+                            // it can't change once observations exist for this trait
+                            if (param is CanopySensitivityParameter && hasObservations) {
+                                showCanopySensitivityLockedDialog = true
+                            } else if (param is DefaultToggleParameter) {
                                 val updatedTrait = trait.clone()
                                 param.toggleValue(updatedTrait)
                                 onUpdateTrait(updatedTrait)
@@ -186,6 +194,12 @@ fun TraitOptionsSection(
                 onUpdateTrait(updatedTrait)
             },
             onDismiss = { showDateFormatDialog = false }
+        )
+    }
+
+    if (showCanopySensitivityLockedDialog) {
+        CanopySensitivityLockedDialog(
+            onDismiss = { showCanopySensitivityLockedDialog = false }
         )
     }
 
@@ -230,6 +244,7 @@ private fun getParamIcon(param: BaseFormatParameter, trait: TraitObject): Int {
         is UnitParameter -> R.drawable.ic_tag_edit
         is ResourceFileParameter -> R.drawable.ic_tb_folder
         is AttachMediaParameter -> R.drawable.multimedia
+        is CanopySensitivityParameter -> R.drawable.tune_variant
         else -> R.drawable.ic_tag_edit
     }
 }

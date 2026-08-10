@@ -1,11 +1,13 @@
 package com.fieldbook.tracker.activities
 
+import android.app.AlertDialog
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts.TakePicture
 import androidx.compose.runtime.remember
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.setViewTreeLifecycleOwner
@@ -19,24 +21,25 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.database.viewmodels.TraitDetailViewModel
+import com.fieldbook.tracker.database.viewmodels.TraitEditorViewModel
 import com.fieldbook.tracker.dialogs.FileExploreDialogFragment
 import com.fieldbook.tracker.dialogs.NewTraitDialog
 import com.fieldbook.tracker.objects.TraitObject
-import com.fieldbook.tracker.ui.screens.traits.TraitEditorScreen
-import com.fieldbook.tracker.ui.theme.AppTheme
-import com.fieldbook.tracker.utilities.Utils
-import com.fieldbook.tracker.database.viewmodels.TraitEditorViewModel
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.traits.formats.NumericFormat
 import com.fieldbook.tracker.traits.formats.TraitFormat
 import com.fieldbook.tracker.traits.formats.parameters.BaseFormatParameter
+import com.fieldbook.tracker.traits.formats.parameters.CanopySensitivityParameter
 import com.fieldbook.tracker.traits.formats.parameters.DecimalPlacesParameter
 import com.fieldbook.tracker.ui.navigation.controllers.TraitNavController
 import com.fieldbook.tracker.ui.navigation.routes.TraitDetail
 import com.fieldbook.tracker.ui.navigation.routes.TraitEditor
 import com.fieldbook.tracker.ui.navigation.routes.TraitGraph
 import com.fieldbook.tracker.ui.screens.traits.TraitDetailScreen
+import com.fieldbook.tracker.ui.screens.traits.TraitEditorScreen
+import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.SoundHelperImpl
+import com.fieldbook.tracker.utilities.Utils
 import com.fieldbook.tracker.utilities.VibrateUtil
 import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.utils.BaseDocumentTreeUtil
@@ -59,6 +62,15 @@ class TraitActivity : ThemedActivity() {
 
     companion object {
         private const val TAG = "TraitEditorActivity"
+    }
+
+    private var activeCanopySensitivityHolder: CanopySensitivityParameter.ViewHolder? = null
+
+    private val canopyTestCaptureLauncher = registerForActivityResult(TakePicture()) { success ->
+        if (success) {
+            activeCanopySensitivityHolder?.onTestCaptureResult()
+            (supportFragmentManager.findFragmentByTag("NewTraitDialog") as? NewTraitDialog)?.onTestCaptureResult()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -243,9 +255,19 @@ class TraitActivity : ThemedActivity() {
 
         val parameterContainer = dialogView.findViewById<LinearLayout>(R.id.parameter_container)
 
+        if (parameter is CanopySensitivityParameter) {
+            parameter.setActivity(this)
+        }
+
         parameter.createViewHolder(parameterContainer)?.let { holder ->
             holder.bind(parameter, trait)
             parameterContainer.addView(holder.itemView)
+            val canopyHolder = holder as? CanopySensitivityParameter.ViewHolder
+            canopyHolder?.configureStandaloneDialog()
+            canopyHolder?.setTestCaptureLauncher(canopyTestCaptureLauncher)
+            if (canopyHolder != null) {
+                activeCanopySensitivityHolder = canopyHolder
+            }
 
             //required for using composable parameter ui
             try {
@@ -254,81 +276,68 @@ class TraitActivity : ThemedActivity() {
             } catch (_: Exception) {
             }
 
-            val dialog = android.app.Dialog(this, R.style.AppAlertDialog)
-            dialog.setContentView(dialogView)
+            val dialogBuilder = AlertDialog.Builder(this, R.style.AppAlertDialog)
+                .setView(dialogView)
+                .setNegativeButton(R.string.dialog_cancel, null)
+                .setPositiveButton(R.string.dialog_save, null)
 
-            // Add Save/Cancel buttons at the bottom of the dialogView programmatically
-            val buttonContainer = LinearLayout(this).apply {
-                orientation = LinearLayout.HORIZONTAL
-                val params = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                )
-                layoutParams = params
-                setPadding(16, 16, 16, 16)
-                gravity = android.view.Gravity.END
+            if (canopyHolder != null) {
+                dialogBuilder
+                    .setTitle(parameter.getName(this))
+                    .setNeutralButton(R.string.canopy_param_test, null)
             }
 
-            val cancelButton = android.widget.Button(this).apply {
-                text = getString(R.string.dialog_cancel)
-                background = null
+            val dialog = dialogBuilder.create()
+            dialog.setOnDismissListener {
+                if (activeCanopySensitivityHolder === canopyHolder) {
+                    activeCanopySensitivityHolder = null
+                }
             }
-
-            val saveButton = android.widget.Button(this).apply {
-                text = getString(R.string.dialog_save)
-                background = null
-            }
-
-            buttonContainer.addView(cancelButton)
-            buttonContainer.addView(saveButton)
-
-            val rootLinear = dialogView.findViewById<LinearLayout>(R.id.parameter_container)
-            rootLinear.addView(buttonContainer)
-
-            cancelButton.setOnClickListener {
-                dialog.dismiss()
-            }
-
-            saveButton.setOnClickListener {
-                holder.textInputLayout.error = null
+            dialog.setOnShowListener {
+                dialog.getButton(AlertDialog.BUTTON_NEUTRAL)?.setOnClickListener {
+                    canopyHolder?.launchTestCapture()
+                }
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                    holder.textInputLayout.error = null
 
                     // parameter specific validation
                     val paramValidationResult = holder.validate(traitRepo, trait)
 
-                if (paramValidationResult.result != true) {
-                    val errorMessage = paramValidationResult.error
-                        ?: getString(R.string.error_loading_trait_detail)
-                    holder.textInputLayout.error = errorMessage
-                    soundHelperImpl.playError()
-                    vibrator.vibrate()
-                    return@setOnClickListener
-                }
-
-                val updatedTrait = holder.merge(trait.clone())
-
-                // inter-parameter validation if needed
-                if (formatDefinition != null && paramHasValidationDependency(
-                        formatDefinition,
-                        parameter
-                    )
-                ) {
-
-                    val errorMessage =
-                        validateInterParameterValidation(formatDefinition, updatedTrait)
-
-                    if (errorMessage != null) {
+                    if (paramValidationResult.result != true) {
+                        val errorMessage = paramValidationResult.error
+                            ?: getString(R.string.error_loading_trait_detail)
                         holder.textInputLayout.error = errorMessage
                         soundHelperImpl.playError()
                         vibrator.vibrate()
                         return@setOnClickListener
                     }
+
+                    val updatedTrait = holder.merge(trait.clone())
+
+                    // inter-parameter validation if needed
+                    if (formatDefinition != null && paramHasValidationDependency(
+                            formatDefinition,
+                            parameter
+                        )
+                    ) {
+
+                        val errorMessage =
+                            validateInterParameterValidation(formatDefinition, updatedTrait)
+
+                        if (errorMessage != null) {
+                            holder.textInputLayout.error = errorMessage
+                            soundHelperImpl.playError()
+                            vibrator.vibrate()
+                            return@setOnClickListener
+                        }
+                    }
+
+                    onUpdated(updatedTrait)
+
+                    CollectActivity.reloadData = true
+
+                    dialog.dismiss()
                 }
-
-                onUpdated(updatedTrait)
-
-                CollectActivity.reloadData = true
-
-                dialog.dismiss()
             }
 
             dialog.show()
