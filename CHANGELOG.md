@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- New Pollinator trait to count categories for a set duration (https://github.com/PhenoApps/Field-Book/pull/1492)
 - Entry navigation area can be optionally hidden from the interface (https://github.com/PhenoApps/Field-Book/pull/1502)
 - Datagrid cells can now be shaded with a color gradient (https://github.com/PhenoApps/Field-Book/pull/1488)
 - Datagrid columns can now be sorted (https://github.com/PhenoApps/Field-Book/pull/1488)
