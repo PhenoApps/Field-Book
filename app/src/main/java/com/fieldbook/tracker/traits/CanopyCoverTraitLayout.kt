@@ -20,7 +20,6 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.view.PreviewView
 import androidx.cardview.widget.CardView
-import androidx.core.content.edit
 import androidx.core.graphics.createBitmap
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
@@ -28,6 +27,7 @@ import androidx.exifinterface.media.ExifInterface
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.database.internalTimeFormatter
+import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
@@ -50,6 +50,9 @@ import kotlin.math.roundToInt
  *   R/G < threshold  AND  B/G < threshold  AND  2G - R - B > 20
  * FGCC (Fractional Green Canopy Cover) is stored as a percentage string, e.g. "45.3".
  *
+ * The source image is attached to the same observation row via photo_uri, so the value and the
+ * image it was computed from travel together through export, database import and deletion.
+ *
  * Extends PhotoTraitLayout for live CameraX preview + system-camera fallback.
  * Sensitivity threshold is a trait parameter (set at creation/edit time), not in the collect screen.
  */
@@ -67,9 +70,6 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
 
         fun sliderToThreshold(progress: Int): Float =
             THRESHOLD_MIN + (progress / 100f) * THRESHOLD_RANGE
-
-        fun imagePrefsKey(traitId: String, obsUnit: String, rep: String) =
-            "canopy_${traitId}_${obsUnit}_${rep}"
     }
 
     constructor(context: Context?) : super(context)
@@ -178,7 +178,6 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
         val traitId = currentTrait.id
         val obsUnit = currentRange.uniqueId
         val rep = act.rep
-        val imageKey = imagePrefsKey(traitId, obsUnit, rep)
         val traitName = FileUtil.sanitizeFileName(currentTrait.name)
         val saveTime = FileUtil.sanitizeFileName(
             OffsetDateTime.now().format(
@@ -187,7 +186,7 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
         )
         val fileName = "${obsUnit}_${traitName}_${saveTime}.jpg"
 
-        // Save image & insert observation with FGCC value all in this IO coroutine
+        // Save image & record observation with FGCC value all in this IO coroutine
         background.launch {
             val savedUri = saveCanopyImageToStorage(file, traitName, fileName)
 
@@ -199,37 +198,15 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
                     val fgcc = analyze(bmp, t)
                     val fgccStr = "%.1f".format(fgcc)
 
-                    // Insert observation with FGCC value using original captured context
-                    // All DB operations happen in this single IO coroutine - no race conditions
-                    try {
-                        val dataHelper = act.getDatabase()
-                        val newRep = dataHelper.getNextRep(studyId, obsUnit, traitId)
-                        val person = act.person.orEmpty()
-                        val location = try { act.locationByPreferences } catch (_: Exception) { "" }
-                        dataHelper.insertObservation(
-                            obsUnit, traitId, fgccStr,
-                            person, location, "", studyId, null, null, null, newRep
-                        )
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Failed to insert observation", e)
-                    }
+                    // Record the value against the original captured context. All DB operations
+                    // happen in this single IO coroutine - no race conditions. The source image
+                    // rides along on photo_uri, so the value and the image it was computed from
+                    // cannot drift apart the way separate keying allowed.
+                    saveObservation(act, studyId, obsUnit, traitId, rep, fgccStr, uri)
 
                     buildOverlay(bmp, threshold)
                 } else null
             } ?: return@launch
-
-            // Handle previous image cleanup and prefs update
-            try {
-                val previousUri = prefs.getString(imageKey, null)
-                if (previousUri != null) {
-                    deleteImageUri(previousUri)
-                }
-                savedUri.let { uri ->
-                    prefs.edit { putString(imageKey, uri.toString()) }
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to update prefs", e)
-            }
 
             // Update UI on main thread
             withContext(Dispatchers.Main) {
@@ -242,6 +219,53 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
         }
 
         return true
+    }
+
+    /**
+     * Mirrors CollectActivity.updateObservation: update the observation already recorded at [rep],
+     * or insert one when there is none. Capturing must not silently add a repeated measure - the
+     * overwrite prompt tells the user the current value is being replaced, and repeats are added
+     * deliberately through the repeat controls, the same as every other trait.
+     */
+    private fun saveObservation(
+        act: CollectActivity,
+        studyId: String,
+        obsUnit: String,
+        traitId: String,
+        rep: String,
+        value: String,
+        imageUri: Uri
+    ) {
+        try {
+            val dataHelper = act.getDatabase()
+            val person = act.person.orEmpty()
+            val location = try { act.locationByPreferences } catch (_: Exception) { "" }
+            val existing = observationForRep(studyId, obsUnit, traitId, rep)
+
+            if (existing == null) {
+                dataHelper.insertObservation(
+                    obsUnit, traitId, value,
+                    person, location, "", studyId, null, null, null, rep,
+                    null, null, imageUri.toString()
+                )
+                return
+            }
+
+            // Nothing references the image being replaced once the row points at the new one
+            existing.photo_uri
+                ?.takeIf { it.isNotEmpty() && it != imageUri.toString() }
+                ?.let(::deleteImageUri)
+
+            existing.value = value
+            existing.photo_uri = imageUri.toString()
+            existing.collector = person
+            existing.geo_coordinates = location
+            existing.observation_time_stamp = OffsetDateTime.now().format(internalTimeFormatter)
+
+            dataHelper.updateObservationModels(dataHelper.db, listOf(existing))
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to save canopy observation for rep $rep", e)
+        }
     }
 
     override fun afterLoadExists(act: CollectActivity, value: String?) {
@@ -367,19 +391,15 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
 
     private fun showStoredImageForRep(rep: String) {
         previewLoadJob?.cancel()
+        val studyId = collectActivity.studyId
         val traitId = currentTrait.id
         val obsUnit = currentRange.uniqueId
-        val uriStr = prefs.getString(imagePrefsKey(traitId, obsUnit, rep), null)
-        if (uriStr == null) {
-            showLivePreview()
-            return
-        }
-
-        val uri = uriStr.toUri()
         val thresholdForPreview = threshold
         previewLoadJob = background.launch {
-            val bitmap = try {
-                loadAndScale(uri, MAX_ANALYSIS_WIDTH)
+            val uriStr = photoUriForRep(studyId, obsUnit, traitId, rep)
+
+            val bitmap = if (uriStr.isNullOrEmpty()) null else try {
+                loadAndScale(uriStr.toUri(), MAX_ANALYSIS_WIDTH)
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to load canopy image for rep $rep", e)
                 null
@@ -396,6 +416,28 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
             }
         }
     }
+
+    /** Observation recorded at [rep] for this context, or null if there is none. */
+    private fun observationForRep(
+        studyId: String,
+        obsUnit: String,
+        traitId: String,
+        rep: String
+    ): ObservationModel? = try {
+        database.getRepeatedValues(studyId, obsUnit, traitId)
+            .firstOrNull { it.rep == rep }
+    } catch (e: Exception) {
+        Log.e(TAG, "Failed to look up canopy observation for rep $rep", e)
+        null
+    }
+
+    /** Source image attached to the observation at [rep], or null if there is none. */
+    private fun photoUriForRep(
+        studyId: String,
+        obsUnit: String,
+        traitId: String,
+        rep: String
+    ): String? = observationForRep(studyId, obsUnit, traitId, rep)?.photo_uri
 
     private fun expandImage() {
         val bitmap = currentPreviewBitmap ?: return
@@ -469,15 +511,18 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
 
 
 
+    /**
+     * CollectActivity already clears photo_uri media when an observation is deleted through the
+     * toolbar, but deleteTraitListener is reachable from other paths too. Deleting here as well
+     * keeps the file from being orphaned; a second delete of a missing file is a no-op.
+     */
     private fun deleteStoredImageForRep(rep: String) {
-        val key = imagePrefsKey(currentTrait.id, currentRange.uniqueId, rep)
-
         try {
-            prefs.getString(key, null)?.let(::deleteImageUri)
+            photoUriForRep(collectActivity.studyId, currentRange.uniqueId, currentTrait.id, rep)
+                ?.takeIf { it.isNotEmpty() }
+                ?.let(::deleteImageUri)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to delete canopy image for rep $rep", e)
-        } finally {
-            prefs.edit { remove(key) }
         }
     }
 
