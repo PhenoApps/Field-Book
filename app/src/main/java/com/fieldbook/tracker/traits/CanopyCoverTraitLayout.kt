@@ -20,7 +20,6 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.view.PreviewView
 import androidx.cardview.widget.CardView
-import androidx.core.graphics.createBitmap
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import androidx.exifinterface.media.ExifInterface
@@ -69,8 +68,26 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
         private const val MAX_ANALYSIS_WIDTH = 1000
         private const val DEFAULT_CAMERA_ASPECT_RATIO = 3f / 4f
 
+        /** Translucent green painted over classified canopy pixels in the capture preview. */
+        private val CANOPY_OVERLAY_COLOR = Color.argb(180, 0, 200, 0)
+
         fun sliderToThreshold(progress: Int): Float =
             THRESHOLD_MIN + (progress / 100f) * THRESHOLD_RANGE
+
+        /**
+         * The Canopeo classification, for one packed ARGB pixel. Single definition on purpose -
+         * the collect preview and the sensitivity parameter's test preview must classify
+         * identically or the number a user tunes against is not the number they collect.
+         */
+        fun isCanopyPixel(pixel: Int, threshold: Float): Boolean {
+            val r = Color.red(pixel).toFloat()
+            val g = Color.green(pixel).toFloat()
+            val b = Color.blue(pixel).toFloat()
+            return g > 0f &&
+                r / g < threshold &&
+                b / g < threshold &&
+                2f * g - r - b > P3_THRESHOLD
+        }
     }
 
     constructor(context: Context?) : super(context)
@@ -197,17 +214,21 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
             val overlay = savedUri?.let { uri ->
                 val bmp = loadAndScale(uri, MAX_ANALYSIS_WIDTH)
                 if (bmp != null) {
-                    val t = threshold
-                    val fgcc = analyze(bmp, t)
-                    val fgccStr = "%.1f".format(fgcc)
+                    // One read of the threshold drives both the value and the overlay, so the
+                    // preview always depicts the number that was actually recorded
+                    val analysis = analyzeWithOverlay(bmp, threshold)
+                    bmp.recycle()
 
                     // Record the value against the original captured context. All DB operations
                     // happen in this single IO coroutine - no race conditions. The source image
                     // rides along on photo_uri, so the value and the image it was computed from
                     // cannot drift apart the way separate keying allowed.
-                    saveObservation(act, studyId, obsUnit, traitId, rep, fgccStr, uri)
+                    saveObservation(
+                        act, studyId, obsUnit, traitId, rep,
+                        "%.1f".format(analysis.fgcc), uri
+                    )
 
-                    buildOverlay(bmp, threshold)
+                    analysis.overlay
                 } else null
             } ?: return@launch
 
@@ -422,7 +443,10 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
                 Log.e(TAG, "Failed to load canopy image for rep $rep", e)
                 null
             }
-            val overlay = bitmap?.let { buildOverlay(it, thresholdForPreview) }
+            val overlay = bitmap?.let { source ->
+                analyzeWithOverlay(source, thresholdForPreview).overlay
+                    .also { source.recycle() }
+            }
             withContext(Dispatchers.Main) {
                 if (collectActivity.rep == rep && currentTrait.id == traitId && currentRange.uniqueId == obsUnit) {
                     if (overlay != null) {
@@ -669,49 +693,32 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
         }
     }
 
-    private fun analyze(bmp: Bitmap, t: Float): Float {
-        val pixels = IntArray(bmp.width * bmp.height)
-        bmp.getPixels(pixels, 0, bmp.width, 0, 0, bmp.width, bmp.height)
-        var greenCount = 0
-        for (pixel in pixels) {
-            val r = Color.red(pixel).toFloat()
-            val g = Color.green(pixel).toFloat()
-            val b = Color.blue(pixel).toFloat()
-            if (g > 0f && r / g < t && b / g < t && 2f * g - r - b > P3_THRESHOLD) greenCount++
-        }
-        return if (pixels.isEmpty()) 0f else greenCount.toFloat() / pixels.size * 100f
-    }
+    /** FGCC percentage and the preview overlay, both produced by one pass over [source]. */
+    private data class CanopyAnalysis(val fgcc: Float, val overlay: Bitmap)
 
-    private fun buildOverlay(source: Bitmap, t: Float): Bitmap {
-        val pixels = IntArray(source.width * source.height)
-        source.getPixels(pixels, 0, source.width, 0, 0, source.width, source.height)
-        val greenOverlay = Color.argb(180, 0, 200, 0)
+    /**
+     * Counts canopy pixels and tints them in a single pass. The overlay is built straight from the
+     * pixel array rather than copying [source] first - every pixel of such a copy was immediately
+     * overwritten, so it only bought an extra full-bitmap allocation.
+     *
+     * [source] is not read after this returns; callers own recycling it.
+     */
+    private fun analyzeWithOverlay(source: Bitmap, threshold: Float): CanopyAnalysis {
+        val width = source.width
+        val height = source.height
+        val pixels = IntArray(width * height)
+        source.getPixels(pixels, 0, width, 0, 0, width, height)
+
+        var canopyCount = 0
         for (i in pixels.indices) {
-            val r = Color.red(pixels[i]).toFloat()
-            val g = Color.green(pixels[i]).toFloat()
-            val b = Color.blue(pixels[i]).toFloat()
-            if (g > 0f && r / g < t && b / g < t && 2f * g - r - b > P3_THRESHOLD) {
-                pixels[i] = greenOverlay
+            if (isCanopyPixel(pixels[i], threshold)) {
+                canopyCount++
+                pixels[i] = CANOPY_OVERLAY_COLOR
             }
         }
-        val overlay = source.copy(Bitmap.Config.ARGB_8888, true)
-        overlay.setPixels(pixels, 0, overlay.width, 0, 0, overlay.width, overlay.height)
-        return overlay
-    }
 
-    /** Binary mask used by CanopySensitivityParameter for test-capture preview (canopy=WHITE, other=BLACK). */
-    fun buildBinaryMask(source: Bitmap, t: Float): Bitmap {
-        val pixels = IntArray(source.width * source.height)
-        source.getPixels(pixels, 0, source.width, 0, 0, source.width, source.height)
-        for (i in pixels.indices) {
-            val r = Color.red(pixels[i]).toFloat()
-            val g = Color.green(pixels[i]).toFloat()
-            val b = Color.blue(pixels[i]).toFloat()
-            pixels[i] = if (g > 0f && r / g < t && b / g < t && 2f * g - r - b > P3_THRESHOLD)
-                Color.WHITE else Color.BLACK
-        }
-        val mask = createBitmap(source.width, source.height)
-        mask.setPixels(pixels, 0, mask.width, 0, 0, mask.width, mask.height)
-        return mask
+        val fgcc = if (pixels.isEmpty()) 0f else canopyCount.toFloat() / pixels.size * 100f
+        val overlay = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888)
+        return CanopyAnalysis(fgcc, overlay)
     }
 }
