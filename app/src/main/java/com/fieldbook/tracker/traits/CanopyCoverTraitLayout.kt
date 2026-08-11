@@ -213,6 +213,16 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
 
             // Update UI on main thread
             withContext(Dispatchers.Main) {
+                // The entry, trait or rep can all change while the file write and analysis run.
+                // This result belongs to the context the capture started in, not to whatever is
+                // on screen now - the observation is already saved either way.
+                // NB: the makeImage parameter shadows the currentTrait property, so the live
+                // trait has to come from getCurrentTrait().
+                if (collectActivity.rep != rep ||
+                    getCurrentTrait()?.id != traitId ||
+                    currentRange.uniqueId != obsUnit
+                ) return@withContext
+
                 showCapturedImage(overlay)
                 act.updateCurrentTraitStatus(true)
                 act.refreshInfoBarAdapter()
