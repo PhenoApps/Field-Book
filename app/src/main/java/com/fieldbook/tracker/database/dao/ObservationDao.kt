@@ -773,12 +773,39 @@ class ObservationDao {
             db.delete(Observation.tableName, "${Study.FK} = ?", arrayOf(studyId))
         }.also { ObservationChangeTracker.markChanged() }
 
-        fun updateObservationModels(db: SQLiteDatabase, observations: List<ObservationModel>) {
+        /**
+         * Mirrors the null-control-character stripping that [insertObservation] applies, so a value
+         * read back out of the database can be compared against the value that was submitted.
+         */
+        fun sanitizeValue(value: String?): String = (value ?: String()).filterNot { it.code == 0 }
+
+        /**
+         * Reads back the value stored under an observation's primary key.
+         * Returns null when no such row exists, which is how a write that never landed is told
+         * apart from one that saved an empty value.
+         */
+        fun getValueById(id: String): String? = withDatabase { db ->
+
+            db.rawQuery(
+                "SELECT value FROM ${Observation.tableName} WHERE ${Observation.PK} = ? LIMIT 1",
+                arrayOf(id)
+            ).use { cursor ->
+
+                if (cursor.moveToFirst()) cursor.getString(0) ?: String() else null
+            }
+        }
+
+        /**
+         * @return the number of rows actually updated, so callers can tell a no-op apart from a save
+         */
+        fun updateObservationModels(db: SQLiteDatabase, observations: List<ObservationModel>): Int {
+
+            var updated = 0
 
             observations.forEach {
 
                 val content = it.toContentValues()
-                db.update(
+                updated += db.update(
                     Observation.tableName,
                     content,
                     "${Observation.PK} = ?", arrayOf(it.internal_id_observation.toString())
@@ -786,6 +813,8 @@ class ObservationDao {
             }
 
             ObservationChangeTracker.markChanged()
+
+            return updated
         }
 
         /**

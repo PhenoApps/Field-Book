@@ -363,6 +363,8 @@ public class CollectActivity extends ThemedActivity
 
     private AlertDialog dialogCrashReport;
 
+    private AlertDialog saveFailedDialog;
+
     private Boolean deleteValueButtonEnabled = true;
 
     public void onCreate(Bundle savedInstanceState) {
@@ -1557,12 +1559,15 @@ public class CollectActivity extends ThemedActivity
             Log.e(TAG, "Failed to get location", e);
         }
 
+        //the primary key that should hold this value once the write completes
+        long observationId;
+
         if (obs == null) {
             String obsUnit = getObservationUnit();
             String studyId = getStudyId();
             String rep = getRep();
             //insert the new observation
-            database.insertObservation(obsUnit, traitDbId, value, person, location,
+            observationId = database.insertObservation(obsUnit, traitDbId, value, person, location,
                     "", studyId, null, null, null, rep);
 
         } else {
@@ -1576,7 +1581,20 @@ public class CollectActivity extends ThemedActivity
 
             obs.setValue(value);
 
-            database.updateObservationModels(database.getDb(), Collections.singletonList(obs));
+            int updated = database.updateObservationModels(database.getDb(), Collections.singletonList(obs));
+
+            observationId = updated > 0 ? obs.getInternal_id_observation() : -1;
+        }
+
+        //read the row back before telling the collector it was saved. insert() returns -1 on a
+        //swallowed SQLException (full disk, I/O error), and without this check the trait would be
+        //marked collected either way -- the failure would only surface when the field is exported
+        if (!database.isObservationSaved(observationId, value)) {
+
+            final String failedTraitDbId = traitDbId;
+            runOnUiThread(() -> onObservationSaveFailed(trait, failedTraitDbId, value, nullableRep));
+
+            return;
         }
 
         runOnUiThread(() -> {
@@ -1586,6 +1604,56 @@ public class CollectActivity extends ThemedActivity
             refreshRepeatedValuesToolbarIndicator();
             collectInputView.refreshTimestamp();
         });
+    }
+
+    /**
+     * Called when a value could not be written to the database.
+     * <p>
+     * The collector is told at the plot where it happened rather than discovering the loss when the
+     * field is exported days later. The trait indicator is reset to what is actually stored, and the
+     * value is left in the input so it can be retried once the underlying problem is cleared.
+     *
+     * @param trait       the trait that was being scored, null means the currently selected trait
+     * @param traitDbId   the resolved id of that trait
+     * @param value       the value that failed to save
+     * @param nullableRep the repeated value that was targeted, may be null
+     */
+    private void onObservationSaveFailed(@Nullable TraitObject trait, String traitDbId,
+                                         String value, @Nullable String nullableRep) {
+
+        Log.e(TAG, "Failed to save observation. study=" + getStudyId()
+                + " unit=" + getObservationUnit() + " trait=" + traitDbId + " value=" + value);
+
+        try {
+            soundHelper.playError();
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to play error sound", e);
+        }
+
+        //show what the database actually holds, not what was typed
+        try {
+            ObservationModel[] saved = database.getRepeatedValues(getStudyId(), getObservationUnit(), traitDbId);
+            updateCurrentTraitStatus(saved != null && saved.length > 0);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to refresh trait status", e);
+        }
+
+        if (isFinishing() || isDestroyed()) return;
+
+        if (saveFailedDialog != null && saveFailedDialog.isShowing()) return;
+
+        saveFailedDialog = new AlertDialog.Builder(this, R.style.AppAlertDialog)
+                .setTitle(R.string.dialog_save_failed_title)
+                .setMessage(getString(R.string.dialog_save_failed_message, getObservationUnit()))
+                .setPositiveButton(R.string.dialog_save_failed_retry, (d, which) -> {
+                    d.dismiss();
+                    updateObservation(trait, value, nullableRep);
+                })
+                .setNegativeButton(R.string.dialog_save_failed_dismiss, (d, which) -> d.dismiss())
+                .setCancelable(false)
+                .create();
+
+        saveFailedDialog.show();
     }
 
     public void insertRep(String value, String rep) {
