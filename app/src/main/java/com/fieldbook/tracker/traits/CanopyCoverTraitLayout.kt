@@ -215,6 +215,11 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
                 act.refreshInfoBarAdapter()
                 act.refreshRepeatedValuesToolbarIndicator()
                 loadLayout()
+
+                // Writing the observation directly bypasses BaseTraitLayout.updateObservation,
+                // which is where every other format advances the entry, so do it here. A capture
+                // that produced no value returns above and must not advance.
+                handleAutoSwitchToNextPlot(currentTrait)
             }
         }
 
