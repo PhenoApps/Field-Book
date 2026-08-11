@@ -32,6 +32,7 @@ import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.DocumentTreeUtil
+import com.fieldbook.tracker.utilities.ExifUtil
 import com.fieldbook.tracker.utilities.FileUtil
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.Dispatchers
@@ -188,7 +189,9 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
 
         // Save image & record observation with FGCC value all in this IO coroutine
         background.launch {
-            val savedUri = saveCanopyImageToStorage(file, traitName, fileName)
+            val savedUri = saveCanopyImageToStorage(file, traitName, fileName)?.also { uri ->
+                writeExif(uri, studyId, obsUnit, traitId, saveTime)
+            }
 
             // Run image analysis on the saved image
             val overlay = savedUri?.let { uri ->
@@ -542,6 +545,36 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to delete canopy image $uriString", e)
+        }
+    }
+
+    /**
+     * Stamp the image with the same study/entry/trait provenance every other Field Book image
+     * carries, matching AbstractCameraTrait.writeExif.
+     *
+     * Written before the image is read back for analysis: saveStringToExif rewrites the target
+     * file in place, so doing it later would race the preview reload that follows a capture.
+     */
+    private fun writeExif(
+        uri: Uri,
+        studyId: String,
+        entryId: String,
+        traitId: String,
+        timestamp: String
+    ) {
+        try {
+            ExifUtil.saveVariableUnitModelToExif(
+                context,
+                collectActivity.person.orEmpty(),
+                timestamp,
+                database.getStudyById(studyId),
+                database.getObservationUnitById(entryId),
+                database.getObservationVariableById(traitId),
+                uri,
+                controller.getRotationRelativeToDevice()
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to write EXIF metadata to canopy image", e)
         }
     }
 
