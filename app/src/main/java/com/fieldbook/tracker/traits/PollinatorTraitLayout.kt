@@ -45,11 +45,7 @@ import com.fieldbook.tracker.traits.formats.parameters.DEFAULT_DURATION_SECONDS
 import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.fieldbook.tracker.utilities.JsonUtil
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories
 import org.json.JSONObject
 
@@ -94,8 +90,8 @@ class PollinatorTraitLayout : BaseTraitLayout {
     private val traitCategories = mutableStateOf<List<BrAPIScaleValidValuesCategories>>(emptyList())
     private val traitDuration = mutableIntStateOf(DEFAULT_DURATION_SECONDS)
 
-    //cancels the timer coroutine when the layout is reset
-    private var saveJob: Job? = null
+    //the observation the counts belong to, the layout only resets while it is the visible trait
+    private var stateOwner: String? = null
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
@@ -124,7 +120,6 @@ class PollinatorTraitLayout : BaseTraitLayout {
     }
 
     private fun resetObservationState() {
-        cancelTimer()
         isRunning.value = false
         isFinished.value = false
         elapsedSeconds.intValue = 0
@@ -139,8 +134,17 @@ class PollinatorTraitLayout : BaseTraitLayout {
             currentTrait?.duration?.toIntOrNull()?.takeIf { it > 0 } ?: DEFAULT_DURATION_SECONDS
         resetObservationState()
         if (onNew == false) restore(currentObservation?.value)
+        stateOwner = observationKey()
         isDataLocked.value = isLocked
     }
+
+    //study, entry, trait and rep the loaded counts came from
+    private fun observationKey(): String = listOf(
+        collectActivity.studyId,
+        collectActivity.observationUnit,
+        currentTrait?.id,
+        collectActivity.rep
+    ).joinToString("/")
 
     override fun refreshLock() {
         super.refreshLock()
@@ -169,14 +173,13 @@ class PollinatorTraitLayout : BaseTraitLayout {
         if (collectInputView.isRepeatEnabled()) refreshLayout(false) else loadLayout()
     }
 
-    private fun cancelTimer() {
-        saveJob?.cancel()
-        saveJob = null
-    }
+    //counts taken here, unlike hasData this ignores what was already stored
+    private fun hasUnsavedCounts(): Boolean =
+        elapsedSeconds.intValue > 0 || counts.values.any { it > 0 }
 
     override fun onExit() {
         isRunning.value = false
-        if (hasData()) save()
+        if (hasUnsavedCounts()) save()
     }
 
     //show the visit total instead of the raw json in the collect input and repeated values toolbar
@@ -202,7 +205,7 @@ class PollinatorTraitLayout : BaseTraitLayout {
 
     private fun key(category: BrAPIScaleValidValuesCategories): String = keyOf(category)
 
-    //build the json payload used by both async saves and the synchronous exit save
+    //build the json payload written for every count, the stop button and the exit save
     private fun buildJson(): String? {
         val cats = categories()
         if (cats.isEmpty()) return null
@@ -231,18 +234,14 @@ class PollinatorTraitLayout : BaseTraitLayout {
         }
     }
 
+    //switching traits calls onExit on the layout being switched to, never save another entry's counts
     private fun save() {
-        saveJob?.cancel()
-        saveJob = CoroutineScope(Dispatchers.IO).launch {
-            val value = buildJson() ?: return@launch
-            val savedLocked = isLocked
-            collectActivity.updateObservation(currentTrait, value, null)
-            CoroutineScope(Dispatchers.Main).launch {
-                collectInputView.text = decodeValue(value)
-                afterLoadExists(collectActivity, value)
-                isDataLocked.value = savedLocked
-            }
-        }
+        if (stateOwner != observationKey()) return
+        val value = buildJson() ?: return
+        collectActivity.updateObservation(currentTrait, value, null)
+        collectInputView.text = decodeValue(value)
+        afterLoadExists(collectActivity, value)
+        isDataLocked.value = isLocked
     }
 
     private fun setupUi() {
@@ -318,8 +317,8 @@ class PollinatorTraitLayout : BaseTraitLayout {
                     enabled = canCollect() && elapsedSeconds.intValue > 0
                 ) {
                     isRunning.value = false
-                    save()
                     isFinished.value = true
+                    save()
                 }
 
                 Text(
