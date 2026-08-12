@@ -1743,6 +1743,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="download_anyway">Scarica</string>
     <string name="confirm_delete_with_media_title">Elimina osservazione</string>
     <string name="confirm_delete_with_media_message">L\'eliminazione di questa osservazione eliminerà anche tutti i contenuti multimediali allegati. Sei sicuro di voler eliminare questa osservazione?</string>
+    <string name="confirm_na_title">Segna come mancante</string>
     <string name="attach">Allega</string>
     <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
     <string name="alert_jump_to_plot_bottom_toolbar_message">La barra degli strumenti inferiore è stata aggiornata per supportare la navigazione della entrata tramite codice a barre.</string>
