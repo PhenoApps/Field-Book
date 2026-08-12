@@ -351,6 +351,11 @@
     <string name="traits_format_stop_watch">Cronometro</string>
     <string name="traits_format_custom">Personalizzato</string>
     <string name="traits_format_hardware">Hardware</string>
+    <string name="traits_format_pollinator">Impollinatore</string>
+    <string name="trait_pollinator_duration_label">Durata (secondi)</string>
+    <string name="trait_pollinator_summary">%1$d visite / %2$d:%3$02d</string>
+    <string name="trait_pollinator_no_categories">Aggiungi categorie a questa caratteristica per registrare i conteggi impollinatori.</string>
+    <string name="trait_pollinator_data_loss_warning">I conteggi e il tempo trascorso registrati per questa entrata verranno eliminati definitivamente.</string>
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Formati di Carattere</string>
     <string name="trait_creator_title_layout">Disposizione dei Caratteri</string>
@@ -385,6 +390,7 @@
     <string name="traits_create_warning_name_blank">Il nome del carattere non può essere vuoto</string>
     <string name="traits_create_warning_duplicate">Il carattere esiste già</string>
     <string name="traits_create_warning_numeric_required">Predefinito, minimo e massimo sono richiesti e deve essere numerico</string>
+    <string name="traits_create_warning_categories_required">Almeno una categoria è richiesta</string>
     <string name="dialog_new_trait_add_cat_button_text">Aggiungi</string>
     <string name="traits_create_categories_value_text">Inserisci il valore della categoria qui</string>
     <string name="list_item_category_delete_content_description">Elimina la categoria.</string>
@@ -486,6 +492,7 @@
     <string name="trait_detail_chip_transfer_images">Trasferire immagini</string>
     <string name="trait_detail_chip_invalid_value">Valori anomali</string>
     <string name="trait_detail_chip_severities">Severità</string>
+    <string name="trait_detail_chip_duration">Durata: %s</string>
     <string name="trait_parameter_allow_multicat">Selezione Categoria Multiple</string>
     <string name="trait_parameter_allow_other">Consenti Altra Categoria</string>
     <string name="trait_other_button">Altro</string>
@@ -1512,6 +1519,20 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="pref_experimental_generate_sample_data_success">Campo di esempio creato con successo.</string>
     <string name="pref_experimental_generate_sample_data_failure">Impossibile generare il campo di esempio. Controllare che l\'archiviazione sia configurata correttamente.</string>
     <string name="traits_format_experimental">Sperimentale</string>
+    <string name="traits_format_canopy_cover">Copertura di Canopia</string>
+    <string name="trait_canopy_sensitivity_label">Sensibilità</string>
+    <string name="canopy_cover_preview_description">Immagine catturata con sovrapposizione a canopia verde</string>
+    <string name="canopy_cover_capture_description">Cattura immagine per l\'analisi della copertura a canopia</string>
+    <string name="canopy_cover_embiggen_description">Espandi l\'immagine catturata a schermo intero</string>
+    <string name="canopy_cover_overwrite_title">Sovrascrivere l\'immagine della canopia?</string>
+    <string name="canopy_cover_overwrite_message">L\'acquisizione di una nuova immagine sostituirà l\'immagine e il valore attuali della canopia per questa osservazione.</string>
+    <string name="canopy_cover_overwrite_positive">Sovrascrivi</string>
+    <string name="canopy_param_test_capture">Prova Acquisizione</string>
+    <string name="canopy_param_test">Prova</string>
+    <string name="canopy_param_threshold_format">Soglia: %.2f</string>
+    <string name="canopy_param_output_format">Valore di uscita: %.1f</string>
+    <string name="canopy_param_locked_title">Sensibilità bloccata</string>
+    <string name="canopy_param_locked_message">La sensibilità non può essere cambiata perché i dati sono già stati raccolti con questo carattere. Crea un nuovo carattere della Canopia per raccogliere con una sensibilità diversa.</string>
     <string name="pref_experimental_traits_category_title">Caratteri Sperimentali</string>
     <string name="pref_experimental_traits_category_summary">Mostra una categoria di caratteri sperimentali nel selettore del tipo di carattere</string>
     <string name="pref_alpha_media_keycode_events_summary">La traccia successiva/precedente naviga i entrati, il volume su/giù si muove attraverso i caratteri, la chiamata catturerà le foto</string>
@@ -1623,6 +1644,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="play">Riproduci</string>
     <string name="pause">Pausa</string>
     <string name="save">Salva</string>
+    <string name="stop">Ferma</string>
     <string name="database_export_invalid_filename">Nome del file di esportazione non valido.</string>
     <string name="device_settings_dialog_name">Nome: %s</string>
     <string name="device_settings_dialog_address">Indirizzo: %s</string>
