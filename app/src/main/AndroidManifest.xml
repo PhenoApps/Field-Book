@@ -3,14 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.fieldbook.tracker">
 
-    <!-- Custom permission allowing other PhenoApps to request BrAPI tokens via AccountManager.
-         Normal protection: any app that declares uses-permission is granted it without a user
-         prompt. Account visibility is controlled per-package in BrapiAuthenticator. -->
-    <permission
-        android:name="org.phenoapps.brapi.READ_TOKEN"
-        android:protectionLevel="normal" />
-
-    <uses-permission android:name="org.phenoapps.brapi.READ_TOKEN" />
+    <!-- No custom BrAPI permission is declared here on purpose. Only one installed app may define
+         a given permission name, and a second app declaring it under a different signing key fails
+         to install outright — which blocked the debug and release variants from coexisting, and
+         would have blocked a sibling PhenoApp from declaring the same thing. Cross-app BrAPI
+         access is gated by account visibility, the authenticator, and the config provider's own
+         caller checks instead. -->
 
     <application
         android:name=".application.FieldBook"

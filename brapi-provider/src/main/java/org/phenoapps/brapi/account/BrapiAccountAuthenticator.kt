@@ -43,7 +43,7 @@ open class BrapiAccountAuthenticator(
         options: Bundle?,
     ): Bundle {
         val am = AccountManager.get(context)
-        val ownerPackage = am.getUserData(account, BrapiAccountConstants.KEY_OWNER_PACKAGE)
+        val ownerPackage = accessPolicy.ownerPackageOf(account)
         val callingPackage = accessPolicy.callingPackageForAccount(account, options)
             ?: return accessPolicy.permissionDeniedBundle()
 

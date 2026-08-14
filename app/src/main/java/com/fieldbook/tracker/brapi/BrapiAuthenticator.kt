@@ -14,9 +14,25 @@ class BrapiAuthenticator(context: Context) : BrapiAccountAuthenticator(
 ) {
 
     companion object {
-        const val ACCOUNT_TYPE = BrapiAccountConstants.ACCOUNT_TYPE
+        /**
+         * Field Book's own BrAPI account type.
+         *
+         * Per-app rather than shared: only the app registered as a type's authenticator, or one
+         * co-signed with it, may write its accounts, so sibling PhenoApps under different signing
+         * keys each need their own. Not a constant because it is derived from the package, which
+         * differs between the debug and release variants.
+         */
+        @JvmStatic
+        fun accountType(context: Context): String =
+            BrapiAccountConstants.accountTypeFor(context.packageName)
+
+        /** Whether [accountType] is a BrAPI account type belonging to any PhenoApp. */
+        @JvmStatic
+        fun isBrapiAccountType(accountType: String?): Boolean =
+            BrapiAccountConstants.isPerAppAccountType(accountType) ||
+                accountType == BrapiAccountConstants.LEGACY_ACCOUNT_TYPE
+
         const val AUTH_TOKEN_TYPE = BrapiAccountConstants.AUTH_TOKEN_TYPE
-        const val READ_TOKEN_PERMISSION = BrapiAccountConstants.READ_TOKEN_PERMISSION
         const val KEY_ID_TOKEN = BrapiAccountConstants.KEY_ID_TOKEN
         const val KEY_SERVER_URL = BrapiAccountConstants.KEY_SERVER_URL
         const val KEY_DISPLAY_NAME = BrapiAccountConstants.KEY_DISPLAY_NAME

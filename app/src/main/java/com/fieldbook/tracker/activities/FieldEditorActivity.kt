@@ -475,8 +475,7 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
         if (hasBrapi) {
             val activeAccount = brapiAccountHelper.findAccount()
             val displayName = activeAccount?.let {
-                brapiAccountHelper.getUserData(it, com.fieldbook.tracker.brapi.BrapiAuthenticator.KEY_DISPLAY_NAME)
-                    ?.takeIf { name -> name.isNotEmpty() }
+                brapiAccountHelper.accountInfo(it)?.displayName?.takeIf { name -> name.isNotEmpty() }
             } ?: getString(R.string.brapi_edit_display_name_default)
             importArray[3] = displayName
         }

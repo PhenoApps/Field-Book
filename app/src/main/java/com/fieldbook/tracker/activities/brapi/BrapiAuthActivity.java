@@ -33,6 +33,8 @@ import net.openid.appauth.AuthorizationServiceConfiguration;
 import net.openid.appauth.Preconditions;
 import net.openid.appauth.ResponseTypeValues;
 import net.openid.appauth.TokenResponse;
+
+import org.phenoapps.brapi.account.BrapiTokenStoreResult;
 import net.openid.appauth.connectivity.ConnectionBuilder;
 
 import java.net.HttpURLConnection;
@@ -272,25 +274,77 @@ public class BrapiAuthActivity extends ThemedActivity {
         getIntent().setData(null);
 
         Log.e("BrAPI", "Error starting BrAPI auth", ex);
-        Toast.makeText(this, R.string.brapi_auth_error_starting, Toast.LENGTH_LONG).show();
+
+        // A bare "Error Starting BrAPI Auth" gives the user nothing to act on and nothing to
+        // report, so surface whatever the provider actually said — a bad client id and a refused
+        // redirect URI are very different problems and look identical without this.
+        String reason = describeAuthFailure(ex);
+        String message = reason.isEmpty()
+                ? getString(R.string.brapi_auth_error_starting)
+                : getString(R.string.brapi_auth_error_starting_reason, reason);
+
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
         setResult(RESULT_CANCELED);
         finish();
+    }
+
+    /**
+     * Best available human-readable cause for an auth failure, or empty when nothing was reported.
+     *
+     * AppAuth puts the provider's own wording in {@code errorDescription} and the OAuth error code
+     * in {@code error}; both are absent for transport-level failures, where the exception message
+     * is all there is.
+     */
+    private String describeAuthFailure(Exception ex) {
+        if (ex == null) return "";
+
+        if (ex instanceof AuthorizationException) {
+            AuthorizationException authEx = (AuthorizationException) ex;
+            if (authEx.errorDescription != null && !authEx.errorDescription.isEmpty()) {
+                return authEx.errorDescription;
+            }
+            if (authEx.error != null && !authEx.error.isEmpty()) {
+                return authEx.error;
+            }
+            if (authEx.getCause() != null && authEx.getCause().getMessage() != null) {
+                return authEx.getCause().getMessage();
+            }
+        }
+
+        return ex.getMessage() == null ? "" : ex.getMessage();
     }
 
     private void authSuccess(String accessToken, @Nullable String idToken) {
 
         String serverUrl = launchServerUrl;
 
+        BrapiTokenStoreResult stored = BrapiTokenStoreResult.STORED;
         if (!serverUrl.isEmpty()) {
-            accountHelper.storeToken(serverUrl, accessToken, idToken);
+            stored = accountHelper.storeToken(serverUrl, accessToken, idToken);
         }
 
         // Clear our data from our deep link so the app doesn't think it is
         // coming from a deep link if it is coming from deep link on pause and resume.
         getIntent().setData(null);
 
-        Log.d("BrAPI", "Auth successful");
-        Toast.makeText(this, R.string.brapi_auth_success, Toast.LENGTH_LONG).show();
+        // The provider signed us in either way, but only STORED means the server now has an
+        // account of its own here. Saying "authorization successful" for the other outcomes would
+        // promise a server card that never appears.
+        int message;
+        switch (stored) {
+            case ALREADY_SHARED:
+                message = R.string.brapi_auth_success_already_shared;
+                break;
+            case ACCOUNT_UNAVAILABLE:
+                message = R.string.brapi_auth_success_no_account;
+                break;
+            default:
+                message = R.string.brapi_auth_success;
+                break;
+        }
+
+        Log.d("BrAPI", "Auth successful, token stored: " + stored);
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
         setResult(RESULT_OK);
         finish();
     }
@@ -350,7 +404,9 @@ public class BrapiAuthActivity extends ThemedActivity {
                             if (response != null && response.accessToken != null) {
                                 authSuccess(response.accessToken, response.idToken);
                             } else {
-                                authError(null);
+                                // The exchange failure carries the provider's reason; dropping it
+                                // here is what made token-exchange problems unreportable.
+                                authError(ex);
                             }
                         }
                     });
