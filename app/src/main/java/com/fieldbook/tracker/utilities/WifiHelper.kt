@@ -21,10 +21,27 @@ class WifiHelper @Inject constructor(
     interface WifiRequester {
         fun onApRequested()
         fun onNetworkBound(network: Network)
+
+        /**
+         * The bound network went away (camera powered off, moved out of range, AP timed out).
+         * Default no-op so requesters that don't care are unaffected.
+         */
+        fun onNetworkLost() = Unit
+
+        /**
+         * The network request timed out or was rejected, so [onNetworkBound] will never arrive.
+         */
+        fun onNetworkUnavailable() = Unit
     }
 
     companion object {
         const val TAG = "WifiHelper"
+
+        /**
+         * Without a timeout the request stays pending forever if the user never accepts the
+         * system connect dialog, which silently blocks every later request.
+         */
+        const val REQUEST_TIMEOUT_MS = 45000
     }
 
     private val connectivityManager by lazy {
@@ -32,93 +49,124 @@ class WifiHelper @Inject constructor(
     }
 
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
+    private var boundNetwork: Network? = null
 
     fun startWifiSearch(ssid: String, pass: String, requester: WifiRequester) {
 
-        requester.onApRequested()
-
-        val wifiNetworkSpecifier = WifiNetworkSpecifier.Builder()
+        val specifier = WifiNetworkSpecifier.Builder()
             .setSsid(ssid)
             .setWpa2Passphrase(pass)
             .build()
 
-        val networkRequest = NetworkRequest.Builder()
-            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-            .removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            .setNetworkSpecifier(wifiNetworkSpecifier)
-            .build()
-
-        networkCallback = object : ConnectivityManager.NetworkCallback() {
-            override fun onAvailable(network: Network) {
-                super.onAvailable(network)
-
-                Log.d(TAG, "Network Available")
-
-                connectivityManager.bindProcessToNetwork(network)
-
-                requester.onNetworkBound(network)
-            }
-        }
-
-        networkCallback?.let {
-            connectivityManager.requestNetwork(networkRequest, it)
-        }
+        requestNetwork(specifier.toRequest(), requester)
     }
 
     fun startWifiSearch(format: String, requester: WifiRequester) {
 
-        requester.onApRequested()
-
-        val specifier =
-            WifiNetworkSpecifier.Builder()
-                .setSsidPattern(
-                    PatternMatcher(
-                        ".*$format.*",
-                        PatternMatcher.PATTERN_SIMPLE_GLOB
-                    )
+        val specifier = WifiNetworkSpecifier.Builder()
+            .setSsidPattern(
+                PatternMatcher(
+                    ".*$format.*",
+                    PatternMatcher.PATTERN_SIMPLE_GLOB
                 )
-                //.setSsid(ssid!!)
-                //adding BSSID will remove the need for the "connect" dialog
-                //.setBssid(MacAddress.fromString(bssid!!))
-                .build()
-
-        val request = NetworkRequest.Builder()
-            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-            .removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            .setNetworkSpecifier(specifier)
+            )
+            //adding BSSID will remove the need for the "connect" dialog
+            //.setBssid(MacAddress.fromString(bssid!!))
             .build()
 
-        networkCallback = object : ConnectivityManager.NetworkCallback() {
+        requestNetwork(specifier.toRequest(), requester)
+    }
+
+    private fun WifiNetworkSpecifier.toRequest(): NetworkRequest =
+        NetworkRequest.Builder()
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .setNetworkSpecifier(this)
+            .build()
+
+    /**
+     * Registers a single network request. Registered callbacks live at the framework level and
+     * outlive the activity, so the previous one must always be unregistered first: otherwise they
+     * accumulate until [ConnectivityManager.requestNetwork] throws TooManyRequestsException and
+     * the device can only recover by toggling wifi.
+     */
+    private fun requestNetwork(request: NetworkRequest, requester: WifiRequester) {
+
+        //releases any previous request and unbinds the process
+        disconnect()
+
+        requester.onApRequested()
+
+        val callback = object : ConnectivityManager.NetworkCallback() {
+
             override fun onAvailable(network: Network) {
                 super.onAvailable(network)
 
                 Log.d(TAG, "Network Available")
 
+                boundNetwork = network
+
                 connectivityManager.bindProcessToNetwork(network)
 
                 requester.onNetworkBound(network)
             }
+
+            override fun onLost(network: Network) {
+                super.onLost(network)
+
+                if (network != boundNetwork) return
+
+                Log.d(TAG, "Network Lost")
+
+                boundNetwork = null
+
+                try {
+                    connectivityManager.bindProcessToNetwork(null)
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to unbind process network", e)
+                }
+
+                requester.onNetworkLost()
+            }
+
+            override fun onUnavailable() {
+                super.onUnavailable()
+
+                Log.d(TAG, "Network Unavailable")
+
+                requester.onNetworkUnavailable()
+            }
         }
 
-        networkCallback?.let {
-            connectivityManager.requestNetwork(request, it)
-        }
+        networkCallback = callback
 
+        try {
+            connectivityManager.requestNetwork(request, callback, REQUEST_TIMEOUT_MS)
+        } catch (e: RuntimeException) {
+            //TooManyRequestsException is a RuntimeException and is not part of the public api
+            Log.e(TAG, "Network request rejected", e)
+            networkCallback = null
+            requester.onNetworkUnavailable()
+        }
     }
 
     fun disconnect() {
+
         networkCallback?.let {
             try {
                 connectivityManager.unregisterNetworkCallback(it)
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.w(TAG, "Failed to unregister network callback", e)
             }
+        }
 
-            try {
-                connectivityManager.bindProcessToNetwork(null)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+        networkCallback = null
+        boundNetwork = null
+
+        try {
+            connectivityManager.bindProcessToNetwork(null)
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to unbind process network", e)
         }
     }
 }

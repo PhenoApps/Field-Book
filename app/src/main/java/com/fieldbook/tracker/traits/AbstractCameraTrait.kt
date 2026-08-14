@@ -29,7 +29,6 @@ import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.adapters.ImageAdapter
 import com.fieldbook.tracker.database.internalTimeFormatter
 import com.fieldbook.tracker.database.models.ObservationModel
-import com.fieldbook.tracker.devices.camera.GoProApi
 import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -208,7 +207,6 @@ abstract class AbstractCameraTrait :
         saveTime: String,
         saveState: SaveState,
         offset: Int? = null,
-        goProImage: GoProApi.GoProImage? = null,
     ) {
 
         // Resolve/create destination Uri synchronously so chunked writes can start immediately.
@@ -237,24 +235,99 @@ abstract class AbstractCameraTrait :
 
         } else {
 
-            if (uri == Uri.EMPTY && goProImage != null) {
+            saveSingleShot(uri, data)
+        }
+    }
 
-                val studyId = collectActivity.studyId
+    /**
+     * Records an observation whose value is a file name on a connected camera rather than a file
+     * in Field Book's storage. Used when a camera trait has its copy-image setting turned off.
+     */
+    protected fun saveFileNameObservation(
+        obsUnit: RangeObject,
+        traitObj: TraitObject,
+        fileName: String
+    ) {
 
-                val rep = database.getNextRep(studyId, obsUnit.uniqueId, currentTrait.id)
+        val studyId = collectActivity.studyId
 
-                (context as? CollectActivity)?.updateObservation(traitObj, goProImage.fileName, rep)
+        val rep = database.getNextRep(studyId, obsUnit.uniqueId, currentTrait.id)
 
-                ui.launch {
+        (context as? CollectActivity)?.updateObservation(traitObj, fileName, rep)
 
-                    notifyItemInserted(goProImage.fileName.toUri())
+        ui.launch {
 
-                    (context as CollectActivity).refreshRepeatedValuesToolbarIndicator()
+            notifyItemInserted(fileName.toUri())
 
-                }
-            } else {
-                saveSingleShot(uri, data)
-            }
+            (context as CollectActivity).refreshRepeatedValuesToolbarIndicator()
+        }
+    }
+
+    /**
+     * Creates the destination file for an image that will be streamed in rather than handed over
+     * as a byte array.
+     *
+     * Unlike [resolveOrCreateFileUri] this does not insert the observation: that only happens once
+     * the bytes have actually landed (see [commitStreamedFile]), so an interrupted transfer cannot
+     * leave an empty file with a valid observation row pointing at it.
+     */
+    protected fun createStreamedFile(obsUnit: RangeObject, saveTime: String): DocumentFile? {
+
+        return try {
+
+            val sanitizedTraitName = FileUtil.sanitizeFileName(currentTrait.name)
+
+            val name = "${obsUnit.uniqueId}_${sanitizedTraitName}_$saveTime.jpg"
+
+            DocumentTreeUtil.getFieldMediaDirectory(context, sanitizedTraitName)
+                ?.createFile("*/*", name)
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to create destination file for streamed image", e)
+            null
+        }
+    }
+
+    protected fun openStreamedFile(file: DocumentFile): OutputStream? =
+        openOutputStreamSafely(file.uri)
+
+    /**
+     * Inserts the observation for a file written by [createStreamedFile] once its bytes are on disk.
+     */
+    protected fun commitStreamedFile(
+        file: DocumentFile,
+        obsUnit: RangeObject,
+        saveTime: String
+    ) {
+
+        val plot = obsUnit.uniqueId
+        val studyId = collectActivity.studyId
+        val person = (activity as? CollectActivity)?.person
+        val location = (activity as? CollectActivity)?.locationByPreferences
+        val rep = database.getNextRep(studyId, plot, currentTrait.id)
+
+        database.insertObservation(
+            plot, currentTrait.id, file.uri.toString(),
+            person, location, "", studyId,
+            null, null, null, rep
+        )
+
+        writeExif(file, studyId, plot, currentTrait.id, saveTime)
+
+        ui.launch {
+            notifyItemInserted(file.uri)
+            (context as CollectActivity).refreshRepeatedValuesToolbarIndicator()
+        }
+    }
+
+    /**
+     * Removes a file created by [createStreamedFile] whose transfer failed.
+     */
+    protected fun discardStreamedFile(file: DocumentFile) {
+        try {
+            if (file.exists()) file.delete()
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to delete partial image file", e)
         }
     }
 

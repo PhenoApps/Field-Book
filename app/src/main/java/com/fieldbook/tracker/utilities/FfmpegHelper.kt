@@ -30,6 +30,30 @@ class FfmpegHelper @Inject constructor() {
 
     private var udpSocket: DatagramSocket? = null
 
+    /**
+     * Stops the keep alive datagrams without touching the socket or the ffmpeg process.
+     *
+     * Used while a photo is downloaded from the camera so the transfer does not compete with the
+     * preview traffic. [cancel] is deliberately not used here: it closes the socket bound to port
+     * 8554 and rebinding immediately afterwards races the socket teardown.
+     */
+    fun pauseKeepAlive() {
+        try {
+            keepAliveJob?.cancel()
+            keepAliveJob = null
+        } catch (_: Exception) {}
+    }
+
+    /**
+     * Restarts the keep alive loop after [pauseKeepAlive]. No-op if the socket is gone, in which
+     * case [initRequestTimer] will rebuild everything when the stream is requested again.
+     */
+    fun resumeKeepAlive() {
+        if (keepAliveJob != null) return
+        val socket = udpSocket ?: return
+        keepAliveJob = startKeepAliveLoop(socket)
+    }
+
     fun cancel() {
 
         try {
@@ -75,60 +99,33 @@ class FfmpegHelper @Inject constructor() {
 
         startFfmpegCommand()
 
-        val keepStreamAliveData = "_GPHD_:1:0:2:0.000000\n".toByteArray()
-
         try {
 
-            val inetAddress = InetAddress.getByName("10.5.5.9")
+            //the previous socket is closed here, so it must always be replaced: reusing the closed
+            //instance made every keep alive after the first stream restart fail silently
+            udpSocket?.let {
+                try { it.disconnect() } catch (_: Exception) {}
+                try { it.close() } catch (_: Exception) {}
+            }
+
+            udpSocket = try {
+                DatagramSocket().also {
+                    it.reuseAddress = true
+                    it.soTimeout = UDP_SOCKET_TIMEOUT.toInt()
+                }
+            } catch (e: Exception) {
+                Log.w(TAG, "Unable to open keep alive socket", e)
+                null
+            }
 
             try {
-
-                udpSocket?.disconnect()
-                udpSocket?.close()
-
-                if (udpSocket == null) {
-                    udpSocket = DatagramSocket().also {
-                        it.reuseAddress = true
-                        it.soTimeout = UDP_SOCKET_TIMEOUT.toInt()
-                    }
-                }
-
                 udpSocket?.bind(InetSocketAddress(8554))
-
             } catch (ignore: Exception) {
             }
 
             keepAliveJob?.cancel()
 
-            keepAliveJob = scope.launch {
-
-                withContext(Dispatchers.IO) {
-
-                    while (true) {
-
-                        try {
-
-                            val keepStreamAlivePacket = DatagramPacket(
-                                keepStreamAliveData,
-                                keepStreamAliveData.size,
-                                inetAddress,
-                                8554
-                            )
-
-                            udpSocket?.send(keepStreamAlivePacket)
-
-                            Log.i(TAG, "Keep Alive sent")
-
-                        } catch (e: Exception) {
-
-                            e.printStackTrace()
-
-                        }
-
-                        delay(KEEP_ALIVE_MESSAGE_PACKET_DELAY)
-                    }
-                }
-            }
+            keepAliveJob = udpSocket?.let { startKeepAliveLoop(it) }
 
             Log.i(TAG, "requestTimer init successfully")
 
@@ -136,6 +133,48 @@ class FfmpegHelper @Inject constructor() {
 
             e.printStackTrace()
 
+        }
+    }
+
+    private fun startKeepAliveLoop(socket: DatagramSocket): Job {
+
+        val keepStreamAliveData = "_GPHD_:1:0:2:0.000000\n".toByteArray()
+
+        return scope.launch {
+
+            withContext(Dispatchers.IO) {
+
+                val inetAddress = try {
+                    InetAddress.getByName("10.5.5.9")
+                } catch (e: Exception) {
+                    Log.w(TAG, "Unable to resolve camera address", e)
+                    return@withContext
+                }
+
+                while (true) {
+
+                    try {
+
+                        val keepStreamAlivePacket = DatagramPacket(
+                            keepStreamAliveData,
+                            keepStreamAliveData.size,
+                            inetAddress,
+                            8554
+                        )
+
+                        socket.send(keepStreamAlivePacket)
+
+                        Log.i(TAG, "Keep Alive sent")
+
+                    } catch (e: Exception) {
+
+                        e.printStackTrace()
+
+                    }
+
+                    delay(KEEP_ALIVE_MESSAGE_PACKET_DELAY)
+                }
+            }
         }
     }
 
