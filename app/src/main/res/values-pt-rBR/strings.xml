@@ -351,6 +351,11 @@
     <string name="traits_format_stop_watch">Cronômetro</string>
     <string name="traits_format_custom">Personalizado</string>
     <string name="traits_format_hardware">Equipamento</string>
+    <string name="traits_format_pollinator">Polinizador</string>
+    <string name="trait_pollinator_duration_label">Duração (segundos)</string>
+    <string name="trait_pollinator_summary">%1$d visitas / %2$d:%3$02d</string>
+    <string name="trait_pollinator_no_categories">Adicione categorias a esta característica para registrar contagens polinizadores.</string>
+    <string name="trait_pollinator_data_loss_warning">A contagem e o tempo registrado para esta entrada serão excluídos permanentemente.</string>
     <!-- Trait Creation Dialog -->
     <string name="traits_toolbar_add_trait">Formato de Característica</string>
     <string name="trait_creator_title_layout">Disposição de Característica</string>
@@ -385,6 +390,7 @@
     <string name="traits_create_warning_name_blank">Nome da característica não pode estar em branco</string>
     <string name="traits_create_warning_duplicate">Característica já existe</string>
     <string name="traits_create_warning_numeric_required">Padrão, mínimo e máximo devem ser numéricos</string>
+    <string name="traits_create_warning_categories_required">Pelo menos uma categoria é obrigatória</string>
     <string name="dialog_new_trait_add_cat_button_text">Adicionar</string>
     <string name="traits_create_categories_value_text">Insira o valor da categoria aqui</string>
     <string name="list_item_category_delete_content_description">Excluir a categoria.</string>
@@ -486,6 +492,7 @@
     <string name="trait_detail_chip_transfer_images">Transferir imagens</string>
     <string name="trait_detail_chip_invalid_value">Valores atípicos</string>
     <string name="trait_detail_chip_severities">Severidades</string>
+    <string name="trait_detail_chip_duration">Duração: %s</string>
     <string name="trait_parameter_allow_multicat">Seleção de Múltiplas Categorias</string>
     <string name="trait_parameter_allow_other">Permitir Outra Categoria</string>
     <string name="trait_other_button">Outros</string>
@@ -1514,6 +1521,20 @@
     <string name="pref_experimental_generate_sample_data_success">Campo de exemplo criado com sucesso.</string>
     <string name="pref_experimental_generate_sample_data_failure">Falha ao gerar o campo de exemplo. Verifique se o armazenamento está configurado corretamente.</string>
     <string name="traits_format_experimental">Experimental</string>
+    <string name="traits_format_canopy_cover">Cobertura de Dossel</string>
+    <string name="trait_canopy_sensitivity_label">Sensibilidade</string>
+    <string name="canopy_cover_preview_description">Imagem capturada com sobreposição de dossel verde</string>
+    <string name="canopy_cover_capture_description">Capturar imagem para análise de cobertura do dossel</string>
+    <string name="canopy_cover_embiggen_description">Expandir a imagem capturada para tela cheia</string>
+    <string name="canopy_cover_overwrite_title">Sobrescrever imagem do dossel?</string>
+    <string name="canopy_cover_overwrite_message">Capturar uma nova imagem irá substituir a imagem e o valor atual do dossel para esta observação.</string>
+    <string name="canopy_cover_overwrite_positive">Sobrescrever</string>
+    <string name="canopy_param_test_capture">Testar Captura</string>
+    <string name="canopy_param_test">Testar</string>
+    <string name="canopy_param_threshold_format">Limite: %.2f</string>
+    <string name="canopy_param_output_format">Valor de saída: %.1f</string>
+    <string name="canopy_param_locked_title">Sensibilidade bloqueada</string>
+    <string name="canopy_param_locked_message">A sensibilidade não pode ser alterada porque dados já foram coletados com esta característica. Crie uma nova característica Dossel para coletar com outra sensibilidade.</string>
     <string name="pref_experimental_traits_category_title">Características Experimentais</string>
     <string name="pref_experimental_traits_category_summary">Mostrar uma categoria de características experimentais no seletor de tipo de característica</string>
     <string name="pref_alpha_media_keycode_events_summary">Seguinte/anterior navega pelas entradas, o botão de aumentar/diminuir o volume alterna entre as características e a função \"Ligar\" captura fotos</string>
@@ -1625,6 +1646,7 @@
     <string name="play">Reproduzir</string>
     <string name="pause">Pausar</string>
     <string name="save">Salvar</string>
+    <string name="stop">Parar</string>
     <string name="database_export_invalid_filename">Nome de arquivo de exportação inválido.</string>
     <string name="device_settings_dialog_name">Nome: %s</string>
     <string name="device_settings_dialog_address">Endereço: %s</string>
@@ -1723,6 +1745,7 @@
     <string name="download_anyway">Baixar</string>
     <string name="confirm_delete_with_media_title">Excluir observação</string>
     <string name="confirm_delete_with_media_message">Excluir esta observação também irá excluir qualquer mídia em anexo. Tem certeza de que deseja excluir esta observação?</string>
+    <string name="confirm_na_title">Marcar como faltando</string>
     <string name="attach">Anexar</string>
     <!-- Alert shown first time user clicks the jump-to-plot toolbar icon to inform about bottom toolbar -->
     <string name="alert_jump_to_plot_bottom_toolbar_message">A barra de ferramentas inferior foi atualizada para suportar a navegação por meio do código de barras.</string>
