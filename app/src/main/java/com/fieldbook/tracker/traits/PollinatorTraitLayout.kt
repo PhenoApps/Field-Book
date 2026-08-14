@@ -93,6 +93,12 @@ class PollinatorTraitLayout : BaseTraitLayout {
     //the observation the counts belong to, the layout only resets while it is the visible trait
     private var stateOwner: String? = null
 
+    //counting was started or a count was taken since these counts were loaded
+    private var isSessionActive = false
+
+    //there are changes that have not been written to the observation yet
+    private var isDirty = false
+
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
@@ -124,6 +130,8 @@ class PollinatorTraitLayout : BaseTraitLayout {
         isFinished.value = false
         elapsedSeconds.intValue = 0
         counts.clear()
+        isSessionActive = false
+        isDirty = false
     }
 
     //reload the saved counts when navigating between repeated measures
@@ -139,15 +147,22 @@ class PollinatorTraitLayout : BaseTraitLayout {
     }
 
     //study, entry, trait and rep the loaded counts came from
+    //the rep only moves without a reload when repeated measures are on, reading it from the
+    //activity otherwise costs a repeated values query on every count
     private fun observationKey(): String = listOf(
         collectActivity.studyId,
         collectActivity.observationUnit,
         currentTrait?.id,
-        collectActivity.rep
+        if (collectInputView.isRepeatEnabled()) collectInputView.getRep() else ""
     ).joinToString("/")
+
+    //a session started here stays editable until it is stopped, frozen applies again on the next load
+    private fun isSessionInProgress(): Boolean = isSessionActive && !isFinished.value
 
     override fun refreshLock() {
         super.refreshLock()
+        //frozen locks an entry once an observation exists and counting writes one on the first count
+        if (isSessionInProgress()) isLocked = collectActivity.isLocked()
         isDataLocked.value = isLocked
         //never keep counting into an observation that has just been locked
         if (isLocked) isRunning.value = false
@@ -173,13 +188,9 @@ class PollinatorTraitLayout : BaseTraitLayout {
         if (collectInputView.isRepeatEnabled()) refreshLayout(false) else loadLayout()
     }
 
-    //counts taken here, unlike hasData this ignores what was already stored
-    private fun hasUnsavedCounts(): Boolean =
-        elapsedSeconds.intValue > 0 || counts.values.any { it > 0 }
-
     override fun onExit() {
         isRunning.value = false
-        if (hasUnsavedCounts()) save()
+        save()
     }
 
     //show the visit total instead of the raw json in the collect input and repeated values toolbar
@@ -210,6 +221,8 @@ class PollinatorTraitLayout : BaseTraitLayout {
         val cats = categories()
         if (cats.isEmpty()) return null
         val countsJson = JSONObject()
+        //keep counts collected under categories that have since been removed from the trait
+        counts.forEach { (k, count) -> countsJson.put(k, count) }
         cats.forEach { countsJson.put(key(it), counts[key(it)] ?: 0) }
         val json = JSONObject()
         json.put(COUNTS_KEY, countsJson)
@@ -236,12 +249,18 @@ class PollinatorTraitLayout : BaseTraitLayout {
 
     //switching traits calls onExit on the layout being switched to, never save another entry's counts
     private fun save() {
+        //restoring an observation fills the counts, only write when something was collected here
+        if (!isDirty) return
         if (stateOwner != observationKey()) return
         val value = buildJson() ?: return
+        val locked = isLocked
         collectActivity.updateObservation(currentTrait, value, null)
         collectInputView.text = decodeValue(value)
+        //afterLoadExists re-locks under frozen, a save must not end a session that is in progress
         afterLoadExists(collectActivity, value)
+        isLocked = locked
         isDataLocked.value = isLocked
+        isDirty = false
     }
 
     private fun setupUi() {
@@ -263,13 +282,19 @@ class PollinatorTraitLayout : BaseTraitLayout {
             if (isRunning.value) {
                 val start = SystemClock.elapsedRealtime() - elapsedSeconds.intValue * 1000L
                 while (isRunning.value && elapsedSeconds.intValue < total) {
-                    elapsedSeconds.intValue = ((SystemClock.elapsedRealtime() - start) / 1000).toInt()
+                    val seconds = ((SystemClock.elapsedRealtime() - start) / 1000).toInt()
+                    //the loop ticks faster than the countdown, only a new second is a change
+                    if (seconds != elapsedSeconds.intValue) {
+                        elapsedSeconds.intValue = seconds
+                        isDirty = true
+                    }
                     delay(200)
                 }
                 if (elapsedSeconds.intValue >= total) {
                     elapsedSeconds.intValue = total
                     isRunning.value = false
                     isFinished.value = true
+                    isDirty = true
                     save()
                 }
             }
@@ -318,6 +343,7 @@ class PollinatorTraitLayout : BaseTraitLayout {
                 ) {
                     isRunning.value = false
                     isFinished.value = true
+                    isDirty = true
                     save()
                 }
 
@@ -336,8 +362,14 @@ class PollinatorTraitLayout : BaseTraitLayout {
                 ControlButton(
                     if (isRunning.value) Icons.Default.Pause else Icons.Default.PlayArrow,
                     context.getString(if (isRunning.value) R.string.pause else R.string.play),
-                    enabled = canCollect() && categories.isNotEmpty()
-                ) { isRunning.value = !isRunning.value }
+                    //a restored observation longer than a shortened duration has no time left to run
+                    enabled = canCollect() && categories.isNotEmpty() && elapsedSeconds.intValue < total
+                ) {
+                    val wasRunning = isRunning.value
+                    isRunning.value = !wasRunning
+                    //pausing is the only user action that ends counting without ending the observation
+                    if (wasRunning) save() else isSessionActive = true
+                }
             }
         }
     }
@@ -352,6 +384,8 @@ class PollinatorTraitLayout : BaseTraitLayout {
             onClick = {
                 if (isRunning.value && canCollect()) {
                     counts[k] = (counts[k] ?: 0) + 1
+                    isSessionActive = true
+                    isDirty = true
                     save()
                 }
             },
