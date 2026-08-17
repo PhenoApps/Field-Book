@@ -38,6 +38,9 @@ import com.fieldbook.tracker.brapi.dialogs.BrapiManualAccountDialogFragment;
 import com.fieldbook.tracker.brapi.dialogs.BrapiStepperAccountDialogFragment;
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache;
 import com.fieldbook.tracker.utilities.BrapiAccountHelper;
+import com.fieldbook.tracker.objects.BrAPIConfig;
+import com.fieldbook.tracker.preferences.enums.TransferSource;
+import com.fieldbook.tracker.utilities.JsonUtil;
 import com.fieldbook.tracker.utilities.OpenAuthConfigurationUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.google.gson.Gson;
@@ -126,6 +129,27 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
 
         CheckBoxPreference brapiEnabledPref = findPreference(PreferenceKeys.BRAPI_ENABLED);
         if (brapiEnabledPref != null) {
+            brapiEnabledPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    boolean isChecked = (Boolean) newValue;
+                    if (!isChecked) { // on disable, reset default sources if they were set to brapi
+                        if (TransferSource.BRAPI.getValue().equals(preferences.getString(PreferenceKeys.IMPORT_SOURCE_DEFAULT, ""))) {
+                            preferences.edit().putString(PreferenceKeys.IMPORT_SOURCE_DEFAULT, TransferSource.ASK.getValue()).apply();
+                        }
+                        if (TransferSource.BRAPI.getValue().equals(preferences.getString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, ""))) {
+                            preferences.edit().putString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, TransferSource.ASK.getValue()).apply();
+                        }
+                        // remove brapi auth token when brapi is disabled
+                        preferences.edit().remove(PreferenceKeys.BRAPI_TOKEN).apply();
+                    }
+                    updatePreferencesVisibility(isChecked);
+                    return true;
+                }
+            });
+
+            updatePreferencesVisibility(brapiEnabledPref.isChecked());
+        }
             brapiEnabledPref.setOnPreferenceChangeListener((pref, newValue) -> {
                 boolean enabled = (Boolean) newValue;
                 if (!enabled) {
