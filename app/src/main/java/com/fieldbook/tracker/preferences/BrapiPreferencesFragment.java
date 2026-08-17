@@ -12,14 +12,15 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.style.StyleSpan;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.StyleSpan;
 import android.util.DisplayMetrics;
 import android.view.WindowMetrics;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -33,14 +34,12 @@ import androidx.preference.PreferenceFragmentCompat;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.PreferencesActivity;
 import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity;
+import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache;
 import com.fieldbook.tracker.brapi.BrapiAuthenticator;
 import com.fieldbook.tracker.brapi.dialogs.BrapiManualAccountDialogFragment;
 import com.fieldbook.tracker.brapi.dialogs.BrapiStepperAccountDialogFragment;
-import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache;
-import com.fieldbook.tracker.utilities.BrapiAccountHelper;
-import com.fieldbook.tracker.objects.BrAPIConfig;
 import com.fieldbook.tracker.preferences.enums.TransferSource;
-import com.fieldbook.tracker.utilities.JsonUtil;
+import com.fieldbook.tracker.utilities.BrapiAccountHelper;
 import com.fieldbook.tracker.utilities.OpenAuthConfigurationUtil;
 import com.fieldbook.tracker.utilities.Utils;
 import com.google.gson.Gson;
@@ -48,8 +47,6 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
-
-import android.widget.ImageView;
 
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.EndSessionRequest;
@@ -129,39 +126,19 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
 
         CheckBoxPreference brapiEnabledPref = findPreference(PreferenceKeys.BRAPI_ENABLED);
         if (brapiEnabledPref != null) {
-            brapiEnabledPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference, Object newValue) {
-                    boolean isChecked = (Boolean) newValue;
-                    if (!isChecked) { // on disable, reset default sources if they were set to brapi
-                        if (TransferSource.BRAPI.getValue().equals(preferences.getString(PreferenceKeys.IMPORT_SOURCE_DEFAULT, ""))) {
-                            preferences.edit().putString(PreferenceKeys.IMPORT_SOURCE_DEFAULT, TransferSource.ASK.getValue()).apply();
-                        }
-                        if (TransferSource.BRAPI.getValue().equals(preferences.getString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, ""))) {
-                            preferences.edit().putString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, TransferSource.ASK.getValue()).apply();
-                        }
-                        // remove brapi auth token when brapi is disabled
-                        preferences.edit().remove(PreferenceKeys.BRAPI_TOKEN).apply();
-                    }
-                    updatePreferencesVisibility(isChecked);
-                    return true;
-                }
-            });
-
-            updatePreferencesVisibility(brapiEnabledPref.isChecked());
-        }
             brapiEnabledPref.setOnPreferenceChangeListener((pref, newValue) -> {
-                boolean enabled = (Boolean) newValue;
-                if (!enabled) {
-                    // Reset default import/export sources if they were pointing to brapi
-                    if ("brapi".equals(preferences.getString(PreferenceKeys.IMPORT_SOURCE_DEFAULT, ""))) {
-                        preferences.edit().putString(PreferenceKeys.IMPORT_SOURCE_DEFAULT, "ask").apply();
+                boolean isChecked = (Boolean) newValue;
+                if (!isChecked) { // on disable, reset default sources if they were set to brapi
+                    if (TransferSource.BRAPI.INSTANCE.getValue().equals(preferences.getString(PreferenceKeys.IMPORT_SOURCE_DEFAULT, ""))) {
+                        preferences.edit().putString(PreferenceKeys.IMPORT_SOURCE_DEFAULT, TransferSource.ASK.INSTANCE.getValue()).apply();
                     }
-                    if ("brapi".equals(preferences.getString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, ""))) {
-                        preferences.edit().putString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, "ask").apply();
+                    if (TransferSource.BRAPI.INSTANCE.getValue().equals(preferences.getString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, ""))) {
+                        preferences.edit().putString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, TransferSource.ASK.INSTANCE.getValue()).apply();
                     }
+                    // remove brapi auth token when brapi is disabled
+                    preferences.edit().remove(PreferenceKeys.BRAPI_TOKEN).apply();
                 }
-                updateServerSectionsVisibility(enabled);
+                updateServerSectionsVisibility(isChecked);
                 return true;
             });
         }

@@ -209,7 +209,7 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
     private fun updatePreferencesVisibility(isChecked: Boolean) {
         val geonavCategory = findPreference<PreferenceCategory>("com.fieldbook.tracker.geonav.CATEGORY")
         val searchMethod = GeoNavSearchMethod.fromValue(
-            preferences.getString(PreferenceKeys.GEONAV_SEARCH_METHOD, GeoNavSearchMethod.DEFAULT.value)
+            preferences.getString(PreferenceKeys.GEONAV_SEARCH_METHOD, GeoNavSearchMethod.DEFAULT.value) ?: GeoNavSearchMethod.DEFAULT.value
         )
 
         geonavCategory?.let { category ->
@@ -228,9 +228,8 @@ class LocationPreferencesFragment : PreferenceFragmentCompat(),
     }
 
     private fun updateMethodSummaryText() {
-        val method = if (GeoNavSearchMethod.fromValue(
-                preferences.getString(PreferenceKeys.GEONAV_SEARCH_METHOD, GeoNavSearchMethod.DEFAULT.value)
-            ) == GeoNavSearchMethod.DISTANCE)
+        val searchMethodStr = preferences.getString(PreferenceKeys.GEONAV_SEARCH_METHOD, GeoNavSearchMethod.DEFAULT.value) ?: GeoNavSearchMethod.DEFAULT.value
+        val method = if (GeoNavSearchMethod.fromValue(searchMethodStr) == GeoNavSearchMethod.DISTANCE)
             getString(R.string.pref_geonav_method_distance)
         else
             getString(R.string.pref_geonav_method_trapezoid)

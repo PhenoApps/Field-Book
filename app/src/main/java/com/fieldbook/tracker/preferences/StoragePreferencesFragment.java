@@ -4,16 +4,12 @@ import static android.app.Activity.RESULT_OK;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,20 +31,13 @@ import com.fieldbook.tracker.database.DataHelper;
 import com.fieldbook.tracker.fragments.ExportDatabaseFragment;
 import com.fieldbook.tracker.fragments.ImportDatabaseFragment;
 import com.fieldbook.tracker.preferences.enums.TransferSource;
-import com.fieldbook.tracker.utilities.FileUtil;
 import com.fieldbook.tracker.utilities.Utils;
-import com.fieldbook.tracker.utilities.ZipUtil;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
-import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -159,7 +148,7 @@ public class StoragePreferencesFragment extends PreferenceFragmentCompat impleme
     }
 
     private boolean validateBrapiEnabledBeforeSetting(String newValue) {
-        if (TransferSource.BRAPI.getValue().equals(newValue) && !preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false)) {
+        if (TransferSource.BRAPI.INSTANCE.getValue().equals(newValue) && !preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false)) {
             showBrapiDisabledAlertDialog();
             return false;
         }
