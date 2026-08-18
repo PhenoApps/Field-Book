@@ -9,6 +9,7 @@ import android.content.SharedPreferences
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import androidx.annotation.RequiresApi
 import org.phenoapps.brapi.BrapiAccountConstants
 import org.phenoapps.brapi.config.BrapiAccountInfo
 import org.phenoapps.brapi.config.BrapiConfigClient
@@ -556,6 +557,7 @@ open class BrapiAccountRepository(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
     fun removeAccount(serverUrl: String) {
         val am = AccountManager.get(context)
         val normalizedUrl = normalizeUrl(serverUrl)
@@ -565,15 +567,8 @@ open class BrapiAccountRepository(
                 accountUrl == serverUrl || accountUrl == normalizedUrl || it.name == serverUrl
             }
             .forEach { account ->
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-                    accountWrite("removeAccount") {
-                        am.removeAccountExplicitly(account)
-                    }
-                } else {
-                    Log.w(
-                        TAG,
-                        "BrAPI account write rejected, SDK_INT < LOLLIPOP_MR1: removeAccount"
-                    )
+                accountWrite("removeAccount") {
+                    am.removeAccountExplicitly(account)
                 }
                 // Drop the grant alongside the account, or it lingers in preferences forever and
                 // silently re-grants an account later created with the same name.
@@ -601,6 +596,7 @@ open class BrapiAccountRepository(
      * that type. Both have to fail quietly rather than take the caller down with them, but only
      * the first is worth retrying, so they are reported apart.
      */
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
     fun migrateFromPrefsIfNeeded(): BrapiMigrationResult {
         migrateLegacyTypeAccounts()
 
@@ -632,6 +628,7 @@ open class BrapiAccountRepository(
      * replacement exists, so the server appears once rather than twice; a failure part-way leaves
      * the original in place to try again.
      */
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
     private fun migrateLegacyTypeAccounts() {
         val am = AccountManager.get(context)
         for (legacy in legacyOwnedAccounts(am)) {
