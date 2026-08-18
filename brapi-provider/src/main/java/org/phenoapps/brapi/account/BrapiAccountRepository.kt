@@ -10,6 +10,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.core.content.edit
 import org.phenoapps.brapi.BrapiAccountConstants
 import org.phenoapps.brapi.config.BrapiAccountInfo
 import org.phenoapps.brapi.config.BrapiConfigClient
@@ -209,15 +210,18 @@ open class BrapiAccountRepository(
         val normalized = normalizeUrl(serverUrl)
         val changed = !isActiveAccount(normalized)
 
-        val editor = preferences.edit().putString(preferenceKeys.baseUrl, normalized)
-        if (changed) {
-            // The token mirrors belong to whichever account was active until now. Carrying them
-            // over would report the newly selected server as signed in and send the previous
-            // server's token to it. An account this app owns re-peeks its real token from
-            // AccountManager; a shared one is repopulated by borrowToken.
-            editor.remove(preferenceKeys.accessToken).remove(preferenceKeys.idToken)
+        preferences.edit {
+            putString(preferenceKeys.baseUrl, normalized)
+
+            if (changed) {
+                // The token mirrors belong to whichever account was active until now. Carrying them
+                // over would report the newly selected server as signed in and send the previous
+                // server's token to it. An account this app owns re-peeks its real token from
+                // AccountManager; a shared one is repopulated by borrowToken.
+                remove(preferenceKeys.accessToken)
+                remove(preferenceKeys.idToken)
+            }
         }
-        editor.apply()
 
         getAccountByUrl(normalized)?.let { syncActiveAccountPrefs(it) }
         return changed
@@ -233,22 +237,22 @@ open class BrapiAccountRepository(
      */
     fun syncActiveAccountPrefs(account: Account) {
         val info = accountInfo(account) ?: return
-        val editor = preferences.edit()
+        preferences.edit {
 
-        fun mirror(prefKey: String?, value: String) {
-            if (prefKey.isNullOrEmpty() || value.isEmpty()) return
-            editor.putString(prefKey, value)
+            fun mirror(prefKey: String?, value: String) {
+                if (prefKey.isNullOrEmpty() || value.isEmpty()) return
+                putString(prefKey, value)
+            }
+
+            mirror(preferenceKeys.baseUrl, info.serverUrl)
+            mirror(preferenceKeys.displayName, info.displayName)
+            mirror(preferenceKeys.oidcUrl, info.oidcUrl)
+            mirror(preferenceKeys.oidcFlow, info.oidcFlow)
+            mirror(preferenceKeys.oidcClientId, info.oidcClientId)
+            mirror(preferenceKeys.oidcScope, info.oidcScope)
+            mirror(preferenceKeys.brapiVersion, info.brapiVersion)
+
         }
-
-        mirror(preferenceKeys.baseUrl, info.serverUrl)
-        mirror(preferenceKeys.displayName, info.displayName)
-        mirror(preferenceKeys.oidcUrl, info.oidcUrl)
-        mirror(preferenceKeys.oidcFlow, info.oidcFlow)
-        mirror(preferenceKeys.oidcClientId, info.oidcClientId)
-        mirror(preferenceKeys.oidcScope, info.oidcScope)
-        mirror(preferenceKeys.brapiVersion, info.brapiVersion)
-
-        editor.apply()
     }
 
     /** Whether [serverUrl] is the account the preference mirrors currently describe. */
@@ -345,7 +349,7 @@ open class BrapiAccountRepository(
                 }.getOrNull()
 
                 if (!token.isNullOrEmpty()) {
-                    preferences.edit().putString(preferenceKeys.accessToken, token).apply()
+                    preferences.edit { putString(preferenceKeys.accessToken, token) }
                 }
                 onResult(token?.takeIf { it.isNotEmpty() })
             },
@@ -381,7 +385,7 @@ open class BrapiAccountRepository(
 
     fun grantSelectedAccount(account: Account) {
         if (!canAccessAccount(account)) return
-        preferences.edit().putBoolean(localGrantPreferenceKey(account), true).apply()
+        preferences.edit { putBoolean(localGrantPreferenceKey(account), true) }
     }
 
     /**
@@ -486,11 +490,11 @@ open class BrapiAccountRepository(
         val displayName = preferences.getString(preferenceKeys.displayName, normalizedUrl)
             ?.takeIf { it.isNotEmpty() } ?: extractHostname(normalizedUrl)
 
-        fun mirror() = preferences.edit()
-            .putString(preferenceKeys.baseUrl, normalizedUrl)
-            .putString(preferenceKeys.accessToken, accessToken)
-            .putString(preferenceKeys.idToken, idToken)
-            .apply()
+        fun mirror() = preferences.edit {
+            putString(preferenceKeys.baseUrl, normalizedUrl)
+            putString(preferenceKeys.accessToken, accessToken)
+            putString(preferenceKeys.idToken, idToken)
+        }
 
         // A server already covered by a shared account must not get a second, locally owned one:
         // that is how the same server ends up listed twice in the system account settings.
@@ -550,10 +554,10 @@ open class BrapiAccountRepository(
 
         val activeUrl = preferences.getString(preferenceKeys.baseUrl, "") ?: ""
         if (activeUrl == serverUrl || activeUrl == normalizedUrl) {
-            preferences.edit()
-                .remove(preferenceKeys.accessToken)
-                .remove(preferenceKeys.idToken)
-                .apply()
+            preferences.edit {
+                remove(preferenceKeys.accessToken)
+                remove(preferenceKeys.idToken)
+            }
         }
     }
 
@@ -572,16 +576,16 @@ open class BrapiAccountRepository(
                 }
                 // Drop the grant alongside the account, or it lingers in preferences forever and
                 // silently re-grants an account later created with the same name.
-                preferences.edit().remove(localGrantPreferenceKey(account)).apply()
+                preferences.edit { remove(localGrantPreferenceKey(account)) }
             }
 
         val activeUrl = preferences.getString(preferenceKeys.baseUrl, "") ?: ""
         if (activeUrl == serverUrl || activeUrl == normalizedUrl) {
-            preferences.edit()
-                .remove(preferenceKeys.baseUrl)
-                .remove(preferenceKeys.accessToken)
-                .remove(preferenceKeys.idToken)
-                .apply()
+            preferences.edit {
+                remove(preferenceKeys.baseUrl)
+                remove(preferenceKeys.accessToken)
+                remove(preferenceKeys.idToken)
+            }
         }
     }
 
@@ -732,7 +736,9 @@ open class BrapiAccountRepository(
         }
         if (stale.isEmpty()) return
 
-        preferences.edit().apply { stale.forEach { remove(it) } }.apply()
+        preferences.edit {
+            stale.forEach { remove(it) }
+        }
         Log.i(TAG, "Pruned ${stale.size} BrAPI grant(s) for uninstalled apps")
     }
 
