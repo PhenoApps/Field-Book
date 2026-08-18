@@ -186,7 +186,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
     public void onResume() {
         super.onResume();
         setupToolbar();
-        if (migrationDeferred) {
+        if (migrationDeferred && !migrationNoticeShown) {
             runPrefMigration();
         }
         accountHelper.refreshOwnedAccountVisibility();
