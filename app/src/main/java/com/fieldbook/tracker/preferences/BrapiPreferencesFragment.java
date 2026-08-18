@@ -12,14 +12,15 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.style.StyleSpan;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.StyleSpan;
 import android.util.DisplayMetrics;
 import android.view.WindowMetrics;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -33,10 +34,10 @@ import androidx.preference.PreferenceFragmentCompat;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.PreferencesActivity;
 import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity;
+import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache;
 import com.fieldbook.tracker.brapi.BrapiAuthenticator;
 import com.fieldbook.tracker.brapi.dialogs.BrapiManualAccountDialogFragment;
 import com.fieldbook.tracker.brapi.dialogs.BrapiStepperAccountDialogFragment;
-import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache;
 import com.fieldbook.tracker.utilities.BrapiAccountHelper;
 import com.fieldbook.tracker.utilities.OpenAuthConfigurationUtil;
 import com.fieldbook.tracker.utilities.Utils;
@@ -45,8 +46,6 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
-
-import android.widget.ImageView;
 
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.EndSessionRequest;
@@ -198,7 +197,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
 
     /**
      * Moves a pre-7.3 BrAPI server config into AccountManager.
-     *
+     * <p>
      * Either way the old preferences stay put, but the two failures need different answers. A
      * deferred write is the brief post-update window before the platform attributes the BrAPI
      * account type to Field Book, and retrying clears it. A blocked one means another installed
@@ -307,7 +306,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
     /**
      * Wires the card's actions, limiting a shared account to the ones Field Book may actually
      * perform on an account another app owns.
-     *
+     * <p>
      * Signing in, editing and removing are the owner's to do. Authorizing here would run Field
      * Book's own OAuth and store the result against a new Field Book account, leaving the same
      * server listed twice in the system account settings; its token is borrowed from the owner
@@ -433,14 +432,16 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
             // Selecting a shared server is not enough to use it: its token belongs to the app that
             // owns the account, so fetch it now and mirror it locally. Without this the server
             // looks signed out no matter how many times it is selected.
-            accountHelper.borrowToken(account, getActivity(), token -> {
-                if (token == null) {
-                    Toast.makeText(context, R.string.brapi_shared_account_not_signed_in,
-                            Toast.LENGTH_LONG).show();
-                }
-                refreshServerCards();
-                return Unit.INSTANCE;
-            });
+            if (isAdded()) {
+                accountHelper.borrowToken(account, getActivity(), token -> {
+                    if (token == null) {
+                        Toast.makeText(context, R.string.brapi_shared_account_not_signed_in,
+                                Toast.LENGTH_LONG).show();
+                    }
+                    refreshServerCards();
+                    return Unit.INSTANCE;
+                });
+            }
             return;
         }
 
