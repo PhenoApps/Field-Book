@@ -85,8 +85,8 @@ open class BrapiAccountRepository(
         AccountManager.get(context).authenticatorTypes
             .filter {
                 BrapiAccountConstants.isPerAppAccountType(it.type) &&
-                    it.type != accountType &&
-                    BrapiAccountConstants.isPackageAllowed(it.packageName)
+                        it.type != accountType &&
+                        BrapiAccountConstants.isPackageAllowed(it.packageName)
             }
             .map { it.type }
     }.getOrDefault(emptyList())
@@ -113,7 +113,11 @@ open class BrapiAccountRepository(
         if (BrapiAccountConstants.isPerAppAccountType(account.type)) {
             account.type.removePrefix("${BrapiAccountConstants.ACCOUNT_TYPE_PREFIX}.")
         } else {
-            readUserData(AccountManager.get(context), account, BrapiAccountConstants.KEY_OWNER_PACKAGE)
+            readUserData(
+                AccountManager.get(context),
+                account,
+                BrapiAccountConstants.KEY_OWNER_PACKAGE
+            )
         }
 
     /**
@@ -471,7 +475,11 @@ open class BrapiAccountRepository(
      * could be written; the result says which of those happened so callers can report it honestly
      * rather than claiming an account was created.
      */
-    fun storeToken(serverUrl: String, accessToken: String, idToken: String?): BrapiTokenStoreResult {
+    fun storeToken(
+        serverUrl: String,
+        accessToken: String,
+        idToken: String?
+    ): BrapiTokenStoreResult {
         val am = AccountManager.get(context)
         val normalizedUrl = normalizeUrl(serverUrl)
         val displayName = preferences.getString(preferenceKeys.displayName, normalizedUrl)
@@ -557,7 +565,16 @@ open class BrapiAccountRepository(
                 accountUrl == serverUrl || accountUrl == normalizedUrl || it.name == serverUrl
             }
             .forEach { account ->
-                accountWrite("removeAccount") { am.removeAccountExplicitly(account) }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                    accountWrite("removeAccount") {
+                        am.removeAccountExplicitly(account)
+                    }
+                } else {
+                    Log.w(
+                        TAG,
+                        "BrAPI account write rejected, SDK_INT < LOLLIPOP_MR1: removeAccount"
+                    )
+                }
                 // Drop the grant alongside the account, or it lingers in preferences forever and
                 // silently re-grants an account later created with the same name.
                 preferences.edit().remove(localGrantPreferenceKey(account)).apply()
@@ -705,7 +722,7 @@ open class BrapiAccountRepository(
                 .map { it.type }
                 .filter {
                     BrapiAccountConstants.isPerAppAccountType(it) ||
-                        it == BrapiAccountConstants.LEGACY_ACCOUNT_TYPE
+                            it == BrapiAccountConstants.LEGACY_ACCOUNT_TYPE
                 }
                 .toSet()
         }.getOrNull() ?: return
@@ -714,7 +731,7 @@ open class BrapiAccountRepository(
 
         val stale = preferences.all.keys.filter { key ->
             key.startsWith(GRANT_PREFERENCE_PREFIX) &&
-                liveTypes.none { key.startsWith("$GRANT_PREFERENCE_PREFIX$it$GRANT_KEY_SEPARATOR") }
+                    liveTypes.none { key.startsWith("$GRANT_PREFERENCE_PREFIX$it$GRANT_KEY_SEPARATOR") }
         }
         if (stale.isEmpty()) return
 
@@ -733,7 +750,11 @@ open class BrapiAccountRepository(
         val ownerPackage = readUserData(am, account, BrapiAccountConstants.KEY_OWNER_PACKAGE)
         if (ownerPackage.isNullOrEmpty()) {
             accountWrite("claimOwnership") {
-                am.setUserData(account, BrapiAccountConstants.KEY_OWNER_PACKAGE, context.packageName)
+                am.setUserData(
+                    account,
+                    BrapiAccountConstants.KEY_OWNER_PACKAGE,
+                    context.packageName
+                )
             }
             configureOwnedAccountVisibility(am, account)
         } else if (ownerPackage == context.packageName) {
@@ -813,7 +834,11 @@ open class BrapiAccountRepository(
 
     private fun canDisplayAccount(am: AccountManager, account: Account): Boolean {
         val ownerPackage = ownerPackageOf(account)
-        if (!BrapiAccountConstants.canPackageAccessAccount(ownerPackage, context.packageName)) return false
+        if (!BrapiAccountConstants.canPackageAccessAccount(
+                ownerPackage,
+                context.packageName
+            )
+        ) return false
         if (ownerPackage == context.packageName) return true
         return hasGrant(am, account)
     }
@@ -823,7 +848,11 @@ open class BrapiAccountRepository(
 
     private fun canUseToken(am: AccountManager, account: Account): Boolean {
         val ownerPackage = ownerPackageOf(account)
-        if (!BrapiAccountConstants.canPackageAccessAccount(ownerPackage, context.packageName)) return false
+        if (!BrapiAccountConstants.canPackageAccessAccount(
+                ownerPackage,
+                context.packageName
+            )
+        ) return false
         if (ownerPackage.isNullOrEmpty() || ownerPackage == context.packageName) return true
         return hasGrant(am, account)
     }
