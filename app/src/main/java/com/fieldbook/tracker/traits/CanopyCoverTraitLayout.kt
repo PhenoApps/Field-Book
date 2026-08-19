@@ -20,18 +20,18 @@ import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.view.PreviewView
 import androidx.cardview.widget.CardView
-import androidx.core.content.edit
-import androidx.core.graphics.createBitmap
 import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import androidx.exifinterface.media.ExifInterface
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.database.internalTimeFormatter
+import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.DocumentTreeUtil
+import com.fieldbook.tracker.utilities.ExifUtil
 import com.fieldbook.tracker.utilities.FileUtil
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.Dispatchers
@@ -50,6 +50,9 @@ import kotlin.math.roundToInt
  *   R/G < threshold  AND  B/G < threshold  AND  2G - R - B > 20
  * FGCC (Fractional Green Canopy Cover) is stored as a percentage string, e.g. "45.3".
  *
+ * The source image is attached to the same observation row via photo_uri, so the value and the
+ * image it was computed from travel together through export, database import and deletion.
+ *
  * Extends PhotoTraitLayout for live CameraX preview + system-camera fallback.
  * Sensitivity threshold is a trait parameter (set at creation/edit time), not in the collect screen.
  */
@@ -65,11 +68,26 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
         private const val MAX_ANALYSIS_WIDTH = 1000
         private const val DEFAULT_CAMERA_ASPECT_RATIO = 3f / 4f
 
+        /** Translucent green painted over classified canopy pixels in the capture preview. */
+        private val CANOPY_OVERLAY_COLOR = Color.argb(180, 0, 200, 0)
+
         fun sliderToThreshold(progress: Int): Float =
             THRESHOLD_MIN + (progress / 100f) * THRESHOLD_RANGE
 
-        fun imagePrefsKey(traitId: String, obsUnit: String, rep: String) =
-            "canopy_${traitId}_${obsUnit}_${rep}"
+        /**
+         * The Canopeo classification, for one packed ARGB pixel. Single definition on purpose -
+         * the collect preview and the sensitivity parameter's test preview must classify
+         * identically or the number a user tunes against is not the number they collect.
+         */
+        fun isCanopyPixel(pixel: Int, threshold: Float): Boolean {
+            val r = Color.red(pixel).toFloat()
+            val g = Color.green(pixel).toFloat()
+            val b = Color.blue(pixel).toFloat()
+            return g > 0f &&
+                r / g < threshold &&
+                b / g < threshold &&
+                2f * g - r - b > P3_THRESHOLD
+        }
     }
 
     constructor(context: Context?) : super(context)
@@ -178,7 +196,6 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
         val traitId = currentTrait.id
         val obsUnit = currentRange.uniqueId
         val rep = act.rep
-        val imageKey = imagePrefsKey(traitId, obsUnit, rep)
         val traitName = FileUtil.sanitizeFileName(currentTrait.name)
         val saveTime = FileUtil.sanitizeFileName(
             OffsetDateTime.now().format(
@@ -187,61 +204,107 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
         )
         val fileName = "${obsUnit}_${traitName}_${saveTime}.jpg"
 
-        // Save image & insert observation with FGCC value all in this IO coroutine
+        // Save image & record observation with FGCC value all in this IO coroutine
         background.launch {
-            val savedUri = saveCanopyImageToStorage(file, traitName, fileName)
+            val savedUri = saveCanopyImageToStorage(file, traitName, fileName)?.also { uri ->
+                writeExif(uri, studyId, obsUnit, traitId, saveTime)
+            }
 
             // Run image analysis on the saved image
             val overlay = savedUri?.let { uri ->
                 val bmp = loadAndScale(uri, MAX_ANALYSIS_WIDTH)
                 if (bmp != null) {
-                    val t = threshold
-                    val fgcc = analyze(bmp, t)
-                    val fgccStr = "%.1f".format(fgcc)
+                    // One read of the threshold drives both the value and the overlay, so the
+                    // preview always depicts the number that was actually recorded
+                    val analysis = analyzeWithOverlay(bmp, threshold)
+                    bmp.recycle()
 
-                    // Insert observation with FGCC value using original captured context
-                    // All DB operations happen in this single IO coroutine - no race conditions
-                    try {
-                        val dataHelper = act.getDatabase()
-                        val newRep = dataHelper.getNextRep(studyId, obsUnit, traitId)
-                        val person = act.person.orEmpty()
-                        val location = try { act.locationByPreferences } catch (_: Exception) { "" }
-                        dataHelper.insertObservation(
-                            obsUnit, traitId, fgccStr,
-                            person, location, "", studyId, null, null, null, newRep
-                        )
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Failed to insert observation", e)
-                    }
+                    // Record the value against the original captured context. All DB operations
+                    // happen in this single IO coroutine - no race conditions. The source image
+                    // rides along on photo_uri, so the value and the image it was computed from
+                    // cannot drift apart the way separate keying allowed.
+                    saveObservation(
+                        act, studyId, obsUnit, traitId, rep,
+                        "%.1f".format(analysis.fgcc), uri
+                    )
 
-                    buildOverlay(bmp, threshold)
+                    analysis.overlay
                 } else null
             } ?: return@launch
 
-            // Handle previous image cleanup and prefs update
-            try {
-                val previousUri = prefs.getString(imageKey, null)
-                if (previousUri != null) {
-                    deleteImageUri(previousUri)
-                }
-                savedUri.let { uri ->
-                    prefs.edit { putString(imageKey, uri.toString()) }
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to update prefs", e)
-            }
-
             // Update UI on main thread
             withContext(Dispatchers.Main) {
+                // The entry, trait or rep can all change while the file write and analysis run.
+                // This result belongs to the context the capture started in, not to whatever is
+                // on screen now - the observation is already saved either way.
+                // NB: the makeImage parameter shadows the currentTrait property, so the live
+                // trait has to come from getCurrentTrait().
+                if (collectActivity.rep != rep ||
+                    getCurrentTrait()?.id != traitId ||
+                    currentRange.uniqueId != obsUnit
+                ) return@withContext
+
                 showCapturedImage(overlay)
                 act.updateCurrentTraitStatus(true)
                 act.refreshInfoBarAdapter()
                 act.refreshRepeatedValuesToolbarIndicator()
                 loadLayout()
+
+                // Writing the observation directly bypasses BaseTraitLayout.updateObservation,
+                // which is where every other format advances the entry, so do it here. A capture
+                // that produced no value returns above and must not advance.
+                handleAutoSwitchToNextPlot(currentTrait)
             }
         }
 
         return true
+    }
+
+    /**
+     * Mirrors CollectActivity.updateObservation: update the observation already recorded at [rep],
+     * or insert one when there is none. Capturing must not silently add a repeated measure - the
+     * overwrite prompt tells the user the current value is being replaced, and repeats are added
+     * deliberately through the repeat controls, the same as every other trait.
+     */
+    private fun saveObservation(
+        act: CollectActivity,
+        studyId: String,
+        obsUnit: String,
+        traitId: String,
+        rep: String,
+        value: String,
+        imageUri: Uri
+    ) {
+        try {
+            val dataHelper = act.getDatabase()
+            val person = act.person.orEmpty()
+            val location = try { act.locationByPreferences } catch (_: Exception) { "" }
+            val existing = observationForRep(studyId, obsUnit, traitId, rep)
+
+            if (existing == null) {
+                dataHelper.insertObservation(
+                    obsUnit, traitId, value,
+                    person, location, "", studyId, null, null, null, rep,
+                    null, null, imageUri.toString()
+                )
+                return
+            }
+
+            // Nothing references the image being replaced once the row points at the new one
+            existing.photo_uri
+                ?.takeIf { it.isNotEmpty() && it != imageUri.toString() }
+                ?.let(::deleteImageUri)
+
+            existing.value = value
+            existing.photo_uri = imageUri.toString()
+            existing.collector = person
+            existing.geo_coordinates = location
+            existing.observation_time_stamp = OffsetDateTime.now().format(internalTimeFormatter)
+
+            dataHelper.updateObservationModels(dataHelper.db, listOf(existing))
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to save canopy observation for rep $rep", e)
+        }
     }
 
     override fun afterLoadExists(act: CollectActivity, value: String?) {
@@ -367,24 +430,23 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
 
     private fun showStoredImageForRep(rep: String) {
         previewLoadJob?.cancel()
+        val studyId = collectActivity.studyId
         val traitId = currentTrait.id
         val obsUnit = currentRange.uniqueId
-        val uriStr = prefs.getString(imagePrefsKey(traitId, obsUnit, rep), null)
-        if (uriStr == null) {
-            showLivePreview()
-            return
-        }
-
-        val uri = uriStr.toUri()
         val thresholdForPreview = threshold
         previewLoadJob = background.launch {
-            val bitmap = try {
-                loadAndScale(uri, MAX_ANALYSIS_WIDTH)
+            val uriStr = photoUriForRep(studyId, obsUnit, traitId, rep)
+
+            val bitmap = if (uriStr.isNullOrEmpty()) null else try {
+                loadAndScale(uriStr.toUri(), MAX_ANALYSIS_WIDTH)
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to load canopy image for rep $rep", e)
                 null
             }
-            val overlay = bitmap?.let { buildOverlay(it, thresholdForPreview) }
+            val overlay = bitmap?.let { source ->
+                analyzeWithOverlay(source, thresholdForPreview).overlay
+                    .also { source.recycle() }
+            }
             withContext(Dispatchers.Main) {
                 if (collectActivity.rep == rep && currentTrait.id == traitId && currentRange.uniqueId == obsUnit) {
                     if (overlay != null) {
@@ -396,6 +458,28 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
             }
         }
     }
+
+    /** Observation recorded at [rep] for this context, or null if there is none. */
+    private fun observationForRep(
+        studyId: String,
+        obsUnit: String,
+        traitId: String,
+        rep: String
+    ): ObservationModel? = try {
+        database.getRepeatedValues(studyId, obsUnit, traitId)
+            .firstOrNull { it.rep == rep }
+    } catch (e: Exception) {
+        Log.e(TAG, "Failed to look up canopy observation for rep $rep", e)
+        null
+    }
+
+    /** Source image attached to the observation at [rep], or null if there is none. */
+    private fun photoUriForRep(
+        studyId: String,
+        obsUnit: String,
+        traitId: String,
+        rep: String
+    ): String? = observationForRep(studyId, obsUnit, traitId, rep)?.photo_uri
 
     private fun expandImage() {
         val bitmap = currentPreviewBitmap ?: return
@@ -469,15 +553,18 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
 
 
 
+    /**
+     * CollectActivity already clears photo_uri media when an observation is deleted through the
+     * toolbar, but deleteTraitListener is reachable from other paths too. Deleting here as well
+     * keeps the file from being orphaned; a second delete of a missing file is a no-op.
+     */
     private fun deleteStoredImageForRep(rep: String) {
-        val key = imagePrefsKey(currentTrait.id, currentRange.uniqueId, rep)
-
         try {
-            prefs.getString(key, null)?.let(::deleteImageUri)
+            photoUriForRep(collectActivity.studyId, currentRange.uniqueId, currentTrait.id, rep)
+                ?.takeIf { it.isNotEmpty() }
+                ?.let(::deleteImageUri)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to delete canopy image for rep $rep", e)
-        } finally {
-            prefs.edit { remove(key) }
         }
     }
 
@@ -492,6 +579,36 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to delete canopy image $uriString", e)
+        }
+    }
+
+    /**
+     * Stamp the image with the same study/entry/trait provenance every other Field Book image
+     * carries, matching AbstractCameraTrait.writeExif.
+     *
+     * Written before the image is read back for analysis: saveStringToExif rewrites the target
+     * file in place, so doing it later would race the preview reload that follows a capture.
+     */
+    private fun writeExif(
+        uri: Uri,
+        studyId: String,
+        entryId: String,
+        traitId: String,
+        timestamp: String
+    ) {
+        try {
+            ExifUtil.saveVariableUnitModelToExif(
+                context,
+                collectActivity.person.orEmpty(),
+                timestamp,
+                database.getStudyById(studyId),
+                database.getObservationUnitById(entryId),
+                database.getObservationVariableById(traitId),
+                uri,
+                controller.getRotationRelativeToDevice()
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to write EXIF metadata to canopy image", e)
         }
     }
 
@@ -576,49 +693,32 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
         }
     }
 
-    private fun analyze(bmp: Bitmap, t: Float): Float {
-        val pixels = IntArray(bmp.width * bmp.height)
-        bmp.getPixels(pixels, 0, bmp.width, 0, 0, bmp.width, bmp.height)
-        var greenCount = 0
-        for (pixel in pixels) {
-            val r = Color.red(pixel).toFloat()
-            val g = Color.green(pixel).toFloat()
-            val b = Color.blue(pixel).toFloat()
-            if (g > 0f && r / g < t && b / g < t && 2f * g - r - b > P3_THRESHOLD) greenCount++
-        }
-        return if (pixels.isEmpty()) 0f else greenCount.toFloat() / pixels.size * 100f
-    }
+    /** FGCC percentage and the preview overlay, both produced by one pass over [source]. */
+    private data class CanopyAnalysis(val fgcc: Float, val overlay: Bitmap)
 
-    private fun buildOverlay(source: Bitmap, t: Float): Bitmap {
-        val pixels = IntArray(source.width * source.height)
-        source.getPixels(pixels, 0, source.width, 0, 0, source.width, source.height)
-        val greenOverlay = Color.argb(180, 0, 200, 0)
+    /**
+     * Counts canopy pixels and tints them in a single pass. The overlay is built straight from the
+     * pixel array rather than copying [source] first - every pixel of such a copy was immediately
+     * overwritten, so it only bought an extra full-bitmap allocation.
+     *
+     * [source] is not read after this returns; callers own recycling it.
+     */
+    private fun analyzeWithOverlay(source: Bitmap, threshold: Float): CanopyAnalysis {
+        val width = source.width
+        val height = source.height
+        val pixels = IntArray(width * height)
+        source.getPixels(pixels, 0, width, 0, 0, width, height)
+
+        var canopyCount = 0
         for (i in pixels.indices) {
-            val r = Color.red(pixels[i]).toFloat()
-            val g = Color.green(pixels[i]).toFloat()
-            val b = Color.blue(pixels[i]).toFloat()
-            if (g > 0f && r / g < t && b / g < t && 2f * g - r - b > P3_THRESHOLD) {
-                pixels[i] = greenOverlay
+            if (isCanopyPixel(pixels[i], threshold)) {
+                canopyCount++
+                pixels[i] = CANOPY_OVERLAY_COLOR
             }
         }
-        val overlay = source.copy(Bitmap.Config.ARGB_8888, true)
-        overlay.setPixels(pixels, 0, overlay.width, 0, 0, overlay.width, overlay.height)
-        return overlay
-    }
 
-    /** Binary mask used by CanopySensitivityParameter for test-capture preview (canopy=WHITE, other=BLACK). */
-    fun buildBinaryMask(source: Bitmap, t: Float): Bitmap {
-        val pixels = IntArray(source.width * source.height)
-        source.getPixels(pixels, 0, source.width, 0, 0, source.width, source.height)
-        for (i in pixels.indices) {
-            val r = Color.red(pixels[i]).toFloat()
-            val g = Color.green(pixels[i]).toFloat()
-            val b = Color.blue(pixels[i]).toFloat()
-            pixels[i] = if (g > 0f && r / g < t && b / g < t && 2f * g - r - b > P3_THRESHOLD)
-                Color.WHITE else Color.BLACK
-        }
-        val mask = createBitmap(source.width, source.height)
-        mask.setPixels(pixels, 0, mask.width, 0, 0, mask.width, mask.height)
-        return mask
+        val fgcc = if (pixels.isEmpty()) 0f else canopyCount.toFloat() / pixels.size * 100f
+        val overlay = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888)
+        return CanopyAnalysis(fgcc, overlay)
     }
 }

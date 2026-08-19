@@ -3650,6 +3650,12 @@ public class CollectActivity extends ThemedActivity
                 return;
             }
 
+            if (!isMediaAttachmentAllowed(obs, mediaType)) {
+                Log.w(TAG, "Media attachment of type " + mediaType + " is not permitted for this trait.");
+                try { f.delete(); } catch (Exception ignore) {}
+                return;
+            }
+
             // Determine whether this will replace existing media on the observation
             String existingUri;
             if (mediaType != null) {
@@ -3837,6 +3843,35 @@ public class CollectActivity extends ThemedActivity
         initToolbars();
         String deleteTts = getString(R.string.act_collect_delete_btn_tts);
         triggerTts(deleteTts);
+    }
+
+    /**
+     * Media attachment is opt-in per trait and per media type, via AttachMediaParameter. Formats
+     * that omit that parameter leave all three flags false; for canopy cover the stored photo_uri
+     * is the observation's own source image, so allowing an attachment there would delete the file
+     * the recorded value was computed from.
+     *
+     * CameraActivity already hides modes a trait disallows. This is the enforcement point, so any
+     * path that reaches the attach flow with a disallowed mode stops before the replace-and-delete.
+     */
+    private boolean isMediaAttachmentAllowed(ObservationModel obs, String mediaType) {
+        if (obs == null || mediaType == null) return false;
+
+        TraitObject trait;
+        try {
+            trait = database.getTraitById(String.valueOf(obs.getObservation_variable_db_id()));
+        } catch (Exception e) {
+            Log.w(TAG, "Could not resolve trait for observation; refusing media attach.", e);
+            return false;
+        }
+
+        if (trait == null) return false;
+
+        if (mediaType.startsWith("photo")) return trait.getAttachPhoto();
+        if ("audio".equals(mediaType)) return trait.getAttachAudio();
+        if ("video".equals(mediaType)) return trait.getAttachVideo();
+
+        return false;
     }
 
     // Delete any attached media URIs stored on the observation (photo_uri, video_uri, audio_uri)
