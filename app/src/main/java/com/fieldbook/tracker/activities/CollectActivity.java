@@ -24,6 +24,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.webkit.MimeTypeMap;
+import android.database.Cursor;
+import android.provider.OpenableColumns;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -1727,22 +1729,57 @@ public class CollectActivity extends ThemedActivity
         String fileString = resourceFileName != null ? resourceFileName :
                             preferences.getString(GeneralKeys.LAST_USED_RESOURCE_FILE, "");
         Log.d(TAG, "fileString after selection: " + fileString);
-        if (!fileString.isEmpty()) {
-            try {
-                Uri resultUri = Uri.parse(fileString);
-                String suffix = fileString.substring(fileString.lastIndexOf('.') + 1).toLowerCase();
-                String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(suffix);
-
-                Intent open = new Intent(Intent.ACTION_VIEW);
-                open.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                open.setDataAndType(resultUri, mime);
-                startActivity(open);
-            } catch (Exception e) {
-                Log.e(TAG, "Error opening saved resource file.", e);
-            }
-        } else {
+        if (fileString.isEmpty()) {
             Utils.makeToast(this, "No file preference saved, select a file with a short press");
+            return;
         }
+
+        try {
+            Uri resultUri = resolveResourceFileUri(fileString);
+            if (resultUri == null) {
+                Utils.makeToast(this, getString(R.string.act_file_explorer_no_file_error));
+                return;
+            }
+
+            // Use the content resolver to determine the MIME type
+            String mime = null;
+            try {
+                getContentResolver().getType(resultUri);
+            } catch (Exception ignore) {}
+
+            if (mime == null) {
+                String suffix = fileString.substring(fileString.lastIndexOf('.') + 1).toLowerCase();
+                mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(suffix);
+            }
+
+            Intent open = new Intent(Intent.ACTION_VIEW);
+            open.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            open.setDataAndType(resultUri, mime);
+            startActivity(open);
+        } catch (Exception e) {
+            Log.e(TAG, "Error opening saved resource file.", e);
+        }
+    }
+
+    private Uri resolveResourceFileUri(String resourceFileValue) {
+        if (resourceFileValue == null) return null;
+        final String trimmed = resourceFileValue.trim();
+        if (trimmed.isEmpty()) return null;
+
+        // Portable form: resources/<relative-path> — resolve via the resources directory tree
+        if (!trimmed.startsWith("content://") && !trimmed.startsWith("file://")) {
+
+            DocumentFile resDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_resources);
+            if (resDir == null || !resDir.exists()) return null;
+            DocumentFile current = resDir.findFile(trimmed);
+            if (current != null) {
+                current.getUri();
+                return current.getUri();
+            }
+        }
+
+        // Legacy: treat as a raw URI (content:// or file://)
+        return Uri.parse(trimmed);
     }
 
     // Overload for backward compatibility
@@ -2325,8 +2362,34 @@ public class CollectActivity extends ThemedActivity
                 if (resultCode == RESULT_OK) {
                     try {
                         String resultString = data.getStringExtra(FileExploreActivity.EXTRA_RESULT_KEY);
-                        //save most recently used resource file
-                        preferences.edit().putString(GeneralKeys.LAST_USED_RESOURCE_FILE, resultString).apply();
+                        // Save most recently used resource file.
+                        // Prefer storing a portable resources/<relative-path> form when possible.
+                        String storedValue = resultString;
+                        try {
+                            Uri chosenUri = Uri.parse(resultString);
+                            if ("content".equalsIgnoreCase(chosenUri.getScheme())) {
+                                DocumentFile resDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_resources);
+                                if (resDir != null && resDir.exists()) {
+                                    // Query the content resolver for the display name of the chosen file.
+                                    try (Cursor cursor = getContentResolver().query(
+                                            chosenUri,
+                                            new String[]{OpenableColumns.DISPLAY_NAME},
+                                            null, null, null)) {
+                                        if (cursor != null && cursor.moveToFirst()) {
+                                            int nameIdx = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                                            if (nameIdx >= 0) {
+                                                String displayName = cursor.getString(nameIdx);
+                                                if (displayName != null && !displayName.trim().isEmpty()) {
+                                                    storedValue = displayName.trim();
+                                                }
+                                            }
+                                        }
+                                    } catch (Exception ignore) {}
+                                }
+                            }
+                        } catch (Exception ignore) {}
+
+                        preferences.edit().putString(GeneralKeys.LAST_USED_RESOURCE_FILE, storedValue).apply();
 
                         Uri resultUri = Uri.parse(resultString);
                         String suffix = resultString.substring(resultString.lastIndexOf('.') + 1).toLowerCase();
