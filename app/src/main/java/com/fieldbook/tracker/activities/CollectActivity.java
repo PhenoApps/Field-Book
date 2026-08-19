@@ -661,8 +661,10 @@ public class CollectActivity extends ThemedActivity
 
     @Override
     public void refreshMain() {
-        rangeBox.saveLastPlotAndTrait();
+        // refresh first so the current range reflects the new paging position,
+        // otherwise the previous plot would be saved as the last plot
         rangeBox.refresh();
+        rangeBox.saveLastPlotAndTrait();
 
         Log.d(TAG, "Refresh main.");
 
@@ -1264,6 +1266,8 @@ public class CollectActivity extends ThemedActivity
         // Reload traits based on selected plot
         rangeBox.display();
 
+        rangeBox.saveLastPlot();
+
         Log.d(TAG, "Move to result core: " + j);
 
         initWidgets(false);
@@ -1283,6 +1287,8 @@ public class CollectActivity extends ThemedActivity
         rangeBox.display();
 
         traitBox.setSelection(traitIndex);
+
+        rangeBox.saveLastPlot();
 
         saveLastTrait();
 
