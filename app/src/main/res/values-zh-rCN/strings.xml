@@ -197,6 +197,36 @@
     <string name="field_dimensions_format">田区: %d × %d</string>
     <string name="field_creator_pattern_linear">线性</string>
     <string name="field_creator_pattern_linear_summary">每行/列后遵循相同方向</string>
+    <string name="field_creator_pattern_zigzag">Serpentine/Zigzag</string>
+    <string name="field_creator_pattern_zigzag_summary">每行/列后的替代方向</string>
+    <string name="field_creator_direction_horizontal">水平</string>
+    <string name="field_creator_direction_horizontal_summary">跨行移动</string>
+    <string name="field_creator_direction_vertical">垂直</string>
+    <string name="field_creator_direction_vertical_summary">向上列/下列走</string>
+    <string name="field_creator_preview_summary">田区: %s (%d x %d)</string>
+    <string name="field_creator_preview_large_field_warning">检测到大田区。创建许多小区可能需要一些时间。</string>
+    <string name="field_creator_preview_creating_field">正在创建田区…</string>
+    <string name="field_creator_preview_create_button">创建</string>
+    <string name="field_creator_preview_expand_button">展开网格</string>
+    <string name="field_creator_preview_collapse_button">折叠网格</string>
+    <string name="field_creator_expanded_preview_title">完整田区预览</string>
+    <string name="dialog_field_creator_ask_name_hint">名称</string>
+    <string name="dialog_field_creator_ask_row_hint">行</string>
+    <string name="dialog_field_creator_ask_columns_hint">列</string>
+    <string name="dialog_field_creator_top_left">左上</string>
+    <string name="dialog_field_creator_bottom_left">左下</string>
+    <string name="dialog_field_creator_top_right">右上</string>
+    <string name="dialog_field_creator_bottom_right">右下</string>
+    <string name="dialog_field_creator_insert_field">创建田区 行: %1$s 列: %2$s</string>
+    <string name="dialog_field_creator_insert_field_complete">创建田区 行: %1$s 列: %2$s… 已完成。</string>
+    <string name="dialog_field_creator_insert_plot">在行 %2$s 列 %3$s 插入小区 %1$s</string>
+    <string name="brapi_resync_choice_required">重新同步时发现了无本地BrAPI ID的现有服务器观测值。选择如何在上传前处理它们。</string>
+    <string name="brapi_resync_dialog_title">重新同步匹配的发现</string>
+    <string name="brapi_resync_dialog_values">本地： %1$s | 服务器： %2$s</string>
+    <string name="brapi_resync_update_existing">更新现有的数据</string>
+    <string name="brapi_resync_upload_new">上传为新项</string>
+    <string name="dialog_field_creator_review_title">审查</string>
+    <string name="dialog_field_creator_size_group_error">请输入有效的名称和格式。</string>
     <string name="field_creator_stepper_pattern">行走模式</string>
     <string name="field_creator_stepper_direction">步行方向</string>
     <!-- Geo-Navigate to Field -->
@@ -721,4 +751,5 @@
     <!-- Preference: Attach media barcode prioritize -->
     <string name="edit">编辑</string>
     <!-- InnoSpectra settings layout -->
+    <string name="view_trait_innospectra_device_name_label">名称</string>
 </resources>
