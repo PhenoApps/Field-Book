@@ -255,9 +255,6 @@ dependencies {
     testImplementation 'org.powermock:powermock-module-junit4:2.0.9'
     testImplementation 'org.powermock:powermock-api-mockito2:2.0.9'
 
-    //androidx exif interface
-    implementation "androidx.exifinterface:exifinterface:1.4.1"
-
     //camerax
     def camerax_version = "1.4.2"
 
