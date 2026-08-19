@@ -153,8 +153,11 @@ class FieldAudioHelper @Inject constructor(@ActivityContext private val context:
             buttonState = ButtonState.WAITING_FOR_RECORDING
             releaseRecorder()
             // zip the field audio and log file only if logging is enabled
-            val isLoggingEnabled = mPrefs.getString(PreferenceKeys.GEONAV_LOGGING_MODE, "0")
-            if(isLoggingEnabled != "0"){
+            val loggingMode = mPrefs.getString(
+                PreferenceKeys.GEONAV_LOGGING_MODE,
+                GeoNavHelper.GeoNavLoggingMode.OFF.value
+            )
+            if(loggingMode != GeoNavHelper.GeoNavLoggingMode.OFF.value){
                 zipAudioLogAndTraits()
             }
         } catch (e: Exception) {

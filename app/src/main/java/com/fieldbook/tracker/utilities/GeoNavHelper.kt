@@ -28,19 +28,26 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.edit
 import androidx.documentfile.provider.DocumentFile
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
+import com.fieldbook.tracker.adapters.AttributeAdapter.AttributeModel
 import com.fieldbook.tracker.database.models.ObservationUnitModel
 import com.fieldbook.tracker.interfaces.CollectController
+import com.fieldbook.tracker.interfaces.GeoNavController
 import com.fieldbook.tracker.location.GPSTracker
 import com.fieldbook.tracker.location.gnss.ConnectThread
 import com.fieldbook.tracker.location.gnss.GNSSResponseReceiver
 import com.fieldbook.tracker.location.gnss.NmeaParser
+import com.fieldbook.tracker.preferences.DropDownKeyModel
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
+import com.fieldbook.tracker.preferences.enums.GeoNavSearchAngle
+import com.fieldbook.tracker.preferences.enums.GeoNavSearchMethod
+import com.fieldbook.tracker.preferences.enums.GeoNavUpdateInterval
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.impactZoneSearch
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.lowPassFilter
 import com.fieldbook.tracker.utilities.GeodeticUtils.Companion.truncateFixQuality
@@ -53,11 +60,6 @@ import java.util.Calendar
 import javax.inject.Inject
 import kotlin.math.pow
 import kotlin.math.sqrt
-import androidx.core.content.edit
-import com.fieldbook.tracker.adapters.AttributeAdapter.AttributeModel
-import com.fieldbook.tracker.interfaces.GeoNavController
-import com.fieldbook.tracker.objects.InfoBarModel
-import com.fieldbook.tracker.preferences.DropDownKeyModel
 
 
 class GeoNavHelper @Inject constructor(private val controller: CollectController, private val geoNavController: GeoNavController):
@@ -328,7 +330,10 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
     }
 
     private fun currentLoggingMode() : String {
-        return preferences.getString(PreferenceKeys.GEONAV_LOGGING_MODE, "0") ?: "0"
+        return preferences.getString(
+            PreferenceKeys.GEONAV_LOGGING_MODE,
+            GeoNavLoggingMode.OFF.value
+        ) ?: GeoNavLoggingMode.OFF.value
     }
 
     /**
@@ -355,18 +360,9 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                 SensorManager.SENSOR_DELAY_UI
             )
 
-            //set update interval from the preferences can be 1s, 5s or 10s
-            val interval = preferences.getString(PreferenceKeys.UPDATE_INTERVAL, "1") ?: "1"
-            var period = 1000L
-            when (interval) {
-                "1" -> {}
-                "5" -> {
-                    period = 5000L
-                }
-                "10" -> {
-                    period = 10000L
-                }
-            }
+            val period = GeoNavUpdateInterval.fromValue(
+                preferences.getString(PreferenceKeys.UPDATE_INTERVAL, GeoNavUpdateInterval.DEFAULT.value) ?: GeoNavUpdateInterval.DEFAULT.value
+            ).millis
 
             //find the mac address of the device, if not found then start the internal GPS
             val address: String = preferences.getString(PreferenceKeys.PAIRED_DEVICE_ADDRESS, "") ?: ""
@@ -486,24 +482,12 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
     private fun runImpactZoneAlgorithm(internal: Boolean) {
 
         //the angle of the IZ algorithm to use, see Geodetic util class for more details
-        val thetaPref: String = preferences.getString(PreferenceKeys.SEARCH_ANGLE, "0") ?: "0"
-        var theta = 22.5
-        when (thetaPref) {
-            "22.5" -> {
-                theta = 22.5
-            }
-            "45" -> {
-                theta = 45.0
-            }
-            "67.5" -> {
-                theta = 67.5
-            }
-            "90" -> {
-                theta = 90.0
-            }
-        }
+        val theta = GeoNavSearchAngle.fromValue(
+            preferences.getString(PreferenceKeys.SEARCH_ANGLE, GeoNavSearchAngle.DEFAULT.value) ?: GeoNavSearchAngle.DEFAULT.value
+        ).degrees
         val geoNavMethod: String =
-            preferences.getString(PreferenceKeys.GEONAV_SEARCH_METHOD, "0") ?: "0"
+            preferences.getString(PreferenceKeys.GEONAV_SEARCH_METHOD, GeoNavSearchMethod.DEFAULT.value)
+                ?: GeoNavSearchMethod.DEFAULT.value
         val d1: Double =
             preferences.getString(PreferenceKeys.GEONAV_PARAMETER_D1, "0.001")?.toDouble() ?: 0.001
         val d2: Double =
@@ -529,8 +513,8 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
         for (model in units) {
             if (model.geo_coordinates != null && model.geo_coordinates!!.isNotEmpty()) {
                 val entryKeys = controller.getDatabase().getRange(
-                    preferences.getString(GeneralKeys.PRIMARY_NAME, null),
-                    preferences.getString(GeneralKeys.SECONDARY_NAME, null),
+                    preferences.getString(GeneralKeys.PRIMARY_NAME, ""),
+                    preferences.getString(GeneralKeys.SECONDARY_NAME, ""),
                     model.observation_unit_db_id,
                     model.internal_id_observation_unit,
                 )
@@ -636,7 +620,7 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                                         DropDownKeyModel.DEFAULT_ATTRIBUTE_LABEL) ?: DropDownKeyModel.DEFAULT_ATTRIBUTE_LABEL
 
                                 var popupTrait =
-                                    preferences.getString(GeneralKeys.GEONAV_POPUP_TRAIT, null)?.let {
+                                    preferences.getString(GeneralKeys.GEONAV_POPUP_TRAIT, DropDownKeyModel.DEFAULT_TRAIT_ID)?.let {
                                         database.getTraitById(it)
                                     }
 
@@ -757,19 +741,6 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
                 val resolver: ContentResolver = controller.getContext().contentResolver
                 val geoNavFolder = getDirectory(controller.getContext(), R.string.dir_geonav)
                 if (geoNavFolder != null && geoNavFolder.exists()) {
-                    val interval = preferences.getString(PreferenceKeys.UPDATE_INTERVAL, "1")
-                    val address =
-                        (preferences.getString(PreferenceKeys.PAIRED_DEVICE_ADDRESS, "") ?: "")
-                            .replace(":".toRegex(), "-")
-                            .replace("\\s".toRegex(), "_")
-                    val thetaPref = preferences.getString(PreferenceKeys.SEARCH_ANGLE, "22.5")
-                    // if the currentLoggingMode is for limited logging, use "limited_" as the prefix for filename
-//                    val prefixOfFile = if (currentLoggingMode() == "1") {
-//                        "limited_"
-//                    } else {
-//                        ""
-//                    }
-
                     // file names for logging modes
                     val limitedModeFileName = "limited_log.csv"
                     val fullModeFileName = "log.csv"
@@ -869,9 +840,10 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
             mTeslas = calculateNoise(mGeomagneticField)
             if ((mTeslas < 25 || mTeslas > 65) && mNotWarnedInterference) {
                 mNotWarnedInterference = false
-                val geoNavMethod: String =
-                    preferences.getString(PreferenceKeys.GEONAV_SEARCH_METHOD, "0") ?: "0"
-                if (geoNavMethod != "0") {
+                val geoNavMethod = GeoNavSearchMethod.fromValue(
+                    preferences.getString(PreferenceKeys.GEONAV_SEARCH_METHOD, GeoNavSearchMethod.DEFAULT.value) ?: GeoNavSearchMethod.DEFAULT.value
+                )
+                if (geoNavMethod != GeoNavSearchMethod.DISTANCE) {
                     Toast.makeText(
                         controller.getContext(), R.string.activity_collect_geomagnetic_noise_detected,
                         Toast.LENGTH_SHORT
@@ -987,6 +959,14 @@ class GeoNavHelper @Inject constructor(private val controller: CollectController
         OFF("0"),
         LIMITED("1"),
         FULL("2"),
-        BOTH("3")
+        BOTH("3");
+
+        companion object {
+            @JvmField
+            val DEFAULT = OFF
+
+            fun fromValue(value: String?): GeoNavLoggingMode =
+                entries.find { it.value == value } ?: DEFAULT
+        }
     }
 }

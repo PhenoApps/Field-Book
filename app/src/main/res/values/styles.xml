@@ -377,4 +377,9 @@
     <style name="FourthChipTheme" parent="Theme.MaterialComponents">
         <item name="chipStyle">@style/FourthChipStyle</item>
     </style>
+
+    <!-- AboutLibraries custom styles -->
+    <style name="AboutLibrariesCustom" parent="Theme.MaterialComponents.Light.DarkActionBar" />
+    <style name="AboutLibrariesCustom_Blue" parent="Theme.MaterialComponents.Light.DarkActionBar" />
+    <style name="AboutLibrariesCustom_HighContrast" parent="Theme.MaterialComponents.Light.DarkActionBar" />
 </resources>
