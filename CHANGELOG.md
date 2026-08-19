@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- Fixed several issues with the Pollinator trait (https://github.com/PhenoApps/Field-Book/pull/1519)
 
 ## [v7.3.0] - 2026-08-10
 
