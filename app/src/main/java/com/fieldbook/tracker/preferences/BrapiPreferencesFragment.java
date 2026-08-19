@@ -12,14 +12,15 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.style.StyleSpan;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.StyleSpan;
 import android.util.DisplayMetrics;
 import android.view.WindowMetrics;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -33,10 +34,10 @@ import androidx.preference.PreferenceFragmentCompat;
 import com.fieldbook.tracker.R;
 import com.fieldbook.tracker.activities.PreferencesActivity;
 import com.fieldbook.tracker.activities.brapi.BrapiAuthActivity;
+import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache;
 import com.fieldbook.tracker.brapi.BrapiAuthenticator;
 import com.fieldbook.tracker.brapi.dialogs.BrapiManualAccountDialogFragment;
 import com.fieldbook.tracker.brapi.dialogs.BrapiStepperAccountDialogFragment;
-import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache;
 import com.fieldbook.tracker.utilities.BrapiAccountHelper;
 import com.fieldbook.tracker.utilities.OpenAuthConfigurationUtil;
 import com.fieldbook.tracker.utilities.Utils;
@@ -46,13 +47,13 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 
-import android.widget.ImageView;
-
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.EndSessionRequest;
 
 import org.jetbrains.annotations.NotNull;
 import org.phenoapps.brapi.BrapiAccountConstants;
+import org.phenoapps.brapi.account.BrapiMigrationResult;
+import org.phenoapps.brapi.config.BrapiAccountInfo;
 import org.phenoapps.brapi.ui.BrapiAccountConfig;
 
 import java.util.List;
@@ -101,6 +102,11 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
 
     // Tracks the shared account awaiting explicit user selection in AccountManager.
     private Account pendingChooseAccount = null;
+
+    // Set when the pre-AccountManager config could not be migrated yet, so the retry in onResume
+    // knows to run and the user is told once why their servers are missing.
+    private boolean migrationDeferred = false;
+    private boolean migrationNoticeShown = false;
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -158,7 +164,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
             });
         }
 
-        accountHelper.migrateFromPrefsIfNeeded();
+        runPrefMigration();
 
         activeServerCategory = findPreference("brapi_active_server_category");
         availableServersCategory = findPreference("brapi_available_servers_category");
@@ -180,9 +186,31 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
     public void onResume() {
         super.onResume();
         setupToolbar();
+        if (migrationDeferred && !migrationNoticeShown) {
+            runPrefMigration();
+        }
         accountHelper.refreshOwnedAccountVisibility();
+        accountHelper.pruneStaleGrants();
         boolean brapiEnabled = preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false);
         updateServerSectionsVisibility(brapiEnabled);
+    }
+
+    /**
+     * Moves a pre-7.3 BrAPI server config into AccountManager.
+     * <p>
+     * Either way the old preferences stay put, but the two failures need different answers. A
+     * deferred write is the brief post-update window before the platform attributes the BrAPI
+     * account type to Field Book, and retrying clears it. A blocked one means another installed
+     * app is registered as the authenticator for that type — Android permits only one — and no
+     * amount of retrying will ever get past it, so it is worth interrupting the user for.
+     */
+    private void runPrefMigration() {
+        migrationDeferred = accountHelper.migrateFromPrefsIfNeeded() == BrapiMigrationResult.DEFERRED;
+
+        if (migrationDeferred && !migrationNoticeShown) {
+            migrationNoticeShown = true;
+            Toast.makeText(context, R.string.brapi_account_migration_deferred, Toast.LENGTH_SHORT).show();
+        }
     }
 
     // ─── Account cards ──────────────────────────────────────────────────────────
@@ -196,18 +224,16 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
 
         String activeUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
 
-        AccountManager am = AccountManager.get(context);
         List<Account> allAccounts = accountHelper.getAllAccounts();
         boolean hasActive = false;
 
         for (Account account : allAccounts) {
-            String serverUrl = am.getUserData(account, BrapiAuthenticator.KEY_SERVER_URL);
-            String ownerPkg = am.getUserData(account, BrapiAuthenticator.KEY_OWNER_PACKAGE);
-            boolean isOwnAccount = context.getPackageName().equals(ownerPkg);
-            boolean isActive = activeUrl.equals(serverUrl);
+            BrapiAccountInfo info = accountHelper.accountInfoOrEmpty(account);
+            boolean isOwnAccount = accountHelper.isOwnAccount(account);
+            boolean isActive = activeUrl.equals(info.getServerUrl());
 
             if (!isOwnAccount) {
-                BrapiServerCardPreference card = buildSharedCard(account, isActive);
+                BrapiServerCardPreference card = buildSharedCard(account, info, isActive);
                 if (isActive) {
                     activeServerCategory.addPreference(card);
                     hasActive = true;
@@ -217,7 +243,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
                 continue;
             }
 
-            BrapiServerCardPreference card = buildCard(account, isActive);
+            BrapiServerCardPreference card = buildCard(account, info, isActive);
 
             if (isActive) {
                 activeServerCategory.addPreference(card);
@@ -239,10 +265,8 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
         }
     }
 
-    private BrapiServerCardPreference buildSharedCard(Account account, boolean isActive) {
-        AccountManager am = AccountManager.get(context);
-        String ownerPkg = am.getUserData(account, BrapiAuthenticator.KEY_OWNER_PACKAGE);
-        String ownerName = BrapiAccountConstants.INSTANCE.displayNameForPackage(ownerPkg);
+    private BrapiServerCardPreference buildSharedCard(Account account, BrapiAccountInfo info, boolean isActive) {
+        String ownerName = BrapiAccountConstants.INSTANCE.displayNameForPackage(info.getOwnerPackage());
         String ownerLabel = ownerName.isEmpty()
                 ? ""
                 : getString(org.phenoapps.brapi.R.string.pheno_brapi_shared_account_from, ownerName);
@@ -253,36 +277,51 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
         card.setExpanded(isActive);
         card.setKey("shared_" + account.name + "_" + (isActive ? "active" : "available"));
         card.setOrder(0);
-        final String label = ownerLabel;
-        card.setOwnerLabel(label);
-        card.setHasToken(accountHelper.peekTokenForAccount(account) != null);
-        configureCardActions(card);
+        card.setOwnerLabel(ownerLabel);
+        card.setDisplayName(info.getLabel());
+        card.setServerUrl(info.getServerUrl());
+        // A shared account's token lives in the owning app, out of reach of peekAuthToken, so its
+        // sign-in state comes from what that app published about it.
+        card.setHasToken(info.getHasToken());
+        configureCardActions(card, false);
         return card;
     }
 
-    private BrapiServerCardPreference buildCard(Account account, boolean isActive) {
+    private BrapiServerCardPreference buildCard(Account account, BrapiAccountInfo info, boolean isActive) {
         BrapiServerCardPreference card = new BrapiServerCardPreference(context);
         card.setAccount(account);
         card.setActive(isActive);
         card.setExpanded(isActive); // active card starts expanded; inactive cards start collapsed
         card.setKey(account.name + "_" + (isActive ? "active" : "available"));
         card.setOrder(0);
+        card.setDisplayName(info.getLabel());
+        card.setServerUrl(info.getServerUrl());
         card.setHasToken(accountHelper.peekTokenForAccount(account) != null);
 
-        configureCardActions(card);
+        configureCardActions(card, true);
 
         return card;
     }
 
-    private void configureCardActions(BrapiServerCardPreference card) {
+    /**
+     * Wires the card's actions, limiting a shared account to the ones Field Book may actually
+     * perform on an account another app owns.
+     * <p>
+     * Signing in, editing and removing are the owner's to do. Authorizing here would run Field
+     * Book's own OAuth and store the result against a new Field Book account, leaving the same
+     * server listed twice in the system account settings; its token is borrowed from the owner
+     * instead. Logging out stays available, since that only drops the borrowed token locally.
+     */
+    private void configureCardActions(BrapiServerCardPreference card, boolean isOwnAccount) {
         card.setOnLogOut(this::logOutAccount);
-        card.setOnAuthorize(this::authorizeAccount);
         card.setOnEnable(this::enableAccount);
         card.setOnCheckCompatibility(this::checkServerCompatibility);
         card.setOnShareSettings(this::shareAccountSettings);
-        card.setOnEdit(this::editAccount);
-        card.setOnRemove(this::removeAccount);
         card.setOnSwitchServer(this::showSwitchServerDialog);
+
+        card.setOnAuthorize(isOwnAccount ? this::authorizeAccount : null);
+        card.setOnEdit(isOwnAccount ? this::editAccount : null);
+        card.setOnRemove(isOwnAccount ? this::removeAccount : null);
     }
 
     // ─── Account actions ────────────────────────────────────────────────────────
@@ -298,10 +337,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
     }
 
     private @NotNull Unit logOutAccount(Account account) {
-        AccountManager am = AccountManager.get(context);
-        String displayName = am.getUserData(account, BrapiAuthenticator.KEY_DISPLAY_NAME);
-        if (displayName == null) displayName = account.name;
-        final String finalDisplayName = displayName;
+        final String finalDisplayName = accountHelper.accountInfoOrEmpty(account).getLabel();
 
         String messageTemplate = getString(R.string.brapi_logout_manage_message, finalDisplayName);
         SpannableString styledMessage = new SpannableString(messageTemplate);
@@ -312,30 +348,39 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 
-        new AlertDialog.Builder(context, R.style.AppAlertDialog)
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.AppAlertDialog)
                 .setTitle(R.string.brapi_logout_manage_title)
                 .setMessage(styledMessage)
                 .setNeutralButton(R.string.brapi_logout_only, (d, w) -> {
                     pendingRemoveAfterLogout = false;
                     doLogout(account);
                 })
-                .setPositiveButton(R.string.brapi_logout_and_remove, (d, w) -> {
-                    pendingRemoveAfterLogout = true;
-                    doLogout(account);
-                })
-                .setNegativeButton(android.R.string.cancel, null)
-                .show();
+                .setNegativeButton(android.R.string.cancel, null);
+
+        // Removal is the owner's to do. Offering it for a shared account promises something
+        // removeAccount() cannot deliver — it only touches accounts this app owns — so the entry
+        // would appear to do nothing.
+        if (accountHelper.isOwnAccount(account)) {
+            builder.setPositiveButton(R.string.brapi_logout_and_remove, (d, w) -> {
+                pendingRemoveAfterLogout = true;
+                doLogout(account);
+            });
+        }
+
+        builder.show();
         return Unit.INSTANCE;
     }
 
     private void doLogout(Account account) {
-        AccountManager am = AccountManager.get(context);
-        String idToken = am.getUserData(account, BrapiAuthenticator.KEY_ID_TOKEN);
+        BrapiAccountInfo info = accountHelper.accountInfoOrEmpty(account);
+        // Only the owning app holds an id token, so a shared account has no OIDC session for
+        // Field Book to end — signing out locally is all there is to do.
+        String idToken = accountHelper.peekIdTokenForAccount(account);
 
         if (idToken != null) {
             Toast.makeText(context, R.string.logging_out_please_wait, Toast.LENGTH_SHORT).show();
             pendingAuthAccount = account;
-            String accountOidcUrl = am.getUserData(account, BrapiAuthenticator.KEY_OIDC_URL);
+            String accountOidcUrl = info.getOidcUrl();
             // Resolved up front: getAuthServiceConfiguration() calls back asynchronously, by which
             // point the fragment may be detached and getString() would throw.
             final Uri postLogoutRedirect = Uri.parse(getString(R.string.brapi_redirect_uri));
@@ -351,17 +396,17 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
                 return null;
             }, accountOidcUrl);
         } else {
-            String serverUrl = am.getUserData(account, BrapiAuthenticator.KEY_SERVER_URL);
-            accountHelper.clearToken(serverUrl != null ? serverUrl : "");
+            String serverUrl = info.getServerUrl();
+            accountHelper.clearToken(serverUrl);
 
             String activeUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
-            if (serverUrl != null && serverUrl.equals(activeUrl)) {
+            if (!serverUrl.isEmpty() && serverUrl.equals(activeUrl)) {
                 preferences.edit().putString(PreferenceKeys.BRAPI_BASE_URL, "").apply();
                 BrapiFilterCache.Companion.delete(context, true);
             }
             if (pendingRemoveAfterLogout) {
                 pendingRemoveAfterLogout = false;
-                if (serverUrl != null) {
+                if (!serverUrl.isEmpty()) {
                     accountHelper.removeAccount(serverUrl);
                 }
             }
@@ -382,6 +427,24 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
 
     private void activateAccount(Account account) {
         makeAccountActive(account);
+
+        if (!accountHelper.isOwnAccount(account)) {
+            // Selecting a shared server is not enough to use it: its token belongs to the app that
+            // owns the account, so fetch it now and mirror it locally. Without this the server
+            // looks signed out no matter how many times it is selected.
+            if (isAdded()) {
+                accountHelper.borrowToken(account, getActivity(), token -> {
+                    if (token == null) {
+                        Toast.makeText(context, R.string.brapi_shared_account_not_signed_in,
+                                Toast.LENGTH_LONG).show();
+                    }
+                    refreshServerCards();
+                    return Unit.INSTANCE;
+                });
+            }
+            return;
+        }
+
         refreshServerCards();
     }
 
@@ -393,9 +456,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
      * @return the account's server URL
      */
     private String makeAccountActive(Account account) {
-        AccountManager am = AccountManager.get(context);
-        String serverUrl = am.getUserData(account, BrapiAuthenticator.KEY_SERVER_URL);
-        if (serverUrl == null) serverUrl = account.name;
+        String serverUrl = accountHelper.serverUrlOf(account);
         if (accountHelper.setActiveAccount(serverUrl)) {
             BrapiFilterCache.Companion.delete(context, true);
         }
@@ -403,28 +464,22 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
     }
 
     private @NotNull Unit authorizeAccount(Account account) {
-        AccountManager am = AccountManager.get(context);
+        BrapiAccountInfo info = accountHelper.accountInfoOrEmpty(account);
         // Make this account active so BrapiAuthActivity picks up its config
         String serverUrl = makeAccountActive(account);
         pendingAuthAccount = account;
         Intent authIntent = new Intent(context, BrapiAuthActivity.class);
         authIntent.putExtra(BrapiAuthActivity.EXTRA_SERVER_URL, serverUrl);
-        authIntent.putExtra(BrapiAuthActivity.EXTRA_OIDC_URL,
-                am.getUserData(account, BrapiAuthenticator.KEY_OIDC_URL));
-        authIntent.putExtra(BrapiAuthActivity.EXTRA_OIDC_FLOW,
-                am.getUserData(account, BrapiAuthenticator.KEY_OIDC_FLOW));
-        authIntent.putExtra(BrapiAuthActivity.EXTRA_OIDC_CLIENT_ID,
-                am.getUserData(account, BrapiAuthenticator.KEY_OIDC_CLIENT_ID));
-        authIntent.putExtra(BrapiAuthActivity.EXTRA_OIDC_SCOPE,
-                am.getUserData(account, BrapiAuthenticator.KEY_OIDC_SCOPE));
+        authIntent.putExtra(BrapiAuthActivity.EXTRA_OIDC_URL, info.getOidcUrl());
+        authIntent.putExtra(BrapiAuthActivity.EXTRA_OIDC_FLOW, info.getOidcFlow());
+        authIntent.putExtra(BrapiAuthActivity.EXTRA_OIDC_CLIENT_ID, info.getOidcClientId());
+        authIntent.putExtra(BrapiAuthActivity.EXTRA_OIDC_SCOPE, info.getOidcScope());
         startActivityForResult(authIntent, AUTH_REQUEST_CODE);
         return Unit.INSTANCE;
     }
 
     private @NotNull Unit checkServerCompatibility(Account account) {
-        AccountManager am = AccountManager.get(context);
-        String serverUrl = am.getUserData(account, BrapiAuthenticator.KEY_SERVER_URL);
-        if (serverUrl == null) serverUrl = account.name;
+        String serverUrl = accountHelper.serverUrlOf(account);
 
         FragmentActivity act = getActivity();
         if (act != null) {
@@ -442,22 +497,21 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
     }
 
     private @NotNull Unit shareAccountSettings(Account account) {
-        AccountManager am = AccountManager.get(context);
         Activity act = getActivity();
         if (act == null) return Unit.INSTANCE;
 
         try {
+            BrapiAccountInfo info = accountHelper.accountInfoOrEmpty(account);
             BrapiAccountConfig config = new BrapiAccountConfig(
-                    am.getUserData(account, BrapiAuthenticator.KEY_SERVER_URL),
-                    am.getUserData(account, BrapiAuthenticator.KEY_DISPLAY_NAME),
-                    am.getUserData(account, BrapiAuthenticator.KEY_BRAPI_VERSION),
+                    info.getServerUrl(),
+                    info.getDisplayName(),
+                    info.getBrapiVersion(),
                     // Published as the portable "code"/"implicit" spelling so that installs which
                     // predate the stable flow identifiers still read this config correctly.
-                    BrapiAccountConstants.INSTANCE.toSharedConfigOidcFlow(
-                            am.getUserData(account, BrapiAuthenticator.KEY_OIDC_FLOW)),
-                    am.getUserData(account, BrapiAuthenticator.KEY_OIDC_URL),
-                    am.getUserData(account, BrapiAuthenticator.KEY_OIDC_CLIENT_ID),
-                    am.getUserData(account, BrapiAuthenticator.KEY_OIDC_SCOPE)
+                    BrapiAccountConstants.INSTANCE.toSharedConfigOidcFlow(info.getOidcFlow()),
+                    info.getOidcUrl(),
+                    info.getOidcClientId(),
+                    info.getOidcScope()
             );
 
             String jsonConfig = new Gson().toJson(config);
@@ -469,15 +523,15 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
     }
 
     private @NotNull Unit editAccount(Account account) {
-        AccountManager am = AccountManager.get(context);
+        BrapiAccountInfo info = accountHelper.accountInfoOrEmpty(account);
         BrapiAccountConfig config = new BrapiAccountConfig(
-                am.getUserData(account, BrapiAuthenticator.KEY_SERVER_URL),
-                am.getUserData(account, BrapiAuthenticator.KEY_DISPLAY_NAME),
-                am.getUserData(account, BrapiAuthenticator.KEY_BRAPI_VERSION),
-                am.getUserData(account, BrapiAuthenticator.KEY_OIDC_FLOW),
-                am.getUserData(account, BrapiAuthenticator.KEY_OIDC_URL),
-                am.getUserData(account, BrapiAuthenticator.KEY_OIDC_CLIENT_ID),
-                am.getUserData(account, BrapiAuthenticator.KEY_OIDC_SCOPE)
+                info.getServerUrl(),
+                info.getDisplayName(),
+                info.getBrapiVersion(),
+                info.getOidcFlow(),
+                info.getOidcUrl(),
+                info.getOidcClientId(),
+                info.getOidcScope()
         );
 
         BrapiManualAccountDialogFragment frag = BrapiManualAccountDialogFragment.Companion.newInstance(
@@ -488,10 +542,9 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
     }
 
     private @NotNull Unit removeAccount(Account account) {
-        AccountManager am = AccountManager.get(context);
-        String serverUrl = am.getUserData(account, BrapiAuthenticator.KEY_SERVER_URL);
-        String displayName = am.getUserData(account, BrapiAuthenticator.KEY_DISPLAY_NAME);
-        if (displayName == null) displayName = account.name;
+        BrapiAccountInfo info = accountHelper.accountInfoOrEmpty(account);
+        String serverUrl = info.getServerUrl();
+        String displayName = info.getLabel();
 
         String removeMessageTemplate = getString(R.string.brapi_logout_manage_message, displayName);
         SpannableString removeStyledMessage = new SpannableString(removeMessageTemplate);
@@ -506,7 +559,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
                 .setTitle(R.string.brapi_logout_manage_title)
                 .setMessage(removeStyledMessage)
                 .setPositiveButton(R.string.brapi_logout_and_remove, (dialog, which) -> {
-                    if (serverUrl != null) {
+                    if (!serverUrl.isEmpty()) {
                         accountHelper.removeAccount(serverUrl);
                         String activeUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
                         if (serverUrl.equals(activeUrl)) {
@@ -553,7 +606,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
             } else if (resultCode == RESULT_OK && data != null) {
                 String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
                 String accountType = data.getStringExtra(AccountManager.KEY_ACCOUNT_TYPE);
-                if (accountName != null && BrapiAuthenticator.ACCOUNT_TYPE.equals(accountType)) {
+                if (accountName != null && BrapiAuthenticator.isBrapiAccountType(accountType)) {
                     Account selected = new Account(accountName, accountType);
                     if (accountHelper.canAccessAccount(selected)) {
                         accountHelper.grantSelectedAccount(selected);
@@ -582,12 +635,11 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
 
             // OIDC end-session completed — clear token for the pending account
             if (loggedOutAccount != null) {
-                AccountManager am = AccountManager.get(context);
-                String serverUrl = am.getUserData(loggedOutAccount, BrapiAuthenticator.KEY_SERVER_URL);
-                accountHelper.clearToken(serverUrl != null ? serverUrl : "");
+                String serverUrl = accountHelper.accountInfoOrEmpty(loggedOutAccount).getServerUrl();
+                accountHelper.clearToken(serverUrl);
 
                 String activeUrl = preferences.getString(PreferenceKeys.BRAPI_BASE_URL, "");
-                boolean wasActiveAccount = serverUrl != null && serverUrl.equals(activeUrl);
+                boolean wasActiveAccount = !serverUrl.isEmpty() && serverUrl.equals(activeUrl);
 
                 if (wasActiveAccount) {
                     // The legacy BRAPI_TOKEN/BRAPI_ID_TOKEN prefs mirror the *active* account, so
@@ -603,7 +655,7 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
                             .apply();
                     BrapiFilterCache.Companion.delete(context, true);
                 }
-                if (removeAfterLogout && serverUrl != null) {
+                if (removeAfterLogout && !serverUrl.isEmpty()) {
                     accountHelper.removeAccount(serverUrl);
                 }
             } else {

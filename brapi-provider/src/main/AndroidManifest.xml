@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- AS complains about having these permissions for the account manager even though our min is 24 -->
+    <uses-permission
+        android:name="android.permission.AUTHENTICATE_ACCOUNTS"
+        android:maxSdkVersion="22" />
+    <uses-permission
+        android:name="android.permission.USE_CREDENTIALS"
+        android:maxSdkVersion="22" />
+
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
 
     <queries>
@@ -17,6 +25,20 @@
             android:name="org.phenoapps.brapi.account.BrapiAccessConfirmActivity"
             android:exported="true"
             android:theme="@style/Theme.AppCompat.Light.Dialog.Alert" />
+
+        <!-- Publishes this app's BrAPI account config to sibling PhenoApps. The authority is
+             per-app because each app owns its own account type.
+
+             Deliberately not guarded by a custom permission. Only one installed app may define a
+             given permission name, and a second app declaring it under a different signing key
+             cannot install at all — the same constraint that forced per-app account types. The
+             provider gates itself instead: it serves only accounts this app owns, only to callers
+             whose package is a known PhenoApp, and only once the account has been made visible to
+             that caller. Nothing secret is served — tokens still go through AccountManager. -->
+        <provider
+            android:name="org.phenoapps.brapi.config.BrapiConfigProvider"
+            android:authorities="${applicationId}.brapi.config"
+            android:exported="true" />
     </application>
 
 </manifest>

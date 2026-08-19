@@ -76,8 +76,7 @@ class TraitEditorViewModel @Inject constructor(
 
     fun getBrapiDisplayName(default: String): String {
         val account = brapiAccountHelper.findAccount() ?: return default
-        return brapiAccountHelper.getUserData(account, com.fieldbook.tracker.brapi.BrapiAuthenticator.KEY_DISPLAY_NAME)
-            ?.takeIf { it.isNotEmpty() } ?: default
+        return brapiAccountHelper.accountInfo(account)?.displayName?.takeIf { it.isNotEmpty() } ?: default
     }
 
     fun previouslyExported() = prefs.getBoolean(GeneralKeys.TRAITS_EXPORTED, false)

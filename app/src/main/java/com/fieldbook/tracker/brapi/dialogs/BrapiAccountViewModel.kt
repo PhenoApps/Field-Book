@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.phenoapps.brapi.BrapiAccountConstants
 import org.phenoapps.brapi.ui.BrapiAccountConfig
 import org.phenoapps.brapi.ui.BrapiAccountUiState
 import org.phenoapps.brapi.ui.defaultBrapiAccountState
@@ -180,6 +181,7 @@ class BrapiAccountViewModel @Inject constructor(
             showInvalidUrlError()
             return
         }
+        if (rejectedAsAlreadyShared(url)) return
         accountWasNew = accountHelper.getAccountByUrl(url) == null
         val displayName = state.displayName.trim().takeIf { it.isNotEmpty() } ?: url
         accountHelper.addAccountConfig(
@@ -190,7 +192,7 @@ class BrapiAccountViewModel @Inject constructor(
             oidcClientId = state.oidcClientId.trim(),
             oidcScope = state.oidcScope.trim(),
             brapiVersion = state.brapiVersion,
-        )
+        ) ?: return
         if (accountHelper.setActiveAccount(url)) invalidateCache()
         viewModelScope.launch {
             _events.emit(
@@ -218,6 +220,9 @@ class BrapiAccountViewModel @Inject constructor(
             showInvalidUrlError()
             return
         }
+        // Only an edit that repoints this account at a server a sibling shares is a problem; an
+        // edit that leaves the URL alone is matched to the existing account by originalServerUrl.
+        if (url != editOriginalUrl && rejectedAsAlreadyShared(url)) return
         val displayName = state.displayName.trim().takeIf { it.isNotEmpty() } ?: url
         accountHelper.addAccountConfig(
             serverUrl = url,
@@ -228,7 +233,7 @@ class BrapiAccountViewModel @Inject constructor(
             oidcScope = state.oidcScope.trim(),
             brapiVersion = state.brapiVersion,
             originalServerUrl = editOriginalUrl,
-        )
+        ) ?: return
         // Editing the active account has to repoint its preference mirrors, otherwise a changed
         // BrAPI version or OIDC setting is stored but never used. Matched on the URL the account
         // was active under, since the edit may have changed the URL itself.
@@ -298,6 +303,29 @@ class BrapiAccountViewModel @Inject constructor(
             )
         }
     }
+
+    /**
+     * Refuses a URL another app already shares, naming that app.
+     *
+     * Adding it here would create a second account for the same server and list it twice in the
+     * system account settings; the shared one is already usable from the server list. Returns true
+     * when the caller should stop.
+     */
+    private fun rejectedAsAlreadyShared(url: String): Boolean {
+        val shared = accountHelper.sharedAccountForUrl(url) ?: return false
+        val owner = BrapiAccountConstants.displayNameForPackage(
+            accountHelper.ownerPackageOf(shared),
+        )
+        viewModelScope.launch {
+            _events.emit(
+                BrapiAccountEvent.ShowError(
+                    R.string.brapi_add_account_already_shared,
+                    listOf(owner),
+                ),
+            )
+        }
+        return true
+    }
 }
 
 // ── Events ────────────────────────────────────────────────────────────────────
@@ -313,8 +341,14 @@ sealed class BrapiAccountEvent {
         val brapiVersion: String,
     ) : BrapiAccountEvent()
 
-    /** Fragment should show a Toast with this string resource. */
-    data class ShowError(@StringRes val messageRes: Int) : BrapiAccountEvent()
+    /**
+     * Fragment should show a Toast with this string resource, formatted with [args] when the
+     * message names something the user needs to see — the app sharing a server, for instance.
+     */
+    data class ShowError(
+        @StringRes val messageRes: Int,
+        val args: List<String> = emptyList(),
+    ) : BrapiAccountEvent()
 
     /** Fragment should dismiss (and finish the host activity if launched from AccountManager). */
     object Dismissed : BrapiAccountEvent()

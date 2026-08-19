@@ -1,13 +1,11 @@
 package com.fieldbook.tracker.brapi.service;
 
 import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 
 import androidx.preference.PreferenceManager;
 
-import com.fieldbook.tracker.brapi.BrapiAuthenticator;
 import com.fieldbook.tracker.preferences.PreferenceKeys;
 import com.fieldbook.tracker.utilities.BrapiAccountHelper;
 
@@ -20,7 +18,7 @@ public class BrAPIServiceFactory {
         BrapiAccountHelper accountHelper = new BrapiAccountHelper(context, prefs);
         accountHelper.migrateFromPrefsIfNeeded();
 
-        // Read BrAPI version from the active account's AccountManager user data (fallback to prefs)
+        // Read BrAPI version from the active account's config (fallback to prefs)
         String version = getActiveAccountVersion(context, accountHelper, prefs);
 
         BrAPIService brAPIService;
@@ -35,7 +33,7 @@ public class BrAPIServiceFactory {
 
     /**
      * Returns the BrAPI version for the active account.
-     * Reads from AccountManager user data first, falls back to SharedPreferences.
+     * Reads the account's config first, falls back to SharedPreferences.
      */
     public static String getActiveAccountVersion(
             Context context,
@@ -44,9 +42,8 @@ public class BrAPIServiceFactory {
     ) {
         Account active = accountHelper.findAccount();
         if (active != null) {
-            AccountManager am = AccountManager.get(context);
-            String version = am.getUserData(active, BrapiAuthenticator.KEY_BRAPI_VERSION);
-            if (version != null && !version.isEmpty()) return version;
+            String version = accountHelper.accountInfoOrEmpty(active).getBrapiVersion();
+            if (!version.isEmpty()) return version;
         }
         return prefs.getString(PreferenceKeys.BRAPI_VERSION, "V1");
     }

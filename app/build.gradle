@@ -79,6 +79,12 @@ android {
 
         buildConfigField "String", "NIX_LICENSE", "\"${nixLicense.replaceAll("\"", "\\\\\"")}\""
 
+        // The BrAPI account type this app owns, read by res/xml/brapi_authenticator.xml. It has to
+        // stay equal to BrapiAccountConstants.accountTypeFor(applicationId), which is what the code
+        // derives at runtime — and it has to differ per variant, or a debug and a release install
+        // would fight over the same account type on one device.
+        resValue "string", "brapi_account_type", "org.phenoapps.brapi.com.fieldbook.tracker"
+
     }
 
     buildTypes {
@@ -94,6 +100,7 @@ android {
             clean
             debuggable true
             applicationIdSuffix ".debug"
+            resValue "string", "brapi_account_type", "org.phenoapps.brapi.com.fieldbook.tracker.debug"
             //proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }

@@ -1412,9 +1412,15 @@
     <string name="brapi_auth_deny">BrAPI Authorization Denied</string>
     <string name="brapi_auth_failed_remove">Remove</string>
     <string name="brapi_auth_error_starting">Error Starting BrAPI Auth</string>
+    <string name="brapi_auth_error_starting_reason">Error Starting BrAPI Auth: %1$s</string>
     <string name="brapi_auth_permission_deny">ERROR: You do not have the permissions necessary to perform this action</string>
     <string name="brapi_auth_needed_title">Login Needed</string>
     <string name="brapi_auth_needed">You need to be logged into the system you are attempting to sync data with in order to sync your data.\n\nWould you like to authenticate now?</string>
+    <string name="brapi_account_migration_deferred">Restart Field Book to finish the BrAPI update</string>
+    <string name="brapi_shared_account_not_signed_in">Sign in to this server from the app that owns it, then select it here again</string>
+    <string name="brapi_add_account_already_shared">%1$s already provides this server. Choose it from Shared Servers instead of adding it again</string>
+    <string name="brapi_auth_success_already_shared">Signed in. This server is already shared from another app, so it stays listed there</string>
+    <string name="brapi_auth_success_no_account">Signed in, but the server could not be saved. Restart Field Book and try again</string>
 
     <!-- BrAPI Import -->
     <string name="import_dialog_title_brapi_fields">BrAPI Field Import</string>

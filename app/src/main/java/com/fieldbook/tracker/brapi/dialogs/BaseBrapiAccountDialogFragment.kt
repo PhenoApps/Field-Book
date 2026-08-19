@@ -80,7 +80,10 @@ abstract class BaseBrapiAccountDialogFragment : DialogFragment() {
             }
             authResponse?.onResult(Bundle().apply {
                 putString(AccountManager.KEY_ACCOUNT_NAME, viewModel.uiState.value.url)
-                putString(AccountManager.KEY_ACCOUNT_TYPE, BrapiAuthenticator.ACCOUNT_TYPE)
+                putString(
+                    AccountManager.KEY_ACCOUNT_TYPE,
+                    BrapiAuthenticator.accountType(requireContext()),
+                )
             })
             dismiss()
             if (authResponse != null) {
@@ -160,7 +163,12 @@ abstract class BaseBrapiAccountDialogFragment : DialogFragment() {
                 // dismissal happens in the authLauncher callback above.
             }
             is BrapiAccountEvent.ShowError -> {
-                Toast.makeText(requireContext(), event.messageRes, Toast.LENGTH_LONG).show()
+                val message = if (event.args.isEmpty()) {
+                    getString(event.messageRes)
+                } else {
+                    getString(event.messageRes, *event.args.toTypedArray())
+                }
+                Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
             }
             is BrapiAccountEvent.Dismissed -> {
                 if (authResponse != null) {
