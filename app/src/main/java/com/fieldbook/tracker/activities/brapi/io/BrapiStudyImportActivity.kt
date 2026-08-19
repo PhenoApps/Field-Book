@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.ThemedActivity
+import com.fieldbook.tracker.activities.brapi.io.mapper.isAtObservationLevel
 import com.fieldbook.tracker.activities.brapi.io.mapper.toTraitObject
 import com.fieldbook.tracker.adapters.StudyAdapter
 import com.fieldbook.tracker.adapters.StudyAdapter.Model
@@ -266,6 +267,13 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         .map { it.observationUnitPosition.observationLevel.levelName }
         .toSet()).toTypedArray()
 
+    /**
+     * The observation level the user has chosen, or null while no choice has been made yet.
+     */
+    private fun selectedLevelName() = existingLevels().let { levels ->
+        if (selectedLevel in levels.indices) levels[selectedLevel] else null
+    }
+
     private fun setLevelListOptions() {
 
         listView.adapter = ArrayAdapter(
@@ -467,7 +475,9 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 id: String,
                 position: Int
             ): HashSet<BrAPIObservationVariable>? {
-                return observationVariables[id]?.toHashSet()
+                val levelName = selectedLevelName()
+                return observationVariables[id]?.filter { it.isAtObservationLevel(levelName) }
+                    ?.toHashSet()
             }
 
             override fun getObservationUnits(
@@ -653,7 +663,9 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                     details.numberOfPlots = units.size
                     details.trialName = study.trialName
 
-                    details.traits = observationVariables[study.studyDbId]?.toList()
+                    //BMS specific, only import the variables used at the selected level
+                    details.traits = observationVariables[study.studyDbId]
+                        ?.filter { it.isAtObservationLevel(level.observationLevelName) }
                         ?.map { it.toTraitObject(this@BrapiStudyImportActivity).also {
                             it.realPosition = maxVariableIndex++
                         } } ?: listOf()
