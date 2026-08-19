@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- Photos taken on Samsung One UI 8.5 devices are now saved correctly (https://github.com/PhenoApps/Field-Book/pull/1525)
 - Last selected entry no longer changes after modifying trait visibility (https://github.com/PhenoApps/Field-Book/pull/1517)
 - Fixed several issues with the Pollinator trait (https://github.com/PhenoApps/Field-Book/pull/1519)
 
