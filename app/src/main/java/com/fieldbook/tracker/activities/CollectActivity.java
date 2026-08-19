@@ -87,6 +87,7 @@ import com.fieldbook.tracker.traits.AbstractCameraTrait;
 import com.fieldbook.tracker.traits.AudioTraitLayout;
 import com.fieldbook.tracker.traits.BaseTraitLayout;
 import com.fieldbook.tracker.traits.CanonTraitLayout;
+import com.fieldbook.tracker.traits.GoProTraitLayout;
 import com.fieldbook.tracker.traits.GNSSTraitLayout;
 import com.fieldbook.tracker.traits.LayoutCollections;
 import com.fieldbook.tracker.traits.PhotoTraitLayout;
@@ -319,6 +320,8 @@ public class CollectActivity extends ThemedActivity
      * Trait layouts
      */
     LayoutCollections traitLayouts;
+    /** The layout currently inflated into the trait holder, so it can be exited when replaced. */
+    private BaseTraitLayout currentInflatedLayout;
     private String inputPlotId = "";
     private AlertDialog goToId;
 
@@ -439,6 +442,13 @@ public class CollectActivity extends ThemedActivity
     protected void onStop() {
         super.onStop();
         usbCameraApi.onStop();
+
+        //the bound wifi network, the ffmpeg pipeline and the camera's access point do not survive
+        //backgrounding, so release the session rather than leaving a half open one that blocks the
+        //next connect attempt
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !isChangingConfigurations()) {
+            goProApi.teardownAsync();
+        }
     }
 
     public void triggerTts(String text) {
@@ -451,6 +461,13 @@ public class CollectActivity extends ThemedActivity
 
         try {
 
+            //release any connected camera before the trait layouts are rebuilt, otherwise the
+            //session leaks and the camera cannot be reconnected in the new field
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                goProApi.teardownAsync();
+            }
+            canonApi.stopSession();
+
             fieldSwitcher.switchField(studyId);
 
             rangeBox.setAllRangeID();
@@ -459,6 +476,9 @@ public class CollectActivity extends ThemedActivity
             //refresh collect activity UI
             rangeBox.reload();
             rangeBox.refresh();
+            //the trait format may be unchanged across the switch, so drop the memo that would
+            //otherwise skip re-inflating and leave the layout bound to the previous field
+            traitBox.resetInflatedFormat();
             initWidgets(false);
 
             if (obsUnitId != null) {
@@ -1365,7 +1385,9 @@ public class CollectActivity extends ThemedActivity
             Log.e(TAG, "Error closing TTS Helper.", e);
         }
 
-        getTraitLayout().onExit();
+        if (currentInflatedLayout != null) {
+            currentInflatedLayout.onExit();
+        }
 
         traitLayoutRefresh();
 
@@ -2870,6 +2892,11 @@ public class CollectActivity extends ThemedActivity
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                                 wifiHelper.disconnect();
                             }
+                        } else if (format.equals(GoProTraitLayout.type)
+                                && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            //start releasing the camera before finish() so the stop stream and
+                            //access point commands still have a live link to travel over
+                            goProApi.teardownAsync();
                         }
                         finish();
                 } else {
@@ -3050,7 +3077,12 @@ public class CollectActivity extends ThemedActivity
 
     @Override
     public void inflateTrait(@NonNull BaseTraitLayout layout) {
-        getTraitLayout().onExit();
+        //getTraitLayout() resolves through the *current* trait, which by this point is already the
+        //incoming one, so track the inflated layout directly to exit the one being left behind
+        if (currentInflatedLayout != null && currentInflatedLayout != layout) {
+            currentInflatedLayout.onExit();
+        }
+        currentInflatedLayout = layout;
         View v = LayoutInflater.from(this).inflate(layout.layoutId(), null);
         LinearLayout holder = findViewById(R.id.traitHolder);
         holder.removeAllViews();

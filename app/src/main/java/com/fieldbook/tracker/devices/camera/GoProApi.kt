@@ -1,12 +1,16 @@
 package com.fieldbook.tracker.devices.camera
 
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattDescriptor
+import android.bluetooth.BluetoothProfile
 import android.content.Context
-import android.net.ConnectivityManager
 import android.net.Network
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.annotation.StringRes
 import androidx.core.net.toUri
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.Player
@@ -14,20 +18,30 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.mediacodec.MediaCodecUtil
+import com.fieldbook.tracker.R
 import com.fieldbook.tracker.interfaces.CollectController
 import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.utilities.WifiHelper
 import dagger.hilt.android.qualifiers.ActivityContext
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
-import okhttp3.Callback
+import okhttp3.ConnectionPool
+import okhttp3.Dispatcher
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -36,11 +50,23 @@ import org.json.JSONException
 import org.json.JSONObject
 import org.phenoapps.fragments.gopro.GoProGatt
 import org.phenoapps.fragments.gopro.GoProGattInterface
+import org.phenoapps.interfaces.bridge.GattBridge
 import org.phenoapps.interfaces.gatt.GattCallbackInterface
-import java.net.SocketException
+import java.io.IOException
+import java.io.OutputStream
 import java.net.URI
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
+/**
+ * Drives a GoPro camera over BLE (control) and its wifi access point (preview stream + media).
+ *
+ * The class owns every resource the session acquires - the [BluetoothGatt] handle, the wifi
+ * network binding, the http client, the ffmpeg pipeline and the ExoPlayer - and releases all of
+ * them through [shutdown]. Anything that leaks here survives the activity: gatt client interfaces
+ * and network callbacks are held by the framework, which is why leaking them used to force users
+ * to toggle their radios before they could reconnect.
+ */
 @RequiresApi(Build.VERSION_CODES.Q)
 @UnstableApi
 class GoProApi @Inject constructor(
@@ -66,12 +92,48 @@ class GoProApi @Inject constructor(
         val time: String
     )
 
+    /**
+     * Destination for a streamed image download. The api never buffers a whole photo in memory,
+     * it asks the caller for a sink and either [commit]s or [discard]s it, so a failed transfer
+     * cannot leave a partial file behind with a valid observation pointing at it.
+     */
+    interface ImageSink {
+        fun openStream(): OutputStream?
+        fun commit(bytesWritten: Long)
+        fun discard()
+    }
+
+    /**
+     * Lifecycle of a session. Every ui decision is driven from this rather than from the player's
+     * playback flags, so a dropped access point returns the user to a usable connect button.
+     */
+    enum class ConnectionState {
+        DISCONNECTED,
+        CONNECTING_BLE,
+        AWAITING_AP,
+        CONNECTING_WIFI,
+        CONNECTED,
+        STREAMING,
+        CAPTURING,
+        DISCONNECTING,
+        ERROR;
+
+        /** True while a session is being established or is live. */
+        val isActive: Boolean
+            get() = this != DISCONNECTED && this != DISCONNECTING && this != ERROR
+    }
+
     interface Callbacks {
-        fun onConnected()
+        fun onConnectionStateChanged(state: ConnectionState, @StringRes messageRes: Int?)
         fun onInitializeGatt()
+        fun onConnected()
         fun onStreamReady()
         fun onStreamRequested()
-        fun onImageRequestReady(bytes: ByteArray, data: ImageRequestData, model: GoProImage? = null)
+        fun onCaptureFinished()
+        fun onCaptureFailed(@StringRes messageRes: Int)
+        fun onImageSinkRequested(data: ImageRequestData, model: GoProImage): ImageSink?
+        fun onImageSaved(data: ImageRequestData, model: GoProImage)
+        fun onImageNameReady(data: ImageRequestData, model: GoProImage)
         fun onBusyStateChanged(isBusy: Int, isEncoding: Int)
     }
 
@@ -84,12 +146,39 @@ class GoProApi @Inject constructor(
     companion object {
         const val TAG = "GoProApi"
         private const val ffmpegOutputUri = "udp://@localhost:8555"
-        private const val REQUEST_TIMEOUT_MS = 4000
+        private const val BASE_URL = "http://10.5.5.9:8080"
+
+        private const val REQUEST_TIMEOUT_MS = 4000L
         private const val MAX_REQUEST_RETRIES = 3
+
+        //a multi megabyte photo over the camera's access point needs far more headroom
+        private const val DOWNLOAD_TIMEOUT_MS = 60000L
+        private const val DOWNLOAD_RETRIES = 2
+
+        private const val BLE_CONNECT_TIMEOUT_MS = 20000L
+        private const val BLE_DISCONNECT_TIMEOUT_MS = 800L
+
+        //how long to wait for the camera to finish writing a photo
+        private const val CAPTURE_TIMEOUT_MS = 20000L
+
+        //how long to wait for the busy flag to rise before assuming the capture was instantaneous
+        private const val CAPTURE_BUSY_WINDOW_MS = 3000L
+        private const val CAPTURE_POLL_INTERVAL_MS = 500L
+
+        //idle cadence for detecting captures triggered by the camera's own shutter button
+        private const val IDLE_POLL_INTERVAL_MS = 2000L
     }
 
     private val gatt by lazy {
         GoProGatt(this)
+    }
+
+    /**
+     * Our own gatt callback. [GoProGatt] exposes one too, but it neither reports link loss nor
+     * owns the handle, so we sit in front of it and forward.
+     */
+    private val gattObserver by lazy {
+        GattBridge.gattBridge(this)
     }
 
     private val controller by lazy {
@@ -105,20 +194,19 @@ class GoProApi @Inject constructor(
             super.onPlaybackStateChanged(playbackState)
             when (playbackState) {
                 Player.STATE_IDLE, Player.STATE_ENDED -> {
-                    Log.d(
-                        TAG, "Player Idle/Ended"
-                    )
-                    streamStarted = false
+                    Log.d(TAG, "Player Idle/Ended")
                 }
 
-                Player.STATE_BUFFERING -> if (!streamStarted) {
+                Player.STATE_BUFFERING -> {
                     Log.d(TAG, "Player Buffering")
-                    Log.d(TAG, "Requesting start stream.")
-                    streamStarted = true
                 }
 
                 Player.STATE_READY -> {
-                    Log.d(TAG, "Player Ready ${if (range.isNotEmpty()) range[0].range.uniqueId else ""}")
+                    Log.d(TAG, "Player Ready")
+
+                    if (connectionState != ConnectionState.CAPTURING) {
+                        setState(ConnectionState.STREAMING)
+                    }
 
                     callbacks?.onStreamReady()
                 }
@@ -126,22 +214,60 @@ class GoProApi @Inject constructor(
         }
     }
 
-    private var requestedUrls = arrayListOf<String>()
     private var player: ExoPlayer? = null
     private var callbacks: Callbacks? = null
 
-    var streamStarted = false
-    var range: ArrayList<ImageRequestData> = arrayListOf()
-    var lastMoved: ImageRequestData? = null
+    private var bluetoothGatt: BluetoothGatt? = null
+    private var disconnectSignal: CompletableDeferred<Unit>? = null
+    private var credentialsSignal: CompletableDeferred<Unit>? = null
+
+    /** Suppresses link-loss handling while we are the ones tearing the link down. */
+    private var expectingDisconnect = false
+
+    private var connectionState = ConnectionState.DISCONNECTED
+
+    private val captureMutex = Mutex()
+    private var captureJob: Job? = null
+    private var pollJob: Job? = null
+    private var pollPaused = false
+
+    /**
+     * Newest media url already consumed. A single value is enough to dedupe and, unlike the
+     * unbounded list this replaced, it does not silently swallow a re-taken photo after a
+     * reconnect.
+     */
+    private var lastRequestedUrl: String? = null
+
+    /** Entry/trait to attach the next photo to, kept current as the user navigates plots. */
+    var currentEntry: ImageRequestData? = null
+
+    fun state(): ConnectionState = connectionState
+
+    private fun setState(state: ConnectionState, @StringRes messageRes: Int? = null) {
+
+        if (connectionState == state && messageRes == null) return
+
+        Log.d(TAG, "Connection state: $connectionState -> $state")
+
+        connectionState = state
+
+        callbacks?.onConnectionStateChanged(state, messageRes)
+    }
 
     /**
      * Coroutine based execution with timeout + retry/backoff.
-     * Throws exception on final failure.
+     * Throws exception on final failure. Caller must close the returned response.
      */
-    private suspend fun executeWithRetrySuspend(request: Request): Response {
+    private suspend fun executeWithRetrySuspend(
+        request: Request,
+        timeoutMs: Long = REQUEST_TIMEOUT_MS,
+        retries: Int = MAX_REQUEST_RETRIES
+    ): Response {
+
         var lastException: Exception? = null
 
-        for (attempt in 1..MAX_REQUEST_RETRIES) {
+        for (attempt in 1..retries) {
+
             val call = try {
                 httpClient?.newCall(request) ?: throw IllegalStateException("No http client")
             } catch (e: Exception) {
@@ -152,7 +278,7 @@ class GoProApi @Inject constructor(
             try {
                 //if it times out it will cancel the call via the catch/finally
                 val response = try {
-                    withTimeout(REQUEST_TIMEOUT_MS.toLong()) {
+                    withTimeout(timeoutMs) {
                         call.execute()
                     }
                 } catch (t: Throwable) {
@@ -163,28 +289,21 @@ class GoProApi @Inject constructor(
 
                 //if we have response then return it to caller (caller must close)
                 return response
+
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                lastException = e as? Exception ?: Exception(e)
-                //attempt to reset client/network bindings
-                if (e is SocketException || (e.message?.contains("Binding socket to network") == true)) {
-                    resetStaleNetworkBindingIfNeeded(e)
-                }
-                if (attempt < MAX_REQUEST_RETRIES) {
+                lastException = e
+                if (attempt < retries) {
                     //backoff before next attempt but respect coroutine cancellation
-                    val backoff = REQUEST_TIMEOUT_MS.toLong() * attempt
-                    try {
-                        delay(backoff)
-                    } catch (cancelled: Throwable) {
-                        // propagate cancellation
-                        throw cancelled
-                    }
+                    delay(REQUEST_TIMEOUT_MS * attempt)
                 } else {
-                    throw lastException ?: Exception("Unknown network error")
+                    throw e
                 }
             }
         }
 
-        throw lastException ?: Exception("Failed to execute request")
+        throw lastException ?: IOException("Failed to execute request")
     }
 
     private fun closeAndEvictClientConnections(client: OkHttpClient?) {
@@ -199,271 +318,264 @@ class GoProApi @Inject constructor(
         } catch (_: Exception) {}
     }
 
-    private fun resetStaleNetworkBindingIfNeeded(e: Throwable) {
-        try {
-            val msg = e.message ?: ""
-            if (e is SocketException && msg.contains("Binding socket to network")) {
-                Log.w(TAG, "Detected stale network binding: \"$msg\" — cancelling HTTP work and resetting client.")
-
-                try {
-                    closeAndEvictClientConnections(httpClient)
-                } catch (t: Throwable) {
-                    Log.w(TAG, "Failed to cancel OkHttp calls: ${t.message}")
-                }
-
-                try {
-                    val cm = context.getSystemService(ConnectivityManager::class.java)
-                    cm?.bindProcessToNetwork(null)
-                } catch (t: Throwable) {
-                    Log.w(TAG, "Failed to unbind process network: ${t.message}")
-                }
-
-                httpClient = OkHttpClient()
-            }
-        } catch (t: Throwable) {
-            Log.w(TAG, "Error handling stale network binding: ${t.message}")
-        }
-    }
-
-    fun getBusyState() {
-
-        val getState: Request = Request.Builder()
-            .url(URI.create("http://10.5.5.9:8080/gopro/camera/state").toHttpUrlOrNull()!!)
-            .build()
-
-        ioScope.launch {
-            try {
-                val response = executeWithRetrySuspend(getState)
-                response.use {
-                    if (!it.isSuccessful) {
-                        Log.e(TAG, "Request state response = not success ${it.code}")
-                    } else {
-                        parseState(it.body?.string() ?: "{}")
-                        Log.i(TAG, "Request state response = success")
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Request state failed.")
-                resetStaleNetworkBindingIfNeeded(e)
-                e.printStackTrace()
-            }
-        }
-    }
-
-    private fun parseState(responseBody: String) {
-        try {
-            val json = JSONObject(responseBody)
-            //Log.d(TAG, json.toString(1))
-            val state = json.getJSONObject("status")
-            //Log.d(TAG, "GoPro state: $state")
-            val busy = state.getInt(GoProStateKeys.BUSY.key)
-            val isEncoding = state.getInt(GoProStateKeys.IS_ENCODING.key)
-            //Log.d(TAG, "Camera is busy: ${busy == 1}")
-            //Log.d(TAG, "Camera is encoding: ${isEncoding == 1}")
-
-            callbacks?.onBusyStateChanged(busy, isEncoding)
-
-        } catch (e: JSONException) {
-            e.printStackTrace()
-        }
-    }
-
-    fun requestStream() {
-
-        //stop stream first, on fail or success start stream again:
-        val stopPreview: Request = Request.Builder()
-            .url(URI.create("http://10.5.5.9:8080/gopro/camera/stream/stop").toHttpUrlOrNull()!!)
-            .build()
-
-        httpClient?.newCall(stopPreview)?.enqueue(object : Callback {
-
-            override fun onFailure(call: okhttp3.Call, e: okio.IOException) {
-                Log.e(TAG, "Request stop failed.")
-                e.printStackTrace()
-            }
-
-            override fun onResponse(call: okhttp3.Call, response: Response) {
-                try {
-                    if (!response.isSuccessful) {
-                        Log.e(TAG, "Request stop preview response = not success")
-                    } else {
-                        Log.i(TAG, "Request stop preview response = success")
-                    }
-                    requestStartStream()
-                } finally {
-                    response.close()
-                }
-            }
-        })
-    }
+    private fun url(path: String): Request =
+        Request.Builder().url(URI.create("$BASE_URL$path").toHttpUrlOrNull()!!).build()
 
     /**
-     * Makes http request to start go pro stream.
-     * If request is successfull it starts the keep alive background routine
+     * Connection region
      */
-    fun requestStartStream() {
-
-        Log.d(TAG, "Request stream start.")
-
-        val startPreview: Request = Request.Builder()
-            .url(URI.create("http://10.5.5.9:8080/gopro/camera/stream/start").toHttpUrlOrNull()!!)
-            .build()
-
-        ioScope.launch {
-            try {
-
-                withTimeoutOrNull(2000L) {
-                    while (httpClient == null) {
-                        delay(100L)
-                    }
-                }
-
-                if (httpClient == null) {
-                    Log.w(TAG, "httpClient still null after wait; aborting start stream request")
-                    return@launch
-                }
-
-                val response = executeWithRetrySuspend(startPreview)
-                response.use {
-                    if (!it.isSuccessful) {
-                        Log.e(TAG, "Request response = not success ${it.code}")
-                    } else {
-                        Log.i(TAG, "Request response = success")
-                    }
-                    controller.getFfmpegHelper().initRequestTimer()
-                    callbacks?.onStreamRequested()
-
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to make network request to GoPro AP")
-                e.printStackTrace()
-            }
-        }
-    }
-
-    /**
-     * http request to read media list (files on gopro device)
-     */
-    fun queryMedia(requestAndSaveImage: Boolean = true) {
-
-        val model = if (range.isNotEmpty()) range.removeAt(0) else lastMoved
-
-        Log.d(TAG, "Attempting media list query.")
-
-        //stop stream first, on fail or success start stream again:
-        val mediaQuery: Request = Request.Builder()
-            .url(URI.create("http://10.5.5.9:8080/gopro/media/list").toHttpUrlOrNull()!!)
-            .build()
-
-        httpClient?.newCall(mediaQuery)?.enqueue(object : Callback {
-
-            override fun onFailure(call: okhttp3.Call, e: okio.IOException) {
-
-                Log.e(TAG, "Media query failed.")
-
-                e.printStackTrace()
-            }
-
-            override fun onResponse(call: okhttp3.Call, response: Response) {
-
-                try {
-                    if (!response.isSuccessful) {
-
-                        Log.e(TAG, "Media query not success")
-
-                    } else {
-
-                        parseMediaQueryResponse(response.body?.string() ?: "{}", model!!, requestAndSaveImage)
-
-                        Log.i(TAG, "Media query success.")
-
-                    }
-                } finally {
-                    response.close()
-                }
-            }
-        })
-    }
-
-    /**
-     * Makes http request to stop stream and cancel necessary threads.
-     */
-    private fun stopStream() {
-
-        Log.d(TAG, "Attempting stop preview request.")
-
-        val stopPreview: Request = Request.Builder()
-            .url(URI.create("http://10.5.5.9:8080/gopro/camera/stream/stop").toHttpUrlOrNull()!!)
-            .build()
-
-        httpClient?.newCall(stopPreview)?.enqueue(object : Callback {
-
-            override fun onFailure(call: okhttp3.Call, e: okio.IOException) {
-                Log.e(TAG, "Request stop failed.")
-                e.printStackTrace()
-            }
-
-            override fun onResponse(call: okhttp3.Call, response: Response) {
-                try {
-                    if (!response.isSuccessful) {
-                        Log.e(TAG, "Request stop preview response = not success")
-                    } else {
-                        Log.i(TAG, "Request stop preview response = success")
-                    }
-                } finally {
-                    response.close()
-                }
-            }
-        })
-    }
-
-    fun onDestroy() {
-
-        stopStream()
-
-        disableAp()
-
-        controller.getFfmpegHelper().cancel()
-
-        try {
-            httpClient?.dispatcher?.cancelAll()
-        } catch (e: Exception) {
-            Log.w(TAG, "Failed to cancel OkHttp calls: ${e.message}")
-        }
-
-        controller.getWifiHelper().disconnect()
-
-        // recreate httpClient and evict prior sockets
-        try {
-            closeAndEvictClientConnections(httpClient)
-        } catch (_: Exception) {}
-        httpClient = OkHttpClient()
-
-        gatt.clear()
-
-        //reset ui component states
-        player?.stop()
-        player?.release()
-        player?.clearVideoSurface()
-        player = null
-        //reset global flags
-        this.streamStarted = false
-
-        ioScope.cancel()
-    }
-
     fun onConnect(device: BluetoothDevice, callbacks: Callbacks) {
 
         this.callbacks = callbacks
 
-        gatt.clear()
+        ioScope.launch {
 
-        device.connectGatt(context, false, gatt.callback)
+            //always start from a clean slate, a half open link is the usual reason a reconnect fails
+            closeGatt()
 
-        callbacks.onInitializeGatt()
+            lastRequestedUrl = null
+
+            setState(ConnectionState.CONNECTING_BLE)
+
+            callbacks.onInitializeGatt()
+
+            disconnectSignal = CompletableDeferred()
+
+            val credentials = CompletableDeferred<Unit>()
+            credentialsSignal = credentials
+
+            val handle = try {
+                device.connectGatt(context, false, gattObserver, BluetoothDevice.TRANSPORT_LE)
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to open gatt connection", e)
+                null
+            }
+
+            if (handle == null) {
+                setState(ConnectionState.ERROR, R.string.gopro_error_ble_failed)
+                return@launch
+            }
+
+            //keep our own reference: GoProGatt only assigns one once services are discovered,
+            //so an early failure would otherwise leak the client interface for good
+            bluetoothGatt = handle
+            gatt.gatt = handle
+
+            val acquired = withTimeoutOrNull(BLE_CONNECT_TIMEOUT_MS) {
+                credentials.await()
+            }
+
+            if (acquired == null && connectionState == ConnectionState.CONNECTING_BLE) {
+                Log.e(TAG, "Timed out waiting for GoPro credentials")
+                closeGatt()
+                setState(ConnectionState.ERROR, R.string.gopro_error_ble_timeout)
+            }
+        }
     }
 
-    fun isStreamStarted(): Boolean = streamStarted
+    /**
+     * Releases the gatt client interface. [BluetoothGatt.close] on its own aborts an in flight
+     * disconnect and leaves the camera believing it still has a central attached, so the link is
+     * dropped first and the closure waits briefly for the stack to confirm.
+     */
+    private suspend fun closeGatt() {
+
+        val handle = bluetoothGatt ?: gatt.gatt
+
+        expectingDisconnect = true
+
+        try {
+
+            try {
+                handle?.disconnect()
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to disconnect gatt", e)
+            }
+
+            if (handle != null) {
+                val signal = disconnectSignal
+                if (signal != null) {
+                    withTimeoutOrNull(BLE_DISCONNECT_TIMEOUT_MS) { signal.await() }
+                } else {
+                    //no session was established, still let the stack settle before closing
+                    delay(BLE_DISCONNECT_TIMEOUT_MS)
+                }
+            }
+
+            try {
+                handle?.close()
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to close gatt", e)
+            }
+
+            try {
+                //cancels the credential read job and releases the packet buffer
+                gatt.clear()
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to clear gatt state", e)
+            }
+
+            gatt.gatt = null
+            bluetoothGatt = null
+            disconnectSignal = null
+
+        } finally {
+            expectingDisconnect = false
+        }
+    }
+
+    private fun onLinkLost(status: Int) {
+
+        if (expectingDisconnect) return
+
+        if (!connectionState.isActive) return
+
+        Log.e(TAG, "GoPro link lost with status $status")
+
+        setState(ConnectionState.ERROR, R.string.gopro_error_ble_disconnected)
+
+        teardownAsync()
+    }
+
+    /**
+     * Teardown region
+     */
+    private var shutdownJob: Job? = null
+
+    fun teardownAsync() {
+        if (shutdownJob?.isActive == true) return
+        if (connectionState == ConnectionState.DISCONNECTED) return
+        shutdownJob = ioScope.launch { shutdown() }
+    }
+
+    /**
+     * Releases everything in an order where each command can still reach the camera: the stream is
+     * stopped while wifi is up and the access point is switched off while the gatt link is open.
+     * The previous implementation fired both and immediately killed the transports underneath
+     * them, which left the camera's radio on and its session half open.
+     */
+    suspend fun shutdown(): Unit = withContext(NonCancellable) {
+
+        if (connectionState == ConnectionState.DISCONNECTING) return@withContext
+
+        setState(ConnectionState.DISCONNECTING)
+
+        try { captureJob?.cancel() } catch (_: Exception) {}
+        stopPolling()
+
+        withTimeoutOrNull(2000L) {
+            try {
+                stopStreamSuspend()
+            } catch (e: Exception) {
+                Log.w(TAG, "Stop stream request failed during shutdown", e)
+            }
+        }
+
+        controller.getFfmpegHelper().cancel()
+
+        try {
+            disableAp()
+            //give the write a chance to reach the camera before the link is closed
+            delay(400L)
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to disable access point", e)
+        }
+
+        closeGatt()
+
+        closeAndEvictClientConnections(httpClient)
+        httpClient = null
+
+        controller.getWifiHelper().disconnect()
+
+        withContext(Dispatchers.Main) {
+            player?.removeListener(playerListener)
+            player?.stop()
+            player?.clearVideoSurface()
+            player?.release()
+            player = null
+        }
+
+        lastRequestedUrl = null
+        currentEntry = null
+
+        setState(ConnectionState.DISCONNECTED)
+    }
+
+    /**
+     * Called when the activity is going away for good. The scope is only cancelled once the
+     * teardown has actually run, otherwise it kills the coroutines delivering the commands.
+     */
+    fun onDestroy() {
+
+        //reuse an in flight teardown rather than racing a second one against it
+        val job = shutdownJob?.takeIf { it.isActive }
+            ?: ioScope.launch { shutdown() }.also { shutdownJob = it }
+
+        job.invokeOnCompletion {
+            callbacks = null
+            ioScope.cancel()
+        }
+    }
+
+    /**
+     * Stream region
+     */
+    fun requestStartStream() {
+        ioScope.launch {
+            try {
+                startStreamSuspend()
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to make network request to GoPro AP", e)
+                setState(ConnectionState.ERROR, R.string.gopro_error_stream_failed)
+            }
+        }
+    }
+
+    private suspend fun startStreamSuspend() {
+
+        Log.d(TAG, "Request stream start.")
+
+        val response = executeWithRetrySuspend(url("/gopro/camera/stream/start"))
+
+        response.use {
+            if (!it.isSuccessful) {
+                Log.e(TAG, "Start stream response = not success ${it.code}")
+            } else {
+                Log.i(TAG, "Start stream response = success")
+            }
+        }
+
+        controller.getFfmpegHelper().initRequestTimer()
+
+        callbacks?.onStreamRequested()
+    }
+
+    private suspend fun stopStreamSuspend() {
+
+        Log.d(TAG, "Attempting stop preview request.")
+
+        val response = executeWithRetrySuspend(url("/gopro/camera/stream/stop"), retries = 1)
+
+        response.use {
+            if (!it.isSuccessful) {
+                Log.e(TAG, "Stop stream response = not success ${it.code}")
+            }
+        }
+    }
+
+    private suspend fun restartPreview() {
+        try {
+            stopStreamSuspend()
+        } catch (e: Exception) {
+            Log.w(TAG, "Stop stream failed while restarting preview", e)
+        }
+        try {
+            startStreamSuspend()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to restart preview", e)
+        }
+    }
 
     fun createPlayer(): ExoPlayer {
 
@@ -510,31 +622,275 @@ class GoProApi @Inject constructor(
         player?.prepare()
 
         return player as ExoPlayer
-
     }
 
     /**
-     * parses media list response and returns the last requests the most recent file
+     * Capture region
      */
-    private fun parseMediaQueryResponse(
-        responseBody: String,
-        model: ImageRequestData,
-        requestAndSaveImage: Boolean = true
+
+    /**
+     * Takes a photo and, depending on the trait's copy setting, either downloads it or records the
+     * name it was given on the camera.
+     *
+     * The whole sequence is serialized behind [captureMutex]: a shutter press used to schedule a
+     * media query on a fixed delay *and* the busy poller fired a second one, so a single photo
+     * could start two overlapping downloads over an already saturated link.
+     */
+    fun capture(data: ImageRequestData, saveImage: Boolean) {
+
+        if (!connectionState.isActive) {
+            callbacks?.onCaptureFailed(R.string.gopro_error_not_connected)
+            return
+        }
+
+        if (captureMutex.isLocked) {
+            callbacks?.onCaptureFailed(R.string.gopro_error_capture_busy)
+            return
+        }
+
+        currentEntry = data
+
+        captureJob = ioScope.launch {
+            captureMutex.withLock {
+                runCapture(data, saveImage, triggerShutter = true)
+            }
+        }
+    }
+
+    /**
+     * Handles a photo the user took with the camera's own shutter button: the capture already
+     * happened, so only the media list and the transfer are needed.
+     */
+    private fun harvest(data: ImageRequestData, saveImage: Boolean) {
+
+        if (captureMutex.isLocked) return
+
+        captureJob = ioScope.launch {
+            captureMutex.withLock {
+                runCapture(data, saveImage, triggerShutter = false)
+            }
+        }
+    }
+
+    private suspend fun runCapture(
+        data: ImageRequestData,
+        saveImage: Boolean,
+        triggerShutter: Boolean
     ) {
+
+        setState(ConnectionState.CAPTURING)
+
+        pollPaused = true
+
+        //a harvest is speculative, so only a capture the user explicitly asked for reports failures
+        val fail: (Int) -> Unit = { messageRes ->
+            Log.w(TAG, "Capture unsuccessful: ${context.getString(messageRes)}")
+            if (triggerShutter) {
+                callbacks?.onCaptureFailed(messageRes)
+            }
+        }
 
         try {
 
-            val json = JSONObject(responseBody)
+            if (triggerShutter) {
 
-            Log.d(TAG, json.toString(1))
+                shutterOn()
 
-            val mediaArray = json.getJSONArray("media")
+                if (!awaitCaptureIdle()) {
+                    fail(R.string.gopro_error_capture_timeout)
+                    return
+                }
+            }
 
-            val size = mediaArray.length()
+            val latest = queryLatestMedia()
+
+            when {
+                latest == null || latest.url == lastRequestedUrl -> {
+                    fail(R.string.gopro_error_no_new_photo)
+                }
+
+                else -> {
+                    lastRequestedUrl = latest.url
+
+                    if (saveImage) {
+                        downloadImage(latest, data, fail)
+                    } else {
+                        callbacks?.onImageNameReady(data, latest)
+                    }
+                }
+            }
+
+        } catch (e: CancellationException) {
+            throw e
+        } catch (t: Throwable) {
+            Log.e(TAG, "Capture failed", t)
+            fail(R.string.gopro_error_capture_failed)
+        } finally {
+            withContext(NonCancellable) {
+                if (connectionState == ConnectionState.CAPTURING) {
+                    restartPreview()
+                    setState(ConnectionState.STREAMING)
+                }
+                pollPaused = false
+                callbacks?.onCaptureFinished()
+            }
+        }
+    }
+
+    /**
+     * Polls the camera until it reports it has finished writing the photo. Returns false if it
+     * never settles within [CAPTURE_TIMEOUT_MS].
+     */
+    private suspend fun awaitCaptureIdle(): Boolean {
+
+        val start = System.currentTimeMillis()
+        var sawBusy = false
+
+        while (System.currentTimeMillis() - start < CAPTURE_TIMEOUT_MS) {
+
+            val state = fetchBusyState()
+
+            if (state != null) {
+
+                callbacks?.onBusyStateChanged(state.first, state.second)
+
+                val busy = state.first == 1 || state.second == 1
+
+                if (busy) {
+                    sawBusy = true
+                } else if (sawBusy || System.currentTimeMillis() - start > CAPTURE_BUSY_WINDOW_MS) {
+                    return true
+                }
+            }
+
+            delay(CAPTURE_POLL_INTERVAL_MS)
+        }
+
+        return false
+    }
+
+    private suspend fun fetchBusyState(): Pair<Int, Int>? {
+
+        return try {
+
+            val response = executeWithRetrySuspend(url("/gopro/camera/state"), retries = 1)
+
+            response.use {
+                if (!it.isSuccessful) {
+                    Log.e(TAG, "Request state response = not success ${it.code}")
+                    null
+                } else {
+                    parseState(it.body?.string() ?: "{}")
+                }
+            }
+
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "Request state failed.", e)
+            null
+        }
+    }
+
+    private fun parseState(responseBody: String): Pair<Int, Int>? {
+        return try {
+            val state = JSONObject(responseBody).getJSONObject("status")
+            Pair(
+                state.getInt(GoProStateKeys.BUSY.key),
+                state.getInt(GoProStateKeys.IS_ENCODING.key)
+            )
+        } catch (e: JSONException) {
+            Log.w(TAG, "Unable to parse camera state", e)
+            null
+        }
+    }
+
+    /**
+     * Watches for captures triggered on the camera itself. Single instance: the previous
+     * implementation started a fresh loop from the trait layout every time the preview became
+     * ready, which happened on every plot navigation, so the polls stacked up and flooded the
+     * access point.
+     */
+    fun startPolling() {
+
+        if (pollJob?.isActive == true) return
+
+        pollJob = ioScope.launch {
+
+            var wasBusy = false
+
+            while (isActive) {
+
+                if (pollPaused || !connectionState.isActive) {
+
+                    //drop the edge we were tracking, otherwise resuming after an app driven
+                    //capture looks like a fresh busy -> idle transition
+                    wasBusy = false
+
+                } else {
+
+                    val state = fetchBusyState()
+
+                    if (state != null) {
+
+                        callbacks?.onBusyStateChanged(state.first, state.second)
+
+                        val busy = state.first == 1 || state.second == 1
+
+                        //busy -> idle means a photo was just written
+                        if (wasBusy && !busy) {
+                            currentEntry?.let { entry ->
+                                harvest(entry, entry.trait.saveImage)
+                            }
+                        }
+
+                        wasBusy = busy
+                    }
+                }
+
+                delay(IDLE_POLL_INTERVAL_MS)
+            }
+        }
+    }
+
+    fun stopPolling() {
+        pollJob?.cancel()
+        pollJob = null
+        pollPaused = false
+    }
+
+    /**
+     * Media region
+     */
+    private suspend fun queryLatestMedia(): GoProImage? {
+
+        Log.d(TAG, "Attempting media list query.")
+
+        val response = executeWithRetrySuspend(url("/gopro/media/list"))
+
+        val body = response.use {
+            if (!it.isSuccessful) {
+                Log.e(TAG, "Media query not success ${it.code}")
+                return null
+            }
+            it.body?.string() ?: "{}"
+        }
+
+        return parseMediaQueryResponse(body)
+    }
+
+    /**
+     * Parses the media list and returns the most recently numbered file.
+     */
+    private fun parseMediaQueryResponse(responseBody: String): GoProImage? {
+
+        return try {
+
+            val mediaArray = JSONObject(responseBody).getJSONArray("media")
 
             val images = arrayListOf<GoProImage>()
 
-            for (i in 0 until size) {
+            for (i in 0 until mediaArray.length()) {
 
                 val media = mediaArray.getJSONObject(i)
 
@@ -542,9 +898,7 @@ class GoProApi @Inject constructor(
 
                 val files = media.getJSONArray("fs")
 
-                val numFiles = files.length()
-
-                for (j in 0 until numFiles) {
+                for (j in 0 until files.length()) {
 
                     val file = files.getJSONObject(j)
 
@@ -556,7 +910,7 @@ class GoProApi @Inject constructor(
                             fileName,
                             file.getString("mod").toLong(),
                             file.getString("s").toLong(),
-                            "http://10.5.5.9:8080/videos/DCIM/$dir/$fileName"
+                            "$BASE_URL/videos/DCIM/$dir/$fileName"
                         )
                     )
                 }
@@ -564,124 +918,205 @@ class GoProApi @Inject constructor(
 
             val pattern = Regex("^([a-zA-Z]*)([0-9]*).([a-zA-Z]*)$")
 
-            val latest = images.maxByOrNull {
+            images.maxByOrNull {
                 pattern.matchEntire(it.fileName)?.destructured?.let { (_, number, _) ->
-                    number.toInt()
+                    number.toIntOrNull() ?: -1
                 } ?: -1
             }
 
-            if (latest != null) {
-                if (latest.url !in requestedUrls) {
-                    requestedUrls.add(latest.url)
-
-                    if (requestAndSaveImage) {
-                        requestFileUrl(latest.url, model)
-                    } else {
-                        saveImageName(latest, model)
-                    }
-
-                    requestStream()
-                }
-            }
-
         } catch (e: JSONException) {
-
-            e.printStackTrace()
-
-        } catch (e: NoSuchElementException) {
-            e.printStackTrace()
+            Log.e(TAG, "Unable to parse media list", e)
+            null
         }
     }
 
-    private fun saveImageName(latest: GoProImage, model: ImageRequestData) {
+    /**
+     * Streams the photo straight into the destination the caller supplies.
+     *
+     * The preview stream and its keep alive datagrams are stopped first. They share the camera's
+     * access point with the transfer, and the contention was enough to drop the link every few
+     * photos when copying images was enabled.
+     */
+    private suspend fun downloadImage(
+        model: GoProImage,
+        data: ImageRequestData,
+        fail: (Int) -> Unit
+    ) {
 
-        callbacks?.onImageRequestReady(
-            byteArrayOf(),
-            model,
-            latest
-        )
+        val sink = callbacks?.onImageSinkRequested(data, model)
+
+        if (sink == null) {
+            Log.e(TAG, "No destination available for ${model.fileName}")
+            fail(R.string.gopro_error_download_failed)
+            return
+        }
+
+        Log.d(TAG, "Image request: ${model.url} for entry: ${data.range.uniqueId}")
+
+        try {
+
+            quietLink()
+
+            val request = Request.Builder()
+                .url(URI.create(model.url).toHttpUrlOrNull()!!)
+                .build()
+
+            val response = executeWithRetrySuspend(request, DOWNLOAD_TIMEOUT_MS, DOWNLOAD_RETRIES)
+
+            val written = response.use { r ->
+
+                if (!r.isSuccessful) throw IOException("Image request failed with ${r.code}")
+
+                val body = r.body ?: throw IOException("Image request returned an empty body")
+
+                val expected = body.contentLength()
+
+                val output = sink.openStream() ?: throw IOException("Unable to open destination")
+
+                val count = output.use { stream ->
+                    body.byteStream().use { input -> input.copyTo(stream) }
+                }
+
+                if (expected > 0L && count != expected) {
+                    throw IOException("Incomplete transfer $count/$expected")
+                }
+
+                count
+            }
+
+            Log.i(TAG, "Downloaded ${model.fileName} ($written bytes)")
+
+            sink.commit(written)
+
+            callbacks?.onImageSaved(data, model)
+
+        } catch (e: CancellationException) {
+            sink.discard()
+            throw e
+        } catch (t: Throwable) {
+            Log.e(TAG, "Image download failed", t)
+            sink.discard()
+            //let the same file be retried on the next capture
+            lastRequestedUrl = null
+            fail(R.string.gopro_error_download_failed)
+        } finally {
+            withContext(NonCancellable) { unquietLink() }
+        }
+    }
+
+    private suspend fun quietLink() {
+
+        try {
+            stopStreamSuspend()
+        } catch (e: Exception) {
+            Log.w(TAG, "Unable to stop stream before download", e)
+        }
+
+        controller.getFfmpegHelper().pauseKeepAlive()
+
+        withContext(Dispatchers.Main) { player?.pause() }
+    }
+
+    private suspend fun unquietLink() {
+
+        controller.getFfmpegHelper().resumeKeepAlive()
+
+        withContext(Dispatchers.Main) { player?.play() }
     }
 
     /**
-     * requests the image at the given url, calls onReady interface when image is downloaded
+     * Gatt callback region. Every method forwards to [GoProGatt] so the phenolib behaviour is
+     * preserved, connection state handling is layered on top.
      */
-    private fun requestFileUrl(url: String, model: ImageRequestData) {
+    override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
 
-        Log.d(TAG, "Image request: $url for model: ${model.range.uniqueId}")
+        if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+            disconnectSignal?.complete(Unit)
+            onLinkLost(status)
+        }
 
-        //stop stream first, on fail or success start stream again:
-        val requestImage: Request = Request.Builder()
-            .url(URI.create(url).toHttpUrlOrNull()!!)
-            .build()
-
-        httpClient?.newCall(requestImage)?.enqueue(object : Callback {
-
-            override fun onFailure(call: okhttp3.Call, e: okio.IOException) {
-
-                Log.e(TAG, "Request image failed.")
-
-                e.printStackTrace()
-            }
-
-            override fun onResponse(call: okhttp3.Call, response: Response) {
-
-                try {
-                    if (!response.isSuccessful) {
-                        Log.e(TAG, "Request image response = not success")
-                        return
-                    }
-
-                    Log.i(TAG, "Request image response = success")
-
-                    response.body?.byteStream()?.use { inputStream ->
-
-                        val bytes = inputStream.readBytes()
-                        Log.d(TAG, "Found image response with: ${bytes.size} bytes")
-
-                        callbacks?.onImageRequestReady(bytes, model)
-                    }
-
-                    requestStream()
-
-                } catch (t: Throwable) {
-                    Log.e(TAG, "Error processing image response", t)
-                } finally {
-                    response.close()
-                }
-            }
-        })
+        this.gatt.onConnectionStateChange(gatt, status, newState)
     }
 
-    override fun onApRequested() {}
+    override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
+        this.gatt.onServicesDiscovered(gatt, status)
+    }
+
+    override fun onCharacteristicRead(
+        gatt: BluetoothGatt?,
+        characteristic: BluetoothGattCharacteristic?,
+        status: Int
+    ) {
+        this.gatt.onCharacteristicRead(gatt, characteristic, status)
+    }
+
+    override fun onCharacteristicWrite(
+        gatt: BluetoothGatt?,
+        characteristic: BluetoothGattCharacteristic?,
+        status: Int
+    ) {
+        this.gatt.onCharacteristicWrite(gatt, characteristic, status)
+    }
+
+    override fun onCharacteristicChanged(
+        gatt: BluetoothGatt?,
+        characteristic: BluetoothGattCharacteristic?
+    ) {
+        this.gatt.onCharacteristicChanged(gatt, characteristic)
+    }
+
+    override fun onDescriptorRead(
+        gatt: BluetoothGatt?,
+        descriptor: BluetoothGattDescriptor?,
+        status: Int
+    ) {
+        this.gatt.onDescriptorRead(gatt, descriptor, status)
+    }
+
+    override fun onDescriptorWrite(
+        gatt: BluetoothGatt?,
+        descriptor: BluetoothGattDescriptor?,
+        status: Int
+    ) {
+        this.gatt.onDescriptorWrite(gatt, descriptor, status)
+    }
+
+    /**
+     * GoProGattController region
+     */
+    override fun onApRequested() {
+        setState(ConnectionState.CONNECTING_WIFI)
+    }
 
     override fun onBoardType(boardType: String) {}
 
     override fun onBssid(wifiBSSID: String) {}
 
-    /**
-     * Collect activity callback region
-     */
     override fun onCredentialsAcquired() {
+
+        credentialsSignal?.complete(Unit)
 
         try {
 
-            Log.d(TAG, "onCredentialsAcquired ${gatt.ssid} ${gatt.password}")
+            Log.d(TAG, "onCredentialsAcquired ${gatt.ssid}")
 
-            gatt.ssid?.let { ssid ->
+            val ssid = gatt.ssid
+            val pass = gatt.password
 
-                gatt.password?.let { pass ->
-
-                    enableAp()
-
-                    controller.getWifiHelper().startWifiSearch(ssid, pass, this)
-
-                }
+            if (ssid.isNullOrBlank() || pass.isNullOrBlank()) {
+                setState(ConnectionState.ERROR, R.string.gopro_error_ble_failed)
+                return
             }
 
+            setState(ConnectionState.AWAITING_AP)
+
+            enableAp()
+
+            controller.getWifiHelper().startWifiSearch(ssid, pass, this)
+
         } catch (e: Exception) {
-
-            e.printStackTrace()
-
+            Log.e(TAG, "Failed to start wifi search", e)
+            setState(ConnectionState.ERROR, R.string.gopro_error_wifi_unavailable)
         }
     }
 
@@ -695,6 +1130,9 @@ class GoProApi @Inject constructor(
 
     override fun onSsid(wifiSSID: String) {}
 
+    /**
+     * GoProGattInterface region
+     */
     override fun disableAp() {
         gatt.disableAp()
     }
@@ -711,23 +1149,56 @@ class GoProApi @Inject constructor(
         gatt.shutterOn()
     }
 
+    /**
+     * WifiRequester region
+     */
     override fun onNetworkBound(network: Network) {
 
         ioScope.launch {
             // Assign a fresh client bound to the network. Evict old connections first.
-            try {
-                closeAndEvictClientConnections(httpClient)
-            } catch (_: Exception) {}
+            closeAndEvictClientConnections(httpClient)
 
             httpClient = OkHttpClient.Builder()
                 .socketFactory(network.socketFactory)
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .writeTimeout(15, TimeUnit.SECONDS)
+                .retryOnConnectionFailure(true)
+                .connectionPool(ConnectionPool(2, 30, TimeUnit.SECONDS))
+                //the camera cannot serve a download, a media list and a state poll at once
+                .dispatcher(Dispatcher().apply {
+                    maxRequests = 2
+                    maxRequestsPerHost = 2
+                })
                 .build()
 
-            try {
-                delay(400L)
-            } catch (_: Exception) {}
+            delay(400L)
+
+            setState(ConnectionState.CONNECTED)
 
             callbacks?.onConnected()
         }
+    }
+
+    override fun onNetworkLost() {
+
+        if (!connectionState.isActive) return
+
+        Log.e(TAG, "GoPro access point lost")
+
+        setState(ConnectionState.ERROR, R.string.gopro_error_wifi_lost)
+
+        teardownAsync()
+    }
+
+    override fun onNetworkUnavailable() {
+
+        if (!connectionState.isActive) return
+
+        Log.e(TAG, "GoPro access point unavailable")
+
+        setState(ConnectionState.ERROR, R.string.gopro_error_wifi_unavailable)
+
+        teardownAsync()
     }
 }

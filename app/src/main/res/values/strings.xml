@@ -720,7 +720,8 @@
 
     <!-- Trait Layout: GoPro -->
     <string name="trait_go_pro_capture_button_text">Capture\n</string>
-    <string name="trait_go_pro_await_device_title">Scanning for GoPros</string>
+    <string name="trait_go_pro_await_device_title">Select a paired GoPro</string>
+    <string name="trait_go_pro_no_paired_devices">No paired GoPro found. Pair the camera in Android Bluetooth settings first.</string>
     <string name="trait_go_pro_await_ble_title">Awaiting GoPro BLE Connection</string>
     <string name="trait_go_pro_await_ble_message">Communicating with GoPro BLE, this may take a minute.</string>
     <string name="trait_go_pro_await_ap_title">Awaiting GoPro AP</string>
@@ -730,6 +731,18 @@
     <string name="go_pro_layout_black_11_not_detected">This trait was made for a GoPro Black 11, please contact developers to implement your GoPro model.\n</string>
     <string name="go_pro_frag_connect_btn_content_description">Connect to a GoPro camera.\n</string>
     <string name="trait_go_pro_capture_content_description">Capture a picture from a connected GoPro device.\n</string>
+    <string name="gopro_error_ble_failed">Could not connect to the GoPro over Bluetooth.</string>
+    <string name="gopro_error_ble_timeout">Timed out connecting to the GoPro over Bluetooth.</string>
+    <string name="gopro_error_ble_disconnected">Lost the Bluetooth connection to the GoPro.</string>
+    <string name="gopro_error_wifi_unavailable">Could not join the GoPro Wi-Fi network.</string>
+    <string name="gopro_error_wifi_lost">Lost the GoPro Wi-Fi network.</string>
+    <string name="gopro_error_stream_failed">Could not start the GoPro live preview.</string>
+    <string name="gopro_error_not_connected">The GoPro is not connected.</string>
+    <string name="gopro_error_capture_busy">Still saving the previous photo.</string>
+    <string name="gopro_error_capture_timeout">The GoPro did not finish capturing in time.</string>
+    <string name="gopro_error_capture_failed">The GoPro capture failed.</string>
+    <string name="gopro_error_no_new_photo">The GoPro did not produce a new photo.</string>
+    <string name="gopro_error_download_failed">Could not copy the photo from the GoPro.</string>
 
     <!-- Trait Layout: USB Camera -->
     <string name="trait_usb_camera_zoom_in_button_text">Zoom in</string>
