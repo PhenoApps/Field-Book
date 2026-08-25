@@ -809,6 +809,12 @@
     <string name="dialog_multi_measure_delete">Delete</string>
     <string name="dialog_multi_measure_select_all">Select all</string>
 
+    <!--- Save failure -->
+    <string name="dialog_save_failed_title">Couldn\'t save this value</string>
+    <string name="dialog_save_failed_message">Nothing was recorded for entry %1$s. The value is still on screen but it is not in the database.\n\nThis usually means the device is out of storage. Free up space, then retry.\n\nDon\'t keep collecting until a value saves — anything you enter will be lost.</string>
+    <string name="dialog_save_failed_retry">Retry</string>
+    <string name="dialog_save_failed_dismiss">Dismiss</string>
+
     <!--- GeoNav -->
     <string name="menu_collect_start_geo_nav_title">Start GeoNav</string>
     <string name="activity_collect_found_plot">Navigated to plot in vicinity</string>
