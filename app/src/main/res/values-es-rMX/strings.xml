@@ -710,6 +710,7 @@
     <string name="dialog_multi_measure_confirm_delete_title">Las observaciones seleccionadas y la multimedia adjunta para este rasgo se eliminarán permanentemente.</string>
     <string name="dialog_multi_measure_delete">Eliminar</string>
     <string name="dialog_multi_measure_select_all">Seleccionar todo</string>
+    <!--- Save failure -->
     <!--- GeoNav -->
     <string name="menu_collect_start_geo_nav_title">Iniciar GeoNav</string>
     <string name="activity_collect_found_plot">Navegado a parcela en proximidad</string>
