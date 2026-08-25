@@ -1,6 +1,8 @@
 package com.fieldbook.tracker.utilities
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import com.fieldbook.tracker.BuildConfig
@@ -22,7 +24,10 @@ class NixSensorHelper @Inject constructor(@ActivityContext val context: Context)
 
     companion object {
         private const val TAG = "Nix"
-        //private const val SCAN_PERIOD_MS = 30000L
+
+        //how long a scan may run before it stops itself, so an unattended search does not leave
+        //the radio scanning for the rest of the session
+        private const val SCAN_PERIOD_MS = 30000L
     }
 
     data class NixDevice(
@@ -35,6 +40,12 @@ class NixSensorHelper @Inject constructor(@ActivityContext val context: Context)
     private var licenseManagerState: LicenseManagerState = LicenseManagerState.INACTIVE
     private var deviceList: MutableList<NixDevice> = mutableListOf()
     private var scanner = DeviceScanner(context)
+
+    private val scanTimeoutHandler = Handler(Looper.getMainLooper())
+    private val scanTimeoutRunnable = Runnable {
+        Log.d(TAG, "Scan period elapsed, stopping scan")
+        stopScan()
+    }
 
     var connectedDevice: IDeviceCompat? = null
 
@@ -102,7 +113,8 @@ class NixSensorHelper @Inject constructor(@ActivityContext val context: Context)
             return
         }
 
-        scanner.stop()
+        //via stopScan so a timeout armed for the outgoing scanner cannot fire against the new one
+        stopScan()
 
         scanner = DeviceScanner(context)
 
@@ -138,12 +150,15 @@ class NixSensorHelper @Inject constructor(@ActivityContext val context: Context)
 
         if (scanner.state == IDeviceScanner.DeviceScannerState.IDLE) {
 
+            scanTimeoutHandler.removeCallbacks(scanTimeoutRunnable)
+            scanTimeoutHandler.postDelayed(scanTimeoutRunnable, SCAN_PERIOD_MS)
+
             scanner.start(object : IDeviceScanner.OnDeviceFoundListener {
                 override fun onScanResult(sender: IDeviceScanner, device: IDeviceCompat) {
                     //log device details
                     val logMsg = "Device found: ${device.name} ID: ${device.id} Type: ${device.type} ScanCount: ${device.scanCount} RSSI: ${device.rssi} Battery: ${device.batteryLevel}"
                     Log.d(TAG, logMsg)
-                    if (!deviceList.map { it.id }.contains(device.id)) {
+                    if (deviceList.none { it.id == device.id }) {
                         deviceList.add(NixDevice(
                             id = device.id,
                             name = device.name,
@@ -181,13 +196,14 @@ class NixSensorHelper @Inject constructor(@ActivityContext val context: Context)
 
             Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
 
-            scanner.stop()
+            stopScan()
 
             onResult(false)
         }
     }
 
     fun stopScan() {
+        scanTimeoutHandler.removeCallbacks(scanTimeoutRunnable)
         scanner.stop()
     }
 

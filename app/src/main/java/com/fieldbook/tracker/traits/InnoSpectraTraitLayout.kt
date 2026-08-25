@@ -49,6 +49,11 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
 
     companion object {
         const val TAG = "SpectralTraitLayout"
+
+        //how long a device scan may run before it stops itself
+        private const val SCAN_PERIOD_MS = 30000L
+
+        private const val DEFAULT_DEVICE_FILTER = "NIR"
     }
 
     private var bluetoothManager: BluetoothManager? = null
@@ -58,8 +63,24 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
     private var nanoReceiver: InnoSpectraBase? = null
     private var isStarting = false
 
+    //held so the scan can actually be stopped again; non-null means a scan is running.
+    //volatile because the scan is started on the main thread but stopDeviceScan() is also reached
+    //from the background auto-reconnect path in scheduleDeviceSearch -> connectDevice
+    @Volatile
+    private var bluetoothLeScanner: BluetoothLeScanner? = null
+
+    @Volatile
+    private var scanCallback: ScanCallback? = null
+
+    //name filter for the running scan, read once per scan rather than per advertisement
+    @Volatile
+    private var scanNameFilter: String = DEFAULT_DEVICE_FILTER
+
     private var deviceConnectionJob: kotlinx.coroutines.Job? = null
     private var deviceSearchJob: kotlinx.coroutines.Job? = null
+
+    @Volatile
+    private var scanTimeoutJob: kotlinx.coroutines.Job? = null
 
     private var connection: ServiceConnection? = null
 
@@ -432,6 +453,10 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
             return
         }
 
+        // We have the device we were looking for, so stop scanning. Leaving the scan running
+        // competes with the GATT connection we are about to open.
+        stopDeviceScan()
+
         // persist selection
         controller.getPreferences().edit {
             putString(GeneralKeys.INNOSPECTRA_NANO_DEVICE_ID, nano.nanoMac)
@@ -541,6 +566,9 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
         deviceSearchJob?.cancel()
         deviceSearchJob = null
 
+        // Stop any scan started while looking for this device
+        stopDeviceScan()
+
         // Reset connection state
         isStarting = false
 
@@ -645,11 +673,8 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
 
     private fun parseScanDeviceResult(result: ScanResult, device: BluetoothDevice) {
 
-        val nanoName = getStringPref(
-            context,
-            SharedPreferencesKeys.DeviceFilter,
-            "NIR"
-        )
+        //read once when the scan starts, this runs for every advertisement received
+        val nanoName = scanNameFilter
 
         result.scanRecord?.deviceName?.let { name ->
 
@@ -664,7 +689,7 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
                         nanoName
                     )
 
-                    if (!deviceList.map { it.second.nanoMac }.contains(nanoDevice.nanoMac)) {
+                    if (deviceList.none { it.second.nanoMac == nanoDevice.nanoMac }) {
 
                         deviceList.add(device to nanoDevice)
 
@@ -691,7 +716,22 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
             return
         }
 
-        scanner.startScan(object : ScanCallback() {
+        // A scan is already running. Starting another would register a second callback with the
+        // Bluetooth stack that nothing would ever stop, so extend the current one instead.
+        scanCallback?.let { running ->
+            Log.d(TAG, "startScan: scan already running, extending scan period")
+            scheduleScanTimeout(running)
+            return
+        }
+
+        // Constant for the life of the scan, so read it here instead of on every advertisement.
+        scanNameFilter = getStringPref(
+            context,
+            SharedPreferencesKeys.DeviceFilter,
+            DEFAULT_DEVICE_FILTER
+        )
+
+        val callback = object : ScanCallback() {
 
             override fun onScanResult(callbackType: Int, result: ScanResult?) {
                 super.onScanResult(callbackType, result)
@@ -709,7 +749,89 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
 
                 }
             }
-        })
+
+            override fun onScanFailed(errorCode: Int) {
+                super.onScanFailed(errorCode)
+
+                Log.e(TAG, "startScan: scan failed with error code $errorCode")
+
+                stopDeviceScan()
+            }
+        }
+
+        bluetoothLeScanner = scanner
+        scanCallback = callback
+
+        try {
+            scanner.startScan(callback)
+        } catch (e: SecurityException) {
+            Log.e(TAG, "startScan: missing permission - ${e.message}")
+            bluetoothLeScanner = null
+            scanCallback = null
+            return
+        }
+
+        scheduleScanTimeout(callback)
+    }
+
+    /**
+     * Arms the timeout that stops the running scan.
+     *
+     * Without it a device that never appears leaves the radio scanning, and the callback
+     * delivering onto the main thread, for the rest of the process. Re-arming on each request is
+     * what lets a repeated search extend the window rather than start a second scan.
+     */
+    private fun scheduleScanTimeout(callback: ScanCallback) {
+
+        scanTimeoutJob?.cancel()
+
+        scanTimeoutJob = background.launch {
+
+            delay(SCAN_PERIOD_MS)
+
+            withContext(Dispatchers.Main) {
+
+                //only stop the scan this timeout was armed for
+                if (scanCallback === callback) {
+
+                    Log.d(TAG, "scheduleScanTimeout: scan period elapsed, stopping scan")
+
+                    stopDeviceScan()
+                }
+            }
+        }
+    }
+
+    /**
+     * Stops the running BLE scan, if there is one.
+     *
+     * BluetoothLeScanner holds a callback until it is explicitly stopped and delivers results on
+     * the main looper, so an abandoned scan keeps doing UI thread work for the life of the
+     * process and degrades the throughput of the connections that are already established.
+     * Android also caps how many scanners a single app may register.
+     */
+    private fun stopDeviceScan() {
+
+        scanTimeoutJob?.cancel()
+        scanTimeoutJob = null
+
+        val scanner = bluetoothLeScanner
+        val callback = scanCallback
+
+        bluetoothLeScanner = null
+        scanCallback = null
+
+        if (scanner == null || callback == null) return
+
+        try {
+            scanner.stopScan(callback)
+            Log.d(TAG, "stopDeviceScan: scan stopped")
+        } catch (e: SecurityException) {
+            Log.d(TAG, "stopDeviceScan: missing permission - ${e.message}")
+        } catch (e: IllegalStateException) {
+            //adapter turned off underneath us
+            Log.d(TAG, "stopDeviceScan: adapter unavailable - ${e.message}")
+        }
     }
 
     private fun buildInnoSpectraServiceConnection(onSdkInitialized: (ISCNIRScanSDK) -> Unit): ServiceConnection =
