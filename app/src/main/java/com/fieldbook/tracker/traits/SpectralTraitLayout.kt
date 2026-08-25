@@ -77,6 +77,9 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
     protected var state: State = State.Spectral
     private var displayedFrameCount: Int = 0
 
+    //set while onRefresh() reloads entry data, so loadLayout() leaves the connection alone
+    private var skipConnectionSetup = false
+
     protected val hapticFeedback by lazy {
         controller.getVibrator()
     }
@@ -130,6 +133,23 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         }
     }
 
+    /**
+     * Reloads the values shown for the current entry without touching the device connection.
+     *
+     * BaseTraitLayout.onRefresh() delegates to loadLayout(), so without this every plot change ran
+     * the connect path: re-running establishConnection() and, whenever the device was not
+     * connected, restarting device discovery and another auto-reconnect attempt. Moving between
+     * entries is not a reason to renegotiate the connection.
+     */
+    override fun onRefresh() {
+        skipConnectionSetup = true
+        try {
+            loadLayout()
+        } finally {
+            skipConnectionSetup = false
+        }
+    }
+
     override fun loadLayout() {
         super.loadLayout()
 
@@ -137,7 +157,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
         loadSpectralFactsList(firstLoad = true)
 
-        if (!establishConnection()) {
+        if (!skipConnectionSetup && !establishConnection()) {
             setupConnectUi()
         }
 

@@ -6,9 +6,11 @@ import android.bluetooth.BluetoothManager
 import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
+import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Build
@@ -20,6 +22,7 @@ import androidx.core.content.edit
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
 import com.ISCSDK.ISCNIRScanSDK
 import com.ISCSDK.ISCNIRScanSDK.NanoDevice
@@ -41,6 +44,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.threeten.bp.OffsetDateTime
 import java.util.UUID
 import kotlin.jvm.java
@@ -53,6 +57,12 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
         //how long a device scan may run before it stops itself
         private const val SCAN_PERIOD_MS = 30000L
 
+        //how long to wait for the device to report its scan config after connecting
+        private const val DEVICE_INFO_TIMEOUT_MS = 30000L
+
+        private const val DEVICE_INFO_POLL_MS = 500L
+        private const val DEVICE_SEARCH_POLL_MS = 500L
+
         private const val DEFAULT_DEVICE_FILTER = "NIR"
     }
 
@@ -61,6 +71,10 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
     private var connectedNanoDevice: NanoDevice? = null
     private var deviceList: MutableList<Pair<BluetoothDevice, NanoDevice>> = mutableListOf()
     private var nanoReceiver: InnoSpectraBase? = null
+
+    //notices the link dropping, registered and unregistered with nanoReceiver
+    private var gattDisconnectReceiver: BroadcastReceiver? = null
+
     private var isStarting = false
 
     //held so the scan can actually be stopped again; non-null means a scan is running.
@@ -76,8 +90,8 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
     @Volatile
     private var scanNameFilter: String = DEFAULT_DEVICE_FILTER
 
-    private var deviceConnectionJob: kotlinx.coroutines.Job? = null
     private var deviceSearchJob: kotlinx.coroutines.Job? = null
+    private var deviceInfoCheckJob: kotlinx.coroutines.Job? = null
 
     @Volatile
     private var scanTimeoutJob: kotlinx.coroutines.Job? = null
@@ -179,6 +193,9 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
         deviceSearchJob?.cancel()
         deviceSearchJob = null
 
+        deviceInfoCheckJob?.cancel()
+        deviceInfoCheckJob = null
+
         // Reset connection state
         isStarting = false
 
@@ -190,6 +207,8 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
             settingsButton?.visibility = GONE
             toggleProgressBar(false)
             startDeviceSearch()
+            //arriving at the trait disconnected still reconnects on its own
+            attemptAutoReconnect()
             setupConnectButton()
         }
     }
@@ -206,28 +225,36 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
         return connected
     }
 
+    /**
+     * Starts scanning only.
+     *
+     * Auto-reconnect deliberately does not live here. This is also what the connect button calls,
+     * and SpectralTraitLayout follows it immediately with the device picker, so doing both meant
+     * pressing connect raced a background reconnect against the user's own selection: the spinner
+     * and the picker came up together, and whichever won left the other stale. Arriving at the
+     * trait disconnected still auto-reconnects, from setupConnectUi().
+     */
     override fun startDeviceSearch() {
+        setupDeviceSearch()
+    }
+
+    /**
+     * Reconnects to the saved device once it turns up in the scan results.
+     */
+    private fun attemptAutoReconnect() {
 
         val deviceId = controller.getPreferences().getString(GeneralKeys.INNOSPECTRA_NANO_DEVICE_ID, "") ?: ""
         val deviceName = controller.getPreferences().getString(GeneralKeys.INNOSPECTRA_NANO_DEVICE_NAME, "") ?: ""
 
-        if (deviceId.isNotBlank() && deviceName.isNotBlank()) {
+        if (deviceId.isBlank() || deviceName.isBlank()) return
 
-            setupDeviceSearch()
+        scheduleDeviceSearch(deviceName, deviceId) { data ->
 
-            scheduleDeviceSearch(deviceName, deviceId) { data ->
+            val device = data.first as BluetoothDevice
+            val nanoDevice = data.second as NanoDevice
 
-                val device = data.first as BluetoothDevice
-                val nanoDevice = data.second as NanoDevice
-
-                // wrap as Device so it can be handled by connectDevice(Device)
-                connectDevice(Device(device to nanoDevice))
-            }
-
-        }
-        else {
-
-            setupDeviceSearch()
+            // wrap as Device so it can be handled by connectDevice(Device)
+            connectDevice(Device(device to nanoDevice))
         }
     }
 
@@ -329,43 +356,59 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
     }
 
     private fun scheduleDeviceInfoCheck(onInfoReceived: suspend () -> Unit) {
-        background.launch {
-            while (true) {
-                val config = (context as CollectActivity).innoSpectraViewModel?.getActiveConfig()
-                if (config != null) {
-                    onInfoReceived()
-                    break
+
+        // Cancel any existing check first
+        deviceInfoCheckJob?.cancel()
+
+        deviceInfoCheckJob = background.launch {
+
+            // Bounded: if the config never arrives the device is not talking to us, and an
+            // unbounded loop here would keep polling for the life of the process.
+            val config = withTimeoutOrNull(DEVICE_INFO_TIMEOUT_MS) {
+
+                var activeConfig = (context as CollectActivity).innoSpectraViewModel?.getActiveConfig()
+
+                while (activeConfig == null) {
+                    delay(DEVICE_INFO_POLL_MS)
+                    activeConfig = (context as CollectActivity).innoSpectraViewModel?.getActiveConfig()
                 }
-                delay(500L)
+
+                activeConfig
+            }
+
+            if (config != null) {
+                onInfoReceived()
+            } else {
+                Log.w(TAG, "scheduleDeviceInfoCheck: timed out waiting for device config")
             }
         }
     }
 
-    private fun scheduleDeviceConnection() {
-        // Cancel any existing job first
-        deviceConnectionJob?.cancel()
+    /**
+     * Handles the SDK's GATT disconnect broadcast.
+     *
+     * This replaces a `while (true)` loop that asked the ViewModel for the connection state every
+     * 250ms, which meant a Bluetooth binder call four times a second for as long as the process
+     * lived. The SDK already tells us when the link drops, so there is nothing to poll for.
+     *
+     * Deliberately does not try to reconnect. Reconnecting means scanning, and a standing scan is
+     * what made the app unresponsive in the first place. Returning to the connect UI and letting
+     * the collector re-select the device is the intended behaviour after a mid-session drop;
+     * arriving at the trait with a saved device still connects on its own via setupConnectUi().
+     */
+    private fun onGattDisconnected() {
 
-        deviceConnectionJob = background.launch {
-            while (true) {
-                val connected = (context as CollectActivity).innoSpectraViewModel?.isConnected()
-                if (connected == false) {
-                    // Hardware disconnect detected - perform proper cleanup
-                    withContext(Dispatchers.Main) {
-                        if (!isLocked) {
-                            isStarting = false
-                            endConnection()
+        if (isLocked) return
 
-                            connectButton?.visibility = VISIBLE
-                            captureButton?.visibility = GONE
-                            progressBar?.visibility = GONE
-                            settingsButton?.visibility = GONE
-                        }
-                    }
-                    break
-                }
-                delay(250L)
-            }
-        }
+        Log.d(TAG, "onGattDisconnected: device reported disconnect, tearing down")
+
+        isStarting = false
+        endConnection()
+
+        connectButton?.visibility = VISIBLE
+        captureButton?.visibility = GONE
+        progressBar?.visibility = GONE
+        settingsButton?.visibility = GONE
     }
 
     private fun scheduleDeviceSearch(deviceName: String, macAddress: String, onDeviceFound: suspend (Pair<*, *>) -> Unit) {
@@ -373,21 +416,35 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
         deviceSearchJob?.cancel()
 
         deviceSearchJob = background.launch {
-            while (true) {
-                // Check if already starting to prevent race conditions
-                if (isStarting) {
-                    Log.d(TAG, "scheduleDeviceSearch: connection already starting, stopping search")
-                    break
+
+            // Bounded by the scan period: once the scan stops, deviceList cannot grow, so polling
+            // past that point would never succeed.
+            val device = withTimeoutOrNull(SCAN_PERIOD_MS) {
+
+                var found: Pair<BluetoothDevice, NanoDevice>? = null
+
+                while (found == null) {
+
+                    // Check if already starting to prevent race conditions
+                    if (isStarting) {
+                        Log.d(TAG, "scheduleDeviceSearch: connection already starting, stopping search")
+                        break
+                    }
+
+                    found = deviceList.firstOrNull { deviceData ->
+                        deviceData.second.nanoMac == macAddress && deviceData.second.nanoName == deviceName
+                    }
+
+                    if (found == null) delay(DEVICE_SEARCH_POLL_MS)
                 }
 
-                val device = deviceList.firstOrNull { deviceData ->
-                    deviceData.second.nanoMac == macAddress && deviceData.second.nanoName == deviceName
-                }
-                if (device != null) {
-                    onDeviceFound(device)
-                    break
-                }
-                delay(500L)
+                found
+            }
+
+            if (device != null) {
+                onDeviceFound(device)
+            } else {
+                Log.d(TAG, "scheduleDeviceSearch: $deviceName not found within the scan period")
             }
         }
     }
@@ -530,6 +587,7 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
                         it.register(context)
                         Log.d(TAG, "beginConnection: registered InnoSpectraBase receiver")
                     }
+                    registerGattDisconnectReceiver()
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "beginConnection: failed to bind service - ${e.message}")
@@ -544,7 +602,8 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
     }
 
     /**
-     * Unregisters the active [InnoSpectraBase] receiver set, if there is one.
+     * Unregisters the active [InnoSpectraBase] receiver set and the GATT disconnect receiver,
+     * if they are registered.
      *
      * The receivers are registered against LocalBroadcastManager, which is application scoped, so
      * nothing removes them implicitly when this view or the activity goes away. A stale set means
@@ -553,18 +612,52 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
      * instead of costing a constant amount.
      */
     private fun unregisterNanoReceiver() {
+
         try {
             nanoReceiver?.unregister(context)
         } catch (e: Exception) {
             Log.d(TAG, "Error unregistering nanoReceiver: ${e.message}")
         }
         nanoReceiver = null
+
+        try {
+            gattDisconnectReceiver?.let {
+                LocalBroadcastManager.getInstance(context).unregisterReceiver(it)
+            }
+        } catch (e: Exception) {
+            Log.d(TAG, "Error unregistering gattDisconnectReceiver: ${e.message}")
+        }
+        gattDisconnectReceiver = null
+    }
+
+    /**
+     * Registers the receiver that notices the device dropping its connection.
+     *
+     * Kept on the same lifetime as [nanoReceiver] so the two cannot get out of step.
+     */
+    private fun registerGattDisconnectReceiver() {
+
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                onGattDisconnected()
+            }
+        }
+
+        gattDisconnectReceiver = receiver
+
+        LocalBroadcastManager.getInstance(context).registerReceiver(
+            receiver,
+            IntentFilter(ISCNIRScanSDK.ACTION_GATT_DISCONNECTED)
+        )
     }
 
     private fun endConnection() {
         // Cancel ongoing device search to prevent reconnection attempts
         deviceSearchJob?.cancel()
         deviceSearchJob = null
+
+        deviceInfoCheckJob?.cancel()
+        deviceInfoCheckJob = null
 
         // Stop any scan started while looking for this device
         stopDeviceScan()
@@ -600,17 +693,8 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
         }
     }
 
-    override fun enableCapture(device: Device) {
-        super.enableCapture(device)
-        scheduleDeviceConnection()
-    }
-
     override fun disconnectAndEraseDevice(device: Device) {
         if (!isLocked) {
-            // Cancel the connection monitoring job to prevent race conditions
-            deviceConnectionJob?.cancel()
-            deviceConnectionJob = null
-
             isStarting = false
             endConnection()
             controller.getPreferences().edit {
