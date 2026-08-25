@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+- User is now notified of failed database writes (https://github.com/PhenoApps/Field-Book/pull/1515)
 
 ### Fixed
 - Photos taken on Samsung One UI 8.5 devices are now saved correctly (https://github.com/PhenoApps/Field-Book/pull/1525)
