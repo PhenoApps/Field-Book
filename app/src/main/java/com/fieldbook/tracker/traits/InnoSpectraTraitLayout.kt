@@ -497,6 +497,10 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
                 context.bindService(gattService, connection!!, Context.BIND_AUTO_CREATE)
 
                 ((context as CollectActivity).innoSpectraViewModel as? NanoEventListener)?.let { listener ->
+                    // Drop any previously registered set before creating a new one. This is the
+                    // only place receivers are registered, so unregistering here is what keeps a
+                    // reconnect from stacking a second set on top of the first.
+                    unregisterNanoReceiver()
                     nanoReceiver = InnoSpectraBase(listener).also {
                         it.register(context)
                         Log.d(TAG, "beginConnection: registered InnoSpectraBase receiver")
@@ -514,6 +518,24 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
         }
     }
 
+    /**
+     * Unregisters the active [InnoSpectraBase] receiver set, if there is one.
+     *
+     * The receivers are registered against LocalBroadcastManager, which is application scoped, so
+     * nothing removes them implicitly when this view or the activity goes away. A stale set means
+     * every SDK broadcast is handled once per set, and because several of the handlers respond by
+     * issuing a BLE command that itself broadcasts a reply, duplicate sets compound on each round
+     * instead of costing a constant amount.
+     */
+    private fun unregisterNanoReceiver() {
+        try {
+            nanoReceiver?.unregister(context)
+        } catch (e: Exception) {
+            Log.d(TAG, "Error unregistering nanoReceiver: ${e.message}")
+        }
+        nanoReceiver = null
+    }
+
     private fun endConnection() {
         // Cancel ongoing device search to prevent reconnection attempts
         deviceSearchJob?.cancel()
@@ -522,13 +544,8 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
         // Reset connection state
         isStarting = false
 
-        try {
-            // Unregister the broadcast receiver to prevent stale listeners
-            nanoReceiver?.unregister(context)
-            nanoReceiver = null
-        } catch (e: Exception) {
-            Log.d(TAG, "Error unregistering nanoReceiver: ${e.message}")
-        }
+        // Unregister the broadcast receivers to prevent stale listeners
+        unregisterNanoReceiver()
 
         try {
             connection?.let { context?.unbindService(it) }
