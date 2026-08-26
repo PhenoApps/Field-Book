@@ -270,6 +270,11 @@
         <activity android:name=".ui.MediaViewerActivity"
             android:label="Media View"/>
 
+        <activity
+            android:name=".activities.ZplEditorActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:screenOrientation="portrait" />
+
         <provider
             android:name=".provider.GenericFileProvider"
             android:authorities="${applicationId}.fileprovider"

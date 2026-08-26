@@ -24,6 +24,7 @@
     <string name="dialog_sort_by">Sort By</string>
     <string name="dialog_enable">Enable</string>
     <string name="dialog_delete">Delete</string>
+    <string name="dialog_add">Add</string>
     <string name="dialog_accept">Accept</string>
     <string name="dialog_exit">Exit</string>
 
@@ -753,6 +754,76 @@
     <string name="trait_layout_print_label_detailed_text">detailed</string>
     <string name="trait_layout_print_label_date_option">date</string>
     <string name="trait_layout_print_label_blank_option">blank</string>
+    <string name="trait_layout_print_label_default_value_option">default value</string>
+
+    <!-- Label print dialogs -->
+    <string name="label_config_title">Label Configuration</string>
+    <string name="label_config_calibrate">Calibrate</string>
+    <string name="label_config_copies">Copies</string>
+    <string name="label_config_template">Template</string>
+    <string name="label_config_no_templates">No templates available.</string>
+    <string name="label_config_load_system_templates">Load System Templates</string>
+    <string name="label_fields_title">Label Fields</string>
+    <string name="label_fields_no_fields">No text fields found in the current template.</string>
+    <string name="label_fields_select">Select…</string>
+    <string name="label_size_selector">Label Size</string>
+    <string name="dialog_apply">Apply</string>
+
+    <string name="zpl_editor_untitled">Untitled</string>
+    <string name="zpl_editor_delete">Delete</string>
+    <string name="zpl_editor_save">Save</string>
+    <string name="zpl_editor_template">Template</string>
+    <string name="zpl_editor_new_template">＋ New Template</string>
+    <string name="zpl_editor_name">Name</string>
+    <string name="zpl_editor_name_placeholder">Enter template name</string>
+    <string name="zpl_editor_reading_printer">Reading from printer…</string>
+    <string name="zpl_editor_could_not_read">Could not read from printer</string>
+    <string name="zpl_editor_label_width">Label Width (inches)</string>
+    <string name="zpl_editor_label_length">Label Length (inches)</string>
+    <string name="zpl_editor_media_type">Media Type</string>
+    <string name="zpl_editor_media_tracking">Media Tracking</string>
+    <string name="zpl_editor_label_settings">Label Settings</string>
+    <string name="zpl_editor_code_label">ZPL Code</string>
+    <string name="zpl_editor_code_placeholder">Enter ZPL commands…</string>
+    <string name="zpl_editor_add_element">Add Element</string>
+    <string name="zpl_editor_element_type">Element Type</string>
+    <string name="zpl_editor_element_text">Text</string>
+    <string name="zpl_editor_element_qr">QR Code</string>
+    <string name="zpl_editor_element_barcode">Barcode (Code 128)</string>
+    <string name="zpl_editor_default_value">Default Value</string>
+    <string name="zpl_editor_default_value_placeholder">Shown when no property is assigned</string>
+    <string name="zpl_editor_font_size">Font Size (dots)</string>
+    <string name="zpl_editor_font_size_helper">Height of text in dots (203 DPI: 28 ≈ 10pt)</string>
+    <string name="zpl_editor_block_width">Block Width (dots, 0 = auto)</string>
+    <string name="zpl_editor_block_width_helper">Field block width for text wrapping. 0 = no wrapping.</string>
+    <string name="zpl_editor_magnification">Magnification (1–10)</string>
+    <string name="zpl_editor_magnification_helper">QR module size. 5 ≈ 105 dots wide.</string>
+    <string name="zpl_editor_barcode_height">Barcode Height (dots)</string>
+    <string name="zpl_editor_barcode_height_helper">Height of the barcode bars.</string>
+    <string name="zpl_editor_module_width">Module Width (1–4)</string>
+    <string name="zpl_editor_module_width_helper">Width of the narrowest bar.</string>
+    <string name="zpl_editor_edit_text">Edit Text Element</string>
+    <string name="zpl_editor_edit_qr">Edit QR Code Element</string>
+    <string name="zpl_editor_edit_barcode">Edit Barcode Element</string>
+    <string name="zpl_editor_delete_template">Delete Template</string>
+    <string name="zpl_editor_delete_confirm">Are you sure you want to delete \"%1$s\"? This cannot be undone.</string>
+    <string name="zpl_editor_save_template">Save As Template</string>
+    <string name="zpl_editor_template_name">Template name</string>
+    <string name="zpl_editor_template_name_empty">Template name cannot be empty</string>
+    <string name="zpl_editor_printer_dpi">Printer DPI</string>
+    <string name="zpl_editor_manual_dpi">Manual DPI</string>
+    <string name="zpl_editor_dpi_manual">Manual</string>
+
+    <string name="zpl_editor_media_thermal_direct">Direct Thermal</string>
+    <string name="zpl_editor_media_thermal_transfer">Thermal Transfer</string>
+    <string name="zpl_editor_media_gap">Gap/Notch</string>
+    <string name="zpl_editor_media_continuous">Continuous</string>
+    <string name="zpl_editor_media_mark">Mark</string>
+    <string name="zpl_editor_dots_display_format">PW = %1$d dots, LL = %2$d dots (%3$d DPI)</string>
+
+    <string name="zpl_template_create_new">＋ Create New</string>
+    <string name="zpl_template_edit_or_select_message">Would you like to edit this template or select it for this trait?</string>
+    <string name="zpl_template_select">Select</string>
 
     <string name="printer_open">Printer is open</string>
     <string name="printer_paused">Printer is paused</string>
@@ -2044,5 +2115,10 @@
     <string name="view_trait_innospectra_unknown">Unknown</string>
     <string name="view_trait_innospectra_na">N/A</string>
     <string name="unknown">Unknown</string>
+    <string name="calibration_sent">Calibration sent</string>
+    <string name="calibration_failed">Calibration failed</string>
+    <string name="export_successful">Export successful</string>
+    <string name="export_failed">Export failed: %1$s</string>
+    <string name="print_failed">Print failed</string>
 
 </resources>

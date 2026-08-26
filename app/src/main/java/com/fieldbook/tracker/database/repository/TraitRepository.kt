@@ -9,7 +9,6 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.application.IoDispatcher
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.models.ObservationModel
-import com.fieldbook.tracker.database.models.TraitAttributes
 import com.fieldbook.tracker.enums.FileFormat
 import com.fieldbook.tracker.objects.TraitImportFile
 import com.fieldbook.tracker.objects.TraitObject
@@ -20,12 +19,13 @@ import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.FileUtils.copyToDirectory
 import com.fieldbook.tracker.utilities.TraitImportFileUtil.detectTraitFileFormat
 import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter
+import com.fieldbook.tracker.traits.formats.Formats
+import com.fieldbook.tracker.zpl.TemplateRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonPrimitive
 import org.phenoapps.utils.BaseDocumentTreeUtil
 import java.io.InputStreamReader
 import java.util.ArrayList
@@ -33,10 +33,10 @@ import java.util.UUID
 import javax.inject.Inject
 
 class TraitRepository @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val database: DataHelper,
     private val prefs: SharedPreferences,
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) {
     companion object {
         private const val TAG = "TraitRepository"
@@ -207,7 +207,17 @@ class TraitRepository @Inject constructor(
                     ?: return@withContext onError(R.string.error_output_stream_failed)
 
             output.use {
-                val wrapper = TraitImportFile(traits.map { it.toTraitJson() })
+                val templateRepository = TemplateRepository(prefs).apply {
+                    ensureBuiltInTemplatesExist()
+                }
+                val wrapper = TraitImportFile(
+                    traits.map { trait ->
+                        trait.toTraitJson(
+                            printTemplate = trait.resolveExportPrintTemplate(templateRepository),
+                            printTemplateName = trait.resolveExportPrintTemplateName(templateRepository),
+                        )
+                    }
+                )
                 val jsonString = json.encodeToString(TraitImportFile.serializer(), wrapper)
 
                 it.write(jsonString.toByteArray())
@@ -269,13 +279,49 @@ class TraitRepository @Inject constructor(
             val jsonText = stream.bufferedReader().use { it.readText() }
 
             val wrapper = json.decodeFromString(TraitImportFile.serializer(), jsonText)
+            val templateRepository = TemplateRepository(prefs).apply {
+                ensureBuiltInTemplatesExist()
+            }
 
             wrapper.traits.mapNotNull { json ->
                 runCatching {
-                    TraitObject.fromJson(json, maxPosition, originalFileName)
+                    TraitObject.fromJson(json, maxPosition, originalFileName).apply {
+                        applyImportedPrintTemplate(json, templateRepository)
+                    }
                 }.getOrNull()
             }
         }
+
+    private fun TraitObject.resolveExportPrintTemplate(templateRepository: TemplateRepository): String? {
+        if (format != Formats.LABEL_PRINT.getDatabaseName()) return null
+
+        val templateId = printTemplateId.ifBlank { return null }
+        return templateRepository.getTemplate(templateId)
+    }
+
+    private fun TraitObject.resolveExportPrintTemplateName(templateRepository: TemplateRepository): String? {
+        if (format != Formats.LABEL_PRINT.getDatabaseName()) return null
+
+        val templateId = printTemplateId.ifBlank { return null }
+        return templateRepository.getTemplateName(templateId)
+    }
+
+    private fun TraitObject.applyImportedPrintTemplate(
+        traitJson: com.fieldbook.tracker.objects.TraitJson,
+        templateRepository: TemplateRepository,
+    ) {
+        if (format != Formats.LABEL_PRINT.getDatabaseName()) return
+
+        val printTemplate = traitJson.printTemplate?.takeIf { it.isNotBlank() } ?: return
+        val templateName = traitJson.printTemplateName?.takeIf { it.isNotBlank() }
+            ?: alias.takeIf { it.isNotBlank() }
+            ?: name
+
+        val savedTemplateId = templateRepository.saveTemplate(templateName, printTemplate)
+        if (!savedTemplateId.isNullOrBlank()) {
+            printTemplateId = savedTemplateId
+        }
+    }
 
     private suspend fun parseCsvTraits(
         uri: Uri,

@@ -24,19 +24,19 @@ import com.fieldbook.tracker.database.dao.ObservationUnitAttributeDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitDao;
 import com.fieldbook.tracker.database.dao.ObservationUnitPropertyDao;
 import com.fieldbook.tracker.database.dao.ObservationVariableDao;
+import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.spectral.DeviceDao;
 import com.fieldbook.tracker.database.dao.spectral.ProtocolDao;
 import com.fieldbook.tracker.database.dao.spectral.SpectralDao;
-import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.spectral.UriDao;
-import com.fieldbook.tracker.database.migrators.ObservationMediaMigratorVersion21;
-import com.fieldbook.tracker.database.views.ObservationVariableAttributeDetailViewCreator;
+import com.fieldbook.tracker.database.migrators.ZplTemplateMigratorVersion22;
+import com.fieldbook.tracker.database.models.GroupModel;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
 import com.fieldbook.tracker.database.models.ObservationVariableModel;
-import com.fieldbook.tracker.database.models.GroupModel;
 import com.fieldbook.tracker.database.models.StudyModel;
 import com.fieldbook.tracker.database.repository.SpectralRepository;
+import com.fieldbook.tracker.database.views.ObservationVariableAttributeDetailViewCreator;
 import com.fieldbook.tracker.objects.FieldObject;
 import com.fieldbook.tracker.objects.RangeObject;
 import com.fieldbook.tracker.objects.SearchData;
@@ -78,7 +78,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext;
  */
 public class DataHelper {
 
-    public static final int DATABASE_VERSION = ObservationMediaMigratorVersion21.VERSION;
+    public static final int DATABASE_VERSION = ZplTemplateMigratorVersion22.VERSION;
     private static final String DATABASE_NAME = "fieldbook.db";
     public static SQLiteDatabase db;
     private static final String TAG = "Field Book";
@@ -134,6 +134,7 @@ public class DataHelper {
     /**
      * V9 special character delete function.
      * TODO: If we want to accept headers with special characters we need to rethink the dynamic range table.
+     *
      * @param s, the column to sanitize
      * @return output, a new string without special characters
      */
@@ -169,6 +170,7 @@ public class DataHelper {
      * Android SDK (SQLiteDatabase classes specifically) doesn't allow sanitization of columns in select clauses.
      * Because FB accepts any trait/observation unit property name and eventually pivots these into columns names in
      * DataHelper.switchField this function is necessary to manually sanitize.
+     *
      * @param s string to sanitize
      * @return string with escaped apostrophes
      */
@@ -455,6 +457,7 @@ public class DataHelper {
 
     /**
      * Get all BrAPI export data categorized by type and status
+     *
      * @param fieldId The field ID to get data for
      * @param hostUrl The BrAPI host URL
      * @return Map containing categorized observations
@@ -465,7 +468,8 @@ public class DataHelper {
 
     /**
      * Convert observations to FieldBookImage objects
-     * @param ctx Context for file operations
+     *
+     * @param ctx          Context for file operations
      * @param observations List of observations to convert
      * @return List of FieldBookImage objects
      */
@@ -527,7 +531,7 @@ public class DataHelper {
         open();
         StudyDao.Companion.updateSearchAttribute(studyId, newSearchAttribute);
     }
-    
+
     public int updateSearchAttributeForAllFields(String newSearchAttribute) {
         open();
         return StudyDao.Companion.updateSearchAttributeForAllFields(newSearchAttribute);
@@ -619,7 +623,7 @@ public class DataHelper {
     /**
      * Convert EAV database to relational
      */
-    public Cursor getExportTableDataShort(int fieldId,  String uniqueId, ArrayList<TraitObject> traits) {
+    public Cursor getExportTableDataShort(int fieldId, String uniqueId, ArrayList<TraitObject> traits) {
 
         open();
 
@@ -748,10 +752,10 @@ public class DataHelper {
 
     public List<String> getExistingObservationUnitCoreColumns() {
         return java.util.Arrays.asList(
-            "primary_id",
-            "secondary_id",
-            "observation_unit_db_id",
-            "geo_coordinates"
+                "primary_id",
+                "secondary_id",
+                "observation_unit_db_id",
+                "geo_coordinates"
         );
     }
 
@@ -985,7 +989,7 @@ public class DataHelper {
     /**
      * V2 - Edit existing trait
      */
-    public long editTraits(String traitDbId, String trait, String traitAlias,String format, String defaultValue,
+    public long editTraits(String traitDbId, String trait, String traitAlias, String format, String defaultValue,
                            String minimum, String maximum, String details, String categories,
                            Boolean closeKeyboardOnOpen,
                            Boolean saveImage,
@@ -995,7 +999,8 @@ public class DataHelper {
                            Boolean invalidValues,
                            Boolean multiMediaPhoto,
                            Boolean multiMediaAudio,
-                           Boolean multiMediaVideo) {
+                           Boolean multiMediaVideo,
+                           String printTemplateId) {
 
         open();
 
@@ -1003,7 +1008,7 @@ public class DataHelper {
                 minimum, maximum, details, categories, closeKeyboardOnOpen, cropImage,
                 saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms, decimalPlacesRequired,
                 mathSymbolsEnabled, allowMulticat, repeatMeasure, autoSwitchPlot, unit, invalidValues,
-                multiMediaPhoto, multiMediaAudio, multiMediaVideo);
+                multiMediaPhoto, multiMediaAudio, multiMediaVideo, printTemplateId);
     }
 
     /**
@@ -1011,6 +1016,7 @@ public class DataHelper {
      * It is currently safe for checking trait name uniqueness.
      * It is also used in SearchDialog, where renaming the trait would invalidate the search query.
      * In general, avoid using this method in features where the trait name might change between invocations.
+     *
      * @param name The name of the trait object (e.g., "Height").
      * @return The trait object fetched from the database.
      */
@@ -1053,7 +1059,7 @@ public class DataHelper {
                 trait.getUseDayOfYear(), trait.getCategoryDisplayValue(), trait.getResourceFile(), trait.getSynonyms(),
                 trait.getMaxDecimalPlaces(), trait.getMathSymbolsEnabled(), trait.getAllowMulticat(),
                 trait.getRepeatedMeasures(), trait.getAutoSwitchPlot(), trait.getUnit(), trait.getInvalidValues(),
-                trait.getAttachPhoto(), trait.getAttachVideo(), trait.getAttachAudio());
+                trait.getAttachPhoto(), trait.getAttachVideo(), trait.getAttachAudio(), trait.getPrintTemplateId());
     }
 
     public boolean checkUnique(HashMap<String, String> values) {
@@ -1242,7 +1248,7 @@ public class DataHelper {
                     Log.d("Database", e.toString());
 
                 }
-            } else if (fileName.endsWith(".zip")){ // for zip file, call the unzip function
+            } else if (fileName.endsWith(".zip")) { // for zip file, call the unzip function
                 try (InputStream input = context.getContentResolver().openInputStream(file.getUri())) {
 
                     try (OutputStream output = new FileOutputStream(internalDbPath)) {
@@ -1303,7 +1309,7 @@ public class DataHelper {
 
 
                 DocumentFile zipFile = databaseDir.findFile(zipFileName);
-                if (zipFile == null){
+                if (zipFile == null) {
                     zipFile = databaseDir.createFile("*/*", zipFileName);
                 }
 
@@ -1325,17 +1331,17 @@ public class DataHelper {
 
                     BaseDocumentTreeUtil.Companion.copy(context, DocumentFile.fromFile(oldDb), backupDatabaseFile);
 
-                    if (outputStream != null){
-                        ZipUtil.Companion.zip(context, new DocumentFile[] { backupDatabaseFile, backupPreferenceFile }, outputStream);
+                    if (outputStream != null) {
+                        ZipUtil.Companion.zip(context, new DocumentFile[]{backupDatabaseFile, backupPreferenceFile}, outputStream);
 
                     }
 
                     // delete .db file and preferences file
-                    if (backupDatabaseFile.exists()){
+                    if (backupDatabaseFile.exists()) {
                         backupDatabaseFile.delete();
                     }
 
-                    if (backupPreferenceFile.exists()){
+                    if (backupPreferenceFile.exists()) {
                         backupPreferenceFile.delete();
                     }
                 }
@@ -1422,6 +1428,7 @@ public class DataHelper {
 
     /**
      * Get the count of missing observations for a trait
+     *
      * @param traitId the trait ID
      * @return the count of missing observations
      */
@@ -1827,6 +1834,11 @@ public class DataHelper {
             if (oldVersion <= 20 && newVersion >= 21) {
 
                 Migrator.Companion.migrateToVersion21(db);
+            }
+
+            if (oldVersion <= 21 && newVersion >= 22) {
+
+                Migrator.Companion.migrateToVersion22(db);
             }
         }
     }

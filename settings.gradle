@@ -12,4 +12,4 @@ pluginManagement {
     }
 }
 
-include ':app', ':brapi-provider'
+include ':app', ':brapi-provider', ':feature-labelprint'

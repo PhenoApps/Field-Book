@@ -3,6 +3,7 @@ package com.fieldbook.tracker.activities
 import android.app.AlertDialog
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import androidx.activity.OnBackPressedCallback
@@ -31,6 +32,7 @@ import com.fieldbook.tracker.traits.formats.TraitFormat
 import com.fieldbook.tracker.traits.formats.parameters.BaseFormatParameter
 import com.fieldbook.tracker.traits.formats.parameters.CanopySensitivityParameter
 import com.fieldbook.tracker.traits.formats.parameters.DecimalPlacesParameter
+import com.fieldbook.tracker.traits.formats.parameters.PrintTemplateParameter
 import com.fieldbook.tracker.ui.navigation.controllers.TraitNavController
 import com.fieldbook.tracker.ui.navigation.routes.TraitDetail
 import com.fieldbook.tracker.ui.navigation.routes.TraitEditor
@@ -70,6 +72,16 @@ class TraitActivity : ThemedActivity() {
         if (success) {
             activeCanopySensitivityHolder?.onTestCaptureResult()
             (supportFragmentManager.findFragmentByTag("NewTraitDialog") as? NewTraitDialog)?.onTestCaptureResult()
+        }
+    }
+
+    private val zplEditorLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val data = result.data ?: return@registerForActivityResult
+            val name = data.getStringExtra(ZplEditorActivity.RESULT_TEMPLATE_NAME)
+            Log.d(TAG, "ZPL template saved: $name")
         }
     }
 
@@ -257,6 +269,13 @@ class TraitActivity : ThemedActivity() {
 
         if (parameter is CanopySensitivityParameter) {
             parameter.setActivity(this)
+        }
+
+        if (parameter is PrintTemplateParameter) {
+            parameter.setActivity(this)
+            parameter.setEditorLauncher { intent ->
+                zplEditorLauncher.launch(intent)
+            }
         }
 
         parameter.createViewHolder(parameterContainer)?.let { holder ->
