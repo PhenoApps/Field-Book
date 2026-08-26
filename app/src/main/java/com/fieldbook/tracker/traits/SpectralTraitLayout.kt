@@ -41,6 +41,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.concurrent.CopyOnWriteArrayList
 
 open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
     LineGraphSelectableAdapter.Listener, ColorAdapter.Listener {
@@ -78,7 +79,16 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
     protected var progressCard: View? = null
     protected var progressLabel: TextView? = null
 
-    protected val spectralDataList = mutableListOf<SpectralFact?>()
+    /**
+     * Samples for the current entry.
+     *
+     * Copy on write because this is touched from both dispatchers: captures add on the main
+     * thread while submitList() iterates on IO, and deletes mutate from IO. A plain ArrayList
+     * throws ConcurrentModificationException on the IO thread when those overlap, which is an
+     * uncaught crash rather than a dropped frame. The list holds a handful of samples per entry,
+     * so copying on each mutation costs nothing.
+     */
+    protected val spectralDataList: MutableList<SpectralFact?> = CopyOnWriteArrayList()
 
     protected var selected: Int = 0
     protected var state: State = State.Spectral

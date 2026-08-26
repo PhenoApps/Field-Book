@@ -631,6 +631,15 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
 
     private fun beginConnection(device: NanoDevice) {
 
+        // Bail before touching anything. This check has to come first: unbinding and reassigning
+        // `connection` on a duplicate attempt orphaned the live binding, and left the field
+        // pointing at an object that was never bound, so the later endConnection() unbound the
+        // wrong instance and swallowed the resulting IllegalArgumentException.
+        if (isStarting) {
+            Log.w(TAG, "beginConnection: connection already starting, ignoring duplicate attempt")
+            return
+        }
+
         // Ensure previous service connection is cleaned up before starting new one
         try {
             if (connection != null) {
@@ -660,34 +669,30 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
             }
         }
 
-        if (!isStarting) {
-            isStarting = true
-            Log.d(TAG, "beginConnection: binding to GATT service for device ${device.nanoMac}")
+        isStarting = true
+        Log.d(TAG, "beginConnection: binding to GATT service for device ${device.nanoMac}")
 
-            try {
-                val gattService = Intent(context, ISCNIRScanSDK::class.java)
-                context.bindService(gattService, connection!!, Context.BIND_AUTO_CREATE)
+        try {
+            val gattService = Intent(context, ISCNIRScanSDK::class.java)
+            context.bindService(gattService, connection!!, Context.BIND_AUTO_CREATE)
 
-                ((context as CollectActivity).innoSpectraViewModel as? NanoEventListener)?.let { listener ->
-                    // Drop any previously registered set before creating a new one. This is the
-                    // only place receivers are registered, so unregistering here is what keeps a
-                    // reconnect from stacking a second set on top of the first.
-                    unregisterNanoReceiver()
-                    nanoReceiver = InnoSpectraBase(listener).also {
-                        it.register(context)
-                        Log.d(TAG, "beginConnection: registered InnoSpectraBase receiver")
-                    }
-                    registerGattDisconnectReceiver()
+            ((context as CollectActivity).innoSpectraViewModel as? NanoEventListener)?.let { listener ->
+                // Drop any previously registered set before creating a new one. This is the
+                // only place receivers are registered, so unregistering here is what keeps a
+                // reconnect from stacking a second set on top of the first.
+                unregisterNanoReceiver()
+                nanoReceiver = InnoSpectraBase(listener).also {
+                    it.register(context)
+                    Log.d(TAG, "beginConnection: registered InnoSpectraBase receiver")
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "beginConnection: failed to bind service - ${e.message}")
-                isStarting = false
-                background.launch(Dispatchers.Main) {
-                    setupConnectUi()
-                }
+                registerGattDisconnectReceiver()
             }
-        } else {
-            Log.w(TAG, "beginConnection: connection already starting, ignoring duplicate attempt")
+        } catch (e: Exception) {
+            Log.e(TAG, "beginConnection: failed to bind service - ${e.message}")
+            isStarting = false
+            background.launch(Dispatchers.Main) {
+                setupConnectUi()
+            }
         }
     }
 
