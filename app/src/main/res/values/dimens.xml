@@ -46,6 +46,13 @@
     <dimen name="fb_trait_fab_image_size_small">24dp</dimen>
 
     <dimen name="fb_trait_fab_size">76dp</dimen>
+    <!--
+        Floor for the spectral trait layout so the busy card is never clipped. While connecting
+        the chart and both recyclers are gone, so without this the layout collapses to the height
+        of the connect button and the card has nowhere to draw.
+        96dp indicator + 40dp padding twice + label and its margin.
+    -->
+    <dimen name="fb_spectral_busy_card_min_height">240dp</dimen>
     <dimen name="fb_trait_big_fab_size">176dp</dimen>
     <dimen name="fb_trait_fab_image_size">38dp</dimen>
   

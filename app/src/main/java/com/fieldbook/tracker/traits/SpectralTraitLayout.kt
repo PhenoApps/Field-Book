@@ -8,8 +8,9 @@ import android.net.Uri
 import android.util.AttributeSet
 import android.util.Log
 import android.util.TypedValue
+import android.view.View
 import android.widget.EditText
-import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
@@ -34,6 +35,7 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.progressindicator.CircularProgressIndicator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -69,8 +71,12 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
     protected var recycler: RecyclerView? = null
     protected var colorRecycler: RecyclerView? = null
     protected var lineChart: LineChart? = null
-    protected var progressBar: ProgressBar? = null
+    protected var progressBar: CircularProgressIndicator? = null
     protected var settingsButton: FloatingActionButton? = null
+
+    //card carrying the busy indicator, raised above the graph so it reads as floating over it
+    protected var progressCard: View? = null
+    protected var progressLabel: TextView? = null
 
     protected val spectralDataList = mutableListOf<SpectralFact?>()
 
@@ -80,6 +86,9 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
     //set while onRefresh() reloads entry data, so loadLayout() leaves the connection alone
     private var skipConnectionSetup = false
+
+    //whether the showing overlay expects progress readings, see toggleProgressBar
+    private var acceptsProgress = false
 
     protected val hapticFeedback by lazy {
         controller.getVibrator()
@@ -113,6 +122,8 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         colorRecycler = act.findViewById(R.id.color_recycler_view)
         lineChart = act.findViewById(R.id.line_chart)
         progressBar = act.findViewById(R.id.progress_bar)
+        progressCard = act.findViewById(R.id.progress_card)
+        progressLabel = act.findViewById(R.id.progress_label)
         settingsButton = act.findViewById(R.id.settings_btn)
 
         recycler?.adapter = LineGraphSelectableAdapter(this)
@@ -414,7 +425,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
             withContext(Dispatchers.Main) {
 
-                progressBar?.visibility = GONE
+                toggleProgressBar(false)
 
                 connectButton?.setOnClickListener {
                     if (isLocked) return@setOnClickListener
@@ -510,7 +521,7 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         return colorResValue.data
     }
 
-    private fun submitList(submitPlaceholder: Boolean = false) {
+    protected fun submitList(submitPlaceholder: Boolean = false) {
 
         background.launch {
 
@@ -642,14 +653,86 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         return y0 + ((y1 - y0) / (x1 - x0)) * (target - x0)
     }
 
-    protected fun toggleProgressBar(flag: Boolean) {
+    /**
+     * Shows or hides the busy overlay.
+     *
+     * The indicator always starts as a spinner. Material's setProgressCompat() finishes the
+     * indeterminate sweep and hands over to the arc on the first real reading, so [determinate]
+     * only says whether readings are expected at all, not how the indicator starts. A stage that
+     * has nothing to report yet keeps spinning instead of parking a bar near zero.
+     *
+     * @param determinate true if [setProgressPercent] will be called for this overlay.
+     * @param label optional text under the indicator, null hides it.
+     */
+    protected fun toggleProgressBar(
+        flag: Boolean,
+        determinate: Boolean = false,
+        label: String? = null
+    ) {
 
         background.launch(Dispatchers.Main) {
 
-            progressBar?.visibility = if (flag) VISIBLE else INVISIBLE
+            acceptsProgress = flag && determinate
 
+            if (flag) {
+
+                //the mode has to change while the indicator is hidden: Material throws if you
+                //switch to indeterminate on one that is already visible
+                progressCard?.visibility = GONE
+                progressBar?.visibility = INVISIBLE
+
+                progressBar?.let { indicator ->
+                    indicator.isIndeterminate = true
+                    indicator.progress = 0
+                }
+            }
+
+            progressLabel?.let { view ->
+                view.text = label ?: ""
+                view.visibility = if (flag && label != null) VISIBLE else GONE
+            }
+
+            progressBar?.visibility = if (flag) VISIBLE else INVISIBLE
+            progressCard?.visibility = if (flag) VISIBLE else GONE
         }
     }
+
+    /**
+     * Reports a real reading, switching the indicator from spinner to arc on the first call.
+     *
+     * Ignored unless the overlay was opened expecting progress, so a stale reading cannot hijack
+     * an indeterminate overlay raised for something else.
+     */
+    protected fun setProgressPercent(percent: Int, label: String? = null) {
+
+        background.launch(Dispatchers.Main) {
+
+            if (acceptsProgress) {
+                //animated, so Material completes the sweep and transitions rather than snapping
+                progressBar?.setProgressCompat(percent.coerceIn(0, 100), true)
+            }
+
+            label?.let { showProgressLabel(it) }
+        }
+    }
+
+    /**
+     * Updates the text under the indicator without touching the arc, for stages that have no
+     * reading of their own to report.
+     */
+    protected fun setProgressLabel(label: String) {
+
+        background.launch(Dispatchers.Main) {
+
+            showProgressLabel(label)
+        }
+    }
+
+    private fun showProgressLabel(label: String) {
+        progressLabel?.text = label
+        progressLabel?.visibility = VISIBLE
+    }
+
 
     override fun deleteTraitListener() {
         super.deleteTraitListener()

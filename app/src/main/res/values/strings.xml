@@ -1704,6 +1704,15 @@
     <string name="inno_spectra_save_failed">Save failed</string>
     <string name="inno_spectra_hardware_incompatible">Hardware incompatible</string>
     <string name="inno_spectra_function_locked">Function locked</string>
+
+    <!-- stages reported while the inno spectra device is connecting -->
+    <string name="inno_spectra_connect_connecting">Connecting</string>
+    <string name="inno_spectra_connect_handshake">Starting up</string>
+    <string name="inno_spectra_connect_device_info">Reading device info</string>
+    <string name="inno_spectra_connect_device_uuid">Identifying device</string>
+    <string name="inno_spectra_connect_device_status">Reading status</string>
+    <string name="inno_spectra_connect_scan_configs">Loading scan configs</string>
+    <string name="inno_spectra_connect_ready">Ready</string>
     <string name="header_temperature">Temperature</string>
     <string name="header_humidity">Humidity</string>
     <string name="header_firmware">Firmware</string>

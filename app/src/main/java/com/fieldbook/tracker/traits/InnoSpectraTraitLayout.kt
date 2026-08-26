@@ -19,8 +19,6 @@ import android.util.AttributeSet
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.content.edit
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.preference.PreferenceManager
@@ -35,6 +33,7 @@ import com.fieldbook.tracker.devices.spectrometers.Device
 import com.fieldbook.tracker.devices.spectrometers.SpectralFrame
 import com.fieldbook.tracker.devices.spectrometers.Spectrometer
 import com.fieldbook.tracker.devices.spectrometers.innospectra.InnoSpectraBase
+import com.fieldbook.tracker.devices.spectrometers.innospectra.InnoSpectraViewModel
 import com.fieldbook.tracker.devices.spectrometers.innospectra.interfaces.NanoEventListener
 import com.fieldbook.tracker.devices.spectrometers.innospectra.models.Frame
 import com.fieldbook.tracker.database.saver.SpectralSaver
@@ -59,6 +58,9 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
 
         //how long to wait for the device to report its scan config after connecting
         private const val DEVICE_INFO_TIMEOUT_MS = 30000L
+
+        //how long a measurement may run before the capture UI is restored anyway
+        private const val CAPTURE_TIMEOUT_MS = 20000L
 
         private const val DEVICE_INFO_POLL_MS = 500L
         private const val DEVICE_SEARCH_POLL_MS = 500L
@@ -92,6 +94,7 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
 
     private var deviceSearchJob: kotlinx.coroutines.Job? = null
     private var deviceInfoCheckJob: kotlinx.coroutines.Job? = null
+    private var captureTimeoutJob: kotlinx.coroutines.Job? = null
 
     @Volatile
     private var scanTimeoutJob: kotlinx.coroutines.Job? = null
@@ -105,15 +108,6 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
         context, attrs, defStyleAttr
     )
-
-    private fun <T> LiveData<T>.observeOnce(lifecycleOwner: LifecycleOwner, observer: Observer<T?>) {
-        observe(lifecycleOwner, object : Observer<T?> {
-            override fun onChanged(value: T?) {
-                observer.onChanged(value)
-                removeObserver(this)
-            }
-        })
-    }
 
     override fun type(): String {
         return Formats.INNO_SPECTRA_SENSOR.getDatabaseName()
@@ -146,8 +140,15 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
                         saveSpectralFrame(frame, entryId, traitId)
                         lastProcessedFrameHash = frameId
 
-                        // Hide progress bar after hardware scan completes
-                        toggleProgressBar(false)
+                        captureTimeoutJob?.cancel()
+                        captureTimeoutJob = null
+
+                        // Restore the capture UI. This is the completion point for both hardware
+                        // and UI triggered scans, so it has to re-enable the button as well as
+                        // drop the overlay.
+                        connectedNanoDevice?.let { nano ->
+                            enableCapture(nano.toDevice())
+                        } ?: toggleProgressBar(false)
                     }
                 }
             } else if (frame == null) {
@@ -159,6 +160,47 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
         hardwareButtonObserver?.let { observer ->
             viewModel.getSpectralData().observe(activity, observer)
         }
+    }
+
+    private var connectionProgressObserver: Observer<InnoSpectraViewModel.ConnectionProgress?>? = null
+
+    /**
+     * Drives the determinate arc from the connection handshake.
+     *
+     * Registered once, like the hardware scan observer, so a reconnect cannot stack a second one.
+     */
+    private fun observeConnectionProgress() {
+
+        val activity = (context as? CollectActivity) ?: return
+        val viewModel = activity.innoSpectraViewModel ?: return
+
+        if (connectionProgressObserver != null) return
+
+        connectionProgressObserver = Observer { progress ->
+
+            if (progress == null) return@Observer
+
+            val label = context.getString(labelFor(progress.stage))
+
+            //a stage with no reading of its own leaves the indicator spinning
+            progress.percent?.let { percent ->
+                setProgressPercent(percent, label)
+            } ?: setProgressLabel(label)
+        }
+
+        connectionProgressObserver?.let { observer ->
+            viewModel.getConnectionProgress().observe(activity, observer)
+        }
+    }
+
+    private fun labelFor(stage: InnoSpectraViewModel.ConnectionStage) = when (stage) {
+        InnoSpectraViewModel.ConnectionStage.CONNECTING -> R.string.inno_spectra_connect_connecting
+        InnoSpectraViewModel.ConnectionStage.HANDSHAKE -> R.string.inno_spectra_connect_handshake
+        InnoSpectraViewModel.ConnectionStage.DEVICE_INFO -> R.string.inno_spectra_connect_device_info
+        InnoSpectraViewModel.ConnectionStage.DEVICE_UUID -> R.string.inno_spectra_connect_device_uuid
+        InnoSpectraViewModel.ConnectionStage.DEVICE_STATUS -> R.string.inno_spectra_connect_device_status
+        InnoSpectraViewModel.ConnectionStage.SCAN_CONFIGS -> R.string.inno_spectra_connect_scan_configs
+        InnoSpectraViewModel.ConnectionStage.READY -> R.string.inno_spectra_connect_ready
     }
 
     private fun setupScanStartedListener() {
@@ -183,6 +225,9 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
 
         // Observe spectral data from hardware button scans and auto-save them
         observeHardwareButtonScans()
+
+        // Drive the determinate arc from the connection handshake
+        observeConnectionProgress()
 
         // Set up listener to show progress bar when any scan starts
         setupScanStartedListener()
@@ -307,42 +352,61 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
         callback: Spectrometer.ResultCallback
     ) {
 
-        if (!isLocked) {
-
-            val viewLifecycleOwner = (context as CollectActivity)
-
-            (context as CollectActivity).innoSpectraViewModel?.scan(context, false)?.observeOnce(viewLifecycleOwner) {
-
-                it?.let { frames ->
-                    Log.d(TAG, "Frames: $frames")
-                    for (f in frames) {
-
-                        Log.d(TAG, "Frame: ${f.rawData}")
-
-                        saveSpectralFrame(f, entryId, traitId)
-
-                        Log.d(TAG, "Spectral Data queued for save")
-                    }
-
-                    // Re-enable capture and hide progress bar
-                    enableCapture(device)
-
-                    // Notify callback that capture completed successfully
-                    callback.onResult(true)
-                } ?: run {
-                    // Scan failed or returned null
-                    enableCapture(device)
-                    callback.onResult(false)
-                }
-            }
-        } else {
+        if (isLocked) {
             // If locked, immediately callback with failure
             enableCapture(device)
             callback.onResult(false)
+            return
         }
 
-        (context as CollectActivity).innoSpectraViewModel?.setEventListener {
-            Log.d(TAG, "Event listener called")
+        val viewModel = (context as CollectActivity).innoSpectraViewModel
+
+        if (viewModel == null || !viewModel.isReadyToScan()) {
+            Log.w(TAG, "capture: device is not ready to scan")
+            enableCapture(device)
+            callback.onResult(false)
+            return
+        }
+
+        // scan() starts the measurement. The frame it produces is handled by
+        // observeHardwareButtonScans(), which is the single place a scan is saved no matter
+        // whether the UI or the hardware button triggered it.
+        //
+        // This used to observe the returned LiveData as well, but scan() publishes a null to
+        // reset itself before starting, and that null arrived immediately and was read as a
+        // failed capture. The result was a visible flash: the overlay came up on the button
+        // press, was torn straight back down by that phantom failure, then came up again when
+        // the scan actually started.
+        viewModel.scan(context, false)
+
+        callback.onResult(true)
+
+        startCaptureTimeout(device)
+    }
+
+    /**
+     * Restores the UI if a measurement never reports back.
+     *
+     * The busy overlay swallows touches, so a scan that silently never completes would otherwise
+     * leave the trait unusable until the user navigates away.
+     */
+    private fun startCaptureTimeout(device: Device) {
+
+        captureTimeoutJob?.cancel()
+
+        captureTimeoutJob = background.launch {
+
+            delay(CAPTURE_TIMEOUT_MS)
+
+            withContext(Dispatchers.Main) {
+
+                Log.w(TAG, "capture: no frame received within timeout, restoring the capture UI")
+
+                enableCapture(device)
+
+                //drop the placeholder row that was added when the capture started
+                submitList()
+            }
         }
     }
 
@@ -423,7 +487,7 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
 
         connectButton?.visibility = VISIBLE
         captureButton?.visibility = GONE
-        progressBar?.visibility = GONE
+        toggleProgressBar(false)
         settingsButton?.visibility = GONE
     }
 
@@ -544,9 +608,19 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
             withContext(Dispatchers.Main) {
                 controller.getSecurityChecker().withNearby {
                     nano.let {
-                        progressBar?.visibility = VISIBLE
+                        //the handshake reports each step, so this one is determinate
+                        toggleProgressBar(
+                            true,
+                            determinate = true,
+                            label = context.getString(R.string.inno_spectra_connect_connecting)
+                        )
+
                         connectButton?.visibility = GONE
-                        (context as CollectActivity).innoSpectraViewModel?.setBluetoothDevice(context, bt)
+
+                        (context as CollectActivity).innoSpectraViewModel?.let { vm ->
+                            vm.setBluetoothDevice(context, bt)
+                            vm.startConnectionProgress()
+                        }
 
                         beginConnection(it)
                     }
@@ -674,6 +748,9 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
 
         deviceInfoCheckJob?.cancel()
         deviceInfoCheckJob = null
+
+        captureTimeoutJob?.cancel()
+        captureTimeoutJob = null
 
         // Stop any scan started while looking for this device
         stopDeviceScan()
