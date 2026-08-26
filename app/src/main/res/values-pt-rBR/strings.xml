@@ -710,6 +710,7 @@
     <string name="dialog_multi_measure_confirm_delete_title">As observações selecionadas e mídia anexada para esta característica serão excluídas permanentemente.</string>
     <string name="dialog_multi_measure_delete">Excluir</string>
     <string name="dialog_multi_measure_select_all">Selecionar tudo</string>
+    <!--- Save failure -->
     <!--- GeoNav -->
     <string name="menu_collect_start_geo_nav_title">Iniciar GeoNav</string>
     <string name="activity_collect_found_plot">Navegou para parcela na proximidade</string>
