@@ -36,6 +36,7 @@ import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -148,6 +149,21 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         } finally {
             skipConnectionSetup = false
         }
+    }
+
+    /**
+     * Cancels the worker scope so it does not outlive the activity.
+     *
+     * [background] is created per layout and layouts are created per CollectActivity, so without
+     * this every leave-and-re-enter of Collect left another live scope behind, holding this view
+     * and through it the destroyed activity.
+     *
+     * A save still in flight when the user leaves Collect is cancelled with it. That is the
+     * intended trade: the alternative is a scope that never ends.
+     */
+    override fun onDestroy() {
+        super.onDestroy()
+        background.cancel()
     }
 
     override fun loadLayout() {
@@ -496,18 +512,23 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
     private fun submitList(submitPlaceholder: Boolean = false) {
 
-        background.launch(Dispatchers.Main) {
+        background.launch {
 
+            val traitId = currentTrait.id
+            val entryId = currentRange.uniqueId
+
+            //one query and one Base64 decode per saved sample, kept off the main thread
             val frames = spectralDataList.filterNotNull()
-                .map {
-                    val observation = database.getObservationById(it.observationId.toString())
-                    it.toSpectralFrame(
-                        observation!!.observation_unit_id,
+                .mapNotNull { fact ->
+                    val observation = database.getObservationById(fact.observationId.toString())
+                        ?: return@mapNotNull null
+                    fact.toSpectralFrame(
+                        observation.observation_unit_id,
                         observation.observation_variable_db_id.toString()
                     )
                 }
                 .filter {
-                    it.traitId == currentTrait.id && it.entryId == currentRange.uniqueId
+                    it.traitId == traitId && it.entryId == entryId
                 }.toMutableList()
 
             if (submitPlaceholder) {
@@ -516,46 +537,28 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
                 frames.removeIf { it.traitId.isEmpty() }
             }
 
-            when (state) {
-                State.Spectral -> submitSpectralList(frames, submitPlaceholder)
-                State.Color -> submitColorList(frames)
-            }
+            withContext(Dispatchers.Main) {
 
-            if (submitPlaceholder) {
-
-                listOf(recycler, colorRecycler).forEachIndexed { i, r ->
-                    r?.postDelayed({
-                        r.scrollToPosition(0)
-                    }, i*50L)
+                when (state) {
+                    State.Spectral -> submitSpectralList(frames, submitPlaceholder)
+                    State.Color -> submitColorList(frames)
                 }
+
+                if (submitPlaceholder) {
+
+                    listOf(recycler, colorRecycler).forEachIndexed { i, r ->
+                        r?.postDelayed({
+                            r.scrollToPosition(0)
+                        }, i*50L)
+                    }
+                }
+
+                controller.updateNumberOfObservations()
             }
-
-            controller.updateNumberOfObservations()
-
         }
     }
 
     private fun submitSpectralList(frames: List<SpectralFrame>, submitPlaceholder: Boolean = false) {
-
-        if (frames.isEmpty() && !submitPlaceholder) {
-            lineChart?.visibility = GONE
-            recycler?.visibility = GONE
-        } else {
-            lineChart?.visibility = VISIBLE
-            recycler?.visibility = VISIBLE
-        }
-
-        val frames = spectralDataList.filterNotNull()
-            .map {
-                val observation = database.getObservationById(it.observationId.toString())
-                it.toSpectralFrame(
-                    observation!!.observation_unit_id,
-                    observation.observation_variable_db_id.toString()
-                )
-            }
-            .filter {
-                it.traitId == currentTrait.id && it.entryId == currentRange.uniqueId
-            }
 
         if (frames.isEmpty() && !submitPlaceholder) {
             lineChart?.visibility = GONE
@@ -587,7 +590,8 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
 
         lineChart!!.invalidate()
 
-        submitLinesList(if (submitPlaceholder) frames + SpectralFrame.placeholder() else frames)
+        //frames already carries the placeholder when one was requested
+        submitLinesList(frames)
     }
 
     private fun submitColorList(frames: List<SpectralFrame>) {
@@ -739,26 +743,26 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         val studyId = collectActivity.studyId
         val plot = (context as? CollectActivity)?.observationUnit
         val traitDbId = currentTrait.id
-        val observations = database.getAllObservations(studyId, plot, traitDbId)
 
-        if (observations.isEmpty()) {
+        background.launch {
 
-            background.launch {
+            val observations = database.getAllObservations(studyId, plot, traitDbId)
+
+            if (observations.isEmpty()) {
 
                 insertAndSetNa()
-            }
 
-        } else {
-
-            if (observations.size == 1 && observations[0].value == "NA") {
+            } else if (observations.size == 1 && observations[0].value == "NA") {
 
                 //already set to NA, do nothing
-                return
 
             } else {
 
-                askUserReplaceObservationsWithNa(observations)
+                withContext(Dispatchers.Main) {
 
+                    askUserReplaceObservationsWithNa(observations)
+
+                }
             }
         }
     }

@@ -188,6 +188,22 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
         setupScanStartedListener()
     }
 
+    /**
+     * Releases the BLE scan, the SDK receivers and the service binding.
+     *
+     * None of these are tied to the view lifecycle: the scan is registered with the Bluetooth
+     * stack, the receivers with an application scoped LocalBroadcastManager, and the binding with
+     * the activity manager. Left alone they survive the activity that created them.
+     *
+     * The device is disconnected rather than handed on, because the ViewModel holding the
+     * connection state is activity scoped: a new CollectActivity gets a fresh one that reports
+     * disconnected regardless, so keeping the GATT link open would only orphan it.
+     */
+    override fun onDestroy() {
+        endConnection()
+        super.onDestroy()
+    }
+
     override fun setupConnectUi() {
         // Cancel any ongoing device search
         deviceSearchJob?.cancel()

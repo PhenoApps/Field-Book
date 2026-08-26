@@ -62,6 +62,18 @@ class NixTraitLayout : SpectralTraitLayout {
         return Formats.NIX.getDatabaseName()
     }
 
+    /**
+     * Stops scanning when the activity goes away.
+     *
+     * The connected device is deliberately left alone: NixSensorHelper is activity scoped and
+     * disconnecting here is what the commented out call in CollectActivity.onDestroy was avoiding.
+     * Only the scan needs releasing, since it otherwise keeps the radio busy for the whole process.
+     */
+    override fun onDestroy() {
+        controller.getNixSensorHelper().stopScan()
+        super.onDestroy()
+    }
+
     override fun loadLayout() {
         super.loadLayout()
 
