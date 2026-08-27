@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - User is now notified of failed database writes (https://github.com/PhenoApps/Field-Book/pull/1515)
 
 ### Fixed
+- Traits imported via BrAPI are now filtered to match the correct observation unit level (https://github.com/PhenoApps/Field-Book/pull/1513)
 - Photos taken on Samsung One UI 8.5 devices are now saved correctly (https://github.com/PhenoApps/Field-Book/pull/1525)
 - Last selected entry no longer changes after modifying trait visibility (https://github.com/PhenoApps/Field-Book/pull/1517)
 - Fixed several issues with the Pollinator trait (https://github.com/PhenoApps/Field-Book/pull/1519)
