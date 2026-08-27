@@ -711,6 +711,10 @@
     <string name="dialog_multi_measure_delete">Excluir</string>
     <string name="dialog_multi_measure_select_all">Selecionar tudo</string>
     <!--- Save failure -->
+    <string name="dialog_save_failed_title">Não foi possível salvar este valor</string>
+    <string name="dialog_save_failed_message">Nada foi registrado para a entrada %1$s. O valor ainda está na tela mas não está no banco de dados.\n\nNormalmente isso significa que o dispositivo está sem espaço armazenamento. Libere espaço, e tente novamente.\n\nNão continue coletando até que um valor economize — o que você entrar será perdido.</string>
+    <string name="dialog_save_failed_retry">Tentar Novamente</string>
+    <string name="dialog_save_failed_dismiss">Ignorar</string>
     <!--- GeoNav -->
     <string name="menu_collect_start_geo_nav_title">Iniciar GeoNav</string>
     <string name="activity_collect_found_plot">Navegou para parcela na proximidade</string>
