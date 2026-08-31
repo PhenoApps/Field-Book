@@ -29,7 +29,7 @@ import com.fieldbook.tracker.database.dao.spectral.ProtocolDao;
 import com.fieldbook.tracker.database.dao.spectral.SpectralDao;
 import com.fieldbook.tracker.database.dao.StudyDao;
 import com.fieldbook.tracker.database.dao.spectral.UriDao;
-import com.fieldbook.tracker.database.migrators.ObservationMediaMigratorVersion21;
+import com.fieldbook.tracker.database.migrators.ImageNamingAttributeVersion22;
 import com.fieldbook.tracker.database.views.ObservationVariableAttributeDetailViewCreator;
 import com.fieldbook.tracker.database.models.ObservationModel;
 import com.fieldbook.tracker.database.models.ObservationUnitModel;
@@ -43,6 +43,7 @@ import com.fieldbook.tracker.objects.SearchData;
 import com.fieldbook.tracker.objects.SearchDialogDataModel;
 import com.fieldbook.tracker.objects.TraitObject;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.utilities.FileUtil;
 import com.fieldbook.tracker.utilities.GeoJsonUtil;
 import com.fieldbook.tracker.utilities.ZipUtil;
 import com.fieldbook.tracker.utilities.export.SpectralFileProcessor;
@@ -78,7 +79,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext;
  */
 public class DataHelper {
 
-    public static final int DATABASE_VERSION = ObservationMediaMigratorVersion21.VERSION;
+    public static final int DATABASE_VERSION = ImageNamingAttributeVersion22.VERSION;
     private static final String DATABASE_NAME = "fieldbook.db";
     public static SQLiteDatabase db;
     private static final String TAG = "Field Book";
@@ -559,6 +560,16 @@ public class DataHelper {
         return StudyDao.Companion.updateSearchAttributeForAllFields(newSearchAttribute);
     }
 
+    public void updateImageNamingAttribute(int studyId, String newImageNamingAttribute) {
+        open();
+        StudyDao.Companion.updateImageNamingAttribute(studyId, newImageNamingAttribute);
+    }
+
+    public int updateImageNamingAttributeForAllFields(String newImageNamingAttribute) {
+        open();
+        return StudyDao.Companion.updateImageNamingAttributeForAllFields(newImageNamingAttribute);
+    }
+
     public ObservationUnitModel[] getObservationUnitsBySearchAttribute(int studyId, String searchValue) {
         open();
         return ObservationUnitDao.Companion.getBySearchAttribute(studyId, searchValue);
@@ -949,6 +960,30 @@ public class DataHelper {
         String uniqueName = preferences.getString(GeneralKeys.UNIQUE_NAME, "");
 
         return ObservationUnitPropertyDao.Companion.getObservationUnitPropertyValues(uniqueName, column, plotId);
+    }
+
+    /**
+     * Returns the value used to name media captured for an entry.
+     * Fields default to the unique id, but can opt into naming media by another unique attribute.
+     *
+     * @param studyId the study the entry belongs to
+     * @param plotId the obs unit id of the entry such as 13RPN0001
+     * @return the sanitized naming value, falling back to the obs unit id
+     */
+    @NonNull
+    public String getImageNamingValue(int studyId, String plotId) {
+
+        open();
+
+        String uniqueName = preferences.getString(GeneralKeys.UNIQUE_NAME, "");
+
+        String attribute = StudyDao.Companion.getImageNamingAttribute(studyId);
+
+        if (attribute == null || attribute.isEmpty() || attribute.equals(uniqueName)) return plotId;
+
+        String value = ObservationUnitPropertyDao.Companion.getObservationUnitPropertyValues(uniqueName, attribute, plotId);
+
+        return value == null || value.isEmpty() ? plotId : FileUtil.sanitizeFileName(value);
     }
 
     /**
@@ -1853,6 +1888,11 @@ public class DataHelper {
             if (oldVersion <= 20 && newVersion >= 21) {
 
                 Migrator.Companion.migrateToVersion21(db);
+            }
+
+            if (oldVersion <= 21 && newVersion >= 22) {
+
+                Migrator.Companion.migrateToVersion22(db);
             }
         }
     }

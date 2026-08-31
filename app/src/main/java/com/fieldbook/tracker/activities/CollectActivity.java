@@ -2633,7 +2633,7 @@ public class CollectActivity extends ThemedActivity
                                             int dot = srcName.lastIndexOf('.');
                                             if (dot > 0) ext = srcName.substring(dot);
                                             DateTimeFormatter internalTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZZZZZ");
-                                            String destName = sanitizedTraitName + "_" + getCRange().uniqueId + "_"
+                                            String destName = sanitizedTraitName + "_" + database.getImageNamingValue(Integer.parseInt(getStudyId()), getCRange().uniqueId) + "_"
                                                     + FileUtil.sanitizeFileName(OffsetDateTime.now().format(internalTimeFormatter)) + ext;
                                             DocumentFile dest = traitPhotos.createFile("*/*", destName);
                                             if (dest != null) {
@@ -3751,7 +3751,7 @@ public class CollectActivity extends ThemedActivity
                                 int dot = srcName.lastIndexOf('.');
                                 if (dot > 0) ext = srcName.substring(dot);
                                 DateTimeFormatter internalTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSZZZZZ");
-                                String destName = sanitizedTraitName + "_" + getCRange().uniqueId + "_"
+                                String destName = sanitizedTraitName + "_" + database.getImageNamingValue(Integer.parseInt(getStudyId()), getCRange().uniqueId) + "_"
                                         + FileUtil.sanitizeFileName(OffsetDateTime.now().format(internalTimeFormatter)) + ext;
                                 DocumentFile dest = traitPhotos.createFile("*/*", destName);
                                 if (dest != null) {

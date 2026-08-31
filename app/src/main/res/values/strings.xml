@@ -306,6 +306,9 @@
     <string name="search_attribute_apply_to_all">Apply choice to all eligible fields</string>
     <string name="search_attribute_updated">Search attribute updated</string>
     <string name="search_attribute_updated_all">Search attribute updated for %1$d field(s)</string>
+    <string name="image_naming_attribute_dialog_title">Set Image Naming ID</string>
+    <string name="image_naming_attribute_updated">Image naming attribute updated</string>
+    <string name="image_naming_attribute_updated_all">Image naming attribute updated for %1$d field(s)</string>
     <string name="search_multiple_matches_found">Found %1$d matching plots. Showing the first one.</string>
 
     <!--    <string name="field_default_sort_order">import order</string>-->

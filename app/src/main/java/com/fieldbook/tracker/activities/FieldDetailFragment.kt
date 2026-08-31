@@ -31,6 +31,7 @@ import com.fieldbook.tracker.adapters.FieldDetailAdapter
 import com.fieldbook.tracker.adapters.FieldDetailItem
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.dialogs.ImageNamingAttributeChooserDialog
 import com.fieldbook.tracker.dialogs.SearchAttributeChooserDialog
 import com.fieldbook.tracker.interfaces.FieldSortController
 import com.fieldbook.tracker.interfaces.FieldSyncController
@@ -96,6 +97,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
     private lateinit var attributeCountChip: Chip
     private lateinit var sortOrderChip: Chip
     private lateinit var editUniqueChip: Chip
+    private lateinit var imageNamingChip: Chip
     private lateinit var dataSummaryTextView: TextView
     private lateinit var trialNameChip: Chip
     private lateinit var studyGroupNameChip: Chip
@@ -126,6 +128,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         attributeCountChip = rootView.findViewById(R.id.attributeCountChip)
         sortOrderChip = rootView.findViewById(R.id.sortOrderChip)
         editUniqueChip = rootView.findViewById(R.id.editUniqueChip)
+        imageNamingChip = rootView.findViewById(R.id.imageNamingChip)
         dataSummaryTextView = rootView.findViewById(R.id.dataSummaryTextView)
         detailRecyclerView = rootView.findViewById(R.id.fieldDetailRecyclerView)
         trialNameChip = rootView.findViewById(R.id.trialNameChip)
@@ -219,6 +222,12 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         editUniqueChip.setOnClickListener {
             fieldObject?.let { field ->
                 showChangeSearchAttributeDialog(field)
+            }
+        }
+
+        imageNamingChip.setOnClickListener {
+            fieldObject?.let { field ->
+                showChangeImageNamingAttributeDialog(field)
             }
         }
 
@@ -322,6 +331,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         var entryCount = field.entryCount.toString()
         val attributeCount = field.attributeCount.toString()
         val searchAttribute = (field.searchAttribute ?: field.uniqueId).toString()
+        val imageNamingAttribute = (field.imageNamingAttribute ?: field.uniqueId).toString()
 
         if (importFormat == ImportFormat.BRAPI) {
             cardViewSync.visibility = View.VISIBLE
@@ -356,6 +366,7 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         sortOrderChip.text = getString(R.string.field_sort_entries)
 //        editUniqueChip.text = getString(R.string.field_edit_unique_id)
         editUniqueChip.text = searchAttribute
+        imageNamingChip.text = imageNamingAttribute
 
         val lastEdit = field.dateEdit
         lastEditTextView.text = if (!lastEdit.isNullOrEmpty()) {
@@ -579,6 +590,51 @@ class FieldDetailFragment : Fragment(), FieldSyncController {
         })
         
         dialog.show(parentFragmentManager, SearchAttributeChooserDialog.TAG)
+    }
+
+    private fun showChangeImageNamingAttributeDialog(field: FieldObject) {
+        (activity as? BaseFieldActivity)?.setActiveField(field.studyId)
+
+        val dialog = ImageNamingAttributeChooserDialog()
+        dialog.setOnImageNamingAttributeSelectedListener(object : ImageNamingAttributeChooserDialog.OnImageNamingAttributeSelectedListener {
+
+            override fun onImageNamingAttributeSelected(label: String, applyToAll: Boolean) {
+                CoroutineScope(Dispatchers.IO).launch {
+
+                    val count = if (applyToAll) {
+                        database.updateImageNamingAttributeForAllFields(label)
+                    } else {
+                        database.updateImageNamingAttribute(field.studyId, label)
+                        -1 // Use -1 to indicate single field update
+                    }
+
+                    withContext(Dispatchers.Main) {
+                        if (applyToAll) {
+                            Toast.makeText(
+                                context,
+                                getString(R.string.image_naming_attribute_updated_all, count),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            Toast.makeText(
+                                context,
+                                getString(R.string.image_naming_attribute_updated),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+
+                        loadFieldDetails()
+
+                        // If apply to all was selected, refresh the parent activity's field list
+                        if (applyToAll) {
+                            (activity as? BaseFieldActivity)?.queryAndLoadFields()
+                        }
+                    }
+                }
+            }
+        })
+
+        dialog.show(parentFragmentManager, ImageNamingAttributeChooserDialog.TAG)
     }
 
     /**

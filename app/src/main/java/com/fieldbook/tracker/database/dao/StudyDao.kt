@@ -73,9 +73,47 @@ class StudyDao {
         * Updates the observation unit search attribute for all studies that have this attribute
         * @return The number of studies that were updated
         */
-        fun updateSearchAttributeForAllFields(newSearchAttribute: String): Int = withDatabase { db ->
-            // First check which studies have this attribute
-            val studiesWithAttribute = mutableListOf<Int>()
+        fun updateSearchAttributeForAllFields(newSearchAttribute: String): Int =
+            getStudiesWithAttribute(newSearchAttribute).count { studyId ->
+                (updateSearchAttribute(studyId, newSearchAttribute) ?: 0) > 0
+            }
+
+        /**
+        * Updates the observation unit image naming attribute for a study record.
+        * This attribute is used to name media captured for an entry, by default it's the same as the unique_id
+        */
+        fun updateImageNamingAttribute(studyId: Int, newImageNamingAttribute: String) = withDatabase { db ->
+            db.update(Study.tableName,
+                contentValuesOf("observation_unit_image_naming_attribute" to newImageNamingAttribute),
+                "${Study.PK} = $studyId",
+                null
+            )
+        }
+
+        /**
+        * Updates the observation unit image naming attribute for all studies that have this attribute
+        * @return The number of studies that were updated
+        */
+        fun updateImageNamingAttributeForAllFields(newImageNamingAttribute: String): Int =
+            getStudiesWithAttribute(newImageNamingAttribute).count { studyId ->
+                (updateImageNamingAttribute(studyId, newImageNamingAttribute) ?: 0) > 0
+            }
+
+        /**
+        * Returns the attribute used to name media captured for a study's entries.
+        */
+        fun getImageNamingAttribute(studyId: Int): String? = withDatabase { db ->
+            db.query(Study.tableName,
+                select = arrayOf("observation_unit_image_naming_attribute"),
+                where = "${Study.PK} = ?",
+                whereArgs = arrayOf(studyId.toString())
+            ).toFirst()["observation_unit_image_naming_attribute"]?.toString()
+        }
+
+        /**
+        * Finds every study that has an attribute with the given name.
+        */
+        private fun getStudiesWithAttribute(attributeName: String): List<Int> = withDatabase { db ->
 
             val query = """
                 SELECT DISTINCT V.study_id 
@@ -85,30 +123,18 @@ class StudyDao {
                 WHERE observation_unit_attribute_name = ?
             """
 
-            Log.d(TAG, "Finding studies with attribute: $newSearchAttribute")
+            Log.d(TAG, "Finding studies with attribute: $attributeName")
 
-            db.rawQuery(query, arrayOf(newSearchAttribute)).use { cursor ->
+            val studies = mutableListOf<Int>()
+
+            db.rawQuery(query, arrayOf(attributeName)).use { cursor ->
                 while (cursor.moveToNext()) {
-                    cursor.getInt(0).let { studyId ->
-                        studiesWithAttribute.add(studyId)
-                        Log.d(TAG, "Found study with matching attribute: $studyId")
-                    }
+                    studies.add(cursor.getInt(0))
                 }
             }
 
-            // Now update each study that has this attribute
-            var updatedCount = 0
-            if (studiesWithAttribute.isNotEmpty()) {
-                for (studyId in studiesWithAttribute) {
-                    // Fix: Add null safety with the Elvis operator (?:)
-                    val result = updateSearchAttribute(studyId, newSearchAttribute)
-                    if ((result ?: 0) > 0) updatedCount++
-                }
-            }
-
-            Log.d(TAG, "Updated search attribute for $updatedCount studies")
-            updatedCount
-        } ?: 0
+            studies
+        } ?: emptyList()
 
         /**
          * Transpose obs. unit. attribute/values into a view based on the selected study.
@@ -229,6 +255,7 @@ class StudyDao {
             it.observationCount = this["observation_count"]?.toString()
             it.trialName = this["trial_name"]?.toString()
             it.searchAttribute = this["observation_unit_search_attribute"]?.toString()
+            it.imageNamingAttribute = this["observation_unit_image_naming_attribute"]?.toString()
             it.groupId = this["group_id"]?.toString()?.toIntOrNull()
             it.archived = this["is_archived"].toString() == "true"
             it.startCorner = this["start_corner"]?.toString()
@@ -290,6 +317,7 @@ class StudyDao {
                     trial_name,
                     count,
                     observation_unit_search_attribute,
+                    observation_unit_image_naming_attribute,
                     is_archived,
                     group_id,
                     start_corner,

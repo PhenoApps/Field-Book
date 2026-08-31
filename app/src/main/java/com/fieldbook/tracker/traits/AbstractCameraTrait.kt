@@ -267,7 +267,8 @@ abstract class AbstractCameraTrait :
         val rep = database.getNextRep(studyId, plot, currentTrait.id)
 
         val sanitizedTraitName = FileUtil.sanitizeFileName(currentTrait.name)
-        val name = "${plot}_${sanitizedTraitName}_$saveTime.jpg"
+        val namingId = database.getImageNamingValue(studyId.toInt(), plot)
+        val name = "${namingId}_${sanitizedTraitName}_$saveTime.jpg"
 
         try {
             DocumentTreeUtil.getFieldMediaDirectory(context, sanitizedTraitName)?.let { dir ->
@@ -558,8 +559,9 @@ abstract class AbstractCameraTrait :
 
         // Prepare file name
         val sanitizedTraitName = FileUtil.sanitizeFileName(currentTrait.name)
+        val namingId = database.getImageNamingValue(studyId.toInt(), plot)
         // Build filename using parameter suffix (.jpg or .mp4)
-        val name = "${plot}_${sanitizedTraitName}_$saveTime${fileSuffix}"
+        val name = "${namingId}_${sanitizedTraitName}_$saveTime${fileSuffix}"
 
         // Try to synchronously resolve/create the file so saver is invoked immediately
         try {
@@ -635,7 +637,7 @@ abstract class AbstractCameraTrait :
                 val traitDbId = currentTrait.id
 
                 // Build filename using parameter suffix (.jpg or .mp4)
-                val name = "${plot}_${sanitizedTraitName}_$saveTime${fileSuffix}"
+                val name = "${namingId}_${sanitizedTraitName}_$saveTime${fileSuffix}"
 
                 DocumentTreeUtil.getFieldMediaDirectory(context, sanitizedTraitNameLocal)?.let { dir ->
 

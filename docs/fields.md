@@ -242,6 +242,7 @@ The top card includes metadata about the field (import source, entry count, attr
 **Renaming** fields will change the name displayed for the field throughout the app.
 **Sorting** displays a dialog to modify the entry order.
 <img class="icon" src="_static/icons/fields/barcode-scan.png"> **Search ID** displays a dialog to choose which unique attribute a barcode search will check against (default is the unique identifer selected on import).
+<img class="icon" src="_static/icons/formats/camera.png"> **Image Naming ID** displays a dialog to choose which unique attribute is used to name captured media (default is the unique identifer selected on import).
 
 The sort dialog is populated by pressing the <img class="icon" src="_static/icons/fields/plus.png"> icon, and selecting from the list of available columns.
 Column priority for sorting can be modified by using using the <img class="icon" src="_static/icons/traits/reorder-horizontal.png"> icon to drag and reorder them.
@@ -262,6 +263,11 @@ This choice can be applied to all fields that have the same attribute by selecti
   <img class="screenshot" src="_static/images/fields/field_detail_search_id.png" width="350px"> 
   <figcaption class="screenshot-caption"><i>The Search ID dialog</i></figcaption> 
 </figure>
+
+The Image Naming ID dialog displays the same list of attributes that are unique within the field.
+By default photos, videos and other captured media are named with the unique identifer that was selected on import.
+Selecting a different attribute will name media captured from then on with that attribute's value for the entry.
+This choice can be applied to all fields that have the same attribute by selecting the checkbox.
 
 The <img class="icon" src="_static/icons/home/barley.png"> [Collect](collect.md) card will navigate to the Collect screen where data can be collected.
 

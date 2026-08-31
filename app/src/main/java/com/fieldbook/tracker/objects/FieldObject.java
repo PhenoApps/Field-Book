@@ -30,6 +30,7 @@ public class FieldObject {
     private String observationCount;
     private String trialName;
     private String searchAttribute;
+    private String imageNamingAttribute;
     private Integer groupId;
     private boolean isArchived;
     private String startCorner;
@@ -254,6 +255,14 @@ public class FieldObject {
 
     public void setSearchAttribute(String searchAttribute) {
         this.searchAttribute = searchAttribute;
+    }
+
+    public String getImageNamingAttribute() {
+        return imageNamingAttribute;
+    }
+
+    public void setImageNamingAttribute(String imageNamingAttribute) {
+        this.imageNamingAttribute = imageNamingAttribute;
     }
 
     public Integer getGroupId() {

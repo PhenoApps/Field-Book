@@ -185,7 +185,8 @@ class CanopyCoverTraitLayout : PhotoTraitLayout {
                 internalTimeFormatter
             )
         )
-        val fileName = "${obsUnit}_${traitName}_${saveTime}.jpg"
+        val namingId = database.getImageNamingValue(studyId.toInt(), obsUnit)
+        val fileName = "${namingId}_${traitName}_${saveTime}.jpg"
 
         // Save image & insert observation with FGCC value all in this IO coroutine
         background.launch {
