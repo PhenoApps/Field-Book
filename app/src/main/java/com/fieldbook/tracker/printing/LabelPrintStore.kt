@@ -55,6 +55,9 @@ class LabelPrintStore(private val prefs: SharedPreferences) {
     val currentPlotIdState = mutableStateOf<String?>(null)
     val assignmentsRevision = mutableIntStateOf(0)
 
+    /** Whether a printer is currently connected (drives print vs. connect button). */
+    val isPrinterConnected = mutableStateOf(false)
+
     /** Tracks which placeholder is currently being assigned via AttributeChooserDialog. */
     var pendingFieldPlaceholder: String? = null
 

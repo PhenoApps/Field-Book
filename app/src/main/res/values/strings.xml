@@ -759,6 +759,7 @@
     <!-- Label print dialogs -->
     <string name="label_config_title">Label Configuration</string>
     <string name="label_config_calibrate">Calibrate</string>
+    <string name="label_config_connect_printer">Connect to printer</string>
     <string name="label_config_copies">Copies</string>
     <string name="label_config_template">Template</string>
     <string name="label_config_no_templates">No templates available.</string>

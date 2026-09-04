@@ -104,6 +104,7 @@ class LabelPrintTraitLayout : BaseTraitLayout {
 
         store.restoreConfig()
         store.currentPlotIdState.value = currentRange?.uniqueId
+        refreshPrinterConnectionState()
 
         currentTrait?.printTemplateId?.let { templateId ->
             if (templateId.isNotEmpty()) {
@@ -145,6 +146,8 @@ class LabelPrintTraitLayout : BaseTraitLayout {
                     onPrintClick = { printLabel() },
                     onSettingsClick = { store.showConfigDialog.value = true },
                     onEditClick = { store.showFieldDialog.value = true },
+                    onConnectClick = { connectToPrinter() },
+                    isPrinterConnected = store.isPrinterConnected.value,
                     copiesCount = copiesCount,
                     previewLabel = previewLabel
                 )
@@ -254,7 +257,15 @@ class LabelPrintTraitLayout : BaseTraitLayout {
     private fun connectToPrinter() {
         val activity = mActivity ?: return
         if (!service.checkBluetoothPermissions(activity)) return
-        service.choosePrinter(context)
+        service.choosePrinter(context, object : com.fieldbook.tracker.utilities.BluetoothChooseCallback {
+            override fun onDeviceChosen(deviceName: String) {
+                activity.runOnUiThread { refreshPrinterConnectionState() }
+            }
+        })
+    }
+
+    private fun refreshPrinterConnectionState() {
+        store.isPrinterConnected.value = !service.getSavedPrinterName().isNullOrEmpty()
     }
 
     private fun calibratePrinter() {

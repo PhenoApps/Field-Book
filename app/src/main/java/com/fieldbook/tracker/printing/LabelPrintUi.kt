@@ -49,6 +49,8 @@ fun LabelPrintMainView(
     onPrintClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onEditClick: () -> Unit = {},
+    onConnectClick: () -> Unit = {},
+    isPrinterConnected: Boolean = true,
     copiesCount: Int,
     previewLabel: ZplLabel? = null
 ) {
@@ -93,7 +95,7 @@ fun LabelPrintMainView(
             Spacer(modifier = Modifier.width(16.dp))
 
             IconButton(
-                onClick = onPrintClick,
+                onClick = if (isPrinterConnected) onPrintClick else onConnectClick,
                 modifier = Modifier
                     .size(76.dp)
                     .background(
@@ -101,7 +103,14 @@ fun LabelPrintMainView(
                         shape = CircleShape
                     )
             ) {
-                if (copiesCount > 1) {
+                if (!isPrinterConnected) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.connection),
+                        contentDescription = stringResource(R.string.label_config_connect_printer),
+                        modifier = Modifier.size(28.dp),
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                } else if (copiesCount > 1) {
                     BadgedBox(
                         badge = { Badge { Text(text = copiesCount.toString()) } }
                     ) {
