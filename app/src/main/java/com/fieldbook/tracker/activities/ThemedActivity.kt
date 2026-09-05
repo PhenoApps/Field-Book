@@ -43,8 +43,8 @@ open class ThemedActivity: AppCompatActivity() {
             //set the theme
             val (themeIndex, textIndex) = with(prefs) {
 
-                (getString(PreferenceKeys.THEME, "0")?.toInt()
-                    ?: 0) to (getString(PreferenceKeys.TEXT_THEME, "1")?.toInt() ?: 1)
+                (getString(PreferenceKeys.THEME, DEFAULT.toString())?.toInt()
+                    ?: DEFAULT) to (getString(PreferenceKeys.TEXT_THEME, MEDIUM.toString())?.toInt() ?: MEDIUM)
 
             }
 

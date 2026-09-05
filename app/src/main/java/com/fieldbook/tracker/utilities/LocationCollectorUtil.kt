@@ -6,8 +6,9 @@ import android.location.Location
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.models.ObservationModel
 import com.fieldbook.tracker.location.GPSTracker
-import com.fieldbook.tracker.preferences.LocationPreferencesFragment
 import com.fieldbook.tracker.preferences.PreferenceKeys
+import com.fieldbook.tracker.preferences.enums.CoordinateFormat
+import com.fieldbook.tracker.preferences.enums.LocationCollectionMode
 import java.util.*
 
 class LocationCollectorUtil {
@@ -52,25 +53,32 @@ class LocationCollectorUtil {
                 val recent: String? = getRecentLocation(context, internalGps, externalGps)
 
                 //if obs mode, save the most recent location, prioritize external gps
-                val locationCollectionMode: Int = prefs.getString(PreferenceKeys.GENERAL_LOCATION_COLLECTION, "0")?.toInt() ?: 0
-                if (locationCollectionMode == LocationPreferencesFragment.LOCATION_COLLECTION_OBS) {
+                val locationCollectionMode = LocationCollectionMode.fromValue(
+                    prefs.getString(
+                        PreferenceKeys.GENERAL_LOCATION_COLLECTION,
+                        LocationCollectionMode.DEFAULT.value
+                    )
+                )
+                if (locationCollectionMode == LocationCollectionMode.OBSERVATION) {
                     if (recent != null) {
                         location = recent
                     }
-                } else if (locationCollectionMode == LocationPreferencesFragment.LOCATION_COLLECTION_OBS_UNIT) {
+                } else if (locationCollectionMode == LocationCollectionMode.OBSERVATION_UNIT) {
 
                     //if obs unit mode, search all observations within the current plot
                     //if a location already exists, use that location for this observation, otherwise use the most recent location
                     location = database.getAllObservations(studyId, obsUnit).getLocation() ?: recent ?: String()
 
-                } else if (locationCollectionMode == LocationPreferencesFragment.LOCATION_COLLECTION_STUDY) {
+                } else if (locationCollectionMode == LocationCollectionMode.STUDY) {
 
                     //similar to above but check if an observation has been saved for a field/study
                     location = database.getAllObservations(studyId).getLocation() ?: recent ?: String()
                 }
 
                 // Format location based on preference
-                val coordinateFormat: Int = prefs.getString(PreferenceKeys.COORDINATE_FORMAT, "0")?.toInt() ?: 0
+                val coordinateFormat = CoordinateFormat.fromValue(
+                    prefs.getString(PreferenceKeys.COORDINATE_FORMAT, CoordinateFormat.DEFAULT.value)
+                )
                 location = formatLocation(location, coordinateFormat)
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -79,8 +87,8 @@ class LocationCollectorUtil {
             return location
         }
 
-        private fun formatLocation(location: String, format: Int): String {
-            return if (format == 1) {
+        private fun formatLocation(location: String, format: CoordinateFormat): String {
+            return if (format == CoordinateFormat.GEOJSON) {
                 // Convert to GeoJSON format
                 val coords = location.split(";")
                 if (coords.size == 2) {

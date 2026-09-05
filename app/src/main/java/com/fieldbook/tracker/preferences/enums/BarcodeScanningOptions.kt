@@ -5,4 +5,9 @@ sealed class BarcodeScanningOptions(val value: String) {
     object EnterValue: BarcodeScanningOptions("1")
     object EnterIfNotId: BarcodeScanningOptions("2")
     object Ask: BarcodeScanningOptions("3")
+
+    companion object {
+        @JvmField
+        val Default: BarcodeScanningOptions = Move
+    }
 }

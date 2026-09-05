@@ -22,6 +22,8 @@ import com.fieldbook.tracker.objects.RangeObject
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
+import com.fieldbook.tracker.preferences.enums.DisableEntryArrowMode
+import com.fieldbook.tracker.preferences.enums.SkipEntriesMode
 import com.fieldbook.tracker.utilities.Utils
 import java.util.*
 import androidx.core.content.edit
@@ -571,9 +573,11 @@ class RangeBoxView : ConstraintLayout {
                 controller.getSoundHelper().playAdvance()
             }
             val entryArrow =
-                controller.getPreferences()
-                    .getString(PreferenceKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0")
-            if ((entryArrow == "1" || entryArrow == "3") && !controller.getTraitBox()
+                DisableEntryArrowMode.fromValue(
+                    controller.getPreferences()
+                        .getString(PreferenceKeys.DISABLE_ENTRY_ARROW_NO_DATA, DisableEntryArrowMode.DEFAULT.value)
+                )
+            if (entryArrow.disablesLeft() && !controller.getTraitBox()
                     .existsTrait()
             ) {
                 controller.getSoundHelper().playError()
@@ -597,9 +601,11 @@ class RangeBoxView : ConstraintLayout {
                 controller.getSoundHelper().playAdvance()
             }
             val entryArrow =
-                controller.getPreferences()
-                    .getString(PreferenceKeys.DISABLE_ENTRY_ARROW_NO_DATA, "0")
-            if ((entryArrow == "2" || entryArrow == "3") && !traitBox.existsTrait()) {
+                DisableEntryArrowMode.fromValue(
+                    controller.getPreferences()
+                        .getString(PreferenceKeys.DISABLE_ENTRY_ARROW_NO_DATA, DisableEntryArrowMode.DEFAULT.value)
+                )
+            if (entryArrow.disablesRight() && !traitBox.existsTrait()) {
                 controller.getSoundHelper().playError()
             } else {
                 if (rangeID.isNotEmpty()) {
@@ -626,25 +632,33 @@ class RangeBoxView : ConstraintLayout {
     }
 
     fun movePaging(pos: Int, step: Int, fromToolbar: Boolean): Int {
-        //three skipMode options: 0. disabled 1. skip active trait 2. skip but check all traits
-
         val skipMode = if (fromToolbar) {
-            controller.getPreferences().getString(PreferenceKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR, "0")?.toIntOrNull() ?: 0
+            SkipEntriesMode.fromValue(
+                controller.getPreferences().getString(
+                    PreferenceKeys.HIDE_ENTRIES_WITH_DATA_TOOLBAR,
+                    SkipEntriesMode.DEFAULT.value
+                )
+            )
         } else {
-            controller.getPreferences().getString(GeneralKeys.HIDE_ENTRIES_WITH_DATA, "0")?.toIntOrNull() ?: 0
+            SkipEntriesMode.fromValue(
+                controller.getPreferences().getString(
+                    GeneralKeys.HIDE_ENTRIES_WITH_DATA,
+                    SkipEntriesMode.DEFAULT.value
+                )
+            )
         }
 
         return when (skipMode) {
-            1 -> {
+            SkipEntriesMode.CURRENT_TRAIT -> {
                 val traits = ArrayList<TraitObject>()
                 controller.getTraitBox().currentTrait.let { traits.add(it!!) }
                 moveToNextUncollectedObs(pos, step, traits)
             }
-            2 -> {
+            SkipEntriesMode.ALL_TRAITS -> {
                 val visibleTraits = ArrayList(controller.getDatabase().getVisibleTraits().filterNotNull())
                 moveToNextUncollectedObs(pos, step, visibleTraits)
             }
-            else -> moveSimply(pos, step)
+            SkipEntriesMode.DISABLED -> moveSimply(pos, step)
         }
     }
 

@@ -10,6 +10,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.PreferencesActivity
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
+import com.fieldbook.tracker.preferences.enums.VerificationInterval
 import dagger.hilt.android.qualifiers.ActivityContext
 import javax.inject.Inject
 
@@ -30,12 +31,9 @@ class VerifyPersonHelper @Inject constructor(@ActivityContext private val contex
         val systemTime = System.nanoTime()
 
         //number of hours to wait before asking for user, pref found in profile
-        val interval = when (preferences.getString(PreferenceKeys.VERIFICATION_INTERVAL, "2")) {
-            "0" -> 0
-            "1" -> 12
-            "2" -> 24
-            else -> -1
-        }
+        val interval = VerificationInterval.fromValue(
+            preferences.getString(PreferenceKeys.VERIFICATION_INTERVAL, VerificationInterval.DEFAULT.value)
+        ).hours
 
         val nanosToWait = 1e9.toLong() * 3600 * interval
         if ((interval == 0 && !alreadyAsked) // ask on opening and app just opened

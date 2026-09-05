@@ -38,6 +38,7 @@ import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache;
 import com.fieldbook.tracker.brapi.BrapiAuthenticator;
 import com.fieldbook.tracker.brapi.dialogs.BrapiManualAccountDialogFragment;
 import com.fieldbook.tracker.brapi.dialogs.BrapiStepperAccountDialogFragment;
+import com.fieldbook.tracker.preferences.enums.TransferSource;
 import com.fieldbook.tracker.utilities.BrapiAccountHelper;
 import com.fieldbook.tracker.utilities.OpenAuthConfigurationUtil;
 import com.fieldbook.tracker.utilities.Utils;
@@ -133,17 +134,18 @@ public class BrapiPreferencesFragment extends PreferenceFragmentCompat {
         CheckBoxPreference brapiEnabledPref = findPreference(PreferenceKeys.BRAPI_ENABLED);
         if (brapiEnabledPref != null) {
             brapiEnabledPref.setOnPreferenceChangeListener((pref, newValue) -> {
-                boolean enabled = (Boolean) newValue;
-                if (!enabled) {
-                    // Reset default import/export sources if they were pointing to brapi
-                    if ("brapi".equals(preferences.getString(PreferenceKeys.IMPORT_SOURCE_DEFAULT, ""))) {
-                        preferences.edit().putString(PreferenceKeys.IMPORT_SOURCE_DEFAULT, "ask").apply();
+                boolean isChecked = (Boolean) newValue;
+                if (!isChecked) { // on disable, reset default sources if they were set to brapi
+                    if (TransferSource.BRAPI.INSTANCE.getValue().equals(preferences.getString(PreferenceKeys.IMPORT_SOURCE_DEFAULT, ""))) {
+                        preferences.edit().putString(PreferenceKeys.IMPORT_SOURCE_DEFAULT, TransferSource.ASK.INSTANCE.getValue()).apply();
                     }
-                    if ("brapi".equals(preferences.getString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, ""))) {
-                        preferences.edit().putString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, "ask").apply();
+                    if (TransferSource.BRAPI.INSTANCE.getValue().equals(preferences.getString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, ""))) {
+                        preferences.edit().putString(PreferenceKeys.EXPORT_SOURCE_DEFAULT, TransferSource.ASK.INSTANCE.getValue()).apply();
                     }
+                    // remove brapi auth token when brapi is disabled
+                    preferences.edit().remove(PreferenceKeys.BRAPI_TOKEN).apply();
                 }
-                updateServerSectionsVisibility(enabled);
+                updateServerSectionsVisibility(isChecked);
                 return true;
             });
         }

@@ -14,6 +14,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
+import com.fieldbook.tracker.preferences.models.ReturnCharacterMode
 import com.fieldbook.tracker.views.TraitBoxView
 import org.phenoapps.utils.SoftKeyboardUtil.Companion.closeKeyboard
 import org.phenoapps.utils.SoftKeyboardUtil.Companion.showKeyboard
@@ -148,13 +149,14 @@ class TextTraitLayout : BaseTraitLayout {
 
                     //check system setting to navigate to next plot/trait
                     val actionOnScanLineFeed =
-                        prefs.getString(PreferenceKeys.RETURN_CHARACTER, "0") ?: "0"
+                        prefs.getString(PreferenceKeys.RETURN_CHARACTER, ReturnCharacterMode.Default.mode)
+                            ?: ReturnCharacterMode.Default.mode
 
-                    if (actionOnScanLineFeed == "1") {
+                    if (actionOnScanLineFeed == ReturnCharacterMode.NextPlot.mode) {
                         controller.getRangeBox().moveEntryRight()
                     }
 
-                    if (actionOnScanLineFeed == "2") {
+                    if (actionOnScanLineFeed == ReturnCharacterMode.NextTrait.mode) {
                         controller.getTraitBox().moveTrait(TraitBoxView.MoveDirection.RIGHT)
                     }
 

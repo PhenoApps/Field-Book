@@ -7,7 +7,6 @@ import android.graphics.Rect
 import android.location.Location
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.OpenableColumns
@@ -22,6 +21,8 @@ import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.edit
+import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.brapi.BrapiActivity
@@ -41,6 +42,8 @@ import com.fieldbook.tracker.objects.FieldFileObject
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
+import com.fieldbook.tracker.preferences.enums.TransferSource
+import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.utilities.BrapiAccountHelper
 import com.fieldbook.tracker.utilities.SnackbarUtils
 import com.fieldbook.tracker.utilities.TapTargetUtil
@@ -48,20 +51,14 @@ import com.fieldbook.tracker.utilities.Utils
 import com.getkeepsafe.taptargetview.TapTarget
 import com.getkeepsafe.taptargetview.TapTargetSequence
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.utils.BaseDocumentTreeUtil
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 import java.io.IOException
-import java.util.ArrayList
-import java.util.LinkedHashMap
-import java.util.NoSuchElementException
-import java.util.StringJoiner
-import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import java.util.Locale
-import androidx.core.content.edit
-import androidx.core.net.toUri
-import com.fieldbook.tracker.traits.formats.Formats
+import java.util.StringJoiner
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
@@ -425,13 +422,13 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
     }
 
     private fun handleImportAction() {
-        val importer = mPrefs.getString("IMPORT_SOURCE_DEFAULT", "ask")
-        when (importer) {
-            "ask" -> showFileDialog()
-            "local" -> loadLocal()
-            "brapi" -> loadBrAPI()
-            "cloud" -> loadCloud()
-            else -> showFileDialog()
+        when (TransferSource.fromValue(
+            mPrefs.getString(PreferenceKeys.IMPORT_SOURCE_DEFAULT, TransferSource.DEFAULT.value)
+        )) {
+            TransferSource.ASK -> showFileDialog()
+            TransferSource.LOCAL -> loadLocal()
+            TransferSource.BRAPI -> loadBrAPI()
+            TransferSource.CLOUD -> loadCloud()
         }
     }
 

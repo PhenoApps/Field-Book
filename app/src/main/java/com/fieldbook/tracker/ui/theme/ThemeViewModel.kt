@@ -26,17 +26,16 @@ class ThemeViewModel @Inject constructor(
     val textType: StateFlow<AppTextType> = _textType.asStateFlow()
 
     private fun getThemeType(): AppThemeType {
-        val themeIndex = prefs.getString(PreferenceKeys.THEME, "0")?.toInt() ?: 0
-        return when (themeIndex) {
-            0 -> AppThemeType.Default
-            1 -> AppThemeType.HighContrast
-            2 -> AppThemeType.Blue
-            else -> AppThemeType.Default
-        }
+        val themeIndex = prefs.getString(PreferenceKeys.THEME, AppThemeType.DEFAULT.index.toString())
+            ?.toIntOrNull()
+            ?: AppThemeType.DEFAULT.index
+        return AppThemeType.fromIndex(themeIndex)
     }
 
     private fun getTextType(): AppTextType {
-        val textIndex = prefs.getString(PreferenceKeys.TEXT_THEME, "1")?.toInt() ?: 1
+        val textIndex = prefs.getString(PreferenceKeys.TEXT_THEME, AppTextType.MEDIUM.index.toString())
+            ?.toIntOrNull()
+            ?: AppTextType.MEDIUM.index
         return AppTextType.entries.find { it.index == textIndex } ?: AppTextType.MEDIUM
     }
 }

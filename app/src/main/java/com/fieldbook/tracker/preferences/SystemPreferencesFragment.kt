@@ -12,6 +12,7 @@ import androidx.preference.PreferenceFragmentCompat
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.PreferencesActivity
 import com.fieldbook.tracker.fragments.ExportDatabaseFragment
+import com.fieldbook.tracker.preferences.enums.TransferSource
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.utils.BaseDocumentTreeUtil
@@ -36,8 +37,8 @@ class SystemPreferencesFragment : PreferenceFragmentCompat(),
         (activity as? PreferencesActivity)?.supportActionBar?.title =
             getString(R.string.preferences_system_title)
 
-        val importSourceDefaultPref = findPreference<ListPreference>("IMPORT_SOURCE_DEFAULT")
-        val exportSourceDefaultPref = findPreference<ListPreference>("EXPORT_SOURCE_DEFAULT")
+        val importSourceDefaultPref = findPreference<ListPreference>(PreferenceKeys.IMPORT_SOURCE_DEFAULT)
+        val exportSourceDefaultPref = findPreference<ListPreference>(PreferenceKeys.EXPORT_SOURCE_DEFAULT)
 
 
         importSourceDefaultPref?.onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
@@ -99,7 +100,7 @@ class SystemPreferencesFragment : PreferenceFragmentCompat(),
     }
 
     private fun validateBrapiEnabledBeforeSetting(newValue: String): Boolean {
-        if ("brapi" == newValue && !preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false)) {
+        if (TransferSource.BRAPI.value == newValue && !preferences.getBoolean(PreferenceKeys.BRAPI_ENABLED, false)) {
             showBrapiDisabledAlertDialog()
             return false
         }
