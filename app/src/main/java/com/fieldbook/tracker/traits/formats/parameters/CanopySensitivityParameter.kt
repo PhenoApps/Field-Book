@@ -2,6 +2,7 @@ package com.fieldbook.tracker.traits.formats.parameters
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.Matrix
 import android.net.Uri
 import android.view.LayoutInflater
@@ -234,20 +235,23 @@ class CanopySensitivityParameter : BaseFormatParameter(
             }
         }
 
+        /**
+         * Classification comes from CanopyCoverTraitLayout so the value previewed here is the
+         * value the trait will record. [source] is the retained test capture - it gets
+         * re-thresholded on every seek bar change, so it must not be recycled.
+         */
         private fun buildBinaryMaskAndOutput(source: Bitmap, t: Float): Pair<Bitmap, Float> {
-            val pixels = IntArray(source.width * source.height)
-            source.getPixels(pixels, 0, source.width, 0, 0, source.width, source.height)
+            val width = source.width
+            val height = source.height
+            val pixels = IntArray(width * height)
+            source.getPixels(pixels, 0, width, 0, 0, width, height)
             var canopyPixels = 0
             for (i in pixels.indices) {
-                val r = android.graphics.Color.red(pixels[i]).toFloat()
-                val g = android.graphics.Color.green(pixels[i]).toFloat()
-                val b = android.graphics.Color.blue(pixels[i]).toFloat()
-                val isCanopy = g > 0f && r / g < t && b / g < t && 2f * g - r - b > CanopyCoverTraitLayout.P3_THRESHOLD
+                val isCanopy = CanopyCoverTraitLayout.isCanopyPixel(pixels[i], t)
                 if (isCanopy) canopyPixels++
-                pixels[i] = if (isCanopy) android.graphics.Color.WHITE else android.graphics.Color.BLACK
+                pixels[i] = if (isCanopy) Color.WHITE else Color.BLACK
             }
-            val mask = Bitmap.createBitmap(source.width, source.height, Bitmap.Config.ARGB_8888)
-            mask.setPixels(pixels, 0, mask.width, 0, 0, mask.width, mask.height)
+            val mask = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888)
             val outputValue = if (pixels.isEmpty()) 0f else canopyPixels.toFloat() / pixels.size * 100f
             return mask to outputValue
         }
