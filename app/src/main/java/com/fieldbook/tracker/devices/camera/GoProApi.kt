@@ -330,6 +330,11 @@ class GoProApi @Inject constructor(
 
         ioScope.launch {
 
+            //if the camera was switched off, a teardown is likely still in flight. Let it finish,
+            //otherwise its tail unbinds the network and resets the state of the session we are
+            //about to start, and the reconnect silently fails.
+            shutdownJob?.takeIf { it.isActive }?.join()
+
             //always start from a clean slate, a half open link is the usual reason a reconnect fails
             closeGatt()
 
