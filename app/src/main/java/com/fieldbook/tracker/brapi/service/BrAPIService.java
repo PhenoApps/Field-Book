@@ -173,7 +173,7 @@ public interface BrAPIService {
                 android.accounts.AccountManager am = android.accounts.AccountManager.get(context);
                 String token = helper.peekToken();
                 if (token != null) {
-                    am.invalidateAuthToken(com.fieldbook.tracker.brapi.BrapiAuthenticator.ACCOUNT_TYPE, token);
+                    am.invalidateAuthToken(active.type, token);
                 }
             }
             // Also clear SharedPreferences token for legacy compatibility

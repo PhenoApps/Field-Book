@@ -1,7 +1,6 @@
 package org.phenoapps.brapi.ui
 
 import android.accounts.Account
-import android.accounts.AccountManager
 import android.content.Context
 import android.util.AttributeSet
 import androidx.compose.runtime.getValue
@@ -11,7 +10,6 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
-import org.phenoapps.brapi.BrapiAccountConstants
 import org.phenoapps.brapi.R
 
 open class BrapiServerCardPreference @JvmOverloads constructor(
@@ -34,6 +32,19 @@ open class BrapiServerCardPreference @JvmOverloads constructor(
     var ownerLabel: String? = null
         set(value) { field = value; notifyChanged() }
 
+    /**
+     * What the card shows for the account.
+     *
+     * Supplied by the host rather than read here: an account owned by another app keeps its config
+     * out of reach of `getUserData`, so only the host — which can ask that app's config provider —
+     * can describe a shared server.
+     */
+    var displayName: String? = null
+        set(value) { field = value; notifyChanged() }
+
+    var serverUrl: String? = null
+        set(value) { field = value; notifyChanged() }
+
     var hasToken: Boolean? = null
         set(value) { field = value; notifyChanged() }
 
@@ -54,11 +65,9 @@ open class BrapiServerCardPreference @JvmOverloads constructor(
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
         val acct = account ?: return
-        val am = AccountManager.get(context)
 
-        val displayName = am.getUserData(acct, BrapiAccountConstants.KEY_DISPLAY_NAME)
-            ?.takeIf { it.isNotEmpty() } ?: acct.name
-        val serverUrl = am.getUserData(acct, BrapiAccountConstants.KEY_SERVER_URL) ?: ""
+        val shownName = displayName?.takeIf { it.isNotEmpty() } ?: acct.name
+        val shownUrl = serverUrl.orEmpty()
         val tokenVisible = hasToken ?: false
 
         (holder.itemView as? ComposeView)?.apply {
@@ -68,8 +77,8 @@ open class BrapiServerCardPreference @JvmOverloads constructor(
             setContent {
                 PhenoBrapiTheme {
                     BrapiServerCard(
-                        displayName = displayName,
-                        serverUrl = serverUrl,
+                        displayName = shownName,
+                        serverUrl = shownUrl,
                         isActive = isActive,
                         hasToken = tokenVisible,
                         isExpanded = expandedState,

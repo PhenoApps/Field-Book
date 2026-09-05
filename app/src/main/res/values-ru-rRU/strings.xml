@@ -674,6 +674,7 @@
     <string name="dialog_multi_measure_confirm_delete_title">Выбранные наблюдения и прикреплённые медиа для этого признака будут удалены без возможности восстановления.</string>
     <string name="dialog_multi_measure_delete">Удалить</string>
     <string name="dialog_multi_measure_select_all">Выбрать всё</string>
+    <!--- Save failure -->
     <!--- GeoNav -->
     <string name="menu_collect_start_geo_nav_title">Запустить GeoNav</string>
     <string name="activity_collect_found_plot">Найдена делянка поблизости</string>

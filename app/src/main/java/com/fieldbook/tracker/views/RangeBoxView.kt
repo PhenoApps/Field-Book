@@ -506,6 +506,12 @@ class RangeBoxView : ConstraintLayout {
         rangeRight.performClick()
     }
 
+    fun saveLastPlot() {
+        controller.getPreferences().edit {
+            putString(GeneralKeys.LAST_PLOT, cRange.uniqueId)
+        }
+    }
+
     fun saveLastPlotAndTrait() {
         controller.getPreferences().edit {
             putString(GeneralKeys.LAST_PLOT, cRange.uniqueId)

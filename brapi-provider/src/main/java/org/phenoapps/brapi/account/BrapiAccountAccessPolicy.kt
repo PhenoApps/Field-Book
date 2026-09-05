@@ -31,8 +31,24 @@ class BrapiAccountAccessPolicy(
         return getCallingPackages(options).any { BrapiAccountConstants.isPackageAllowed(it) }
     }
 
+    /**
+     * The package that owns [account], read off its type.
+     *
+     * Per-app types encode their owner, which is both cheaper and more reliable than the user-data
+     * copy — the copy is unreadable from anywhere but the owning app. Legacy accounts predate the
+     * per-app types and still have to be asked.
+     */
+    fun ownerPackageOf(account: Account): String? =
+        if (BrapiAccountConstants.isPerAppAccountType(account.type)) {
+            account.type.removePrefix("${BrapiAccountConstants.ACCOUNT_TYPE_PREFIX}.")
+        } else {
+            runCatching {
+                accountManager.getUserData(account, BrapiAccountConstants.KEY_OWNER_PACKAGE)
+            }.getOrNull()
+        }
+
     fun callingPackageForAccount(account: Account, options: Bundle?): String? {
-        val ownerPackage = accountManager.getUserData(account, BrapiAccountConstants.KEY_OWNER_PACKAGE)
+        val ownerPackage = ownerPackageOf(account)
         val callingPackages = getCallingPackages(options)
         return callingPackages.firstOrNull { it == ownerPackage }
             ?: callingPackages.firstOrNull {
@@ -42,7 +58,7 @@ class BrapiAccountAccessPolicy(
 
     fun needsLegacyAccessGrant(account: Account, callingPackage: String): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) return false
-        val ownerPackage = accountManager.getUserData(account, BrapiAccountConstants.KEY_OWNER_PACKAGE)
+        val ownerPackage = ownerPackageOf(account)
         if (ownerPackage.isNullOrEmpty() || ownerPackage == callingPackage) return false
         return accountManager.getUserData(
             account,
@@ -67,8 +83,9 @@ class BrapiAccountAccessPolicy(
         )
     }
 
+    /** Looks up one of this app's own accounts — the only ones its authenticator serves. */
     fun findAccount(accountName: String): Account? =
-        accountManager.getAccountsByType(BrapiAccountConstants.ACCOUNT_TYPE)
+        accountManager.getAccountsByType(BrapiAccountConstants.accountTypeFor(context.packageName))
             .firstOrNull { it.name == accountName }
 
     fun tokenResultBundle(account: Account, authTokenType: String): Bundle =

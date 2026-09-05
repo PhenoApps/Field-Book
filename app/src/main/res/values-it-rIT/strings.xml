@@ -710,6 +710,11 @@
     <string name="dialog_multi_measure_confirm_delete_title">Le osservazioni selezionate e i media allegati per questo carattere verranno eliminati definitivamente.</string>
     <string name="dialog_multi_measure_delete">Elimina</string>
     <string name="dialog_multi_measure_select_all">Seleziona tutti</string>
+    <!--- Save failure -->
+    <string name="dialog_save_failed_title">Impossibile salvare questo valore</string>
+    <string name="dialog_save_failed_message">Nulla è stato registrato per la entrata %1$s. Il valore è ancora a schermo ma non è nel database.\n\nQuesto di solito significa che il dispositivo è fuori spazio di archiviazione. Libera spazio, poi riprova.\n\nNon continuare a raccogliere fino a quando un valore salva - tutto ciò che inserisci sarà perso.</string>
+    <string name="dialog_save_failed_retry">Riprovare</string>
+    <string name="dialog_save_failed_dismiss">Ignora</string>
     <!--- GeoNav -->
     <string name="menu_collect_start_geo_nav_title">Avvia GeoNav</string>
     <string name="activity_collect_found_plot">Navigato verso la parcella in prossimità</string>

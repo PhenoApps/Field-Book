@@ -45,11 +45,7 @@ import com.fieldbook.tracker.traits.formats.parameters.DEFAULT_DURATION_SECONDS
 import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.utilities.CategoryJsonUtil
 import com.fieldbook.tracker.utilities.JsonUtil
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories
 import org.json.JSONObject
 
@@ -94,8 +90,14 @@ class PollinatorTraitLayout : BaseTraitLayout {
     private val traitCategories = mutableStateOf<List<BrAPIScaleValidValuesCategories>>(emptyList())
     private val traitDuration = mutableIntStateOf(DEFAULT_DURATION_SECONDS)
 
-    //cancels the timer coroutine when the layout is reset
-    private var saveJob: Job? = null
+    //the observation the counts belong to, the layout only resets while it is the visible trait
+    private var stateOwner: String? = null
+
+    //counting was started or a count was taken since these counts were loaded
+    private var isSessionActive = false
+
+    //there are changes that have not been written to the observation yet
+    private var isDirty = false
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
@@ -124,11 +126,12 @@ class PollinatorTraitLayout : BaseTraitLayout {
     }
 
     private fun resetObservationState() {
-        cancelTimer()
         isRunning.value = false
         isFinished.value = false
         elapsedSeconds.intValue = 0
         counts.clear()
+        isSessionActive = false
+        isDirty = false
     }
 
     //reload the saved counts when navigating between repeated measures
@@ -139,11 +142,27 @@ class PollinatorTraitLayout : BaseTraitLayout {
             currentTrait?.duration?.toIntOrNull()?.takeIf { it > 0 } ?: DEFAULT_DURATION_SECONDS
         resetObservationState()
         if (onNew == false) restore(currentObservation?.value)
+        stateOwner = observationKey()
         isDataLocked.value = isLocked
     }
 
+    //study, entry, trait and rep the loaded counts came from
+    //the rep only moves without a reload when repeated measures are on, reading it from the
+    //activity otherwise costs a repeated values query on every count
+    private fun observationKey(): String = listOf(
+        collectActivity.studyId,
+        collectActivity.observationUnit,
+        currentTrait?.id,
+        if (collectInputView.isRepeatEnabled()) collectInputView.getRep() else ""
+    ).joinToString("/")
+
+    //a session started here stays editable until it is stopped, frozen applies again on the next load
+    private fun isSessionInProgress(): Boolean = isSessionActive && !isFinished.value
+
     override fun refreshLock() {
         super.refreshLock()
+        //frozen locks an entry once an observation exists and counting writes one on the first count
+        if (isSessionInProgress()) isLocked = collectActivity.isLocked()
         isDataLocked.value = isLocked
         //never keep counting into an observation that has just been locked
         if (isLocked) isRunning.value = false
@@ -169,14 +188,9 @@ class PollinatorTraitLayout : BaseTraitLayout {
         if (collectInputView.isRepeatEnabled()) refreshLayout(false) else loadLayout()
     }
 
-    private fun cancelTimer() {
-        saveJob?.cancel()
-        saveJob = null
-    }
-
     override fun onExit() {
         isRunning.value = false
-        if (hasData()) save()
+        save()
     }
 
     //show the visit total instead of the raw json in the collect input and repeated values toolbar
@@ -202,11 +216,13 @@ class PollinatorTraitLayout : BaseTraitLayout {
 
     private fun key(category: BrAPIScaleValidValuesCategories): String = keyOf(category)
 
-    //build the json payload used by both async saves and the synchronous exit save
+    //build the json payload written for every count, the stop button and the exit save
     private fun buildJson(): String? {
         val cats = categories()
         if (cats.isEmpty()) return null
         val countsJson = JSONObject()
+        //keep counts collected under categories that have since been removed from the trait
+        counts.forEach { (k, count) -> countsJson.put(k, count) }
         cats.forEach { countsJson.put(key(it), counts[key(it)] ?: 0) }
         val json = JSONObject()
         json.put(COUNTS_KEY, countsJson)
@@ -231,18 +247,20 @@ class PollinatorTraitLayout : BaseTraitLayout {
         }
     }
 
+    //switching traits calls onExit on the layout being switched to, never save another entry's counts
     private fun save() {
-        saveJob?.cancel()
-        saveJob = CoroutineScope(Dispatchers.IO).launch {
-            val value = buildJson() ?: return@launch
-            val savedLocked = isLocked
-            collectActivity.updateObservation(currentTrait, value, null)
-            CoroutineScope(Dispatchers.Main).launch {
-                collectInputView.text = decodeValue(value)
-                afterLoadExists(collectActivity, value)
-                isDataLocked.value = savedLocked
-            }
-        }
+        //restoring an observation fills the counts, only write when something was collected here
+        if (!isDirty) return
+        if (stateOwner != observationKey()) return
+        val value = buildJson() ?: return
+        val locked = isLocked
+        collectActivity.updateObservation(currentTrait, value, null)
+        collectInputView.text = decodeValue(value)
+        //afterLoadExists re-locks under frozen, a save must not end a session that is in progress
+        afterLoadExists(collectActivity, value)
+        isLocked = locked
+        isDataLocked.value = isLocked
+        isDirty = false
     }
 
     private fun setupUi() {
@@ -264,13 +282,19 @@ class PollinatorTraitLayout : BaseTraitLayout {
             if (isRunning.value) {
                 val start = SystemClock.elapsedRealtime() - elapsedSeconds.intValue * 1000L
                 while (isRunning.value && elapsedSeconds.intValue < total) {
-                    elapsedSeconds.intValue = ((SystemClock.elapsedRealtime() - start) / 1000).toInt()
+                    val seconds = ((SystemClock.elapsedRealtime() - start) / 1000).toInt()
+                    //the loop ticks faster than the countdown, only a new second is a change
+                    if (seconds != elapsedSeconds.intValue) {
+                        elapsedSeconds.intValue = seconds
+                        isDirty = true
+                    }
                     delay(200)
                 }
                 if (elapsedSeconds.intValue >= total) {
                     elapsedSeconds.intValue = total
                     isRunning.value = false
                     isFinished.value = true
+                    isDirty = true
                     save()
                 }
             }
@@ -318,8 +342,9 @@ class PollinatorTraitLayout : BaseTraitLayout {
                     enabled = canCollect() && elapsedSeconds.intValue > 0
                 ) {
                     isRunning.value = false
-                    save()
                     isFinished.value = true
+                    isDirty = true
+                    save()
                 }
 
                 Text(
@@ -337,8 +362,14 @@ class PollinatorTraitLayout : BaseTraitLayout {
                 ControlButton(
                     if (isRunning.value) Icons.Default.Pause else Icons.Default.PlayArrow,
                     context.getString(if (isRunning.value) R.string.pause else R.string.play),
-                    enabled = canCollect() && categories.isNotEmpty()
-                ) { isRunning.value = !isRunning.value }
+                    //a restored observation longer than a shortened duration has no time left to run
+                    enabled = canCollect() && categories.isNotEmpty() && elapsedSeconds.intValue < total
+                ) {
+                    val wasRunning = isRunning.value
+                    isRunning.value = !wasRunning
+                    //pausing is the only user action that ends counting without ending the observation
+                    if (wasRunning) save() else isSessionActive = true
+                }
             }
         }
     }
@@ -353,6 +384,8 @@ class PollinatorTraitLayout : BaseTraitLayout {
             onClick = {
                 if (isRunning.value && canCollect()) {
                     counts[k] = (counts[k] ?: 0) + 1
+                    isSessionActive = true
+                    isDirty = true
                     save()
                 }
             },

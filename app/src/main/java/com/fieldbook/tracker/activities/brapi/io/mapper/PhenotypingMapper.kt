@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.activities.brapi.io.mapper
 
 import android.content.Context
+import android.util.Log
 import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV2.ADDITIONAL_INFO_OBSERVATION_LEVEL_NAMES
 import com.fieldbook.tracker.objects.TraitObject
@@ -56,21 +57,48 @@ fun BrAPIObservationVariable.toTraitObject(context: Context) = TraitObject().als
         }
     }
 
-    if (additionalInfo != null && additionalInfo.has(ADDITIONAL_INFO_OBSERVATION_LEVEL_NAMES)) {
-
-        additionalInfo.getAsJsonArray(ADDITIONAL_INFO_OBSERVATION_LEVEL_NAMES)?.let { array ->
-
-            val listType = object : TypeToken<List<String?>?>() {}.type
-
-            it.observationLevelNames =
-                Gson().fromJson<List<String>>(
-                    array,
-                    listType
-                )
-
-        }
-    }
+    it.observationLevelNames = getObservationLevelNames()
 
     it.visible = true
 
+}
+
+/**
+ * The BMS implementation of BrAPI 2.x includes an observationLevelNames array in a variable's
+ * additionalInfo. This metadata identifies the level(s) at which a variable is used within a
+ * study/field, and is not otherwise retrievable through GET /variables.
+ *
+ * Returns null when the variable does not carry the metadata.
+ */
+fun BrAPIObservationVariable.getObservationLevelNames(): List<String>? {
+
+    if (additionalInfo == null || !additionalInfo.has(ADDITIONAL_INFO_OBSERVATION_LEVEL_NAMES)) return null
+
+    return try {
+
+        val array = additionalInfo.getAsJsonArray(ADDITIONAL_INFO_OBSERVATION_LEVEL_NAMES) ?: return null
+
+        val listType = object : TypeToken<List<String?>?>() {}.type
+
+        Gson().fromJson<List<String>>(array, listType)
+
+    } catch (e: Exception) {
+
+        Log.e("PhenotypingMapper", "Failed to parse $ADDITIONAL_INFO_OBSERVATION_LEVEL_NAMES", e)
+
+        null
+    }
+}
+
+/**
+ * BMS specific. Variables that declare observation levels only belong to the study at those
+ * levels; variables without the metadata are kept, so servers that don't supply it are unaffected.
+ */
+fun BrAPIObservationVariable.isAtObservationLevel(levelName: String?): Boolean {
+
+    if (levelName == null) return true
+
+    val levels = getObservationLevelNames() ?: return true
+
+    return levels.any { it.equals(levelName, ignoreCase = true) }
 }

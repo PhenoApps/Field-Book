@@ -488,10 +488,36 @@ public class DataHelper {
         ObservationUnitDao.Companion.updateObservationUnitModels(db, models);
     }
 
-    public void updateObservationModels(SQLiteDatabase db, List<ObservationModel> observations) {
+    public int updateObservationModels(SQLiteDatabase db, List<ObservationModel> observations) {
 
-        ObservationDao.Companion.updateObservationModels(db, observations);
+        return ObservationDao.Companion.updateObservationModels(db, observations);
 
+    }
+
+    /**
+     * Reads an observation back out of the database to confirm a write actually landed.
+     * <p>
+     * Android's SQLiteDatabase.insert() catches SQLException internally and returns -1, so a full
+     * disk (SQLiteFullException) or an I/O error (SQLiteDiskIOException) is otherwise
+     * indistinguishable from a successful save. Anything that shows the collector a saved state
+     * must confirm the row exists first.
+     *
+     * @param internalId    the primary key the write should have produced
+     * @param expectedValue the value that was submitted
+     * @return true only if the row exists and holds the submitted value
+     */
+    public boolean isObservationSaved(long internalId, String expectedValue) {
+
+        if (internalId <= 0) return false;
+
+        open();
+
+        String stored = ObservationDao.Companion.getValueById(String.valueOf(internalId));
+
+        if (stored == null) return false;
+
+        return ObservationDao.Companion.sanitizeValue(stored)
+                .equals(ObservationDao.Companion.sanitizeValue(expectedValue));
     }
 
     public void updateObservationMediaUris(ObservationModel observation) {

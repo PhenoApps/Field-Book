@@ -1,11 +1,11 @@
 package com.fieldbook.tracker.utilities
 
 import android.content.Context
-import android.media.ExifInterface
 import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import androidx.exifinterface.media.ExifInterface
 import com.fieldbook.tracker.database.models.ObservationUnitModel
 import com.fieldbook.tracker.database.models.ObservationVariableModel
 import com.fieldbook.tracker.database.models.StudyModel
@@ -32,9 +32,8 @@ class ExifUtil {
 
         fun saveStringToExif(context: Context, data: String, uri: Uri) {
 
-            // ExifInterface(FileDescriptor).saveAttributes() has a bug on some Android versions
-            // where it writes an incorrect APP1 segment length and re-includes the original JPEG's
-            // SOI byte, producing a corrupt file. Using a temp-file path avoids this bug.
+            // ExifInterface needs a seekable file to rewrite in place, which a SAF document uri
+            // does not reliably give, so the image is edited through a temp file and copied back.
             val tempFile = File(context.cacheDir, "exif_edit_${System.currentTimeMillis()}.jpg")
 
             try {
@@ -43,9 +42,21 @@ class ExifUtil {
                     FileOutputStream(tempFile).use { output -> input.copyTo(output) }
                 } ?: return
 
+                // Some cameras hand back an EXIF block that nearly fills the 65535 byte APP1
+                // budget, most of it a padded thumbnail. Clear that out before adding to it,
+                // otherwise the segment overflows and the image is left unreadable.
+                tempFile.writeBytes(JpegUtil.prepareForExifWrite(tempFile.readBytes()))
+
                 val exif = ExifInterface(tempFile.absolutePath)
                 exif.setAttribute(ExifInterface.TAG_USER_COMMENT, data)
                 exif.saveAttributes()
+
+                val written = tempFile.readBytes()
+
+                if (JpegUtil.isJpeg(written) && !JpegUtil.isStructurallyValid(written)) {
+                    Log.e(PhotoTraitLayout.TAG, "saveStringToExif: EXIF write produced an unreadable image, keeping the original")
+                    return
+                }
 
                 // Write the corrected file back, truncating any previous content
                 val out = context.contentResolver.openOutputStream(uri, "wt")
@@ -54,6 +65,13 @@ class ExifUtil {
                 } else {
                     Log.e(PhotoTraitLayout.TAG, "saveStringToExif: openOutputStream returned null, EXIF not written back")
                 }
+
+            } catch (e: IllegalStateException) {
+
+                // androidx's ExifInterface refuses to write an APP1 segment larger than 65535
+                // bytes. The platform one truncated the length instead, which is what left
+                // photos unreadable on devices with a large camera EXIF block.
+                Log.e(PhotoTraitLayout.TAG, "EXIF data too large to write, keeping the original image.", e)
 
             } catch (e: Exception) {
 

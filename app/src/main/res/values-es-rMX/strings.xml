@@ -35,7 +35,7 @@
     <string name="app_intro_intro_title_slide1">¡Bienvenido a Field Book!</string>
     <string name="app_intro_intro_summary_slide1">Tradicionalmente, la captura de datos en el campo requería la escritura y transcripción desde papel. Field Book se creó como una solución digital para la captura de datos que aumenta la velocidad de recolección con una mayor integridad de los mismos.</string>
     <string name="app_intro_intro_title_slide2">Funcionalidad y Personalización</string>
-    <string name="app_intro_intro_summary_slide2">Los datos se introducen en Field Book con diseños de rasgos personalizados y diseñadas para simplificar la captura de datos y minimizar los errores.\n\n Por defecto, los datos recolectados se almacenan localmente, ademas Field Book soporta la Breeding API que permite enviar datos a sistemas compatibles con BrAPI.</string>
+    <string name="app_intro_intro_summary_slide2">Los datos se ingresan en Field Book con diseños de rasgos personalizados y diseñadas para simplificar la captura de datos y minimizar los errores.\n\n Por defecto, los datos recolectados se almacenan localmente, ademas Field Book soporta la Breeding API que permite enviar datos a sistemas compatibles con BrAPI.</string>
     <string name="app_intro_required_setup_title">Configuración Requerida</string>
     <string name="app_intro_required_setup_summary">Para empezar a usar Field Book, otorga los permisos necesarios para la aplicación y luego define una carpeta donde tus datos serán almacenados.</string>
     <string name="app_intro_permissions_title">Permisos</string>
@@ -419,7 +419,7 @@
     <string name="trait_parameter_decimal_places_allowed">Permitir decimales</string>
     <string name="trait_parameter_decimal_places_custom">Máximo de decimales:</string>
     <string name="trait_parameter_decimal_places_custom_hint">1–10</string>
-    <string name="trait_parameter_decimal_places_custom_required">Por favor, introduzca el número de decimales (1–10)</string>
+    <string name="trait_parameter_decimal_places_custom_required">Por favor, ingrese el número de decimales (1–10)</string>
     <string name="trait_parameter_decimal_places_custom_error">Valor debe estar entre 1 y 10</string>
     <string name="trait_parameter_invalid_number">Número inválido</string>
     <string name="trait_parameter_mathematical_symbols">Símbolos Matemáticos</string>
@@ -703,13 +703,18 @@
     <string name="list_item_summary_nav_button_content_description">Navega a la entrada seleccionada.</string>
     <!--- Repeated measures -->
     <string name="view_repeated_values_add_button_content_description">Agrega una nueva observación.</string>
-    <string name="view_repeated_values_add_button_fail">Debe introducir un valor antes de crear una nueva observación.</string>
+    <string name="view_repeated_values_add_button_fail">Debe ingresar un valor antes de crear una nueva observación.</string>
     <string name="menu_collect_repeated_values_indicator">Muestra el número de valores repetidos.</string>
     <string name="dialog_multi_measure_delete_no_observations">No existen observaciones.</string>
     <string name="dialog_multi_measure_delete_title">Observaciones</string>
     <string name="dialog_multi_measure_confirm_delete_title">Las observaciones seleccionadas y la multimedia adjunta para este rasgo se eliminarán permanentemente.</string>
     <string name="dialog_multi_measure_delete">Eliminar</string>
     <string name="dialog_multi_measure_select_all">Seleccionar todo</string>
+    <!--- Save failure -->
+    <string name="dialog_save_failed_title">No se pudo salvar este valor</string>
+    <string name="dialog_save_failed_message">No se ha registrado nada para la entrada %1$s. El valor todavía está en pantalla pero no está en la base de datos.\n\nEsto generalmente significa que el dispositivo está con insuficiente espacio de almacenamiento. Libera espacio, luego vuelve a intentarlo.\n\nNo sigas recolectando hasta que un valor es guardado, todo lo que ingreses se perderá.</string>
+    <string name="dialog_save_failed_retry">Reintentar</string>
+    <string name="dialog_save_failed_dismiss">Descartar</string>
     <!--- GeoNav -->
     <string name="menu_collect_start_geo_nav_title">Iniciar GeoNav</string>
     <string name="activity_collect_found_plot">Navegado a parcela en proximidad</string>
@@ -968,7 +973,7 @@
     <string name="preferences_sound_delete_obs_description">Reproducir sonido al eliminar observación</string>
     <string name="preferences_category_audio_tts_title">Texto a Voz</string>
     <string name="preferences_general_tts_title">Texto a Voz</string>
-    <string name="preferences_general_tts_description">Activar Texto a Voz cuando los datos son introducidos en la actividad de Captura</string>
+    <string name="preferences_general_tts_description">Activar Texto a Voz cuando los datos son ingresados en la actividad de Captura</string>
     <string name="preferences_general_tts_language_title">Elegir idioma</string>
     <string name="preferences_general_tts_language_description">Elegir un idioma de Texto a Voz compatible</string>
     <!-- BrAPI preferences are in the BrAPI section below -->
@@ -1087,7 +1092,7 @@
     <string name="preferences_brapi_barcode_config_dialog_title">Configuración de BrAPI Escaneable</string>
     <string name="qr_code_share_choose_action_title">Elegir Acción</string>
     <string name="act_brapi_auth_http_warning_title">Advertencia HTTP</string>
-    <string name="act_brapi_auth_http_warning_message">Ha introducido una url de http. No hay garantía de que esta conexión sea segura.</string>
+    <string name="act_brapi_auth_http_warning_message">Ha ingresado una url de http. No hay garantía de que esta conexión sea segura.</string>
     <string name="brapi_base_url">URL base</string>
     <string name="brapi_base_url_desc">La URL base para el servidor conectado por BrAPI</string>
     <string name="brapi_choice_to_make_default_dialog_title">Hacer este servidor BrAPI el predeterminado:</string>
@@ -1544,7 +1549,7 @@
     <string name="activity_collect_proximity_warning">GeoNav detenido, fuera de coordenadas de proximidad</string>
     <string name="failed_to_save_study">Error al guardar el estudio</string>
     <string name="no_suitable_file_manager_was_found">No se encontró un Administrador de Archivos adecuado.</string>
-    <string name="trait_error_invalid_multicat_value">Se introdujeron datos categóricos inválidos.</string>
+    <string name="trait_error_invalid_multicat_value">Se ingresaron datos categóricos inválidos.</string>
     <string name="trait_error_multicat_disabled">Categorías multiples encontradas pero Multi-categorías está desactivado para este rasgo</string>
     <string name="dialog_crash_report_title">Error al cargar los datos</string>
     <string name="dialog_crash_report_message">Presione OK para enviar un informe de diagnóstico anónimo para ayudar a mejorar la app.</string>

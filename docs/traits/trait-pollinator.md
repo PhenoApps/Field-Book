@@ -15,8 +15,9 @@ At least one category is required.
 On the Collect screen, press the <img class="icon" src="../_static/icons/formats/play.png"> start button to start the countdown.
 Press the <img class="icon" src="../_static/icons/formats/pause.png"> pause button to pause the countdown.
 Press a category button each time a pollinator of that type is observed to increment its count.
-Press the <img class="icon" src="../_static/icons/formats/stop.png"> stop button to end the observation and save the counts.
-The observation is also saved automatically when the timer reaches zero.
+Press the <img class="icon" src="../_static/icons/formats/stop.png"> stop button to end the observation.
+The observation also ends automatically when the timer reaches zero.
+Counts are saved as they are recorded, so an observation is kept even if it is not stopped.
 Use the delete button in the toolbar to remove a saved observation and start the entry over.
 
 Per-category counts and the elapsed time are saved together for each entry.
