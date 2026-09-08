@@ -3,6 +3,7 @@ package org.phenoapps.brapi.ui
 import android.accounts.Account
 import android.content.Context
 import android.util.AttributeSet
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -62,6 +63,15 @@ open class BrapiServerCardPreference @JvmOverloads constructor(
         isSelectable = false
     }
 
+    /**
+     * Theme wrapper for the card. Defaults to the module theme; hosts override it so the card
+     * follows the theme the user picked in the app rather than the module palette.
+     */
+    @Composable
+    protected open fun Theme(content: @Composable () -> Unit) {
+        PhenoBrapiTheme(content)
+    }
+
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
         val acct = account ?: return
@@ -75,7 +85,7 @@ open class BrapiServerCardPreference @JvmOverloads constructor(
                 ViewCompositionStrategy.DisposeOnDetachedFromWindowOrReleasedFromPool,
             )
             setContent {
-                PhenoBrapiTheme {
+                Theme {
                     BrapiServerCard(
                         displayName = shownName,
                         serverUrl = shownUrl,
