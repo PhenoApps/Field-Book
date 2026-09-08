@@ -162,7 +162,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
@@ -317,6 +317,10 @@ public class CollectActivity extends ThemedActivity
     private View composeMediaAnchor = null;
     private View composeMissingAnchor = null;
     private View composeDeleteAnchor = null;
+
+    // Single executor reused for every onPause backup. Creating a pool per pause leaked its
+    // non daemon threads for the life of the process, and collection sessions pause often.
+    private final ExecutorService backupExecutor = Executors.newSingleThreadExecutor();
 
     /**
      * Trait layouts
@@ -967,25 +971,46 @@ public class CollectActivity extends ThemedActivity
                         // positions: 1/6, 3/6, 5/6 of width (centered horizontally)
                         float[] fractions = new float[]{1f/6f, 3f/6f, 5f/6f};
 
-                        View[] anchors = new View[3];
+                        // initToolbars runs from initWidgets, so this block executes on every plot
+                        // navigation. Reposition the existing anchors instead of adding three more
+                        // views to the root each pass, which previously left every earlier set
+                        // attached and grew the view tree for the length of the session.
+                        View[] anchors = new View[]{composeMediaAnchor, composeMissingAnchor, composeDeleteAnchor};
+
                         for (int i = 0; i < 3; i++) {
-                            View v = new View(CollectActivity.this);
-                            v.setBackgroundColor(android.graphics.Color.TRANSPARENT);
-                            v.setClickable(false);
-                            v.setFocusable(false);
-                            v.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-                            int id = View.generateViewId();
-                            v.setId(id);
 
-                            FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(size, size);
+                            View v = anchors[i];
 
-                            root.addView(v, lp);
+                            if (v == null || v.getParent() != root) {
+
+                                if (v != null && v.getParent() instanceof ViewGroup) {
+                                    ((ViewGroup) v.getParent()).removeView(v);
+                                }
+
+                                v = new View(CollectActivity.this);
+                                v.setBackgroundColor(android.graphics.Color.TRANSPARENT);
+                                v.setClickable(false);
+                                v.setFocusable(false);
+                                v.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
+                                v.setId(View.generateViewId());
+
+                                root.addView(v, new FrameLayout.LayoutParams(size, size));
+
+                                anchors[i] = v;
+
+                            } else {
+
+                                ViewGroup.LayoutParams lp = v.getLayoutParams();
+                                if (lp != null && (lp.width != size || lp.height != size)) {
+                                    lp.width = size;
+                                    lp.height = size;
+                                    v.setLayoutParams(lp);
+                                }
+                            }
 
                             float cx = fractions[i] * w;
                             v.setX(relX + cx - size / 2f);
                             v.setY(relY + (h - size) / 2f);
-
-                            anchors[i] = v;
                         }
 
                         composeMediaAnchor = anchors[0];
@@ -1319,29 +1344,26 @@ public class CollectActivity extends ThemedActivity
 
         database.updateEditDate(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
 
-        // Backup database
-        try {
+        // Backup database. The directory lookup stays off the main thread with the export:
+        // getDirectory resolves through the storage access framework, which lists the tree and
+        // queries each child for its name, so it is the slower half of this work and has caused
+        // ANRs on low end devices where onPause blocks long enough to miss input dispatch.
+        backupExecutor.execute(() -> {
 
-            DocumentFile databaseDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_database);
-            if (databaseDir != null) {
+            try {
 
-                Executor executor = Executors.newFixedThreadPool(2);
-                executor.execute(() -> {
+                DocumentFile databaseDir = BaseDocumentTreeUtil.Companion.getDirectory(this, R.string.dir_database);
+                if (databaseDir != null) {
 
-                    try {
+                    database.exportDatabase(this, "backup");
+                }
 
-                        database.exportDatabase(this,"backup");
-
-                    } catch (IOException io) {
-                        Log.e(TAG, "Error exporting database.", io);
-                    }
-
-                });
+            } catch (IOException io) {
+                Log.e(TAG, "Error exporting database.", io);
+            } catch (Exception e) {
+                Log.e(TAG, "Error backing up database.", e);
             }
-
-        } catch (Exception e) {
-            Log.e(TAG, "Error backing up database.", e);
-        }
+        });
 
         geoNavHelper.stopGeoNav();
 
@@ -1391,6 +1413,9 @@ public class CollectActivity extends ThemedActivity
         }
 
         sensorHelper.unregister();
+
+        //lets an in flight backup finish, but stops the pool from outliving the activity
+        backupExecutor.shutdown();
 
         super.onDestroy();
     }

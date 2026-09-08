@@ -50,6 +50,8 @@ val DefaultAppColors = AppColors(
 
     interactive = InteractiveColors(
         tapTarget = BaseColors.TapTarget,
+        accent = BaseColors.Primary,
+        onAccent = BaseColors.TextHighContrastInverted,
         spinnerSelected = BaseColors.SpinnerSelected,
         spinnerFocused = BaseColors.SpinnerFocused,
         seekBar = BaseColors.SeekbarColor,
@@ -165,6 +167,7 @@ val BlueAppColors = DefaultAppColors.copy(
     ),
 
     interactive = DefaultAppColors.interactive.copy(
+        accent = BlueThemeOverrides.Primary,
         spinnerFocused = BlueThemeOverrides.SpinnerFocused,
         spinnerSelected = BlueThemeOverrides.SpinnerSelected,
         selectedItemBackground = BlueThemeOverrides.SelectedItemBackground
@@ -242,6 +245,8 @@ val HighContrastAppColors = DefaultAppColors.copy(
     ),
 
     text = DefaultAppColors.text.copy(
+        secondary = HighContrastOverrides.TextSecondary,
+        subheading = HighContrastOverrides.SubheadingColor,
         highContrast = HighContrastOverrides.TextHighContrastInverted
     ),
 
@@ -254,6 +259,10 @@ val HighContrastAppColors = DefaultAppColors.copy(
     ),
 
     interactive = DefaultAppColors.interactive.copy(
+        // The high contrast primary is white, so Material components that draw on the background
+        // need the dark shade instead -- this mirrors colorPrimary in BaseAppTheme.HighContrast.
+        accent = HighContrastOverrides.PrimaryDark,
+        onAccent = HighContrastOverrides.Primary,
         spinnerFocused = HighContrastOverrides.SpinnerFocused,
         spinnerSelected = HighContrastOverrides.SpinnerSelected,
         selectedItemBackground = HighContrastOverrides.SelectedItemBackground
