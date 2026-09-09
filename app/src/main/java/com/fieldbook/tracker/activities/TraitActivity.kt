@@ -1,6 +1,10 @@
 package com.fieldbook.tracker.activities
 
+import androidx.preference.PreferenceManager
+import com.fieldbook.tracker.zpl.TemplateRepository
 import android.app.AlertDialog
+import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -67,6 +71,7 @@ class TraitActivity : ThemedActivity() {
     }
 
     private var activeCanopySensitivityHolder: CanopySensitivityParameter.ViewHolder? = null
+    private var pendingPrintTemplateUpdate: Pair<TraitObject, (TraitObject) -> Unit>? = null
 
     private val canopyTestCaptureLauncher = registerForActivityResult(TakePicture()) { success ->
         if (success) {
@@ -82,7 +87,24 @@ class TraitActivity : ThemedActivity() {
             val data = result.data ?: return@registerForActivityResult
             val name = data.getStringExtra(ZplEditorActivity.RESULT_TEMPLATE_NAME)
             Log.d(TAG, "ZPL template saved: $name")
+
+            if (name != null) {
+                pendingPrintTemplateUpdate?.let { (trait, onUpdated) ->
+                    val templateRepository = TemplateRepository(
+                        PreferenceManager.getDefaultSharedPreferences(this)
+                    )
+                    val id = templateRepository.getAllTemplates().entries.find { it.value == name }?.key
+                    if (id != null) {
+                        val updatedTrait = trait.clone()
+                        updatedTrait.printTemplateId = id
+                        onUpdated(updatedTrait)
+
+                        CollectActivity.reloadData = true
+                    }
+                }
+            }
         }
+        pendingPrintTemplateUpdate = null
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -259,6 +281,24 @@ class TraitActivity : ThemedActivity() {
         parameter: BaseFormatParameter, trait: TraitObject,
         onUpdated: (TraitObject) -> Unit,
     ) {
+        if (parameter is PrintTemplateParameter) {
+            pendingPrintTemplateUpdate = trait to onUpdated
+            val context = this
+            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+            val templateRepository = TemplateRepository(prefs)
+            val templateId = trait.printTemplateId
+            val initialZpl = if (templateId.isNotEmpty()) {
+                templateRepository.getTemplate(templateId) ?: ""
+            } else ""
+
+            val intent = Intent(context, ZplEditorActivity::class.java).apply {
+                putExtra(ZplEditorActivity.EXTRA_INITIAL_ZPL, initialZpl)
+                putExtra(ZplEditorActivity.EXTRA_TEMPLATE_NAME, if (templateId.isNotEmpty()) templateRepository.getTemplateName(templateId) else null)
+            }
+            zplEditorLauncher.launch(intent)
+            return
+        }
+
         val dialogView = LayoutInflater.from(this)
             .inflate(R.layout.dialog_trait_parameter_edit, null)
 
@@ -269,13 +309,6 @@ class TraitActivity : ThemedActivity() {
 
         if (parameter is CanopySensitivityParameter) {
             parameter.setActivity(this)
-        }
-
-        if (parameter is PrintTemplateParameter) {
-            parameter.setActivity(this)
-            parameter.setEditorLauncher { intent ->
-                zplEditorLauncher.launch(intent)
-            }
         }
 
         parameter.createViewHolder(parameterContainer)?.let { holder ->

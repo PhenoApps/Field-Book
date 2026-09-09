@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.traits.formats.parameters
 
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
@@ -44,64 +43,11 @@ class PrintTemplateParameter() : BaseFormatParameter(
 
         init {
             templateEditText.setOnClickListener {
-                showTemplateSelectionDialog()
+                launchZplEditor(templateEditText.tag as? String)
             }
             
             templateEditText.isFocusable = false
             templateEditText.isClickable = true
-        }
-
-        private fun showTemplateSelectionDialog() {
-            val context = itemView.context
-            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-            val templateRepository = TemplateRepository(prefs)
-            templateRepository.ensureBuiltInTemplatesExist()
-            
-            val templates = templateRepository.getAllTemplates()
-            val templateNames = templates.values.toList().sorted()
-            
-            val options = mutableListOf<String>()
-            options.add(context.getString(R.string.zpl_template_create_new))
-            options.addAll(templateNames)
-
-            val currentTemplateId = templateEditText.tag as? String ?: ""
-            val currentTemplateName = if (currentTemplateId.isNotEmpty()) {
-                templateRepository.getTemplateName(currentTemplateId) ?: ""
-            } else ""
-
-            val selectedIndex = if (currentTemplateName.isNotEmpty()) {
-                options.indexOf(currentTemplateName).coerceAtLeast(-1)
-            } else -1
-
-            AlertDialog.Builder(context)
-                .setTitle(R.string.label_config_template)
-                .setSingleChoiceItems(options.toTypedArray(), selectedIndex) { dialog, which ->
-                    if (which == 0) {
-                        launchZplEditor(null)
-                        dialog.dismiss()
-                    }
-                }
-                .setPositiveButton(R.string.zpl_template_select) { dialog, _ ->
-                    val listView = (dialog as AlertDialog).listView
-                    val which = listView.checkedItemPosition
-                    if (which > 0) {
-                        val name = options[which]
-                        val id = templates.entries.find { it.value == name }?.key
-                        templateEditText.setText(name)
-                        templateEditText.tag = id
-                    }
-                }
-                .setNeutralButton(R.string.edit) { dialog, _ ->
-                    val listView = (dialog as AlertDialog).listView
-                    val which = listView.checkedItemPosition
-                    if (which > 0) {
-                        val name = options[which]
-                        val id = templates.entries.find { it.value == name }?.key
-                        launchZplEditor(id)
-                    }
-                }
-                .setNegativeButton(R.string.dialog_cancel, null)
-                .show()
         }
 
         private fun launchZplEditor(templateId: String?) {
