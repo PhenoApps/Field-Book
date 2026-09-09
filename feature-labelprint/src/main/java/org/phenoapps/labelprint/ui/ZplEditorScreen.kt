@@ -734,19 +734,9 @@ private fun LabelSettingsDialog(
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
-                val dpiValue = localDpi.toIntOrNull() ?: defaultDpi
-                val widthDots = ((localWidthInches.toFloatOrNull() ?: 0f) * dpiValue).toInt()
-                val heightDots = ((localHeightInches.toFloatOrNull() ?: 0f) * dpiValue).toInt()
-                Text(
-                    text = stringResource(
-                        R.string.zpl_editor_dots_display_format,
-                        widthDots,
-                        heightDots,
-                        dpiValue
-                    ),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                //val dpiValue = localDpi.toIntOrNull() ?: defaultDpi
+                //val widthDots = ((localWidthInches.toFloatOrNull() ?: 0f) * dpiValue).toInt()
+                //val heightDots = ((localHeightInches.toFloatOrNull() ?: 0f) * dpiValue).toInt()
                 var mediaTypeExpanded by remember { mutableStateOf(false) }
                 ExposedDropdownMenuBox(
                     expanded = mediaTypeExpanded,
@@ -952,15 +942,6 @@ private fun AddElementDialog(
                             onValueChange = { fontSize = it.filter { it.isDigit() } },
                             label = { Text(stringResource(R.string.zpl_editor_font_size)) },
                             singleLine = true,
-                            supportingText = { Text(stringResource(R.string.zpl_editor_font_size_helper)) },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        OutlinedTextField(
-                            value = blockWidth,
-                            onValueChange = { blockWidth = it.filter { it.isDigit() } },
-                            label = { Text(stringResource(R.string.zpl_editor_block_width)) },
-                            singleLine = true,
-                            supportingText = { Text(stringResource(R.string.zpl_editor_block_width_helper)) },
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
