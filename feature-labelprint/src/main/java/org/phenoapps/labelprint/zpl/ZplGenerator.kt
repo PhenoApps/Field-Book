@@ -166,6 +166,7 @@ object ZplGenerator {
                 val placeholder = placeholderMatch?.groupValues?.get(1) ?: fullText
                 val prefix = if (placeholderMatch != null) fullText.substringBefore(placeholder) else ""
                 val suffix = if (placeholderMatch != null) fullText.substringAfter(placeholder) else ""
+                val isDate = placeholder.startsWith("{date")
 
                 elements.add(
                     LabelDesignElement(
@@ -177,7 +178,8 @@ object ZplGenerator {
                         fontSize = fontSize,
                         blockWidth = blockWidth,
                         prefix = prefix,
-                        suffix = suffix
+                        suffix = suffix,
+                        isDate = isDate
                     )
                 )
             }

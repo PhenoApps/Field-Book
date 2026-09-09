@@ -77,10 +77,7 @@ class LabelPrintStore(private val prefs: SharedPreferences) {
     fun buildFieldOptions(context: Context, attributes: Array<String>) {
         fieldOptions = LabelPrintService.buildFieldOptions(
             fieldNameLabel = context.getString(R.string.field_name_attribute),
-            attributes = attributes.toList(),
-            dateLabel = context.getString(R.string.trait_layout_print_label_date_option),
-            blankLabel = context.getString(R.string.trait_layout_print_label_blank_option),
-            defaultValueLabel = context.getString(R.string.trait_layout_print_label_default_value_option)
+            attributes = attributes.toList()
         )
     }
 

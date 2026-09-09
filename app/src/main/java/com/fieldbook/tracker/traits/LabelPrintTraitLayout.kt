@@ -236,16 +236,8 @@ class LabelPrintTraitLayout : BaseTraitLayout {
 
     private fun showAttributeChooserDialog() {
         val activity = mActivity as? CollectActivity ?: return
-        val defaultValueLabel =
-            context.getString(R.string.trait_layout_print_label_default_value_option)
-        val dateLabel = context.getString(R.string.trait_layout_print_label_date_option)
-        val blankLabel = context.getString(R.string.trait_layout_print_label_blank_option)
 
-        val dialog = LabelFieldChooserDialog(
-            dateLabel = dateLabel,
-            blankLabel = blankLabel,
-            defaultValueLabel = defaultValueLabel
-        )
+        val dialog = LabelFieldChooserDialog()
         dialog.setOnAttributeSelectedListener(object :
             AttributeChooserDialog.OnAttributeSelectedListener {
             override fun onAttributeSelected(model: AttributeAdapter.AttributeModel) {

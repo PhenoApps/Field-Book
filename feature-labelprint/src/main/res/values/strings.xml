@@ -34,6 +34,7 @@
     <string name="zpl_editor_element_text">Text</string>
     <string name="zpl_editor_element_qr">QR Code</string>
     <string name="zpl_editor_element_barcode">Barcode (Code 128)</string>
+    <string name="zpl_editor_date_field">Date Field</string>
     <string name="zpl_editor_default_value">Default Value</string>
     <string name="zpl_editor_prefix">Prefix</string>
     <string name="zpl_editor_suffix">Suffix</string>

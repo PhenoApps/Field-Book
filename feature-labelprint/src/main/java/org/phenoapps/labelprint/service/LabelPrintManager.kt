@@ -32,7 +32,7 @@ class LabelPrintManager @Inject constructor(
             val placeholders = mutableListOf<String>()
             for (match in PLACEHOLDER_PATTERN.findAll(templateZpl)) {
                 val placeholder = match.value
-                if (placeholder !in placeholders) {
+                if (placeholder !in placeholders && !placeholder.startsWith("{date")) {
                     placeholders.add(placeholder)
                 }
             }
@@ -46,6 +46,13 @@ class LabelPrintManager @Inject constructor(
             var result = templateZpl
             for ((placeholder, value) in assignments) {
                 result = result.replace(placeholder, value)
+            }
+            // Automatically resolve date placeholders
+            val dateStr = currentDateString()
+            for (match in PLACEHOLDER_PATTERN.findAll(result)) {
+                if (match.value.startsWith("{date")) {
+                    result = result.replace(match.value, dateStr)
+                }
             }
             return result
         }

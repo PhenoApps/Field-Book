@@ -118,17 +118,11 @@ class LabelPrintService @Inject constructor(
 
         fun buildFieldOptions(
             fieldNameLabel: String,
-            attributes: List<String>,
-            dateLabel: String,
-            blankLabel: String,
-            defaultValueLabel: String
+            attributes: List<String>
         ): List<String> {
             return buildList {
                 add(fieldNameLabel)
                 addAll(attributes)
-                add(dateLabel)
-                add(defaultValueLabel)
-                add(blankLabel)
             }
         }
 
