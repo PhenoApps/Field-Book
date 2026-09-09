@@ -18,7 +18,6 @@ import com.fieldbook.tracker.adapters.AttributeAdapter
 import com.fieldbook.tracker.dialogs.AttributeChooserDialog
 import com.fieldbook.tracker.dialogs.LabelFieldChooserDialog
 import com.fieldbook.tracker.preferences.GeneralKeys
-import com.fieldbook.tracker.printing.LabelFieldAssignmentDialog
 import com.fieldbook.tracker.printing.LabelPrintConfigDialog
 import com.fieldbook.tracker.printing.LabelPrintMainView
 import com.fieldbook.tracker.printing.LabelPrintService
@@ -149,7 +148,6 @@ class LabelPrintTraitLayout : BaseTraitLayout {
                 LabelPrintMainView(
                     onPrintClick = { printLabel() },
                     onSettingsClick = { store.showConfigDialog.value = true },
-                    onEditClick = { store.showFieldDialog.value = true },
                     onConnectClick = { connectToPrinter() },
                     isPrinterConnected = store.isPrinterConnected.value,
                     copiesCount = copiesCount,
@@ -157,26 +155,6 @@ class LabelPrintTraitLayout : BaseTraitLayout {
                 )
 
                 if (store.showConfigDialog.value) {
-                    LabelPrintConfigDialog(
-                        currentCopies = store.selectedCopies.intValue.toString(),
-                        copiesOptions = LabelPrintService.COPIES_OPTIONS,
-                        onConfirm = { copies ->
-                            store.selectedCopies.intValue = copies.toIntOrNull() ?: 1
-                            store.saveConfig()
-                            store.assignmentsRevision.intValue++
-                            store.showConfigDialog.value = false
-                        },
-                        onDismiss = {
-                            store.assignmentsRevision.intValue++
-                            store.showConfigDialog.value = false
-                        },
-                        onConnectClick = { connectToPrinter() },
-                        onDisconnectClick = { disconnectPrinter() },
-                        onCalibrate = { calibratePrinter() }
-                    )
-                }
-
-                if (store.showFieldDialog.value) {
                     val currentTemplateZpl = remember(
                         currentTrait?.printTemplateId
                     ) {
@@ -205,29 +183,39 @@ class LabelPrintTraitLayout : BaseTraitLayout {
                         merged
                     }
 
-                    LabelFieldAssignmentDialog(
+                    LabelPrintConfigDialog(
+                        currentCopies = store.selectedCopies.intValue.toString(),
+                        copiesOptions = LabelPrintService.COPIES_OPTIONS,
+                        onConfirm = { copies ->
+                            store.selectedCopies.intValue = copies.toIntOrNull() ?: 1
+                            store.saveConfig()
+
+                            val id = currentTrait?.printTemplateId
+                            val templateName =
+                                if (id != null) templateRepository.getTemplateName(id) else null
+                            if (templateName != null) {
+                                templateRepository.saveAssignments(templateName, currentAssignments)
+                                val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+                                templateRepository.saveStudyAssignments(studyId, currentAssignments)
+                            }
+
+                            store.assignmentsRevision.intValue++
+                            store.fieldAssignments.clear()
+                            store.showConfigDialog.value = false
+                        },
+                        onDismiss = {
+                            store.fieldAssignments.clear()
+                            store.assignmentsRevision.intValue++
+                            store.showConfigDialog.value = false
+                        },
+                        onConnectClick = { connectToPrinter() },
+                        onDisconnectClick = { disconnectPrinter() },
+                        onCalibrate = { calibratePrinter() },
                         templateZpl = currentTemplateZpl,
                         currentAssignments = currentAssignments,
                         onFieldClick = { placeholder ->
                             store.pendingFieldPlaceholder = placeholder
                             showAttributeChooserDialog()
-                        },
-                        onConfirm = { assignments ->
-                            val id = currentTrait?.printTemplateId
-                            val templateName =
-                                if (id != null) templateRepository.getTemplateName(id) else null
-                            if (templateName != null) {
-                                templateRepository.saveAssignments(templateName, assignments)
-                                val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
-                                templateRepository.saveStudyAssignments(studyId, assignments)
-                            }
-                            store.assignmentsRevision.intValue++
-                            store.fieldAssignments.clear()
-                            store.showFieldDialog.value = false
-                        },
-                        onDismiss = {
-                            store.fieldAssignments.clear()
-                            store.showFieldDialog.value = false
                         }
                     )
                 }

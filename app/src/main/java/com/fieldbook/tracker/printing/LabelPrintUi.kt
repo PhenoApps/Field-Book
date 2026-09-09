@@ -15,7 +15,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LinkOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
@@ -23,6 +22,7 @@ import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -49,7 +49,6 @@ import org.phenoapps.labelprint.zpl.ZplLabel
 fun LabelPrintMainView(
     onPrintClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    onEditClick: () -> Unit = {},
     onConnectClick: () -> Unit = {},
     isPrinterConnected: Boolean = true,
     copiesCount: Int,
@@ -132,24 +131,8 @@ fun LabelPrintMainView(
                 }
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
-
-            IconButton(
-                onClick = onEditClick,
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = CircleShape
-                    )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = "Edit label fields",
-                    modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-            }
+            // Balanced spacer to keep the print button centered (matches settings button + spacer)
+            Spacer(modifier = Modifier.width(16.dp + 40.dp))
         }
     }
 }
@@ -162,9 +145,16 @@ fun LabelPrintConfigDialog(
     onDismiss: () -> Unit,
     onConnectClick: () -> Unit = {},
     onDisconnectClick: (() -> Unit)? = null,
-    onCalibrate: (() -> Unit)? = null
+    onCalibrate: (() -> Unit)? = null,
+    templateZpl: String = "",
+    currentAssignments: Map<String, String> = emptyMap(),
+    onFieldClick: (placeholder: String) -> Unit = {}
 ) {
     var localCopies by remember { mutableStateOf(currentCopies) }
+
+    val placeholders = remember(templateZpl) {
+        LabelPrintManager.extractPlaceholders(templateZpl)
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -213,6 +203,21 @@ fun LabelPrintConfigDialog(
                         }
                     }
                 }
+
+                if (placeholders.isNotEmpty()) {
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                    Text(
+                        text = stringResource(R.string.label_fields_title),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                    placeholders.forEach { placeholder ->
+                        LabelFieldSelector(
+                            label = placeholder,
+                            selected = currentAssignments[placeholder] ?: "",
+                            onClick = { onFieldClick(placeholder) }
+                        )
+                    }
+                }
             }
         },
         confirmButton = {
@@ -220,56 +225,6 @@ fun LabelPrintConfigDialog(
                 onConfirm(localCopies)
             }) {
                 Text(stringResource(R.string.dialog_ok))
-            }
-        },
-        dismissButton = { }
-    )
-}
-
-@Composable
-fun LabelFieldAssignmentDialog(
-    templateZpl: String,
-    currentAssignments: Map<String, String>,
-    onFieldClick: (placeholder: String) -> Unit,
-    onConfirm: (assignments: Map<String, String>) -> Unit,
-    onDismiss: () -> Unit
-) {
-    val placeholders = remember(templateZpl) {
-        LabelPrintManager.extractPlaceholders(templateZpl)
-    }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
-        title = { Text(stringResource(R.string.label_fields_title)) },
-        text = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                placeholders.forEach { placeholder ->
-                    LabelFieldSelector(
-                        label = placeholder,
-                        selected = currentAssignments[placeholder] ?: "",
-                        onClick = { onFieldClick(placeholder) }
-                    )
-                }
-                if (placeholders.isEmpty()) {
-                    Text(
-                        text = stringResource(R.string.label_fields_no_fields),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = {
-                onConfirm(currentAssignments)
-            }) {
-                Text(stringResource(R.string.dialog_apply))
             }
         },
         dismissButton = {
