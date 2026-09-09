@@ -342,24 +342,6 @@ fun ZplEditorScreen(
                         contentDescription = if (showZplCode) "Hide ZPL" else "Show ZPL"
                     )
                 }
-                if (selectedElementId != null) {
-                    FilledTonalIconButton(onClick = { showEditElementDialog = true }) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit selected")
-                    }
-                    FilledTonalIconButton(
-                        onClick = {
-                            elements.removeAll { it.id == selectedElementId }
-                            selectedElementId = null
-                            regenerateZpl()
-                        }
-                    ) {
-                        Icon(
-                            Icons.Default.Delete,
-                            contentDescription = "Delete selected",
-                            tint = MaterialTheme.colorScheme.error
-                        )
-                    }
-                }
             }
 
             val parsedLabel = remember(zplText) {
@@ -402,18 +384,67 @@ fun ZplEditorScreen(
                         .clip(RoundedCornerShape(8.dp))
                 )
 
-                IconButton(
-                    onClick = { showAddElementDialog = true },
+                Row(
                     modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(16.dp)
-                        .background(color = MaterialTheme.colorScheme.primary, shape = CircleShape)
+                        .fillMaxWidth()
+                        .align(Alignment.BottomStart)
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
                 ) {
-                    Icon(
-                        Icons.Default.Add,
-                        contentDescription = "Add element",
-                        tint = MaterialTheme.colorScheme.onPrimary
-                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        AnimatedVisibility(visible = selectedElementId != null) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                IconButton(
+                                    onClick = { showEditElementDialog = true },
+                                    modifier = Modifier
+                                        .background(
+                                            color = MaterialTheme.colorScheme.secondaryContainer,
+                                            shape = CircleShape
+                                        )
+                                ) {
+                                    Icon(
+                                        Icons.Default.Edit,
+                                        contentDescription = "Edit selected",
+                                        tint = MaterialTheme.colorScheme.onSecondaryContainer
+                                    )
+                                }
+                                IconButton(
+                                    onClick = {
+                                        elements.removeAll { it.id == selectedElementId }
+                                        selectedElementId = null
+                                        regenerateZpl()
+                                    },
+                                    modifier = Modifier
+                                        .background(
+                                            color = MaterialTheme.colorScheme.errorContainer,
+                                            shape = CircleShape
+                                        )
+                                ) {
+                                    Icon(
+                                        Icons.Default.Delete,
+                                        contentDescription = "Delete selected",
+                                        tint = MaterialTheme.colorScheme.onErrorContainer
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    IconButton(
+                        onClick = { showAddElementDialog = true },
+                        modifier = Modifier
+                            .background(
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = CircleShape
+                            )
+                    ) {
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = "Add element",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
                 }
             }
 
