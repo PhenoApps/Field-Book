@@ -260,10 +260,12 @@ fun ZplEditorScreen(
             }
         }
     ) { innerPadding ->
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(innerPadding)
-            .imePadding()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .imePadding()
+        ) {
             var dropdownExpanded by remember { mutableStateOf(false) }
 
             ExposedDropdownMenuBox(
@@ -375,9 +377,11 @@ fun ZplEditorScreen(
                 }
             }
 
-            Box(modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
                 LabelDesignCanvas(
                     elements = elements.toList(),
                     labelWidthDots = labelWidth,
@@ -418,9 +422,11 @@ fun ZplEditorScreen(
                 enter = expandVertically(),
                 exit = shrinkVertically()
             ) {
-                Column(modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                ) {
                     Text(
                         text = stringResource(R.string.zpl_editor_code_label),
                         style = MaterialTheme.typography.labelMedium,
@@ -936,7 +942,6 @@ private fun AddElementDialog(
                     value = defaultValue,
                     onValueChange = { defaultValue = it },
                     label = { Text(stringResource(R.string.zpl_editor_default_value)) },
-                    placeholder = { Text(stringResource(R.string.zpl_editor_default_value_placeholder)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -1070,7 +1075,6 @@ private fun EditElementDialog(
                     value = defaultValue,
                     onValueChange = { defaultValue = it },
                     label = { Text(stringResource(R.string.zpl_editor_default_value)) },
-                    placeholder = { Text(stringResource(R.string.zpl_editor_default_value_placeholder)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
