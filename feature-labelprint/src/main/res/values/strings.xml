@@ -34,6 +34,8 @@
     <string name="zpl_editor_element_qr">QR Code</string>
     <string name="zpl_editor_element_barcode">Barcode (Code 128)</string>
     <string name="zpl_editor_default_value">Default Value</string>
+    <string name="zpl_editor_prefix">Prefix</string>
+    <string name="zpl_editor_suffix">Suffix</string>
     <string name="zpl_editor_default_value_placeholder">Shown when no property is assigned</string>
     <string name="zpl_editor_font_size">Font Size (dots)</string>
     <string name="zpl_editor_font_size_helper">Height of text in dots (203 DPI: 28 ≈ 10pt)</string>

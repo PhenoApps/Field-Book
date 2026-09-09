@@ -124,7 +124,8 @@ fun LabelDesignCanvas(
                                     val guideW: Float
                                     if (hitElement.type == LabelDesignElementType.TEXT) {
                                         hitTestPaint.textSize = hitElement.fontSize.toFloat()
-                                        guideW = hitTestPaint.measureText(hitElement.placeholder)
+                                        val displayText = "${hitElement.prefix}${hitElement.placeholder}${hitElement.suffix}"
+                                        guideW = hitTestPaint.measureText(displayText)
                                     } else {
                                         guideW = dragBounds.width()
                                     }
@@ -143,7 +144,8 @@ fun LabelDesignCanvas(
                                         val otherCx: Float
                                         if (other.type == LabelDesignElementType.TEXT) {
                                             hitTestPaint.textSize = other.fontSize.toFloat()
-                                            val tw = hitTestPaint.measureText(other.placeholder)
+                                            val displayText = "${other.prefix}${other.placeholder}${other.suffix}"
+                                            val tw = hitTestPaint.measureText(displayText)
                                             otherCx = other.x + tw / 2f
                                         } else {
                                             otherCx = (ob.left + ob.right) / 2f
@@ -331,7 +333,7 @@ private fun drawTextElement(
         isAntiAlias = true
     }
 
-    val displayText = element.placeholder
+    val displayText = "${element.prefix}${element.placeholder}${element.suffix}"
     val textWidth = textPaint.measureText(displayText)
     val metrics = textPaint.fontMetrics
     val naturalHeight = -metrics.ascent + metrics.descent
@@ -526,7 +528,8 @@ private fun getElementHitBounds(element: LabelDesignElement): RectF {
     val rawBounds = when (element.type) {
         LabelDesignElementType.TEXT -> {
             hitTestPaint.textSize = element.fontSize.toFloat()
-            val measuredWidth = hitTestPaint.measureText(element.placeholder)
+            val displayText = "${element.prefix}${element.placeholder}${element.suffix}"
+            val measuredWidth = hitTestPaint.measureText(displayText)
             val width = if (element.blockWidth > 0) element.blockWidth.toFloat() else measuredWidth
             val height = element.fontSize.toFloat()
             RectF(element.x.toFloat(), element.y.toFloat(), element.x + width, element.y + height)
@@ -566,7 +569,8 @@ private fun getElementVisualBounds(element: LabelDesignElement): RectF {
     return when (element.type) {
         LabelDesignElementType.TEXT -> {
             hitTestPaint.textSize = element.fontSize.toFloat()
-            val measuredWidth = hitTestPaint.measureText(element.placeholder)
+            val displayText = "${element.prefix}${element.placeholder}${element.suffix}"
+            val measuredWidth = hitTestPaint.measureText(displayText)
             val width = if (element.blockWidth > 0) element.blockWidth.toFloat() else measuredWidth
             val height = element.fontSize.toFloat()
             RectF(

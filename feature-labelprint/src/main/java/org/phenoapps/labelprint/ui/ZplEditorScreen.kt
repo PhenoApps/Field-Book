@@ -892,6 +892,8 @@ private fun AddElementDialog(
 ) {
     var elementType by remember { mutableStateOf(LabelDesignElementType.TEXT) }
     var defaultValue by remember { mutableStateOf("") }
+    var prefix by remember { mutableStateOf("") }
+    var suffix by remember { mutableStateOf("") }
     var fontSize by remember { mutableStateOf("28") }
     var blockWidth by remember { mutableStateOf("0") }
     var magnification by remember { mutableStateOf("5") }
@@ -969,6 +971,20 @@ private fun AddElementDialog(
                 when (elementType) {
                     LabelDesignElementType.TEXT -> {
                         OutlinedTextField(
+                            value = prefix,
+                            onValueChange = { prefix = it },
+                            label = { Text(stringResource(R.string.zpl_editor_prefix)) },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        OutlinedTextField(
+                            value = suffix,
+                            onValueChange = { suffix = it },
+                            label = { Text(stringResource(R.string.zpl_editor_suffix)) },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        OutlinedTextField(
                             value = fontSize,
                             onValueChange = { fontSize = it.filter { it.isDigit() } },
                             label = { Text(stringResource(R.string.zpl_editor_font_size)) },
@@ -1019,6 +1035,8 @@ private fun AddElementDialog(
                         y = 0,
                         placeholder = placeholderId,
                         defaultValue = defaultValue,
+                        prefix = prefix,
+                        suffix = suffix,
                         fontSize = fontSize.toIntOrNull()?.coerceIn(10, 300) ?: 28,
                         blockWidth = blockWidth.toIntOrNull()?.coerceAtLeast(0) ?: 0
                     )
@@ -1059,6 +1077,8 @@ private fun EditElementDialog(
     onDismiss: () -> Unit
 ) {
     var defaultValue by remember { mutableStateOf(element.defaultValue) }
+    var prefix by remember { mutableStateOf(element.prefix) }
+    var suffix by remember { mutableStateOf(element.suffix) }
     var fontSize by remember { mutableStateOf(element.fontSize.toString()) }
     var blockWidth by remember { mutableStateOf(element.blockWidth.toString()) }
     var magnification by remember { mutableStateOf(element.magnification.toString()) }
@@ -1092,6 +1112,20 @@ private fun EditElementDialog(
                 )
                 when (element.type) {
                     LabelDesignElementType.TEXT -> {
+                        OutlinedTextField(
+                            value = prefix,
+                            onValueChange = { prefix = it },
+                            label = { Text(stringResource(R.string.zpl_editor_prefix)) },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        OutlinedTextField(
+                            value = suffix,
+                            onValueChange = { suffix = it },
+                            label = { Text(stringResource(R.string.zpl_editor_suffix)) },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                         OutlinedTextField(
                             value = fontSize,
                             onValueChange = { fontSize = it.filter { it.isDigit() } },
@@ -1147,6 +1181,8 @@ private fun EditElementDialog(
                 val updated = when (element.type) {
                     LabelDesignElementType.TEXT -> element.copy(
                         defaultValue = defaultValue,
+                        prefix = prefix,
+                        suffix = suffix,
                         fontSize = fontSize.toIntOrNull()?.coerceIn(10, 300) ?: element.fontSize,
                         blockWidth = blockWidth.toIntOrNull()?.coerceAtLeast(0)
                             ?: element.blockWidth

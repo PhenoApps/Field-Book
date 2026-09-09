@@ -24,5 +24,7 @@ data class LabelDesignElement(
     val magnification: Int = 5,
     val blockWidth: Int = 0,
     val barcodeHeight: Int = 80,
-    val moduleWidth: Int = 2
+    val moduleWidth: Int = 2,
+    val prefix: String = "",
+    val suffix: String = ""
 )

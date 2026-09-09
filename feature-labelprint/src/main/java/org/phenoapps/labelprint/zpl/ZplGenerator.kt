@@ -51,7 +51,7 @@ object ZplGenerator {
                         lines.add("^FB${element.blockWidth},2,0,C,0")
                     }
                     lines.add("^A0,${element.fontSize},")
-                    lines.add("^FD${element.placeholder}^FS")
+                    lines.add("^FD${element.prefix}${element.placeholder}${element.suffix}^FS")
                 }
                 LabelDesignElementType.QR_CODE -> {
                     lines.add("^FO${element.x},${element.y}")
@@ -161,7 +161,11 @@ object ZplGenerator {
                 val blockMatch = Regex("""\^FB(\d+),""").find(segment)
                 val blockWidth = blockMatch?.groupValues?.get(1)?.toIntOrNull() ?: 0
                 val dataMatch = Regex("""\^FD(.+?)\^FS""").find(segment)
-                val placeholder = dataMatch?.groupValues?.get(1) ?: "text"
+                val fullText = dataMatch?.groupValues?.get(1) ?: "text"
+                val placeholderMatch = Regex("""(\{.+?\})""").find(fullText)
+                val placeholder = placeholderMatch?.groupValues?.get(1) ?: fullText
+                val prefix = if (placeholderMatch != null) fullText.substringBefore(placeholder) else ""
+                val suffix = if (placeholderMatch != null) fullText.substringAfter(placeholder) else ""
 
                 elements.add(
                     LabelDesignElement(
@@ -171,7 +175,9 @@ object ZplGenerator {
                         y = y,
                         placeholder = placeholder,
                         fontSize = fontSize,
-                        blockWidth = blockWidth
+                        blockWidth = blockWidth,
+                        prefix = prefix,
+                        suffix = suffix
                     )
                 )
             }
