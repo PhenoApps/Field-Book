@@ -106,6 +106,10 @@ class LabelPrintTraitLayout : BaseTraitLayout {
         store.currentPlotIdState.value = currentRange?.uniqueId
         refreshPrinterConnectionState()
 
+        val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+        val attributes = database.getAllObservationUnitAttributeNames(studyId)
+        store.buildFieldOptions(context, attributes)
+
         currentTrait?.printTemplateId?.let { templateId ->
             if (templateId.isNotEmpty()) {
                 store.selectedTemplateNameState.value =
