@@ -56,6 +56,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -102,7 +103,7 @@ fun ZplEditorScreen(
     initialTemplateName: String? = null,
     templates: Map<String, String>, // name -> zpl
     onDismiss: () -> Unit,
-    onSave: (name: String, zpl: String, defaultValues: Map<String, String>) -> Unit,
+    onSave: (name: String, zpl: String) -> Unit,
     onDelete: (name: String) -> Unit,
     onExport: (suggestedName: String, zpl: String) -> Unit,
     onReadFromDevice: (suspend () -> LabelSettings?)? = null
@@ -144,6 +145,15 @@ fun ZplEditorScreen(
     var showAddElementDialog by remember { mutableStateOf(false) }
     var showEditElementDialog by remember { mutableStateOf(false) }
     var selectedElementId by remember { mutableStateOf<String?>(null) }
+
+    val hasGlobalErrors by remember {
+        derivedStateOf {
+            elements.any {
+                (it.type == LabelDesignElementType.TEXT && (it.prefix.contains('{') || it.prefix.contains('}') || it.prefix.contains('^'))) ||
+                        (it.type == LabelDesignElementType.TEXT && (it.suffix.contains('{') || it.suffix.contains('}') || it.suffix.contains('^')))
+            }
+        }
+    }
 
     fun nextElementId(): String {
         val existingIds = elements.map { it.id }.toSet()
@@ -205,7 +215,10 @@ fun ZplEditorScreen(
                     ) {
                         Icon(Icons.Default.Refresh, contentDescription = "Reset")
                     }
-                    IconButton(onClick = { onExport(templateName ?: "template", zplText) }) {
+                    IconButton(
+                        onClick = { onExport(templateName ?: "template", zplText) },
+                        enabled = !hasGlobalErrors
+                    ) {
                         Icon(Icons.Default.Save, contentDescription = "Export")
                     }
                 },
@@ -241,19 +254,17 @@ fun ZplEditorScreen(
                 Button(
                     onClick = {
                         if (templateName != null) {
-                            onSave(
-                                templateName!!,
-                                zplText,
-                                elements.associate { it.placeholder to it.defaultValue })
+                            onSave(templateName!!, zplText)
                             onDismiss()
                         } else {
                             showSaveDialog = true
                         }
                     },
                     modifier = Modifier.weight(1f),
+                    enabled = !hasGlobalErrors,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White,
-                        contentColor = MaterialTheme.colorScheme.primary
+                        containerColor = if (hasGlobalErrors) Color.LightGray else Color.White,
+                        contentColor = if (hasGlobalErrors) Color.DarkGray else MaterialTheme.colorScheme.primary
                     )
                 ) {
                     Icon(Icons.Default.Save, null, Modifier.padding(end = 4.dp))
@@ -368,25 +379,45 @@ fun ZplEditorScreen(
                     .fillMaxWidth()
                     .weight(1f)
             ) {
-                LabelDesignCanvas(
-                    elements = elements.toList(),
-                    labelWidthDots = labelWidth,
-                    labelHeightDots = labelHeight,
-                    selectedElementId = selectedElementId,
-                    onElementSelected = { id -> selectedElementId = id },
-                    onElementMoved = { id, newX, newY ->
-                        val index = elements.indexOfFirst { it.id == id }
-                        if (index >= 0) {
-                            elements[index] = elements[index].copy(x = newX, y = newY)
-                            regenerateZpl()
+                Column {
+                    AnimatedVisibility(visible = hasGlobalErrors) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp, vertical = 4.dp)
+                                .background(
+                                    MaterialTheme.colorScheme.errorContainer,
+                                    RoundedCornerShape(4.dp)
+                                )
+                                .padding(8.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.zpl_editor_invalid_chars),
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                style = MaterialTheme.typography.bodySmall
+                            )
                         }
-                    },
-                    parsedLabel = parsedLabel,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 12.dp, vertical = 8.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                )
+                    }
+                    LabelDesignCanvas(
+                        elements = elements.toList(),
+                        labelWidthDots = labelWidth,
+                        labelHeightDots = labelHeight,
+                        selectedElementId = selectedElementId,
+                        onElementSelected = { id -> selectedElementId = id },
+                        onElementMoved = { id, newX, newY ->
+                            val index = elements.indexOfFirst { it.id == id }
+                            if (index >= 0) {
+                                elements[index] = elements[index].copy(x = newX, y = newY)
+                                regenerateZpl()
+                            }
+                        },
+                        parsedLabel = parsedLabel,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 12.dp, vertical = 8.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                    )
+                }
 
                 Row(
                     modifier = Modifier
@@ -624,10 +655,7 @@ fun ZplEditorScreen(
                 TextButton(onClick = {
                     if (saveName.isBlank()) showError = true
                     else {
-                        onSave(
-                            saveName.trim(),
-                            zplText,
-                            elements.associate { it.placeholder to it.defaultValue })
+                        onSave(saveName.trim(), zplText)
                         templateName = saveName.trim()
                         selectedTemplateName = saveName.trim()
                         showSaveDialog = false
@@ -897,7 +925,6 @@ private fun AddElementDialog(
     onDismiss: () -> Unit
 ) {
     var elementType by remember { mutableStateOf(LabelDesignElementType.TEXT) }
-    var defaultValue by remember { mutableStateOf("") }
     var prefix by remember { mutableStateOf("") }
     var suffix by remember { mutableStateOf("") }
     var fontSize by remember { mutableStateOf("28") }
@@ -907,6 +934,11 @@ private fun AddElementDialog(
     var moduleWidth by remember { mutableStateOf("2") }
     var typeExpanded by remember { mutableStateOf(false) }
     var isDate by remember { mutableStateOf(false) }
+
+    val hasInvalidChars = remember(prefix, suffix) {
+        prefix.contains('{') || prefix.contains('}') || prefix.contains('^') ||
+                suffix.contains('{') || suffix.contains('}') || suffix.contains('^')
+    }
 
     val placeholderId = when (elementType) {
         LabelDesignElementType.TEXT -> if (isDate) "{date}" else "{text$nextTextIndex}"
@@ -968,14 +1000,6 @@ private fun AddElementDialog(
                             })
                     }
                 }
-                OutlinedTextField(
-                    value = defaultValue,
-                    onValueChange = { defaultValue = it },
-                    label = { Text(stringResource(R.string.zpl_editor_default_value)) },
-                    singleLine = true,
-                    enabled = !isDate,
-                    modifier = Modifier.fillMaxWidth()
-                )
                 when (elementType) {
                     LabelDesignElementType.TEXT -> {
                         Row(
@@ -990,6 +1014,12 @@ private fun AddElementDialog(
                             onValueChange = { prefix = it },
                             label = { Text(stringResource(R.string.zpl_editor_prefix)) },
                             singleLine = true,
+                            isError = prefix.contains('{') || prefix.contains('}') || prefix.contains('^'),
+                            supportingText = {
+                                if (prefix.contains('{') || prefix.contains('}') || prefix.contains('^')) {
+                                    Text(stringResource(R.string.zpl_editor_invalid_chars))
+                                }
+                            },
                             modifier = Modifier.fillMaxWidth()
                         )
                         OutlinedTextField(
@@ -997,6 +1027,12 @@ private fun AddElementDialog(
                             onValueChange = { suffix = it },
                             label = { Text(stringResource(R.string.zpl_editor_suffix)) },
                             singleLine = true,
+                            isError = suffix.contains('{') || suffix.contains('}') || suffix.contains('^'),
+                            supportingText = {
+                                if (suffix.contains('{') || suffix.contains('}') || suffix.contains('^')) {
+                                    Text(stringResource(R.string.zpl_editor_invalid_chars))
+                                }
+                            },
                             modifier = Modifier.fillMaxWidth()
                         )
                         OutlinedTextField(
@@ -1041,45 +1077,45 @@ private fun AddElementDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = {
-                val element = when (elementType) {
-                    LabelDesignElementType.TEXT -> LabelDesignElement(
-                        id = "",
-                        type = LabelDesignElementType.TEXT,
-                        x = 0,
-                        y = 0,
-                        placeholder = placeholderId,
-                        defaultValue = defaultValue,
-                        prefix = prefix,
-                        suffix = suffix,
-                        fontSize = fontSize.toIntOrNull()?.coerceIn(10, 300) ?: 28,
-                        blockWidth = blockWidth.toIntOrNull()?.coerceAtLeast(0) ?: 0,
-                        isDate = isDate
-                    )
+            TextButton(
+                onClick = {
+                    val element = when (elementType) {
+                        LabelDesignElementType.TEXT -> LabelDesignElement(
+                            id = "",
+                            type = LabelDesignElementType.TEXT,
+                            x = 0,
+                            y = 0,
+                            placeholder = placeholderId,
+                            prefix = prefix,
+                            suffix = suffix,
+                            fontSize = fontSize.toIntOrNull()?.coerceIn(10, 300) ?: 28,
+                            blockWidth = blockWidth.toIntOrNull()?.coerceAtLeast(0) ?: 0,
+                            isDate = isDate
+                        )
 
-                    LabelDesignElementType.QR_CODE -> LabelDesignElement(
-                        id = "",
-                        type = LabelDesignElementType.QR_CODE,
-                        x = 0,
-                        y = 0,
-                        placeholder = placeholderId,
-                        defaultValue = defaultValue,
-                        magnification = magnification.toIntOrNull()?.coerceIn(1, 10) ?: 5
-                    )
+                        LabelDesignElementType.QR_CODE -> LabelDesignElement(
+                            id = "",
+                            type = LabelDesignElementType.QR_CODE,
+                            x = 0,
+                            y = 0,
+                            placeholder = placeholderId,
+                            magnification = magnification.toIntOrNull()?.coerceIn(1, 10) ?: 5
+                        )
 
-                    LabelDesignElementType.BARCODE_128 -> LabelDesignElement(
-                        id = "",
-                        type = LabelDesignElementType.BARCODE_128,
-                        x = 0,
-                        y = 0,
-                        placeholder = placeholderId,
-                        defaultValue = defaultValue,
-                        barcodeHeight = barcodeHeight.toIntOrNull()?.coerceIn(10, 300) ?: 80,
-                        moduleWidth = moduleWidth.toIntOrNull()?.coerceIn(1, 4) ?: 2
-                    )
-                }
-                onConfirm(element)
-            }) { Text(stringResource(R.string.dialog_add)) }
+                        LabelDesignElementType.BARCODE_128 -> LabelDesignElement(
+                            id = "",
+                            type = LabelDesignElementType.BARCODE_128,
+                            x = 0,
+                            y = 0,
+                            placeholder = placeholderId,
+                            barcodeHeight = barcodeHeight.toIntOrNull()?.coerceIn(10, 300) ?: 80,
+                            moduleWidth = moduleWidth.toIntOrNull()?.coerceIn(1, 4) ?: 2
+                        )
+                    }
+                    onConfirm(element)
+                },
+                enabled = !hasInvalidChars
+            ) { Text(stringResource(R.string.dialog_add)) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.dialog_cancel)) } }
     )
@@ -1092,7 +1128,6 @@ private fun EditElementDialog(
     onConfirm: (LabelDesignElement) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var defaultValue by remember { mutableStateOf(element.defaultValue) }
     var prefix by remember { mutableStateOf(element.prefix) }
     var suffix by remember { mutableStateOf(element.suffix) }
     var fontSize by remember { mutableStateOf(element.fontSize.toString()) }
@@ -1101,6 +1136,12 @@ private fun EditElementDialog(
     var barcodeHeight by remember { mutableStateOf(element.barcodeHeight.toString()) }
     var moduleWidth by remember { mutableStateOf(element.moduleWidth.toString()) }
     var isDate by remember { mutableStateOf(element.isDate) }
+
+    val hasInvalidChars = remember(prefix, suffix) {
+        prefix.contains('{') || prefix.contains('}') || prefix.contains('^') ||
+                suffix.contains('{') || suffix.contains('}') || suffix.contains('^')
+    }
+
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = MaterialTheme.colorScheme.surface,
@@ -1120,14 +1161,6 @@ private fun EditElementDialog(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                OutlinedTextField(
-                    value = defaultValue,
-                    onValueChange = { defaultValue = it },
-                    label = { Text(stringResource(R.string.zpl_editor_default_value)) },
-                    singleLine = true,
-                    enabled = !isDate,
-                    modifier = Modifier.fillMaxWidth()
-                )
                 when (element.type) {
                     LabelDesignElementType.TEXT -> {
                         Row(
@@ -1142,6 +1175,12 @@ private fun EditElementDialog(
                             onValueChange = { prefix = it },
                             label = { Text(stringResource(R.string.zpl_editor_prefix)) },
                             singleLine = true,
+                            isError = prefix.contains('{') || prefix.contains('}') || prefix.contains('^'),
+                            supportingText = {
+                                if (prefix.contains('{') || prefix.contains('}') || prefix.contains('^')) {
+                                    Text(stringResource(R.string.zpl_editor_invalid_chars))
+                                }
+                            },
                             modifier = Modifier.fillMaxWidth()
                         )
                         OutlinedTextField(
@@ -1149,6 +1188,12 @@ private fun EditElementDialog(
                             onValueChange = { suffix = it },
                             label = { Text(stringResource(R.string.zpl_editor_suffix)) },
                             singleLine = true,
+                            isError = suffix.contains('{') || suffix.contains('}') || suffix.contains('^'),
+                            supportingText = {
+                                if (suffix.contains('{') || suffix.contains('}') || suffix.contains('^')) {
+                                    Text(stringResource(R.string.zpl_editor_invalid_chars))
+                                }
+                            },
                             modifier = Modifier.fillMaxWidth()
                         )
                         OutlinedTextField(
@@ -1202,35 +1247,38 @@ private fun EditElementDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = {
-                val updated = when (element.type) {
-                    LabelDesignElementType.TEXT -> element.copy(
-                        defaultValue = defaultValue,
-                        prefix = prefix,
-                        suffix = suffix,
-                        fontSize = fontSize.toIntOrNull()?.coerceIn(10, 300) ?: element.fontSize,
-                        blockWidth = blockWidth.toIntOrNull()?.coerceAtLeast(0)
-                            ?: element.blockWidth,
-                        isDate = isDate,
-                        placeholder = if (isDate) "{date}" else if (element.placeholder.startsWith("{date")) "{${element.id}}" else element.placeholder
-                    )
+            TextButton(
+                onClick = {
+                    val updated = when (element.type) {
+                        LabelDesignElementType.TEXT -> element.copy(
+                            prefix = prefix,
+                            suffix = suffix,
+                            fontSize = fontSize.toIntOrNull()?.coerceIn(10, 300) ?: element.fontSize,
+                            blockWidth = blockWidth.toIntOrNull()?.coerceAtLeast(0)
+                                ?: element.blockWidth,
+                            isDate = isDate,
+                            placeholder = if (isDate) "{date}" else if (element.placeholder.startsWith(
+                                    "{date"
+                                )
+                            ) "{${element.id}}" else element.placeholder
+                        )
 
-                    LabelDesignElementType.QR_CODE -> element.copy(
-                        defaultValue = defaultValue,
-                        magnification = magnification.toIntOrNull()?.coerceIn(1, 10)
-                            ?: element.magnification
-                    )
+                        LabelDesignElementType.QR_CODE -> element.copy(
+                            magnification = magnification.toIntOrNull()?.coerceIn(1, 10)
+                                ?: element.magnification
+                        )
 
-                    LabelDesignElementType.BARCODE_128 -> element.copy(
-                        defaultValue = defaultValue,
-                        barcodeHeight = barcodeHeight.toIntOrNull()?.coerceIn(10, 300)
-                            ?: element.barcodeHeight,
-                        moduleWidth = moduleWidth.toIntOrNull()?.coerceIn(1, 4)
-                            ?: element.moduleWidth
-                    )
-                }
-                onConfirm(updated)
-            }) { Text(stringResource(R.string.dialog_apply)) }
+                        LabelDesignElementType.BARCODE_128 -> element.copy(
+                            barcodeHeight = barcodeHeight.toIntOrNull()?.coerceIn(10, 300)
+                                ?: element.barcodeHeight,
+                            moduleWidth = moduleWidth.toIntOrNull()?.coerceIn(1, 4)
+                                ?: element.moduleWidth
+                        )
+                    }
+                    onConfirm(updated)
+                },
+                enabled = !hasInvalidChars
+            ) { Text(stringResource(R.string.dialog_apply)) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.dialog_cancel)) } }
     )

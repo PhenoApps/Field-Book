@@ -302,21 +302,15 @@ class LabelPrintTraitLayout : BaseTraitLayout {
         val observationUnitAttributes =
             buildObservationUnitAttributes(uniqueId, dateLabel, blankLabel, fieldNameLabel)
 
-        val defaultValueLabel =
-            context.getString(R.string.trait_layout_print_label_default_value_option)
-        val defaultValues = templateRepository.getDefaultValues(templateName)
-
         val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
         val assignments = templateRepository.getAssignments(templateName).toMutableMap().apply {
             putAll(templateRepository.getStudyAssignments(studyId))
         }
 
-        val resolvedAssignments = assignments.mapValues { (placeholder, fieldOption) ->
+        val resolvedAssignments = assignments.mapValues { (_, fieldOption) ->
             LabelPrintService.resolveFieldValue(
                 fieldOption, observationUnitAttributes,
                 fieldName, dateString, blankLabel, dateLabel, fieldNameLabel,
-                defaultValueLabel = defaultValueLabel,
-                defaultValue = defaultValues[placeholder] ?: "",
                 database = database,
                 studyId = collectActivity.studyId,
                 plotId = uniqueId,
@@ -354,10 +348,6 @@ class LabelPrintTraitLayout : BaseTraitLayout {
             buildObservationUnitAttributes(uniqueId, dateLabel, blankLabel, fieldNameLabel)
         } else emptyMap()
 
-        val defaultValueLabel =
-            context.getString(R.string.trait_layout_print_label_default_value_option)
-        val defaultValues = templateRepository.getDefaultValues(templateName)
-
         val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
         val assignments = templateRepository.getAssignments(templateName).toMutableMap().apply {
             putAll(templateRepository.getStudyAssignments(studyId))
@@ -367,8 +357,6 @@ class LabelPrintTraitLayout : BaseTraitLayout {
             LabelPrintService.resolveFieldValue(
                 fieldOption, observationUnitAttributes,
                 fieldName, dateString, blankLabel, dateLabel, fieldNameLabel,
-                defaultValueLabel = defaultValueLabel,
-                defaultValue = defaultValues[placeholder] ?: "",
                 database = database,
                 studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString(),
                 plotId = uniqueId,
@@ -398,8 +386,6 @@ class LabelPrintTraitLayout : BaseTraitLayout {
         blankLabel: String,
         fieldNameLabel: String
     ): Map<String, String> {
-        val defaultValueLabel =
-            context.getString(R.string.trait_layout_print_label_default_value_option)
         val attributes = mutableMapOf<String, String>()
 
         // Add core identifiers explicitly using their column names from preferences
@@ -415,7 +401,7 @@ class LabelPrintTraitLayout : BaseTraitLayout {
 
         // Add study-specific attributes
         for (option in store.fieldOptions) {
-            if (option != dateLabel && option != blankLabel && option != fieldNameLabel && option != defaultValueLabel
+            if (option != dateLabel && option != blankLabel && option != fieldNameLabel
                 && option != uniqueName && option != primaryName && option != secondaryName
             ) {
                 val value = database.getObservationUnitPropertyValues(option, uniqueId)

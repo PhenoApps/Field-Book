@@ -21,7 +21,6 @@ class TemplateRepository @Inject constructor(private val prefs: SharedPreference
     companion object {
         private const val TAG = "TemplateRepository"
         const val KEY_ASSIGNMENTS_JSON = "zpl_template_assignments_json"
-        const val KEY_DEFAULT_VALUES_JSON = "zpl_template_default_values_json"
         const val KEY_SELECTED_TEMPLATE_ID = "zpl_selected_template_id"
         const val KEY_STUDY_ASSIGNMENTS_PREFIX = "zpl_study_assignments_"
 
@@ -289,46 +288,6 @@ class TemplateRepository @Inject constructor(private val prefs: SharedPreference
         root.put(templateName, templateObj)
         prefs.edit {
             putString(KEY_ASSIGNMENTS_JSON, root.toString())
-        }
-    }
-
-    fun getDefaultValues(templateName: String): Map<String, String> {
-        val json = prefs.getString(KEY_DEFAULT_VALUES_JSON, null) ?: return emptyMap()
-        return try {
-            val root = JSONObject(json)
-            val templateObj = root.optJSONObject(templateName) ?: return emptyMap()
-            val result = mutableMapOf<String, String>()
-            val keys = templateObj.keys()
-            while (keys.hasNext()) {
-                val key = keys.next()
-                result[key] = templateObj.getString(key)
-            }
-            result
-        } catch (e: JSONException) {
-            Log.w(TAG, "Malformed default values JSON, returning empty map", e)
-            emptyMap()
-        }
-    }
-
-    fun saveDefaultValues(templateName: String, defaultValues: Map<String, String>) {
-        val json = prefs.getString(KEY_DEFAULT_VALUES_JSON, null)
-        val root = if (json != null) {
-            try {
-                JSONObject(json)
-            } catch (e: JSONException) {
-                JSONObject()
-            }
-        } else JSONObject()
-
-        val templateObj = JSONObject()
-        for ((key, value) in defaultValues) {
-            if (value.isNotEmpty()) {
-                templateObj.put(key, value)
-            }
-        }
-        root.put(templateName, templateObj)
-        prefs.edit {
-            putString(KEY_DEFAULT_VALUES_JSON, root.toString())
         }
     }
 }

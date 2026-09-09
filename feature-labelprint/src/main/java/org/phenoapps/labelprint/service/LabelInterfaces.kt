@@ -9,8 +9,7 @@ data class LabelTemplate(
     val id: String,
     val name: String,
     val zpl: String,
-    val assignments: Map<String, String> = emptyMap(),
-    val defaultValues: Map<String, String> = emptyMap()
+    val assignments: Map<String, String> = emptyMap()
 )
 
 /**

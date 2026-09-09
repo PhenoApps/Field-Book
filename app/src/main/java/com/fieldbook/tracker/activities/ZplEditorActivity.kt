@@ -104,9 +104,8 @@ class ZplEditorActivity : ComponentActivity() {
                         }
                         finish()
                     },
-                    onSave = { name, normalizedZpl, defaultValues ->
+                    onSave = { name, normalizedZpl ->
                         val id = templateRepository.saveTemplate(name, normalizedZpl)
-                        templateRepository.saveDefaultValues(name, defaultValues)
                         templateRepository.setSelectedTemplateId(id)
                         allTemplates = templateRepository.getAllTemplates()
                     },

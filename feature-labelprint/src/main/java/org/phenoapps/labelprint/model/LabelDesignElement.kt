@@ -19,7 +19,6 @@ data class LabelDesignElement(
     val x: Int,
     val y: Int,
     val placeholder: String,
-    val defaultValue: String = "",
     val fontSize: Int = 28,
     val magnification: Int = 5,
     val blockWidth: Int = 0,

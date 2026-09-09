@@ -58,8 +58,6 @@ class LabelPrintService @Inject constructor(
             blankLabel: String,
             dateLabel: String,
             fieldNameLabel: String,
-            defaultValueLabel: String = "",
-            defaultValue: String = "",
             database: com.fieldbook.tracker.database.DataHelper? = null,
             studyId: String? = null,
             plotId: String? = null,
@@ -69,7 +67,6 @@ class LabelPrintService @Inject constructor(
                 dateLabel -> dateString
                 fieldNameLabel -> fieldName
                 blankLabel -> ""
-                defaultValueLabel -> defaultValue
                 else -> {
                     val attrValue = observationUnitAttributes[fieldOption]
                     if (!attrValue.isNullOrEmpty()) return attrValue
@@ -159,8 +156,7 @@ class LabelPrintService @Inject constructor(
         trait: TraitObject,
         dateLabel: String,
         blankLabel: String,
-        fieldNameLabel: String,
-        defaultValueLabel: String = ""
+        fieldNameLabel: String
     ) {
         val selectedId = if (trait.printTemplateId.isNotEmpty()) {
             trait.printTemplateId
@@ -180,7 +176,6 @@ class LabelPrintService @Inject constructor(
             resolveFieldValue(
                 fieldOption, observationUnitAttributes,
                 fieldName, dateString, blankLabel, dateLabel, fieldNameLabel,
-                defaultValueLabel,
                 database = null, // resolveTemplate usually has db passed if needed
                 studyId = studyId.toString(),
                 plotId = plotId,
