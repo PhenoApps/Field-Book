@@ -171,6 +171,7 @@ class LabelPrintTraitLayout : BaseTraitLayout {
                             store.showConfigDialog.value = false
                         },
                         onConnectClick = { connectToPrinter() },
+                        onDisconnectClick = { disconnectPrinter() },
                         onCalibrate = { calibratePrinter() }
                     )
                 }
@@ -262,6 +263,12 @@ class LabelPrintTraitLayout : BaseTraitLayout {
 
     private fun refreshPrinterConnectionState() {
         store.isPrinterConnected.value = !service.getSavedPrinterName().isNullOrEmpty()
+    }
+
+    private fun disconnectPrinter() {
+        prefs.edit().remove(GeneralKeys.LABEL_PRINT_DEVICE_NAME).apply()
+        refreshPrinterConnectionState()
+        Toast.makeText(context, R.string.printer_not_connected, Toast.LENGTH_SHORT).show()
     }
 
     private fun calibratePrinter() {

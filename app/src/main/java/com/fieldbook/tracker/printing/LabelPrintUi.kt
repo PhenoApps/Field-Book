@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.LinkOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -160,6 +161,7 @@ fun LabelPrintConfigDialog(
     onConfirm: (copies: String) -> Unit,
     onDismiss: () -> Unit,
     onConnectClick: () -> Unit = {},
+    onDisconnectClick: (() -> Unit)? = null,
     onCalibrate: (() -> Unit)? = null
 ) {
     var localCopies by remember { mutableStateOf(currentCopies) }
@@ -192,13 +194,23 @@ fun LabelPrintConfigDialog(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
+                    horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally)
                 ) {
                     IconButton(onClick = onConnectClick) {
                         Icon(
                             painter = painterResource(id = R.drawable.connection),
                             contentDescription = "Connect to printer"
                         )
+                    }
+
+                    if (onDisconnectClick != null) {
+                        IconButton(onClick = onDisconnectClick) {
+                            Icon(
+                                imageVector = Icons.Default.LinkOff,
+                                contentDescription = "Disconnect printer",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
                     }
                 }
             }
