@@ -127,6 +127,7 @@ fun ZplEditorScreen(
 
     var zplText by remember { mutableStateOf(initialZpl) }
     var templateName by remember { mutableStateOf(initialTemplateName) }
+    var selectedTemplateName by remember { mutableStateOf(initialTemplateName) }
     var mediaType by remember { mutableStateOf(initialParsed.mediaType) }
     var mediaGap by remember { mutableStateOf(initialParsed.mediaGap) }
 
@@ -184,7 +185,7 @@ fun ZplEditorScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = templateName ?: stringResource(R.string.zpl_editor_untitled),
+                        text = stringResource(R.string.zpl_editor_title),
                         style = MaterialTheme.typography.titleMedium
                     )
                 },
@@ -276,7 +277,7 @@ fun ZplEditorScreen(
                     .padding(horizontal = 12.dp, vertical = 4.dp)
             ) {
                 OutlinedTextField(
-                    value = templateName ?: stringResource(R.string.zpl_editor_untitled),
+                    value = selectedTemplateName ?: stringResource(R.string.zpl_editor_untitled),
                     onValueChange = {},
                     readOnly = true,
                     label = { Text(stringResource(R.string.zpl_editor_template)) },
@@ -295,6 +296,7 @@ fun ZplEditorScreen(
                         text = { Text(stringResource(R.string.zpl_editor_new_template)) },
                         onClick = {
                             templateName = null
+                            selectedTemplateName = null
                             elements.clear()
                             zplText = ""
                             dropdownExpanded = false
@@ -306,6 +308,7 @@ fun ZplEditorScreen(
                             text = { Text(name) },
                             onClick = {
                                 templateName = name
+                                selectedTemplateName = name
                                 syncFromCode(templates[name] ?: "")
                                 dropdownExpanded = false
                             }
@@ -567,6 +570,7 @@ fun ZplEditorScreen(
                     if (templateName != null) {
                         onDelete(templateName!!)
                         templateName = null
+                        selectedTemplateName = null
                         elements.clear()
                         zplText = ""
                     }
@@ -624,6 +628,7 @@ fun ZplEditorScreen(
                             zplText,
                             elements.associate { it.placeholder to it.defaultValue })
                         templateName = saveName.trim()
+                        selectedTemplateName = saveName.trim()
                         showSaveDialog = false
                         onDismiss()
                     }

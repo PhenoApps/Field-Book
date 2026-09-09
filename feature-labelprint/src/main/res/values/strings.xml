@@ -12,6 +12,7 @@
     <string name="label_size_selector">Label Size</string>
     <string name="dialog_apply">Apply</string>
 
+    <string name="zpl_editor_title">Label editor</string>
     <string name="zpl_editor_untitled">Untitled</string>
     <string name="zpl_editor_delete">Delete</string>
     <string name="zpl_editor_save">Save</string>
