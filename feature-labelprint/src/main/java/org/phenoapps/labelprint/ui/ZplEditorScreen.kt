@@ -27,7 +27,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
@@ -67,6 +66,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -149,8 +149,12 @@ fun ZplEditorScreen(
     val hasGlobalErrors by remember {
         derivedStateOf {
             elements.any {
-                (it.type == LabelDesignElementType.TEXT && (it.prefix.contains('{') || it.prefix.contains('}') || it.prefix.contains('^'))) ||
-                        (it.type == LabelDesignElementType.TEXT && (it.suffix.contains('{') || it.suffix.contains('}') || it.suffix.contains('^')))
+                (it.type == LabelDesignElementType.TEXT && (it.prefix.contains('{') || it.prefix.contains(
+                    '}'
+                ) || it.prefix.contains('^'))) ||
+                        (it.type == LabelDesignElementType.TEXT && (it.suffix.contains('{') || it.suffix.contains(
+                            '}'
+                        ) || it.suffix.contains('^')))
             }
         }
     }
@@ -213,13 +217,16 @@ fun ZplEditorScreen(
                         },
                         enabled = templateName != null && templates.containsKey(templateName)
                     ) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Reset")
+                        Icon(painterResource(R.drawable.undo_variant), contentDescription = "Reset")
                     }
                     IconButton(
                         onClick = { onExport(templateName ?: "template", zplText) },
                         enabled = !hasGlobalErrors
                     ) {
-                        Icon(Icons.Default.Save, contentDescription = "Export")
+                        Icon(
+                            painterResource(R.drawable.export_variant),
+                            contentDescription = "Export"
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -1014,9 +1021,14 @@ private fun AddElementDialog(
                             onValueChange = { prefix = it },
                             label = { Text(stringResource(R.string.zpl_editor_prefix)) },
                             singleLine = true,
-                            isError = prefix.contains('{') || prefix.contains('}') || prefix.contains('^'),
+                            isError = prefix.contains('{') || prefix.contains('}') || prefix.contains(
+                                '^'
+                            ),
                             supportingText = {
-                                if (prefix.contains('{') || prefix.contains('}') || prefix.contains('^')) {
+                                if (prefix.contains('{') || prefix.contains('}') || prefix.contains(
+                                        '^'
+                                    )
+                                ) {
                                     Text(stringResource(R.string.zpl_editor_invalid_chars))
                                 }
                             },
@@ -1027,9 +1039,14 @@ private fun AddElementDialog(
                             onValueChange = { suffix = it },
                             label = { Text(stringResource(R.string.zpl_editor_suffix)) },
                             singleLine = true,
-                            isError = suffix.contains('{') || suffix.contains('}') || suffix.contains('^'),
+                            isError = suffix.contains('{') || suffix.contains('}') || suffix.contains(
+                                '^'
+                            ),
                             supportingText = {
-                                if (suffix.contains('{') || suffix.contains('}') || suffix.contains('^')) {
+                                if (suffix.contains('{') || suffix.contains('}') || suffix.contains(
+                                        '^'
+                                    )
+                                ) {
                                     Text(stringResource(R.string.zpl_editor_invalid_chars))
                                 }
                             },
@@ -1175,9 +1192,14 @@ private fun EditElementDialog(
                             onValueChange = { prefix = it },
                             label = { Text(stringResource(R.string.zpl_editor_prefix)) },
                             singleLine = true,
-                            isError = prefix.contains('{') || prefix.contains('}') || prefix.contains('^'),
+                            isError = prefix.contains('{') || prefix.contains('}') || prefix.contains(
+                                '^'
+                            ),
                             supportingText = {
-                                if (prefix.contains('{') || prefix.contains('}') || prefix.contains('^')) {
+                                if (prefix.contains('{') || prefix.contains('}') || prefix.contains(
+                                        '^'
+                                    )
+                                ) {
                                     Text(stringResource(R.string.zpl_editor_invalid_chars))
                                 }
                             },
@@ -1188,9 +1210,14 @@ private fun EditElementDialog(
                             onValueChange = { suffix = it },
                             label = { Text(stringResource(R.string.zpl_editor_suffix)) },
                             singleLine = true,
-                            isError = suffix.contains('{') || suffix.contains('}') || suffix.contains('^'),
+                            isError = suffix.contains('{') || suffix.contains('}') || suffix.contains(
+                                '^'
+                            ),
                             supportingText = {
-                                if (suffix.contains('{') || suffix.contains('}') || suffix.contains('^')) {
+                                if (suffix.contains('{') || suffix.contains('}') || suffix.contains(
+                                        '^'
+                                    )
+                                ) {
                                     Text(stringResource(R.string.zpl_editor_invalid_chars))
                                 }
                             },
@@ -1253,7 +1280,8 @@ private fun EditElementDialog(
                         LabelDesignElementType.TEXT -> element.copy(
                             prefix = prefix,
                             suffix = suffix,
-                            fontSize = fontSize.toIntOrNull()?.coerceIn(10, 300) ?: element.fontSize,
+                            fontSize = fontSize.toIntOrNull()?.coerceIn(10, 300)
+                                ?: element.fontSize,
                             blockWidth = blockWidth.toIntOrNull()?.coerceAtLeast(0)
                                 ?: element.blockWidth,
                             isDate = isDate,
