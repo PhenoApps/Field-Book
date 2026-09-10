@@ -43,6 +43,7 @@ import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -215,13 +216,19 @@ fun ZplEditorScreen(
                             val saved = templates[templateName]
                             if (saved != null) syncFromCode(saved)
                         },
-                        enabled = templateName != null && templates.containsKey(templateName)
+                        enabled = templateName != null && templates.containsKey(templateName),
+                        colors = IconButtonDefaults.iconButtonColors(
+                            disabledContentColor = MaterialTheme.colorScheme.onPrimary
+                        )
                     ) {
                         Icon(painterResource(R.drawable.undo_variant), contentDescription = "Reset")
                     }
                     IconButton(
                         onClick = { onExport(templateName ?: "template", zplText) },
-                        enabled = !hasGlobalErrors
+                        enabled = !hasGlobalErrors,
+                        colors = IconButtonDefaults.iconButtonColors(
+                            disabledContentColor = MaterialTheme.colorScheme.onPrimary
+                        )
                     ) {
                         Icon(
                             painterResource(R.drawable.export_variant),
@@ -250,14 +257,28 @@ fun ZplEditorScreen(
                     onClick = { showDeleteConfirm = true },
                     enabled = templateName != null,
                     modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.outlinedButtonColors(
+                    colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.error
+                        contentColor = MaterialTheme.colorScheme.error,
+                        disabledContainerColor = MaterialTheme.colorScheme.surface,
+                        disabledContentColor = MaterialTheme.colorScheme.error
+                    ),
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        if (templateName != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Icon(Icons.Default.Delete, null, Modifier.padding(end = 4.dp))
+
+                    Icon(
+                        Icons.Default.Delete,
+                        null,
+                        Modifier.padding(end = 4.dp),
+                        tint = if (templateName != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.error
+                    )
                     Text(stringResource(R.string.zpl_editor_delete))
                 }
+
+
                 Button(
                     onClick = {
                         if (templateName != null) {
@@ -270,10 +291,13 @@ fun ZplEditorScreen(
                     modifier = Modifier.weight(1f),
                     enabled = !hasGlobalErrors,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (hasGlobalErrors) Color.LightGray else Color.White,
-                        contentColor = if (hasGlobalErrors) Color.DarkGray else MaterialTheme.colorScheme.primary
+                        containerColor = MaterialTheme.colorScheme.onPrimary,
+                        contentColor = MaterialTheme.colorScheme.primary,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                ) {
+                )
+                {
                     Icon(Icons.Default.Save, null, Modifier.padding(end = 4.dp))
                     Text(stringResource(R.string.zpl_editor_save))
                 }

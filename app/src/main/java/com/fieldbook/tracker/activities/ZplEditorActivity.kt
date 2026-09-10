@@ -1,16 +1,12 @@
 package com.fieldbook.tracker.activities
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,7 +14,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.ui.theme.AppTheme
+import com.fieldbook.tracker.ui.theme.enums.AppTextType
+import com.fieldbook.tracker.ui.theme.enums.AppThemeType
 import com.fieldbook.tracker.zpl.TemplateRepository
 import com.zebra.sdk.comm.BluetoothConnection
 import com.zebra.sdk.comm.ConnectionException
@@ -30,7 +29,7 @@ import java.io.IOException
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class ZplEditorActivity : ComponentActivity() {
+class ZplEditorActivity : ThemedActivity() {
 
     companion object {
         private const val TAG = "ZplEditorActivity"
@@ -42,9 +41,6 @@ class ZplEditorActivity : ComponentActivity() {
 
     @Inject
     lateinit var templateRepository: TemplateRepository
-
-    @Inject
-    lateinit var prefs: SharedPreferences
 
     private var pendingExportZpl: String = ""
 
@@ -65,7 +61,6 @@ class ZplEditorActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         templateRepository.ensureBuiltInTemplatesExist()
@@ -74,7 +69,16 @@ class ZplEditorActivity : ComponentActivity() {
         val templateName = intent.getStringExtra(EXTRA_TEMPLATE_NAME)
 
         setContent {
-            AppTheme {
+            val themeIndex = prefs.getString(PreferenceKeys.THEME, "0")?.toInt() ?: 0
+            val themeType = when (themeIndex) {
+                1 -> AppThemeType.HighContrast
+                2 -> AppThemeType.Blue
+                else -> AppThemeType.Default
+            }
+            val textIndex = prefs.getString(PreferenceKeys.TEXT_THEME, "1")?.toInt() ?: 1
+            val textType = AppTextType.entries.find { it.index == textIndex } ?: AppTextType.MEDIUM
+
+            AppTheme(themeTypeOverride = themeType, textTypeOverride = textType) {
                 var allTemplates by remember {
                     mutableStateOf(templateRepository.getAllTemplates())
                 }
