@@ -78,7 +78,7 @@ class PrintThread(private val ctx: Context, private val btName: String) : Thread
 
                     val linkOsPrinter = ZebraPrinterFactory.createLinkOsPrinter(printer)
 
-                    linkOsPrinter?.let { it ->
+                    linkOsPrinter?.let {
 
                         val printerStatus = it.currentStatus
 
@@ -88,7 +88,7 @@ class PrintThread(private val ctx: Context, private val btName: String) : Thread
                         val printerPaused = ctx.getString(R.string.printer_paused)
                         val noPaper = ctx.getString(R.string.printer_empty)
                         val notConnected = ctx.getString(R.string.printer_not_connected)
-                        val success = ctx.getString(R.string.printer_success)
+                        ctx.getString(R.string.printer_success)
 
                         val intent = Intent("printer_message")
 
@@ -100,7 +100,7 @@ class PrintThread(private val ctx: Context, private val btName: String) : Thread
 
                             }
 
-                            intent.putExtra("message", success)
+                            //intent.putExtra("message", success)
                             intent.putExtra("numLabels", mLabelCommands.size)
                             intent.putExtra("plotId", plotId)
                             intent.putExtra("traitId", trait?.id)
