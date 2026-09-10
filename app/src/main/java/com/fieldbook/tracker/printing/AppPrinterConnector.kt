@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.content.SharedPreferences
+import com.fieldbook.tracker.R
+import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.BluetoothChooseCallback
 import com.fieldbook.tracker.utilities.BluetoothUtil
@@ -39,14 +41,18 @@ class AppPrinterConnector @Inject constructor(
     }
 
     override fun print(zplLabels: List<String>, onResult: (Boolean, String?) -> Unit) {
+        print(zplLabels, "", null, onResult)
+    }
+
+    fun print(zplLabels: List<String>, plotId: String, trait: TraitObject?, onResult: (Boolean, String?) -> Unit) {
         val printerName = getConnectedPrinterName()
         if (printerName == null) {
-            onResult(false, "No printer connected")
+            onResult(false, context.getString(R.string.printer_not_connected))
             return
         }
-        
+
         try {
-            bluetoothUtil.print(context, printerName, zplLabels, "", null)
+            bluetoothUtil.print(context, printerName, zplLabels, plotId, trait)
             onResult(true, null)
         } catch (e: Exception) {
             onResult(false, e.message)

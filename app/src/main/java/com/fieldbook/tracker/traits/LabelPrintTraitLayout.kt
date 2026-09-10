@@ -5,12 +5,12 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Color
 import android.util.AttributeSet
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
+import androidx.core.graphics.toColorInt
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
@@ -54,22 +54,30 @@ class LabelPrintTraitLayout : BaseTraitLayout {
             val plotId = intent.extras?.getString("plotId")
             val traitId = intent.extras?.getString("traitId")
 
-            message?.let {
-                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            val activity = mActivity as? CollectActivity ?: return
+
+            activity.runOnUiThread {
+                message?.let {
+                    Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                }
             }
 
             if (LabelPrintService.shouldInsertObservation(numLabels, plotId, traitId)) {
-                val activity = mActivity as? CollectActivity ?: return
-
-                val priorCount = collectInputView?.text?.toIntOrNull() ?: 0
+                val studyId = activity.studyId
+                val currentVal = database.getAllObservations(studyId, plotId!!, traitId!!)
+                    ?.lastOrNull()?.value
+                val priorCount = currentVal?.toIntOrNull() ?: 0
                 val cumulativeCount = priorCount + numLabels
 
                 activity.updateObservation(currentTrait, cumulativeCount.toString(), null)
 
-                collectInputView?.text = cumulativeCount.toString()
-                collectInputView?.setTextColor(Color.parseColor(displayColor))
+                activity.runOnUiThread {
+                    collectInputView?.text = cumulativeCount.toString()
+                    collectInputView?.setTextColor(displayColor.toColorInt())
+                    collectInputView?.markObservationSaved()
 
-                store.assignmentsRevision.intValue++
+                    store.assignmentsRevision.intValue++
+                }
             }
         }
     }
@@ -242,11 +250,13 @@ class LabelPrintTraitLayout : BaseTraitLayout {
     private fun connectToPrinter() {
         val activity = mActivity ?: return
         if (!service.checkBluetoothPermissions(activity)) return
-        service.choosePrinter(context, object : com.fieldbook.tracker.utilities.BluetoothChooseCallback {
-            override fun onDeviceChosen(deviceName: String) {
-                activity.runOnUiThread { refreshPrinterConnectionState() }
-            }
-        })
+        service.choosePrinter(
+            context,
+            object : com.fieldbook.tracker.utilities.BluetoothChooseCallback {
+                override fun onDeviceChosen(deviceName: String) {
+                    activity.runOnUiThread { refreshPrinterConnectionState() }
+                }
+            })
     }
 
     private fun refreshPrinterConnectionState() {
@@ -348,7 +358,7 @@ class LabelPrintTraitLayout : BaseTraitLayout {
             putAll(templateRepository.getStudyAssignments(studyId))
         }
 
-        val resolvedAssignments = assignments.mapValues { (placeholder, fieldOption) ->
+        val resolvedAssignments = assignments.mapValues { (_, fieldOption) ->
             LabelPrintService.resolveFieldValue(
                 fieldOption, observationUnitAttributes,
                 fieldName, dateString, blankLabel, dateLabel, fieldNameLabel,

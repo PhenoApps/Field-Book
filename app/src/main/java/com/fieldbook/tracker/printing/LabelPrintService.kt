@@ -136,7 +136,7 @@ class LabelPrintService @Inject constructor(
     fun printLabels(context: Context, labels: List<String>, plotId: String, trait: TraitObject?) {
         // AppPrinterConnector currently ignores plotId/trait in its generic print implementation.
         // If logging is needed, it should be done here or inside the connector.
-        printerConnector.print(labels) { success, error ->
+        printerConnector.print(labels, plotId, trait) { success, error ->
             if (!success) {
                 Toast.makeText(
                     context,
