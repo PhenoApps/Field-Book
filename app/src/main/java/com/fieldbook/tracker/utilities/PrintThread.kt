@@ -28,10 +28,10 @@ class PrintThread(private val ctx: Context, private val btName: String) : Thread
 
     //the trait and plot to attach the print count to in the database
     private var plotId: String = ""
-    private lateinit var trait: TraitObject
+    private var trait: TraitObject? = null
 
     //the command the bluetooth util class uses
-    fun print(labels: List<String>, plotId: String, trait: TraitObject) {
+    fun print(labels: List<String>, plotId: String, trait: TraitObject?) {
         mLabelCommands = labels
         this.plotId = plotId
         this.trait = trait
@@ -78,7 +78,7 @@ class PrintThread(private val ctx: Context, private val btName: String) : Thread
 
                     val linkOsPrinter = ZebraPrinterFactory.createLinkOsPrinter(printer)
 
-                    linkOsPrinter?.let { it ->
+                    linkOsPrinter?.let {
 
                         val printerStatus = it.currentStatus
 
@@ -88,7 +88,7 @@ class PrintThread(private val ctx: Context, private val btName: String) : Thread
                         val printerPaused = ctx.getString(R.string.printer_paused)
                         val noPaper = ctx.getString(R.string.printer_empty)
                         val notConnected = ctx.getString(R.string.printer_not_connected)
-                        val success = ctx.getString(R.string.printer_success)
+                        ctx.getString(R.string.printer_success)
 
                         val intent = Intent("printer_message")
 
@@ -100,11 +100,11 @@ class PrintThread(private val ctx: Context, private val btName: String) : Thread
 
                             }
 
-                            intent.putExtra("message", success)
+                            //intent.putExtra("message", success)
                             intent.putExtra("numLabels", mLabelCommands.size)
                             intent.putExtra("plotId", plotId)
-                            intent.putExtra("traitId", trait.id)
-                            intent.putExtra("traitFormat", trait.format)
+                            intent.putExtra("traitId", trait?.id)
+                            intent.putExtra("traitFormat", trait?.format)
 
                         } else if (printerStatus.isHeadOpen) {
 

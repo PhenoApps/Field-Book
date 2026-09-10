@@ -148,6 +148,9 @@ val BlueAppColors = DefaultAppColors.copy(
 
     text = DefaultAppColors.text.copy(
         tertiary = BlueThemeOverrides.TextLight,
+        title = BlueThemeOverrides.TextLight,
+        highContrast = BlueThemeOverrides.TextLight,
+        button = BlueThemeOverrides.TextLight,
     ),
 
     topAppBarColors = TopAppBarColors(

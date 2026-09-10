@@ -15,6 +15,7 @@ import com.fieldbook.tracker.ui.theme.colors.AppColors
 import com.fieldbook.tracker.ui.theme.colors.BlueAppColors
 import com.fieldbook.tracker.ui.theme.colors.DefaultAppColors
 import com.fieldbook.tracker.ui.theme.colors.HighContrastAppColors
+import com.fieldbook.tracker.ui.theme.enums.AppTextType
 import com.fieldbook.tracker.ui.theme.enums.AppThemeType
 import com.fieldbook.tracker.ui.theme.typography.CompactTypography
 import com.fieldbook.tracker.ui.theme.typography.ExpandedTypography
@@ -37,12 +38,17 @@ import com.fieldbook.tracker.ui.theme.typography.ThemeTypography
 @Composable
 fun AppTheme(
     themeViewModel: ThemeViewModel = hiltViewModel(),
+    themeTypeOverride: AppThemeType? = null,
+    textTypeOverride: AppTextType? = null,
     content: @Composable () -> Unit
 ) {
     val activity = LocalActivity.current
 
-    val themeType by themeViewModel.themeType.collectAsState()
-    val textType by themeViewModel.textType.collectAsState()
+    val themeTypeState by themeViewModel.themeType.collectAsState()
+    val textTypeState by themeViewModel.textType.collectAsState()
+
+    val themeType = themeTypeOverride ?: themeTypeState
+    val textType = textTypeOverride ?: textTypeState
 
     // select colors based on theme type
     val colors = remember(themeType) {

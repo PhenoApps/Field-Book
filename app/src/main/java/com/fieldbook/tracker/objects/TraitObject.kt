@@ -117,6 +117,10 @@ class TraitObject {
         get() = attributeValues.getString(TraitAttributes.DURATION)
         set(value) = attributeValues.setValue(TraitAttributes.DURATION, value)
 
+    var printTemplateId: String
+        get() = attributeValues.getString(TraitAttributes.PRINT_TEMPLATE_ID)
+        set(value) = attributeValues.setValue(TraitAttributes.PRINT_TEMPLATE_ID, value)
+
     companion object {
 
         fun fromJson(json: TraitJson, maxPosition: Int, originalFileName: String) = TraitObject().apply {
@@ -204,7 +208,8 @@ class TraitObject {
                 attachVideo == that.attachVideo &&
                 allowOther == that.allowOther &&
                 sensitivity == that.sensitivity &&
-                duration == that.duration
+                duration == that.duration &&
+                printTemplateId == that.printTemplateId
     }
 
     override fun hashCode(): Int {
@@ -215,7 +220,7 @@ class TraitObject {
             saveImage, useDayOfYear, categoryDisplayValue, resourceFile, synonyms,
             maxDecimalPlaces, mathSymbolsEnabled, allowMulticat, repeatedMeasures,
             autoSwitchPlot, unit, invalidValues, attachAudio, attachPhoto, attachVideo,
-            allowOther, duration, sensitivity
+            allowOther, duration, sensitivity, printTemplateId
         )
     }
 
@@ -256,6 +261,7 @@ class TraitObject {
         t.allowOther = this.allowOther
         t.sensitivity = this.sensitivity
         t.duration = this.duration
+        t.printTemplateId = this.printTemplateId
 
         return t
     }

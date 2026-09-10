@@ -3076,21 +3076,6 @@ public class CollectActivity extends ThemedActivity
         return preferences.getBoolean(PreferenceKeys.RETURN_FIRST_TRAIT, false);
     }
 
-    /**
-     * Inserts a user observation whenever a label is printed.
-     * @param plotID: The plot ID at the time of printing.
-     * @param traitID: The trait ID at the time of printing.
-     * @param labelNumber: The number of labels printed.
-     */
-    public void insertPrintObservation(String plotID, String traitID, String labelNumber) {
-        String studyId = Integer.toString(preferences.getInt(GeneralKeys.SELECTED_FIELD_ID, 0));
-
-        database.insertObservation(plotID, traitID, labelNumber,
-                getPerson(),
-                getLocationByPreferences(), "", studyId, "",
-                null, null, null);
-    }
-
     @NonNull
     @Override
     public DataHelper getDatabase() {
