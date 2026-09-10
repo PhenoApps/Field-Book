@@ -221,6 +221,8 @@ class LabelPrintService @Inject constructor(
 
     fun getSavedPrinterName(): String? = printerConnector.getConnectedPrinterName()
 
+    fun isBluetoothEnabled(): Boolean = printerConnector.isBluetoothEnabled()
+
     fun calibrate(onResult: (Boolean) -> Unit) {
         printerConnector.calibrate(onResult)
     }

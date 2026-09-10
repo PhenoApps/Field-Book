@@ -1,6 +1,8 @@
 package com.fieldbook.tracker.traits
 
+import android.annotation.SuppressLint
 import android.app.Activity
+import android.bluetooth.BluetoothAdapter
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -247,9 +249,16 @@ class LabelPrintTraitLayout : BaseTraitLayout {
         dialog.show(activity.supportFragmentManager, "labelFieldAttributeChooser")
     }
 
+    @SuppressLint("MissingPermission")
     private fun connectToPrinter() {
         val activity = mActivity ?: return
         if (!service.checkBluetoothPermissions(activity)) return
+
+        if (!service.isBluetoothEnabled()) {
+            activity.startActivity(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE))
+            return
+        }
+
         service.choosePrinter(
             context,
             object : com.fieldbook.tracker.utilities.BluetoothChooseCallback {
@@ -259,8 +268,9 @@ class LabelPrintTraitLayout : BaseTraitLayout {
             })
     }
 
+    @SuppressLint("MissingPermission")
     private fun refreshPrinterConnectionState() {
-        store.isPrinterConnected.value = !service.getSavedPrinterName().isNullOrEmpty()
+        store.isPrinterConnected.value = service.isBluetoothEnabled() && !service.getSavedPrinterName().isNullOrEmpty()
     }
 
     private fun disconnectPrinter() {
@@ -423,6 +433,7 @@ class LabelPrintTraitLayout : BaseTraitLayout {
     override fun refreshLayout(onNew: Boolean?) {
         super.refreshLayout(onNew)
         store.currentPlotIdState.value = currentRange?.uniqueId
+        refreshPrinterConnectionState()
         store.assignmentsRevision.intValue++
     }
 
