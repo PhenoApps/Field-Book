@@ -291,7 +291,7 @@ fun ZplEditorScreen(
                     modifier = Modifier.weight(1f),
                     enabled = !hasGlobalErrors,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.onPrimary,
+                        containerColor = MaterialTheme.colorScheme.surface,
                         contentColor = MaterialTheme.colorScheme.primary,
                         disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                         disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant

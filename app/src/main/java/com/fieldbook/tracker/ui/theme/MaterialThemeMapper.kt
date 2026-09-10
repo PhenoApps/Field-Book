@@ -14,7 +14,7 @@ import com.fieldbook.tracker.ui.theme.typography.ThemeTypography
 fun AppColors.toMaterialColorScheme(): ColorScheme {
     return lightColorScheme(
         primary = this.primary,
-        onPrimary = this.text.title,
+        onPrimary = this.text.highContrast,
         primaryContainer = this.primaryTransparent,
         onPrimaryContainer = this.text.primary,
 
@@ -36,7 +36,7 @@ fun AppColors.toMaterialColorScheme(): ColorScheme {
         background = this.background,
         onBackground = this.text.primary,
 
-        surface = Color.White,
+        surface = this.background,
         onSurface = this.text.primary,
         surfaceVariant = this.interactive.selectedItemBackground,
         onSurfaceVariant = this.text.secondary,
