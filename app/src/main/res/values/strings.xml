@@ -1021,6 +1021,11 @@
 
     <!-- Appearance -->
     <string name="preferences_appearance_title">Appearance</string>
+
+    <!-- Labels -->
+    <string name="preferences_labels_title">Labels</string>
+    <string name="preferences_labels_zpl_editor_title">ZPL Editor</string>
+    <string name="preferences_labels_zpl_editor_summary">Create and edit ZPL label templates</string>
     <string name="preferences_appearance_application_title">Application</string>
 
     <string name="preferences_appearance_theme_title">Theme</string>
