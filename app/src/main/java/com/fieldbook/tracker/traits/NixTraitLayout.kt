@@ -302,7 +302,10 @@ class NixTraitLayout : SpectralTraitLayout {
         getDevice(device)?.let { nixDevice ->
 
             toggleProgressBar(true)
-            connectButton?.isEnabled = false
+
+            // Hide, not just disable: the connect button is a FAB sitting over the progress bar,
+            // and a greyed out FAB still reads as tappable while the handshake runs.
+            connectButton?.visibility = GONE
 
             val nix = (context as CollectActivity).getNixSensorHelper()
 
@@ -310,7 +313,6 @@ class NixTraitLayout : SpectralTraitLayout {
 
             nix.connect(nixDevice) { connected ->
                 if (connected) {
-                    connectButton?.isEnabled = true
                     saveDevice(device)
                     enableCapture(device)
                     ensureSpectralCompat(nixDevice)
