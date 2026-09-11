@@ -288,12 +288,37 @@ class GoProTraitLayout :
                 GoProApi.ConnectionState.CONNECTING_BLE,
                 GoProApi.ConnectionState.AWAITING_AP,
                 GoProApi.ConnectionState.CONNECTING_WIFI,
-                GoProApi.ConnectionState.CONNECTED -> showConnectingUi()
+                GoProApi.ConnectionState.CONNECTED -> {
+                    showConnectingUi()
+                    showStage(state)
+                }
 
                 GoProApi.ConnectionState.STREAMING,
                 GoProApi.ConnectionState.CAPTURING,
                 GoProApi.ConnectionState.DISCONNECTING -> Unit
             }
+        }
+    }
+
+    /**
+     * Names the stage on the progress dialog. A generic spinner gives the user nothing to act on
+     * when a connection stalls, whereas knowing whether it stopped at bluetooth, at the access
+     * point or at the preview points straight at the cause.
+     */
+    private fun showStage(state: GoProApi.ConnectionState) {
+
+        val messageRes = when (state) {
+            GoProApi.ConnectionState.CONNECTING_BLE -> R.string.gopro_stage_bluetooth
+            GoProApi.ConnectionState.AWAITING_AP -> R.string.gopro_stage_enabling_ap
+            GoProApi.ConnectionState.CONNECTING_WIFI -> R.string.gopro_stage_joining_wifi
+            GoProApi.ConnectionState.CONNECTED -> R.string.gopro_stage_starting_preview
+            else -> return
+        }
+
+        try {
+            dialogWaitForStream?.setMessage(context.getString(messageRes))
+        } catch (e: Exception) {
+            Log.w(TAG, "Unable to update stream dialog message", e)
         }
     }
 
@@ -346,7 +371,8 @@ class GoProTraitLayout :
         model: GoProApi.GoProImage
     ): GoProApi.ImageSink? {
 
-        val file: DocumentFile = createStreamedFile(data.range, data.time) ?: return null
+        val file: DocumentFile =
+            createStreamedFile(data.range, data.trait, data.time) ?: return null
 
         return object : GoProApi.ImageSink {
 
@@ -354,7 +380,7 @@ class GoProTraitLayout :
                 this@GoProTraitLayout.openStreamedFile(file)
 
             override fun commit(bytesWritten: Long) {
-                this@GoProTraitLayout.commitStreamedFile(file, data.range, data.time)
+                this@GoProTraitLayout.commitStreamedFile(file, data.range, data.trait, data.time)
             }
 
             override fun discard() {

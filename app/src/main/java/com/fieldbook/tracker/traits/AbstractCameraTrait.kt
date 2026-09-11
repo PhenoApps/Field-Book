@@ -251,7 +251,7 @@ abstract class AbstractCameraTrait :
 
         val studyId = collectActivity.studyId
 
-        val rep = database.getNextRep(studyId, obsUnit.uniqueId, currentTrait.id)
+        val rep = database.getNextRep(studyId, obsUnit.uniqueId, traitObj.id)
 
         (context as? CollectActivity)?.updateObservation(traitObj, fileName, rep)
 
@@ -271,11 +271,17 @@ abstract class AbstractCameraTrait :
      * the bytes have actually landed (see [commitStreamedFile]), so an interrupted transfer cannot
      * leave an empty file with a valid observation row pointing at it.
      */
-    protected fun createStreamedFile(obsUnit: RangeObject, saveTime: String): DocumentFile? {
+    protected fun createStreamedFile(
+        obsUnit: RangeObject,
+        traitObj: TraitObject,
+        saveTime: String
+    ): DocumentFile? {
 
         return try {
 
-            val sanitizedTraitName = FileUtil.sanitizeFileName(currentTrait.name)
+            //the trait comes from the capture rather than from currentTrait: a streamed download
+            //takes seconds, and the user can move to another trait while it is in flight
+            val sanitizedTraitName = FileUtil.sanitizeFileName(traitObj.name)
 
             val name = "${obsUnit.uniqueId}_${sanitizedTraitName}_$saveTime.jpg"
 
@@ -297,6 +303,7 @@ abstract class AbstractCameraTrait :
     protected fun commitStreamedFile(
         file: DocumentFile,
         obsUnit: RangeObject,
+        traitObj: TraitObject,
         saveTime: String
     ) {
 
@@ -304,15 +311,15 @@ abstract class AbstractCameraTrait :
         val studyId = collectActivity.studyId
         val person = (activity as? CollectActivity)?.person
         val location = (activity as? CollectActivity)?.locationByPreferences
-        val rep = database.getNextRep(studyId, plot, currentTrait.id)
+        val rep = database.getNextRep(studyId, plot, traitObj.id)
 
         database.insertObservation(
-            plot, currentTrait.id, file.uri.toString(),
+            plot, traitObj.id, file.uri.toString(),
             person, location, "", studyId,
             null, null, null, rep
         )
 
-        writeExif(file, studyId, plot, currentTrait.id, saveTime)
+        writeExif(file, studyId, plot, traitObj.id, saveTime)
 
         ui.launch {
             notifyItemInserted(file.uri)

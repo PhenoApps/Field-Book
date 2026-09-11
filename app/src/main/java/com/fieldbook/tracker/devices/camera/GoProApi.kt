@@ -8,11 +8,15 @@ import android.bluetooth.BluetoothProfile
 import android.content.Context
 import android.net.Network
 import android.os.Build
+import android.os.SystemClock
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.annotation.StringRes
 import androidx.core.net.toUri
+import androidx.media3.datasource.DataSource
+import androidx.media3.datasource.UdpDataSource
 import androidx.media3.common.MimeTypes
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultRenderersFactory
@@ -121,6 +125,10 @@ class GoProApi @Inject constructor(
         /** True while a session is being established or is live. */
         val isActive: Boolean
             get() = this != DISCONNECTED && this != DISCONNECTING && this != ERROR
+
+        /** True once the session owns a preview player, whether or not frames have arrived yet. */
+        val hasPlayer: Boolean
+            get() = this == CONNECTED || this == STREAMING || this == CAPTURING
     }
 
     interface Callbacks {
@@ -155,8 +163,37 @@ class GoProApi @Inject constructor(
         private const val DOWNLOAD_TIMEOUT_MS = 60000L
         private const val DOWNLOAD_RETRIES = 2
 
-        private const val BLE_CONNECT_TIMEOUT_MS = 20000L
+        /**
+         * Budget for the whole bluetooth handshake. Generous on purpose: phenolib's credential
+         * sequence alone spends about ten seconds in fixed delays after service discovery, on top
+         * of connection and discovery, so a tighter budget tears down links that were about to
+         * succeed.
+         */
+        private const val BLE_CONNECT_TIMEOUT_MS = 45000L
         private const val BLE_DISCONNECT_TIMEOUT_MS = 800L
+
+        //how long to wait for the first preview frame before declaring the session failed
+        private const val STREAM_READY_TIMEOUT_MS = 30000L
+
+        //settle time between clearing a stuck preview stream and asking for a new one
+        private const val STREAM_RECOVERY_DELAY_MS = 600L
+
+        //Live preview buffering. Every millisecond held here is visible lag, so the window is kept
+        //small and, more importantly, capped: the old 5s maximum let latency grow and never shrink.
+        private const val MIN_BUFFER_MS = 250
+        private const val MAX_BUFFER_MS = 1000
+        private const val BUFFER_FOR_PLAYBACK_MS = 150
+        private const val BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS = 250
+
+        //must outlast a photo download, otherwise the player tears its socket down mid capture
+        private const val UDP_SOCKET_TIMEOUT_MS = 30000
+
+        //the player opens the udp socket before the camera has sent anything, so early failures
+        //are expected and retried rather than fatal. The retries have to keep going for as long as
+        //ffmpeg is still retrying its own side, otherwise the player has given up by the time a
+        //later ffmpeg attempt finally produces output.
+        private const val MAX_PLAYER_RETRIES = 9
+        private const val PLAYER_RETRY_DELAY_MS = 3000L
 
         //how long to wait for the camera to finish writing a photo
         private const val CAPTURE_TIMEOUT_MS = 20000L
@@ -190,6 +227,7 @@ class GoProApi @Inject constructor(
     private val ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private val playerListener: Player.Listener = object : Player.Listener {
+
         override fun onPlaybackStateChanged(playbackState: Int) {
             super.onPlaybackStateChanged(playbackState)
             when (playbackState) {
@@ -204,11 +242,50 @@ class GoProApi @Inject constructor(
                 Player.STATE_READY -> {
                     Log.d(TAG, "Player Ready")
 
+                    streamWatchdog?.cancel()
+                    streamWatchdog = null
+                    playerRetries = 0
+
                     if (connectionState != ConnectionState.CAPTURING) {
                         setState(ConnectionState.STREAMING)
                     }
 
                     callbacks?.onStreamReady()
+                }
+            }
+        }
+
+        /**
+         * The player is opened as soon as ffmpeg is launched, so it routinely reaches the udp
+         * socket before the camera has sent anything: the camera only starts streaming once a keep
+         * alive lands, and those are on a five second cadence. media3 gives up on the source after
+         * a few seconds and parks in STATE_IDLE, and nothing used to re-prepare it - the preview
+         * then never arrived and the connect flow sat on its spinner indefinitely.
+         */
+        override fun onPlayerError(error: PlaybackException) {
+            super.onPlayerError(error)
+
+            Log.e(TAG, "Player error (${error.errorCodeName})", error)
+
+            //Retry for as long as the session owns a player, not just while the first frame is
+            //still awaited. A preview that dies after it has started - which is exactly what a
+            //capture can cause - otherwise stays dead for the rest of the session.
+            if (!connectionState.hasPlayer) return
+
+            if (playerRetries >= MAX_PLAYER_RETRIES) {
+                Log.e(TAG, "Giving up on preview after $playerRetries retries")
+                return
+            }
+
+            playerRetries++
+
+            ioScope.launch {
+                delay(PLAYER_RETRY_DELAY_MS)
+                withContext(Dispatchers.Main) {
+                    if (connectionState.hasPlayer) {
+                        Log.d(TAG, "Re-preparing preview, attempt $playerRetries")
+                        player?.prepare()
+                    }
                 }
             }
         }
@@ -231,6 +308,12 @@ class GoProApi @Inject constructor(
     private var pollJob: Job? = null
     private var pollPaused = false
 
+    private var stateChangedAt = 0L
+
+    /** Fails the session if the first preview frame never arrives. */
+    private var streamWatchdog: Job? = null
+    private var playerRetries = 0
+
     /**
      * Newest media url already consumed. A single value is enough to dedupe and, unlike the
      * unbounded list this replaced, it does not silently swallow a re-taken photo after a
@@ -247,7 +330,12 @@ class GoProApi @Inject constructor(
 
         if (connectionState == state && messageRes == null) return
 
-        Log.d(TAG, "Connection state: $connectionState -> $state")
+        //elapsed time per stage makes a stalled connect readable straight from logcat
+        val now = SystemClock.elapsedRealtime()
+        val sinceLast = if (stateChangedAt == 0L) 0L else now - stateChangedAt
+        stateChangedAt = now
+
+        Log.d(TAG, "Connection state: $connectionState -> $state (+${sinceLast}ms)")
 
         connectionState = state
 
@@ -466,6 +554,9 @@ class GoProApi @Inject constructor(
         setState(ConnectionState.DISCONNECTING)
 
         try { captureJob?.cancel() } catch (_: Exception) {}
+        streamWatchdog?.cancel()
+        streamWatchdog = null
+        playerRetries = 0
         stopPolling()
 
         withTimeoutOrNull(2000L) {
@@ -533,6 +624,7 @@ class GoProApi @Inject constructor(
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to make network request to GoPro AP", e)
                 setState(ConnectionState.ERROR, R.string.gopro_error_stream_failed)
+                teardownAsync()
             }
         }
     }
@@ -541,19 +633,69 @@ class GoProApi @Inject constructor(
 
         Log.d(TAG, "Request stream start.")
 
-        val response = executeWithRetrySuspend(url("/gopro/camera/stream/start"))
+        var started = requestStreamStart()
 
-        response.use {
-            if (!it.isSuccessful) {
-                Log.e(TAG, "Start stream response = not success ${it.code}")
-            } else {
-                Log.i(TAG, "Start stream response = success")
+        if (!started) {
+            //The camera refuses to start a preview while it believes one is already running, and
+            //that belief survives a power cycle when the previous session was not closed cleanly.
+            //Clearing it and asking again is the recovery. Without it the camera sends nothing at
+            //all while ffmpeg and the player sit waiting on an empty socket.
+            Log.w(TAG, "Start stream refused, clearing the existing stream and retrying")
+
+            try {
+                stopStreamSuspend()
+            } catch (e: Exception) {
+                Log.w(TAG, "Stop stream failed during recovery", e)
             }
+
+            delay(STREAM_RECOVERY_DELAY_MS)
+
+            started = requestStreamStart()
+        }
+
+        //never hand an unstarted stream to ffmpeg: it blocks on the socket forever rather than
+        //exiting, so neither its own retries nor the player's would ever fire
+        if (!started) {
+            throw IOException("Camera refused to start the preview stream")
         }
 
         controller.getFfmpegHelper().initRequestTimer()
 
         callbacks?.onStreamRequested()
+
+        armStreamWatchdog()
+    }
+
+    private suspend fun requestStreamStart(): Boolean =
+        executeWithRetrySuspend(url("/gopro/camera/stream/start")).use {
+            if (it.isSuccessful) {
+                Log.i(TAG, "Start stream response = success")
+                true
+            } else {
+                Log.e(TAG, "Start stream response = not success ${it.code}")
+                false
+            }
+        }
+
+    /**
+     * Nothing else bounds the wait for the first preview frame. Without this the trait sits on its
+     * "waiting for live preview" spinner forever whenever ffmpeg or the camera's stream fails to
+     * come up, with no error and no way back to the connect button.
+     */
+    private fun armStreamWatchdog() {
+
+        streamWatchdog?.cancel()
+
+        streamWatchdog = ioScope.launch {
+
+            delay(STREAM_READY_TIMEOUT_MS)
+
+            if (connectionState == ConnectionState.CONNECTED) {
+                Log.e(TAG, "No preview frame within ${STREAM_READY_TIMEOUT_MS}ms, failing session")
+                setState(ConnectionState.ERROR, R.string.gopro_error_stream_timeout)
+                teardownAsync()
+            }
+        }
     }
 
     private suspend fun stopStreamSuspend() {
@@ -569,34 +711,60 @@ class GoProApi @Inject constructor(
         }
     }
 
-    private suspend fun restartPreview() {
+    /** Returns false if the camera would not give the preview back, leaving the session broken. */
+    private suspend fun restartPreview(): Boolean {
         try {
             stopStreamSuspend()
         } catch (e: Exception) {
             Log.w(TAG, "Stop stream failed while restarting preview", e)
         }
-        try {
+        return try {
             startStreamSuspend()
+            true
         } catch (e: Exception) {
             Log.e(TAG, "Failed to restart preview", e)
+            false
         }
     }
 
+    /**
+     * Returns the preview player, building it only once per session.
+     *
+     * Rebuilding it is what broke the preview after every capture: the ffmpeg output port is bound
+     * by the player, and a replacement instance tried to bind it while the outgoing one was still
+     * closing, which surfaced as EADDRINUSE. Reusing the instance also keeps the socket bound
+     * across a capture, so the preview simply resumes when ffmpeg starts sending again.
+     */
     fun createPlayer(): ExoPlayer {
 
-        //Max. Buffer: The maximum duration, in milliseconds, of the media the player is attempting to buffer. Once the buffer reaches Max Buffer, it will stop filling it up.
-        //min Buffer: The minimum length of media that the player will ensure is buffered at all times, in milliseconds.
-        //Playback Buffer: The default amount of time, in milliseconds, of media that needs to be buffered in order for playback to start or resume after a user action such as a seek.
-        //Buffer for playback after rebuffer: The duration of the media that needs to be buffered in order for playback to continue after a rebuffer, in milliseconds.
-        player?.removeListener(playerListener)
-        player?.stop()
-        player?.release()
-        player = null
+        player?.let { existing ->
+
+            //ENDED counts too: a live source that hit end of stream is just as stuck as an idle one
+            if (existing.playbackState == Player.STATE_IDLE ||
+                existing.playbackState == Player.STATE_ENDED
+            ) {
+                Log.d(TAG, "Re-preparing existing preview player")
+                existing.prepare()
+            }
+
+            existing.playWhenReady = true
+
+            return existing
+        }
 
         val trackSelector = androidx.media3.exoplayer.trackselection.DefaultTrackSelector(context)
+
+        //Buffering is kept short on purpose. These are a live preview: anything the player holds
+        //on to is latency the user sees between moving the camera and the screen catching up, and
+        //a large maximum lets that gap grow without ever recovering.
         val loadControl = androidx.media3.exoplayer.DefaultLoadControl.Builder()
             .setPrioritizeTimeOverSizeThresholds(true)
-            .setBufferDurationsMs(2500, 5000, 1500, 2000)
+            .setBufferDurationsMs(
+                MIN_BUFFER_MS,
+                MAX_BUFFER_MS,
+                BUFFER_FOR_PLAYBACK_MS,
+                BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS
+            )
             .build()
 
         val renderersFactory = DefaultRenderersFactory(context)
@@ -605,28 +773,37 @@ class GoProApi @Inject constructor(
                 if (mimeType == MimeTypes.VIDEO_MV_HEVC) emptyList() else MediaCodecUtil.getDecoderInfos(mimeType, requiresSecureDecoder, requiresTunnelingDecoder)
             }
 
-        player = ExoPlayer.Builder(context)
+        val created = ExoPlayer.Builder(context)
             .setTrackSelector(trackSelector)
             .setLoadControl(loadControl)
             .setRenderersFactory(renderersFactory)
             .build()
 
-        player?.addListener(playerListener)
+        created.addListener(playerListener)
+
+        //A udp source is built directly rather than going through DefaultDataSource so its socket
+        //timeout can be raised. The default gives up after eight seconds, which a photo download
+        //routinely exceeds, and the resulting teardown and rebind is what the preview used to trip
+        //over on the way back.
+        val dataSourceFactory = DataSource.Factory {
+            UdpDataSource(UdpDataSource.DEFAULT_MAX_PACKET_SIZE, UDP_SOCKET_TIMEOUT_MS)
+        }
 
         val mediaSource: androidx.media3.exoplayer.source.MediaSource =
-            androidx.media3.exoplayer.source.ProgressiveMediaSource.Factory(
-                androidx.media3.datasource.DefaultDataSource.Factory(context)
-            ).createMediaSource(
-                androidx.media3.common.MediaItem.fromUri(
-                    ffmpegOutputUri.toUri()
+            androidx.media3.exoplayer.source.ProgressiveMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(
+                    androidx.media3.common.MediaItem.fromUri(
+                        ffmpegOutputUri.toUri()
+                    )
                 )
-            )
 
-        player?.setMediaSource(mediaSource)
-        player?.playWhenReady = true
-        player?.prepare()
+        created.setMediaSource(mediaSource)
+        created.playWhenReady = true
+        created.prepare()
 
-        return player as ExoPlayer
+        player = created
+
+        return created
     }
 
     /**
@@ -733,8 +910,14 @@ class GoProApi @Inject constructor(
         } finally {
             withContext(NonCancellable) {
                 if (connectionState == ConnectionState.CAPTURING) {
-                    restartPreview()
-                    setState(ConnectionState.STREAMING)
+                    if (restartPreview()) {
+                        setState(ConnectionState.STREAMING)
+                    } else {
+                        //do not report a live session over a preview the camera refused to give
+                        //back: that reads as working while nothing updates on screen
+                        setState(ConnectionState.ERROR, R.string.gopro_error_stream_failed)
+                        teardownAsync()
+                    }
                 }
                 pollPaused = false
                 callbacks?.onCaptureFinished()
@@ -1103,12 +1286,19 @@ class GoProApi @Inject constructor(
 
         try {
 
-            Log.d(TAG, "onCredentialsAcquired ${gatt.ssid}")
-
             val ssid = gatt.ssid
             val pass = gatt.password
 
+            //the ssid must match what the camera shows under Connections > Camera Info exactly.
+            //Log the length rather than the passphrase itself so a blank or truncated read is
+            //still diagnosable from a bug report.
+            Log.d(
+                TAG,
+                "Credentials acquired: ssid=[$ssid] passphrase length=${pass?.length ?: 0}"
+            )
+
             if (ssid.isNullOrBlank() || pass.isNullOrBlank()) {
+                Log.e(TAG, "Camera did not report usable wifi credentials")
                 setState(ConnectionState.ERROR, R.string.gopro_error_ble_failed)
                 return
             }

@@ -7,7 +7,10 @@ import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.net.wifi.WifiNetworkSpecifier
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.os.PatternMatcher
+import android.os.SystemClock
 import android.util.Log
 import androidx.annotation.RequiresApi
 import dagger.hilt.android.qualifiers.ActivityContext
@@ -38,15 +41,18 @@ class WifiHelper @Inject constructor(
         const val TAG = "WifiHelper"
 
         /**
-         * Without a timeout the request stays pending forever if the user never accepts the
-         * system connect dialog, which silently blocks every later request.
+         * How long to wait for the camera's access point before giving up. Generous: the user may
+         * still be reading the system connect dialog.
          */
-        const val REQUEST_TIMEOUT_MS = 45000
+        const val REQUEST_TIMEOUT_MS = 45000L
     }
 
     private val connectivityManager by lazy {
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     }
+
+    private val timeoutHandler = Handler(Looper.getMainLooper())
+    private var timeoutRunnable: Runnable? = null
 
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
     private var boundNetwork: Network? = null
@@ -58,7 +64,7 @@ class WifiHelper @Inject constructor(
             .setWpa2Passphrase(pass)
             .build()
 
-        requestNetwork(specifier.toRequest(), requester)
+        requestNetwork(specifier.toRequest(), requester, ssid)
     }
 
     fun startWifiSearch(format: String, requester: WifiRequester) {
@@ -74,7 +80,7 @@ class WifiHelper @Inject constructor(
             //.setBssid(MacAddress.fromString(bssid!!))
             .build()
 
-        requestNetwork(specifier.toRequest(), requester)
+        requestNetwork(specifier.toRequest(), requester, "*$format*")
     }
 
     private fun WifiNetworkSpecifier.toRequest(): NetworkRequest =
@@ -85,28 +91,41 @@ class WifiHelper @Inject constructor(
             .build()
 
     /**
-     * Registers a single network request. Registered callbacks live at the framework level and
-     * outlive the activity, so the previous one must always be unregistered first: otherwise they
-     * accumulate until [ConnectivityManager.requestNetwork] throws TooManyRequestsException and
-     * the device can only recover by toggling wifi.
+     * Registers a single network request for a camera's access point.
+     *
+     * Registered callbacks live at the framework level and outlive the activity, so the previous
+     * one must always be released first: otherwise they accumulate until
+     * [ConnectivityManager.requestNetwork] throws TooManyRequestsException and the device can only
+     * recover by toggling wifi.
      */
-    private fun requestNetwork(request: NetworkRequest, requester: WifiRequester) {
+    private fun requestNetwork(request: NetworkRequest, requester: WifiRequester, label: String) {
 
         //releases any previous request and unbinds the process
         disconnect()
 
         requester.onApRequested()
 
+        val startedAt = SystemClock.elapsedRealtime()
+
+        fun elapsed() = SystemClock.elapsedRealtime() - startedAt
+
         val callback = object : ConnectivityManager.NetworkCallback() {
 
             override fun onAvailable(network: Network) {
                 super.onAvailable(network)
 
-                Log.d(TAG, "Network Available")
+                cancelTimeout()
 
                 boundNetwork = network
 
-                connectivityManager.bindProcessToNetwork(network)
+                val bound = try {
+                    connectivityManager.bindProcessToNetwork(network)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to bind process to $label", e)
+                    false
+                }
+
+                Log.d(TAG, "Joined $label in ${elapsed()}ms, process bound = $bound")
 
                 requester.onNetworkBound(network)
             }
@@ -116,7 +135,7 @@ class WifiHelper @Inject constructor(
 
                 if (network != boundNetwork) return
 
-                Log.d(TAG, "Network Lost")
+                Log.w(TAG, "Lost $label after ${elapsed()}ms")
 
                 boundNetwork = null
 
@@ -132,7 +151,9 @@ class WifiHelper @Inject constructor(
             override fun onUnavailable() {
                 super.onUnavailable()
 
-                Log.d(TAG, "Network Unavailable")
+                cancelTimeout()
+
+                Log.e(TAG, "$label unavailable after ${elapsed()}ms")
 
                 requester.onNetworkUnavailable()
             }
@@ -140,17 +161,39 @@ class WifiHelper @Inject constructor(
 
         networkCallback = callback
 
+        Log.d(TAG, "Requesting network $label")
+
         try {
-            connectivityManager.requestNetwork(request, callback, REQUEST_TIMEOUT_MS)
+            //deliberately the untimed overload. The timeout variant's behaviour with a
+            //WifiNetworkSpecifier is inconsistent across vendors, and when it does not deliver
+            //onUnavailable the connect flow stalls with no way out, so the deadline is enforced
+            //here where it is guaranteed to fire.
+            connectivityManager.requestNetwork(request, callback)
         } catch (e: RuntimeException) {
             //TooManyRequestsException is a RuntimeException and is not part of the public api
-            Log.e(TAG, "Network request rejected", e)
+            Log.e(TAG, "Network request for $label rejected", e)
             networkCallback = null
             requester.onNetworkUnavailable()
+            return
         }
+
+        timeoutRunnable = Runnable {
+            if (networkCallback === callback && boundNetwork == null) {
+                Log.e(TAG, "Timed out joining $label after ${elapsed()}ms")
+                disconnect()
+                requester.onNetworkUnavailable()
+            }
+        }.also { timeoutHandler.postDelayed(it, REQUEST_TIMEOUT_MS) }
+    }
+
+    private fun cancelTimeout() {
+        timeoutRunnable?.let { timeoutHandler.removeCallbacks(it) }
+        timeoutRunnable = null
     }
 
     fun disconnect() {
+
+        cancelTimeout()
 
         networkCallback?.let {
             try {

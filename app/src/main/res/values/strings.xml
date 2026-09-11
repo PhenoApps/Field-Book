@@ -737,6 +737,11 @@
     <string name="gopro_error_wifi_unavailable">Could not join the GoPro Wi-Fi network.</string>
     <string name="gopro_error_wifi_lost">Lost the GoPro Wi-Fi network.</string>
     <string name="gopro_error_stream_failed">Could not start the GoPro live preview.</string>
+    <string name="gopro_error_stream_timeout">The GoPro live preview did not start. Power the camera off and on, then try again.</string>
+    <string name="gopro_stage_bluetooth">Connecting over Bluetooth…</string>
+    <string name="gopro_stage_enabling_ap">Turning on the camera Wi‑Fi…</string>
+    <string name="gopro_stage_joining_wifi">Joining the camera Wi‑Fi…</string>
+    <string name="gopro_stage_starting_preview">Starting the live preview…</string>
     <string name="gopro_error_not_connected">The GoPro is not connected.</string>
     <string name="gopro_error_capture_busy">Still saving the previous photo.</string>
     <string name="gopro_error_capture_timeout">The GoPro did not finish capturing in time.</string>
