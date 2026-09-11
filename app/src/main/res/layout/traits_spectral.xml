@@ -2,20 +2,9 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:minHeight="@dimen/fb_spectral_busy_card_min_height"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
-
-    <ProgressBar style="@style/IndeterminateProgressStyle"
-        android:layout_margin="16dp"
-        android:layout_width="@dimen/brapi_filter_pb_size"
-        android:layout_height="@dimen/brapi_filter_pb_size"
-        android:id="@+id/progress_bar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:visibility="invisible"
-        android:elevation="3dp"
-        android:indeterminate="true"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         style="@style/FloatingActionButtonStyle.TraitButtons"
@@ -103,5 +92,59 @@
         app:layout_constraintTop_toBottomOf="@id/color_recycler_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <!--
+        Busy indicator, shown while connecting or taking a measurement.
+
+        Declared last and raised above the FABs so it reads as floating over the graph rather than
+        being lost in it. clickable stops a tap landing on whatever sits behind the card.
+    -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/progress_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="8dp"
+        app:cardBackgroundColor="?attr/fb_color_background"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="40dp">
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/progress_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                app:indicatorColor="?attr/fb_color_indeterminate_progress_bar"
+                app:trackThickness="8dp"
+                app:trackCornerRadius="4dp"
+                app:indicatorSize="96dp" />
+
+            <TextView
+                android:id="@+id/progress_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:textColor="?attr/fb_color_text_dark"
+                android:textSize="16sp"
+                android:visibility="gone"
+                tools:text="Loading scan configs"
+                tools:visibility="visible" />
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

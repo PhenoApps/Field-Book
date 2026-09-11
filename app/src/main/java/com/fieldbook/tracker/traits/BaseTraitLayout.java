@@ -224,6 +224,15 @@ public abstract class BaseTraitLayout extends LinearLayout {
     public void onExit() {}
 
     /**
+     * Called for every trait layout when the hosting activity is destroyed.
+     *
+     * Layouts are constructed once per CollectActivity, so anything a layout owns that outlives a
+     * view - a coroutine scope, a Bluetooth scan, a receiver registered on an application scoped
+     * manager - has to be released here or it leaks the activity along with it.
+     */
+    public void onDestroy() {}
+
+    /**
      * Optional warning shown before a toolbar action discards collected data, s.a. delete or
      * marking an observation missing. Return null to let the action proceed without confirming.
      */

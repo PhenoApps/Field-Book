@@ -55,6 +55,73 @@ class InnoSpectraViewModel @Inject constructor() : ViewModel(), InnoSpectraViewM
 
     data class NanoConnection(val sdk: ISCNIRScanSDK, val device: NanoDevice)
 
+    /**
+     * Ordered stages of the connection handshake, with the percentage each one represents.
+     *
+     * The SDK announces every step as its own broadcast, so this is real progress rather than a
+     * timer: each stage is posted when its broadcast actually lands. The percentages are the
+     * share of a connection's wall clock that has elapsed by that point, measured on a device as
+     * 6.0s connecting, then 3.9, 2.6, 0.3, 1.7, 0.7 and 0.6s for the stages that follow. Spacing
+     * them evenly instead would make the arc lurch, since the stages differ by 20x in length.
+     *
+     * [CONNECTING] carries no percentage: nothing is broadcast until the BLE link is up, so there
+     * is nothing to report during it. The indicator spins through that stage and switches to the
+     * arc when [HANDSHAKE] lands. It is also the longest stage, which is exactly the stretch a
+     * bar parked near zero would misrepresent.
+     *
+     * [SCAN_CONFIGS] covers the config download, which reports a genuine received/total fraction
+     * and so fills the span between its own percentage and [READY].
+     */
+    enum class ConnectionStage(val percent: Int?) {
+        CONNECTING(null),
+        HANDSHAKE(38),
+        DEVICE_INFO(63),
+        DEVICE_UUID(79),
+        DEVICE_STATUS(81),
+        SCAN_CONFIGS(92),
+        READY(100)
+    }
+
+    data class ConnectionProgress(val stage: ConnectionStage, val percent: Int?)
+
+    private val mConnectionProgress: MutableLiveData<ConnectionProgress?> = MutableLiveData(null)
+
+    fun getConnectionProgress(): LiveData<ConnectionProgress?> = mConnectionProgress
+
+    /**
+     * Marks the start of a connection attempt. Called by the trait layout because nothing is
+     * broadcast until the BLE link is already up.
+     */
+    fun startConnectionProgress() = postStage(ConnectionStage.CONNECTING)
+
+    private fun postStage(stage: ConnectionStage) {
+        mConnectionProgress.postValue(ConnectionProgress(stage, stage.percent))
+    }
+
+    /**
+     * Config download progress. Held just below [ConnectionStage.READY] so the arc cannot reach
+     * the end before the active config actually arrives.
+     */
+    private fun postConfigProgress() {
+
+        val base = ConnectionStage.SCAN_CONFIGS.percent ?: return
+        val end = ConnectionStage.READY.percent ?: return
+
+        val total = mConfigSize ?: 0
+        val span = end - base
+
+        val percent = if (total > 0) {
+            //held short of the end so the arc cannot fill before the active config arrives
+            base + (span * mConfigs.size / total).coerceAtMost(span - 3)
+        } else {
+            base
+        }
+
+        mConnectionProgress.postValue(
+            ConnectionProgress(ConnectionStage.SCAN_CONFIGS, percent)
+        )
+    }
+
     //track if device is currently connected
     private var mConnected = false
 
@@ -253,6 +320,7 @@ class InnoSpectraViewModel @Inject constructor() : ViewModel(), InnoSpectraViewM
         mRefDataReady = false
         mBluetoothDevice = null
         mConnectionStarting = false
+        mConnectionProgress.postValue(null)
 
         return 1
     }
@@ -283,6 +351,15 @@ class InnoSpectraViewModel @Inject constructor() : ViewModel(), InnoSpectraViewM
     } else false
 
     private fun isRefDataReady() = mRefDataReady
+
+    /**
+     * Whether [scan] will actually start a measurement.
+     *
+     * Callers need this up front because scan() reports "cannot scan" by returning a LiveData
+     * already holding null, which is indistinguishable from the null it publishes to reset itself
+     * just before a real scan begins.
+     */
+    fun isReadyToScan() = isConnected() && isRefDataReady()
 
     override fun reset(context: Context?) {
 
@@ -353,6 +430,8 @@ class InnoSpectraViewModel @Inject constructor() : ViewModel(), InnoSpectraViewM
 
         if (isGattStateConnected()) {
 
+            postStage(ConnectionStage.HANDSHAKE)
+
             // ControlPhysicalButton(PhysicalButton.Lock)
 
             //jni call
@@ -421,6 +500,8 @@ class InnoSpectraViewModel @Inject constructor() : ViewModel(), InnoSpectraViewM
 
         mDeviceInfo.uuid = uuid
 
+        postStage(ConnectionStage.DEVICE_UUID)
+
         GetDeviceStatus()
 
     }
@@ -435,6 +516,8 @@ class InnoSpectraViewModel @Inject constructor() : ViewModel(), InnoSpectraViewM
 
         mConnected = true
 
+        postStage(ConnectionStage.DEVICE_INFO)
+
         GetUUID()
     }
 
@@ -443,6 +526,8 @@ class InnoSpectraViewModel @Inject constructor() : ViewModel(), InnoSpectraViewM
         if (mConfigs.isEmpty() || !mConfigs.any { config.scanConfigIndex == it.scanConfigIndex }) {
 
             mConfigs.add(config)
+
+            postConfigProgress()
 
             if (mConfigs.size == mConfigSize) {
 
@@ -456,11 +541,15 @@ class InnoSpectraViewModel @Inject constructor() : ViewModel(), InnoSpectraViewM
     override fun onGetActiveConfig(index: Int) {
 
         mActiveIndex = index
+
+        postStage(ConnectionStage.READY)
     }
 
     override fun onGetDeviceStatus(status: DeviceStatus) {
 
         mDeviceStatus = status
+
+        postStage(ConnectionStage.DEVICE_STATUS)
 
         GetScanConfig()
     }
@@ -468,6 +557,8 @@ class InnoSpectraViewModel @Inject constructor() : ViewModel(), InnoSpectraViewM
     override fun onGetConfigSize(size: Int) {
 
         mConfigSize = size
+
+        postConfigProgress()
     }
 
     override fun onConfigSaveStatus(status: Boolean) {

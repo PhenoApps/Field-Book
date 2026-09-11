@@ -30,7 +30,10 @@ import com.nixsensor.universalsdk.OnDeviceResultListener
 import com.nixsensor.universalsdk.ReferenceWhite
 import com.nixsensor.universalsdk.ScanMode
 import com.serenegiant.bluetooth.BluetoothManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.threeten.bp.OffsetDateTime
 
 
@@ -42,10 +45,14 @@ class NixTraitLayout : SpectralTraitLayout {
     companion object {
         const val TAG = "NixTraitLayout"
         const val SEARCH_RECURSION_LIMIT = 42
+
+        //how long a measurement may run before the capture UI is restored anyway
+        private const val CAPTURE_TIMEOUT_MS = 20000L
     }
 
 
     private var recursionCount = 0
+    private var captureTimeoutJob: kotlinx.coroutines.Job? = null
     private val nixSaver = SpectralSaver(database)
 
     constructor(context: Context?) : super(context)
@@ -60,6 +67,23 @@ class NixTraitLayout : SpectralTraitLayout {
 
     override fun type(): String {
         return Formats.NIX.getDatabaseName()
+    }
+
+    /**
+     * Stops scanning, and any connect attempt still waiting, when the activity goes away.
+     *
+     * The connected device is deliberately left alone: NixSensorHelper is activity scoped and
+     * disconnecting here is what the commented out call in CollectActivity.onDestroy was avoiding.
+     * The scan needs releasing, since it otherwise keeps the radio busy for the whole process, and
+     * so does a pending connect, whose callbacks would otherwise land on a view that is gone.
+     */
+    override fun onDestroy() {
+        cancelCaptureTimeout()
+        with(controller.getNixSensorHelper()) {
+            stopScan()
+            cancelPendingConnect()
+        }
+        super.onDestroy()
     }
 
     override fun loadLayout() {
@@ -201,6 +225,10 @@ class NixTraitLayout : SpectralTraitLayout {
 
         if (IDeviceScanner.isBluetoothPermissionGranted(context)) {
 
+            //the budget is per wait, not per session: without this every retry ever spent counts
+            //against the limit and device search stops working permanently partway through a day
+            recursionCount = 0
+
             controller.getNixSensorHelper().search {}
 
         } else {
@@ -278,19 +306,31 @@ class NixTraitLayout : SpectralTraitLayout {
         getDevice(device)?.let { nixDevice ->
 
             toggleProgressBar(true)
-            connectButton?.isEnabled = false
+
+            // Hide, not just disable: the connect button is a FAB sitting over the progress bar,
+            // and a greyed out FAB still reads as tappable while the handshake runs.
+            connectButton?.visibility = GONE
 
             val nix = (context as CollectActivity).getNixSensorHelper()
 
-            nix.stopScan()
-
+            //the scan is left running: the helper waits for the device to advertise before it
+            //opens the link, and stops scanning itself once it has a handle to connect through
             nix.connect(nixDevice) { connected ->
-                if (connected) {
-                    connectButton?.isEnabled = true
-                    saveDevice(device)
-                    enableCapture(device)
-                    ensureSpectralCompat(nixDevice)
+
+                if (connected != null) {
+
+                    //what the helper connected, which is not always what the picker handed over
+                    val live = connected.toDevice()
+
+                    saveDevice(live)
+                    enableCapture(live)
+                    ensureSpectralCompat(connected)
+
                 } else {
+                    //covers a refused attempt, one the SDK never answered, and a device that
+                    //never advertised, so the trait is never left on the spinner with no way back
+                    Toast.makeText(context, R.string.nix_error_connect_failed, Toast.LENGTH_SHORT)
+                        .show()
                     setupConnectUi()
                 }
             }
@@ -327,8 +367,11 @@ class NixTraitLayout : SpectralTraitLayout {
             ?: (device.deviceImplementation as? NixSensorHelper.NixDevice)?.device
 
     override fun disconnectAndEraseDevice(device: Device) {
+        cancelCaptureTimeout()
         getDevice(device)?.let { nixDevice ->
-            nixDevice.disconnect()
+            //through the helper so the disconnect is stamped: the next connect waits out the
+            //teardown instead of being swallowed by it
+            controller.getNixSensorHelper().disconnect(nixDevice)
             controller.getPreferences().edit {
                 remove(GeneralKeys.NIX_ADDRESS)
                 remove(GeneralKeys.NIX_NAME)
@@ -349,29 +392,44 @@ class NixTraitLayout : SpectralTraitLayout {
 
     override fun capture(device: Device, entryId: String, traitId: String, callback: ResultCallback) {
 
-        getDevice(device)?.let { nixDevice ->
+        // setupCaptureButton() has already disabled the button and raised the overlay, so every
+        // path out of here has to hand them back. Falling through silently strands the trait.
+        val nixDevice = getDevice(device)
 
-            Log.d(TAG, "Device state: ${nixDevice.state}")
+        if (nixDevice == null) {
+            Log.w(TAG, "capture: no device backing the capture request")
+            enableCapture(device)
+            callback.onResult(false)
+            return
+        }
 
-            if (!isDeviceCompatible(nixDevice)) {
-                Toast.makeText(context, R.string.nix_device_incompatible, Toast.LENGTH_SHORT).show()
-                enableCapture(device)
-                return@let
-            }
+        Log.d(TAG, "Device state: ${nixDevice.state}")
 
-            if (nixDevice.state != DeviceState.IDLE) {
-                Toast.makeText(context, R.string.nix_device_connecting, Toast.LENGTH_SHORT).show()
-                enableCapture(device)
-                return@let
-            }
+        if (!isDeviceCompatible(nixDevice)) {
+            Toast.makeText(context, R.string.nix_device_incompatible, Toast.LENGTH_SHORT).show()
+            enableCapture(device)
+            callback.onResult(false)
+            return
+        }
 
-            callback.onResult(true)
+        if (nixDevice.state != DeviceState.IDLE) {
+            Toast.makeText(context, R.string.nix_device_connecting, Toast.LENGTH_SHORT).show()
+            enableCapture(device)
+            callback.onResult(false)
+            return
+        }
 
-            nixDevice.measure(object : OnDeviceResultListener {
+        callback.onResult(true)
+
+        startCaptureTimeout(device)
+
+        nixDevice.measure(object : OnDeviceResultListener {
                 override fun onDeviceResult(
                     status: CommandStatus,
                     measurements: Map<ScanMode, IMeasurementData>?
                 ) {
+
+                    cancelCaptureTimeout()
 
                     captureButton?.isEnabled = true
                     toggleProgressBar(false)
@@ -440,8 +498,39 @@ class NixTraitLayout : SpectralTraitLayout {
                         }
                     }
                 }
-            })
+        })
+    }
+
+    /**
+     * Restores the capture UI if a measurement never reports back.
+     *
+     * The SDK gives no guarantee that OnDeviceResultListener fires: if the sensor drops the link
+     * mid measurement the callback simply never arrives, leaving the button disabled and the
+     * overlay up with no way back short of switching traits.
+     */
+    private fun startCaptureTimeout(device: Device) {
+
+        captureTimeoutJob?.cancel()
+
+        captureTimeoutJob = background.launch {
+
+            delay(CAPTURE_TIMEOUT_MS)
+
+            withContext(Dispatchers.Main) {
+
+                Log.w(TAG, "capture: no measurement result within timeout, restoring the capture UI")
+
+                enableCapture(device)
+
+                //drop the placeholder row added when the capture started
+                submitList()
+            }
         }
+    }
+
+    private fun cancelCaptureTimeout() {
+        captureTimeoutJob?.cancel()
+        captureTimeoutJob = null
     }
 
     private fun isDeviceCompatible(device: IDeviceCompat): Boolean {

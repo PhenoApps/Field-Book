@@ -1374,7 +1374,8 @@ public class CollectActivity extends ThemedActivity
 
         traitLayoutRefresh();
 
-        //nixSensorHelper.disconnect();
+        //release resources every trait layout owns, not just the one on screen
+        traitLayouts.onDestroy();
 
         bleScanner.stopScanning();
 
