@@ -169,13 +169,26 @@ class CanonApi @Inject constructor(@param:ActivityContext private val context: C
 
                     log("Stopping session responded $response")
 
-                    session.callbacks?.onSessionStop()
-
-                    session.disconnect()
-
                 }
 
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+
+                //a powered off camera cannot acknowledge the close, the handshake is best effort
+                log("Stop session handshake failed: ${e.message}")
+
+            } finally {
+
+                //always release. Notifying only on a successful handshake left the trait showing a
+                //dead preview with no way back to the connect button when the camera was switched
+                //off, and the only way out was leaving and re-entering collect.
+                session.callbacks?.onSessionStop()
+
+                try {
+                    session.disconnect()
+                } catch (_: Exception) {
+                }
+
+                this@CanonApi.session = null
             }
         }
     }
