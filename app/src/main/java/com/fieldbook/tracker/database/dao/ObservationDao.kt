@@ -36,13 +36,22 @@ class ObservationDao {
 
         const val TAG = "ObservationDao"
 
+        /**
+         * Returns null when no observation carries [id].
+         *
+         * toFirst() answers a miss with an empty row rather than nothing, and ObservationModel
+         * reads its columns through map delegates, so handing that row on produced a model that
+         * threw NoSuchElementException on first field access instead of a null callers could
+         * check. Spectral facts whose observation had been deleted crashed the trait that way.
+         */
         fun getById(id: String): ObservationModel? = withDatabase { db ->
 
             db.query(Observation.tableName,
                 where = "${Observation.PK} = ?",
                 whereArgs = arrayOf(id))
                 .toFirst()
-                .let { ObservationModel(it) }
+                .takeIf { it.isNotEmpty() }
+                ?.let { ObservationModel(it) }
 
         }
 

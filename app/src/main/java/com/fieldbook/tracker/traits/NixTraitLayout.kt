@@ -70,15 +70,19 @@ class NixTraitLayout : SpectralTraitLayout {
     }
 
     /**
-     * Stops scanning when the activity goes away.
+     * Stops scanning, and any connect attempt still waiting, when the activity goes away.
      *
      * The connected device is deliberately left alone: NixSensorHelper is activity scoped and
      * disconnecting here is what the commented out call in CollectActivity.onDestroy was avoiding.
-     * Only the scan needs releasing, since it otherwise keeps the radio busy for the whole process.
+     * The scan needs releasing, since it otherwise keeps the radio busy for the whole process, and
+     * so does a pending connect, whose callbacks would otherwise land on a view that is gone.
      */
     override fun onDestroy() {
         cancelCaptureTimeout()
-        controller.getNixSensorHelper().stopScan()
+        with(controller.getNixSensorHelper()) {
+            stopScan()
+            cancelPendingConnect()
+        }
         super.onDestroy()
     }
 
@@ -309,14 +313,24 @@ class NixTraitLayout : SpectralTraitLayout {
 
             val nix = (context as CollectActivity).getNixSensorHelper()
 
-            nix.stopScan()
-
+            //the scan is left running: the helper waits for the device to advertise before it
+            //opens the link, and stops scanning itself once it has a handle to connect through
             nix.connect(nixDevice) { connected ->
-                if (connected) {
-                    saveDevice(device)
-                    enableCapture(device)
-                    ensureSpectralCompat(nixDevice)
+
+                if (connected != null) {
+
+                    //what the helper connected, which is not always what the picker handed over
+                    val live = connected.toDevice()
+
+                    saveDevice(live)
+                    enableCapture(live)
+                    ensureSpectralCompat(connected)
+
                 } else {
+                    //covers a refused attempt, one the SDK never answered, and a device that
+                    //never advertised, so the trait is never left on the spinner with no way back
+                    Toast.makeText(context, R.string.nix_error_connect_failed, Toast.LENGTH_SHORT)
+                        .show()
                     setupConnectUi()
                 }
             }
@@ -355,7 +369,9 @@ class NixTraitLayout : SpectralTraitLayout {
     override fun disconnectAndEraseDevice(device: Device) {
         cancelCaptureTimeout()
         getDevice(device)?.let { nixDevice ->
-            nixDevice.disconnect()
+            //through the helper so the disconnect is stamped: the next connect waits out the
+            //teardown instead of being swallowed by it
+            controller.getNixSensorHelper().disconnect(nixDevice)
             controller.getPreferences().edit {
                 remove(GeneralKeys.NIX_ADDRESS)
                 remove(GeneralKeys.NIX_NAME)
