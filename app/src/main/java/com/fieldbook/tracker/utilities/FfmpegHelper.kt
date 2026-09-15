@@ -2,6 +2,7 @@ package com.fieldbook.tracker.utilities
 
 import android.util.Log
 import com.arthenica.ffmpegkit.FFmpegKit
+import com.arthenica.ffmpegkit.FFmpegKitConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
@@ -30,8 +31,21 @@ class FfmpegHelper @Inject constructor() {
 
     private var udpSocket: DatagramSocket? = null
 
-    fun cancel() {
+    /**
+     * Returns false when native libs for this ABI are missing (e.g. old 32-bit-only devices
+     * when the packaged AAR lacked armeabi-v7a). Never throws.
+     */
+    fun isAvailable(): Boolean {
+        return try {
+            FFmpegKitConfig.getVersion()
+            true
+        } catch (t: Throwable) {
+            Log.e(TAG, "FFmpegKit unavailable on this device", t)
+            false
+        }
+    }
 
+    fun cancel() {
         try {
             ffmpegJob?.cancel()
             ffmpegJob = null
@@ -72,17 +86,14 @@ class FfmpegHelper @Inject constructor() {
      * starts a background thread to send keep alive messages
      */
     fun initRequestTimer() {
-
         startFfmpegCommand()
 
         val keepStreamAliveData = "_GPHD_:1:0:2:0.000000\n".toByteArray()
 
         try {
-
             val inetAddress = InetAddress.getByName("10.5.5.9")
 
             try {
-
                 udpSocket?.disconnect()
                 udpSocket?.close()
 
@@ -101,13 +112,9 @@ class FfmpegHelper @Inject constructor() {
             keepAliveJob?.cancel()
 
             keepAliveJob = scope.launch {
-
                 withContext(Dispatchers.IO) {
-
                     while (true) {
-
                         try {
-
                             val keepStreamAlivePacket = DatagramPacket(
                                 keepStreamAliveData,
                                 keepStreamAliveData.size,
@@ -116,13 +123,10 @@ class FfmpegHelper @Inject constructor() {
                             )
 
                             udpSocket?.send(keepStreamAlivePacket)
-
                             Log.i(TAG, "Keep Alive sent")
 
                         } catch (e: Exception) {
-
                             e.printStackTrace()
-
                         }
 
                         delay(KEEP_ALIVE_MESSAGE_PACKET_DELAY)
@@ -133,9 +137,7 @@ class FfmpegHelper @Inject constructor() {
             Log.i(TAG, "requestTimer init successfully")
 
         } catch (e: Exception) {
-
             e.printStackTrace()
-
         }
     }
 
@@ -153,13 +155,15 @@ class FfmpegHelper @Inject constructor() {
      * Starts FFMPEG background coroutine that creates udp substream for Android/Exoplayer to interpret.
      */
     private fun startFfmpegCommand() {
-
         stop()
 
+        if (!isAvailable()) {
+            Log.e(TAG, "Skipping FFmpeg start — native library missing for this ABI")
+            return
+        }
+
         ffmpegJob = scope.launch {
-
             withContext(Dispatchers.IO) {
-
                 val streamInputUri = "udp://:8554" // maybe different depending on gopro modelID?
 
                 val command =
@@ -167,8 +171,11 @@ class FfmpegHelper @Inject constructor() {
 
                 Log.d(TAG, "Executing FFMPEG Kit: $command")
 
-                FFmpegKit.execute(command)
-
+                try {
+                    FFmpegKit.execute(command)
+                } catch (t: Throwable) {
+                    Log.e(TAG, "FFmpegKit.execute failed", t)
+                }
             }
         }
     }
