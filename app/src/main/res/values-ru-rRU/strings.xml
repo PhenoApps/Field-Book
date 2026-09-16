@@ -1375,6 +1375,7 @@
     <string name="inno_spectra_save_failed">Сохранение не удалось</string>
     <string name="inno_spectra_hardware_incompatible">Несовместимое оборудование</string>
     <string name="inno_spectra_function_locked">Функция заблокирована</string>
+    <!-- stages reported while the inno spectra device is connecting -->
     <string name="header_temperature">Температура</string>
     <string name="header_humidity">Влажность</string>
     <string name="header_firmware">Прошивка</string>
