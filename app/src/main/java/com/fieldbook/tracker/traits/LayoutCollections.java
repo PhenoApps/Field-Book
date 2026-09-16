@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.traits;
 
 import android.app.Activity;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -72,6 +73,23 @@ public class LayoutCollections {
         for (BaseTraitLayout layout : this.traitLayouts) {
             if (layout instanceof LabelPrintTraitLayout) {
                 ((LabelPrintTraitLayout) layout).unregisterReceiver();
+            }
+        }
+    }
+
+    /**
+     * Releases resources held by every layout, not just the one currently showing.
+     *
+     * A layout the user never opened still holds whatever it allocated at construction, so this
+     * has to walk the whole list.
+     */
+    public void onDestroy() {
+        for (BaseTraitLayout layout : this.traitLayouts) {
+            try {
+                layout.onDestroy();
+            } catch (Exception e) {
+                //one layout failing to tear down must not stop the rest
+                Log.e("LayoutCollections", "Error destroying " + layout.getClass().getSimpleName(), e);
             }
         }
     }
