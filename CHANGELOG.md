@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - User is now notified of failed database writes (https://github.com/PhenoApps/Field-Book/pull/1515)
 
 ### Fixed
+- GoPro connection improvements (https://github.com/PhenoApps/Field-Book/pull/1522)
 - Canopy trait improvements and bug fixes (https://github.com/PhenoApps/Field-Book/pull/1514)
 - BrAPI account manager improvements and optimizations (https://github.com/PhenoApps/Field-Book/pull/1524)
 - Traits imported via BrAPI are now filtered to match the correct observation unit level (https://github.com/PhenoApps/Field-Book/pull/1513)
