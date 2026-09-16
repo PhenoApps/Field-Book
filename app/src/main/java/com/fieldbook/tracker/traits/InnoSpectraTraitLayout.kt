@@ -133,11 +133,22 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
 
                 // Only save if this is a new frame (different hash from last processed)
                 if (frameId != lastProcessedFrameHash) {
-                    val entryId = currentRange?.uniqueId
-                    val traitId = currentTrait?.id
+                    val metadata = viewModel.getCurrentScanMetadata()
+                    val entryId = metadata?.entryId ?: currentRange?.uniqueId
+                    val traitId = metadata?.traitId ?: currentTrait?.id
 
                     if (entryId != null && traitId != null) {
-                        saveSpectralFrame(frame, entryId, traitId)
+                        saveSpectralFrame(
+                            frame = frame,
+                            entryId = entryId,
+                            traitId = traitId,
+                            studyId = metadata?.studyId,
+                            person = metadata?.person,
+                            location = metadata?.location,
+                            timestamp = metadata?.timestamp,
+                            deviceAddress = metadata?.deviceAddress,
+                            deviceName = metadata?.deviceName
+                        )
                         lastProcessedFrameHash = frameId
 
                         captureTimeoutJob?.cancel()
@@ -208,6 +219,26 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
         val viewModel = activity.innoSpectraViewModel ?: return
 
         viewModel.setScanStartedListener {
+
+            // Capture metadata at the moment scan starts
+            val entryId = currentRange?.uniqueId
+            val traitId = currentTrait?.id
+
+            if (entryId != null && traitId != null) {
+                viewModel.setCurrentScanMetadata(
+                    InnoSpectraViewModel.ScanMetadata(
+                        studyId = activity.studyId,
+                        entryId = entryId,
+                        traitId = traitId,
+                        person = activity.person,
+                        location = activity.locationByPreferences,
+                        timestamp = OffsetDateTime.now().format(internalTimeFormatter),
+                        deviceAddress = controller.getPreferences().getString("nano_device_id", "") ?: "",
+                        deviceName = controller.getPreferences().getString("nano_device_name", "") ?: ""
+                    )
+                )
+            }
+
             // Show progress bar when any scan starts (hardware or software)
             toggleProgressBar(true)
         }
@@ -377,6 +408,26 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
         // failed capture. The result was a visible flash: the overlay came up on the button
         // press, was torn straight back down by that phantom failure, then came up again when
         // the scan actually started.
+        val studyId = (context as CollectActivity).studyId
+        val person = (context as CollectActivity).person
+        val location = (context as CollectActivity).locationByPreferences
+        val timestamp = OffsetDateTime.now().format(internalTimeFormatter)
+        val deviceAddress = controller.getPreferences().getString("nano_device_id", "") ?: ""
+        val deviceName = controller.getPreferences().getString("nano_device_name", "") ?: ""
+        
+        viewModel.setCurrentScanMetadata(
+            InnoSpectraViewModel.ScanMetadata(
+                studyId = studyId,
+                entryId = entryId,
+                traitId = traitId,
+                person = person,
+                location = location,
+                timestamp = timestamp,
+                deviceAddress = deviceAddress,
+                deviceName = deviceName
+            )
+        )
+
         viewModel.scan(context, false)
 
         callback.onResult(true)
@@ -411,27 +462,37 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
     }
 
 
-    private fun saveSpectralFrame(frame: Frame, entryId: String, traitId: String) {
+    private fun saveSpectralFrame(
+        frame: Frame, 
+        entryId: String, 
+        traitId: String,
+        studyId: String? = null,
+        person: String? = null,
+        location: String? = null,
+        timestamp: String? = null,
+        deviceAddress: String? = null,
+        deviceName: String? = null
+    ) {
 
         val values = frame.rawData.joinToString(" ") { it.toString() }
         val wavelengths = frame.data.joinToString(" ") { it.toString() }
-        val timestamp = OffsetDateTime.now().format(internalTimeFormatter)
+        val finalTimestamp = timestamp ?: OffsetDateTime.now().format(internalTimeFormatter)
 
         // Build SpectralFrame
         val spectralFrame = SpectralFrame(
             values = values,
             wavelengths = wavelengths,
             color = "",
-            timestamp = timestamp,
+            timestamp = finalTimestamp,
             entryId = entryId,
             traitId = traitId
         )
 
-        val deviceAddress = connectedNanoDevice?.nanoMac ?: return
+        val finalDeviceAddress = deviceAddress ?: connectedNanoDevice?.nanoMac ?: ""
 
         // Write to file and database
-        writeSpectralDataToFile("inno_spectra_$deviceAddress", spectralFrame, true)?.let { spectralUri ->
-            writeSpectralDataToDatabase(spectralFrame, "", spectralUri, entryId, traitId)
+        writeSpectralDataToFile("inno_spectra_$finalDeviceAddress", spectralFrame, true)?.let { spectralUri ->
+            writeSpectralDataToDatabase(spectralFrame, "", spectralUri, entryId, traitId, studyId, person, location, deviceAddress, deviceName)
         }
     }
 
@@ -1048,27 +1109,36 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
         color: String,
         uri: String,
         entryId: String,
-        traitId: String
+        traitId: String,
+        studyId: String?,
+        person: String?,
+        location: String?,
+        deviceAddress: String?,
+        deviceName: String?
     ) {
 
-        val deviceAddress = controller.getPreferences().getString("nano_device_id", "") ?: ""
-        val deviceName = controller.getPreferences().getString("nano_device_name", "") ?: ""
-        val studyId = collectActivity.studyId
-        val person = (context as? CollectActivity)?.person
-        val location = (context as? CollectActivity)?.locationByPreferences
+        val metadata = (context as? CollectActivity)?.innoSpectraViewModel?.getCurrentScanMetadata()
+
+        val finalDeviceAddress = deviceAddress ?: controller.getPreferences().getString("nano_device_id", "") ?: ""
+        val finalDeviceName = deviceName ?: controller.getPreferences().getString("nano_device_name", "") ?: ""
+        
+        val finalStudyId = studyId ?: if (metadata?.entryId == entryId && metadata?.traitId == traitId) metadata.studyId else collectActivity.studyId
+        val finalPerson = person ?: if (metadata?.entryId == entryId && metadata?.traitId == traitId) metadata.person else (context as? CollectActivity)?.person
+        val finalLocation = location ?: if (metadata?.entryId == entryId && metadata?.traitId == traitId) metadata.location else (context as? CollectActivity)?.locationByPreferences
+        
         val comment: String? = null
-        val createdAt = OffsetDateTime.now().format(internalTimeFormatter)
+        val createdAt = frame.timestamp.ifBlank { OffsetDateTime.now().format(internalTimeFormatter) }
 
         background.launch {
 
             nanoSaver.saveData(
                 SpectralSaver.RequiredData(
                     viewModel = controller.getSpectralViewModel(),
-                    deviceAddress = deviceAddress,
-                    deviceName = deviceName,
-                    studyId = studyId,
-                    person = person.toString(),
-                    location = location.toString(),
+                    deviceAddress = finalDeviceAddress,
+                    deviceName = finalDeviceName,
+                    studyId = finalStudyId,
+                    person = finalPerson.toString(),
+                    location = finalLocation.toString(),
                     comment = comment,
                     createdAt = createdAt,
                     frame = frame,

@@ -295,7 +295,12 @@ open class SpectralTraitLayout : BaseTraitLayout, Spectrometer,
         color: String,
         uri: String,
         entryId: String,
-        traitId: String
+        traitId: String,
+        studyId: String?,
+        person: String?,
+        location: String?,
+        deviceAddress: String?,
+        deviceName: String?
     ) {
         TODO("Not yet implemented")
     }

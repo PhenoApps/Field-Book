@@ -154,27 +154,32 @@ class NixTraitLayout : SpectralTraitLayout {
         color: String,
         uri: String,
         entryId: String,
-        traitId: String
+        traitId: String,
+        studyId: String?,
+        person: String?,
+        location: String?,
+        deviceAddress: String?,
+        deviceName: String?
     ) {
 
-        val deviceAddress = controller.getPreferences().getString(GeneralKeys.NIX_ADDRESS, "") ?: ""
-        val deviceName = controller.getPreferences().getString(GeneralKeys.NIX_NAME, "") ?: ""
-        val studyId = collectActivity.studyId
-        val person = (context as? CollectActivity)?.person
-        val location = (context as? CollectActivity)?.locationByPreferences
+        val finalDeviceAddress = deviceAddress ?: controller.getPreferences().getString(GeneralKeys.NIX_ADDRESS, "") ?: ""
+        val finalDeviceName = deviceName ?: controller.getPreferences().getString(GeneralKeys.NIX_NAME, "") ?: ""
+        val finalStudyId = studyId ?: collectActivity.studyId
+        val finalPerson = person ?: (context as? CollectActivity)?.person
+        val finalLocation = location ?: (context as? CollectActivity)?.locationByPreferences
         val comment = null
-        val createdAt = OffsetDateTime.now().format(internalTimeFormatter)
+        val createdAt = frame.timestamp.ifBlank { OffsetDateTime.now().format(internalTimeFormatter) }
 
         background.launch {
 
             nixSaver.saveData(
                 SpectralSaver.RequiredData(
                     viewModel = controller.getSpectralViewModel(),
-                    deviceAddress = deviceAddress,
-                    deviceName = deviceName,
-                    studyId = studyId,
-                    person = person.toString(),
-                    location = location.toString(),
+                    deviceAddress = finalDeviceAddress,
+                    deviceName = finalDeviceName,
+                    studyId = finalStudyId,
+                    person = finalPerson.toString(),
+                    location = finalLocation.toString(),
                     comment = comment,
                     createdAt = createdAt,
                     frame = frame,
@@ -419,6 +424,14 @@ class NixTraitLayout : SpectralTraitLayout {
             return
         }
 
+        val activity = context as? CollectActivity
+        val studyId = activity?.studyId
+        val person = activity?.person
+        val location = activity?.locationByPreferences
+        val timestamp = OffsetDateTime.now().format(internalTimeFormatter)
+        val deviceAddress = controller.getPreferences().getString(GeneralKeys.NIX_ADDRESS, "") ?: ""
+        val deviceName = controller.getPreferences().getString(GeneralKeys.NIX_NAME, "") ?: ""
+
         callback.onResult(true)
 
         startCaptureTimeout(device)
@@ -437,7 +450,7 @@ class NixTraitLayout : SpectralTraitLayout {
                     when (status) {
                         CommandStatus.SUCCESS -> {
                             // Successful operation
-                            handleMeasurementData(measurements, entryId, traitId)
+                            handleMeasurementData(measurements, entryId, traitId, studyId, person, location, timestamp, deviceAddress, deviceName)
                         }
 
                         CommandStatus.ERROR_NOT_READY -> {
@@ -554,7 +567,13 @@ class NixTraitLayout : SpectralTraitLayout {
     private fun handleMeasurementData(
         measurements: Map<ScanMode, IMeasurementData>?,
         entryId: String,
-        traitId: String
+        traitId: String,
+        studyId: String? = null,
+        person: String? = null,
+        location: String? = null,
+        timestamp: String? = null,
+        deviceAddress: String? = null,
+        deviceName: String? = null
     ) {
         measurements?.let { m ->
             if (m.isNotEmpty()) {
@@ -572,7 +591,7 @@ class NixTraitLayout : SpectralTraitLayout {
 
                     val frame = SpectralFrame(
                         color = color,
-                        timestamp = OffsetDateTime.now().format(
+                        timestamp = timestamp ?: OffsetDateTime.now().format(
                             internalTimeFormatter
                         ),
                         entryId = entryId,
@@ -595,7 +614,7 @@ class NixTraitLayout : SpectralTraitLayout {
 
                     writeSpectralDataToFile(data.deviceType.toString(), frame, data.providesSpectral)?.let { spectralUri ->
 
-                        writeSpectralDataToDatabase(frame, color, spectralUri, entryId, traitId)
+                        writeSpectralDataToDatabase(frame, color, spectralUri, entryId, traitId, studyId, person, location, deviceAddress, deviceName)
 
                     }
                 }

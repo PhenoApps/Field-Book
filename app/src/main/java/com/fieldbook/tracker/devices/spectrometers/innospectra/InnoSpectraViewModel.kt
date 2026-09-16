@@ -158,6 +158,26 @@ class InnoSpectraViewModel @Inject constructor() : ViewModel(), InnoSpectraViewM
 
     private var mConfigSaved: Boolean? = null
 
+    // Metadata for the current scan
+    data class ScanMetadata(
+        val studyId: String,
+        val entryId: String,
+        val traitId: String,
+        val person: String?,
+        val location: String?,
+        val timestamp: String,
+        val deviceAddress: String,
+        val deviceName: String
+    )
+
+    private var mCurrentScanMetadata: ScanMetadata? = null
+
+    fun setCurrentScanMetadata(metadata: ScanMetadata?) {
+        mCurrentScanMetadata = metadata
+    }
+
+    fun getCurrentScanMetadata(): ScanMetadata? = mCurrentScanMetadata
+
     private fun buildServiceConnection(context: Context): ServiceConnection =
         object : ServiceConnection {
 
