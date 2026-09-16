@@ -1438,6 +1438,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="inno_spectra_save_failed">Salvataggio fallito</string>
     <string name="inno_spectra_hardware_incompatible">Hardware incompatibile</string>
     <string name="inno_spectra_function_locked">Funzione Bloccata</string>
+    <!-- stages reported while the inno spectra device is connecting -->
     <string name="header_temperature">Temperatura</string>
     <string name="header_humidity">Umidità</string>
     <string name="header_firmware">Firmware</string>
