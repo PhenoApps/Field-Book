@@ -246,4 +246,20 @@ class CanonTraitLayout :
         controller.getCanonApi().boundNetwork = network
         startCanonSession(currentRange)
     }
+
+    /**
+     * The camera's access point disappeared, usually because it was switched off. Reacting here is
+     * much faster than waiting for the session sockets to time out, and it puts the connect button
+     * back so the user can reconnect without leaving collect.
+     */
+    override fun onNetworkLost() {
+        controller.getCanonApi().boundNetwork = null
+        controller.getCanonApi().stopSession()
+        onSessionStop()
+    }
+
+    override fun onNetworkUnavailable() {
+        controller.getWifiHelper().disconnect()
+        onSessionStop()
+    }
 }
