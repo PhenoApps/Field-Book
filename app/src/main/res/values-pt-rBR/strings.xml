@@ -1440,6 +1440,7 @@
     <string name="inno_spectra_save_failed">Salvar falhou</string>
     <string name="inno_spectra_hardware_incompatible">Hardware incompatível</string>
     <string name="inno_spectra_function_locked">Função bloqueada</string>
+    <!-- stages reported while the inno spectra device is connecting -->
     <string name="header_temperature">Temperatura</string>
     <string name="header_humidity">Umidade</string>
     <string name="header_firmware">Firmware</string>
