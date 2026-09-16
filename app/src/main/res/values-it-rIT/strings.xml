@@ -632,7 +632,6 @@
     <string name="trait_boolean_unset">Rimuovi</string>
     <!-- Trait Layout: GoPro -->
     <string name="trait_go_pro_capture_button_text">Cattura\n</string>
-    <string name="trait_go_pro_await_device_title">Scansione per GoPro</string>
     <string name="trait_go_pro_await_ble_title">In Attesa Della Connessione GoPro BLE</string>
     <string name="trait_go_pro_await_ble_message">Comunicando con GoPro BLE, questo potrebbe richiedere un minuto.</string>
     <string name="trait_go_pro_await_ap_title">Aspettando GoPro AP</string>

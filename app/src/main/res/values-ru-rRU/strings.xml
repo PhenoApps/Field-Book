@@ -596,7 +596,6 @@
     <string name="trait_boolean_unset">Не задано</string>
     <!-- Trait Layout: GoPro -->
     <string name="trait_go_pro_capture_button_text">Снять\n</string>
-    <string name="trait_go_pro_await_device_title">Поиск GoPro</string>
     <string name="trait_go_pro_await_ble_title">Ожидание BLE‑подключения GoPro</string>
     <string name="trait_go_pro_await_ble_message">Идёт обмен данными по BLE с GoPro. Это может занять минуту.</string>
     <string name="trait_go_pro_await_ap_title">Ожидание точки доступа GoPro</string>
