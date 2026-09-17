@@ -220,6 +220,7 @@
     <!-- canon camera strings -->
     <!-- spectral trait strings -->
     <!-- inno spectra -->
+    <!-- stages reported while the inno spectra device is connecting -->
     <string name="brapi_traits_filter_title">Merkmale</string>
     <string name="traits_sort_default">Vorgegeben</string>
     <!--  NearbyShare  -->
