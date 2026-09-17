@@ -13,12 +13,16 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts.TakePicture
+import androidx.core.content.edit
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
+import com.fieldbook.tracker.activities.ZplEditorActivity
 import com.fieldbook.tracker.adapters.TraitFormatAdapter
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
@@ -27,18 +31,16 @@ import com.fieldbook.tracker.traits.formats.TraitFormatParametersAdapter
 import com.fieldbook.tracker.traits.formats.ValidationResult
 import com.fieldbook.tracker.traits.formats.parameters.BaseFormatParameter
 import com.fieldbook.tracker.traits.formats.parameters.CanopySensitivityParameter
+import com.fieldbook.tracker.traits.formats.parameters.DisplayValueParameter
+import com.fieldbook.tracker.traits.formats.parameters.PrintTemplateParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 import com.fieldbook.tracker.traits.formats.ui.ParameterScrollView
 import com.fieldbook.tracker.utilities.SoundHelperImpl
 import com.fieldbook.tracker.utilities.VibrateUtil
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import org.phenoapps.utils.SoftKeyboardUtil
 import javax.inject.Inject
-import androidx.core.content.edit
-import androidx.lifecycle.lifecycleScope
-import com.fieldbook.tracker.database.repository.TraitRepository
-import com.fieldbook.tracker.traits.formats.parameters.DisplayValueParameter
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class NewTraitDialog(
@@ -78,6 +80,19 @@ class NewTraitDialog(
     private val canopyTestCaptureLauncher = registerForActivityResult(TakePicture()) { success ->
         if (success) {
             parametersSv.findHolder<CanopySensitivityParameter.ViewHolder>()?.onTestCaptureResult()
+        }
+    }
+
+    private val zplEditorLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data = result.data ?: return@registerForActivityResult
+            val name = data.getStringExtra(ZplEditorActivity.RESULT_TEMPLATE_NAME)
+            if (!name.isNullOrBlank()) {
+                parametersSv.findHolder<PrintTemplateParameter.PrintTemplateViewHolder>()
+                    ?.updateTemplate(name)
+            }
         }
     }
 
@@ -314,11 +329,12 @@ class NewTraitDialog(
     }
 
     private fun show() {
-        topLevelFormats = if (prefs.getBoolean(PreferenceKeys.EXPERIMENTAL_TRAITS_CATEGORY, false)) {
-            Formats.getMainFormats() + listOf(Formats.BASE_EXPERIMENTAL)
-        } else {
-            Formats.getMainFormats()
-        }
+        topLevelFormats =
+            if (prefs.getBoolean(PreferenceKeys.EXPERIMENTAL_TRAITS_CATEGORY, false)) {
+                Formats.getMainFormats() + listOf(Formats.BASE_EXPERIMENTAL)
+            } else {
+                Formats.getMainFormats()
+            }
 
         if (initialTraitObject == null) {
             showFormatLayouts(topLevelFormats)
@@ -356,6 +372,14 @@ class NewTraitDialog(
 
             }
 
+            if (parameter is PrintTemplateParameter) {
+
+                parameter.setActivity(activity)
+                parameter.setEditorLauncher { intent ->
+                    zplEditorLauncher.launch(intent)
+                }
+            }
+
             if (parameter is CanopySensitivityParameter) {
 
                 parameter.setActivity(activity)
@@ -368,7 +392,9 @@ class NewTraitDialog(
 
                 parametersSv.addViewHolder(holder)
 
-                (holder as? CanopySensitivityParameter.ViewHolder)?.setTestCaptureLauncher(canopyTestCaptureLauncher)
+                (holder as? CanopySensitivityParameter.ViewHolder)?.setTestCaptureLauncher(
+                    canopyTestCaptureLauncher
+                )
 
                 lockCanopySensitivityIfCollected(holder)
             }
@@ -632,14 +658,16 @@ class NewTraitDialog(
 
             traitFormatsRv.adapter = null
 
-            showFormatLayouts(when (format) {
-                Formats.BASE_PHOTO -> Formats.getCameraFormats()
-                Formats.BASE_SPECTRAL -> Formats.getSpectralFormats()
-                Formats.HARDWARE -> Formats.getHardwareFormats()
-                Formats.CUSTOM -> Formats.getCustomFormats()
-                Formats.BASE_EXPERIMENTAL -> Formats.getExperimentalFormats()
-                else -> Formats.getMainFormats()
-            }, showBack = true)
+            showFormatLayouts(
+                when (format) {
+                    Formats.BASE_PHOTO -> Formats.getCameraFormats()
+                    Formats.BASE_SPECTRAL -> Formats.getSpectralFormats()
+                    Formats.HARDWARE -> Formats.getHardwareFormats()
+                    Formats.CUSTOM -> Formats.getCustomFormats()
+                    Formats.BASE_EXPERIMENTAL -> Formats.getExperimentalFormats()
+                    else -> Formats.getMainFormats()
+                }, showBack = true
+            )
 
         } else {
 

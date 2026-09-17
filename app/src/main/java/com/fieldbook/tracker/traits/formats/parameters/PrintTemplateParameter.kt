@@ -1,0 +1,113 @@
+package com.fieldbook.tracker.traits.formats.parameters
+
+import android.app.Activity
+import android.content.Intent
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.preference.PreferenceManager
+import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.ZplEditorActivity
+import com.fieldbook.tracker.database.repository.TraitRepository
+import com.fieldbook.tracker.objects.TraitObject
+import com.fieldbook.tracker.traits.formats.ValidationResult
+import com.fieldbook.tracker.zpl.TemplateRepository
+import com.google.android.material.textfield.TextInputEditText
+
+class PrintTemplateParameter() : BaseFormatParameter(
+    nameStringResourceId = R.string.label_config_template,
+    defaultLayoutId = R.layout.list_item_trait_parameter_print_template,
+    parameter = Parameters.PRINT_TEMPLATE
+) {
+
+    private var activity: Activity? = null
+    private var editorLauncher: ((Intent) -> Unit)? = null
+
+    fun setActivity(activity: Activity) {
+        this.activity = activity
+    }
+    
+    fun setEditorLauncher(launcher: (Intent) -> Unit) {
+        this.editorLauncher = launcher
+    }
+
+    override fun createViewHolder(parent: ViewGroup): ViewHolder {
+        val view = LayoutInflater.from(parent.context)
+            .inflate(defaultLayoutId, parent, false)
+        return PrintTemplateViewHolder(view)
+    }
+
+    inner class PrintTemplateViewHolder(itemView: View) : ViewHolder(itemView) {
+        private val templateEditText: TextInputEditText =
+            itemView.findViewById(R.id.list_item_trait_parameter_print_template_et)
+
+        init {
+            templateEditText.setOnClickListener {
+                launchZplEditor(templateEditText.tag as? String)
+            }
+            
+            templateEditText.isFocusable = false
+            templateEditText.isClickable = true
+        }
+
+        private fun launchZplEditor(templateId: String?) {
+            val context = itemView.context
+            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+            val templateRepository = TemplateRepository(prefs)
+            val initialZpl = if (templateId != null) {
+                templateRepository.getTemplate(templateId) ?: ""
+            } else ""
+            
+            val intent = Intent(context, ZplEditorActivity::class.java).apply {
+                putExtra(ZplEditorActivity.EXTRA_INITIAL_ZPL, initialZpl)
+                putExtra(ZplEditorActivity.EXTRA_TEMPLATE_NAME, if (templateId != null) templateRepository.getTemplateName(templateId) else null)
+            }
+            
+            editorLauncher?.invoke(intent) ?: activity?.startActivity(intent)
+        }
+
+        fun updateTemplate(name: String) {
+            val context = itemView.context
+            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+            val templateRepository = TemplateRepository(prefs)
+            val templates = templateRepository.getAllTemplates()
+            val id = templates.entries.find { it.value == name }?.key
+            
+            templateEditText.setText(name)
+            templateEditText.tag = id
+        }
+
+        override fun merge(traitObject: TraitObject) = traitObject.apply {
+            printTemplateId = templateEditText.tag as? String ?: ""
+        }
+
+        override fun load(traitObject: TraitObject?): Boolean {
+            val templateId = traitObject?.printTemplateId
+            if (!templateId.isNullOrEmpty()) {
+                val context = itemView.context
+                val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+                val templateRepository = TemplateRepository(prefs)
+                val name = templateRepository.getTemplateName(templateId)
+                templateEditText.setText(name ?: "")
+                templateEditText.tag = templateId
+            } else {
+                templateEditText.setText("")
+                templateEditText.tag = null
+            }
+            return true
+        }
+
+        override fun validate(
+            traitRepo: TraitRepository,
+            initialTraitObject: TraitObject?
+        ): ValidationResult {
+            if (templateEditText.text.isNullOrBlank()) {
+                return ValidationResult(
+                    result = false,
+                    error = itemView.context.getString(R.string.label_fields_select)
+                )
+            }
+            return ValidationResult(result = true)
+        }
+    }
+}

@@ -58,6 +58,13 @@ object GroupsTable {
     }
 }
 
+object LabelTemplateTable {
+    const val TABLE_NAME = "label_templates"
+    const val ID = "id"
+    const val NAME = "name"
+    const val ZPL = "zpl"
+}
+
 object ObservationVariableAttributeDetailsView {
     const val VIEW_NAME = "observation_variable_attribute_details_view"
     const val INTERNAL_ID = "internal_id_observation_variable"
@@ -84,4 +91,5 @@ object ObservationVariableAttributeDetailsView {
     const val ALLOW_OTHER = "allowOther"
     const val CANOPY_SENSITIVITY = "canopySensitivity"
     const val DURATION = "duration"
+    const val PRINT_TEMPLATE_ID = "printTemplateId"
 }

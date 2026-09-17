@@ -8,6 +8,7 @@ import android.util.Log
 import com.fieldbook.tracker.database.*
 import com.fieldbook.tracker.database.Migrator.ObservationVariable
 import com.fieldbook.tracker.database.models.ObservationVariableModel
+import com.fieldbook.tracker.database.models.TraitAttributes
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.utilities.SynonymsUtil.deserializeSynonyms
 import com.fieldbook.tracker.utilities.SynonymsUtil.serializeSynonyms
@@ -332,7 +333,8 @@ class ObservationVariableDao {
                        invalidValues: Boolean,
                        attachPhoto: Boolean,
                        attachVideo: Boolean,
-                       attachAudio: Boolean): Long = withDatabase { db ->
+                       attachAudio: Boolean,
+                       printTemplateId: String): Long = withDatabase { db ->
 
            val contentValues = ContentValues().apply {
                put("observation_variable_name", trait)
@@ -373,6 +375,7 @@ class ObservationVariableDao {
                     this.attachPhoto = attachPhoto
                     this.attachVideo = attachVideo
                     this.attachAudio = attachAudio
+                    this.printTemplateId = printTemplateId
                 }
 
                 traitObj.saveAttributeValues()

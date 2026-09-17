@@ -22,6 +22,7 @@ import com.fieldbook.tracker.preferences.BrapiPreferencesFragment;
 import com.fieldbook.tracker.preferences.ExperimentalPreferencesFragment;
 import com.fieldbook.tracker.preferences.FeaturesPreferencesFragment;
 import com.fieldbook.tracker.preferences.GeneralKeys;
+import com.fieldbook.tracker.preferences.LabelsPreferencesFragment;
 import com.fieldbook.tracker.preferences.LocationPreferencesFragment;
 import com.fieldbook.tracker.preferences.PreferencesFragment;
 import com.fieldbook.tracker.preferences.ProfilePreferencesFragment;
@@ -142,6 +143,7 @@ public class PreferencesActivity extends ThemedActivity implements PreferenceFra
         if (file == R.xml.preferences_behavior) return new BehaviorPreferencesFragment();
         if (file == R.xml.preferences_location) return new LocationPreferencesFragment();
         if (file == R.xml.preferences_sounds) return new SoundsPreferencesFragment();
+        if (file == R.xml.preferences_labels) return new LabelsPreferencesFragment();
         if (file == R.xml.preferences_brapi) return new BrapiPreferencesFragment();
         if (file == R.xml.preferences_brapi_advanced) return new BrapiAdvancedPreferencesFragment();
         if (file == R.xml.preferences_system) return new SystemPreferencesFragment();

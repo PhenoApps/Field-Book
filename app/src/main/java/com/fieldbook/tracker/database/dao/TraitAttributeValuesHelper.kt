@@ -53,6 +53,12 @@ class TraitAttributeValuesHelper(var traitId: String? = null) {
                         attributes[AUTO_SWITCH_PLOT]?.let { trait.autoSwitchPlot = it.toBoolean() }
                         attributes[UNIT]?.let { trait.unit = it }
                         attributes[INVALID_VALUES]?.let { trait.invalidValues = it.toBoolean() }
+                        attributes[ATTACH_PHOTO]?.let { trait.attachPhoto = it.toBoolean() }
+                        attributes[ATTACH_VIDEO]?.let { trait.attachVideo = it.toBoolean() }
+                        attributes[ATTACH_AUDIO]?.let { trait.attachAudio = it.toBoolean() }
+                        attributes[CANOPY_SENSITIVITY]?.let { trait.sensitivity = it }
+                        attributes[DURATION]?.let { trait.duration = it }
+                        attributes[PRINT_TEMPLATE_ID]?.let { trait.printTemplateId = it }
                     }
                 }
             }
