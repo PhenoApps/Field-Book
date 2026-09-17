@@ -47,6 +47,17 @@ class LabelPrintTraitLayout : BaseTraitLayout {
     private var composeView: ComposeView? = null
     private var mActivity: Activity? = null
 
+    private val bluetoothStateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent?) {
+            if (intent?.action == BluetoothAdapter.ACTION_STATE_CHANGED) {
+                val state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)
+                if (state == BluetoothAdapter.STATE_ON || state == BluetoothAdapter.STATE_OFF) {
+                    refreshPrinterConnectionState()
+                }
+            }
+        }
+    }
+
     private val printerMessageReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent?) {
             if (intent?.extras == null) return
@@ -114,6 +125,10 @@ class LabelPrintTraitLayout : BaseTraitLayout {
         store.restoreConfig()
         store.currentPlotIdState.value = currentRange?.uniqueId
         refreshPrinterConnectionState()
+
+        if (!store.isPrinterConnected.value && !service.getSavedPrinterName().isNullOrEmpty()) {
+            connectToPrinter(false)
+        }
 
         val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
         val attributes = database.getAllObservationUnitAttributeNames(studyId)
@@ -251,7 +266,7 @@ class LabelPrintTraitLayout : BaseTraitLayout {
     }
 
     @SuppressLint("MissingPermission")
-    private fun connectToPrinter() {
+    private fun connectToPrinter(forceChooser: Boolean = false) {
         val activity = mActivity ?: return
         if (!service.checkBluetoothPermissions(activity)) return
 
@@ -260,13 +275,17 @@ class LabelPrintTraitLayout : BaseTraitLayout {
             return
         }
 
-        service.choosePrinter(
-            context,
-            object : com.fieldbook.tracker.utilities.BluetoothChooseCallback {
-                override fun onDeviceChosen(deviceName: String) {
-                    activity.runOnUiThread { refreshPrinterConnectionState() }
-                }
-            })
+        if (forceChooser || service.getSavedPrinterName().isNullOrEmpty()) {
+            service.choosePrinter(
+                context,
+                object : com.fieldbook.tracker.utilities.BluetoothChooseCallback {
+                    override fun onDeviceChosen(deviceName: String) {
+                        activity.runOnUiThread { refreshPrinterConnectionState() }
+                    }
+                })
+        } else {
+            refreshPrinterConnectionState()
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -450,11 +469,26 @@ class LabelPrintTraitLayout : BaseTraitLayout {
         Log.d(TAG, "Registering printerMessageReceiver")
         LocalBroadcastManager.getInstance(context)
             .registerReceiver(printerMessageReceiver, IntentFilter("printer_message"))
+
+        try {
+            context.registerReceiver(
+                bluetoothStateReceiver,
+                IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to register bluetoothStateReceiver", e)
+        }
     }
 
     fun unregisterReceiver() {
         Log.d(TAG, "Unregistering printerMessageReceiver")
         LocalBroadcastManager.getInstance(context)
             .unregisterReceiver(printerMessageReceiver)
+
+        try {
+            context.unregisterReceiver(bluetoothStateReceiver)
+        } catch (_: Exception) {
+            // ignore
+        }
     }
 }

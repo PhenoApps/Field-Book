@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -16,7 +17,7 @@ import javax.inject.Singleton
 
 @Singleton
 class AppPrinterConnector @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val prefs: SharedPreferences
 ) : PrinterConnector {
 
@@ -34,7 +35,7 @@ class AppPrinterConnector @Inject constructor(
     override fun connectToPrinter(onResult: (Boolean) -> Unit) {
         bluetoothUtil.choose(context, object : BluetoothChooseCallback {
             override fun onDeviceChosen(deviceName: String) {
-                prefs.edit().putString(GeneralKeys.LABEL_PRINT_DEVICE_NAME, deviceName).apply()
+                prefs.edit { putString(GeneralKeys.LABEL_PRINT_DEVICE_NAME, deviceName) }
                 onResult(true)
             }
         })
@@ -44,7 +45,12 @@ class AppPrinterConnector @Inject constructor(
         print(zplLabels, "", null, onResult)
     }
 
-    fun print(zplLabels: List<String>, plotId: String, trait: TraitObject?, onResult: (Boolean, String?) -> Unit) {
+    fun print(
+        zplLabels: List<String>,
+        plotId: String,
+        trait: TraitObject?,
+        onResult: (Boolean, String?) -> Unit
+    ) {
         val printerName = getConnectedPrinterName()
         if (printerName == null) {
             onResult(false, context.getString(R.string.printer_not_connected))
@@ -66,7 +72,7 @@ class AppPrinterConnector @Inject constructor(
             onResult(false)
             return
         }
-        
+
         Thread {
             try {
                 val adapter = BluetoothAdapter.getDefaultAdapter()
