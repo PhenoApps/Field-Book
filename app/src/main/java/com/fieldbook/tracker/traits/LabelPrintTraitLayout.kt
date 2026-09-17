@@ -218,6 +218,7 @@ class LabelPrintTraitLayout : BaseTraitLayout {
                             store.assignmentsRevision.intValue++
                             store.showConfigDialog.value = false
                         },
+                        isPrinterConnected = store.isPrinterConnected.value,
                         onConnectClick = { connectToPrinter() },
                         onDisconnectClick = { disconnectPrinter() },
                         onCalibrate = { calibratePrinter() },

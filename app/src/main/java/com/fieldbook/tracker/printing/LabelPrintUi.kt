@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LinkOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -143,6 +141,7 @@ fun LabelPrintConfigDialog(
     copiesOptions: List<String>,
     onConfirm: (copies: String) -> Unit,
     onDismiss: () -> Unit,
+    isPrinterConnected: Boolean = false,
     onConnectClick: () -> Unit = {},
     onDisconnectClick: (() -> Unit)? = null,
     onCalibrate: (() -> Unit)? = null,
@@ -182,26 +181,23 @@ fun LabelPrintConfigDialog(
                     }
                 }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally)
-                ) {
-                    IconButton(onClick = onConnectClick) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.connection),
-                            contentDescription = "Connect to printer"
-                        )
-                    }
-
-                    if (onDisconnectClick != null) {
-                        IconButton(onClick = onDisconnectClick) {
-                            Icon(
-                                imageVector = Icons.Default.LinkOff,
-                                contentDescription = "Disconnect printer",
-                                tint = MaterialTheme.colorScheme.error
-                            )
+                OutlinedButton(
+                    onClick = {
+                        if (isPrinterConnected) {
+                            onDisconnectClick?.invoke()
+                        } else {
+                            onConnectClick()
                         }
-                    }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = if (isPrinterConnected) {
+                            stringResource(R.string.disconnect)
+                        } else {
+                            stringResource(R.string.label_config_connect_printer)
+                        }
+                    )
                 }
 
                 if (placeholders.isNotEmpty()) {
