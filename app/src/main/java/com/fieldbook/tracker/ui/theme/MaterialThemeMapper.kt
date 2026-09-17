@@ -13,8 +13,8 @@ import com.fieldbook.tracker.ui.theme.typography.ThemeTypography
  */
 fun AppColors.toMaterialColorScheme(): ColorScheme {
     return lightColorScheme(
-        primary = this.primary,
-        onPrimary = this.text.highContrast,
+        primary = this.interactive.accent,
+        onPrimary = this.interactive.onAccent,
         primaryContainer = this.primaryTransparent,
         onPrimaryContainer = this.text.primary,
 

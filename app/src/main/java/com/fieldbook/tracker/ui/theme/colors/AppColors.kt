@@ -63,6 +63,16 @@ data class ButtonColors(
 @Immutable
 data class InteractiveColors(
     val tapTarget: Color,
+    /**
+     * Accent for Material components that paint themselves straight onto the background: text
+     * button labels, radio marks, focused text field outlines, progress indicators, step markers.
+     * It is the Compose counterpart of `colorPrimary` in styles.xml, which is not always
+     * [AppColors.primary]: the high contrast theme points it at the dark shade because its
+     * [AppColors.primary] is white, the same as the background.
+     */
+    val accent: Color,
+    /** Content drawn on top of [accent]. */
+    val onAccent: Color,
     val spinnerSelected: Color,
     val spinnerFocused: Color,
     val seekBar: Color,
