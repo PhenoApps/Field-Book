@@ -223,7 +223,7 @@ fun LabelDesignCanvas(
             val scaledW = labelWidthDots * s
             val scaledH = labelHeightDots * s
             val ox = (cw - scaledW) / 2f
-            val oy = (ch - scaledH) / 2f
+            val oy = margin
             labelOffsetX = ox
             labelOffsetY = oy
 

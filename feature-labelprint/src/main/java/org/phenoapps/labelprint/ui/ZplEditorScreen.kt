@@ -48,6 +48,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -405,111 +406,171 @@ fun ZplEditorScreen(
                 }
             }
 
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
             ) {
-                Column {
-                    AnimatedVisibility(visible = hasGlobalErrors) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 12.dp, vertical = 4.dp)
-                                .background(
-                                    MaterialTheme.colorScheme.errorContainer,
-                                    RoundedCornerShape(4.dp)
-                                )
-                                .padding(8.dp)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.zpl_editor_invalid_chars),
-                                color = MaterialTheme.colorScheme.onErrorContainer,
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                    }
-                    LabelDesignCanvas(
-                        elements = elements.toList(),
-                        labelWidthDots = labelWidth,
-                        labelHeightDots = labelHeight,
-                        selectedElementId = selectedElementId,
-                        onElementSelected = { id -> selectedElementId = id },
-                        onElementMoved = { id, newX, newY ->
-                            val index = elements.indexOfFirst { it.id == id }
-                            if (index >= 0) {
-                                elements[index] = elements[index].copy(x = newX, y = newY)
-                                regenerateZpl()
-                            }
-                        },
-                        parsedLabel = parsedLabel,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 12.dp, vertical = 8.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                    )
-                }
-
-                Row(
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.BottomStart)
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Bottom
+                        .weight(1f)
                 ) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        AnimatedVisibility(visible = selectedElementId != null) {
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                IconButton(
-                                    onClick = { showEditElementDialog = true },
-                                    modifier = Modifier
-                                        .background(
-                                            color = MaterialTheme.colorScheme.secondaryContainer,
-                                            shape = CircleShape
-                                        )
-                                ) {
-                                    Icon(
-                                        Icons.Default.Edit,
-                                        contentDescription = "Edit selected",
-                                        tint = MaterialTheme.colorScheme.onSecondaryContainer
+                    Column {
+                        AnimatedVisibility(visible = hasGlobalErrors) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp, vertical = 4.dp)
+                                    .background(
+                                        MaterialTheme.colorScheme.errorContainer,
+                                        RoundedCornerShape(4.dp)
                                     )
+                                    .padding(8.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.zpl_editor_invalid_chars),
+                                    color = MaterialTheme.colorScheme.onErrorContainer,
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        }
+                        LabelDesignCanvas(
+                            elements = elements.toList(),
+                            labelWidthDots = labelWidth,
+                            labelHeightDots = labelHeight,
+                            selectedElementId = selectedElementId,
+                            onElementSelected = { id -> selectedElementId = id },
+                            onElementMoved = { id, newX, newY ->
+                                val index = elements.indexOfFirst { it.id == id }
+                                if (index >= 0) {
+                                    elements[index] = elements[index].copy(x = newX, y = newY)
+                                    regenerateZpl()
                                 }
-                                IconButton(
-                                    onClick = {
-                                        elements.removeAll { it.id == selectedElementId }
-                                        selectedElementId = null
-                                        regenerateZpl()
-                                    },
-                                    modifier = Modifier
-                                        .background(
-                                            color = MaterialTheme.colorScheme.errorContainer,
-                                            shape = CircleShape
-                                        )
-                                ) {
-                                    Icon(
-                                        Icons.Default.Delete,
-                                        contentDescription = "Delete selected",
-                                        tint = MaterialTheme.colorScheme.onErrorContainer
+                            },
+                            parsedLabel = parsedLabel,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 12.dp, vertical = 4.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                        )
+                    }
+                }
+
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    AnimatedVisibility(visible = selectedElementId != null) {
+                        val element = elements.find { it.id == selectedElementId }
+                        if (element != null) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f), RoundedCornerShape(8.dp))
+                                    .padding(8.dp)
+                            ) {
+                                if (element.type == LabelDesignElementType.TEXT) {
+                                    Text(
+                                        text = stringResource(R.string.zpl_editor_font_size) + ": ${element.fontSize}",
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
+                                    Slider(
+                                        value = element.fontSize.toFloat(),
+                                        onValueChange = { newValue ->
+                                            val index = elements.indexOfFirst { it.id == element.id }
+                                            if (index >= 0) {
+                                                elements[index] = elements[index].copy(fontSize = newValue.toInt())
+                                                regenerateZpl()
+                                            }
+                                        },
+                                        valueRange = 10f..300f,
+                                        steps = 289
+                                    )
+                                } else if (element.type == LabelDesignElementType.QR_CODE) {
+                                    Text(
+                                        text = stringResource(R.string.zpl_editor_magnification) + ": ${element.magnification}",
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
+                                    Slider(
+                                        value = element.magnification.toFloat(),
+                                        onValueChange = { newValue ->
+                                            val index = elements.indexOfFirst { it.id == element.id }
+                                            if (index >= 0) {
+                                                elements[index] = elements[index].copy(magnification = newValue.toInt())
+                                                regenerateZpl()
+                                            }
+                                        },
+                                        valueRange = 1f..10f,
+                                        steps = 8
                                     )
                                 }
                             }
                         }
                     }
 
-                    IconButton(
-                        onClick = { showAddElementDialog = true },
-                        modifier = Modifier
-                            .background(
-                                color = MaterialTheme.colorScheme.primary,
-                                shape = CircleShape
-                            )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            Icons.Default.Add,
-                            contentDescription = "Add element",
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            AnimatedVisibility(visible = selectedElementId != null) {
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    IconButton(
+                                        onClick = { showEditElementDialog = true },
+                                        modifier = Modifier
+                                            .background(
+                                                color = MaterialTheme.colorScheme.secondaryContainer,
+                                                shape = CircleShape
+                                            )
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Edit,
+                                            contentDescription = "Edit selected",
+                                            tint = MaterialTheme.colorScheme.onSecondaryContainer
+                                        )
+                                    }
+                                    IconButton(
+                                        onClick = {
+                                            elements.removeAll { it.id == selectedElementId }
+                                            selectedElementId = null
+                                            regenerateZpl()
+                                        },
+                                        modifier = Modifier
+                                            .background(
+                                                color = MaterialTheme.colorScheme.errorContainer,
+                                                shape = CircleShape
+                                            )
+                                    ) {
+                                        Icon(
+                                            Icons.Default.Delete,
+                                            contentDescription = "Delete selected",
+                                            tint = MaterialTheme.colorScheme.onErrorContainer
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        IconButton(
+                            onClick = { showAddElementDialog = true },
+                            modifier = Modifier
+                                .background(
+                                    color = MaterialTheme.colorScheme.primary,
+                                    shape = CircleShape
+                                )
+                        ) {
+                            Icon(
+                                Icons.Default.Add,
+                                contentDescription = "Add element",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
                     }
                 }
             }
@@ -1076,23 +1137,22 @@ private fun AddElementDialog(
                             },
                             modifier = Modifier.fillMaxWidth()
                         )
-                        OutlinedTextField(
-                            value = fontSize,
-                            onValueChange = { fontSize = it.filter { it.isDigit() } },
-                            label = { Text(stringResource(R.string.zpl_editor_font_size)) },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth()
+                        Text(stringResource(R.string.zpl_editor_font_size) + ": $fontSize", style = MaterialTheme.typography.bodySmall)
+                        Slider(
+                            value = fontSize.toFloatOrNull() ?: 28f,
+                            onValueChange = { fontSize = it.toInt().toString() },
+                            valueRange = 10f..300f,
+                            steps = 289
                         )
                     }
 
                     LabelDesignElementType.QR_CODE -> {
-                        OutlinedTextField(
-                            value = magnification,
-                            onValueChange = { magnification = it.filter { it.isDigit() } },
-                            label = { Text(stringResource(R.string.zpl_editor_magnification)) },
-                            singleLine = true,
-                            supportingText = { Text(stringResource(R.string.zpl_editor_magnification_helper)) },
-                            modifier = Modifier.fillMaxWidth()
+                        Text(stringResource(R.string.zpl_editor_magnification) + ": $magnification", style = MaterialTheme.typography.bodySmall)
+                        Slider(
+                            value = magnification.toFloatOrNull() ?: 5f,
+                            onValueChange = { magnification = it.toInt().toString() },
+                            valueRange = 1f..10f,
+                            steps = 8
                         )
                     }
 
@@ -1247,13 +1307,12 @@ private fun EditElementDialog(
                             },
                             modifier = Modifier.fillMaxWidth()
                         )
-                        OutlinedTextField(
-                            value = fontSize,
-                            onValueChange = { fontSize = it.filter { it.isDigit() } },
-                            label = { Text(stringResource(R.string.zpl_editor_font_size)) },
-                            singleLine = true,
-                            supportingText = { Text(stringResource(R.string.zpl_editor_font_size_helper)) },
-                            modifier = Modifier.fillMaxWidth()
+                        Text(stringResource(R.string.zpl_editor_font_size) + ": $fontSize", style = MaterialTheme.typography.bodySmall)
+                        Slider(
+                            value = fontSize.toFloatOrNull() ?: 28f,
+                            onValueChange = { fontSize = it.toInt().toString() },
+                            valueRange = 10f..300f,
+                            steps = 289
                         )
                         OutlinedTextField(
                             value = blockWidth,
@@ -1266,13 +1325,12 @@ private fun EditElementDialog(
                     }
 
                     LabelDesignElementType.QR_CODE -> {
-                        OutlinedTextField(
-                            value = magnification,
-                            onValueChange = { magnification = it.filter { it.isDigit() } },
-                            label = { Text(stringResource(R.string.zpl_editor_magnification)) },
-                            singleLine = true,
-                            supportingText = { Text(stringResource(R.string.zpl_editor_magnification_helper)) },
-                            modifier = Modifier.fillMaxWidth()
+                        Text(stringResource(R.string.zpl_editor_magnification) + ": $magnification", style = MaterialTheme.typography.bodySmall)
+                        Slider(
+                            value = magnification.toFloatOrNull() ?: 5f,
+                            onValueChange = { magnification = it.toInt().toString() },
+                            valueRange = 1f..10f,
+                            steps = 8
                         )
                     }
 
