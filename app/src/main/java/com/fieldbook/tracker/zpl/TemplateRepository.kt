@@ -24,6 +24,7 @@ class TemplateRepository @Inject constructor(private val prefs: SharedPreference
         const val KEY_SELECTED_TEMPLATE_ID = "zpl_selected_template_id"
         const val KEY_DEFAULT_TEMPLATE_ID = "zpl_default_template_id"
         const val KEY_STUDY_ASSIGNMENTS_PREFIX = "zpl_study_assignments_"
+        const val KEY_BUILT_IN_TEMPLATES_INSTALLED = "zpl_built_in_templates_installed"
 
         val BUILT_IN_TEMPLATES = mapOf(
             "3×2 Simple" to listOf(
@@ -115,11 +116,19 @@ class TemplateRepository @Inject constructor(private val prefs: SharedPreference
      * Ensures built-in templates exist in the label_templates table.
      */
     fun ensureBuiltInTemplatesExist() {
+        if (prefs.getBoolean(KEY_BUILT_IN_TEMPLATES_INSTALLED, false)) {
+            return
+        }
+
         val existingNames = getAllTemplates().values.toSet()
         for ((name, zpl) in BUILT_IN_TEMPLATES) {
             if (name !in existingNames) {
                 saveTemplate(name, zpl)
             }
+        }
+
+        prefs.edit {
+            putBoolean(KEY_BUILT_IN_TEMPLATES_INSTALLED, true)
         }
     }
 
