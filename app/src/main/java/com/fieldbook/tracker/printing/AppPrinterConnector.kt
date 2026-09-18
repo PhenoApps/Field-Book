@@ -32,7 +32,7 @@ class AppPrinterConnector @Inject constructor(
     }
 
     @SuppressLint("MissingPermission")
-    override fun connectToPrinter(onResult: (Boolean) -> Unit) {
+    override fun connectToPrinter(context: Context, onResult: (Boolean) -> Unit) {
         bluetoothUtil.choose(context, object : BluetoothChooseCallback {
             override fun onDeviceChosen(deviceName: String) {
                 prefs.edit { putString(GeneralKeys.LABEL_PRINT_DEVICE_NAME, deviceName) }

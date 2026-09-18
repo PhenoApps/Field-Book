@@ -146,6 +146,7 @@ fun ZplEditorScreen(
     var showDeleteConfirm by remember { mutableStateOf(false) }
     var showAddElementDialog by remember { mutableStateOf(false) }
     var showEditElementDialog by remember { mutableStateOf(false) }
+    var showUnsavedWarningDialog by remember { mutableStateOf(false) }
     var selectedElementId by remember { mutableStateOf<String?>(null) }
 
     val hasGlobalErrors by remember {
@@ -197,6 +198,26 @@ fun ZplEditorScreen(
         syncingFromCode = false
     }
 
+    val hasUnsavedChanges = remember(zplText, templateName, templates) {
+        if (templateName == null) {
+            zplText.isNotBlank() && zplText != initialZpl
+        } else {
+            zplText != templates[templateName]
+        }
+    }
+
+    fun handleDismiss() {
+        if (hasUnsavedChanges) {
+            showUnsavedWarningDialog = true
+        } else {
+            onDismiss()
+        }
+    }
+
+    androidx.activity.compose.BackHandler {
+        handleDismiss()
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -207,8 +228,11 @@ fun ZplEditorScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onDismiss) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    IconButton(onClick = ::handleDismiss) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.zpl_editor_back)
+                        )
                     }
                 },
                 actions = {
@@ -222,7 +246,10 @@ fun ZplEditorScreen(
                             disabledContentColor = MaterialTheme.colorScheme.onPrimary
                         )
                     ) {
-                        Icon(painterResource(R.drawable.undo_variant), contentDescription = "Reset")
+                        Icon(
+                            painterResource(R.drawable.undo_variant),
+                            contentDescription = stringResource(R.string.zpl_editor_reset)
+                        )
                     }
                     IconButton(
                         onClick = { onExport(templateName ?: "template", zplText) },
@@ -233,7 +260,7 @@ fun ZplEditorScreen(
                     ) {
                         Icon(
                             painterResource(R.drawable.export_variant),
-                            contentDescription = "Export"
+                            contentDescription = stringResource(R.string.zpl_editor_export)
                         )
                     }
                 },
@@ -380,13 +407,18 @@ fun ZplEditorScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 FilledTonalIconButton(onClick = { showSettingsDialog = true }) {
-                    Icon(Icons.Default.Settings, contentDescription = "Label Settings")
+                    Icon(
+                        Icons.Default.Settings,
+                        contentDescription = stringResource(R.string.zpl_editor_settings_description)
+                    )
                 }
                 Spacer(Modifier.weight(1f))
                 FilledTonalIconButton(onClick = { showZplCode = !showZplCode }) {
                     Icon(
                         Icons.Default.Code,
-                        contentDescription = if (showZplCode) "Hide ZPL" else "Show ZPL"
+                        contentDescription = if (showZplCode) stringResource(R.string.zpl_editor_hide_zpl) else stringResource(
+                            R.string.zpl_editor_show_zpl
+                        )
                     )
                 }
             }
@@ -471,7 +503,10 @@ fun ZplEditorScreen(
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f), RoundedCornerShape(8.dp))
+                                    .background(
+                                        MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                                        RoundedCornerShape(8.dp)
+                                    )
                                     .padding(8.dp)
                             ) {
                                 if (element.type == LabelDesignElementType.TEXT) {
@@ -482,9 +517,11 @@ fun ZplEditorScreen(
                                     Slider(
                                         value = element.fontSize.toFloat(),
                                         onValueChange = { newValue ->
-                                            val index = elements.indexOfFirst { it.id == element.id }
+                                            val index =
+                                                elements.indexOfFirst { it.id == element.id }
                                             if (index >= 0) {
-                                                elements[index] = elements[index].copy(fontSize = newValue.toInt())
+                                                elements[index] =
+                                                    elements[index].copy(fontSize = newValue.toInt())
                                                 regenerateZpl()
                                             }
                                         },
@@ -499,9 +536,11 @@ fun ZplEditorScreen(
                                     Slider(
                                         value = element.magnification.toFloat(),
                                         onValueChange = { newValue ->
-                                            val index = elements.indexOfFirst { it.id == element.id }
+                                            val index =
+                                                elements.indexOfFirst { it.id == element.id }
                                             if (index >= 0) {
-                                                elements[index] = elements[index].copy(magnification = newValue.toInt())
+                                                elements[index] =
+                                                    elements[index].copy(magnification = newValue.toInt())
                                                 regenerateZpl()
                                             }
                                         },
@@ -531,7 +570,7 @@ fun ZplEditorScreen(
                                     ) {
                                         Icon(
                                             Icons.Default.Edit,
-                                            contentDescription = "Edit selected",
+                                            contentDescription = stringResource(R.string.zpl_editor_edit_selected),
                                             tint = MaterialTheme.colorScheme.onSecondaryContainer
                                         )
                                     }
@@ -549,7 +588,7 @@ fun ZplEditorScreen(
                                     ) {
                                         Icon(
                                             Icons.Default.Delete,
-                                            contentDescription = "Delete selected",
+                                            contentDescription = stringResource(R.string.zpl_editor_delete_selected),
                                             tint = MaterialTheme.colorScheme.onErrorContainer
                                         )
                                     }
@@ -567,7 +606,7 @@ fun ZplEditorScreen(
                         ) {
                             Icon(
                                 Icons.Default.Add,
-                                contentDescription = "Add element",
+                                contentDescription = stringResource(R.string.zpl_editor_add_element_description),
                                 tint = MaterialTheme.colorScheme.onPrimary
                             )
                         }
@@ -747,9 +786,10 @@ fun ZplEditorScreen(
                 TextButton(onClick = {
                     if (saveName.isBlank()) showError = true
                     else {
-                        onSave(saveName.trim(), zplText)
-                        templateName = saveName.trim()
-                        selectedTemplateName = saveName.trim()
+                        val trimmed = saveName.trim()
+                        onSave(trimmed, zplText)
+                        templateName = trimmed
+                        selectedTemplateName = trimmed
                         showSaveDialog = false
                         onDismiss()
                     }
@@ -759,6 +799,31 @@ fun ZplEditorScreen(
                 TextButton(onClick = {
                     showSaveDialog = false
                 }) { Text(stringResource(R.string.dialog_cancel)) }
+            }
+        )
+    }
+
+    if (showUnsavedWarningDialog) {
+        AlertDialog(
+            onDismissRequest = { showUnsavedWarningDialog = false },
+            containerColor = MaterialTheme.colorScheme.surface,
+            title = { Text(stringResource(R.string.zpl_editor_unsaved_changes)) },
+            text = { Text(stringResource(R.string.zpl_editor_unsaved_message)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showUnsavedWarningDialog = false
+                    onDismiss()
+                }) {
+                    Text(
+                        stringResource(R.string.zpl_editor_leave),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showUnsavedWarningDialog = false }) {
+                    Text(stringResource(R.string.dialog_cancel))
+                }
             }
         )
     }
@@ -814,7 +879,7 @@ private fun LabelSettingsDialog(
                     dpi
                 )
             } else {
-                readStatus = "Could not read from printer"
+                readStatus = context.getString(R.string.zpl_editor_could_not_read)
             }
         }
     }
@@ -1137,7 +1202,10 @@ private fun AddElementDialog(
                             },
                             modifier = Modifier.fillMaxWidth()
                         )
-                        Text(stringResource(R.string.zpl_editor_font_size) + ": $fontSize", style = MaterialTheme.typography.bodySmall)
+                        Text(
+                            stringResource(R.string.zpl_editor_font_size) + ": $fontSize",
+                            style = MaterialTheme.typography.bodySmall
+                        )
                         Slider(
                             value = fontSize.toFloatOrNull() ?: 28f,
                             onValueChange = { fontSize = it.toInt().toString() },
@@ -1147,7 +1215,10 @@ private fun AddElementDialog(
                     }
 
                     LabelDesignElementType.QR_CODE -> {
-                        Text(stringResource(R.string.zpl_editor_magnification) + ": $magnification", style = MaterialTheme.typography.bodySmall)
+                        Text(
+                            stringResource(R.string.zpl_editor_magnification) + ": $magnification",
+                            style = MaterialTheme.typography.bodySmall
+                        )
                         Slider(
                             value = magnification.toFloatOrNull() ?: 5f,
                             onValueChange = { magnification = it.toInt().toString() },
@@ -1307,7 +1378,10 @@ private fun EditElementDialog(
                             },
                             modifier = Modifier.fillMaxWidth()
                         )
-                        Text(stringResource(R.string.zpl_editor_font_size) + ": $fontSize", style = MaterialTheme.typography.bodySmall)
+                        Text(
+                            stringResource(R.string.zpl_editor_font_size) + ": $fontSize",
+                            style = MaterialTheme.typography.bodySmall
+                        )
                         Slider(
                             value = fontSize.toFloatOrNull() ?: 28f,
                             onValueChange = { fontSize = it.toInt().toString() },
@@ -1325,7 +1399,10 @@ private fun EditElementDialog(
                     }
 
                     LabelDesignElementType.QR_CODE -> {
-                        Text(stringResource(R.string.zpl_editor_magnification) + ": $magnification", style = MaterialTheme.typography.bodySmall)
+                        Text(
+                            stringResource(R.string.zpl_editor_magnification) + ": $magnification",
+                            style = MaterialTheme.typography.bodySmall
+                        )
                         Slider(
                             value = magnification.toFloatOrNull() ?: 5f,
                             onValueChange = { magnification = it.toInt().toString() },

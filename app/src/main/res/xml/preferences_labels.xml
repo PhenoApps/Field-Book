@@ -16,6 +16,12 @@
             android:summary="@string/preferences_labels_zpl_editor_summary"
             android:icon="@drawable/ic_trait_barcode" />
 
+        <Preference
+            android:key="pref_key_default_zpl_template"
+            android:title="@string/preferences_labels_default_template_title"
+            android:summary="@string/preferences_labels_default_template_summary"
+            android:icon="@drawable/ic_trait_barcode" />
+
     </PreferenceCategory>
 
 </androidx.preference.PreferenceScreen>

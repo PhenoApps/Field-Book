@@ -1,11 +1,11 @@
 package com.fieldbook.tracker.utilities
 
+import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.util.Log
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.objects.TraitObject
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 interface BluetoothChooseCallback {
     fun onDeviceChosen(deviceName: String)
@@ -35,7 +35,7 @@ class BluetoothUtil {
                 .toList()
 
             if (pairedDevices.isEmpty()) {
-                MaterialAlertDialogBuilder(ctx, R.style.AppAlertDialog)
+                AlertDialog.Builder(ctx, android.R.style.Theme_DeviceDefault_Light_Dialog_Alert)
                     .setTitle(R.string.bluetooth_printer_choose_device_title)
                     .setMessage(R.string.no_device_paired)
                     .setPositiveButton(android.R.string.ok, null)
@@ -46,7 +46,7 @@ class BluetoothUtil {
             val deviceNames = pairedDevices.map { it.name }.toTypedArray()
             var selectedIndex = -1
 
-            MaterialAlertDialogBuilder(ctx, R.style.AppAlertDialog)
+            AlertDialog.Builder(ctx, android.R.style.Theme_DeviceDefault_Light_Dialog_Alert)
                 .setTitle(R.string.bluetooth_printer_choose_device_title)
                 .setSingleChoiceItems(deviceNames, -1) { _, which ->
                     selectedIndex = which

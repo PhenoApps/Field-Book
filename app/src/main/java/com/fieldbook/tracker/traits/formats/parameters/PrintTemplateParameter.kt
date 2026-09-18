@@ -83,16 +83,24 @@ class PrintTemplateParameter() : BaseFormatParameter(
 
         override fun load(traitObject: TraitObject?): Boolean {
             val templateId = traitObject?.printTemplateId
+            val context = itemView.context
+            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+            val templateRepository = TemplateRepository(prefs)
+            
             if (!templateId.isNullOrEmpty()) {
-                val context = itemView.context
-                val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-                val templateRepository = TemplateRepository(prefs)
                 val name = templateRepository.getTemplateName(templateId)
                 templateEditText.setText(name ?: "")
                 templateEditText.tag = templateId
             } else {
-                templateEditText.setText("")
-                templateEditText.tag = null
+                val defaultId = templateRepository.getDefaultTemplateId()
+                if (!defaultId.isNullOrEmpty()) {
+                    val name = templateRepository.getTemplateName(defaultId)
+                    templateEditText.setText(name ?: "")
+                    templateEditText.tag = defaultId
+                } else {
+                    templateEditText.setText("")
+                    templateEditText.tag = null
+                }
             }
             return true
         }

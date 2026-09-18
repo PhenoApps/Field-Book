@@ -25,6 +25,7 @@ import com.zebra.sdk.printer.SGD
 import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.labelprint.ui.LabelSettings
 import org.phenoapps.labelprint.ui.ZplEditorScreen
+import org.phenoapps.labelprint.zpl.ZplGenerator
 import java.io.IOException
 import javax.inject.Inject
 
@@ -156,14 +157,14 @@ class ZplEditorActivity : ThemedActivity() {
             val height = heightStr?.trim()?.toIntOrNull() ?: 406
 
             val mediaType = when {
-                mediaTypeStr?.contains("trans", ignoreCase = true) == true -> "Thermal Transfer"
-                else -> "Direct Thermal"
+                mediaTypeStr?.contains("trans", ignoreCase = true) == true -> ZplGenerator.MEDIA_THERMAL_TRANSFER
+                else -> ZplGenerator.MEDIA_THERMAL_DIRECT
             }
 
             val mediaGap = when {
-                trackingStr?.contains("continuous", ignoreCase = true) == true -> "Continuous"
-                trackingStr?.contains("mark", ignoreCase = true) == true -> "Mark"
-                else -> "Gap/Notch"
+                trackingStr?.contains("continuous", ignoreCase = true) == true -> ZplGenerator.TRACKING_CONTINUOUS
+                trackingStr?.contains("mark", ignoreCase = true) == true -> ZplGenerator.TRACKING_MARK
+                else -> ZplGenerator.TRACKING_GAP
             }
 
             LabelSettings(

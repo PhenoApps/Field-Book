@@ -32,7 +32,7 @@ interface LabelTemplateProvider {
 interface PrinterConnector {
     fun isBluetoothEnabled(): Boolean
     fun getConnectedPrinterName(): String?
-    fun connectToPrinter(onResult: (Boolean) -> Unit)
+    fun connectToPrinter(context: android.content.Context, onResult: (Boolean) -> Unit)
     fun print(zplLabels: List<String>, onResult: (Boolean, String?) -> Unit)
     fun calibrate(onResult: (Boolean) -> Unit)
 }

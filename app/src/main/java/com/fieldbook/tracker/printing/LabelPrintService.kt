@@ -212,7 +212,7 @@ class LabelPrintService @Inject constructor(
     }
 
     fun choosePrinter(context: Context, callback: BluetoothChooseCallback? = null) {
-        printerConnector.connectToPrinter { success ->
+        printerConnector.connectToPrinter(context) { success ->
             if (success) {
                 callback?.onDeviceChosen(printerConnector.getConnectedPrinterName() ?: "")
             }

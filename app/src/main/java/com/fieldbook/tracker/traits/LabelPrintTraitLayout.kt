@@ -277,7 +277,7 @@ class LabelPrintTraitLayout : BaseTraitLayout {
 
         if (forceChooser || service.getSavedPrinterName().isNullOrEmpty()) {
             service.choosePrinter(
-                context,
+                activity,
                 object : com.fieldbook.tracker.utilities.BluetoothChooseCallback {
                     override fun onDeviceChosen(deviceName: String) {
                         activity.runOnUiThread { refreshPrinterConnectionState() }
