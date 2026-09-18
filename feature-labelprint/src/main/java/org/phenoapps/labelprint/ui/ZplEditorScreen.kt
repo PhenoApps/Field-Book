@@ -224,7 +224,8 @@ fun ZplEditorScreen(
                 title = {
                     Text(
                         text = stringResource(R.string.zpl_editor_title),
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
                     )
                 },
                 navigationIcon = {
