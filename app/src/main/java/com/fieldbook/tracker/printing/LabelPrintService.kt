@@ -20,7 +20,7 @@ import javax.inject.Singleton
 
 /**
  * Reusable label printing service that encapsulates all printing functionality.
- * Delegates core logic to the :feature-labelprint library's [LabelPrintManager].
+ * Delegates core logic to the :label-print library's [LabelPrintManager].
  */
 @Singleton
 class LabelPrintService @Inject constructor(
