@@ -173,7 +173,10 @@ class LabelPrintTraitLayout : BaseTraitLayout {
                 LabelPrintMainView(
                     onPrintClick = { printLabel() },
                     onSettingsClick = { store.showConfigDialog.value = true },
-                    onConnectClick = { connectToPrinter() },
+                    onConnectClick = { 
+                        store.isManualDisconnected.value = false
+                        connectToPrinter(forceChooser = true) 
+                    },
                     isPrinterConnected = store.isPrinterConnected.value,
                     copiesCount = copiesCount,
                     previewLabel = previewLabel
@@ -234,7 +237,10 @@ class LabelPrintTraitLayout : BaseTraitLayout {
                             store.showConfigDialog.value = false
                         },
                         isPrinterConnected = store.isPrinterConnected.value,
-                        onConnectClick = { connectToPrinter() },
+                        onConnectClick = { 
+                            store.isManualDisconnected.value = false
+                            connectToPrinter(forceChooser = true)
+                        },
                         onDisconnectClick = { disconnectPrinter() },
                         onCalibrate = { calibratePrinter() },
                         templateZpl = currentTemplateZpl,
@@ -290,11 +296,13 @@ class LabelPrintTraitLayout : BaseTraitLayout {
 
     @SuppressLint("MissingPermission")
     private fun refreshPrinterConnectionState() {
-        store.isPrinterConnected.value = service.isBluetoothEnabled() && !service.getSavedPrinterName().isNullOrEmpty()
+        store.isPrinterConnected.value = service.isBluetoothEnabled() 
+                && !service.getSavedPrinterName().isNullOrEmpty()
+                && !store.isManualDisconnected.value
     }
 
     private fun disconnectPrinter() {
-        prefs.edit().remove(GeneralKeys.LABEL_PRINT_DEVICE_NAME).apply()
+        store.isManualDisconnected.value = true
         refreshPrinterConnectionState()
         Toast.makeText(context, R.string.printer_not_connected, Toast.LENGTH_SHORT).show()
     }

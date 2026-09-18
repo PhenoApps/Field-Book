@@ -58,6 +58,9 @@ class LabelPrintStore(private val prefs: SharedPreferences) {
     /** Whether a printer is currently connected (drives print vs. connect button). */
     val isPrinterConnected = mutableStateOf(false)
 
+    /** Tracks if the user manually disconnected the printer in this session. */
+    val isManualDisconnected = mutableStateOf(false)
+
     /** Tracks which placeholder is currently being assigned via AttributeChooserDialog. */
     var pendingFieldPlaceholder: String? = null
 

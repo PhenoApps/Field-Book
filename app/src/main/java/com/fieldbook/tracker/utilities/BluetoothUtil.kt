@@ -35,7 +35,7 @@ class BluetoothUtil {
                 .toList()
 
             if (pairedDevices.isEmpty()) {
-                AlertDialog.Builder(ctx, android.R.style.Theme_DeviceDefault_Light_Dialog_Alert)
+                AlertDialog.Builder(ctx, R.style.AppAlertDialog)
                     .setTitle(R.string.bluetooth_printer_choose_device_title)
                     .setMessage(R.string.no_device_paired)
                     .setPositiveButton(android.R.string.ok, null)
@@ -46,7 +46,7 @@ class BluetoothUtil {
             val deviceNames = pairedDevices.map { it.name }.toTypedArray()
             var selectedIndex = -1
 
-            AlertDialog.Builder(ctx, android.R.style.Theme_DeviceDefault_Light_Dialog_Alert)
+            AlertDialog.Builder(ctx, R.style.AppAlertDialog)
                 .setTitle(R.string.bluetooth_printer_choose_device_title)
                 .setSingleChoiceItems(deviceNames, -1) { _, which ->
                     selectedIndex = which

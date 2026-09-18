@@ -70,24 +70,24 @@
     </style>
 
     <style name="DialogTitleStyle">
-        <item name="android:textColor">?attr/fb_color_text_dark</item>
-        <item name="android:background">?attr/fb_color_background</item>
-        <item name="android:textSize">?attr/fb_title_text_size</item>
+        <item name="android:textColor">@color/main_color_text_dark</item>
+        <item name="android:background">@color/main_color_background</item>
+        <item name="android:textSize">@dimen/title_text_size_medium</item>
         <item name="android:textStyle">bold</item>
     </style>
 
     <style name="TextAppearance.AppCompat.Subhead" parent="Base.TextAppearance.AppCompat.Subhead">
-        <item name="android:textSize">?attr/fb_title_text_size</item>
-        <item name="android:textColor">?attr/fb_color_text_dark</item>
+        <item name="android:textSize">@dimen/title_text_size_medium</item>
+        <item name="android:textColor">@color/main_color_text_dark</item>
     </style>
 
     <style name="TextAppearance.AppCompat.Title" parent="Base.TextAppearance.AppCompat.Title">
-        <item name="android:textSize">?attr/fb_title_text_size</item>
-        <item name="android:textColor">?attr/fb_color_text_dark</item>
+        <item name="android:textSize">@dimen/title_text_size_medium</item>
+        <item name="android:textColor">@color/main_color_text_dark</item>
     </style>
 
     <style name="TextAppearance.AppCompat.Button" parent="Base.TextAppearance.AppCompat.Button">
-        <item name="android:textSize">?attr/fb_title_text_size</item>
+        <item name="android:textSize">@dimen/title_text_size_medium</item>
     </style>
 
 </resources>
