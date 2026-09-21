@@ -9,9 +9,12 @@ import android.graphics.RectF
 import android.graphics.drawable.Drawable
 import android.graphics.ColorFilter
 import android.hardware.camera2.CameraCharacteristics
+import android.os.Build
 import android.util.Log
 import android.util.Size
 import android.util.TypedValue
+import android.view.Surface
+import android.view.WindowManager
 import androidx.annotation.OptIn
 import androidx.camera.camera2.interop.Camera2CameraInfo
 import androidx.camera.camera2.interop.ExperimentalCamera2Interop
@@ -77,8 +80,54 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
         }, ContextCompat.getMainExecutor(context))
     }
 
+    // Use cases from the most recent bind, kept so target rotation can be updated on a
+    // configuration change without rebinding (a rebind would drop an in-flight recording).
+    private var boundImageCapture: ImageCapture? = null
+    private var boundPreview: Preview? = null
+    private var boundAnalysis: ImageAnalysis? = null
+    private var boundVideoCapture: VideoCapture<Recorder>? = null
+
     fun unbind() {
         cameraXInstance.get().unbindAll()
+        boundImageCapture = null
+        boundPreview = null
+        boundAnalysis = null
+        boundVideoCapture = null
+    }
+
+    /**
+     * The display rotation the camera use cases should target.
+     *
+     * Until Android 16 this was arrived at by accident: [ProcessCameraProvider.bindToLifecycle]
+     * defaults each use case's target rotation to the display rotation at bind time, and every
+     * camera surface lived inside a portrait locked activity, so it was always ROTATION_0. With
+     * orientation restrictions ignored on large screens that is no longer guaranteed, and a
+     * wrong target rotation changes both the EXIF orientation of saved images and which edge of
+     * the frame the normalized crop rect lands on.
+     */
+    private fun currentRotation(): Int = try {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            context.display?.rotation ?: Surface.ROTATION_0
+        } else {
+            @Suppress("DEPRECATION")
+            (context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.rotation
+        }
+    } catch (e: Exception) {
+        Log.w(TAG, "Could not read display rotation, defaulting to ROTATION_0", e)
+        Surface.ROTATION_0
+    }
+
+    /**
+     * Re-applies the current display rotation to the bound use cases. Safe to call at any time;
+     * it does not rebind, so an in-flight video recording is unaffected. Call from
+     * [android.app.Activity.onConfigurationChanged] on any activity hosting a camera surface.
+     */
+    fun updateTargetRotation() {
+        val rotation = currentRotation()
+        boundImageCapture?.targetRotation = rotation
+        boundPreview?.targetRotation = rotation
+        boundAnalysis?.targetRotation = rotation
+        boundVideoCapture?.targetRotation = rotation
     }
 
     /** Toggle between back and front camera selectors. */
@@ -151,6 +200,8 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
                 builder.setResolutionSelector(resolutionSelector)
             }
 
+            builder.setTargetRotation(currentRotation())
+
             val imageCapture = builder.build()
 
             val camera = cameraXInstance.get().bindToLifecycle(
@@ -158,6 +209,8 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
                 currentSelector,
                 imageCapture
             )
+
+            boundImageCapture = imageCapture
 
             Log.d(TAG, "Camera lifecycle bound: ${camera.cameraInfo}")
 
@@ -203,6 +256,11 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
             builder.setResolutionSelector(resolutionSelector)
             prevBuilder.setResolutionSelector(resolutionSelector)
         }
+
+        val rotation = currentRotation()
+        builder.setTargetRotation(rotation)
+        prevBuilder.setTargetRotation(rotation)
+        analysis?.targetRotation = rotation
 
         val imageCapture = builder.build()
 
@@ -274,6 +332,10 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
                 useCaseGroup
             )
 
+            boundImageCapture = imageCapture
+            boundPreview = p
+            boundAnalysis = analysis
+
             Log.d(TAG, "Camera lifecycle bound: ${camera.cameraInfo}")
 
             onBind.invoke(camera, executor, imageCapture)
@@ -313,6 +375,10 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
 
             prevBuilder.setResolutionSelector(resolutionSelector)
         }
+
+        val rotation = currentRotation()
+        prevBuilder.setTargetRotation(rotation)
+        analysis?.targetRotation = rotation
 
         val p = prevBuilder.build()
 
@@ -364,7 +430,11 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
         val recorder = Recorder.Builder().setExecutor(exec)
             .setAspectRatio(AspectRatio.RATIO_4_3)
             .build()
-        val videoCapture = VideoCapture.withOutput(recorder)
+        // Builder rather than withOutput(): the latter offers no target rotation hook, and
+        // without it a recording started in one orientation is saved with the wrong rotation
+        val videoCapture = VideoCapture.Builder(recorder)
+            .setTargetRotation(rotation)
+            .build()
 
         val useCaseGroupBuilder = UseCaseGroup.Builder()
         useCaseGroupBuilder.addUseCase(p)
@@ -379,6 +449,10 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
                 currentSelector,
                 useCaseGroup
             )
+
+            boundPreview = p
+            boundAnalysis = analysis
+            boundVideoCapture = videoCapture
 
             Log.d(TAG, "Camera lifecycle bound for video: ${camera.cameraInfo}")
 

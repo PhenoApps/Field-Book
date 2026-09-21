@@ -1,57 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+    Wrapped in a scroll view so the summary cannot overlap the migrate and skip buttons in a
+    short window. This runs on upgrade and blocks the user until answered. fillViewport keeps
+    the buttons pinned to the bottom whenever there is room, so nothing changes on a phone.
+-->
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fillViewport="true">
 
-    <TextView style="@style/TextViewStyle.Bold.Title"
-        android:layout_width="0dp"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_margin="16dp"
-        android:id="@+id/frag_storage_migrator_title_tv"
-        android:text="@string/frag_storage_migrator_title"/>
+        android:minHeight="@dimen/fb_collect_trait_container_min_height">
 
-    <TextView
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/frag_storage_migrator_title_tv"
-        android:id="@+id/frag_storage_migrator_summary_tv"
-        android:layout_margin="16dp"
-        android:text="@string/frag_storage_migrator_summary"/>
+        <TextView style="@style/TextViewStyle.Bold.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_margin="16dp"
+            android:id="@+id/frag_storage_migrator_title_tv"
+            android:text="@string/frag_storage_migrator_title"/>
 
-    <Button
-        android:text="@string/migrate"
-        android:id="@+id/frag_storage_migrator_choose_dir_btn"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/frag_storage_migrator_skip_btn"
-        android:layout_margin="16dp"/>
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/frag_storage_migrator_title_tv"
+            android:id="@+id/frag_storage_migrator_summary_tv"
+            android:layout_margin="16dp"
+            android:text="@string/frag_storage_migrator_summary"/>
 
-    <ProgressBar
-        android:visibility="invisible"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/frag_storage_migrator_choose_dir_btn"
-        android:layout_margin="16dp"
-        android:id="@+id/frag_migrator_pb"/>
+        <ProgressBar
+            android:visibility="invisible"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/frag_storage_migrator_summary_tv"
+            app:layout_constraintBottom_toTopOf="@id/frag_storage_migrator_choose_dir_btn"
+            app:layout_constraintVertical_bias="1.0"
+            android:layout_margin="16dp"
+            android:id="@+id/frag_migrator_pb"/>
 
-    <Button
-        android:text="@string/skip"
-        android:id="@+id/frag_storage_migrator_skip_btn"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_margin="16dp"/>
+        <Button
+            android:text="@string/migrate"
+            android:id="@+id/frag_storage_migrator_choose_dir_btn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/frag_migrator_pb"
+            app:layout_constraintBottom_toTopOf="@id/frag_storage_migrator_skip_btn"
+            app:layout_constraintVertical_bias="1.0"
+            android:layout_margin="16dp"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <Button
+            android:text="@string/skip"
+            android:id="@+id/frag_storage_migrator_skip_btn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/frag_storage_migrator_choose_dir_btn"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintVertical_bias="1.0"
+            android:layout_margin="16dp"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.core.widget.NestedScrollView>

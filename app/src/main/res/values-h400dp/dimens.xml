@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Overrides for very short windows: a small phone in landscape, or a narrow split-screen or
+    freeform window on a large screen. See values-h480dp/dimens.xml for why these are height
+    qualified rather than smallest-width qualified.
+-->
+<resources>
+
+    <!-- collect chrome -->
+    <dimen name="fb_collect_infobar_max_height">64dp</dimen>
+    <dimen name="fb_collect_trait_container_min_height">100dp</dimen>
+
+    <!-- trait layout internals -->
+    <dimen name="fb_trait_chart_height">150dp</dimen>
+    <dimen name="fb_spectral_busy_card_min_height">140dp</dimen>
+    <dimen name="fb_trait_big_fab_size">96dp</dimen>
+    <dimen name="fb_trait_camera_preview_min_height">128dp</dimen>
+
+    <!-- camera trait recycler previews, kept at 4:3 -->
+    <dimen name="camera_preview_portrait_width">123dp</dimen>
+    <dimen name="camera_preview_portrait_height">160dp</dimen>
+
+</resources>

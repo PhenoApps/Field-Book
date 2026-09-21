@@ -45,7 +45,14 @@ class CropImageView : ConstraintLayout {
 
     companion object {
         const val TAG = "CropImageView"
-        const val MIN_DISTANCE_BETWEEN_HANDLES = 32
+
+        /**
+         * Smallest gap allowed between opposing crop handles, in dp. Converted to pixels per
+         * instance by [minDistanceBetweenHandles] - it is compared against view coordinates,
+         * so leaving it as a raw pixel value made the minimum crop region grow whenever the
+         * crop surface was smaller than a phone-portrait one.
+         */
+        const val MIN_DISTANCE_BETWEEN_HANDLES_DP = 32
         const val DEFAULT_CROP_COORDINATES = "0.00, 0.00, 1.00, 1.00"
         fun parseRectCoordinates(rectCoordinates: String): RectF? {
 
@@ -106,6 +113,11 @@ class CropImageView : ConstraintLayout {
 
     //size of the handle image view, set in dimens.xml
     private val handleSize: Int
+
+    //MIN_DISTANCE_BETWEEN_HANDLES_DP in pixels, so the minimum crop region is the same physical
+    //size regardless of display density or how large the crop surface was laid out
+    private val minDistanceBetweenHandles: Float
+        get() = MIN_DISTANCE_BETWEEN_HANDLES_DP * resources.displayMetrics.density
 
     //global handle that tracks which handle was last clicked
     private var handle: ImageView? = null
@@ -574,20 +586,22 @@ class CropImageView : ConstraintLayout {
             )
 
             //update handles to not cross each other
-            if (cropHandleTop!!.y > cropHandleBottom!!.y - MIN_DISTANCE_BETWEEN_HANDLES) {
-                cropHandleTop!!.y = round(cropHandleBottom!!.y - MIN_DISTANCE_BETWEEN_HANDLES)
+            val minGap = minDistanceBetweenHandles
+
+            if (cropHandleTop!!.y > cropHandleBottom!!.y - minGap) {
+                cropHandleTop!!.y = round(cropHandleBottom!!.y - minGap)
             }
 
-            if (cropHandleStart!!.x > cropHandleEnd!!.x - MIN_DISTANCE_BETWEEN_HANDLES) {
-                cropHandleStart!!.x = round(cropHandleEnd!!.x - MIN_DISTANCE_BETWEEN_HANDLES)
+            if (cropHandleStart!!.x > cropHandleEnd!!.x - minGap) {
+                cropHandleStart!!.x = round(cropHandleEnd!!.x - minGap)
             }
 
-            if (cropHandleBottom!!.y < cropHandleTop!!.y + MIN_DISTANCE_BETWEEN_HANDLES) {
-                cropHandleBottom!!.y = round(cropHandleTop!!.y + MIN_DISTANCE_BETWEEN_HANDLES)
+            if (cropHandleBottom!!.y < cropHandleTop!!.y + minGap) {
+                cropHandleBottom!!.y = round(cropHandleTop!!.y + minGap)
             }
 
-            if (cropHandleEnd!!.x < cropHandleStart!!.x + MIN_DISTANCE_BETWEEN_HANDLES) {
-                cropHandleEnd!!.x = round(cropHandleStart!!.x + MIN_DISTANCE_BETWEEN_HANDLES)
+            if (cropHandleEnd!!.x < cropHandleStart!!.x + minGap) {
+                cropHandleEnd!!.x = round(cropHandleStart!!.x + minGap)
             }
 
             //get midpoints

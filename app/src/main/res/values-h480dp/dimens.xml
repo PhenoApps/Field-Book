@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Overrides for windows shorter than the phone-portrait default, such as a phone or tablet in
+    landscape, an unfolded foldable, or a split-screen half. Everything here is a structural
+    height that would otherwise force the collect screen's trait entry area toward zero.
+
+    These are deliberately height (-h) qualified rather than smallest-width (-sw) qualified: the
+    failure is "the window is short", which a smallest-width qualifier cannot detect. An unfolded
+    foldable in landscape has sw > 600dp AND a short height, so -sw600dp would make it worse.
+-->
+<resources>
+
+    <!-- collect chrome -->
+    <dimen name="fb_collect_infobar_max_height">96dp</dimen>
+    <dimen name="fb_collect_trait_container_min_height">140dp</dimen>
+
+    <!-- trait layout internals -->
+    <dimen name="fb_trait_chart_height">200dp</dimen>
+    <dimen name="fb_spectral_busy_card_min_height">180dp</dimen>
+    <dimen name="fb_trait_big_fab_size">120dp</dimen>
+    <dimen name="fb_trait_camera_preview_min_height">160dp</dimen>
+
+    <!-- camera trait recycler previews, kept at 4:3 -->
+    <dimen name="camera_preview_portrait_width">154dp</dimen>
+    <dimen name="camera_preview_portrait_height">200dp</dimen>
+
+</resources>

@@ -25,6 +25,16 @@
         <activity
             android:name=".activities.StatisticsActivity"
             android:exported="false" />
+
+        <!-- android:screenOrientation="portrait" below is intentional and must be kept.
+             From Android 16 (targetSdk 36) the platform ignores screenOrientation,
+             resizeableActivity and aspect-ratio restrictions on any display whose
+             smallest width is >= 600dp, so these attributes only take effect on phones
+             (sw < 600dp) where portrait is the ergonomic default for field collection.
+             They are a no-op on tablets, foldables and desktop windowing, which is why
+             the PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY opt-out could be removed.
+             Do not "clean these up" - deleting them would change phone behaviour. -->
+
         <!-- The Main Page activity that lists all other activities -->
         <activity
             android:name=".activities.ConfigActivity"
@@ -45,7 +55,7 @@
         <activity
             android:name=".activities.FieldEditorActivity"
             android:alwaysRetainTaskState="false"
-            android:configChanges="keyboardHidden|orientation"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|locale|layoutDirection"
             android:finishOnTaskLaunch="true"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
@@ -53,7 +63,7 @@
         <activity
             android:name=".activities.FieldArchivedActivity"
             android:alwaysRetainTaskState="false"
-            android:configChanges="keyboardHidden|orientation"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|locale|layoutDirection"
             android:finishOnTaskLaunch="true"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
@@ -61,7 +71,7 @@
         <activity
             android:name=".activities.FieldCreatorActivity"
             android:alwaysRetainTaskState="false"
-            android:configChanges="keyboardHidden|orientation"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|locale|layoutDirection"
             android:finishOnTaskLaunch="true"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
@@ -71,7 +81,7 @@
         <activity
             android:name=".activities.TraitActivity"
             android:alwaysRetainTaskState="false"
-            android:configChanges="keyboardHidden|orientation"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|locale|layoutDirection"
             android:finishOnTaskLaunch="true"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
@@ -83,7 +93,7 @@
             android:theme="@style/ActivityDialog" /> <!-- Main page for data collection -->
         <activity
             android:name=".activities.CollectActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize|locale|keyboard"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|locale|layoutDirection|uiMode"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:exported="true"
@@ -239,12 +249,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" /> <!-- barcode capture activity -->
-        <activity
-            android:name="com.journeyapps.barcodescanner.CaptureActivity"
-            android:screenOrientation="portrait"
-            android:stateNotNeeded="true"
-            tools:replace="android:screenOrientation" />
+            android:theme="@style/AppTheme" />
 
         <!-- used to define SAF storage directory, required at start of app -->
         <activity
@@ -256,8 +261,12 @@
             android:name=".activities.LocaleChoiceActivity"
             android:theme="@style/AppTheme" />
 
+        <!-- Handles its own config changes so a live CameraX session (including an
+             in-flight video recording) survives a rotate, fold or window resize.
+             Target rotation is re-applied from onConfigurationChanged instead. -->
         <activity
             android:name=".activities.CameraActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|locale|layoutDirection"
             android:exported="true"
             android:theme="@style/AppTheme" />
 
@@ -277,9 +286,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
-
-        <!--TODO: Temporarily opt out of forced layout changes in sdk 36. Needs to be addressed before updating to sdk 37 -->
-        <property android:name="android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY" android:value="true" />
 
         <!-- BrAPI AccountManager authenticator service -->
         <service
@@ -312,13 +318,6 @@
             <action android:name="android.intent.action.GET_CONTENT" />
         </intent>
     </queries>
-
-    <supports-screens
-        android:anyDensity="true"
-        android:largeScreens="true"
-        android:normalScreens="true"
-        android:smallScreens="true"
-        android:xlargeScreens="true" />
 
     <uses-feature
         android:name="android.hardware.location"

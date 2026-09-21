@@ -1,3 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <lint>
+
+    <!--
+        The portrait locks in AndroidManifest.xml are intentional. From targetSdk 36 the
+        platform ignores screenOrientation on displays whose smallest width is >= 600dp, so
+        the attribute only takes effect on phones, where portrait is the ergonomic default for
+        field collection. Deleting it - which is what this check invites - would change phone
+        behaviour without improving large screen behaviour at all.
+    -->
+    <issue id="LockedOrientationActivity" severity="ignore" />
+
 </lint>
