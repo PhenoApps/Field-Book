@@ -4,11 +4,13 @@ sealed class VerificationInterval(val value: String, val hours: Int) {
     object EVERY_OPEN : VerificationInterval("0", 0)
     object EVERY_12H : VerificationInterval("1", 12)
     object EVERY_24H : VerificationInterval("2", 24)
-    object NEVER : VerificationInterval("3", 0)
+
+    // negative hours so that neither the "ask on open" nor the "interval elapsed" check fires
+    object NEVER : VerificationInterval("3", -1)
 
     companion object {
         @JvmField
-        val DEFAULT: VerificationInterval = EVERY_OPEN
+        val DEFAULT: VerificationInterval = EVERY_24H
 
         fun fromValue(value: String?): VerificationInterval {
             return when (value) {
