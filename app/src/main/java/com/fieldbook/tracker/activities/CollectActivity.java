@@ -314,9 +314,8 @@ public class CollectActivity extends ThemedActivity
 
     UVCCameraTextureView uvcView;
 
-    // Last seen resource-qualifier inputs, used by onConfigurationChanged to detect when the
-    // window has crossed a bucket boundary whose qualified resources we intentionally do not
-    // re-resolve (see onConfigurationChanged).
+    // Previous resource-qualifier inputs, compared in onConfigurationChanged to detect when
+    // the window has crossed a bucket boundary.
     private int lastSmallestWidthDp = Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
     private int lastScreenHeightDp = Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
     private int lastNightMode = Configuration.UI_MODE_NIGHT_UNDEFINED;
@@ -423,9 +422,9 @@ public class CollectActivity extends ThemedActivity
         DeviceDao deviceDao = new DeviceDao(database);
         UriDao uriDao = new UriDao(database);
 
-        // scoped to the activity's ViewModelStore so onCleared() runs and viewModelScope is
-        // cancelled - creating these straight from the factory leaked a live SupervisorJob
-        // (holding the repository, which holds DataHelper) on every activity create
+        // scoped to the activity's ViewModelStore so onCleared() cancels viewModelScope -
+        // creating these straight from the factory leaked a live SupervisorJob (holding the
+        // repository, and so DataHelper) on every activity create
         spectralViewModel = new ViewModelProvider(this,
                 new SpectralViewModelFactory(new SpectralRepository(spectralDao, protocolDao, deviceDao, uriDao)))
                 .get(SpectralViewModel.class);
@@ -1401,49 +1400,42 @@ public class CollectActivity extends ThemedActivity
             rangeBox.saveLastPlotAndTrait();
         }
 
-        // A destroy that is only a configuration change (rotate, fold, resize on a large
-        // screen) must not tear down the hardware sessions - dropping a BLE scale, a
-        // GreenSeeker, GNSS averaging or a USB camera mid-collection is a data loss event.
-        // isFinishing() is checked too: some OEM builds misreport isChangingConfigurations()
-        // when an activity is finished from a background task, and a leaked camera or
-        // spectrometer session cannot be recovered without a force-stop.
-        boolean teardown = isFinishing() || !isChangingConfigurations();
+        // Teardown is unconditional, including when isChangingConfigurations() is true. The
+        // helpers below are unscoped @ActivityContext injections, so a replacement activity is
+        // handed new instances - skipping cleanup orphans the old connection rather than
+        // handing it over, and the device stays held until a force-stop. Rotation, folding and
+        // resizing never reach here anyway; the manifest's configChanges keeps the activity
+        // alive through them.
 
-        if (teardown) {
-
-            try {
-                ttsHelper.close();
-            } catch (Exception e) {
-                Log.e(TAG, "Error closing TTS Helper.", e);
-            }
-
-            if (currentInflatedLayout != null) {
-                currentInflatedLayout.onExit();
-            }
-
-            traitLayoutRefresh();
-
-            //release resources every trait layout owns, not just the one on screen
-            traitLayouts.onDestroy();
-
-            bleScanner.stopScanning();
-
-            greenSeekerGattManager.disconnect();
-
-            scaleGattManager.disconnect();
-
-            usbCameraApi.onDestroy();
-
-            gnssThreadHelper.stop();
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                goProApi.onDestroy();
-            }
+        try {
+            ttsHelper.close();
+        } catch (Exception e) {
+            Log.e(TAG, "Error closing TTS Helper.", e);
         }
 
-        // always unregister: SensorHelper is activity scoped and register() runs from
-        // onCreate, so skipping this would leak the destroyed activity through
-        // SensorManager. The replacement instance re-registers immediately.
+        if (currentInflatedLayout != null) {
+            currentInflatedLayout.onExit();
+        }
+
+        traitLayoutRefresh();
+
+        //release resources every trait layout owns, not just the one on screen
+        traitLayouts.onDestroy();
+
+        bleScanner.stopScanning();
+
+        greenSeekerGattManager.disconnect();
+
+        scaleGattManager.disconnect();
+
+        usbCameraApi.onDestroy();
+
+        gnssThreadHelper.stop();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            goProApi.onDestroy();
+        }
+
         sensorHelper.unregister();
 
         super.onDestroy();
@@ -1897,36 +1889,24 @@ public class CollectActivity extends ThemedActivity
     }
 
     /**
-     * Handles rotation, fold/unfold and window resizes without letting the activity be
-     * recreated, so live BLE/GNSS/USB-camera sessions and in-progress input survive.
-     * <p>
-     * Because the manifest declares these config changes, the view hierarchy is NOT
-     * destroyed here - nothing needs re-inflating. Only the things that genuinely depend on
-     * window geometry or uiMode are re-applied.
-     * <p>
-     * Deliberately NOT called from here:
-     * <ul>
-     *   <li>{@code loadScreen()} - it calls setContentView, which forces inflateTrait ->
-     *       currentInflatedLayout.onExit(), tearing down exactly the hardware session this
-     *       method exists to protect.</li>
-     *   <li>{@code handleFlipFlopPreferences()} - the ConstraintSet lives in the existing
-     *       children's LayoutParams, which survive without recreation. Re-running it would
-     *       rewrite the LayoutParams of every child of layout_main, including the
-     *       UVCCameraTextureView whose params are set imperatively by UsbCameraTraitLayout.</li>
-     *   <li>{@code initWidgets()} - it can finish() the activity when no traits are visible.</li>
-     *   <li>Toolbar rebinding - the bottom bar is a ComposeView and recomposes itself.</li>
-     *   <li>{@code currentInflatedLayout.refreshLayout(...)} - several trait layouts repopulate
-     *       their input from the stored observation, so calling it here would discard exactly
-     *       the in-progress typing this method exists to preserve. The views re-measure on
-     *       their own when the window size changes; nothing has to ask them to.</li>
-     * </ul>
-     * Accepted cost: when a qualifier bucket is crossed (for example a foldable opening past
-     * sw600dp), qualified dimens are not re-resolved. Only text sizes, three button widths and
-     * a status icon size are qualified, so buttons stay phone-sized until the user leaves and
-     * re-enters collect. That is cosmetic and self-healing, and far cheaper than dropping a
-     * connected sensor. This is also why "density" is intentionally absent from the manifest's
-     * configChanges - a density change makes every baked-in dp stale, not just a few dimens,
-     * and recreation is the correct response to it.
+     * Handles rotation, fold and resize without recreating the activity, so live BLE/GNSS/USB
+     * camera sessions and in-progress input survive. The view hierarchy is not destroyed, so
+     * nothing is re-inflated - only what depends on window geometry or uiMode is re-applied.
+     *
+     * Deliberately not called here: loadScreen() (setContentView forces inflateTrait, tearing
+     * down the hardware session this method protects), handleFlipFlopPreferences() (would
+     * rewrite the LayoutParams of every child of layout_main, including the imperatively sized
+     * UVCCameraTextureView), initWidgets() (can finish() the activity), toolbar rebinding (the
+     * bottom bar is Compose and recomposes itself) and refreshLayout() (would repopulate trait
+     * input from the stored observation, discarding in-progress typing; the views re-measure on
+     * their own).
+     *
+     * Without re-inflation, height-qualified dimens are not re-resolved, so the two structural
+     * ones are re-applied in applyCollectSizeConstraints(). Text sizes and button widths stay
+     * stale until collect is reopened, which is cosmetic.
+     *
+     * "density" is deliberately absent from the manifest's configChanges: it makes every
+     * baked-in dp stale, so recreation is the right response.
      */
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
@@ -1949,9 +1929,11 @@ public class CollectActivity extends ThemedActivity
         // the adapter needs a fresh measure pass against the new width
         refreshInfoBarAdapter();
 
-        // CameraX use cases bind their target rotation at bind time; with orientation no longer
-        // pinned on large screens it has to be updated explicitly or saved images and the
-        // normalized crop rect land on the wrong edge of the frame
+        // re-resolve the structural height dimens for the new window
+        applyCollectSizeConstraints();
+
+        // use cases bind their target rotation at bind time; without an explicit update, saved
+        // images and the normalized crop rect land on the wrong edge of the frame
         try {
             cameraXFacade.updateTargetRotation();
         } catch (Exception e) {
@@ -1959,8 +1941,43 @@ public class CollectActivity extends ThemedActivity
         }
 
         if (bucketChanged) {
-            Log.d(TAG, "Resource qualifier bucket changed (sw=" + newConfig.smallestScreenWidthDp
-                    + "dp, h=" + newConfig.screenHeightDp + "dp); qualified dimens stay stale until re-entry.");
+            Log.d(TAG, "Window bucket changed (sw=" + newConfig.smallestScreenWidthDp
+                    + "dp, h=" + newConfig.screenHeightDp + "dp)");
+        }
+    }
+
+    /**
+     * Re-reads the height-qualified structural dimens and applies them to the existing views.
+     * A self-handled configuration change does not re-inflate activity_collect.xml, so these
+     * would otherwise stay pinned to the bucket current when collect was opened. Touching only
+     * the two LayoutParams fields leaves input state and hardware sessions untouched.
+     */
+    private void applyCollectSizeConstraints() {
+
+        try {
+
+            int infoBarMax = getResources().getDimensionPixelSize(R.dimen.fb_collect_infobar_max_height);
+            int traitMin = getResources().getDimensionPixelSize(R.dimen.fb_collect_trait_container_min_height);
+
+            if (infoBarRv != null && infoBarRv.getLayoutParams() instanceof ConstraintLayout.LayoutParams) {
+                ConstraintLayout.LayoutParams lp = (ConstraintLayout.LayoutParams) infoBarRv.getLayoutParams();
+                if (lp.matchConstraintMaxHeight != infoBarMax) {
+                    lp.matchConstraintMaxHeight = infoBarMax;
+                    infoBarRv.setLayoutParams(lp);
+                }
+            }
+
+            View traitContainer = findViewById(R.id.svTraitContainer);
+            if (traitContainer != null && traitContainer.getLayoutParams() instanceof ConstraintLayout.LayoutParams) {
+                ConstraintLayout.LayoutParams lp = (ConstraintLayout.LayoutParams) traitContainer.getLayoutParams();
+                if (lp.matchConstraintMinHeight != traitMin) {
+                    lp.matchConstraintMinHeight = traitMin;
+                    traitContainer.setLayoutParams(lp);
+                }
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error applying collect size constraints.", e);
         }
     }
 

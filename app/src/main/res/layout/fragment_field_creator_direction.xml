@@ -6,9 +6,9 @@
     android:padding="16dp">
 
     <!--
-        The title and the direction options scroll independently of the pinned bottom
-        navigation. Without this their wrap_content height overflows past the separator in a
-        short window and draws underneath the navigation bar.
+        Scrolls independently of the pinned bottom navigation; without this the title and
+        direction options overflow past the separator in a short window and draw underneath the
+        navigation bar.
     -->
     <androidx.core.widget.NestedScrollView
         android:id="@+id/direction_form_scroll"

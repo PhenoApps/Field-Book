@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Scrollable: AlertDialog does not scroll a view supplied via setView(), it clips it, which
-    would put the positive button out of reach in a short window. Four labelled rows with two
-    spinners is enough content for that to happen in landscape.
+    Scrollable: AlertDialog clips a setView() layout rather than scrolling it, which would put
+    the positive button out of reach in a short window.
 -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"

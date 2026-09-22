@@ -34,11 +34,10 @@
     </androidx.appcompat.widget.Toolbar>
 
     <!--
-        Never displayed: the constraints park it past the bottom-right corner of the parent.
-        It exists only to own a SurfaceTexture for the UVC driver, and its LayoutParams are
-        replaced at runtime with the camera's own pixel dimensions in
-        UsbCameraTraitLayout.updatePreviewSize. px is the correct unit for a capture surface -
-        converting these to dp would change the preview buffer geometry on every non-mdpi device.
+        Never displayed: the constraints park it past the bottom-right corner. It exists only to
+        own a SurfaceTexture for the UVC driver, and UsbCameraTraitLayout.updatePreviewSize
+        replaces its LayoutParams with the camera's own pixel dimensions. px is the correct unit
+        for a capture surface; dp would change the preview buffer geometry off mdpi.
     -->
     <com.serenegiant.widget.UVCCameraTextureView
         android:layout_width="640px"
@@ -50,10 +49,9 @@
         tools:ignore="PxUsage" />
 
     <!--
-        Capped rather than wrap_content: one row is added per selected info bar attribute, and
-        users routinely pick four to six. Unbounded, the rows push svTraitContainer (the only
-        flexible element in the chain) to zero height in a short window and the data entry area
-        disappears. The recycler already scrolls internally.
+        Capped rather than wrap_content: one row is added per selected attribute, and unbounded
+        they push svTraitContainer - the only flexible element in the chain - to zero height in
+        a short window. The recycler already scrolls internally.
     -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/act_collect_infobar_rv"
@@ -100,12 +98,10 @@
 
     <!--
         The trait entry area. constraintHeight_min gives it a floor so the chrome above cannot
-        squeeze it out of existence in a short window; it scrolls internally once it hits the
-        floor.
-
+        squeeze it out in a short window; it scrolls internally once it hits the floor.
         fillViewport stays false: traitHolder has gravity="center", so filling the viewport
-        would stretch the holder and centre every trait layout in the leftover space instead of
-        stacking it directly under the input view.
+        would centre every trait layout in the leftover space instead of stacking it directly
+        under the input view.
     -->
     <ScrollView
         android:id="@+id/svTraitContainer"

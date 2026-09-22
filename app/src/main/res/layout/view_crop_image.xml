@@ -66,11 +66,10 @@
         android:elevation="1dp"/>
 
     <!--
-        Sized as a percentage of the window at a 3:4 ratio and clamped to the old fixed
-        340x480dp. On a phone that clamp is what binds, so the surface is the same size it has
-        always been; in a short window it shrinks proportionally instead of pushing the save
-        controls off-screen. Crop handle positions are normalised against the view's measured
-        width and height when saved, so a smaller surface still stores identical coordinates.
+        Sized as a percentage of the window at 3:4 and clamped to the old fixed 340x480dp, so a
+        phone is unchanged while a short window shrinks the surface instead of pushing the save
+        controls off-screen. Handle positions are stored normalised against the measured size,
+        so a smaller surface still yields identical coordinates.
     -->
     <com.fieldbook.tracker.views.OverlayImageView
         android:layout_width="0dp"

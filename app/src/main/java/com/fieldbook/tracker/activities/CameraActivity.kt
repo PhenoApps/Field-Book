@@ -349,10 +349,8 @@ class CameraActivity : ThemedActivity() {
     }
 
     /**
-     * The manifest declares these config changes so a live camera session, including an
-     * in-flight video recording, survives a rotate, fold or resize. Only the pieces that depend
-     * on window geometry are re-applied - the use cases are updated in place rather than
-     * rebound, because rebinding would drop the recording.
+     * Config changes are declared in the manifest so a live camera session survives a rotate,
+     * fold or resize. Use cases are updated in place; rebinding would drop a recording.
      */
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)

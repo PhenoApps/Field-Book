@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Scrollable: the 70dp top margin plus title, summary and three setup rows is taller than a
-    landscape window, and AppIntroActivity is not orientation locked. This is a first-run gate,
-    so a clipped setup row is a user who cannot finish onboarding.
+    Scrollable: title, summary and three setup rows are taller than a landscape window, and
+    AppIntroActivity is not orientation locked. A clipped setup row blocks onboarding.
 -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"

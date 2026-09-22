@@ -26,14 +26,11 @@
             android:name=".activities.StatisticsActivity"
             android:exported="false" />
 
-        <!-- android:screenOrientation="portrait" below is intentional and must be kept.
-             From Android 16 (targetSdk 36) the platform ignores screenOrientation,
-             resizeableActivity and aspect-ratio restrictions on any display whose
-             smallest width is >= 600dp, so these attributes only take effect on phones
-             (sw < 600dp) where portrait is the ergonomic default for field collection.
-             They are a no-op on tablets, foldables and desktop windowing, which is why
-             the PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY opt-out could be removed.
-             Do not "clean these up" - deleting them would change phone behaviour. -->
+        <!-- The screenOrientation="portrait" locks below are intentional. From targetSdk 36
+             the platform ignores screenOrientation, resizeableActivity and aspect-ratio
+             restrictions above sw600dp, so they only take effect on phones, where portrait is
+             the ergonomic default for field collection. Deleting them would change phone
+             behaviour without affecting large screens. -->
 
         <!-- The Main Page activity that lists all other activities -->
         <activity
@@ -261,9 +258,9 @@
             android:name=".activities.LocaleChoiceActivity"
             android:theme="@style/AppTheme" />
 
-        <!-- Handles its own config changes so a live CameraX session (including an
-             in-flight video recording) survives a rotate, fold or window resize.
-             Target rotation is re-applied from onConfigurationChanged instead. -->
+        <!-- Handles its own config changes so a live CameraX session, including an in-flight
+             recording, survives a rotate, fold or resize. onConfigurationChanged re-applies the
+             target rotation instead. -->
         <activity
             android:name=".activities.CameraActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|locale|layoutDirection"

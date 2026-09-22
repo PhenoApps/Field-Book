@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     Scrollable: AlertDialog clips a setView() layout rather than scrolling it, and a month grid
-    plus header is taller than a landscape dialog. Without this the last week rows and the
-    dialog buttons are unreachable.
+    plus header is taller than a landscape dialog.
 -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:custom="http://schemas.android.com/tools"

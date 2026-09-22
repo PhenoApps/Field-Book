@@ -1,23 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Overrides for very short windows: a small phone in landscape, or a narrow split-screen or
-    freeform window on a large screen. See values-h480dp/dimens.xml for why these are height
-    qualified rather than smallest-width qualified.
+    Available window height between 400dp and 480dp: a larger phone in landscape, or a roomy
+    split-screen half. See values-h480dp/dimens.xml for why the buckets run smallest-first.
 -->
 <resources>
 
     <!-- collect chrome -->
-    <dimen name="fb_collect_infobar_max_height">64dp</dimen>
-    <dimen name="fb_collect_trait_container_min_height">100dp</dimen>
+    <dimen name="fb_collect_infobar_max_height">96dp</dimen>
+    <dimen name="fb_collect_trait_container_min_height">140dp</dimen>
 
     <!-- trait layout internals -->
-    <dimen name="fb_trait_chart_height">150dp</dimen>
-    <dimen name="fb_spectral_busy_card_min_height">140dp</dimen>
-    <dimen name="fb_trait_big_fab_size">96dp</dimen>
-    <dimen name="fb_trait_camera_preview_min_height">128dp</dimen>
+    <dimen name="fb_trait_chart_height">200dp</dimen>
+    <dimen name="fb_spectral_busy_card_min_height">180dp</dimen>
+    <dimen name="fb_trait_big_fab_size">120dp</dimen>
+    <dimen name="fb_trait_camera_preview_min_height">160dp</dimen>
 
     <!-- camera trait recycler previews, kept at 4:3 -->
-    <dimen name="camera_preview_portrait_width">123dp</dimen>
-    <dimen name="camera_preview_portrait_height">160dp</dimen>
+    <dimen name="camera_preview_portrait_width">154dp</dimen>
+    <dimen name="camera_preview_portrait_height">200dp</dimen>
 
 </resources>

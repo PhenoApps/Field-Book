@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Wrapped in a scroll view so the summary cannot overlap the migrate and skip buttons in a
-    short window. This runs on upgrade and blocks the user until answered. fillViewport keeps
-    the buttons pinned to the bottom whenever there is room, so nothing changes on a phone.
+    Scrollable so the summary cannot overlap the migrate and skip buttons in a short window.
+    fillViewport keeps the buttons at the bottom when there is room.
 -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"

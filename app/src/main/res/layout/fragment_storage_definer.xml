@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Wrapped in a scroll view so the title and summary cannot overlap the progress bar and the
-    choose-directory button in a short window. This is a first-run blocking screen and
-    DefineStorageActivity is not orientation locked, so on a tablet it is landscape from the
-    very first launch. fillViewport keeps the button pinned to the bottom whenever there is
-    room, so nothing changes on a phone.
+    Scrollable so the title and summary cannot overlap the progress bar and choose-directory
+    button in a short window - this is a first-run blocking screen and DefineStorageActivity is
+    not orientation locked. fillViewport keeps the button at the bottom when there is room.
 -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"

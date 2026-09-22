@@ -8,31 +8,33 @@
     <dimen name="camera_preview_landscape_width">150dp</dimen>
     <dimen name="camera_preview_landscape_height">115dp</dimen>
 
-    <!-- portrait image preview sizes for camera trait recycler view, these should be 4:3-->
-    <dimen name="camera_preview_portrait_width">230dp</dimen>
-    <dimen name="camera_preview_portrait_height">300dp</dimen>
+    <!-- portrait image preview sizes for camera trait recycler view, these should be 4:3.
+         Compact values; values-h400dp and values-h480dp grow them. -->
+    <dimen name="camera_preview_portrait_width">123dp</dimen>
+    <dimen name="camera_preview_portrait_height">160dp</dimen>
 
     <!--
-        Upper bounds for the crop surface, a bit larger than the preview. The surface is sized
-        as a percentage of the window at a 3:4 ratio and clamped to these, so a phone reproduces
-        the previous fixed 340x480dp exactly while a short window shrinks the surface instead of
-        pushing the save controls off-screen.
+        Upper bounds for the crop surface, a bit larger than the preview. The surface is sized as
+        a percentage of the window at 3:4 and clamped to these, so a phone reproduces the
+        previous fixed 340x480dp while a short window shrinks instead.
     -->
     <dimen name="crop_image_max_width">340dp</dimen>
     <dimen name="crop_image_max_height">480dp</dimen>
 
     <!--
-        Collect screen sizing. Both of these are overridden in values-h480dp and values-h400dp:
-        the constraint is available window HEIGHT, not device class, so an unfolded foldable in
-        landscape (sw > 600dp but short) needs the small values, which a -sw qualifier cannot see.
+        Height-bucketed sizing. -hNdp means "available height >= N dp" and there is no maximum
+        height qualifier, so the buckets run SMALLEST FIRST: this file holds the compact values
+        (windows shorter than 400dp) and values-h400dp then values-h480dp grow them. Inverting
+        this gives tall windows the cramped sizes.
 
-        Without a cap the info bar grows one row per selected attribute and svTraitContainer,
-        the only flexible element in the chain, absorbs the whole deficit down to zero - the
-        data entry area disappears. The recycler already scrolls internally, it just never got
-        the chance while it was wrap_content.
+        Height rather than smallest-width qualified because the constraint is vertical room,
+        which a -sw qualifier cannot see: an unfolded foldable in landscape is sw600dp AND short.
+
+        The info bar needs a cap because it grows one row per selected attribute, and
+        svTraitContainer - the only flexible element in the chain - absorbs the whole deficit.
     -->
-    <dimen name="fb_collect_infobar_max_height">160dp</dimen>
-    <dimen name="fb_collect_trait_container_min_height">200dp</dimen>
+    <dimen name="fb_collect_infobar_max_height">64dp</dimen>
+    <dimen name="fb_collect_trait_container_min_height">100dp</dimen>
 
     <dimen name="brapi_importer_filter_height">40dp</dimen>
 
@@ -69,9 +71,10 @@
         the chart and both recyclers are gone, so without this the layout collapses to the height
         of the connect button and the card has nowhere to draw.
         96dp indicator + 40dp padding twice + label and its margin.
+        Compact value; values-h400dp and values-h480dp grow it back to 240dp.
     -->
-    <dimen name="fb_spectral_busy_card_min_height">240dp</dimen>
-    <dimen name="fb_trait_big_fab_size">176dp</dimen>
+    <dimen name="fb_spectral_busy_card_min_height">140dp</dimen>
+    <dimen name="fb_trait_big_fab_size">96dp</dimen>
     <dimen name="fb_trait_fab_image_size">38dp</dimen>
   
     <dimen name="brapi_filter_tv_padding">8dp</dimen>
@@ -82,11 +85,13 @@
 
     <dimen name="fb_trait_line_graph_selector_size">38dp</dimen>
 
-    <!-- Height of the in-trait charts (green seeker, spectral). Shrinks in short windows. -->
-    <dimen name="fb_trait_chart_height">300dp</dimen>
+    <!-- Height of the in-trait charts (green seeker, spectral).
+         Compact value; values-h400dp and values-h480dp grow it back to 300dp. -->
+    <dimen name="fb_trait_chart_height">150dp</dimen>
 
-    <!-- Minimum height of the camera trait preview surface. -->
-    <dimen name="fb_trait_camera_preview_min_height">256dp</dimen>
+    <!-- Minimum height of the camera trait preview surface.
+         Compact value; values-h400dp and values-h480dp grow it back to 256dp. -->
+    <dimen name="fb_trait_camera_preview_min_height">128dp</dimen>
 
     <!--  chip related  -->
     <dimen name="chip_icon_size">24dp</dimen>

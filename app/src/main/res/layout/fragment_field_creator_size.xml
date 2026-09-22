@@ -6,9 +6,8 @@
     android:padding="16dp">
 
     <!--
-        The form scrolls independently of the pinned bottom navigation. Without this the
-        wrap_content stack of title, name field, row/column inputs, error text and warning card
-        overflows past the separator in a short window and draws underneath the navigation bar.
+        Scrolls independently of the pinned bottom navigation; without this the form overflows
+        past the separator in a short window and draws underneath the navigation bar.
         constrainedHeight lets it shrink and scroll rather than push the preview out.
     -->
     <androidx.core.widget.NestedScrollView

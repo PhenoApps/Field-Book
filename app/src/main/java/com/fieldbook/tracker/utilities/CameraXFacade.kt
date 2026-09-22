@@ -9,7 +9,10 @@ import android.graphics.RectF
 import android.graphics.drawable.Drawable
 import android.graphics.ColorFilter
 import android.hardware.camera2.CameraCharacteristics
+import android.hardware.display.DisplayManager
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.util.Size
 import android.util.TypedValue
@@ -80,8 +83,8 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
         }, ContextCompat.getMainExecutor(context))
     }
 
-    // Use cases from the most recent bind, kept so target rotation can be updated on a
-    // configuration change without rebinding (a rebind would drop an in-flight recording).
+    // Use cases from the most recent bind, kept so target rotation can be updated without
+    // rebinding (a rebind would drop an in-flight recording).
     private var boundImageCapture: ImageCapture? = null
     private var boundPreview: Preview? = null
     private var boundAnalysis: ImageAnalysis? = null
@@ -93,17 +96,65 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
         boundPreview = null
         boundAnalysis = null
         boundVideoCapture = null
+        unregisterDisplayListener()
+    }
+
+    private val displayManager by lazy {
+        context.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
     }
 
     /**
-     * The display rotation the camera use cases should target.
-     *
-     * Until Android 16 this was arrived at by accident: [ProcessCameraProvider.bindToLifecycle]
-     * defaults each use case's target rotation to the display rotation at bind time, and every
-     * camera surface lived inside a portrait locked activity, so it was always ROTATION_0. With
-     * orientation restrictions ignored on large screens that is no longer guaranteed, and a
-     * wrong target rotation changes both the EXIF orientation of saved images and which edge of
-     * the frame the normalized crop rect lands on.
+     * A 180 degree rotation changes the display rotation without changing the Configuration, so
+     * no configuration callback fires. Without this listener the use cases keep a stale target
+     * rotation and images are saved upside down.
+     */
+    private var displayListener: DisplayManager.DisplayListener? = null
+
+    private fun registerDisplayListener() {
+
+        if (displayListener != null) return
+
+        val listener = object : DisplayManager.DisplayListener {
+            override fun onDisplayAdded(displayId: Int) {}
+            override fun onDisplayRemoved(displayId: Int) {}
+            override fun onDisplayChanged(displayId: Int) {
+                val boundDisplayId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    context.display?.displayId
+                } else {
+                    @Suppress("DEPRECATION")
+                    (context.getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay.displayId
+                }
+                if (displayId == boundDisplayId) {
+                    updateTargetRotation()
+                }
+            }
+        }
+
+        try {
+            displayManager.registerDisplayListener(listener, Handler(Looper.getMainLooper()))
+            displayListener = listener
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not register display listener", e)
+        }
+    }
+
+    private fun unregisterDisplayListener() {
+        displayListener?.let {
+            try {
+                displayManager.unregisterDisplayListener(it)
+            } catch (e: Exception) {
+                Log.w(TAG, "Could not unregister display listener", e)
+            }
+        }
+        displayListener = null
+    }
+
+    /**
+     * The display rotation the camera use cases should target. This used to be ROTATION_0 by
+     * accident: [ProcessCameraProvider.bindToLifecycle] defaults to the display rotation at bind
+     * time, and every camera surface lived in a portrait-locked activity. Above sw600dp that
+     * lock is ignored, and a wrong target rotation changes both the EXIF orientation of saved
+     * images and which edge of the frame the normalized crop rect lands on.
      */
     private fun currentRotation(): Int = try {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -118,9 +169,9 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
     }
 
     /**
-     * Re-applies the current display rotation to the bound use cases. Safe to call at any time;
-     * it does not rebind, so an in-flight video recording is unaffected. Call from
-     * [android.app.Activity.onConfigurationChanged] on any activity hosting a camera surface.
+     * Re-applies the current display rotation to the bound use cases. Does not rebind, so an
+     * in-flight recording is unaffected. Call from onConfigurationChanged on any activity
+     * hosting a camera surface.
      */
     fun updateTargetRotation() {
         val rotation = currentRotation()
@@ -211,6 +262,7 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
             )
 
             boundImageCapture = imageCapture
+            registerDisplayListener()
 
             Log.d(TAG, "Camera lifecycle bound: ${camera.cameraInfo}")
 
@@ -335,6 +387,7 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
             boundImageCapture = imageCapture
             boundPreview = p
             boundAnalysis = analysis
+            registerDisplayListener()
 
             Log.d(TAG, "Camera lifecycle bound: ${camera.cameraInfo}")
 
@@ -430,8 +483,8 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
         val recorder = Recorder.Builder().setExecutor(exec)
             .setAspectRatio(AspectRatio.RATIO_4_3)
             .build()
-        // Builder rather than withOutput(): the latter offers no target rotation hook, and
-        // without it a recording started in one orientation is saved with the wrong rotation
+        // Builder rather than withOutput(): the latter has no target rotation hook, without
+        // which a recording is saved with the wrong rotation
         val videoCapture = VideoCapture.Builder(recorder)
             .setTargetRotation(rotation)
             .build()
@@ -453,6 +506,7 @@ class CameraXFacade @Inject constructor(@param:ActivityContext private val conte
             boundPreview = p
             boundAnalysis = analysis
             boundVideoCapture = videoCapture
+            registerDisplayListener()
 
             Log.d(TAG, "Camera lifecycle bound for video: ${camera.cameraInfo}")
 

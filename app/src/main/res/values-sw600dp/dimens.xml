@@ -3,8 +3,7 @@
 
     <!--
         Text and button sizing only. Structural heights belong in the values-h* buckets: the
-        constraint there is available window height, which a smallest-width qualifier cannot
-        see - an unfolded foldable in landscape is sw600dp AND short.
+        constraint there is window height, which a smallest-width qualifier cannot see.
     -->
 
     <!-- text sizes -->
