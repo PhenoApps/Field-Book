@@ -181,6 +181,16 @@ class BrapiSyncViewModel @Inject constructor(
         editedImageObservations = exportData["editedImageObservations"] ?: emptyList()
         incompleteImageObservations = exportData["incompleteImageObservations"] ?: emptyList()
 
+        // Anything collected on a trait that did not come from this server - created in the app,
+        // imported from a trait file, or pulled from a different brapi server - can never be
+        // uploaded. Roll those observations up into a single count for the summary line.
+        val unsyncableObservationCount = listOf(
+            "userCreatedTraitObservations",
+            "userCreatedImageObservations",
+            "wrongSourceObservations",
+            "wrongSourceImageObservations"
+        ).sumOf { (exportData[it] ?: emptyList()).size }
+
         _uiState.update {
             it.copy(
                 newObservationCount = newObservations.size,
@@ -190,6 +200,7 @@ class BrapiSyncViewModel @Inject constructor(
                 incompleteImageCount = incompleteImageObservations.size,
                 syncedObservationCount = (exportData["syncedObservations"] ?: emptyList()).size,
                 syncedImageCount = (exportData["syncedImageObservations"] ?: emptyList()).size,
+                unsyncableObservationCount = unsyncableObservationCount,
             )
         }
     }
