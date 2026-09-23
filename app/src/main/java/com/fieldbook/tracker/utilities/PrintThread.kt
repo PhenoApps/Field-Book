@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Looper
 import android.widget.Toast
+import androidx.annotation.StringRes
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.objects.TraitObject
@@ -78,9 +79,13 @@ class PrintThread(private val ctx: Context, private val btName: String) : Thread
 
                     val linkOsPrinter = ZebraPrinterFactory.createLinkOsPrinter(printer)
 
-                    linkOsPrinter?.let {
+                    if (linkOsPrinter == null) {
 
-                        val printerStatus = it.currentStatus
+                        sendMessage(R.string.printer_not_connected)
+
+                    } else {
+
+                        val printerStatus = linkOsPrinter.currentStatus
 
                         getPrinterStatus(bc)
 
@@ -88,7 +93,6 @@ class PrintThread(private val ctx: Context, private val btName: String) : Thread
                         val printerPaused = ctx.getString(R.string.printer_paused)
                         val noPaper = ctx.getString(R.string.printer_empty)
                         val notConnected = ctx.getString(R.string.printer_not_connected)
-                        ctx.getString(R.string.printer_success)
 
                         val intent = Intent("printer_message")
 
@@ -100,7 +104,6 @@ class PrintThread(private val ctx: Context, private val btName: String) : Thread
 
                             }
 
-                            //intent.putExtra("message", success)
                             intent.putExtra("numLabels", mLabelCommands.size)
                             intent.putExtra("plotId", plotId)
                             intent.putExtra("traitId", trait?.id)
@@ -129,18 +132,39 @@ class PrintThread(private val ctx: Context, private val btName: String) : Thread
                     }
                 } catch (e: ConnectionException) {
 
+                    //printer is off, out of range, or dropped the connection
                     e.printStackTrace()
+
+                    sendMessage(R.string.printer_not_connected)
 
                 } catch (e: ZebraPrinterLanguageUnknownException) {
 
                     e.printStackTrace()
 
+                    sendMessage(R.string.printer_not_connected)
+
                 } finally {
 
                     bc.close()
                 }
+            } else {
+
+                //the saved printer is no longer paired
+                sendMessage(R.string.printer_not_connected)
+
             }
         }
+    }
+
+    /**
+     * Sends an error message back to the trait layout, which shows it as a toast.
+     */
+    private fun sendMessage(@StringRes message: Int) {
+
+        mLocalBroadcast?.sendBroadcast(
+            Intent("printer_message").putExtra("message", ctx.getString(message))
+        )
+
     }
 
     @Throws(ConnectionException::class)
