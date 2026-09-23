@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -338,6 +339,9 @@ fun ZplEditorScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
+                    // innerPadding already covers the bottom bar, which the keyboard hides,
+                    // so only pad the keyboard height beyond it
+                    .consumeWindowInsets(innerPadding)
                     .imePadding()
             ) {
                 var dropdownExpanded by remember { mutableStateOf(false) }
