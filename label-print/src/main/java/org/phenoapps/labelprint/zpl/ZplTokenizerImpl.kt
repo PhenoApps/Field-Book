@@ -28,13 +28,19 @@ class ZplTokenizerImpl : ZplTokenizer {
             pos++
             col++
 
+            // commands are two characters (e.g. ^FO, ^CF, ^B3), except ^A, whose next characters
+            // are its font name and orientation (^A0N, ^ADN) and belong to its parameters
             val cmdBuilder = StringBuilder()
-            while (pos < input.length && input[pos].isUpperCase() && cmdBuilder.length < 3) {
+            if (pos < input.length && input[pos].isUpperCase()) {
                 cmdBuilder.append(input[pos])
                 pos++
                 col++
-                if (cmdBuilder.length == 2 && (cmdBuilder.toString() == "FD" || cmdBuilder.toString() == "FX")) {
-                    break
+                if (cmdBuilder[0] != 'A' && pos < input.length
+                    && (input[pos].isUpperCase() || input[pos].isDigit())
+                ) {
+                    cmdBuilder.append(input[pos])
+                    pos++
+                    col++
                 }
             }
             val command = cmdBuilder.toString()

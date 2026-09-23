@@ -564,6 +564,7 @@
     <string name="trait_detail_chip_invalid_value">Outlier values</string>
     <string name="trait_detail_chip_severities">Severities</string>
     <string name="trait_detail_chip_duration">Duration: %s</string>
+    <string name="trait_detail_chip_print_template">Template: %s</string>
 
     <string name="trait_parameter_allow_multicat">Multiple Category Selection</string>
     <string name="trait_parameter_allow_other">Allow Other Category</string>
@@ -762,6 +763,7 @@
     <string name="label_config_template">Template</string>
     <string name="label_fields_title">Label Fields</string>
     <string name="label_fields_select">Select…</string>
+    <string name="label_config_template_required">Choose a label template</string>
     <string name="zpl_template_create_new">＋ Create New</string>
 
     <string name="printer_open">Printer is open</string>

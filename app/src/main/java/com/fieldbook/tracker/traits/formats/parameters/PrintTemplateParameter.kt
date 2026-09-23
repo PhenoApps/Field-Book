@@ -131,7 +131,7 @@ class PrintTemplateParameter() : BaseFormatParameter(
             if (templateEditText.text.isNullOrBlank()) {
                 return ValidationResult(
                     result = false,
-                    error = itemView.context.getString(R.string.label_fields_select)
+                    error = itemView.context.getString(R.string.label_config_template_required)
                 )
             }
             return ValidationResult(result = true)
