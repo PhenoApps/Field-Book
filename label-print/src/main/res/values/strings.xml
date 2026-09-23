@@ -21,6 +21,7 @@
     <string name="zpl_editor_name">Name</string>
     <string name="zpl_editor_name_placeholder">Enter template name</string>
     <string name="zpl_editor_reading_printer">Reading from printer…</string>
+    <string name="zpl_editor_read_from_printer">Read from printer</string>
     <string name="zpl_editor_could_not_read">Could not read from printer</string>
     <string name="zpl_editor_label_width">Label Width (inches)</string>
     <string name="zpl_editor_label_length">Label Length (inches)</string>

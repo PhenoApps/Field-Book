@@ -3,6 +3,8 @@ package com.fieldbook.tracker.activities
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -12,9 +14,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.preferences.PreferenceKeys
+import com.fieldbook.tracker.printing.LabelPrintService
 import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.ui.theme.enums.AppTextType
 import com.fieldbook.tracker.ui.theme.enums.AppThemeType
@@ -34,6 +39,7 @@ class ZplEditorActivity : ThemedActivity() {
 
     companion object {
         private const val TAG = "ZplEditorActivity"
+        private const val BLUETOOTH_PERMISSION_REQUEST_CODE = 100
         const val EXTRA_INITIAL_ZPL = "initial_zpl"
         const val EXTRA_TEMPLATE_NAME = "template_name"
         const val RESULT_ZPL = "result_zpl"
@@ -143,20 +149,35 @@ class ZplEditorActivity : ThemedActivity() {
             return null
         }
 
-        val adapter = BluetoothAdapter.getDefaultAdapter() ?: return null
-        val device = adapter.bondedDevices.firstOrNull { it.name == printerName } ?: return null
-        val connection = BluetoothConnection(device.address)
+        // bondedDevices and connecting throw SecurityException without these (BLUETOOTH_CONNECT on 12+)
+        val missingPermissions = LabelPrintService.getRequiredPermissions(Build.VERSION.SDK_INT)
+            .filter { ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED }
+        if (missingPermissions.isNotEmpty()) {
+            Log.w(TAG, "Missing Bluetooth permissions: $missingPermissions")
+            runOnUiThread {
+                ActivityCompat.requestPermissions(
+                    this, missingPermissions.toTypedArray(), BLUETOOTH_PERMISSION_REQUEST_CODE
+                )
+            }
+            return null
+        }
+
+        var connection: BluetoothConnection? = null
 
         return try {
-            connection.open()
+            val adapter = BluetoothAdapter.getDefaultAdapter() ?: return null
+            val device = adapter.bondedDevices.firstOrNull { it.name == printerName } ?: return null
+            connection = BluetoothConnection(device.address).apply { open() }
 
             val widthStr = SGD.GET("ezpl.print_width", connection)
             val heightStr = SGD.GET("ezpl.label_length", connection)
             val mediaTypeStr = SGD.GET("ezpl.media_type", connection)
             val trackingStr = SGD.GET("media.type", connection)
+            val dpiStr = SGD.GET("head.resolution.in_dpi", connection)
 
             val width = widthStr?.trim()?.toIntOrNull() ?: 609
             val height = heightStr?.trim()?.toIntOrNull() ?: 406
+            val dpi = dpiStr?.trim()?.toIntOrNull()?.takeIf { it > 0 }
 
             val mediaType = when {
                 mediaTypeStr?.contains("trans", ignoreCase = true) == true -> ZplGenerator.MEDIA_THERMAL_TRANSFER
@@ -173,14 +194,21 @@ class ZplEditorActivity : ThemedActivity() {
                 labelWidth = width,
                 labelLength = height,
                 mediaType = mediaType,
-                mediaGap = mediaGap
+                mediaGap = mediaGap,
+                dpi = dpi
             )
         } catch (e: ConnectionException) {
             Log.e(TAG, "Failed to read settings from printer", e)
             null
+        } catch (e: SecurityException) {
+            Log.e(TAG, "Bluetooth permission denied reading printer settings", e)
+            null
+        } catch (e: Exception) {
+            Log.e(TAG, "Unexpected error reading printer settings", e)
+            null
         } finally {
             try {
-                connection.close()
+                connection?.close()
             } catch (_: Exception) {
             }
         }

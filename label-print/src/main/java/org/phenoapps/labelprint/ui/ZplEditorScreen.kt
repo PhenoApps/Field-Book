@@ -56,13 +56,13 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -75,6 +75,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.phenoapps.labelprint.R
 import org.phenoapps.labelprint.model.LabelDesignElement
@@ -92,7 +93,9 @@ data class LabelSettings(
     val labelWidth: Int,
     val labelLength: Int,
     val mediaType: String,
-    val mediaGap: String
+    val mediaGap: String,
+    /** Printer resolution, null if the printer didn't report it. */
+    val dpi: Int? = null
 )
 
 /**
@@ -871,25 +874,42 @@ private fun LabelSettingsDialog(
     var localMediaType by remember { mutableStateOf(mediaType) }
     var localMediaGap by remember { mutableStateOf(mediaGap) }
     var readStatus by remember { mutableStateOf<String?>(null) }
+    var readFailed by remember { mutableStateOf(false) }
     var isReading by remember { mutableStateOf(false) }
 
-    if (onReadFromDevice != null) {
-        val context = androidx.compose.ui.platform.LocalContext.current
-        LaunchedEffect(Unit) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    // Only connects to the printer when the user asks, then fills the fields with its settings
+    fun readFromDevice(read: suspend () -> LabelSettings?) {
+        if (isReading) return
+        scope.launch {
             isReading = true
-            val settings = withContext(Dispatchers.IO) { onReadFromDevice() }
+            readStatus = null
+            val settings = withContext(Dispatchers.IO) { read() }
             isReading = false
-            if (settings != null) {
-                val dpi = defaultDpi
-                readStatus = context.getString(
-                    R.string.zpl_editor_dots_display_format,
-                    settings.labelWidth,
-                    settings.labelLength,
-                    dpi
-                )
-            } else {
+
+            if (settings == null) {
+                readFailed = true
                 readStatus = context.getString(R.string.zpl_editor_could_not_read)
+                return@launch
             }
+
+            val dpi = settings.dpi ?: localDpi.toIntOrNull() ?: defaultDpi
+            localDpi = dpi.toString()
+            isManualDpi = dpi != 203 && dpi != 300
+            localWidthInches = String.format("%.2f", settings.labelWidth.toFloat() / dpi)
+            localHeightInches = String.format("%.2f", settings.labelLength.toFloat() / dpi)
+            localMediaType = settings.mediaType
+            localMediaGap = settings.mediaGap
+
+            readFailed = false
+            readStatus = context.getString(
+                R.string.zpl_editor_dots_display_format,
+                settings.labelWidth,
+                settings.labelLength,
+                dpi
+            )
         }
     }
 
@@ -1043,6 +1063,13 @@ private fun LabelSettingsDialog(
                     }
                 }
                 if (onReadFromDevice != null) {
+                    OutlinedButton(
+                        onClick = { readFromDevice(onReadFromDevice) },
+                        enabled = !isReading,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(stringResource(R.string.zpl_editor_read_from_printer))
+                    }
                     if (isReading) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -1063,7 +1090,7 @@ private fun LabelSettingsDialog(
                         Text(
                             text = readStatus!!,
                             style = MaterialTheme.typography.bodySmall,
-                            color = if (readStatus!!.contains("Could not")) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                            color = if (readFailed) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
