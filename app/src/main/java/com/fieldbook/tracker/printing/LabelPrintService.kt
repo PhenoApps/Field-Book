@@ -3,7 +3,6 @@ package com.fieldbook.tracker.printing
 import android.Manifest
 import android.app.Activity
 import android.content.Context
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.widget.Toast
@@ -11,9 +10,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.objects.TraitObject
-import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.BluetoothChooseCallback
-import com.fieldbook.tracker.zpl.TemplateRepository
 import org.phenoapps.labelprint.service.LabelPrintManager
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -24,8 +21,6 @@ import javax.inject.Singleton
  */
 @Singleton
 class LabelPrintService @Inject constructor(
-    private val prefs: SharedPreferences,
-    private val templateRepository: TemplateRepository,
     private val printerConnector: AppPrinterConnector
 ) {
 
@@ -50,13 +45,14 @@ class LabelPrintService @Inject constructor(
             }
         }
 
+        /**
+         * The value a placeholder's assigned field option prints for a plot: the field name,
+         * an observation unit attribute, or the latest observation of a trait.
+         */
         fun resolveFieldValue(
             fieldOption: String,
             observationUnitAttributes: Map<String, String>,
             fieldName: String,
-            dateString: String,
-            blankLabel: String,
-            dateLabel: String,
             fieldNameLabel: String,
             database: com.fieldbook.tracker.database.DataHelper? = null,
             studyId: String? = null,
@@ -64,9 +60,7 @@ class LabelPrintService @Inject constructor(
             context: Context? = null
         ): String {
             return when (fieldOption) {
-                dateLabel -> dateString
                 fieldNameLabel -> fieldName
-                blankLabel -> ""
                 else -> {
                     val attrValue = observationUnitAttributes[fieldOption]
                     if (!attrValue.isNullOrEmpty()) return attrValue
@@ -123,8 +117,6 @@ class LabelPrintService @Inject constructor(
             }
         }
 
-        fun currentDateString(): String = LabelPrintManager.currentDateString()
-
         fun shouldInsertObservation(numLabels: Int, plotId: String?, traitId: String?): Boolean {
             return numLabels > 0 && plotId != null && traitId != null
         }
@@ -134,8 +126,6 @@ class LabelPrintService @Inject constructor(
     }
 
     fun printLabels(context: Context, labels: List<String>, plotId: String, trait: TraitObject?) {
-        // AppPrinterConnector currently ignores plotId/trait in its generic print implementation.
-        // If logging is needed, it should be done here or inside the connector.
         printerConnector.print(labels, plotId, trait) { success, error ->
             if (!success) {
                 Toast.makeText(
@@ -145,42 +135,6 @@ class LabelPrintService @Inject constructor(
                 ).show()
             }
         }
-    }
-
-    fun printFromTemplate(
-        context: Context,
-        observationUnitAttributes: Map<String, String>,
-        fieldName: String,
-        copies: Int,
-        plotId: String,
-        trait: TraitObject,
-        dateLabel: String,
-        blankLabel: String,
-        fieldNameLabel: String
-    ) {
-        val selectedId = templateRepository.resolveTemplateId(trait.printTemplateId) ?: return
-
-        val templateZpl = templateRepository.getTemplate(selectedId) ?: return
-
-        val dateString = currentDateString()
-        val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
-        val assignments = templateRepository.getAssignments(studyId, selectedId)
-
-        val resolvedAssignments = assignments.mapValues { (_, fieldOption) ->
-            resolveFieldValue(
-                fieldOption, observationUnitAttributes,
-                fieldName, dateString, blankLabel, dateLabel, fieldNameLabel,
-                database = null, // resolveTemplate usually has db passed if needed
-                studyId = studyId.toString(),
-                plotId = plotId,
-                context = context
-            )
-        }
-
-        val resolvedZpl = applyPlaceholderAssignments(templateZpl, resolvedAssignments)
-        val labels = List<String>(copies) { resolvedZpl }
-
-        printLabels(context, labels, plotId, trait)
     }
 
     fun checkBluetoothPermissions(activity: Activity): Boolean {

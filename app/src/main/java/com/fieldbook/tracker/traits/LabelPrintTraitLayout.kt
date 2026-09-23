@@ -169,7 +169,7 @@ class LabelPrintTraitLayout : BaseTraitLayout {
 
         // Manual DI for service until fully refactored to Hilt if needed
         val printerConnector = com.fieldbook.tracker.printing.AppPrinterConnector(context, prefs)
-        service = LabelPrintService(prefs, templateRepository, printerConnector)
+        service = LabelPrintService(printerConnector)
 
         store.restoreConfig()
         store.currentPlotIdState.value = currentRange?.uniqueId
@@ -369,17 +369,14 @@ class LabelPrintTraitLayout : BaseTraitLayout {
             return
         }
 
-        val dateString = LabelPrintService.currentDateString()
         val fieldName = prefs.getString(GeneralKeys.FIELD_FILE, "") ?: ""
-        val dateLabel = context.getString(R.string.trait_layout_print_label_date_option)
-        val blankLabel = context.getString(R.string.trait_layout_print_label_blank_option)
         val fieldNameLabel = context.getString(R.string.field_name_attribute)
 
         val rangeObject = currentRange ?: return
         val uniqueId = rangeObject.uniqueId ?: return
 
         val observationUnitAttributes =
-            buildObservationUnitAttributes(uniqueId, dateLabel, blankLabel, fieldNameLabel)
+            buildObservationUnitAttributes(uniqueId, fieldNameLabel)
 
         val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
         val assignments = templateRepository.getAssignments(studyId, templateId)
@@ -387,7 +384,7 @@ class LabelPrintTraitLayout : BaseTraitLayout {
         val resolvedAssignments = assignments.mapValues { (_, fieldOption) ->
             LabelPrintService.resolveFieldValue(
                 fieldOption, observationUnitAttributes,
-                fieldName, dateString, blankLabel, dateLabel, fieldNameLabel,
+                fieldName, fieldNameLabel,
                 database = database,
                 studyId = collectActivity.studyId,
                 plotId = uniqueId,
@@ -410,15 +407,12 @@ class LabelPrintTraitLayout : BaseTraitLayout {
         val templateId = store.templateIdState.value ?: return null
         val templateZpl = templateRepository.getTemplate(templateId) ?: return null
 
-        val dateString = LabelPrintService.currentDateString()
         val fieldName = prefs.getString(GeneralKeys.FIELD_FILE, "") ?: ""
-        val dateLabel = context.getString(R.string.trait_layout_print_label_date_option)
-        val blankLabel = context.getString(R.string.trait_layout_print_label_blank_option)
         val fieldNameLabel = context.getString(R.string.field_name_attribute)
 
         val uniqueId = currentRange?.uniqueId
         val observationUnitAttributes = if (uniqueId != null) {
-            buildObservationUnitAttributes(uniqueId, dateLabel, blankLabel, fieldNameLabel)
+            buildObservationUnitAttributes(uniqueId, fieldNameLabel)
         } else emptyMap()
 
         val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
@@ -427,7 +421,7 @@ class LabelPrintTraitLayout : BaseTraitLayout {
         val resolvedAssignments = assignments.mapValues { (_, fieldOption) ->
             LabelPrintService.resolveFieldValue(
                 fieldOption, observationUnitAttributes,
-                fieldName, dateString, blankLabel, dateLabel, fieldNameLabel,
+                fieldName, fieldNameLabel,
                 database = database,
                 studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString(),
                 plotId = uniqueId,
@@ -453,8 +447,6 @@ class LabelPrintTraitLayout : BaseTraitLayout {
 
     private fun buildObservationUnitAttributes(
         uniqueId: String,
-        dateLabel: String,
-        blankLabel: String,
         fieldNameLabel: String
     ): Map<String, String> {
         val attributes = mutableMapOf<String, String>()
@@ -472,7 +464,7 @@ class LabelPrintTraitLayout : BaseTraitLayout {
 
         // Add study-specific attributes
         for (option in store.fieldOptions) {
-            if (option != dateLabel && option != blankLabel && option != fieldNameLabel
+            if (option != fieldNameLabel
                 && option != uniqueName && option != primaryName && option != secondaryName
             ) {
                 val value = database.getObservationUnitPropertyValues(option, uniqueId)

@@ -6,22 +6,14 @@ import android.os.Bundle
 import android.util.Log
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
-import com.fieldbook.tracker.adapters.AttributeAdapter
 import com.fieldbook.tracker.utilities.BackgroundUiTask
 
 /**
- * Extension of AttributeChooserDialog that adds label-specific options
- * (date, blank, default value) to the attributes tab. Used by the label print
- * trait layout for assigning field values to template placeholders.
- *
- * The user sees the same tabbed interface as infobars (attributes, traits, other)
- * with these additional special options prepended to the attributes list.
+ * AttributeChooserDialog used by the label print trait layout for assigning field values
+ * to template placeholders. It shows the same tabbed interface as infobars (attributes,
+ * traits, other), with the field name added to the top of the attributes list.
  */
-class LabelFieldChooserDialog(
-    private val dateLabel: String = "",
-    private val blankLabel: String = "",
-    private val defaultValueLabel: String = ""
-) : AttributeChooserDialog(
+class LabelFieldChooserDialog : AttributeChooserDialog(
     showTraits = true,
     showOther = true,
     showSystemAttributes = true
@@ -33,11 +25,11 @@ class LabelFieldChooserDialog(
             context?.getString(R.string.dialog_att_chooser_title_default)
         )
 
-        // Override the show listener to inject special options after data loads
+        // Override the show listener to add the field name option after data loads
         dialog.setOnShowListener {
             toggleProgressVisibility(true)
             BackgroundUiTask.execute(
-                backgroundBlock = ::loadDataWithSpecialOptions,
+                backgroundBlock = ::loadData,
                 uiBlock = ::setupTabLayout,
                 onCanceled = ::setupTabLayout
             )
@@ -47,27 +39,15 @@ class LabelFieldChooserDialog(
     }
 
     /**
-     * Loads data from the database and prepends special label options
-     * (default value, date, blank) to the attributes list.
+     * Loads attributes and traits from the database, with the field name as the first attribute.
      */
-    private fun loadDataWithSpecialOptions() {
+    private fun loadData() {
         try {
             val activity = requireActivity() as CollectActivity
-            attributes =
+            val studyAttributes =
                 activity.getDatabase().getAllObservationUnitAttributeNames(activity.studyId.toInt())
-            val attributesList = attributes.toMutableList()
 
-            // Add system attribute (field name)
-            attributesList.add(0, getString(R.string.field_name_attribute))
-
-            // Prepend special label options at the top
-            val specialOptions = mutableListOf<String>()
-            if (blankLabel.isNotEmpty()) specialOptions.add(0, blankLabel)
-            if (dateLabel.isNotEmpty()) specialOptions.add(0, dateLabel)
-            if (defaultValueLabel.isNotEmpty()) specialOptions.add(0, defaultValueLabel)
-            attributesList.addAll(0, specialOptions)
-
-            attributes = attributesList.toTypedArray()
+            attributes = arrayOf(getString(R.string.field_name_attribute)) + studyAttributes
             visibleTraits = activity.getDatabase().allTraitObjects.toTypedArray()
             nonVisibleTraits = visibleTraits.filter { !it.visible }.toTypedArray()
             visibleTraits = visibleTraits.filter { it.visible }.toTypedArray()

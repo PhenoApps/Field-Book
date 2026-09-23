@@ -164,5 +164,4 @@
     <item name="deleteTrait" type="id" />
     <item name="importdb" type="id" />
     <item name="exportdb" type="id" />
-    <item name="print_assignments_tag" type="id" />
 </resources>

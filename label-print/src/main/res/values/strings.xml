@@ -4,12 +4,8 @@
     <string name="label_config_calibrate">Calibrate</string>
     <string name="label_config_copies">Copies</string>
     <string name="label_config_template">Template</string>
-    <string name="label_config_no_templates">No templates available.</string>
-    <string name="label_config_load_system_templates">Load System Templates</string>
     <string name="label_fields_title">Label Fields</string>
-    <string name="label_fields_no_fields">No text fields found in the current template.</string>
     <string name="label_fields_select">Select…</string>
-    <string name="label_size_selector">Label Size</string>
     <string name="dialog_apply">Apply</string>
 
     <string name="label_templates_title">Label templates</string>
@@ -52,16 +48,12 @@
     <string name="zpl_editor_element_qr">QR Code</string>
     <string name="zpl_editor_element_barcode">Barcode (Code 128)</string>
     <string name="zpl_editor_element_date">Date</string>
-    <string name="zpl_editor_default_value">Default Value</string>
     <string name="zpl_editor_prefix">Prefix</string>
     <string name="zpl_editor_suffix">Suffix</string>
-    <string name="zpl_editor_default_value_placeholder">Shown when no property is assigned</string>
     <string name="zpl_editor_font_size">Font Size (dots)</string>
-    <string name="zpl_editor_font_size_helper">Height of text in dots (203 DPI: 28 ≈ 10pt)</string>
     <string name="zpl_editor_block_width">Block Width (dots, 0 = auto)</string>
     <string name="zpl_editor_block_width_helper">Field block width for text wrapping. 0 = no wrapping.</string>
     <string name="zpl_editor_magnification">Magnification (1–10)</string>
-    <string name="zpl_editor_magnification_helper">QR module size. 5 ≈ 105 dots wide.</string>
     <string name="zpl_editor_barcode_height">Barcode Height (dots)</string>
     <string name="zpl_editor_barcode_height_helper">Height of the barcode bars.</string>
     <string name="zpl_editor_module_width">Module Width (1–4)</string>
@@ -86,7 +78,6 @@
     <string name="zpl_editor_media_mark">Mark</string>
     <string name="zpl_editor_dots_display_format">PW = %1$d dots, LL = %2$d dots (%3$d DPI)</string>
 
-    <string name="zpl_editor_set_default">Set as default template</string>
     <string name="zpl_editor_settings_description">Label Settings</string>
     <string name="zpl_editor_hide_zpl">Hide ZPL</string>
     <string name="zpl_editor_show_zpl">Show ZPL</string>
@@ -101,8 +92,6 @@
     <string name="zpl_editor_back">Back</string>
 
     <string name="zpl_template_create_new">＋ Create New</string>
-    <string name="zpl_template_edit_or_select_message">Would you like to edit this template or select it for this trait?</string>
-    <string name="zpl_template_select">Select</string>
 
     <string name="dialog_cancel">Cancel</string>
     <string name="dialog_add">Add</string>

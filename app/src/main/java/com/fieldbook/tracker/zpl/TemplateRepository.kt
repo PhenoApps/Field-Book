@@ -115,8 +115,6 @@ class TemplateRepository @Inject constructor(private val prefs: SharedPreference
         )
     }
 
-    fun getBuiltInTemplates(): Map<String, String> = BUILT_IN_TEMPLATES
-
     /**
      * Ensures built-in templates exist in the label_templates table (once, so deleted
      * built-ins stay deleted), and that a default template is set if one is available.
@@ -316,7 +314,7 @@ class TemplateRepository @Inject constructor(private val prefs: SharedPreference
     /**
      * The template's last saved assignments, independent of study.
      */
-    fun getTemplateAssignments(templateId: String): Map<String, String> =
+    private fun getTemplateAssignments(templateId: String): Map<String, String> =
         readJsonMap(prefs.getString(KEY_ASSIGNMENTS_JSON, null)?.let { json ->
             runCatching { JSONObject(json).optJSONObject(templateId) }.getOrNull()
         })

@@ -12,7 +12,6 @@ import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.utilities.BluetoothChooseCallback
 import com.fieldbook.tracker.utilities.BluetoothUtil
 import dagger.hilt.android.qualifiers.ApplicationContext
-import org.phenoapps.labelprint.service.PrinterConnector
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,7 +19,7 @@ import javax.inject.Singleton
 class AppPrinterConnector @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val prefs: SharedPreferences
-) : PrinterConnector {
+) {
 
     companion object {
         private const val TAG = "AppPrinterConnector"
@@ -28,26 +27,22 @@ class AppPrinterConnector @Inject constructor(
 
     private val bluetoothUtil = BluetoothUtil()
 
-    override fun isBluetoothEnabled(): Boolean {
+    fun isBluetoothEnabled(): Boolean {
         return BluetoothAdapter.getDefaultAdapter()?.isEnabled ?: false
     }
 
-    override fun getConnectedPrinterName(): String? {
+    fun getConnectedPrinterName(): String? {
         return prefs.getString(GeneralKeys.LABEL_PRINT_DEVICE_NAME, null)
     }
 
     @SuppressLint("MissingPermission")
-    override fun connectToPrinter(context: Context, onResult: (Boolean) -> Unit) {
+    fun connectToPrinter(context: Context, onResult: (Boolean) -> Unit) {
         bluetoothUtil.choose(context, object : BluetoothChooseCallback {
             override fun onDeviceChosen(deviceName: String) {
                 prefs.edit { putString(GeneralKeys.LABEL_PRINT_DEVICE_NAME, deviceName) }
                 onResult(true)
             }
         })
-    }
-
-    override fun print(zplLabels: List<String>, onResult: (Boolean, String?) -> Unit) {
-        print(zplLabels, "", null, onResult)
     }
 
     fun print(
@@ -71,7 +66,7 @@ class AppPrinterConnector @Inject constructor(
     }
 
     @SuppressLint("MissingPermission")
-    override fun calibrate(onResult: (Boolean) -> Unit) {
+    fun calibrate(onResult: (Boolean) -> Unit) {
         val printerName = getConnectedPrinterName()
         if (printerName == null) {
             onResult(false)

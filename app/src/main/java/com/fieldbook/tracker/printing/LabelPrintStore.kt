@@ -33,16 +33,6 @@ class LabelPrintStore(private val prefs: SharedPreferences) {
                 defaultValue
             }
         }
-
-        /**
-         * Determines whether the badge should be visible on the Print FAB.
-         */
-        fun shouldShowBadge(copiesCount: Int): Boolean = copiesCount > 1
-
-        /**
-         * Returns the badge text to display when the badge is visible.
-         */
-        fun badgeText(copiesCount: Int): String = copiesCount.toString()
     }
 
     // ─── Reactive State ─────────────────────────────────────────────────────────
