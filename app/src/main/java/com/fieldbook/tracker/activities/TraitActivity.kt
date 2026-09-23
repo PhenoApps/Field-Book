@@ -3,8 +3,6 @@ package com.fieldbook.tracker.activities
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.zpl.TemplateRepository
 import android.app.AlertDialog
-import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -85,26 +83,28 @@ class TraitActivity : ThemedActivity() {
     ) { result ->
         if (result.resultCode == RESULT_OK) {
             val data = result.data ?: return@registerForActivityResult
-            val name = data.getStringExtra(ZplEditorActivity.RESULT_TEMPLATE_NAME)
-            Log.d(TAG, "ZPL template saved: $name")
+            val templateId = data.getStringExtra(ZplEditorActivity.RESULT_TEMPLATE_ID)
+            Log.d(TAG, "ZPL template saved: $templateId")
 
-            if (name != null) {
+            if (!templateId.isNullOrBlank()) {
                 pendingPrintTemplateUpdate?.let { (trait, onUpdated) ->
-                    val templateRepository = TemplateRepository(
-                        PreferenceManager.getDefaultSharedPreferences(this)
-                    )
-                    val id = templateRepository.getAllTemplates().entries.find { it.value == name }?.key
-                    if (id != null) {
-                        val updatedTrait = trait.clone()
-                        updatedTrait.printTemplateId = id
-                        onUpdated(updatedTrait)
-
-                        CollectActivity.reloadData = true
-                    }
+                    applyPrintTemplate(trait, templateId, onUpdated)
                 }
             }
         }
         pendingPrintTemplateUpdate = null
+    }
+
+    private fun applyPrintTemplate(
+        trait: TraitObject,
+        templateId: String,
+        onUpdated: (TraitObject) -> Unit
+    ) {
+        val updatedTrait = trait.clone()
+        updatedTrait.printTemplateId = templateId
+        onUpdated(updatedTrait)
+
+        CollectActivity.reloadData = true
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -282,20 +282,16 @@ class TraitActivity : ThemedActivity() {
         onUpdated: (TraitObject) -> Unit,
     ) {
         if (parameter is PrintTemplateParameter) {
-            pendingPrintTemplateUpdate = trait to onUpdated
-            val context = this
-            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-            val templateRepository = TemplateRepository(prefs)
-            val templateId = trait.printTemplateId
-            val initialZpl = if (templateId.isNotEmpty()) {
-                templateRepository.getTemplate(templateId) ?: ""
-            } else ""
-
-            val intent = Intent(context, ZplEditorActivity::class.java).apply {
-                putExtra(ZplEditorActivity.EXTRA_INITIAL_ZPL, initialZpl)
-                putExtra(ZplEditorActivity.EXTRA_TEMPLATE_NAME, if (templateId.isNotEmpty()) templateRepository.getTemplateName(templateId) else null)
-            }
-            zplEditorLauncher.launch(intent)
+            PrintTemplateParameter.showTemplatePicker(
+                context = this,
+                templateRepository = TemplateRepository(PreferenceManager.getDefaultSharedPreferences(this)),
+                currentTemplateId = trait.printTemplateId.ifEmpty { null },
+                onTemplateSelected = { templateId -> applyPrintTemplate(trait, templateId, onUpdated) },
+                onCreateNew = {
+                    pendingPrintTemplateUpdate = trait to onUpdated
+                    zplEditorLauncher.launch(PrintTemplateParameter.newTemplateIntent(this))
+                }
+            )
             return
         }
 

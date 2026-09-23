@@ -161,7 +161,7 @@ class LabelPrintService @Inject constructor(
         val selectedId = if (trait.printTemplateId.isNotEmpty()) {
             trait.printTemplateId
         } else {
-            templateRepository.getSelectedTemplateId()
+            templateRepository.getDefaultTemplateId()
         } ?: return
 
         val templateZpl = templateRepository.getTemplate(selectedId) ?: return

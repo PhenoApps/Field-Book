@@ -21,7 +21,6 @@ class TemplateRepository @Inject constructor(private val prefs: SharedPreference
     companion object {
         private const val TAG = "TemplateRepository"
         const val KEY_ASSIGNMENTS_JSON = "zpl_template_assignments_json"
-        const val KEY_SELECTED_TEMPLATE_ID = "zpl_selected_template_id"
         const val KEY_DEFAULT_TEMPLATE_ID = "zpl_default_template_id"
         const val KEY_STUDY_ASSIGNMENTS_PREFIX = "zpl_study_assignments_"
         const val KEY_BUILT_IN_TEMPLATES_INSTALLED = "zpl_built_in_templates_installed"
@@ -196,9 +195,6 @@ class TemplateRepository @Inject constructor(private val prefs: SharedPreference
      */
     fun deleteTemplate(id: String) = withDatabase { db ->
         db.delete(LabelTemplateTable.TABLE_NAME, "${LabelTemplateTable.ID} = ?", arrayOf(id))
-        if (getSelectedTemplateId() == id) {
-            clearSelection()
-        }
     }
 
     /**
@@ -217,28 +213,6 @@ class TemplateRepository @Inject constructor(private val prefs: SharedPreference
             if (id == null) remove(KEY_DEFAULT_TEMPLATE_ID)
             else putString(KEY_DEFAULT_TEMPLATE_ID, id)
         }
-    }
-
-    /**
-     * Returns the currently selected template ID from preferences.
-     */
-    fun getSelectedTemplateId(): String? {
-        val selectedId = prefs.getString(KEY_SELECTED_TEMPLATE_ID, null) ?: return null
-        return if (getAllTemplates().containsKey(selectedId)) selectedId else null
-    }
-
-    /**
-     * Sets the selected template ID.
-     */
-    fun setSelectedTemplateId(id: String?) {
-        prefs.edit {
-            if (id == null) remove(KEY_SELECTED_TEMPLATE_ID)
-            else putString(KEY_SELECTED_TEMPLATE_ID, id)
-        }
-    }
-
-    fun clearSelection() {
-        setSelectedTemplateId(null)
     }
 
     /**

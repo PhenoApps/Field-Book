@@ -38,12 +38,16 @@ class ZplEditorActivity : ThemedActivity() {
         const val EXTRA_TEMPLATE_NAME = "template_name"
         const val RESULT_ZPL = "result_zpl"
         const val RESULT_TEMPLATE_NAME = "result_template_name"
+        const val RESULT_TEMPLATE_ID = "result_template_id"
     }
 
     @Inject
     lateinit var templateRepository: TemplateRepository
 
     private var pendingExportZpl: String = ""
+
+    /** Id of the template saved in this editor session, only this is returned to the caller. */
+    private var savedTemplateId: String? = null
 
     private val exportLauncher = registerForActivityResult(
         ActivityResultContracts.CreateDocument("text/plain")
@@ -92,16 +96,15 @@ class ZplEditorActivity : ThemedActivity() {
                         if (id != null) templateRepository.getTemplate(id) ?: "" else ""
                     },
                     onDismiss = {
-                        val selectedId = templateRepository.getSelectedTemplateId()
-                        val selectedName =
-                            if (selectedId != null) templateRepository.getTemplateName(selectedId) else null
-                        val selectedZpl =
-                            if (selectedId != null) templateRepository.getTemplate(selectedId) else null
+                        val savedId = savedTemplateId
+                        val savedName = savedId?.let { templateRepository.getTemplateName(it) }
+                        val savedZpl = savedId?.let { templateRepository.getTemplate(it) }
 
-                        if (selectedName != null && selectedZpl != null) {
+                        if (savedId != null && savedName != null && savedZpl != null) {
                             val resultIntent = Intent().apply {
-                                putExtra(RESULT_ZPL, selectedZpl)
-                                putExtra(RESULT_TEMPLATE_NAME, selectedName)
+                                putExtra(RESULT_TEMPLATE_ID, savedId)
+                                putExtra(RESULT_ZPL, savedZpl)
+                                putExtra(RESULT_TEMPLATE_NAME, savedName)
                             }
                             setResult(RESULT_OK, resultIntent)
                         } else {
@@ -110,8 +113,7 @@ class ZplEditorActivity : ThemedActivity() {
                         finish()
                     },
                     onSave = { name, normalizedZpl ->
-                        val id = templateRepository.saveTemplate(name, normalizedZpl)
-                        templateRepository.setSelectedTemplateId(id)
+                        savedTemplateId = templateRepository.saveTemplate(name, normalizedZpl)
                         allTemplates = templateRepository.getAllTemplates()
                     },
                     onDelete = { name ->

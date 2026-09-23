@@ -88,10 +88,10 @@ class NewTraitDialog(
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val data = result.data ?: return@registerForActivityResult
-            val name = data.getStringExtra(ZplEditorActivity.RESULT_TEMPLATE_NAME)
-            if (!name.isNullOrBlank()) {
+            val templateId = data.getStringExtra(ZplEditorActivity.RESULT_TEMPLATE_ID)
+            if (!templateId.isNullOrBlank()) {
                 parametersSv.findHolder<PrintTemplateParameter.PrintTemplateViewHolder>()
-                    ?.updateTemplate(name)
+                    ?.updateTemplate(templateId)
             }
         }
     }

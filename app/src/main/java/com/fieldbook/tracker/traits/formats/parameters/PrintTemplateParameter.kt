@@ -1,6 +1,8 @@
 package com.fieldbook.tracker.traits.formats.parameters
 
 import android.app.Activity
+import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
@@ -20,13 +22,52 @@ class PrintTemplateParameter() : BaseFormatParameter(
     parameter = Parameters.PRINT_TEMPLATE
 ) {
 
+    companion object {
+
+        /**
+         * Shows the saved templates as a single choice list, with an entry at the top
+         * to create a new template in the editor.
+         */
+        fun showTemplatePicker(
+            context: Context,
+            templateRepository: TemplateRepository,
+            currentTemplateId: String?,
+            onTemplateSelected: (templateId: String) -> Unit,
+            onCreateNew: () -> Unit
+        ) {
+            val templates = templateRepository.getAllTemplates().entries
+                .sortedBy { it.value.lowercase() }
+
+            val items = arrayOf(context.getString(R.string.zpl_template_create_new)) +
+                    templates.map { it.value }.toTypedArray()
+
+            val checkedIndex = templates.indexOfFirst { it.key == currentTemplateId }
+                .let { if (it >= 0) it + 1 else -1 }
+
+            AlertDialog.Builder(context, R.style.AppAlertDialog)
+                .setTitle(R.string.label_config_template)
+                .setSingleChoiceItems(items, checkedIndex) { dialog, which ->
+                    dialog.dismiss()
+                    if (which == 0) onCreateNew()
+                    else onTemplateSelected(templates[which - 1].key)
+                }
+                .setNegativeButton(R.string.dialog_cancel, null)
+                .show()
+        }
+
+        /**
+         * Intent that opens the editor on a blank template.
+         */
+        fun newTemplateIntent(context: Context) = Intent(context, ZplEditorActivity::class.java)
+    }
+
     private var activity: Activity? = null
     private var editorLauncher: ((Intent) -> Unit)? = null
 
     fun setActivity(activity: Activity) {
         this.activity = activity
     }
-    
+
     fun setEditorLauncher(launcher: (Intent) -> Unit) {
         this.editorLauncher = launcher
     }
@@ -41,40 +82,32 @@ class PrintTemplateParameter() : BaseFormatParameter(
         private val templateEditText: TextInputEditText =
             itemView.findViewById(R.id.list_item_trait_parameter_print_template_et)
 
+        private val templateRepository: TemplateRepository
+            get() = TemplateRepository(PreferenceManager.getDefaultSharedPreferences(itemView.context))
+
         init {
             templateEditText.setOnClickListener {
-                launchZplEditor(templateEditText.tag as? String)
+                showTemplatePicker(
+                    context = itemView.context,
+                    templateRepository = templateRepository,
+                    currentTemplateId = templateEditText.tag as? String,
+                    onTemplateSelected = ::updateTemplate,
+                    onCreateNew = ::launchNewTemplateEditor
+                )
             }
-            
+
             templateEditText.isFocusable = false
             templateEditText.isClickable = true
         }
 
-        private fun launchZplEditor(templateId: String?) {
-            val context = itemView.context
-            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-            val templateRepository = TemplateRepository(prefs)
-            val initialZpl = if (templateId != null) {
-                templateRepository.getTemplate(templateId) ?: ""
-            } else ""
-            
-            val intent = Intent(context, ZplEditorActivity::class.java).apply {
-                putExtra(ZplEditorActivity.EXTRA_INITIAL_ZPL, initialZpl)
-                putExtra(ZplEditorActivity.EXTRA_TEMPLATE_NAME, if (templateId != null) templateRepository.getTemplateName(templateId) else null)
-            }
-            
+        private fun launchNewTemplateEditor() {
+            val intent = newTemplateIntent(itemView.context)
             editorLauncher?.invoke(intent) ?: activity?.startActivity(intent)
         }
 
-        fun updateTemplate(name: String) {
-            val context = itemView.context
-            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-            val templateRepository = TemplateRepository(prefs)
-            val templates = templateRepository.getAllTemplates()
-            val id = templates.entries.find { it.value == name }?.key
-            
-            templateEditText.setText(name)
-            templateEditText.tag = id
+        fun updateTemplate(templateId: String) {
+            templateEditText.setText(templateRepository.getTemplateName(templateId) ?: "")
+            templateEditText.tag = templateId
         }
 
         override fun merge(traitObject: TraitObject) = traitObject.apply {
@@ -83,18 +116,16 @@ class PrintTemplateParameter() : BaseFormatParameter(
 
         override fun load(traitObject: TraitObject?): Boolean {
             val templateId = traitObject?.printTemplateId
-            val context = itemView.context
-            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-            val templateRepository = TemplateRepository(prefs)
-            
+            val repository = templateRepository
+
             if (!templateId.isNullOrEmpty()) {
-                val name = templateRepository.getTemplateName(templateId)
+                val name = repository.getTemplateName(templateId)
                 templateEditText.setText(name ?: "")
                 templateEditText.tag = templateId
             } else {
-                val defaultId = templateRepository.getDefaultTemplateId()
+                val defaultId = repository.getDefaultTemplateId()
                 if (!defaultId.isNullOrEmpty()) {
-                    val name = templateRepository.getTemplateName(defaultId)
+                    val name = repository.getTemplateName(defaultId)
                     templateEditText.setText(name ?: "")
                     templateEditText.tag = defaultId
                 } else {
