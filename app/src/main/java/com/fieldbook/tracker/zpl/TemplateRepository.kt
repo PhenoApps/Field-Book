@@ -26,7 +26,6 @@ class TemplateRepository @Inject constructor(private val prefs: SharedPreference
         const val KEY_ASSIGNMENTS_JSON = "zpl_template_assignments_by_id_json"
         const val KEY_DEFAULT_TEMPLATE_ID = "zpl_default_template_id"
         const val KEY_STUDY_ASSIGNMENTS_PREFIX = "zpl_study_template_assignments_"
-        const val KEY_BUILT_IN_TEMPLATES_INSTALLED = "zpl_built_in_templates_installed"
 
         /** Built-in template used as the default when none is set. */
         const val BUILT_IN_DEFAULT_TEMPLATE_NAME = "2×1 Simple"
@@ -116,23 +115,11 @@ class TemplateRepository @Inject constructor(private val prefs: SharedPreference
     }
 
     /**
-     * Ensures built-in templates exist in the label_templates table (once, so deleted
-     * built-ins stay deleted), and that a default template is set if one is available.
+     * Sets the built-in default template as the default when no default is set.
+     * The built-in templates themselves are installed with the database (see
+     * ZplTemplateMigratorVersion22), so deleted built-ins stay deleted.
      */
-    fun ensureBuiltInTemplatesExist() {
-        if (!prefs.getBoolean(KEY_BUILT_IN_TEMPLATES_INSTALLED, false)) {
-            val existingNames = getAllTemplates().values.toSet()
-            for ((name, zpl) in BUILT_IN_TEMPLATES) {
-                if (name !in existingNames) {
-                    saveTemplate(name, zpl)
-                }
-            }
-
-            prefs.edit {
-                putBoolean(KEY_BUILT_IN_TEMPLATES_INSTALLED, true)
-            }
-        }
-
+    fun ensureDefaultTemplate() {
         if (getDefaultTemplateId() == null) {
             getAllTemplates().entries
                 .find { it.value == BUILT_IN_DEFAULT_TEMPLATE_NAME }
@@ -148,7 +135,7 @@ class TemplateRepository @Inject constructor(private val prefs: SharedPreference
         if (!traitTemplateId.isNullOrEmpty() && getTemplateName(traitTemplateId) != null) {
             return traitTemplateId
         }
-        ensureBuiltInTemplatesExist()
+        ensureDefaultTemplate()
         return getDefaultTemplateId()
     }
 

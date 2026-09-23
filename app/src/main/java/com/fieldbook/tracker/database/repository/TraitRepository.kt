@@ -208,7 +208,7 @@ class TraitRepository @Inject constructor(
 
             output.use {
                 val templateRepository = TemplateRepository(prefs).apply {
-                    ensureBuiltInTemplatesExist()
+                    ensureDefaultTemplate()
                 }
                 val wrapper = TraitImportFile(
                     traits.map { trait ->
@@ -280,7 +280,7 @@ class TraitRepository @Inject constructor(
 
             val wrapper = json.decodeFromString(TraitImportFile.serializer(), jsonText)
             val templateRepository = TemplateRepository(prefs).apply {
-                ensureBuiltInTemplatesExist()
+                ensureDefaultTemplate()
             }
 
             wrapper.traits.mapNotNull { json ->

@@ -58,7 +58,7 @@ class LabelsPreferencesFragment : PreferenceFragmentCompat() {
 
     private fun updateTemplatesSummary() {
         findPreference<Preference>(KEY_LABEL_TEMPLATES)?.let { pref ->
-            templateRepository.ensureBuiltInTemplatesExist()
+            templateRepository.ensureDefaultTemplate()
             val defaultName = templateRepository.getDefaultTemplateId()
                 ?.let { templateRepository.getTemplateName(it) }
             pref.summary = if (defaultName != null) {

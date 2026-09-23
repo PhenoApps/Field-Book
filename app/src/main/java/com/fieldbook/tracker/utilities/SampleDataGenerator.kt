@@ -165,7 +165,7 @@ class SampleDataGenerator @Inject constructor(
             val templateRepository = TemplateRepository(
                 PreferenceManager.getDefaultSharedPreferences(context)
             ).apply {
-                ensureBuiltInTemplatesExist()
+                ensureDefaultTemplate()
             }
 
             val loaded = mutableListOf<TraitObject>()

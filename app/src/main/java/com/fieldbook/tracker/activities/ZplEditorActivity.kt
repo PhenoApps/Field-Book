@@ -70,7 +70,7 @@ class ZplEditorActivity : ThemedActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        templateRepository.ensureBuiltInTemplatesExist()
+        templateRepository.ensureDefaultTemplate()
 
         // the template being edited, null when creating a new one
         val editingId = intent.getStringExtra(EXTRA_TEMPLATE_ID)

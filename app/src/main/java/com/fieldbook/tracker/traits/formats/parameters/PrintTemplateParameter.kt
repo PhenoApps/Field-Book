@@ -35,7 +35,7 @@ class PrintTemplateParameter() : BaseFormatParameter(
             onTemplateSelected: (templateId: String) -> Unit,
             onCreateNew: () -> Unit
         ) {
-            templateRepository.ensureBuiltInTemplatesExist()
+            templateRepository.ensureDefaultTemplate()
             val templates = templateRepository.getAllTemplates().entries
                 .sortedBy { it.value.lowercase() }
 

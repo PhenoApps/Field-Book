@@ -83,7 +83,7 @@ class LabelTemplatesActivity : ThemedActivity() {
                     onDelete = { id ->
                         templateRepository.deleteTemplate(id)
                         // picks a new default if the deleted template was the default
-                        templateRepository.ensureBuiltInTemplatesExist()
+                        templateRepository.ensureDefaultTemplate()
                         CollectActivity.reloadData = true
                         loadTemplates()
                     }
@@ -98,7 +98,7 @@ class LabelTemplatesActivity : ThemedActivity() {
     }
 
     private fun loadTemplates() {
-        templateRepository.ensureBuiltInTemplatesExist()
+        templateRepository.ensureDefaultTemplate()
         val defaultId = templateRepository.getDefaultTemplateId()
 
         templates.value = templateRepository.getAllTemplates().entries
