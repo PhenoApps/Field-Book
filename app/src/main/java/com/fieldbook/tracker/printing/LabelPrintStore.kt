@@ -51,7 +51,8 @@ class LabelPrintStore(private val prefs: SharedPreferences) {
 
     val showConfigDialog = mutableStateOf(false)
     val showFieldDialog = mutableStateOf(false)
-    val selectedTemplateNameState = mutableStateOf<String?>(null)
+    /** Template the current trait prints with: the trait's own, or the default template. */
+    val templateIdState = mutableStateOf<String?>(null)
     val currentPlotIdState = mutableStateOf<String?>(null)
     val assignmentsRevision = mutableIntStateOf(0)
 

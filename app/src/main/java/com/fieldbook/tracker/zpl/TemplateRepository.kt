@@ -25,6 +25,9 @@ class TemplateRepository @Inject constructor(private val prefs: SharedPreference
         const val KEY_STUDY_ASSIGNMENTS_PREFIX = "zpl_study_assignments_"
         const val KEY_BUILT_IN_TEMPLATES_INSTALLED = "zpl_built_in_templates_installed"
 
+        /** Built-in template used as the default when none is set. */
+        const val BUILT_IN_DEFAULT_TEMPLATE_NAME = "2×1 Simple"
+
         val BUILT_IN_TEMPLATES = mapOf(
             "3×2 Simple" to listOf(
                 "^XA",
@@ -112,23 +115,40 @@ class TemplateRepository @Inject constructor(private val prefs: SharedPreference
     fun getBuiltInTemplates(): Map<String, String> = BUILT_IN_TEMPLATES
 
     /**
-     * Ensures built-in templates exist in the label_templates table.
+     * Ensures built-in templates exist in the label_templates table (once, so deleted
+     * built-ins stay deleted), and that a default template is set if one is available.
      */
     fun ensureBuiltInTemplatesExist() {
-        if (prefs.getBoolean(KEY_BUILT_IN_TEMPLATES_INSTALLED, false)) {
-            return
-        }
+        if (!prefs.getBoolean(KEY_BUILT_IN_TEMPLATES_INSTALLED, false)) {
+            val existingNames = getAllTemplates().values.toSet()
+            for ((name, zpl) in BUILT_IN_TEMPLATES) {
+                if (name !in existingNames) {
+                    saveTemplate(name, zpl)
+                }
+            }
 
-        val existingNames = getAllTemplates().values.toSet()
-        for ((name, zpl) in BUILT_IN_TEMPLATES) {
-            if (name !in existingNames) {
-                saveTemplate(name, zpl)
+            prefs.edit {
+                putBoolean(KEY_BUILT_IN_TEMPLATES_INSTALLED, true)
             }
         }
 
-        prefs.edit {
-            putBoolean(KEY_BUILT_IN_TEMPLATES_INSTALLED, true)
+        if (getDefaultTemplateId() == null) {
+            getAllTemplates().entries
+                .find { it.value == BUILT_IN_DEFAULT_TEMPLATE_NAME }
+                ?.let { setDefaultTemplateId(it.key) }
         }
+    }
+
+    /**
+     * The template a trait prints with: its own template if it still exists, otherwise the
+     * default template. Null when neither is available.
+     */
+    fun resolveTemplateId(traitTemplateId: String?): String? {
+        ensureBuiltInTemplatesExist()
+        if (!traitTemplateId.isNullOrEmpty() && getTemplateName(traitTemplateId) != null) {
+            return traitTemplateId
+        }
+        return getDefaultTemplateId()
     }
 
     /**

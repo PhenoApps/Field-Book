@@ -2129,5 +2129,6 @@
     <string name="export_successful">Export successful</string>
     <string name="export_failed">Export failed: %1$s</string>
     <string name="print_failed">Print failed</string>
+    <string name="label_print_no_template">No label template found. Choose a template for this trait or set a default template in Settings → Labels.</string>
 
 </resources>

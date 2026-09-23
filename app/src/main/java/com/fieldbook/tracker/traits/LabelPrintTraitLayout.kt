@@ -134,20 +134,7 @@ class LabelPrintTraitLayout : BaseTraitLayout {
         val attributes = database.getAllObservationUnitAttributeNames(studyId)
         store.buildFieldOptions(context, attributes)
 
-        currentTrait?.printTemplateId?.let { templateId ->
-            if (templateId.isNotEmpty()) {
-                store.selectedTemplateNameState.value =
-                    templateRepository.getTemplateName(templateId)
-            }
-        }
-
-        if (store.selectedTemplateNameState.value == null) {
-            val defaultName = "2×1 Simple"
-            val templates = templateRepository.getAllTemplates()
-            if (templates.values.contains(defaultName)) {
-                store.selectedTemplateNameState.value = defaultName
-            }
-        }
+        resolveTemplate()
 
         setupUi()
 
@@ -157,13 +144,22 @@ class LabelPrintTraitLayout : BaseTraitLayout {
         collectInputView?.editText?.isEnabled = false
     }
 
+    /**
+     * Traits created before per-trait templates have no template id, and a trait's template
+     * may have been deleted, so fall back to the default template.
+     */
+    private fun resolveTemplate() {
+        store.templateIdState.value =
+            templateRepository.resolveTemplateId(currentTrait?.printTemplateId)
+    }
+
     private fun setupUi() {
         composeView?.setContent {
             AppTheme {
                 val copiesCount = store.selectedCopies.intValue
 
                 val previewLabel = remember(
-                    currentTrait?.printTemplateId,
+                    store.templateIdState.value,
                     store.currentPlotIdState.value,
                     store.assignmentsRevision.intValue
                 ) {
@@ -184,17 +180,17 @@ class LabelPrintTraitLayout : BaseTraitLayout {
 
                 if (store.showConfigDialog.value) {
                     val currentTemplateZpl = remember(
-                        currentTrait?.printTemplateId
+                        store.templateIdState.value
                     ) {
-                        val id = currentTrait?.printTemplateId
+                        val id = store.templateIdState.value
                         if (id != null) templateRepository.getTemplate(id) ?: "" else ""
                     }
 
                     val currentAssignments = remember(
-                        currentTrait?.printTemplateId,
+                        store.templateIdState.value,
                         store.assignmentsRevision.intValue
                     ) {
-                        val id = currentTrait?.printTemplateId
+                        val id = store.templateIdState.value
                         val templateName =
                             if (id != null) templateRepository.getTemplateName(id) else null
 
@@ -218,7 +214,7 @@ class LabelPrintTraitLayout : BaseTraitLayout {
                             store.selectedCopies.intValue = copies.toIntOrNull() ?: 1
                             store.saveConfig()
 
-                            val id = currentTrait?.printTemplateId
+                            val id = store.templateIdState.value
                             val templateName =
                                 if (id != null) templateRepository.getTemplateName(id) else null
                             if (templateName != null) {
@@ -327,11 +323,15 @@ class LabelPrintTraitLayout : BaseTraitLayout {
 
         val collectActivity = context as? CollectActivity ?: return
         val trait = currentTrait ?: return
-        val templateId = trait.printTemplateId
-        if (templateId.isEmpty()) return
 
-        val templateZpl = templateRepository.getTemplate(templateId) ?: return
-        val templateName = templateRepository.getTemplateName(templateId) ?: return
+        resolveTemplate()
+        val templateId = store.templateIdState.value
+        val templateZpl = templateId?.let { templateRepository.getTemplate(it) }
+        val templateName = templateId?.let { templateRepository.getTemplateName(it) }
+        if (templateZpl == null || templateName == null) {
+            Toast.makeText(context, R.string.label_print_no_template, Toast.LENGTH_LONG).show()
+            return
+        }
 
         val dateString = LabelPrintService.currentDateString()
         val fieldName = prefs.getString(GeneralKeys.FIELD_FILE, "") ?: ""
@@ -374,9 +374,7 @@ class LabelPrintTraitLayout : BaseTraitLayout {
     }
 
     private fun buildPreviewLabel(): org.phenoapps.labelprint.zpl.ZplLabel? {
-        val trait = currentTrait ?: return null
-        val templateId = trait.printTemplateId
-        if (templateId.isEmpty()) return null
+        val templateId = store.templateIdState.value ?: return null
         val templateZpl = templateRepository.getTemplate(templateId) ?: return null
         val templateName = templateRepository.getTemplateName(templateId) ?: return null
 
@@ -460,6 +458,7 @@ class LabelPrintTraitLayout : BaseTraitLayout {
 
     override fun refreshLayout(onNew: Boolean?) {
         super.refreshLayout(onNew)
+        resolveTemplate()
         store.currentPlotIdState.value = currentRange?.uniqueId
         refreshPrinterConnectionState()
         store.assignmentsRevision.intValue++

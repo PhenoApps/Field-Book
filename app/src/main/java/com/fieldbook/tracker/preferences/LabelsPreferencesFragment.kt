@@ -63,6 +63,7 @@ class LabelsPreferencesFragment : PreferenceFragmentCompat() {
                 true
             }
 
+        templateRepository.ensureBuiltInTemplatesExist()
         updateDefaultTemplateSummary()
         findPreference<Preference>("pref_key_default_zpl_template")?.onPreferenceClickListener =
             Preference.OnPreferenceClickListener {

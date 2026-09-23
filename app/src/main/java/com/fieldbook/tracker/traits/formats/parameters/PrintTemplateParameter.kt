@@ -35,6 +35,7 @@ class PrintTemplateParameter() : BaseFormatParameter(
             onTemplateSelected: (templateId: String) -> Unit,
             onCreateNew: () -> Unit
         ) {
+            templateRepository.ensureBuiltInTemplatesExist()
             val templates = templateRepository.getAllTemplates().entries
                 .sortedBy { it.value.lowercase() }
 
@@ -115,24 +116,11 @@ class PrintTemplateParameter() : BaseFormatParameter(
         }
 
         override fun load(traitObject: TraitObject?): Boolean {
-            val templateId = traitObject?.printTemplateId
             val repository = templateRepository
+            val templateId = repository.resolveTemplateId(traitObject?.printTemplateId)
 
-            if (!templateId.isNullOrEmpty()) {
-                val name = repository.getTemplateName(templateId)
-                templateEditText.setText(name ?: "")
-                templateEditText.tag = templateId
-            } else {
-                val defaultId = repository.getDefaultTemplateId()
-                if (!defaultId.isNullOrEmpty()) {
-                    val name = repository.getTemplateName(defaultId)
-                    templateEditText.setText(name ?: "")
-                    templateEditText.tag = defaultId
-                } else {
-                    templateEditText.setText("")
-                    templateEditText.tag = null
-                }
-            }
+            templateEditText.setText(templateId?.let { repository.getTemplateName(it) } ?: "")
+            templateEditText.tag = templateId
             return true
         }
 
