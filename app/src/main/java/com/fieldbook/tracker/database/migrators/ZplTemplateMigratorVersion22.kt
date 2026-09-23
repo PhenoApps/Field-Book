@@ -10,7 +10,7 @@ class ZplTemplateMigratorVersion22 : FieldBookMigrator {
     }
 
     override fun migrate(db: SQLiteDatabase): Result<Any> = runCatching {
-        // Create the label_templates table
-        db.execSQL("CREATE TABLE IF NOT EXISTS ${LabelTemplateTable.TABLE_NAME} (${LabelTemplateTable.ID} INTEGER PRIMARY KEY AUTOINCREMENT, ${LabelTemplateTable.NAME} TEXT, ${LabelTemplateTable.ZPL} TEXT)")
+        // Create the label_templates table, names are unique since templates are saved by name
+        db.execSQL("CREATE TABLE IF NOT EXISTS ${LabelTemplateTable.TABLE_NAME} (${LabelTemplateTable.ID} INTEGER PRIMARY KEY AUTOINCREMENT, ${LabelTemplateTable.NAME} TEXT NOT NULL UNIQUE, ${LabelTemplateTable.ZPL} TEXT)")
     }
 }
