@@ -34,7 +34,7 @@
     <string name="zpl_editor_element_text">Text</string>
     <string name="zpl_editor_element_qr">QR Code</string>
     <string name="zpl_editor_element_barcode">Barcode (Code 128)</string>
-    <string name="zpl_editor_date_field">Date Field</string>
+    <string name="zpl_editor_element_date">Date</string>
     <string name="zpl_editor_default_value">Default Value</string>
     <string name="zpl_editor_prefix">Prefix</string>
     <string name="zpl_editor_suffix">Suffix</string>
@@ -50,6 +50,7 @@
     <string name="zpl_editor_module_width">Module Width (1–4)</string>
     <string name="zpl_editor_module_width_helper">Width of the narrowest bar.</string>
     <string name="zpl_editor_edit_text">Edit Text Element</string>
+    <string name="zpl_editor_edit_date">Edit Date Element</string>
     <string name="zpl_editor_edit_qr">Edit QR Code Element</string>
     <string name="zpl_editor_edit_barcode">Edit Barcode Element</string>
     <string name="zpl_editor_delete_template">Delete Template</string>

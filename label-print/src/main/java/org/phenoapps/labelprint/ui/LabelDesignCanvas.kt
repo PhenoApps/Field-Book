@@ -122,7 +122,7 @@ fun LabelDesignCanvas(
                                     val dragH = dragBounds.height()
 
                                     val guideW: Float
-                                    if (hitElement.type == LabelDesignElementType.TEXT) {
+                                    if (hitElement.type.isTextLike) {
                                         hitTestPaint.textSize = hitElement.fontSize.toFloat()
                                         val displayText = "${hitElement.prefix}${hitElement.placeholder}${hitElement.suffix}"
                                         guideW = hitTestPaint.measureText(displayText)
@@ -142,7 +142,7 @@ fun LabelDesignCanvas(
                                     for (other in otherElements) {
                                         val ob = getElementVisualBounds(other)
                                         val otherCx: Float
-                                        if (other.type == LabelDesignElementType.TEXT) {
+                                        if (other.type.isTextLike) {
                                             hitTestPaint.textSize = other.fontSize.toFloat()
                                             val displayText = "${other.prefix}${other.placeholder}${other.suffix}"
                                             val tw = hitTestPaint.measureText(displayText)
@@ -277,7 +277,7 @@ fun LabelDesignCanvas(
                     }
                 } else {
                     when (element.type) {
-                        LabelDesignElementType.TEXT -> {
+                        LabelDesignElementType.TEXT, LabelDesignElementType.DATE -> {
                             drawTextElement(nativeCanvas, element, ex, ey, s, isSelected)
                         }
                         LabelDesignElementType.QR_CODE -> {
@@ -483,7 +483,7 @@ private fun drawSelectionHighlight(
     val w: Float
     val h: Float
     when {
-        element.type == LabelDesignElementType.TEXT && element.blockWidth > 0 -> {
+        element.type.isTextLike && element.blockWidth > 0 -> {
             w = element.blockWidth * scale
             h = element.fontSize * scale
         }
@@ -526,7 +526,7 @@ private fun hitTest(elements: List<LabelDesignElement>, dotX: Int, dotY: Int): L
 
 private fun getElementHitBounds(element: LabelDesignElement): RectF {
     val rawBounds = when (element.type) {
-        LabelDesignElementType.TEXT -> {
+        LabelDesignElementType.TEXT, LabelDesignElementType.DATE -> {
             hitTestPaint.textSize = element.fontSize.toFloat()
             val displayText = "${element.prefix}${element.placeholder}${element.suffix}"
             val measuredWidth = hitTestPaint.measureText(displayText)
@@ -567,7 +567,7 @@ private fun getElementHitBounds(element: LabelDesignElement): RectF {
 
 private fun getElementVisualBounds(element: LabelDesignElement): RectF {
     return when (element.type) {
-        LabelDesignElementType.TEXT -> {
+        LabelDesignElementType.TEXT, LabelDesignElementType.DATE -> {
             hitTestPaint.textSize = element.fontSize.toFloat()
             val displayText = "${element.prefix}${element.placeholder}${element.suffix}"
             val measuredWidth = hitTestPaint.measureText(displayText)

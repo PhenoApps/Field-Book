@@ -45,7 +45,7 @@ object ZplGenerator {
 
         for (element in elements) {
             when (element.type) {
-                LabelDesignElementType.TEXT -> {
+                LabelDesignElementType.TEXT, LabelDesignElementType.DATE -> {
                     lines.add("^FO${element.x},${element.y}")
                     if (element.blockWidth > 0) {
                         lines.add("^FB${element.blockWidth},2,0,C,0")
@@ -166,20 +166,23 @@ object ZplGenerator {
                 val placeholder = placeholderMatch?.groupValues?.get(1) ?: fullText
                 val prefix = if (placeholderMatch != null) fullText.substringBefore(placeholder) else ""
                 val suffix = if (placeholderMatch != null) fullText.substringAfter(placeholder) else ""
-                val isDate = placeholder.startsWith("{date")
+                val type = if (placeholder.startsWith("{date")) {
+                    LabelDesignElementType.DATE
+                } else {
+                    LabelDesignElementType.TEXT
+                }
 
                 elements.add(
                     LabelDesignElement(
                         id = "elem_${idCounter++}",
-                        type = LabelDesignElementType.TEXT,
+                        type = type,
                         x = x,
                         y = y,
                         placeholder = placeholder,
                         fontSize = fontSize,
                         blockWidth = blockWidth,
                         prefix = prefix,
-                        suffix = suffix,
-                        isDate = isDate
+                        suffix = suffix
                     )
                 )
             }

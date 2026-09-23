@@ -5,8 +5,19 @@ package org.phenoapps.labelprint.model
  */
 enum class LabelDesignElementType {
     TEXT,
+    DATE,
     QR_CODE,
-    BARCODE_128
+    BARCODE_128;
+
+    /**
+     * Text and date elements share the same ZPL (^A0 + ^FD) and font/prefix/suffix settings,
+     * a date element's placeholder is always [DATE_PLACEHOLDER].
+     */
+    val isTextLike: Boolean get() = this == TEXT || this == DATE
+
+    companion object {
+        const val DATE_PLACEHOLDER = "{date}"
+    }
 }
 
 /**
@@ -25,6 +36,5 @@ data class LabelDesignElement(
     val barcodeHeight: Int = 80,
     val moduleWidth: Int = 2,
     val prefix: String = "",
-    val suffix: String = "",
-    val isDate: Boolean = false
+    val suffix: String = ""
 )

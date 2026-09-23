@@ -32,7 +32,6 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -152,10 +151,10 @@ fun ZplEditorScreen(
     val hasGlobalErrors by remember {
         derivedStateOf {
             elements.any {
-                (it.type == LabelDesignElementType.TEXT && (it.prefix.contains('{') || it.prefix.contains(
+                (it.type.isTextLike && (it.prefix.contains('{') || it.prefix.contains(
                     '}'
                 ) || it.prefix.contains('^'))) ||
-                        (it.type == LabelDesignElementType.TEXT && (it.suffix.contains('{') || it.suffix.contains(
+                        (it.type.isTextLike && (it.suffix.contains('{') || it.suffix.contains(
                             '}'
                         ) || it.suffix.contains('^')))
             }
@@ -512,7 +511,7 @@ fun ZplEditorScreen(
                                         )
                                         .padding(8.dp)
                                 ) {
-                                    if (element.type == LabelDesignElementType.TEXT) {
+                                    if (element.type.isTextLike) {
                                         Text(
                                             text = stringResource(R.string.zpl_editor_font_size) + ": ${element.fontSize}",
                                             style = MaterialTheme.typography.labelSmall
@@ -1096,7 +1095,6 @@ private fun AddElementDialog(
     var barcodeHeight by remember { mutableStateOf("80") }
     var moduleWidth by remember { mutableStateOf("2") }
     var typeExpanded by remember { mutableStateOf(false) }
-    var isDate by remember { mutableStateOf(false) }
 
     val hasInvalidChars = remember(prefix, suffix) {
         prefix.contains('{') || prefix.contains('}') || prefix.contains('^') ||
@@ -1104,7 +1102,8 @@ private fun AddElementDialog(
     }
 
     val placeholderId = when (elementType) {
-        LabelDesignElementType.TEXT -> if (isDate) "{date}" else "{text$nextTextIndex}"
+        LabelDesignElementType.TEXT -> "{text$nextTextIndex}"
+        LabelDesignElementType.DATE -> LabelDesignElementType.DATE_PLACEHOLDER
         LabelDesignElementType.QR_CODE -> "{qrcode$nextQrCodeIndex}"
         LabelDesignElementType.BARCODE_128 -> "{barcode$nextBarcodeIndex}"
     }
@@ -1128,6 +1127,7 @@ private fun AddElementDialog(
                     OutlinedTextField(
                         value = when (elementType) {
                             LabelDesignElementType.TEXT -> stringResource(R.string.zpl_editor_element_text)
+                            LabelDesignElementType.DATE -> stringResource(R.string.zpl_editor_element_date)
                             LabelDesignElementType.QR_CODE -> stringResource(R.string.zpl_editor_element_qr)
                             LabelDesignElementType.BARCODE_128 -> stringResource(R.string.zpl_editor_element_barcode)
                         },
@@ -1151,6 +1151,11 @@ private fun AddElementDialog(
                                 elementType = LabelDesignElementType.TEXT; typeExpanded = false
                             })
                         DropdownMenuItem(
+                            text = { Text(stringResource(R.string.zpl_editor_element_date)) },
+                            onClick = {
+                                elementType = LabelDesignElementType.DATE; typeExpanded = false
+                            })
+                        DropdownMenuItem(
                             text = { Text(stringResource(R.string.zpl_editor_element_qr)) },
                             onClick = {
                                 elementType = LabelDesignElementType.QR_CODE; typeExpanded = false
@@ -1164,14 +1169,7 @@ private fun AddElementDialog(
                     }
                 }
                 when (elementType) {
-                    LabelDesignElementType.TEXT -> {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Checkbox(checked = isDate, onCheckedChange = { isDate = it })
-                            Text(stringResource(R.string.zpl_editor_date_field))
-                        }
+                    LabelDesignElementType.TEXT, LabelDesignElementType.DATE -> {
                         OutlinedTextField(
                             value = prefix,
                             onValueChange = { prefix = it },
@@ -1258,17 +1256,16 @@ private fun AddElementDialog(
             TextButton(
                 onClick = {
                     val element = when (elementType) {
-                        LabelDesignElementType.TEXT -> LabelDesignElement(
+                        LabelDesignElementType.TEXT, LabelDesignElementType.DATE -> LabelDesignElement(
                             id = "",
-                            type = LabelDesignElementType.TEXT,
+                            type = elementType,
                             x = 0,
                             y = 0,
                             placeholder = placeholderId,
                             prefix = prefix,
                             suffix = suffix,
                             fontSize = fontSize.toIntOrNull()?.coerceIn(10, 300) ?: 28,
-                            blockWidth = blockWidth.toIntOrNull()?.coerceAtLeast(0) ?: 0,
-                            isDate = isDate
+                            blockWidth = blockWidth.toIntOrNull()?.coerceAtLeast(0) ?: 0
                         )
 
                         LabelDesignElementType.QR_CODE -> LabelDesignElement(
@@ -1313,7 +1310,6 @@ private fun EditElementDialog(
     var magnification by remember { mutableStateOf(element.magnification.toString()) }
     var barcodeHeight by remember { mutableStateOf(element.barcodeHeight.toString()) }
     var moduleWidth by remember { mutableStateOf(element.moduleWidth.toString()) }
-    var isDate by remember { mutableStateOf(element.isDate) }
 
     val hasInvalidChars = remember(prefix, suffix) {
         prefix.contains('{') || prefix.contains('}') || prefix.contains('^') ||
@@ -1326,9 +1322,10 @@ private fun EditElementDialog(
         title = {
             Text(
                 when (element.type) {
-                    LabelDesignElementType.TEXT -> stringResource(R.string.zpl_editor_edit_text); LabelDesignElementType.QR_CODE -> stringResource(
-                    R.string.zpl_editor_edit_qr
-                ); LabelDesignElementType.BARCODE_128 -> stringResource(R.string.zpl_editor_edit_barcode)
+                    LabelDesignElementType.TEXT -> stringResource(R.string.zpl_editor_edit_text)
+                    LabelDesignElementType.DATE -> stringResource(R.string.zpl_editor_edit_date)
+                    LabelDesignElementType.QR_CODE -> stringResource(R.string.zpl_editor_edit_qr)
+                    LabelDesignElementType.BARCODE_128 -> stringResource(R.string.zpl_editor_edit_barcode)
                 }
             )
         },
@@ -1340,14 +1337,7 @@ private fun EditElementDialog(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 when (element.type) {
-                    LabelDesignElementType.TEXT -> {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Checkbox(checked = isDate, onCheckedChange = { isDate = it })
-                            Text(stringResource(R.string.zpl_editor_date_field))
-                        }
+                    LabelDesignElementType.TEXT, LabelDesignElementType.DATE -> {
                         OutlinedTextField(
                             value = prefix,
                             onValueChange = { prefix = it },
@@ -1442,18 +1432,13 @@ private fun EditElementDialog(
             TextButton(
                 onClick = {
                     val updated = when (element.type) {
-                        LabelDesignElementType.TEXT -> element.copy(
+                        LabelDesignElementType.TEXT, LabelDesignElementType.DATE -> element.copy(
                             prefix = prefix,
                             suffix = suffix,
                             fontSize = fontSize.toIntOrNull()?.coerceIn(10, 300)
                                 ?: element.fontSize,
                             blockWidth = blockWidth.toIntOrNull()?.coerceAtLeast(0)
-                                ?: element.blockWidth,
-                            isDate = isDate,
-                            placeholder = if (isDate) "{date}" else if (element.placeholder.startsWith(
-                                    "{date"
-                                )
-                            ) "{${element.id}}" else element.placeholder
+                                ?: element.blockWidth
                         )
 
                         LabelDesignElementType.QR_CODE -> element.copy(
