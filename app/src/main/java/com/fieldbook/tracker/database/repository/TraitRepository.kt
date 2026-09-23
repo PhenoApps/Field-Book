@@ -285,41 +285,51 @@ class TraitRepository @Inject constructor(
 
             wrapper.traits.mapNotNull { json ->
                 runCatching {
-                    TraitObject.fromJson(json, maxPosition, originalFileName).apply {
-                        applyImportedPrintTemplate(json, templateRepository)
+                    TraitObject.fromJson(json, maxPosition, originalFileName).also { trait ->
+                        applyImportedPrintTemplate(trait, json, templateRepository)
                     }
                 }.getOrNull()
             }
         }
 
+    /**
+     * Exports the template the trait prints with, which is the default when it has none of its own.
+     */
     private fun TraitObject.resolveExportPrintTemplate(templateRepository: TemplateRepository): String? {
         if (format != Formats.LABEL_PRINT.getDatabaseName()) return null
 
-        val templateId = printTemplateId.ifBlank { return null }
+        val templateId = templateRepository.resolveTemplateId(printTemplateId) ?: return null
         return templateRepository.getTemplate(templateId)
     }
 
     private fun TraitObject.resolveExportPrintTemplateName(templateRepository: TemplateRepository): String? {
         if (format != Formats.LABEL_PRINT.getDatabaseName()) return null
 
-        val templateId = printTemplateId.ifBlank { return null }
+        val templateId = templateRepository.resolveTemplateId(printTemplateId) ?: return null
         return templateRepository.getTemplateName(templateId)
     }
 
-    private fun TraitObject.applyImportedPrintTemplate(
+    /**
+     * Replaces an imported trait's template id, which belongs to the exporting device's database,
+     * with the id of its exported template saved on this device.
+     * Without an exported template the trait uses the default template.
+     */
+    fun applyImportedPrintTemplate(
+        trait: TraitObject,
         traitJson: com.fieldbook.tracker.objects.TraitJson,
         templateRepository: TemplateRepository,
     ) {
-        if (format != Formats.LABEL_PRINT.getDatabaseName()) return
+        trait.printTemplateId = ""
+
+        if (trait.format != Formats.LABEL_PRINT.getDatabaseName()) return
 
         val printTemplate = traitJson.printTemplate?.takeIf { it.isNotBlank() } ?: return
         val templateName = traitJson.printTemplateName?.takeIf { it.isNotBlank() }
-            ?: alias.takeIf { it.isNotBlank() }
-            ?: name
+            ?: trait.alias.takeIf { it.isNotBlank() }
+            ?: trait.name
 
-        val savedTemplateId = templateRepository.saveTemplate(templateName, printTemplate)
-        if (!savedTemplateId.isNullOrBlank()) {
-            printTemplateId = savedTemplateId
+        templateRepository.importTemplate(templateName, printTemplate)?.let {
+            trait.printTemplateId = it
         }
     }
 

@@ -99,6 +99,12 @@ data class LabelSettings(
 )
 
 /**
+ * Prefix/suffix text can't contain placeholder braces or ZPL command prefixes (^ and ~).
+ */
+private fun String.hasInvalidTemplateChars() =
+    contains('{') || contains('}') || contains('^') || contains('~')
+
+/**
  * Visual-first ZPL label editor with drag-and-drop element positioning.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -152,15 +158,30 @@ fun ZplEditorScreen(
     var showUnsavedWarningDialog by remember { mutableStateOf(false) }
     var selectedElementId by remember { mutableStateOf<String?>(null) }
 
+    /** Name of a different, existing template the user is about to replace. */
+    var pendingOverwriteName by remember { mutableStateOf<String?>(null) }
+
+    fun saveAndClose(name: String) {
+        onSave(name, zplText)
+        templateName = name
+        selectedTemplateName = name
+        onDismiss()
+    }
+
+    // Saving is by name, so saving under another template's name replaces that template
+    fun requestSave(name: String) {
+        if (name in templates.keys && name != selectedTemplateName) {
+            pendingOverwriteName = name
+        } else {
+            saveAndClose(name)
+        }
+    }
+
     val hasGlobalErrors by remember {
         derivedStateOf {
             elements.any {
-                (it.type.isTextLike && (it.prefix.contains('{') || it.prefix.contains(
-                    '}'
-                ) || it.prefix.contains('^'))) ||
-                        (it.type.isTextLike && (it.suffix.contains('{') || it.suffix.contains(
-                            '}'
-                        ) || it.suffix.contains('^')))
+                (it.type.isTextLike && it.prefix.hasInvalidTemplateChars()) ||
+                        (it.type.isTextLike && it.suffix.hasInvalidTemplateChars())
             }
         }
     }
@@ -314,8 +335,7 @@ fun ZplEditorScreen(
                 Button(
                     onClick = {
                         if (templateName != null) {
-                            onSave(templateName!!, zplText)
-                            onDismiss()
+                            requestSave(templateName!!)
                         } else {
                             showSaveDialog = true
                         }
@@ -797,12 +817,8 @@ fun ZplEditorScreen(
                     TextButton(onClick = {
                         if (saveName.isBlank()) showError = true
                         else {
-                            val trimmed = saveName.trim()
-                            onSave(trimmed, zplText)
-                            templateName = trimmed
-                            selectedTemplateName = trimmed
                             showSaveDialog = false
-                            onDismiss()
+                            requestSave(saveName.trim())
                         }
                     }) { Text(stringResource(R.string.zpl_editor_save)) }
                 },
@@ -810,6 +826,31 @@ fun ZplEditorScreen(
                     TextButton(onClick = {
                         showSaveDialog = false
                     }) { Text(stringResource(R.string.dialog_cancel)) }
+                }
+            )
+        }
+
+        pendingOverwriteName?.let { name ->
+            AlertDialog(
+                onDismissRequest = { pendingOverwriteName = null },
+                containerColor = MaterialTheme.colorScheme.surface,
+                title = { Text(stringResource(R.string.zpl_editor_overwrite_title)) },
+                text = { Text(stringResource(R.string.zpl_editor_overwrite_message, name)) },
+                confirmButton = {
+                    TextButton(onClick = {
+                        pendingOverwriteName = null
+                        saveAndClose(name)
+                    }) {
+                        Text(
+                            stringResource(R.string.zpl_editor_replace),
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { pendingOverwriteName = null }) {
+                        Text(stringResource(R.string.dialog_cancel))
+                    }
                 }
             )
         }
@@ -1128,8 +1169,8 @@ private fun AddElementDialog(
     var typeExpanded by remember { mutableStateOf(false) }
 
     val hasInvalidChars = remember(prefix, suffix) {
-        prefix.contains('{') || prefix.contains('}') || prefix.contains('^') ||
-                suffix.contains('{') || suffix.contains('}') || suffix.contains('^')
+        prefix.hasInvalidTemplateChars() ||
+                suffix.hasInvalidTemplateChars()
     }
 
     val placeholderId = when (elementType) {
@@ -1206,14 +1247,9 @@ private fun AddElementDialog(
                             onValueChange = { prefix = it },
                             label = { Text(stringResource(R.string.zpl_editor_prefix)) },
                             singleLine = true,
-                            isError = prefix.contains('{') || prefix.contains('}') || prefix.contains(
-                                '^'
-                            ),
+                            isError = prefix.hasInvalidTemplateChars(),
                             supportingText = {
-                                if (prefix.contains('{') || prefix.contains('}') || prefix.contains(
-                                        '^'
-                                    )
-                                ) {
+                                if (prefix.hasInvalidTemplateChars()) {
                                     Text(stringResource(R.string.zpl_editor_invalid_chars))
                                 }
                             },
@@ -1224,14 +1260,9 @@ private fun AddElementDialog(
                             onValueChange = { suffix = it },
                             label = { Text(stringResource(R.string.zpl_editor_suffix)) },
                             singleLine = true,
-                            isError = suffix.contains('{') || suffix.contains('}') || suffix.contains(
-                                '^'
-                            ),
+                            isError = suffix.hasInvalidTemplateChars(),
                             supportingText = {
-                                if (suffix.contains('{') || suffix.contains('}') || suffix.contains(
-                                        '^'
-                                    )
-                                ) {
+                                if (suffix.hasInvalidTemplateChars()) {
                                     Text(stringResource(R.string.zpl_editor_invalid_chars))
                                 }
                             },
@@ -1343,8 +1374,8 @@ private fun EditElementDialog(
     var moduleWidth by remember { mutableStateOf(element.moduleWidth.toString()) }
 
     val hasInvalidChars = remember(prefix, suffix) {
-        prefix.contains('{') || prefix.contains('}') || prefix.contains('^') ||
-                suffix.contains('{') || suffix.contains('}') || suffix.contains('^')
+        prefix.hasInvalidTemplateChars() ||
+                suffix.hasInvalidTemplateChars()
     }
 
     AlertDialog(
@@ -1374,14 +1405,9 @@ private fun EditElementDialog(
                             onValueChange = { prefix = it },
                             label = { Text(stringResource(R.string.zpl_editor_prefix)) },
                             singleLine = true,
-                            isError = prefix.contains('{') || prefix.contains('}') || prefix.contains(
-                                '^'
-                            ),
+                            isError = prefix.hasInvalidTemplateChars(),
                             supportingText = {
-                                if (prefix.contains('{') || prefix.contains('}') || prefix.contains(
-                                        '^'
-                                    )
-                                ) {
+                                if (prefix.hasInvalidTemplateChars()) {
                                     Text(stringResource(R.string.zpl_editor_invalid_chars))
                                 }
                             },
@@ -1392,14 +1418,9 @@ private fun EditElementDialog(
                             onValueChange = { suffix = it },
                             label = { Text(stringResource(R.string.zpl_editor_suffix)) },
                             singleLine = true,
-                            isError = suffix.contains('{') || suffix.contains('}') || suffix.contains(
-                                '^'
-                            ),
+                            isError = suffix.hasInvalidTemplateChars(),
                             supportingText = {
-                                if (suffix.contains('{') || suffix.contains('}') || suffix.contains(
-                                        '^'
-                                    )
-                                ) {
+                                if (suffix.hasInvalidTemplateChars()) {
                                     Text(stringResource(R.string.zpl_editor_invalid_chars))
                                 }
                             },

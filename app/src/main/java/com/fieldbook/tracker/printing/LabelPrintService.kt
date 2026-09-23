@@ -161,12 +161,10 @@ class LabelPrintService @Inject constructor(
         val selectedId = templateRepository.resolveTemplateId(trait.printTemplateId) ?: return
 
         val templateZpl = templateRepository.getTemplate(selectedId) ?: return
-        val templateName = templateRepository.getTemplateName(selectedId) ?: return
 
         val dateString = currentDateString()
-        val assignments = templateRepository.getAssignments(templateName).toMutableMap()
         val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
-        assignments.putAll(templateRepository.getStudyAssignments(studyId))
+        val assignments = templateRepository.getAssignments(studyId, selectedId)
 
         val resolvedAssignments = assignments.mapValues { (_, fieldOption) ->
             resolveFieldValue(

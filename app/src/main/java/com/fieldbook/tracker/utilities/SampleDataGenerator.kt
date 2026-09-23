@@ -8,7 +8,6 @@ import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.TraitImportFile
 import com.fieldbook.tracker.objects.TraitObject
-import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.zpl.TemplateRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.serialization.json.Json
@@ -175,18 +174,7 @@ class SampleDataGenerator @Inject constructor(
             wrapper.traits.forEach { traitJson ->
                 runCatching {
                     val trait = TraitObject.fromJson(traitJson, maxPosition, "trait_sample_json.trt")
-                    if (trait.format == Formats.LABEL_PRINT.getDatabaseName()) {
-                        val printTemplate = traitJson.printTemplate?.takeIf { it.isNotBlank() }
-                        if (printTemplate != null) {
-                            val templateName = traitJson.printTemplateName?.takeIf { it.isNotBlank() }
-                                ?: trait.alias.takeIf { it.isNotBlank() }
-                                ?: trait.name
-
-                            templateRepository.saveTemplate(templateName, printTemplate)?.let { templateId ->
-                                trait.printTemplateId = templateId
-                            }
-                        }
-                    }
+                    traitRepository.applyImportedPrintTemplate(trait, traitJson, templateRepository)
                     val rowId = traitRepository.insertTrait(trait)
                     if (rowId != -1L) {
                         trait.id = rowId.toString()

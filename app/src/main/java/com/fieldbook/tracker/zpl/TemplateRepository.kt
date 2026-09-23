@@ -13,16 +13,16 @@ import javax.inject.Singleton
 
 /**
  * Manages ZPL templates stored in the database's label_templates table.
- * Placeholders assignments are still stored in SharedPreferences as JSON.
+ * Placeholder assignments are stored in SharedPreferences as JSON, keyed by template ID.
  */
 @Singleton
 class TemplateRepository @Inject constructor(private val prefs: SharedPreferences) {
 
     companion object {
         private const val TAG = "TemplateRepository"
-        const val KEY_ASSIGNMENTS_JSON = "zpl_template_assignments_json"
+        const val KEY_ASSIGNMENTS_JSON = "zpl_template_assignments_by_id_json"
         const val KEY_DEFAULT_TEMPLATE_ID = "zpl_default_template_id"
-        const val KEY_STUDY_ASSIGNMENTS_PREFIX = "zpl_study_assignments_"
+        const val KEY_STUDY_ASSIGNMENTS_PREFIX = "zpl_study_template_assignments_"
         const val KEY_BUILT_IN_TEMPLATES_INSTALLED = "zpl_built_in_templates_installed"
 
         /** Built-in template used as the default when none is set. */
@@ -211,10 +211,35 @@ class TemplateRepository @Inject constructor(private val prefs: SharedPreference
     }
 
     /**
-     * Deletes a template by ID.
+     * Saves an imported template without replacing an existing one: reuses a template with the
+     * same name and ZPL, otherwise saves under the first free "name (n)".
+     * Returns the ID of the template to use.
      */
-    fun deleteTemplate(id: String) = withDatabase { db ->
-        db.delete(LabelTemplateTable.TABLE_NAME, "${LabelTemplateTable.ID} = ?", arrayOf(id))
+    fun importTemplate(name: String, zpl: String): String? {
+        val templates = getAllTemplates()
+        val existingNames = templates.values.toSet()
+
+        templates.entries.find { it.value == name }?.let { existing ->
+            if (getTemplate(existing.key) == zpl) return existing.key
+        }
+
+        var uniqueName = name
+        var suffix = 2
+        while (uniqueName in existingNames) {
+            uniqueName = "$name ($suffix)"
+            suffix++
+        }
+        return saveTemplate(uniqueName, zpl)
+    }
+
+    /**
+     * Deletes a template by ID, along with its saved assignments.
+     */
+    fun deleteTemplate(id: String) {
+        withDatabase { db ->
+            db.delete(LabelTemplateTable.TABLE_NAME, "${LabelTemplateTable.ID} = ?", arrayOf(id))
+        }
+        removeAssignments(id)
     }
 
     /**
@@ -236,80 +261,67 @@ class TemplateRepository @Inject constructor(private val prefs: SharedPreference
     }
 
     /**
-     * Returns placeholder assignments for a specific study.
-     * Stored as a JSON map of placeholder -> field option.
+     * Placeholder -> field option assignments for a template in a study.
+     * Assignments saved for this study override the template's last saved assignments,
+     * which act as the starting point in studies that haven't configured the template.
      */
-    fun getStudyAssignments(studyId: Int): Map<String, String> {
-        val key = "$KEY_STUDY_ASSIGNMENTS_PREFIX$studyId"
-        val json = prefs.getString(key, null) ?: return emptyMap()
-        return try {
-            val root = JSONObject(json)
-            val result = mutableMapOf<String, String>()
-            val keys = root.keys()
-            while (keys.hasNext()) {
-                val k = keys.next()
-                result[k] = root.getString(k)
-            }
-            result
-        } catch (e: JSONException) {
-            Log.w(TAG, "Malformed study assignments JSON, returning empty map", e)
-            emptyMap()
-        }
+    fun getAssignments(studyId: Int, templateId: String): Map<String, String> {
+        val studyLevel = readJsonMap(prefs.getString(studyAssignmentsKey(studyId, templateId), null)
+            ?.let { json -> runCatching { JSONObject(json) }.getOrNull() })
+        return getTemplateAssignments(templateId) + studyLevel
     }
 
     /**
-     * Saves placeholder assignments for a specific study.
+     * The template's last saved assignments, independent of study.
      */
-    fun saveStudyAssignments(studyId: Int, assignments: Map<String, String>) {
-        val key = "$KEY_STUDY_ASSIGNMENTS_PREFIX$studyId"
-        val root = JSONObject()
-        for ((k, v) in assignments) {
-            root.put(k, v)
-        }
-        prefs.edit {
-            putString(key, root.toString())
-        }
-    }
+    fun getTemplateAssignments(templateId: String): Map<String, String> =
+        readJsonMap(prefs.getString(KEY_ASSIGNMENTS_JSON, null)?.let { json ->
+            runCatching { JSONObject(json).optJSONObject(templateId) }.getOrNull()
+        })
 
     /**
-     * Placeholder field assignments are still stored in Prefs, keyed by template NAME
-     * for backwards compatibility and easy name-based lookups in the UI.
+     * Saves assignments for a template in a study, and as the template's defaults for other studies.
      */
-    fun getAssignments(templateName: String): Map<String, String> {
-        val json = prefs.getString(KEY_ASSIGNMENTS_JSON, null) ?: return emptyMap()
-        return try {
-            val root = JSONObject(json)
-            val templateObj = root.optJSONObject(templateName) ?: return emptyMap()
-            val result = mutableMapOf<String, String>()
-            val keys = templateObj.keys()
-            while (keys.hasNext()) {
-                val key = keys.next()
-                result[key] = templateObj.getString(key)
-            }
-            result
-        } catch (e: JSONException) {
-            Log.w(TAG, "Malformed assignments JSON, returning empty map", e)
-            emptyMap()
-        }
-    }
+    fun saveAssignments(studyId: Int, templateId: String, assignments: Map<String, String>) {
+        val root = prefs.getString(KEY_ASSIGNMENTS_JSON, null)
+            ?.let { runCatching { JSONObject(it) }.getOrNull() } ?: JSONObject()
+        root.put(templateId, JSONObject(assignments))
 
-    fun saveAssignments(templateName: String, assignments: Map<String, String>) {
-        val json = prefs.getString(KEY_ASSIGNMENTS_JSON, null)
-        val root = if (json != null) {
-            try {
-                JSONObject(json)
-            } catch (e: JSONException) {
-                JSONObject()
-            }
-        } else JSONObject()
-
-        val templateObj = JSONObject()
-        for ((key, value) in assignments) {
-            templateObj.put(key, value)
-        }
-        root.put(templateName, templateObj)
         prefs.edit {
             putString(KEY_ASSIGNMENTS_JSON, root.toString())
+            putString(studyAssignmentsKey(studyId, templateId), JSONObject(assignments).toString())
+        }
+    }
+
+    /**
+     * Removes a template's saved assignments, both its defaults and every study's.
+     */
+    private fun removeAssignments(templateId: String) {
+        val root = prefs.getString(KEY_ASSIGNMENTS_JSON, null)
+            ?.let { runCatching { JSONObject(it) }.getOrNull() }
+        root?.remove(templateId)
+
+        val studyKeySuffix = "_$templateId"
+        val studyKeys = prefs.all.keys.filter {
+            it.startsWith(KEY_STUDY_ASSIGNMENTS_PREFIX) && it.endsWith(studyKeySuffix)
+        }
+
+        prefs.edit {
+            if (root != null) putString(KEY_ASSIGNMENTS_JSON, root.toString())
+            studyKeys.forEach { remove(it) }
+        }
+    }
+
+    private fun studyAssignmentsKey(studyId: Int, templateId: String) =
+        "$KEY_STUDY_ASSIGNMENTS_PREFIX${studyId}_$templateId"
+
+    private fun readJsonMap(obj: JSONObject?): Map<String, String> {
+        if (obj == null) return emptyMap()
+        return try {
+            obj.keys().asSequence().associateWith { obj.getString(it) }
+        } catch (e: JSONException) {
+            Log.w(TAG, "Malformed assignments JSON, ignoring", e)
+            emptyMap()
         }
     }
 }

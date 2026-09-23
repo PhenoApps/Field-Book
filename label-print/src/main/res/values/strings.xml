@@ -59,7 +59,10 @@
     <string name="zpl_editor_save_template">Save As Template</string>
     <string name="zpl_editor_template_name">Template name</string>
     <string name="zpl_editor_template_name_empty">Template name cannot be empty</string>
-    <string name="zpl_editor_invalid_chars">Characters {, }, and ^ are not allowed</string>
+    <string name="zpl_editor_overwrite_title">Replace Template</string>
+    <string name="zpl_editor_overwrite_message">A template named \"%1$s\" already exists. Replace it with this template?</string>
+    <string name="zpl_editor_replace">Replace</string>
+    <string name="zpl_editor_invalid_chars">Characters {, }, ^, and ~ are not allowed</string>
     <string name="zpl_editor_printer_dpi">Printer DPI</string>
     <string name="zpl_editor_manual_dpi">Manual DPI</string>
     <string name="zpl_editor_dpi_manual">Manual</string>

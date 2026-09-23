@@ -35,10 +35,9 @@ fun TraitObject.toTraitJson(
     printTemplate: String? = null,
     printTemplateName: String? = null,
 ): TraitJson {
+    // template ids are local to this device's database, the template itself is exported instead
     val attributes = toAttributeJsonMap().toMutableMap().also { map ->
-        if (printTemplate != null) {
-            map.remove(TraitAttributes.PRINT_TEMPLATE_ID.key)
-        }
+        map.remove(TraitAttributes.PRINT_TEMPLATE_ID.key)
     }.ifEmpty { null }
 
     return TraitJson(

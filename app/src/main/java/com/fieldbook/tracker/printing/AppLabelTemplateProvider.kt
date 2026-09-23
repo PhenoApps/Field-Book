@@ -18,7 +18,7 @@ class AppLabelTemplateProvider @Inject constructor(
     override fun getTemplate(id: String): LabelTemplate? {
         val name = repository.getTemplateName(id) ?: return null
         val zpl = repository.getTemplate(id) ?: return null
-        val assignments = repository.getAssignments(name)
+        val assignments = repository.getTemplateAssignments(id)
         
         return LabelTemplate(
             id = id,

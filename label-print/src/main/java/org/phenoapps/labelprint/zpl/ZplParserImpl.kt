@@ -5,7 +5,54 @@ package org.phenoapps.labelprint.zpl
  */
 class ZplParserImpl : ZplParser {
 
-    override fun parse(tokens: List<ZplToken>): ParseResult {
+    override fun parse(tokens: List<ZplToken>): ParseResult = parseDecoded(decodeFieldHex(tokens))
+
+    /**
+     * ^FH makes the next ^FD's data hex escaped (indicator followed by two hex digits,
+     * the indicator defaults to '_'), decode it so the preview shows the printed text.
+     */
+    private fun decodeFieldHex(tokens: List<ZplToken>): List<ZplToken> {
+        val result = mutableListOf<ZplToken>()
+        var indicator: Char? = null
+        for (token in tokens) {
+            when (token.command) {
+                "FH" -> indicator = token.parameters.firstOrNull() ?: '_'
+                "FD" -> {
+                    val hex = indicator
+                    result.add(if (hex != null) token.copy(parameters = token.parameters.hexDecode(hex)) else token)
+                    indicator = null
+                }
+                "FS", "XA", "XZ" -> {
+                    indicator = null
+                    result.add(token)
+                }
+                else -> result.add(token)
+            }
+        }
+        return result
+    }
+
+    private fun String.hexDecode(indicator: Char): String = buildString {
+        var i = 0
+        val source = this@hexDecode
+        while (i < source.length) {
+            val c = source[i]
+            val code = if (c == indicator && i + 2 < source.length) {
+                source.substring(i + 1, i + 3)
+                    .takeIf { hex -> hex.all { it in '0'..'9' || it.lowercaseChar() in 'a'..'f' } }
+                    ?.toInt(16)
+            } else null
+            if (code != null) {
+                append(code.toChar())
+                i += 3
+            } else {
+                append(c)
+                i++
+            }
+        }
+    }
+
+    private fun parseDecoded(tokens: List<ZplToken>): ParseResult {
         val labels = mutableListOf<ZplLabel>()
         val errors = mutableListOf<ZplParseError>()
         var state = ParserState()

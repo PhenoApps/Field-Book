@@ -240,20 +240,12 @@ class LabelPrintTraitLayout : BaseTraitLayout {
                         store.assignmentsRevision.intValue
                     ) {
                         val id = store.templateIdState.value
-                        val templateName =
-                            if (id != null) templateRepository.getTemplateName(id) else null
-
-                        val templateLoaded = if (templateName != null) {
-                            templateRepository.getAssignments(templateName)
+                        val saved = if (id != null) {
+                            val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+                            templateRepository.getAssignments(studyId, id)
                         } else emptyMap()
 
-                        val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
-                        val studyLoaded = templateRepository.getStudyAssignments(studyId)
-
-                        val merged = templateLoaded.toMutableMap()
-                        merged.putAll(studyLoaded)
-                        merged.putAll(store.fieldAssignments)
-                        merged
+                        saved + store.fieldAssignments
                     }
 
                     LabelPrintConfigDialog(
@@ -263,13 +255,9 @@ class LabelPrintTraitLayout : BaseTraitLayout {
                             store.selectedCopies.intValue = copies.toIntOrNull() ?: 1
                             store.saveConfig()
 
-                            val id = store.templateIdState.value
-                            val templateName =
-                                if (id != null) templateRepository.getTemplateName(id) else null
-                            if (templateName != null) {
-                                templateRepository.saveAssignments(templateName, currentAssignments)
+                            store.templateIdState.value?.let { id ->
                                 val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
-                                templateRepository.saveStudyAssignments(studyId, currentAssignments)
+                                templateRepository.saveAssignments(studyId, id, currentAssignments)
                             }
 
                             store.assignmentsRevision.intValue++
@@ -376,8 +364,7 @@ class LabelPrintTraitLayout : BaseTraitLayout {
         resolveTemplate()
         val templateId = store.templateIdState.value
         val templateZpl = templateId?.let { templateRepository.getTemplate(it) }
-        val templateName = templateId?.let { templateRepository.getTemplateName(it) }
-        if (templateZpl == null || templateName == null) {
+        if (templateId == null || templateZpl == null) {
             Toast.makeText(context, R.string.label_print_no_template, Toast.LENGTH_LONG).show()
             return
         }
@@ -395,9 +382,7 @@ class LabelPrintTraitLayout : BaseTraitLayout {
             buildObservationUnitAttributes(uniqueId, dateLabel, blankLabel, fieldNameLabel)
 
         val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
-        val assignments = templateRepository.getAssignments(templateName).toMutableMap().apply {
-            putAll(templateRepository.getStudyAssignments(studyId))
-        }
+        val assignments = templateRepository.getAssignments(studyId, templateId)
 
         val resolvedAssignments = assignments.mapValues { (_, fieldOption) ->
             LabelPrintService.resolveFieldValue(
@@ -424,7 +409,6 @@ class LabelPrintTraitLayout : BaseTraitLayout {
     private fun buildPreviewLabel(): org.phenoapps.labelprint.zpl.ZplLabel? {
         val templateId = store.templateIdState.value ?: return null
         val templateZpl = templateRepository.getTemplate(templateId) ?: return null
-        val templateName = templateRepository.getTemplateName(templateId) ?: return null
 
         val dateString = LabelPrintService.currentDateString()
         val fieldName = prefs.getString(GeneralKeys.FIELD_FILE, "") ?: ""
@@ -438,9 +422,7 @@ class LabelPrintTraitLayout : BaseTraitLayout {
         } else emptyMap()
 
         val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
-        val assignments = templateRepository.getAssignments(templateName).toMutableMap().apply {
-            putAll(templateRepository.getStudyAssignments(studyId))
-        }
+        val assignments = templateRepository.getAssignments(studyId, templateId)
 
         val resolvedAssignments = assignments.mapValues { (_, fieldOption) ->
             LabelPrintService.resolveFieldValue(

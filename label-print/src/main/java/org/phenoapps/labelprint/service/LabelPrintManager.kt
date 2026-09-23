@@ -39,22 +39,69 @@ class LabelPrintManager @Inject constructor(
             return placeholders
         }
 
+        /** Field data between ^FD and ^FS, where placeholders live. */
+        private val FIELD_DATA_PATTERN = Regex("""\^FD(.*?)\^FS""", RegexOption.DOT_MATCHES_ALL)
+
+        /** Hex escape indicator used with ^FH (the ZPL default). */
+        private const val HEX_INDICATOR = '_'
+
         /**
-         * Resolves all placeholders in a ZPL template using the provided assignments map.
+         * Resolves all placeholders in a ZPL template using the provided assignments map,
+         * date placeholders resolve to the current date. Unassigned placeholders are left as is.
+         *
+         * Values are data, so ZPL command characters in them (^ and ~) are hex escaped:
+         * the field gets ^FH, and underscores already in the field are escaped to keep their meaning.
          */
         fun applyPlaceholderAssignments(templateZpl: String, assignments: Map<String, String>): String {
-            var result = templateZpl
-            for ((placeholder, value) in assignments) {
-                result = result.replace(placeholder, value)
-            }
-            // Automatically resolve date placeholders
             val dateStr = currentDateString()
-            for (match in PLACEHOLDER_PATTERN.findAll(result)) {
-                if (match.value.startsWith("{date")) {
-                    result = result.replace(match.value, dateStr)
+
+            fun valueFor(placeholder: String): String? =
+                assignments[placeholder] ?: if (placeholder.startsWith("{date")) dateStr else null
+
+            return FIELD_DATA_PATTERN.replace(templateZpl) { field ->
+                val data = field.groupValues[1]
+                val placeholders = PLACEHOLDER_PATTERN.findAll(data).toList()
+                val values = placeholders.mapNotNull { valueFor(it.value) }
+                if (values.isEmpty()) return@replace field.value
+
+                val precedingZpl = templateZpl.substring(0, field.range.first).trimEnd()
+                val alreadyHex = precedingZpl.endsWith("^FH") || precedingZpl.endsWith("^FH$HEX_INDICATOR")
+                val addHex = !alreadyHex && values.any { it.hasZplCommandChars() }
+                val escapeValues = alreadyHex || addHex
+
+                val resolved = StringBuilder()
+                var index = 0
+                for (match in placeholders) {
+                    val literal = data.substring(index, match.range.first)
+                    resolved.append(if (addHex) literal.hexEscape(onlyIndicator = true) else literal)
+
+                    val value = valueFor(match.value)
+                    resolved.append(
+                        when {
+                            value == null -> match.value
+                            escapeValues -> value.hexEscape()
+                            else -> value
+                        }
+                    )
+                    index = match.range.last + 1
                 }
+                val tail = data.substring(index)
+                resolved.append(if (addHex) tail.hexEscape(onlyIndicator = true) else tail)
+
+                (if (addHex) "^FH^FD" else "^FD") + resolved + "^FS"
             }
-            return result
+        }
+
+        private fun String.hasZplCommandChars() = contains('^') || contains('~')
+
+        /**
+         * Escapes characters for a ^FH field: the indicator itself, and optionally ^ and ~.
+         */
+        private fun String.hexEscape(onlyIndicator: Boolean = false): String = buildString {
+            for (c in this@hexEscape) {
+                val escape = c == HEX_INDICATOR || (!onlyIndicator && (c == '^' || c == '~'))
+                if (escape) append(HEX_INDICATOR).append("%02X".format(c.code)) else append(c)
+            }
         }
 
         /**
