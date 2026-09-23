@@ -1441,6 +1441,7 @@
     <string name="inno_spectra_hardware_incompatible">Hardware incompatible</string>
     <string name="inno_spectra_function_locked">Función bloqueada</string>
     <!-- stages reported while the inno spectra device is connecting -->
+    <string name="inno_spectra_connect_ready">Listo</string>
     <string name="header_temperature">Temperatura</string>
     <string name="header_humidity">Humedad</string>
     <string name="header_firmware">Firmware</string>
@@ -1638,6 +1639,7 @@
     <string name="nix_error_bluetooth_permissions">Debe aceptar permisos de bluetooth o intentar reiniciar la aplicación.</string>
     <string name="nix_error_bluetooth_unavailable">Bluetooth no está disponible.</string>
     <string name="nix_error_bluetooth_disabled">Bluetooth está desactivado en el dispositivo.</string>
+    <string name="nix_error_connect_failed">No se pudo conectar al dispositivo, inténtelo de nuevo.</string>
     <string name="list_item_color_placeholder_content_description">Marcador de posición para un nuevo escaneo</string>
     <string name="loading">Cargando</string>
     <string name="nix_error_no_network">Nix puede necesitar internet para funcionar correctamente.</string>
