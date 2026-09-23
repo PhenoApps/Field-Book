@@ -96,7 +96,7 @@ class LabelPrintTraitLayout : BaseTraitLayout {
                     }
                     activity.refreshInfoBarAdapter()
 
-                    store.assignmentsRevision.intValue++
+                    if (::store.isInitialized) store.assignmentsRevision.intValue++
                 }
             }
         }
@@ -329,6 +329,8 @@ class LabelPrintTraitLayout : BaseTraitLayout {
 
     @SuppressLint("MissingPermission")
     private fun refreshPrinterConnectionState() {
+        // receivers are registered with the other layouts, before this one may have loaded
+        if (!::store.isInitialized || !::service.isInitialized) return
         store.isPrinterConnected.value = service.isBluetoothEnabled() 
                 && !service.getSavedPrinterName().isNullOrEmpty()
                 && !store.isManualDisconnected.value
