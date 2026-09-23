@@ -14,11 +14,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.preferences.GeneralKeys
-import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.printing.LabelPrintService
 import com.fieldbook.tracker.ui.theme.AppTheme
-import com.fieldbook.tracker.ui.theme.enums.AppTextType
-import com.fieldbook.tracker.ui.theme.enums.AppThemeType
 import com.fieldbook.tracker.zpl.TemplateRepository
 import com.zebra.sdk.comm.BluetoothConnection
 import com.zebra.sdk.comm.ConnectionException
@@ -83,16 +80,7 @@ class ZplEditorActivity : ThemedActivity() {
             .toSet()
 
         setContent {
-            val themeIndex = prefs.getString(PreferenceKeys.THEME, "0")?.toInt() ?: 0
-            val themeType = when (themeIndex) {
-                1 -> AppThemeType.HighContrast
-                2 -> AppThemeType.Blue
-                else -> AppThemeType.Default
-            }
-            val textIndex = prefs.getString(PreferenceKeys.TEXT_THEME, "1")?.toInt() ?: 1
-            val textType = AppTextType.entries.find { it.index == textIndex } ?: AppTextType.MEDIUM
-
-            AppTheme(themeTypeOverride = themeType, textTypeOverride = textType) {
+            AppTheme {
                 ZplEditorScreen(
                     initialZpl = initialZpl,
                     initialTemplateName = templateName,

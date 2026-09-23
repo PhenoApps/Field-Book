@@ -7,10 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.mutableStateOf
 import com.fieldbook.tracker.R
-import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.ui.theme.AppTheme
-import com.fieldbook.tracker.ui.theme.enums.AppTextType
-import com.fieldbook.tracker.ui.theme.enums.AppThemeType
 import com.fieldbook.tracker.zpl.TemplateRepository
 import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.labelprint.ui.LabelTemplateListItem
@@ -56,16 +53,7 @@ class LabelTemplatesActivity : ThemedActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val themeIndex = prefs.getString(PreferenceKeys.THEME, "0")?.toInt() ?: 0
-            val themeType = when (themeIndex) {
-                1 -> AppThemeType.HighContrast
-                2 -> AppThemeType.Blue
-                else -> AppThemeType.Default
-            }
-            val textIndex = prefs.getString(PreferenceKeys.TEXT_THEME, "1")?.toInt() ?: 1
-            val textType = AppTextType.entries.find { it.index == textIndex } ?: AppTextType.MEDIUM
-
-            AppTheme(themeTypeOverride = themeType, textTypeOverride = textType) {
+            AppTheme {
                 LabelTemplatesScreen(
                     templates = templates.value,
                     onBack = { finish() },
