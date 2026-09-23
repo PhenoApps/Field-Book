@@ -39,6 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
 import org.phenoapps.labelprint.service.LabelPrintManager
+import org.phenoapps.labelprint.ui.LabelPrintContrastTheme
 import org.phenoapps.labelprint.ui.ZplPreviewCanvas
 import org.phenoapps.labelprint.zpl.ZplLabel
 
@@ -155,80 +156,82 @@ fun LabelPrintConfigDialog(
         LabelPrintManager.extractPlaceholders(templateZpl)
     }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
-        title = { Text(text = stringResource(R.string.label_config_title)) },
-        text = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                CopiesSelector(
-                    options = copiesOptions,
-                    selected = localCopies,
-                    onSelect = { localCopies = it }
-                )
+    LabelPrintContrastTheme {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            containerColor = MaterialTheme.colorScheme.surface,
+            title = { Text(text = stringResource(R.string.label_config_title)) },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    CopiesSelector(
+                        options = copiesOptions,
+                        selected = localCopies,
+                        onSelect = { localCopies = it }
+                    )
 
-                if (onCalibrate != null) {
+                    if (onCalibrate != null) {
+                        OutlinedButton(
+                            onClick = onCalibrate,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(stringResource(R.string.label_config_calibrate))
+                        }
+                    }
+
                     OutlinedButton(
-                        onClick = onCalibrate,
+                        onClick = {
+                            if (isPrinterConnected) {
+                                onDisconnectClick?.invoke()
+                            } else {
+                                onConnectClick()
+                            }
+                        },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(stringResource(R.string.label_config_calibrate))
-                    }
-                }
-
-                OutlinedButton(
-                    onClick = {
-                        if (isPrinterConnected) {
-                            onDisconnectClick?.invoke()
-                        } else {
-                            onConnectClick()
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = if (isPrinterConnected) {
-                            stringResource(R.string.disconnect)
-                        } else {
-                            stringResource(R.string.label_config_connect_printer)
-                        }
-                    )
-                }
-
-                if (placeholders.isNotEmpty()) {
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                    Text(
-                        text = stringResource(R.string.label_fields_title),
-                        style = MaterialTheme.typography.titleSmall
-                    )
-                    placeholders.forEach { placeholder ->
-                        LabelFieldSelector(
-                            label = placeholder,
-                            selected = currentAssignments[placeholder] ?: "",
-                            onClick = { onFieldClick(placeholder) }
+                        Text(
+                            text = if (isPrinterConnected) {
+                                stringResource(R.string.disconnect)
+                            } else {
+                                stringResource(R.string.label_config_connect_printer)
+                            }
                         )
                     }
+
+                    if (placeholders.isNotEmpty()) {
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                        Text(
+                            text = stringResource(R.string.label_fields_title),
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                        placeholders.forEach { placeholder ->
+                            LabelFieldSelector(
+                                label = placeholder,
+                                selected = currentAssignments[placeholder] ?: "",
+                                onClick = { onFieldClick(placeholder) }
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    onConfirm(localCopies)
+                }) {
+                    Text(stringResource(R.string.dialog_ok))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.dialog_cancel))
                 }
             }
-        },
-        confirmButton = {
-            TextButton(onClick = {
-                onConfirm(localCopies)
-            }) {
-                Text(stringResource(R.string.dialog_ok))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.dialog_cancel))
-            }
-        }
-    )
+        )
+    }
 }
 
 @Composable

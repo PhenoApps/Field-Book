@@ -319,9 +319,10 @@ fun ZplEditorScreen(
                     },
                     modifier = Modifier.weight(1f),
                     enabled = !hasGlobalErrors,
+                    border = lowContrastOutline(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.primary,
+                        contentColor = readablePrimary(),
                         disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                         disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -333,500 +334,504 @@ fun ZplEditorScreen(
             }
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .imePadding()
-        ) {
-            var dropdownExpanded by remember { mutableStateOf(false) }
-
-            ExposedDropdownMenuBox(
-                expanded = dropdownExpanded,
-                onExpandedChange = { dropdownExpanded = it },
+        LabelPrintContrastTheme {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 4.dp)
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .imePadding()
             ) {
-                OutlinedTextField(
-                    value = selectedTemplateName ?: stringResource(R.string.zpl_editor_untitled),
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text(stringResource(R.string.zpl_editor_template)) },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded) },
-                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                var dropdownExpanded by remember { mutableStateOf(false) }
+
+                ExposedDropdownMenuBox(
+                    expanded = dropdownExpanded,
+                    onExpandedChange = { dropdownExpanded = it },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                )
-                ExposedDropdownMenu(
-                    expanded = dropdownExpanded,
-                    onDismissRequest = { dropdownExpanded = false },
-                    containerColor = MaterialTheme.colorScheme.surface
+                        .padding(horizontal = 12.dp, vertical = 4.dp)
                 ) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.zpl_editor_new_template)) },
-                        onClick = {
-                            templateName = null
-                            selectedTemplateName = null
-                            elements.clear()
-                            zplText = ""
-                            dropdownExpanded = false
-                        }
+                    OutlinedTextField(
+                        value = selectedTemplateName ?: stringResource(R.string.zpl_editor_untitled),
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text(stringResource(R.string.zpl_editor_template)) },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded) },
+                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                     )
-                    HorizontalDivider()
-                    templates.keys.forEach { name ->
+                    ExposedDropdownMenu(
+                        expanded = dropdownExpanded,
+                        onDismissRequest = { dropdownExpanded = false },
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ) {
                         DropdownMenuItem(
-                            text = { Text(name) },
+                            text = { Text(stringResource(R.string.zpl_editor_new_template)) },
                             onClick = {
-                                templateName = name
-                                selectedTemplateName = name
-                                syncFromCode(templates[name] ?: "")
+                                templateName = null
+                                selectedTemplateName = null
+                                elements.clear()
+                                zplText = ""
                                 dropdownExpanded = false
                             }
                         )
+                        HorizontalDivider()
+                        templates.keys.forEach { name ->
+                            DropdownMenuItem(
+                                text = { Text(name) },
+                                onClick = {
+                                    templateName = name
+                                    selectedTemplateName = name
+                                    syncFromCode(templates[name] ?: "")
+                                    dropdownExpanded = false
+                                }
+                            )
+                        }
                     }
                 }
-            }
 
-            OutlinedTextField(
-                value = templateName ?: "",
-                onValueChange = { templateName = it.ifBlank { null } },
-                label = { Text(stringResource(R.string.zpl_editor_name)) },
-                singleLine = true,
-                placeholder = { Text(stringResource(R.string.zpl_editor_name_placeholder)) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 4.dp)
-            )
+                OutlinedTextField(
+                    value = templateName ?: "",
+                    onValueChange = { templateName = it.ifBlank { null } },
+                    label = { Text(stringResource(R.string.zpl_editor_name)) },
+                    singleLine = true,
+                    placeholder = { Text(stringResource(R.string.zpl_editor_name_placeholder)) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 4.dp)
+                )
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                FilledTonalIconButton(onClick = { showSettingsDialog = true }) {
-                    Icon(
-                        Icons.Default.Settings,
-                        contentDescription = stringResource(R.string.zpl_editor_settings_description)
-                    )
-                }
-                Spacer(Modifier.weight(1f))
-                FilledTonalIconButton(onClick = { showZplCode = !showZplCode }) {
-                    Icon(
-                        Icons.Default.Code,
-                        contentDescription = if (showZplCode) stringResource(R.string.zpl_editor_hide_zpl) else stringResource(
-                            R.string.zpl_editor_show_zpl
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    FilledTonalIconButton(onClick = { showSettingsDialog = true }) {
+                        Icon(
+                            Icons.Default.Settings,
+                            contentDescription = stringResource(R.string.zpl_editor_settings_description)
                         )
-                    )
+                    }
+                    Spacer(Modifier.weight(1f))
+                    FilledTonalIconButton(onClick = { showZplCode = !showZplCode }) {
+                        Icon(
+                            Icons.Default.Code,
+                            contentDescription = if (showZplCode) stringResource(R.string.zpl_editor_hide_zpl) else stringResource(
+                                R.string.zpl_editor_show_zpl
+                            )
+                        )
+                    }
                 }
-            }
 
-            val parsedLabel = remember(zplText) {
-                if (zplText.isBlank()) null
-                else {
-                    val tokenizer = ZplTokenizerImpl()
-                    val parser = ZplParserImpl()
-                    val tokenResult = tokenizer.tokenize(zplText)
-                    if (tokenResult is TokenizeResult.Success) {
-                        val parseResult = parser.parse(tokenResult.tokens)
-                        if (parseResult is ParseResult.Success) {
-                            parseResult.document.labels.firstOrNull()
+                val parsedLabel = remember(zplText) {
+                    if (zplText.isBlank()) null
+                    else {
+                        val tokenizer = ZplTokenizerImpl()
+                        val parser = ZplParserImpl()
+                        val tokenResult = tokenizer.tokenize(zplText)
+                        if (tokenResult is TokenizeResult.Success) {
+                            val parseResult = parser.parse(tokenResult.tokens)
+                            if (parseResult is ParseResult.Success) {
+                                parseResult.document.labels.firstOrNull()
+                            } else null
                         } else null
-                    } else null
+                    }
                 }
-            }
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-            ) {
-                Box(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
                 ) {
-                    Column {
-                        AnimatedVisibility(visible = hasGlobalErrors) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 12.dp, vertical = 4.dp)
-                                    .background(
-                                        MaterialTheme.colorScheme.errorContainer,
-                                        RoundedCornerShape(4.dp)
-                                    )
-                                    .padding(8.dp)
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.zpl_editor_invalid_chars),
-                                    color = MaterialTheme.colorScheme.onErrorContainer,
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-                        }
-                        LabelDesignCanvas(
-                            elements = elements.toList(),
-                            labelWidthDots = labelWidth,
-                            labelHeightDots = labelHeight,
-                            selectedElementId = selectedElementId,
-                            onElementSelected = { id -> selectedElementId = id },
-                            onElementMoved = { id, newX, newY ->
-                                val index = elements.indexOfFirst { it.id == id }
-                                if (index >= 0) {
-                                    elements[index] = elements[index].copy(x = newX, y = newY)
-                                    regenerateZpl()
-                                }
-                            },
-                            parsedLabel = parsedLabel,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(horizontal = 12.dp, vertical = 4.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                        )
-                    }
-                }
-
-                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    AnimatedVisibility(visible = selectedElementId != null) {
-                        val element = elements.find { it.id == selectedElementId }
-                        if (element != null) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .background(
-                                        MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
-                                        RoundedCornerShape(8.dp)
-                                    )
-                                    .padding(8.dp)
-                            ) {
-                                if (element.type == LabelDesignElementType.TEXT) {
-                                    Text(
-                                        text = stringResource(R.string.zpl_editor_font_size) + ": ${element.fontSize}",
-                                        style = MaterialTheme.typography.labelSmall
-                                    )
-                                    Slider(
-                                        value = element.fontSize.toFloat(),
-                                        onValueChange = { newValue ->
-                                            val index =
-                                                elements.indexOfFirst { it.id == element.id }
-                                            if (index >= 0) {
-                                                elements[index] =
-                                                    elements[index].copy(fontSize = newValue.toInt())
-                                                regenerateZpl()
-                                            }
-                                        },
-                                        valueRange = 10f..300f,
-                                        steps = 289
-                                    )
-                                } else if (element.type == LabelDesignElementType.QR_CODE) {
-                                    Text(
-                                        text = stringResource(R.string.zpl_editor_magnification) + ": ${element.magnification}",
-                                        style = MaterialTheme.typography.labelSmall
-                                    )
-                                    Slider(
-                                        value = element.magnification.toFloat(),
-                                        onValueChange = { newValue ->
-                                            val index =
-                                                elements.indexOfFirst { it.id == element.id }
-                                            if (index >= 0) {
-                                                elements[index] =
-                                                    elements[index].copy(magnification = newValue.toInt())
-                                                regenerateZpl()
-                                            }
-                                        },
-                                        valueRange = 1f..10f,
-                                        steps = 8
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            AnimatedVisibility(visible = selectedElementId != null) {
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    IconButton(
-                                        onClick = { showEditElementDialog = true },
-                                        modifier = Modifier
-                                            .background(
-                                                color = MaterialTheme.colorScheme.secondaryContainer,
-                                                shape = CircleShape
-                                            )
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Edit,
-                                            contentDescription = stringResource(R.string.zpl_editor_edit_selected),
-                                            tint = MaterialTheme.colorScheme.onSecondaryContainer
-                                        )
-                                    }
-                                    IconButton(
-                                        onClick = {
-                                            elements.removeAll { it.id == selectedElementId }
-                                            selectedElementId = null
-                                            regenerateZpl()
-                                        },
-                                        modifier = Modifier
-                                            .background(
-                                                color = MaterialTheme.colorScheme.errorContainer,
-                                                shape = CircleShape
-                                            )
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Delete,
-                                            contentDescription = stringResource(R.string.zpl_editor_delete_selected),
-                                            tint = MaterialTheme.colorScheme.onErrorContainer
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
-                        IconButton(
-                            onClick = { showAddElementDialog = true },
-                            modifier = Modifier
-                                .background(
-                                    color = MaterialTheme.colorScheme.primary,
-                                    shape = CircleShape
-                                )
-                        ) {
-                            Icon(
-                                Icons.Default.Add,
-                                contentDescription = stringResource(R.string.zpl_editor_add_element_description),
-                                tint = MaterialTheme.colorScheme.onPrimary
-                            )
-                        }
-                    }
-                }
-            }
-
-            AnimatedVisibility(
-                visible = showZplCode,
-                enter = expandVertically(),
-                exit = shrinkVertically()
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.zpl_editor_code_label),
-                        style = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
-                    )
-                    TextField(
-                        value = zplText,
-                        onValueChange = { syncFromCode(it) },
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f)
-                            .padding(horizontal = 8.dp),
-                        textStyle = TextStyle(fontFamily = FontFamily.Monospace, fontSize = 12.sp),
-                        placeholder = {
-                            Text(
-                                text = stringResource(R.string.zpl_editor_code_placeholder),
-                                fontFamily = FontFamily.Monospace,
-                                fontSize = 12.sp
+                    ) {
+                        Column {
+                            AnimatedVisibility(visible = hasGlobalErrors) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp, vertical = 4.dp)
+                                        .background(
+                                            MaterialTheme.colorScheme.errorContainer,
+                                            RoundedCornerShape(4.dp)
+                                        )
+                                        .padding(8.dp)
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.zpl_editor_invalid_chars),
+                                        color = MaterialTheme.colorScheme.onErrorContainer,
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+                            }
+                            LabelDesignCanvas(
+                                elements = elements.toList(),
+                                labelWidthDots = labelWidth,
+                                labelHeightDots = labelHeight,
+                                selectedElementId = selectedElementId,
+                                onElementSelected = { id -> selectedElementId = id },
+                                onElementMoved = { id, newX, newY ->
+                                    val index = elements.indexOfFirst { it.id == id }
+                                    if (index >= 0) {
+                                        elements[index] = elements[index].copy(x = newX, y = newY)
+                                        regenerateZpl()
+                                    }
+                                },
+                                parsedLabel = parsedLabel,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 12.dp, vertical = 4.dp)
+                                    .clip(RoundedCornerShape(8.dp))
                             )
-                        },
-                        colors = TextFieldDefaults.colors(
-                            unfocusedContainerColor = Color.Transparent,
-                            focusedContainerColor = Color.Transparent
-                        )
-                    )
-                }
-            }
-        }
-    }
-
-    if (showSettingsDialog) {
-        LabelSettingsDialog(
-            labelWidth = labelWidth,
-            labelLength = labelHeight,
-            mediaType = mediaType,
-            mediaGap = mediaGap,
-            defaultDpi = localDpi.toIntOrNull() ?: 203,
-            onConfirm = { newWidth, newHeight, newMedia, newGap, newDpi ->
-                localDpi = newDpi.toString()
-                labelWidth = newWidth
-                labelHeight = newHeight
-                mediaType = newMedia
-                mediaGap = newGap
-                regenerateZpl()
-                showSettingsDialog = false
-            },
-            onDismiss = { showSettingsDialog = false },
-            onReadFromDevice = onReadFromDevice
-        )
-    }
-
-    if (showAddElementDialog) {
-        val existingPlaceholders = elements.map { it.placeholder }.toSet()
-        var nextFieldIdx = 1
-        while ("{text$nextFieldIdx}" in existingPlaceholders) nextFieldIdx++
-        var nextBarcodeIdx = 1
-        while ("{barcode$nextBarcodeIdx}" in existingPlaceholders) nextBarcodeIdx++
-        var nextQrIdx = 1
-        while ("{qrcode$nextQrIdx}" in existingPlaceholders) nextQrIdx++
-        AddElementDialog(
-            nextTextIndex = nextFieldIdx,
-            nextBarcodeIndex = nextBarcodeIdx,
-            nextQrCodeIndex = nextQrIdx,
-            onConfirm = { newElement ->
-                val newId = nextElementId()
-                val margin = 20
-                val spawnX = margin.coerceIn(0, (labelWidth - margin).coerceAtLeast(0))
-                val spawnY =
-                    (margin + (elements.size * 40)) % (labelHeight - margin).coerceAtLeast(margin + 1)
-                elements.add(newElement.copy(id = newId, x = spawnX, y = spawnY))
-                selectedElementId = newId
-                regenerateZpl()
-                showAddElementDialog = false
-            },
-            onDismiss = { showAddElementDialog = false }
-        )
-    }
-
-    if (showEditElementDialog && selectedElementId != null) {
-        val selectedElement = elements.find { it.id == selectedElementId }
-        if (selectedElement != null) {
-            EditElementDialog(
-                element = selectedElement,
-                onConfirm = { updated ->
-                    val index = elements.indexOfFirst { it.id == updated.id }
-                    if (index >= 0) {
-                        elements[index] = updated
-                        regenerateZpl()
+                        }
                     }
-                    showEditElementDialog = false
-                },
-                onDismiss = { showEditElementDialog = false }
-            )
-        } else {
-            showEditElementDialog = false
-        }
-    }
 
-    if (showDeleteConfirm) {
-        AlertDialog(
-            onDismissRequest = { showDeleteConfirm = false },
-            containerColor = MaterialTheme.colorScheme.surface,
-            title = { Text(stringResource(R.string.zpl_editor_delete_template)) },
-            text = { Text(stringResource(R.string.zpl_editor_delete_confirm, templateName ?: "")) },
-            confirmButton = {
-                TextButton(onClick = {
-                    if (templateName != null) {
-                        onDelete(templateName!!)
-                        templateName = null
-                        selectedTemplateName = null
-                        elements.clear()
-                        zplText = ""
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        AnimatedVisibility(visible = selectedElementId != null) {
+                            val element = elements.find { it.id == selectedElementId }
+                            if (element != null) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(
+                                            MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                                            RoundedCornerShape(8.dp)
+                                        )
+                                        .padding(8.dp)
+                                ) {
+                                    if (element.type == LabelDesignElementType.TEXT) {
+                                        Text(
+                                            text = stringResource(R.string.zpl_editor_font_size) + ": ${element.fontSize}",
+                                            style = MaterialTheme.typography.labelSmall
+                                        )
+                                        Slider(
+                                            value = element.fontSize.toFloat(),
+                                            onValueChange = { newValue ->
+                                                val index =
+                                                    elements.indexOfFirst { it.id == element.id }
+                                                if (index >= 0) {
+                                                    elements[index] =
+                                                        elements[index].copy(fontSize = newValue.toInt())
+                                                    regenerateZpl()
+                                                }
+                                            },
+                                            valueRange = 10f..300f,
+                                            steps = 289
+                                        )
+                                    } else if (element.type == LabelDesignElementType.QR_CODE) {
+                                        Text(
+                                            text = stringResource(R.string.zpl_editor_magnification) + ": ${element.magnification}",
+                                            style = MaterialTheme.typography.labelSmall
+                                        )
+                                        Slider(
+                                            value = element.magnification.toFloat(),
+                                            onValueChange = { newValue ->
+                                                val index =
+                                                    elements.indexOfFirst { it.id == element.id }
+                                                if (index >= 0) {
+                                                    elements[index] =
+                                                        elements[index].copy(magnification = newValue.toInt())
+                                                    regenerateZpl()
+                                                }
+                                            },
+                                            valueRange = 1f..10f,
+                                            steps = 8
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                AnimatedVisibility(visible = selectedElementId != null) {
+                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        IconButton(
+                                            onClick = { showEditElementDialog = true },
+                                            modifier = Modifier
+                                                .background(
+                                                    color = MaterialTheme.colorScheme.secondaryContainer,
+                                                    shape = CircleShape
+                                                )
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Edit,
+                                                contentDescription = stringResource(R.string.zpl_editor_edit_selected),
+                                                tint = MaterialTheme.colorScheme.onSecondaryContainer
+                                            )
+                                        }
+                                        IconButton(
+                                            onClick = {
+                                                elements.removeAll { it.id == selectedElementId }
+                                                selectedElementId = null
+                                                regenerateZpl()
+                                            },
+                                            modifier = Modifier
+                                                .background(
+                                                    color = MaterialTheme.colorScheme.errorContainer,
+                                                    shape = CircleShape
+                                                )
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Delete,
+                                                contentDescription = stringResource(R.string.zpl_editor_delete_selected),
+                                                tint = MaterialTheme.colorScheme.onErrorContainer
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            IconButton(
+                                onClick = { showAddElementDialog = true },
+                                modifier = Modifier
+                                    .background(
+                                        color = MaterialTheme.colorScheme.primary,
+                                        shape = CircleShape
+                                    )
+                            ) {
+                                Icon(
+                                    Icons.Default.Add,
+                                    contentDescription = stringResource(R.string.zpl_editor_add_element_description),
+                                    tint = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
+                        }
                     }
-                    showDeleteConfirm = false
-                }) {
-                    Text(
-                        stringResource(R.string.zpl_editor_delete),
-                        color = MaterialTheme.colorScheme.error
-                    )
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteConfirm = false }) {
-                    Text(
-                        stringResource(R.string.dialog_cancel)
-                    )
-                }
-            }
-        )
-    }
 
-    if (showSaveDialog) {
-        var saveName by remember { mutableStateOf(templateName ?: "") }
-        var showError by remember { mutableStateOf(false) }
-        AlertDialog(
-            onDismissRequest = { showSaveDialog = false },
-            containerColor = MaterialTheme.colorScheme.surface,
-            title = { Text(stringResource(R.string.zpl_editor_save_template)) },
-            text = {
-                Column {
-                    TextField(
-                        value = saveName,
-                        onValueChange = { saveName = it; if (it.isNotBlank()) showError = false },
-                        label = { Text(stringResource(R.string.zpl_editor_template_name)) },
-                        singleLine = true,
-                        isError = showError,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    if (showError) {
+                AnimatedVisibility(
+                    visible = showZplCode,
+                    enter = expandVertically(),
+                    exit = shrinkVertically()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                    ) {
                         Text(
-                            text = stringResource(R.string.zpl_editor_template_name_empty),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.padding(top = 4.dp)
+                            text = stringResource(R.string.zpl_editor_code_label),
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                        )
+                        TextField(
+                            value = zplText,
+                            onValueChange = { syncFromCode(it) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                                .padding(horizontal = 8.dp),
+                            textStyle = TextStyle(fontFamily = FontFamily.Monospace, fontSize = 12.sp),
+                            placeholder = {
+                                Text(
+                                    text = stringResource(R.string.zpl_editor_code_placeholder),
+                                    fontFamily = FontFamily.Monospace,
+                                    fontSize = 12.sp
+                                )
+                            },
+                            colors = TextFieldDefaults.colors(
+                                unfocusedContainerColor = Color.Transparent,
+                                focusedContainerColor = Color.Transparent
+                            )
                         )
                     }
                 }
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    if (saveName.isBlank()) showError = true
-                    else {
-                        val trimmed = saveName.trim()
-                        onSave(trimmed, zplText)
-                        templateName = trimmed
-                        selectedTemplateName = trimmed
-                        showSaveDialog = false
-                        onDismiss()
-                    }
-                }) { Text(stringResource(R.string.zpl_editor_save)) }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    showSaveDialog = false
-                }) { Text(stringResource(R.string.dialog_cancel)) }
             }
-        )
+        }
     }
 
-    if (showUnsavedWarningDialog) {
-        AlertDialog(
-            onDismissRequest = { showUnsavedWarningDialog = false },
-            containerColor = MaterialTheme.colorScheme.surface,
-            title = { Text(stringResource(R.string.zpl_editor_unsaved_changes)) },
-            text = { Text(stringResource(R.string.zpl_editor_unsaved_message)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    showUnsavedWarningDialog = false
-                    onDismiss()
-                }) {
-                    Text(
-                        stringResource(R.string.zpl_editor_leave),
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showUnsavedWarningDialog = false }) {
-                    Text(stringResource(R.string.dialog_cancel))
-                }
+    LabelPrintContrastTheme {
+        if (showSettingsDialog) {
+            LabelSettingsDialog(
+                labelWidth = labelWidth,
+                labelLength = labelHeight,
+                mediaType = mediaType,
+                mediaGap = mediaGap,
+                defaultDpi = localDpi.toIntOrNull() ?: 203,
+                onConfirm = { newWidth, newHeight, newMedia, newGap, newDpi ->
+                    localDpi = newDpi.toString()
+                    labelWidth = newWidth
+                    labelHeight = newHeight
+                    mediaType = newMedia
+                    mediaGap = newGap
+                    regenerateZpl()
+                    showSettingsDialog = false
+                },
+                onDismiss = { showSettingsDialog = false },
+                onReadFromDevice = onReadFromDevice
+            )
+        }
+
+        if (showAddElementDialog) {
+            val existingPlaceholders = elements.map { it.placeholder }.toSet()
+            var nextFieldIdx = 1
+            while ("{text$nextFieldIdx}" in existingPlaceholders) nextFieldIdx++
+            var nextBarcodeIdx = 1
+            while ("{barcode$nextBarcodeIdx}" in existingPlaceholders) nextBarcodeIdx++
+            var nextQrIdx = 1
+            while ("{qrcode$nextQrIdx}" in existingPlaceholders) nextQrIdx++
+            AddElementDialog(
+                nextTextIndex = nextFieldIdx,
+                nextBarcodeIndex = nextBarcodeIdx,
+                nextQrCodeIndex = nextQrIdx,
+                onConfirm = { newElement ->
+                    val newId = nextElementId()
+                    val margin = 20
+                    val spawnX = margin.coerceIn(0, (labelWidth - margin).coerceAtLeast(0))
+                    val spawnY =
+                        (margin + (elements.size * 40)) % (labelHeight - margin).coerceAtLeast(margin + 1)
+                    elements.add(newElement.copy(id = newId, x = spawnX, y = spawnY))
+                    selectedElementId = newId
+                    regenerateZpl()
+                    showAddElementDialog = false
+                },
+                onDismiss = { showAddElementDialog = false }
+            )
+        }
+
+        if (showEditElementDialog && selectedElementId != null) {
+            val selectedElement = elements.find { it.id == selectedElementId }
+            if (selectedElement != null) {
+                EditElementDialog(
+                    element = selectedElement,
+                    onConfirm = { updated ->
+                        val index = elements.indexOfFirst { it.id == updated.id }
+                        if (index >= 0) {
+                            elements[index] = updated
+                            regenerateZpl()
+                        }
+                        showEditElementDialog = false
+                    },
+                    onDismiss = { showEditElementDialog = false }
+                )
+            } else {
+                showEditElementDialog = false
             }
-        )
+        }
+
+        if (showDeleteConfirm) {
+            AlertDialog(
+                onDismissRequest = { showDeleteConfirm = false },
+                containerColor = MaterialTheme.colorScheme.surface,
+                title = { Text(stringResource(R.string.zpl_editor_delete_template)) },
+                text = { Text(stringResource(R.string.zpl_editor_delete_confirm, templateName ?: "")) },
+                confirmButton = {
+                    TextButton(onClick = {
+                        if (templateName != null) {
+                            onDelete(templateName!!)
+                            templateName = null
+                            selectedTemplateName = null
+                            elements.clear()
+                            zplText = ""
+                        }
+                        showDeleteConfirm = false
+                    }) {
+                        Text(
+                            stringResource(R.string.zpl_editor_delete),
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeleteConfirm = false }) {
+                        Text(
+                            stringResource(R.string.dialog_cancel)
+                        )
+                    }
+                }
+            )
+        }
+
+        if (showSaveDialog) {
+            var saveName by remember { mutableStateOf(templateName ?: "") }
+            var showError by remember { mutableStateOf(false) }
+            AlertDialog(
+                onDismissRequest = { showSaveDialog = false },
+                containerColor = MaterialTheme.colorScheme.surface,
+                title = { Text(stringResource(R.string.zpl_editor_save_template)) },
+                text = {
+                    Column {
+                        TextField(
+                            value = saveName,
+                            onValueChange = { saveName = it; if (it.isNotBlank()) showError = false },
+                            label = { Text(stringResource(R.string.zpl_editor_template_name)) },
+                            singleLine = true,
+                            isError = showError,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        if (showError) {
+                            Text(
+                                text = stringResource(R.string.zpl_editor_template_name_empty),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        if (saveName.isBlank()) showError = true
+                        else {
+                            val trimmed = saveName.trim()
+                            onSave(trimmed, zplText)
+                            templateName = trimmed
+                            selectedTemplateName = trimmed
+                            showSaveDialog = false
+                            onDismiss()
+                        }
+                    }) { Text(stringResource(R.string.zpl_editor_save)) }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        showSaveDialog = false
+                    }) { Text(stringResource(R.string.dialog_cancel)) }
+                }
+            )
+        }
+
+        if (showUnsavedWarningDialog) {
+            AlertDialog(
+                onDismissRequest = { showUnsavedWarningDialog = false },
+                containerColor = MaterialTheme.colorScheme.surface,
+                title = { Text(stringResource(R.string.zpl_editor_unsaved_changes)) },
+                text = { Text(stringResource(R.string.zpl_editor_unsaved_message)) },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showUnsavedWarningDialog = false
+                        onDismiss()
+                    }) {
+                        Text(
+                            stringResource(R.string.zpl_editor_leave),
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showUnsavedWarningDialog = false }) {
+                        Text(stringResource(R.string.dialog_cancel))
+                    }
+                }
+            )
+        }
     }
 }
 
