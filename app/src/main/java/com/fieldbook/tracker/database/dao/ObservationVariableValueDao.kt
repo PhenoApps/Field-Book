@@ -38,6 +38,42 @@ class ObservationVariableValueDao {
             ))
         }
 
+        /**
+         * Number of traits whose attribute [attributeName] has the value [value].
+         */
+        fun countByAttributeValue(attributeName: String, value: String): Int = withDatabase { db ->
+            db.rawQuery(
+                """
+                SELECT COUNT(DISTINCT v.${ObservationVariable.FK})
+                FROM ${ObservationVariableValue.tableName} v
+                JOIN ${Migrator.ObservationVariableAttribute.tableName} a
+                    ON v.${Migrator.ObservationVariableAttribute.FK} = a.${Migrator.ObservationVariableAttribute.PK}
+                WHERE a.observation_variable_attribute_name = ?
+                    AND v.observation_variable_attribute_value = ?
+                """.trimIndent(),
+                arrayOf(attributeName, value)
+            ).use { cursor -> if (cursor.moveToFirst()) cursor.getInt(0) else 0 }
+        } ?: 0
+
+        /**
+         * Clears attribute [attributeName] on every trait where it has the value [value].
+         */
+        fun clearAttributeValue(attributeName: String, value: String) = withDatabase { db ->
+            db.execSQL(
+                """
+                UPDATE ${ObservationVariableValue.tableName}
+                SET observation_variable_attribute_value = ''
+                WHERE observation_variable_attribute_value = ?
+                    AND ${Migrator.ObservationVariableAttribute.FK} IN (
+                        SELECT ${Migrator.ObservationVariableAttribute.PK}
+                        FROM ${Migrator.ObservationVariableAttribute.tableName}
+                        WHERE observation_variable_attribute_name = ?
+                    )
+                """.trimIndent(),
+                arrayOf(value, attributeName)
+            )
+        }
+
         fun insert(min: String, max: String, categories: String, closeKeyboardOnOpen: String, cropImage: String, useDayOfYear: String, displayValue: String, resourceFile: String, id: String) = withDatabase { db ->
 
             //iterate through mapping of the old columns that are now attr/vals

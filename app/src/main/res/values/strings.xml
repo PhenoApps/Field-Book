@@ -770,11 +770,8 @@
     <string name="label_size_selector">Label Size</string>
     <string name="dialog_apply">Apply</string>
 
-    <string name="zpl_editor_untitled">Untitled</string>
     <string name="zpl_editor_delete">Delete</string>
     <string name="zpl_editor_save">Save</string>
-    <string name="zpl_editor_template">Template</string>
-    <string name="zpl_editor_new_template">＋ New Template</string>
     <string name="zpl_editor_name">Name</string>
     <string name="zpl_editor_name_placeholder">Enter template name</string>
     <string name="zpl_editor_reading_printer">Reading from printer…</string>
@@ -806,8 +803,6 @@
     <string name="zpl_editor_edit_text">Edit Text Element</string>
     <string name="zpl_editor_edit_qr">Edit QR Code Element</string>
     <string name="zpl_editor_edit_barcode">Edit Barcode Element</string>
-    <string name="zpl_editor_delete_template">Delete Template</string>
-    <string name="zpl_editor_delete_confirm">Are you sure you want to delete \"%1$s\"? This cannot be undone.</string>
     <string name="zpl_editor_save_template">Save As Template</string>
     <string name="zpl_editor_template_name">Template name</string>
     <string name="zpl_editor_template_name_empty">Template name cannot be empty</string>
@@ -1024,11 +1019,10 @@
 
     <!-- Labels -->
     <string name="preferences_labels_title">Labels</string>
-    <string name="preferences_labels_zpl_editor_title">ZPL Editor</string>
-    <string name="preferences_labels_zpl_editor_summary">Create and edit ZPL label templates</string>
     <string name="preferences_labels_printer_summary">Configure the default Bluetooth printer</string>
-    <string name="preferences_labels_default_template_title">Default Template</string>
-    <string name="preferences_labels_default_template_summary">Set the default ZPL template for new traits</string>
+    <string name="preferences_labels_templates_title">Label templates</string>
+    <string name="preferences_labels_templates_description">Add, edit and choose the default label template</string>
+    <string name="preferences_labels_templates_summary">Default: %1$s</string>
     <string name="preferences_appearance_application_title">Application</string>
 
     <string name="preferences_appearance_theme_title">Theme</string>
@@ -2130,5 +2124,6 @@
     <string name="export_failed">Export failed: %1$s</string>
     <string name="print_failed">Print failed</string>
     <string name="label_print_no_template">No label template found. Choose a template for this trait or set a default template in Settings → Labels.</string>
+    <string name="zpl_editor_save_failed">Could not save the template</string>
 
 </resources>

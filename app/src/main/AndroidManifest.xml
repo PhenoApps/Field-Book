@@ -275,6 +275,11 @@
             android:configChanges="orientation|keyboardHidden|screenSize|locale"
             android:screenOrientation="portrait" />
 
+        <activity
+            android:name=".activities.LabelTemplatesActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize|locale"
+            android:screenOrientation="portrait" />
+
         <provider
             android:name=".provider.GenericFileProvider"
             android:authorities="${applicationId}.fileprovider"

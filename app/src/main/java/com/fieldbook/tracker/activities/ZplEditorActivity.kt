@@ -10,10 +10,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.fieldbook.tracker.R
@@ -40,8 +36,8 @@ class ZplEditorActivity : ThemedActivity() {
     companion object {
         private const val TAG = "ZplEditorActivity"
         private const val BLUETOOTH_PERMISSION_REQUEST_CODE = 100
-        const val EXTRA_INITIAL_ZPL = "initial_zpl"
-        const val EXTRA_TEMPLATE_NAME = "template_name"
+        /** Id of the template to edit, omit to create a new template. */
+        const val EXTRA_TEMPLATE_ID = "template_id"
         const val RESULT_ZPL = "result_zpl"
         const val RESULT_TEMPLATE_NAME = "result_template_name"
         const val RESULT_TEMPLATE_ID = "result_template_id"
@@ -76,8 +72,15 @@ class ZplEditorActivity : ThemedActivity() {
 
         templateRepository.ensureBuiltInTemplatesExist()
 
-        val initialZpl = intent.getStringExtra(EXTRA_INITIAL_ZPL) ?: ""
-        val templateName = intent.getStringExtra(EXTRA_TEMPLATE_NAME)
+        // the template being edited, null when creating a new one
+        val editingId = intent.getStringExtra(EXTRA_TEMPLATE_ID)
+            ?.takeIf { templateRepository.getTemplateName(it) != null }
+        val initialZpl = editingId?.let { templateRepository.getTemplate(it) } ?: ""
+        val templateName = editingId?.let { templateRepository.getTemplateName(it) }
+        val otherTemplateNames = templateRepository.getAllTemplates()
+            .filterKeys { it != editingId }
+            .values
+            .toSet()
 
         setContent {
             val themeIndex = prefs.getString(PreferenceKeys.THEME, "0")?.toInt() ?: 0
@@ -90,17 +93,10 @@ class ZplEditorActivity : ThemedActivity() {
             val textType = AppTextType.entries.find { it.index == textIndex } ?: AppTextType.MEDIUM
 
             AppTheme(themeTypeOverride = themeType, textTypeOverride = textType) {
-                var allTemplates by remember {
-                    mutableStateOf(templateRepository.getAllTemplates())
-                }
-
                 ZplEditorScreen(
                     initialZpl = initialZpl,
                     initialTemplateName = templateName,
-                    templates = allTemplates.values.associateWith { name ->
-                        val id = allTemplates.entries.find { it.value == name }?.key
-                        if (id != null) templateRepository.getTemplate(id) ?: "" else ""
-                    },
+                    otherTemplateNames = otherTemplateNames,
                     onDismiss = {
                         val savedId = savedTemplateId
                         val savedName = savedId?.let { templateRepository.getTemplateName(it) }
@@ -118,16 +114,17 @@ class ZplEditorActivity : ThemedActivity() {
                         }
                         finish()
                     },
-                    onSave = { name, normalizedZpl ->
-                        savedTemplateId = templateRepository.saveTemplate(name, normalizedZpl)
-                        allTemplates = templateRepository.getAllTemplates()
-                    },
-                    onDelete = { name ->
-                        val id = allTemplates.entries.find { it.value == name }?.key
-                        if (id != null) {
-                            templateRepository.deleteTemplate(id)
-                            allTemplates = templateRepository.getAllTemplates()
+                    onSave = { name, zpl ->
+                        savedTemplateId = if (editingId != null) {
+                            // update in place so a rename keeps the template's id
+                            editingId.takeIf { templateRepository.updateTemplate(it, name, zpl) }
+                        } else {
+                            templateRepository.saveTemplate(name, zpl)
                         }
+                        if (savedTemplateId == null) {
+                            Toast.makeText(this, R.string.zpl_editor_save_failed, Toast.LENGTH_SHORT).show()
+                        }
+                        savedTemplateId != null
                     },
                     onExport = { suggestedName, zpl -> launchExport(suggestedName, zpl) },
                     onReadFromDevice = { readSettingsFromDevice() }

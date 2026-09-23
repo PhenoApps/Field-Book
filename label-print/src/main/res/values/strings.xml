@@ -12,12 +12,28 @@
     <string name="label_size_selector">Label Size</string>
     <string name="dialog_apply">Apply</string>
 
+    <string name="label_templates_title">Label templates</string>
+    <string name="label_templates_add">Add template</string>
+    <string name="label_templates_empty">No templates</string>
+    <string name="label_templates_default_badge">Default</string>
+    <string name="label_templates_more_options">More options</string>
+    <string name="label_templates_set_default">Set as default</string>
+    <string name="label_templates_duplicate">Duplicate</string>
+    <string name="label_templates_delete_title">Delete \"%1$s\"?</string>
+    <string name="label_templates_delete_default">This is the default template. A different default will be chosen.</string>
+    <string name="label_templates_delete_cannot_undo">This cannot be undone.</string>
+    <plurals name="label_templates_used_by">
+        <item quantity="one">Used by %d trait</item>
+        <item quantity="other">Used by %d traits</item>
+    </plurals>
+    <plurals name="label_templates_delete_used_by">
+        <item quantity="one">%d trait uses this template and will print with the default template instead.</item>
+        <item quantity="other">%d traits use this template and will print with the default template instead.</item>
+    </plurals>
+
     <string name="zpl_editor_title">Label editor</string>
-    <string name="zpl_editor_untitled">Untitled</string>
     <string name="zpl_editor_delete">Delete</string>
     <string name="zpl_editor_save">Save</string>
-    <string name="zpl_editor_template">Template</string>
-    <string name="zpl_editor_new_template">＋ New Template</string>
     <string name="zpl_editor_name">Name</string>
     <string name="zpl_editor_name_placeholder">Enter template name</string>
     <string name="zpl_editor_reading_printer">Reading from printer…</string>
@@ -54,14 +70,10 @@
     <string name="zpl_editor_edit_date">Edit Date Element</string>
     <string name="zpl_editor_edit_qr">Edit QR Code Element</string>
     <string name="zpl_editor_edit_barcode">Edit Barcode Element</string>
-    <string name="zpl_editor_delete_template">Delete Template</string>
-    <string name="zpl_editor_delete_confirm">Are you sure you want to delete \"%1$s\"? This cannot be undone.</string>
     <string name="zpl_editor_save_template">Save As Template</string>
     <string name="zpl_editor_template_name">Template name</string>
     <string name="zpl_editor_template_name_empty">Template name cannot be empty</string>
-    <string name="zpl_editor_overwrite_title">Replace Template</string>
-    <string name="zpl_editor_overwrite_message">A template named \"%1$s\" already exists. Replace it with this template?</string>
-    <string name="zpl_editor_replace">Replace</string>
+    <string name="zpl_editor_name_taken">A template with this name already exists</string>
     <string name="zpl_editor_invalid_chars">Characters {, }, ^, and ~ are not allowed</string>
     <string name="zpl_editor_printer_dpi">Printer DPI</string>
     <string name="zpl_editor_manual_dpi">Manual DPI</string>

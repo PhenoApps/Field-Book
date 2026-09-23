@@ -2,9 +2,12 @@ package com.fieldbook.tracker.zpl
 
 import android.content.ContentValues
 import android.content.SharedPreferences
+import android.database.sqlite.SQLiteConstraintException
 import android.util.Log
 import androidx.core.content.edit
 import com.fieldbook.tracker.database.LabelTemplateTable
+import com.fieldbook.tracker.database.dao.ObservationVariableValueDao
+import com.fieldbook.tracker.database.models.TraitAttributes
 import com.fieldbook.tracker.database.withDatabase
 import org.json.JSONException
 import org.json.JSONObject
@@ -217,28 +220,65 @@ class TemplateRepository @Inject constructor(private val prefs: SharedPreference
      */
     fun importTemplate(name: String, zpl: String): String? {
         val templates = getAllTemplates()
-        val existingNames = templates.values.toSet()
 
         templates.entries.find { it.value == name }?.let { existing ->
             if (getTemplate(existing.key) == zpl) return existing.key
         }
 
-        var uniqueName = name
-        var suffix = 2
-        while (uniqueName in existingNames) {
-            uniqueName = "$name ($suffix)"
-            suffix++
-        }
-        return saveTemplate(uniqueName, zpl)
+        return saveTemplate(uniqueName(name, templates.values.toSet()), zpl)
     }
 
     /**
+     * Updates a template's name and ZPL by ID, so renaming keeps the same template.
+     * Returns false if the update failed, e.g. the name belongs to another template.
+     */
+    fun updateTemplate(id: String, name: String, zpl: String): Boolean = withDatabase { db ->
+        val values = ContentValues().apply {
+            put(LabelTemplateTable.NAME, name)
+            put(LabelTemplateTable.ZPL, zpl)
+        }
+        try {
+            db.update(LabelTemplateTable.TABLE_NAME, values, "${LabelTemplateTable.ID} = ?", arrayOf(id)) > 0
+        } catch (e: SQLiteConstraintException) {
+            Log.w(TAG, "Template name already in use: $name", e)
+            false
+        }
+    } ?: false
+
+    /**
+     * Saves a copy of a template under the first free "name (n)". Returns the copy's ID.
+     */
+    fun duplicateTemplate(id: String): String? {
+        val name = getTemplateName(id) ?: return null
+        val zpl = getTemplate(id) ?: return null
+        return saveTemplate(uniqueName(name, getAllTemplates().values.toSet()), zpl)
+    }
+
+    private fun uniqueName(base: String, existingNames: Set<String>): String {
+        var uniqueName = base
+        var suffix = 2
+        while (uniqueName in existingNames) {
+            uniqueName = "$base ($suffix)"
+            suffix++
+        }
+        return uniqueName
+    }
+
+    /**
+     * Number of traits that use the template as their own (not through the default).
+     */
+    fun countTraitsUsing(id: String): Int =
+        ObservationVariableValueDao.countByAttributeValue(TraitAttributes.PRINT_TEMPLATE_ID.key, id)
+
+    /**
      * Deletes a template by ID, along with its saved assignments.
+     * Traits that used it are cleared so they print with the default template.
      */
     fun deleteTemplate(id: String) {
         withDatabase { db ->
             db.delete(LabelTemplateTable.TABLE_NAME, "${LabelTemplateTable.ID} = ?", arrayOf(id))
         }
+        ObservationVariableValueDao.clearAttributeValue(TraitAttributes.PRINT_TEMPLATE_ID.key, id)
         removeAssignments(id)
     }
 

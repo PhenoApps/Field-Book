@@ -106,16 +106,20 @@ private fun String.hasInvalidTemplateChars() =
 
 /**
  * Visual-first ZPL label editor with drag-and-drop element positioning.
+ * Edits a single template, or creates one when [initialTemplateName] is null.
+ * Choosing, deleting and setting templates as default happens in [LabelTemplatesScreen].
+ *
+ * @param otherTemplateNames names of the other saved templates, which this one can't be saved as
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ZplEditorScreen(
     initialZpl: String = "",
     initialTemplateName: String? = null,
-    templates: Map<String, String>, // name -> zpl
+    otherTemplateNames: Set<String>,
     onDismiss: () -> Unit,
-    onSave: (name: String, zpl: String) -> Unit,
-    onDelete: (name: String) -> Unit,
+    /** Saves the template, returns false if it couldn't be saved so the editor stays open. */
+    onSave: (name: String, zpl: String) -> Boolean,
     onExport: (suggestedName: String, zpl: String) -> Unit,
     onReadFromDevice: (suspend () -> LabelSettings?)? = null
 ) {
@@ -140,7 +144,6 @@ fun ZplEditorScreen(
 
     var zplText by remember { mutableStateOf(initialZpl) }
     var templateName by remember { mutableStateOf(initialTemplateName) }
-    var selectedTemplateName by remember { mutableStateOf(initialTemplateName) }
     var mediaType by remember { mutableStateOf(initialParsed.mediaType) }
     var mediaGap by remember { mutableStateOf(initialParsed.mediaGap) }
 
@@ -152,28 +155,18 @@ fun ZplEditorScreen(
     var showZplCode by remember { mutableStateOf(false) }
     var showSaveDialog by remember { mutableStateOf(false) }
     var showSettingsDialog by remember { mutableStateOf(false) }
-    var showDeleteConfirm by remember { mutableStateOf(false) }
     var showAddElementDialog by remember { mutableStateOf(false) }
     var showEditElementDialog by remember { mutableStateOf(false) }
     var showUnsavedWarningDialog by remember { mutableStateOf(false) }
     var selectedElementId by remember { mutableStateOf<String?>(null) }
 
-    /** Name of a different, existing template the user is about to replace. */
-    var pendingOverwriteName by remember { mutableStateOf<String?>(null) }
+    // Templates are saved by name, so another template's name can't be reused
+    val nameTaken = templateName?.trim()?.let { it in otherTemplateNames } == true
 
     fun saveAndClose(name: String) {
-        onSave(name, zplText)
-        templateName = name
-        selectedTemplateName = name
-        onDismiss()
-    }
-
-    // Saving is by name, so saving under another template's name replaces that template
-    fun requestSave(name: String) {
-        if (name in templates.keys && name != selectedTemplateName) {
-            pendingOverwriteName = name
-        } else {
-            saveAndClose(name)
+        if (onSave(name, zplText)) {
+            templateName = name
+            onDismiss()
         }
     }
 
@@ -222,12 +215,13 @@ fun ZplEditorScreen(
         syncingFromCode = false
     }
 
-    val hasUnsavedChanges = remember(zplText, templateName, templates) {
-        if (templateName == null) {
-            zplText.isNotBlank() && zplText != initialZpl
-        } else {
-            zplText != templates[templateName]
-        }
+    val hasUnsavedChanges = remember(zplText, templateName) {
+        zplText != initialZpl || templateName != initialTemplateName
+    }
+
+    fun resetChanges() {
+        templateName = initialTemplateName
+        syncFromCode(initialZpl)
     }
 
     fun handleDismiss() {
@@ -248,8 +242,8 @@ fun ZplEditorScreen(
                 title = {
                     Text(
                         text = stringResource(R.string.zpl_editor_title),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                        // matches the app's AppBar title: default top bar style, medium weight
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
                     )
                 },
                 navigationIcon = {
@@ -262,13 +256,10 @@ fun ZplEditorScreen(
                 },
                 actions = {
                     IconButton(
-                        onClick = {
-                            val saved = templates[templateName]
-                            if (saved != null) syncFromCode(saved)
-                        },
-                        enabled = templateName != null && templates.containsKey(templateName),
+                        onClick = ::resetChanges,
+                        enabled = hasUnsavedChanges,
                         colors = IconButtonDefaults.iconButtonColors(
-                            disabledContentColor = MaterialTheme.colorScheme.onPrimary
+                            disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.38f)
                         )
                     ) {
                         Icon(
@@ -280,7 +271,7 @@ fun ZplEditorScreen(
                         onClick = { onExport(templateName ?: "template", zplText) },
                         enabled = !hasGlobalErrors,
                         colors = IconButtonDefaults.iconButtonColors(
-                            disabledContentColor = MaterialTheme.colorScheme.onPrimary
+                            disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.38f)
                         )
                     ) {
                         Icon(
@@ -306,42 +297,17 @@ fun ZplEditorScreen(
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                OutlinedButton(
-                    onClick = { showDeleteConfirm = true },
-                    enabled = templateName != null,
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.error,
-                        disabledContainerColor = MaterialTheme.colorScheme.surface,
-                        disabledContentColor = MaterialTheme.colorScheme.error
-                    ),
-                    border = androidx.compose.foundation.BorderStroke(
-                        1.dp,
-                        if (templateName != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.error
-                    )
-                ) {
-
-                    Icon(
-                        Icons.Default.Delete,
-                        null,
-                        Modifier.padding(end = 4.dp),
-                        tint = if (templateName != null) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.error
-                    )
-                    Text(stringResource(R.string.zpl_editor_delete))
-                }
-
-
                 Button(
                     onClick = {
-                        if (templateName != null) {
-                            requestSave(templateName!!)
-                        } else {
+                        val name = templateName?.trim()
+                        if (name.isNullOrEmpty()) {
                             showSaveDialog = true
+                        } else {
+                            saveAndClose(name)
                         }
                     },
                     modifier = Modifier.weight(1f),
-                    enabled = !hasGlobalErrors,
+                    enabled = !hasGlobalErrors && !nameTaken,
                     border = lowContrastOutline(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.surface,
@@ -367,62 +333,16 @@ fun ZplEditorScreen(
                     .consumeWindowInsets(innerPadding)
                     .imePadding()
             ) {
-                var dropdownExpanded by remember { mutableStateOf(false) }
-
-                ExposedDropdownMenuBox(
-                    expanded = dropdownExpanded,
-                    onExpandedChange = { dropdownExpanded = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 4.dp)
-                ) {
-                    OutlinedTextField(
-                        value = selectedTemplateName ?: stringResource(R.string.zpl_editor_untitled),
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text(stringResource(R.string.zpl_editor_template)) },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded) },
-                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                    )
-                    ExposedDropdownMenu(
-                        expanded = dropdownExpanded,
-                        onDismissRequest = { dropdownExpanded = false },
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.zpl_editor_new_template)) },
-                            onClick = {
-                                templateName = null
-                                selectedTemplateName = null
-                                elements.clear()
-                                zplText = ""
-                                dropdownExpanded = false
-                            }
-                        )
-                        HorizontalDivider()
-                        templates.keys.forEach { name ->
-                            DropdownMenuItem(
-                                text = { Text(name) },
-                                onClick = {
-                                    templateName = name
-                                    selectedTemplateName = name
-                                    syncFromCode(templates[name] ?: "")
-                                    dropdownExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-
                 OutlinedTextField(
                     value = templateName ?: "",
                     onValueChange = { templateName = it.ifBlank { null } },
                     label = { Text(stringResource(R.string.zpl_editor_name)) },
                     singleLine = true,
                     placeholder = { Text(stringResource(R.string.zpl_editor_name_placeholder)) },
+                    isError = nameTaken,
+                    supportingText = if (nameTaken) {
+                        { Text(stringResource(R.string.zpl_editor_name_taken)) }
+                    } else null,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 12.dp, vertical = 4.dp)
@@ -753,42 +673,10 @@ fun ZplEditorScreen(
             }
         }
 
-        if (showDeleteConfirm) {
-            AlertDialog(
-                onDismissRequest = { showDeleteConfirm = false },
-                containerColor = MaterialTheme.colorScheme.surface,
-                title = { Text(stringResource(R.string.zpl_editor_delete_template)) },
-                text = { Text(stringResource(R.string.zpl_editor_delete_confirm, templateName ?: "")) },
-                confirmButton = {
-                    TextButton(onClick = {
-                        if (templateName != null) {
-                            onDelete(templateName!!)
-                            templateName = null
-                            selectedTemplateName = null
-                            elements.clear()
-                            zplText = ""
-                        }
-                        showDeleteConfirm = false
-                    }) {
-                        Text(
-                            stringResource(R.string.zpl_editor_delete),
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showDeleteConfirm = false }) {
-                        Text(
-                            stringResource(R.string.dialog_cancel)
-                        )
-                    }
-                }
-            )
-        }
-
         if (showSaveDialog) {
             var saveName by remember { mutableStateOf(templateName ?: "") }
             var showError by remember { mutableStateOf(false) }
+            val saveNameTaken = saveName.trim() in otherTemplateNames
             AlertDialog(
                 onDismissRequest = { showSaveDialog = false },
                 containerColor = MaterialTheme.colorScheme.surface,
@@ -800,12 +688,15 @@ fun ZplEditorScreen(
                             onValueChange = { saveName = it; if (it.isNotBlank()) showError = false },
                             label = { Text(stringResource(R.string.zpl_editor_template_name)) },
                             singleLine = true,
-                            isError = showError,
+                            isError = showError || saveNameTaken,
                             modifier = Modifier.fillMaxWidth()
                         )
-                        if (showError) {
+                        if (showError || saveNameTaken) {
                             Text(
-                                text = stringResource(R.string.zpl_editor_template_name_empty),
+                                text = stringResource(
+                                    if (saveNameTaken) R.string.zpl_editor_name_taken
+                                    else R.string.zpl_editor_template_name_empty
+                                ),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.error,
                                 modifier = Modifier.padding(top = 4.dp)
@@ -814,43 +705,21 @@ fun ZplEditorScreen(
                     }
                 },
                 confirmButton = {
-                    TextButton(onClick = {
-                        if (saveName.isBlank()) showError = true
-                        else {
-                            showSaveDialog = false
-                            requestSave(saveName.trim())
-                        }
-                    }) { Text(stringResource(R.string.zpl_editor_save)) }
+                    TextButton(
+                        onClick = {
+                            if (saveName.isBlank()) showError = true
+                            else {
+                                showSaveDialog = false
+                                saveAndClose(saveName.trim())
+                            }
+                        },
+                        enabled = !saveNameTaken
+                    ) { Text(stringResource(R.string.zpl_editor_save)) }
                 },
                 dismissButton = {
                     TextButton(onClick = {
                         showSaveDialog = false
                     }) { Text(stringResource(R.string.dialog_cancel)) }
-                }
-            )
-        }
-
-        pendingOverwriteName?.let { name ->
-            AlertDialog(
-                onDismissRequest = { pendingOverwriteName = null },
-                containerColor = MaterialTheme.colorScheme.surface,
-                title = { Text(stringResource(R.string.zpl_editor_overwrite_title)) },
-                text = { Text(stringResource(R.string.zpl_editor_overwrite_message, name)) },
-                confirmButton = {
-                    TextButton(onClick = {
-                        pendingOverwriteName = null
-                        saveAndClose(name)
-                    }) {
-                        Text(
-                            stringResource(R.string.zpl_editor_replace),
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { pendingOverwriteName = null }) {
-                        Text(stringResource(R.string.dialog_cancel))
-                    }
                 }
             )
         }

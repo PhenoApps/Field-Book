@@ -2,14 +2,12 @@ package com.fieldbook.tracker.preferences
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.LabelTemplatesActivity
 import com.fieldbook.tracker.activities.PreferencesActivity
-import com.fieldbook.tracker.activities.ZplEditorActivity
 import com.fieldbook.tracker.printing.LabelPrintService
-import com.fieldbook.tracker.traits.formats.parameters.PrintTemplateParameter
 import com.fieldbook.tracker.zpl.TemplateRepository
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -22,18 +20,6 @@ class LabelsPreferencesFragment : PreferenceFragmentCompat() {
 
     @Inject
     lateinit var templateRepository: TemplateRepository
-
-    private val zplDefaultTemplateLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == android.app.Activity.RESULT_OK) {
-            val data = result.data ?: return@registerForActivityResult
-            val templateId = data.getStringExtra(ZplEditorActivity.RESULT_TEMPLATE_ID)
-            if (!templateId.isNullOrBlank()) {
-                setDefaultTemplate(templateId)
-            }
-        }
-    }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences_labels, rootKey)
@@ -57,40 +43,33 @@ class LabelsPreferencesFragment : PreferenceFragmentCompat() {
             }
         }
 
-        findPreference<Preference>("pref_key_zpl_editor")?.onPreferenceClickListener =
+        findPreference<Preference>(KEY_LABEL_TEMPLATES)?.onPreferenceClickListener =
             Preference.OnPreferenceClickListener {
-                startActivity(Intent(context, ZplEditorActivity::class.java))
-                true
-            }
-
-        templateRepository.ensureBuiltInTemplatesExist()
-        updateDefaultTemplateSummary()
-        findPreference<Preference>("pref_key_default_zpl_template")?.onPreferenceClickListener =
-            Preference.OnPreferenceClickListener {
-                val ctx = context ?: return@OnPreferenceClickListener true
-                PrintTemplateParameter.showTemplatePicker(
-                    context = ctx,
-                    templateRepository = templateRepository,
-                    currentTemplateId = templateRepository.getDefaultTemplateId(),
-                    onTemplateSelected = ::setDefaultTemplate,
-                    onCreateNew = {
-                        zplDefaultTemplateLauncher.launch(PrintTemplateParameter.newTemplateIntent(ctx))
-                    }
-                )
+                startActivity(Intent(context, LabelTemplatesActivity::class.java))
                 true
             }
     }
 
-    private fun setDefaultTemplate(templateId: String) {
-        templateRepository.setDefaultTemplateId(templateId)
-        updateDefaultTemplateSummary()
+    override fun onResume() {
+        super.onResume()
+        // the default can change in the templates screen
+        updateTemplatesSummary()
     }
 
-    private fun updateDefaultTemplateSummary() {
-        findPreference<Preference>("pref_key_default_zpl_template")?.let { pref ->
-            val defaultId = templateRepository.getDefaultTemplateId()
-            val name = if (defaultId != null) templateRepository.getTemplateName(defaultId) else null
-            pref.summary = name ?: getString(R.string.preferences_labels_default_template_summary)
+    private fun updateTemplatesSummary() {
+        findPreference<Preference>(KEY_LABEL_TEMPLATES)?.let { pref ->
+            templateRepository.ensureBuiltInTemplatesExist()
+            val defaultName = templateRepository.getDefaultTemplateId()
+                ?.let { templateRepository.getTemplateName(it) }
+            pref.summary = if (defaultName != null) {
+                getString(R.string.preferences_labels_templates_summary, defaultName)
+            } else {
+                getString(R.string.preferences_labels_templates_description)
+            }
         }
+    }
+
+    companion object {
+        private const val KEY_LABEL_TEMPLATES = "pref_key_label_templates"
     }
 }

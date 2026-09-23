@@ -43,7 +43,7 @@
         app:fragment="com.fieldbook.tracker.preferences.SoundsPreferencesFragment" />
 
     <Preference
-        android:icon="@drawable/ic_trait_barcode"
+        android:icon="@drawable/tag_text_outline"
         android:key="pref_key_labels_settings"
         android:title="@string/preferences_labels_title"
         app:fragment="com.fieldbook.tracker.preferences.LabelsPreferencesFragment" />
