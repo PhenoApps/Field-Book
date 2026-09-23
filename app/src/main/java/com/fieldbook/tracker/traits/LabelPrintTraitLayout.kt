@@ -27,25 +27,32 @@ import com.fieldbook.tracker.printing.LabelPrintService
 import com.fieldbook.tracker.printing.LabelPrintStore
 import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.zpl.TemplateRepository
+import dagger.hilt.android.AndroidEntryPoint
 import org.phenoapps.labelprint.zpl.ParseResult
 import org.phenoapps.labelprint.zpl.TokenizeResult
 import org.phenoapps.labelprint.zpl.ZplParserImpl
 import org.phenoapps.labelprint.zpl.ZplTokenizerImpl
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
+import javax.inject.Inject
 
 /**
  * Trait layout for Zebra label printing.
  */
+@AndroidEntryPoint
 class LabelPrintTraitLayout : BaseTraitLayout {
 
     companion object {
         private const val TAG = "LabelPrintTraitLayout"
     }
 
+    @Inject
+    lateinit var service: LabelPrintService
+
+    @Inject
+    lateinit var templateRepository: TemplateRepository
+
     private lateinit var store: LabelPrintStore
-    private lateinit var service: LabelPrintService
-    private lateinit var templateRepository: TemplateRepository
 
     private var composeView: ComposeView? = null
     private var mActivity: Activity? = null
@@ -160,16 +167,11 @@ class LabelPrintTraitLayout : BaseTraitLayout {
         composeView = act.findViewById(R.id.compose_view)
         mActivity = act
 
-        templateRepository = TemplateRepository(prefs)
         store = LabelPrintStore(prefs)
     }
 
     override fun loadLayout() {
         super.loadLayout()
-
-        // Manual DI for service until fully refactored to Hilt if needed
-        val printerConnector = com.fieldbook.tracker.printing.AppPrinterConnector(context, prefs)
-        service = LabelPrintService(printerConnector)
 
         store.restoreConfig()
         store.currentPlotIdState.value = currentRange?.uniqueId
@@ -330,7 +332,7 @@ class LabelPrintTraitLayout : BaseTraitLayout {
     @SuppressLint("MissingPermission")
     private fun refreshPrinterConnectionState() {
         // receivers are registered with the other layouts, before this one may have loaded
-        if (!::store.isInitialized || !::service.isInitialized) return
+        if (!::store.isInitialized) return
         store.isPrinterConnected.value = service.isBluetoothEnabled() 
                 && !service.getSavedPrinterName().isNullOrEmpty()
                 && !store.isManualDisconnected.value

@@ -7,13 +7,13 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.ZplEditorActivity
 import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.ValidationResult
 import com.fieldbook.tracker.zpl.TemplateRepository
+import com.fieldbook.tracker.zpl.TemplateRepositoryEntryPoint
 import com.google.android.material.textfield.TextInputEditText
 
 class PrintTemplateParameter() : BaseFormatParameter(
@@ -83,8 +83,8 @@ class PrintTemplateParameter() : BaseFormatParameter(
         private val templateEditText: TextInputEditText =
             itemView.findViewById(R.id.list_item_trait_parameter_print_template_et)
 
-        private val templateRepository: TemplateRepository
-            get() = TemplateRepository(PreferenceManager.getDefaultSharedPreferences(itemView.context))
+        private val templateRepository: TemplateRepository =
+            TemplateRepositoryEntryPoint.get(itemView.context)
 
         init {
             templateEditText.setOnClickListener {

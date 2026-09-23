@@ -2,7 +2,6 @@ package com.fieldbook.tracker.utilities
 
 import android.content.Context
 import android.util.Log
-import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.FieldObject
@@ -33,6 +32,7 @@ import javax.inject.Inject
 class SampleDataGenerator @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val traitRepository: TraitRepository,
+    private val templateRepository: TemplateRepository,
     private val database: DataHelper
 ) {
 
@@ -162,11 +162,7 @@ class SampleDataGenerator @Inject constructor(
 
             val json = Json { ignoreUnknownKeys = true }
             val wrapper = json.decodeFromString(TraitImportFile.serializer(), jsonText)
-            val templateRepository = TemplateRepository(
-                PreferenceManager.getDefaultSharedPreferences(context)
-            ).apply {
-                ensureDefaultTemplate()
-            }
+            templateRepository.ensureDefaultTemplate()
 
             val loaded = mutableListOf<TraitObject>()
             val maxPosition = traitRepository.getMaxPosition()

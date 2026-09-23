@@ -36,6 +36,7 @@ class TraitRepository @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val database: DataHelper,
     private val prefs: SharedPreferences,
+    private val templateRepository: TemplateRepository,
     @param:IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) {
     companion object {
@@ -207,9 +208,7 @@ class TraitRepository @Inject constructor(
                     ?: return@withContext onError(R.string.error_output_stream_failed)
 
             output.use {
-                val templateRepository = TemplateRepository(prefs).apply {
-                    ensureDefaultTemplate()
-                }
+                templateRepository.ensureDefaultTemplate()
                 val wrapper = TraitImportFile(
                     traits.map { trait ->
                         trait.toTraitJson(
@@ -279,9 +278,7 @@ class TraitRepository @Inject constructor(
             val jsonText = stream.bufferedReader().use { it.readText() }
 
             val wrapper = json.decodeFromString(TraitImportFile.serializer(), jsonText)
-            val templateRepository = TemplateRepository(prefs).apply {
-                ensureDefaultTemplate()
-            }
+            templateRepository.ensureDefaultTemplate()
 
             wrapper.traits.mapNotNull { json ->
                 runCatching {

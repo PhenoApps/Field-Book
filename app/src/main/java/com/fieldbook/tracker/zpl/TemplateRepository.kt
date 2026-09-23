@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.zpl
 
 import android.content.ContentValues
+import android.content.Context
 import android.content.SharedPreferences
 import android.database.sqlite.SQLiteConstraintException
 import android.util.Log
@@ -9,6 +10,10 @@ import com.fieldbook.tracker.database.LabelTemplateTable
 import com.fieldbook.tracker.database.dao.ObservationVariableValueDao
 import com.fieldbook.tracker.database.models.TraitAttributes
 import com.fieldbook.tracker.database.withDatabase
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import org.json.JSONException
 import org.json.JSONObject
 import javax.inject.Inject
@@ -366,5 +371,20 @@ class TemplateRepository @Inject constructor(private val prefs: SharedPreference
             Log.w(TAG, "Malformed assignments JSON, ignoring", e)
             emptyMap()
         }
+    }
+}
+
+/**
+ * Gives classes Hilt doesn't create, like trait format parameters, the singleton [TemplateRepository].
+ */
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface TemplateRepositoryEntryPoint {
+    fun templateRepository(): TemplateRepository
+
+    companion object {
+        fun get(context: Context): TemplateRepository = EntryPointAccessors
+            .fromApplication(context.applicationContext, TemplateRepositoryEntryPoint::class.java)
+            .templateRepository()
     }
 }

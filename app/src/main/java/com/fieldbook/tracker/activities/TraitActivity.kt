@@ -1,6 +1,5 @@
 package com.fieldbook.tracker.activities
 
-import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.zpl.TemplateRepository
 import android.app.AlertDialog
 import android.net.Uri
@@ -63,6 +62,9 @@ class TraitActivity : ThemedActivity() {
 
     @Inject
     lateinit var traitRepo: TraitRepository
+
+    @Inject
+    lateinit var templateRepository: TemplateRepository
 
     companion object {
         private const val TAG = "TraitEditorActivity"
@@ -284,7 +286,7 @@ class TraitActivity : ThemedActivity() {
         if (parameter is PrintTemplateParameter) {
             PrintTemplateParameter.showTemplatePicker(
                 context = this,
-                templateRepository = TemplateRepository(PreferenceManager.getDefaultSharedPreferences(this)),
+                templateRepository = templateRepository,
                 currentTemplateId = trait.printTemplateId.ifEmpty { null },
                 onTemplateSelected = { templateId -> applyPrintTemplate(trait, templateId, onUpdated) },
                 onCreateNew = {
