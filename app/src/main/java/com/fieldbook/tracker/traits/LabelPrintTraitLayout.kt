@@ -371,31 +371,9 @@ class LabelPrintTraitLayout : BaseTraitLayout {
             return
         }
 
-        val fieldName = prefs.getString(GeneralKeys.FIELD_FILE, "") ?: ""
-        val fieldNameLabel = context.getString(R.string.field_name_attribute)
+        val uniqueId = currentRange?.uniqueId ?: return
 
-        val rangeObject = currentRange ?: return
-        val uniqueId = rangeObject.uniqueId ?: return
-
-        val observationUnitAttributes =
-            buildObservationUnitAttributes(uniqueId, fieldNameLabel)
-
-        val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
-        val assignments = templateRepository.getAssignments(studyId, templateId)
-
-        val resolvedAssignments = assignments.mapValues { (_, fieldOption) ->
-            LabelPrintService.resolveFieldValue(
-                fieldOption, observationUnitAttributes,
-                fieldName, fieldNameLabel,
-                database = database,
-                studyId = collectActivity.studyId,
-                plotId = uniqueId,
-                context = context
-            )
-        }
-
-        val resolvedZpl =
-            LabelPrintService.applyPlaceholderAssignments(templateZpl, resolvedAssignments)
+        val resolvedZpl = resolveLabelZpl(templateId, templateZpl, uniqueId)
 
         val labels = List<String>(store.selectedCopies.intValue) { resolvedZpl }
 
@@ -409,29 +387,7 @@ class LabelPrintTraitLayout : BaseTraitLayout {
         val templateId = store.templateIdState.value ?: return null
         val templateZpl = templateRepository.getTemplate(templateId) ?: return null
 
-        val fieldName = prefs.getString(GeneralKeys.FIELD_FILE, "") ?: ""
-        val fieldNameLabel = context.getString(R.string.field_name_attribute)
-
-        val uniqueId = currentRange?.uniqueId
-        val observationUnitAttributes = if (uniqueId != null) {
-            buildObservationUnitAttributes(uniqueId, fieldNameLabel)
-        } else emptyMap()
-
-        val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
-        val assignments = templateRepository.getAssignments(studyId, templateId)
-
-        val resolvedAssignments = assignments.mapValues { (_, fieldOption) ->
-            LabelPrintService.resolveFieldValue(
-                fieldOption, observationUnitAttributes,
-                fieldName, fieldNameLabel,
-                database = database,
-                studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0).toString(),
-                plotId = uniqueId,
-                context = context
-            )
-        }
-        val previewZpl =
-            LabelPrintService.applyPlaceholderAssignments(templateZpl, resolvedAssignments)
+        val previewZpl = resolveLabelZpl(templateId, templateZpl, currentRange?.uniqueId)
 
         if (previewZpl.isNotBlank()) {
             val tokenizer = ZplTokenizerImpl()
@@ -445,6 +401,35 @@ class LabelPrintTraitLayout : BaseTraitLayout {
             }
         }
         return null
+    }
+
+    /**
+     * The template's ZPL with each placeholder replaced by its assigned field's value for the plot.
+     * Placeholders resolve to blank values when there is no plot.
+     */
+    private fun resolveLabelZpl(templateId: String, templateZpl: String, uniqueId: String?): String {
+        val fieldName = prefs.getString(GeneralKeys.FIELD_FILE, "") ?: ""
+        val fieldNameLabel = context.getString(R.string.field_name_attribute)
+
+        val observationUnitAttributes = if (uniqueId != null) {
+            buildObservationUnitAttributes(uniqueId, fieldNameLabel)
+        } else emptyMap()
+
+        val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+        val assignments = templateRepository.getAssignments(studyId, templateId)
+
+        val resolvedAssignments = assignments.mapValues { (_, fieldOption) ->
+            LabelPrintService.resolveFieldValue(
+                fieldOption, observationUnitAttributes,
+                fieldName, fieldNameLabel,
+                database = database,
+                studyId = studyId.toString(),
+                plotId = uniqueId,
+                context = context
+            )
+        }
+
+        return LabelPrintService.applyPlaceholderAssignments(templateZpl, resolvedAssignments)
     }
 
     private fun buildObservationUnitAttributes(
