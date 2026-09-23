@@ -632,6 +632,8 @@
     <string name="trait_boolean_unset">Desmarcar</string>
     <!-- Trait Layout: GoPro -->
     <string name="trait_go_pro_capture_button_text">Capturar\n</string>
+    <string name="trait_go_pro_await_device_title">Selecione um GoPro pareado</string>
+    <string name="trait_go_pro_no_paired_devices">Nenhum GoPro emparelhado. Pareie a câmera nas configurações do Bluetooth Android primeiro.</string>
     <string name="trait_go_pro_await_ble_title">Aguardando a conexão GoPro BLE</string>
     <string name="trait_go_pro_await_ble_message">Comunicando com o GoPro BLE, isso pode demorar um minuto.</string>
     <string name="trait_go_pro_await_ap_title">Aguardando o GoPro AP</string>
@@ -641,6 +643,11 @@
     <string name="go_pro_layout_black_11_not_detected">Esta característica foi feita para um GoPro Black 11, por favor, entre em contato com os desenvolvedores para implementar seu modelo GoPro.\n</string>
     <string name="go_pro_frag_connect_btn_content_description">Conecte-se a uma câmera do GoPro.\n</string>
     <string name="trait_go_pro_capture_content_description">Capture uma foto de um dispositivo GoPro conectado.\n</string>
+    <string name="gopro_error_ble_failed">Não foi possível conectar ao GoPro por Bluetooth.</string>
+    <string name="gopro_error_ble_timeout">Tempo limite de conexão com o GoPro por Bluetooth.</string>
+    <string name="gopro_error_ble_disconnected">Perdeu a conexão Bluetooth com o GoPro.</string>
+    <string name="gopro_error_wifi_unavailable">Não foi possível juntar-se à rede Wi-Fi GoPro.</string>
+    <string name="gopro_error_wifi_lost">Perdeu a rede Wi-Fi GoPro.</string>
     <!-- Trait Layout: USB Camera -->
     <string name="trait_usb_camera_zoom_in_button_text">Mais Zoom</string>
     <string name="trait_usb_camera_zoom_out_button_text">Menos Zoom</string>
