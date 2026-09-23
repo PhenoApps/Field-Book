@@ -47,6 +47,7 @@ import com.fieldbook.tracker.utilities.GeoJsonUtil;
 import com.fieldbook.tracker.utilities.ZipUtil;
 import com.fieldbook.tracker.utilities.export.SpectralFileProcessor;
 import com.fieldbook.tracker.utilities.export.ValueProcessorFormatAdapter;
+import com.fieldbook.tracker.zpl.TemplateRepository;
 
 import org.phenoapps.utils.BaseDocumentTreeUtil;
 import org.threeten.bp.OffsetDateTime;
@@ -1242,6 +1243,9 @@ public class DataHelper {
                 try {
                     BaseDocumentTreeUtil.Companion.copy(context, file, DocumentFile.fromFile(oldDb));
 
+                    // a .db file has no preferences, so template ids saved in them don't match it
+                    TemplateRepository.clearTemplatePreferences(preferences);
+
                     open();
                 } catch (Exception e) {
 
@@ -1254,6 +1258,11 @@ public class DataHelper {
                     try (OutputStream output = new FileOutputStream(internalDbPath)) {
                         boolean isSampleDb = fileName.equals("sample_db.zip");
                         ZipUtil.Companion.unzip(context, input, output, isSampleDb);
+
+                        // other zips restore their own preferences, the sample database's are skipped
+                        if (isSampleDb) {
+                            TemplateRepository.clearTemplatePreferences(preferences);
+                        }
 
                         open();
                     } catch (Exception e) {

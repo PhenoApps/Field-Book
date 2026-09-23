@@ -27,6 +27,22 @@ class TemplateRepository @Inject constructor(private val prefs: SharedPreference
         const val KEY_DEFAULT_TEMPLATE_ID = "zpl_default_template_id"
         const val KEY_STUDY_ASSIGNMENTS_PREFIX = "zpl_study_template_assignments_"
 
+        /**
+         * Removes the default template and all saved assignments. Call after replacing the
+         * database without its preferences, since these are keyed by template ID and would
+         * otherwise point at unrelated templates in the new database.
+         */
+        @JvmStatic
+        fun clearTemplatePreferences(prefs: SharedPreferences) {
+            val keys = prefs.all.keys.filter {
+                it == KEY_DEFAULT_TEMPLATE_ID || it == KEY_ASSIGNMENTS_JSON
+                        || it.startsWith(KEY_STUDY_ASSIGNMENTS_PREFIX)
+            }
+            prefs.edit {
+                keys.forEach { remove(it) }
+            }
+        }
+
         /** Built-in template used as the default when none is set. */
         const val BUILT_IN_DEFAULT_TEMPLATE_NAME = "2×1 Simple"
 
