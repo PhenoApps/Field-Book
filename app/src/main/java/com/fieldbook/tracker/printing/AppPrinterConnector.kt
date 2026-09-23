@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.core.content.edit
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.objects.TraitObject
@@ -20,6 +21,10 @@ class AppPrinterConnector @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val prefs: SharedPreferences
 ) : PrinterConnector {
+
+    companion object {
+        private const val TAG = "AppPrinterConnector"
+    }
 
     private val bluetoothUtil = BluetoothUtil()
 
@@ -74,20 +79,27 @@ class AppPrinterConnector @Inject constructor(
         }
 
         Thread {
+            var connection: com.zebra.sdk.comm.BluetoothConnection? = null
             try {
-                val adapter = BluetoothAdapter.getDefaultAdapter()
-                val device = adapter.bondedDevices.firstOrNull { it.name == printerName }
+                val device = BluetoothAdapter.getDefaultAdapter()
+                    ?.bondedDevices
+                    ?.firstOrNull { it.name == printerName }
                 if (device != null) {
-                    val connection = com.zebra.sdk.comm.BluetoothConnection(device.address)
-                    connection.open()
+                    connection = com.zebra.sdk.comm.BluetoothConnection(device.address).apply { open() }
                     connection.write("~JC\n^XA\n^JUS\n^XZ\n".toByteArray())
-                    connection.close()
                     onResult(true)
                 } else {
                     onResult(false)
                 }
             } catch (e: Exception) {
+                Log.e(TAG, "Calibration failed", e)
                 onResult(false)
+            } finally {
+                // close even when opening or writing fails, so the printer isn't left connected
+                try {
+                    connection?.close()
+                } catch (_: Exception) {
+                }
             }
         }.start()
     }

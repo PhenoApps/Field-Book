@@ -147,10 +147,10 @@ class TemplateRepository @Inject constructor(private val prefs: SharedPreference
      * default template. Null when neither is available.
      */
     fun resolveTemplateId(traitTemplateId: String?): String? {
-        ensureBuiltInTemplatesExist()
         if (!traitTemplateId.isNullOrEmpty() && getTemplateName(traitTemplateId) != null) {
             return traitTemplateId
         }
+        ensureBuiltInTemplatesExist()
         return getDefaultTemplateId()
     }
 
@@ -215,15 +215,16 @@ class TemplateRepository @Inject constructor(private val prefs: SharedPreference
 
     /**
      * Saves an imported template without replacing an existing one: reuses a template with the
-     * same name and ZPL, otherwise saves under the first free "name (n)".
+     * same ZPL, otherwise saves under the first free "name (n)".
      * Returns the ID of the template to use.
      */
     fun importTemplate(name: String, zpl: String): String? {
         val templates = getAllTemplates()
 
-        templates.entries.find { it.value == name }?.let { existing ->
-            if (getTemplate(existing.key) == zpl) return existing.key
-        }
+        // reuse an identical template, preferring the same name, so importing the same file
+        // again (or traits that are skipped as duplicates) doesn't pile up copies
+        val identical = templates.entries.filter { getTemplate(it.key) == zpl }
+        (identical.find { it.value == name } ?: identical.firstOrNull())?.let { return it.key }
 
         return saveTemplate(uniqueName(name, templates.values.toSet()), zpl)
     }
@@ -287,7 +288,8 @@ class TemplateRepository @Inject constructor(private val prefs: SharedPreference
      */
     fun getDefaultTemplateId(): String? {
         val defaultId = prefs.getString(KEY_DEFAULT_TEMPLATE_ID, null) ?: return null
-        return if (getAllTemplates().containsKey(defaultId)) defaultId else null
+        // single row lookup, this runs on every plot change through resolveTemplateId
+        return if (getTemplateName(defaultId) != null) defaultId else null
     }
 
     /**
