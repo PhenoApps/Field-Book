@@ -17,6 +17,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
 import com.fieldbook.tracker.adapters.AttributeAdapter
+import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.dialogs.AttributeChooserDialog
 import com.fieldbook.tracker.dialogs.LabelFieldChooserDialog
 import com.fieldbook.tracker.preferences.GeneralKeys
@@ -30,6 +31,8 @@ import org.phenoapps.labelprint.zpl.ParseResult
 import org.phenoapps.labelprint.zpl.TokenizeResult
 import org.phenoapps.labelprint.zpl.ZplParserImpl
 import org.phenoapps.labelprint.zpl.ZplTokenizerImpl
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 
 /**
  * Trait layout for Zebra label printing.
@@ -75,24 +78,70 @@ class LabelPrintTraitLayout : BaseTraitLayout {
                 }
             }
 
+            // numLabels is only set when the printer reported ready and the labels were sent
             if (LabelPrintService.shouldInsertObservation(numLabels, plotId, traitId)) {
-                val studyId = activity.studyId
-                val currentVal = database.getAllObservations(studyId, plotId!!, traitId!!)
-                    ?.lastOrNull()?.value
-                val priorCount = currentVal?.toIntOrNull() ?: 0
-                val cumulativeCount = priorCount + numLabels
-
-                activity.updateObservation(currentTrait, cumulativeCount.toString(), null)
+                val cumulativeCount = saveLabelCount(activity, plotId!!, traitId!!, numLabels)
 
                 activity.runOnUiThread {
-                    collectInputView?.text = cumulativeCount.toString()
-                    collectInputView?.setTextColor(displayColor.toColorInt())
-                    collectInputView?.markObservationSaved()
+                    triggerTts(context.getString(R.string.trait_print_label_success))
+
+                    // the user may have moved on (e.g. auto switch plot) before the printer responded
+                    if (plotId == currentRange?.uniqueId && traitId == currentTrait?.id) {
+                        collectInputView?.text = cumulativeCount.toString()
+                        collectInputView?.setTextColor(displayColor.toColorInt())
+                        collectInputView?.markObservationSaved()
+                        activity.updateCurrentTraitStatus(true)
+                        activity.refreshRepeatedValuesToolbarIndicator()
+                        collectInputView?.refreshTimestamp()
+                    }
+                    activity.refreshInfoBarAdapter()
 
                     store.assignmentsRevision.intValue++
                 }
             }
         }
+    }
+
+    /**
+     * Adds [numLabels] to the printed-label count of the plot and trait the labels were printed
+     * for, not the current plot, since the printer responds asynchronously.
+     * Updates the latest rep if one exists, otherwise inserts a new observation.
+     * Returns the new count.
+     */
+    private fun saveLabelCount(
+        activity: CollectActivity,
+        plotId: String,
+        traitId: String,
+        numLabels: Int
+    ): Int {
+        val studyId = activity.studyId
+        val latest = database.getAllObservations(studyId, plotId, traitId)
+            ?.maxByOrNull { it.rep.toIntOrNull() ?: 0 }
+        val count = (latest?.value?.toIntOrNull() ?: 0) + numLabels
+
+        val person = activity.person
+        val location = try {
+            activity.locationByPreferences
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to get location", e)
+            null
+        }
+
+        if (latest == null) {
+            database.insertObservation(
+                plotId, traitId, count.toString(), person, location, "", studyId,
+                null, null, null, database.getDefaultRep(studyId, plotId, traitId)
+            )
+        } else {
+            latest.value = count.toString()
+            latest.collector = person
+            latest.geo_coordinates = location
+            latest.observation_time_stamp = OffsetDateTime.now()
+                .format(DateTimeFormatter.ofPattern(DataHelper.TIME_FORMAT_PATTERN))
+            database.updateObservationModels(database.db, listOf(latest))
+        }
+
+        return count
     }
 
     constructor(context: Context) : super(context)
@@ -367,7 +416,6 @@ class LabelPrintTraitLayout : BaseTraitLayout {
         val labels = List<String>(store.selectedCopies.intValue) { resolvedZpl }
 
         store.saveConfig()
-        triggerTts(context.getString(R.string.trait_print_label_success))
 
         val plotId = collectActivity.getRangeBox().getPlotID() ?: return
         service.printLabels(context, labels, plotId, trait)
