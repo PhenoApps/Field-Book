@@ -632,6 +632,8 @@
     <string name="trait_boolean_unset">Desestablecer</string>
     <!-- Trait Layout: GoPro -->
     <string name="trait_go_pro_capture_button_text">Capturar\n</string>
+    <string name="trait_go_pro_await_device_title">Seleccione un GoPro emparejado</string>
+    <string name="trait_go_pro_no_paired_devices">No se encontró GoPro. Emparejar la cámara en los ajustes de Bluetooth de Android primero.</string>
     <string name="trait_go_pro_await_ble_title">Esperando Conexión GoPro BLE</string>
     <string name="trait_go_pro_await_ble_message">Comunicando con GoPro BLE, esto puede tardar un minuto.</string>
     <string name="trait_go_pro_await_ap_title">Esperando GoPro AP</string>
@@ -641,6 +643,23 @@
     <string name="go_pro_layout_black_11_not_detected">Este rasgo fue creado para una GoPro Black 11, por favor contacte con los desarrolladores para implementar su modelo GoPro.\n</string>
     <string name="go_pro_frag_connect_btn_content_description">Conectar a una cámara GoPro.\n</string>
     <string name="trait_go_pro_capture_content_description">Capturar una foto desde un dispositivo GoPro conectado.\n</string>
+    <string name="gopro_error_ble_failed">No se pudo conectar a GoPro por Bluetooth.</string>
+    <string name="gopro_error_ble_timeout">Se ha agotado el tiempo de conexión a GoPro por Bluetooth.</string>
+    <string name="gopro_error_ble_disconnected">Se perdió la conexión Bluetooth a GoPro.</string>
+    <string name="gopro_error_wifi_unavailable">No se pudo conectar a la red Wi-Fi de GoPro.</string>
+    <string name="gopro_error_wifi_lost">Se perdió la red Wi-Fi de GoPro.</string>
+    <string name="gopro_error_stream_failed">No se pudo iniciar la vista previa en vivo de GoPro.</string>
+    <string name="gopro_error_stream_timeout">La vista previa en vivo de GoPro no se inició; apague y encienda la cámara, y vuelva a intentarlo.</string>
+    <string name="gopro_stage_bluetooth">Conectando a través de Bluetooth…</string>
+    <string name="gopro_stage_enabling_ap">Encender Wi-Fi de la cámara…</string>
+    <string name="gopro_stage_joining_wifi">Emparejando al Wi-Fi de la cámara…</string>
+    <string name="gopro_stage_starting_preview">Iniciando la vista previa en vivo…</string>
+    <string name="gopro_error_not_connected">La GoPro no está conectada.</string>
+    <string name="gopro_error_capture_busy">Guardando la foto anterior.</string>
+    <string name="gopro_error_capture_timeout">La GoPro no terminó de capturar a tiempo.</string>
+    <string name="gopro_error_capture_failed">La captura de GoPro falló.</string>
+    <string name="gopro_error_no_new_photo">La GoPro no produjo una foto nueva.</string>
+    <string name="gopro_error_download_failed">No se pudo copiar la foto de la GoPro.</string>
     <!-- Trait Layout: USB Camera -->
     <string name="trait_usb_camera_zoom_in_button_text">Acercar</string>
     <string name="trait_usb_camera_zoom_out_button_text">Alejar</string>
@@ -1177,9 +1196,15 @@
     <string name="brapi_auth_deny">Autorización BrAPI denegada</string>
     <string name="brapi_auth_failed_remove">Remover</string>
     <string name="brapi_auth_error_starting">Error al iniciar la autenticación BrAPI</string>
+    <string name="brapi_auth_error_starting_reason">Error Iniciando BrAPI Auth: %1$s</string>
     <string name="brapi_auth_permission_deny">ERROR: no tiene los permisos necesarios para el sistema especificado.</string>
     <string name="brapi_auth_needed_title">Se necesita iniciar sesión</string>
     <string name="brapi_auth_needed">Necesita estar conectado al sistema con el que estás intentando sincronizar los datos para sincronizar tus datos.\n\n¿Desea autenticarse ahora?</string>
+    <string name="brapi_account_migration_deferred">Reinicie Field Book para finalizar la actualización de BrAPI</string>
+    <string name="brapi_shared_account_not_signed_in">Inicia sesión en este servidor desde la aplicación, luego selecciónalo de nuevo aquí</string>
+    <string name="brapi_add_account_already_shared">%1$s ya proporciona este servidor. Elige entre Servidores Compartidos en lugar de añadirlo de nuevo</string>
+    <string name="brapi_auth_success_already_shared">Sesión iniciada. Este servidor ya está compartido desde otra aplicación, así que permanece en la lista</string>
+    <string name="brapi_auth_success_no_account">Sesión iniciada, pero el servidor no pudo ser guardado. Reinicie Field Book y vuelva a intentarlo</string>
     <!-- BrAPI Import -->
     <string name="import_dialog_title_brapi_fields">Importar Campo con BrAPI</string>
     <string name="brapi_load_data_button">Cargar Campos</string>
@@ -1441,6 +1466,13 @@
     <string name="inno_spectra_hardware_incompatible">Hardware incompatible</string>
     <string name="inno_spectra_function_locked">Función bloqueada</string>
     <!-- stages reported while the inno spectra device is connecting -->
+    <string name="inno_spectra_connect_connecting">Conectando</string>
+    <string name="inno_spectra_connect_handshake">Iniciando</string>
+    <string name="inno_spectra_connect_device_info">Leyendo información del dispositivo</string>
+    <string name="inno_spectra_connect_device_uuid">Identificando dispositivo</string>
+    <string name="inno_spectra_connect_device_status">Leyendo el estado</string>
+    <string name="inno_spectra_connect_scan_configs">Cargando configuraciones de escaneo</string>
+    <string name="inno_spectra_connect_ready">Listo</string>
     <string name="header_temperature">Temperatura</string>
     <string name="header_humidity">Humedad</string>
     <string name="header_firmware">Firmware</string>
@@ -1638,6 +1670,7 @@
     <string name="nix_error_bluetooth_permissions">Debe aceptar permisos de bluetooth o intentar reiniciar la aplicación.</string>
     <string name="nix_error_bluetooth_unavailable">Bluetooth no está disponible.</string>
     <string name="nix_error_bluetooth_disabled">Bluetooth está desactivado en el dispositivo.</string>
+    <string name="nix_error_connect_failed">No se pudo conectar al dispositivo, inténtelo de nuevo.</string>
     <string name="list_item_color_placeholder_content_description">Marcador de posición para un nuevo escaneo</string>
     <string name="loading">Cargando</string>
     <string name="nix_error_no_network">Nix puede necesitar internet para funcionar correctamente.</string>
