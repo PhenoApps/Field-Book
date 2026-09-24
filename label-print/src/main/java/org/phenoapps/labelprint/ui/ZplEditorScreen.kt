@@ -1354,6 +1354,8 @@ private fun WrapWidthSlider(blockWidth: Int, labelWidth: Int, onBlockWidthChange
     val max = (labelWidth / WRAP_WIDTH_STEP * WRAP_WIDTH_STEP).coerceAtLeast(WRAP_WIDTH_STEP)
     CompactSlider(
         label = stringResource(R.string.zpl_editor_block_width),
+        valueText = if (blockWidth == 0) stringResource(R.string.zpl_editor_no_wrapping)
+        else blockWidth.toString(),
         value = blockWidth,
         onValueChange = onBlockWidthChange,
         range = 0..max,
@@ -1405,11 +1407,12 @@ private fun CompactSlider(
     value: Int,
     onValueChange: (Int) -> Unit,
     range: IntRange,
-    step: Int
+    step: Int,
+    valueText: String = value.toString()
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Column {
-        Text("$label: $value", style = MaterialTheme.typography.bodySmall)
+        Text("$label: $valueText", style = MaterialTheme.typography.bodySmall)
         Slider(
             value = value.toFloat(),
             onValueChange = { onValueChange(it.roundToInt()) },

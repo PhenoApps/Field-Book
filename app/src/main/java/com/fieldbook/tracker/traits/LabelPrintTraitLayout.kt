@@ -213,20 +213,15 @@ class LabelPrintTraitLayout : BaseTraitLayout {
             AppTheme {
                 val copiesCount = store.selectedCopies.intValue
 
-                val previewLabel = remember(
+                val preview = remember(
                     store.templateIdState.value,
                     store.currentPlotIdState.value,
                     store.assignmentsRevision.intValue
                 ) {
-                    buildPreviewLabel()
+                    buildPreview()
                 }
-
-                val placeholders = remember(store.templateIdState.value) {
-                    store.templateIdState.value
-                        ?.let { templateRepository.getTemplate(it) }
-                        ?.let { LabelPrintManager.extractPlaceholders(it) }
-                        ?: emptyList()
-                }
+                val previewLabel = preview.label
+                val placeholders = preview.placeholders
 
                 val showFields: (() -> Unit)? = if (placeholders.isNotEmpty()) {
                     { store.showFieldDialog.value = true }
@@ -402,9 +397,19 @@ class LabelPrintTraitLayout : BaseTraitLayout {
         service.printLabels(context, labels, plotId, trait)
     }
 
-    private fun buildPreviewLabel(): org.phenoapps.labelprint.zpl.ZplLabel? {
-        val templateId = store.templateIdState.value ?: return null
-        val templateZpl = templateRepository.getTemplate(templateId) ?: return null
+    /**
+     * The rendered label and the template's placeholders, read from the same template so the
+     * label fields always match what the preview shows.
+     */
+    private class Preview(
+        val label: org.phenoapps.labelprint.zpl.ZplLabel? = null,
+        val placeholders: List<String> = emptyList()
+    )
+
+    private fun buildPreview(): Preview {
+        val templateId = store.templateIdState.value ?: return Preview()
+        val templateZpl = templateRepository.getTemplate(templateId) ?: return Preview()
+        val placeholders = LabelPrintManager.extractPlaceholders(templateZpl)
 
         val previewZpl = resolveLabelZpl(templateId, templateZpl, currentRange?.uniqueId)
 
@@ -415,11 +420,11 @@ class LabelPrintTraitLayout : BaseTraitLayout {
             if (tokenResult is TokenizeResult.Success) {
                 val parseResult = parser.parse(tokenResult.tokens)
                 if (parseResult is ParseResult.Success) {
-                    return parseResult.document.labels.firstOrNull()
+                    return Preview(parseResult.document.labels.firstOrNull(), placeholders)
                 }
             }
         }
-        return null
+        return Preview(placeholders = placeholders)
     }
 
     /**
@@ -430,12 +435,12 @@ class LabelPrintTraitLayout : BaseTraitLayout {
         val fieldName = prefs.getString(GeneralKeys.FIELD_FILE, "") ?: ""
         val fieldNameLabel = context.getString(R.string.field_name_attribute)
 
-        val observationUnitAttributes = if (uniqueId != null) {
-            buildObservationUnitAttributes(uniqueId, fieldNameLabel)
-        } else emptyMap()
-
         val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
         val assignments = templateRepository.getAssignments(studyId, templateId)
+
+        val observationUnitAttributes = if (uniqueId != null) {
+            buildObservationUnitAttributes(uniqueId, assignments.values, fieldNameLabel)
+        } else emptyMap()
 
         val resolvedAssignments = assignments.mapValues { (_, fieldOption) ->
             LabelPrintService.resolveFieldValue(
@@ -451,33 +456,33 @@ class LabelPrintTraitLayout : BaseTraitLayout {
         return LabelPrintService.applyPlaceholderAssignments(templateZpl, resolvedAssignments)
     }
 
+    /**
+     * Attribute values of the observation unit for the fields a label uses, looked up one query
+     * per field rather than for every attribute in the study, since this runs on each plot change.
+     * Fields that aren't attributes, like traits, are left for resolveFieldValue to look up.
+     */
     private fun buildObservationUnitAttributes(
         uniqueId: String,
+        assignedFields: Collection<String>,
         fieldNameLabel: String
     ): Map<String, String> {
-        val attributes = mutableMapOf<String, String>()
-
-        // Add core identifiers explicitly using their column names from preferences
+        // core identifiers use their column names from preferences
         val uniqueName = prefs.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
         val primaryName = prefs.getString(GeneralKeys.PRIMARY_NAME, "") ?: ""
         val secondaryName = prefs.getString(GeneralKeys.SECONDARY_NAME, "") ?: ""
+        val attributeNames = store.fieldOptions.toSet() + primaryName + secondaryName - ""
 
-        if (uniqueName.isNotEmpty()) attributes[uniqueName] = uniqueId
-        if (primaryName.isNotEmpty()) attributes[primaryName] =
-            database.getObservationUnitPropertyValues(primaryName, uniqueId)
-        if (secondaryName.isNotEmpty()) attributes[secondaryName] =
-            database.getObservationUnitPropertyValues(secondaryName, uniqueId)
-
-        // Add study-specific attributes
-        for (option in store.fieldOptions) {
-            if (option != fieldNameLabel
-                && option != uniqueName && option != primaryName && option != secondaryName
-            ) {
-                val value = database.getObservationUnitPropertyValues(option, uniqueId)
-                attributes[option] = value ?: ""
+        return assignedFields.distinct()
+            .filter { it != fieldNameLabel }
+            .mapNotNull { field ->
+                when {
+                    uniqueName.isNotEmpty() && field == uniqueName -> field to uniqueId
+                    field in attributeNames -> field to
+                            (database.getObservationUnitPropertyValues(field, uniqueId) ?: "")
+                    else -> null
+                }
             }
-        }
-        return attributes
+            .toMap()
     }
 
     override fun setNaTraitsText() {

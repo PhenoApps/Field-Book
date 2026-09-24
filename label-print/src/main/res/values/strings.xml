@@ -45,7 +45,8 @@
     <string name="zpl_editor_prefix">Prefix</string>
     <string name="zpl_editor_suffix">Suffix</string>
     <string name="zpl_editor_font_size">Font Size</string>
-    <string name="zpl_editor_block_width">Width (0 = no wrapping)</string>
+    <string name="zpl_editor_block_width">Width</string>
+    <string name="zpl_editor_no_wrapping">No wrapping</string>
     <string name="zpl_editor_magnification">Size</string>
     <string name="zpl_editor_barcode_height">Height</string>
     <string name="zpl_editor_module_width">Width</string>

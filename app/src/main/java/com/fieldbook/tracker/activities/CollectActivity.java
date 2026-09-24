@@ -1315,6 +1315,9 @@ public class CollectActivity extends ThemedActivity
             if (databaseDir != null) {
 
                 Executor executor = Executors.newFixedThreadPool(2);
+                // TODO exportDatabase closes the shared database while it copies the file, so
+                //  anything that reads it meanwhile (e.g. onResume's trait layout load, when the
+                //  user returns before the backup finishes) fails with "already-closed object"
                 executor.execute(() -> {
 
                     try {
