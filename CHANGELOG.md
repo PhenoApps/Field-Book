@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Sync now lists observations that cannot be sent via BrAPI (https://github.com/PhenoApps/Field-Book/pull/1542)
 
 ### Changed
 - User is now notified of failed database writes (https://github.com/PhenoApps/Field-Book/pull/1515)
