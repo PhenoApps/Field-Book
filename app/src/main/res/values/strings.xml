@@ -2037,6 +2037,10 @@
     <string name="edited_images">Edited Images</string>
     <string name="include_images">Include Images</string>
     <string name="no_observations_to_upload">No observations to upload</string>
+    <plurals name="brapi_unsyncable_observations">
+        <item quantity="one">%1$d observation cannot be synced because its trait was not imported from %2$s.</item>
+        <item quantity="other">%1$d observations cannot be synced because their traits were not imported from %2$s.</item>
+    </plurals>
     <string name="sync_statistics">Sync Statistics</string>
     <string name="synced_observations">Synced Observations</string>
     <string name="synced_images">Synced Images</string>

@@ -79,6 +79,10 @@ data class BrapiExportUiState(
     val syncedObservationCount: Int = 0,
     val syncedImageCount: Int = 0,
 
+    // Observations collected on traits that did not come from this brapi server. These can never
+    // be uploaded, so they are only summarized for the user.
+    val unsyncableObservationCount: Int = 0,
+
     // Download results for user to confirm
     val downloadedInserts: Int = 0,
     val downloadedUpdates: Int = 0,
