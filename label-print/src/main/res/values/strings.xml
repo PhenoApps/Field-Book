@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="label_config_title">Label Configuration</string>
-    <string name="label_config_calibrate">Calibrate</string>
-    <string name="label_config_copies">Copies</string>
-    <string name="label_config_template">Template</string>
-    <string name="label_fields_title">Label Fields</string>
-    <string name="label_fields_select">Select…</string>
     <string name="dialog_apply">Apply</string>
 
     <string name="label_templates_title">Label templates</string>
@@ -53,7 +47,7 @@
     <string name="zpl_editor_font_size">Font Size</string>
     <string name="zpl_editor_block_width">Width (0 = no wrapping)</string>
     <string name="zpl_editor_magnification">Size</string>
-    <string name="zpl_editor_barcode_height">Barcode Height (dots)</string>
+    <string name="zpl_editor_barcode_height">Height</string>
     <string name="zpl_editor_module_width">Width</string>
     <string name="zpl_editor_edit_text">Edit Text Element</string>
     <string name="zpl_editor_edit_date">Edit Date Element</string>
@@ -87,8 +81,6 @@
     <string name="zpl_editor_delete_selected">Delete selected</string>
     <string name="zpl_editor_add_element_description">Add element</string>
     <string name="zpl_editor_back">Back</string>
-
-    <string name="zpl_template_create_new">＋ Create New</string>
 
     <string name="dialog_cancel">Cancel</string>
     <string name="dialog_add">Add</string>
