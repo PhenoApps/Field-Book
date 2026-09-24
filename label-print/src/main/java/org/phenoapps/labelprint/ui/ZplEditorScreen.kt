@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,6 +50,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -67,11 +69,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
@@ -85,6 +91,7 @@ import org.phenoapps.labelprint.zpl.TokenizeResult
 import org.phenoapps.labelprint.zpl.ZplGenerator
 import org.phenoapps.labelprint.zpl.ZplParserImpl
 import org.phenoapps.labelprint.zpl.ZplTokenizerImpl
+import kotlin.math.roundToInt
 
 /**
  * Data class holding label settings.
@@ -97,6 +104,17 @@ data class LabelSettings(
     /** Printer resolution, null if the printer didn't report it. */
     val dpi: Int? = null
 )
+
+private const val MIN_FONT_SIZE = 10
+private const val MAX_FONT_SIZE = 300
+private const val FONT_SIZE_STEP = 5
+private const val DEFAULT_FONT_SIZE = 30
+private const val MIN_MAGNIFICATION = 1
+private const val MAX_MAGNIFICATION = 10
+private const val DEFAULT_MAGNIFICATION = 5
+private const val MIN_MODULE_WIDTH = 1
+private const val MAX_MODULE_WIDTH = 4
+private const val DEFAULT_MODULE_WIDTH = 2
 
 /**
  * Prefix/suffix text can't contain placeholder braces or ZPL command prefixes (^ and ~).
@@ -333,11 +351,10 @@ fun ZplEditorScreen(
                     .consumeWindowInsets(innerPadding)
                     .imePadding()
             ) {
-                OutlinedTextField(
+                SelectAllTextField(
                     value = templateName ?: "",
                     onValueChange = { templateName = it.ifBlank { null } },
                     label = { Text(stringResource(R.string.zpl_editor_name)) },
-                    singleLine = true,
                     placeholder = { Text(stringResource(R.string.zpl_editor_name_placeholder)) },
                     isError = nameTaken,
                     supportingText = if (nameTaken) {
@@ -463,38 +480,51 @@ fun ZplEditorScreen(
                                             text = stringResource(R.string.zpl_editor_font_size) + ": ${element.fontSize}",
                                             style = MaterialTheme.typography.labelSmall
                                         )
-                                        Slider(
-                                            value = element.fontSize.toFloat(),
-                                            onValueChange = { newValue ->
+                                        FontSizeSlider(
+                                            fontSize = element.fontSize,
+                                            onFontSizeChange = { newValue ->
                                                 val index =
                                                     elements.indexOfFirst { it.id == element.id }
                                                 if (index >= 0) {
                                                     elements[index] =
-                                                        elements[index].copy(fontSize = newValue.toInt())
+                                                        elements[index].copy(fontSize = newValue)
                                                     regenerateZpl()
                                                 }
-                                            },
-                                            valueRange = 10f..300f,
-                                            steps = 289
+                                            }
                                         )
                                     } else if (element.type == LabelDesignElementType.QR_CODE) {
                                         Text(
                                             text = stringResource(R.string.zpl_editor_magnification) + ": ${element.magnification}",
                                             style = MaterialTheme.typography.labelSmall
                                         )
-                                        Slider(
-                                            value = element.magnification.toFloat(),
-                                            onValueChange = { newValue ->
+                                        MagnificationSlider(
+                                            magnification = element.magnification,
+                                            onMagnificationChange = { newValue ->
                                                 val index =
                                                     elements.indexOfFirst { it.id == element.id }
                                                 if (index >= 0) {
                                                     elements[index] =
-                                                        elements[index].copy(magnification = newValue.toInt())
+                                                        elements[index].copy(magnification = newValue)
                                                     regenerateZpl()
                                                 }
-                                            },
-                                            valueRange = 1f..10f,
-                                            steps = 8
+                                            }
+                                        )
+                                    } else if (element.type == LabelDesignElementType.BARCODE_128) {
+                                        Text(
+                                            text = stringResource(R.string.zpl_editor_module_width) + ": ${element.moduleWidth}",
+                                            style = MaterialTheme.typography.labelSmall
+                                        )
+                                        ModuleWidthSlider(
+                                            moduleWidth = element.moduleWidth,
+                                            onModuleWidthChange = { newValue ->
+                                                val index =
+                                                    elements.indexOfFirst { it.id == element.id }
+                                                if (index >= 0) {
+                                                    elements[index] =
+                                                        elements[index].copy(moduleWidth = newValue)
+                                                    regenerateZpl()
+                                                }
+                                            }
                                         )
                                     }
                                 }
@@ -1030,11 +1060,11 @@ private fun AddElementDialog(
     var elementType by remember { mutableStateOf(LabelDesignElementType.TEXT) }
     var prefix by remember { mutableStateOf("") }
     var suffix by remember { mutableStateOf("") }
-    var fontSize by remember { mutableStateOf("28") }
+    var fontSize by remember { mutableIntStateOf(DEFAULT_FONT_SIZE) }
     var blockWidth by remember { mutableStateOf("0") }
-    var magnification by remember { mutableStateOf("5") }
+    var magnification by remember { mutableIntStateOf(DEFAULT_MAGNIFICATION) }
     var barcodeHeight by remember { mutableStateOf("80") }
-    var moduleWidth by remember { mutableStateOf("2") }
+    var moduleWidth by remember { mutableIntStateOf(DEFAULT_MODULE_WIDTH) }
     var typeExpanded by remember { mutableStateOf(false) }
 
     val hasInvalidChars = remember(prefix, suffix) {
@@ -1111,42 +1141,17 @@ private fun AddElementDialog(
                 }
                 when (elementType) {
                     LabelDesignElementType.TEXT, LabelDesignElementType.DATE -> {
-                        OutlinedTextField(
-                            value = prefix,
-                            onValueChange = { prefix = it },
-                            label = { Text(stringResource(R.string.zpl_editor_prefix)) },
-                            singleLine = true,
-                            isError = prefix.hasInvalidTemplateChars(),
-                            supportingText = {
-                                if (prefix.hasInvalidTemplateChars()) {
-                                    Text(stringResource(R.string.zpl_editor_invalid_chars))
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        OutlinedTextField(
-                            value = suffix,
-                            onValueChange = { suffix = it },
-                            label = { Text(stringResource(R.string.zpl_editor_suffix)) },
-                            singleLine = true,
-                            isError = suffix.hasInvalidTemplateChars(),
-                            supportingText = {
-                                if (suffix.hasInvalidTemplateChars()) {
-                                    Text(stringResource(R.string.zpl_editor_invalid_chars))
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth()
+                        PrefixSuffixFields(
+                            prefix = prefix,
+                            onPrefixChange = { prefix = it },
+                            suffix = suffix,
+                            onSuffixChange = { suffix = it }
                         )
                         Text(
                             stringResource(R.string.zpl_editor_font_size) + ": $fontSize",
                             style = MaterialTheme.typography.bodySmall
                         )
-                        Slider(
-                            value = fontSize.toFloatOrNull() ?: 28f,
-                            onValueChange = { fontSize = it.toInt().toString() },
-                            valueRange = 10f..300f,
-                            steps = 289
-                        )
+                        FontSizeSlider(fontSize = fontSize, onFontSizeChange = { fontSize = it })
                     }
 
                     LabelDesignElementType.QR_CODE -> {
@@ -1154,30 +1159,18 @@ private fun AddElementDialog(
                             stringResource(R.string.zpl_editor_magnification) + ": $magnification",
                             style = MaterialTheme.typography.bodySmall
                         )
-                        Slider(
-                            value = magnification.toFloatOrNull() ?: 5f,
-                            onValueChange = { magnification = it.toInt().toString() },
-                            valueRange = 1f..10f,
-                            steps = 8
+                        MagnificationSlider(
+                            magnification = magnification,
+                            onMagnificationChange = { magnification = it }
                         )
                     }
 
                     LabelDesignElementType.BARCODE_128 -> {
-                        OutlinedTextField(
-                            value = barcodeHeight,
-                            onValueChange = { barcodeHeight = it.filter { it.isDigit() } },
-                            label = { Text(stringResource(R.string.zpl_editor_barcode_height)) },
-                            singleLine = true,
-                            supportingText = { Text(stringResource(R.string.zpl_editor_barcode_height_helper)) },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        OutlinedTextField(
-                            value = moduleWidth,
-                            onValueChange = { moduleWidth = it.filter { it.isDigit() } },
-                            label = { Text(stringResource(R.string.zpl_editor_module_width)) },
-                            singleLine = true,
-                            supportingText = { Text(stringResource(R.string.zpl_editor_module_width_helper)) },
-                            modifier = Modifier.fillMaxWidth()
+                        BarcodeFields(
+                            barcodeHeight = barcodeHeight,
+                            onBarcodeHeightChange = { barcodeHeight = it },
+                            moduleWidth = moduleWidth,
+                            onModuleWidthChange = { moduleWidth = it }
                         )
                     }
                 }
@@ -1195,7 +1188,7 @@ private fun AddElementDialog(
                             placeholder = placeholderId,
                             prefix = prefix,
                             suffix = suffix,
-                            fontSize = fontSize.toIntOrNull()?.coerceIn(10, 300) ?: 28,
+                            fontSize = fontSize,
                             blockWidth = blockWidth.toIntOrNull()?.coerceAtLeast(0) ?: 0
                         )
 
@@ -1205,7 +1198,7 @@ private fun AddElementDialog(
                             x = 0,
                             y = 0,
                             placeholder = placeholderId,
-                            magnification = magnification.toIntOrNull()?.coerceIn(1, 10) ?: 5
+                            magnification = magnification
                         )
 
                         LabelDesignElementType.BARCODE_128 -> LabelDesignElement(
@@ -1215,7 +1208,7 @@ private fun AddElementDialog(
                             y = 0,
                             placeholder = placeholderId,
                             barcodeHeight = barcodeHeight.toIntOrNull()?.coerceIn(10, 300) ?: 80,
-                            moduleWidth = moduleWidth.toIntOrNull()?.coerceIn(1, 4) ?: 2
+                            moduleWidth = moduleWidth
                         )
                     }
                     onConfirm(element)
@@ -1236,11 +1229,11 @@ private fun EditElementDialog(
 ) {
     var prefix by remember { mutableStateOf(element.prefix) }
     var suffix by remember { mutableStateOf(element.suffix) }
-    var fontSize by remember { mutableStateOf(element.fontSize.toString()) }
+    var fontSize by remember { mutableIntStateOf(element.fontSize) }
     var blockWidth by remember { mutableStateOf(element.blockWidth.toString()) }
-    var magnification by remember { mutableStateOf(element.magnification.toString()) }
+    var magnification by remember { mutableIntStateOf(element.magnification) }
     var barcodeHeight by remember { mutableStateOf(element.barcodeHeight.toString()) }
-    var moduleWidth by remember { mutableStateOf(element.moduleWidth.toString()) }
+    var moduleWidth by remember { mutableIntStateOf(element.moduleWidth) }
 
     val hasInvalidChars = remember(prefix, suffix) {
         prefix.hasInvalidTemplateChars() ||
@@ -1269,48 +1262,21 @@ private fun EditElementDialog(
             ) {
                 when (element.type) {
                     LabelDesignElementType.TEXT, LabelDesignElementType.DATE -> {
-                        OutlinedTextField(
-                            value = prefix,
-                            onValueChange = { prefix = it },
-                            label = { Text(stringResource(R.string.zpl_editor_prefix)) },
-                            singleLine = true,
-                            isError = prefix.hasInvalidTemplateChars(),
-                            supportingText = {
-                                if (prefix.hasInvalidTemplateChars()) {
-                                    Text(stringResource(R.string.zpl_editor_invalid_chars))
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        OutlinedTextField(
-                            value = suffix,
-                            onValueChange = { suffix = it },
-                            label = { Text(stringResource(R.string.zpl_editor_suffix)) },
-                            singleLine = true,
-                            isError = suffix.hasInvalidTemplateChars(),
-                            supportingText = {
-                                if (suffix.hasInvalidTemplateChars()) {
-                                    Text(stringResource(R.string.zpl_editor_invalid_chars))
-                                }
-                            },
-                            modifier = Modifier.fillMaxWidth()
+                        PrefixSuffixFields(
+                            prefix = prefix,
+                            onPrefixChange = { prefix = it },
+                            suffix = suffix,
+                            onSuffixChange = { suffix = it }
                         )
                         Text(
                             stringResource(R.string.zpl_editor_font_size) + ": $fontSize",
                             style = MaterialTheme.typography.bodySmall
                         )
-                        Slider(
-                            value = fontSize.toFloatOrNull() ?: 28f,
-                            onValueChange = { fontSize = it.toInt().toString() },
-                            valueRange = 10f..300f,
-                            steps = 289
-                        )
-                        OutlinedTextField(
+                        FontSizeSlider(fontSize = fontSize, onFontSizeChange = { fontSize = it })
+                        SelectAllTextField(
                             value = blockWidth,
                             onValueChange = { blockWidth = it.filter { it.isDigit() } },
                             label = { Text(stringResource(R.string.zpl_editor_block_width)) },
-                            singleLine = true,
-                            supportingText = { Text(stringResource(R.string.zpl_editor_block_width_helper)) },
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
@@ -1320,30 +1286,18 @@ private fun EditElementDialog(
                             stringResource(R.string.zpl_editor_magnification) + ": $magnification",
                             style = MaterialTheme.typography.bodySmall
                         )
-                        Slider(
-                            value = magnification.toFloatOrNull() ?: 5f,
-                            onValueChange = { magnification = it.toInt().toString() },
-                            valueRange = 1f..10f,
-                            steps = 8
+                        MagnificationSlider(
+                            magnification = magnification,
+                            onMagnificationChange = { magnification = it }
                         )
                     }
 
                     LabelDesignElementType.BARCODE_128 -> {
-                        OutlinedTextField(
-                            value = barcodeHeight,
-                            onValueChange = { barcodeHeight = it.filter { it.isDigit() } },
-                            label = { Text(stringResource(R.string.zpl_editor_barcode_height)) },
-                            singleLine = true,
-                            supportingText = { Text(stringResource(R.string.zpl_editor_barcode_height_helper)) },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        OutlinedTextField(
-                            value = moduleWidth,
-                            onValueChange = { moduleWidth = it.filter { it.isDigit() } },
-                            label = { Text(stringResource(R.string.zpl_editor_module_width)) },
-                            singleLine = true,
-                            supportingText = { Text(stringResource(R.string.zpl_editor_module_width_helper)) },
-                            modifier = Modifier.fillMaxWidth()
+                        BarcodeFields(
+                            barcodeHeight = barcodeHeight,
+                            onBarcodeHeightChange = { barcodeHeight = it },
+                            moduleWidth = moduleWidth,
+                            onModuleWidthChange = { moduleWidth = it }
                         )
                     }
                 }
@@ -1356,22 +1310,19 @@ private fun EditElementDialog(
                         LabelDesignElementType.TEXT, LabelDesignElementType.DATE -> element.copy(
                             prefix = prefix,
                             suffix = suffix,
-                            fontSize = fontSize.toIntOrNull()?.coerceIn(10, 300)
-                                ?: element.fontSize,
+                            fontSize = fontSize,
                             blockWidth = blockWidth.toIntOrNull()?.coerceAtLeast(0)
                                 ?: element.blockWidth
                         )
 
                         LabelDesignElementType.QR_CODE -> element.copy(
-                            magnification = magnification.toIntOrNull()?.coerceIn(1, 10)
-                                ?: element.magnification
+                            magnification = magnification
                         )
 
                         LabelDesignElementType.BARCODE_128 -> element.copy(
                             barcodeHeight = barcodeHeight.toIntOrNull()?.coerceIn(10, 300)
                                 ?: element.barcodeHeight,
-                            moduleWidth = moduleWidth.toIntOrNull()?.coerceIn(1, 4)
-                                ?: element.moduleWidth
+                            moduleWidth = moduleWidth
                         )
                     }
                     onConfirm(updated)
@@ -1380,5 +1331,164 @@ private fun EditElementDialog(
             ) { Text(stringResource(R.string.dialog_apply)) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.dialog_cancel)) } }
+    )
+}
+
+@Composable
+private fun PrefixSuffixFields(
+    prefix: String,
+    onPrefixChange: (String) -> Unit,
+    suffix: String,
+    onSuffixChange: (String) -> Unit
+) {
+    AffixTextField(prefix, onPrefixChange, stringResource(R.string.zpl_editor_prefix))
+    AffixTextField(suffix, onSuffixChange, stringResource(R.string.zpl_editor_suffix))
+}
+
+@Composable
+private fun AffixTextField(value: String, onValueChange: (String) -> Unit, label: String) {
+    val invalid = value.hasInvalidTemplateChars()
+    SelectAllTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        isError = invalid,
+        // only reserve space for the error when there is one, so valid fields stay evenly spaced
+        supportingText = if (invalid) {
+            { Text(stringResource(R.string.zpl_editor_invalid_chars)) }
+        } else null,
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+@Composable
+private fun BarcodeFields(
+    barcodeHeight: String,
+    onBarcodeHeightChange: (String) -> Unit,
+    moduleWidth: Int,
+    onModuleWidthChange: (Int) -> Unit
+) {
+    SelectAllTextField(
+        value = barcodeHeight,
+        onValueChange = { onBarcodeHeightChange(it.filter { c -> c.isDigit() }) },
+        label = { Text(stringResource(R.string.zpl_editor_barcode_height)) },
+        modifier = Modifier.fillMaxWidth()
+    )
+    Text(
+        stringResource(R.string.zpl_editor_module_width) + ": $moduleWidth",
+        style = MaterialTheme.typography.bodySmall
+    )
+    ModuleWidthSlider(moduleWidth = moduleWidth, onModuleWidthChange = onModuleWidthChange)
+}
+
+@Composable
+private fun ModuleWidthSlider(moduleWidth: Int, onModuleWidthChange: (Int) -> Unit) {
+    CompactSlider(
+        value = moduleWidth,
+        onValueChange = onModuleWidthChange,
+        range = MIN_MODULE_WIDTH..MAX_MODULE_WIDTH,
+        step = 1
+    )
+}
+
+@Composable
+private fun FontSizeSlider(fontSize: Int, onFontSizeChange: (Int) -> Unit) {
+    CompactSlider(
+        value = fontSize,
+        onValueChange = onFontSizeChange,
+        range = MIN_FONT_SIZE..MAX_FONT_SIZE,
+        step = FONT_SIZE_STEP
+    )
+}
+
+@Composable
+private fun MagnificationSlider(magnification: Int, onMagnificationChange: (Int) -> Unit) {
+    CompactSlider(
+        value = magnification,
+        onValueChange = onMagnificationChange,
+        range = MIN_MAGNIFICATION..MAX_MAGNIFICATION,
+        step = 1
+    )
+}
+
+/**
+ * Integer slider that snaps to multiples of [step] within [range], with a thinner track and
+ * thumb than the Material3 defaults, and no tick marks.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CompactSlider(
+    value: Int,
+    onValueChange: (Int) -> Unit,
+    range: IntRange,
+    step: Int
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    Slider(
+        value = value.toFloat(),
+        onValueChange = { onValueChange(it.roundToInt()) },
+        valueRange = range.first.toFloat()..range.last.toFloat(),
+        // steps counts the stops between the two ends
+        steps = (range.last - range.first) / step - 1,
+        interactionSource = interactionSource,
+        thumb = {
+            SliderDefaults.Thumb(
+                interactionSource = interactionSource,
+                thumbSize = DpSize(4.dp, 24.dp)
+            )
+        },
+        track = { sliderState ->
+            SliderDefaults.Track(
+                sliderState = sliderState,
+                modifier = Modifier.height(6.dp),
+                drawTick = { _, _ -> }
+            )
+        }
+    )
+}
+
+/**
+ * Single line [OutlinedTextField] that selects its text when it gains focus, so tapping the
+ * field and typing replaces the value.
+ */
+@Composable
+private fun SelectAllTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+    placeholder: (@Composable () -> Unit)? = null,
+    isError: Boolean = false,
+    supportingText: (@Composable () -> Unit)? = null
+) {
+    var fieldValue by remember { mutableStateOf(TextFieldValue(value)) }
+    // the tap that focuses the field places the cursor right after, which would drop the selection
+    var ignoreNextSelection by remember { mutableStateOf(false) }
+
+    // follow changes made outside the field, like resetting the editor
+    val current = if (fieldValue.text == value) fieldValue
+    else TextFieldValue(value, TextRange(value.length))
+
+    OutlinedTextField(
+        value = current,
+        onValueChange = { newValue ->
+            val selectionOnly = newValue.text == current.text
+            if (!(ignoreNextSelection && selectionOnly)) {
+                fieldValue = newValue
+                if (!selectionOnly) onValueChange(newValue.text)
+            }
+            ignoreNextSelection = false
+        },
+        label = label,
+        placeholder = placeholder,
+        isError = isError,
+        supportingText = supportingText,
+        singleLine = true,
+        modifier = modifier.onFocusChanged { state ->
+            if (state.isFocused) {
+                fieldValue = current.copy(selection = TextRange(0, current.text.length))
+                ignoreNextSelection = true
+            }
+        }
     )
 }

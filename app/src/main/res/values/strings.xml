@@ -759,7 +759,12 @@
     <string name="label_config_title">Label Configuration</string>
     <string name="label_config_calibrate">Calibrate</string>
     <string name="label_config_connect_printer">Connect to printer</string>
-    <string name="label_config_copies">Copies</string>
+    <plurals name="label_config_copies_count">
+        <item quantity="one">%d copy</item>
+        <item quantity="other">%d copies</item>
+    </plurals>
+    <string name="label_config_copies_decrease">Fewer copies</string>
+    <string name="label_config_copies_increase">More copies</string>
     <string name="label_config_template">Template</string>
     <string name="label_fields_title">Label Fields</string>
     <string name="label_fields_select">Select…</string>

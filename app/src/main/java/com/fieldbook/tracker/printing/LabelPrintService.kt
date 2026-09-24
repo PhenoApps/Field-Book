@@ -27,7 +27,8 @@ class LabelPrintService @Inject constructor(
     companion object {
         private const val BLUETOOTH_PERMISSION_REQUEST_CODE = 99
 
-        val COPIES_OPTIONS = (1..10).map { it.toString() }
+        const val MAX_COPIES = 10
+        val COPIES_OPTIONS = (1..MAX_COPIES).map { it.toString() }
 
         fun getRequiredPermissions(apiLevel: Int): Array<String> {
             return if (apiLevel >= Build.VERSION_CODES.S) {

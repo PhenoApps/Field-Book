@@ -13,6 +13,8 @@ import android.widget.Toast
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.graphics.toColorInt
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CollectActivity
@@ -21,6 +23,7 @@ import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.dialogs.AttributeChooserDialog
 import com.fieldbook.tracker.dialogs.LabelFieldChooserDialog
 import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.printing.LabelFieldsDialog
 import com.fieldbook.tracker.printing.LabelPrintConfigDialog
 import com.fieldbook.tracker.printing.LabelPrintMainView
 import com.fieldbook.tracker.printing.LabelPrintService
@@ -28,6 +31,7 @@ import com.fieldbook.tracker.printing.LabelPrintStore
 import com.fieldbook.tracker.ui.theme.AppTheme
 import com.fieldbook.tracker.zpl.TemplateRepository
 import dagger.hilt.android.AndroidEntryPoint
+import org.phenoapps.labelprint.service.LabelPrintManager
 import org.phenoapps.labelprint.zpl.ParseResult
 import org.phenoapps.labelprint.zpl.TokenizeResult
 import org.phenoapps.labelprint.zpl.ZplParserImpl
@@ -217,26 +221,52 @@ class LabelPrintTraitLayout : BaseTraitLayout {
                     buildPreviewLabel()
                 }
 
+                val placeholders = remember(store.templateIdState.value) {
+                    store.templateIdState.value
+                        ?.let { templateRepository.getTemplate(it) }
+                        ?.let { LabelPrintManager.extractPlaceholders(it) }
+                        ?: emptyList()
+                }
+
+                val showFields: (() -> Unit)? = if (placeholders.isNotEmpty()) {
+                    { store.showFieldDialog.value = true }
+                } else null
+
                 LabelPrintMainView(
                     onPrintClick = { printLabel() },
                     onSettingsClick = { store.showConfigDialog.value = true },
-                    onConnectClick = { 
+                    onConnectClick = {
                         store.isManualDisconnected.value = false
-                        connectToPrinter(forceChooser = true) 
+                        connectToPrinter(forceChooser = true)
                     },
+                    onPreviewClick = showFields,
                     isPrinterConnected = store.isPrinterConnected.value,
                     copiesCount = copiesCount,
                     previewLabel = previewLabel
                 )
 
                 if (store.showConfigDialog.value) {
-                    val currentTemplateZpl = remember(
-                        store.templateIdState.value
-                    ) {
-                        val id = store.templateIdState.value
-                        if (id != null) templateRepository.getTemplate(id) ?: "" else ""
-                    }
+                    LabelPrintConfigDialog(
+                        currentCopies = store.selectedCopies.intValue,
+                        maxCopies = LabelPrintService.MAX_COPIES,
+                        onConfirm = { copies ->
+                            store.selectedCopies.intValue = copies
+                            store.saveConfig()
+                            store.showConfigDialog.value = false
+                        },
+                        onDismiss = { store.showConfigDialog.value = false },
+                        isPrinterConnected = store.isPrinterConnected.value,
+                        onConnectClick = {
+                            store.isManualDisconnected.value = false
+                            connectToPrinter(forceChooser = true)
+                        },
+                        onDisconnectClick = { disconnectPrinter() },
+                        onCalibrate = { calibratePrinter() },
+                        onFieldsClick = showFields
+                    )
+                }
 
+                if (store.showFieldDialog.value) {
                     val currentAssignments = remember(
                         store.templateIdState.value,
                         store.assignmentsRevision.intValue
@@ -250,39 +280,26 @@ class LabelPrintTraitLayout : BaseTraitLayout {
                         saved + store.fieldAssignments
                     }
 
-                    LabelPrintConfigDialog(
-                        currentCopies = store.selectedCopies.intValue.toString(),
-                        copiesOptions = LabelPrintService.COPIES_OPTIONS,
-                        onConfirm = { copies ->
-                            store.selectedCopies.intValue = copies.toIntOrNull() ?: 1
-                            store.saveConfig()
-
+                    LabelFieldsDialog(
+                        placeholders = placeholders,
+                        assignments = currentAssignments,
+                        onFieldClick = { placeholder ->
+                            store.pendingFieldPlaceholder = placeholder
+                            showAttributeChooserDialog()
+                        },
+                        onConfirm = {
                             store.templateIdState.value?.let { id ->
                                 val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
                                 templateRepository.saveAssignments(studyId, id, currentAssignments)
                             }
-
-                            store.assignmentsRevision.intValue++
                             store.fieldAssignments.clear()
-                            store.showConfigDialog.value = false
+                            store.assignmentsRevision.intValue++
+                            store.showFieldDialog.value = false
                         },
                         onDismiss = {
                             store.fieldAssignments.clear()
                             store.assignmentsRevision.intValue++
-                            store.showConfigDialog.value = false
-                        },
-                        isPrinterConnected = store.isPrinterConnected.value,
-                        onConnectClick = { 
-                            store.isManualDisconnected.value = false
-                            connectToPrinter(forceChooser = true)
-                        },
-                        onDisconnectClick = { disconnectPrinter() },
-                        onCalibrate = { calibratePrinter() },
-                        templateZpl = currentTemplateZpl,
-                        currentAssignments = currentAssignments,
-                        onFieldClick = { placeholder ->
-                            store.pendingFieldPlaceholder = placeholder
-                            showAttributeChooserDialog()
+                            store.showFieldDialog.value = false
                         }
                     )
                 }
@@ -469,6 +486,10 @@ class LabelPrintTraitLayout : BaseTraitLayout {
 
     override fun refreshLayout(onNew: Boolean?) {
         super.refreshLayout(onNew)
+        // CollectActivity refreshes the layout in onDestroy, when the backup started in onPause
+        // may have closed the database, and there's nothing left to show anyway
+        val lifecycle = (mActivity as? LifecycleOwner)?.lifecycle
+        if (lifecycle?.currentState == Lifecycle.State.DESTROYED) return
         resolveTemplate()
         store.currentPlotIdState.value = currentRange?.uniqueId
         refreshPrinterConnectionState()

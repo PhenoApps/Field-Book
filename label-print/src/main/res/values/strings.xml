@@ -43,21 +43,18 @@
     <string name="zpl_editor_code_label">ZPL Code</string>
     <string name="zpl_editor_code_placeholder">Enter ZPL commands…</string>
     <string name="zpl_editor_add_element">Add Element</string>
-    <string name="zpl_editor_element_type">Element Type</string>
+    <string name="zpl_editor_element_type">Type</string>
     <string name="zpl_editor_element_text">Text</string>
     <string name="zpl_editor_element_qr">QR Code</string>
     <string name="zpl_editor_element_barcode">Barcode (Code 128)</string>
     <string name="zpl_editor_element_date">Date</string>
     <string name="zpl_editor_prefix">Prefix</string>
     <string name="zpl_editor_suffix">Suffix</string>
-    <string name="zpl_editor_font_size">Font Size (dots)</string>
-    <string name="zpl_editor_block_width">Block Width (dots, 0 = auto)</string>
-    <string name="zpl_editor_block_width_helper">Field block width for text wrapping. 0 = no wrapping.</string>
-    <string name="zpl_editor_magnification">Magnification (1–10)</string>
+    <string name="zpl_editor_font_size">Font Size</string>
+    <string name="zpl_editor_block_width">Width (0 = no wrapping)</string>
+    <string name="zpl_editor_magnification">Size</string>
     <string name="zpl_editor_barcode_height">Barcode Height (dots)</string>
-    <string name="zpl_editor_barcode_height_helper">Height of the barcode bars.</string>
-    <string name="zpl_editor_module_width">Module Width (1–4)</string>
-    <string name="zpl_editor_module_width_helper">Width of the narrowest bar.</string>
+    <string name="zpl_editor_module_width">Width</string>
     <string name="zpl_editor_edit_text">Edit Text Element</string>
     <string name="zpl_editor_edit_date">Edit Date Element</string>
     <string name="zpl_editor_edit_qr">Edit QR Code Element</string>

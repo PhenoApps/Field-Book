@@ -1,6 +1,8 @@
 package com.fieldbook.tracker.printing
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,13 +16,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -29,26 +33,30 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
-import org.phenoapps.labelprint.service.LabelPrintManager
 import org.phenoapps.labelprint.ui.LabelPrintContrastTheme
 import org.phenoapps.labelprint.ui.ZplPreviewCanvas
 import org.phenoapps.labelprint.zpl.ZplLabel
 
+/**
+ * @param onPreviewClick opens the label field assignments, null when the template has no fields
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LabelPrintMainView(
     onPrintClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onConnectClick: () -> Unit = {},
+    onPreviewClick: (() -> Unit)? = null,
     isPrinterConnected: Boolean = true,
     copiesCount: Int,
     previewLabel: ZplLabel? = null
@@ -65,6 +73,11 @@ fun LabelPrintMainView(
                 .fillMaxWidth()
                 .height(200.dp)
                 .padding(horizontal = 8.dp, vertical = 4.dp)
+                .clickable(
+                    enabled = onPreviewClick != null,
+                    onClickLabel = stringResource(R.string.label_fields_title),
+                    onClick = { onPreviewClick?.invoke() }
+                )
         )
 
         Row(
@@ -136,25 +149,22 @@ fun LabelPrintMainView(
     }
 }
 
+/**
+ * @param onFieldsClick opens the label field assignments, null when the template has no fields
+ */
 @Composable
 fun LabelPrintConfigDialog(
-    currentCopies: String,
-    copiesOptions: List<String>,
-    onConfirm: (copies: String) -> Unit,
+    currentCopies: Int,
+    maxCopies: Int,
+    onConfirm: (copies: Int) -> Unit,
     onDismiss: () -> Unit,
     isPrinterConnected: Boolean = false,
     onConnectClick: () -> Unit = {},
     onDisconnectClick: (() -> Unit)? = null,
     onCalibrate: (() -> Unit)? = null,
-    templateZpl: String = "",
-    currentAssignments: Map<String, String> = emptyMap(),
-    onFieldClick: (placeholder: String) -> Unit = {}
+    onFieldsClick: (() -> Unit)? = null
 ) {
-    var localCopies by remember { mutableStateOf(currentCopies) }
-
-    val placeholders = remember(templateZpl) {
-        LabelPrintManager.extractPlaceholders(templateZpl)
-    }
+    var localCopies by remember { mutableIntStateOf(currentCopies.coerceIn(1, maxCopies)) }
 
     LabelPrintContrastTheme {
         AlertDialog(
@@ -168,11 +178,20 @@ fun LabelPrintConfigDialog(
                         .verticalScroll(rememberScrollState()),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    CopiesSelector(
-                        options = copiesOptions,
-                        selected = localCopies,
-                        onSelect = { localCopies = it }
+                    CopiesStepper(
+                        copies = localCopies,
+                        maxCopies = maxCopies,
+                        onCopiesChange = { localCopies = it }
                     )
+
+                    if (onFieldsClick != null) {
+                        OutlinedButton(
+                            onClick = onFieldsClick,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(stringResource(R.string.label_fields_title))
+                        }
+                    }
 
                     if (onCalibrate != null) {
                         OutlinedButton(
@@ -201,27 +220,58 @@ fun LabelPrintConfigDialog(
                             }
                         )
                     }
-
-                    if (placeholders.isNotEmpty()) {
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                        Text(
-                            text = stringResource(R.string.label_fields_title),
-                            style = MaterialTheme.typography.titleSmall
-                        )
-                        placeholders.forEach { placeholder ->
-                            LabelFieldSelector(
-                                label = placeholder,
-                                selected = currentAssignments[placeholder] ?: "",
-                                onClick = { onFieldClick(placeholder) }
-                            )
-                        }
-                    }
                 }
             },
             confirmButton = {
                 TextButton(onClick = {
                     onConfirm(localCopies)
                 }) {
+                    Text(stringResource(R.string.dialog_ok))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.dialog_cancel))
+                }
+            }
+        )
+    }
+}
+
+/**
+ * Assigns a field to each of the template's placeholders.
+ */
+@Composable
+fun LabelFieldsDialog(
+    placeholders: List<String>,
+    assignments: Map<String, String>,
+    onFieldClick: (placeholder: String) -> Unit,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    LabelPrintContrastTheme {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            containerColor = MaterialTheme.colorScheme.surface,
+            title = { Text(text = stringResource(R.string.label_fields_title)) },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    placeholders.forEach { placeholder ->
+                        LabelFieldSelector(
+                            label = placeholder,
+                            selected = assignments[placeholder] ?: "",
+                            onClick = { onFieldClick(placeholder) }
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = onConfirm) {
                     Text(stringResource(R.string.dialog_ok))
                 }
             },
@@ -258,45 +308,52 @@ fun LabelFieldSelector(
     }
 }
 
+/**
+ * The copies count between round - and + buttons.
+ */
 @Composable
-fun CopiesSelector(
-    options: List<String>,
-    selected: String,
-    onSelect: (String) -> Unit
+fun CopiesStepper(
+    copies: Int,
+    maxCopies: Int,
+    onCopiesChange: (Int) -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        FilledTonalIconButton(
+            onClick = { onCopiesChange(copies - 1) },
+            enabled = copies > 1
+        ) {
+            Icon(
+                Icons.Default.Remove,
+                contentDescription = stringResource(R.string.label_config_copies_decrease)
+            )
+        }
 
-    Column {
-        Text(
-            text = stringResource(R.string.label_config_copies),
-            style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.padding(bottom = 4.dp)
-        )
-        Box {
-            OutlinedButton(
-                onClick = { expanded = true },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = selected.ifEmpty { "1" },
-                    maxLines = 1
-                )
-            }
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier.background(MaterialTheme.colorScheme.surface)
-            ) {
-                options.forEach { option ->
-                    DropdownMenuItem(
-                        text = { Text(text = option) },
-                        onClick = {
-                            onSelect(option)
-                            expanded = false
-                        }
-                    )
-                }
-            }
+        // outlined like the buttons below it
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .height(40.dp)
+                .border(ButtonDefaults.outlinedButtonBorder(enabled = true), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = pluralStringResource(R.plurals.label_config_copies_count, copies, copies),
+                style = MaterialTheme.typography.labelLarge
+            )
+        }
+
+        FilledTonalIconButton(
+            onClick = { onCopiesChange(copies + 1) },
+            enabled = copies < maxCopies
+        ) {
+            Icon(
+                Icons.Default.Add,
+                contentDescription = stringResource(R.string.label_config_copies_increase)
+            )
         }
     }
 }
