@@ -656,6 +656,8 @@
     <string name="gopro_stage_starting_preview">Iniciando pre-visualização ao vivo…</string>
     <string name="gopro_error_not_connected">O GoPro não está conectado.</string>
     <string name="gopro_error_capture_busy">Ainda salvando a foto anterior.</string>
+    <string name="gopro_error_capture_timeout">O GoPro não terminou de capturar a tempo.</string>
+    <string name="gopro_error_capture_failed">A captura do GoPro falhou.</string>
     <string name="gopro_error_no_new_photo">O GoPro não produziu uma nova foto.</string>
     <string name="gopro_error_download_failed">Não foi possível copiar a foto do GoPro.</string>
     <!-- Trait Layout: USB Camera -->
@@ -1194,9 +1196,15 @@
     <string name="brapi_auth_deny">Autorização de BrAPI Negada</string>
     <string name="brapi_auth_failed_remove">Remover</string>
     <string name="brapi_auth_error_starting">Erro ao Iniciar a Autenticação BrAPI</string>
+    <string name="brapi_auth_error_starting_reason">Erro ao iniciar o BrAPI Auth: %1$s</string>
     <string name="brapi_auth_permission_deny">ERRO: Você não tem as permissões necessárias para executar esta ação</string>
     <string name="brapi_auth_needed_title">Login Necessário</string>
     <string name="brapi_auth_needed">Você precisa estar conectado ao sistema com o qual está tentando sincronizar dados para sincronizar seus dados.\n\nDeseja autenticar agora?</string>
+    <string name="brapi_account_migration_deferred">Reinicie Field Book para terminar a atualização do BrAPI</string>
+    <string name="brapi_shared_account_not_signed_in">Faça login neste servidor a partir do aplicativo ao qual ele pertence e, em seguida, selecione-o novamente aqui</string>
+    <string name="brapi_add_account_already_shared">%1$s já fornece este servidor. Escolha a partir de Servidores Compartilhados em vez de adicioná-lo novamente</string>
+    <string name="brapi_auth_success_already_shared">Conectado. Esse servidor já está compartilhado de outro aplicativo, por isso continua listado lá</string>
+    <string name="brapi_auth_success_no_account">Conectado, mas o servidor não pôde ser salvo. Reinicie Field Book e tente novamente</string>
     <!-- BrAPI Import -->
     <string name="import_dialog_title_brapi_fields">Importar Campo BrAPI</string>
     <string name="brapi_load_data_button">Carregar Campos</string>
