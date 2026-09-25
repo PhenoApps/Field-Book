@@ -632,6 +632,8 @@
     <string name="trait_boolean_unset">Rimuovi</string>
     <!-- Trait Layout: GoPro -->
     <string name="trait_go_pro_capture_button_text">Cattura\n</string>
+    <string name="trait_go_pro_await_device_title">Seleziona una GoPro associata</string>
+    <string name="trait_go_pro_no_paired_devices">Nessuna GoPro associata trovata. Associa prima la fotocamera nelle impostazioni Bluetooth di Android.</string>
     <string name="trait_go_pro_await_ble_title">In Attesa Della Connessione GoPro BLE</string>
     <string name="trait_go_pro_await_ble_message">Comunicando con GoPro BLE, questo potrebbe richiedere un minuto.</string>
     <string name="trait_go_pro_await_ap_title">Aspettando GoPro AP</string>
@@ -641,6 +643,23 @@
     <string name="go_pro_layout_black_11_not_detected">Questo carattere è stato fatto per un GoPro Black 11, si prega di contattare gli sviluppatori per implementare il tuo modello GoPro.\n</string>
     <string name="go_pro_frag_connect_btn_content_description">Connettiti a una fotocamera GoPro.\n</string>
     <string name="trait_go_pro_capture_content_description">Cattura un\'immagine da un dispositivo GoPro connesso.\n</string>
+    <string name="gopro_error_ble_failed">Impossibile connettersi al GoPro tramite Bluetooth.</string>
+    <string name="gopro_error_ble_timeout">Tempo scaduto il collegamento al GoPro tramite Bluetooth.</string>
+    <string name="gopro_error_ble_disconnected">Ha perso la connessione Bluetooth a GoPro.</string>
+    <string name="gopro_error_wifi_unavailable">Impossibile entrare nella rete Wi-Fi GoPro.</string>
+    <string name="gopro_error_wifi_lost">Ha perso la rete Wi-Fi GoPro.</string>
+    <string name="gopro_error_stream_failed">Impossibile avviare l\'anteprima live di GoPro.</string>
+    <string name="gopro_error_stream_timeout">L\'anteprima live di GoPro non è iniziata. Accendi la fotocamera spenta e accesa, quindi riprova.</string>
+    <string name="gopro_stage_bluetooth">Connessione tramite Bluetooth…</string>
+    <string name="gopro_stage_enabling_ap">Attivazione della fotocamera Wi‐Fi…</string>
+    <string name="gopro_stage_joining_wifi">Entrando nella fotocamera Wi‐Fi…</string>
+    <string name="gopro_stage_starting_preview">Avvio dell\'anteprima live…</string>
+    <string name="gopro_error_not_connected">GoPro non è connesso.</string>
+    <string name="gopro_error_capture_busy">Salvando ancora la foto precedente.</string>
+    <string name="gopro_error_capture_timeout">GoPro non ha finito di catturare in tempo.</string>
+    <string name="gopro_error_capture_failed">L\'acquisizione di GoPro non è riuscita.</string>
+    <string name="gopro_error_no_new_photo">Il GoPro non ha prodotto una nuova foto.</string>
+    <string name="gopro_error_download_failed">Impossibile copiare la foto da GoPro.</string>
     <!-- Trait Layout: USB Camera -->
     <string name="trait_usb_camera_zoom_in_button_text">Aumenta Zoom</string>
     <string name="trait_usb_camera_zoom_out_button_text">Diminuisci Zoom</string>
@@ -1177,9 +1196,15 @@
     <string name="brapi_auth_deny">Autorizzazione BrAPI negata</string>
     <string name="brapi_auth_failed_remove">Rimuovi</string>
     <string name="brapi_auth_error_starting">Errore durante l\'avvio dell\'autenticazione BrAPI</string>
+    <string name="brapi_auth_error_starting_reason">Errore Nell\'Avvio Di BrAPI Auth: %1$s</string>
     <string name="brapi_auth_permission_deny">ERRORE: Non hai i permessi necessari per eseguire questa azione</string>
     <string name="brapi_auth_needed_title">Accesso necessario</string>
     <string name="brapi_auth_needed">Devi aver effettuato l\'accesso al sistema con cui stai tentando di sincronizzare i dati in per sincronizzare i tuoi dati.\n\nVuoi autenticarti ora?</string>
+    <string name="brapi_account_migration_deferred">Riavvia il Field Book per completare l\'aggiornamento di BrAPI</string>
+    <string name="brapi_shared_account_not_signed_in">Accedi a questo server dall\'app che lo possiede, quindi selezionalo di nuovo qui</string>
+    <string name="brapi_add_account_already_shared">%1$s fornisce già questo server. Sceglierlo dai server condivisi invece di aggiungerlo di nuovo</string>
+    <string name="brapi_auth_success_already_shared">Accesso effettuato. Questo server è già condiviso da un\'altra app, quindi rimane elencato</string>
+    <string name="brapi_auth_success_no_account">Accesso effettuato, ma il server non può essere salvato. Riavvia il Field Book e riprova</string>
     <!-- BrAPI Import -->
     <string name="import_dialog_title_brapi_fields">Importazione Campo BrAPI</string>
     <string name="brapi_load_data_button">Carica Campi</string>
@@ -1439,6 +1464,13 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="inno_spectra_hardware_incompatible">Hardware incompatibile</string>
     <string name="inno_spectra_function_locked">Funzione Bloccata</string>
     <!-- stages reported while the inno spectra device is connecting -->
+    <string name="inno_spectra_connect_connecting">Connessione in corso</string>
+    <string name="inno_spectra_connect_handshake">Avvio in corso</string>
+    <string name="inno_spectra_connect_device_info">Lettura informazioni dispositivo</string>
+    <string name="inno_spectra_connect_device_uuid">Identificazione del dispositivo</string>
+    <string name="inno_spectra_connect_device_status">Stato di lettura</string>
+    <string name="inno_spectra_connect_scan_configs">Caricamento impostazioni di scansione</string>
+    <string name="inno_spectra_connect_ready">Pronto</string>
     <string name="header_temperature">Temperatura</string>
     <string name="header_humidity">Umidità</string>
     <string name="header_firmware">Firmware</string>
@@ -1636,6 +1668,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="nix_error_bluetooth_permissions">Devi accettare i permessi bluetooth o provare a riavviare l\'app.</string>
     <string name="nix_error_bluetooth_unavailable">Bluetooth non disponibile.</string>
     <string name="nix_error_bluetooth_disabled">Il Bluetooth è disabilitato sul dispositivo.</string>
+    <string name="nix_error_connect_failed">Impossibile connettersi al dispositivo, riprovare.</string>
     <string name="list_item_color_placeholder_content_description">Segnaposto per nuova scansione</string>
     <string name="loading">Caricando</string>
     <string name="nix_error_no_network">Nix potrebbe richiedere internet per funzionare correttamente.</string>
@@ -1722,6 +1755,10 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="edited_images">Immagini modificate</string>
     <string name="include_images">Includi Immagini</string>
     <string name="no_observations_to_upload">Nessuna osservazione da caricare</string>
+    <plurals name="brapi_unsyncable_observations">
+        <item quantity="one">L\'osservazione di %1$d non può essere sincronizzata perché le carattere non è stata importata da %2$s.</item>
+        <item quantity="other">Le osservazioni di %1$d non possono essere sincronizzate perché le carattere non sono state importate da %2$s.</item>
+    </plurals>
     <string name="sync_statistics">Statistiche Di Sincronizzazione</string>
     <string name="synced_observations">Osservazioni Sincronizzate</string>
     <string name="synced_images">Immagini sincronizzate</string>

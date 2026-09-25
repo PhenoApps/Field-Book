@@ -1757,6 +1757,10 @@
     <string name="edited_images">Fotos Editadas</string>
     <string name="include_images">Incluir Imágenes</string>
     <string name="no_observations_to_upload">No hay observaciones para cargar</string>
+    <plurals name="brapi_unsyncable_observations">
+        <item quantity="one">La observación %1$d no se puede sincronizar porque su característica no fue importada desde %2$s.</item>
+        <item quantity="other">Las observaciones %1$d no se pueden sincronizar porque sus rasgos no fueron importados desde %2$s.</item>
+    </plurals>
     <string name="sync_statistics">Estadísticas de Sincronización</string>
     <string name="synced_observations">Observaciones Sincronizadas</string>
     <string name="synced_images">Fotos Sincronizadas</string>
