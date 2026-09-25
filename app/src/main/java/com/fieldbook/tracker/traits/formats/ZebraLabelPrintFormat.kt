@@ -5,11 +5,12 @@ import com.fieldbook.tracker.traits.formats.parameters.AutoSwitchPlotParameter
 import com.fieldbook.tracker.traits.formats.parameters.DetailsParameter
 import com.fieldbook.tracker.traits.formats.parameters.AttachMediaParameter
 import com.fieldbook.tracker.traits.formats.parameters.NameParameter
+import com.fieldbook.tracker.traits.formats.parameters.PrintTemplateParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 
 class ZebraLabelPrintFormat : TraitFormat(
     format = Formats.LABEL_PRINT,
-    defaultLayoutId = R.layout.trait_label_print,
+    defaultLayoutId = R.layout.trait_label_print_compose,
     layoutView = null,
     databaseName = "zebra label print",
     nameStringResourceId = R.string.traits_format_labelprint,
@@ -18,6 +19,7 @@ class ZebraLabelPrintFormat : TraitFormat(
     NameParameter(),
     DetailsParameter(),
     AutoSwitchPlotParameter(),
+    PrintTemplateParameter(),
     ResourceFileParameter(),
     AttachMediaParameter()
 )

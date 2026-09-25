@@ -15,7 +15,8 @@ enum class Parameters {
     ATTACH_MEDIA,
     ALLOW_OTHER,
     CANOPY_SENSITIVITY,
-    DURATION;
+    DURATION,
+    PRINT_TEMPLATE;
 
     companion object {
 
@@ -26,7 +27,8 @@ enum class Parameters {
             "closeKeyboardOnOpen",
             "cropImage",
             "attachMedia",
-            "allowOther"
+            "allowOther",
+            "printTemplate"
         )
     }
 }

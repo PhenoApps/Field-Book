@@ -36,6 +36,7 @@ import com.fieldbook.tracker.traits.formats.parameters.AllowOtherParameter
 import com.fieldbook.tracker.traits.formats.parameters.CanopySensitivityParameter
 import com.fieldbook.tracker.traits.formats.parameters.MultipleCategoriesParameter
 import com.fieldbook.tracker.traits.formats.parameters.Parameters
+import com.fieldbook.tracker.traits.formats.parameters.PrintTemplateParameter
 import com.fieldbook.tracker.traits.formats.parameters.RepeatedMeasureParameter
 import com.fieldbook.tracker.traits.formats.parameters.ResourceFileParameter
 import com.fieldbook.tracker.traits.formats.parameters.SaveImageParameter
@@ -50,6 +51,7 @@ import com.fieldbook.tracker.utilities.StringUtil.capitalizeFirstLetter
 import com.fieldbook.tracker.utilities.TraitDetailUtil.getTodayDayOfYear
 import com.fieldbook.tracker.utilities.TraitDetailUtil.getTodayFormattedDate
 import com.fieldbook.tracker.utilities.TraitDetailUtil.parseCategoryExample
+import com.fieldbook.tracker.zpl.TemplateRepositoryEntryPoint
 
 private const val TAG = "TraitOptionsSection"
 
@@ -268,6 +270,15 @@ private fun getParamText(context: Context, param: BaseFormatParameter, trait: Tr
                 R.string.trait_detail_chip_duration,
                 "%d:%02d".format(seconds / 60, seconds % 60)
             )
+        }
+
+        is PrintTemplateParameter -> {
+            // the template the trait prints with, which is the default when it has none of its own
+            val templateRepository = TemplateRepositoryEntryPoint.get(context)
+            templateRepository.resolveTemplateId(trait.printTemplateId)
+                ?.let { templateRepository.getTemplateName(it) }
+                ?.let { context.getString(R.string.trait_detail_chip_print_template, it) }
+                ?: param.getName(context).capitalizeFirstLetter()
         }
 
         else -> param.getName(context).capitalizeFirstLetter()
