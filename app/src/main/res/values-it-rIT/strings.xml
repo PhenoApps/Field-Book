@@ -643,6 +643,23 @@
     <string name="go_pro_layout_black_11_not_detected">Questo carattere è stato fatto per un GoPro Black 11, si prega di contattare gli sviluppatori per implementare il tuo modello GoPro.\n</string>
     <string name="go_pro_frag_connect_btn_content_description">Connettiti a una fotocamera GoPro.\n</string>
     <string name="trait_go_pro_capture_content_description">Cattura un\'immagine da un dispositivo GoPro connesso.\n</string>
+    <string name="gopro_error_ble_failed">Impossibile connettersi al GoPro tramite Bluetooth.</string>
+    <string name="gopro_error_ble_timeout">Tempo scaduto il collegamento al GoPro tramite Bluetooth.</string>
+    <string name="gopro_error_ble_disconnected">Ha perso la connessione Bluetooth a GoPro.</string>
+    <string name="gopro_error_wifi_unavailable">Impossibile entrare nella rete Wi-Fi GoPro.</string>
+    <string name="gopro_error_wifi_lost">Ha perso la rete Wi-Fi GoPro.</string>
+    <string name="gopro_error_stream_failed">Impossibile avviare l\'anteprima live di GoPro.</string>
+    <string name="gopro_error_stream_timeout">L\'anteprima live di GoPro non è iniziata. Accendi la fotocamera spenta e accesa, quindi riprova.</string>
+    <string name="gopro_stage_bluetooth">Connessione tramite Bluetooth…</string>
+    <string name="gopro_stage_enabling_ap">Attivazione della fotocamera Wi‐Fi…</string>
+    <string name="gopro_stage_joining_wifi">Entrando nella fotocamera Wi‐Fi…</string>
+    <string name="gopro_stage_starting_preview">Avviare l\'anteprima live…</string>
+    <string name="gopro_error_not_connected">GoPro non è connesso.</string>
+    <string name="gopro_error_capture_busy">Salvando ancora la foto precedente.</string>
+    <string name="gopro_error_capture_timeout">GoPro non ha finito di catturare in tempo.</string>
+    <string name="gopro_error_capture_failed">L\'acquisizione di GoPro non è riuscita.</string>
+    <string name="gopro_error_no_new_photo">Il GoPro non ha prodotto una nuova foto.</string>
+    <string name="gopro_error_download_failed">Impossibile copiare la foto da GoPro.</string>
     <!-- Trait Layout: USB Camera -->
     <string name="trait_usb_camera_zoom_in_button_text">Aumenta Zoom</string>
     <string name="trait_usb_camera_zoom_out_button_text">Diminuisci Zoom</string>
@@ -1179,9 +1196,11 @@
     <string name="brapi_auth_deny">Autorizzazione BrAPI negata</string>
     <string name="brapi_auth_failed_remove">Rimuovi</string>
     <string name="brapi_auth_error_starting">Errore durante l\'avvio dell\'autenticazione BrAPI</string>
+    <string name="brapi_auth_error_starting_reason">Errore Nell\'Avvio Di BrAPI Auth: %1$s</string>
     <string name="brapi_auth_permission_deny">ERRORE: Non hai i permessi necessari per eseguire questa azione</string>
     <string name="brapi_auth_needed_title">Accesso necessario</string>
     <string name="brapi_auth_needed">Devi aver effettuato l\'accesso al sistema con cui stai tentando di sincronizzare i dati in per sincronizzare i tuoi dati.\n\nVuoi autenticarti ora?</string>
+    <string name="brapi_account_migration_deferred">Riavvia il Field Book per completare l\'aggiornamento di BrAPI</string>
     <!-- BrAPI Import -->
     <string name="import_dialog_title_brapi_fields">Importazione Campo BrAPI</string>
     <string name="brapi_load_data_button">Carica Campi</string>
