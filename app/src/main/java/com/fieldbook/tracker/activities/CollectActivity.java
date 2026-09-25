@@ -314,6 +314,12 @@ public class CollectActivity extends ThemedActivity
 
     UVCCameraTextureView uvcView;
 
+    // Previous resource-qualifier inputs, compared in onConfigurationChanged to detect when
+    // the window has crossed a bucket boundary.
+    private int lastSmallestWidthDp = Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
+    private int lastScreenHeightDp = Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
+    private int lastNightMode = Configuration.UI_MODE_NIGHT_UNDEFINED;
+
     // Runtime anchors that map to the Compose toolbar buttons (created in initToolbars)
     private View composeMediaAnchor = null;
     private View composeMissingAnchor = null;
@@ -404,6 +410,11 @@ public class CollectActivity extends ThemedActivity
 
         loadScreen();
 
+        Configuration config = getResources().getConfiguration();
+        lastSmallestWidthDp = config.smallestScreenWidthDp;
+        lastScreenHeightDp = config.screenHeightDp;
+        lastNightMode = config.uiMode & Configuration.UI_MODE_NIGHT_MASK;
+
         verifyPersonHelper.checkLastOpened();
 
         SpectralDao spectralDao = new SpectralDao(database);
@@ -411,11 +422,16 @@ public class CollectActivity extends ThemedActivity
         DeviceDao deviceDao = new DeviceDao(database);
         UriDao uriDao = new UriDao(database);
 
-        spectralViewModel = new SpectralViewModelFactory(new SpectralRepository(spectralDao, protocolDao, deviceDao, uriDao))
-                .create(SpectralViewModel.class);
+        // scoped to the activity's ViewModelStore so onCleared() cancels viewModelScope -
+        // creating these straight from the factory leaked a live SupervisorJob (holding the
+        // repository, and so DataHelper) on every activity create
+        spectralViewModel = new ViewModelProvider(this,
+                new SpectralViewModelFactory(new SpectralRepository(spectralDao, protocolDao, deviceDao, uriDao)))
+                .get(SpectralViewModel.class);
 
-        collectViewModel = new CollectViewModelFactory(traitRepository)
-                .create(CollectViewModel.class);
+        collectViewModel = new ViewModelProvider(this,
+                new CollectViewModelFactory(traitRepository))
+                .get(CollectViewModel.class);
 
         initializeInnoSpectraViewModel();
     }
@@ -1384,6 +1400,13 @@ public class CollectActivity extends ThemedActivity
             rangeBox.saveLastPlotAndTrait();
         }
 
+        // Teardown is unconditional, including when isChangingConfigurations() is true. The
+        // helpers below are unscoped @ActivityContext injections, so a replacement activity is
+        // handed new instances - skipping cleanup orphans the old connection rather than
+        // handing it over, and the device stays held until a force-stop. Rotation, folding and
+        // resizing never reach here anyway; the manifest's configChanges keeps the activity
+        // alive through them.
+
         try {
             ttsHelper.close();
         } catch (Exception e) {
@@ -1865,9 +1888,97 @@ public class CollectActivity extends ThemedActivity
         super.onPostCreate(savedInstanceState);
     }
 
+    /**
+     * Handles rotation, fold and resize without recreating the activity, so live BLE/GNSS/USB
+     * camera sessions and in-progress input survive. The view hierarchy is not destroyed, so
+     * nothing is re-inflated - only what depends on window geometry or uiMode is re-applied.
+     *
+     * Deliberately not called here: loadScreen() (setContentView forces inflateTrait, tearing
+     * down the hardware session this method protects), handleFlipFlopPreferences() (would
+     * rewrite the LayoutParams of every child of layout_main, including the imperatively sized
+     * UVCCameraTextureView), initWidgets() (can finish() the activity), toolbar rebinding (the
+     * bottom bar is Compose and recomposes itself) and refreshLayout() (would repopulate trait
+     * input from the stored observation, discarding in-progress typing; the views re-measure on
+     * their own).
+     *
+     * Without re-inflation, height-qualified dimens are not re-resolved, so the two structural
+     * ones are re-applied in applyCollectSizeConstraints(). Text sizes and button widths stay
+     * stale until collect is reopened, which is cosmetic.
+     *
+     * "density" is deliberately absent from the manifest's configChanges: it makes every
+     * baked-in dp stale, so recreation is the right response.
+     */
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+
+        int nightMode = newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK;
+
+        boolean bucketChanged = newConfig.smallestScreenWidthDp != lastSmallestWidthDp
+                || newConfig.screenHeightDp != lastScreenHeightDp
+                || nightMode != lastNightMode;
+
+        lastSmallestWidthDp = newConfig.smallestScreenWidthDp;
+        lastScreenHeightDp = newConfig.screenHeightDp;
+        lastNightMode = nightMode;
+
+        // cutout and system bar geometry change on rotate/fold, and the inset helper reads
+        // Configuration.uiMode to pick the bar tint
+        setupCollectInsets();
+
+        // the adapter needs a fresh measure pass against the new width
+        refreshInfoBarAdapter();
+
+        // re-resolve the structural height dimens for the new window
+        applyCollectSizeConstraints();
+
+        // use cases bind their target rotation at bind time; without an explicit update, saved
+        // images and the normalized crop rect land on the wrong edge of the frame
+        try {
+            cameraXFacade.updateTargetRotation();
+        } catch (Exception e) {
+            Log.e(TAG, "Error updating camera target rotation on configuration change.", e);
+        }
+
+        if (bucketChanged) {
+            Log.d(TAG, "Window bucket changed (sw=" + newConfig.smallestScreenWidthDp
+                    + "dp, h=" + newConfig.screenHeightDp + "dp)");
+        }
+    }
+
+    /**
+     * Re-reads the height-qualified structural dimens and applies them to the existing views.
+     * A self-handled configuration change does not re-inflate activity_collect.xml, so these
+     * would otherwise stay pinned to the bucket current when collect was opened. Touching only
+     * the two LayoutParams fields leaves input state and hardware sessions untouched.
+     */
+    private void applyCollectSizeConstraints() {
+
+        try {
+
+            int infoBarMax = getResources().getDimensionPixelSize(R.dimen.fb_collect_infobar_max_height);
+            int traitMin = getResources().getDimensionPixelSize(R.dimen.fb_collect_trait_container_min_height);
+
+            if (infoBarRv != null && infoBarRv.getLayoutParams() instanceof ConstraintLayout.LayoutParams) {
+                ConstraintLayout.LayoutParams lp = (ConstraintLayout.LayoutParams) infoBarRv.getLayoutParams();
+                if (lp.matchConstraintMaxHeight != infoBarMax) {
+                    lp.matchConstraintMaxHeight = infoBarMax;
+                    infoBarRv.setLayoutParams(lp);
+                }
+            }
+
+            View traitContainer = findViewById(R.id.svTraitContainer);
+            if (traitContainer != null && traitContainer.getLayoutParams() instanceof ConstraintLayout.LayoutParams) {
+                ConstraintLayout.LayoutParams lp = (ConstraintLayout.LayoutParams) traitContainer.getLayoutParams();
+                if (lp.matchConstraintMinHeight != traitMin) {
+                    lp.matchConstraintMinHeight = traitMin;
+                    traitContainer.setLayoutParams(lp);
+                }
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error applying collect size constraints.", e);
+        }
     }
 
     @Override

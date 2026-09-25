@@ -20,7 +20,17 @@ class SensorHelper @Inject constructor(@ActivityContext private val context: Con
         private const val TAG = "SensorHelper"
     }
 
-    data class RotationModel(val yaw: Float, val pitch: Float, val roll: Float)
+    /**
+     * @param displayRotation the [Surface] rotation the angles were measured against, for the
+     * relative-rotation path only. Null marks a record written before the remap, so consumers
+     * can tell the two conventions apart. Gson omits nulls, so the gravity path is unchanged.
+     */
+    data class RotationModel(
+        val yaw: Float,
+        val pitch: Float,
+        val roll: Float,
+        val displayRotation: Int? = null
+    )
 
     interface RelativeRotationListener {
         fun onRotationEvent(rotation: RotationModel)
@@ -64,8 +74,21 @@ class SensorHelper @Inject constructor(@ActivityContext private val context: Con
         val rotationMatrix = FloatArray(9)
         SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
 
+        // Remap into the displayed frame rather than the device's natural frame. This used to
+        // pass (AXIS_X, AXIS_Y), the identity, which was only correct because every camera
+        // surface lived in a portrait-locked activity on a natural-portrait phone; elsewhere
+        // the reading is off by 90 or 270 degrees. ROTATION_0 still maps to (AXIS_X, AXIS_Y),
+        // so output on a portrait phone is unchanged.
+        val displayRotation = getDeviceRotation()
+        val (axisX, axisY) = when (displayRotation) {
+            Surface.ROTATION_90 -> SensorManager.AXIS_Y to SensorManager.AXIS_MINUS_X
+            Surface.ROTATION_180 -> SensorManager.AXIS_MINUS_X to SensorManager.AXIS_MINUS_Y
+            Surface.ROTATION_270 -> SensorManager.AXIS_MINUS_Y to SensorManager.AXIS_X
+            else -> SensorManager.AXIS_X to SensorManager.AXIS_Y
+        }
+
         val remapMatrix = FloatArray(9)
-        SensorManager.remapCoordinateSystem(rotationMatrix, SensorManager.AXIS_X, SensorManager.AXIS_Y, remapMatrix)
+        SensorManager.remapCoordinateSystem(rotationMatrix, axisX, axisY, remapMatrix)
 
         val orientationVector = FloatArray(3)
         SensorManager.getOrientation(remapMatrix, orientationVector)
@@ -79,7 +102,9 @@ class SensorHelper @Inject constructor(@ActivityContext private val context: Con
         //Log.d(TAG, "Yaw: $yaw Pitch: $pitch Roll: $roll")
 
         if (context is RelativeRotationListener) {
-            context.onRotationEvent(RotationModel(yaw.toFloat(), pitch.toFloat(), roll.toFloat()))
+            context.onRotationEvent(
+                RotationModel(yaw.toFloat(), pitch.toFloat(), roll.toFloat(), displayRotation)
+            )
         }
     }
 

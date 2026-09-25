@@ -65,9 +65,15 @@
         app:layout_constraintTop_toTopOf="@id/crop_image_iv"
         android:elevation="1dp"/>
 
+    <!--
+        Sized as a percentage of the window at 3:4 and clamped to the old fixed 340x480dp, so a
+        phone is unchanged while a short window shrinks the surface instead of pushing the save
+        controls off-screen. Handle positions are stored normalised against the measured size,
+        so a smaller surface still yields identical coordinates.
+    -->
     <com.fieldbook.tracker.views.OverlayImageView
-        android:layout_width="@dimen/crop_image_portrait_width"
-        android:layout_height="@dimen/crop_image_portrait_height"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:adjustViewBounds="true"
         android:cropToPadding="true"
         android:scaleType="centerCrop"
@@ -78,7 +84,11 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintVertical_bias="0.33"
-        app:layout_constraintDimensionRatio="4:3"/>
+        app:layout_constraintWidth_percent="0.9"
+        app:layout_constraintHeight_percent="0.55"
+        app:layout_constraintWidth_max="@dimen/crop_image_max_width"
+        app:layout_constraintHeight_max="@dimen/crop_image_max_height"
+        app:layout_constraintDimensionRatio="H,3:4"/>
 
     <RelativeLayout
         android:id="@+id/crop_image_rl"

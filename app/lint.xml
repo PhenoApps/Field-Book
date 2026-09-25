@@ -1,3 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <lint>
+
+    <!-- Portrait locks in AndroidManifest.xml are intentional: from targetSdk 36 the platform
+         ignores screenOrientation above sw600dp, so they only affect phones, where portrait is
+         the ergonomic default for field collection. -->
+    <issue id="LockedOrientationActivity" severity="ignore" />
+
 </lint>
