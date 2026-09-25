@@ -146,6 +146,7 @@ tasks.withType(KotlinCompile).configureEach {
 dependencies {
 
     implementation project(':brapi-provider')
+    implementation project(':uvc')
 
     //seven segment display compose ui
     implementation 'com.github.rabross:SegmentedDisplay:0.4.0'
@@ -184,8 +185,15 @@ dependencies {
     implementation 'com.google.firebase:firebase-crashlytics-ktx:19.4.4'
 
     implementation 'com.google.zxing:core:3.5.3'
+    
+    implementation('com.github.phenoapps:phenolib:v0.9.56')
 
-    implementation('com.github.phenoapps:phenolib:v0.9.55')
+    // Transitive compile/api deps previously pulled via phenolib POM (needed with flat AAR):
+    implementation 'com.google.code.gson:gson:2.8.9'
+    implementation 'com.squareup.okhttp:logging-interceptor:2.7.5'
+    implementation 'io.swagger.core.v3:swagger-annotations:2.1.2'
+    implementation 'javax.annotation:javax.annotation-api:1.3.2'
+    implementation 'org.threeten:threetenbp:1.5.0'
 
     implementation 'com.google.android.exoplayer:exoplayer:2.19.1'
     implementation 'androidx.media3:media3-exoplayer:1.8.0'
@@ -196,7 +204,6 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
 
     //uvc camera java native libs
-    implementation("com.serenegiant:common:2.12.4")
 
     //ffmpeg 16kb
     implementation("com.arthenica:smart-exception-java:0.2.1")
@@ -356,7 +363,7 @@ repositories {
 
 tasks.register('prepareKotlinBuildScriptModel') {}
 
-android.defaultConfig.manifestPlaceholders = ['appAuthRedirectScheme': 'fieldbook' ]
+android.defaultConfig.manifestPlaceholders = ['appAuthRedirectScheme': 'fieldbook']
 
 // generates res/raw/aboutlibraries.json from the real dependency graph at build time
 // the nested blocks are set as properties, groovy resolves collect { } to its own collect method

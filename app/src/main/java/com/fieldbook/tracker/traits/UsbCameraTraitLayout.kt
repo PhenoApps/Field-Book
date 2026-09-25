@@ -3,10 +3,8 @@ package com.fieldbook.tracker.traits
 import android.app.AlertDialog
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.SurfaceTexture
 import android.util.AttributeSet
 import android.view.Surface
-import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -20,7 +18,6 @@ import com.serenegiant.widget.CameraViewInterface
 import com.serenegiant.widget.UVCCameraTextureView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import org.phenoapps.interfaces.usb.camera.CameraSurfaceListener
 
 @AndroidEntryPoint
 class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
@@ -32,6 +29,9 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
 
     private var surface: Surface? = null
     private var lastBitmap: Bitmap? = null
+    private var laidOutPreviewWidth: Int = 0
+    private var laidOutPreviewHeight: Int = 0
+    private var traitUvcView: UVCCameraTextureView? = null
 
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
@@ -45,19 +45,33 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
         return type
     }
 
+    /** On-screen TextureView inside the preview card (not the off-screen activity one). */
+    private fun previewUvc(): UVCCameraTextureView {
+        return traitUvcView ?: controller.getUvcView()
+    }
+
+
     override fun loadLayout() {
         super.loadLayout()
+        traitUvcView = activity?.findViewById(R.id.trait_camera_uvc_tv)
+            ?: findViewById(R.id.trait_camera_uvc_tv)
         setup()
     }
 
     override fun onConnected(camera: UVCCamera?, sizes: List<Size>) {
-
-        sizes.maxByOrNull { it.height * it.width }?.let { size ->
-            setCameraPreviewSize(camera, size)
-            updatePreviewSize(size.width, size.height)
-        }
-
+        val maxPixels = 1280 * 720
+        val size = sizes.filter { it.width * it.height <= maxPixels }
+            .maxByOrNull { it.height * it.width }
+            ?: sizes.minByOrNull { it.height * it.width }
+            ?: Size(0, 0, 0, UVCCamera.DEFAULT_PREVIEW_WIDTH, UVCCamera.DEFAULT_PREVIEW_HEIGHT)
+        // Layout first, then bind after the TextureView has a SurfaceTexture.
+        updatePreviewSize(size.width, size.height)
         startCaptureUi()
+        previewUvc().post {
+            if (controller.getUsbApi().isConnected()) {
+                setCameraPreviewSize(camera ?: controller.getUsbApi().camera, size)
+            }
+        }
     }
 
     override fun onDisconnected() {
@@ -67,7 +81,7 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
     }
 
     override fun getUsbCameraInterface(): CameraViewInterface {
-        return controller.getUvcView()
+        return previewUvc()
     }
 
     override fun getPreviewView(): ImageView? {
@@ -75,21 +89,30 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
     }
 
     override fun onSettingsChanged() {
+        // After unplug, never re-show the preview card (frame callbacks used to).
+        if (!controller.getUsbApi().isConnected()) {
+            previewCardView?.visibility = GONE
+            imageView?.visibility = GONE
+            return
+        }
 
         previewCardView?.visibility = if (prefs.getBoolean(GeneralKeys.USB_CAMERA_PREVIEW, true))
-            View.VISIBLE else View.GONE
+            VISIBLE else GONE
 
         val sizes = controller.getUsbApi().supportedSizes?.distinct()
         val maxSize = sizes?.maxByOrNull { it.height * it.width }?.let { sizes.indexOf(it) } ?: 0
         val resIndex = prefs.getInt(GeneralKeys.USB_CAMERA_RESOLUTION_INDEX, maxSize)
 
-        val size = sizes?.get(resIndex) ?: Size(0,0,0,
+        val size = sizes?.get(resIndex) ?: Size(
+            0, 0, 0,
             1920,
             1080
         )
 
-        controller.getUsbApi().camera?.autoFocus = prefs.getBoolean(GeneralKeys.USB_CAMERA_AUTO_FOCUS, true)
-        controller.getUsbApi().camera?.autoWhiteBlance = prefs.getBoolean(GeneralKeys.USB_CAMERA_AUTO_WHITE_BALANCE, true)
+        controller.getUsbApi().camera?.autoFocus =
+            prefs.getBoolean(GeneralKeys.USB_CAMERA_AUTO_FOCUS, true)
+        controller.getUsbApi().camera?.autoWhiteBlance =
+            prefs.getBoolean(GeneralKeys.USB_CAMERA_AUTO_WHITE_BALANCE, true)
         controller.getUsbApi().camera?.updateCameraParams()
 
         updatePreviewSize(size.width, size.height)
@@ -98,7 +121,7 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
 
     private fun setup() {
 
-        imageView?.visibility = View.VISIBLE
+        imageView?.visibility = VISIBLE
 
         previewCardView?.layoutParams = ConstraintLayout.LayoutParams(
             ConstraintLayout.LayoutParams.WRAP_CONTENT,
@@ -110,7 +133,7 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
         }
 
         if (controller.getUsbApi().isConnected()) {
-            
+
             startCaptureUi()
 
         } else initUi()
@@ -126,14 +149,24 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
     }
 
     private fun initUi() {
+        try {
+            previewUvc().visibility = GONE
+        } catch (_: Exception) {
+        }
+        // Hide visible preview only
+        lastBitmap = null
+        laidOutPreviewWidth = 0
+        laidOutPreviewHeight = 0
+        imageView?.setImageDrawable(null)
+        imageView?.visibility = GONE
 
-        shutterButton?.visibility = View.INVISIBLE
+        shutterButton?.visibility = INVISIBLE
 
-        settingsButton?.visibility = View.INVISIBLE
+        settingsButton?.visibility = INVISIBLE
 
-        previewCardView?.visibility = View.GONE
+        previewCardView?.visibility = GONE
 
-        connectBtn?.visibility = View.VISIBLE
+        connectBtn?.visibility = VISIBLE
 
         connectBtn?.setOnClickListener {
 
@@ -144,9 +177,14 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
 
     private fun showResolutionChoiceDialog() {
 
-        val supportedSizes = controller.getUsbApi().supportedSizes?.map { android.util.Size(it.width, it.height) }?.distinct()
-        val initialMaxIndexSelected = supportedSizes?.maxByOrNull { it.height * it.width }?.let { supportedSizes.indexOf(it) } ?: 0
-        val settingsView = UsbCameraTraitSettingsView(context, supportedSizes ?: listOf(), initialMaxIndexSelected)
+        val supportedSizes =
+            controller.getUsbApi().supportedSizes?.map { android.util.Size(it.width, it.height) }
+                ?.distinct()
+        val initialMaxIndexSelected =
+            supportedSizes?.maxByOrNull { it.height * it.width }?.let { supportedSizes.indexOf(it) }
+                ?: 0
+        val settingsView =
+            UsbCameraTraitSettingsView(context, supportedSizes ?: listOf(), initialMaxIndexSelected)
 
         AlertDialog.Builder(context, R.style.AppAlertDialog)
             .setTitle(R.string.trait_usb_photo_settings_title)
@@ -160,26 +198,33 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
     }
 
     private fun setCameraPreviewSize(camera: UVCCamera?, size: Size) {
-        surface = Surface(controller.getUvcView().surfaceTexture)
-
+        val texture = previewUvc().surfaceTexture
+        if (texture == null) {
+            previewUvc().post {
+                if (controller.getUsbApi().isConnected()) {
+                    setCameraPreviewSize(camera ?: controller.getUsbApi().camera, size)
+                }
+            }
+            return
+        }
+        try {
+            surface?.release()
+        } catch (_: Exception) {
+        }
+        surface = Surface(texture)
         camera?.setPreviewSize(size.width, size.height)
         camera?.setPreviewDisplay(surface)
         camera?.startPreview()
     }
 
     private fun updatePreviewSize(width: Int, height: Int) {
+        if (width <= 0 || height <= 0) return
+        if (width == laidOutPreviewWidth && height == laidOutPreviewHeight) return
+        laidOutPreviewWidth = width
+        laidOutPreviewHeight = height
 
         ui.launch {
-            controller?.getUvcView()?.aspectRatio = width / height.toDouble()
-
-            (controller?.getUvcView() as UVCCameraTextureView).layoutParams = ConstraintLayout.LayoutParams(
-                width, height
-            )
-
-            ((controller?.getUvcView() as UVCCameraTextureView).layoutParams as ConstraintLayout.LayoutParams).let { params ->
-                params.topToBottom = ConstraintLayout.LayoutParams.PARENT_ID
-                params.startToEnd = ConstraintLayout.LayoutParams.PARENT_ID
-            }
+            previewUvc().aspectRatio = width / height.toDouble()
         }
     }
 
@@ -187,66 +232,41 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
 
         ui.launch {
 
-            shutterButton?.visibility = View.VISIBLE
-            connectBtn?.visibility = View.INVISIBLE
-            settingsButton?.visibility = View.VISIBLE
-            //previewCardView?.visibility = View.VISIBLE
+            shutterButton?.visibility = VISIBLE
+            connectBtn?.visibility = INVISIBLE
+            settingsButton?.visibility = VISIBLE
+            previewCardView?.visibility = VISIBLE
+            imageView?.visibility = GONE
+            previewUvc().visibility = VISIBLE
+            setupPreviewAndCaptureButtons()
 
             shutterButton?.setOnClickListener {
 
                 shutterButton?.isEnabled = false
 
-                lastBitmap?.let { bmp ->
+                val bmp = try {
+                    previewUvc().bitmap
+                } catch (_: Exception) {
+                    lastBitmap
+                }
 
+                if (bmp != null) {
+                    lastBitmap = bmp
                     controller.getSoundHelper().playShutter()
-
                     saveBitmapToStorage(bmp, currentRange, currentTrait)
-
-                    activity?.runOnUiThread {
-
-                        shutterButton?.isEnabled = true
-                    }
-                }
-            }
-
-            controller.getUvcView().surfaceTextureListener =
-                object : CameraSurfaceListener {
-                    override fun onSurfaceTextureAvailable(
-                        surface: SurfaceTexture,
-                        width: Int,
-                        height: Int
-                    ) {
-                    }
-
-                    override fun onSurfaceTextureUpdated(surfaceTexture: SurfaceTexture) {
-                        controller.getUvcView().bitmap?.let { bmp ->
-
-                            if (lastBitmap == null) {
-
-                                setupPreviewAndCaptureButtons()
-
-                            }
-
-                            imageView?.setImageBitmap(bmp)
-                            lastBitmap = bmp
-                            onSettingsChanged()
-                        }
-                    }
                 }
 
-            val sizes = controller.getUsbApi().camera?.supportedSizeList?.distinct() ?: listOf()
-            val maxIndex = sizes.maxByOrNull { it.height * it.width }?.let { sizes.indexOf(it) } ?: 0
-            val resIndex = prefs.getInt(GeneralKeys.USB_CAMERA_RESOLUTION_INDEX, maxIndex)
-            if (sizes.isNotEmpty() && resIndex < sizes.size) {
-                updatePreviewSize(sizes[resIndex].width, sizes[resIndex].height)
+                activity?.runOnUiThread {
+                    shutterButton?.isEnabled = true
+                }
             }
         }
     }
 
     private fun setupPreviewAndCaptureButtons() {
 
-        settingsButton?.visibility = View.VISIBLE
-        shutterButton?.visibility = View.VISIBLE
+        settingsButton?.visibility = VISIBLE
+        shutterButton?.visibility = VISIBLE
 
     }
 }
