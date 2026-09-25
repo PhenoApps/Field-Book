@@ -653,7 +653,7 @@
     <string name="gopro_stage_bluetooth">Connessione tramite Bluetooth…</string>
     <string name="gopro_stage_enabling_ap">Attivazione della fotocamera Wi‐Fi…</string>
     <string name="gopro_stage_joining_wifi">Entrando nella fotocamera Wi‐Fi…</string>
-    <string name="gopro_stage_starting_preview">Avviare l\'anteprima live…</string>
+    <string name="gopro_stage_starting_preview">Avvio dell\'anteprima live…</string>
     <string name="gopro_error_not_connected">GoPro non è connesso.</string>
     <string name="gopro_error_capture_busy">Salvando ancora la foto precedente.</string>
     <string name="gopro_error_capture_timeout">GoPro non ha finito di catturare in tempo.</string>
@@ -1201,6 +1201,10 @@
     <string name="brapi_auth_needed_title">Accesso necessario</string>
     <string name="brapi_auth_needed">Devi aver effettuato l\'accesso al sistema con cui stai tentando di sincronizzare i dati in per sincronizzare i tuoi dati.\n\nVuoi autenticarti ora?</string>
     <string name="brapi_account_migration_deferred">Riavvia il Field Book per completare l\'aggiornamento di BrAPI</string>
+    <string name="brapi_shared_account_not_signed_in">Accedi a questo server dall\'app che lo possiede, quindi selezionalo di nuovo qui</string>
+    <string name="brapi_add_account_already_shared">%1$s fornisce già questo server. Sceglierlo dai server condivisi invece di aggiungerlo di nuovo</string>
+    <string name="brapi_auth_success_already_shared">Accesso effettuato. Questo server è già condiviso da un\'altra app, quindi rimane elencato</string>
+    <string name="brapi_auth_success_no_account">Accesso effettuato, ma il server non può essere salvato. Riavvia il Field Book e riprova</string>
     <!-- BrAPI Import -->
     <string name="import_dialog_title_brapi_fields">Importazione Campo BrAPI</string>
     <string name="brapi_load_data_button">Carica Campi</string>
@@ -1460,6 +1464,13 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="inno_spectra_hardware_incompatible">Hardware incompatibile</string>
     <string name="inno_spectra_function_locked">Funzione Bloccata</string>
     <!-- stages reported while the inno spectra device is connecting -->
+    <string name="inno_spectra_connect_connecting">Connessione in corso</string>
+    <string name="inno_spectra_connect_handshake">Avvio in corso</string>
+    <string name="inno_spectra_connect_device_info">Lettura informazioni dispositivo</string>
+    <string name="inno_spectra_connect_device_uuid">Identificazione del dispositivo</string>
+    <string name="inno_spectra_connect_device_status">Stato di lettura</string>
+    <string name="inno_spectra_connect_scan_configs">Caricamento impostazioni di scansione</string>
+    <string name="inno_spectra_connect_ready">Pronto</string>
     <string name="header_temperature">Temperatura</string>
     <string name="header_humidity">Umidità</string>
     <string name="header_firmware">Firmware</string>
@@ -1657,6 +1668,7 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="nix_error_bluetooth_permissions">Devi accettare i permessi bluetooth o provare a riavviare l\'app.</string>
     <string name="nix_error_bluetooth_unavailable">Bluetooth non disponibile.</string>
     <string name="nix_error_bluetooth_disabled">Il Bluetooth è disabilitato sul dispositivo.</string>
+    <string name="nix_error_connect_failed">Impossibile connettersi al dispositivo, riprovare.</string>
     <string name="list_item_color_placeholder_content_description">Segnaposto per nuova scansione</string>
     <string name="loading">Caricando</string>
     <string name="nix_error_no_network">Nix potrebbe richiedere internet per funzionare correttamente.</string>
@@ -1743,6 +1755,10 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="edited_images">Immagini modificate</string>
     <string name="include_images">Includi Immagini</string>
     <string name="no_observations_to_upload">Nessuna osservazione da caricare</string>
+    <plurals name="brapi_unsyncable_observations">
+        <item quantity="one">L\'osservazione di %1$d non può essere sincronizzata perché le carattere non è stata importata da %2$s.</item>
+        <item quantity="other">Le osservazioni di %1$d non possono essere sincronizzate perché le carattere non sono state importate da %2$s.</item>
+    </plurals>
     <string name="sync_statistics">Statistiche Di Sincronizzazione</string>
     <string name="synced_observations">Osservazioni Sincronizzate</string>
     <string name="synced_images">Immagini sincronizzate</string>
