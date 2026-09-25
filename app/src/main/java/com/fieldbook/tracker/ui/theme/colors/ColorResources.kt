@@ -123,6 +123,8 @@ object HighContrastOverrides {
     val TraitPercentStroke = Color.Black
     val TraitPercentStart = Color.White
     val TextHighContrastInverted = Color.Black
+    val TextSecondary = Color.Black
+    val SubheadingColor = Color.Black
     val IconFillTint = Color.White
     val BooleanFalse = Color.Black
     val BooleanTrue = Color.Black
