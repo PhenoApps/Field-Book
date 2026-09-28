@@ -1,0 +1,538 @@
+package com.fieldbook.tracker.traits
+
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.bluetooth.BluetoothAdapter
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.util.AttributeSet
+import android.util.Log
+import android.widget.Toast
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.ComposeView
+import androidx.core.graphics.toColorInt
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.fieldbook.tracker.R
+import com.fieldbook.tracker.activities.CollectActivity
+import com.fieldbook.tracker.adapters.AttributeAdapter
+import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.dialogs.AttributeChooserDialog
+import com.fieldbook.tracker.dialogs.LabelFieldChooserDialog
+import com.fieldbook.tracker.preferences.GeneralKeys
+import com.fieldbook.tracker.printing.LabelFieldsDialog
+import com.fieldbook.tracker.printing.LabelPrintConfigDialog
+import com.fieldbook.tracker.printing.LabelPrintMainView
+import com.fieldbook.tracker.printing.LabelPrintService
+import com.fieldbook.tracker.printing.LabelPrintStore
+import com.fieldbook.tracker.ui.theme.AppTheme
+import com.fieldbook.tracker.zpl.TemplateRepository
+import dagger.hilt.android.AndroidEntryPoint
+import org.phenoapps.labelprint.service.LabelPrintManager
+import org.phenoapps.labelprint.zpl.ParseResult
+import org.phenoapps.labelprint.zpl.TokenizeResult
+import org.phenoapps.labelprint.zpl.ZplParserImpl
+import org.phenoapps.labelprint.zpl.ZplTokenizerImpl
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
+import javax.inject.Inject
+
+/**
+ * Trait layout for Zebra label printing.
+ */
+@AndroidEntryPoint
+class LabelPrintTraitLayout : BaseTraitLayout {
+
+    companion object {
+        private const val TAG = "LabelPrintTraitLayout"
+    }
+
+    @Inject
+    lateinit var service: LabelPrintService
+
+    @Inject
+    lateinit var templateRepository: TemplateRepository
+
+    private lateinit var store: LabelPrintStore
+
+    private var composeView: ComposeView? = null
+    private var mActivity: Activity? = null
+
+    private val bluetoothStateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent?) {
+            if (intent?.action == BluetoothAdapter.ACTION_STATE_CHANGED) {
+                val state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)
+                if (state == BluetoothAdapter.STATE_ON || state == BluetoothAdapter.STATE_OFF) {
+                    refreshPrinterConnectionState()
+                }
+            }
+        }
+    }
+
+    private val printerMessageReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent?) {
+            if (intent?.extras == null) return
+
+            val message = intent.extras?.getString("message")
+            val numLabels = intent.extras?.getInt("numLabels", 0) ?: 0
+            val plotId = intent.extras?.getString("plotId")
+            val traitId = intent.extras?.getString("traitId")
+
+            val activity = mActivity as? CollectActivity ?: return
+
+            activity.runOnUiThread {
+                message?.let {
+                    Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            // numLabels is only set when the printer reported ready and the labels were sent
+            if (LabelPrintService.shouldInsertObservation(numLabels, plotId, traitId)) {
+                val cumulativeCount = saveLabelCount(activity, plotId!!, traitId!!, numLabels)
+
+                activity.runOnUiThread {
+                    triggerTts(context.getString(R.string.trait_print_label_success))
+
+                    // the user may have moved on (e.g. auto switch plot) before the printer responded
+                    if (plotId == currentRange?.uniqueId && traitId == currentTrait?.id) {
+                        collectInputView?.text = cumulativeCount.toString()
+                        collectInputView?.setTextColor(displayColor.toColorInt())
+                        collectInputView?.markObservationSaved()
+                        activity.updateCurrentTraitStatus(true)
+                        activity.refreshRepeatedValuesToolbarIndicator()
+                        collectInputView?.refreshTimestamp()
+                    }
+                    activity.refreshInfoBarAdapter()
+
+                    if (::store.isInitialized) store.assignmentsRevision.intValue++
+                }
+            }
+        }
+    }
+
+    /**
+     * Adds [numLabels] to the printed-label count of the plot and trait the labels were printed
+     * for, not the current plot, since the printer responds asynchronously.
+     * Updates the latest rep if one exists, otherwise inserts a new observation.
+     * Returns the new count.
+     */
+    private fun saveLabelCount(
+        activity: CollectActivity,
+        plotId: String,
+        traitId: String,
+        numLabels: Int
+    ): Int {
+        val studyId = activity.studyId
+        val latest = database.getAllObservations(studyId, plotId, traitId)
+            ?.maxByOrNull { it.rep.toIntOrNull() ?: 0 }
+        val count = (latest?.value?.toIntOrNull() ?: 0) + numLabels
+
+        val person = activity.person
+        val location = try {
+            activity.locationByPreferences
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to get location", e)
+            null
+        }
+
+        if (latest == null) {
+            database.insertObservation(
+                plotId, traitId, count.toString(), person, location, "", studyId,
+                null, null, null, database.getDefaultRep(studyId, plotId, traitId)
+            )
+        } else {
+            latest.value = count.toString()
+            latest.collector = person
+            latest.geo_coordinates = location
+            latest.observation_time_stamp = OffsetDateTime.now()
+                .format(DateTimeFormatter.ofPattern(DataHelper.TIME_FORMAT_PATTERN))
+            database.updateObservationModels(database.db, listOf(latest))
+        }
+
+        return count
+    }
+
+    constructor(context: Context) : super(context)
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    )
+
+    override fun type(): String = "zebra label print"
+
+    override fun layoutId(): Int = R.layout.trait_label_print_compose
+
+    override fun init(act: Activity) {
+        composeView = act.findViewById(R.id.compose_view)
+        mActivity = act
+
+        store = LabelPrintStore(prefs)
+    }
+
+    override fun loadLayout() {
+        super.loadLayout()
+
+        store.restoreConfig()
+        store.currentPlotIdState.value = currentRange?.uniqueId
+        refreshPrinterConnectionState()
+
+        if (!store.isPrinterConnected.value && !service.getSavedPrinterName().isNullOrEmpty()) {
+            connectToPrinter(false)
+        }
+
+        val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+        val attributes = database.getAllObservationUnitAttributeNames(studyId)
+        store.buildFieldOptions(context, attributes)
+
+        resolveTemplate()
+
+        setupUi()
+
+        toggleVisibility(VISIBLE)
+        collectInputView?.editText?.isFocusable = false
+        collectInputView?.editText?.isFocusableInTouchMode = false
+        collectInputView?.editText?.isEnabled = false
+    }
+
+    /**
+     * Traits created before per-trait templates have no template id, and a trait's template
+     * may have been deleted, so fall back to the default template.
+     */
+    private fun resolveTemplate() {
+        store.templateIdState.value =
+            templateRepository.resolveTemplateId(currentTrait?.printTemplateId)
+    }
+
+    private fun setupUi() {
+        composeView?.setContent {
+            AppTheme {
+                val copiesCount = store.selectedCopies.intValue
+
+                val preview = remember(
+                    store.templateIdState.value,
+                    store.currentPlotIdState.value,
+                    store.assignmentsRevision.intValue
+                ) {
+                    buildPreview()
+                }
+                val previewLabel = preview.label
+                val placeholders = preview.placeholders
+
+                val showFields: (() -> Unit)? = if (placeholders.isNotEmpty()) {
+                    { store.showFieldDialog.value = true }
+                } else null
+
+                LabelPrintMainView(
+                    onPrintClick = { printLabel() },
+                    onSettingsClick = { store.showConfigDialog.value = true },
+                    onConnectClick = {
+                        store.isManualDisconnected.value = false
+                        connectToPrinter(forceChooser = true)
+                    },
+                    onPreviewClick = showFields,
+                    isPrinterConnected = store.isPrinterConnected.value,
+                    copiesCount = copiesCount,
+                    previewLabel = previewLabel
+                )
+
+                if (store.showConfigDialog.value) {
+                    LabelPrintConfigDialog(
+                        currentCopies = store.selectedCopies.intValue,
+                        maxCopies = LabelPrintService.MAX_COPIES,
+                        onConfirm = { copies ->
+                            store.selectedCopies.intValue = copies
+                            store.saveConfig()
+                            store.showConfigDialog.value = false
+                        },
+                        onDismiss = { store.showConfigDialog.value = false },
+                        isPrinterConnected = store.isPrinterConnected.value,
+                        onConnectClick = {
+                            store.isManualDisconnected.value = false
+                            connectToPrinter(forceChooser = true)
+                        },
+                        onDisconnectClick = { disconnectPrinter() },
+                        onCalibrate = { calibratePrinter() },
+                        onFieldsClick = showFields
+                    )
+                }
+
+                if (store.showFieldDialog.value) {
+                    val currentAssignments = remember(
+                        store.templateIdState.value,
+                        store.assignmentsRevision.intValue
+                    ) {
+                        val id = store.templateIdState.value
+                        val saved = if (id != null) {
+                            val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+                            templateRepository.getAssignments(studyId, id)
+                        } else emptyMap()
+
+                        saved + store.fieldAssignments
+                    }
+
+                    LabelFieldsDialog(
+                        placeholders = placeholders,
+                        assignments = currentAssignments,
+                        onFieldClick = { placeholder ->
+                            store.pendingFieldPlaceholder = placeholder
+                            showAttributeChooserDialog()
+                        },
+                        onConfirm = {
+                            store.templateIdState.value?.let { id ->
+                                val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+                                templateRepository.saveAssignments(studyId, id, currentAssignments)
+                            }
+                            store.fieldAssignments.clear()
+                            store.assignmentsRevision.intValue++
+                            store.showFieldDialog.value = false
+                        },
+                        onDismiss = {
+                            store.fieldAssignments.clear()
+                            store.assignmentsRevision.intValue++
+                            store.showFieldDialog.value = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    private fun showAttributeChooserDialog() {
+        val activity = mActivity as? CollectActivity ?: return
+
+        val dialog = LabelFieldChooserDialog()
+        dialog.setOnAttributeSelectedListener(object :
+            AttributeChooserDialog.OnAttributeSelectedListener {
+            override fun onAttributeSelected(model: AttributeAdapter.AttributeModel) {
+                val placeholder = store.pendingFieldPlaceholder ?: return
+                store.fieldAssignments[placeholder] = model.label
+                store.assignmentsRevision.intValue++
+                store.pendingFieldPlaceholder = null
+            }
+        })
+        dialog.show(activity.supportFragmentManager, "labelFieldAttributeChooser")
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun connectToPrinter(forceChooser: Boolean = false) {
+        val activity = mActivity ?: return
+        if (!service.checkBluetoothPermissions(activity)) return
+
+        if (!service.isBluetoothEnabled()) {
+            activity.startActivity(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE))
+            return
+        }
+
+        if (forceChooser || service.getSavedPrinterName().isNullOrEmpty()) {
+            service.choosePrinter(
+                activity,
+                object : com.fieldbook.tracker.utilities.BluetoothChooseCallback {
+                    override fun onDeviceChosen(deviceName: String) {
+                        activity.runOnUiThread { refreshPrinterConnectionState() }
+                    }
+                })
+        } else {
+            refreshPrinterConnectionState()
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun refreshPrinterConnectionState() {
+        // receivers are registered with the other layouts, before this one may have loaded
+        if (!::store.isInitialized) return
+        store.isPrinterConnected.value = service.isBluetoothEnabled() 
+                && !service.getSavedPrinterName().isNullOrEmpty()
+                && !store.isManualDisconnected.value
+    }
+
+    private fun disconnectPrinter() {
+        store.isManualDisconnected.value = true
+        refreshPrinterConnectionState()
+        Toast.makeText(context, R.string.printer_not_connected, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun calibratePrinter() {
+        val activity = mActivity ?: return
+        if (!service.checkBluetoothPermissions(activity)) return
+        service.calibrate { success ->
+            activity.runOnUiThread {
+                val msg =
+                    if (success) context.getString(R.string.calibration_sent) else context.getString(
+                        R.string.calibration_failed
+                    )
+                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun printLabel() {
+        val activity = mActivity ?: return
+        if (!service.checkBluetoothPermissions(activity)) return
+
+        val collectActivity = context as? CollectActivity ?: return
+        val trait = currentTrait ?: return
+
+        resolveTemplate()
+        val templateId = store.templateIdState.value
+        val templateZpl = templateId?.let { templateRepository.getTemplate(it) }
+        if (templateId == null || templateZpl == null) {
+            Toast.makeText(context, R.string.label_print_no_template, Toast.LENGTH_LONG).show()
+            return
+        }
+
+        val uniqueId = currentRange?.uniqueId ?: return
+
+        val resolvedZpl = resolveLabelZpl(templateId, templateZpl, uniqueId)
+
+        val labels = List<String>(store.selectedCopies.intValue) { resolvedZpl }
+
+        store.saveConfig()
+
+        val plotId = collectActivity.getRangeBox().getPlotID() ?: return
+        service.printLabels(context, labels, plotId, trait)
+    }
+
+    /**
+     * The rendered label and the template's placeholders, read from the same template so the
+     * label fields always match what the preview shows.
+     */
+    private class Preview(
+        val label: org.phenoapps.labelprint.zpl.ZplLabel? = null,
+        val placeholders: List<String> = emptyList()
+    )
+
+    private fun buildPreview(): Preview {
+        val templateId = store.templateIdState.value ?: return Preview()
+        val templateZpl = templateRepository.getTemplate(templateId) ?: return Preview()
+        val placeholders = LabelPrintManager.extractPlaceholders(templateZpl)
+
+        val previewZpl = resolveLabelZpl(templateId, templateZpl, currentRange?.uniqueId)
+
+        if (previewZpl.isNotBlank()) {
+            val tokenizer = ZplTokenizerImpl()
+            val parser = ZplParserImpl()
+            val tokenResult = tokenizer.tokenize(previewZpl)
+            if (tokenResult is TokenizeResult.Success) {
+                val parseResult = parser.parse(tokenResult.tokens)
+                if (parseResult is ParseResult.Success) {
+                    return Preview(parseResult.document.labels.firstOrNull(), placeholders)
+                }
+            }
+        }
+        return Preview(placeholders = placeholders)
+    }
+
+    /**
+     * The template's ZPL with each placeholder replaced by its assigned field's value for the plot.
+     * Placeholders resolve to blank values when there is no plot.
+     */
+    private fun resolveLabelZpl(templateId: String, templateZpl: String, uniqueId: String?): String {
+        val fieldName = prefs.getString(GeneralKeys.FIELD_FILE, "") ?: ""
+        val fieldNameLabel = context.getString(R.string.field_name_attribute)
+
+        val studyId = prefs.getInt(GeneralKeys.SELECTED_FIELD_ID, 0)
+        val assignments = templateRepository.getAssignments(studyId, templateId)
+
+        val observationUnitAttributes = if (uniqueId != null) {
+            buildObservationUnitAttributes(uniqueId, assignments.values, fieldNameLabel)
+        } else emptyMap()
+
+        val resolvedAssignments = assignments.mapValues { (_, fieldOption) ->
+            LabelPrintService.resolveFieldValue(
+                fieldOption, observationUnitAttributes,
+                fieldName, fieldNameLabel,
+                database = database,
+                studyId = studyId.toString(),
+                plotId = uniqueId,
+                context = context
+            )
+        }
+
+        return LabelPrintService.applyPlaceholderAssignments(templateZpl, resolvedAssignments)
+    }
+
+    /**
+     * Attribute values of the observation unit for the fields a label uses, looked up one query
+     * per field rather than for every attribute in the study, since this runs on each plot change.
+     * Fields that aren't attributes, like traits, are left for resolveFieldValue to look up.
+     */
+    private fun buildObservationUnitAttributes(
+        uniqueId: String,
+        assignedFields: Collection<String>,
+        fieldNameLabel: String
+    ): Map<String, String> {
+        // core identifiers use their column names from preferences
+        val uniqueName = prefs.getString(GeneralKeys.UNIQUE_NAME, "") ?: ""
+        val primaryName = prefs.getString(GeneralKeys.PRIMARY_NAME, "") ?: ""
+        val secondaryName = prefs.getString(GeneralKeys.SECONDARY_NAME, "") ?: ""
+        val attributeNames = store.fieldOptions.toSet() + primaryName + secondaryName - ""
+
+        return assignedFields.distinct()
+            .filter { it != fieldNameLabel }
+            .mapNotNull { field ->
+                when {
+                    uniqueName.isNotEmpty() && field == uniqueName -> field to uniqueId
+                    field in attributeNames -> field to
+                            (database.getObservationUnitPropertyValues(field, uniqueId) ?: "")
+                    else -> null
+                }
+            }
+            .toMap()
+    }
+
+    override fun setNaTraitsText() {
+        store.assignmentsRevision.intValue++
+    }
+
+    override fun refreshLayout(onNew: Boolean?) {
+        super.refreshLayout(onNew)
+        // CollectActivity refreshes the layout in onDestroy, when the backup started in onPause
+        // may have closed the database, and there's nothing left to show anyway
+        val lifecycle = (mActivity as? LifecycleOwner)?.lifecycle
+        if (lifecycle?.currentState == Lifecycle.State.DESTROYED) return
+        resolveTemplate()
+        store.currentPlotIdState.value = currentRange?.uniqueId
+        refreshPrinterConnectionState()
+        store.assignmentsRevision.intValue++
+    }
+
+    override fun deleteTraitListener() {
+        if (isLocked) return
+        (context as? CollectActivity)?.removeTrait()
+        super.deleteTraitListener()
+        collectInputView?.text = ""
+        store.assignmentsRevision.intValue++
+    }
+
+    fun registerReceiver() {
+        Log.d(TAG, "Registering printerMessageReceiver")
+        LocalBroadcastManager.getInstance(context)
+            .registerReceiver(printerMessageReceiver, IntentFilter("printer_message"))
+
+        try {
+            context.registerReceiver(
+                bluetoothStateReceiver,
+                IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to register bluetoothStateReceiver", e)
+        }
+    }
+
+    fun unregisterReceiver() {
+        Log.d(TAG, "Unregistering printerMessageReceiver")
+        LocalBroadcastManager.getInstance(context)
+            .unregisterReceiver(printerMessageReceiver)
+
+        try {
+            context.unregisterReceiver(bluetoothStateReceiver)
+        } catch (_: Exception) {
+            // ignore
+        }
+    }
+}

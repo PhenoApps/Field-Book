@@ -1,8 +1,10 @@
 package com.fieldbook.tracker.activities
 
+import com.fieldbook.tracker.zpl.TemplateRepository
 import android.app.AlertDialog
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import androidx.activity.OnBackPressedCallback
@@ -31,6 +33,7 @@ import com.fieldbook.tracker.traits.formats.TraitFormat
 import com.fieldbook.tracker.traits.formats.parameters.BaseFormatParameter
 import com.fieldbook.tracker.traits.formats.parameters.CanopySensitivityParameter
 import com.fieldbook.tracker.traits.formats.parameters.DecimalPlacesParameter
+import com.fieldbook.tracker.traits.formats.parameters.PrintTemplateParameter
 import com.fieldbook.tracker.ui.navigation.controllers.TraitNavController
 import com.fieldbook.tracker.ui.navigation.routes.TraitDetail
 import com.fieldbook.tracker.ui.navigation.routes.TraitEditor
@@ -60,17 +63,50 @@ class TraitActivity : ThemedActivity() {
     @Inject
     lateinit var traitRepo: TraitRepository
 
+    @Inject
+    lateinit var templateRepository: TemplateRepository
+
     companion object {
         private const val TAG = "TraitEditorActivity"
     }
 
     private var activeCanopySensitivityHolder: CanopySensitivityParameter.ViewHolder? = null
+    private var pendingPrintTemplateUpdate: Pair<TraitObject, (TraitObject) -> Unit>? = null
 
     private val canopyTestCaptureLauncher = registerForActivityResult(TakePicture()) { success ->
         if (success) {
             activeCanopySensitivityHolder?.onTestCaptureResult()
             (supportFragmentManager.findFragmentByTag("NewTraitDialog") as? NewTraitDialog)?.onTestCaptureResult()
         }
+    }
+
+    private val zplEditorLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val data = result.data ?: return@registerForActivityResult
+            val templateId = data.getStringExtra(ZplEditorActivity.RESULT_TEMPLATE_ID)
+            Log.d(TAG, "ZPL template saved: $templateId")
+
+            if (!templateId.isNullOrBlank()) {
+                pendingPrintTemplateUpdate?.let { (trait, onUpdated) ->
+                    applyPrintTemplate(trait, templateId, onUpdated)
+                }
+            }
+        }
+        pendingPrintTemplateUpdate = null
+    }
+
+    private fun applyPrintTemplate(
+        trait: TraitObject,
+        templateId: String,
+        onUpdated: (TraitObject) -> Unit
+    ) {
+        val updatedTrait = trait.clone()
+        updatedTrait.printTemplateId = templateId
+        onUpdated(updatedTrait)
+
+        CollectActivity.reloadData = true
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -247,6 +283,20 @@ class TraitActivity : ThemedActivity() {
         parameter: BaseFormatParameter, trait: TraitObject,
         onUpdated: (TraitObject) -> Unit,
     ) {
+        if (parameter is PrintTemplateParameter) {
+            PrintTemplateParameter.showTemplatePicker(
+                context = this,
+                templateRepository = templateRepository,
+                currentTemplateId = trait.printTemplateId.ifEmpty { null },
+                onTemplateSelected = { templateId -> applyPrintTemplate(trait, templateId, onUpdated) },
+                onCreateNew = {
+                    pendingPrintTemplateUpdate = trait to onUpdated
+                    zplEditorLauncher.launch(PrintTemplateParameter.newTemplateIntent(this))
+                }
+            )
+            return
+        }
+
         val dialogView = LayoutInflater.from(this)
             .inflate(R.layout.dialog_trait_parameter_edit, null)
 

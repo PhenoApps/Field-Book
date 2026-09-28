@@ -65,6 +65,7 @@ public class PreferencesFragment extends BasePreferenceFragment implements Nearb
         config.index(R.xml.preferences_system);
         config.index(R.xml.preferences_profile);
         config.index(R.xml.preferences_sounds);
+        config.index(R.xml.preferences_labels);
         config.index(R.xml.preferences_experimental);
         config.index(R.xml.preferences_location);
         config.index(R.xml.preferences_features);

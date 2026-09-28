@@ -7,6 +7,7 @@ import com.fieldbook.tracker.database.repository.TraitRepository
 import com.fieldbook.tracker.objects.FieldObject
 import com.fieldbook.tracker.objects.TraitImportFile
 import com.fieldbook.tracker.objects.TraitObject
+import com.fieldbook.tracker.zpl.TemplateRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.serialization.json.Json
 import org.brapi.v2.model.pheno.BrAPIScaleValidValuesCategories
@@ -31,6 +32,7 @@ import javax.inject.Inject
 class SampleDataGenerator @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val traitRepository: TraitRepository,
+    private val templateRepository: TemplateRepository,
     private val database: DataHelper
 ) {
 
@@ -160,6 +162,7 @@ class SampleDataGenerator @Inject constructor(
 
             val json = Json { ignoreUnknownKeys = true }
             val wrapper = json.decodeFromString(TraitImportFile.serializer(), jsonText)
+            templateRepository.ensureDefaultTemplate()
 
             val loaded = mutableListOf<TraitObject>()
             val maxPosition = traitRepository.getMaxPosition()
@@ -167,6 +170,7 @@ class SampleDataGenerator @Inject constructor(
             wrapper.traits.forEach { traitJson ->
                 runCatching {
                     val trait = TraitObject.fromJson(traitJson, maxPosition, "trait_sample_json.trt")
+                    traitRepository.applyImportedPrintTemplate(trait, traitJson, templateRepository)
                     val rowId = traitRepository.insertTrait(trait)
                     if (rowId != -1L) {
                         trait.id = rowId.toString()
@@ -307,7 +311,7 @@ class SampleDataGenerator @Inject constructor(
         if (raw.isBlank()) return emptyList()
         return try {
             CategoryJsonUtil.decodeCategories(raw).mapNotNull { it.label }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             raw.split("/").map { it.trim() }.filter { it.isNotEmpty() }
         }
     }

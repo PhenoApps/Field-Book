@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dialog_apply">Apply</string>
+
+    <string name="label_templates_title">Label templates</string>
+    <string name="label_templates_add">Add template</string>
+    <string name="label_templates_empty">No templates</string>
+    <string name="label_templates_default_badge">Default</string>
+    <string name="label_templates_more_options">More options</string>
+    <string name="label_templates_set_default">Set as default</string>
+    <string name="label_templates_duplicate">Duplicate</string>
+    <string name="label_templates_delete_title">Delete \"%1$s\"?</string>
+    <string name="label_templates_delete_default">This is the default template. A different default will be chosen.</string>
+    <string name="label_templates_delete_cannot_undo">This cannot be undone.</string>
+    <plurals name="label_templates_used_by">
+        <item quantity="one">Used by %d trait</item>
+        <item quantity="other">Used by %d traits</item>
+    </plurals>
+    <plurals name="label_templates_delete_used_by">
+        <item quantity="one">%d trait uses this template and will print with the default template instead.</item>
+        <item quantity="other">%d traits use this template and will print with the default template instead.</item>
+    </plurals>
+
+    <string name="zpl_editor_title">Label editor</string>
+    <string name="zpl_editor_delete">Delete</string>
+    <string name="zpl_editor_save">Save</string>
+    <string name="zpl_editor_name">Name</string>
+    <string name="zpl_editor_name_placeholder">Enter template name</string>
+    <string name="zpl_editor_reading_printer">Reading from printer…</string>
+    <string name="zpl_editor_read_from_printer">Read from printer</string>
+    <string name="zpl_editor_could_not_read">Could not read from printer</string>
+    <string name="zpl_editor_label_width">Label Width (inches)</string>
+    <string name="zpl_editor_label_length">Label Length (inches)</string>
+    <string name="zpl_editor_media_type">Media Type</string>
+    <string name="zpl_editor_media_tracking">Media Tracking</string>
+    <string name="zpl_editor_label_settings">Label Settings</string>
+    <string name="zpl_editor_code_label">ZPL Code</string>
+    <string name="zpl_editor_code_placeholder">Enter ZPL commands…</string>
+    <string name="zpl_editor_add_element">Add Element</string>
+    <string name="zpl_editor_element_type">Type</string>
+    <string name="zpl_editor_element_text">Text</string>
+    <string name="zpl_editor_element_qr">QR Code</string>
+    <string name="zpl_editor_element_barcode">Barcode (Code 128)</string>
+    <string name="zpl_editor_element_date">Date</string>
+    <string name="zpl_editor_prefix">Prefix</string>
+    <string name="zpl_editor_suffix">Suffix</string>
+    <string name="zpl_editor_font_size">Font Size</string>
+    <string name="zpl_editor_block_width">Width</string>
+    <string name="zpl_editor_no_wrapping">No wrapping</string>
+    <string name="zpl_editor_magnification">Size</string>
+    <string name="zpl_editor_barcode_height">Height</string>
+    <string name="zpl_editor_module_width">Width</string>
+    <string name="zpl_editor_edit_text">Edit Text Element</string>
+    <string name="zpl_editor_edit_date">Edit Date Element</string>
+    <string name="zpl_editor_edit_qr">Edit QR Code Element</string>
+    <string name="zpl_editor_edit_barcode">Edit Barcode Element</string>
+    <string name="zpl_editor_save_template">Save As Template</string>
+    <string name="zpl_editor_template_name">Template name</string>
+    <string name="zpl_editor_template_name_empty">Template name cannot be empty</string>
+    <string name="zpl_editor_name_taken">A template with this name already exists</string>
+    <string name="zpl_editor_invalid_chars">Characters {, }, ^, and ~ are not allowed</string>
+    <string name="zpl_editor_printer_dpi">Printer DPI</string>
+    <string name="zpl_editor_manual_dpi">Manual DPI</string>
+    <string name="zpl_editor_dpi_manual">Manual</string>
+
+    <string name="zpl_editor_media_thermal_direct">Direct Thermal</string>
+    <string name="zpl_editor_media_thermal_transfer">Thermal Transfer</string>
+    <string name="zpl_editor_media_gap">Gap/Notch</string>
+    <string name="zpl_editor_media_continuous">Continuous</string>
+    <string name="zpl_editor_media_mark">Mark</string>
+    <string name="zpl_editor_dots_display_format">PW = %1$d dots, LL = %2$d dots (%3$d DPI)</string>
+
+    <string name="zpl_editor_settings_description">Label Settings</string>
+    <string name="zpl_editor_hide_zpl">Hide ZPL</string>
+    <string name="zpl_editor_show_zpl">Show ZPL</string>
+    <string name="zpl_editor_unsaved_changes">Unsaved Changes</string>
+    <string name="zpl_editor_unsaved_message">You have unsaved changes. Are you sure you want to leave?</string>
+    <string name="zpl_editor_leave">Leave</string>
+    <string name="zpl_editor_reset">Reset</string>
+    <string name="zpl_editor_export">Export</string>
+    <string name="zpl_editor_edit_selected">Edit selected</string>
+    <string name="zpl_editor_delete_selected">Delete selected</string>
+    <string name="zpl_editor_add_element_description">Add element</string>
+    <string name="zpl_editor_back">Back</string>
+
+    <string name="dialog_cancel">Cancel</string>
+    <string name="dialog_add">Add</string>
+</resources>

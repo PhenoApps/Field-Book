@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <Preference
+        android:icon="@drawable/tag_multiple_outline"
+        android:key="pref_key_label_templates"
+        android:summary="@string/preferences_labels_templates_description"
+        android:title="@string/preferences_labels_templates_title" />
+
+    <Preference
+        android:icon="@drawable/connection"
+        android:key="pref_key_label_printer"
+        android:summary="@string/preferences_labels_printer_summary"
+        android:title="@string/label_config_connect_printer" />
+
+</androidx.preference.PreferenceScreen>

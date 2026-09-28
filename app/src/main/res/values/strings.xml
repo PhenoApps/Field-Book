@@ -564,6 +564,7 @@
     <string name="trait_detail_chip_invalid_value">Outlier values</string>
     <string name="trait_detail_chip_severities">Severities</string>
     <string name="trait_detail_chip_duration">Duration: %s</string>
+    <string name="trait_detail_chip_print_template">Template: %s</string>
 
     <string name="trait_parameter_allow_multicat">Multiple Category Selection</string>
     <string name="trait_parameter_allow_other">Allow Other Category</string>
@@ -772,6 +773,22 @@
     <string name="trait_layout_print_label_date_option">date</string>
     <string name="trait_layout_print_label_blank_option">blank</string>
 
+    <!-- Label print dialogs -->
+    <string name="label_config_title">Label Configuration</string>
+    <string name="label_config_calibrate">Calibrate</string>
+    <string name="label_config_connect_printer">Connect to printer</string>
+    <plurals name="label_config_copies_count">
+        <item quantity="one">%d copy</item>
+        <item quantity="other">%d copies</item>
+    </plurals>
+    <string name="label_config_copies_decrease">Fewer copies</string>
+    <string name="label_config_copies_increase">More copies</string>
+    <string name="label_config_template">Template</string>
+    <string name="label_fields_title">Label Fields</string>
+    <string name="label_fields_select">Select…</string>
+    <string name="label_config_template_required">Choose a label template</string>
+    <string name="zpl_template_create_new">＋ Create New</string>
+
     <string name="printer_open">Printer is open</string>
     <string name="printer_paused">Printer is paused</string>
     <string name="printer_empty">Printer is empty</string>
@@ -973,6 +990,13 @@
 
     <!-- Appearance -->
     <string name="preferences_appearance_title">Appearance</string>
+
+    <!-- Labels -->
+    <string name="preferences_labels_title">Labels</string>
+    <string name="preferences_labels_printer_summary">Configure the default Bluetooth printer</string>
+    <string name="preferences_labels_templates_title">Label templates</string>
+    <string name="preferences_labels_templates_description">Add, edit and choose the default label template</string>
+    <string name="preferences_labels_templates_summary">Default: %1$s</string>
     <string name="preferences_appearance_application_title">Application</string>
 
     <string name="preferences_appearance_theme_title">Theme</string>
@@ -2088,5 +2112,12 @@
     <string name="view_trait_innospectra_unknown">Unknown</string>
     <string name="view_trait_innospectra_na">N/A</string>
     <string name="unknown">Unknown</string>
+    <string name="calibration_sent">Calibration sent</string>
+    <string name="calibration_failed">Calibration failed</string>
+    <string name="export_successful">Export successful</string>
+    <string name="export_failed">Export failed: %1$s</string>
+    <string name="print_failed">Print failed</string>
+    <string name="label_print_no_template">No label template found. Choose a template for this trait or set a default template in Settings → Labels.</string>
+    <string name="zpl_editor_save_failed">Could not save the template</string>
 
 </resources>
