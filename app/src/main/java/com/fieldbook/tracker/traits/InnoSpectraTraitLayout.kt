@@ -659,18 +659,16 @@ class InnoSpectraTraitLayout : SpectralTraitLayout {
 
     private fun startScan(scanner: BluetoothLeScanner) {
 
-        if (ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.BLUETOOTH_SCAN
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+        //BLUETOOTH_SCAN only exists on API 31+, checking it on older devices (e.g. Boox Palma, API 30)
+        //always reports denied, which silently prevented any scan; pre-S BLE scans need fine location
+        val scanPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            Manifest.permission.BLUETOOTH_SCAN
+        } else {
+            Manifest.permission.ACCESS_FINE_LOCATION
+        }
+
+        if (ActivityCompat.checkSelfPermission(context, scanPermission) != PackageManager.PERMISSION_GRANTED) {
+            Log.w(TAG, "startScan: missing $scanPermission, not scanning")
             return
         }
 
