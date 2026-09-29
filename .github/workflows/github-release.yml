@@ -119,7 +119,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
 
       - name: Install Build Tools 29.0.3
         run: sdkmanager "build-tools;29.0.3"
