@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - User is now notified of failed database writes (https://github.com/PhenoApps/Field-Book/pull/1515)
 
 ### Fixed
+- Boox barcode scanning and theme improvements (https://github.com/PhenoApps/Field-Book/pull/1532)
 - InnoSpectra and Nix trait improvements and bug fixes (https://github.com/PhenoApps/Field-Book/pull/1529)
 - GoPro connection improvements (https://github.com/PhenoApps/Field-Book/pull/1522)
 - Canopy trait improvements and bug fixes (https://github.com/PhenoApps/Field-Book/pull/1514)
