@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Fixed
+
+## [v7.3.1] - 2026-09-29
+
+### Added
 - Sync now lists observations that cannot be sent via BrAPI (https://github.com/PhenoApps/Field-Book/pull/1542)
 
 ### Changed
@@ -990,3 +998,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v7.2.3]: https://github.com/PhenoApps/Field-Book/releases/tag/7.2.3
 
 [v7.3.0]: https://github.com/PhenoApps/Field-Book/releases/tag/7.3.0
+[v7.3.1]: https://github.com/PhenoApps/Field-Book/releases/tag/7.3.1

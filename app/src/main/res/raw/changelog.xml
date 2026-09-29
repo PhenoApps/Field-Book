@@ -1,5 +1,19 @@
 <changelog>
 
+    <release date="2026-09-29" versionCode="70301" versionName="v7.3.1">
+        <new>Sync now lists observations that cannot be sent via BrAPI</new>
+        <info>User is now notified of failed database writes</info>
+        <bugfix>Boox barcode scanning and theme improvements</bugfix>
+        <bugfix>InnoSpectra and Nix trait improvements and bug fixes</bugfix>
+        <bugfix>GoPro connection improvements</bugfix>
+        <bugfix>Canopy trait improvements and bug fixes</bugfix>
+        <bugfix>BrAPI account manager improvements and optimizations</bugfix>
+        <bugfix>Traits imported via BrAPI are now filtered to match the correct observation unit level</bugfix>
+        <bugfix>Photos taken on Samsung One UI 8.5 devices are now saved correctly</bugfix>
+        <bugfix>Last selected entry no longer changes after modifying trait visibility</bugfix>
+        <bugfix>Fixed several issues with the Pollinator trait</bugfix>
+    </release>
+
     <release date="2026-08-10" versionCode="70300" versionName="v7.3.0">
         <new>New Canopy Cover experimental trait</new>
         <new>New Pollinator trait to count categories for a set duration</new>
