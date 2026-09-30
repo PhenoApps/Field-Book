@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Available window height >= 480dp: phones and tablets in portrait, tablets in landscape.
+    These are the full-size values.
+
+    Android has no maximum-height qualifier - -hNdp means "height >= N dp" - so the buckets run
+    smallest-first: values/ holds the compact sizes and each higher -h bucket grows them.
+
+    Height rather than smallest-width qualified because the constraint is vertical room, which a
+    -sw qualifier cannot see: an unfolded foldable in landscape is sw600dp AND short.
+-->
+<resources>
+
+    <!-- collect chrome -->
+    <dimen name="fb_collect_infobar_max_height">160dp</dimen>
+    <dimen name="fb_collect_trait_container_min_height">200dp</dimen>
+
+    <!-- trait layout internals -->
+    <dimen name="fb_trait_chart_height">300dp</dimen>
+    <dimen name="fb_spectral_busy_card_min_height">240dp</dimen>
+    <dimen name="fb_trait_big_fab_size">176dp</dimen>
+    <dimen name="fb_trait_camera_preview_min_height">256dp</dimen>
+
+    <!-- camera trait recycler previews, kept at 4:3 -->
+    <dimen name="camera_preview_portrait_width">230dp</dimen>
+    <dimen name="camera_preview_portrait_height">300dp</dimen>
+
+</resources>

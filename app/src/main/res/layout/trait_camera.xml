@@ -57,7 +57,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:keepScreenOn="true"
-                android:minHeight="256dp"
+                android:minHeight="@dimen/fb_trait_camera_preview_min_height"
                 app:resize_mode="zoom"
                 app:show_buffering="when_playing"
                 app:show_shuffle_button="true"

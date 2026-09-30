@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+    Scrollable: title, summary and the setup rows are taller than a landscape window, and
+    AppIntroActivity is not orientation locked. A clipped setup row blocks onboarding.
+-->
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fillViewport="true">
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical">
 
     <TextView
@@ -39,3 +48,5 @@
 
     </LinearLayout>
 </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>

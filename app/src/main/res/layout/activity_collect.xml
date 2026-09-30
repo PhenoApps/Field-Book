@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -32,21 +33,35 @@
 
     </androidx.appcompat.widget.Toolbar>
 
+    <!--
+        Never displayed: the constraints park it past the bottom-right corner. It exists only to
+        own a SurfaceTexture for the UVC driver, and UsbCameraTraitLayout.updatePreviewSize
+        replaces its LayoutParams with the camera's own pixel dimensions. px is the correct unit
+        for a capture surface; dp would change the preview buffer geometry off mdpi.
+    -->
     <com.serenegiant.widget.UVCCameraTextureView
         android:layout_width="640px"
         android:layout_height="480px"
         android:visibility="visible"
         android:id="@+id/collect_activity_uvc_tv"
         app:layout_constraintTop_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="parent"/>
+        app:layout_constraintStart_toEndOf="parent"
+        tools:ignore="PxUsage" />
 
+    <!--
+        Capped rather than wrap_content: one row is added per selected attribute, and unbounded
+        they push svTraitContainer - the only flexible element in the chain - to zero height in
+        a short window. The recycler already scrolls internally.
+    -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/act_collect_infobar_rv"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:scrollbars="vertical"
+        app:layout_constraintHeight_default="wrap"
+        app:layout_constraintHeight_max="@dimen/fb_collect_infobar_max_height"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar" />
@@ -81,6 +96,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/act_collect_range_box" />
 
+    <!--
+        The trait entry area. constraintHeight_min gives it a floor so the chrome above cannot
+        squeeze it out in a short window; it scrolls internally once it hits the floor.
+        fillViewport stays false: traitHolder has gravity="center", so filling the viewport
+        would centre every trait layout in the leftover space instead of stacking it directly
+        under the input view.
+    -->
     <ScrollView
         android:id="@+id/svTraitContainer"
         android:layout_width="match_parent"
@@ -89,6 +111,7 @@
         android:isScrollContainer="true"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
+        app:layout_constraintHeight_min="@dimen/fb_collect_trait_container_min_height"
         app:layout_constraintBottom_toTopOf="@id/toolbarBottom"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -97,7 +120,7 @@
         <LinearLayout
             android:id="@+id/traitHolder"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="vertical"/>
 
