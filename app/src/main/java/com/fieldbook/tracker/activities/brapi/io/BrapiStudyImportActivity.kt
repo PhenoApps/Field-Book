@@ -21,6 +21,7 @@ import com.fieldbook.tracker.activities.brapi.io.mapper.isAtObservationLevel
 import com.fieldbook.tracker.activities.brapi.io.mapper.toTraitObject
 import com.fieldbook.tracker.adapters.StudyAdapter
 import com.fieldbook.tracker.adapters.StudyAdapter.Model
+import com.fieldbook.tracker.brapi.BrapiControllerResponse
 import com.fieldbook.tracker.brapi.model.BrapiObservationLevel
 import com.fieldbook.tracker.brapi.model.BrapiStudyDetails
 import com.fieldbook.tracker.brapi.service.BrAPIService
@@ -114,6 +115,9 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
     //cleared whenever levels or units change, see existingLevels()
     private var existingLevelsCache: Array<String>? = null
+
+    //levels of the selected studies that already exist as fields
+    private val importedLevels by lazy { BrapiImportedLevels(db.allFieldObjects) }
 
     private var selectedLevel: Int = -1
     private var selectedSort: Int = -1
@@ -231,17 +235,23 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         setLevelListOptions()
     }
 
+    private fun BrAPIObservationUnit.levelName(): String? = observationUnitPosition?.observationLevel?.levelName
+
     /**
      * Server levels (in server order) that are used by at least one unit.
      * Falls back to the levels found on the units if the server levels are unavailable or don't match.
+     * Levels already imported for every selected study that has them are left out.
      */
     private fun existingLevels(): Array<String> = existingLevelsCache ?: run {
 
-        val unitLevels = observationUnits.values.flatten()
-            .mapNotNullTo(linkedSetOf()) { it.observationUnitPosition?.observationLevel?.levelName }
+        val importableLevels = linkedSetOf<String>()
+        observationUnits.forEach { (studyDbId, units) ->
+            units.mapNotNullTo(linkedSetOf()) { it.levelName() }
+                .filterNotTo(importableLevels) { importedLevels.isImported(studyDbId, it) }
+        }
 
-        observationLevels.filter { it in unitLevels }
-            .ifEmpty { unitLevels.toList() }
+        observationLevels.filter { it in importableLevels }
+            .ifEmpty { importableLevels.toList() }
             .toTypedArray()
 
     }.also { existingLevelsCache = it }
@@ -455,6 +465,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 position: Int
             ): HashSet<BrAPIObservationVariable>? {
                 val levelName = selectedLevelName()
+                if (importedLevels.isImported(id, levelName)) return hashSetOf()
                 return observationVariables[id]?.filter { it.isAtObservationLevel(levelName) }
                     ?.toHashSet()
             }
@@ -465,9 +476,10 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
             ): HashSet<BrAPIObservationUnit>? {
                 val levelName = selectedLevelName()
                 return observationUnits[id]?.let { units ->
-                    if (levelName == null) units
-                    else units.filterTo(hashSetOf()) {
-                        it.observationUnitPosition?.observationLevel?.levelName == levelName
+                    when {
+                        levelName == null -> units
+                        importedLevels.isImported(id, levelName) -> hashSetOf()
+                        else -> units.filterTo(hashSetOf()) { it.levelName() == levelName }
                     }
                 }
             }
@@ -534,7 +546,8 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
             studyList.adapter?.notifyDataSetChanged()
 
-            importButton.isEnabled = true
+            //nothing left to import when every level of the selected studies already exists
+            importButton.isEnabled = existingLevels().isNotEmpty()
         }
     }
 
@@ -575,10 +588,22 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
                         studies.firstOrNull { it.studyDbId == id }?.let {
 
-                            saveStudy(it, level, sortOrder)
+                            val response = saveStudy(it, level, sortOrder)
 
-                            successfullyImportedStudies.add(id) // track the successfully imported fields
+                            if (response?.status == true) {
 
+                                successfullyImportedStudies.add(id) // track the successfully imported fields
+
+                            } else if (response != null) {
+
+                                Log.e(TAG, "Failed to save study $id: ${response.message}")
+
+                                runOnUiThread {
+
+                                    Toast.makeText(this@BrapiStudyImportActivity, getString(R.string.failed_to_save_study), Toast.LENGTH_SHORT).show()
+
+                                }
+                            }
                         }
 
                     } catch (e: Exception) {
@@ -595,9 +620,9 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
                 val resultIntent = Intent()
                 if (successfullyImportedStudies.size == 1) { // switch active field if only one study was imported
-                    val studyModel = db.getStudyByDbId(successfullyImportedStudies.first())
-                    val fieldId = studyModel?.internal_id_study
-                    resultIntent.putExtra("fieldId", fieldId ?: -1)
+                    //a study can have one field per level, so look up the field for the imported level
+                    val fieldId = db.checkBrapiStudyUnique(level.observationLevelName, successfullyImportedStudies.first())
+                    resultIntent.putExtra("fieldId", fieldId)
                 }
                 setResult(RESULT_OK, resultIntent)
                 finish()
@@ -606,19 +631,28 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         }
     }
 
+    /**
+     * @return the save result, or null if the study was skipped because it has no units at this level
+     * or the level is already imported
+     */
     private fun saveStudy(
         study: BrAPIStudy,
         level: BrapiObservationLevel,
         sortId: String
-    ) {
+    ): BrapiControllerResponse<*>? {
+
+        if (importedLevels.isImported(study.studyDbId, level.observationLevelName)) return null
 
         var maxVariableIndex = db.maxPositionFromTraits + 1
 
-        attributesTable?.get(study.studyDbId)?.let { studyAttributes ->
+        return attributesTable?.get(study.studyDbId)?.let { studyAttributes ->
 
-            observationUnits[study.studyDbId]?.filter {
-                it.observationUnitPosition.observationLevel.levelName.equals(level.observationLevelName, ignoreCase = true)
+            val studyUnits = observationUnits[study.studyDbId].orEmpty()
+
+            studyUnits.filter {
+                it.levelName().equals(level.observationLevelName, ignoreCase = true)
             }
+                .takeIf { it.isNotEmpty() }
                 ?.let { units ->
 
                     val details = BrapiStudyDetails()
@@ -627,6 +661,9 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                     details.commonCropName = study.commonCropName
                     details.numberOfPlots = units.size
                     details.trialName = study.trialName
+
+                    //every level of the study's units, so the study stays importable until all are imported
+                    details.studyDbLevels = studyUnits.mapNotNull { it.levelName() }.distinct()
 
                     //BMS specific, only import the variables used at the selected level
                     details.traits = observationVariables[study.studyDbId]

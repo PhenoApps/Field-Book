@@ -1704,6 +1704,9 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             field.setObservationLevel(observationLevel);
             field.setDataSourceFormat(ImportFormat.BRAPI);
             field.setTrialName(studyDetails.getTrialName());
+            if (studyDetails.getStudyDbLevels() != null) {
+                field.setStudyDbLevels(new JSONArray(studyDetails.getStudyDbLevels()).toString());
+            }
             // Get our host url
             if (BrAPIService.getHostUrl(context) != null) {
                 field.setDataSource(BrAPIService.getHostUrl(context));

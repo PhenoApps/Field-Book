@@ -225,6 +225,7 @@ class StudyDao {
                 null, "null" -> ""
                 else -> observationLevel
             }
+            it.studyDbLevels = this["study_db_levels"]?.toString()
             it.attributeCount = this["attribute_count"]?.toString()
             it.traitCount = this["trait_count"]?.toString()
             it.observationCount = this["observation_count"]?.toString()
@@ -400,7 +401,8 @@ class StudyDao {
                 field.studyDbId
             ) else -1
 
-            val nameExists = getAllFieldObjects("study_name").any { it.name == field.name }
+            //brapi studies may share a name, one field per observation level, uniqueness is checked above
+            val nameExists = !fromBrapi && getAllFieldObjects("study_name").any { it.name == field.name }
 
             if (sid == -1 && !nameExists) {
 
@@ -425,6 +427,7 @@ class StudyDao {
                     put("study_source", field.dataSource)
                     put("count", field.entryCount)
                     put("observation_levels", field.observationLevel)
+                    put("study_db_levels", field.studyDbLevels)
                     put("trial_name", field.trialName)
                     put("start_corner", field.startCorner)
                     put("walking_direction", field.walkingDirection)

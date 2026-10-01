@@ -12,6 +12,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.brapi.io.BrapiCacheModel
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterTypeAdapter
+import com.fieldbook.tracker.activities.brapi.io.BrapiImportedLevels
 import com.fieldbook.tracker.activities.brapi.io.BrapiStudyImportActivity
 import com.fieldbook.tracker.activities.brapi.io.TrialStudyModel
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiCropsFilterActivity
@@ -98,8 +99,16 @@ class BrapiStudyFilterActivity(
     }
 
     override fun List<CheckboxListAdapter.Model>.filterExists(): List<CheckboxListAdapter.Model> {
-        val brapiIds = database.allFieldObjects.filter { it.studyId >= 0 }.map { it.studyDbId }
-        return filter { it.id !in brapiIds }
+        //studies stay listed until every observation level of their units has been imported
+        val importedLevels = BrapiImportedLevels(database.allFieldObjects)
+        return filterNot { importedLevels.isFullyImported(it.id) }.map { model ->
+            val levels = importedLevels.importedLevels(model.id)
+            if (levels.isEmpty()) model
+            else model.copy(subLabel = listOf(
+                model.subLabel,
+                getString(R.string.brapi_study_imported_levels, levels.sorted().joinToString(", "))
+            ).filter { it.isNotEmpty() }.joinToString(" · "))
+        }
     }
 
     override fun onSearchTextComplete(searchText: String) {
