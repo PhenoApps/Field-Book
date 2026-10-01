@@ -41,7 +41,8 @@
             app:layout_constraintHorizontal_bias="0"
             tools:text="KSU" />
 
-        <com.google.android.material.chip.ChipGroup
+        <!-- location and trial share one line, long names are ellipsized rather than wrapped -->
+        <com.fieldbook.tracker.views.SharedWidthRow
             android:id="@+id/list_item_study_chip_group"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -54,10 +55,12 @@
                 android:id="@+id/list_item_study_location_chip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
                 app:chipIcon="@drawable/map_marker_outline"
                 android:checkable="false"
                 android:textColor="@color/BLACK"
                 android:ellipsize="end"
+                android:singleLine="true"
                 app:chipIconTint="@color/BLACK"
                 app:chipBackgroundColor="@color/light_gray"
                 tools:text="Manhattan, KS" />
@@ -70,11 +73,12 @@
                 android:checkable="false"
                 android:textColor="@color/BLACK"
                 android:ellipsize="end"
+                android:singleLine="true"
                 app:chipIconTint="@color/BLACK"
                 app:chipBackgroundColor="@color/light_gray"
                 tools:text="PeeDee Otter Trial"/>
 
-        </com.google.android.material.chip.ChipGroup>
+        </com.fieldbook.tracker.views.SharedWidthRow>
 
         <!-- importable observation levels, one list_item_study_level row each -->
         <LinearLayout
