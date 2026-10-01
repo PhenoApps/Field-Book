@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
+import android.view.WindowManager
 import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.ProgressBar
@@ -503,27 +504,38 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
             if (brapiService !is BrAPIServiceV2) return@launch
 
-            //fetch levels, variables, units, and germs for all studies concurrently,
-            //the http client limits how many requests are sent to the server at once
-            coroutineScope {
+            //keep the screen on so the device doesn't sleep and drop the connection mid-download
+            setKeepScreenOn(true)
 
-                launch {
-                    observationLevels.addAll(fetchObservationLevels(programDbId))
-                    existingLevelsCache = null
-                }
+            try {
 
-                studyModels.forEachIndexed { index, model ->
+                //fetch levels, variables, units, and germs for all studies concurrently,
+                //the http client limits how many requests are sent to the server at once
+                coroutineScope {
 
                     launch {
-                        coroutineScope {
-                            launch { fetchObservationVariables(model.id) }
-                            launch { fetchObservationUnits(model.id) }
-                        }
-                        studyList.adapter?.notifyItemChanged(index)
+                        observationLevels.addAll(fetchObservationLevels(programDbId))
+                        existingLevelsCache = null
                     }
 
-                    launch { fetchGermplasm(model.id) }
+                    studyModels.forEachIndexed { index, model ->
+
+                        launch {
+                            coroutineScope {
+                                launch { fetchObservationVariables(model.id) }
+                                launch { fetchObservationUnits(model.id) }
+                            }
+                            studyList.adapter?.notifyItemChanged(index)
+                        }
+
+                        launch { fetchGermplasm(model.id) }
+                    }
                 }
+
+            } finally {
+
+                //let the screen sleep again while the user chooses a level
+                setKeepScreenOn(false)
             }
 
             if ((studyList.adapter as StudyAdapter).currentList.any {
@@ -561,6 +573,9 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
             loadingTextView.text = getString(R.string.act_brapi_study_import_saving)
             loadingTextView.visibility = View.VISIBLE
             importButton.isEnabled = false
+
+            //the activity finishes once saving is done, which clears the flag
+            setKeepScreenOn(true)
 
             launch(Dispatchers.IO) {
                 val successfullyImportedStudies = mutableListOf<String>()
@@ -749,6 +764,14 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 }
             }
         } ?: emptyList()
+    }
+
+    /**
+     * Window flag only, so no wake lock permission is needed.
+     */
+    private fun setKeepScreenOn(keepOn: Boolean) {
+        if (keepOn) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
     private suspend fun setProgress(progress: Int, progressMax: Int) {
