@@ -131,7 +131,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         }
     }
 
-    private fun createChip(styleResId: Int, label: String, id: String) =
+    protected fun createChip(styleResId: Int, label: String, id: String) =
         Chip(ContextThemeWrapper(this, styleResId)).apply {
             text = label
             tag = id
@@ -174,12 +174,25 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
                 }
                 chipGroup.addView(chip)
             }
+
+            addExtraFilterChips()
         }
     }
+
+    /**
+     * Adds chips for filters a subclass keeps itself, called after the saved filter chips are added.
+     */
+    protected open fun addExtraFilterChips() = Unit
+
+    /**
+     * Resets filters a subclass keeps itself, called when all filters are cleared.
+     */
+    protected open fun clearExtraFilters() = Unit
 
     private fun clearFilters() {
         chipGroup.removeAllViews()
         BrapiFilterCache.clearPreferences(this@BrapiListFilterActivity, defaultRootFilterKey)
+        clearExtraFilters()
         restoreModels()
     }
 

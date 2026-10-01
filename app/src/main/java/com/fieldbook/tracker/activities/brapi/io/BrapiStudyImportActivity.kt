@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.WindowManager
@@ -53,6 +54,7 @@ import org.brapi.v2.model.germ.BrAPIGermplasm
 import org.brapi.v2.model.pheno.BrAPIObservationUnit
 import org.brapi.v2.model.pheno.BrAPIObservationVariable
 import org.brapi.v2.model.pheno.BrAPIPositionCoordinateTypeEnum
+import org.json.JSONArray
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.collections.set
@@ -120,8 +122,20 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     //checked level names per study
     private val selectedLevels = hashMapOf<String, MutableSet<String>>()
 
-    //levels of the selected studies that already exist as fields
-    private val importedLevels by lazy { BrapiImportedLevels(db.allFieldObjects) }
+    //levels of the selected studies that already exist as fields, loaded off the main thread in fetchStudyData
+    private var importedLevels = BrapiImportedLevels(emptyList())
+
+    private var programDbId = ""
+    private var studyModels: List<Model> = emptyList()
+
+    //fetching study data, the refresh action is disabled meanwhile
+    private var loading = false
+
+    //saving fields, level selection and refresh are ignored meanwhile
+    private var importing = false
+
+    //set by the refresh action to fetch every level of each study instead of only the remaining recorded ones
+    private var fullRefresh = false
 
     private var attributesTable: HashMap<String, Map<String, Map<String, String>>>? = null
 
@@ -158,6 +172,11 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
             android.R.id.home -> {
                 setResult(RESULT_CANCELED)
                 finish()
+                return true
+            }
+
+            R.id.action_refresh_study_data -> {
+                refreshStudyData()
                 return true
             }
         }
@@ -419,8 +438,9 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                     if (checked) add(levelName) else remove(levelName)
                 }
 
-                //attributes are built once everything has loaded, saving needs them
-                importButton.isEnabled = attributesTable != null && hasSelectedLevels()
+                //attributes are built once everything has loaded, saving needs them,
+                //and the levels to save are taken when import starts so the button stays off while saving
+                importButton.isEnabled = !importing && attributesTable != null && hasSelectedLevels()
             }
 
             override fun getLocation(id: String): String {
@@ -434,6 +454,24 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
         (studyList.adapter as StudyAdapter).submitList(studyModels)
 
+        this.programDbId = programDbId
+        this.studyModels = studyModels
+
+        fetchStudyData()
+    }
+
+    /**
+     * Fetches levels, variables, units and germplasm for the studies, then builds the unit attributes.
+     * Also used by the refresh action, which sets fullRefresh to fetch every level of each study
+     * rather than only the levels recorded by earlier imports.
+     */
+    private fun fetchStudyData() {
+
+        val studyDbIds = studyModels.map { it.id }
+
+        loading = true
+        invalidateOptionsMenu()
+
         launch {
 
             if (brapiService !is BrAPIServiceV2) return@launch
@@ -442,6 +480,9 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
             setKeepScreenOn(true)
 
             try {
+
+                //imported levels decide which levels are fetched and shown, the query is too slow for the main thread
+                importedLevels = withContext(Dispatchers.IO) { BrapiImportedLevels(db.allFieldObjects) }
 
                 //fetch levels, variables, units, and germs for all studies concurrently,
                 //the http client limits how many requests are sent to the server at once
@@ -474,6 +515,14 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
                 //let the screen sleep again while the user chooses a level
                 setKeepScreenOn(false)
+
+                loading = false
+                invalidateOptionsMenu()
+            }
+
+            if (fullRefresh) {
+                saveRefreshedLevels(studyDbIds)
+                fullRefresh = false
             }
 
             if ((studyList.adapter as StudyAdapter).currentList.any {
@@ -499,10 +548,74 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         }
     }
 
+    /**
+     * Records every level found on each study's units on the study's existing fields,
+     * so studies with levels added on the server since they were imported show in the study list again.
+     */
+    private suspend fun saveRefreshedLevels(studyDbIds: List<String>) {
+
+        val levelsByStudy = studyDbIds.mapNotNull { id ->
+            observationUnits[id]?.takeIf { it.isNotEmpty() }?.let { units ->
+                id to units.mapNotNull { it.levelName() }.distinct()
+            }
+        }
+
+        importedLevels = withContext(Dispatchers.IO) {
+            levelsByStudy.forEach { (id, levels) ->
+                db.updateStudyDbLevels(id, JSONArray(levels).toString())
+            }
+            BrapiImportedLevels(db.allFieldObjects)
+        }
+
+        onLevelsChanged()
+    }
+
+    /**
+     * Clears the fetched data and fetches it again, including every level of each study.
+     */
+    private fun refreshStudyData() {
+
+        if (loading || importing) return
+
+        observationLevels.clear()
+        observationVariables.clear()
+        observationUnits.clear()
+        germplasms.clear()
+        loadedStudies.clear()
+        unitProgress.clear()
+        onLevelsChanged()
+
+        //selected levels are kept, levels that are no longer importable are skipped when saving
+        attributesTable = null
+        importButton.isEnabled = false
+
+        fullRefresh = true
+
+        studyList.adapter?.notifyDataSetChanged()
+
+        fetchStudyData()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_brapi_study_import, menu)
+        return true
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        menu?.findItem(R.id.action_refresh_study_data)?.isEnabled = !loading && !importing
+        return super.onPrepareOptionsMenu(menu)
+    }
+
     private fun setupImportButton(studyDbIds: List<String>) {
 
         importButton.visibility = View.VISIBLE
         importButton.setOnClickListener {
+
+            if (importing) return@setOnClickListener
+
+            //the activity finishes once saving is done, so this is never cleared
+            importing = true
+            invalidateOptionsMenu()
 
             progressBar.visibility = View.VISIBLE
             progressBar.isIndeterminate = true
@@ -763,7 +876,8 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
      */
     private suspend fun fetchObservationUnits(studyDbId: String) {
 
-        val remainingLevels = importedLevels.remainingLevels(studyDbId)
+        //a refresh fetches every level so levels added on the server since the last import are found
+        val remainingLevels = if (fullRefresh) null else importedLevels.remainingLevels(studyDbId)
 
         val units = if (remainingLevels == null) fetchObservationUnits(studyDbId, null) else {
 

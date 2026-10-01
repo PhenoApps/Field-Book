@@ -1094,6 +1094,13 @@ public class DataHelper {
         StudyDao.Companion.updateImportDate(studyId);
     }
 
+    public void updateStudyDbLevels(String studyDbId, String levels) {
+
+        open();
+
+        StudyDao.Companion.updateStudyDbLevels(studyDbId, levels);
+    }
+
     public void updateEditDate(int studyId) {
         StudyDao.Companion.updateEditDate(studyId);
     }

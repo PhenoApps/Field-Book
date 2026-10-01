@@ -1396,7 +1396,7 @@
     <string name="brapi_filter_type_crop">Культура</string>
     <string name="brapi_importer_search_hint">Текст для поиска</string>
     <string name="act_brapi_filter_by_title">Фильтр: %s</string>
-    <string name="check_all">Выбрать все фильтры</string>
+    <string name="check_all">Выбрать все</string>
     <string name="menu_action_brapi_filter_clear_all">Сбросить все фильтры</string>
     <string name="brapi_filter_error">Ошибка при запросе %s</string>
     <string name="brapi_importer_fetch_data">Загрузка данных. Первый запуск может занять минуту.</string>

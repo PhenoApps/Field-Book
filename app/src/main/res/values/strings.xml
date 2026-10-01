@@ -1758,11 +1758,13 @@
     <string name="brapi_filter_type_crop">Crop</string>
     <string name="brapi_importer_search_hint">Search Text</string>
     <string name="act_brapi_filter_by_title">Filter By: %s</string>
-    <string name="check_all">Check All Filters</string>
+    <string name="check_all">Select All</string>
     <string name="menu_action_brapi_filter_clear_all">Clear all filters</string>
     <string name="brapi_filter_error">Something went wrong querying for %s</string>
     <string name="brapi_importer_fetch_data">Fetching data, the first run may take a minute.</string>
     <string name="menu_filter_brapi_reset_cache_title">Reset Cache</string>
+    <string name="menu_filter_brapi_show_imported_studies">Show Imported Studies</string>
+    <string name="brapi_filter_imported_studies">All Studies</string>
     <string name="brapi_filter_bottom_sheet_delete_all_description">clear all filters</string>
     <string name="act_brapi_study_import_fetch_variables">Fetching variables for %s...</string>
     <string name="act_brapi_study_import_fetch_units">Fetching observation units for %s...</string>
@@ -1774,6 +1776,7 @@
     <string name="act_brapi_list_filter_error_multiple_programs">Please select studies from the same program.</string>
     <string name="act_brapi_study_import_saving">Saving...</string>
     <string name="act_brapi_study_import_title">Study Import</string>
+    <string name="act_brapi_study_import_refresh">Refresh Study Data</string>
     <string name="select">Select</string>
     <string name="results">results</string>
     <string name="failed_to_fetch_observation_units">Failed to fetch observation units</string>    <string name="preferences_brapi_cache_invalidate_dialog_title">Invalidate Cache Interval Choices</string>

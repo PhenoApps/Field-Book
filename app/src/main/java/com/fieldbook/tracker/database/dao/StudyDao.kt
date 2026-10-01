@@ -545,6 +545,16 @@ class StudyDao {
             }, "${Study.PK} = ?", arrayOf("$studyId"))
         }
 
+        /**
+         * Replaces the recorded observation levels (json array) on every field imported from the BrAPI study.
+         */
+        fun updateStudyDbLevels(studyDbId: String, levels: String) = withDatabase { db ->
+
+            db.update(Study.tableName, contentValuesOf(
+                "study_db_levels" to levels
+            ), "study_db_id = ?", arrayOf(studyDbId))
+        }
+
         fun updateEditDate(studyId: Int) = withDatabase { db ->
 
             db.query(
