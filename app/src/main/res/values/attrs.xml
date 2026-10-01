@@ -282,6 +282,9 @@
 
     <attr name="fb_border_color" format="color" />
 
+    <!-- opacity of unselected level pills on the BrAPI study import screen, see StudyAdapter -->
+    <attr name="fb_unselected_pill_alpha" format="float" />
+
     <attr name="fb_trait_button_background_tint" format="color" />
 
     <attr name="fb_categorical_button_selected_color" format="color" />

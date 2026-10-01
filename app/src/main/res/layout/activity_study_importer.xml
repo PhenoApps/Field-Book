@@ -36,22 +36,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/act_list_filter_pb"/>
 
-    <ListView
-        android:visibility="gone"
-        tools:visibility="visible"
-        android:layout_margin="8dp"
-        android:background="@drawable/cell"
-        android:id="@+id/act_study_importer_lv"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        tools:listitem="@android:layout/simple_list_item_1"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/act_brapi_importer_tv"
-        app:layout_constraintBottom_toTopOf="@id/act_list_filter_rv"
-        android:choiceMode="singleChoice"
-        app:layout_constraintVertical_weight="0.25"/>
-
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -59,9 +43,8 @@
         android:orientation="vertical"
         tools:listitem="@layout/list_item_study"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintTop_toBottomOf="@id/act_study_importer_lv"
-        app:layout_constraintBottom_toTopOf="@id/act_study_importer_import_button"
-        app:layout_constraintVertical_weight="0.5"/>
+        app:layout_constraintTop_toBottomOf="@id/act_brapi_importer_tv"
+        app:layout_constraintBottom_toTopOf="@id/act_study_importer_import_button"/>
 
     <!-- hidden pagination ui that brapi service is coupled to -->
     <LinearLayout

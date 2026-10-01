@@ -258,6 +258,8 @@
         <item name="fb_seek_bar_color">@color/high_contrast_primary_dark</item>
         <item name="fb_seek_bar_thumb_color">@color/high_contrast_primary_dark</item>
         <item name="fb_border_color">@color/high_contrast_border</item>
+        <!-- no fading, unselected pills are told apart by their fill and thinner outline -->
+        <item name="fb_unselected_pill_alpha">1.0</item>
 
         <item name="fb_geonav_snackbar_view">@drawable/cell_geonav_snackbar_high_contrast</item>
 

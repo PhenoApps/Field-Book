@@ -7,8 +7,6 @@ import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.view.WindowManager
-import android.widget.ArrayAdapter
-import android.widget.ListView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -101,7 +99,6 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
     private lateinit var loadingTextView: TextView
     private lateinit var progressBar: ProgressBar
-    private lateinit var listView: ListView
     private lateinit var studyList: RecyclerView
     private lateinit var importButton: MaterialButton
 
@@ -112,13 +109,17 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     private val observationUnits = hashMapOf<String, HashSet<BrAPIObservationUnit>>()
     private val germplasms = hashMapOf<String, HashSet<BrAPIGermplasm>>()
 
-    //cleared whenever levels or units change, see existingLevels()
-    private var existingLevelsCache: Array<String>? = null
+    //per study, cleared whenever levels, units or variables change, see getLevels()
+    private val levelsCache = hashMapOf<String, List<StudyAdapter.Level>>()
+
+    //studies whose units and variables have finished fetching, successfully or not
+    private val loadedStudies = hashSetOf<String>()
+
+    //checked level names per study
+    private val selectedLevels = hashMapOf<String, MutableSet<String>>()
 
     //levels of the selected studies that already exist as fields
     private val importedLevels by lazy { BrapiImportedLevels(db.allFieldObjects) }
-
-    private var selectedLevel: Int = -1
 
     private var attributesTable: HashMap<String, Map<String, Map<String, String>>>? = null
 
@@ -132,7 +133,6 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
         loadingTextView = findViewById(R.id.act_brapi_importer_tv)
         progressBar = findViewById(R.id.act_list_filter_pb)
-        listView = findViewById(R.id.act_study_importer_lv)
         studyList = findViewById(R.id.act_list_filter_rv)
         importButton = findViewById(R.id.act_study_importer_import_button)
 
@@ -196,85 +196,65 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         setupImportButton(studyDbIds)
     }
 
-    private fun loadLevelList() {
-
-        listView.visibility = View.VISIBLE
-
-        setDefaultAttributeIdentifiers()
-
-        setLevelListOptions()
-    }
-
     private fun BrAPIObservationUnit.levelName(): String? = observationUnitPosition?.observationLevel?.levelName
 
     /**
-     * Server levels (in server order) that are used by at least one unit.
-     * Falls back to the levels found on the units if the server levels are unavailable or don't match.
-     * Levels already imported for every selected study that has them are left out.
+     * Levels used by the study's units that haven't been imported yet,
+     * in server level order, followed by any levels the server didn't list.
      */
-    private fun existingLevels(): Array<String> = existingLevelsCache ?: run {
+    private fun importableLevels(studyDbId: String): List<String> {
 
-        val importableLevels = linkedSetOf<String>()
-        observationUnits.forEach { (studyDbId, units) ->
-            units.mapNotNullTo(linkedSetOf()) { it.levelName() }
-                .filterNotTo(importableLevels) { importedLevels.isImported(studyDbId, it) }
-        }
+        val unitLevels = observationUnits[studyDbId].orEmpty()
+            .mapNotNullTo(linkedSetOf()) { it.levelName() }
+            .filterNot { importedLevels.isImported(studyDbId, it) }
 
-        observationLevels.filter { it in importableLevels }
-            .ifEmpty { importableLevels.toList() }
-            .toTypedArray()
-
-    }.also { existingLevelsCache = it }
+        return observationLevels.filter { it in unitLevels } + unitLevels.filterNot { it in observationLevels }
+    }
 
     /**
-     * The observation level the user has chosen, or null while no choice has been made yet.
+     * Importable levels of the study with their unit and trait counts, for the study card.
      */
-    private fun selectedLevelName() = existingLevels().let { levels ->
-        if (selectedLevel in levels.indices) levels[selectedLevel] else null
-    }
+    private fun getLevels(studyDbId: String): List<StudyAdapter.Level> {
 
-    private fun setLevelListOptions() {
+        val levels = levelsCache.getOrPut(studyDbId) {
 
-        listView.adapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_list_item_single_choice,
-            existingLevels()
-        )
+            val units = observationUnits[studyDbId].orEmpty()
+            val variables = observationVariables[studyDbId].orEmpty()
 
-        listView.setItemChecked(selectedLevel, true)
-
-        listView.smoothScrollToPosition(selectedLevel)
-
-        listView.setOnItemClickListener { _, _, position, _ ->
-
-            selectedLevel = if (selectedLevel == position) {
-
-                listView.setItemChecked(selectedLevel, false)
-
-                -1
-
-            } else position
-
-            studyList.adapter?.notifyDataSetChanged()
-
-        }
-
-        if (existingLevels().isEmpty()) {
-            listView.visibility = View.GONE
-        }
-    }
-
-    private fun setDefaultAttributeIdentifiers() {
-
-        val levels = existingLevels()
-
-        if (selectedLevel == -1) {
-            selectedLevel = if (levels.contains("plot")) {
-                levels.indexOf("plot")
-            } else {
-                0
+            importableLevels(studyDbId).map { level ->
+                StudyAdapter.Level(
+                    name = level,
+                    unitCount = units.count { it.levelName() == level },
+                    traitCount = variables.count { it.isAtObservationLevel(level) },
+                    checked = false
+                )
             }
         }
+
+        val selected = selectedLevels[studyDbId].orEmpty()
+
+        return levels.map { it.copy(checked = it.name in selected) }
+    }
+
+    /**
+     * Checks plot by default, or the first level if the study has no plots,
+     * unless the user has already made a choice for the study.
+     */
+    private fun selectDefaultLevel(studyDbId: String) {
+
+        if (studyDbId in selectedLevels) return
+
+        val levels = importableLevels(studyDbId)
+
+        (levels.firstOrNull { it.equals("plot", ignoreCase = true) } ?: levels.firstOrNull())?.let {
+            selectedLevels[studyDbId] = mutableSetOf(it)
+        }
+    }
+
+    private fun hasSelectedLevels() = selectedLevels.values.any { it.isNotEmpty() }
+
+    private fun onLevelsChanged() {
+        levelsCache.clear()
     }
 
     private fun getAttributes(studyDbId: String): Map<String, Map<String, String>> {
@@ -402,32 +382,19 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         }
 
         studyList.adapter = StudyAdapter(object : StudyAdapter.StudyLoader {
-            override fun getObservationVariables(
-                id: String,
-                position: Int
-            ): HashSet<BrAPIObservationVariable>? {
-                val levelName = selectedLevelName()
-                if (importedLevels.isImported(id, levelName)) return hashSetOf()
-                return observationVariables[id]?.filter { it.isAtObservationLevel(levelName) }
-                    ?.toHashSet()
-            }
 
-            override fun getObservationUnits(
-                id: String,
-                position: Int
-            ): HashSet<BrAPIObservationUnit>? {
-                val levelName = selectedLevelName()
-                return observationUnits[id]?.let { units ->
-                    when {
-                        levelName == null -> units
-                        importedLevels.isImported(id, levelName) -> hashSetOf()
-                        else -> units.filterTo(hashSetOf()) { it.levelName() == levelName }
-                    }
+            override fun isLoading(id: String) = id !in loadedStudies
+
+            override fun getLevels(id: String) = this@BrapiStudyImportActivity.getLevels(id)
+
+            override fun onLevelChecked(id: String, levelName: String, checked: Boolean) {
+
+                selectedLevels.getOrPut(id) { mutableSetOf() }.apply {
+                    if (checked) add(levelName) else remove(levelName)
                 }
-            }
 
-            override fun getGermplasm(id: String, position: Int): HashSet<BrAPIGermplasm>? {
-                return germplasms[id]?.toHashSet()
+                //attributes are built once everything has loaded, saving needs them
+                importButton.isEnabled = attributesTable != null && hasSelectedLevels()
             }
 
             override fun getLocation(id: String): String {
@@ -456,7 +423,8 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
                     launch {
                         observationLevels.addAll(fetchObservationLevels(programDbId))
-                        existingLevelsCache = null
+                        onLevelsChanged()
+                        studyList.adapter?.notifyDataSetChanged()
                     }
 
                     studyModels.forEachIndexed { index, model ->
@@ -466,6 +434,9 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                                 launch { fetchObservationVariables(model.id) }
                                 launch { fetchObservationUnits(model.id) }
                             }
+                            loadedStudies.add(model.id)
+                            onLevelsChanged()
+                            selectDefaultLevel(model.id)
                             studyList.adapter?.notifyItemChanged(index)
                         }
 
@@ -495,12 +466,10 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 attributesTable = HashMap(studyDbIds.associateWith { getAttributes(it) })
             }
 
-            loadLevelList()
-
             studyList.adapter?.notifyDataSetChanged()
 
-            //nothing left to import when every level of the selected studies already exists
-            importButton.isEnabled = existingLevels().isNotEmpty()
+            //nothing to import until at least one level is checked
+            importButton.isEnabled = hasSelectedLevels()
         }
     }
 
@@ -518,24 +487,20 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
             //the activity finishes once saving is done, which clears the flag
             setKeepScreenOn(true)
 
+            //each checked level of each study becomes its own field, in the order shown on the cards
+            val studyLevels = studyDbIds.flatMap { id ->
+                val selected = selectedLevels[id].orEmpty()
+                importableLevels(id).filter { it in selected }.map { level -> id to level }
+            }
+
             launch(Dispatchers.IO) {
-                val successfullyImportedStudies = mutableListOf<String>()
 
-                val level = BrapiObservationLevel().also {
-                    it.observationLevelName = try {
-                        if (selectedLevel in existingLevels().indices) {
-                            existingLevels().elementAt(selectedLevel)
-                        } else {
-                            "plot"
-                        }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Failed to get observation level", e)
-                        finish()
-                        ""
-                    }
-                }
+                //(studyDbId, level) of each field that was created
+                val successfulImports = mutableListOf<Pair<String, String>>()
 
-                studyDbIds.forEach { id ->
+                studyLevels.forEach { (id, levelName) ->
+
+                    val level = BrapiObservationLevel().also { it.observationLevelName = levelName }
 
                     try {
 
@@ -545,11 +510,11 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
                             if (response?.status == true) {
 
-                                successfullyImportedStudies.add(id) // track the successfully imported fields
+                                successfulImports.add(id to levelName) // track the successfully imported fields
 
                             } else if (response != null) {
 
-                                Log.e(TAG, "Failed to save study $id: ${response.message}")
+                                Log.e(TAG, "Failed to save study $id at $levelName: ${response.message}")
 
                                 runOnUiThread {
 
@@ -572,10 +537,10 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 }
 
                 val resultIntent = Intent()
-                if (successfullyImportedStudies.size == 1) { // switch active field if only one study was imported
+                if (successfulImports.size == 1) { // switch active field if only one field was imported
                     //a study can have one field per level, so look up the field for the imported level
-                    val fieldId = db.checkBrapiStudyUnique(level.observationLevelName, successfullyImportedStudies.first())
-                    resultIntent.putExtra("fieldId", fieldId)
+                    val (studyDbId, levelName) = successfulImports.first()
+                    resultIntent.putExtra("fieldId", db.checkBrapiStudyUnique(levelName, studyDbId))
                 }
                 setResult(RESULT_OK, resultIntent)
                 finish()
@@ -793,7 +758,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
         units?.let {
             observationUnits[studyDbId] = it
-            existingLevelsCache = null
+            onLevelsChanged()
         }
     }
 
