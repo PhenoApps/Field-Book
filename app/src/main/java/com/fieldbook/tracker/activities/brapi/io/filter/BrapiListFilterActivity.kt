@@ -271,7 +271,8 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
             toggleProgressBar(View.INVISIBLE)
 
-            restoreModels()
+            //show what was just downloaded, restoreModels would download again if the server has no studies
+            loadStorageItems(BrapiFilterCache.getStoredModels(this@BrapiListFilterActivity))
 
         } catch (e: Exception) {
             e.printStackTrace()
@@ -287,6 +288,8 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         if (brapiService is BrAPIServiceV1)
             return@launch
 
+        var failed = false
+
         (brapiService as BrAPIServiceV2).studyService.fetchAll(
             StudyQueryParams().also {
                 it.pageSize(pageSize)
@@ -294,6 +297,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             }
         )
             .catch { e ->
+                failed = true
                 onApiException(e)
                 queryStudiesJob?.cancel()
             }
@@ -307,18 +311,19 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
                 withContext(Dispatchers.Main) {
                     setProgress(modelCache.size, totalCount)
-                    if (modelCache.size == totalCount || totalCount < pageSize) {
-                        progressBar.visibility = View.GONE
-                        fetchDescriptionTv.visibility = View.GONE
-
-                        withContext(Dispatchers.IO) {
-                            saveCacheToFile(modelCache as List<BrAPIStudy>, trialModels)
-                        }
-
-                        queryStudiesJob?.cancel()
-                    }
                 }
         }
+
+        //the flow completes once every page has responded, so save whatever arrived even if it doesn't
+        //match the server's total count, a failed page ends the flow with an error instead
+        if (failed) return@launch
+
+        withContext(Dispatchers.Main) {
+            progressBar.visibility = View.GONE
+            fetchDescriptionTv.visibility = View.GONE
+        }
+
+        saveCacheToFile(modelCache, trialModels)
     }
 
     protected fun onApiException(e: Throwable? = null) {
