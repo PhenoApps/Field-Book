@@ -28,7 +28,7 @@
         android:textColor="@color/BLACK"
         app:chipIcon="@drawable/ic_shape"
         app:chipIconTint="@color/BLACK"
-        app:chipBackgroundColor="@color/WHITE"
+        app:chipBackgroundColor="@color/study_level_chip_background"
         tools:text="plot" />
 
     <Space
@@ -47,7 +47,7 @@
         android:textColor="@color/BLACK"
         app:chipIcon="@drawable/ic_dots_grid"
         app:chipIconTint="@color/BLACK"
-        app:chipBackgroundColor="@color/WHITE"
+        app:chipBackgroundColor="@color/study_level_chip_background"
         tools:text="108" />
 
     <com.google.android.material.chip.Chip
@@ -61,7 +61,7 @@
         android:textColor="@color/BLACK"
         app:chipIcon="@drawable/ic_ruler"
         app:chipIconTint="@color/BLACK"
-        app:chipBackgroundColor="@color/WHITE"
+        app:chipBackgroundColor="@color/study_level_chip_background"
         tools:text="12" />
 
 </LinearLayout>
