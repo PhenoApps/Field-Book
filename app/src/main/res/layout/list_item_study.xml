@@ -15,11 +15,16 @@
         android:layout_height="wrap_content"
         android:padding="16dp">
 
-        <ProgressBar
+        <!-- spins until the server reports how many units to expect, then fills as pages arrive -->
+        <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/list_item_study_pb"
             android:indeterminate="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:indicatorColor="?attr/fb_color_indeterminate_progress_bar"
+            app:trackColor="@color/light_gray"
+            app:trackCornerRadius="2dp"
+            app:indicatorSize="32dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"/>
 

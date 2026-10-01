@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.CheckBox
 import android.widget.LinearLayout
-import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.DiffUtil
@@ -15,6 +14,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.google.android.material.chip.Chip
+import com.google.android.material.progressindicator.CircularProgressIndicator
 
 /**
  * One card per study being imported, listing the study's importable observation levels as checkboxes.
@@ -26,6 +26,11 @@ class StudyAdapter(private val studyLoader: StudyLoader) :
 
     interface StudyLoader {
         fun isLoading(id: String): Boolean
+
+        /**
+         * Units received and units expected while loading, or null until the server reports a total.
+         */
+        fun getProgress(id: String): Pair<Int, Int>?
         fun getLevels(id: String): List<Level>
         fun onLevelChecked(id: String, levelName: String, checked: Boolean)
         fun getLocation(id: String): String
@@ -63,9 +68,27 @@ class StudyAdapter(private val studyLoader: StudyLoader) :
 
             val loading = studyLoader.isLoading(id)
             holder.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
+            if (loading) bindProgress(holder.progressBar, studyLoader.getProgress(id))
 
             bindLevels(holder.levelsLayout, id, if (loading) emptyList() else studyLoader.getLevels(id))
         }
+    }
+
+    /**
+     * Spins until a total is known, then fills with the units received so far.
+     */
+    private fun bindProgress(indicator: CircularProgressIndicator, progress: Pair<Int, Int>?) {
+
+        if (progress == null) {
+            indicator.isIndeterminate = true
+            return
+        }
+
+        val (received, total) = progress
+
+        indicator.isIndeterminate = false
+        indicator.max = total
+        indicator.setProgressCompat(received.coerceAtMost(total), true)
     }
 
     private fun bindLevels(layout: LinearLayout, id: String, levels: List<Level>) {
@@ -137,7 +160,7 @@ class StudyAdapter(private val studyLoader: StudyLoader) :
     inner class ViewHolder(v: CardView) : RecyclerView.ViewHolder(v) {
         var titleTextView: TextView = v.findViewById(R.id.list_item_study_title_tv)
         var locationChip: Chip = v.findViewById(R.id.list_item_study_location_chip)
-        var progressBar: ProgressBar = v.findViewById(R.id.list_item_study_pb)
+        var progressBar: CircularProgressIndicator = v.findViewById(R.id.list_item_study_pb)
         var trialChip: Chip = v.findViewById(R.id.list_item_trial_chip)
         var levelsLayout: LinearLayout = v.findViewById(R.id.list_item_study_levels_ll)
     }

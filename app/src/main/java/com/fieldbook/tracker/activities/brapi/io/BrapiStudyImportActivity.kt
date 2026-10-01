@@ -114,6 +114,9 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     //studies whose units and variables have finished fetching, successfully or not
     private val loadedStudies = hashSetOf<String>()
 
+    //unit download progress per study, (received, total) per unit request keyed by level, null for all levels
+    private val unitProgress = hashMapOf<String, HashMap<String?, Pair<Int, Int>>>()
+
     //checked level names per study
     private val selectedLevels = hashMapOf<String, MutableSet<String>>()
 
@@ -252,6 +255,28 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
     private fun hasSelectedLevels() = selectedLevels.values.any { it.isNotEmpty() }
 
+    /**
+     * Units received out of units expected across the study's unit requests so far,
+     * or null until a request has reported a total. When only the remaining levels are fetched,
+     * each level's total is added as its request starts.
+     */
+    private fun getUnitProgress(studyDbId: String): Pair<Int, Int>? {
+
+        val requests = unitProgress[studyDbId]?.values ?: return null
+
+        val total = requests.sumOf { it.second }
+
+        return if (total > 0) requests.sumOf { it.first } to total else null
+    }
+
+    private fun onUnitProgress(studyDbId: String, levelName: String?, received: Int, total: Int) {
+
+        unitProgress.getOrPut(studyDbId) { hashMapOf() }[levelName] = received to total
+
+        val position = (studyList.adapter as? StudyAdapter)?.currentList?.indexOfFirst { it.id == studyDbId } ?: -1
+        if (position >= 0) studyList.adapter?.notifyItemChanged(position)
+    }
+
     private fun onLevelsChanged() {
         levelsCache.clear()
     }
@@ -383,6 +408,8 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         studyList.adapter = StudyAdapter(object : StudyAdapter.StudyLoader {
 
             override fun isLoading(id: String) = id !in loadedStudies
+
+            override fun getProgress(id: String) = getUnitProgress(id)
 
             override fun getLevels(id: String) = this@BrapiStudyImportActivity.getLevels(id)
 
@@ -678,7 +705,14 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     /**
      * Collects every page of a Fetcher flow, or returns null if any page failed
      */
-    private suspend inline fun <reified M> fetchAllPages(name: String, crossinline flow: () -> Flow<Any>): HashSet<M>? =
+    /**
+     * @param onPage called on the main thread after each page with the models received so far and the server's total
+     */
+    private suspend inline fun <reified M> fetchAllPages(
+        name: String,
+        crossinline onPage: (received: Int, total: Int) -> Unit = { _, _ -> },
+        crossinline flow: () -> Flow<Any>
+    ): HashSet<M>? =
         withContext(Dispatchers.IO) {
             try {
                 val models = hashSetOf<M>()
@@ -686,6 +720,8 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                     val (total, page) = response as Pair<*, *>
                     models.addAll((page as List<*>).filterIsInstance<M>())
                     Log.d(TAG, "Fetched $name ${models.size}/$total")
+                    val received = models.size
+                    withContext(Dispatchers.Main) { onPage(received, total as? Int ?: 0) }
                 }
                 models
             } catch (e: Exception) {
@@ -757,7 +793,10 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
         val service = brapiService as BrAPIServiceV2
 
-        return fetchAllPages<BrAPIObservationUnit>("units for $studyDbId at ${levelName ?: "all levels"}") {
+        return fetchAllPages<BrAPIObservationUnit>(
+            "units for $studyDbId at ${levelName ?: "all levels"}",
+            onPage = { received, total -> onUnitProgress(studyDbId, levelName, received, total) }
+        ) {
             service.observationUnitService.fetchAll(ObservationUnitQueryParams().also {
                 it.studyDbId(studyDbId)
                 it.pageSize(pageSize())
