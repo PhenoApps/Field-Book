@@ -136,9 +136,11 @@ abstract class ListFilterActivity : ThemedActivity(),
     private fun setupRecyclerView() {
 
         recyclerView.adapter = CheckboxListAdapter { checked, position ->
-            if (position in cache.indices) {
 
-                val item = cache[position]
+            //the shown list can be narrowed by search, so positions index it rather than the cache
+            val item = (recyclerView.adapter as? CheckboxListAdapter)?.currentList?.getOrNull(position)
+
+            if (item != null) {
 
                 item.checked = checked
 

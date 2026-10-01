@@ -504,16 +504,40 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         if (::paginationManager.isInitialized) paginationManager.reset()
     }
 
+    /**
+     * Checks every item in the list as currently filtered and searched, or unchecks them if they're all checked.
+     * The adapter's selection is updated directly, since rows only update it as they're bound and
+     * off-screen rows would otherwise be missed.
+     */
+    private fun toggleAllVisible() {
+
+        val adapter = recyclerView.adapter as? CheckboxListAdapter ?: return
+        val visible = adapter.currentList
+
+        if (visible.isEmpty()) return
+
+        val check = !visible.all { it.checked }
+
+        visible.forEach { model ->
+            model.checked = check
+            if (check) {
+                if (model !in adapter.selected) adapter.selected.add(model)
+            } else {
+                adapter.selected.remove(model)
+            }
+        }
+
+        adapter.notifyItemRangeChanged(0, visible.size)
+
+        importTextView.visibility = if (showNextButton()) View.VISIBLE else View.GONE
+        resetSelectionCountDisplay()
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
         when (item.itemId) {
             R.id.action_check_all -> {
-                if (cache.isNotEmpty()) {
-                    val allChecked = cache.all { it.checked }
-                    cache.forEach { it.checked = !allChecked }
-                    submitAdapterItems(cache)
-                    (recyclerView.adapter)?.notifyItemRangeChanged(0, cache.size)
-                }
+                toggleAllVisible()
                 return true
             }
 

@@ -269,7 +269,7 @@ class BrapiTraitFilterActivity(
     //add menu to toolbar
     override fun onCreateOptionsMenu(menu: android.view.Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_filter_brapi, menu)
-        menu?.findItem(R.id.action_check_all)?.isVisible = false
+        menu?.findItem(R.id.action_check_all)?.isVisible = true
         menu?.findItem(R.id.action_reset_cache)?.isVisible = true
         menu?.findItem(R.id.action_brapi_filter)?.isVisible = true
         selectionMenuItem = menu?.findItem(R.id.action_clear_selection)

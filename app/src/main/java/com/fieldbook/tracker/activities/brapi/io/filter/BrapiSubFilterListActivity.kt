@@ -67,6 +67,12 @@ abstract class BrapiSubFilterListActivity<T> : BrapiListFilterActivity<T>() {
         searchEditText.addTextChangedListener(textWatcher)
     }
 
+    /**
+     * Shows the number of selected items as a badge on the clear selection item.
+     * This runs once per rebound row, so it can be called many times in one frame (e.g. check all).
+     * Attaching a badge to a toolbar item is posted until the toolbar is laid out, so a single badge is kept
+     * and only its number updated, and detaching is posted to run after any pending attach.
+     */
     @OptIn(ExperimentalBadgeUtils::class)
     override fun resetSelectionCountDisplay() {
 
@@ -74,20 +80,38 @@ abstract class BrapiSubFilterListActivity<T> : BrapiListFilterActivity<T>() {
 
         val numSelected = (recyclerView.adapter as CheckboxListAdapter).selected.size
 
-        if (numFilterBadge != null) BadgeUtils.detachBadgeDrawable(numFilterBadge, toolbar, R.id.action_clear_selection)
-
         if (numSelected > 0) {
+
             selectionMenuItem?.isVisible = true
-            numFilterBadge = BadgeDrawable.create(this).apply {
-                isVisible = true
-                number = numSelected
+
+            val badge = numFilterBadge ?: BadgeDrawable.create(this).apply {
                 horizontalOffset = 16
                 maxNumber = 9
             }.also {
+                numFilterBadge = it
                 BadgeUtils.attachBadgeDrawable(it, toolbar, R.id.action_clear_selection)
             }
+
+            badge.number = numSelected
+            badge.isVisible = true
+
         } else {
-            selectionMenuItem?.isVisible = false
+
+            val badge = numFilterBadge
+
+            if (badge == null) {
+                selectionMenuItem?.isVisible = false
+                return
+            }
+
+            numFilterBadge = null
+
+            //detach while the clear selection item still exists, then hide it,
+            //otherwise its view is reused by another toolbar item with the badge still drawn on it
+            toolbar.post {
+                BadgeUtils.detachBadgeDrawable(badge, toolbar, R.id.action_clear_selection)
+                if (numFilterBadge == null) selectionMenuItem?.isVisible = false
+            }
         }
     }
 }
