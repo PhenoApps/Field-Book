@@ -57,7 +57,6 @@ import java.util.Locale
 import javax.inject.Inject
 import kotlin.collections.set
 import kotlin.coroutines.resume
-import kotlin.math.max
 
 /**
  * receive study information including trial
@@ -674,14 +673,6 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     private fun setKeepScreenOn(keepOn: Boolean) {
         if (keepOn) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-    }
-
-    private suspend fun setProgress(progress: Int, progressMax: Int) {
-        withContext(Dispatchers.Main) {
-            progressBar.isIndeterminate = false
-            progressBar.progress = progress
-            progressBar.max = progressMax
-        }
     }
 
     /**

@@ -1499,7 +1499,6 @@
     <string name="brapi_importer_fetch_data">Obteniendo datos, la primera ejecución puede tardar un minuto.</string>
     <string name="menu_filter_brapi_reset_cache_title">Restablecer Cache</string>
     <string name="brapi_filter_bottom_sheet_delete_all_description">limpiar todos los filtros</string>
-    <string name="act_brapi_study_import_fetch_levels">Obteniendo niveles de observación...</string>
     <string name="act_brapi_study_import_fetch_variables">Obteniendo variables para %s...</string>
     <string name="act_brapi_study_import_fetch_units">Obteniendo unidades de observación para %s...</string>
     <string name="act_brapi_study_import_fetch_germplasm">Obteniendo germplasma para %s...</string>
@@ -1529,10 +1528,8 @@
     <string name="search_bar_hint">Buscando… %s</string>
     <string name="menu_filter_brapi_clear_filters">Limpiar Filtros</string>
     <string name="menu_filter_brapi_clear_selection">Limpiar Selección</string>
-    <string name="level">Nivel</string>
     <string name="primary">Primario</string>
     <string name="secondary">Secundario</string>
-    <string name="sort">Ordenar</string>
     <string name="brapi_traits_filter_title">Rasgos</string>
     <string name="brapi_filter_type_study">Estudio</string>
     <string name="act_brapi_study_filter">Filtro</string>
@@ -1590,7 +1587,6 @@
     <string name="quick_goto_primary_hint">ID Primario</string>
     <string name="quick_goto_secondary_hint">ID secundario</string>
     <string name="quick_goto_dialog_icon_description">persona en funciones</string>
-    <string name="failed_to_fetch_observation_levels">Fallo obteniendo el nivel de las observaciónes</string>
     <string name="traits_sort_default">Predeterminado</string>
     <string name="traits_crop_image_parameter">Recortar</string>
     <string name="dialog_crop_title">Definir Región de Recorte</string>

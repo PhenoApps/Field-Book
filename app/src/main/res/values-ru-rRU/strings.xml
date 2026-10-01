@@ -1402,7 +1402,6 @@
     <string name="brapi_importer_fetch_data">Загрузка данных. Первый запуск может занять минуту.</string>
     <string name="menu_filter_brapi_reset_cache_title">Сбросить кеш</string>
     <string name="brapi_filter_bottom_sheet_delete_all_description">сбросить все фильтры</string>
-    <string name="act_brapi_study_import_fetch_levels">Загрузка уровней наблюдений…</string>
     <string name="act_brapi_study_import_fetch_variables">Загрузка переменных для %s…</string>
     <string name="act_brapi_study_import_fetch_units">Загрузка единиц наблюдений для %s…</string>
     <string name="act_brapi_study_import_fetch_germplasm">Получение гермоплазмы для %s…</string>
@@ -1428,10 +1427,8 @@
     <string name="search_bar_hint">Поиск… %s</string>
     <string name="menu_filter_brapi_clear_filters">Сбросить фильтры</string>
     <string name="menu_filter_brapi_clear_selection">Снять выделение</string>
-    <string name="level">Уровень</string>
     <string name="primary">Первичный</string>
     <string name="secondary">Вторичный</string>
-    <string name="sort">Сортировка</string>
     <string name="brapi_traits_filter_title">Признаки</string>
     <string name="brapi_filter_type_study">Исследование</string>
     <string name="act_brapi_study_filter">Фильтр</string>
@@ -1477,7 +1474,6 @@
     <string name="quick_goto_primary_hint">Первичный ID</string>
     <string name="quick_goto_secondary_hint">Вторичный ID</string>
     <string name="quick_goto_dialog_icon_description">бегущий человек</string>
-    <string name="failed_to_fetch_observation_levels">Не удалось загрузить уровни наблюдений</string>
     <string name="traits_sort_default">значение по умолчанию</string>
     <string name="traits_crop_image_parameter">Обрезка</string>
     <string name="dialog_crop_title">Область обрезки</string>

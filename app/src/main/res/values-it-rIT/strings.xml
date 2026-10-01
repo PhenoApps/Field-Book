@@ -1497,7 +1497,6 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="brapi_importer_fetch_data">Recupero dei dati, la prima esecuzione potrebbe richiedere un minuto.</string>
     <string name="menu_filter_brapi_reset_cache_title">Reimposta Cache</string>
     <string name="brapi_filter_bottom_sheet_delete_all_description">cancella tutti i filtri</string>
-    <string name="act_brapi_study_import_fetch_levels">Recupero livelli d\'osservazione...</string>
     <string name="act_brapi_study_import_fetch_variables">Recupero variabili per %s...</string>
     <string name="act_brapi_study_import_fetch_units">Recupero unità d\'osservazione per %s...</string>
     <string name="act_brapi_study_import_fetch_germplasm">Recupero del germplasma per %s...</string>
@@ -1527,10 +1526,8 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="search_bar_hint">Ricercando… %s</string>
     <string name="menu_filter_brapi_clear_filters">Cancella Filtri</string>
     <string name="menu_filter_brapi_clear_selection">Cancella selezione</string>
-    <string name="level">Livello</string>
     <string name="primary">Primario</string>
     <string name="secondary">Secondario</string>
-    <string name="sort">Ordina</string>
     <string name="brapi_traits_filter_title">Caratteri</string>
     <string name="brapi_filter_type_study">Studio</string>
     <string name="act_brapi_study_filter">Filtro</string>
@@ -1588,7 +1585,6 @@ Caratteri e campi creati manualmente o importati tramite CSV dovranno essere esp
     <string name="quick_goto_primary_hint">ID Primario</string>
     <string name="quick_goto_secondary_hint">ID secondario</string>
     <string name="quick_goto_dialog_icon_description">utente in gestione</string>
-    <string name="failed_to_fetch_observation_levels">Recupero dei livelli di osservazione fallito</string>
     <string name="traits_sort_default">Impostazioni predefinite</string>
     <string name="traits_crop_image_parameter">Ritaglia</string>
     <string name="dialog_crop_title">Definisci Regione Di Ritaglio</string>
