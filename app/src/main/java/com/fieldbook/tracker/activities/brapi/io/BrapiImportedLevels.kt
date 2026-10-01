@@ -22,8 +22,11 @@ class BrapiImportedLevels(fields: List<FieldObject>) {
         }
     }
 
+    //lowercased imported level names per study
     private val imported = hashMapOf<String, MutableSet<String>>()
-    private val available = hashMapOf<String, MutableSet<String>>()
+
+    //recorded level names per study, keyed by lowercased name to keep the server's casing for queries
+    private val available = hashMapOf<String, MutableMap<String, String>>()
 
     init {
         fields.filter { it.studyId >= 0 && !it.studyDbId.isNullOrEmpty() }.forEach { field ->
@@ -34,18 +37,25 @@ class BrapiImportedLevels(fields: List<FieldObject>) {
             val importedLevels = imported.getOrPut(studyDbId) { hashSetOf() }
             field.observationLevel?.takeIf { it.isNotEmpty() }?.let { importedLevels.add(it.lowercase()) }
 
-            available.getOrPut(studyDbId) { hashSetOf() }
-                .addAll(decode(field.studyDbLevels).map { it.lowercase() })
+            val availableLevels = available.getOrPut(studyDbId) { linkedMapOf() }
+            decode(field.studyDbLevels).forEach { availableLevels.putIfAbsent(it.lowercase(), it) }
         }
     }
 
-    /**
-     * Imported level names for the study, lowercased.
-     */
-    fun importedLevels(studyDbId: String): Set<String> = imported[studyDbId].orEmpty()
-
     fun isImported(studyDbId: String, level: String?): Boolean =
-        level != null && level.lowercase() in importedLevels(studyDbId)
+        level != null && level.lowercase() in imported[studyDbId].orEmpty()
+
+    /**
+     * Levels recorded for the study by earlier imports, empty if none were recorded.
+     */
+    fun knownLevels(studyDbId: String): Collection<String> = available[studyDbId]?.values.orEmpty()
+
+    /**
+     * Recorded levels that haven't been imported yet,
+     * or null when the study has no recorded levels and all of its units need to be fetched.
+     */
+    fun remainingLevels(studyDbId: String): List<String>? =
+        knownLevels(studyDbId).filterNot { isImported(studyDbId, it) }.takeIf { it.isNotEmpty() }
 
     /**
      * True once every level the study's units had is imported.
@@ -53,7 +63,6 @@ class BrapiImportedLevels(fields: List<FieldObject>) {
      */
     fun isFullyImported(studyDbId: String): Boolean {
         val importedLevels = imported[studyDbId] ?: return false
-        val availableLevels = available[studyDbId].orEmpty()
-        return importedLevels.containsAll(availableLevels)
+        return available[studyDbId].orEmpty().keys.all { it in importedLevels }
     }
 }

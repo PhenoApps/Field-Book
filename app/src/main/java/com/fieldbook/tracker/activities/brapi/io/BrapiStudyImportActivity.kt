@@ -662,8 +662,10 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                     details.numberOfPlots = units.size
                     details.trialName = study.trialName
 
-                    //every level of the study's units, so the study stays importable until all are imported
-                    details.studyDbLevels = studyUnits.mapNotNull { it.levelName() }.distinct()
+                    //every level of the study's units, so the study stays importable until all are imported,
+                    //including levels recorded earlier that weren't fetched this time
+                    details.studyDbLevels = (importedLevels.knownLevels(study.studyDbId) +
+                            studyUnits.mapNotNull { it.levelName() }).distinctBy { it.lowercase() }
 
                     //BMS specific, only import the variables used at the selected level
                     details.traits = observationVariables[study.studyDbId]
@@ -803,18 +805,48 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         }?.let { observationVariables[studyDbId] = it }
     }
 
+    /**
+     * If an earlier import recorded the study's levels, only the levels not yet imported are fetched,
+     * one request per level. Otherwise every unit of the study is fetched.
+     */
     private suspend fun fetchObservationUnits(studyDbId: String) {
+
+        val remainingLevels = importedLevels.remainingLevels(studyDbId)
+
+        val units = if (remainingLevels == null) fetchObservationUnits(studyDbId, null) else {
+
+            val levelUnits = hashSetOf<BrAPIObservationUnit>()
+
+            for (level in remainingLevels) {
+
+                val units = fetchObservationUnits(studyDbId, level) ?: return
+
+                levelUnits.addAll(units)
+
+                //the server ignored the level filter and sent every unit, so the other levels are already here
+                if (units.any { !it.levelName().equals(level, ignoreCase = true) }) break
+            }
+
+            //nothing came back for the remaining levels, fall back to fetching the whole study
+            levelUnits.ifEmpty { fetchObservationUnits(studyDbId, null) }
+        }
+
+        units?.let {
+            observationUnits[studyDbId] = it
+            existingLevelsCache = null
+        }
+    }
+
+    private suspend fun fetchObservationUnits(studyDbId: String, levelName: String?): HashSet<BrAPIObservationUnit>? {
 
         val service = brapiService as BrAPIServiceV2
 
-        fetchAllPages<BrAPIObservationUnit>("units for $studyDbId") {
+        return fetchAllPages<BrAPIObservationUnit>("units for $studyDbId at ${levelName ?: "all levels"}") {
             service.observationUnitService.fetchAll(ObservationUnitQueryParams().also {
                 it.studyDbId(studyDbId)
                 it.pageSize(pageSize())
+                levelName?.let { level -> it.observationUnitLevelName(level) }
             })
-        }?.let {
-            observationUnits[studyDbId] = it
-            existingLevelsCache = null
         }
     }
 

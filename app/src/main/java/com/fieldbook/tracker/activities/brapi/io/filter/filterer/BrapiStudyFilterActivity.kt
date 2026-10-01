@@ -101,14 +101,7 @@ class BrapiStudyFilterActivity(
     override fun List<CheckboxListAdapter.Model>.filterExists(): List<CheckboxListAdapter.Model> {
         //studies stay listed until every observation level of their units has been imported
         val importedLevels = BrapiImportedLevels(database.allFieldObjects)
-        return filterNot { importedLevels.isFullyImported(it.id) }.map { model ->
-            val levels = importedLevels.importedLevels(model.id)
-            if (levels.isEmpty()) model
-            else model.copy(subLabel = listOf(
-                model.subLabel,
-                getString(R.string.brapi_study_imported_levels, levels.sorted().joinToString(", "))
-            ).filter { it.isNotEmpty() }.joinToString(" · "))
-        }
+        return filterNot { importedLevels.isFullyImported(it.id) }
     }
 
     override fun onSearchTextComplete(searchText: String) {
