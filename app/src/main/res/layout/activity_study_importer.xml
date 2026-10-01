@@ -36,28 +36,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/act_list_filter_pb"/>
 
-    <com.google.android.material.tabs.TabLayout
-        android:visibility="gone"
-        tools:visibility="visible"
-        android:id="@+id/brapi_importer_tl"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/act_brapi_importer_tv">
-
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/level"/>
-
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/sort"/>
-
-    </com.google.android.material.tabs.TabLayout>
-    
     <ListView
         android:visibility="gone"
         tools:visibility="visible"
@@ -69,7 +47,7 @@
         tools:listitem="@android:layout/simple_list_item_1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/brapi_importer_tl"
+        app:layout_constraintTop_toBottomOf="@id/act_brapi_importer_tv"
         app:layout_constraintBottom_toTopOf="@id/act_list_filter_rv"
         android:choiceMode="singleChoice"
         app:layout_constraintVertical_weight="0.25"/>

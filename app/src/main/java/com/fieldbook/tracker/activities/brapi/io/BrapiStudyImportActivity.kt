@@ -33,7 +33,6 @@ import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.InsetHandler
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -102,7 +101,6 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
     private lateinit var loadingTextView: TextView
     private lateinit var progressBar: ProgressBar
-    private lateinit var tabLayout: TabLayout
     private lateinit var listView: ListView
     private lateinit var studyList: RecyclerView
     private lateinit var importButton: MaterialButton
@@ -121,7 +119,6 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     private val importedLevels by lazy { BrapiImportedLevels(db.allFieldObjects) }
 
     private var selectedLevel: Int = -1
-    private var selectedSort: Int = -1
 
     private var attributesTable: HashMap<String, Map<String, Map<String, String>>>? = null
 
@@ -135,7 +132,6 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
         loadingTextView = findViewById(R.id.act_brapi_importer_tv)
         progressBar = findViewById(R.id.act_list_filter_pb)
-        tabLayout = findViewById(R.id.brapi_importer_tl)
         listView = findViewById(R.id.act_study_importer_lv)
         studyList = findViewById(R.id.act_list_filter_rv)
         importButton = findViewById(R.id.act_study_importer_import_button)
@@ -195,39 +191,12 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         importButton.isEnabled = false
         loadingTextView.visibility = View.GONE
         progressBar.visibility = View.INVISIBLE
-        tabLayout.visibility = View.GONE
 
         loadStudyList(programDbId, studyDbIds)
         setupImportButton(studyDbIds)
     }
 
-    enum class Tab {
-        LEVELS, SORT
-    }
-
-    private fun loadTabLayout() {
-
-        tabLayout.visibility = View.VISIBLE
-
-        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                when (tab?.position) {
-                    Tab.LEVELS.ordinal -> setLevelListOptions()
-                    Tab.SORT.ordinal -> setSortListOptions()
-                }
-
-                listView.visibility = View.VISIBLE
-
-            }
-
-            override fun onTabUnselected(tab: TabLayout.Tab?) {
-
-            }
-
-            override fun onTabReselected(tab: TabLayout.Tab?) {
-
-            }
-        })
+    private fun loadLevelList() {
 
         listView.visibility = View.VISIBLE
 
@@ -292,34 +261,6 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
         if (existingLevels().isEmpty()) {
             listView.visibility = View.GONE
-        }
-    }
-
-    private fun getAttributeKeys() = attributesTable?.values?.flatMap { it.values }?.flatMap { it.keys }?.distinct() ?: listOf()
-
-    private fun setSortListOptions() {
-
-        listView.visibility = View.VISIBLE
-
-        listView.adapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_list_item_single_choice,
-            getAttributeKeys()
-        )
-
-        listView.setItemChecked(selectedSort, true)
-
-        listView.smoothScrollToPosition(selectedSort)
-
-        listView.setOnItemClickListener { _, _, position, _ ->
-
-            selectedSort = if (selectedSort == position) {
-
-                listView.setItemChecked(selectedSort, false)
-
-                -1
-
-            } else position
         }
     }
 
@@ -554,7 +495,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 attributesTable = HashMap(studyDbIds.associateWith { getAttributes(it) })
             }
 
-            loadTabLayout()
+            loadLevelList()
 
             studyList.adapter?.notifyDataSetChanged()
 
@@ -594,16 +535,13 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                     }
                 }
 
-                val allAttributes = getAttributeKeys()
-                val sortOrder = if (selectedSort == -1) "" else allAttributes[selectedSort]
-
                 studyDbIds.forEach { id ->
 
                     try {
 
                         studies.firstOrNull { it.studyDbId == id }?.let {
 
-                            val response = saveStudy(it, level, sortOrder)
+                            val response = saveStudy(it, level)
 
                             if (response?.status == true) {
 
@@ -652,8 +590,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
      */
     private fun saveStudy(
         study: BrAPIStudy,
-        level: BrapiObservationLevel,
-        sortId: String
+        level: BrapiObservationLevel
     ): BrapiControllerResponse<*>? {
 
         if (importedLevels.isImported(study.studyDbId, level.observationLevelName)) return null
@@ -724,13 +661,13 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                     details.values = mutableListOf()
                     details.values.addAll(unitAttributes)
 
-                    //primary/secondary no longer required
+                    //primary/secondary and sort are no longer chosen at import
                     brapiService.saveStudyDetails(
                         details,
                         level,
                         "",
                         "",
-                        sortId,
+                        "",
                     )
                 }
         }
