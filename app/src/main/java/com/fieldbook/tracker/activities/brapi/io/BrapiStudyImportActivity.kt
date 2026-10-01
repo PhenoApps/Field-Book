@@ -23,6 +23,7 @@ import com.fieldbook.tracker.adapters.StudyAdapter
 import com.fieldbook.tracker.adapters.StudyAdapter.Model
 import com.fieldbook.tracker.brapi.model.BrapiObservationLevel
 import com.fieldbook.tracker.brapi.model.BrapiStudyDetails
+import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV1
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV2
@@ -31,18 +32,19 @@ import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.InsetHandler
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.tabs.TabLayout
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.brapi.client.v2.JSON
 import org.brapi.client.v2.model.queryParams.germplasm.GermplasmQueryParams
 import org.brapi.client.v2.model.queryParams.phenotype.ObservationUnitQueryParams
@@ -55,6 +57,7 @@ import org.brapi.v2.model.pheno.BrAPIPositionCoordinateTypeEnum
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.collections.set
+import kotlin.coroutines.resume
 import kotlin.math.max
 
 /**
@@ -102,14 +105,15 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     private lateinit var studyList: RecyclerView
     private lateinit var importButton: MaterialButton
 
+    //fetched models are only written on the main thread, once each fetch completes
     private val studies = arrayListOf<BrAPIStudy>()
-    private val observationLevels = hashSetOf<String>()
-    private val observationVariables =
-        hashMapOf<String, HashSet<BrAPIObservationVariable>>().withDefault { hashSetOf() }
-    private val observationUnits =
-        hashMapOf<String, HashSet<BrAPIObservationUnit>>().withDefault { hashSetOf() }
-    private val germplasms =
-        hashMapOf<String, HashSet<BrAPIGermplasm>>().withDefault { hashSetOf() }
+    private val observationLevels = linkedSetOf<String>()
+    private val observationVariables = hashMapOf<String, HashSet<BrAPIObservationVariable>>()
+    private val observationUnits = hashMapOf<String, HashSet<BrAPIObservationUnit>>()
+    private val germplasms = hashMapOf<String, HashSet<BrAPIGermplasm>>()
+
+    //cleared whenever levels or units change, see existingLevels()
+    private var existingLevelsCache: Array<String>? = null
 
     private var selectedLevel: Int = -1
     private var selectedSort: Int = -1
@@ -177,55 +181,26 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         }
     }
 
-    private suspend fun setLoadingText(text: String) {
-        withContext(Dispatchers.Main) {
-            loadingTextView.text = text
-        }
-    }
-
+    /**
+     * Observation levels are fetched alongside the study data rather than before it,
+     * see loadStudyList
+     */
     private fun fetchStudyInfo(programDbId: String, studyDbIds: List<String>) {
 
-        launch {
+        importButton.isEnabled = false
+        loadingTextView.visibility = View.GONE
+        progressBar.visibility = View.INVISIBLE
+        tabLayout.visibility = View.GONE
 
-            setLoadingText(getString(R.string.act_brapi_study_import_fetch_levels))
-
-            try {
-
-                fetchObservationLevels(programDbId).join()
-
-            } catch (e: Exception) {
-
-                e.printStackTrace()
-
-                FirebaseCrashlytics.getInstance().recordException(e)
-
-                withContext(Dispatchers.Main) {
-
-                    Toast.makeText(this@BrapiStudyImportActivity, getString(R.string.failed_to_fetch_observation_levels), Toast.LENGTH_SHORT).show()
-
-                    setResult(RESULT_CANCELED)
-
-                    finish()
-                }
-            }
-
-            withContext(Dispatchers.Main) {
-                importButton.isEnabled = false
-                loadingTextView.visibility = View.GONE
-                progressBar.visibility = View.INVISIBLE
-                tabLayout.visibility = View.GONE
-
-                loadStudyList(studyDbIds)
-                setupImportButton(studyDbIds)
-            }
-        }
+        loadStudyList(programDbId, studyDbIds)
+        setupImportButton(studyDbIds)
     }
 
     enum class Tab {
         LEVELS, SORT
     }
 
-    private fun loadTabLayout(studyDbIds: List<String>) {
+    private fun loadTabLayout() {
 
         tabLayout.visibility = View.VISIBLE
 
@@ -251,21 +226,25 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
         listView.visibility = View.VISIBLE
 
-        attributesTable = hashMapOf()
-        attributesTable?.let { table ->
-            for (study in studyDbIds) {
-                table[study] = getAttributes(study)
-            }
-        }
-
         setDefaultAttributeIdentifiers()
 
         setLevelListOptions()
     }
 
-    private fun existingLevels() = observationLevels.toList().intersect(observationUnits.flatMap { it.value }
-        .map { it.observationUnitPosition.observationLevel.levelName }
-        .toSet()).toTypedArray()
+    /**
+     * Server levels (in server order) that are used by at least one unit.
+     * Falls back to the levels found on the units if the server levels are unavailable or don't match.
+     */
+    private fun existingLevels(): Array<String> = existingLevelsCache ?: run {
+
+        val unitLevels = observationUnits.values.flatten()
+            .mapNotNullTo(linkedSetOf()) { it.observationUnitPosition?.observationLevel?.levelName }
+
+        observationLevels.filter { it in unitLevels }
+            .ifEmpty { unitLevels.toList() }
+            .toTypedArray()
+
+    }.also { existingLevelsCache = it }
 
     /**
      * The observation level the user has chosen, or null while no choice has been made yet.
@@ -349,7 +328,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     private fun getAttributes(studyDbId: String): Map<String, Map<String, String>> {
 
         val unitAttributes = hashMapOf<String, Map<String, String>>()
-        val germs = germplasms[studyDbId] ?: listOf()
+        val germs = germplasms[studyDbId].orEmpty().associateBy { it.germplasmDbId }
 
         observationUnits[studyDbId]?.forEach { unit ->
 
@@ -401,7 +380,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
             if (germplasms.isNotEmpty() && unit.germplasmDbId != null) {
 
-                germs.firstOrNull { it.germplasmDbId == unit.germplasmDbId }?.let { germ ->
+                germs[unit.germplasmDbId]?.let { germ ->
 
                     germ.accessionNumber?.let { accession ->
                         attributes["AccessionNumber"] = accession
@@ -451,7 +430,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         return null
     }
 
-    private fun loadStudyList(studyDbIds: List<String>) {
+    private fun loadStudyList(programDbId: String, studyDbIds: List<String>) {
 
         studyList.layoutManager = LinearLayoutManager(this).also {
             it.orientation = LinearLayoutManager.VERTICAL
@@ -484,14 +463,12 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 id: String,
                 position: Int
             ): HashSet<BrAPIObservationUnit>? {
-                return try {
-                    val levels = existingLevels()
-                    if (selectedLevel >= 0 && levels.isNotEmpty()) observationUnits[id]?.toHashSet()
-                        ?.filter { it.observationUnitPosition.observationLevel.levelName == levels.elementAt(selectedLevel) }?.toHashSet()
-                    else observationUnits[id]?.toHashSet()
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to get observation units", e)
-                    hashSetOf()
+                val levelName = selectedLevelName()
+                return observationUnits[id]?.let { units ->
+                    if (levelName == null) units
+                    else units.filterTo(hashSetOf()) {
+                        it.observationUnitPosition?.observationLevel?.levelName == levelName
+                    }
                 }
             }
 
@@ -512,51 +489,30 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
         launch {
 
-            async {
+            if (brapiService !is BrAPIServiceV2) return@launch
 
-                //fetch variables, units, and germs for all studies asynchronously
+            //fetch levels, variables, units, and germs for all studies concurrently,
+            //the http client limits how many requests are sent to the server at once
+            coroutineScope {
+
+                launch {
+                    observationLevels.addAll(fetchObservationLevels(programDbId))
+                    existingLevelsCache = null
+                }
+
                 studyModels.forEachIndexed { index, model ->
 
                     launch {
-                        val job = fetchObservationVariables(model.id)
-                        job.join()
-                        withContext(Dispatchers.Main) {
-                            studyList.adapter?.notifyItemChanged(index)
+                        coroutineScope {
+                            launch { fetchObservationVariables(model.id) }
+                            launch { fetchObservationUnits(model.id) }
                         }
+                        studyList.adapter?.notifyItemChanged(index)
                     }
+
+                    launch { fetchGermplasm(model.id) }
                 }
-
-            }.await()
-
-            async {
-
-                //fetch variables, units, and germs for all studies asynchronously
-                studyModels.forEachIndexed { index, model ->
-
-                    launch {
-                        val job = fetchObservationUnits(model.id)
-                        job.join()
-                    }
-                }
-
-            }.await()
-
-            async {
-
-                //fetch variables, units, and germs for all studies asynchronously
-                studyModels.forEachIndexed { index, model ->
-
-                    launch {
-                        val job = fetchGermplasm(model.id)
-                        job.join()
-                        withContext(Dispatchers.Main) {
-                            studyList.adapter?.notifyItemChanged(index)
-                            loadTabLayout(studyDbIds)
-                        }
-                    }
-                }
-
-            }.await()
+            }
 
             if ((studyList.adapter as StudyAdapter).currentList.any {
                     observationUnits[it.id]?.isEmpty() != false
@@ -567,7 +523,16 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
                 onBackPressedDispatcher.onBackPressed()
 
+                return@launch
             }
+
+            withContext(Dispatchers.Default) {
+                attributesTable = HashMap(studyDbIds.associateWith { getAttributes(it) })
+            }
+
+            loadTabLayout()
+
+            studyList.adapter?.notifyDataSetChanged()
 
             importButton.isEnabled = true
         }
@@ -717,34 +682,34 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         }
     }
 
-    private suspend fun fetchObservationLevels(programDbId: String) = coroutineScope {
+    /**
+     * @return the server's observation level names in level order, or empty if they could not be fetched,
+     * in which case the levels found on the units are used instead
+     */
+    private suspend fun fetchObservationLevels(programDbId: String): List<String> {
 
         Log.d(TAG, "Fetching levels for $programDbId")
 
-        launch(Dispatchers.IO) {
+        val timeoutMillis = BrAPIService.getTimeoutValue(this) * 1000L * 2
 
-            brapiService.getObservationLevels(null, { levels ->
+        return withTimeoutOrNull(timeoutMillis) {
+            suspendCancellableCoroutine { continuation ->
+                brapiService.getObservationLevels(programDbId.ifEmpty { null }, { levels ->
 
-                Log.d(TAG, "${levels.size} levels fetched")
+                    Log.d(TAG, "${levels.size} levels fetched")
 
-                //log the levels
-                levels.forEach { level ->
-                    observationLevels.add(level.observationLevelName)
-                    Log.d(TAG, "Level: ${level.observationLevelName}")
+                    if (continuation.isActive) {
+                        continuation.resume(levels.mapNotNull { it.observationLevelName })
+                    }
+
+                }) { _ ->
+
+                    Log.e(TAG, "Failed to fetch observation levels")
+
+                    if (continuation.isActive) continuation.resume(emptyList())
                 }
-
-            }) { _ ->
-                //Toast.makeText(this, "Failed to fetch observation levels", Toast.LENGTH_SHORT).show()
-                setResult(RESULT_CANCELED)
-                finish()
             }
-
-            while (observationLevels.isEmpty()) {
-                ensureActive()
-            }
-
-            cancel()
-        }
+        } ?: emptyList()
     }
 
     private suspend fun setProgress(progress: Int, progressMax: Int) {
@@ -755,141 +720,64 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         }
     }
 
-    private suspend fun fetchGermplasm(studyDbId: String) = coroutineScope {
-
-        val germs = arrayListOf<BrAPIGermplasm>()
-
-        val pageSize = prefs.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
-
-        Log.d(TAG, "Fetching germplasm for $studyDbId")
-
-        launch(Dispatchers.IO) {
-
-            (brapiService as BrAPIServiceV2).germplasmService.fetchAll(GermplasmQueryParams()
-                .also {
-                    it.studyDbId(studyDbId)
-                    it.pageSize(pageSize)
-                })
-                .catch {
-                    Log.e(TAG, "Failed to fetch germplasm")
-                    cancel()
+    /**
+     * Collects every page of a Fetcher flow, or returns null if any page failed
+     */
+    private suspend inline fun <reified M> fetchAllPages(name: String, crossinline flow: () -> Flow<Any>): HashSet<M>? =
+        withContext(Dispatchers.IO) {
+            try {
+                val models = hashSetOf<M>()
+                flow().collect { response ->
+                    val (total, page) = response as Pair<*, *>
+                    models.addAll((page as List<*>).filterIsInstance<M>())
+                    Log.d(TAG, "Fetched $name ${models.size}/$total")
                 }
-                .collect { result ->
-
-                    val data = result as Pair<*, *>
-                    val total = data.first as Int
-                    val models = data.second as List<*>
-                    models.forEach { unit ->
-
-                        (unit as? BrAPIGermplasm)?.let { g ->
-                            Log.d("Unit", g.germplasmName ?: "No name")
-                            germs.add(g)
-                            if (total == germs.size) {
-                                germplasms.getOrPut(studyDbId) { hashSetOf() }
-                                    .addAll(germs)
-                                cancel()
-                            }
-                        }
-                    }
-
-                    if (models.isEmpty() && total == 0) {
-                        cancel()
-                    }
-                }
-        }
-    }
-
-
-    private suspend fun fetchObservationVariables(studyDbId: String) =
-        coroutineScope {
-
-            val models = arrayListOf<BrAPIObservationVariable>()
-
-            val pageSize = prefs.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
-
-            launch(Dispatchers.IO) {
-                (brapiService as BrAPIServiceV2).observationVariableService.fetchAll(
-                    VariableQueryParams().also {
-                        it.studyDbId(studyDbId)
-                        it.pageSize(pageSize)
-                    })
-                    .catch {
-                        Log.e(TAG, "Failed to fetch observation variables")
-                        cancel()
-                    }
-                    .collect { variables ->
-
-                    val data = variables as Pair<*, *>
-                    val total = data.first as Int
-                    val variableModels = data.second as List<*>
-                    variableModels.forEach { model ->
-
-                        (model as? BrAPIObservationVariable)?.let { variable ->
-
-                            Log.d(TAG, "Variable: ${variable.observationVariableName}")
-
-                            models.add(variable)
-                            Log.d(TAG, "Variable: ${models.size}/$total")
-
-                            if (total == models.size) {
-                                observationVariables.getOrPut(studyDbId) { hashSetOf() }
-                                    .addAll(models)
-
-                                cancel()
-                            }
-                        }
-                    }
-
-                    if (models.isEmpty() && total == 0) {
-                        cancel()
-                    }
-                }
+                models
+            } catch (e: Exception) {
+                currentCoroutineContext().ensureActive()
+                Log.e(TAG, "Failed to fetch $name", e)
+                null
             }
         }
 
-    private suspend fun fetchObservationUnits(studyDbId: String) = coroutineScope {
+    private fun pageSize() = prefs.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "512")?.toIntOrNull() ?: 512
 
-        val units = arrayListOf<BrAPIObservationUnit>()
+    private suspend fun fetchGermplasm(studyDbId: String) {
 
-        val pageSize = prefs.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
+        val service = brapiService as BrAPIServiceV2
 
-        launch(Dispatchers.IO) {
+        fetchAllPages<BrAPIGermplasm>("germplasm for $studyDbId") {
+            service.germplasmService.fetchAll(GermplasmQueryParams().also {
+                it.studyDbId(studyDbId)
+                it.pageSize(pageSize())
+            })
+        }?.let { germplasms[studyDbId] = it }
+    }
 
-            (brapiService as BrAPIServiceV2).observationUnitService.fetchAll(
-                ObservationUnitQueryParams().also {
-                    it.studyDbId(studyDbId)
-                    it.pageSize(pageSize)
-                    //it.observationUnitLevelName("plot")
-                }
-            )
-                .catch {
-                    Log.e(TAG, "Failed to fetch observation units")
-                    cancel()
-                }
-                .collect { response ->
-                    Log.d("Unit", "Response")
+    private suspend fun fetchObservationVariables(studyDbId: String) {
 
-                    val data = response as Pair<*, *>
-                    val total = data.first as Int
-                    val models = data.second as List<*>
-                    models.forEach { unit ->
+        val service = brapiService as BrAPIServiceV2
 
-                        (unit as? BrAPIObservationUnit)?.let { u ->
-                            Log.d("Unit", u.observationUnitName)
-                            units.add(u)
-                            if (total == units.size) {
-                                observationUnits.getOrPut(studyDbId) { hashSetOf() }
-                                    .addAll(units)
-                                cancel()
-                            }
-                        }
-                    }
+        fetchAllPages<BrAPIObservationVariable>("variables for $studyDbId") {
+            service.observationVariableService.fetchAll(VariableQueryParams().also {
+                it.studyDbId(studyDbId)
+                it.pageSize(pageSize())
+            })
+        }?.let { observationVariables[studyDbId] = it }
+    }
 
-                    if (models.isEmpty() && total == 0) {
+    private suspend fun fetchObservationUnits(studyDbId: String) {
 
-                        cancel()
-                    }
-                }
+        val service = brapiService as BrAPIServiceV2
+
+        fetchAllPages<BrAPIObservationUnit>("units for $studyDbId") {
+            service.observationUnitService.fetchAll(ObservationUnitQueryParams().also {
+                it.studyDbId(studyDbId)
+                it.pageSize(pageSize())
+            })
+        }?.let {
+            observationUnits[studyDbId] = it
+            existingLevelsCache = null
         }
     }
 

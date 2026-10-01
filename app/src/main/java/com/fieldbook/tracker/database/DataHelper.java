@@ -1232,6 +1232,13 @@ public class DataHelper {
         StudyDao.Companion.createFieldData(studyId, columns, data);
     }
 
+    public void createFieldDataRows(int studyId, List<String> columns, List<List<String>> rows) {
+
+        open();
+
+        StudyDao.Companion.createFieldDataRows(studyId, columns, rows);
+    }
+
     /**
      * Delete all tables
      */

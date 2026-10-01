@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.database.dao
 
 import android.content.ContentValues
+import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteException
 import android.util.Log
 import androidx.core.content.contentValuesOf
@@ -461,12 +462,38 @@ class StudyDao {
         /**
          * This function should always be called within a transaction.
          */
-        fun createFieldData(studyId: Int, columns: List<String>, data: List<String>) = withDatabase { db ->
+        fun createFieldData(studyId: Int, columns: List<String>, data: List<String>) =
+            createFieldDataRows(studyId, columns, listOf(data))
+
+        /**
+         * Inserts many rows, looking up the unique column and attribute ids once rather than per row.
+         * This function should always be called within a transaction.
+         */
+        fun createFieldDataRows(studyId: Int, columns: List<String>, rows: List<List<String>>) = withDatabase { db ->
 
             val names = getNames(studyId)!!
 
             //input data corresponds to original database column names
             val uniqueIndex = columns.indexOf(names.unique)
+
+            //geo coordinates are stored on the unit rather than as an attribute value
+            val attrIds = columns.map {
+                if (it == "geo_coordinates") -1 else ObservationUnitAttributeDao.getIdByName(it)
+            }
+
+            rows.forEach { data ->
+                insertFieldDataRow(db, studyId, columns, data, uniqueIndex, attrIds)
+            }
+        }
+
+        private fun insertFieldDataRow(
+            db: SQLiteDatabase,
+            studyId: Int,
+            columns: List<String>,
+            data: List<String>,
+            uniqueIndex: Int,
+            attrIds: List<Int>
+        ) {
 
             //check if data size matches the columns size, on mismatch fill with dummy data
             //mainly fixes issues with BrAPI when xtype/ytype and row/col values are not given
@@ -496,12 +523,11 @@ class StudyDao {
             columns.forEachIndexed { index, it ->
 
                 if (it != "geo_coordinates") {
-                    val attrId = ObservationUnitAttributeDao.getIdByName(it)
 
                     db.insert(ObservationUnitValue.tableName, null, contentValuesOf(
                         Study.FK to studyId,
                         ObservationUnit.FK to rowid,
-                        ObservationUnitAttribute.FK to attrId,
+                        ObservationUnitAttribute.FK to attrIds[index],
                         "observation_unit_value_name" to actualData[index]
                     ))
                 }

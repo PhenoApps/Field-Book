@@ -3,79 +3,82 @@ package com.fieldbook.tracker.brapi.service
 import android.util.Log
 import com.fieldbook.tracker.brapi.service.core.ApiCall
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.callbackFlow
 import okhttp3.Call
 import org.brapi.client.v2.ApiCallback
-import org.brapi.client.v2.model.exceptions.ApiException
 import org.brapi.client.v2.model.queryParams.core.BrAPIQueryParams
 import org.brapi.v2.model.BrAPIResponse
 import org.brapi.v2.model.BrAPIResponseResult
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.reflect.KFunction2
 
 /**
  * Converts BrAPI REST calls into cold flows
+ * Emits (totalCount to models) for each page and completes once every page has responded,
+ * or fails with the first page error.
  * @param T the brapi query param sub class
  * @param R the brapi response
  */
 class Fetcher<U, T : BrAPIQueryParams, R : BrAPIResponse<*>> {
 
+    private fun R.data(): List<U> =
+        (result as? BrAPIResponseResult<*>)?.data?.mapNotNull {
+            @Suppress("UNCHECKED_CAST")
+            it as? U
+        } ?: emptyList()
+
     fun fetchAll(params: T, apiCall: KFunction2<T, ApiCallback<R>, Call>) = callbackFlow {
 
         try {
 
-            //first step: get the first page to read pagination metadata to determine how many
-            //page will need to be queried
+            //first step: get the first page, its data is kept and its pagination metadata
+            //determines how many remaining pages need to be queried
             params.page(0)
 
-            //callback for returning the data through the flow channel, called after pagination is found
-            //callback for querying metadata about the api call, then it queries for all data
-            val initialCallback = ApiCall<R>({
+            val initialCallback = ApiCall<R>({ first ->
 
-                Log.d("FETCH", "Checking metadata: ${it.metadata == null}")
+                val pagination = first.metadata?.pagination
+                val totalCount = pagination?.totalCount ?: 0
+                val totalPages = pagination?.totalPages ?: 1
 
-                //only care about metadata, so grab its pagination total count and call the api for all data
-                if (it.metadata != null) {
+                Log.d("FETCH", "Total count: $totalCount, Total pages: $totalPages")
 
-                    val totalCount = it.metadata.pagination.totalCount
-                    val total = it.metadata.pagination.totalPages
-                    var actualCount = 0
+                trySend(totalCount to first.data())
 
-                    Log.d("FETCH", "Total count: $totalCount, Total pages: $total")
+                if (totalPages <= 1) {
+                    close()
+                    return@ApiCall
+                }
 
-                    if (totalCount == 0) {
-                        trySend(totalCount to emptyList())
-                        return@ApiCall
-                    }
+                val remaining = AtomicInteger(totalPages - 1)
+                val failed = AtomicBoolean(false)
 
-                    for (i in 0 until total) {
+                for (i in 1 until totalPages) {
 
-                        params.page(i)
+                    params.page(i)
 
-                        Log.d("FETCH", "Calling page $i/$total with ${params.pageSize()} items")
-                        apiCall(params, ApiCall<R>({ response ->
+                    Log.d("FETCH", "Calling page $i/$totalPages with ${params.pageSize()} items")
 
-                            if (response.metadata != null && response.result != null) {
+                    apiCall(params, ApiCall<R>({ response ->
 
-                                (response.result as? BrAPIResponseResult<*>)?.data?.let { data ->
+                        trySend(totalCount to response.data())
 
-                                    Log.d("FETCH", "Received data ${data.size}")
+                        if (remaining.decrementAndGet() == 0 && !failed.get()) {
+                            close()
+                        }
 
-                                    actualCount += data.size
+                    }) { e ->
 
-                                    trySend(totalCount to data.mapNotNull { m -> m as? U })
+                        Log.e("FETCH", "Failed to fetch page $i/$totalPages", e)
 
-                                    Log.d("FETCH", "Sent $actualCount/$totalCount models")
-
-                                }
-                            }
-
-                        }) { e ->
-
-                            e?.printStackTrace()
-
-                        })
-                    }
+                        if (failed.compareAndSet(false, true)) {
+                            close(e ?: IllegalStateException("Failed to fetch page $i"))
+                        }
+                    })
                 }
 
             }) { e ->
@@ -101,5 +104,5 @@ class Fetcher<U, T : BrAPIQueryParams, R : BrAPIResponse<*>> {
 
         awaitClose()
 
-    }
+    }.buffer(Channel.UNLIMITED)
 }
