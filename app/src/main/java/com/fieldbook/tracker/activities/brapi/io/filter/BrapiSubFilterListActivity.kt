@@ -5,6 +5,7 @@ import android.view.MenuItem
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.annotation.OptIn
+import androidx.appcompat.widget.ActionMenuView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.adapters.CheckboxListAdapter
 import com.google.android.material.appbar.MaterialToolbar
@@ -67,27 +68,61 @@ abstract class BrapiSubFilterListActivity<T> : BrapiListFilterActivity<T>() {
         searchEditText.addTextChangedListener(textWatcher)
     }
 
-    @OptIn(ExperimentalBadgeUtils::class)
+    private val toolbar by lazy { findViewById<MaterialToolbar>(R.id.act_list_filter_tb) }
+
+    //coalesces the many calls made while rows are rebound (e.g. select all) into one update
+    private val selectionBadgeUpdate = Runnable { updateSelectionBadge() }
+
+    /**
+     * Shows the number of selected items as a badge on the clear selection item, on the next frame.
+     */
     override fun resetSelectionCountDisplay() {
+        toolbar.removeCallbacks(selectionBadgeUpdate)
+        toolbar.post(selectionBadgeUpdate)
+    }
 
-        val toolbar = findViewById<MaterialToolbar>(R.id.act_list_filter_tb)
+    /**
+     * Toolbar item views are reused for other items whenever an item is shown or hidden
+     * (clear selection, clear filters), and a badge stays drawn on the view it was attached to.
+     * Detaching by item id can't reach a badge once its view belongs to another item,
+     * so badges are cleared from every toolbar item view and a new one is attached to wherever
+     * the clear selection item is now. Attaching is posted by BadgeUtils, and since updates are also posted
+     * the next update always runs after it.
+     */
+    @OptIn(ExperimentalBadgeUtils::class)
+    private fun updateSelectionBadge() {
 
-        val numSelected = (recyclerView.adapter as CheckboxListAdapter).selected.size
+        val numSelected = (recyclerView.adapter as? CheckboxListAdapter)?.selected?.size ?: 0
 
-        if (numFilterBadge != null) BadgeUtils.detachBadgeDrawable(numFilterBadge, toolbar, R.id.action_clear_selection)
+        clearToolbarBadges()
+        numFilterBadge = null
+
+        selectionMenuItem?.isVisible = numSelected > 0
 
         if (numSelected > 0) {
-            selectionMenuItem?.isVisible = true
             numFilterBadge = BadgeDrawable.create(this).apply {
-                isVisible = true
-                number = numSelected
                 horizontalOffset = 16
                 maxNumber = 9
+                number = numSelected
             }.also {
                 BadgeUtils.attachBadgeDrawable(it, toolbar, R.id.action_clear_selection)
             }
-        } else {
-            selectionMenuItem?.isVisible = false
         }
+    }
+
+    //badges are drawn on the view's overlay, which toolbar item views don't otherwise use
+    private fun clearToolbarBadges() {
+        for (i in 0 until toolbar.childCount) {
+            (toolbar.getChildAt(i) as? ActionMenuView)?.let { menuView ->
+                for (j in 0 until menuView.childCount) {
+                    menuView.getChildAt(j).overlay.clear()
+                }
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        toolbar.removeCallbacks(selectionBadgeUpdate)
+        super.onDestroy()
     }
 }

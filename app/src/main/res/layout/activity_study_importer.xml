@@ -36,44 +36,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/act_list_filter_pb"/>
 
-    <com.google.android.material.tabs.TabLayout
-        android:visibility="gone"
-        tools:visibility="visible"
-        android:id="@+id/brapi_importer_tl"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/act_brapi_importer_tv">
-
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/level"/>
-
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/sort"/>
-
-    </com.google.android.material.tabs.TabLayout>
-    
-    <ListView
-        android:visibility="gone"
-        tools:visibility="visible"
-        android:layout_margin="8dp"
-        android:background="@drawable/cell"
-        android:id="@+id/act_study_importer_lv"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        tools:listitem="@android:layout/simple_list_item_1"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/brapi_importer_tl"
-        app:layout_constraintBottom_toTopOf="@id/act_list_filter_rv"
-        android:choiceMode="singleChoice"
-        app:layout_constraintVertical_weight="0.25"/>
-
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -81,9 +43,8 @@
         android:orientation="vertical"
         tools:listitem="@layout/list_item_study"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintTop_toBottomOf="@id/act_study_importer_lv"
-        app:layout_constraintBottom_toTopOf="@id/act_study_importer_import_button"
-        app:layout_constraintVertical_weight="0.5"/>
+        app:layout_constraintTop_toBottomOf="@id/act_brapi_importer_tv"
+        app:layout_constraintBottom_toTopOf="@id/act_study_importer_import_button"/>
 
     <!-- hidden pagination ui that brapi service is coupled to -->
     <LinearLayout
@@ -124,10 +85,14 @@
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:text="@string/dialog_save"
-        android:textColor="?attr/fb_color_text_high_contrast_inverted"
-        android:background="@drawable/cell"
-        android:backgroundTint="?attr/fb_color_primary"
+        android:text="@string/dialog_import"
+        android:textColor="@color/primary_button_text"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        app:cornerRadius="5dp"
+        app:backgroundTint="@color/primary_button_background"
+        app:strokeColor="?attr/fb_high_contrast_outline_color"
+        app:strokeWidth="1dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/act_list_filter_rv"
         app:layout_constraintEnd_toEndOf="parent"/>

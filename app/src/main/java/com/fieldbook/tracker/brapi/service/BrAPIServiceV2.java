@@ -1704,6 +1704,9 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             field.setObservationLevel(observationLevel);
             field.setDataSourceFormat(ImportFormat.BRAPI);
             field.setTrialName(studyDetails.getTrialName());
+            if (studyDetails.getStudyDbLevels() != null) {
+                field.setStudyDbLevels(new JSONArray(studyDetails.getStudyDbLevels()).toString());
+            }
             // Get our host url
             if (BrAPIService.getHostUrl(context) != null) {
                 field.setDataSource(BrAPIService.getHostUrl(context));
@@ -1757,11 +1760,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
 
                 System.out.println("Size of study details: " + studyDetails.getValues().size());
 
-                for (List<String> dataRow : studyDetails.getValues()) {
-                    dataHelper.createFieldData(studyId, studyDetails.getAttributes(), dataRow);
-                    Log.d("BrAPIServiceV2", "Saving: Attributes: " + studyDetails.getAttributes());
-                    Log.d("BrAPIServiceV2", "Saving: dataRow: " + dataRow);
-                }
+                dataHelper.createFieldDataRows(studyId, studyDetails.getAttributes(), studyDetails.getValues());
 
                 // Insert the traits already associated with this study
                 for (TraitObject t : studyDetails.getTraits()) {

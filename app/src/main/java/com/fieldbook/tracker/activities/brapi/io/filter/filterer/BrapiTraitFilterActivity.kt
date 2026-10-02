@@ -105,11 +105,15 @@ class BrapiTraitFilterActivity(
 
     override fun onSearchTextComplete(searchText: String) {
 
+        //blank text would add an empty filter chip
+        val text = searchText.trim()
+        if (text.isEmpty()) return
+
         prefs.getStringSet("${filterName}${GeneralKeys.LIST_FILTER_TEXTS}", setOf())?.let { texts ->
             prefs.edit {
                 putStringSet(
                     "${filterName}${GeneralKeys.LIST_FILTER_TEXTS}",
-                    texts.plus(searchText)
+                    texts.plus(text)
                 )
             }
         }
@@ -269,7 +273,7 @@ class BrapiTraitFilterActivity(
     //add menu to toolbar
     override fun onCreateOptionsMenu(menu: android.view.Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_filter_brapi, menu)
-        menu?.findItem(R.id.action_check_all)?.isVisible = false
+        menu?.findItem(R.id.action_check_all)?.isVisible = true
         menu?.findItem(R.id.action_reset_cache)?.isVisible = true
         menu?.findItem(R.id.action_brapi_filter)?.isVisible = true
         selectionMenuItem = menu?.findItem(R.id.action_clear_selection)

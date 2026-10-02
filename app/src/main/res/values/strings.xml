@@ -1758,13 +1758,14 @@
     <string name="brapi_filter_type_crop">Crop</string>
     <string name="brapi_importer_search_hint">Search Text</string>
     <string name="act_brapi_filter_by_title">Filter By: %s</string>
-    <string name="check_all">Check All Filters</string>
+    <string name="check_all">Select All</string>
     <string name="menu_action_brapi_filter_clear_all">Clear all filters</string>
     <string name="brapi_filter_error">Something went wrong querying for %s</string>
     <string name="brapi_importer_fetch_data">Fetching data, the first run may take a minute.</string>
     <string name="menu_filter_brapi_reset_cache_title">Reset Cache</string>
+    <string name="menu_filter_brapi_show_imported_studies">Show Imported Studies</string>
+    <string name="brapi_filter_imported_studies">All Studies</string>
     <string name="brapi_filter_bottom_sheet_delete_all_description">clear all filters</string>
-    <string name="act_brapi_study_import_fetch_levels">Fetching observation levels...</string>
     <string name="act_brapi_study_import_fetch_variables">Fetching variables for %s...</string>
     <string name="act_brapi_study_import_fetch_units">Fetching observation units for %s...</string>
     <string name="act_brapi_study_import_fetch_germplasm">Fetching germplasm for %s...</string>
@@ -1775,10 +1776,10 @@
     <string name="act_brapi_list_filter_error_multiple_programs">Please select studies from the same program.</string>
     <string name="act_brapi_study_import_saving">Saving...</string>
     <string name="act_brapi_study_import_title">Study Import</string>
+    <string name="act_brapi_study_import_refresh">Refresh Study Data</string>
     <string name="select">Select</string>
     <string name="results">results</string>
-    <string name="failed_to_fetch_observation_units">Failed to fetch observation units</string>
-    <string name="preferences_brapi_cache_invalidate_dialog_title">Invalidate Cache Interval Choices</string>
+    <string name="failed_to_fetch_observation_units">Failed to fetch observation units</string>    <string name="preferences_brapi_cache_invalidate_dialog_title">Invalidate Cache Interval Choices</string>
     <string name="preferences_brapi_cache_invalidate_summary">%s</string>
     <string name="preferences_brapi_cache_invalidate_title">Cache Invalidation</string>
     <string name="brapi_v1_is_not_compatible">BrAPI V1 is not compatible.</string>
@@ -1794,10 +1795,8 @@
     <string name="search_bar_hint">Searching… %s</string>
     <string name="menu_filter_brapi_clear_filters">Clear Filters</string>
     <string name="menu_filter_brapi_clear_selection">Clear Selection</string>
-    <string name="level">Level</string>
     <string name="primary">Primary</string>
     <string name="secondary">Secondary</string>
-    <string name="sort">Sort</string>
     <string name="brapi_traits_filter_title">Traits</string>
     <string name="brapi_filter_type_study">Study</string>
     <string name="act_brapi_study_filter">Filter</string>
@@ -1859,7 +1858,6 @@
     <string name="quick_goto_primary_hint">Primary ID</string>
     <string name="quick_goto_secondary_hint">Secondary ID</string>
     <string name="quick_goto_dialog_icon_description">running person</string>
-    <string name="failed_to_fetch_observation_levels">Failed fetching observation levels</string>
     <string name="traits_sort_default">Default</string>
     <string name="traits_crop_image_parameter">Crop</string>
     <string name="dialog_crop_title">Define Crop Region</string>

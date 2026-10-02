@@ -131,7 +131,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         }
     }
 
-    private fun createChip(styleResId: Int, label: String, id: String) =
+    protected fun createChip(styleResId: Int, label: String, id: String) =
         Chip(ContextThemeWrapper(this, styleResId)).apply {
             text = label
             tag = id
@@ -158,7 +158,8 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             }
 
             val searchText = prefs.getStringSet("${filterName}${GeneralKeys.LIST_FILTER_TEXTS}", setOf())
-            searchText?.forEach { text ->
+            //blank filters saved before they were blocked match everything, so they aren't shown
+            searchText?.filter { it.isNotBlank() }?.forEach { text ->
                 val chip = createChip(R.style.FourthChipTheme, text, text)
                 chip.setOnCloseIconClickListener {
                     val currentTexts = prefs.getStringSet("${filterName}${GeneralKeys.LIST_FILTER_TEXTS}", setOf())?.toMutableSet()
@@ -174,12 +175,25 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
                 }
                 chipGroup.addView(chip)
             }
+
+            addExtraFilterChips()
         }
     }
+
+    /**
+     * Adds chips for filters a subclass keeps itself, called after the saved filter chips are added.
+     */
+    protected open fun addExtraFilterChips() = Unit
+
+    /**
+     * Resets filters a subclass keeps itself, called when all filters are cleared.
+     */
+    protected open fun clearExtraFilters() = Unit
 
     private fun clearFilters() {
         chipGroup.removeAllViews()
         BrapiFilterCache.clearPreferences(this@BrapiListFilterActivity, defaultRootFilterKey)
+        clearExtraFilters()
         restoreModels()
     }
 
@@ -258,7 +272,8 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
             toggleProgressBar(View.INVISIBLE)
 
-            restoreModels()
+            //show what was just downloaded, restoreModels would download again if the server has no studies
+            loadStorageItems(BrapiFilterCache.getStoredModels(this@BrapiListFilterActivity))
 
         } catch (e: Exception) {
             e.printStackTrace()
@@ -274,6 +289,8 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         if (brapiService is BrAPIServiceV1)
             return@launch
 
+        var failed = false
+
         (brapiService as BrAPIServiceV2).studyService.fetchAll(
             StudyQueryParams().also {
                 it.pageSize(pageSize)
@@ -281,6 +298,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             }
         )
             .catch { e ->
+                failed = true
                 onApiException(e)
                 queryStudiesJob?.cancel()
             }
@@ -294,18 +312,19 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
                 withContext(Dispatchers.Main) {
                     setProgress(modelCache.size, totalCount)
-                    if (modelCache.size == totalCount || totalCount < pageSize) {
-                        progressBar.visibility = View.GONE
-                        fetchDescriptionTv.visibility = View.GONE
-
-                        withContext(Dispatchers.IO) {
-                            saveCacheToFile(modelCache as List<BrAPIStudy>, trialModels)
-                        }
-
-                        queryStudiesJob?.cancel()
-                    }
                 }
         }
+
+        //the flow completes once every page has responded, so save whatever arrived even if it doesn't
+        //match the server's total count, a failed page ends the flow with an error instead
+        if (failed) return@launch
+
+        withContext(Dispatchers.Main) {
+            progressBar.visibility = View.GONE
+            fetchDescriptionTv.visibility = View.GONE
+        }
+
+        saveCacheToFile(modelCache, trialModels)
     }
 
     protected fun onApiException(e: Throwable? = null) {
@@ -504,16 +523,40 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         if (::paginationManager.isInitialized) paginationManager.reset()
     }
 
+    /**
+     * Checks every item in the list as currently filtered and searched, or unchecks them if they're all checked.
+     * The adapter's selection is updated directly, since rows only update it as they're bound and
+     * off-screen rows would otherwise be missed.
+     */
+    private fun toggleAllVisible() {
+
+        val adapter = recyclerView.adapter as? CheckboxListAdapter ?: return
+        val visible = adapter.currentList
+
+        if (visible.isEmpty()) return
+
+        val check = !visible.all { it.checked }
+
+        visible.forEach { model ->
+            model.checked = check
+            if (check) {
+                if (model !in adapter.selected) adapter.selected.add(model)
+            } else {
+                adapter.selected.remove(model)
+            }
+        }
+
+        adapter.notifyItemRangeChanged(0, visible.size)
+
+        importTextView.visibility = if (showNextButton()) View.VISIBLE else View.GONE
+        resetSelectionCountDisplay()
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
         when (item.itemId) {
             R.id.action_check_all -> {
-                if (cache.isNotEmpty()) {
-                    val allChecked = cache.all { it.checked }
-                    cache.forEach { it.checked = !allChecked }
-                    submitAdapterItems(cache)
-                    (recyclerView.adapter)?.notifyItemRangeChanged(0, cache.size)
-                }
+                toggleAllVisible()
                 return true
             }
 

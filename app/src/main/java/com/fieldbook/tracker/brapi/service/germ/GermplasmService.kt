@@ -4,7 +4,6 @@ import com.fieldbook.tracker.brapi.service.BrapiV2ApiCallBack
 import com.fieldbook.tracker.brapi.service.Fetcher
 import com.fieldbook.tracker.brapi.service.core.ApiFailCallback
 import com.fieldbook.tracker.brapi.service.core.ApiListSuccess
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import org.brapi.client.v2.model.exceptions.ApiException
@@ -72,11 +71,10 @@ interface GermplasmService {
                     api::germplasmGetAsync
                 ).collect { models ->
 
-                    trySend(models)
+                    send(models)
 
                 }
 
-                awaitClose()
             }
     }
 }

@@ -12,6 +12,7 @@ import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.brapi.io.BrapiCacheModel
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterCache
 import com.fieldbook.tracker.activities.brapi.io.BrapiFilterTypeAdapter
+import com.fieldbook.tracker.activities.brapi.io.BrapiImportedLevels
 import com.fieldbook.tracker.activities.brapi.io.BrapiStudyImportActivity
 import com.fieldbook.tracker.activities.brapi.io.TrialStudyModel
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiCropsFilterActivity
@@ -39,6 +40,7 @@ class BrapiStudyFilterActivity(
         const val FILTER_NAME = "studies"
         const val FILTERER_KEY = "com.fieldbook.tracker.activities.brapi.io.filters.studies."
         const val EXTRA_MODE = "com.fieldbook.tracker.activities.brapi.io.filterer.BrapiStudyFilterActivity.EXTRA_MODE"
+        private const val SHOW_IMPORTED_CHIP_ID = "com.fieldbook.tracker.activities.brapi.io.filterer.BrapiStudyFilterActivity.SHOW_IMPORTED"
         fun getIntent(context: Context) = Intent(context, BrapiStudyFilterActivity::class.java)
     }
 
@@ -98,16 +100,68 @@ class BrapiStudyFilterActivity(
     }
 
     override fun List<CheckboxListAdapter.Model>.filterExists(): List<CheckboxListAdapter.Model> {
-        val brapiIds = database.allFieldObjects.filter { it.studyId >= 0 }.map { it.studyDbId }
-        return filter { it.id !in brapiIds }
+
+        //fully imported studies can be listed so their levels can be refreshed from the import screen
+        if (showImportedStudies) return this
+
+        //studies stay listed until every observation level of their units has been imported
+        val importedLevels = BrapiImportedLevels(database.allFieldObjects)
+        return filterNot { importedLevels.isFullyImported(it.id) }
+    }
+
+    //an extra filter shown as a chip, not saved, cleared with the other filters
+    private var showImportedStudies = false
+
+    //shown or hidden directly, rebuilding the menu would leave the selection count badge on a reused toolbar view
+    private var showImportedMenuItem: MenuItem? = null
+
+    override fun addExtraFilterChips() {
+
+        if (!showImportedStudies) return
+
+        chipGroup.addView(
+            createChip(R.style.FourthChipTheme, getString(R.string.brapi_filter_imported_studies), SHOW_IMPORTED_CHIP_ID).apply {
+                setOnCloseIconClickListener { setShowImportedStudies(false) }
+            }
+        )
+    }
+
+    //clear filters reloads the list itself
+    override fun clearExtraFilters() = updateShowImportedStudies(false)
+
+    private fun setShowImportedStudies(show: Boolean) {
+        updateShowImportedStudies(show)
+        restoreModels()
+    }
+
+    private fun updateShowImportedStudies(show: Boolean) {
+
+        if (showImportedStudies && !show) {
+            //hidden studies would otherwise still be imported with the selection
+            val importedLevels = BrapiImportedLevels(database.allFieldObjects)
+            (recyclerView.adapter as CheckboxListAdapter).selected.removeAll { importedLevels.isFullyImported(it.id) }
+        }
+
+        showImportedStudies = show
+
+        showImportedMenuItem?.isVisible = !show
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(SHOW_IMPORTED_CHIP_ID, showImportedStudies)
     }
 
     override fun onSearchTextComplete(searchText: String) {
 
+        //blank text would add an empty filter chip
+        val text = searchText.trim()
+        if (text.isEmpty()) return
+
         prefs.getStringSet("${filterName}${GeneralKeys.LIST_FILTER_TEXTS}", setOf())?.let { texts ->
             prefs.edit().putStringSet(
                 "${filterName}${GeneralKeys.LIST_FILTER_TEXTS}",
-                texts.plus(searchText)
+                texts.plus(text)
             ).apply()
         }
 
@@ -146,6 +200,9 @@ class BrapiStudyFilterActivity(
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        //kept across rotation, but not saved once the page is closed
+        if (savedInstanceState?.getBoolean(SHOW_IMPORTED_CHIP_ID) == true) setShowImportedStudies(true)
+
         chipGroup.visibility = View.VISIBLE
 
         setupMainToolbar()
@@ -175,9 +232,11 @@ class BrapiStudyFilterActivity(
     //add menu to toolbar
     override fun onCreateOptionsMenu(menu: android.view.Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_filter_brapi, menu)
-        menu?.findItem(R.id.action_check_all)?.isVisible = isFilterMode
+        menu?.findItem(R.id.action_check_all)?.isVisible = true
         menu?.findItem(R.id.action_reset_cache)?.isVisible = !isFilterMode
         menu?.findItem(R.id.action_brapi_filter)?.isVisible = !isFilterMode
+        //shown until the filter is on, its chip turns it off again
+        showImportedMenuItem = menu?.findItem(R.id.action_show_imported)?.apply { isVisible = !showImportedStudies }
         selectionMenuItem = menu?.findItem(R.id.action_clear_selection)
         return true
     }
@@ -188,6 +247,9 @@ class BrapiStudyFilterActivity(
             return true
         } else if (item.itemId == R.id.action_brapi_filter) {
             showFilterChoiceDialog()
+        } else if (item.itemId == R.id.action_show_imported) {
+            setShowImportedStudies(true)
+            return true
         }
         return super.onOptionsItemSelected(item)
     }

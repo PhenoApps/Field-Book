@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- one importable observation level in a study card, a pill that toggles selection, see StudyAdapter -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/list_item_study_level_pill"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="4dp"
+    android:layout_marginBottom="4dp"
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp"
+    android:background="@drawable/study_level_pill"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
+
+    <com.google.android.material.chip.Chip
+        android:id="@+id/list_item_study_level_chip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checkable="false"
+        android:clickable="false"
+        android:focusable="false"
+        android:ellipsize="end"
+        android:textColor="@color/BLACK"
+        app:chipIcon="@drawable/ic_shape"
+        app:chipIconTint="@color/BLACK"
+        app:chipBackgroundColor="@color/study_level_chip_background"
+        tools:text="plot" />
+
+    <Space
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <com.google.android.material.chip.Chip
+        android:id="@+id/list_item_study_level_units_chip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:checkable="false"
+        android:clickable="false"
+        android:focusable="false"
+        android:textColor="@color/BLACK"
+        app:chipIcon="@drawable/ic_dots_grid"
+        app:chipIconTint="@color/BLACK"
+        app:chipBackgroundColor="@color/study_level_chip_background"
+        tools:text="108" />
+
+    <com.google.android.material.chip.Chip
+        android:id="@+id/list_item_study_level_traits_chip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:checkable="false"
+        android:clickable="false"
+        android:focusable="false"
+        android:textColor="@color/BLACK"
+        app:chipIcon="@drawable/ic_ruler"
+        app:chipIconTint="@color/BLACK"
+        app:chipBackgroundColor="@color/study_level_chip_background"
+        tools:text="12" />
+
+</LinearLayout>

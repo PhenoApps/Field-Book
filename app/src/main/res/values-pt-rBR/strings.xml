@@ -1493,13 +1493,12 @@
     <string name="brapi_filter_type_crop">Colheita</string>
     <string name="brapi_importer_search_hint">Procurar Texto</string>
     <string name="act_brapi_filter_by_title">Filtrar Por: %s</string>
-    <string name="check_all">Verificar Todos os Filtros</string>
+    <string name="check_all">Selecionar Tudo</string>
     <string name="menu_action_brapi_filter_clear_all">Limpar todos os filtros</string>
     <string name="brapi_filter_error">Algo deu errado ao consultar para %s</string>
     <string name="brapi_importer_fetch_data">Buscando dados, a primeira execução pode levar um minuto.</string>
     <string name="menu_filter_brapi_reset_cache_title">Restabelecer Cache</string>
     <string name="brapi_filter_bottom_sheet_delete_all_description">limpar todos os filtros</string>
-    <string name="act_brapi_study_import_fetch_levels">Buscando níveis de observação...</string>
     <string name="act_brapi_study_import_fetch_variables">Buscando variáveis para %s...</string>
     <string name="act_brapi_study_import_fetch_units">Buscando unidades de observação para %s...</string>
     <string name="act_brapi_study_import_fetch_germplasm">Buscando germplasm para %s...</string>
@@ -1529,10 +1528,8 @@
     <string name="search_bar_hint">Procurando… %s</string>
     <string name="menu_filter_brapi_clear_filters">Limpar Filtros</string>
     <string name="menu_filter_brapi_clear_selection">Limpar Seleção</string>
-    <string name="level">Nível</string>
     <string name="primary">Primário</string>
     <string name="secondary">Secundário</string>
-    <string name="sort">Organizar</string>
     <string name="brapi_traits_filter_title">Características</string>
     <string name="brapi_filter_type_study">Estudo</string>
     <string name="act_brapi_study_filter">Filtrar</string>
@@ -1590,7 +1587,6 @@
     <string name="quick_goto_primary_hint">ID Primário</string>
     <string name="quick_goto_secondary_hint">ID Secundário</string>
     <string name="quick_goto_dialog_icon_description">pessoa executando</string>
-    <string name="failed_to_fetch_observation_levels">Falha ao buscar nível de observações</string>
     <string name="traits_sort_default">Padrão</string>
     <string name="traits_crop_image_parameter">Recortar</string>
     <string name="dialog_crop_title">Definir Região de Recorte</string>
