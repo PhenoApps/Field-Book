@@ -330,10 +330,11 @@ class UsbCameraApi @Inject constructor(@ActivityContext private val context: Con
                 }
                 try {
                     frame.rewind()
+                    // RGBX bytes match ARGB_8888's in-memory RGBA order; full 8-bit color.
                     val bmp = Bitmap.createBitmap(
                         size.width,
                         size.height,
-                        Bitmap.Config.RGB_565
+                        Bitmap.Config.ARGB_8888
                     )
                     bmp.copyPixelsFromBuffer(frame)
                     captured.set(bmp)
@@ -344,7 +345,7 @@ class UsbCameraApi @Inject constructor(@ActivityContext private val context: Con
                 }
             }
 
-            cam.setFrameCallback(callback, UVCCamera.PIXEL_FORMAT_RGB565)
+            cam.setFrameCallback(callback, UVCCamera.PIXEL_FORMAT_RGBX)
             if (!latch.await(3, TimeUnit.SECONDS)) {
                 // Timed out waiting for a frame at the requested size.
             }

@@ -293,9 +293,20 @@ class UsbCameraTraitLayout : CameraTrait, UsbCameraApi.Callbacks {
         }
         releasePreviewSurface()
         surface = Surface(texture)
-        if (needsPreviewRebind || sink !== boundStreamSink) {
+        val current = try {
+            camera?.previewSize
+        } catch (_: Exception) {
+            null
+        }
+        // Native setPreviewSize does not restart a running stream, so a size change
+        // (e.g. restoring preview size after captureStill) needs stop/start.
+        val sizeChanged = current == null ||
+                current.width != size.width ||
+                current.height != size.height
+        if (needsPreviewRebind || sink !== boundStreamSink || sizeChanged) {
             try {
-                // Previous TextureView was destroyed or stream sink changed (preview on/off).
+                // Previous TextureView was destroyed, stream sink changed (preview on/off),
+                // or the stream size is changing.
                 camera?.stopPreview()
             } catch (_: Exception) {
             }
