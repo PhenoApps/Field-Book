@@ -158,7 +158,8 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             }
 
             val searchText = prefs.getStringSet("${filterName}${GeneralKeys.LIST_FILTER_TEXTS}", setOf())
-            searchText?.forEach { text ->
+            //blank filters saved before they were blocked match everything, so they aren't shown
+            searchText?.filter { it.isNotBlank() }?.forEach { text ->
                 val chip = createChip(R.style.FourthChipTheme, text, text)
                 chip.setOnCloseIconClickListener {
                     val currentTexts = prefs.getStringSet("${filterName}${GeneralKeys.LIST_FILTER_TEXTS}", setOf())?.toMutableSet()

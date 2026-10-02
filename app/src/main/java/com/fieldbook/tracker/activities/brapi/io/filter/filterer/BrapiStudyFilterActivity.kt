@@ -154,10 +154,14 @@ class BrapiStudyFilterActivity(
 
     override fun onSearchTextComplete(searchText: String) {
 
+        //blank text would add an empty filter chip
+        val text = searchText.trim()
+        if (text.isEmpty()) return
+
         prefs.getStringSet("${filterName}${GeneralKeys.LIST_FILTER_TEXTS}", setOf())?.let { texts ->
             prefs.edit().putStringSet(
                 "${filterName}${GeneralKeys.LIST_FILTER_TEXTS}",
-                texts.plus(searchText)
+                texts.plus(text)
             ).apply()
         }
 
