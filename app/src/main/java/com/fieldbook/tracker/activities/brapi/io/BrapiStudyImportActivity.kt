@@ -59,6 +59,7 @@ import org.brapi.client.v2.model.queryParams.phenotype.ObservationUnitQueryParam
 import org.brapi.client.v2.model.queryParams.phenotype.VariableQueryParams
 import org.brapi.v2.model.core.BrAPIStudy
 import org.brapi.v2.model.germ.BrAPIGermplasm
+import org.brapi.v2.model.pheno.BrAPIObservation
 import org.brapi.v2.model.pheno.BrAPIObservationUnit
 import org.brapi.v2.model.pheno.BrAPIObservationVariable
 import org.brapi.v2.model.pheno.BrAPIPositionCoordinateTypeEnum
@@ -852,8 +853,10 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         //a supervisor scope so a failed or cancelled download doesn't cancel the import that finishes the activity
         supervisorScope {
 
+            val included = includedObservations(imports.map { it.first }.distinct())
+
             val download = async(Dispatchers.IO) {
-                observationDownloader.downloadInto(brapiService, fields) { progress ->
+                observationDownloader.downloadInto(brapiService, fields, included) { progress ->
                     runOnUiThread { dialog.setDownloadProgress(progress) }
                 }
             }
@@ -1204,6 +1207,20 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
         return ObservationCounts(study = total, levels = importableLevels(studyDbId).associateWith { byLevel[it] ?: 0 })
     }
+
+    /**
+     * Observations sent with the units of each study that had any, keyed by study, saved at import
+     * instead of downloading them again. Studies without them are downloaded from the server's observations.
+     */
+    private fun includedObservations(studyDbIds: Collection<String>): Map<String, List<BrAPIObservation>> =
+        studyDbIds.associateWith { id ->
+            observationUnits[id].orEmpty().flatMap { unit ->
+                //an observation inside its unit may leave out the unit it belongs to
+                unit.observations.orEmpty().onEach { observation ->
+                    if (observation.observationUnitDbId == null) observation.observationUnitDbId = unit.observationUnitDbId
+                }
+            }
+        }.filterValues { it.isNotEmpty() }
 
     /**
      * Zero counts for a study the server lists no variables for, it has no observations to count.

@@ -1170,6 +1170,16 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     }
 
     /**
+     * Maps observations the server sent with other data, such as units fetched with includeObservations,
+     * the same way as observations from the observations endpoint.
+     *
+     * @param validVariableDbIds observations of other variables are dropped
+     */
+    public List<Observation> mapObservations(List<BrAPIObservation> brapiObservationList, List<String> validVariableDbIds) {
+        return mapObservations(brapiObservationList, getExtVariableDbIdMapping(), validVariableDbIds);
+    }
+
+    /**
      * Function to map the observations from Brapi to the Fieldbook Observation variable.
      *
      * @param brapiObservationList

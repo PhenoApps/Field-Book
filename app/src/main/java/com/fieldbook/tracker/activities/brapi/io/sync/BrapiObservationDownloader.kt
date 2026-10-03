@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.util.Log
 import com.fieldbook.tracker.brapi.model.Observation
 import com.fieldbook.tracker.brapi.service.BrAPIService
+import com.fieldbook.tracker.brapi.service.BrAPIServiceV2
 import com.fieldbook.tracker.brapi.service.BrapiPaginationManager
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.database.repository.TraitRepository
@@ -23,6 +24,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
+import org.brapi.v2.model.pheno.BrAPIObservation
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -208,11 +210,14 @@ class BrapiObservationDownloader @Inject constructor(
      * Fields of the same study share one download. A study that fails to download throws,
      * fields of studies before it keep their saved observations.
      *
+     * @param included observations the server already sent for a study, such as with its units,
+     * keyed by study, these are saved instead of downloading the study's observations
      * @return the number of observations saved into each field, keyed by field id
      */
     suspend fun downloadInto(
         brAPIService: BrAPIService,
         fields: List<FieldObject>,
+        included: Map<String, List<BrAPIObservation>> = emptyMap(),
         onProgress: (Progress) -> Unit = {}
     ): Map<Int, Int> = withContext(Dispatchers.IO) {
 
@@ -229,14 +234,21 @@ class BrapiObservationDownloader @Inject constructor(
 
             onProgress(Progress(index, studies.size, 0, 0))
 
-            var observations = emptyList<Observation>()
+            //mapped like the observations endpoint's, after the import so the study's traits are known
+            val includedObservations = included[studyDbId]
+                ?.let { (brAPIService as? BrAPIServiceV2)?.mapObservations(it, variableDbIds) }
 
-            fetch(brAPIService, studyDbId, variableDbIds).collect { update ->
-                when (update) {
-                    is DownloadProgressUpdate.InDownloadProgress ->
-                        onProgress(Progress(index, studies.size, update.pageCount, update.totalPages))
+            var observations = includedObservations.orEmpty()
 
-                    is DownloadProgressUpdate.Completed -> observations = update.data
+            if (includedObservations == null) {
+
+                fetch(brAPIService, studyDbId, variableDbIds).collect { update ->
+                    when (update) {
+                        is DownloadProgressUpdate.InDownloadProgress ->
+                            onProgress(Progress(index, studies.size, update.pageCount, update.totalPages))
+
+                        is DownloadProgressUpdate.Completed -> observations = update.data
+                    }
                 }
             }
 
