@@ -37,6 +37,12 @@ The tabs at the top can be used to change the observation level and sort order f
 Press the Save button at the bottom of the screen to import the fields into Field Book.
 The fields and any linked traits will be saved for use in Field Book.
 
+Field Book can also download the observations already collected for the fields on the server.
+By default, you are asked whether to download them each time you import.
+Choosing **Never** in this prompt skips the download and stops the prompt from appearing again.
+This can be changed with the **Download Observations** option in [BrAPI Transmission Settings](settings/settings-brapi.md#transmission-settings).
+If the download fails, the fields are still imported, and their observations can be downloaded later with [Sync](#sync).
+
 !> Any field can be exported locally, but only fields that have been imported via BrAPI are able to export data via BrAPI.
 And only if that data is also collected using BrAPI-imported traits.
 

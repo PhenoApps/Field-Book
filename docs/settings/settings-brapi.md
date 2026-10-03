@@ -90,6 +90,9 @@ Defaults to `5`.
 Defaults to `5`.
 - <img class="icon" src="_static/icons/settings/brapi/history.png"> **Cache Invalidation** controls how often Field Book automatically clears its saved copy of server data so it can pick up anything new.
 This matters for field and trait imports, which need a fresh cache to see new data added on the server.
+- <img class="icon" src="_static/icons/settings/brapi/download.png"> **Download Observations** controls whether importing a field also downloads the observations already collected for it on the server.
+Choose `Always`, `Ask every time`, or `Never`.
+Defaults to `Ask every time`.
 
 <figure class="image">
   <img class="screenshot" src="_static/images/brapi/settings/brapi_transmission_settings.png" width="350px"> 

@@ -1777,6 +1777,27 @@
     <string name="act_brapi_study_import_saving">Saving...</string>
     <string name="act_brapi_study_import_title">Study Import</string>
     <string name="act_brapi_study_import_refresh">Refresh Study Data</string>
+    <string name="act_brapi_study_import_observations_title">Download existing observations?</string>
+    <string name="act_brapi_study_import_observations_message">Observations currently stored on the server for these studies will be downloaded into the new fields.</string>
+    <string name="act_brapi_study_import_observations_download">Download</string>
+    <string name="act_brapi_study_import_observations_skip">Skip</string>
+    <string name="act_brapi_study_import_observations_never">Never</string>
+    <string name="act_brapi_study_import_saving_field">Field %1$d of %2$d</string>
+    <string name="act_brapi_study_import_downloading_title">Downloading observations</string>
+    <string name="act_brapi_study_import_downloading">Study %1$d of %2$d…</string>
+    <string name="act_brapi_study_import_downloading_page">Study %1$d of %2$d, page %3$d of %4$d</string>
+    <string name="act_brapi_study_import_observations_failed">Fields were imported, but their observations could not be downloaded. Use Sync on each field to try again.</string>
+    <string name="act_brapi_study_import_observations_cancelled">Observation download cancelled. Use Sync on each field to download the rest.</string>
+    <plurals name="act_brapi_study_import_observations_downloaded">
+        <item quantity="one">Downloaded %d observation</item>
+        <item quantity="other">Downloaded %d observations</item>
+    </plurals>
+    <string name="preferences_brapi_import_observations_title">Download Observations</string>
+    <string name="preferences_brapi_import_observations_summary">%s</string>
+    <string name="preferences_brapi_import_observations_dialog_title">Download existing observations when importing studies</string>
+    <string name="prefs_brapi_import_observations_choice_always">Always</string>
+    <string name="prefs_brapi_import_observations_choice_ask">Ask every time</string>
+    <string name="prefs_brapi_import_observations_choice_never">Never</string>
     <string name="select">Select</string>
     <string name="results">results</string>
     <string name="failed_to_fetch_observation_units">Failed to fetch observation units</string>    <string name="preferences_brapi_cache_invalidate_dialog_title">Invalidate Cache Interval Choices</string>

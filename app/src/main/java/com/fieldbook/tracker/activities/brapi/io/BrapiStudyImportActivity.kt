@@ -8,17 +8,19 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.WindowManager
-import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedDispatcher
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.edit
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.ThemedActivity
 import com.fieldbook.tracker.activities.brapi.io.mapper.isAtObservationLevel
 import com.fieldbook.tracker.activities.brapi.io.mapper.toTraitObject
+import com.fieldbook.tracker.activities.brapi.io.sync.BrapiObservationDownloader
 import com.fieldbook.tracker.adapters.StudyAdapter
 import com.fieldbook.tracker.adapters.StudyAdapter.Model
 import com.fieldbook.tracker.brapi.BrapiControllerResponse
@@ -33,9 +35,11 @@ import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.InsetHandler
 import com.google.android.material.button.MaterialButton
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.currentCoroutineContext
@@ -43,6 +47,7 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.brapi.client.v2.JSON
@@ -74,6 +79,11 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         const val EXTRA_PROGRAM_DB_ID = "programDbId"
         const val EXTRA_STUDY_DB_IDS = "studyDbIds"
 
+        //values of PreferenceKeys.BRAPI_IMPORT_OBSERVATIONS, see pref_brapi_import_observations_values
+        private const val IMPORT_OBSERVATIONS_ALWAYS = "always"
+        private const val IMPORT_OBSERVATIONS_ASK = "ask"
+        private const val IMPORT_OBSERVATIONS_NEVER = "never"
+
         fun getIntent(context: Context): Intent {
             return Intent(context, BrapiStudyImportActivity::class.java)
         }
@@ -98,8 +108,6 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         }
     }
 
-    private lateinit var loadingTextView: TextView
-    private lateinit var progressBar: ProgressBar
     private lateinit var studyList: RecyclerView
     private lateinit var importButton: MaterialButton
 
@@ -142,13 +150,14 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     @Inject
     lateinit var db: DataHelper
 
+    @Inject
+    lateinit var observationDownloader: BrapiObservationDownloader
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_study_importer)
 
-        loadingTextView = findViewById(R.id.act_brapi_importer_tv)
-        progressBar = findViewById(R.id.act_list_filter_pb)
         studyList = findViewById(R.id.act_list_filter_rv)
         importButton = findViewById(R.id.act_study_importer_import_button)
 
@@ -210,8 +219,6 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     private fun fetchStudyInfo(programDbId: String, studyDbIds: List<String>) {
 
         importButton.isEnabled = false
-        loadingTextView.visibility = View.GONE
-        progressBar.visibility = View.INVISIBLE
 
         loadStudyList(programDbId, studyDbIds)
         setupImportButton(studyDbIds)
@@ -613,78 +620,239 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
             if (importing) return@setOnClickListener
 
-            //the activity finishes once saving is done, so this is never cleared
-            importing = true
-            invalidateOptionsMenu()
-
-            progressBar.visibility = View.VISIBLE
-            progressBar.isIndeterminate = true
-            loadingTextView.text = getString(R.string.act_brapi_study_import_saving)
-            loadingTextView.visibility = View.VISIBLE
-            importButton.isEnabled = false
-
-            //the activity finishes once saving is done, which clears the flag
-            setKeepScreenOn(true)
-
-            //each checked level of each study becomes its own field, in the order shown on the cards
-            val studyLevels = studyDbIds.flatMap { id ->
-                val selected = selectedLevels[id].orEmpty()
-                importableLevels(id).filter { it in selected }.map { level -> id to level }
+            when (prefs.getString(PreferenceKeys.BRAPI_IMPORT_OBSERVATIONS, IMPORT_OBSERVATIONS_ASK)) {
+                IMPORT_OBSERVATIONS_ALWAYS -> importStudies(studyDbIds, downloadObservations = true)
+                IMPORT_OBSERVATIONS_NEVER -> importStudies(studyDbIds, downloadObservations = false)
+                else -> askToDownloadObservations { download -> importStudies(studyDbIds, download) }
             }
+        }
+    }
 
-            launch(Dispatchers.IO) {
+    /**
+     * Dismissing the dialog leaves the screen as it was, so the user can change their selection.
+     * Never skips the download and stops asking, the setting can be changed back in BrAPI settings.
+     */
+    private fun askToDownloadObservations(onChoice: (Boolean) -> Unit) {
 
-                //(studyDbId, level) of each field that was created
-                val successfulImports = mutableListOf<Pair<String, String>>()
+        AlertDialog.Builder(this, R.style.AppAlertDialog)
+            .setTitle(R.string.act_brapi_study_import_observations_title)
+            .setMessage(R.string.act_brapi_study_import_observations_message)
+            .setPositiveButton(R.string.act_brapi_study_import_observations_download) { _, _ -> onChoice(true) }
+            .setNegativeButton(R.string.act_brapi_study_import_observations_skip) { _, _ -> onChoice(false) }
+            .setNeutralButton(R.string.act_brapi_study_import_observations_never) { _, _ ->
+                prefs.edit { putString(PreferenceKeys.BRAPI_IMPORT_OBSERVATIONS, IMPORT_OBSERVATIONS_NEVER) }
+                onChoice(false)
+            }
+            .show()
+    }
 
-                studyLevels.forEach { (id, levelName) ->
+    private fun importStudies(studyDbIds: List<String>, downloadObservations: Boolean) {
 
-                    val level = BrapiObservationLevel().also { it.observationLevelName = levelName }
+        if (importing) return
 
-                    try {
+        //the activity finishes once saving is done, so this is never cleared
+        importing = true
+        invalidateOptionsMenu()
 
-                        studies.firstOrNull { it.studyDbId == id }?.let {
+        importButton.isEnabled = false
 
-                            val response = saveStudy(it, level)
+        //the activity finishes once saving is done, which clears the flag
+        setKeepScreenOn(true)
 
-                            if (response?.status == true) {
+        //each checked level of each study becomes its own field, in the order shown on the cards
+        val studyLevels = studyDbIds.flatMap { id ->
+            val selected = selectedLevels[id].orEmpty()
+            importableLevels(id).filter { it in selected }.map { level -> id to level }
+        }
 
-                                successfulImports.add(id to levelName) // track the successfully imported fields
+        val dialog = ImportProgressDialog()
 
-                            } else if (response != null) {
+        launch(Dispatchers.IO) {
 
-                                Log.e(TAG, "Failed to save study $id at $levelName: ${response.message}")
+            //(studyDbId, level) of each field that was created
+            val successfulImports = mutableListOf<Pair<String, String>>()
 
-                                runOnUiThread {
+            studyLevels.forEachIndexed { index, (id, levelName) ->
 
-                                    Toast.makeText(this@BrapiStudyImportActivity, getString(R.string.failed_to_save_study), Toast.LENGTH_SHORT).show()
+                runOnUiThread { dialog.setSaving(index + 1, studyLevels.size) }
 
-                                }
+                val level = BrapiObservationLevel().also { it.observationLevelName = levelName }
+
+                try {
+
+                    studies.firstOrNull { it.studyDbId == id }?.let {
+
+                        val response = saveStudy(it, level)
+
+                        if (response?.status == true) {
+
+                            successfulImports.add(id to levelName) // track the successfully imported fields
+
+                        } else if (response != null) {
+
+                            Log.e(TAG, "Failed to save study $id at $levelName: ${response.message}")
+
+                            runOnUiThread {
+
+                                Toast.makeText(this@BrapiStudyImportActivity, getString(R.string.failed_to_save_study), Toast.LENGTH_SHORT).show()
+
                             }
                         }
+                    }
 
-                    } catch (e: Exception) {
+                } catch (e: Exception) {
 
-                        Log.e(TAG, "Failed to save study", e)
+                    Log.e(TAG, "Failed to save study", e)
 
-                        runOnUiThread {
+                    runOnUiThread {
 
-                            Toast.makeText(this@BrapiStudyImportActivity, getString(R.string.failed_to_save_study), Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@BrapiStudyImportActivity, getString(R.string.failed_to_save_study), Toast.LENGTH_SHORT).show()
 
-                        }
                     }
                 }
-
-                val resultIntent = Intent()
-                if (successfulImports.size == 1) { // switch active field if only one field was imported
-                    //a study can have one field per level, so look up the field for the imported level
-                    val (studyDbId, levelName) = successfulImports.first()
-                    resultIntent.putExtra("fieldId", db.checkBrapiStudyUnique(levelName, studyDbId))
-                }
-                setResult(RESULT_OK, resultIntent)
-                finish()
-
             }
+
+            val resultIntent = Intent()
+            if (successfulImports.size == 1) { // switch active field if only one field was imported
+                //a study can have one field per level, so look up the field for the imported level
+                val (studyDbId, levelName) = successfulImports.first()
+                resultIntent.putExtra("fieldId", db.checkBrapiStudyUnique(levelName, studyDbId))
+            }
+            //set before downloading, the fields are kept if the user leaves while observations download
+            setResult(RESULT_OK, resultIntent)
+
+            if (downloadObservations && successfulImports.isNotEmpty()) {
+                downloadImportedObservations(successfulImports, dialog)
+            }
+
+            withContext(Dispatchers.Main) {
+                dialog.dismiss()
+                finish()
+            }
+        }
+    }
+
+    /**
+     * Downloads the server's observations into the fields that were just created, reporting progress in the import dialog.
+     * A failed or cancelled download leaves the fields in place, the user can sync each field later.
+     * Observations of studies that finished before a cancel are kept.
+     *
+     * @param imports (studyDbId, level) of each created field
+     */
+    private suspend fun downloadImportedObservations(imports: List<Pair<String, String>>, dialog: ImportProgressDialog) {
+
+        val fields = imports.mapNotNull { (studyDbId, levelName) ->
+            db.checkBrapiStudyUnique(levelName, studyDbId)
+                .takeIf { it > 0 }
+                ?.let { db.getFieldObject(it) }
+        }
+
+        val studyCount = fields.mapNotNull { it.studyDbId }.distinct().size
+
+        withContext(Dispatchers.Main) {
+            dialog.setDownloadProgress(BrapiObservationDownloader.Progress(0, studyCount, 0, 0))
+        }
+
+        //a supervisor scope so a failed or cancelled download doesn't cancel the import that finishes the activity
+        supervisorScope {
+
+            val download = async(Dispatchers.IO) {
+                observationDownloader.downloadInto(brapiService, fields) { progress ->
+                    runOnUiThread { dialog.setDownloadProgress(progress) }
+                }
+            }
+
+            withContext(Dispatchers.Main) {
+                dialog.showCancel { download.cancel() }
+            }
+
+            val message = try {
+
+                val count = download.await().values.sum()
+
+                resources.getQuantityString(R.plurals.act_brapi_study_import_observations_downloaded, count, count)
+
+            } catch (e: CancellationException) {
+
+                //rethrows if the import itself was cancelled because the activity closed,
+                //otherwise only the download was cancelled from the dialog
+                currentCoroutineContext().ensureActive()
+
+                getString(R.string.act_brapi_study_import_observations_cancelled)
+
+            } catch (e: Exception) {
+
+                Log.e(TAG, "Failed to download observations for imported fields", e)
+
+                getString(R.string.act_brapi_study_import_observations_failed)
+            }
+
+            withContext(Dispatchers.Main) {
+                Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    /**
+     * Status of the import, saving the fields and then downloading their observations.
+     * Not cancelable by back or outside taps. The cancel button is only shown while observations download,
+     * stopping partway through saving would leave some of the selected fields imported and others not.
+     */
+    private inner class ImportProgressDialog {
+
+        private val view = layoutInflater.inflate(R.layout.dialog_loading, null)
+
+        private val messageTextView = view.findViewById<TextView>(R.id.loading_message).also {
+            it.text = ""
+        }
+
+        private val dialog = AlertDialog.Builder(this@BrapiStudyImportActivity, R.style.AppAlertDialog)
+            .setTitle(R.string.act_brapi_study_import_saving)
+            .setView(view)
+            .setCancelable(false)
+            //only creates the button, showCancel sets a click listener that doesn't dismiss the dialog
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+
+        private val cancelButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE).also {
+            it.visibility = View.GONE
+        }
+
+        fun setSaving(field: Int, fieldCount: Int) {
+            messageTextView.text = getString(R.string.act_brapi_study_import_saving_field, field, fieldCount)
+        }
+
+        fun setDownloadProgress(progress: BrapiObservationDownloader.Progress) {
+
+            dialog.setTitle(R.string.act_brapi_study_import_downloading_title)
+
+            messageTextView.text = if (progress.totalPages > 1) {
+                getString(
+                    R.string.act_brapi_study_import_downloading_page,
+                    progress.studyIndex + 1,
+                    progress.studyCount,
+                    progress.page,
+                    progress.totalPages
+                )
+            } else {
+                getString(
+                    R.string.act_brapi_study_import_downloading,
+                    progress.studyIndex + 1,
+                    progress.studyCount
+                )
+            }
+        }
+
+        fun showCancel(onCancel: () -> Unit) {
+            cancelButton.visibility = View.VISIBLE
+            cancelButton.setOnClickListener {
+                cancelButton.isEnabled = false
+                onCancel()
+            }
+        }
+
+        fun dismiss() {
+            if (dialog.isShowing && !isDestroyed) dialog.dismiss()
         }
     }
 
