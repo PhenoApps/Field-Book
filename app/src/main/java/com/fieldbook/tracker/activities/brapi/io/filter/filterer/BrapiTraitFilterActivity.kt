@@ -198,7 +198,6 @@ class BrapiTraitFilterActivity(
             withContext(Dispatchers.Main) {
                 fetchDescriptionTv.text = getString(R.string.act_brapi_list_filter_loading_variables)
                 progressBar.visibility = View.VISIBLE
-                progressBar.progress = 0
             }
 
             queryVariablesJob = queryVariables()
@@ -242,7 +241,6 @@ class BrapiTraitFilterActivity(
                     variables.addAll(models)
 
                     withContext(Dispatchers.Main) {
-                        setProgress(variables.size, totalCount)
                         if (variables.size == totalCount || totalCount < pageSize) {
                             BrapiFilterCache.saveVariables(this@BrapiTraitFilterActivity, variables)
                             restoreModels()

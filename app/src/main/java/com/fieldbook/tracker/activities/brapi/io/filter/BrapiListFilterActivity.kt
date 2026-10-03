@@ -264,19 +264,16 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         try {
             trialModels.clear()
 
-            progressBar.isIndeterminate = true
             progressBar.visibility = View.VISIBLE
 
             queryTrialsJob = queryTrials()
             queryTrialsJob?.join()
 
-            progressBar.isIndeterminate = false
-            progressBar.progress = 0
-
             queryStudiesJob = queryStudies()
             queryStudiesJob?.join()
 
-            toggleProgressBar(View.INVISIBLE)
+            //gone rather than invisible, so the search bar moves back up under the toolbar
+            toggleProgressBar(View.GONE)
 
             //show what was just downloaded, restoreModels would download again if the server has no studies
             loadStorageItems(BrapiFilterCache.getStoredModels(this@BrapiListFilterActivity))
@@ -310,15 +307,8 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             }
             .collect {
 
-                var (totalCount, models) = it as Pair<*, *>
-                totalCount = totalCount as Int
-                models = models as List<*>
-                models = models.map { m -> m as BrAPIStudy }
-                modelCache.addAll(models)
-
-                withContext(Dispatchers.Main) {
-                    setProgress(modelCache.size, totalCount)
-                }
+                val models = (it as Pair<*, *>).second as List<*>
+                modelCache.addAll(models.map { m -> m as BrAPIStudy })
         }
 
         //the flow completes once every page has responded, so save whatever arrived even if it doesn't
@@ -396,10 +386,6 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
                 models = models.map { it as BrAPITrial }
 
                 trialModels.addAll(models)
-
-                withContext(Dispatchers.Main) {
-                    setProgress(trialModels.size, total)
-                }
 
                 if (total == trialModels.size || total < pageSize) {
                     queryTrialsJob?.cancel()

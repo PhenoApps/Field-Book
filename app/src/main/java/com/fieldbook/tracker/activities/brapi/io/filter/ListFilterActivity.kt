@@ -125,12 +125,6 @@ abstract class ListFilterActivity : ThemedActivity(),
 
     }
 
-    protected fun setProgress(progress: Int, progressMax: Int) {
-        progressBar.isIndeterminate = false
-        progressBar.progress = progress
-        progressBar.max = progressMax
-    }
-
     open fun resetSelectionCountDisplay() = Unit
 
     private fun setupRecyclerView() {

@@ -15,6 +15,19 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
+    <!-- shown while study data loads, each card shows its own progress -->
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/act_study_importer_pb"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="gone"
+        app:indicatorColor="?attr/fb_color_indeterminate_progress_bar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/act_list_filter_tb"
+        tools:visibility="visible" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -22,7 +35,7 @@
         android:orientation="vertical"
         tools:listitem="@layout/list_item_study"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintTop_toBottomOf="@id/act_list_filter_tb"
+        app:layout_constraintTop_toBottomOf="@id/act_study_importer_pb"
         app:layout_constraintBottom_toTopOf="@id/act_study_importer_import_button"/>
 
     <!-- hidden pagination ui that brapi service is coupled to -->

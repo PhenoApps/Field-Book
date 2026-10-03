@@ -34,6 +34,7 @@ import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.InsetHandler
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.progressindicator.LinearProgressIndicator
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -114,6 +115,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     }
 
     private lateinit var studyList: RecyclerView
+    private lateinit var loadingIndicator: LinearProgressIndicator
     private lateinit var importButton: MaterialButton
 
     //fetched models are only written on the main thread, once each fetch completes
@@ -176,6 +178,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         setContentView(R.layout.activity_study_importer)
 
         studyList = findViewById(R.id.act_list_filter_rv)
+        loadingIndicator = findViewById(R.id.act_study_importer_pb)
         importButton = findViewById(R.id.act_study_importer_import_button)
 
         val toolbar = findViewById<Toolbar>(R.id.act_list_filter_tb)
@@ -530,6 +533,10 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
             if (brapiService !is BrAPIServiceV2) return@launch
 
+            //hidden once the attributes are built and the study can be imported,
+            //a failed load closes the screen instead
+            loadingIndicator.visibility = View.VISIBLE
+
             //keep the screen on so the device doesn't sleep and drop the connection mid-download
             setKeepScreenOn(true)
 
@@ -598,6 +605,8 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
             }
 
             studyList.adapter?.notifyDataSetChanged()
+
+            loadingIndicator.visibility = View.GONE
 
             //nothing to import until at least one level is checked
             importButton.isEnabled = hasSelectedLevels()
