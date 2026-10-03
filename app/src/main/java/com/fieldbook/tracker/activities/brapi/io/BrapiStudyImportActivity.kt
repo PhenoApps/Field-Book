@@ -7,7 +7,6 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.WindowManager
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedDispatcher
@@ -1031,14 +1030,6 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 }
             }
         } ?: emptyList()
-    }
-
-    /**
-     * Window flag only, so no wake lock permission is needed.
-     */
-    private fun setKeepScreenOn(keepOn: Boolean) {
-        if (keepOn) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
     /**

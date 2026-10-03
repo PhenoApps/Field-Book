@@ -242,7 +242,13 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         launch(Dispatchers.IO) {
             if (!hasData()) {
                 launch(Dispatchers.Main) {
-                    loadData()
+                    //downloading every trial and study can take a long time on a large server
+                    setKeepScreenOn(true)
+                    try {
+                        loadData()
+                    } finally {
+                        setKeepScreenOn(false)
+                    }
                 }
             } else {
                 withContext(Dispatchers.Main) {
