@@ -1788,6 +1788,10 @@
     <string name="act_brapi_study_import_downloading_page">Study %1$d of %2$d, page %3$d of %4$d</string>
     <string name="act_brapi_study_import_observations_failed">Fields were imported, but their observations could not be downloaded. Use Sync on each field to try again.</string>
     <string name="act_brapi_study_import_observations_cancelled">Observation download cancelled. Use Sync on each field to download the rest.</string>
+    <plurals name="act_brapi_study_import_observations_on_server">
+        <item quantity="one">%d observation on the server</item>
+        <item quantity="other">%d observations on the server</item>
+    </plurals>
     <plurals name="act_brapi_study_import_observations_downloaded">
         <item quantity="one">Downloaded %d observation</item>
         <item quantity="other">Downloaded %d observations</item>

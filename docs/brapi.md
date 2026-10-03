@@ -38,6 +38,8 @@ Press the Save button at the bottom of the screen to import the fields into Fiel
 The fields and any linked traits will be saved for use in Field Book.
 
 Field Book can also download the observations already collected for the fields on the server.
+The number of observations on the server is shown next to each observation level.
+If the server can't count observations by level, the total for the whole field is shown next to its location and trial instead.
 By default, you are asked whether to download them each time you import.
 Choosing **Never** in this prompt skips the download and stops the prompt from appearing again.
 This can be changed with the **Download Observations** option in [BrAPI Transmission Settings](settings/settings-brapi.md#transmission-settings).

@@ -28,13 +28,19 @@ class StudyAdapter(private val studyLoader: StudyLoader) :
         fun isLoading(id: String): Boolean
 
         /**
-         * Units received and units expected while loading, or null until the server reports a total.
+         * Progress and its maximum while loading, or null until the server reports a total.
          */
         fun getProgress(id: String): Pair<Int, Int>?
         fun getLevels(id: String): List<Level>
         fun onLevelChecked(id: String, levelName: String, checked: Boolean)
         fun getLocation(id: String): String
         fun getTrialName(id: String): String
+
+        /**
+         * Observations on the server for the whole study, shown on the location and trial row.
+         * Null hides the chip, while counting or when the levels carry their own counts.
+         */
+        fun getObservationCount(id: String): Int?
     }
 
     data class Model(
@@ -47,6 +53,8 @@ class StudyAdapter(private val studyLoader: StudyLoader) :
         val unitCount: Int,
         val traitCount: Int,
         val checked: Boolean,
+        //observations on the server at this level, null hides the chip
+        val observationCount: Int? = null,
     )
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -66,12 +74,32 @@ class StudyAdapter(private val studyLoader: StudyLoader) :
             holder.locationChip.visibility = if (holder.locationChip.text.isNotBlank()) View.VISIBLE else View.GONE
             holder.trialChip.visibility = if (holder.trialChip.text.isNotBlank()) View.VISIBLE else View.GONE
 
+            bindObservationCount(holder.observationsChip, studyLoader.getObservationCount(id))
+
             val loading = studyLoader.isLoading(id)
             holder.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
             if (loading) bindProgress(holder.progressBar, studyLoader.getProgress(id))
 
             bindLevels(holder.levelsLayout, id, if (loading) emptyList() else studyLoader.getLevels(id))
         }
+    }
+
+    /**
+     * Payload updates rebind the existing card in place, a change without a payload
+     * cross-fades the whole card, which pulses when progress arrives page by page.
+     */
+    override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
+
+        if (payloads.isNotEmpty() && payloads.all { it == PAYLOAD_PROGRESS }) {
+
+            val id = currentList[position].id
+
+            if (studyLoader.isLoading(id)) bindProgress(holder.progressBar, studyLoader.getProgress(id))
+
+            return
+        }
+
+        onBindViewHolder(holder, position)
     }
 
     /**
@@ -104,6 +132,7 @@ class StudyAdapter(private val studyLoader: StudyLoader) :
             pill.findViewById<Chip>(R.id.list_item_study_level_chip).text = level.name
             pill.findViewById<Chip>(R.id.list_item_study_level_units_chip).text = level.unitCount.toString()
             pill.findViewById<Chip>(R.id.list_item_study_level_traits_chip).text = level.traitCount.toString()
+            bindObservationCount(pill.findViewById(R.id.list_item_study_level_observations_chip), level.observationCount)
 
             pill.accessibilityDelegate = pillAccessibilityDelegate
 
@@ -119,6 +148,18 @@ class StudyAdapter(private val studyLoader: StudyLoader) :
         }
 
         layout.visibility = if (levels.isEmpty()) View.GONE else View.VISIBLE
+    }
+
+    private fun bindObservationCount(chip: Chip, count: Int?) {
+
+        chip.visibility = if (count == null) View.GONE else View.VISIBLE
+
+        if (count != null) {
+            chip.text = count.toString()
+            chip.contentDescription = chip.resources.getQuantityString(
+                R.plurals.act_brapi_study_import_observations_on_server, count, count
+            )
+        }
     }
 
     /**
@@ -151,6 +192,9 @@ class StudyAdapter(private val studyLoader: StudyLoader) :
 
     companion object {
         private const val DEFAULT_UNSELECTED_ALPHA = 0.5f
+
+        //notifyItemChanged payload for loading progress, see onBindViewHolder(holder, position, payloads)
+        const val PAYLOAD_PROGRESS = "progress"
     }
 
     override fun getItemCount(): Int {
@@ -162,6 +206,7 @@ class StudyAdapter(private val studyLoader: StudyLoader) :
         var locationChip: Chip = v.findViewById(R.id.list_item_study_location_chip)
         var progressBar: CircularProgressIndicator = v.findViewById(R.id.list_item_study_pb)
         var trialChip: Chip = v.findViewById(R.id.list_item_trial_chip)
+        var observationsChip: Chip = v.findViewById(R.id.list_item_study_observations_chip)
         var levelsLayout: LinearLayout = v.findViewById(R.id.list_item_study_levels_ll)
     }
 

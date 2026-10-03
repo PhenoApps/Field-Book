@@ -64,4 +64,21 @@
         app:chipBackgroundColor="@color/study_level_chip_background"
         tools:text="12" />
 
+    <!-- observations already on the server at this level, hidden until counted or when the server can't count by level -->
+    <com.google.android.material.chip.Chip
+        android:id="@+id/list_item_study_level_observations_chip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:visibility="gone"
+        android:checkable="false"
+        android:clickable="false"
+        android:focusable="false"
+        android:textColor="@color/BLACK"
+        app:chipIcon="@drawable/ic_nav_drawer_collect_data"
+        app:chipIconTint="@color/BLACK"
+        app:chipBackgroundColor="@color/study_level_chip_background"
+        tools:visibility="visible"
+        tools:text="1240" />
+
 </LinearLayout>

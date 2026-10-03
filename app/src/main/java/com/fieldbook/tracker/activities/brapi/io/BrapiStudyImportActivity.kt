@@ -30,6 +30,7 @@ import com.fieldbook.tracker.brapi.service.BrAPIService
 import com.fieldbook.tracker.brapi.service.BrAPIServiceFactory
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV1
 import com.fieldbook.tracker.brapi.service.BrAPIServiceV2
+import com.fieldbook.tracker.brapi.service.pheno.ObservationService
 import com.fieldbook.tracker.database.DataHelper
 import com.fieldbook.tracker.preferences.PreferenceKeys
 import com.fieldbook.tracker.utilities.InsetHandler
@@ -52,6 +53,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.brapi.client.v2.JSON
 import org.brapi.client.v2.model.queryParams.germplasm.GermplasmQueryParams
+import org.brapi.client.v2.model.queryParams.phenotype.ObservationQueryParams
 import org.brapi.client.v2.model.queryParams.phenotype.ObservationUnitQueryParams
 import org.brapi.client.v2.model.queryParams.phenotype.VariableQueryParams
 import org.brapi.v2.model.core.BrAPIStudy
@@ -83,6 +85,10 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         private const val IMPORT_OBSERVATIONS_ALWAYS = "always"
         private const val IMPORT_OBSERVATIONS_ASK = "ask"
         private const val IMPORT_OBSERVATIONS_NEVER = "never"
+
+        //study card progress, see getLoadProgress
+        private const val PROGRESS_MAX = 1000
+        private const val COUNT_PROGRESS_SHARE = 0.1f
 
         fun getIntent(context: Context): Intent {
             return Intent(context, BrapiStudyImportActivity::class.java)
@@ -129,6 +135,18 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
     //checked level names per study
     private val selectedLevels = hashMapOf<String, MutableSet<String>>()
+
+    /**
+     * Observations on the server for a study, levels is null when the server couldn't count by level,
+     * then the study total is shown on the location and trial row instead.
+     */
+    private data class ObservationCounts(val study: Int?, val levels: Map<String, Int>?)
+
+    //filled in after each study's units load, see fetchObservationCounts
+    private val observationCounts = hashMapOf<String, ObservationCounts>()
+
+    //observation count requests per study, (finished, total), the last part of the study's loading progress
+    private val countProgress = hashMapOf<String, Pair<Int, Int>>()
 
     //levels of the selected studies that already exist as fields, loaded off the main thread in fetchStudyData
     private var importedLevels = BrapiImportedLevels(emptyList())
@@ -260,8 +278,9 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         }
 
         val selected = selectedLevels[studyDbId].orEmpty()
+        val levelCounts = observationCounts[studyDbId]?.levels
 
-        return levels.map { it.copy(checked = it.name in selected) }
+        return levels.map { it.copy(checked = it.name in selected, observationCount = levelCounts?.get(it.name)) }
     }
 
     /**
@@ -282,25 +301,51 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     private fun hasSelectedLevels() = selectedLevels.values.any { it.isNotEmpty() }
 
     /**
-     * Units received out of units expected across the study's unit requests so far,
-     * or null until a request has reported a total. When only the remaining levels are fetched,
-     * each level's total is added as its request starts.
+     * The study's loading progress out of PROGRESS_MAX, or null until a unit request has reported a total.
+     * Units fill most of it, by units received out of units expected across the unit requests so far,
+     * and observation count requests fill the last COUNT_PROGRESS_SHARE as they finish.
+     * When only the remaining levels are fetched, each level's total is added as its request starts.
      */
-    private fun getUnitProgress(studyDbId: String): Pair<Int, Int>? {
+    private fun getLoadProgress(studyDbId: String): Pair<Int, Int>? {
 
         val requests = unitProgress[studyDbId]?.values ?: return null
 
-        val total = requests.sumOf { it.second }
+        val unitTotal = requests.sumOf { it.second }
 
-        return if (total > 0) requests.sumOf { it.first } to total else null
+        if (unitTotal <= 0) return null
+
+        val units = requests.sumOf { it.first }.coerceAtMost(unitTotal).toFloat() / unitTotal
+
+        val counts = countProgress[studyDbId]
+            ?.let { (finished, total) -> if (total > 0) finished.toFloat() / total else 0f }
+            ?: 0f
+
+        val progress = units * (1 - COUNT_PROGRESS_SHARE) + counts * COUNT_PROGRESS_SHARE
+
+        return (progress * PROGRESS_MAX).toInt() to PROGRESS_MAX
     }
 
     private fun onUnitProgress(studyDbId: String, levelName: String?, received: Int, total: Int) {
 
         unitProgress.getOrPut(studyDbId) { hashMapOf() }[levelName] = received to total
 
+        notifyProgress(studyDbId)
+    }
+
+    /**
+     * Records a finished observation count request, out of total requests for the study.
+     */
+    private fun onCountProgress(studyDbId: String, finished: Int, total: Int) {
+
+        countProgress[studyDbId] = finished to total
+
+        notifyProgress(studyDbId)
+    }
+
+    private fun notifyProgress(studyDbId: String) {
+
         val position = (studyList.adapter as? StudyAdapter)?.currentList?.indexOfFirst { it.id == studyDbId } ?: -1
-        if (position >= 0) studyList.adapter?.notifyItemChanged(position)
+        if (position >= 0) studyList.adapter?.notifyItemChanged(position, StudyAdapter.PAYLOAD_PROGRESS)
     }
 
     private fun onLevelsChanged() {
@@ -435,7 +480,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
             override fun isLoading(id: String) = id !in loadedStudies
 
-            override fun getProgress(id: String) = getUnitProgress(id)
+            override fun getProgress(id: String) = getLoadProgress(id)
 
             override fun getLevels(id: String) = this@BrapiStudyImportActivity.getLevels(id)
 
@@ -457,6 +502,9 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
             override fun getTrialName(id: String): String {
                 return cacheModels.studies.firstOrNull { it.study.studyDbId == id }?.study?.trialName ?: ""
             }
+
+            override fun getObservationCount(id: String): Int? =
+                observationCounts[id]?.takeIf { it.levels == null }?.study
         })
 
         (studyList.adapter as StudyAdapter).submitList(studyModels)
@@ -508,6 +556,8 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                                 launch { fetchObservationVariables(model.id) }
                                 launch { fetchObservationUnits(model.id) }
                             }
+                            //counts are by level, so they wait for the units, and the levels show with their counts
+                            fetchObservationCounts(model.id)
                             loadedStudies.add(model.id)
                             onLevelsChanged()
                             selectDefaultLevel(model.id)
@@ -590,6 +640,8 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         germplasms.clear()
         loadedStudies.clear()
         unitProgress.clear()
+        countProgress.clear()
+        observationCounts.clear()
         onLevelsChanged()
 
         //selected levels are kept, levels that are no longer importable are skipped when saving
@@ -619,6 +671,12 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         importButton.setOnClickListener {
 
             if (importing) return@setOnClickListener
+
+            //nothing to download, skip the prompt
+            if (selectedObservationCount(studyDbIds) == 0) {
+                importStudies(studyDbIds, downloadObservations = false)
+                return@setOnClickListener
+            }
 
             when (prefs.getString(PreferenceKeys.BRAPI_IMPORT_OBSERVATIONS, IMPORT_OBSERVATIONS_ASK)) {
                 IMPORT_OBSERVATIONS_ALWAYS -> importStudies(studyDbIds, downloadObservations = true)
@@ -1086,6 +1144,122 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
             })
         }
     }
+
+    /**
+     * Counts the study's observations on the server, in total and at each importable level,
+     * reporting each finished request as part of the study's loading progress.
+     * Called on the main thread once the study's units have loaded.
+     */
+    private suspend fun fetchObservationCounts(studyDbId: String) {
+
+        val service = brapiService as? BrAPIServiceV2 ?: return
+
+        val levels = importableLevels(studyDbId)
+
+        val unitLevels = observationUnits[studyDbId].orEmpty()
+            .filter { it.observationUnitDbId != null }
+            .associate { it.observationUnitDbId to it.levelName() }
+
+        //the study total and one request per level
+        val requestCount = levels.size + 1
+        var finished = 0
+
+        onCountProgress(studyDbId, finished, requestCount)
+
+        //the requests run on the io dispatcher, progress is recorded back on the main thread
+        suspend fun count(levelName: String?) =
+            withContext(Dispatchers.IO) { countObservations(service, studyDbId, levelName) }
+                .also { onCountProgress(studyDbId, ++finished, requestCount) }
+
+        observationCounts[studyDbId] = coroutineScope {
+
+            val study = async { count(null) }
+            val byLevel = levels.map { level -> level to async { count(level) } }
+
+            val studyTotal = study.await()?.total
+
+            ObservationCounts(
+                study = studyTotal,
+                levels = levelTotals(studyTotal, byLevel.map { (level, count) -> level to count.await() }, unitLevels)
+            )
+        }
+    }
+
+    /**
+     * @param levelName filters by the unit's level, BrAPI 2.1 servers may ignore it
+     * @return null if the server failed to answer
+     */
+    private suspend fun countObservations(
+        service: BrAPIServiceV2,
+        studyDbId: String,
+        levelName: String?
+    ): ObservationService.Count? = try {
+
+        service.observationService.count(ObservationQueryParams().also {
+            it.studyDbId(studyDbId)
+            levelName?.let { level -> it.observationUnitLevelName(level) }
+        })
+
+    } catch (e: Exception) {
+
+        currentCoroutineContext().ensureActive()
+
+        Log.e(TAG, "Failed to count observations for $studyDbId at ${levelName ?: "all levels"}", e)
+
+        null
+    }
+
+    /**
+     * The level totals if the server filtered by level, or null to show the study total instead.
+     * Servers that ignore the level filter return the whole study's observations for each level,
+     * which shows as a returned observation on a unit at another level, or level totals that don't add up.
+     *
+     * @param unitLevels level of each of the study's fetched units, by unit id
+     */
+    private fun levelTotals(
+        studyTotal: Int?,
+        levelCounts: List<Pair<String, ObservationService.Count?>>,
+        unitLevels: Map<String, String?>
+    ): Map<String, Int>? {
+
+        if (levelCounts.isEmpty()) return null
+
+        //a level the server couldn't count
+        val totals = levelCounts.associate { (level, count) -> level to (count?.total ?: return null) }
+
+        //every importable level's units are fetched, so a unit that isn't among them is at another level
+        val sampleAtOtherLevel = levelCounts.any { (level, count) ->
+            val unitDbId = count?.sample?.observationUnitDbId ?: return@any false
+            unitLevels[unitDbId]?.equals(level, ignoreCase = true) != true
+        }
+
+        if (sampleAtOtherLevel) return null
+
+        if (studyTotal != null) {
+
+            //each level returned the whole study
+            if (totals.size > 1 && studyTotal > 0 && totals.values.all { it == studyTotal }) return null
+
+            //the levels can't hold more observations than the study
+            if (totals.values.sum() > studyTotal) return null
+        }
+
+        return totals
+    }
+
+    /**
+     * Observations on the server for the checked levels of the selected studies,
+     * or null if any of them hasn't been counted.
+     */
+    private fun selectedObservationCount(studyDbIds: List<String>): Int? =
+        studyDbIds.filter { selectedLevels[it].orEmpty().isNotEmpty() }.sumOf { id ->
+
+            val counts = observationCounts[id] ?: return null
+
+            counts.levels?.let { levels ->
+                selectedLevels[id].orEmpty().sumOf { level -> levels[level] ?: return null }
+            } ?: counts.study ?: return null
+        }
 
     override fun onDestroy() {
         super.onDestroy()

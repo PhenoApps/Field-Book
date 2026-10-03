@@ -26,6 +26,7 @@ import com.fieldbook.tracker.brapi.service.core.ServerInfoService;
 import com.fieldbook.tracker.brapi.service.core.StudyService;
 import com.fieldbook.tracker.brapi.service.core.TrialService;
 import com.fieldbook.tracker.brapi.service.germ.GermplasmService;
+import com.fieldbook.tracker.brapi.service.pheno.ObservationService;
 import com.fieldbook.tracker.brapi.service.pheno.ObservationUnitService;
 import com.fieldbook.tracker.brapi.service.pheno.ObservationVariableService;
 import com.fieldbook.tracker.database.DataHelper;
@@ -149,6 +150,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     public final StudyService studyService;
     public final ObservationVariableService observationVariableService;
     public final ObservationUnitService observationUnitService;
+    public final ObservationService observationService;
     public final GermplasmService germplasmService;
     public final ServerInfoService serverInfoService;
 
@@ -179,6 +181,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         this.trialService = new TrialService.Default(this.trialsApi);
         this.observationVariableService = new ObservationVariableService.Default(this.traitsApi);
         this.observationUnitService = new ObservationUnitService.Default(this.observationUnitsApi);
+        this.observationService = new ObservationService.Default(this.observationsApi);
         this.germplasmService = new GermplasmService.Default(this.germplasmApi);
         this.serverInfoService = new ServerInfoService.Default(this.serverInfoApi);
 
