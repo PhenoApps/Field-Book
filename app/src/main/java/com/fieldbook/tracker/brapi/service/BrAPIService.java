@@ -122,6 +122,17 @@ public interface BrAPIService {
         return checkPreference(context, PreferenceKeys.BRAPI_TIMEOUT, "120");
     }
 
+    //also the default in preferences_brapi_advanced.xml, so the settings screen shows what's used
+    String DEFAULT_PAGE_SIZE = "100";
+
+    /**
+     * Page size for every paged BrAPI request, larger pages mean fewer requests,
+     * which matters on servers with a high fixed cost per request.
+     */
+    static int getPageSize(Context context) {
+        return checkPreference(context, PreferenceKeys.BRAPI_PAGE_SIZE, DEFAULT_PAGE_SIZE);
+    }
+
     static int getChunkSize(Context context) {
         return checkPreference(context, PreferenceKeys.BRAPI_CHUNK_SIZE, "500");
     }

@@ -78,7 +78,7 @@ class BrapiObservationDownloader @Inject constructor(
 
         val pageCount = AtomicInteger(1)
 
-        val pageSize = preferences.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50")?.toInt() ?: 50
+        val pageSize = BrAPIService.getPageSize(context)
         val paginationManager = BrapiPaginationManager(0, pageSize)
 
         Log.d(

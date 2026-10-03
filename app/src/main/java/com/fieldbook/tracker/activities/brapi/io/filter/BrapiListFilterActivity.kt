@@ -287,7 +287,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
         val modelCache = arrayListOf<BrAPIStudy>()
 
-        val pageSize = prefs.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
+        val pageSize = BrAPIService.getPageSize(this@BrapiListFilterActivity)
 
         if (brapiService is BrAPIServiceV1)
             return@launch
@@ -362,7 +362,7 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
     private suspend fun queryTrials() = async(Dispatchers.IO) {
 
-        val pageSize = prefs.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "512")?.toInt() ?: 512
+        val pageSize = BrAPIService.getPageSize(this@BrapiListFilterActivity)
 
         if (brapiService is BrAPIServiceV1)
             return@async

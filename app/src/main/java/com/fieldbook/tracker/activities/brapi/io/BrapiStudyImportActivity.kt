@@ -38,6 +38,7 @@ import com.google.android.material.progressindicator.LinearProgressIndicator
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.async
@@ -335,11 +336,21 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     }
 
     /**
-     * Records a finished observation count request, out of total requests for the study.
+     * Sets how many observation count requests the study makes: the study total from the start,
+     * then one per level once the units show the study has several importable levels.
      */
-    private fun onCountProgress(studyDbId: String, finished: Int, total: Int) {
+    private fun setCountRequests(studyDbId: String, total: Int) {
 
-        countProgress[studyDbId] = finished to total
+        countProgress[studyDbId] = (countProgress[studyDbId]?.first ?: 0) to total
+
+        notifyProgress(studyDbId)
+    }
+
+    private fun onCountRequestFinished(studyDbId: String) {
+
+        val (finished, total) = countProgress[studyDbId] ?: (0 to 1)
+
+        countProgress[studyDbId] = (finished + 1) to total
 
         notifyProgress(studyDbId)
     }
@@ -558,12 +569,19 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                     studyModels.forEachIndexed { index, model ->
 
                         launch {
+
+                            //the study total doesn't need the units, so it's counted while they download
+                            setCountRequests(model.id, 1)
+                            val studyCount = async { countWithProgress(model.id, null) }
+
                             coroutineScope {
                                 launch { fetchObservationVariables(model.id) }
                                 launch { fetchObservationUnits(model.id) }
                             }
-                            //counts are by level, so they wait for the units, and the levels show with their counts
-                            fetchObservationCounts(model.id)
+
+                            //level counts need the units' levels, and the levels show with their counts
+                            observationCounts[model.id] = fetchObservationCounts(model.id, studyCount)
+
                             loadedStudies.add(model.id)
                             onLevelsChanged()
                             selectDefaultLevel(model.id)
@@ -1070,7 +1088,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
             }
         }
 
-    private fun pageSize() = prefs.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "512")?.toIntOrNull() ?: 512
+    private fun pageSize() = BrAPIService.getPageSize(this)
 
     private suspend fun fetchGermplasm(studyDbId: String) {
 
@@ -1146,13 +1164,16 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     }
 
     /**
-     * Counts the study's observations on the server, in total and at each importable level,
-     * reporting each finished request as part of the study's loading progress.
-     * Called on the main thread once the study's units have loaded.
+     * Counts the study's observations at each importable level, once the study's units have loaded,
+     * and combines them with the study total that was counted alongside the units.
+     * A study with a single importable level isn't counted by level, its study total is shown on
+     * the level row if that's the study's only level, or on the location and trial row otherwise.
+     * Called on the main thread.
      */
-    private suspend fun fetchObservationCounts(studyDbId: String) {
-
-        val service = brapiService as? BrAPIServiceV2 ?: return
+    private suspend fun fetchObservationCounts(
+        studyDbId: String,
+        studyCount: Deferred<ObservationService.Count?>
+    ): ObservationCounts {
 
         val levels = importableLevels(studyDbId)
 
@@ -1160,29 +1181,47 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
             .filter { it.observationUnitDbId != null }
             .associate { it.observationUnitDbId to it.levelName() }
 
-        //the study total and one request per level
-        val requestCount = levels.size + 1
-        var finished = 0
+        if (levels.size <= 1) {
 
-        onCountProgress(studyDbId, finished, requestCount)
+            val studyTotal = studyCount.await()?.total
 
-        //the requests run on the io dispatcher, progress is recorded back on the main thread
-        suspend fun count(levelName: String?) =
-            withContext(Dispatchers.IO) { countObservations(service, studyDbId, levelName) }
-                .also { onCountProgress(studyDbId, ++finished, requestCount) }
+            //levels imported earlier have observations the study total would include
+            val allLevels = (importedLevels.knownLevels(studyDbId) + unitLevels.values.filterNotNull())
+                .distinctBy { it.lowercase() }
 
-        observationCounts[studyDbId] = coroutineScope {
+            val onlyLevel = levels.singleOrNull()
+                ?.takeIf { allLevels.size == 1 && !importedLevels.hasImports(studyDbId) }
 
-            val study = async { count(null) }
-            val byLevel = levels.map { level -> level to async { count(level) } }
+            return ObservationCounts(
+                study = studyTotal,
+                levels = if (onlyLevel != null && studyTotal != null) mapOf(onlyLevel to studyTotal) else null
+            )
+        }
 
-            val studyTotal = study.await()?.total
+        setCountRequests(studyDbId, levels.size + 1)
+
+        return coroutineScope {
+
+            val byLevel = levels.map { level -> level to async { countWithProgress(studyDbId, level) } }
+
+            val studyTotal = studyCount.await()?.total
 
             ObservationCounts(
                 study = studyTotal,
                 levels = levelTotals(studyTotal, byLevel.map { (level, count) -> level to count.await() }, unitLevels)
             )
         }
+    }
+
+    /**
+     * Counts on the io dispatcher, then records the finished request for the study's progress on the main thread.
+     */
+    private suspend fun countWithProgress(studyDbId: String, levelName: String?): ObservationService.Count? {
+
+        val service = brapiService as? BrAPIServiceV2 ?: return null
+
+        return withContext(Dispatchers.IO) { countObservations(service, studyDbId, levelName) }
+            .also { onCountRequestFinished(studyDbId) }
     }
 
     /**

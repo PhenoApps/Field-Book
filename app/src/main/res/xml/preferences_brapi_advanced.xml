@@ -2,8 +2,9 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <!-- keep in step with BrAPIService.DEFAULT_PAGE_SIZE -->
     <com.fieldbook.tracker.preferences.BetterEditTextPreference
-        android:defaultValue="50"
+        android:defaultValue="100"
         android:icon="@drawable/ic_pref_brapi_pagination"
         android:inputType="number"
         android:key="BRAPI_PAGE_SIZE"

@@ -79,7 +79,7 @@ On the other device, choose **Add Account** > **Scan Configuration Code** to imp
 Press <img class="icon" src="_static/icons/settings/brapi/cogs.png"> **Transmission Settings** to configure how Field Book communicates with BrAPI servers:
 
 - <img class="icon" src="_static/icons/settings/brapi/layers-triple.png"> **Page Size** controls how many records Field Book asks for at a time when downloading data from a server.
-Defaults to `50`.
+Defaults to `100`.
 - <img class="icon" src="_static/icons/settings/brapi/transfer.png"> **Chunk Size** controls how many records Field Book sends at a time when uploading data to a server.
 Defaults to `500`.
 - <img class="icon" src="_static/icons/settings/brapi/timer-outline.png"> **Server Timeout** is how long Field Book waits for a server to respond before giving up.

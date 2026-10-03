@@ -1152,7 +1152,7 @@ class BrapiSyncViewModel @Inject constructor(
 
         return try {
             val pageSize =
-                preferences.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50")?.toInt() ?: 50
+                BrAPIService.getPageSize(context)
             val paginationManager = BrapiPaginationManager(0, pageSize)
 
             val firstPage = brAPIService.awaitGetSingleObservationPage(

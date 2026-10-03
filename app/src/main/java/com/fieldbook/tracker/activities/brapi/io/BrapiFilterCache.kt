@@ -21,6 +21,22 @@ class BrapiFilterCache {
 
         private const val JSON_FILE_NAME = "com.fieldbook.tracker.activities.filters.json"
 
+        /**
+         * The parsed cache file and the file's (last modified, length) when it was read or written.
+         * The file can hold every trial and study of a large server, and parsing it on each screen,
+         * on the main thread, paused opening the study import. Kept until the file changes.
+         */
+        @Volatile
+        private var memory: Pair<Pair<Long, Long>, BrapiCacheModel>? = null
+
+        private fun File.stamp() = lastModified() to length()
+
+        //callers reassign studies and variables when filtering, so each gets its own model,
+        //gson leaves fields missing from older cache files null despite their types
+        @Suppress("USELESS_ELVIS", "UNNECESSARY_SAFE_CALL")
+        private fun BrapiCacheModel.shallowCopy() =
+            BrapiCacheModel(studies ?: emptyList(), variables?.toMutableMap() ?: mutableMapOf())
+
         enum class CacheClearInterval(val value: String) {
             EVERY("0"),
             DAILY("1"),
@@ -83,11 +99,14 @@ class BrapiFilterCache {
             context.externalCacheDir?.let { cacheDir ->
                 val file = File(cacheDir, JSON_FILE_NAME)
                 if (file.exists()) {
-                    val json = file.readText()
-                    return Gson().fromJson(
-                        json,
-                        getTypeToken()
-                    )
+
+                    val stamp = file.stamp()
+
+                    val model = memory?.takeIf { it.first == stamp }?.second
+                        ?: Gson().fromJson<BrapiCacheModel>(file.readText(), getTypeToken())
+                            .also { memory = stamp to it }
+
+                    return model.shallowCopy()
                 }
             }
             return BrapiCacheModel.empty()
@@ -103,7 +122,10 @@ class BrapiFilterCache {
         fun saveToStorage(context: Context, model: BrapiCacheModel) {
             val json = Gson().toJson(model, getTypeToken())
             context.externalCacheDir?.let {
-                File(it, JSON_FILE_NAME).writeText(json)
+                val file = File(it, JSON_FILE_NAME)
+                file.writeText(json)
+                //the caller may keep changing its model, so the saved state is copied
+                memory = file.stamp() to model.shallowCopy()
             }
         }
 
@@ -132,6 +154,8 @@ class BrapiFilterCache {
                 clearPreferences(context, BrapiStudyFilterActivity.FILTERER_KEY)
                 clearPreferences(context, BrapiTraitFilterActivity.FILTERER_KEY)
             }
+
+            memory = null
 
             context.externalCacheDir?.let {
                 File(it, JSON_FILE_NAME).delete()

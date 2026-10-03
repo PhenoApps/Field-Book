@@ -42,6 +42,11 @@ class BrapiImportedLevels(fields: List<FieldObject>) {
         }
     }
 
+    /**
+     * True if any field was imported from the study, at any level.
+     */
+    fun hasImports(studyDbId: String): Boolean = studyDbId in imported
+
     fun isImported(studyDbId: String, level: String?): Boolean =
         level != null && level.lowercase() in imported[studyDbId].orEmpty()
 
