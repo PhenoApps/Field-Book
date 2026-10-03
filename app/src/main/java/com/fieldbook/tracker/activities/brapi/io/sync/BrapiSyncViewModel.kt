@@ -57,7 +57,8 @@ class BrapiSyncViewModel @Inject constructor(
     private val dataHelper: DataHelper,
     private val preferences: SharedPreferences,
     private val traitRepo: TraitRepository,
-    private val valueProcessorFormatAdapter: ValueProcessorFormatAdapter
+    private val valueProcessorFormatAdapter: ValueProcessorFormatAdapter,
+    private val downloader: BrapiObservationDownloader
 ) : ViewModel() {
 
     private var brAPIService = BrAPIServiceFactory.getBrAPIService(context)
@@ -409,7 +410,7 @@ class BrapiSyncViewModel @Inject constructor(
                     )
                 }
 
-                getObservations()
+                downloader.fetch(brAPIService, study.studyDbId, downloader.getVariableDbIds(study))
                     .onCompletion { cause ->
 
                         Log.d(TAG, "Download flow completed with cause: $cause")
@@ -467,54 +468,13 @@ class BrapiSyncViewModel @Inject constructor(
 
                                     val traitsById = traitRepo.getTraits().associateBy { it.id }
 
-                                    //the server returns the whole study, but a study imported at several levels
-                                    //is split into one field per level, so keep only this field's units
-                                    val fieldUnitDbIds = uiState.value.study?.let { fieldObject ->
-                                        dataHelper.getAllObservationUnits(fieldObject.studyId)
-                                            .mapTo(hashSetOf()) { it.observation_unit_db_id }
-                                    }.orEmpty()
-
-                                    val fieldObservations = update.data.filter { it.unitDbId in fieldUnitDbIds }
-
-                                    Log.d(TAG, "Kept ${fieldObservations.size} of ${update.data.size} observations for this field's units")
+                                    val fieldObservations = downloader.filterToField(study.studyId, update.data)
 
                                     val resolved = resolveObservationStatus(fieldObservations, traitsById)
 
                                     Log.d(TAG, "Saving ${resolved.first.size} new observations")
 
-                                    uiState.value.study?.let { fieldObject ->
-
-                                        resolved.first.forEach { obs ->
-
-                                            Log.d(TAG, "Saving observation: ${obs.dbId}")
-
-                                            obs.internalVariableDbId = obs.variableDbId
-
-                                            // Store categorical BrAPI values using Field Book's internal JSON format.
-                                            obs.value =
-                                                normalizeDownloadedObservationValue(obs, traitsById)
-
-                                            val rep = dataHelper.getNextRep(
-                                                fieldObject.studyId.toString(),
-                                                obs.unitDbId,
-                                                obs.internalVariableDbId
-                                            ).toInt()
-
-                                            dataHelper.insertObservation(
-                                                obs.unitDbId,
-                                                obs.internalVariableDbId,
-                                                obs.value ?: "",
-                                                obs.collector ?: "",
-                                                "",
-                                                "",
-                                                fieldObject.studyId.toString(),
-                                                obs.dbId,
-                                                obs.timestamp,
-                                                obs.lastSyncedTime,
-                                                rep.toString()
-                                            )
-                                        }
-                                    }
+                                    downloader.insert(study, resolved.first, traitsById)
 
                                     Log.d(
                                         TAG,
@@ -525,8 +485,7 @@ class BrapiSyncViewModel @Inject constructor(
                                         if (obs.internalVariableDbId.isNullOrBlank()) {
                                             obs.internalVariableDbId = obs.variableDbId
                                         }
-                                        obs.value =
-                                            normalizeDownloadedObservationValue(obs, traitsById)
+                                        obs.value = downloader.normalizeValue(obs, traitsById)
                                     }
 
                                     dataHelper.updateObservationsByBrapiId(resolved.second)
@@ -823,7 +782,7 @@ class BrapiSyncViewModel @Inject constructor(
                     if (obs.internalVariableDbId.isNullOrBlank()) {
                         obs.internalVariableDbId = obs.variableDbId
                     }
-                    obs.value = normalizeDownloadedObservationValue(obs, traitsById)
+                    obs.value = downloader.normalizeValue(obs, traitsById)
                 }
                 dataHelper.updateObservationsByBrapiId(toUpdateFromServer)
             }
@@ -1537,129 +1496,6 @@ class BrapiSyncViewModel @Inject constructor(
         }
 
         return completedMessage
-    }
-
-    private fun getObservations(): Flow<DownloadProgressUpdate> = channelFlow {
-
-        val pageCount = AtomicInteger(1)
-
-        val study = _uiState.value.study
-            ?: throw IllegalStateException(context.getString(R.string.study_not_initialized))
-        val brapiStudyId =
-            study.studyDbId
-                ?: throw IllegalStateException(context.getString(R.string.brapi_study_db_id_is_missing))
-
-        val variables = traitRepo.getTraits().filter {
-            it.traitDataSource.isNotEmpty() && it.traitDataSource == study.dataSource
-        }
-
-        val variableDbIds = variables.mapNotNull { it.externalDbId }
-
-        val pageSize = preferences.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50")?.toInt() ?: 50
-        val paginationManager = BrapiPaginationManager(0, pageSize)
-
-        Log.d(
-            TAG,
-            "Starting to pull observations from brapi server with pagesize: $pageSize and ${variableDbIds.size} variables for $brapiStudyId"
-        )
-
-        //gets the first page of data and updates the pagination manager with total page size
-        val firstPageResult = brAPIService.awaitGetSingleObservationPage(
-            brapiStudyId,
-            variableDbIds,
-            paginationManager
-        )
-
-        Log.d(
-            TAG,
-            "First page returned with ${firstPageResult.size} observations, total pages: ${paginationManager.totalPages}"
-        )
-
-        val totalPages = paginationManager.totalPages ?: 0
-
-        //if there's only one page, we're done.
-        if (totalPages <= 1) {
-
-            send(DownloadProgressUpdate.Completed(firstPageResult))
-
-        } else {
-
-            trySend(
-                DownloadProgressUpdate.InDownloadProgress(
-                    pageCount.get(),
-                    totalPages
-                )
-            )
-
-            val concurrencyLimit = (preferences.getString(
-                PreferenceKeys.BRAPI_MAX_CONCURRENT_OBSERVATION_TRANSFER, "5"
-            ))?.toInt() ?: 5
-
-            val allObservations = brAPIService.awaitGetObservations(
-                brapiStudyId = brapiStudyId,
-                variableDbIds = variableDbIds,
-                paginationManager = paginationManager,
-                initialPages = firstPageResult,
-                concurrencyLimit = concurrencyLimit
-            ) { _, observations ->
-
-                trySend(
-                    DownloadProgressUpdate.InDownloadProgress(
-                        pageCount.incrementAndGet(),
-                        totalPages
-                    )
-                )
-
-                Log.d(TAG, "Downloaded: ${observations.size} observations")
-            }
-
-            Log.d(TAG, "All observations returned with ${allObservations.size} observations")
-
-            send(DownloadProgressUpdate.Completed(allObservations))
-        }
-
-    }.flowOn(Dispatchers.IO)
-
-    private fun normalizeDownloadedObservationValue(
-        observation: Observation,
-        traitsById: Map<String, TraitObject>
-    ): String {
-        val rawValue = observation.value ?: return ""
-
-        if (rawValue.isBlank() || rawValue == "NA") return rawValue
-
-        val traitId = observation.internalVariableDbId
-            ?.takeIf { it.isNotBlank() }
-            ?: observation.variableDbId?.takeIf { it.isNotBlank() }
-            ?: return rawValue
-        val trait = traitsById[traitId] ?: return rawValue
-
-        return when {
-            trait.format in CategoricalTraitLayout.POSSIBLE_VALUES ->
-                CategoryJsonUtil.encodeDownloadedBrapiCategoricalValue(rawValue, trait.categories)
-
-            trait.format == Formats.DATE.getDatabaseName() -> {
-                // If the value is already internal DateJson, keep it as-is.
-                if (JsonUtil.isJsonValid(rawValue)) return rawValue
-                // Otherwise it's a plain BrAPI ISO-8601 date "YYYY-MM-DD". Convert to DateJson.
-                try {
-                    val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                    val parsed = sdf.parse(rawValue) ?: return rawValue
-                    val cal = Calendar.getInstance()
-                    cal.time = parsed
-                    DateJsonUtil.encode(
-                        DateJsonCoder.DateJson(
-                            formattedDate = rawValue,
-                            dayOfYear = cal.get(Calendar.DAY_OF_YEAR).toString()
-                        )
-                    )
-                } catch (_: Exception) {
-                    rawValue
-                }
-            }
-
-            else -> rawValue
-        }
     }
 
     private fun processImageResponse(
