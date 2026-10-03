@@ -35,7 +35,7 @@ interface ObservationService {
                 params.page(0).pageSize(1)
 
                 try {
-                    api.observationsGetAsync(
+                    val call = api.observationsGetAsync(
                         params,
                         object : BrapiV2ApiCallBack<BrAPIObservationListResponse>() {
                             override fun onSuccess(
@@ -63,6 +63,10 @@ interface ObservationService {
                                 }
                             }
                         })
+
+                    //a count that's no longer needed shouldn't hold a connection until the server answers
+                    continuation.invokeOnCancellation { call.cancel() }
+
                 } catch (e: ApiException) {
                     if (continuation.isActive) {
                         continuation.resumeWithException(BrapiException(e.code))

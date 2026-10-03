@@ -346,6 +346,18 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         notifyProgress(studyDbId)
     }
 
+    /**
+     * Fills the count share of the study's progress when its remaining count requests aren't needed.
+     */
+    private fun finishCountRequests(studyDbId: String) {
+
+        val total = countProgress[studyDbId]?.second ?: 1
+
+        countProgress[studyDbId] = total to total
+
+        notifyProgress(studyDbId)
+    }
+
     private fun onCountRequestFinished(studyDbId: String) {
 
         val (finished, total) = countProgress[studyDbId] ?: (0 to 1)
@@ -1159,13 +1171,56 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 it.studyDbId(studyDbId)
                 it.pageSize(pageSize())
                 levelName?.let { level -> it.observationUnitLevelName(level) }
+                if (includeObservations()) it.includeObservations(true)
             })
         }
     }
 
     /**
-     * Counts the study's observations at each importable level, once the study's units have loaded,
-     * and combines them with the study total that was counted alongside the units.
+     * Units are fetched with their observations unless observations are never downloaded at import.
+     * BrAPI 2.1 servers that support it then give exact counts per level without counting requests,
+     * see embeddedObservationCounts. The observations stay with the units until the screen closes.
+     */
+    private fun includeObservations() =
+        prefs.getString(PreferenceKeys.BRAPI_IMPORT_OBSERVATIONS, IMPORT_OBSERVATIONS_ASK) != IMPORT_OBSERVATIONS_NEVER
+
+    /**
+     * Counts from the observations sent with the units, exact for each level,
+     * or null if none were sent: the server may not support includeObservations, or the study may have none.
+     */
+    private fun embeddedObservationCounts(studyDbId: String): ObservationCounts? {
+
+        val byLevel = hashMapOf<String, Int>()
+
+        observationUnits[studyDbId].orEmpty().forEach { unit ->
+            unit.levelName()?.let { level ->
+                byLevel[level] = (byLevel[level] ?: 0) + (unit.observations?.size ?: 0)
+            }
+        }
+
+        val total = byLevel.values.sum()
+
+        if (total == 0) return null
+
+        return ObservationCounts(study = total, levels = importableLevels(studyDbId).associateWith { byLevel[it] ?: 0 })
+    }
+
+    /**
+     * Zero counts for a study the server lists no variables for, it has no observations to count.
+     * Null if the study has variables, or they couldn't be fetched.
+     */
+    private fun noVariableCounts(studyDbId: String): ObservationCounts? {
+
+        if (observationVariables[studyDbId]?.isEmpty() != true) return null
+
+        return ObservationCounts(study = 0, levels = importableLevels(studyDbId).associateWith { 0 })
+    }
+
+    /**
+     * The study's observation counts, once its units and variables have loaded. They come from the
+     * observations sent with the units when there are any, or are zero when the study has no variables.
+     * Otherwise the study's observations are counted at each importable level
+     * and combined with the study total that was counted alongside the units.
      * A study with a single importable level isn't counted by level, its study total is shown on
      * the level row if that's the study's only level, or on the location and trial row otherwise.
      * Called on the main thread.
@@ -1174,6 +1229,14 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         studyDbId: String,
         studyCount: Deferred<ObservationService.Count?>
     ): ObservationCounts {
+
+        //counted from the observations sent with the units, or there's nothing to count,
+        //so the study count that started alongside the units isn't needed
+        (embeddedObservationCounts(studyDbId) ?: noVariableCounts(studyDbId))?.let { counts ->
+            studyCount.cancel()
+            finishCountRequests(studyDbId)
+            return counts
+        }
 
         val levels = importableLevels(studyDbId)
 
