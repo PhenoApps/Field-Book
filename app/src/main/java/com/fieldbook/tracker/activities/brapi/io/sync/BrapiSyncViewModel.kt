@@ -466,7 +466,19 @@ class BrapiSyncViewModel @Inject constructor(
                                 val (inserts, updates, conflicts) = withContext(Dispatchers.IO) {
 
                                     val traitsById = traitRepo.getTraits().associateBy { it.id }
-                                    val resolved = resolveObservationStatus(update.data, traitsById)
+
+                                    //the server returns the whole study, but a study imported at several levels
+                                    //is split into one field per level, so keep only this field's units
+                                    val fieldUnitDbIds = uiState.value.study?.let { fieldObject ->
+                                        dataHelper.getAllObservationUnits(fieldObject.studyId)
+                                            .mapTo(hashSetOf()) { it.observation_unit_db_id }
+                                    }.orEmpty()
+
+                                    val fieldObservations = update.data.filter { it.unitDbId in fieldUnitDbIds }
+
+                                    Log.d(TAG, "Kept ${fieldObservations.size} of ${update.data.size} observations for this field's units")
+
+                                    val resolved = resolveObservationStatus(fieldObservations, traitsById)
 
                                     Log.d(TAG, "Saving ${resolved.first.size} new observations")
 
