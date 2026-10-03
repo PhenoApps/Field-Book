@@ -29,6 +29,7 @@ Fields can be filtered by `program`, `season`, `trial`, or `crop` by pressing <i
 The number of selected fields is displayed on the <img class="icon" src="_static/icons/settings/brapi/tray-remove.png"> icon in the toolbar.
 Press this icon to clear your selections.
 If your field was recently created in your database, you may need to reset the cache from the menu in the top toolbar.
+Resetting the cache also clears any filters.
 Press the import button on the bottom of the screen to download the fields to Field Book.
 
 The final screen shows additional details for each selected field, including the number of entries, number of associated traits, location, and season.
@@ -71,6 +72,7 @@ Traits can also be filtered by `trial`, `study`, or `crop` by pressing <img clas
 The number of selected traits is displayed on the the <img class="icon" src="_static/icons/settings/brapi/tray-remove.png"> icon in the toolbar.
 Press this icon to clear your selections.
 If your trait was recently created in your database, you may need to reset the cache from the menu in the top toolbar.
+Resetting the cache also clears any filters.
 
 When you are finished with your selections, press the import button on the bottom of the screen to download the traits to Field Book.
 The final step provides an opportunity to modify trait details like format.

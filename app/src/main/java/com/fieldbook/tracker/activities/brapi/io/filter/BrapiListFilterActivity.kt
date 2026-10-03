@@ -475,10 +475,11 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
         cache.clear()
 
+        // Filters refer to programs, trials and studies of the old cache, so they're cleared with it.
         // Don't clear the adapter here — keep showing the previous list while the progress bar
-        // indicates loading. restoreModels() will reload from the server and update everything
-        // (adapter + hint) once the fresh data arrives.
-        restoreModels()
+        // indicates loading. clearFilters() calls restoreModels(), which reloads from the server
+        // and updates everything (adapter + hint) once the fresh data arrives.
+        clearFilters()
     }
 
     private fun saveCacheToFile(models: List<BrAPIStudy>, trials: List<BrAPITrial>) {
