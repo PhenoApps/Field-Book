@@ -560,8 +560,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
             if (brapiService !is BrAPIServiceV2) return@launch
 
-            //hidden once the attributes are built and the study can be imported,
-            //a failed load closes the screen instead
+            //hidden once the attributes are built and the study can be imported
             loadingIndicator.visibility = View.VISIBLE
 
             //keep the screen on so the device doesn't sleep and drop the connection mid-download
@@ -606,48 +605,64 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
                             loadedStudies.add(model.id)
                             onLevelsChanged()
+                            keepImportableSelections(model.id)
                             selectDefaultLevel(model.id)
                             studyList.adapter?.notifyItemChanged(index)
                         }
                     }
                 }
 
+                if (fullRefresh) {
+                    saveRefreshedLevels(studyDbIds)
+                    fullRefresh = false
+                }
+
+                if ((studyList.adapter as StudyAdapter).currentList.any {
+                        observationUnits[it.id]?.isEmpty() != false
+                    }) {
+
+                    Toast.makeText(this@BrapiStudyImportActivity,
+                        getString(R.string.failed_to_fetch_observation_units), Toast.LENGTH_SHORT).show()
+
+                    onBackPressedDispatcher.onBackPressed()
+
+                    return@launch
+                }
+
+                withContext(Dispatchers.Default) {
+                    attributesTable = HashMap(studyDbIds.associateWith { getAttributes(it) })
+                }
+
+                studyList.adapter?.notifyDataSetChanged()
+
+                //nothing to import until at least one level is checked
+                importButton.isEnabled = hasSelectedLevels()
+
             } finally {
 
-                //let the screen sleep again while the user chooses a level
+                //only now, so a refresh can't start while the refreshed levels are saved
+                //or the attributes are built from the maps a refresh would clear
                 setKeepScreenOn(false)
+
+                loadingIndicator.visibility = View.GONE
 
                 loading = false
                 invalidateOptionsMenu()
             }
+        }
+    }
 
-            if (fullRefresh) {
-                saveRefreshedLevels(studyDbIds)
-                fullRefresh = false
-            }
+    /**
+     * Drops checked levels that are no longer importable, such as after a refresh, so they don't enable
+     * the import with nothing checked. If that leaves the study with nothing checked,
+     * its default level is checked again, see selectDefaultLevel.
+     */
+    private fun keepImportableSelections(studyDbId: String) {
 
-            if ((studyList.adapter as StudyAdapter).currentList.any {
-                    observationUnits[it.id]?.isEmpty() != false
-                }) {
+        val selected = selectedLevels[studyDbId] ?: return
 
-                Toast.makeText(this@BrapiStudyImportActivity,
-                    getString(R.string.failed_to_fetch_observation_units), Toast.LENGTH_SHORT).show()
-
-                onBackPressedDispatcher.onBackPressed()
-
-                return@launch
-            }
-
-            withContext(Dispatchers.Default) {
-                attributesTable = HashMap(studyDbIds.associateWith { getAttributes(it) })
-            }
-
-            studyList.adapter?.notifyDataSetChanged()
-
-            loadingIndicator.visibility = View.GONE
-
-            //nothing to import until at least one level is checked
-            importButton.isEnabled = hasSelectedLevels()
+        if (selected.retainAll(importableLevels(studyDbId).toSet()) && selected.isEmpty()) {
+            selectedLevels.remove(studyDbId)
         }
     }
 
@@ -1161,7 +1176,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         val remainingLevels = if (fullRefresh) null else importedLevels.remainingLevels(studyDbId)
 
         //one request per level to fetch, or one for the whole study
-        val plannedSteps = (remainingLevels ?: listOf(null)).map { unitStep(it) }
+        val plannedSteps = (remainingLevels ?: listOf(null)).mapTo(mutableListOf()) { unitStep(it) }
 
         plannedSteps.forEach { expectRequests(studyDbId, it, 1) }
 
@@ -1183,6 +1198,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
                 //nothing came back for the remaining levels, fall back to fetching the whole study
                 levelUnits.ifEmpty {
+                    plannedSteps += unitStep(null)
                     expectRequests(studyDbId, unitStep(null), 1)
                     fetchObservationUnits(studyDbId, null)
                 }

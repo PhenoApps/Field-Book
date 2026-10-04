@@ -67,6 +67,10 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
     private var queryStudiesJob: Job? = null
     private var queryTrialsJob: Job? = null
 
+    //the restore or download in progress, and whether another was asked for meanwhile, see restoreModels
+    private var restoreJob: Job? = null
+    private var restoreAgain = false
+
     protected var selectionMenuItem: MenuItem? = null
 
     protected lateinit var paginationManager: BrapiPaginationManager
@@ -235,13 +239,24 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         return BrapiFilterCache.getStoredModels(this@BrapiListFilterActivity).studies.isNotEmpty()
     }
 
+    /**
+     * Shows the cached models, downloading them first if there's no cache.
+     * Runs one at a time: two downloads at once would share the trial list and cancel each other's jobs.
+     * A call while one is running restores again once it finishes, with the filters as they are then.
+     * Called on the main thread.
+     */
     fun restoreModels() {
 
         progressBar.visibility = View.VISIBLE
 
-        launch(Dispatchers.IO) {
+        if (restoreJob?.isActive == true) {
+            restoreAgain = true
+            return
+        }
+
+        restoreJob = launch(Dispatchers.IO) {
             if (!hasData()) {
-                launch(Dispatchers.Main) {
+                withContext(Dispatchers.Main) {
                     //downloading every trial and study can take a long time on a large server
                     setKeepScreenOn(true)
                     try {
@@ -254,6 +269,16 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
                 withContext(Dispatchers.Main) {
                     progressBar.visibility = View.GONE
                     loadStorageItems(BrapiFilterCache.getStoredModels(this@BrapiListFilterActivity))
+                }
+            }
+        }.also { job ->
+            job.invokeOnCompletion { cause ->
+                //not after the activity's scope is cancelled, the launch below would do nothing anyway
+                if (cause == null) launch(Dispatchers.Main) {
+                    if (restoreAgain) {
+                        restoreAgain = false
+                        restoreModels()
+                    }
                 }
             }
         }
