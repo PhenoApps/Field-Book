@@ -68,6 +68,7 @@ import java.util.Locale
 import javax.inject.Inject
 import kotlin.collections.set
 import kotlin.coroutines.resume
+import kotlin.math.ceil
 
 /**
  * receive study information including trial
@@ -88,9 +89,12 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         private const val IMPORT_OBSERVATIONS_ASK = "ask"
         private const val IMPORT_OBSERVATIONS_NEVER = "never"
 
-        //study card progress, see getLoadProgress
-        private const val PROGRESS_MAX = 1000
-        private const val COUNT_PROGRESS_SHARE = 0.1f
+        //steps of a study's load, see loadSteps
+        private const val STEP_VARIABLES = "variables"
+        private const val STEP_GERMPLASM = "germplasm"
+        private const val STEP_COUNTS = "counts"
+
+        private fun unitStep(levelName: String?) = "units:${levelName.orEmpty()}"
 
         fun getIntent(context: Context): Intent {
             return Intent(context, BrapiStudyImportActivity::class.java)
@@ -130,11 +134,16 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     //per study, cleared whenever levels, units or variables change, see getLevels()
     private val levelsCache = hashMapOf<String, List<StudyAdapter.Level>>()
 
-    //studies whose units and variables have finished fetching, successfully or not
+    //studies whose units, variables, germplasm and observation counts have finished fetching, successfully or not
     private val loadedStudies = hashSetOf<String>()
 
-    //unit download progress per study, (received, total) per unit request keyed by level, null for all levels
-    private val unitProgress = hashMapOf<String, HashMap<String?, Pair<Int, Int>>>()
+    /**
+     * Requests of each study's load, (finished, expected) per step: variables, germplasm,
+     * units for each level fetched, and observation counts, see getLoadProgress.
+     * Every step expects one request when the load starts, so the card's progress is determinate
+     * from the start, and paged steps expect more once their first page shows how many pages there are.
+     */
+    private val loadSteps = hashMapOf<String, HashMap<String, Pair<Int, Int>>>()
 
     //checked level names per study
     private val selectedLevels = hashMapOf<String, MutableSet<String>>()
@@ -147,9 +156,6 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
     //filled in after each study's units load, see fetchObservationCounts
     private val observationCounts = hashMapOf<String, ObservationCounts>()
-
-    //observation count requests per study, (finished, total), the last part of the study's loading progress
-    private val countProgress = hashMapOf<String, Pair<Int, Int>>()
 
     //levels of the selected studies that already exist as fields, loaded off the main thread in fetchStudyData
     private var importedLevels = BrapiImportedLevels(emptyList())
@@ -305,65 +311,62 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
     private fun hasSelectedLevels() = selectedLevels.values.any { it.isNotEmpty() }
 
     /**
-     * The study's loading progress out of PROGRESS_MAX, or null until a unit request has reported a total.
-     * Units fill most of it, by units received out of units expected across the unit requests so far,
-     * and observation count requests fill the last COUNT_PROGRESS_SHARE as they finish.
-     * When only the remaining levels are fetched, each level's total is added as its request starts.
+     * Requests finished out of requests expected across the study's load, see loadSteps,
+     * or null before the load has started. Each request counts the same however long it takes,
+     * and the expected total can grow as paged steps find more pages.
      */
     private fun getLoadProgress(studyDbId: String): Pair<Int, Int>? {
 
-        val requests = unitProgress[studyDbId]?.values ?: return null
+        val steps = loadSteps[studyDbId]?.values ?: return null
 
-        val unitTotal = requests.sumOf { it.second }
+        val expected = steps.sumOf { it.second }
 
-        if (unitTotal <= 0) return null
+        if (expected <= 0) return null
 
-        val units = requests.sumOf { it.first }.coerceAtMost(unitTotal).toFloat() / unitTotal
-
-        val counts = countProgress[studyDbId]
-            ?.let { (finished, total) -> if (total > 0) finished.toFloat() / total else 0f }
-            ?: 0f
-
-        val progress = units * (1 - COUNT_PROGRESS_SHARE) + counts * COUNT_PROGRESS_SHARE
-
-        return (progress * PROGRESS_MAX).toInt() to PROGRESS_MAX
+        return steps.sumOf { (finished, total) -> finished.coerceAtMost(total) } to expected
     }
 
-    private fun onUnitProgress(studyDbId: String, levelName: String?, received: Int, total: Int) {
+    /**
+     * Sets how many requests a step of the study's load expects, keeping the ones already finished.
+     */
+    private fun expectRequests(studyDbId: String, step: String, expected: Int) {
 
-        unitProgress.getOrPut(studyDbId) { hashMapOf() }[levelName] = received to total
+        val steps = loadSteps.getOrPut(studyDbId) { hashMapOf() }
+
+        steps[step] = (steps[step]?.first ?: 0) to expected
+
+        notifyProgress(studyDbId)
+    }
+
+    private fun finishRequest(studyDbId: String, step: String) {
+
+        val steps = loadSteps.getOrPut(studyDbId) { hashMapOf() }
+
+        val (finished, expected) = steps[step] ?: (0 to 1)
+
+        steps[step] = (finished + 1) to expected
 
         notifyProgress(studyDbId)
     }
 
     /**
-     * Sets how many observation count requests the study makes: the study total from the start,
-     * then one per level once the units show the study has several importable levels.
+     * Records a paged step's pages so far, out of the pages its first page showed to expect.
      */
-    private fun setCountRequests(studyDbId: String, total: Int) {
+    private fun onPages(studyDbId: String, step: String, received: Int, expected: Int) {
 
-        countProgress[studyDbId] = (countProgress[studyDbId]?.first ?: 0) to total
+        loadSteps.getOrPut(studyDbId) { hashMapOf() }[step] = received to expected.coerceAtLeast(received)
 
         notifyProgress(studyDbId)
     }
 
     /**
-     * Fills the count share of the study's progress when its remaining count requests aren't needed.
+     * Marks the rest of a step's requests finished, when they failed or aren't needed.
      */
-    private fun finishCountRequests(studyDbId: String) {
+    private fun finishStep(studyDbId: String, step: String) {
 
-        val total = countProgress[studyDbId]?.second ?: 1
+        val steps = loadSteps[studyDbId] ?: return
 
-        countProgress[studyDbId] = total to total
-
-        notifyProgress(studyDbId)
-    }
-
-    private fun onCountRequestFinished(studyDbId: String) {
-
-        val (finished, total) = countProgress[studyDbId] ?: (0 to 1)
-
-        countProgress[studyDbId] = (finished + 1) to total
+        steps[step]?.let { (_, expected) -> steps[step] = expected to expected }
 
         notifyProgress(studyDbId)
     }
@@ -583,13 +586,19 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
                         launch {
 
+                            //every step expects a request from the start so the card's progress is determinate,
+                            //units expect theirs in fetchObservationUnits, which knows the levels to fetch
+                            expectRequests(model.id, STEP_VARIABLES, 1)
+                            expectRequests(model.id, STEP_GERMPLASM, 1)
+                            expectRequests(model.id, STEP_COUNTS, 1)
+
                             //the study total doesn't need the units, so it's counted while they download
-                            setCountRequests(model.id, 1)
                             val studyCount = async { countWithProgress(model.id, null) }
 
                             coroutineScope {
                                 launch { fetchObservationVariables(model.id) }
                                 launch { fetchObservationUnits(model.id) }
+                                launch { fetchGermplasm(model.id) }
                             }
 
                             //level counts need the units' levels, and the levels show with their counts
@@ -600,8 +609,6 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                             selectDefaultLevel(model.id)
                             studyList.adapter?.notifyItemChanged(index)
                         }
-
-                        launch { fetchGermplasm(model.id) }
                     }
                 }
 
@@ -678,8 +685,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         observationUnits.clear()
         germplasms.clear()
         loadedStudies.clear()
-        unitProgress.clear()
-        countProgress.clear()
+        loadSteps.clear()
         observationCounts.clear()
         onLevelsChanged()
 
@@ -1076,24 +1082,34 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
     /**
      * Collects every page of a Fetcher flow, or returns null if any page failed
-     */
-    /**
-     * @param onPage called on the main thread after each page with the models received so far and the server's total
+     *
+     * @param onPage called on the main thread after each page with the pages received so far
+     * and the pages expected, from the server's total and the size of the first page,
+     * which is the page size the server used whatever was asked for
      */
     private suspend inline fun <reified M> fetchAllPages(
         name: String,
-        crossinline onPage: (received: Int, total: Int) -> Unit = { _, _ -> },
+        crossinline onPage: (received: Int, expected: Int) -> Unit = { _, _ -> },
         crossinline flow: () -> Flow<Any>
     ): HashSet<M>? =
         withContext(Dispatchers.IO) {
             try {
                 val models = hashSetOf<M>()
+                var pages = 0
+                var expectedPages = 1
                 flow().collect { response ->
                     val (total, page) = response as Pair<*, *>
-                    models.addAll((page as List<*>).filterIsInstance<M>())
-                    Log.d(TAG, "Fetched $name ${models.size}/$total")
-                    val received = models.size
-                    withContext(Dispatchers.Main) { onPage(received, total as? Int ?: 0) }
+                    val data = (page as List<*>).filterIsInstance<M>()
+                    models.addAll(data)
+                    pages++
+                    //the Fetcher sends the first page before requesting the rest
+                    if (pages == 1 && data.isNotEmpty()) {
+                        expectedPages = ceil((total as? Int ?: 0) / data.size.toDouble()).toInt().coerceAtLeast(1)
+                    }
+                    Log.d(TAG, "Fetched $name ${models.size}/$total, page $pages/$expectedPages")
+                    val received = pages
+                    val expected = expectedPages
+                    withContext(Dispatchers.Main) { onPage(received, expected) }
                 }
                 models
             } catch (e: Exception) {
@@ -1109,7 +1125,10 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
         val service = brapiService as BrAPIServiceV2
 
-        fetchAllPages<BrAPIGermplasm>("germplasm for $studyDbId") {
+        fetchAllPages<BrAPIGermplasm>(
+            "germplasm for $studyDbId",
+            onPage = { received, expected -> onPages(studyDbId, STEP_GERMPLASM, received, expected) }
+        ) {
             service.germplasmService.fetchAll(GermplasmQueryParams().also {
                 it.studyDbId(studyDbId)
                 it.pageSize(pageSize())
@@ -1121,7 +1140,10 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
         val service = brapiService as BrAPIServiceV2
 
-        fetchAllPages<BrAPIObservationVariable>("variables for $studyDbId") {
+        fetchAllPages<BrAPIObservationVariable>(
+            "variables for $studyDbId",
+            onPage = { received, expected -> onPages(studyDbId, STEP_VARIABLES, received, expected) }
+        ) {
             service.observationVariableService.fetchAll(VariableQueryParams().also {
                 it.studyDbId(studyDbId)
                 it.pageSize(pageSize())
@@ -1138,27 +1160,43 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         //a refresh fetches every level so levels added on the server since the last import are found
         val remainingLevels = if (fullRefresh) null else importedLevels.remainingLevels(studyDbId)
 
-        val units = if (remainingLevels == null) fetchObservationUnits(studyDbId, null) else {
+        //one request per level to fetch, or one for the whole study
+        val plannedSteps = (remainingLevels ?: listOf(null)).map { unitStep(it) }
 
-            val levelUnits = hashSetOf<BrAPIObservationUnit>()
+        plannedSteps.forEach { expectRequests(studyDbId, it, 1) }
 
-            for (level in remainingLevels) {
+        try {
 
-                val units = fetchObservationUnits(studyDbId, level) ?: return
+            val units = if (remainingLevels == null) fetchObservationUnits(studyDbId, null) else {
 
-                levelUnits.addAll(units)
+                val levelUnits = hashSetOf<BrAPIObservationUnit>()
 
-                //the server ignored the level filter and sent every unit, so the other levels are already here
-                if (units.any { !it.levelName().equals(level, ignoreCase = true) }) break
+                for (level in remainingLevels) {
+
+                    val units = fetchObservationUnits(studyDbId, level) ?: return
+
+                    levelUnits.addAll(units)
+
+                    //the server ignored the level filter and sent every unit, so the other levels are already here
+                    if (units.any { !it.levelName().equals(level, ignoreCase = true) }) break
+                }
+
+                //nothing came back for the remaining levels, fall back to fetching the whole study
+                levelUnits.ifEmpty {
+                    expectRequests(studyDbId, unitStep(null), 1)
+                    fetchObservationUnits(studyDbId, null)
+                }
             }
 
-            //nothing came back for the remaining levels, fall back to fetching the whole study
-            levelUnits.ifEmpty { fetchObservationUnits(studyDbId, null) }
-        }
+            units?.let {
+                observationUnits[studyDbId] = it
+                onLevelsChanged()
+            }
 
-        units?.let {
-            observationUnits[studyDbId] = it
-            onLevelsChanged()
+        } finally {
+
+            //levels skipped after the server ignored the filter, or left after a failed request
+            plannedSteps.forEach { finishStep(studyDbId, it) }
         }
     }
 
@@ -1168,7 +1206,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
         return fetchAllPages<BrAPIObservationUnit>(
             "units for $studyDbId at ${levelName ?: "all levels"}",
-            onPage = { received, total -> onUnitProgress(studyDbId, levelName, received, total) }
+            onPage = { received, expected -> onPages(studyDbId, unitStep(levelName), received, expected) }
         ) {
             service.observationUnitService.fetchAll(ObservationUnitQueryParams().also {
                 it.studyDbId(studyDbId)
@@ -1251,7 +1289,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         //so the study count that started alongside the units isn't needed
         (embeddedObservationCounts(studyDbId) ?: noVariableCounts(studyDbId))?.let { counts ->
             studyCount.cancel()
-            finishCountRequests(studyDbId)
+            finishStep(studyDbId, STEP_COUNTS)
             return counts
         }
 
@@ -1278,7 +1316,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
             )
         }
 
-        setCountRequests(studyDbId, levels.size + 1)
+        expectRequests(studyDbId, STEP_COUNTS, levels.size + 1)
 
         return coroutineScope {
 
@@ -1301,7 +1339,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         val service = brapiService as? BrAPIServiceV2 ?: return null
 
         return withContext(Dispatchers.IO) { countObservations(service, studyDbId, levelName) }
-            .also { onCountRequestFinished(studyDbId) }
+            .also { finishRequest(studyDbId, STEP_COUNTS) }
     }
 
     /**

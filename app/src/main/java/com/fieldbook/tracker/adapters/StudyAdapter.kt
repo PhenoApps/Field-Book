@@ -28,7 +28,7 @@ class StudyAdapter(private val studyLoader: StudyLoader) :
         fun isLoading(id: String): Boolean
 
         /**
-         * Progress and its maximum while loading, or null until the server reports a total.
+         * Steps finished and steps expected while loading, or null before loading starts.
          */
         fun getProgress(id: String): Pair<Int, Int>?
         fun getLevels(id: String): List<Level>
@@ -103,7 +103,7 @@ class StudyAdapter(private val studyLoader: StudyLoader) :
     }
 
     /**
-     * Spins until a total is known, then fills with the units received so far.
+     * Spins until loading starts, then fills as the steps of the load finish.
      */
     private fun bindProgress(indicator: CircularProgressIndicator, progress: Pair<Int, Int>?) {
 
