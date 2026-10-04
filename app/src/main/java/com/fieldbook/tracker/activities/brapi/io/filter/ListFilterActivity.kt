@@ -38,7 +38,6 @@ abstract class ListFilterActivity : ThemedActivity(),
         }
     }
 
-    protected val searchModels: ArrayList<String> = arrayListOf()
     protected var searchJob: Job? = null
 
     protected lateinit var fetchDescriptionTv: TextView
@@ -117,18 +116,10 @@ abstract class ListFilterActivity : ThemedActivity(),
         progressBar = findViewById(R.id.act_list_filter_pb)
         searchBar = findViewById(R.id.act_list_filter_sb)
 
-        searchBar.editText.setDropDownBackgroundResource(org.phenoapps.androidlibrary.R.color.WHITE)
-
         importTextView.text = getString(R.string.act_brapi_filter_apply)
 
         setupRecyclerView()
 
-    }
-
-    protected fun setProgress(progress: Int, progressMax: Int) {
-        progressBar.isIndeterminate = false
-        progressBar.progress = progress
-        progressBar.max = progressMax
     }
 
     open fun resetSelectionCountDisplay() = Unit
@@ -136,9 +127,11 @@ abstract class ListFilterActivity : ThemedActivity(),
     private fun setupRecyclerView() {
 
         recyclerView.adapter = CheckboxListAdapter { checked, position ->
-            if (position in cache.indices) {
 
-                val item = cache[position]
+            //the shown list can be narrowed by search, so positions index it rather than the cache
+            val item = (recyclerView.adapter as? CheckboxListAdapter)?.currentList?.getOrNull(position)
+
+            if (item != null) {
 
                 item.checked = checked
 

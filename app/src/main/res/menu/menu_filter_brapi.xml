@@ -24,6 +24,12 @@
         android:title="@string/menu_filter_brapi_clear_filters"
         android:icon="@drawable/delete_sweep"
         app:showAsAction="always" />
+    <!-- study import list only, see BrapiStudyFilterActivity -->
+    <item
+        android:visible="false"
+        android:id="@+id/action_show_imported"
+        android:title="@string/menu_filter_brapi_show_imported_studies"
+        app:showAsAction="never" />
     <item
         android:id="@+id/action_reset_cache"
         android:title="@string/menu_filter_brapi_reset_cache_title"

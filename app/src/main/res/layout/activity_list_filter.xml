@@ -16,17 +16,18 @@
         app:layout_constraintTop_toTopOf="parent"
         app:menu="@menu/menu_filter_brapi" />
 
-    <ProgressBar
+    <!-- shown while data downloads from the server, the search bar moves down below it -->
+    <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/act_list_filter_pb"
-        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="-7dp"
         android:indeterminate="true"
-        android:visibility="visible"
+        android:visibility="gone"
+        app:indicatorColor="?attr/fb_color_indeterminate_progress_bar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/act_list_filter_tb" />
+        app:layout_constraintTop_toBottomOf="@id/act_list_filter_tb"
+        tools:visibility="visible" />
 
     <com.fieldbook.tracker.views.SearchBar
         android:id="@+id/act_list_filter_sb"
@@ -34,7 +35,7 @@
         android:layout_height="wrap_content"
         android:background="@color/WHITE"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/act_list_filter_tb" />
+        app:layout_constraintTop_toBottomOf="@id/act_list_filter_pb" />
 
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/act_list_filter_cg"
@@ -107,9 +108,13 @@
         android:minHeight="?attr/actionBarSize"
         android:text="@string/dialog_import"
         android:visibility="gone"
-        android:textColor="?attr/fb_color_text_high_contrast_inverted"
-        android:background="@drawable/cell"
-        android:backgroundTint="?attr/fb_color_primary"
+        android:textColor="@color/primary_button_text"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        app:cornerRadius="5dp"
+        app:backgroundTint="@color/primary_button_background"
+        app:strokeColor="?attr/fb_high_contrast_outline_color"
+        app:strokeWidth="1dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

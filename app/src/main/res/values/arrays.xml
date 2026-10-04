@@ -96,6 +96,18 @@
         <item>@string/prefs_brapi_cache_invalidate_choice_none</item>
     </string-array>
   
+    <string-array name="pref_brapi_import_observations_values">
+        <item>always</item>
+        <item>ask</item>
+        <item>never</item>
+    </string-array>
+
+    <string-array name="pref_brapi_import_observations_entries">
+        <item>@string/prefs_brapi_import_observations_choice_always</item>
+        <item>@string/prefs_brapi_import_observations_choice_ask</item>
+        <item>@string/prefs_brapi_import_observations_choice_never</item>
+    </string-array>
+
     <string name="prefs_brapi_cache_invalidate_choice_each_time">Every time BrAPI import is opened</string>
     <string name="prefs_brapi_cache_invalidate_choice_daily">Daily</string>
     <string name="prefs_brapi_cache_invalidate_choice_weekly">Weekly</string>

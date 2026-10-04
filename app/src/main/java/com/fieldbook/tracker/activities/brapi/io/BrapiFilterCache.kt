@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.activities.brapi.io
 
 import android.content.Context
+import android.util.Log
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiCropsFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiProgramFilterActivity
@@ -19,7 +20,25 @@ import java.lang.reflect.Type
 class BrapiFilterCache {
     companion object {
 
+        private const val TAG = "BrapiFilterCache"
+
         private const val JSON_FILE_NAME = "com.fieldbook.tracker.activities.filters.json"
+
+        /**
+         * The parsed cache file and the file's (last modified, length) when it was read or written.
+         * The file can hold every trial and study of a large server, and parsing it on each screen,
+         * on the main thread, paused opening the study import. Kept until the file changes.
+         */
+        @Volatile
+        private var memory: Pair<Pair<Long, Long>, BrapiCacheModel>? = null
+
+        private fun File.stamp() = lastModified() to length()
+
+        //callers reassign studies and variables when filtering, so each gets its own model,
+        //gson leaves fields missing from older cache files null despite their types
+        @Suppress("USELESS_ELVIS", "UNNECESSARY_SAFE_CALL")
+        private fun BrapiCacheModel.shallowCopy() =
+            BrapiCacheModel(studies ?: emptyList(), variables?.toMutableMap() ?: mutableMapOf())
 
         enum class CacheClearInterval(val value: String) {
             EVERY("0"),
@@ -83,14 +102,37 @@ class BrapiFilterCache {
             context.externalCacheDir?.let { cacheDir ->
                 val file = File(cacheDir, JSON_FILE_NAME)
                 if (file.exists()) {
-                    val json = file.readText()
-                    return Gson().fromJson(
-                        json,
-                        getTypeToken()
-                    )
+
+                    val stamp = file.stamp()
+
+                    val model = memory?.takeIf { it.first == stamp }?.second
+                        ?: readFile(file)?.also { memory = stamp to it }
+                        ?: return BrapiCacheModel.empty()
+
+                    return model.shallowCopy()
                 }
             }
             return BrapiCacheModel.empty()
+        }
+
+        /**
+         * Parses the cache file, or deletes it and returns null if it can't be parsed, so the data is
+         * downloaded again rather than failing on every open. A write cut off by the app being killed
+         * could leave a partial file before saves went through a temporary file.
+         */
+        private fun readFile(file: File): BrapiCacheModel? {
+
+            val model = try {
+                Gson().fromJson<BrapiCacheModel>(file.readText(), getTypeToken())
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to read the BrAPI cache, it will be downloaded again", e)
+                null
+            }
+
+            //gson returns null for an empty file
+            if (model == null) file.delete()
+
+            return model
         }
 
         fun saveStudyTrialsToFile(context: Context, models: List<TrialStudyModel>) {
@@ -103,7 +145,17 @@ class BrapiFilterCache {
         fun saveToStorage(context: Context, model: BrapiCacheModel) {
             val json = Gson().toJson(model, getTypeToken())
             context.externalCacheDir?.let {
-                File(it, JSON_FILE_NAME).writeText(json)
+                val file = File(it, JSON_FILE_NAME)
+                val temp = File(it, "$JSON_FILE_NAME.tmp")
+                temp.writeText(json)
+                //a rename replaces the file in one step, so a write that's cut off leaves the previous cache
+                //rather than a partial one, the delete is for file systems that won't rename over a file
+                if (!temp.renameTo(file)) {
+                    file.delete()
+                    temp.renameTo(file)
+                }
+                //the caller may keep changing its model, so the saved state is copied
+                memory = file.stamp() to model.shallowCopy()
             }
         }
 
@@ -132,6 +184,8 @@ class BrapiFilterCache {
                 clearPreferences(context, BrapiStudyFilterActivity.FILTERER_KEY)
                 clearPreferences(context, BrapiTraitFilterActivity.FILTERER_KEY)
             }
+
+            memory = null
 
             context.externalCacheDir?.let {
                 File(it, JSON_FILE_NAME).delete()

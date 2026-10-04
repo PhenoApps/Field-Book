@@ -29,6 +29,7 @@ Fields can be filtered by `program`, `season`, `trial`, or `crop` by pressing <i
 The number of selected fields is displayed on the <img class="icon" src="_static/icons/settings/brapi/tray-remove.png"> icon in the toolbar.
 Press this icon to clear your selections.
 If your field was recently created in your database, you may need to reset the cache from the menu in the top toolbar.
+Resetting the cache also clears any filters.
 Press the import button on the bottom of the screen to download the fields to Field Book.
 
 The final screen shows additional details for each selected field, including the number of entries, number of associated traits, location, and season.
@@ -36,6 +37,14 @@ The tabs at the top can be used to change the observation level and sort order f
 
 Press the Save button at the bottom of the screen to import the fields into Field Book.
 The fields and any linked traits will be saved for use in Field Book.
+
+Field Book can also download the observations already collected for the fields on the server.
+The number of observations on the server is shown next to each observation level.
+If the server can't count observations by level, the total for the whole field is shown next to its location and trial instead.
+By default, you are asked whether to download them each time you import.
+Choosing **Never** in this prompt skips the download and stops the prompt from appearing again.
+This can be changed with the **Download Observations** option in [BrAPI Transmission Settings](settings/settings-brapi.md#transmission-settings).
+If the download fails, the fields are still imported, and their observations can be downloaded later with [Sync](#sync).
 
 !> Any field can be exported locally, but only fields that have been imported via BrAPI are able to export data via BrAPI.
 And only if that data is also collected using BrAPI-imported traits.
@@ -63,6 +72,7 @@ Traits can also be filtered by `trial`, `study`, or `crop` by pressing <img clas
 The number of selected traits is displayed on the the <img class="icon" src="_static/icons/settings/brapi/tray-remove.png"> icon in the toolbar.
 Press this icon to clear your selections.
 If your trait was recently created in your database, you may need to reset the cache from the menu in the top toolbar.
+Resetting the cache also clears any filters.
 
 When you are finished with your selections, press the import button on the bottom of the screen to download the traits to Field Book.
 The final step provides an opportunity to modify trait details like format.

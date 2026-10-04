@@ -26,6 +26,7 @@ import com.fieldbook.tracker.brapi.service.core.ServerInfoService;
 import com.fieldbook.tracker.brapi.service.core.StudyService;
 import com.fieldbook.tracker.brapi.service.core.TrialService;
 import com.fieldbook.tracker.brapi.service.germ.GermplasmService;
+import com.fieldbook.tracker.brapi.service.pheno.ObservationService;
 import com.fieldbook.tracker.brapi.service.pheno.ObservationUnitService;
 import com.fieldbook.tracker.brapi.service.pheno.ObservationVariableService;
 import com.fieldbook.tracker.database.DataHelper;
@@ -149,6 +150,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     public final StudyService studyService;
     public final ObservationVariableService observationVariableService;
     public final ObservationUnitService observationUnitService;
+    public final ObservationService observationService;
     public final GermplasmService germplasmService;
     public final ServerInfoService serverInfoService;
 
@@ -179,6 +181,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
         this.trialService = new TrialService.Default(this.trialsApi);
         this.observationVariableService = new ObservationVariableService.Default(this.traitsApi);
         this.observationUnitService = new ObservationUnitService.Default(this.observationUnitsApi);
+        this.observationService = new ObservationService.Default(this.observationsApi);
         this.germplasmService = new GermplasmService.Default(this.germplasmApi);
         this.serverInfoService = new ServerInfoService.Default(this.serverInfoApi);
 
@@ -562,7 +565,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                                BrapiObservationLevel observationLevel, final Function<BrapiStudyDetails, Void> function,
                                final Function<Integer, Void> failFunction) {
         try {
-            final Integer pageSize = Integer.parseInt(preferences.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50"));
+            final Integer pageSize = BrAPIService.getPageSize(context);
             final BrapiStudyDetails study = new BrapiStudyDetails();
             study.setAttributes(new ArrayList<>());
             study.setValues(new ArrayList<>());
@@ -763,7 +766,7 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
     }
 
     public Map<String, BrAPIGermplasm> getGermplasmDetails(List<String> allGermplasmDbIds, final Function<Integer, Void> failFunction) {
-        final Integer pageSize = Integer.parseInt(preferences.getString(PreferenceKeys.BRAPI_PAGE_SIZE, "50"));
+        final Integer pageSize = BrAPIService.getPageSize(context);
         BrAPIGermplasmSearchRequest germplasmBody = new BrAPIGermplasmSearchRequest();
         List<String> doubledGermplasmDbIds = new ArrayList<>(allGermplasmDbIds);
         doubledGermplasmDbIds.addAll(allGermplasmDbIds);
@@ -1164,6 +1167,16 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             externalIdToInternalMap.put(model.getObservation_unit_db_id(), String.valueOf(model.getInternal_id_observation_unit()));
         }
         return externalIdToInternalMap;
+    }
+
+    /**
+     * Maps observations the server sent with other data, such as units fetched with includeObservations,
+     * the same way as observations from the observations endpoint.
+     *
+     * @param validVariableDbIds observations of other variables are dropped
+     */
+    public List<Observation> mapObservations(List<BrAPIObservation> brapiObservationList, List<String> validVariableDbIds) {
+        return mapObservations(brapiObservationList, getExtVariableDbIdMapping(), validVariableDbIds);
     }
 
     /**
@@ -1704,6 +1717,9 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
             field.setObservationLevel(observationLevel);
             field.setDataSourceFormat(ImportFormat.BRAPI);
             field.setTrialName(studyDetails.getTrialName());
+            if (studyDetails.getStudyDbLevels() != null) {
+                field.setStudyDbLevels(new JSONArray(studyDetails.getStudyDbLevels()).toString());
+            }
             // Get our host url
             if (BrAPIService.getHostUrl(context) != null) {
                 field.setDataSource(BrAPIService.getHostUrl(context));
@@ -1730,38 +1746,38 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 return new BrapiControllerResponse(false, BrAPIService.noPlots);
             }
 
-            // Construct our map to check for uniques
-            for (List<String> dataRow : studyDetails.getValues()) {
-                Integer idColumn = studyDetails.getAttributes().indexOf("ObservationUnitName");
-                checkMap.put(dataRow.get(idColumn), dataRow.get(idColumn));
+            // Construct our map to check for uniques, against the unit ids the field is keyed on
+            // like file imports, units without the column are left out rather than failing every save
+            int idColumn = studyDetails.getAttributes().indexOf("ObservationUnitDbId");
+            if (idColumn >= 0) {
+                for (List<String> dataRow : studyDetails.getValues()) {
+                    if (idColumn < dataRow.size()) {
+                        checkMap.put(dataRow.get(idColumn), dataRow.get(idColumn));
+                    }
+                }
             }
 
             if (!dataHelper.checkUnique(checkMap)) {
                 return new BrapiControllerResponse(false, BrAPIService.notUniqueIdMessage);
             }
 
-
-            DataHelper.db.beginTransaction();
-            // All checks finished, insert our data.
-            int studyId = dataHelper.createField(field, studyDetails.getAttributes(), true);
-            field.setStudyId(studyId);
-
             boolean fail = false;
             String failMessage = "";
 
-            // We want the saving of plots and traits wrap together in a transaction
-            // so if they fail, the field can be deleted.
+            DataHelper.db.beginTransaction();
+
+            // We want the saving of the field, plots and traits wrapped together in a transaction
+            // so if they fail, nothing is saved. The transaction is always ended, an open one would
+            // be left on the shared connection if creating the field threw.
             try {
 
-                int plotId = studyDetails.getAttributes().indexOf("Plot");
+                // All checks finished, insert our data.
+                int studyId = dataHelper.createField(field, studyDetails.getAttributes(), true);
+                field.setStudyId(studyId);
 
                 System.out.println("Size of study details: " + studyDetails.getValues().size());
 
-                for (List<String> dataRow : studyDetails.getValues()) {
-                    dataHelper.createFieldData(studyId, studyDetails.getAttributes(), dataRow);
-                    Log.d("BrAPIServiceV2", "Saving: Attributes: " + studyDetails.getAttributes());
-                    Log.d("BrAPIServiceV2", "Saving: dataRow: " + dataRow);
-                }
+                dataHelper.createFieldDataRows(studyId, studyDetails.getAttributes(), studyDetails.getValues());
 
                 // Insert the traits already associated with this study
                 for (TraitObject t : studyDetails.getTraits()) {
@@ -1789,11 +1805,11 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 // Delete our field if our traits or fields failed to insert
                 fail = true;
                 failMessage = e.toString();
+            } finally {
+                // The shared connection is no longer closed and reopened after each save,
+                // which could break other threads using it.
+                DataHelper.db.endTransaction();
             }
-
-            DataHelper.db.endTransaction();
-            dataHelper.close();
-            dataHelper.open();
 
             if (fail) {
                 return new BrapiControllerResponse(false, failMessage);

@@ -12,100 +12,135 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/list_item_brapi_filter_cl"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:padding="16dp">
 
-        <ProgressBar
+        <!-- spins until the server reports how many units to expect, then fills as pages arrive -->
+        <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/list_item_study_pb"
             android:indeterminate="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="16dp"
-            app:layout_constraintVertical_bias="0"
+            app:indicatorColor="?attr/fb_color_indeterminate_progress_bar"
+            app:trackColor="@color/light_gray"
+            app:trackCornerRadius="2dp"
+            app:indicatorSize="32dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"/>
+
+        <!-- in place of the progress ring when the study couldn't be loaded, the ring is left invisible to keep its space -->
+        <ImageView
+            android:id="@+id/list_item_study_error_iv"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_transfer_error"
+            android:visibility="gone"
+            app:tint="?attr/colorError"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
 
         <TextView
             android:id="@+id/list_item_study_title_tv"
             style="@style/TextViewStyle.Bold.Title"
             android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_margin="16dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:gravity="center_vertical"
-            app:layout_constraintBottom_toTopOf="@id/list_item_study_units_chip"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toStartOf="@id/list_item_study_pb"
-            app:layout_constraintVertical_bias="0"
             app:layout_constraintHorizontal_bias="0"
             tools:text="KSU" />
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/list_item_study_units_chip"
-            android:layout_width="wrap_content"
+        <!-- location and trial share one line, long names are ellipsized rather than wrapped -->
+        <com.fieldbook.tracker.views.SharedWidthRow
+            android:id="@+id/list_item_study_chip_group"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            app:chipIcon="@drawable/ic_dots_grid"
-            android:checkable="false"
-            android:textColor="@color/BLACK"
-            app:layout_constraintHorizontal_bias="0"
+            android:layout_marginTop="8dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/list_item_study_pb"
-            app:chipIconTint="@color/BLACK"
-            app:chipBackgroundColor="@color/light_gray"
-            tools:text="108"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/list_item_study_title_tv">
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/list_item_study_traits_chip"
-            style="@style/TextViewStyle.Sub"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            app:chipIcon="@drawable/ic_ruler"
-            android:checkable="false"
-            android:textColor="@color/BLACK"
-            app:layout_constraintHorizontal_bias="0"
-            app:layout_constraintStart_toEndOf="@id/list_item_study_units_chip"
-            app:layout_constraintTop_toBottomOf="@id/list_item_study_pb"
-            app:chipIconTint="@color/BLACK"
-            app:chipBackgroundColor="@color/light_gray"
-            tools:text="2" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/list_item_study_location_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                app:chipIcon="@drawable/map_marker_outline"
+                android:checkable="false"
+                android:clickable="false"
+                android:focusable="false"
+                android:textColor="@color/BLACK"
+                android:ellipsize="end"
+                android:singleLine="true"
+                app:chipIconTint="@color/BLACK"
+                app:chipBackgroundColor="@color/light_gray"
+                tools:text="Manhattan, KS" />
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/list_item_study_location_chip"
-            style="@style/TextViewStyle.Sub"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            app:chipIcon="@drawable/map_marker_outline"
-            android:checkable="false"
-            android:textColor="@color/BLACK"
-            app:layout_constraintHorizontal_bias="0"
-            app:layout_constraintStart_toEndOf="@id/list_item_study_traits_chip"
-            app:layout_constraintTop_toBottomOf="@id/list_item_study_pb"
-            app:chipIconTint="@color/BLACK"
-            app:chipBackgroundColor="@color/light_gray"
-            tools:text="Manhattan, KS" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/list_item_trial_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:chipIcon="@drawable/ic_trial"
+                android:checkable="false"
+                android:clickable="false"
+                android:focusable="false"
+                android:textColor="@color/BLACK"
+                android:ellipsize="end"
+                android:singleLine="true"
+                app:chipIconTint="@color/BLACK"
+                app:chipBackgroundColor="@color/light_gray"
+                tools:text="PeeDee Otter Trial"/>
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/list_item_trial_chip"
-            android:layout_width="wrap_content"
+            <!-- observations already on the server for the whole study, used when the server can't count by level -->
+            <com.google.android.material.chip.Chip
+                android:id="@+id/list_item_study_observations_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:visibility="gone"
+                app:chipIcon="@drawable/ic_nav_drawer_collect_data"
+                android:checkable="false"
+                android:clickable="false"
+                android:focusable="false"
+                android:textColor="@color/BLACK"
+                android:singleLine="true"
+                app:chipIconTint="@color/BLACK"
+                app:chipBackgroundColor="@color/light_gray"
+                tools:visibility="visible"
+                tools:text="1240"/>
+
+        </com.fieldbook.tracker.views.SharedWidthRow>
+
+        <!-- why the study couldn't be loaded, shown instead of its levels -->
+        <TextView
+            android:id="@+id/list_item_study_error_tv"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            app:chipIcon="@drawable/ic_trial"
-            android:checkable="false"
-            android:textColor="@color/BLACK"
-            android:ellipsize="end"
-            app:layout_constraintHorizontal_bias="0"
+            android:layout_marginTop="8dp"
+            android:textColor="?attr/colorError"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/list_item_study_units_chip"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:chipIconTint="@color/BLACK"
-            app:chipBackgroundColor="@color/light_gray"
-            tools:text="PeeDee Otter Trial"/>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/list_item_study_chip_group"
+            tools:text="Failed to fetch observation units"
+            tools:visibility="visible" />
+
+        <!-- importable observation levels, one list_item_study_level row each -->
+        <LinearLayout
+            android:id="@+id/list_item_study_levels_ll"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/list_item_study_error_tv"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.cardview.widget.CardView>
-
