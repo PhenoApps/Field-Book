@@ -38,7 +38,6 @@ abstract class ListFilterActivity : ThemedActivity(),
         }
     }
 
-    protected val searchModels: ArrayList<String> = arrayListOf()
     protected var searchJob: Job? = null
 
     protected lateinit var fetchDescriptionTv: TextView
@@ -116,8 +115,6 @@ abstract class ListFilterActivity : ThemedActivity(),
         importTextView = findViewById(R.id.act_list_filter_import_btn)
         progressBar = findViewById(R.id.act_list_filter_pb)
         searchBar = findViewById(R.id.act_list_filter_sb)
-
-        searchBar.editText.setDropDownBackgroundResource(org.phenoapps.androidlibrary.R.color.WHITE)
 
         importTextView.text = getString(R.string.act_brapi_filter_apply)
 

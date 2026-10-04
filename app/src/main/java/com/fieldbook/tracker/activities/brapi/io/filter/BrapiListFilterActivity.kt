@@ -475,6 +475,9 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
         cache.clear()
 
+        //the count is of the deleted cache, loadStorageItems shows the new one once the reload finishes
+        searchBar.editText.hint = null
+
         // Filters refer to programs, trials and studies of the old cache, so they're cleared with it.
         // Don't clear the adapter here — keep showing the previous list while the progress bar
         // indicates loading. clearFilters() calls restoreModels(), which reloads from the server

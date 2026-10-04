@@ -2,8 +2,6 @@ package com.fieldbook.tracker.activities.brapi.io.filter
 
 import android.text.TextWatcher
 import android.view.MenuItem
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
 import androidx.annotation.OptIn
 import androidx.appcompat.widget.ActionMenuView
 import com.fieldbook.tracker.R
@@ -43,29 +41,10 @@ abstract class BrapiSubFilterListActivity<T> : BrapiListFilterActivity<T>() {
 
     override fun setupSearch(models: List<CheckboxListAdapter.Model>) {
 
-        val searchEditText = searchBar.editText
-
-        searchModels.clear()
-
-        searchModels.addAll(models.map { it.label }.distinct())
-
-        val adapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_dropdown_item_1line,
-            searchModels
-        )
-
-        searchEditText.threshold = 1
-
-        searchEditText.setAdapter(adapter)
-
-        searchEditText.onItemClickListener =
-            AdapterView.OnItemClickListener { parent, _, position, _ ->
-                val selected = parent?.getItemAtPosition(position).toString()
-                searchEditText.setText(selected)
-            }
-
-        searchEditText.addTextChangedListener(textWatcher)
+        //typing filters the list itself, no suggestions are shown,
+        //setupSearch runs on every list refresh, so the watcher is removed first to add it only once
+        searchBar.editText.removeTextChangedListener(textWatcher)
+        searchBar.editText.addTextChangedListener(textWatcher)
     }
 
     private val toolbar by lazy { findViewById<MaterialToolbar>(R.id.act_list_filter_tb) }
