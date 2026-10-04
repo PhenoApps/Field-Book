@@ -123,7 +123,7 @@ public interface BrAPIService {
     }
 
     //also the default in preferences_brapi_advanced.xml, so the settings screen shows what's used
-    String DEFAULT_PAGE_SIZE = "100";
+    String DEFAULT_PAGE_SIZE = "250";
 
     /**
      * Page size for every paged BrAPI request, larger pages mean fewer requests,
