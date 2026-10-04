@@ -375,6 +375,16 @@ public class DataHelper {
     }
 
     @NonNull
+    /**
+     * Highest rep of each unit and trait in the study, keyed by (observation unit id, trait id).
+     */
+    public Map<kotlin.Pair<String, String>, Integer> getMaxReps(String studyId) {
+
+        open();
+
+        return ObservationDao.Companion.getMaxReps(studyId);
+    }
+
     public String getNextRep(String studyId, String unit, String traitDbId) {
 
         open();

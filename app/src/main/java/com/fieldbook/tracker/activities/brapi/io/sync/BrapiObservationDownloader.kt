@@ -162,6 +162,9 @@ class BrapiObservationDownloader @Inject constructor(
     /**
      * Saves server observations into the field as new local observations, each in the next rep
      * of its unit and variable. Callers decide which observations are new.
+     *
+     * The field's highest reps are read once and counted up in memory, and the inserts are written
+     * in one transaction, rather than a rep query and a commit for each observation.
      */
     fun insert(
         field: FieldObject,
@@ -169,36 +172,51 @@ class BrapiObservationDownloader @Inject constructor(
         traitsById: Map<String, TraitObject>
     ) {
 
+        if (observations.isEmpty()) return
+
         val studyId = field.studyId.toString()
 
-        observations.forEach { obs ->
+        Log.d(TAG, "Saving ${observations.size} observations into field $studyId")
 
-            Log.d(TAG, "Saving observation: ${obs.dbId}")
+        val maxReps = HashMap(dataHelper.getMaxReps(studyId))
 
-            obs.internalVariableDbId = obs.variableDbId
+        dataHelper.beginTransaction()
 
-            // Store categorical BrAPI values using Field Book's internal JSON format.
-            obs.value = normalizeValue(obs, traitsById)
+        try {
 
-            val rep = dataHelper.getNextRep(
-                studyId,
-                obs.unitDbId,
-                obs.internalVariableDbId
-            ).toInt()
+            observations.forEach { obs ->
 
-            dataHelper.insertObservation(
-                obs.unitDbId,
-                obs.internalVariableDbId,
-                obs.value ?: "",
-                obs.collector ?: "",
-                "",
-                "",
-                studyId,
-                obs.dbId,
-                obs.timestamp,
-                obs.lastSyncedTime,
-                rep.toString()
-            )
+                obs.internalVariableDbId = obs.variableDbId
+
+                // Store categorical BrAPI values using Field Book's internal JSON format.
+                obs.value = normalizeValue(obs, traitsById)
+
+                val key = obs.unitDbId.orEmpty() to obs.internalVariableDbId.orEmpty()
+                val rep = (maxReps[key] ?: 0) + 1
+                maxReps[key] = rep
+
+                dataHelper.insertObservation(
+                    obs.unitDbId,
+                    obs.internalVariableDbId,
+                    obs.value ?: "",
+                    obs.collector ?: "",
+                    "",
+                    "",
+                    studyId,
+                    obs.dbId,
+                    //without a server timestamp the insert would use the current time, which is later
+                    //than the sync time, and the next sync would treat the observation as a local edit
+                    obs.timestamp ?: obs.lastSyncedTime,
+                    obs.lastSyncedTime,
+                    rep.toString()
+                )
+            }
+
+            dataHelper.setTransactionSuccessfull()
+
+        } finally {
+
+            dataHelper.endTransaction()
         }
     }
 
