@@ -81,7 +81,7 @@ class BrapiStudyFilterActivity(
             it.studies =
                 it.studies.filter { if (programDbIds.isNotEmpty()) it.programDbId in programDbIds else true }
                     .filter { if (trialDbIds.isNotEmpty()) it.trialDbId in trialDbIds else true }
-                    .filter { if (seasonDbIds.isNotEmpty()) it.study.seasons.any { s -> s in seasonDbIds } else true }
+                    .filter { if (seasonDbIds.isNotEmpty()) it.study.seasons.orEmpty().any { s -> s in seasonDbIds } else true }
                     .filter { if (commonCropNames.isNotEmpty()) it.study.commonCropName in commonCropNames else true }
         }
 

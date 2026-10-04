@@ -1,6 +1,7 @@
 package com.fieldbook.tracker.activities.brapi.io
 
 import android.content.Context
+import android.util.Log
 import androidx.preference.PreferenceManager
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiCropsFilterActivity
 import com.fieldbook.tracker.activities.brapi.io.filter.BrapiProgramFilterActivity
@@ -18,6 +19,8 @@ import java.lang.reflect.Type
 
 class BrapiFilterCache {
     companion object {
+
+        private const val TAG = "BrapiFilterCache"
 
         private const val JSON_FILE_NAME = "com.fieldbook.tracker.activities.filters.json"
 
@@ -103,13 +106,33 @@ class BrapiFilterCache {
                     val stamp = file.stamp()
 
                     val model = memory?.takeIf { it.first == stamp }?.second
-                        ?: Gson().fromJson<BrapiCacheModel>(file.readText(), getTypeToken())
-                            .also { memory = stamp to it }
+                        ?: readFile(file)?.also { memory = stamp to it }
+                        ?: return BrapiCacheModel.empty()
 
                     return model.shallowCopy()
                 }
             }
             return BrapiCacheModel.empty()
+        }
+
+        /**
+         * Parses the cache file, or deletes it and returns null if it can't be parsed, so the data is
+         * downloaded again rather than failing on every open. A write cut off by the app being killed
+         * could leave a partial file before saves went through a temporary file.
+         */
+        private fun readFile(file: File): BrapiCacheModel? {
+
+            val model = try {
+                Gson().fromJson<BrapiCacheModel>(file.readText(), getTypeToken())
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to read the BrAPI cache, it will be downloaded again", e)
+                null
+            }
+
+            //gson returns null for an empty file
+            if (model == null) file.delete()
+
+            return model
         }
 
         fun saveStudyTrialsToFile(context: Context, models: List<TrialStudyModel>) {
@@ -123,7 +146,14 @@ class BrapiFilterCache {
             val json = Gson().toJson(model, getTypeToken())
             context.externalCacheDir?.let {
                 val file = File(it, JSON_FILE_NAME)
-                file.writeText(json)
+                val temp = File(it, "$JSON_FILE_NAME.tmp")
+                temp.writeText(json)
+                //a rename replaces the file in one step, so a write that's cut off leaves the previous cache
+                //rather than a partial one, the delete is for file systems that won't rename over a file
+                if (!temp.renameTo(file)) {
+                    file.delete()
+                    temp.renameTo(file)
+                }
                 //the caller may keep changing its model, so the saved state is copied
                 memory = file.stamp() to model.shallowCopy()
             }

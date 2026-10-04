@@ -461,6 +461,12 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             .persistCheckBoxes()
             .sortedBy { it.label }
 
+        //the adapter only adds a row to selected when its checkbox is bound, so models checked from the saved
+        //filter are added here, otherwise rows never scrolled to are left out of the import and the count
+        (recyclerView.adapter as CheckboxListAdapter).selected.let { selected ->
+            uiModels.filter { it.checked && it !in selected }.forEach { selected.add(it) }
+        }
+
         cache.addAll(uiModels.filter { it !in cache })
 
         submitAdapterItems(cache)
