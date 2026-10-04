@@ -2,7 +2,6 @@ package com.fieldbook.tracker.brapi.service
 
 import android.util.Log
 import com.fieldbook.tracker.brapi.service.core.ApiCall
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.buffer
@@ -12,6 +11,7 @@ import org.brapi.client.v2.ApiCallback
 import org.brapi.client.v2.model.queryParams.core.BrAPIQueryParams
 import org.brapi.v2.model.BrAPIResponse
 import org.brapi.v2.model.BrAPIResponseResult
+import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.reflect.KFunction2
@@ -25,13 +25,17 @@ import kotlin.reflect.KFunction2
  */
 class Fetcher<U, T : BrAPIQueryParams, R : BrAPIResponse<*>> {
 
-    private fun R.data(): List<U> =
-        (result as? BrAPIResponseResult<*>)?.data?.mapNotNull {
+    //the client passes null for a response without a body, such as a 204, despite the type
+    private fun R?.data(): List<U> =
+        (this?.result as? BrAPIResponseResult<*>)?.data?.mapNotNull {
             @Suppress("UNCHECKED_CAST")
             it as? U
         } ?: emptyList()
 
     fun fetchAll(params: T, apiCall: KFunction2<T, ApiCallback<R>, Call>) = callbackFlow {
+
+        //every request made, cancelled when the flow ends early, after a failed page or when the collector stops
+        val calls = ConcurrentLinkedQueue<Call>()
 
         try {
 
@@ -39,15 +43,23 @@ class Fetcher<U, T : BrAPIQueryParams, R : BrAPIResponse<*>> {
             //determines how many remaining pages need to be queried
             params.page(0)
 
-            val initialCallback = ApiCall<R>({ first ->
+            val initialCallback = ApiCall<R>({ response ->
 
-                val pagination = first.metadata?.pagination
+                @Suppress("USELESS_CAST")
+                val first = response as R?
+
+                val data = first.data()
+                val pagination = first?.metadata?.pagination
                 val totalCount = pagination?.totalCount ?: 0
-                val totalPages = pagination?.totalPages ?: 1
+
+                //some servers leave out totalPages, it's worked out from the total
+                //and the page size the server used, which may not be the one asked for
+                val pageSize = pagination?.pageSize?.takeIf { it > 0 } ?: data.size.takeIf { it > 0 } ?: 1
+                val totalPages = pagination?.totalPages ?: ((totalCount + pageSize - 1) / pageSize)
 
                 Log.d("FETCH", "Total count: $totalCount, Total pages: $totalPages")
 
-                trySend(totalCount to first.data())
+                trySend(totalCount to data)
 
                 if (totalPages <= 1) {
                     close()
@@ -63,9 +75,10 @@ class Fetcher<U, T : BrAPIQueryParams, R : BrAPIResponse<*>> {
 
                     Log.d("FETCH", "Calling page $i/$totalPages with ${params.pageSize()} items")
 
-                    apiCall(params, ApiCall<R>({ response ->
+                    calls += apiCall(params, ApiCall<R>({ pageResponse ->
 
-                        trySend(totalCount to response.data())
+                        @Suppress("USELESS_CAST")
+                        trySend(totalCount to (pageResponse as R?).data())
 
                         if (remaining.decrementAndGet() == 0 && !failed.get()) {
                             close()
@@ -83,13 +96,13 @@ class Fetcher<U, T : BrAPIQueryParams, R : BrAPIResponse<*>> {
 
             }) { e ->
 
-                e?.printStackTrace()
+                Log.e("FETCH", "Failed to fetch the first page", e)
 
-                cancel(e?.message ?: "Unknown error", e)
-
+                //closed with the error rather than cancelled, so collectors get the server's error code
+                close(e ?: IllegalStateException("Failed to fetch the first page"))
             }
 
-            apiCall(params, initialCallback)
+            calls += apiCall(params, initialCallback)
 
             Log.d("FETCH", "Initial call made")
 
@@ -97,12 +110,11 @@ class Fetcher<U, T : BrAPIQueryParams, R : BrAPIResponse<*>> {
 
             e.printStackTrace()
 
-            cancel(e.message ?: "Unknown error")
-
-            throw(e)
+            close(e)
         }
 
-        awaitClose()
+        //requests that already finished ignore the cancel
+        awaitClose { calls.forEach { it.cancel() } }
 
     }.buffer(Channel.UNLIMITED)
 }

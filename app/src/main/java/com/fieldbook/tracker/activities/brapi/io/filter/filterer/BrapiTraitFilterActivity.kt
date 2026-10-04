@@ -25,7 +25,8 @@ import com.fieldbook.tracker.traits.formats.Formats
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -213,12 +214,12 @@ class BrapiTraitFilterActivity(
 
         try {
 
-            var count = 0
-
             queried = true
 
             if (brapiService is BrAPIServiceV1)
                 return@launch
+
+            var failed = false
 
             (brapiService as BrAPIServiceV2).observationVariableService.fetchAll(
                 VariableQueryParams().also {
@@ -226,31 +227,33 @@ class BrapiTraitFilterActivity(
                 }
             )
                 .catch { e ->
+                    failed = true
                     onApiException(e)
-                    queryVariablesJob?.cancel()
                 }
                 .collect {
-
-                    var (totalCount, models) = it as Pair<*, *>
-                    totalCount = totalCount as Int
-                    models = models as List<*>
-                    models = models.map { m -> m as BrAPIObservationVariable }
-
-                    count += (models as List<*>).size
-
-                    variables.addAll(models)
-
-                    withContext(Dispatchers.Main) {
-                        if (variables.size == totalCount || totalCount < pageSize) {
-                            BrapiFilterCache.saveVariables(this@BrapiTraitFilterActivity, variables)
-                            restoreModels()
-                            cancel()
-                        }
-                    }
+                    val models = (it as Pair<*, *>).second as List<*>
+                    variables.addAll(models.map { m -> m as BrAPIObservationVariable })
                 }
+
+            //the flow completes once every page has responded, so save whatever arrived even if it doesn't
+            //match the server's total count, a failed page ends the flow with an error instead
+            if (failed) return@launch
+
+            withContext(Dispatchers.Main) {
+                BrapiFilterCache.saveVariables(this@BrapiTraitFilterActivity, variables)
+                //runs once this load finishes, see restoreModels
+                restoreModels()
+            }
+
         } catch (e: Exception) {
+            currentCoroutineContext().ensureActive()
             e.printStackTrace()
         }
+    }
+
+    //a reset cache downloads the variables again
+    override fun onCacheReset() {
+        queried = false
     }
 
     override fun hasData(): Boolean {

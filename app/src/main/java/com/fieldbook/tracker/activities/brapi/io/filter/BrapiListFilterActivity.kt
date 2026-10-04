@@ -31,7 +31,6 @@ import com.google.android.material.chip.ChipGroup
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -66,6 +65,10 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
     private var queryStudiesJob: Job? = null
     private var queryTrialsJob: Job? = null
+
+    //set when the trial download fails, so loadData stops before requesting studies
+    @Volatile
+    private var trialsFailed = false
 
     //the restore or download in progress, and whether another was asked for meanwhile, see restoreModels
     private var restoreJob: Job? = null
@@ -288,11 +291,16 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
 
         try {
             trialModels.clear()
+            trialsFailed = false
 
             progressBar.visibility = View.VISIBLE
 
             queryTrialsJob = queryTrials()
             queryTrialsJob?.join()
+
+            //onApiException has already shown the error and is closing the screen or asking to sign in again,
+            //requesting studies would only show it a second time
+            if (trialsFailed) return
 
             queryStudiesJob = queryStudies()
             queryStudiesJob?.join()
@@ -399,22 +407,13 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
             })
 
             .catch { e ->
+                trialsFailed = true
                 onApiException(e)
-                cancel()
-                queryTrialsJob?.cancel()
             }
-            .collect { it ->
-
-                var (total, models) = it as Pair<*, *>
-                total = total as Int
-                models = models as List<*>
-                models = models.map { it as BrAPITrial }
-
-                trialModels.addAll(models)
-
-                if (total == trialModels.size || total < pageSize) {
-                    queryTrialsJob?.cancel()
-                }
+            //the flow completes once every page has responded, a failed page ends it with an error instead
+            .collect {
+                val models = (it as Pair<*, *>).second as List<*>
+                trialModels.addAll(models.map { m -> m as BrAPITrial })
             }
     }
 
@@ -494,9 +493,16 @@ abstract class BrapiListFilterActivity<T> : ListFilterActivity() {
         }
     }
 
+    /**
+     * Called after the cache is deleted, before the list reloads, for screens that keep their own loaded state.
+     */
+    protected open fun onCacheReset() = Unit
+
     private fun resetStorageCache() {
 
         BrapiFilterCache.delete(this)
+
+        onCacheReset()
 
         cache.clear()
 
