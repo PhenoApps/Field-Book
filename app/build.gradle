@@ -263,7 +263,7 @@ dependencies {
     testImplementation 'org.powermock:powermock-api-mockito2:2.0.9'
 
     //camerax
-    def camerax_version = "1.4.2"
+    def camerax_version = "1.5.3"
 
     implementation "androidx.camera:camera-effects:$camerax_version"
 
@@ -271,6 +271,7 @@ dependencies {
     implementation "androidx.camera:camera-lifecycle:$camerax_version"
     implementation "androidx.camera:camera-view:$camerax_version"
     implementation "androidx.camera:camera-core:$camerax_version"
+    implementation "androidx.camera:camera-video:$camerax_version"
 
     // The view and compose calendar library
     implementation 'com.kizitonwose.calendar:view:2.5.0'

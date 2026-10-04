@@ -61,10 +61,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/view_trait_photo_settings_resolution_tv"
-        app:layout_constraintBottom_toTopOf="@id/view_trait_photo_settings_crop_btn"
+        app:layout_constraintBottom_toTopOf="@id/view_trait_photo_settings_advanced_ll"
         app:layout_constraintVertical_bias="0">
 
-        <ScrollView
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -78,8 +78,107 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
 
-        </ScrollView>
+        </androidx.core.widget.NestedScrollView>
     </FrameLayout>
+
+    <!-- advanced controls for the built-in camera; hidden by default since other camera settings views share this layout -->
+    <LinearLayout
+        android:id="@+id/view_trait_photo_settings_advanced_ll"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/view_trait_photo_settings_resolution_fl"
+        app:layout_constraintBottom_toTopOf="@id/view_trait_photo_settings_crop_btn">
+
+        <TextView
+            android:id="@+id/view_trait_photo_settings_advanced_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/view_trait_photo_settings_advanced_title"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/view_trait_photo_settings_exposure_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/view_trait_photo_settings_exposure_title" />
+
+        <RadioGroup
+            android:id="@+id/view_trait_photo_settings_exposure_rg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <RadioButton
+                android:id="@+id/view_trait_photo_settings_exposure_auto_rb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/view_trait_photo_settings_exposure_auto" />
+
+            <RadioButton
+                android:id="@+id/view_trait_photo_settings_exposure_locked_rb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/view_trait_photo_settings_exposure_locked" />
+
+            <RadioButton
+                android:id="@+id/view_trait_photo_settings_exposure_manual_rb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/view_trait_photo_settings_exposure_manual" />
+        </RadioGroup>
+
+        <LinearLayout
+            android:id="@+id/view_trait_photo_settings_manual_ll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/view_trait_photo_settings_iso_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" />
+
+            <SeekBar
+                android:id="@+id/view_trait_photo_settings_iso_sb"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/view_trait_photo_settings_shutter_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" />
+
+            <SeekBar
+                android:id="@+id/view_trait_photo_settings_shutter_sb"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <CheckBox
+            android:id="@+id/view_trait_photo_settings_awb_lock_cb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/view_trait_photo_settings_awb_lock" />
+
+        <CheckBox
+            android:id="@+id/view_trait_photo_settings_save_raw_cb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/view_trait_photo_settings_save_raw" />
+
+    </LinearLayout>
 
     <Button
         android:layout_width="match_parent"
@@ -90,7 +189,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/view_trait_photo_settings_resolution_fl" />
+        app:layout_constraintTop_toBottomOf="@id/view_trait_photo_settings_advanced_ll" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

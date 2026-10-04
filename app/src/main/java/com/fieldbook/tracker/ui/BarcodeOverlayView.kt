@@ -51,17 +51,16 @@ class BarcodeOverlayView @JvmOverloads constructor(
         }
     }
 
+    // only claim touches that start on a detection, so other touches reach the preview underneath (tap-to-focus, re-meter)
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (event.action == MotionEvent.ACTION_UP) {
-            val x = event.x
-            val y = event.y
-            for (i in rects.indices) {
-                if (rects[i].contains(x, y)) {
-                    listener?.invoke(i)
-                    return true
-                }
+        val index = rects.indexOfFirst { it.contains(event.x, event.y) }
+        return when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> index >= 0
+            MotionEvent.ACTION_UP -> {
+                if (index >= 0) listener?.invoke(index)
+                true
             }
+            else -> true
         }
-        return true
     }
 }

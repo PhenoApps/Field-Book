@@ -8,6 +8,8 @@ import android.media.MediaRecorder
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Size
+import android.view.GestureDetector
+import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
@@ -31,9 +33,11 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.painterResource
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.database.DataHelper
+import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.preferences.GeneralKeys
 import com.fieldbook.tracker.views.CropImageView
 import com.fieldbook.tracker.traits.AbstractCameraTrait
+import com.fieldbook.tracker.traits.PhotoTraitLayout
 import com.fieldbook.tracker.ui.MediaViewerActivity
 import com.fieldbook.tracker.ui.components.widgets.ThreeStateToggle
 import com.fieldbook.tracker.ui.theme.AppTheme
@@ -41,6 +45,8 @@ import com.fieldbook.tracker.utilities.CameraXFacade
 import com.fieldbook.tracker.utilities.FileUtil
 import com.fieldbook.tracker.utilities.InsetHandler
 import com.fieldbook.tracker.utilities.Utils
+import com.fieldbook.tracker.utilities.camera.CameraControlSettings
+import com.fieldbook.tracker.utilities.camera.DualCaptureCallback
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.mlkit.vision.barcode.BarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScanning
@@ -94,6 +100,15 @@ class CameraActivity : ThemedActivity() {
     private var launchedForVideoTrait = false
     // flag set when CameraActivity was launched specifically from a photo-trait capture flow
     private var launchedForPhotoTrait = false
+
+    // trait that launched this activity, used for its advanced camera controls
+    private var trait: TraitObject? = null
+
+    // advanced camera controls only apply to photo captures for a photo-type trait
+    private val controls: CameraControlSettings
+        get() = if (launchedForPhotoTrait && currentMode == MODE_PHOTO) {
+            CameraControlSettings.from(trait, allowRaw = trait?.format == PhotoTraitLayout.type)
+        } else CameraControlSettings.DEFAULT
 
     private var imageCapture: ImageCapture? = null
 
@@ -211,7 +226,7 @@ class CameraActivity : ThemedActivity() {
 
             if (currentMode in setOf(MODE_PHOTO, MODE_VIDEO, MODE_AUDIO)) {
 
-                val trait = traitId?.takeIf { it != "-1" }?.let { id ->
+                trait = traitId?.takeIf { it != "-1" }?.let { id ->
                     database.getTraitById(id)
                 }
 
@@ -588,24 +603,41 @@ class CameraActivity : ThemedActivity() {
         val capture = imageCapture ?: return
         val tmp = File(cacheDir, AbstractCameraTrait.TEMPORARY_IMAGE_NAME)
         val outputFileOptions = ImageCapture.OutputFileOptions.Builder(tmp).build()
-        capture.takePicture(outputFileOptions, cameraExecutor,
-            object : ImageCapture.OnImageSavedCallback {
-                override fun onError(exception: ImageCaptureException) {
-                    exception.printStackTrace()
-                }
-                override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                    // after photo saved to file, run ML Kit on the saved file to detect a barcode
-                    runOnUiThread {
-                        val destPath = saveFileToFieldStorage(tmp, traitName ?: "unknown")
-                        val intent = Intent()
-                        intent.putExtra("media_type", "photo")
-                        intent.putExtra("media_path", destPath)
-                        intent.putExtra(EXTRA_SKIP_SAVE, skipSaveFlag)
-                        setResult(RESULT_OK, intent)
-                        finish()
+
+        // the RAW file (if any) is picked up by PhotoTraitLayout.makeImage alongside the JPEG
+        val rawFile = File(cacheDir, AbstractCameraTrait.TEMPORARY_RAW_NAME).apply { delete() }
+
+        val onSaved = {
+            runOnUiThread {
+                val destPath = saveFileToFieldStorage(tmp, traitName ?: "unknown")
+                val intent = Intent()
+                intent.putExtra("media_type", "photo")
+                intent.putExtra("media_path", destPath)
+                intent.putExtra(EXTRA_SKIP_SAVE, skipSaveFlag)
+                setResult(RESULT_OK, intent)
+                finish()
+            }
+        }
+
+        if (cameraXFacade.isRawCaptureActive) {
+
+            val rawOutputFileOptions = ImageCapture.OutputFileOptions.Builder(rawFile).build()
+
+            capture.takePicture(rawOutputFileOptions, outputFileOptions, cameraExecutor,
+                DualCaptureCallback { onSaved() })
+
+        } else {
+
+            capture.takePicture(outputFileOptions, cameraExecutor,
+                object : ImageCapture.OnImageSavedCallback {
+                    override fun onError(exception: ImageCaptureException) {
+                        exception.printStackTrace()
                     }
-                }
-            })
+                    override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                        onSaved()
+                    }
+                })
+        }
     }
 
     private fun saveFileToFieldStorage(src: File, traitName: String): String {
@@ -760,33 +792,70 @@ class CameraActivity : ThemedActivity() {
 
                     val resolution = getSupportedResolutionByPreferences()
 
+                    val cameraControls = controls
+
+                    // RAW + JPEG + preview + analysis is not a guaranteed stream combination, so skip barcode analysis
+                    val photoAnalysis = if (cameraControls.saveRaw) null else analysis
+
+                    cameraXFacade.onLocksApplied = { _, _ ->
+                        Utils.makeToast(this, getString(R.string.camera_controls_locked))
+                    }
+
                     cameraXFacade.bindPreview(
                         previewView,
                         resolution,
                         traitId,
-                        analysis,
-                        showCropRegion = currentMode == MODE_PHOTO
+                        photoAnalysis,
+                        showCropRegion = currentMode == MODE_PHOTO,
+                        controls = cameraControls
                     ) { camera, _, capture ->
 
                         boundCamera = camera
 
                         imageCapture = capture
 
+                        if (cameraXFacade.rawCaptureFellBack) {
+                            Utils.makeToast(this, getString(R.string.camera_raw_unavailable))
+                        }
                     }
 
-                    // set up tap-to-focus on previewView
-                    previewView.setOnTouchListener { v, event ->
-                        if (event.action == MotionEvent.ACTION_UP) {
-                            v.performClick()
+                    // when exposure or white balance is locked, metering would fight the lock, so only focus
+                    val meteringFlags = if (cameraControls.needsLock) {
+                        FocusMeteringAction.FLAG_AF
+                    } else FocusMeteringAction.FLAG_AF or FocusMeteringAction.FLAG_AE
+
+                    // tap to focus; when exposure/white balance are locked, a long press re-meters at that point and locks again
+                    val gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
+
+                        override fun onDown(e: MotionEvent) = true
+
+                        override fun onSingleTapUp(e: MotionEvent): Boolean {
                             try {
                                 val factory: MeteringPointFactory = previewView.meteringPointFactory
-                                val point: MeteringPoint = factory.createPoint(event.x, event.y)
-                                val action = FocusMeteringAction.Builder(point, FocusMeteringAction.FLAG_AF or FocusMeteringAction.FLAG_AE)
+                                val point: MeteringPoint = factory.createPoint(e.x, e.y)
+                                val action = FocusMeteringAction.Builder(point, meteringFlags)
                                     .setAutoCancelDuration(3, java.util.concurrent.TimeUnit.SECONDS)
                                     .build()
                                 boundCamera?.cameraControl?.startFocusAndMetering(action)
                             } catch (_: Exception) {}
+                            return true
                         }
+
+                        override fun onLongPress(e: MotionEvent) {
+                            val camera = boundCamera ?: return
+                            if (!cameraControls.needsLock) return
+                            try {
+                                val point = previewView.meteringPointFactory.createPoint(e.x, e.y)
+                                previewView.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                                // onLocksApplied shows the "locked" message once the new lock is in place
+                                cameraXFacade.remeterAndLock(camera, point, cameraControls)
+                            } catch (_: Exception) {}
+                        }
+                    })
+
+                    previewView.setOnTouchListener { v, event ->
+                        if (event.actionMasked == MotionEvent.ACTION_UP) v.performClick()
+                        gestureDetector.onTouchEvent(event)
                         true
                     }
 
@@ -794,7 +863,7 @@ class CameraActivity : ThemedActivity() {
                     try {
                         val factory = previewView.meteringPointFactory
                         val centerPoint = factory.createPoint(previewView.width / 2f, previewView.height / 2f)
-                        val action = FocusMeteringAction.Builder(centerPoint, FocusMeteringAction.FLAG_AF or FocusMeteringAction.FLAG_AE)
+                        val action = FocusMeteringAction.Builder(centerPoint, meteringFlags)
                             .setAutoCancelDuration(3, java.util.concurrent.TimeUnit.SECONDS)
                             .build()
                         boundCamera?.cameraControl?.startFocusAndMetering(action)
@@ -924,6 +993,7 @@ class CameraActivity : ThemedActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        cameraXFacade.onLocksApplied = null
         try {
             mediaRecorder?.release()
             mediaRecorder = null
