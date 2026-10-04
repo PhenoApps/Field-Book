@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.CheckBox
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.cardview.widget.CardView
@@ -41,6 +42,11 @@ class StudyAdapter(private val studyLoader: StudyLoader) :
          * Null hides the chip, while counting or when the levels carry their own counts.
          */
         fun getObservationCount(id: String): Int?
+
+        /**
+         * Why the study couldn't be loaded, shown on its card instead of its levels, or null if it loaded.
+         */
+        fun getError(id: String): String?
     }
 
     data class Model(
@@ -77,10 +83,21 @@ class StudyAdapter(private val studyLoader: StudyLoader) :
             bindObservationCount(holder.observationsChip, studyLoader.getObservationCount(id))
 
             val loading = studyLoader.isLoading(id)
-            holder.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
+            val error = if (loading) null else studyLoader.getError(id)
+
+            //invisible rather than gone under the error icon, so the title keeps clear of the icon
+            holder.progressBar.visibility = when {
+                loading -> View.VISIBLE
+                error != null -> View.INVISIBLE
+                else -> View.GONE
+            }
             if (loading) bindProgress(holder.progressBar, studyLoader.getProgress(id))
 
-            bindLevels(holder.levelsLayout, id, if (loading) emptyList() else studyLoader.getLevels(id))
+            holder.errorIcon.visibility = if (error != null) View.VISIBLE else View.GONE
+            holder.errorTextView.visibility = if (error != null) View.VISIBLE else View.GONE
+            holder.errorTextView.text = error
+
+            bindLevels(holder.levelsLayout, id, if (loading || error != null) emptyList() else studyLoader.getLevels(id))
         }
     }
 
@@ -207,6 +224,8 @@ class StudyAdapter(private val studyLoader: StudyLoader) :
         var progressBar: CircularProgressIndicator = v.findViewById(R.id.list_item_study_pb)
         var trialChip: Chip = v.findViewById(R.id.list_item_trial_chip)
         var observationsChip: Chip = v.findViewById(R.id.list_item_study_observations_chip)
+        var errorIcon: ImageView = v.findViewById(R.id.list_item_study_error_iv)
+        var errorTextView: TextView = v.findViewById(R.id.list_item_study_error_tv)
         var levelsLayout: LinearLayout = v.findViewById(R.id.list_item_study_levels_ll)
     }
 

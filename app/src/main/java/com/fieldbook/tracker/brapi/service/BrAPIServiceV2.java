@@ -1746,30 +1746,34 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 return new BrapiControllerResponse(false, BrAPIService.noPlots);
             }
 
-            // Construct our map to check for uniques
-            for (List<String> dataRow : studyDetails.getValues()) {
-                Integer idColumn = studyDetails.getAttributes().indexOf("ObservationUnitName");
-                checkMap.put(dataRow.get(idColumn), dataRow.get(idColumn));
+            // Construct our map to check for uniques, against the unit ids the field is keyed on
+            // like file imports, units without the column are left out rather than failing every save
+            int idColumn = studyDetails.getAttributes().indexOf("ObservationUnitDbId");
+            if (idColumn >= 0) {
+                for (List<String> dataRow : studyDetails.getValues()) {
+                    if (idColumn < dataRow.size()) {
+                        checkMap.put(dataRow.get(idColumn), dataRow.get(idColumn));
+                    }
+                }
             }
 
             if (!dataHelper.checkUnique(checkMap)) {
                 return new BrapiControllerResponse(false, BrAPIService.notUniqueIdMessage);
             }
 
-
-            DataHelper.db.beginTransaction();
-            // All checks finished, insert our data.
-            int studyId = dataHelper.createField(field, studyDetails.getAttributes(), true);
-            field.setStudyId(studyId);
-
             boolean fail = false;
             String failMessage = "";
 
-            // We want the saving of plots and traits wrap together in a transaction
-            // so if they fail, the field can be deleted.
+            DataHelper.db.beginTransaction();
+
+            // We want the saving of the field, plots and traits wrapped together in a transaction
+            // so if they fail, nothing is saved. The transaction is always ended, an open one would
+            // be left on the shared connection if creating the field threw.
             try {
 
-                int plotId = studyDetails.getAttributes().indexOf("Plot");
+                // All checks finished, insert our data.
+                int studyId = dataHelper.createField(field, studyDetails.getAttributes(), true);
+                field.setStudyId(studyId);
 
                 System.out.println("Size of study details: " + studyDetails.getValues().size());
 
@@ -1801,11 +1805,11 @@ public class BrAPIServiceV2 extends AbstractBrAPIService implements BrAPIService
                 // Delete our field if our traits or fields failed to insert
                 fail = true;
                 failMessage = e.toString();
+            } finally {
+                // The shared connection is no longer closed and reopened after each save,
+                // which could break other threads using it.
+                DataHelper.db.endTransaction();
             }
-
-            DataHelper.db.endTransaction();
-            dataHelper.close();
-            dataHelper.open();
 
             if (fail) {
                 return new BrapiControllerResponse(false, failMessage);

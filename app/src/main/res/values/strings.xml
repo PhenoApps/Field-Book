@@ -1782,6 +1782,8 @@
     <string name="act_brapi_study_import_observations_download">Download</string>
     <string name="act_brapi_study_import_observations_skip">Skip</string>
     <string name="act_brapi_study_import_observations_never">Never</string>
+    <string name="act_brapi_study_import_error_study">Failed to fetch study details</string>
+    <string name="act_brapi_study_import_error_no_units">The server has no observation units for this study</string>
     <string name="act_brapi_study_import_saving_field">Field %1$d of %2$d</string>
     <string name="act_brapi_study_import_downloading_title">Downloading observations</string>
     <string name="act_brapi_study_import_downloading">Study %1$d of %2$d…</string>

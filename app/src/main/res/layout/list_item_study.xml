@@ -28,6 +28,19 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"/>
 
+        <!-- in place of the progress ring when the study couldn't be loaded, the ring is left invisible to keep its space -->
+        <ImageView
+            android:id="@+id/list_item_study_error_iv"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_transfer_error"
+            android:visibility="gone"
+            app:tint="?attr/colorError"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+
         <TextView
             android:id="@+id/list_item_study_title_tv"
             style="@style/TextViewStyle.Bold.Title"
@@ -102,6 +115,20 @@
 
         </com.fieldbook.tracker.views.SharedWidthRow>
 
+        <!-- why the study couldn't be loaded, shown instead of its levels -->
+        <TextView
+            android:id="@+id/list_item_study_error_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="?attr/colorError"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/list_item_study_chip_group"
+            tools:text="Failed to fetch observation units"
+            tools:visibility="visible" />
+
         <!-- importable observation levels, one list_item_study_level row each -->
         <LinearLayout
             android:id="@+id/list_item_study_levels_ll"
@@ -111,7 +138,7 @@
             android:orientation="vertical"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/list_item_study_chip_group"
+            app:layout_constraintTop_toBottomOf="@id/list_item_study_error_tv"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

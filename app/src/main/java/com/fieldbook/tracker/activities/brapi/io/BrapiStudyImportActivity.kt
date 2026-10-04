@@ -53,6 +53,7 @@ import kotlinx.coroutines.supervisorScope
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.brapi.client.v2.JSON
+import org.brapi.client.v2.model.queryParams.core.StudyQueryParams
 import org.brapi.client.v2.model.queryParams.germplasm.GermplasmQueryParams
 import org.brapi.client.v2.model.queryParams.phenotype.ObservationQueryParams
 import org.brapi.client.v2.model.queryParams.phenotype.ObservationUnitQueryParams
@@ -93,6 +94,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         private const val STEP_VARIABLES = "variables"
         private const val STEP_GERMPLASM = "germplasm"
         private const val STEP_COUNTS = "counts"
+        private const val STEP_STUDY = "study"
 
         private fun unitStep(levelName: String?) = "units:${levelName.orEmpty()}"
 
@@ -156,6 +158,9 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
     //filled in after each study's units load, see fetchObservationCounts
     private val observationCounts = hashMapOf<String, ObservationCounts>()
+
+    //why each study that couldn't be loaded failed, see studyError, its card shows the reason and it can't be imported
+    private val studyErrors = hashMapOf<String, String>()
 
     //levels of the selected studies that already exist as fields, loaded off the main thread in fetchStudyData
     private var importedLevels = BrapiImportedLevels(emptyList())
@@ -524,16 +529,19 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 importButton.isEnabled = !importing && attributesTable != null && hasSelectedLevels()
             }
 
+            //from studies rather than the cache, so studies fetched because the cache didn't have them are included
             override fun getLocation(id: String): String {
-               return cacheModels.studies.firstOrNull { it.study.studyDbId == id }?.study?.locationName ?: ""
+               return studies.firstOrNull { it.studyDbId == id }?.locationName ?: ""
             }
 
             override fun getTrialName(id: String): String {
-                return cacheModels.studies.firstOrNull { it.study.studyDbId == id }?.study?.trialName ?: ""
+                return studies.firstOrNull { it.studyDbId == id }?.trialName ?: ""
             }
 
             override fun getObservationCount(id: String): Int? =
                 observationCounts[id]?.takeIf { it.levels == null }?.study
+
+            override fun getError(id: String): String? = studyErrors[id]
         })
 
         (studyList.adapter as StudyAdapter).submitList(studyModels)
@@ -598,10 +606,26 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                                 launch { fetchObservationVariables(model.id) }
                                 launch { fetchObservationUnits(model.id) }
                                 launch { fetchGermplasm(model.id) }
+
+                                //a study missing from the cache, such as one added since it was built,
+                                //needs its details from the server to be saved as a field
+                                if (studies.none { it.studyDbId == model.id }) {
+                                    expectRequests(model.id, STEP_STUDY, 1)
+                                    launch { fetchStudy(model.id) }
+                                }
                             }
 
-                            //level counts need the units' levels, and the levels show with their counts
-                            observationCounts[model.id] = fetchObservationCounts(model.id, studyCount)
+                            val error = studyError(model.id)
+
+                            if (error == null) {
+                                //level counts need the units' levels, and the levels show with their counts
+                                observationCounts[model.id] = fetchObservationCounts(model.id, studyCount)
+                            } else {
+                                //the card shows the error instead of levels, so nothing needs counting
+                                studyErrors[model.id] = error
+                                studyCount.cancel()
+                                finishStep(model.id, STEP_COUNTS)
+                            }
 
                             loadedStudies.add(model.id)
                             onLevelsChanged()
@@ -615,18 +639,6 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 if (fullRefresh) {
                     saveRefreshedLevels(studyDbIds)
                     fullRefresh = false
-                }
-
-                if ((studyList.adapter as StudyAdapter).currentList.any {
-                        observationUnits[it.id]?.isEmpty() != false
-                    }) {
-
-                    Toast.makeText(this@BrapiStudyImportActivity,
-                        getString(R.string.failed_to_fetch_observation_units), Toast.LENGTH_SHORT).show()
-
-                    onBackPressedDispatcher.onBackPressed()
-
-                    return@launch
                 }
 
                 withContext(Dispatchers.Default) {
@@ -702,6 +714,7 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         loadedStudies.clear()
         loadSteps.clear()
         observationCounts.clear()
+        studyErrors.clear()
         onLevelsChanged()
 
         //selected levels are kept, levels that are no longer importable are skipped when saving
@@ -810,9 +823,16 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
 
                             Log.e(TAG, "Failed to save study $id at $levelName: ${response.message}")
 
+                            //the reasons the old import dialog explained, others get the general message
+                            val message = when (response.message) {
+                                BrAPIService.notUniqueIdMessage -> R.string.import_error_unique
+                                BrAPIService.noPlots -> R.string.act_collect_no_plots
+                                else -> R.string.failed_to_save_study
+                            }
+
                             runOnUiThread {
 
-                                Toast.makeText(this@BrapiStudyImportActivity, getString(R.string.failed_to_save_study), Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this@BrapiStudyImportActivity, getString(message), Toast.LENGTH_LONG).show()
 
                             }
                         }
@@ -1135,6 +1155,48 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
         }
 
     private fun pageSize() = BrAPIService.getPageSize(this)
+
+    /**
+     * Why the study can't be imported once its load has finished, or null if it can.
+     * A failed study is shown on its card, the other studies can still be imported.
+     */
+    private fun studyError(studyDbId: String): String? {
+
+        val units = observationUnits[studyDbId]
+
+        return when {
+            studies.none { it.studyDbId == studyDbId } -> getString(R.string.act_brapi_study_import_error_study)
+            units == null -> getString(R.string.failed_to_fetch_observation_units)
+            units.isEmpty() -> getString(R.string.act_brapi_study_import_error_no_units)
+            else -> null
+        }
+    }
+
+    /**
+     * Fetches the details of a selected study that isn't in the BrAPI cache, its name, crop and trial
+     * are saved with the field. Its card is titled with its id until they arrive.
+     */
+    private suspend fun fetchStudy(studyDbId: String) {
+
+        val service = brapiService as BrAPIServiceV2
+
+        val study = fetchAllPages<BrAPIStudy>(
+            "study $studyDbId",
+            onPage = { received, expected -> onPages(studyDbId, STEP_STUDY, received, expected) }
+        ) {
+            //without the active filter the study list uses, so an inactive study is found too
+            service.studyService.fetchAll(StudyQueryParams().also {
+                it.studyDbId(studyDbId)
+                it.pageSize(pageSize())
+            })
+        }?.firstOrNull { it.studyDbId == studyDbId } ?: return
+
+        studies.add(study)
+
+        studyModels = studyModels.map { if (it.id == studyDbId) it.copy(title = study.studyName ?: studyDbId) else it }
+
+        (studyList.adapter as? StudyAdapter)?.submitList(studyModels)
+    }
 
     private suspend fun fetchGermplasm(studyDbId: String) {
 
