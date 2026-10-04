@@ -2,49 +2,52 @@ package com.fieldbook.tracker.ui.camera
 
 import android.app.Activity
 import android.view.ViewGroup
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.foundation.interaction.InteractionSource
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.ui.theme.AppTheme
@@ -52,6 +55,12 @@ import com.fieldbook.tracker.ui.theme.ReadablePrimaryTheme
 import com.fieldbook.tracker.utilities.camera.CameraSettingsState
 import com.fieldbook.tracker.utilities.camera.ExposureMode
 import com.fieldbook.tracker.utilities.camera.ShutterFormat
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
+import kotlin.math.roundToInt
+
+// a little shorter than Material's default 4 x 44dp slider thumb
+private val SLIDER_THUMB_SIZE = DpSize(4.dp, 36.dp)
 
 /**
  * Shows [CameraSettingsDialog] over a View-based [activity] by attaching a temporary ComposeView
@@ -145,7 +154,7 @@ fun CameraSettingsDialog(
                     }
 
                     if (state.advancedAvailable) {
-                        AdvancedSettings(state) { state = it }
+                        AdvancedSettings(state) { transform -> state = transform(state) }
                     }
                 }
 
@@ -264,12 +273,15 @@ private fun ResolutionPickerDialog(
     )
 }
 
+/**
+ * Per-trait camera controls. Changes are passed to [update] as transforms of the latest state,
+ * so a click that follows a long-press doesn't overwrite the long-press's changes.
+ */
 @Composable
-private fun AdvancedSettings(state: CameraSettingsState, onChange: (CameraSettingsState) -> Unit) {
-
-    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-    SettingTitle(stringResource(R.string.view_trait_photo_settings_advanced_title))
+private fun AdvancedSettings(
+    state: CameraSettingsState,
+    update: ((CameraSettingsState) -> CameraSettingsState) -> Unit
+) {
 
     if (state.exposureModes.size > 1) {
 
@@ -279,7 +291,11 @@ private fun AdvancedSettings(state: CameraSettingsState, onChange: (CameraSettin
             options = state.exposureModes,
             selected = state.exposureMode,
             label = { stringResource(it.labelRes()) },
-            onSelect = { onChange(state.copy(exposureMode = it)) }
+            onSelect = { mode -> update { it.copy(exposureMode = mode) } },
+            // long-pressing Manual resets ISO and shutter speed to their defaults
+            onLongPress = { mode ->
+                if (mode == ExposureMode.MANUAL) update { it.withManualDefaults() }
+            }
         )
 
         SupportingText(stringResource(state.exposureMode.summaryRes()))
@@ -287,33 +303,23 @@ private fun AdvancedSettings(state: CameraSettingsState, onChange: (CameraSettin
         if (state.exposureMode == ExposureMode.MANUAL) {
 
             if (state.isoSteps.isNotEmpty()) {
-                val title = stringResource(R.string.view_trait_photo_settings_iso)
-                Column {
-                    SettingTitle(title)
-                    ValueStepper(
-                        value = state.isoSteps[state.isoIndex].toString(),
-                        title = title,
-                        canDecrease = state.isoIndex > 0,
-                        canIncrease = state.isoIndex < state.isoSteps.lastIndex,
-                        onDecrease = { onChange(state.copy(isoIndex = state.isoIndex - 1)) },
-                        onIncrease = { onChange(state.copy(isoIndex = state.isoIndex + 1)) }
-                    )
-                }
+                StepSlider(
+                    title = stringResource(R.string.view_trait_photo_settings_iso),
+                    value = state.isoSteps[state.isoIndex].toString(),
+                    index = state.isoIndex,
+                    count = state.isoSteps.size,
+                    onIndexChange = { index -> update { it.copy(isoIndex = index) } }
+                )
             }
 
             if (state.shutterSteps.isNotEmpty()) {
-                val title = stringResource(R.string.view_trait_photo_settings_shutter)
-                Column {
-                    SettingTitle(title)
-                    ValueStepper(
-                        value = ShutterFormat.label(state.shutterSteps[state.shutterIndex]),
-                        title = title,
-                        canDecrease = state.shutterIndex > 0,
-                        canIncrease = state.shutterIndex < state.shutterSteps.lastIndex,
-                        onDecrease = { onChange(state.copy(shutterIndex = state.shutterIndex - 1)) },
-                        onIncrease = { onChange(state.copy(shutterIndex = state.shutterIndex + 1)) }
-                    )
-                }
+                StepSlider(
+                    title = stringResource(R.string.view_trait_photo_settings_shutter),
+                    value = ShutterFormat.label(state.shutterSteps[state.shutterIndex]),
+                    index = state.shutterIndex,
+                    count = state.shutterSteps.size,
+                    onIndexChange = { index -> update { it.copy(shutterIndex = index) } }
+                )
             }
         }
     }
@@ -322,7 +328,7 @@ private fun AdvancedSettings(state: CameraSettingsState, onChange: (CameraSettin
         SwitchRow(
             text = stringResource(R.string.view_trait_photo_settings_awb_lock),
             checked = state.awbLock,
-            onCheckedChange = { onChange(state.copy(awbLock = it)) }
+            onCheckedChange = { checked -> update { it.copy(awbLock = checked) } }
         )
     }
 
@@ -330,7 +336,7 @@ private fun AdvancedSettings(state: CameraSettingsState, onChange: (CameraSettin
         SwitchRow(
             text = stringResource(R.string.view_trait_photo_settings_save_raw),
             checked = state.saveRaw,
-            onCheckedChange = { onChange(state.copy(saveRaw = it)) }
+            onCheckedChange = { checked -> update { it.copy(saveRaw = checked) } }
         )
     }
 }
@@ -368,22 +374,59 @@ private fun SupportingText(text: String) {
     )
 }
 
+/**
+ * @param onLongPress called when an option is held; the option's click still follows on release
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun <T> ChoiceRow(
     options: List<T>,
     selected: T,
     label: @Composable (T) -> String,
-    onSelect: (T) -> Unit
+    onSelect: (T) -> Unit,
+    onLongPress: ((T) -> Unit)? = null
 ) {
     SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
         options.forEachIndexed { index, option ->
-            SegmentedButton(
-                selected = option == selected,
-                onClick = { onSelect(option) },
-                shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size)
-            ) {
-                Text(text = label(option), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            key(option) {
+
+                val interactionSource = remember { MutableInteractionSource() }
+
+                if (onLongPress != null) {
+                    LongPressEffect(interactionSource) { onLongPress(option) }
+                }
+
+                SegmentedButton(
+                    selected = option == selected,
+                    onClick = { onSelect(option) },
+                    shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
+                    interactionSource = interactionSource
+                ) {
+                    Text(text = label(option), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Calls [onLongPress] (with haptic feedback) when a press on [interactionSource] is held for the
+ * system long-press timeout. Releasing or cancelling earlier cancels it.
+ */
+@Composable
+private fun LongPressEffect(interactionSource: InteractionSource, onLongPress: () -> Unit) {
+
+    val timeout = LocalViewConfiguration.current.longPressTimeoutMillis
+    val haptics = LocalHapticFeedback.current
+    val currentOnLongPress by rememberUpdatedState(onLongPress)
+
+    LaunchedEffect(interactionSource) {
+        // collectLatest cancels the pending delay as soon as the press is released or cancelled
+        interactionSource.interactions.collectLatest { interaction ->
+            if (interaction is PressInteraction.Press) {
+                delay(timeout)
+                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                currentOnLongPress()
             }
         }
     }
@@ -408,44 +451,46 @@ private fun SwitchRow(
 }
 
 /**
- * A value between round - and + buttons, matching the label print trait's copies stepper.
+ * A slider that snaps to [count] discrete steps, with the current step's [value] shown beside the title.
+ * The slider is hidden when there is only one step to choose from.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ValueStepper(
-    value: String,
+private fun StepSlider(
     title: String,
-    canDecrease: Boolean,
-    canIncrease: Boolean,
-    onDecrease: () -> Unit,
-    onIncrease: () -> Unit
+    value: String,
+    index: Int,
+    count: Int,
+    onIndexChange: (Int) -> Unit
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        FilledTonalIconButton(onClick = onDecrease, enabled = canDecrease) {
-            Icon(
-                Icons.Default.Remove,
-                contentDescription = stringResource(R.string.view_trait_photo_settings_decrease, title)
-            )
-        }
+    Column {
 
-        // outlined like the buttons below it
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .height(40.dp)
-                .border(ButtonDefaults.outlinedButtonBorder(enabled = true), CircleShape),
-            contentAlignment = Alignment.Center
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            SettingTitle(title, modifier = Modifier.weight(1f))
             Text(text = value, style = MaterialTheme.typography.labelLarge)
         }
 
-        FilledTonalIconButton(onClick = onIncrease, enabled = canIncrease) {
-            Icon(
-                Icons.Default.Add,
-                contentDescription = stringResource(R.string.view_trait_photo_settings_increase, title)
+        if (count > 1) {
+
+            val interactionSource = remember { MutableInteractionSource() }
+
+            Slider(
+                value = index.toFloat(),
+                onValueChange = { onIndexChange(it.roundToInt().coerceIn(0, count - 1)) },
+                valueRange = 0f..(count - 1).toFloat(),
+                // steps counts the stops between the two ends
+                steps = (count - 2).coerceAtLeast(0),
+                interactionSource = interactionSource,
+                thumb = {
+                    SliderDefaults.Thumb(
+                        interactionSource = interactionSource,
+                        thumbSize = SLIDER_THUMB_SIZE
+                    )
+                },
+                modifier = Modifier.semantics { stateDescription = value }
             )
         }
     }

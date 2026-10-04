@@ -47,7 +47,7 @@ If RAW capture is enabled, a `.dng` file with the same name is saved next to eac
 
 ### Advanced camera settings
 
-When the Default camera is selected, the settings dialog includes an Advanced section for consistent, comparable photos.
+When the Default camera is selected, the settings dialog includes additional options for consistent, comparable photos.
 These settings are saved for the current trait and are included when the trait is exported and imported.
 They do not apply to the Android camera app, which controls its own exposure and white balance.
 Options that the device's camera doesn't support are hidden.
@@ -59,8 +59,9 @@ Options that the device's camera doesn't support are hidden.
     Long-press the preview to measure and lock exposure again; in the expanded camera, exposure is measured at the point that was pressed.
     Changing the exposure setting, or closing Field Book, also starts a fresh measurement.
     On devices without manual sensor control, the exposure is measured again each time the camera starts.
-  - `Manual` sets a fixed ISO and shutter speed, which stay the same across sessions.
+  - `Manual` sets a fixed ISO and shutter speed using sliders, and they stay the same across sessions.
     It is only available on devices that support manual sensor control.
+    Long-press `Manual` to reset both sliders to their defaults.
 - `Lock white balance` measures white balance the first time the camera starts for the trait and holds it, so colors don't shift between photos.
   Like locked exposure, it is remembered while Field Book is open, and a long-press on the preview measures it again.
   On devices without manual color control, white balance is measured again each time the camera starts.

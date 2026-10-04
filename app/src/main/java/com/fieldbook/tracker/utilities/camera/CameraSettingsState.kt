@@ -24,13 +24,22 @@ data class CameraSettingsState(
     val exposureMode: ExposureMode,
     val isoSteps: List<Int>,
     val isoIndex: Int,
+    val defaultIsoIndex: Int,
     val shutterSteps: List<Long>,
     val shutterIndex: Int,
+    val defaultShutterIndex: Int,
     val awbLockAvailable: Boolean,
     val awbLock: Boolean,
     val rawAvailable: Boolean,
     val saveRaw: Boolean,
 ) {
+
+    /** Manual exposure with ISO and shutter speed back at their defaults. */
+    fun withManualDefaults() = copy(
+        exposureMode = ExposureMode.MANUAL,
+        isoIndex = defaultIsoIndex,
+        shutterIndex = defaultShutterIndex
+    )
 
     /** Resolution indices ordered from smallest to largest pixel count. */
     val resolutionOrder: List<Int>
@@ -79,8 +88,10 @@ data class CameraSettingsState(
                 exposureMode = exposureMode,
                 isoSteps = isoSteps,
                 isoIndex = CameraCapabilities.nearestIndex(isoSteps, capabilities.clampIso(trait?.cameraIso?.toIntOrNull())),
+                defaultIsoIndex = CameraCapabilities.nearestIndex(isoSteps, capabilities.clampIso(null)),
                 shutterSteps = shutterSteps,
                 shutterIndex = CameraCapabilities.nearestIndex(shutterSteps, capabilities.clampExposure(trait?.cameraExposureTimeNs?.toLongOrNull())),
+                defaultShutterIndex = CameraCapabilities.nearestIndex(shutterSteps, capabilities.clampExposure(null)),
                 awbLockAvailable = capabilities.awbLockAvailable,
                 awbLock = trait?.cameraAwbLock ?: false,
                 rawAvailable = rawAvailable,
