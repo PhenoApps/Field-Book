@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.traits
 
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.ClipData
 import android.content.Context
 import android.content.Intent
@@ -17,7 +16,6 @@ import androidx.camera.core.Camera
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.view.PreviewView
-import androidx.core.widget.NestedScrollView
 import com.fieldbook.tracker.R
 import com.fieldbook.tracker.activities.CameraActivity
 import com.fieldbook.tracker.activities.CollectActivity
@@ -31,7 +29,8 @@ import com.fieldbook.tracker.utilities.Utils
 import com.fieldbook.tracker.utilities.camera.CameraCapabilities
 import com.fieldbook.tracker.utilities.camera.CameraControlSettings
 import com.fieldbook.tracker.utilities.camera.DualCaptureCallback
-import com.fieldbook.tracker.views.CameraTraitSettingsView
+import com.fieldbook.tracker.ui.camera.showCameraSettingsDialog
+import com.fieldbook.tracker.utilities.camera.CameraSettingsState
 import org.threeten.bp.OffsetDateTime
 import java.io.File
 import java.util.concurrent.ExecutorService
@@ -331,23 +330,24 @@ open class PhotoTraitLayout : CameraTrait {
 
     override fun showSettings() {
 
-        val settingsView = CameraTraitSettingsView(
-            context,
+        val trait = currentTrait
+
+        val initial = CameraSettingsState.from(
+            prefs,
+            trait,
             supportedResolutions,
-            currentTrait,
             cameraCapabilities,
             supportsRawCapture()
         )
-        val scrollView = NestedScrollView(context).apply { addView(settingsView) }
-        AlertDialog.Builder(context, R.style.AppAlertDialog)
-            .setTitle(R.string.trait_system_photo_settings_title)
-            .setPositiveButton(R.string.dialog_ok) { dialog, _ ->
-                settingsView.commitChanges()
-                onSettingsChanged()
-                dialog.dismiss()
-            }
-            .setView(scrollView)
-            .show()
+
+        val onCropClick = if (trait?.cropImage == true) {
+            { (context as CollectActivity).requestAndCropImage(true, false) }
+        } else null
+
+        showCameraSettingsDialog(context as Activity, initial, onCropClick) { state ->
+            state.commit(prefs, trait, initial)
+            onSettingsChanged()
+        }
     }
 
     override fun onSettingsChanged() {

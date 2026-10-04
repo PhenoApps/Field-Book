@@ -64,7 +64,7 @@ Options that the device's camera doesn't support are hidden.
 - `Lock white balance` measures white balance the first time the camera starts for the trait and holds it, so colors don't shift between photos.
   Like locked exposure, it is remembered while Field Book is open, and a long-press on the preview measures it again.
   On devices without manual color control, white balance is measured again each time the camera starts.
-- `Also save RAW (DNG)` saves an unprocessed `.dng` file alongside each `.jpg`.
+- `Capture RAW (DNG)` saves an unprocessed `.dng` file alongside each `.jpg`.
   It is only available on devices that support RAW capture.
   The `.jpg` is still the recorded observation, and the `.dng` is included in media exports and deleted along with its photo.
   DNG files are large, often 10 to 25 MB each.
