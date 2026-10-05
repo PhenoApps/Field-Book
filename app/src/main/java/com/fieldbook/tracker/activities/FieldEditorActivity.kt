@@ -56,7 +56,6 @@ import org.phenoapps.utils.BaseDocumentTreeUtil
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 import java.io.IOException
-import java.util.Locale
 import java.util.StringJoiner
 import javax.inject.Inject
 
@@ -749,31 +748,28 @@ class FieldEditorActivity : BaseFieldActivity(), FieldSortController {
             return
         }
 
-        // only reserved word for now is id which is used in many queries
-        // other sqlite keywords are sanitized with a tick mark to make them an identifier
-        val reservedNames = arrayOf("id")
-        val list = listOf(*reservedNames)
-
         // replace specials and emptys and add them to the actual columns list to be displayed
         val actualColumns = ArrayList<String>()
 
         // define flag to let the user know characters were replaced at the end of the loop
         var hasSpecialCharacters = false
         for (columnName in importColumns) {
-            if (list.contains(columnName.lowercase(Locale.ROOT))) {
-                Utils.makeToast(this, "${getString(R.string.import_error_column_name)} \"$columnName\"")
+
+            // replace the special characters, only add to the actual list if it is not empty
+            val name = if (DataHelper.hasSpecialChars(columnName)) {
+                hasSpecialCharacters = true
+                DataHelper.replaceSpecialChars(columnName)
+            } else columnName
+
+            // protected names collide with columns used when switching fields (issue 1478)
+            if (DataHelper.isProtectedColumnName(name)) {
+                Utils.makeToast(this, "${getString(R.string.import_error_column_name)} \"$name\"")
                 return
             }
 
-            // replace the special characters, only add to the actual list if it is not empty
-            if (DataHelper.hasSpecialChars(columnName)) {
-                hasSpecialCharacters = true
-                val replaced = DataHelper.replaceSpecialChars(columnName)
-                if (replaced.isNotEmpty() && !actualColumns.contains(replaced)) {
-                    actualColumns.add(replaced)
-                }
-            } else if (columnName.isNotEmpty()) { // handle normal column
-                actualColumns.add(columnName)
+            // sqlite column names are case-insensitive, so Plot and plot are duplicates
+            if (name.isNotEmpty() && actualColumns.none { it.equals(name, ignoreCase = true) }) {
+                actualColumns.add(name)
             }
         }
 

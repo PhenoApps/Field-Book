@@ -190,6 +190,48 @@ public class DataHelper {
     }
 
     /**
+     * Issue 1478, imported column names that collide with columns used when pivoting attributes
+     * into the ObservationUnitProperty table. Compared case-insensitively since sqlite column names are.
+     */
+    private static final List<String> PROTECTED_COLUMN_NAMES = Arrays.asList(
+            "id",
+            "study_id",
+            "internal_id_observation_unit",
+            "observation_unit_id",
+            "internal_id_observation_unit_value",
+            "observation_unit_value_name",
+            "observation_unit_attribute_db_id",
+            "internal_id_observation_unit_attribute",
+            "observation_unit_attribute_name"
+    );
+
+    /**
+     * Checks whether a column name can be imported as an observation unit attribute.
+     * geo_coordinates is allowed with exact casing only, since it maps to the built-in column.
+     */
+    public static boolean isProtectedColumnName(String name) {
+
+        String lower = name.toLowerCase(Locale.ROOT);
+
+        if (PROTECTED_COLUMN_NAMES.contains(lower)) return true;
+
+        return lower.equals("geo_coordinates") && !name.equals("geo_coordinates");
+    }
+
+    /**
+     * @return the first protected column name in the list, or null if none are protected
+     */
+    public static String findProtectedColumnName(Iterable<String> names) {
+
+        for (String name : names) {
+
+            if (name != null && isProtectedColumnName(name)) return name;
+        }
+
+        return null;
+    }
+
+    /**
      * Issue 753, lat/lngs are saved in the incorrect order and need to be swapped
      */
     public void fixGeoCoordinates(SQLiteDatabase db) {
