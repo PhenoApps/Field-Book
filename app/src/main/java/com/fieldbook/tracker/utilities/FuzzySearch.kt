@@ -225,12 +225,13 @@ class FuzzySearch @Inject constructor(@param:ActivityContext private val context
 
             fieldSwitcher.switchField(newStudyId)
 
-            val intent = Intent(context, ConfigActivity::class.java)
-
-            intent.putExtra(ConfigActivity.LOAD_FIELD_ID, newStudyId)
-
-            (context as? Activity)?.startActivity(intent)
-
         }
+
+        // ConfigActivity opens collect for LOAD_FIELD_ID, which then moves to LAST_PLOT
+        val intent = Intent(context, ConfigActivity::class.java)
+
+        intent.putExtra(ConfigActivity.LOAD_FIELD_ID, newStudyId)
+
+        (context as? Activity)?.startActivity(intent)
     }
 }
