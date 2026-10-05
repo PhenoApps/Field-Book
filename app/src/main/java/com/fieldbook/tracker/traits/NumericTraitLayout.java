@@ -256,11 +256,39 @@ public class NumericTraitLayout extends BaseTraitLayout {
                         removeTrait(getCurrentTrait());
                     }
                 } else if (numberButtons.containsKey(view.getId())) {
-                    value = curText + numberButtons.get(view.getId()).getText().toString();
+                    final String key = numberButtons.get(view.getId()).getText().toString();
+                    value = curText + key;
                     getCollectInputView().setText(value);
                     updateObservation(getCurrentTrait(), value);
+                    handleAutoAdvanceDigits(key, value);
                 }
             }
+        }
+    }
+
+    /**
+     * Moves to the next entry when a digit keypress brings the value to exactly the trait's
+     * auto advance digit count. Non-digit characters (decimal point, math symbols) are not counted.
+     */
+    private void handleAutoAdvanceDigits(String key, String value) {
+        if (key.length() != 1 || !Character.isDigit(key.charAt(0))) return;
+
+        int requiredDigits;
+        try {
+            requiredDigits = Integer.parseInt(getCurrentTrait().getAutoAdvanceDigits().trim());
+        } catch (NumberFormatException e) {
+            return;
+        }
+
+        if (requiredDigits < 1) return;
+
+        int digitCount = 0;
+        for (int i = 0; i < value.length(); i++) {
+            if (Character.isDigit(value.charAt(i))) digitCount++;
+        }
+
+        if (digitCount == requiredDigits) {
+            controller.getRangeBox().moveEntryRight();
         }
     }
 }
