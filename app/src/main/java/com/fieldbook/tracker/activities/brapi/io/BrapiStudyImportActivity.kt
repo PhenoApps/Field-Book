@@ -374,6 +374,24 @@ class BrapiStudyImportActivity : ThemedActivity(), CoroutineScope by MainScope()
                 }
             }
 
+            //spec puts the treatment type in factor and its level in modality,
+            //some servers (e.g. DeltaBreed) only send the level in factor
+            unit.treatments?.forEach { treatment ->
+                try {
+                    val factor = treatment.factor?.takeIf { it.isNotBlank() }
+                    val modality = treatment.modality?.takeIf { it.isNotBlank() }
+                    val (key, value) = when {
+                        factor != null && modality != null -> factor to modality
+                        else -> "Treatment" to (factor ?: modality)
+                    }
+                    if (value != null) {
+                        attributes[key] = attributes[key]?.let { "$it; $value" } ?: value
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed loading treatment $treatment", e)
+                }
+            }
+
             val position = unit.observationUnitPosition
             if (position != null) {
                 position.observationLevelRelationships?.forEach { level ->
