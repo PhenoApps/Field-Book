@@ -1,7 +1,6 @@
 package com.fieldbook.tracker.ui.screens.traits.listItems
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -39,7 +38,6 @@ import com.fieldbook.tracker.objects.TraitObject
 import com.fieldbook.tracker.traits.formats.Formats
 import com.fieldbook.tracker.ui.components.widgets.AppIcon
 import com.fieldbook.tracker.ui.theme.AppTheme
-import org.phenoapps.brapi.R as BrapiR
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -118,8 +116,8 @@ fun TraitListItem(
                 )
 
                 if (trait.isBrapiTrait()) {
-                    Image(
-                        painter = painterResource(BrapiR.drawable.pheno_brapi_logo),
+                    AppIcon(
+                        icon = R.drawable.ic_adv_brapi,
                         contentDescription = stringResource(R.string.trait_brapi_indicator),
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
