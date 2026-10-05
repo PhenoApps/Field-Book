@@ -98,6 +98,43 @@ class ObservationUnitDao {
             .toTypedArray()
         } ?: emptyArray()
 
+        /**
+         * Lists every observation unit in a study with its search attribute value, used to suggest
+         * similar ids when a search has no exact match.
+         * @param studyId The study ID to list
+         * @return pairs of observation unit db id and search attribute value (null if the unit has none)
+         */
+        fun getSearchAttributeValues(studyId: Int): List<Pair<String, String?>> = withDatabase { db ->
+
+            val query = """
+                SELECT ou.observation_unit_db_id AS unit_id, ouv.observation_unit_value_name AS search_value
+                FROM ${ObservationUnit.tableName} ou
+                LEFT JOIN observation_units_values ouv ON
+                    ou.${ObservationUnit.PK} = ouv.observation_unit_id
+                    AND ouv.study_id = ?
+                    AND ouv.observation_unit_attribute_db_id IN (
+                        SELECT internal_id_observation_unit_attribute
+                        FROM observation_units_attributes
+                        WHERE observation_unit_attribute_name = (
+                            SELECT observation_unit_search_attribute
+                            FROM ${Study.tableName}
+                            WHERE ${Study.PK} = ?
+                        )
+                    )
+                WHERE ou.${Study.FK} = ?
+            """
+
+            db.rawQuery(query, arrayOf(
+                studyId.toString(),
+                studyId.toString(),
+                studyId.toString()
+            ))
+            .toTable()
+            .mapNotNull { row ->
+                row["unit_id"]?.toString()?.let { it to row["search_value"]?.toString() }
+            }
+        } ?: emptyList()
+
         fun getAll(eid: Int): Array<ObservationUnitModel> = withDatabase { db ->
 
             arrayOf(*db.query(ObservationUnit.tableName,

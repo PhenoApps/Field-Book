@@ -39,6 +39,28 @@ When advancing entries, skips either entries that already have data for the acti
 
 Switches the location of the trait advancement section (small green arrows) and the entry advancement section (large black arrows).
 
+## Barcodes
+
+#### Toolbar Barcode Scanning
+
+Sets how a barcode scanned from the bottom toolbar is interpreted.
+Barcodes can be used to move to an entry, record the value as a phenotype, record the value as a phenotype if it is not an entry ID, or ask each time.
+
+#### Always Use Detected Barcode
+
+When enabled, a barcode detected while attaching media is processed automatically.
+When disabled, the detection box must be tapped to use the barcode.
+
+#### Suggest Similar IDs
+
+When enabled, a scanned or entered ID with no exact match shows a list of close matches to choose from.
+This helps when a barcode is misread or only partly scanned.
+Matches ignore case and spaces, and allow a missing, extra, swapped, or wrong character, or a truncated ID.
+Entries in the current field are suggested first, followed by other fields.
+When scanning from the Fields screen, field names and aliases are also suggested.
+Field Book never moves to a suggested entry until one is chosen.
+Suggestions are not shown when an unmatched barcode is recorded as a phenotype value.
+
 ## Hardware
 
 #### <img class="icon" src="../_static/icons/settings/behavior/contrast-box.png"> Navigate With Volume Keys
