@@ -122,10 +122,7 @@ fun TraitOptionsSection(
             }
 
             // display label/value for brapi categorical trait
-            val isBrapiTrait =
-                trait.externalDbId?.isNotEmpty() == true ||
-                        trait.traitDataSource.contains("brapi", ignoreCase = true)
-
+            val isBrapiTrait = trait.isBrapiTrait()
 
             val traitHasBrapiCategories =
                 isBrapiTrait && trait.format == "categorical" &&
