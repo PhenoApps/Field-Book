@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+
+### Fixed
+
+## [v7.3.2] - 2026-10-06
+
+### Changed
 - Improved USB camera integration (https://github.com/PhenoApps/Field-Book/pull/1544)
 
 ### Fixed
@@ -1001,3 +1007,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [v7.3.0]: https://github.com/PhenoApps/Field-Book/releases/tag/7.3.0
 [v7.3.1]: https://github.com/PhenoApps/Field-Book/releases/tag/7.3.1
+[v7.3.2]: https://github.com/PhenoApps/Field-Book/releases/tag/7.3.2
