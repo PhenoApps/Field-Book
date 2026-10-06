@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 ### Fixed
+- Slashes in trait names no longer stop images from saving (https://github.com/PhenoApps/Field-Book/pull/1556)
 
 ## [v7.3.1] - 2026-09-29
 
