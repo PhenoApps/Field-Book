@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 ### Changed
+- Improved USB camera integration (https://github.com/PhenoApps/Field-Book/pull/1544)
 
 ### Fixed
 - Slashes in trait names no longer stop images from saving (https://github.com/PhenoApps/Field-Book/pull/1556)
