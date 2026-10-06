@@ -34,8 +34,10 @@ public final class FileUtil {
     //https://stackoverflow.com/questions/2679699/what-characters-allowed-in-file-names-on-android
     public static String sanitizeFileName(String name) {
         //erase all C0 set characters (0x00-0x1F) and replace some other illegal characters with '_'
+        //'/' and DEL must be included: the storage provider replaces them with '_' on create,
+        //so a name containing them would never match its own directory in findFile
         return name.replaceAll("[\\x00-\\x1f]", "")
-                .replaceAll("[|\\?\\*<\"\\\\:>'\";]", "_");
+                .replaceAll("[|\\?\\*<\"\\\\:>'\";/\\x7f]", "_");
     }
 
     /**
