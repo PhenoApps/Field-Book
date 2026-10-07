@@ -38,7 +38,7 @@
     <com.github.mikephil.charting.charts.LineChart
         android:id="@+id/line_chart"
         android:layout_width="0dp"
-        android:layout_height="300dp"
+        android:layout_height="@dimen/fb_trait_chart_height"
         android:layout_margin="4dp"
         android:visibility="gone"
         tools:visibility="visible"

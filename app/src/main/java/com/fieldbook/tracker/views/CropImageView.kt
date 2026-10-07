@@ -45,7 +45,13 @@ class CropImageView : ConstraintLayout {
 
     companion object {
         const val TAG = "CropImageView"
-        const val MIN_DISTANCE_BETWEEN_HANDLES = 32
+
+        /**
+         * Smallest gap allowed between opposing crop handles, in dp. Converted to pixels by
+         * [minDistanceBetweenHandles]; as a raw pixel value the minimum crop region grew
+         * whenever the crop surface was smaller than a phone-portrait one.
+         */
+        const val MIN_DISTANCE_BETWEEN_HANDLES_DP = 32
         const val DEFAULT_CROP_COORDINATES = "0.00, 0.00, 1.00, 1.00"
         fun parseRectCoordinates(rectCoordinates: String): RectF? {
 
@@ -107,6 +113,11 @@ class CropImageView : ConstraintLayout {
     //size of the handle image view, set in dimens.xml
     private val handleSize: Int
 
+    //MIN_DISTANCE_BETWEEN_HANDLES_DP in pixels, so the minimum crop region is the same physical
+    //size regardless of density or crop surface size
+    private val minDistanceBetweenHandles: Float
+        get() = MIN_DISTANCE_BETWEEN_HANDLES_DP * resources.displayMetrics.density
+
     //global handle that tracks which handle was last clicked
     private var handle: ImageView? = null
 
@@ -142,6 +153,23 @@ class CropImageView : ConstraintLayout {
 
         //initialize image view
         imageView = view.findViewById(R.id.crop_image_iv)
+
+        // The crop surface is sized from the window, and handle positions are absolute pixels,
+        // so a resize would leave them at their old coordinates, clamped to the new bounds, and
+        // write back a different selection than the user made. Re-deriving them from the
+        // normalized coordinates keeps the selection intact.
+        imageView?.addOnLayoutChangeListener { _, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+            val changed = (right - left) != (oldRight - oldLeft) ||
+                    (bottom - top) != (oldBottom - oldTop) ||
+                    left != oldLeft || top != oldTop
+            if (changed) {
+                // positions depend on the image view's resolved x/y, so wait for layout to settle
+                post {
+                    positionHandlesFromNormalized()
+                    invalidate()
+                }
+            }
+        }
 
         //initialize relative layout
         relativeLayout = view.findViewById(R.id.crop_image_rl)
@@ -256,38 +284,49 @@ class CropImageView : ConstraintLayout {
         }
     }
 
-    private fun submitCoordinatesToUi() {
-        val input = editText!!.text.toString()
-        if (input.isNotBlank()) {
-            val values = input.split(",")
-            if (values.size == 4) {
-                try {
-                    val topLeftX = values[0].toFloat()
-                    val topLeftY = values[1].toFloat()
-                    val bottomRightX = values[2].toFloat()
-                    val bottomRightY = values[3].toFloat()
+    /**
+     * Places the four handles from the normalized coordinates in the edit text, the source of
+     * truth for the selection. Safe to call whenever the image view's bounds change; it does
+     * not touch focus.
+     *
+     * @return true if the handles were repositioned
+     */
+    private fun positionHandlesFromNormalized(): Boolean {
 
-                    imageView?.let { iv ->
-                        cropHandleTop?.y =
-                            iv.y + topLeftY * iv.height - handleSize / 2
-                        cropHandleBottom?.y =
-                            iv.y + bottomRightY * iv.height - handleSize / 2
-                        cropHandleStart?.x =
-                            iv.x + topLeftX * iv.width - handleSize / 2
-                        cropHandleEnd?.x =
-                            iv.x + bottomRightX * iv.width - handleSize / 2
-                    }
+        val input = editText?.text?.toString() ?: return false
+        if (input.isBlank()) return false
 
-                    editText?.clearFocus()
+        val values = input.split(",")
+        if (values.size != 4) return false
 
-                    invalidate()
+        return try {
 
-                } catch (e: Exception) {
+            val topLeftX = values[0].trim().toFloat()
+            val topLeftY = values[1].trim().toFloat()
+            val bottomRightX = values[2].trim().toFloat()
+            val bottomRightY = values[3].trim().toFloat()
 
-                    e.printStackTrace()
-
-                }
+            imageView?.let { iv ->
+                cropHandleTop?.y = iv.y + topLeftY * iv.height - handleSize / 2
+                cropHandleBottom?.y = iv.y + bottomRightY * iv.height - handleSize / 2
+                cropHandleStart?.x = iv.x + topLeftX * iv.width - handleSize / 2
+                cropHandleEnd?.x = iv.x + bottomRightX * iv.width - handleSize / 2
             }
+
+            true
+
+        } catch (e: Exception) {
+
+            e.printStackTrace()
+
+            false
+        }
+    }
+
+    private fun submitCoordinatesToUi() {
+        if (positionHandlesFromNormalized()) {
+            editText?.clearFocus()
+            invalidate()
         }
     }
 
@@ -574,20 +613,22 @@ class CropImageView : ConstraintLayout {
             )
 
             //update handles to not cross each other
-            if (cropHandleTop!!.y > cropHandleBottom!!.y - MIN_DISTANCE_BETWEEN_HANDLES) {
-                cropHandleTop!!.y = round(cropHandleBottom!!.y - MIN_DISTANCE_BETWEEN_HANDLES)
+            val minGap = minDistanceBetweenHandles
+
+            if (cropHandleTop!!.y > cropHandleBottom!!.y - minGap) {
+                cropHandleTop!!.y = round(cropHandleBottom!!.y - minGap)
             }
 
-            if (cropHandleStart!!.x > cropHandleEnd!!.x - MIN_DISTANCE_BETWEEN_HANDLES) {
-                cropHandleStart!!.x = round(cropHandleEnd!!.x - MIN_DISTANCE_BETWEEN_HANDLES)
+            if (cropHandleStart!!.x > cropHandleEnd!!.x - minGap) {
+                cropHandleStart!!.x = round(cropHandleEnd!!.x - minGap)
             }
 
-            if (cropHandleBottom!!.y < cropHandleTop!!.y + MIN_DISTANCE_BETWEEN_HANDLES) {
-                cropHandleBottom!!.y = round(cropHandleTop!!.y + MIN_DISTANCE_BETWEEN_HANDLES)
+            if (cropHandleBottom!!.y < cropHandleTop!!.y + minGap) {
+                cropHandleBottom!!.y = round(cropHandleTop!!.y + minGap)
             }
 
-            if (cropHandleEnd!!.x < cropHandleStart!!.x + MIN_DISTANCE_BETWEEN_HANDLES) {
-                cropHandleEnd!!.x = round(cropHandleStart!!.x + MIN_DISTANCE_BETWEEN_HANDLES)
+            if (cropHandleEnd!!.x < cropHandleStart!!.x + minGap) {
+                cropHandleEnd!!.x = round(cropHandleStart!!.x + minGap)
             }
 
             //get midpoints

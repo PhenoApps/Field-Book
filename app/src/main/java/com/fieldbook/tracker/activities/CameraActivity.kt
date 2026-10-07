@@ -3,10 +3,12 @@ package com.fieldbook.tracker.activities
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.graphics.PointF
 import android.media.MediaRecorder
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.util.Size
 import android.view.MotionEvent
 import android.view.View
@@ -344,6 +346,22 @@ class CameraActivity : ThemedActivity() {
             cameraXFacade.toggleCameraSelector()
             bindLifecycle()
         }
+    }
+
+    /**
+     * Config changes are declared in the manifest so a live camera session survives a rotate,
+     * fold or resize. Use cases are updated in place; rebinding would drop a recording.
+     */
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        try {
+            cameraXFacade.updateTargetRotation()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error updating camera target rotation on configuration change", e)
+        }
+
+        setupCameraInsets()
     }
 
     private fun setupUiForMode() {
